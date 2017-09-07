@@ -9,20 +9,19 @@ import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatche
 import com.twitter.finagle.http.exp.StreamTransport
 import com.twitter.finagle.http.filter.{
   ClientContextFilter,
-  HttpNackFilter,
   ClientNackFilter,
+  HttpNackFilter,
   ServerContextFilter
 }
 import com.twitter.finagle.liveness.FailureDetector
-import com.twitter.finagle.http.netty.{
-  Netty3ClientStreamTransport,
-  Netty3HttpListener,
-  Netty3HttpTransporter,
-  Netty3ServerStreamTransport
-}
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.http2.{Http2Listener, Http2Transporter}
-import com.twitter.finagle.netty4.http.exp.{Netty4HttpListener, Netty4HttpTransporter}
+import com.twitter.finagle.netty3.http.{
+  Netty3ClientStreamTransport,
+  Netty3Http,
+  Netty3ServerStreamTransport
+}
+import com.twitter.finagle.netty4.http.{Netty4HttpListener, Netty4HttpTransporter}
 import com.twitter.finagle.netty4.http.{Netty4ClientStreamTransport, Netty4ServerStreamTransport}
 import com.twitter.finagle.server._
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
@@ -30,7 +29,7 @@ import com.twitter.finagle.ssl.ApplicationProtocols
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.{Duration, Future, Monitor, StorageUnit, Time}
 import java.net.{InetSocketAddress, SocketAddress}
 
@@ -75,8 +74,8 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
   case class HttpImpl(
     clientTransport: Transport[Any, Any] => StreamTransport[Request, Response],
     serverTransport: Transport[Any, Any] => StreamTransport[Response, Request],
-    transporter: Stack.Params => SocketAddress => Transporter[Any, Any],
-    listener: Stack.Params => Listener[Any, Any],
+    transporter: Stack.Params => SocketAddress => Transporter[Any, Any, TransportContext],
+    listener: Stack.Params => Listener[Any, Any, TransportContext],
     implName: String
   ) {
 
@@ -87,11 +86,12 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     implicit val httpImplParam: Stack.Param[HttpImpl] = Stack.Param(Netty4Impl)
   }
 
+  @deprecated("Netty3 based implementations will be removed. Prefer Netty4Impl.", "2017-08-23")
   val Netty3Impl: HttpImpl = HttpImpl(
     new Netty3ClientStreamTransport(_),
     new Netty3ServerStreamTransport(_),
-    Netty3HttpTransporter,
-    Netty3HttpListener,
+    Netty3Http.Transporter,
+    Netty3Http.Listener,
     "Netty3"
   )
 
@@ -200,6 +200,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
 
     protected type In = Any
     protected type Out = Any
+    protected type Context = TransportContext
 
     protected def endpointer: Stackable[ServiceFactory[Request, Response]] =
       new EndpointerModule[Request, Response](
@@ -293,8 +294,8 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
      * The compression level to use. If passed the default value (-1) then it will use
      * [[com.twitter.finagle.http.codec.TextualContentCompressor TextualContentCompressor]]
      * which will compress text-like content-types with the default compression level (6).
-     * Otherwise, use [[org.jboss.netty.handler.codec.http.HttpContentCompressor HttpContentCompressor]]
-     * for all content-types with specified compression level.
+     * Otherwise, use Netty `HttpContentCompressor` for all content-types with specified
+     * compression level.
      */
     def withCompressionLevel(level: Int): Client =
       configured(http.param.CompressionLevel(level))
@@ -359,7 +360,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       super.filtered(filter)
   }
 
-  val client: Http.Client = Client()
+  def client: Http.Client = Client()
 
   def newService(dest: Name, label: String): Service[Request, Response] =
     client.newService(dest, label)
@@ -394,8 +395,9 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
 
     protected type In = Any
     protected type Out = Any
+    protected type Context = TransportContext
 
-    protected def newListener(): Listener[Any, Any] = {
+    protected def newListener(): Listener[Any, Any, TransportContext] = {
       params[HttpImpl].listener(params)
     }
 
@@ -405,7 +407,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       new HttpTransport(params[HttpImpl].serverTransport(transport))
 
     protected def newDispatcher(
-      transport: Transport[In, Out],
+      transport: Transport[In, Out] { type Context <: Server.this.Context },
       service: Service[Request, Response]
     ): HttpServerDispatcher = {
       val param.Stats(stats) = params[param.Stats]
@@ -460,8 +462,8 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
      * The compression level to use. If passed the default value (-1) then it will use
      * [[com.twitter.finagle.http.codec.TextualContentCompressor TextualContentCompressor]]
      * which will compress text-like content-types with the default compression level (6).
-     * Otherwise, use [[org.jboss.netty.handler.codec.http.HttpContentCompressor HttpContentCompressor]]
-     * for all content-types with specified compression level.
+     * Otherwise, use the Netty `HttpContentCompressor` for all content-types with specified
+     * compression level.
      */
     def withCompressionLevel(level: Int): Server =
       configured(http.param.CompressionLevel(level))
@@ -478,6 +480,24 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
      */
     def withHttpStats: Server =
       withStack(stack.replace(http.filter.StatsFilter.role, http.filter.StatsFilter.module))
+
+    /**
+     * By default finagle-http automatically sends 100-CONTINUE responses to inbound
+     * requests which set the 'Expect: 100-Continue' header. Streaming servers will
+     * always return 100-CONTINUE. Non-streaming servers will compare the
+     * content-length header to the configured limit (see: `withMaxRequestSize`)
+     * and send either a 100-CONTINUE or 413-REQUEST ENTITY TOO LARGE as
+     * appropriate. This method disables those automatic responses.
+     *
+     * @note Servers operating as proxies should disable automatic responses in
+     *       order to allow origin servers to determine whether the expectation
+     *       can be met.
+     *
+     * @note Disabling automatic continues is only supported in
+     *       [[com.twitter.finagle.Http.Netty4Impl]] servers.
+     */
+    def withNoAutomaticContinue: Server =
+      configured(http.param.AutomaticContinue(false))
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
@@ -506,7 +526,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       super.configuredParams(newParams)
   }
 
-  val server: Http.Server = Server()
+  def server: Http.Server = Server()
 
   def serve(addr: SocketAddress, service: ServiceFactory[Request, Response]): ListeningServer =
     server.serve(addr, service)

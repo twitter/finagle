@@ -11,12 +11,9 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.util.StackRegistry
 import com.twitter.util.{Await, Duration, Future, MockTimer, Promise, Time}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
-class StackServerTest extends FunSuite with StringServer {
+class StackServerTest extends FunSuite {
   test("Deadline isn't changed until after it's recorded") {
     val echo = ServiceFactory.const(Service.mk[Unit, Deadline] { unit =>
       Future.value(Contexts.broadcast(Deadline))
@@ -88,14 +85,21 @@ class StackServerTest extends FunSuite with StringServer {
     ServerRegistry.clear()
     val name = "testServer"
     val s = Service.const[String](Future.value("foo"))
-    val server = stringServer.withLabel(name).serve(new InetSocketAddress(0), s)
+    val server = StringServer.server.withLabel(name).serve(new InetSocketAddress(0), s)
 
+    // assert registry entry added
     assert(ServerRegistry.registrants.count { e: StackRegistry.Entry =>
       val param.Label(actual) = e.params[param.Label]
       name == actual
     } == 1)
 
     Await.ready(server.close(), 10.seconds)
+
+    // assert registry entry removed
+    assert(ServerRegistry.registrants.count { e: StackRegistry.Entry =>
+      val param.Label(actual) = e.params[param.Label]
+      name == actual
+    } == 0)
   }
 
   test("ListeningStackServer closes ServiceFactories") {
@@ -114,7 +118,7 @@ class StackServerTest extends FunSuite with StringServer {
     val stk: Stack[ServiceFactory[String, String]] = StackServer.newStack.prepend(stackable)
     val factory = ServiceFactory.const(Service.const[String](Future.value("hi")))
 
-    val server = stringServer
+    val server = StringServer.server
       .withStack(stk)
       .serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), factory)
     Await.result(server.close(), 2.seconds)
@@ -149,7 +153,7 @@ class StackServerTest extends FunSuite with StringServer {
       val stack = StackServer.newStack[String, String] ++ Stack.Leaf(Endpoint, echo)
       val factory = ServiceFactory.const(Service.const[String](Future.value("hi")))
 
-      val server = stringServer
+      val server = StringServer.server
         .withStack(stack)
         .serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), factory)
 

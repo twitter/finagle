@@ -1,6 +1,6 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.Service
+import com.twitter.finagle.{ListeningServer, Service}
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.io.Buf
 import com.twitter.io.Reader.ReaderDiscarded
@@ -124,35 +124,56 @@ abstract class AbstractHttp1EndToEndTest extends AbstractEndToEndTest {
     await(client.close())
   }
 
-  test("server handles expect continue header") {
-    val expectP = new Promise[Boolean]
+  for {
+    streaming <- Seq(false, true)
+    autoContinueEnabled <- Seq(false, true)
+  } {
+    val streamS = if (streaming) "streaming" else "non-streaming"
+    val continueS = if (autoContinueEnabled) "enabled" else "disabled"
+    val label = s"$streamS server handles expect continue header when autoContinue is $continueS"
+    val feature = if (autoContinueEnabled) AutomaticContinue else DisableAutomaticContinue
 
-    val svc = new HttpService {
-      def apply(request: Request) = {
-        expectP.setValue(request.headerMap.contains("expect"))
-        val response = Response()
-        Future.value(response)
+    testIfImplemented(feature)(label) {
+      val sawExpectHeaderP = new Promise[Boolean]
+
+      val svc = new HttpService {
+        def apply(request: Request) = {
+          sawExpectHeaderP.setValue(request.headerMap.contains("expect"))
+          val response = Response()
+          Future.value(response)
+        }
       }
+      val stck =
+        serverImpl()
+          .withStatsReceiver(NullStatsReceiver)
+          .withStreaming(streaming)
+
+      val server: ListeningServer =
+        (if (autoContinueEnabled)
+           stck
+         else
+           stck.withNoAutomaticContinue).serve("localhost:*", svc)
+
+      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+      val client = clientImpl()
+        .withStatsReceiver(statsRecv)
+        .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+      val req = Request("/streaming")
+      req.setChunked(false)
+      req.headerMap.set("expect", "100-continue")
+
+      val res = await(client(req))
+      if (autoContinueEnabled)
+        assert(res.status == Status.Continue)
+      else
+        assert(res.status == Status.Ok)
+
+      assert(await(sawExpectHeaderP) != autoContinueEnabled)
+
+      await(client.close())
+      await(server.close())
     }
-    val server = serverImpl()
-      .withStatsReceiver(NullStatsReceiver)
-      .withStreaming(true)
-      .serve("localhost:*", svc)
-
-    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-    val client = clientImpl()
-      .withStatsReceiver(statsRecv)
-      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
-
-    val req = Request("/streaming")
-    req.setChunked(false)
-    req.headerMap.set("expect", "100-continue")
-
-    val res = client(req)
-    assert(await(res).status == Status.Continue)
-    assert(await(expectP) == false)
-    await(client.close())
-    await(server.close())
   }
 
   // HEAD related tests

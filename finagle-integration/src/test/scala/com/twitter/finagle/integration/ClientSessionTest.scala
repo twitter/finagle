@@ -11,16 +11,13 @@ import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.io.Buf
 import com.twitter.util._
 import com.twitter.util.TimeConversions._
-import org.junit.runner.RunWith
 import org.mockito.Mockito.when
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 
 /**
  * We want client session statuses to reflect the status of their underlying transports.
  */
-@RunWith(classOf[JUnitRunner])
 class ClientSessionTest extends FunSuite with MockitoSugar {
 
   def testSessionStatus[Req, Rep](
@@ -105,7 +102,7 @@ class ClientSessionTest extends FunSuite with MockitoSugar {
   testSessionStatus(
     "mysql-dispatcher", { tr: Transport[mysql.transport.Packet, mysql.transport.Packet] =>
       val handshake = mysql.Handshake(Some("username"), Some("password"))
-      val dispatcher = new mysql.ClientDispatcher(tr, handshake)
+      val dispatcher = new mysql.ClientDispatcher(tr, handshake, false)
       () =>
         dispatcher.status
     }

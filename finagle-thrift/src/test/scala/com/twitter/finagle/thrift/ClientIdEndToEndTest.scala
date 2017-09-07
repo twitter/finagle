@@ -1,17 +1,14 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.Service
+import com.twitter.finagle.{RichServerParam, Service}
 import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.test._
 import com.twitter.util.{Await, Future}
 import org.apache.thrift.protocol.TProtocolFactory
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import scala.reflect.ClassTag
 
-@RunWith(classOf[JUnitRunner])
 class ClientIdEndToEndTest extends FunSuite with ThriftTest {
   type Iface = B.ServiceIface
   def ifaceManifest = implicitly[ClassTag[B.ServiceIface]]
@@ -30,7 +27,7 @@ class ClientIdEndToEndTest extends FunSuite with ThriftTest {
     def show_me_your_dtab_size() = Future.value(0)
   }
 
-  val ifaceToService = new B.Service(_, _)
+  val ifaceToService = new B.Service(_: Iface, _: RichServerParam)
   val serviceToIface = new B.ServiceToClient(
     _: Service[ThriftClientRequest, Array[Byte]],
     _: TProtocolFactory,

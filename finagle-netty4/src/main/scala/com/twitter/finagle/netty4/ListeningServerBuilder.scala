@@ -34,10 +34,6 @@ private class ListeningServerBuilder(
 ) {
   import Netty4Listener.BackPressure
 
-  // Exports N4-related metrics under `finagle/netty4`.
-  exportNetty4MetricsAndRegistryEntries()
-  trackReferenceLeaks.init
-
   private[this] val Timer(timer) = params[Timer]
 
   // transport params

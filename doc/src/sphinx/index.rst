@@ -29,10 +29,10 @@ their behavior.
 
 Other useful resources include:
 
-- “`Your Server as a Function <http://monkey.org/~marius/funsrv.pdf>`_” a paper motivating the core abstractions behind finagle (`PLOS’13 <http://sigops.org/sosp/sosp13/plos.html>`_).
+- `Your Server as a Function <http://monkey.org/~marius/funsrv.pdf>`_, a paper motivating the core abstractions behind finagle (`PLOS’13 <http://sigops.org/sosp/sosp13/plos.html>`_).
 - `Twitter engineering blog entry introducing Finagle <https://blog.twitter.com/2011/finagle-a-protocol-agnostic-rpc-system>`_
-- `ScalaDays 2011 presentation on Finagle <http://days2011.scala-lang.org/node/138/286>`_
 - Twitter's `Scala School <http://twitter.github.com/scala_school/>`_ has a section `introducing Finagle <http://twitter.github.com/scala_school/finagle.html>`_ and another `constructing a distributed search engine using Finagle <http://twitter.github.com/scala_school/searchbird.html>`_
+- `Finagle 101 <http://kostyukov.net/posts/finagle-101/>`_ by Vladimir Kostyukov
 - Alex Martins’ `post <http://alexmartins.me/2015/12/30/building-fault-tolerant-clients-with-finagle-part-1.html>`_ on configuring fault tolerant Finagle clients (Part 1)
 
 .. _Dapper: http://research.google.com/pubs/pub36356.html

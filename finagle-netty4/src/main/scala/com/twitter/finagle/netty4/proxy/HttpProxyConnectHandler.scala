@@ -59,11 +59,11 @@ private[netty4] class HttpProxyConnectHandler(
     "Basic " + Base64StringEncoder.encode(bytes)
   }
 
-  private[this] final def fail(ctx: ChannelHandlerContext, t: Throwable): Unit = {
+  private[this] final def fail(t: Throwable): Unit = {
     // We "try" because it might be already cancelled and we don't need to handle
     // cancellations here - it's already done by `proxyCancellationsTo`.
     connectPromise.tryFailure(t)
-    failPendingWrites(ctx, t)
+    failPendingWrites(t)
   }
 
   override def connect(
@@ -134,14 +134,14 @@ private[netty4] class HttpProxyConnectHandler(
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable): Unit = {
-    fail(ctx, cause)
+    fail(cause)
     ctx.fireExceptionCaught(cause) // we don't call super.exceptionCaught since we've already filed
     // both connect promise and pending writes in `fail`
     ctx.close() // close a channel since we've failed to perform an HTTP proxy handshake
   }
 
   override def channelInactive(ctx: ChannelHandlerContext): Unit = {
-    fail(ctx, new ChannelClosedException(ctx.channel().remoteAddress()))
+    fail(new ChannelClosedException(ctx.channel().remoteAddress()))
     ctx.fireChannelInactive()
   }
 
@@ -160,7 +160,7 @@ private[netty4] class HttpProxyConnectHandler(
           ctx.channel().remoteAddress()
         )
 
-      fail(ctx, failure)
+      fail(failure)
       ctx.close()
     }
   }

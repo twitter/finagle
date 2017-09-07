@@ -5,12 +5,17 @@ scala_library(
     repo = artifactory,
   ),
   dependencies=[
-    'util/util-logging',
     'finagle/finagle-core',
     'finagle/finagle-netty4',
     'util/util-core',
+    'util/util-logging',
     'util/util-stats',
   ],
   sources=rglobs('*.scala'),
   strict_deps=True,
+  exports=[
+    'finagle/finagle-core:finagle-core',
+    'util/util-core:util-core',
+  ]
+
 )

@@ -7,12 +7,9 @@ import com.twitter.finagle.server.StringServer
 import com.twitter.finagle.Service
 import com.twitter.util.{Await, Future}
 import java.net.{InetAddress, InetSocketAddress}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
-class ServerChannelConfigurationTest extends FunSuite with StringClient with StringServer {
+class ServerChannelConfigurationTest extends FunSuite {
 
   val identityService = Service.mk[String, String] { req =>
     Future.value(req)
@@ -22,13 +19,13 @@ class ServerChannelConfigurationTest extends FunSuite with StringClient with Str
     val lifeTime = 100.millis
     val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val server = ServerBuilder()
-      .stack(Server().withSession.maxLifeTime(lifeTime))
+      .stack(StringServer.Server().withSession.maxLifeTime(lifeTime))
       .bindTo(address)
       .name("FinagleServer")
       .build(identityService)
 
     val client: Service[String, String] = ClientBuilder()
-      .stack(Client(appendDelimeter = false))
+      .stack(StringClient.Client(appendDelimeter = false))
       .daemon(true) // don't create an exit guard
       .hosts(server.boundAddress.asInstanceOf[InetSocketAddress])
       .hostConnectionLimit(1)
@@ -44,13 +41,13 @@ class ServerChannelConfigurationTest extends FunSuite with StringClient with Str
     val idleTime = 100.millis
     val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val server = ServerBuilder()
-      .stack(Server().withSession.maxIdleTime(idleTime))
+      .stack(StringServer.Server().withSession.maxIdleTime(idleTime))
       .bindTo(address)
       .name("FinagleServer")
       .build(identityService)
 
     val client: Service[String, String] = ClientBuilder()
-      .stack(Client(appendDelimeter = false))
+      .stack(StringClient.Client(appendDelimeter = false))
       .daemon(true) // don't create an exit guard
       .hosts(server.boundAddress.asInstanceOf[InetSocketAddress])
       .hostConnectionLimit(1)

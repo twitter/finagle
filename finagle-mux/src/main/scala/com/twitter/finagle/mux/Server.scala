@@ -148,7 +148,7 @@ private class Tracker[T] {
     math.abs(state.get) - 1
 }
 
-private[twitter] object ServerDispatcher {
+private[finagle] object ServerDispatcher {
 
   /**
    * Construct a new request-response dispatcher.
@@ -186,7 +186,7 @@ private[twitter] object ServerDispatcher {
  * A dispatcher for the Mux protocol. In addition to multiplexing, the dispatcher
  * handles concerns of leasing and draining.
  */
-private[twitter] class ServerDispatcher(
+private[finagle] class ServerDispatcher(
   trans: Transport[Message, Message],
   service: Service[Message, Message],
   lessor: Lessor, // the lessor that the dispatcher should register with in order to get leases

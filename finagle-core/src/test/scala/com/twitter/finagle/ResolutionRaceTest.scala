@@ -1,13 +1,12 @@
 package com.twitter.finagle
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.client.StringClient
+import com.twitter.finagle.server.StringServer
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class ResolutionRaceTest extends FunSuite {
 
   private[this] val Echoer = Service.mk[String, String](Future.value)
@@ -21,12 +20,12 @@ class ResolutionRaceTest extends FunSuite {
    */
   test("resolution raciness") {
     val socketAddr = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    val server = Echo.serve(socketAddr, Echoer)
+    val server = StringServer.server.serve(socketAddr, Echoer)
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
     val dest = s"asyncinet!localhost:${addr.getPort}"
     try {
       val phrase = s"[$dest]"
-      val echo = Echo.newService(dest)
+      val echo = StringClient.client.newService(dest)
       try {
         val echoed = Await.result(echo(phrase), 5.seconds)
         assert(echoed == phrase)

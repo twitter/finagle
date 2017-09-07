@@ -2,13 +2,107 @@
   (http://docutils.sourceforge.net/docs/user/rst/quickstart.html)
   as it is included in Finagle's user's guide.
 
-Note that ``RB_ID=#`` correspond to associated messages in commits.
+Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in commits.
 
-6.x
+7.x
 -----
+
+7.1.0
+------
 
 New Features
 ~~~~~~~~~~~~
+
+  * finagle-core: If a `c.t.u.tunable.Tunable` request or total timeout has been configured
+    on a client which uses a `c.t.f.client.DynamicTimeout` filter, the current value of tunable will
+    be used in the case of no dynamic timeout set for a request. ``PHAB_ID=D81886``
+
+  * finagle-core: `FailFastException` now captures the throwable that caused it. ``PHAB_ID=D86396``
+
+  * finagle-redis: finagle interface for redis DBSIZE command. ``PHAB_ID=D85305``
+
+Bug Fixes
+~~~~~~~~~
+
+  * finagle-core: Unregister `ServerRegistry` entry on `StackServer#close`. A
+    StackServer entry is registered in the `ServerRegistry` on serve of the
+    server but never unregistered. It is now unregistered on close of
+    the StackServer. ``PHAB_ID=D83200``
+
+  * finagle-netty4: `Netty4ClientEngineFactory` and `Netty4ServerEngineFactory` now
+    properly load all chain certificates when the `SslClientConfiguration` or
+    `SslServerConfiguration` uses `KeyCredentials.CertKeyAndChain` instead of just the
+    first one in the file. ``PHAB_ID=D82414``
+
+  * finagle-thrift/thriftmux: Thrift/ThriftMux servers and clients now can be configured
+    with `withMaxReusableBufferSize` to specify the max size of the reusable buffer for
+    Thrift responses. ``PHAB_ID=D83190``
+
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-stats: Verbosity levels are now respected: debug-metrics aren't exported
+    by default.  ``PHAB_ID=D85278``
+
+  * finagle-netty4: `ChannelTransport` no longer considers the `Channel.isWritable` result
+    when determining status. ``PHAB_ID=D82670``
+
+Deprecations
+~~~~~~~~~~~~
+
+  * finagle-base-http: Encoding/decoding methods on `c.t.f.http.Request` and `c.t.f.http.Response`
+    to/from Strings and arrays of bytes have been deprecated. Use the methods on
+    `c.t.f.http.codec.HttpCodec` instead:
+       - For `c.t.f.http.Request.encodeString`, use `c.t.f.Http.codec.HttpCodec.encodeRequestToString`
+       - For `c.t.f.http.Request.encodeBytes`, use `c.t.f.Http.codec.HttpCodec.encodeRequestToBytes`
+       - For `c.t.f.http.Request.decodeString`, use `c.t.f.Http.codec.HttpCodec.decodeStringToRequest`
+       - For c.t.f.http.Request.decodeBytes`, use `c.t.f.Http.codec.HttpCodec.decodeBytesToRequest`
+       - For `c.t.f.http.Response.encodeString`, use `c.t.f.Http.codec.HttpCodec.encodeResponseToString`
+       - For `c.t.f.http.Response.decodeString`, use `c.t.f.Http.codec.HttpCodec.decodeStringToResponse`
+       - For `c.t.f.http.Response.decodeBytes`, use `c.t.f.Http.codec.HttpCodec.decodeBytesToResponse`
+    ``PHAB_ID=D81341``
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: Remove deprecated method `httpProxyTo(String, Option[Transporter.Credentials])`.
+    Use `httpProxyTo(String, Transporter.Credentials]` instead. ``PHAB_ID=D84077``
+
+  * finagle-*-http: Netty 3 specific HTTP transport related code has been moved into its own
+    project, finagle-netty3-http, in preparation for removing it from Finagle.
+    ``PHAB_ID=D84101``
+
+  * finagle-memcached: Remove deprecated method `BaseClient.release()`. Use
+    `BaseClient.close()` instead. ``PHAB_ID=D83168``
+
+  * finagle-memcached: Move `c.t.f.memcached.java.Client` to `c.t.f.memcached.JavaClient`,
+    `c.t.f.memcached.java.ClientBase` to `c.t.f.memcached.JavaClientBase`, and
+    `c.t.f.memcached.java.ResultWithCAS` to `c.t.f.memcached.ResultWithCAS`. ``PHAB_ID=D83719``
+
+  * finagle-core: Added a new type member `Context` to `Transport`, and a method that
+    returns a context, which has most of the methods currently directly on `Transport`.
+    Also deprecates most of those methods--please start using the context instead of the
+    `Transport` directly.  Also added type parameters to `Transporter`, `Listener`, and
+    type members to `StackClient` and `StackServer`.  ``PHAB_ID=D83972``
+
+  * finagle-core: `com.twitter.finagle.loadbalancer.DeterministicOrdering` was renamed
+    to `com.twitter.finagle.loadbalancer.ProcessCoordinate` and the internal `Coord` ADT
+    was changed as well. ``PHAB_ID=D84452``
+
+  * finagle-thrift: Move `Thrift.Server.param.MaxReusableBufferSize` to
+    `Thrift.param.MaxReusableBufferSize` for both server and client use. ``PHAB_ID=D83190``
+
+7.0.0
+------
+
+New Features
+~~~~~~~~~~~~
+
+  * finagle-core: A `StackClient` can be configured with a `c.t.u.tunable.Tunable`
+    request timeout using `.withRequestTimeout(tunable)`; this facilitates changing
+    the timeout at runtime, without server restart.
+    See https://twitter.github.io/finagle/guide/Configuration.html#tunables for details.
+    ``PHAB_ID=D80751``.
 
   * finagle-core: `SslClientSessionVerifier` and `SslServerSessionVerifier` have been added
     as `Stack` params for executing custom SSL/TLS `Session` verification logic on the
@@ -28,11 +122,19 @@ New Features
     `c.t.f.util.defaultTimerSlowTaskMaxRuntime`, and
     `c.t.f.util.defaultTimerSlowTaskLogMinInterval`, respectively. ``PHAB_ID=D70279``
 
+  * finagle-core: The JVM metrics for GC, allocations, memory, and more have moved
+    here from TwitterServer. See the new JVM section in the user guide for details:
+    https://twitter.github.io/finagle/guide/Metrics.html
+    ``PHAB_ID=D80883``
+
   * finagle-http, finagle-thriftmux: `MethodBuilder` has been promoted out of experimental.
     `MethodBuilder` is a collection of APIs for client configuration at a higher level than
     the Finagle 6 APIs while improving upon the deprecated `ClientBuilder`.
     See the user guide for details: https://twitter.github.io/finagle/guide/MethodBuilder.html
     ``PHAB_ID=D60032``
+
+  * finagle-http: add `withNoAutomaticContinue` api to disable automatically sending 100 CONTINUE
+    responses. ``PHAB_ID=D80017``
 
   * finagle-http: The nack related logic in the `c.t.f.h.c.HttpClientDispatcher` has been
     moved into a filter, `c.t.f.h.f.ClientNackFilter` which has been added to the client
@@ -41,17 +143,48 @@ New Features
   * finagle-init: Introduce a module to support service-loading initialization
     code. ``PHAB_ID=D75950``
 
-  * finagle-netty4: Adds support for passing a chain file to the default TLS implementation.
-    ``PHAB_ID=D59531``
+  * finagle-memcached: Added support for partitioned backends in finagle client. Introducing
+    the new PartitioningService (``PHAB_ID=D75143``), KetamaPartitioningService (``PHAB_ID=D77499``)
+    and MemcachedPartitioningService (``PHAB_ID=D78927``), which provide this support at different
+    levels of abstraction. The c.t.f.Memcached util, that is used for creating new memcached
+    clients, now creates a new partitioning client that utilizes these new services for the
+    Memcached protocol. The new memcached client can be enabled by setting the toggle
+    "com.twitter.finagle.memcached.UsePartitioningMemcachedClient" to 1.0. ``PHAB_ID=D80352``
 
-  * finagle-netty4: Netty 4 transports now use pooled allocators by default. ``PHAB_ID=D75014``
+  * finagle-mux: Default to new more efficient decoder. ``PHAB_ID=D80225``
 
   * finagle-mysql: `IsolationLevel` support was added with
     `Transactions.transactionWithIsolation` method, so the default level can be overridden
     at the transaction level. ``PHAB_ID=D68944``
 
+  * finagle-mysql: Add support for unsigned integers. When enabled, unsigned integers that do
+    not fit into the existing signed representation are widened. For example an unsigned
+    Int32 is represented as a Java Long, etc. Because this changes the `c.t.f.mysql.Value`
+    variant returned by the row, it is disabled by default and must be enabled with the param
+    `c.t.f.Mysql.param.UnsignedColumns`. ``PHAB_ID=D78721``
+
+  * finagle-netty4: Adds support for passing a chain file to the default TLS implementation.
+    ``PHAB_ID=D59531``
+
+  * finagle-netty4: Netty 4 transports now use pooled allocators by default. ``PHAB_ID=D75014``
+
+  * finagle-netty4: `KeyCredentials.CertKeyAndChain` is now available to use with
+    `Netty4ServerEngineFactory`. ``PHAB_ID=D80494``
+
+  * finagle-netty4: `c.t.f.netty4.trackReferenceLeaks` is now a CLI flag (default: disabled)
+    rather than a toggle. ``PHAB_ID=D80654``
+
   * finagle-stats: Metrics now report verbosity levels via `MetricsView.verbosity`.
     ``PHAB_ID=D78150``
+
+  * finagle-stats: `JsonExporter` now respects verbosity levels (current default behavior is
+    to keep exporting "debug" metrics). Adjust `com.twitter.finagle.stats.verbose` tunable
+    whitelist to change it.  ``PHAB_ID=D79571``
+
+  * finagle-tunable: `StandardTunableMap` is now public. Users can access file-based, in-memory,
+    and service-loaded tunable values using the map.
+    See https://twitter.github.io/finagle/guide/Configuration.html#tunables for details.
+    ``PHAB_ID=D80751``.
 
   * finagle: Changed dependencies of Netty from 4.1.10 to 4.1.12. ``PHAB_ID=D60438``
 
@@ -65,6 +198,13 @@ Breaking API Changes
 
   * finagle: Finagle is now decoupled from Netty 3. Depend on `finagle-netty3`
     explicitly if needed. ``PHAB_ID=D65268``
+
+  * finagle-base-http: The HTTP message model has been refactored to remove backing
+    Netty 3 types. Additionally, the `Request` and `Response` classes now have private
+    constructors to enforce a more appropriate inheritance model: `Request.Proxy` and
+    `Response.Proxy` are now the point of entry for extending the HTTP model types. Along
+    with the model changes the InputStream generated `.getInputStream()` method of HTTP
+    messages no longer consumes the messages body. ``PHAB_ID=D74519``
 
   * finagle-core: The Framer type has been transformed into a specialized version of a
     more generic abstraction, Decoder[T]. ``PHAB_ID=D59495``
@@ -93,6 +233,13 @@ Breaking API Changes
   * finagle-memcached: Add `c.t.util.Closable` trait to `c.t.f.memcached.BaseClient`.
     ``PHAB_ID=D63970``
 
+  * finagle-mysql: A number of implementation details were made private such as specific
+    `Row` implementations and `ResultSet` builder functions that consume raw packets.
+    ``PHAB_ID=D78721``
+
+  * finagle-netty4-http: HTTP/1.1 implementation based on Netty 4 is no longer experimental
+    and is moved out of the `exp` package. ``PHAB_ID=D80181``
+
   * finagle-serversets: Remove `ZkMetaData.AddressOrdering``, it is no longer used.
     ``PHAB_ID=D60698``
 
@@ -120,6 +267,13 @@ Runtime Behavior Changes
 
   * finagle-http: Dispatcher stats are now exported under the client scope like
     all other client stats.``PHAB_ID=D72265``
+
+  * finagle-http: It's now possible to send a response from the HTTP server that has a
+    Content-Length header so long as the 'Transfer-Encoding: chunked' isn't set on the response.
+    ``PHAB_ID=D80087``
+
+  * finagle-http: Non-streaming servers strip 'expect' headers when a 100 CONTINUE
+    response is sent. ``PHAB_ID=D80017``
 
   * finagle-serversets: `Stabilizer` is no longer exporting `pending_tasks` and `deviation_ms`
     stats. See `notify_ms` instead.  ``PHAB_ID=D65571``

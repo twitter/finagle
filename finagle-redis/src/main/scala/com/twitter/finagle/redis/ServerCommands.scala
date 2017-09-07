@@ -62,7 +62,10 @@ trait ServerCommands extends BasicServerCommands { self: BaseClient =>
 
   // TODO: CONFIG RESETSTAT
 
-  // TODO: DBSIZE
+  def dbSize(): Future[Long] =
+    doRequest(DBSize) {
+      case IntegerReply(n) => Future.value(n)
+    }
 
   // TODO: DEBUG OBJECT
 

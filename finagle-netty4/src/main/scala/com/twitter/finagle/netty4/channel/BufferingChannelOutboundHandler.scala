@@ -49,8 +49,10 @@ private[finagle] trait BufferingChannelOutboundHandler extends ChannelOutboundHa
   /**
    * Fails all the pending writes with a given `cause`.
    */
-  protected def failPendingWrites(ctx: ChannelHandlerContext, cause: Throwable): Unit = {
-    getWriteQueue(ctx).removeAndFailAll(cause)
+  final protected def failPendingWrites(cause: Throwable): Unit = {
+    if (pendingWrites != null) {
+      pendingWrites.removeAndFailAll(cause)
+    }
   }
 
   override def write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise): Unit = {
@@ -58,7 +60,7 @@ private[finagle] trait BufferingChannelOutboundHandler extends ChannelOutboundHa
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable): Unit = {
-    failPendingWrites(ctx, cause)
+    failPendingWrites(cause)
     ctx.fireExceptionCaught(cause)
   }
 

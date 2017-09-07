@@ -2,7 +2,9 @@ package com.twitter.finagle.http2.transport
 
 import com.twitter.finagle.{FailureFlags, Stack}
 import com.twitter.finagle.http2.{RefTransport, Http2Transporter}
-import com.twitter.finagle.transport.{Transport, TransportProxy}
+
+import com.twitter.finagle.netty4.transport.HasExecutor
+import com.twitter.finagle.transport.{Transport, TransportProxy, TransportContext}
 import com.twitter.logging.{HasLogLevel, Level}
 import com.twitter.util.{Promise, Future, Time, Return, Throw}
 import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
@@ -24,6 +26,7 @@ private[http2] class Http2UpgradingTransport(
 ) extends TransportProxy[Any, Any](t) {
 
   import Http2Transporter._
+  import Http2ClientDowngrader.StreamMessage
 
   private[this] val finishedWriting = Promise[Unit]
   finishedWriting.setInterruptHandler {
@@ -45,9 +48,13 @@ private[http2] class Http2UpgradingTransport(
   }
 
   private[this] def upgradeSuccessful(): Unit = synchronized {
-    val casted =
-      Transport.cast[Http2ClientDowngrader.StreamMessage, Http2ClientDowngrader.StreamMessage](t)
-    val multiplexed = new MultiplexedTransporter(casted, t.remoteAddress, params)
+    val inOutCasted = Transport.cast[StreamMessage, StreamMessage](t)
+    val contextCasted = inOutCasted.asInstanceOf[
+      Transport[StreamMessage, StreamMessage] {
+        type Context = TransportContext with HasExecutor
+      }
+    ]
+    val multiplexed = new MultiplexedTransporter(contextCasted, t.remoteAddress, params)
     p.updateIfEmpty(Return(Some(multiplexed)))
     ref.update { _ =>
       unsafeCast(multiplexed.first())

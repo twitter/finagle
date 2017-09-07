@@ -1,17 +1,21 @@
 package com.twitter.finagle.stats
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.http.{RequestParamMap, MediaType, Request}
-import com.twitter.util.{Time, MockTimer, Await}
+import com.twitter.finagle.http.{MediaType, Request, RequestParamMap}
+import com.twitter.finagle.util.DefaultTimer
+import com.twitter.util.tunable.Tunable
+import com.twitter.util.{Await, MockTimer, Time}
 import java.io.{BufferedWriter, File, FileOutputStream, OutputStreamWriter}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.concurrent.{IntegrationPatience, Eventually}
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.JUnitRunner
 import scala.util.matching.Regex
 
 @RunWith(classOf[JUnitRunner])
 class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience {
+
+  import JsonExporter._
 
   // 2015-02-05 20:05:00 +0000
   private val zeroSecs = Time.fromSeconds(1423166700)
@@ -43,7 +47,8 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
   test("samples can be filtered") {
     val registry = new Metrics()
     val exporter = new JsonExporter(registry) {
-      override lazy val statsFilterRegex: Option[Regex] = mkRegex("abc,ill_be_partially_matched.*")
+      override lazy val statsFilterRegex: Option[Regex] =
+        commaSeparatedRegex("abc,ill_be_partially_matched.*")
     }
     val sample = Map[String, Number](
       "jvm_uptime" -> 15.0,
@@ -65,7 +70,7 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
     val registry = new Metrics()
     val exporter = new JsonExporter(registry)
     assert(
-      exporter.mkRegex("").isEmpty,
+      commaSeparatedRegex("").isEmpty,
       "Empty regex filter should result in no filter regex generated"
     )
   }
@@ -141,7 +146,7 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
     viewsCounter.incr()
     gcCounter.incr()
     val exporter = new JsonExporter(registry) {
-      override lazy val statsFilterRegex: Option[Regex] = mkRegex("jvm.*,vie")
+      override lazy val statsFilterRegex: Option[Regex] = commaSeparatedRegex("jvm.*,vie")
     }
     val requestFiltered = Request("/admin/metrics.json?filtered=1&pretty=0")
     val responseFiltered = Await.result(exporter.apply(requestFiltered)).contentString
@@ -296,4 +301,31 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
     assert(!json.contains("boom"), json)
   }
 
+  test("respecting verbosity levels") {
+    val metrics = new Metrics()
+    val sr = new MetricsStatsReceiver(metrics)
+    sr.counter(Verbosity.Debug, "foo", "bar").incr(10)
+    sr.counter(Verbosity.Debug, "foo", "baz").incr(20)
+    sr.counter(Verbosity.Debug, "qux").incr(30)
+    sr.counter(Verbosity.Default, "aux").incr(40)
+
+    val exporter =
+      new JsonExporter(
+        metrics,
+        Tunable.const(Verbose.id, "*/bar,qux"),
+        DefaultTimer
+      )
+
+    val json = exporter.json(pretty = false, filtered = false)
+    assert(json.contains(""""foo/bar":10"""))
+    assert(json.contains(""""qux":30"""))
+    assert(json.contains(""""aux":40"""))
+    assert(!json.contains(""""foo/baz":20"""))
+  }
+
+  test("escape regexp special characters in glob") {
+    assert(
+      commaSeparatedGlob("[]^$a.|?b*+()c{}d").forall(_.matcher("[]^$a.|?bcde*+()c{}d").matches)
+    )
+  }
 }

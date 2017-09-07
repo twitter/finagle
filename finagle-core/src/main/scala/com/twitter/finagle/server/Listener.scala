@@ -1,6 +1,6 @@
 package com.twitter.finagle.server
 
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.{ListeningServer, NullServer, Stack}
 import java.net.SocketAddress
 
@@ -13,15 +13,23 @@ import java.net.SocketAddress
  * The returned `ListeningServer` is used to inspect the server, and
  * is also used to shut it down.
  */
-trait Listener[In, Out] {
-  def listen(addr: SocketAddress)(serveTransport: Transport[In, Out] => Unit): ListeningServer
+trait Listener[In, Out, Ctx <: TransportContext] {
+  def listen(
+    addr: SocketAddress
+  )(serveTransport: Transport[In, Out] {
+    type Context <: Ctx
+  } => Unit): ListeningServer
 }
 
 /**
  * An empty Listener that can be used as a placeholder.
  */
-object NullListener extends Listener[Any, Any] {
-  def listen(addr: SocketAddress)(serveTransport: Transport[Any, Any] => Unit) = NullServer
+object NullListener extends Listener[Any, Any, TransportContext] {
+  def listen(
+    addr: SocketAddress
+  )(serveTransport: Transport[Any, Any] {
+    type Context <: TransportContext
+  } => Unit) = NullServer
 }
 
 /**

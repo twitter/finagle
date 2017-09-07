@@ -13,7 +13,7 @@ import javax.net.ssl.SSLSession
 import org.scalatest.FunSuite
 import org.scalatest.mockito.MockitoSugar
 
-class ClientTransportParamsTest extends FunSuite with MockitoSugar with StringClient {
+class ClientTransportParamsTest extends FunSuite with MockitoSugar {
 
   private val config = SslClientConfiguration()
   private val engine = mock[Engine]
@@ -25,24 +25,24 @@ class ClientTransportParamsTest extends FunSuite with MockitoSugar with StringCl
   }
 
   test("withTransport.tls sets SSL/TLS configuration") {
-    val client = stringClient.withTransport.tls(config)
+    val client = StringClient.client.withTransport.tls(config)
     assert(client.params[Transport.ClientSsl].sslClientConfiguration == Some(config))
   }
 
   test("withTransport.tls sets SSL/TLS configuration, engine factory") {
-    val client = stringClient.withTransport.tls(config, engineFactory)
+    val client = StringClient.client.withTransport.tls(config, engineFactory)
     assert(client.params[Transport.ClientSsl].sslClientConfiguration == Some(config))
     assert(client.params[SslClientEngineFactory.Param].factory == engineFactory)
   }
 
   test("withTransport.tls sets SSL/TLS configuration, verifier") {
-    val client = stringClient.withTransport.tls(config, sessionVerifier)
+    val client = StringClient.client.withTransport.tls(config, sessionVerifier)
     assert(client.params[Transport.ClientSsl].sslClientConfiguration == Some(config))
     assert(client.params[SslClientSessionVerifier.Param].verifier == sessionVerifier)
   }
 
   test("withTransport.tls sets SSL/TLS configuration, engine factory, verifier") {
-    val client = stringClient.withTransport.tls(config, engineFactory, sessionVerifier)
+    val client = StringClient.client.withTransport.tls(config, engineFactory, sessionVerifier)
     assert(client.params[Transport.ClientSsl].sslClientConfiguration == Some(config))
     assert(client.params[SslClientEngineFactory.Param].factory == engineFactory)
     assert(client.params[SslClientSessionVerifier.Param].verifier == sessionVerifier)

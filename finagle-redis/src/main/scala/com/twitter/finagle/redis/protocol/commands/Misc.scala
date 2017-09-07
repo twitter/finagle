@@ -15,6 +15,10 @@ case class Select(index: Int) extends Command {
   override def body: Seq[Buf] = Seq(Buf.Utf8(index.toString))
 }
 
+case object DBSize extends Command {
+  def name: Buf = Command.DBSIZE
+}
+
 case class Auth(code: Buf) extends Command {
   def name: Buf = Command.AUTH
   override def body: Seq[Buf] = Seq(code)

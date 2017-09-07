@@ -25,7 +25,7 @@ verbosity.
     .withTransport.verbose
     .newService("localhost:10000,localhost:10001")
 
-A higher-level client API, :ref:`MethodBuilder <methodbuilder>`, builds on
+A :ref:`higher-level client API <methodbuilder>`, `MethodBuilder`, builds on
 the client, providing logical success rate metrics, application-level retry
 policies, per-attempt timeouts, and total timeouts.
 
@@ -213,7 +213,7 @@ Concepts
 
 A :util-tunable-src:`Tunable <com/twitter/util/tunable/Tunable.scala>` is like a Function0;
 it produces a value when applied. Dynamic configuration facilitates this value changing
-across invokations at runtime.
+across invocations at runtime.
 
 `Tunables` are accessed by means of a
 :util-tunable-src:`TunableMap <com/twitter/util/tunable/TunableMap.scala>`, which contains all the
@@ -236,7 +236,6 @@ on an HTTP client with a `Tunable`:
   package com.example.service
 
   import com.twitter.finagle.Http
-  import com.twitter.finagle.service.TimeoutFilter
   import com.twitter.finagle.tunable.StandardTunableMap
   import com.twitter.util.Duration
   import com.twitter.util.tunable.{Tunable, TunableMap}
@@ -250,7 +249,7 @@ on an HTTP client with a `Tunable`:
 
   val client = Http.client
     .withLabel(clientId)
-    .configured(TimeoutFilter.Param(timeoutTunable))
+    .withRequestTimeout(timeoutTunable)
     .newService("localhost:10000")
 
 Configuration

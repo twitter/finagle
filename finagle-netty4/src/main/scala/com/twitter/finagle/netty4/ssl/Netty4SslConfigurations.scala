@@ -1,6 +1,8 @@
 package com.twitter.finagle.netty4.ssl
 
 import com.twitter.finagle.ssl.{ApplicationProtocols, TrustCredentials}
+import com.twitter.util.Try
+import com.twitter.util.security.Pkcs8EncodedKeySpecFile
 import io.netty.handler.ssl.{ApplicationProtocolConfig, SslContextBuilder, SslProvider}
 import io.netty.handler.ssl.ApplicationProtocolConfig.{
   Protocol,
@@ -8,6 +10,9 @@ import io.netty.handler.ssl.ApplicationProtocolConfig.{
   SelectorFailureBehavior
 }
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory
+import java.io.File
+import java.security.{KeyFactory, PrivateKey}
+import java.security.spec.InvalidKeySpecException
 import scala.collection.JavaConverters._
 
 /**
@@ -86,5 +91,33 @@ private[ssl] object Netty4SslConfigurations {
   ): SslContextBuilder =
     if (forceJdk) builder.sslProvider(SslProvider.JDK)
     else builder
+
+  /**
+   * Attempts to load an unencrypted private key file into a `PrivateKey`. The file
+   * is loaded into a `PrivateKey` in order to use specific methods provided by
+   * Netty for accommodating a key and multiple certificates.
+   */
+  def getPrivateKey(keyFile: File): Try[PrivateKey] = {
+    val encodedKeySpec = new Pkcs8EncodedKeySpecFile(keyFile).readPkcs8EncodedKeySpec()
+
+    // keeps identical behavior to netty
+    // https://github.com/netty/netty/blob/netty-4.1.11.Final/handler/src/main/java/io/netty/handler/ssl/SslContext.java#L1006
+    encodedKeySpec.flatMap { keySpec =>
+      Try {
+        KeyFactory.getInstance("RSA").generatePrivate(keySpec)
+      }.handle {
+          case _: InvalidKeySpecException =>
+            KeyFactory.getInstance("DSA").generatePrivate(keySpec)
+        }
+        .handle {
+          case _: InvalidKeySpecException =>
+            KeyFactory.getInstance("EC").generatePrivate(keySpec)
+        }
+        .handle {
+          case ex: InvalidKeySpecException =>
+            throw new InvalidKeySpecException("None of RSA, DSA, EC worked", ex)
+        }
+    }
+  }
 
 }

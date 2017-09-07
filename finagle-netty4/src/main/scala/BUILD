@@ -7,8 +7,8 @@ scala_library(
   dependencies=[
     '3rdparty/jvm/io/netty:netty4',
     '3rdparty/jvm/io/netty:netty4-codec',
-    '3rdparty/jvm/io/netty:netty4-http',
     '3rdparty/jvm/io/netty:netty4-handler-proxy',
+    '3rdparty/jvm/io/netty:netty4-http',
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-init/src/main/scala:scala',
     'finagle/finagle-netty4/src/main/resources',
@@ -18,6 +18,8 @@ scala_library(
     'util/util-core/src/main/scala:scala',
     'util/util-jvm/src/main/scala:scala',
     'util/util-lint/src/main/scala:scala',
+    'util/util-logging/src/main/scala:scala',
+    'util/util-registry/src/main/scala:scala',
     'util/util-security/src/main/scala:scala',
     'util/util-stats/src/main/scala:scala',
   ],

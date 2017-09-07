@@ -3,29 +3,23 @@ package com.twitter.finagle.server
 import com.twitter.finagle._
 import com.twitter.finagle.param
 import com.twitter.finagle.dispatch.SerialServerDispatcher
-import com.twitter.finagle.netty3.Netty3Listener
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.netty4.Netty4Listener
+import com.twitter.finagle.transport.{Transport, TransportContext}
+import io.netty.channel.ChannelPipeline
+import io.netty.handler.codec.string.{StringDecoder, StringEncoder}
+import io.netty.handler.codec.{DelimiterBasedFrameDecoder, Delimiters}
 import java.nio.charset.StandardCharsets
-import org.jboss.netty.channel._
-import org.jboss.netty.handler.codec.frame.{Delimiters, DelimiterBasedFrameDecoder}
-import org.jboss.netty.handler.codec.string.{StringEncoder, StringDecoder}
 
-private[finagle] object StringServerPipeline extends ChannelPipelineFactory {
-  def getPipeline = {
-    val pipeline = Channels.pipeline()
-    pipeline.addLast("line", new DelimiterBasedFrameDecoder(100, Delimiters.lineDelimiter: _*))
-    pipeline.addLast("stringDecoder", new StringDecoder(StandardCharsets.UTF_8))
-    pipeline.addLast("stringEncoder", new StringEncoder(StandardCharsets.UTF_8))
-    pipeline
-  }
-}
-
-private[finagle] object StringServer {
+object StringServer {
   val protocolLibrary = "string"
-}
 
-trait StringServer {
-  import StringServer._
+  private object StringServerPipeline extends (ChannelPipeline => Unit) {
+    def apply(pipeline: ChannelPipeline): Unit = {
+      pipeline.addLast("line", new DelimiterBasedFrameDecoder(100, Delimiters.lineDelimiter: _*))
+      pipeline.addLast("stringDecoder", new StringDecoder(StandardCharsets.UTF_8))
+      pipeline.addLast("stringEncoder", new StringEncoder(StandardCharsets.UTF_8))
+    }
+  }
 
   case class Server(
     stack: Stack[ServiceFactory[String, String]] = StackServer.newStack,
@@ -38,13 +32,14 @@ trait StringServer {
 
     protected type In = String
     protected type Out = String
+    protected type Context = TransportContext
 
-    protected def newListener() = Netty3Listener(StringServerPipeline, params)
+    protected def newListener() = Netty4Listener(StringServerPipeline, params)
     protected def newDispatcher(
-      transport: Transport[In, Out],
+      transport: Transport[In, Out] { type Context <: Server.this.Context },
       service: Service[String, String]
     ) = new SerialServerDispatcher(transport, service)
   }
 
-  val stringServer = Server()
+  def server: Server = Server()
 }

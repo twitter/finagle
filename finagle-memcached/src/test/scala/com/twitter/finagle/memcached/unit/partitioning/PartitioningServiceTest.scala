@@ -107,8 +107,9 @@ class PartitioningServiceTest extends PartitioningServiceTestBase {
       val batchedRequest: String = servers.map(_._3).mkString(RequestDelimiter)
       intercept[IndividualRequestTimeoutException] {
         val future = client(batchedRequest)
-        timeControl.advance(2.seconds)
-        Await.result(future, 3.second)
+        timeControl.advance(3.seconds)
+        timer.tick()
+        Await.result(future, 10.seconds)
       }
     }
   }

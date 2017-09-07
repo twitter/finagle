@@ -66,6 +66,7 @@ private[redis] trait BtreeSortedSetCommands { self: BaseClient =>
     doRequest(BRange(key, Buf.Utf8(count.toString), startField, endField)) {
       case MBulkReply(messages) => Future.value(returnPairs(ReplyFormat.toBuf(messages)))
       case EmptyMBulkReply => Future.Nil
+      case EmptyBulkReply => Future.Nil   // on a cache miss
     }
   }
 

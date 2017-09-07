@@ -86,6 +86,10 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
     testBcard(client, dict)
   }
 
+  test("Test commands for a key that doesn't exist") {
+    testCacheMissOnCommands(client, dict)
+  }
+
   test("Correctly merge lkeys with destination and set expiry") {
     val bufFoo = Buf.Utf8("foo")
     val bufBoo = Buf.Utf8("boo")
@@ -385,6 +389,25 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
     }
 
     println("Test BRANGE Exclusive Start End succeeded")
+  }
+
+  def testCacheMissOnCommands(client: Client,
+    dict: mutable.HashMap[String, mutable.HashMap[String, String]]): Unit =
+  {
+    val bufFoo = Buf.Utf8("foo")
+    val bufBar = Buf.Utf8("bar")
+    
+    var rangeResult = Await.result(client.bRange(bufFoo, 10, None, None), TIMEOUT)
+    assert(rangeResult.isEmpty)
+
+    var remResult = Await.result(client.bRem(bufFoo, Seq(bufBar)), TIMEOUT)
+    assert(remResult == 0)
+
+    var cardResult = Await.result(client.bCard(bufFoo), TIMEOUT)
+    assert(cardResult == 0)
+
+    var getResult = Await.result(client.bGet(bufFoo, bufBar), TIMEOUT)
+    assert(getResult == None)
   }
 
   def validate(

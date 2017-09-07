@@ -8,6 +8,7 @@ import com.twitter.finagle.client.{
 }
 import com.twitter.finagle.context.RemoteInfo.Upstream
 import com.twitter.finagle.mux.lease.exp.Lessor
+import com.twitter.finagle.mux.transport.{OpportunisticTls, MuxContext}
 import com.twitter.finagle.param.{
   ExceptionStatsHandler => _,
   Monitor => _,
@@ -159,7 +160,6 @@ object ThriftMux
         .withLabel("thrift")
         .withStatsReceiver(ClientStatsReceiver)
 
-    // not a `val` in order to avoid initialization issues
     private def muxer: StackClient[mux.Request, mux.Response] =
       Mux.client
         .copy(stack = BaseClientStack)
@@ -193,10 +193,18 @@ object ThriftMux
 
     protected lazy val Label(defaultClientName) = params[Label]
 
-    override protected lazy val Stats(stats) = params[Stats]
+    protected val clientParam: RichClientParam = RichClientParam(
+      protocolFactory = params[Thrift.param.ProtocolFactory].protocolFactory,
+      maxThriftBufferSize = params[Thrift.param.MaxReusableBufferSize].maxReusableBufferSize,
+      clientStats = params[Stats].statsReceiver,
+      responseClassifier = params[com.twitter.finagle.param.ResponseClassifier].responseClassifier
+    )
 
-    protected val Thrift.param.ProtocolFactory(protocolFactory) =
-      params[Thrift.param.ProtocolFactory]
+    @deprecated("Use clientParam.protocolFactory", "2017-08-16")
+    protected def protocolFactory: TProtocolFactory = clientParam.protocolFactory
+
+    @deprecated("Use clientParam.clientStats", "2017-08-16")
+    override protected def stats: StatsReceiver = clientParam.clientStats
 
     def withParams(ps: Stack.Params): Client =
       copy(muxer = muxer.withParams(ps))
@@ -234,6 +242,18 @@ object ThriftMux
       val stackable = Filter.canStackFromFac.toStackable(role, filter)
       withStack(stackable +: stack)
     }
+
+    /**
+     * Produce a [[com.twitter.finagle.ThriftMux.Client]] with the specified max
+     * size of the reusable buffer for thrift responses. If this size
+     * is exceeded, the buffer is not reused and a new buffer is
+     * allocated for the next thrift response.
+     * The default max size is 16Kb.
+     *
+     * @param size Max size of the reusable buffer for thrift responses in bytes.
+     */
+    def withMaxReusableBufferSize(size: Int): Client =
+      configured(Thrift.param.MaxReusableBufferSize(size))
 
     private[this] def clientId: Option[ClientId] = params[Thrift.param.ClientId].clientId
 
@@ -331,10 +351,34 @@ object ThriftMux
     override def withRetryBackoff(backoff: Stream[Duration]): Client =
       super.withRetryBackoff(backoff)
 
+    /**
+     * Configures the client to negotiate whether to speak tls or not.
+     *
+     * The valid levels are Off, which indicates this client will never speak TLS,
+     * Desired, which indicates it may speak TLS, but may also not speak TLS,
+     * and Required, which indicates it must speak TLS.
+     *
+     * Clients that are configured to be Required cannot speak to servers that are
+     * configured Off, and vice versa.
+     *
+     * Note that opportunistic TLS is negotiated in a cleartext handshake, and is
+     * incompatible with mux over TLS.
+     */
+    def withOpportunisticTls(level: OpportunisticTls.Level): Client =
+      configured(Mux.param.OppTls(Some(level)))
+
+    /**
+     * Disables oportunistic TLS.
+     *
+     * If the client is still TLS configured, it will speak mux over TLS.  To instead
+     * configure the client to be `Off`, use `withOpportunisticTls(OpportunisticTls.Off)`.
+     */
+    def noOpportunisticTls: Client = configured(Mux.param.OppTls(None))
+
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
   }
 
-  val client: ThriftMux.Client = Client()
+  def client: ThriftMux.Client = Client()
 
   protected val Thrift.param.ProtocolFactory(protocolFactory) =
     client.params[Thrift.param.ProtocolFactory]
@@ -374,6 +418,7 @@ object ThriftMux
 
     protected type In = Buf
     protected type Out = Buf
+    protected type Context = MuxContext
 
     private[this] val statsReceiver = params[Stats].statsReceiver
 
@@ -382,11 +427,15 @@ object ThriftMux
       params: Stack.Params = this.params
     ): ServerMuxer = copy(stack, params)
 
-    protected def newListener(): Listener[In, Out] =
+    protected def newListener(): Listener[In, Out, Context] =
       params[Mux.param.MuxImpl].listener(params)
 
+    // we cache tlsHeaders here because it's hard to propagate a `let` to the
+    // server's dispatcher in tests
+    private[this] val cachedTlsHeaders = Mux.param.MuxImpl.tlsHeaders
+
     protected def newDispatcher(
-      transport: Transport[In, Out],
+      transport: Transport[In, Out] { type Context <: ServerMuxer.this.Context },
       service: Service[mux.Request, mux.Response]
     ): Closable = {
       val Lessor.Param(lessor) = params[Lessor.Param]
@@ -395,14 +444,20 @@ object ThriftMux
       val param.ExceptionStatsHandler(excRecorder) = params[param.ExceptionStatsHandler]
       val param.Tracer(tracer) = params[param.Tracer]
       val Thrift.param.ProtocolFactory(pf) = params[Thrift.param.ProtocolFactory]
+      val Mux.param.OppTls(level) = params[Mux.param.OppTls]
 
       val thriftEmulator = thriftmux.ThriftEmulator(transport, pf, statsReceiver.scope("thriftmux"))
 
       val negotiatedTrans = mux.Handshake.server(
         trans = thriftEmulator,
         version = Mux.LatestVersion,
-        headers = Mux.Server.headers(_, frameSize),
-        negotiate = Mux.negotiate(frameSize, muxStatsReceiver)
+        headers = Mux.Server.headers(_, frameSize, if (cachedTlsHeaders) level else None),
+        negotiate = Mux.negotiate(
+          frameSize,
+          muxStatsReceiver,
+          level.getOrElse(OpportunisticTls.Off),
+          transport.context.turnOnTls _
+        )
       )
 
       val statsTrans =
@@ -481,17 +536,26 @@ object ThriftMux
     def stack: Stack[ServiceFactory[mux.Request, mux.Response]] =
       muxer.stack
 
-    override protected val Label(serverLabel) = params[Label]
+    protected val serverParam: RichServerParam = RichServerParam(
+      protocolFactory = params[Thrift.param.ProtocolFactory].protocolFactory,
+      serviceName = params[Label].label,
+      maxThriftBufferSize = params[Thrift.param.MaxReusableBufferSize].maxReusableBufferSize,
+      serverStats = params[Stats].statsReceiver
+    )
 
-    override protected lazy val Stats(serverStats) = params[Stats]
+    @deprecated("Use serverParam.serviceName", "2017-08-16")
+    override protected def serverLabel: String = serverParam.serviceName
+
+    @deprecated("Use serverParam.serverStats", "2017-08-16")
+    override protected def serverStats: StatsReceiver = serverParam.serverStats
 
     def params: Stack.Params = muxer.params
 
-    protected val Thrift.param.ProtocolFactory(protocolFactory) =
-      params[Thrift.param.ProtocolFactory]
+    @deprecated("Use serverParam.protocolFactory", "2017-08-16")
+    protected def protocolFactory: TProtocolFactory = serverParam.protocolFactory
 
-    override val Thrift.Server.param.MaxReusableBufferSize(maxThriftBufferSize) =
-      params[Thrift.Server.param.MaxReusableBufferSize]
+    @deprecated("Use serverParam.maxThriftBufferSize", "2017-08-16")
+    override protected def maxThriftBufferSize: Int = serverParam.maxThriftBufferSize
 
     /**
      * Produce a `com.twitter.finagle.Thrift.Server` using the provided
@@ -499,6 +563,30 @@ object ThriftMux
      */
     def withProtocolFactory(pf: TProtocolFactory): Server =
       configured(Thrift.param.ProtocolFactory(pf))
+
+    /**
+     * Configures the server to negotiate whether to speak tls or not.
+     *
+     * The valid levels are Off, which indicates this server will never speak TLS,
+     * Desired, which indicates it may speak TLS, but may also not speak TLS,
+     * and Required, which indicates it must speak TLS.
+     *
+     * Servers that are configured to be Required cannot speak to clients that are
+     * configured Off, and vice versa.
+     *
+     * Note that opportunistic TLS is negotiated in a cleartext handshake, and is
+     * incompatible with mux over TLS.
+     */
+    def withOpportunisticTls(level: OpportunisticTls.Level): Server =
+      configured(Mux.param.OppTls(Some(level)))
+
+    /**
+     * Disables oportunistic TLS.
+     *
+     * If the server is still TLS configured, it will speak mux over TLS.  To instead
+     * configure the server to be `Off`, use `withOpportunisticTls(OpportunisticTls.Off)`.
+     */
+    def noOpportunisticTls: Server = configured(Mux.param.OppTls(None))
 
     /**
      * Produce a [[com.twitter.finagle.ThriftMux.Server]] using the provided stack.
@@ -518,14 +606,16 @@ object ThriftMux
     }
 
     /**
-     * Produce a [[com.twitter.finagle.Thrift.Server]] with the specified max
+     * Produce a [[com.twitter.finagle.ThriftMux.Server]] with the specified max
      * size of the reusable buffer for thrift responses. If this size
      * is exceeded, the buffer is not reused and a new buffer is
      * allocated for the next thrift response.
+     * The default max size is 16Kb.
+     *
      * @param size Max size of the reusable buffer for thrift responses in bytes.
      */
     def withMaxReusableBufferSize(size: Int): Server =
-      configured(Thrift.Server.param.MaxReusableBufferSize(size))
+      configured(Thrift.param.MaxReusableBufferSize(size))
 
     def withParams(ps: Stack.Params): Server =
       copy(muxer = muxer.withParams(ps))
@@ -570,7 +660,7 @@ object ThriftMux
     override def configured[P](psp: (P, Stack.Param[P])): Server = super.configured(psp)
   }
 
-  val server: Server = Server()
+  def server: ThriftMux.Server = Server()
     .configured(Label("thrift"))
     .configured(Stats(ServerStatsReceiver))
 

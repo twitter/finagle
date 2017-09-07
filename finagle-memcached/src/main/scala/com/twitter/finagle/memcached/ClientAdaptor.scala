@@ -39,5 +39,4 @@ class ClientAdaptor[T](val self: Client, bijection: Bijection[Buf, T])
   def stats(args: Option[String]): Future[Seq[String]] = self.stats(args)
 
   def close(deadline: Time): Future[Unit] = self.close()
-  def release(): Unit = self.release()
 }

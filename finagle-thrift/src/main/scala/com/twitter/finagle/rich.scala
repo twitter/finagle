@@ -44,9 +44,7 @@ private[twitter] object ThriftUtil {
   private[finagle] def constructIface[Iface](
     underlying: Service[ThriftClientRequest, Array[Byte]],
     cls: Class[_],
-    protocolFactory: TProtocolFactory,
-    sr: StatsReceiver,
-    responseClassifier: ResponseClassifier
+    clientParam: RichClientParam
   ): Iface = {
     val clsName = cls.getName
 
@@ -60,10 +58,11 @@ private[twitter] object ThriftUtil {
         cons <- findConstructor(
           clientCls,
           classOf[Service[_, _]],
-          classOf[TProtocolFactory],
-          classOf[ResponseClassifier]
+          classOf[RichClientParam]
         )
-      } yield cons.newInstance(underlying, protocolFactory, responseClassifier)
+      } yield {
+        cons.newInstance(underlying, clientParam)
+      }
 
     // This is used with Scrooge's Scala generated code.
     // The class name passed in should be ServiceName$FutureIface
@@ -77,12 +76,9 @@ private[twitter] object ThriftUtil {
         cons <- findConstructor(
           clientCls,
           classOf[Service[_, _]],
-          classOf[TProtocolFactory],
-          classOf[String],
-          classOf[StatsReceiver],
-          classOf[ResponseClassifier]
+          classOf[RichClientParam]
         )
-      } yield cons.newInstance(underlying, protocolFactory, "", sr, responseClassifier)
+      } yield cons.newInstance(underlying, clientParam)
 
     val iface =
       tryJavaServiceNameDotServiceIface
@@ -103,10 +99,7 @@ private[twitter] object ThriftUtil {
    */
   def serverFromIface(
     impl: AnyRef,
-    protocolFactory: TProtocolFactory,
-    stats: StatsReceiver,
-    maxThriftBufferSize: Int,
-    label: String
+    serverParam: RichServerParam
   ): BinaryService = {
     // This is used with Scrooge's Java generated code.
     // The class passed in should be ServiceName$ServiceIface.
@@ -115,8 +108,10 @@ private[twitter] object ThriftUtil {
       for {
         baseName <- findRootWithSuffix(iface.getName, "$ServiceIface")
         serviceCls <- findClass[BinaryService](baseName + s"$$Service")
-        cons <- findConstructor(serviceCls, iface, classOf[TProtocolFactory])
-      } yield cons.newInstance(impl, protocolFactory)
+        cons <- findConstructor(serviceCls, iface, classOf[RichServerParam])
+      } yield {
+        cons.newInstance(impl, serverParam)
+      }
 
     // This is used with Scrooge's Scala generated code.
     // The class passed in should be ServiceName$FutureIface,
@@ -134,12 +129,9 @@ private[twitter] object ThriftUtil {
         findConstructor(
           serviceCls,
           baseClass,
-          classOf[TProtocolFactory],
-          classOf[StatsReceiver],
-          Integer.TYPE,
-          classOf[String]
+          classOf[RichServerParam]
         ).map { cons =>
-          cons.newInstance(impl, protocolFactory, stats, Int.box(maxThriftBufferSize), label)
+          cons.newInstance(impl, serverParam)
         }
       }).flatten
 
@@ -159,9 +151,38 @@ private[twitter] object ThriftUtil {
     }
   }
 
+  @deprecated("Use com.twitter.finagle.RichServerParam", "2017-08-16")
+  def serverFromIface(
+    impl: AnyRef,
+    protocolFactory: TProtocolFactory,
+    stats: StatsReceiver = NullStatsReceiver,
+    maxThriftBufferSize: Int = Thrift.param.maxThriftBufferSize,
+    label: String
+  ): BinaryService = {
+    serverFromIface(impl, RichServerParam(protocolFactory, label, maxThriftBufferSize, stats))
+  }
+
   /**
    * Construct a multiplexed binary [[com.twitter.finagle.Service]].
    */
+  def serverFromIfaces(
+    ifaces: Map[String, AnyRef],
+    defaultService: Option[String],
+    serverParam: RichServerParam
+  ): BinaryService = {
+    val services = ifaces.map {
+      case (serviceName, impl) =>
+        serviceName -> serverFromIface(impl, serverParam)
+    }
+    new MultiplexedFinagleService(
+      services,
+      defaultService,
+      serverParam.protocolFactory,
+      serverParam.maxThriftBufferSize
+    )
+  }
+
+  @deprecated("Use com.twitter.finagle.RichServerParam", "2017-08-16")
   def serverFromIfaces(
     ifaces: Map[String, AnyRef],
     defaultService: Option[String],
@@ -170,17 +191,16 @@ private[twitter] object ThriftUtil {
     maxThriftBufferSize: Int,
     label: String
   ): BinaryService = {
-    val services = ifaces.map {
-      case (serviceName, impl) =>
-        serviceName -> serverFromIface(
-          impl,
-          protocolFactory,
-          stats,
-          maxThriftBufferSize,
-          serviceName
-        )
-    }
-    new MultiplexedFinagleService(services, defaultService, protocolFactory, maxThriftBufferSize)
+    serverFromIfaces(
+      ifaces,
+      defaultService,
+      RichServerParam(
+        protocolFactory,
+        label,
+        maxThriftBufferSize,
+        stats
+      )
+    )
   }
 
   /**
@@ -188,18 +208,14 @@ private[twitter] object ThriftUtil {
    * interface using whichever Thrift code-generation toolchain is available.
    * (Legacy version for backward-compatibility).
    */
+  @deprecated("Use com.twitter.finagle.RichServerParam", "2017-08-16")
   def serverFromIface(
     impl: AnyRef,
     protocolFactory: TProtocolFactory,
     serviceName: String
-  ): BinaryService =
-    serverFromIface(
-      impl,
-      protocolFactory,
-      LoadedStatsReceiver,
-      Thrift.Server.maxThriftBufferSize,
-      serviceName
-    )
+  ): BinaryService = {
+    serverFromIface(impl, RichServerParam(protocolFactory, serviceName))
+  }
 }
 
 /**
@@ -255,11 +271,13 @@ private[twitter] object ThriftUtil {
 trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
   import ThriftUtil._
 
-  protected val protocolFactory: TProtocolFactory
+  protected val clientParam: RichClientParam
+
+  protected def protocolFactory: TProtocolFactory
 
   /** The client name used when group isn't named. */
   protected val defaultClientName: String
-  protected lazy val stats: StatsReceiver = ClientStatsReceiver
+  protected def stats: StatsReceiver = ClientStatsReceiver
 
   /**
    * The `Stack.Params` to be used by this client.
@@ -311,12 +329,31 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
    * $clientUse
    */
   def newIface[Iface](name: Name, label: String, cls: Class[_]): Iface = {
-    newIface(name, label, cls, protocolFactory, newService(name, label))
+    newIface(name, label, cls, clientParam, newService(name, label))
   }
 
   /**
    * $clientUse
    */
+  def newIface[Iface](
+    name: Name,
+    label: String,
+    cls: Class[_],
+    clientParam: RichClientParam,
+    service: Service[ThriftClientRequest, Array[Byte]]
+  ): Iface = {
+    val clientLabel = (label, defaultClientName) match {
+      case ("", "") => Showable.show(name)
+      case ("", l1) => l1
+      case (l0, l1) => l0
+    }
+
+    val clientConfigScoped =
+      clientParam.copy(clientStats = clientParam.clientStats.scope(clientLabel))
+    constructIface(service, cls, clientConfigScoped)
+  }
+
+  @deprecated("Use com.twitter.finagle.RichClientParam", "2017-8-16")
   def newIface[Iface](
     name: Name,
     label: String,
@@ -329,11 +366,12 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
       case ("", l1) => l1
       case (l0, l1) => l0
     }
-    val sr = stats.scope(clientLabel)
-    val responseClassifier =
-      params[com.twitter.finagle.param.ResponseClassifier].responseClassifier
 
-    constructIface(service, cls, protocolFactory, sr, responseClassifier)
+    val clientConfigScoped = clientParam.copy(
+      protocolFactory = protocolFactory,
+      clientStats = clientParam.clientStats.scope(clientLabel)
+    )
+    constructIface(service, cls, clientConfigScoped)
   }
 
   /**
@@ -382,10 +420,9 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
     implicit builder: ServiceIfaceBuilder[ServiceIface]
   ): ServiceIface = {
     val statsLabel = if (label.isEmpty) defaultClientName else label
-    val scopedStats = stats.scope(statsLabel)
-    val responseClassifier =
-      params[com.twitter.finagle.param.ResponseClassifier].responseClassifier
-    builder.newServiceIface(service, protocolFactory, scopedStats, responseClassifier)
+    val clientConfigScoped =
+      clientParam.copy(clientStats = clientParam.clientStats.scope(statsLabel))
+    builder.newServiceIface(service, clientConfigScoped)
   }
 
   /**
@@ -420,8 +457,9 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
     }
 
     def newIface[Iface](serviceName: String, cls: Class[_]): Iface = {
-      val multiplexedProtocol = Protocols.multiplex(serviceName, protocolFactory)
-      ThriftRichClient.this.newIface(dest, label, cls, multiplexedProtocol, service)
+      val multiplexedProtocol = Protocols.multiplex(serviceName, clientParam.protocolFactory)
+      val clientConfigMultiplexed = clientParam.copy(protocolFactory = multiplexedProtocol)
+      ThriftRichClient.this.newIface(dest, label, cls, clientConfigMultiplexed, service)
     }
 
     def newServiceIface[ServiceIface <: ThriftServiceIface.Filterable[ServiceIface]](
@@ -429,12 +467,50 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
     )(
       implicit builder: ServiceIfaceBuilder[ServiceIface]
     ): ServiceIface = {
-      val multiplexedProtocol = Protocols.multiplex(serviceName, protocolFactory)
+      val multiplexedProtocol = Protocols.multiplex(serviceName, clientParam.protocolFactory)
       val statsLabel = if (label.isEmpty) defaultClientName else label
-      val scopedStats = stats.scope(statsLabel)
-      builder.newServiceIface(service, multiplexedProtocol, scopedStats)
+      val clientConfigMultiplexedScoped = clientParam.copy(
+        protocolFactory = multiplexedProtocol,
+        clientStats = clientParam.clientStats.scope(statsLabel)
+      )
+      builder.newServiceIface(service, clientConfigMultiplexedScoped)
     }
   }
+}
+
+/**
+ * Produce a client with params wrapped in RichClientParam
+ *
+ * @param protocolFactory A `TProtocolFactory` creates protocol objects from transports
+ * @param serviceName For client stats, (default: empty string)
+ * @param maxThriftBufferSize The max size of a reusable buffer for the thrift response
+ * @param responseClassifier  See [[com.twitter.finagle.service.ResponseClassifier]]
+ * @param clientStats StatsReceiver for recording metrics
+ */
+case class RichClientParam(
+  protocolFactory: TProtocolFactory = Thrift.param.protocolFactory,
+  serviceName: String = "",
+  maxThriftBufferSize: Int = Thrift.param.maxThriftBufferSize,
+  responseClassifier: ResponseClassifier = ResponseClassifier.Default,
+  clientStats: StatsReceiver = ClientStatsReceiver
+) {
+
+  def this(
+    protocolFactory: TProtocolFactory,
+    maxThriftBufferSize: Int,
+    responseClassifier: ResponseClassifier
+  ) = this(protocolFactory, "", maxThriftBufferSize, responseClassifier, ClientStatsReceiver)
+
+  def this(
+    protocolFactory: TProtocolFactory,
+    responseClassifier: ResponseClassifier
+  ) = this(protocolFactory, Thrift.param.maxThriftBufferSize, responseClassifier)
+
+  def this(
+    protocolFactory: TProtocolFactory
+  ) = this(protocolFactory, ResponseClassifier.Default)
+
+  def this() = this(Thrift.param.protocolFactory)
 }
 
 /**
@@ -500,33 +576,29 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
 trait ThriftRichServer { self: Server[Array[Byte], Array[Byte]] =>
   import ThriftUtil._
 
-  protected val protocolFactory: TProtocolFactory
+  protected def serverParam: RichServerParam
 
-  protected val maxThriftBufferSize: Int = Thrift.Server.maxThriftBufferSize
+  protected def protocolFactory: TProtocolFactory
 
-  protected val serverLabel: String = "thrift"
+  protected def maxThriftBufferSize: Int = Thrift.param.maxThriftBufferSize
+
+  protected def serverLabel: String = "thrift"
 
   protected def params: Stack.Params
 
-  protected lazy val serverStats: StatsReceiver = params[Stats].statsReceiver
+  protected def serverStats: StatsReceiver = params[Stats].statsReceiver
 
   /**
    * $serveIface
    */
   def serveIface(addr: String, iface: AnyRef): ListeningServer =
-    serve(
-      addr,
-      serverFromIface(iface, protocolFactory, serverStats, maxThriftBufferSize, serverLabel)
-    )
+    serve(addr, serverFromIface(iface, serverParam))
 
   /**
    * $serveIface
    */
   def serveIface(addr: SocketAddress, iface: AnyRef): ListeningServer =
-    serve(
-      addr,
-      serverFromIface(iface, protocolFactory, serverStats, maxThriftBufferSize, serverLabel)
-    )
+    serve(addr, serverFromIface(iface, serverParam))
 
   /**
    * $serveIfaces
@@ -536,26 +608,13 @@ trait ThriftRichServer { self: Server[Array[Byte], Array[Byte]] =>
     ifaces: Map[String, AnyRef],
     defaultService: Option[String] = None
   ): ListeningServer =
-    serve(
-      addr,
-      serverFromIfaces(
-        ifaces,
-        defaultService,
-        protocolFactory,
-        serverStats,
-        maxThriftBufferSize,
-        serverLabel
-      )
-    )
+    serve(addr, serverFromIfaces(ifaces, defaultService, serverParam))
 
   /**
    * $serveIfaces
    */
   def serveIfaces(addr: SocketAddress, ifaces: Map[String, AnyRef]): ListeningServer =
-    serve(
-      addr,
-      serverFromIfaces(ifaces, None, protocolFactory, serverStats, maxThriftBufferSize, serverLabel)
-    )
+    serve(addr, serverFromIfaces(ifaces, None, serverParam))
 
   /**
    * $serveIfaces
@@ -565,15 +624,32 @@ trait ThriftRichServer { self: Server[Array[Byte], Array[Byte]] =>
     ifaces: Map[String, AnyRef],
     defaultService: Option[String]
   ): ListeningServer =
-    serve(
-      addr,
-      serverFromIfaces(
-        ifaces,
-        defaultService,
-        protocolFactory,
-        serverStats,
-        maxThriftBufferSize,
-        serverLabel
-      )
-    )
+    serve(addr, serverFromIfaces(ifaces, defaultService, serverParam))
+}
+
+/**
+ * Produce a server with params wrapped in RichServerParam
+ *
+ * @param protocolFactory A `TProtocolFactory` creates protocol objects from transports
+ * @param serviceName For server stats, (default: "thrift")
+ * @param maxThriftBufferSize The max size of a reusable buffer for the thrift response
+ * @param serverStats StatsReceiver for recording metrics
+ */
+case class RichServerParam(
+  protocolFactory: TProtocolFactory = Thrift.param.protocolFactory,
+  serviceName: String = "thrift",
+  maxThriftBufferSize: Int = Thrift.param.maxThriftBufferSize,
+  serverStats: StatsReceiver = LoadedStatsReceiver
+) {
+
+  def this(
+    protocolFactory: TProtocolFactory,
+    maxThriftBufferSize: Int
+  ) = this(protocolFactory, "thrift", maxThriftBufferSize, LoadedStatsReceiver)
+
+  def this(
+    protocolFactory: TProtocolFactory
+  ) = this(protocolFactory, Thrift.param.maxThriftBufferSize)
+
+  def this() = this(Thrift.param.protocolFactory)
 }

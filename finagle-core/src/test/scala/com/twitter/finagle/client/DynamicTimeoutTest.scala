@@ -6,6 +6,7 @@ import com.twitter.finagle.param.HighResTimer
 import com.twitter.finagle.service.{Retries, RetryPolicy, TimeoutFilter}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.util._
+import com.twitter.util.tunable.Tunable
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.JUnitRunner
@@ -44,7 +45,26 @@ class DynamicTimeoutTest extends FunSuite with Matchers with Eventually with Int
       param.Stats(NullStatsReceiver)
   }
 
+  private def perReqParams(
+    timeout: Tunable[Duration],
+    compensation: Duration
+  ): Stack.Params = {
+    Stack.Params.empty +
+      TimeoutFilter.Param(timeout) +
+      param.Timer(timer) +
+      LatencyCompensation.Compensation(compensation) +
+      param.Stats(NullStatsReceiver)
+  }
+
   private def totalParams(timeout: Duration): Stack.Params = {
+    Stack.Params.empty +
+      TimeoutFilter.TotalTimeout(timeout) +
+      TimeoutFilter.Param(timeout) +
+      param.Timer(timer) +
+      param.Stats(NullStatsReceiver)
+  }
+
+  private def totalParams(timeout: Tunable[Duration]): Stack.Params = {
     Stack.Params.empty +
       TimeoutFilter.TotalTimeout(timeout) +
       TimeoutFilter.Param(timeout) +
@@ -87,6 +107,23 @@ class DynamicTimeoutTest extends FunSuite with Matchers with Eventually with Int
     }
   }
 
+  test("per-request module uses default tunable timeout when key not set") {
+    val tunable = Tunable.mutable[Duration]("id", 4.seconds)
+    val params = perReqParams(tunable, Duration.Undefined)
+    val svc = Await.result(perReqStack.make(params).apply(ClientConnection.nil), 5.seconds)
+
+    Time.withCurrentTimeFrozen { tc =>
+      val res1 = svc(1)
+      assertBeforeAndAfterTimeout(res1, 4.seconds, tc, perReqExn)
+
+      // Make sure we're getting the new value once we set the Tunable
+      tunable.set(2.seconds)
+
+      val res2 = svc(1)
+      assertBeforeAndAfterTimeout(res2, 2.seconds, tc, perReqExn)
+    }
+  }
+
   test("totalFilter uses default timeout when key not set") {
     val params = totalParams(4.seconds)
     val svc = DynamicTimeout.totalFilter(params).andThen(mkSvc())
@@ -94,6 +131,23 @@ class DynamicTimeoutTest extends FunSuite with Matchers with Eventually with Int
     Time.withCurrentTimeFrozen { tc =>
       val res = svc(1)
       assertBeforeAndAfterTimeout(res, 4.seconds, tc, totalExn)
+    }
+  }
+
+  test("totalFilter uses default tunable timeout when key not set") {
+    val tunable = Tunable.mutable[Duration]("id", 4.seconds)
+    val params = totalParams(tunable)
+    val svc = DynamicTimeout.totalFilter(params).andThen(mkSvc())
+
+    Time.withCurrentTimeFrozen { tc =>
+      val res1 = svc(1)
+      assertBeforeAndAfterTimeout(res1, 4.seconds, tc, totalExn)
+
+      // Make sure we're getting the new value once we set the Tunable
+      tunable.set(2.seconds)
+
+      val res2 = svc(1)
+      assertBeforeAndAfterTimeout(res2, 2.seconds, tc, totalExn)
     }
   }
 

@@ -82,6 +82,9 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(params: St
         case Some((u, p)) => new Socks5ProxyHandler(sa, u, p)
       }
 
+      // Use only Finagle's session acquisition timeout
+      proxyHandler.setConnectTimeoutMillis(0)
+
       pipe.addFirst(
         "socksProxyConnect",
         new Netty4ProxyConnectHandler(proxyHandler, bypassLocalhostConnections = true)
@@ -94,6 +97,9 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(params: St
         case None => new HttpProxyHandler(sa)
         case Some(c) => new HttpProxyHandler(sa, c.username, c.password)
       }
+
+      // Use only Finagle's session acquisition timeout
+      proxyHandler.setConnectTimeoutMillis(0)
 
       // TODO: Figure out if it makes sense to bypass localhost connections when HTTP proxy is
       // enabled (see CSL-4409).

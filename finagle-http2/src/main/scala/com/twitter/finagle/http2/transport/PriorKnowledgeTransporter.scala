@@ -3,9 +3,10 @@ package com.twitter.finagle.http2.transport
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.http2.Http2Transporter
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader.StreamMessage
+import com.twitter.finagle.netty4.transport.HasExecutor
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.{Stack, Status}
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext, LegacyContext}
 import com.twitter.logging.Logger
 import com.twitter.util.{Future, ConstFuture, Promise, Time}
 import java.net.SocketAddress
@@ -22,9 +23,9 @@ import java.util.concurrent.atomic.AtomicReference
  * Instead, it speaks http/2 from birth.
  */
 private[http2] class PriorKnowledgeTransporter(
-  underlying: Transporter[Any, Any],
+  underlying: Transporter[Any, Any, TransportContext],
   params: Stack.Params
-) extends Transporter[Any, Any] { self =>
+) extends Transporter[Any, Any, TransportContext] { self =>
 
   private[this] val log = Logger.get()
   private[this] val Stats(statsReceiver) = params[Stats]
@@ -36,8 +37,14 @@ private[http2] class PriorKnowledgeTransporter(
 
   private[this] def createMultiplexedTransporter(): Future[MultiplexedTransporter] = {
     underlying().map { transport =>
+      val inOutCasted = Transport.cast[StreamMessage, StreamMessage](transport)
+      val contextCasted = inOutCasted.asInstanceOf[
+        Transport[StreamMessage, StreamMessage] {
+          type Context = TransportContext with HasExecutor
+        }
+      ]
       val multi = new MultiplexedTransporter(
-        Transport.cast[StreamMessage, StreamMessage](transport),
+        contextCasted,
         remoteAddress,
         params
       )
@@ -64,6 +71,7 @@ private[http2] class PriorKnowledgeTransporter(
   }
 
   private[this] def deadTransport(exn: Throwable) = new Transport[Any, Any] {
+    type Context = TransportContext
     def read(): Future[Any] = Future.never
     def write(msg: Any): Future[Unit] = Future.never
     val status: Status = Status.Closed
@@ -72,6 +80,7 @@ private[http2] class PriorKnowledgeTransporter(
     def localAddress: SocketAddress = new SocketAddress {}
     def peerCertificate: Option[Certificate] = None
     def close(deadline: Time): Future[Unit] = Future.Done
+    val context: TransportContext = new LegacyContext(this)
   }
 
   def apply(): Future[Transport[Any, Any]] = getMulti().flatMap { multi =>

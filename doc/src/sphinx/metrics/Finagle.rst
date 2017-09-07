@@ -33,11 +33,11 @@ Scheduler
 Timer
 <<<<<
 
-**finagle/timer/pending_tasks**
+**finagle/timer/pending_tasks** `verbosity:debug`
   A stat of the number of pending tasks to run for
   :src:`HashedWheelTimer.Default <com/twitter/finagle/util/HashedWheelTimer.scala>`.
 
-**finagle/timer/deviation_ms**
+**finagle/timer/deviation_ms** `verbosity:debug`
   A stat of the deviation in milliseconds of tasks scheduled on
   :src:`HashedWheelTimer.Default <com/twitter/finagle/util/HashedWheelTimer.scala>`
   from their expected time.
@@ -101,38 +101,35 @@ These metrics are exported from Finagle's underlying transport
 implementation, the Netty 4 library and available under `finagle/netty4`
 on any instance running Finagle with Netty 4.
 
-NOTE: All pooling metrics are only exported when pooling is enabled
-      (default: disabled) and only account for direct memory.
-
-**pooling/allocations/huge**
+**pooling/allocations/huge** `verbosity:debug`
   A gauge (a counter) of total number of HUGE *direct allocations*
   (i.e., unpooled allocations that exceed the current chunk size).
 
-**pooling/allocations/normal**
+**pooling/allocations/normal** `verbosity:debug`
   A gauge (a counter) of total number of NORMAL *direct allocations*
   (i.e., less than a current chunk size).
 
-**pooling/allocations/small**
+**pooling/allocations/small** `verbosity:debug`
   A gauge (a counter) of total number of SMALL *direct allocations*
   (i.e., less than a page size, 8192 bytes).
 
-**pooling/allocations/tiny**
+**pooling/allocations/tiny** `verbosity:debug`
   A gauge (a counter) of total number of TINY *direct allocations*
   (i.e., less than 512 bytes).
 
-**pooling/deallocations/huge**
+**pooling/deallocations/huge** `verbosity:debug`
   A gauge (a counter) of total number of HUGE *direct deallocations*
   (i.e., unpooled allocations that exceed the current chunk size).
 
-**pooling/deallocations/normal**
+**pooling/deallocations/normal** `verbosity:debug`
   A gauge (a counter) of total number of NORMAL *direct deallocations*
   (i.e., less than a chunk size).
 
-**pooling/deallocations/small**
+**pooling/deallocations/small** `verbosity:debug`
   A gauge (a counter) of total number of SMALL *direct deallocations*
   (i.e., less than a page size, 8192 bytes).
 
-**pooling/deallocations/tiny**
+**pooling/deallocations/tiny** `verbosity:debug`
   A gauge (a counter) of total number of TINY *direct deallocations*
   (i.e., less than 512 bytes).
 

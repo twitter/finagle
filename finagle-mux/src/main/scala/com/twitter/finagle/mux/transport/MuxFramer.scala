@@ -1,8 +1,9 @@
 package com.twitter.finagle.mux.transport
 
 import com.twitter.concurrent.{AsyncQueue, Broker, Offer}
+import com.twitter.finagle.mux.transport.Message.{Rdiscarded, Tdiscarded}
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{LegacyContext, Transport, TransportContext}
 import com.twitter.finagle.{Failure, Status}
 import com.twitter.io.{Buf, BufByteWriter, ByteReader}
 import com.twitter.util.{Future, Promise, Return, Throw, Time}
@@ -83,6 +84,8 @@ private[finagle] object MuxFramer {
     writeWindowBytes: Option[Int],
     statsReceiver: StatsReceiver
   ): Transport[Message, Message] = new Transport[Message, Message] {
+    type Context = TransportContext
+
     require(
       writeWindowBytes.isEmpty || writeWindowBytes.exists(_ > 0),
       s"writeWindowBytes must be positive: $writeWindowBytes"
@@ -102,57 +105,6 @@ private[finagle] object MuxFramer {
         }
       }
     )
-
-    /**
-     * Returns an iterator over the fragments of `msg`. Each fragment is sized to
-     * be <= `maxSize`. Note, this should not be iterated over on more than one
-     * thread at a time.
-     */
-    private[this] def fragment(msg: Message, maxSize: Int): Iterator[Buf] =
-      if (msg.buf.length <= maxSize) {
-        Iterator.single(Message.encode(msg))
-      } else
-        new Iterator[Buf] {
-          // Create a mux header with the tag MSB set to 1. This signifies
-          // that the message is part of a set of fragments. Note that the
-          // decoder needs to respect this and not attempt to decode fragments
-          // past their headers.
-          private[this] val header: Array[Byte] = {
-            val tag = Message.Tags.setMsb(msg.tag)
-            Array[Byte](
-              msg.typ,
-              (tag >> 16 & 0xff).toByte,
-              (tag >> 8 & 0xff).toByte,
-              (tag & 0xff).toByte
-            )
-          }
-
-          private[this] val headerBuf = Buf.ByteArray.Owned(header)
-          private[this] val buf = msg.buf
-          private[this] val readable = buf.length
-
-          @volatile private[this] var read = 0
-
-          def hasNext: Boolean = read < readable
-
-          def next(): Buf = {
-            if (!hasNext) throw new NoSuchElementException
-
-            if (readable - read <= maxSize) {
-              // Toggle the tag MSB in the header region which signifies
-              // the end of the sequence. Note, our header is denormalized
-              // across 4 bytes.
-              header(1) = (header(1) ^ (1 << 7)).toByte
-            }
-            // ensure we don't slice past the end of the msg.buf
-            val frameLength = math.min(readable - read, maxSize)
-            // note that the size of a frame is implicitly prepended by the transports
-            // pipeline and is derived from readable bytes.
-            val b = headerBuf.concat(buf.slice(from = read, until = read + frameLength))
-            read += frameLength
-            b
-          }
-        }
 
     // Queues incoming streams which are dequeued and
     // flushed in `writeLoop`.
@@ -279,7 +231,7 @@ private[finagle] object MuxFramer {
             // be removed via interrupts. However, the transport can
             // be bounded which is the underlying resource backing the
             // writeq.
-            val nq = writeq ! FragmentStream(m.tag, fragment(m, writeWindowBytes.get), p)
+            val nq = writeq ! FragmentStream(m.tag, Message.encodeFragments(m, writeWindowBytes.get), p)
             nq.before(p).ensure {
               pendingWriteStreams.decrementAndGet()
             }
@@ -302,43 +254,54 @@ private[finagle] object MuxFramer {
         val typ = Message.Tags.extractType(header)
         val tag = Message.Tags.extractTag(header)
 
-        val isFragment = Message.Tags.isFragment(tag)
-
         // normalize tag by flipping the tag MSB
         val t = Message.Tags.setMsb(tag)
 
-        // Both a transmitter or receiver can discard a stream.
-        val discard = typ == Message.Types.BAD_Tdiscarded ||
-          typ == Message.Types.Rdiscarded
-
-        // We only want to intercept discards in this loop if we
-        // are processing the stream.
-        val nextTags = if (discard && tags.contains(tag)) {
-          tags - tag
-        } else if (isFragment) {
-          // Append the fragment to the respective `tag` in `tags`.
-          // Note, we don't reset the reader index because we want
-          // to consume the header for fragments.
-          tags.updated(t, tags.get(t) match {
-            case Some(buf0) => buf0.concat(br.readAll())
-            case None => br.readAll()
-          })
-        } else {
-          // If the fragment bit isn't flipped, the `buf` is either
-          // a fully buffered message or the last fragment for `tag`.
-          // We distinguish between the two by checking for the presence
-          // of `tag` in `tags`.
-          val resBuf =
-            if (!tags.contains(t)) buf
-            else {
-              val head = buf.slice(0, 4)
-              val rest = tags(t)
-              val last = buf.slice(4, buf.length)
-              Buf(Seq(head, rest, last))
+        val nextTags =
+          if (Message.Types.isDiscard(typ)) {
+            val msg = Message.decode(buf)
+            // `Tdiscarded` has a tag of 0 since its a MarkerMessage and encodes
+            // the discarded tag in the `which` field whereas `Rdiscarded` is
+            // not a marker tag. (shrug)
+            val discardTag = msg match {
+              case Tdiscarded(which, _) => Message.Tags.setMsb(which)
+              case Rdiscarded(_) => t
+              case _ => unexpectedMessage("[Tdiscarded | Rdiscarded]", msg)
             }
-          readq.offer(Message.decode(resBuf))
-          tags - t
-        }
+            // We only want to intercept discards in this loop if we
+            // are processing the stream.
+            if (tags.contains(discardTag)) {
+              // if we're the client, we need to propagate the Rdiscarded to the dispatcher
+              // if we're the server, we need to send the client a synthesized Rdiscarded
+              msg match {
+                case Tdiscarded(which, _) => write(Rdiscarded(which))
+                case Rdiscarded(_) => readq.offer(msg)
+                case _ => unexpectedMessage("[Tdiscarded | Rdiscarded]", msg)
+              }
+              tags - discardTag
+            } else {
+              readq.offer(msg)
+              tags
+            }
+          } else if (Message.Tags.isFragment(tag)) {
+            tags.updated(t, tags.get(t) match {
+              case Some(buf0) => buf0.concat(br.readAll())
+              case None => br.readAll()
+            })
+          } else {
+            val resBuf =
+              if (!tags.contains(t)) buf
+              else {
+                val head = buf.slice(0, 4)
+                val rest = tags(t)
+                val last = buf.slice(4, buf.length)
+                Buf(Seq(head, rest, last))
+              }
+
+            readq.offer(Message.decode(resBuf))
+            tags - t
+          }
+
         pendingReadStreams.set(nextTags.size)
         readLoop(nextTags)
       }
@@ -357,5 +320,10 @@ private[finagle] object MuxFramer {
     def remoteAddress: SocketAddress = trans.remoteAddress
     def peerCertificate: Option[Certificate] = trans.peerCertificate
     def close(deadline: Time): Future[Unit] = trans.close(deadline)
+    val context: TransportContext = new LegacyContext(this)
+  }
+
+  private[this] def unexpectedMessage(expected: String, found: Message): Nothing = {
+    throw new IllegalStateException(s"Unexpected message. Expected $expected, observed $found.")
   }
 }

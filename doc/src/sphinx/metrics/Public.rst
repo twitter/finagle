@@ -92,8 +92,8 @@ RequestSemaphoreFilter
 PayloadSizeFilter (enabled for Mux, HTTP (non-chunked), Thrift)
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-**request_payload_bytes**
+**request_payload_bytes** `verbosity:debug`
   A histogram of the number of bytes per request's payload.
 
-**response_payload_bytes**
+**response_payload_bytes** `verbosity:debug`
   A histogram of the number of bytes per response's payload.

@@ -1,22 +1,37 @@
 package com.twitter.finagle.mysql.integration
 
+import com.twitter.finagle.Mysql
 import com.twitter.finagle.mysql._
 import com.twitter.util.{Await, TwitterDateFormat}
 import java.sql.Timestamp
 import java.util.TimeZone
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class NumericTypeTest extends FunSuite with IntegrationClient {
+
+  // This test requires support for unsigned integers
+  override protected def configureClient(
+    username: String,
+    password: String,
+    db: String
+  ): Mysql.Client = {
+    super
+      .configureClient(username, password, db)
+      .configured(Mysql.param.UnsignedColumns(supported = true))
+  }
+
   for (c <- client) {
     Await.ready(c.query("""CREATE TEMPORARY TABLE IF NOT EXISTS `numeric` (
-        `smallint` smallint(6) NOT NULL,
         `tinyint` tinyint(4) NOT NULL,
+        `tinyint_unsigned` tinyint(4) UNSIGNED NOT NULL,
+        `smallint` smallint(6) NOT NULL,
+        `smallint_unsigned` smallint(6) UNSIGNED NOT NULL,
         `mediumint` mediumint(9) NOT NULL,
+        `mediumint_unsigned` mediumint(9) UNSIGNED NOT NULL,
         `int` int(11) NOT NULL,
+        `int_unsigned` int(11) UNSIGNED NOT NULL,
         `bigint` bigint(20) NOT NULL,
+        `bigint_unsigned` bigint(20) UNSIGNED NOT NULL,
         `float` float(4,2) NOT NULL,
         `double` double(4,3) NOT NULL,
         `decimal` decimal(30,11) NOT NULL,
@@ -24,58 +39,77 @@ class NumericTypeTest extends FunSuite with IntegrationClient {
         PRIMARY KEY (`smallint`)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8;"""))
 
-    Await.ready(c.query("""INSERT INTO `numeric` (`smallint`,
-        `tinyint`, `mediumint`, `int`,
-        `bigint`, `float`, `double`, `decimal`, `bit`)
-        VALUES (1, 2, 3, 4, 5, 1.61, 1.618, 1.61803398875, 1);"""))
+    Await.ready(c.query("""INSERT INTO `numeric` (
+        `tinyint`, `tinyint_unsigned`,
+        `smallint`, `smallint_unsigned`,
+        `mediumint`, `mediumint_unsigned`,
+        `int`, `int_unsigned`,
+        `bigint`, `bigint_unsigned`,
+        `float`, `double`, `decimal`, `bit`) VALUES (
+        127, 255,
+        32767, 63535,
+        8388607, 16777215,
+        2147483647, 4294967295,
+        9223372036854775807, 18446744073709551615,
+        1.61, 1.618, 1.61803398875, 1);"""))
 
-    val textEncoded = Await.result(c.query("SELECT * FROM `numeric`") map {
+    val signedTextEncodedQuery =
+      """SELECT `tinyint`, `smallint`, `mediumint`, `int`, `bigint`, `float`, `double`,`decimal`, `bit` FROM `numeric` """
+    runTest(c, signedTextEncodedQuery)(testRow)
+
+    val unsignedTextEncodedQuery =
+      """SELECT `tinyint_unsigned`, `smallint_unsigned`, `mediumint_unsigned`, `int_unsigned`, `bigint_unsigned` FROM `numeric` """
+    runTest(c, unsignedTextEncodedQuery)(testUnsignedRow)
+  }
+
+  def runTest(c: Client, sql: String)(testFunc: Row => Unit): Unit = {
+    val textEncoded = Await.result(c.query(sql) map {
       case rs: ResultSet if rs.rows.size > 0 => rs.rows(0)
       case v => fail("expected a ResultSet with 1 row but received: %s".format(v))
     })
 
-    val ps = c.prepare("SELECT * FROM `numeric`")
+    val ps = c.prepare(sql)
     val binaryrows = Await.result(ps.select()(identity))
     assert(binaryrows.size == 1)
     val binaryEncoded = binaryrows(0)
 
-    testRow(textEncoded)
-    testRow(binaryEncoded)
+    testFunc(textEncoded)
+    testFunc(binaryEncoded)
   }
 
   def testRow(row: Row) {
     val rowType = row.getClass.getName
     test("extract %s from %s".format("tinyint", rowType)) {
       row("tinyint") match {
-        case Some(ByteValue(b)) => assert(b == 2)
+        case Some(ByteValue(b)) => assert(b == 127)
         case v => fail("expected ByteValue but got %s".format(v))
       }
     }
 
     test("extract %s from %s".format("smallint", rowType)) {
       row("smallint") match {
-        case Some(ShortValue(s)) => assert(s == 1)
+        case Some(ShortValue(s)) => assert(s == 32767)
         case v => fail("expected ShortValue but got %s".format(v))
       }
     }
 
     test("extract %s from %s".format("mediumint", rowType)) {
       row("mediumint") match {
-        case Some(IntValue(i)) => assert(i == 3)
+        case Some(IntValue(i)) => assert(i == 8388607)
         case v => fail("expected IntValue but got %s".format(v))
       }
     }
 
     test("extract %s from %s".format("int", rowType)) {
       row("int") match {
-        case Some(IntValue(i)) => assert(i == 4)
+        case Some(IntValue(i)) => assert(i == 2147483647)
         case v => fail("expected IntValue but got %s".format(v))
       }
     }
 
     test("extract %s from %s".format("bigint", rowType)) {
       row("bigint") match {
-        case Some(LongValue(l)) => assert(l == 5)
+        case Some(LongValue(l)) => assert(l == 9223372036854775807l)
         case v => fail("expected LongValue but got %s".format(v))
       }
     }
@@ -110,9 +144,47 @@ class NumericTypeTest extends FunSuite with IntegrationClient {
       }
     }
   }
+
+  def testUnsignedRow(row: Row) {
+    val rowType = row.getClass.getName
+
+    test("extract %s from %s".format("tinyint_unsigned", rowType)) {
+      row("tinyint_unsigned") match {
+        case Some(ShortValue(b)) => assert(b == 255)
+        case v => fail("expected ShortValue but got %s".format(v))
+      }
+    }
+
+    test("extract %s from %s".format("smallint_unsigned", rowType)) {
+      row("smallint_unsigned") match {
+        case Some(IntValue(s)) => assert(s == 63535)
+        case v => fail("expected ShortValue but got %s".format(v))
+      }
+    }
+
+    test("extract %s from %s".format("mediumint_unsigned", rowType)) {
+      row("mediumint_unsigned") match {
+        case Some(IntValue(i)) => assert(i == 16777215)
+        case v => fail("expected IntValue but got %s".format(v))
+      }
+    }
+
+    test("extract %s from %s".format("int_unsigned", rowType)) {
+      row("int_unsigned") match {
+        case Some(LongValue(i)) => assert(i == 4294967295l)
+        case v => fail("expected IntValue but got %s".format(v))
+      }
+    }
+
+    test("extract %s from %s".format("bigint_unsigned", rowType)) {
+      row("bigint_unsigned") match {
+        case Some(BigIntValue(bi)) => assert(bi == BigInt("18446744073709551615"))
+        case v => fail("expected LongValue but got %s".format(v))
+      }
+    }
+  }
 }
 
-@RunWith(classOf[JUnitRunner])
 class BlobTypeTest extends FunSuite with IntegrationClient {
   for (c <- client) {
     Await.ready(c.query("""CREATE TEMPORARY TABLE `blobs` (
@@ -146,7 +218,7 @@ class BlobTypeTest extends FunSuite with IntegrationClient {
     })
 
     val ps = c.prepare("SELECT * FROM `blobs`")
-    val binaryrows = Await.result(ps.select()(identity))
+    val binaryrows: Seq[Row] = Await.result(ps.select()(identity))
     assert(binaryrows.size == 1)
     val binaryEncoded = binaryrows(0)
 
@@ -242,7 +314,6 @@ class BlobTypeTest extends FunSuite with IntegrationClient {
   }
 }
 
-@RunWith(classOf[JUnitRunner])
 class DateTimeTypeTest extends FunSuite with IntegrationClient {
   for (c <- client) {
     Await.ready(

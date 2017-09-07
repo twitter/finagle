@@ -38,6 +38,7 @@ object Charset {
   /**
    * Some useful charset constants
    */
+  val Utf8_bin = 83.toShort
   val Utf8_general_ci = 33.toShort
   val Binary = 63.toShort
 

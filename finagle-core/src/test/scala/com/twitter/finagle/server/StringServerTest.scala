@@ -6,19 +6,11 @@ import com.twitter.finagle.client.StringClient
 import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
 import com.twitter.util.{Await, Future, Promise}
 import java.net.{InetAddress, InetSocketAddress, Socket}
-import org.junit.runner.RunWith
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import scala.util.control.NonFatal
 
-@RunWith(classOf[JUnitRunner])
-class StringServerTest
-    extends FunSuite
-    with StringServer
-    with StringClient
-    with Eventually
-    with IntegrationPatience {
+class StringServerTest extends FunSuite with Eventually with IntegrationPatience {
 
   test("StringServer notices when the client cuts the connection") {
     val p = Promise[String]()
@@ -37,7 +29,7 @@ class StringServerTest
     }
 
     val server =
-      stringServer.serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), service)
+      StringServer.server.serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), service)
 
     val client = new Socket()
     eventually { client.connect(server.boundAddress) }
@@ -54,17 +46,17 @@ class StringServerTest
 
   test("exports listener type to registry") {
     val registry = new SimpleRegistry
-    val label = "stringServer"
+    val label = "StringServer.server"
 
     val listeningServer = GlobalRegistry.withRegistry(registry) {
-      stringServer
+      StringServer.server
         .withLabel(label)
         .serve(":*", Service.mk[String, String](Future.value(_)))
     }
 
     val expectedEntry = Entry(
       key = Seq("server", StringServer.protocolLibrary, label, "Listener"),
-      value = "Netty3Listener"
+      value = "Netty4Listener"
     )
 
     assert(registry.iterator.contains(expectedEntry))
@@ -82,11 +74,11 @@ class StringServerTest
     val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val registry = ServerRegistry.connectionRegistry(address)
 
-    val server = stringServer.serve(address, svc)
+    val server = StringServer.server.serve(address, svc)
     val boundAddress = server.boundAddress.asInstanceOf[InetSocketAddress]
 
-    val client1 = stringClient.newService(Name.bound(Address(boundAddress)), "stringClient1")
-    val client2 = stringClient.newService(Name.bound(Address(boundAddress)), "stringClient2")
+    val client1 = StringClient.client.newService(Name.bound(Address(boundAddress)), "stringClient1")
+    val client2 = StringClient.client.newService(Name.bound(Address(boundAddress)), "stringClient2")
   }
 
   test("ConnectionRegistry has the right size") {

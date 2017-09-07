@@ -15,12 +15,7 @@ import org.scalatest.concurrent.Eventually
 import org.scalatest.{BeforeAndAfterEach, FunSuite}
 import scala.collection.mutable
 
-trait PartitioningServiceTestBase
-    extends FunSuite
-    with StringClient
-    with StringServer
-    with BeforeAndAfterEach
-    with Eventually {
+trait PartitioningServiceTestBase extends FunSuite with BeforeAndAfterEach with Eventually {
   import PartitioningServiceTestBase._
 
   protected[this] val failingHosts = new mutable.HashSet[String]()
@@ -73,7 +68,7 @@ trait PartitioningServiceTestBase
     // create a cluster of multiple servers, listening on unique port numbers
     startingIndex until (startingIndex + size) map { i =>
       val addr = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-      val server = stringServer.serve(addr, echoService(servername = s"server#$i"))
+      val server = StringServer.server.serve(addr, echoService(servername = s"server#$i"))
       val boundAddress = server.boundAddress.asInstanceOf[InetSocketAddress]
       val port = boundAddress.getPort
       (server, boundAddress, port, i)
@@ -95,7 +90,7 @@ trait PartitioningServiceTestBase
           getPartitioningServiceModule
         )
 
-    stringClient
+    StringClient.client
       .withStack(newClientStack)
       .withRequestTimeout(1.second)
       .configured(Stats(sr))

@@ -11,9 +11,10 @@ junit_tests(
     'finagle/finagle-thrift/src/main/java:java',
     'finagle/finagle-thrift/src/test/java',
     'finagle/finagle-thrift/src/test/resources',
+    'finagle/finagle-thrift/src/test/thrift:test-thrift-java',
+    'finagle/finagle-thrift/src/test/thrift:test-thrift-scala',
     'finagle/finagle-thrift/src/test/thrift:thrift-java',
     'finagle/finagle-thrift/src/test/thrift:thrift-scala',
-    'finagle/finagle-thrift/src/test/thrift:test-thrift-scala',
     'scrooge/scrooge-core/src/main/scala:scala',
     'util/util-app/src/main/scala:scala',
     'util/util-core/src/main/scala:scala',
@@ -21,4 +22,6 @@ junit_tests(
   ],
   sources=rglobs('*.scala'),
   fatal_warnings=True,
+  strict_deps=True,
+
 )

@@ -33,10 +33,8 @@ private[stats] object Metrics {
     def count: Long = adder.sum()
   }
 
-  class StoreGaugeImpl(override val name: String, f: => Float) extends MetricsStore.StoreGauge {
-
-    def read: Float =
-      f
+  class StoreGaugeImpl(override val name: String, f: => Number) extends MetricsStore.StoreGauge {
+    override def read: Number = f
   }
 
   class StoreStatImpl(histo: MetricsHistogram, override val name: String, doLog: Boolean)
@@ -162,7 +160,13 @@ private[finagle] class Metrics(
     if (prev != null) prev else next
   }
 
-  def registerGauge(verbosity: Verbosity, names: Seq[String], f: => Float): Unit = {
+  def registerGauge(verbosity: Verbosity, names: Seq[String], f: => Float): Unit =
+    registerNumberGauge(verbosity, names, f)
+
+  def registerLongGauge(verbosity: Verbosity, names: Seq[String], f: => Long): Unit =
+    registerNumberGauge(verbosity, names, f)
+
+  private def registerNumberGauge(verbosity: Verbosity, names: Seq[String], f: => Number): Unit = {
     val formatted = format(names)
     val curNameUsage = reservedNames.putIfAbsent(formatted, GaugeRepr)
 
@@ -195,7 +199,7 @@ private[finagle] class Metrics(
       case (names, sg) =>
         val key = format(names)
         try {
-          map.put(key, Float.box(sg.read))
+          map.put(key, sg.read)
         } catch {
           case NonFatal(e) => log.warning(e, s"exception while sampling gauge '$key'")
         }

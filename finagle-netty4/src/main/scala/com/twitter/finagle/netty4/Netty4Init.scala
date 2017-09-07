@@ -1,6 +1,23 @@
 package com.twitter.finagle.netty4
 
+import com.twitter.app.GlobalFlag
 import com.twitter.finagle.FinagleInit
+import com.twitter.finagle.stats.FinagleStatsReceiver
+import io.netty.util.{ResourceLeakDetector, ResourceLeakDetectorFactory}
+
+/**
+ * Enable reference leak tracking in netty and export a counter at finagle/netty4/reference_leaks.
+ *
+ * @note By default samples 1% of buffers but this rate can increased via the
+ *       io.netty.leakDetectionLevel env variable.
+ *
+ *       see: https://netty.io/wiki/reference-counted-objects.html#wiki-h3-11
+ */
+private object trackReferenceLeaks
+    extends GlobalFlag[Boolean](
+      false,
+      "Enable reference leak tracking in Netty and export a counter at finagle/netty4/reference_leaks"
+    )
 
 /**
  * Runs prior initialization of any client/server in order to set Netty 4 system properties
@@ -52,6 +69,26 @@ private class Netty4Init extends FinagleInit {
     // will have a chance to tune it.
     if (System.getProperty("io.netty.allocator.maxOrder") == null) {
       System.setProperty("io.netty.allocator.maxOrder", "7")
+    }
+
+    // Initialize N4 metrics.
+    exportNetty4MetricsAndRegistryEntries()
+
+    // Enable tracking of reference leaks.
+    if (trackReferenceLeaks()) {
+      val referenceLeaks =
+        FinagleStatsReceiver.counter("netty4", "reference_leaks")
+
+      if (ResourceLeakDetector.getLevel == ResourceLeakDetector.Level.DISABLED) {
+        ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.SIMPLE)
+      }
+
+      ResourceLeakDetectorFactory.setResourceLeakDetectorFactory(
+        new StatsLeakDetectorFactory({ () =>
+          referenceLeaks.incr()
+          referenceLeakLintRule.leakDetected()
+        })
+      )
     }
   }
 }

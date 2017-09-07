@@ -8,16 +8,13 @@ import com.twitter.finagle.server.StringServer
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}
 import java.util.logging.{Level, Logger, StreamHandler}
-import org.junit.runner.RunWith
 import org.mockito.Matchers._
 import org.mockito.Mockito.{times, verify, when}
 import org.mockito.{Matchers, Mockito}
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
-class MonitorFilterTest extends FunSuite with MockitoSugar with StringClient with StringServer {
+class MonitorFilterTest extends FunSuite with MockitoSugar {
 
   class MockMonitor extends Monitor {
     def handle(cause: Throwable) = false
@@ -108,7 +105,7 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with StringClient wit
     val service = mock[Service[String, String]]
     when(service.close(any[Time])) thenReturn Future.Done
     val server = ServerBuilder()
-      .stack(stringServer)
+      .stack(StringServer.server)
       .name("FakeService2")
       .bindTo(address)
       .monitor((_, _) => monitor)
@@ -118,7 +115,7 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with StringClient wit
     // We cannot mock "service" directly, because we are testing an internal filter defined in the ServerBuilder
     // that sits on top of "service". Therefore we need to create a client to initiates the requests.
     val client = ClientBuilder()
-      .stack(stringClient)
+      .stack(StringClient.client)
       .hosts(Seq(server.boundAddress.asInstanceOf[InetSocketAddress]))
       .hostConnectionLimit(1)
       .build()
@@ -155,7 +152,7 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with StringClient wit
     }
 
     val client = ClientBuilder()
-      .stack(stringClient.withEndpoint(mockService))
+      .stack(StringClient.client.withEndpoint(mockService))
       .monitor(_ => monitor)
       .logger(mockLogger)
       .hosts(Seq(new InetSocketAddress(0)))

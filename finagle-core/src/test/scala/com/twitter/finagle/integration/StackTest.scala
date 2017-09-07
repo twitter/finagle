@@ -8,13 +8,10 @@ import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.server.StringServer
 import com.twitter.util.{Await, Future}
 import java.net.{InetAddress, InetSocketAddress}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class StackTest extends FunSuite {
-  class TestCtx extends StringClient with StringServer {
+  class TestCtx {
     val failService =
       Service.mk[String, String] { s: String =>
         Future.exception(Failure.rejected("unhappy"))
@@ -31,9 +28,9 @@ class StackTest extends FunSuite {
 
   test("Client/Server: Status.busy propagates from failAccrual to the top of the stack") {
     new TestCtx {
-      val server = stringServer.serve(new InetSocketAddress(0), failService)
+      val server = StringServer.server.serve(new InetSocketAddress(0), failService)
       val client =
-        stringClient
+        StringClient.client
           .withStack(newClientStack)
           .configured(FailureAccrualFactory.Param(5, 1.minute))
           .newService(
@@ -53,13 +50,13 @@ class StackTest extends FunSuite {
   test("ClientBuilder: Status.busy propagates from failAccrual to the top of the stack") {
     new TestCtx {
       val server = ServerBuilder()
-        .stack(stringServer)
+        .stack(StringServer.server)
         .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
         .name("server")
         .build(failService)
 
       val client = ClientBuilder()
-        .stack(stringClient)
+        .stack(StringClient.client)
         .failureAccrualParams((5, 1.minute))
         .hosts(Seq(server.boundAddress.asInstanceOf[InetSocketAddress]))
         .hostConnectionLimit(1)
@@ -77,7 +74,7 @@ class StackTest extends FunSuite {
   test("Client/Server: Status.busy propagates from failFast to the top of the stack") {
     new TestCtx {
       val client =
-        stringClient
+        StringClient.client
           .withStack(newClientStack)
           .newService(
             Name.bound(Address(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))),

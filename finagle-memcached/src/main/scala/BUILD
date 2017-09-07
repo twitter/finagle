@@ -40,4 +40,9 @@ scala_library(
   #     like SBT, throwing an error for "import java.*" statements.
   java_sources=['finagle/finagle-memcached/src/main/java'],
   strict_deps=True,
+  exports=[
+    '3rdparty/jvm/com/twitter/bijection:core',
+    'finagle/finagle-core/src/main/scala:scala',
+    'util/util-core/src/main/scala:scala',
+  ]
 )

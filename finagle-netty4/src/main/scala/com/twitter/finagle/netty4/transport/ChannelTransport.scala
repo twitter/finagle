@@ -27,6 +27,8 @@ private[finagle] class ChannelTransport(
   readQueue: AsyncQueue[Any] = new AsyncQueue[Any]
 ) extends Transport[Any, Any] {
 
+  type Context = Netty4Context
+
   import ChannelTransport._
 
   private[this] val failed = new AtomicBoolean(false)
@@ -134,7 +136,6 @@ private[finagle] class ChannelTransport(
 
   def status: Status =
     if (failed.get || !ch.isOpen) Status.Closed
-    else if (!ch.isWritable) Status.Busy
     else Status.Open
 
   def close(deadline: Time): Future[Unit] = {
@@ -192,6 +193,8 @@ private[finagle] class ChannelTransport(
       }
     }
   )
+
+  val context: Netty4Context = new Netty4Context(this, ch.eventLoop)
 }
 
 private[finagle] object ChannelTransport {

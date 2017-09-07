@@ -1,6 +1,6 @@
 package com.twitter.finagle.http2.transport
 
-import com.twitter.finagle.netty4.http.exp.HttpCodecName
+import com.twitter.finagle.netty4.http.HttpCodecName
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle.stats.InMemoryStatsReceiver

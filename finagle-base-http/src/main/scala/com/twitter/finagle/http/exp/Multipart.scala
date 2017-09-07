@@ -2,6 +2,7 @@ package com.twitter.finagle.http.exp
 
 import com.twitter.conversions.storage._
 import com.twitter.finagle.http.{Method, Request}
+import com.twitter.finagle.http.netty.Bijections
 import com.twitter.io.Buf
 import com.twitter.util.StorageUnit
 import org.jboss.netty.handler.codec.http.multipart
@@ -91,7 +92,7 @@ object Multipart {
 
     val decoder = new multipart.HttpPostRequestDecoder(
       new multipart.DefaultHttpDataFactory(MaxInMemoryFileSize.inBytes),
-      request.httpRequest
+      Bijections.requestToNetty(request)
     )
     val attrs = new mutable.HashMap[String, mutable.ListBuffer[String]]()
     val files = new mutable.HashMap[String, mutable.ListBuffer[FileUpload]]()

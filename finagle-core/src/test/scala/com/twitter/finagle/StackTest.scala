@@ -1,10 +1,7 @@
 package com.twitter.finagle
 
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class StackTest extends FunSuite {
   val testRole1 = Stack.Role("TestRole1")
   val testRole2 = Stack.Role("TestRole2")

@@ -6,11 +6,13 @@ import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.thrift._
 import com.twitter.finagle.thrift.thrift.{RequestHeader, ResponseHeader, UpgradeReply}
 import com.twitter.finagle.tracing.Trace
-import com.twitter.finagle.transport.{Transport, TransportProxy}
-import com.twitter.finagle.{Failure, Path, Dtab}
+import com.twitter.finagle.transport.{Transport, TransportProxy, UpdatableContext}
+import com.twitter.finagle.{Failure, Path, Dtab, Status}
 import com.twitter.io.Buf
 import com.twitter.logging.Level
-import com.twitter.util.{Future, Try, Return, Promise, Throw, Updatable}
+import com.twitter.util.{Future, Try, Return, Promise, Throw, Updatable, Time}
+import java.net.SocketAddress
+import java.security.cert.Certificate
 import java.util.logging.Logger
 import org.apache.thrift.protocol.{TProtocolFactory, TMessage, TMessageType}
 import scala.collection.mutable
@@ -29,17 +31,27 @@ private[finagle] object ThriftEmulator {
    * A thread-safe swappable Transport reference.
    */
   private class TransportRef[In, Out](init: Transport[In, Out])
-      extends TransportProxy[In, Out](init)
+      extends Transport[In, Out]
       with Updatable[Transport[In, Out]] {
     @volatile private[this] var cur: Transport[In, Out] = init
-    override def self: Transport[In, Out] = cur
 
-    def write(in: In): Future[Unit] = self.write(in)
-    def read(): Future[Out] = self.read()
+    type Context = UpdatableContext
+
+    def write(in: In): Future[Unit] = cur.write(in)
+    def read(): Future[Out] = cur.read()
 
     def update(trans: Transport[In, Out]): Unit = {
       cur = trans
+      context() = trans.context
     }
+    def status: Status = cur.status
+    def onClose: Future[Throwable] = cur.onClose
+    def localAddress: SocketAddress = cur.localAddress
+    def remoteAddress: SocketAddress = cur.remoteAddress
+    def peerCertificate: Option[Certificate] = cur.peerCertificate
+    def close(deadline: Time): Future[Unit] = cur.close(deadline)
+    val context: UpdatableContext = new UpdatableContext(init.context)
+    override def toString: String = cur.toString
   }
 
   /**

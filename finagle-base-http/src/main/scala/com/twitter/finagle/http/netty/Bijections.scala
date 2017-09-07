@@ -1,17 +1,8 @@
 package com.twitter.finagle.http.netty
 
-import com.twitter.finagle.http.{Status, Version, Method, Request, Response}
-import java.net.InetSocketAddress
-import org.jboss.netty.handler.codec.http.{
-  HttpVersion,
-  HttpResponseStatus,
-  HttpMethod,
-  HttpRequest,
-  HttpResponse
-}
-
-// TODO Use bijection-core when bijection.Conversion is contravariant in A.
-// See: github.com/twitter/bijection/pull/180.
+import com.twitter.finagle.http.{HeaderMap, Message, Method, Request, Response, Status, Version}
+import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
+import org.jboss.netty.handler.codec.http._
 
 private[finagle] trait Injection[A, B] {
   def apply(a: A): B
@@ -79,15 +70,22 @@ object Bijections {
     def apply(r: Request): HttpRequest = requestToNetty(r)
   }
 
-  def requestToNetty(r: Request): HttpRequest = r.httpRequest
+  def requestToNetty(r: Request): HttpRequest = {
+    val nettyRequest =
+      new DefaultHttpRequest(versionToNetty(r.version), methodToNetty(r.method), r.uri)
+    copyHeadersAndContentToNetty(r, nettyRequest)
+    nettyRequest
+  }
 
   implicit val requestFromNettyInjection = new Injection[HttpRequest, Request] {
     def apply(r: HttpRequest): Request = requestFromNetty(r)
   }
 
-  def requestFromNetty(r: HttpRequest): Request = new Request {
-    val httpRequest = r
-    lazy val remoteSocketAddress = new InetSocketAddress(0)
+  def requestFromNetty(r: HttpRequest): Request = {
+    val req =
+      Request(versionFromNetty(r.getProtocolVersion), methodFromNetty(r.getMethod), r.getUri)
+    copyHeadersAndContentFromNetty(r, req)
+    req
   }
 
   // Response
@@ -96,16 +94,50 @@ object Bijections {
     def apply(r: HttpResponse): Response = responseFromNetty(r)
   }
 
-  def responseFromNetty(r: HttpResponse): Response = Response(r)
+  def responseFromNetty(r: HttpResponse): Response = {
+    val resp = Response(versionFromNetty(r.getProtocolVersion), statusFromNetty(r.getStatus))
+    copyHeadersAndContentFromNetty(r, resp)
+    resp
+  }
 
   implicit val responseToNettyInjection = new Injection[Response, HttpResponse] {
     def apply(r: Response): HttpResponse = responseToNetty(r)
   }
 
-  def responseToNetty(r: Response): HttpResponse = r.httpMessage match {
-    case resp: HttpResponse => resp
-    case other =>
-      val msg = s"The impossible happened: the Response was backed by '$other'"
-      throw new IllegalStateException(msg)
+  def responseToNetty(r: Response): HttpResponse = {
+    val nettyResponse = new DefaultHttpResponse(versionToNetty(r.version), statusToNetty(r.status))
+    copyHeadersAndContentToNetty(r, nettyResponse)
+    nettyResponse
+  }
+
+  def copyHeadersAndContentFromNetty(httpMessage: HttpMessage, message: Message): Unit = {
+    copyHeadersFromNetty(httpMessage.headers, message.headerMap)
+    if (httpMessage.isChunked) {
+      message.setChunked(true)
+    } else if (httpMessage.getContent.readable()) { // we have static content
+      message.content = ChannelBufferBuf.newOwned(httpMessage.getContent)
+    }
+  }
+
+  def copyHeadersAndContentToNetty(message: Message, httpMessage: HttpMessage): Unit = {
+    copyHeadersToNetty(message.headerMap, httpMessage.headers)
+    if (message.isChunked) {
+      httpMessage.setChunked(true)
+    } else if (!message.content.isEmpty) {
+      // We duplicate in case this was a ChannelBufferBuf and we got a ref to the underlying ChannelBuffer
+      httpMessage.setContent(BufChannelBuffer(message.content).duplicate())
+    }
+  }
+
+  private def copyHeadersFromNetty(httpHeaders: HttpHeaders, headers: HeaderMap): Unit = {
+    val it = httpHeaders.iterator()
+    while (it.hasNext) {
+      val e = it.next()
+      headers.add(e.getKey, e.getValue)
+    }
+  }
+
+  private def copyHeadersToNetty(headers: HeaderMap, httpHeaders: HttpHeaders): Unit = {
+    headers.foreach { case (k, v) => httpHeaders.add(k, v) }
   }
 }

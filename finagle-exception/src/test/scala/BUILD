@@ -9,7 +9,10 @@ junit_tests(
     'finagle/finagle-exception/src/main/thrift:thrift-scala',
     'util/util-codec',
     'util/util-core/src/main/scala:scala',
+    'util/util-stats/src/main/scala:scala',
   ],
   sources=rglobs('*.scala'),
   fatal_warnings=True,
+  strict_deps=True,
+
 )

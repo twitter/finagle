@@ -144,6 +144,22 @@ object EOF extends Decoder[EOF] {
 case class EOF(warnings: Short, serverStatus: ServerStatus) extends Result
 
 /**
+ * These bit masks are to understand whether corresponding attribute
+ * is set for the field. Link to source code from mysql is below.
+ * [[https://github.com/mysql/mysql-server/blob/5.7/include/mysql_com.h]]
+ */
+object FieldAttributes {
+  val NotNullBitMask: Short = 1
+  val PrimaryKeyBitMask: Short = 2
+  val UniqueKeyBitMask: Short = 4
+  val MultipleKeyBitMask: Short = 8
+  val BlobBitMask: Short = 16
+  val UnsignedBitMask: Short = 32
+  val ZeroFillBitMask: Short = 64
+  val BinaryBitMask: Short = 128
+}
+
+/**
  * Represents the column meta-data associated with a query.
  * Sent during ResultSet transmission and as part of the
  * meta-data associated with a Row.
@@ -204,6 +220,9 @@ case class Field(
 ) extends Result {
   def id: String = if (name.isEmpty) origName else name
   override val toString = "Field(%s)".format(id)
+
+  def isUnsigned: Boolean = (flags & FieldAttributes.UnsignedBitMask) > 0
+  def isSigned: Boolean = !isUnsigned
 }
 
 /**
@@ -250,23 +269,26 @@ object CloseStatementOK extends OK(0, 0, 0, 0, "Internal Close OK")
  * [[http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-ProtocolText::Resultset]]
  * [[http://dev.mysql.com/doc/internals/en/binary-protocol-resultset.html]]
  */
-object ResultSet {
-  def apply(isBinaryEncoded: Boolean)(
+private object ResultSetBuilder {
+  def apply(isBinaryEncoded: Boolean, supportUnsigned: Boolean)(
     header: Packet,
     fieldPackets: Seq[Packet],
     rowPackets: Seq[Packet]
-  ): Try[ResultSet] = Try(decode(isBinaryEncoded)(header, fieldPackets, rowPackets))
+  ): Try[ResultSet] =
+    Try(decode(isBinaryEncoded, supportUnsigned)(header, fieldPackets, rowPackets))
 
   def decode(
-    isBinaryEncoded: Boolean
+    isBinaryEncoded: Boolean,
+    supportUnsigned: Boolean
   )(header: Packet, fieldPackets: Seq[Packet], rowPackets: Seq[Packet]): ResultSet = {
     val fields = fieldPackets.map(Field.decode).toIndexedSeq
 
-    decodeRows(isBinaryEncoded, rowPackets, fields)
+    decodeRows(isBinaryEncoded, supportUnsigned, rowPackets, fields)
   }
 
-  def decodeRows(
+  private[this] def decodeRows(
     isBinaryEncoded: Boolean,
+    supportUnsigned: Boolean,
     rowPackets: Seq[Packet],
     fields: IndexedSeq[Field]
   ): ResultSet = {
@@ -280,9 +302,9 @@ object ResultSet {
      */
     val rows = rowPackets.map { p: Packet =>
       if (!isBinaryEncoded)
-        new StringEncodedRow(p.body, fields, indexMap)
+        new StringEncodedRow(p.body, fields, indexMap, !supportUnsigned)
       else
-        new BinaryEncodedRow(p.body, fields, indexMap)
+        new BinaryEncodedRow(p.body, fields, indexMap, !supportUnsigned)
     }
 
     ResultSet(fields, rows)

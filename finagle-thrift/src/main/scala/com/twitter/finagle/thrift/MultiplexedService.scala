@@ -14,7 +14,7 @@ private[finagle] class MultiplexedFinagleService(
   services: Map[String, Service[Array[Byte], Array[Byte]]],
   defaultService: Option[String],
   protocolFactory: TProtocolFactory,
-  maxThriftBufferSize: Int = Thrift.Server.maxThriftBufferSize
+  maxThriftBufferSize: Int = Thrift.param.maxThriftBufferSize
 ) extends Service[Array[Byte], Array[Byte]] {
 
   private val serviceMap = services.mapValues(getFunctionMap)
