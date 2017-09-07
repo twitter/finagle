@@ -90,7 +90,7 @@ private[finagle] class ClientDispatcher(trans: Transport[Message, Message])
                 // to reserve the tag of discarded requests until Tdiscarded is
                 // acknowledged by the peer.
                 val interrupted = messages.synchronized {
-                  messages.maybeRemap(msg.tag, Empty) match {
+                  messages.maybeRemap(msg.tag, Updatable.Empty) match {
                     case Some(u) if u eq p =>
                       // We have to send the Tdiscarded from within the lock to ensure
                       // that we don't race with receiving the response, unmapping the
@@ -134,8 +134,6 @@ private[finagle] object ClientDispatcher {
   val InitialTagMapSize: Int = 256
 
   val FutureExhaustedTagsException = Future.exception(Failure.rejected("Exhausted tags"))
-
-  val Empty: Updatable[Try[Message]] = Updatable.empty()
 
   /**
    * Creates a mux client dispatcher that can handle mux Request/Responses.
