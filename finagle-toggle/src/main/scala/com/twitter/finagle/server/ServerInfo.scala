@@ -26,10 +26,16 @@ abstract class ServerInfo {
   def id: String
 
   /**
+   * An identifier which represents the "cluster" that this server
+   * belongs to. Note, in some cases where the server isn't part of
+   * a cluster, this can be equivalent to `id`.
+   */
+  def clusterId: String
+
+  /**
    * The instance id of the server, if available
    */
   def instanceId: Option[Long]
-
 }
 
 object ServerInfo {
@@ -42,6 +48,7 @@ object ServerInfo {
     def environment: Option[String] = None
     val id: String = NetUtil.getLocalHostName()
     val instanceId: Option[Long] = None
+    val clusterId: String = id
   }
 
   private[this] def registerServerInfo(serverInfo: ServerInfo): Unit =
