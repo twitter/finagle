@@ -34,12 +34,9 @@ Bug Fixes
     `SslServerConfiguration` uses `KeyCredentials.CertKeyAndChain` instead of just the
     first one in the file. ``PHAB_ID=D82414``
 
-Breaking API Changes
-~~~~~~~~~~~~~~~~~~~~
-
-  * finagle-core: `com.twitter.finagle.loadbalancer.DeterministicOrdering` was renamed
-    to `com.twitter.finagle.loadbalancer.ProcessCoordinate` and the internal `Coord` ADT
-    was changed as well. ``PHAB_ID=D84452``
+  * finagle-thrift/thriftmux: Thrift/ThriftMux servers and clients now can be configured
+    with `withMaxReusableBufferSize` to specify the max size of the reusable buffer for
+    Thrift responses. ``PHAB_ID=D83190``
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -87,6 +84,13 @@ Breaking API Changes
     Also deprecates most of those methods--please start using the context instead of the
     `Transport` directly.  Also added type parameters to `Transporter`, `Listener`, and
     type members to `StackClient` and `StackServer`.  ``PHAB_ID=D83972``
+
+  * finagle-core: `com.twitter.finagle.loadbalancer.DeterministicOrdering` was renamed
+    to `com.twitter.finagle.loadbalancer.ProcessCoordinate` and the internal `Coord` ADT
+    was changed as well. ``PHAB_ID=D84452``
+
+  * finagle-thrift: Move `Thrift.Server.param.MaxReusableBufferSize` to
+    `Thrift.param.MaxReusableBufferSize` for both server and client use. ``PHAB_ID=D83190``
 
 7.0.0
 ------

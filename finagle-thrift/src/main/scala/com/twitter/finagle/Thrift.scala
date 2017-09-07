@@ -120,22 +120,22 @@ object Thrift
     extends Client[ThriftClientRequest, Array[Byte]]
     with Server[Array[Byte], Array[Byte]] {
 
-  /**
-   * The vanilla Thrift `Transporter` and `Listener` factories deviate from other protocols in
-   * the result of the netty pipeline: most other protocols expect to receive a framed `Buf`
-   * while vanilla thrift produces an `Array[Byte]`. This has two related motivations. First, the
-   * end result needed by the thrift implementations is an `Array[Byte]`, which is relatively
-   * trivial to deal with and is a JVM native type so it's unnecessary to go through a `Buf`.
-   * By avoiding an indirection through `Buf` we can avoid an unnecessary copy in the netty4
-   * pipeline that would be required to ensure that the bytes were on the heap before
-   * entering the Finagle transport types.
-   */
-  val protocolFactory: TProtocolFactory = Protocols.binaryFactory()
-
-  // Planned deprecation. Use `Thrift.Server.maxThriftBufferSize` instead.
-  val maxThriftBufferSize: Int = 16 * 1024
-
   object param {
+
+    /**
+     * The vanilla Thrift `Transporter` and `Listener` factories deviate from other protocols in
+     * the result of the netty pipeline: most other protocols expect to receive a framed `Buf`
+     * while vanilla thrift produces an `Array[Byte]`. This has two related motivations. First, the
+     * end result needed by the thrift implementations is an `Array[Byte]`, which is relatively
+     * trivial to deal with and is a JVM native type so it's unnecessary to go through a `Buf`.
+     * By avoiding an indirection through `Buf` we can avoid an unnecessary copy in the netty4
+     * pipeline that would be required to ensure that the bytes were on the heap before
+     * entering the Finagle transport types.
+     */
+    val protocolFactory: TProtocolFactory = Protocols.binaryFactory()
+
+    val maxThriftBufferSize: Int = 16 * 1024
+
     case class ClientId(clientId: Option[thrift.ClientId])
     implicit object ClientId extends Stack.Param[ClientId] {
       val default = ClientId(None)
@@ -143,7 +143,7 @@ object Thrift
 
     case class ProtocolFactory(protocolFactory: TProtocolFactory)
     implicit object ProtocolFactory extends Stack.Param[ProtocolFactory] {
-      val default = ProtocolFactory(Protocols.binaryFactory())
+      val default = ProtocolFactory(protocolFactory)
     }
 
     /**
@@ -166,6 +166,19 @@ object Thrift
     case class AttemptTTwitterUpgrade(upgrade: Boolean)
     implicit object AttemptTTwitterUpgrade extends Stack.Param[AttemptTTwitterUpgrade] {
       val default = AttemptTTwitterUpgrade(true)
+    }
+
+    /**
+     * A `Param` to set the max size of a reusable buffer for the thrift response.
+     * If the buffer size exceeds the specified value, the buffer is not reused,
+     * and a new buffer is used for the next thrift response.
+     * The default max size is 16Kb.
+     *
+     * @param maxReusableBufferSize Max buffer size in bytes.
+     */
+    case class MaxReusableBufferSize(maxReusableBufferSize: Int)
+    implicit object MaxReusableBufferSize extends Stack.Param[MaxReusableBufferSize] {
+      val default = MaxReusableBufferSize(maxThriftBufferSize)
     }
   }
 
@@ -216,14 +229,24 @@ object Thrift
       params: Stack.Params = this.params
     ): Client = copy(stack, params)
 
+    protected val clientParam: RichClientParam = RichClientParam(
+      protocolFactory = params[param.ProtocolFactory].protocolFactory,
+      maxThriftBufferSize = params[param.MaxReusableBufferSize].maxReusableBufferSize,
+      clientStats = params[Stats].statsReceiver,
+      responseClassifier = params[com.twitter.finagle.param.ResponseClassifier].responseClassifier
+    )
+
     protected lazy val Label(defaultClientName) = params[Label]
 
     protected type In = ThriftClientRequest
     protected type Out = Array[Byte]
     protected type Context = TransportContext
 
-    protected val param.ProtocolFactory(protocolFactory) = params[param.ProtocolFactory]
-    override protected lazy val Stats(stats) = params[Stats]
+    @deprecated("Use clientParam.protocolFactory", "2017-08-16")
+    protected def protocolFactory: TProtocolFactory = clientParam.protocolFactory
+
+    @deprecated("Use clientParam.clientStats", "2017-08-16")
+    override protected def stats: StatsReceiver = clientParam.clientStats
 
     protected def newTransporter(addr: SocketAddress): Transporter[In, Out, Context] =
       Netty4Transport.Client(params)(addr)
@@ -254,6 +277,18 @@ object Thrift
 
     def withNoAttemptTTwitterUpgrade: Client =
       configured(param.AttemptTTwitterUpgrade(false))
+
+    /**
+     * Produce a [[com.twitter.finagle.Thrift.Client]] with the specified max
+     * size of the reusable buffer for thrift responses. If this size
+     * is exceeded, the buffer is not reused and a new buffer is
+     * allocated for the next thrift response.
+     * The default max size is 16Kb.
+     *
+     * @param size Max size of the reusable buffer for thrift responses in bytes.
+     */
+    def withMaxReusableBufferSize(size: Int): Client =
+      configured(param.MaxReusableBufferSize(size))
 
     def clientId: Option[thrift.ClientId] = params[Thrift.param.ClientId].clientId
 
@@ -363,23 +398,6 @@ object Thrift
         }
       }
 
-    val maxThriftBufferSize: Int = 16 * 1024
-
-    object param {
-
-      /**
-       * A `Param` to set the max size of a reusable buffer for the thrift response.
-       * If the buffer size exceeds the specified value, the buffer is not reused,
-       * and a new buffer is used for the next thrift response.
-       *
-       * @param maxReusableBufferSize Max buffer size in bytes.
-       */
-      case class MaxReusableBufferSize(maxReusableBufferSize: Int)
-      implicit object MaxReusableBufferSize extends Stack.Param[MaxReusableBufferSize] {
-        val default = MaxReusableBufferSize(maxThriftBufferSize)
-      }
-    }
-
     private val stack: Stack[ServiceFactory[Array[Byte], Array[Byte]]] = StackServer.newStack
       .replace(StackServer.Role.preparer, preparer)
 
@@ -407,10 +425,23 @@ object Thrift
     protected type Out = Array[Byte]
     protected type Context = TransportContext
 
-    protected val param.ProtocolFactory(protocolFactory) = params[param.ProtocolFactory]
+    protected val serverParam: RichServerParam = RichServerParam(
+      protocolFactory = params[Thrift.param.ProtocolFactory].protocolFactory,
+      maxThriftBufferSize = params[Thrift.param.MaxReusableBufferSize].maxReusableBufferSize,
+      serverStats = params[Stats].statsReceiver
+    )
 
-    override val Server.param.MaxReusableBufferSize(maxThriftBufferSize) =
-      params[Server.param.MaxReusableBufferSize]
+    @deprecated("Use serverParam.serviceName", "2017-08-16")
+    override protected def serverLabel: String = serverParam.serviceName
+
+    @deprecated("Use serverParam.serverStats", "2017-08-16")
+    override protected def serverStats: StatsReceiver = serverParam.serverStats
+
+    @deprecated("Use serverParam.protocolFactory", "2017-08-16")
+    protected def protocolFactory: TProtocolFactory = serverParam.protocolFactory
+
+    @deprecated("Use serverParam.maxThriftBufferSize", "2017-08-16")
+    override protected def maxThriftBufferSize: Int = serverParam.maxThriftBufferSize
 
     protected def newListener(): Listener[In, Out, Context] = Netty4Transport.Server(params)
 
@@ -430,10 +461,12 @@ object Thrift
      * size of the reusable buffer for thrift responses. If this size
      * is exceeded, the buffer is not reused and a new buffer is
      * allocated for the next thrift response.
+     * The default max size is 16Kb.
+     *
      * @param size Max size of the reusable buffer for thrift responses in bytes.
      */
     def withMaxReusableBufferSize(size: Int): Server =
-      configured(Server.param.MaxReusableBufferSize(size))
+      configured(param.MaxReusableBufferSize(size))
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905

@@ -193,10 +193,18 @@ object ThriftMux
 
     protected lazy val Label(defaultClientName) = params[Label]
 
-    override protected lazy val Stats(stats) = params[Stats]
+    protected val clientParam: RichClientParam = RichClientParam(
+      protocolFactory = params[Thrift.param.ProtocolFactory].protocolFactory,
+      maxThriftBufferSize = params[Thrift.param.MaxReusableBufferSize].maxReusableBufferSize,
+      clientStats = params[Stats].statsReceiver,
+      responseClassifier = params[com.twitter.finagle.param.ResponseClassifier].responseClassifier
+    )
 
-    protected val Thrift.param.ProtocolFactory(protocolFactory) =
-      params[Thrift.param.ProtocolFactory]
+    @deprecated("Use clientParam.protocolFactory", "2017-08-16")
+    protected def protocolFactory: TProtocolFactory = clientParam.protocolFactory
+
+    @deprecated("Use clientParam.clientStats", "2017-08-16")
+    override protected def stats: StatsReceiver = clientParam.clientStats
 
     def withParams(ps: Stack.Params): Client =
       copy(muxer = muxer.withParams(ps))
@@ -234,6 +242,18 @@ object ThriftMux
       val stackable = Filter.canStackFromFac.toStackable(role, filter)
       withStack(stackable +: stack)
     }
+
+    /**
+     * Produce a [[com.twitter.finagle.ThriftMux.Client]] with the specified max
+     * size of the reusable buffer for thrift responses. If this size
+     * is exceeded, the buffer is not reused and a new buffer is
+     * allocated for the next thrift response.
+     * The default max size is 16Kb.
+     *
+     * @param size Max size of the reusable buffer for thrift responses in bytes.
+     */
+    def withMaxReusableBufferSize(size: Int): Client =
+      configured(Thrift.param.MaxReusableBufferSize(size))
 
     private[this] def clientId: Option[ClientId] = params[Thrift.param.ClientId].clientId
 
@@ -482,17 +502,26 @@ object ThriftMux
     def stack: Stack[ServiceFactory[mux.Request, mux.Response]] =
       muxer.stack
 
-    override protected val Label(serverLabel) = params[Label]
+    protected val serverParam: RichServerParam = RichServerParam(
+      protocolFactory = params[Thrift.param.ProtocolFactory].protocolFactory,
+      serviceName = params[Label].label,
+      maxThriftBufferSize = params[Thrift.param.MaxReusableBufferSize].maxReusableBufferSize,
+      serverStats = params[Stats].statsReceiver
+    )
 
-    override protected lazy val Stats(serverStats) = params[Stats]
+    @deprecated("Use serverParam.serviceName", "2017-08-16")
+    override protected def serverLabel: String = serverParam.serviceName
+
+    @deprecated("Use serverParam.serverStats", "2017-08-16")
+    override protected def serverStats: StatsReceiver = serverParam.serverStats
 
     def params: Stack.Params = muxer.params
 
-    protected val Thrift.param.ProtocolFactory(protocolFactory) =
-      params[Thrift.param.ProtocolFactory]
+    @deprecated("Use serverParam.protocolFactory", "2017-08-16")
+    protected def protocolFactory: TProtocolFactory = serverParam.protocolFactory
 
-    override val Thrift.Server.param.MaxReusableBufferSize(maxThriftBufferSize) =
-      params[Thrift.Server.param.MaxReusableBufferSize]
+    @deprecated("Use serverParam.maxThriftBufferSize", "2017-08-16")
+    override protected def maxThriftBufferSize: Int = serverParam.maxThriftBufferSize
 
     /**
      * Produce a `com.twitter.finagle.Thrift.Server` using the provided
@@ -519,14 +548,16 @@ object ThriftMux
     }
 
     /**
-     * Produce a [[com.twitter.finagle.Thrift.Server]] with the specified max
+     * Produce a [[com.twitter.finagle.ThriftMux.Server]] with the specified max
      * size of the reusable buffer for thrift responses. If this size
      * is exceeded, the buffer is not reused and a new buffer is
      * allocated for the next thrift response.
+     * The default max size is 16Kb.
+     *
      * @param size Max size of the reusable buffer for thrift responses in bytes.
      */
     def withMaxReusableBufferSize(size: Int): Server =
-      configured(Thrift.Server.param.MaxReusableBufferSize(size))
+      configured(Thrift.param.MaxReusableBufferSize(size))
 
     def withParams(ps: Stack.Params): Server =
       copy(muxer = muxer.withParams(ps))

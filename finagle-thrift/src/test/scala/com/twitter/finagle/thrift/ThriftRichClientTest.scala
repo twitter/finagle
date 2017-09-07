@@ -5,19 +5,22 @@ import com.twitter.finagle._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.thrift.ThriftServiceIface.Filterable
 import org.apache.thrift.protocol.TProtocolFactory
-import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito._
 import org.mockito.Matchers._
 import org.scalatest.{FunSuite, OneInstancePerTest}
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
-@RunWith(classOf[JUnitRunner])
+
 class ThriftRichClientTest extends FunSuite with MockitoSugar with OneInstancePerTest {
   object ThriftRichClientMock
       extends Client[ThriftClientRequest, Array[Byte]]
       with ThriftRichClient {
-    override val protocolFactory: TProtocolFactory = Protocols.binaryFactory()
+
+    lazy val clientParam = RichClientParam(Protocols.binaryFactory())
+
+    protected val protocolFactory: TProtocolFactory = clientParam.protocolFactory
+    override protected val stats: StatsReceiver = clientParam.clientStats
+
     override val defaultClientName = "mock_client"
 
     protected def params: Stack.Params = Stack.Params.empty
@@ -41,27 +44,26 @@ class ThriftRichClientTest extends FunSuite with MockitoSugar with OneInstancePe
   private val svcIface = new SvcIface
 
   test("ThriftRichClientTest newServiceIface takes dest String and stats scoping label arguments") {
-    val captor = ArgumentCaptor.forClass(classOf[StatsReceiver])
+    val captor = ArgumentCaptor.forClass(classOf[RichClientParam])
     val mockBuilder = mock[ServiceIfaceBuilder[SvcIface]]
-    doReturn(svcIface).when(mockBuilder).newServiceIface(any(), any(), captor.capture(), any())
-
+    doReturn(svcIface).when(mockBuilder).newServiceIface(any(), captor.capture())
     val client = spy(ThriftRichClientMock)
     client.newServiceIface("/s/tweetypie/tweetypie", "tweetypie_client")(builder = mockBuilder)
 
-    assert(captor.getValue.toString == "NullStatsReceiver/clnt/tweetypie_client")
+    assert(captor.getValue.clientStats.toString == "NullStatsReceiver/clnt/tweetypie_client")
     verify(client).newService("/s/tweetypie/tweetypie", "tweetypie_client")
   }
 
   test("ThriftRichClientTest newServiceIface takes dest Name and stats scoping label arguments") {
-    val captor = ArgumentCaptor.forClass(classOf[StatsReceiver])
+    val captor = ArgumentCaptor.forClass(classOf[RichClientParam])
     val mockBuilder = mock[ServiceIfaceBuilder[SvcIface]]
-    doReturn(svcIface).when(mockBuilder).newServiceIface(any(), any(), captor.capture(), any())
+    doReturn(svcIface).when(mockBuilder).newServiceIface(any(), captor.capture())
 
     val name = Name.empty
     val client = spy(ThriftRichClientMock)
     client.newServiceIface(name, "tweetypie_client")(builder = mockBuilder)
 
-    assert(captor.getValue.toString == "NullStatsReceiver/clnt/tweetypie_client")
+    assert(captor.getValue.clientStats.toString == "NullStatsReceiver/clnt/tweetypie_client")
     verify(client).newService(name, "tweetypie_client")
   }
 }
