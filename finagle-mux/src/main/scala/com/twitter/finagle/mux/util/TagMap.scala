@@ -8,7 +8,10 @@ import scala.collection.immutable.Range
 import scala.collection.mutable.ListBuffer
 
 /**
- * TagMaps maintains a mapping between tags and elements of type `T`.
+ * A `TagMap` maintains a mapping between tags and elements of type `T`.
+ *
+ * @note it is up to the user to ensure thread safety of the `TagMap` unless
+ *       otherwise noted in the implementation.
  */
 private[mux] trait TagMap[T] {
 
@@ -55,13 +58,13 @@ private[mux] object TagMap {
     require(initialSize >= 0)
     require(set.range.start >= 0)
 
-    def size: Int = self.synchronized { values.size }
+    def size: Int = values.size
 
     // while this a dependency on Netty 4, it is internal to this implementation
     // and not publicly exposed.
     private[this] val values = new IntObjectHashMap[T](initialSize)
 
-    def map(el: T): Option[Int] = self.synchronized {
+    def map(el: T): Option[Int] = {
       set.acquire() match {
         case t @ Some(tag) =>
           values.put(tag, el)
@@ -72,18 +75,18 @@ private[mux] object TagMap {
     }
 
     def maybeRemap(tag: Int, newEl: T): Option[T] = {
-      if (!inRange(tag)) return None
-
-      self.synchronized {
+      if (!inRange(tag)) {
+        None
+      } else {
         val oldEl = values.put(tag, newEl)
         Option(oldEl)
       }
     }
 
     def unmap(tag: Int): Option[T] = {
-      if (!inRange(tag)) return None
-
-      self.synchronized {
+      if (!inRange(tag)) {
+        None
+      } else {
         val oldEl = values.remove(tag)
         val res = Option(oldEl)
 
@@ -93,14 +96,11 @@ private[mux] object TagMap {
     }
 
     def get(tag: Int): Option[T] = {
-      if (!inRange(tag)) return None
-
-      self.synchronized {
-        Option(values.get(tag))
-      }
+      if (!inRange(tag)) None
+      else Option(values.get(tag))
     }
 
-    def unmapAll(): Seq[T] = self.synchronized {
+    def unmapAll(): Seq[T] = {
       val results = values.values().asScala.toList
       set.clear()
       values.clear()
@@ -129,8 +129,9 @@ private[mux] object TagMap {
     /** Acquire a tag, if available */
     def acquire(): Option[Int] = {
       val tag = bits.nextClearBit(start)
-      if (!range.contains(tag)) None
-      else {
+      if (!range.contains(tag)) {
+        None
+      } else {
         bits.set(tag)
         Some(tag)
       }
@@ -153,8 +154,9 @@ private[mux] object TagMap {
       @tailrec
       def build(i: Int, buffer: ListBuffer[Int]): Seq[Int] = {
         val next = bits.nextSetBit(i)
-        if (next == -1) buffer.result()
-        else {
+        if (next == -1) {
+          buffer.result()
+        } else {
           buffer += next
           build(next + 1, buffer)
         }
