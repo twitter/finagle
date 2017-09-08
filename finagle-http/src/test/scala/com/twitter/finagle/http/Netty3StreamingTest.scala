@@ -1,6 +1,5 @@
-package com.twitter.finagle.http.netty
+package com.twitter.finagle.http
 
-import com.twitter.finagle.http.AbstractStreamingTest
 import com.twitter.finagle.Http
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner

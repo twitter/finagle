@@ -2,7 +2,7 @@ package com.twitter.finagle.http.codec
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.Status
-import com.twitter.finagle.http.netty.Bijections
+import com.twitter.finagle.http.netty3.Bijections
 import com.twitter.finagle.http.{Request, Response, Version, Status => HttpStatus}
 import com.twitter.finagle.netty3.http.Netty3ClientStreamTransport
 import com.twitter.finagle.stats.NullStatsReceiver

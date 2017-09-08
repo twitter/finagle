@@ -1,6 +1,7 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.http.Message.BufOutputStream
+import com.twitter.finagle.http.netty3.Netty3HeaderMap
 import com.twitter.io.{Buf, BufInputStream, Reader => BufReader, Writer => BufWriter}
 import com.twitter.util.{Closable, Duration, Future}
 import java.io._
@@ -9,7 +10,6 @@ import java.nio.charset.Charset
 import java.util.{Date, Locale, TimeZone}
 import org.apache.commons.lang.StringUtils
 import org.apache.commons.lang.time.FastDateFormat
-import org.jboss.netty.handler.codec.http.DefaultHttpHeaders
 import scala.collection.JavaConverters._
 
 /**
@@ -25,7 +25,7 @@ abstract class Message {
   private[this] var _chunked: Boolean = false
 
   // We continue to use the Netty 3 type internally to get its validation logic
-  private[this] lazy val _headerMap: HeaderMap = new Netty3HeaderMap(new DefaultHttpHeaders())
+  private[this] lazy val _headerMap: HeaderMap = new Netty3HeaderMap()
 
   /**
    * A read-only handle to the internal stream of bytes, representing the

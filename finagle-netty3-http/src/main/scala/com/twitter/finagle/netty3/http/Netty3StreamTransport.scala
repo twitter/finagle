@@ -2,11 +2,11 @@ package com.twitter.finagle.netty3.http
 
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher.wrapWriteException
 import com.twitter.finagle.http._
-import com.twitter.finagle.http.ReaderUtils.{readChunk, streamChunks}
 import com.twitter.finagle.http.exp.{Multi, StreamTransportProxy}
-import com.twitter.finagle.http.netty.Bijections._
-import com.twitter.finagle.http.netty.{Bijections, Injection}
+import com.twitter.finagle.http.netty3.Bijections._
+import com.twitter.finagle.http.netty3.{Bijections, Injection}
 import com.twitter.finagle.netty3.ChannelBufferBuf
+import com.twitter.finagle.netty3.http.ReaderUtils.{readChunk, streamChunks}
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.{BufReader, Reader}
 import com.twitter.util.Future

@@ -1,4 +1,4 @@
-package com.twitter.finagle.http.netty
+package com.twitter.finagle.http.netty3
 
 import com.twitter.finagle.http.{HeaderMap, Message, Method, Request, Response, Status, Version}
 import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
