@@ -4,15 +4,13 @@ import com.twitter.finagle.Status
 import com.twitter.finagle.transport.TransportContext
 import com.twitter.util.{Future, Time}
 import com.twitter.logging.Logger
-import io.netty.channel.{ChannelPipeline, ChannelHandler}
 import java.net.SocketAddress
 import java.security.cert.Certificate
 import java.util.concurrent.atomic.AtomicBoolean
 
 private[finagle] class MuxContext(
   underlying: TransportContext,
-  pipeline: ChannelPipeline,
-  handler: () => ChannelHandler
+  turnOnTlsFn: () => Unit
 ) extends TransportContext {
   def status: Status = underlying.status
   def close(deadline: Time): Future[Unit] = underlying.close(deadline)
@@ -29,7 +27,7 @@ private[finagle] class MuxContext(
    */
   def turnOnTls(): Unit = {
     if (turnedOn.compareAndSet(false, true)) {
-      pipeline.addFirst("opportunisticSslInit", handler())
+      turnOnTlsFn()
     } else {
       log.warning("Tried to enable tls more than once, which probably isn't what you want to do")
     }

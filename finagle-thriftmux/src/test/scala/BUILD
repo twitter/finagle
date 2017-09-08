@@ -5,6 +5,7 @@ junit_tests(
     '3rdparty/jvm/org/scalatest',
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-mux/src/main/scala:scala',
+    'finagle/finagle-netty4/src/main/scala:scala',
     'finagle/finagle-thrift',
     'finagle/finagle-thrift/src/main/java:java',
     'finagle/finagle-thriftmux',

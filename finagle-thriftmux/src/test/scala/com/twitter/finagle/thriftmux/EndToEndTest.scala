@@ -8,6 +8,7 @@ import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.PipeliningDispatcher
 import com.twitter.finagle.mux.transport.{IncompatibleNegotiationException, OpportunisticTls}
+import com.twitter.finagle.netty4.channel.ChannelSnooper
 import com.twitter.finagle.param.{Label, Stats, Tracer => PTracer}
 import com.twitter.finagle.service._
 import com.twitter.finagle.ssl.{TrustCredentials, KeyCredentials}
@@ -23,7 +24,9 @@ import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.{Buf, TempFile}
 import com.twitter.util._
+import io.netty.channel.ChannelPipeline
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
+import java.lang.StringBuffer
 import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol._
 import org.scalactic.source.Position
@@ -1659,12 +1662,20 @@ class EndToEndTest
     testMethodBuilderRetries(stats, server, builder)
   }
 
-  test("can talk to each other with opportunistic tls") {
+  test("can talk to each other when one party is off") {
     val certFile = TempFile.fromResourcePath("/ssl/certs/svc-test-server.cert.pem")
     // deleteOnExit is handled by TempFile
 
     val keyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-server-pkcs8.key.pem")
     // deleteOnExit is handled by TempFile
+
+    val buffer = new StringBuffer()
+    val recordingPrinter: (Stack.Params, ChannelPipeline) => Unit = (params, pipeline) => {
+      Mux.Client.tlsEnable(params, pipeline)
+      pipeline.addFirst(ChannelSnooper.byteSnooper("whatever") { (string, _) =>
+        buffer.append(string)
+      })
+    }
 
     flag.overrides.let(Mux.param.MuxImpl.TlsHeadersToggleId, 1.0) {
       val config = SslServerConfiguration(
@@ -1681,12 +1692,63 @@ class EndToEndTest
 
       val client = ThriftMux.client.withTransport.tlsWithoutValidation
         .withOpportunisticTls(OpportunisticTls.Desired)
+        .configured(Mux.param.TurnOnTlsFn(recordingPrinter))
         .newIface[TestService.FutureIface](
           Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
           "client"
         )
 
-      assert(Await.result(client.query("." * 10), 5.seconds) == "." * 20)
+      val rep = Await.result(client.query("." * 10), 5.seconds)
+      assert(rep == "." * 20)
+
+      // we check that it's non-empty to ensure that it was correctly installed
+      assert(!buffer.toString.isEmpty)
+      // check that the payload isn't in cleartext over the wire
+      assert(!buffer.toString.contains("." * 10))
+      Await.result(server.close(), 5.seconds)
+    }
+  }
+
+
+  test("can talk to each other with opportunistic tls") {
+    val certFile = TempFile.fromResourcePath("/ssl/certs/svc-test-server.cert.pem")
+    // deleteOnExit is handled by TempFile
+
+    val keyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-server-pkcs8.key.pem")
+    // deleteOnExit is handled by TempFile
+
+    val buffer = new StringBuffer()
+    val recordingPrinter: (Stack.Params, ChannelPipeline) => Unit = (params, pipeline) => {
+      Mux.Client.tlsEnable(params, pipeline)
+      pipeline.addFirst(ChannelSnooper.byteSnooper("whatever") { (string, _) =>
+        buffer.append(string)
+      })
+    }
+
+    flag.overrides.let(Mux.param.MuxImpl.TlsHeadersToggleId, 1.0) {
+      val config = SslServerConfiguration(
+        keyCredentials = KeyCredentials.CertAndKey(certFile, keyFile),
+        trustCredentials = TrustCredentials.Insecure
+      )
+      val iface = new TestService.FutureIface {
+        def query(x: String): Future[String] = Future.value(x + x)
+      }
+      val server = ThriftMux.server.withTransport
+        .tls(config)
+        .withOpportunisticTls(OpportunisticTls.Off)
+        .serveIface("localhost:*", iface)
+
+      val client = ThriftMux.client.withTransport.tlsWithoutValidation
+        .withOpportunisticTls(OpportunisticTls.Desired)
+        .configured(Mux.param.TurnOnTlsFn(recordingPrinter))
+        .newIface[TestService.FutureIface](
+          Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+          "client"
+        )
+
+      val rep = Await.result(client.query("." * 10), 5.seconds)
+      assert(rep == "." * 20)
+      assert(buffer.toString.isEmpty)
       Await.result(server.close(), 5.seconds)
     }
   }
