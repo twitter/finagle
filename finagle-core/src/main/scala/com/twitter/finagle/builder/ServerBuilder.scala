@@ -263,7 +263,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
     val withParams: Stack.Params => FinagleServer[Req1, Rep1] = { ps =>
       server.withParams(server.params ++ ps)
     }
-    copy(params, withParams)
+    copy(server.params ++ params, withParams)
   }
 
   /**
