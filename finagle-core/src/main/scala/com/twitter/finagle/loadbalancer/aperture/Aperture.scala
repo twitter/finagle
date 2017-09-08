@@ -344,18 +344,17 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       )
     }
 
-    override def min: Int = coord match {
-      // We want to additionally ensure that p2c can actually converge when there
-      // are weights present (i.e. servers aren't evenly divisible by clients).
-      // In order to do so, we need to pick over 4 or more servers. To see why, we can
-      // think about this in terms of picking one weighted node. If we only have one
-      // node to choose from, it's impossible to respect the weight since we will always
-      // return the single node – we need at least 2 servers in this case. The same
-      // holds true for pick2, except we need 4 so that the weight(s) hold.
-      case FromInstanceId(_, _, n) if vector.size % n != 0 =>
-        math.min(math.max(4, minAperture), vector.size)
-      case _ => super.min
-    }
+    // We want to additionally ensure that p2c can actually converge when there
+    // are weights present. In order to do so, we need to pick over 4 or more servers.
+    // To see why, we can think about this in terms of picking one weighted node.
+    // If we only have one node to choose from, it's impossible to respect the weight
+    // since we will always return the single node – we need at least 2 nodes in
+    // this case. The same holds true for pick2, except we need 4 so that the
+    // weight(s) hold. Additionally, a min value of 4 nodes is more practical
+    // for resiliency. Note that this definition ignores the user defined `minAperture`,
+    // but that isn't likely to hold much value given our definition of `min`
+    // and how we calculate the `apertureWidth`.
+    override def min: Int = math.min(4, vector.size)
 
     // Translates the logical `aperture` into a physical one that
     // maps to the ring. Note, we do this in terms of the peer

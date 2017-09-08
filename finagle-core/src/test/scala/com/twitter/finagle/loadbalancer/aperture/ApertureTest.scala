@@ -227,7 +227,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
     ProcessCoordinate.setCoordinate(offset = 0, instanceId = 1, totalInstances = 10)
     bal.update(counts.range(10))
     bal.applyn(1000)
-    assert(counts.nonzero == Set(1))
+    assert(counts.nonzero == Set(1, 2, 3, 4))
   }
 
   test("useDeterministicOrdering, clients unevenly divide servers") {
