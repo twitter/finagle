@@ -5,25 +5,14 @@ import com.twitter.finagle._
 import com.twitter.finagle.client.StdStackClient
 import com.twitter.finagle.context.RemoteInfo
 import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor}
-import com.twitter.finagle.mux.transport.{
-  BadMessageException,
-  Message,
-  OpportunisticTls,
-  IncompatibleNegotiationException
-}
-import com.twitter.finagle.netty4.channel.ChannelSnooper
+import com.twitter.finagle.mux.transport.{BadMessageException, Message}
 import com.twitter.finagle.server.StdStackServer
 import com.twitter.finagle.service.Retries
-import com.twitter.finagle.ssl.{TrustCredentials, KeyCredentials}
-import com.twitter.finagle.ssl.server.SslServerConfiguration
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.toggle.flag
 import com.twitter.finagle.tracing._
-import com.twitter.io.{Buf, BufByteWriter, ByteReader, TempFile}
+import com.twitter.io.{Buf, BufByteWriter, ByteReader}
 import com.twitter.util._
-import io.netty.channel.ChannelPipeline
 import java.io.{PrintWriter, StringWriter}
-import java.lang.StringBuffer
 import java.net.{InetAddress, InetSocketAddress, ServerSocket, Socket}
 import java.util.concurrent.atomic.AtomicInteger
 import org.scalactic.source.Position
@@ -497,133 +486,6 @@ EOF
       }
     } finally {
       server.close()
-    }
-  }
-
-  test(s"$implName: can talk to each other with opportunistic tls") {
-    val certFile = TempFile.fromResourcePath("/ssl/certs/svc-test-server.cert.pem")
-    // deleteOnExit is handled by TempFile
-
-    val keyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-server-pkcs8.key.pem")
-    // deleteOnExit is handled by TempFile
-
-    val buffer = new StringBuffer()
-    val recordingPrinter: (Stack.Params, ChannelPipeline) => Unit = (params, pipeline) => {
-      Mux.Client.tlsEnable(params, pipeline)
-      pipeline.addFirst(ChannelSnooper.byteSnooper("whatever") { (string, _) =>
-        buffer.append(string)
-      })
-    }
-
-    flag.overrides.let(Mux.param.MuxImpl.TlsHeadersToggleId, 1.0) {
-      val config = SslServerConfiguration(
-        keyCredentials = KeyCredentials.CertAndKey(certFile, keyFile),
-        trustCredentials = TrustCredentials.Insecure
-      )
-      val service = new Service[Request, Response] {
-        def apply(req: Request) = Future.value(Response(req.body.concat(req.body)))
-      }
-      val server = serverImpl.withTransport
-        .tls(config)
-        .withOpportunisticTls(OpportunisticTls.Desired)
-        .serve("localhost:*", service)
-
-      val client = clientImpl.withTransport.tlsWithoutValidation
-        .withOpportunisticTls(OpportunisticTls.Desired)
-        .configured(Mux.param.TurnOnTlsFn(recordingPrinter))
-        .newService(
-          Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-          "client"
-        )
-
-      val rep = Await.result(client(Request(Path.empty, Buf.Utf8("." * 10))), 5.seconds)
-      val Buf.Utf8(repString) = rep.body
-      assert(repString == "." * 20)
-
-      // we check that it's non-empty to ensure that it was correctly installed
-      assert(!buffer.toString.isEmpty)
-      // check that the payload isn't in cleartext over the wire
-      assert(!buffer.toString.contains("." * 10))
-      Await.result(Closable.all(server, client).close(), 5.seconds)
-    }
-  }
-
-  test(s"$implName: can talk to each other when one party is off") {
-    val certFile = TempFile.fromResourcePath("/ssl/certs/svc-test-server.cert.pem")
-    // deleteOnExit is handled by TempFile
-
-    val keyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-server-pkcs8.key.pem")
-    // deleteOnExit is handled by TempFile
-
-    val buffer = new StringBuffer()
-    val recordingPrinter: (Stack.Params, ChannelPipeline) => Unit = (params, pipeline) => {
-      Mux.Client.tlsEnable(params, pipeline)
-      pipeline.addFirst(ChannelSnooper.byteSnooper("whatever") { (string, _) =>
-        buffer.append(string)
-      })
-    }
-
-    flag.overrides.let(Mux.param.MuxImpl.TlsHeadersToggleId, 1.0) {
-      val config = SslServerConfiguration(
-        keyCredentials = KeyCredentials.CertAndKey(certFile, keyFile),
-        trustCredentials = TrustCredentials.Insecure
-      )
-      val service = new Service[Request, Response] {
-        def apply(req: Request) = Future.value(Response(req.body.concat(req.body)))
-      }
-      val server = serverImpl.withTransport
-        .tls(config)
-        .withOpportunisticTls(OpportunisticTls.Off)
-        .serve("localhost:*", service)
-
-      val client = clientImpl.withTransport.tlsWithoutValidation
-        .withOpportunisticTls(OpportunisticTls.Desired)
-        .configured(Mux.param.TurnOnTlsFn(recordingPrinter))
-        .newService(
-          Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-          "client"
-        )
-
-      val rep = Await.result(client(Request(Path.empty, Buf.Utf8("." * 10))), 5.seconds)
-      val Buf.Utf8(repString) = rep.body
-      assert(repString == "." * 20)
-      assert(buffer.toString.isEmpty)
-      Await.result(Closable.all(server, client).close(), 5.seconds)
-    }
-  }
-
-  test(s"$implName: can't talk to each other with incompatible opportunistic tls") {
-    val certFile = TempFile.fromResourcePath("/ssl/certs/svc-test-server.cert.pem")
-    // deleteOnExit is handled by TempFile
-
-    val keyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-server-pkcs8.key.pem")
-    // deleteOnExit is handled by TempFile
-
-    flag.overrides.let(Mux.param.MuxImpl.TlsHeadersToggleId, 1.0) {
-      val config = SslServerConfiguration(
-        keyCredentials = KeyCredentials.CertAndKey(certFile, keyFile),
-        trustCredentials = TrustCredentials.Insecure
-      )
-      val service = new Service[Request, Response] {
-        def apply(req: Request) = Future.value(Response(req.body.concat(req.body)))
-      }
-      val server = serverImpl.withTransport
-        .tls(config)
-        .withOpportunisticTls(OpportunisticTls.Off)
-        .serve("localhost:*", service)
-
-      val client = clientImpl.withTransport.tlsWithoutValidation
-        .withOpportunisticTls(OpportunisticTls.Required)
-        .newService(
-          Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-          "client"
-        )
-      intercept[IncompatibleNegotiationException] {
-        Await.result(client(Request(Path.empty, Buf.Utf8("." * 10))), 5.seconds)
-      }
-      intercept[IncompatibleNegotiationException] {
-        Await.result(Closable.all(server, client).close(), 5.seconds)
-      }
     }
   }
 }
