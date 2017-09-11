@@ -55,7 +55,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
         label = "",
         timer = new NullTimer,
         emptyException = new NoBrokersAvailableException,
-        useDeterministicOrdering = false
+        useDeterministicOrdering = None
       )
     }
   }
@@ -221,7 +221,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
   test("useDeterministicOrdering, clients evenly divide servers") {
     val counts = new Counts
     val bal = new Bal {
-      override protected val useDeterministicOrdering = true
+      override protected val useDeterministicOrdering = Some(true)
     }
 
     ProcessCoordinate.setCoordinate(offset = 0, instanceId = 1, totalInstances = 10)
@@ -233,7 +233,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
   test("useDeterministicOrdering, clients unevenly divide servers") {
     val counts = new Counts
     val bal = new Bal {
-      override protected val useDeterministicOrdering = true
+      override protected val useDeterministicOrdering = Some(true)
     }
 
     ProcessCoordinate.setCoordinate(offset = 0, instanceId = 1, totalInstances = 4)
@@ -251,7 +251,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
 
   test("no-arg rebuilds are idempotent") {
     val bal = new Bal {
-      override protected val useDeterministicOrdering = true
+      override protected val useDeterministicOrdering = Some(true)
     }
 
     ProcessCoordinate.setCoordinate(0, 5, 10)
@@ -270,7 +270,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
 
   test("order maintained when status flaps") {
     val bal = new Bal {
-      override protected val useDeterministicOrdering = true
+      override protected val useDeterministicOrdering = Some(true)
     }
 
     ProcessCoordinate.unsetCoordinate()

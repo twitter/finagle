@@ -63,7 +63,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    * Enables [[Aperture]] to read coordinate data from [[ProcessCoordinate]]
    * to derive an ordering for the endpoints used by this [[Balancer]] instance.
    */
-  protected def useDeterministicOrdering: Boolean
+  protected def useDeterministicOrdering: Option[Boolean]
 
   /**
    * Adjust the aperture by `n` serving units.
@@ -101,11 +101,19 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    */
   protected def label: String
 
+  private[this] def dapertureActive: Boolean =
+    useDeterministicOrdering match {
+      case Some(bool) => bool
+      // The third state will be used to automatically
+      // toggle this feature on.
+      case None => false
+    }
+
   private[this] val gauges = Seq(
     statsReceiver.addGauge("aperture") { aperture },
     statsReceiver.addGauge("physical_aperture") { dist.physicalAperture },
     statsReceiver.addGauge("use_deterministic_ordering") {
-      if (useDeterministicOrdering) 1F else 0F
+      if (dapertureActive) 1F else 0F
     }
   )
 
@@ -209,10 +217,10 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     def rebuild(vec: Vector[Node]): This =
       if (vec.isEmpty) new EmptyVector(initAperture)
       else ProcessCoordinate() match {
-        case Some(coord) if useDeterministicOrdering =>
+        case Some(coord) if dapertureActive =>
           new DeterministicApeture(vec, initAperture, coord)
 
-        case None if useDeterministicOrdering =>
+        case None if dapertureActive =>
           noCoordinate.incr()
           new RandomAperture(vec, initAperture)
 
