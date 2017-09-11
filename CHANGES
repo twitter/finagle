@@ -7,6 +7,13 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 7.x
 -----
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-netty4: `Netty4ClientEngineFactory` and `Netty4ServerEngineFactory` now
+    validate loaded certificates in all cases to ensure that the current date
+    range is within the validity range specified in the certificate. ``PHAB_ID=D88664``
+
 7.1.0
 ------
 
