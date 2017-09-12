@@ -310,6 +310,11 @@ object Stack {
     def default: P
 
     /**
+      * Compatibility method so the Param value is accessible from Java.
+      */
+    final def getDefault: P = default
+
+    /**
      * Method invoked to generate a way to display a P-typed param, which takes the form
      * Seq[(key, () => value)], where `key` and `value` are the variable names and values for
      * public member variables in the class. The function `() => value` is invoked to display the
