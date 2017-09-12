@@ -1,7 +1,9 @@
 package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle._
+import com.twitter.finagle.CoreToggles
 import com.twitter.finagle.loadbalancer.{Balancer, NodeT, DistributorT}
+import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.util.Rng
 import com.twitter.logging.Logger
 import com.twitter.util.{Future, Time}
@@ -10,6 +12,9 @@ import scala.collection.mutable.ListBuffer
 
 private object Aperture {
   private val log = Logger.get()
+
+  val dapertureToggleKey = "com.twitter.finagle.core.UseDeterministicAperture"
+  private val dapertureToggle = CoreToggles(dapertureToggleKey)
 }
 
 /**
@@ -101,12 +106,17 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    */
   protected def label: String
 
+  // We set the toggle to take into account both the cluster id and the `label`
+  // for the client. Effectively, we want all the clients of a particular
+  // cluster to be included during the same experiment window since d-aperture
+  // needs all the respective clients to participate in order to be effective.
+  private[this] def dapertureToggleActive: Boolean =
+    dapertureToggle(s"${ServerInfo().clusterId}:$label".hashCode)
+
   private[this] def dapertureActive: Boolean =
     useDeterministicOrdering match {
       case Some(bool) => bool
-      // The third state will be used to automatically
-      // toggle this feature on.
-      case None => false
+      case None => dapertureToggleActive
     }
 
   private[this] val gauges = Seq(
@@ -191,7 +201,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     // need to guarantee visibility across threads and don't need to
     // provide other synchronization between threads.
     @volatile private[this] var _aperture: Int = initAperture
-    // Make sure the aperture is within bounds [minAperture, maxAperture].
+    // Make sure the aperture is within bounds [min, max].
     adjust(0)
 
     /**
@@ -265,7 +275,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    * A distributor which has an aperture size but an empty vector to select
    * from, so it always returns the `failingNode`.
    */
-  private[this] class EmptyVector(initAperture: Int)
+  protected class EmptyVector(initAperture: Int)
     extends BaseDist(Vector.empty, initAperture) {
       require(vector.isEmpty, s"vector must be empty: $vector")
       def indices: Set[Int] = Set.empty
@@ -284,7 +294,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    *
    * @param initAperture The initial aperture to use.
    */
-  private[this] class RandomAperture(
+  protected class RandomAperture(
     vector: Vector[Node],
     initAperture: Int
   ) extends BaseDist(vector, initAperture) {
@@ -322,7 +332,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    * @param coord The [[ProcessCoordinate]] for this process which is used to narrow
    * the range of `pick2`.
    */
-  private[this] class DeterministicApeture(
+  protected class DeterministicApeture(
     vector: Vector[Node],
     initAperture: Int,
     coord: Coord
@@ -334,7 +344,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     // We log the contents of the aperture on each distributor rebuild when using
     // deterministic aperture. Rebuilds are not frequent and concentrated around
     // events where this information would be valuable (i.e. coordinate changes or
-    // host add/removes). Thus, we choose to log this at `info` instead of `debug`.
+    // host add/removes).
     {
       val apertureSlice: String = {
         val offset = coord.offset
@@ -347,9 +357,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
         }.mkString("[", ", ", "]")
       }
       val lbl = if (label.isEmpty) "<unlabelled>" else label
-      log.info(
-        s"Aperture updated for client $lbl: nodes=$apertureSlice"
-      )
+      log.debug(s"Aperture updated for client $lbl: nodes=$apertureSlice")
     }
 
     // We want to additionally ensure that p2c can actually converge when there

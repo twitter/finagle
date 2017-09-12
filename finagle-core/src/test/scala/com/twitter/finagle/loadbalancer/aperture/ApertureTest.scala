@@ -3,6 +3,7 @@ package com.twitter.finagle.loadbalancer.aperture
 import com.twitter.finagle._
 import com.twitter.finagle.loadbalancer.{EndpointFactory, FailingEndpointFactory, NodeT}
 import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.toggle
 import com.twitter.finagle.util.Rng
 import com.twitter.util.{Activity, Await, Duration, NullTimer}
 import org.scalatest.FunSuite
@@ -226,6 +227,9 @@ class ApertureTest extends FunSuite with ApertureSuite {
 
     ProcessCoordinate.setCoordinate(offset = 0, instanceId = 1, totalInstances = 10)
     bal.update(counts.range(10))
+    bal.rebuildx()
+    assert(bal.isDeterministicAperture)
+    assert(bal.minUnitsx == 4)
     bal.applyn(1000)
     assert(counts.nonzero == Set(1, 2, 3, 4))
   }
@@ -238,6 +242,8 @@ class ApertureTest extends FunSuite with ApertureSuite {
 
     ProcessCoordinate.setCoordinate(offset = 0, instanceId = 1, totalInstances = 4)
     bal.update(counts.range(10))
+    bal.rebuildx()
+    assert(bal.isDeterministicAperture)
     assert(bal.minUnitsx == 4)
     bal.applyn(1000)
     // The range is 2.5, so we need a physical aperture of at least 2 to satisfy
@@ -299,6 +305,32 @@ class ApertureTest extends FunSuite with ApertureSuite {
     bal.rebuildx()
     for (i <- servers.indices) {
       assert(servers(i) == bal.distx.vector(i).factory)
+    }
+  }
+
+  test("daperture toggle") {
+    toggle.flag.overrides.let(Aperture.dapertureToggleKey, 1.0) {
+      val bal = new Bal {
+        override val minAperture = 150
+      }
+      ProcessCoordinate.setCoordinate(0, 0, 150)
+      bal.update(Vector.tabulate(150)(Factory))
+      bal.rebuildx()
+      assert(bal.isDeterministicAperture)
+      // ignore 150, since we are using d-aperture and instead
+      // default to 4.
+      assert(bal.minUnitsx == 4)
+    }
+
+    toggle.flag.overrides.let(Aperture.dapertureToggleKey, 0.0) {
+      val bal = new Bal {
+        override val minAperture = 150
+      }
+      ProcessCoordinate.setCoordinate(0, 0, 150)
+      bal.update(Vector.tabulate(150)(Factory))
+      bal.rebuildx()
+      assert(bal.isRandomAperture)
+      assert(bal.minUnitsx == 150)
     }
   }
 }
