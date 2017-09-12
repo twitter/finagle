@@ -5,8 +5,9 @@ import com.twitter.finagle.Stack
 import com.twitter.finagle.http2.param.FrameLoggerNamePrefix
 import com.twitter.finagle.http2.{LoggerPerFrameTypeLogger, Settings}
 import com.twitter.finagle.netty4.http._
-import io.netty.channel.{Channel, ChannelHandlerContext, ChannelInitializer, ChannelOption}
-import io.netty.handler.codec.http2.{Http2CodecBuilder, Http2StreamChannelBootstrap}
+import com.twitter.finagle.netty4.param.Allocator
+import io.netty.channel.{Channel, ChannelHandlerContext, ChannelInitializer}
+import io.netty.handler.codec.http2.Http2MultiplexCodecBuilder
 import io.netty.handler.ssl.{ApplicationProtocolNames, ApplicationProtocolNegotiationHandler}
 
 private[http2] class NpnOrAlpnHandler(init: ChannelInitializer[Channel], params: Stack.Params)
@@ -23,8 +24,11 @@ private[http2] class NpnOrAlpnHandler(init: ChannelInitializer[Channel], params:
         // Http2 has been negotiated, replace the HttpCodec with an Http2Codec
         val initializer = new ChannelInitializer[Channel] {
           def initChannel(ch: Channel): Unit = {
+            val alloc = params[Allocator].allocator
+            ctx.channel.config().setAllocator(alloc)
             ch.pipeline.addLast(new Http2NackHandler)
             ch.pipeline.addLast(new RichHttp2ServerDowngrader(validateHeaders = false))
+            ch.pipeline.addLast(new RstHandler())
             initServer(params)(ch.pipeline)
             ch.pipeline.addLast(init)
           }
@@ -34,16 +38,13 @@ private[http2] class NpnOrAlpnHandler(init: ChannelInitializer[Channel], params:
         ctx.channel.config.setAutoRead(true)
         val initialSettings = Settings.fromParams(params)
         val logger = new LoggerPerFrameTypeLogger(params[FrameLoggerNamePrefix].loggerNamePrefix)
-        val bootstrap = new Http2StreamChannelBootstrap()
-          .option(ChannelOption.ALLOCATOR, ctx.alloc())
-          .handler(initializer)
 
         ctx
           .pipeline()
           .replace(
             HttpCodecName,
-            "http2Codec",
-            new Http2CodecBuilder(true /* server */, bootstrap)
+            Http2CodecName,
+            Http2MultiplexCodecBuilder.forServer(initializer)
               .frameLogger(logger)
               .initialSettings(initialSettings)
               .build()

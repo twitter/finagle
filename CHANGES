@@ -54,6 +54,12 @@ Runtime Behavior Changes
   * finagle-netty4: `ChannelTransport` no longer considers the `Channel.isWritable` result
     when determining status. ``PHAB_ID=D82670``
 
+  * finagle-http2: Upgraded to the new netty http/2 API in netty version 4.1.15.Final,
+    which fixes several long-standing bugs but has some bugs around cleartext http/2.
+    One of the work-arounds modifies the visibility of a private field, so it's incompatible
+    with security managers.  This is only true for http/2--all other protocols will be unaffected.
+    ``PHAB_ID=D87685``
+
 Deprecations
 ~~~~~~~~~~~~
 
