@@ -46,6 +46,8 @@ private[ssl] object Netty4SslConfigurations {
           .trustManager(InsecureTrustManagerFactory.INSTANCE)
       case TrustCredentials.CertCollection(file) =>
         builder.trustManager(file)
+      case TrustCredentials.Certificates(certificates) =>
+        builder.trustManager(certificates:_*)
     }
   }
 

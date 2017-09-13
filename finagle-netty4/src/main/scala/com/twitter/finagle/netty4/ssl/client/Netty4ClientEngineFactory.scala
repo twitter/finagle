@@ -48,6 +48,8 @@ class Netty4ClientEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
           cert <- new X509CertificateFile(certFile).readX509Certificate()
           chain <- new X509CertificateFile(chainFile).readX509Certificates()
         } yield builder.keyManager(key, cert +: chain: _*)
+      case KeyCredentials.KeyAndCertChain(key, chain) =>
+        Return(builder.keyManager(key, chain:_*))
     }
 
   /**
