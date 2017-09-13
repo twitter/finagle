@@ -561,14 +561,15 @@ lazy val finagleRedis = Project(
   base = file("finagle-redis")
 ).settings(
   sharedSettings
+).configs(
+  IntegrationTest extend(Test)
+).settings(
+  Defaults.itSettings: _*
 ).settings(
   name := "finagle-redis",
   libraryDependencies ++= Seq(
     util("logging")
-  ),
-  testOptions in Test := Seq(Tests.Filter {
-    name => !name.startsWith("com.twitter.finagle.redis.integration")
-  })
+  )
 ).dependsOn(finagleCore, finagleNetty4)
 
 lazy val finagleMux = Project(
