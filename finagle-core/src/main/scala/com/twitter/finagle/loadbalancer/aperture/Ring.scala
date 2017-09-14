@@ -38,9 +38,10 @@ private class Ring(size: Int, rng: Rng) {
   require(size > 0, s"size must be > 0: $size")
 
   /**
-   * Computes the width of each index on the ring.
+   * Returns the uniform width of any given index on the ring. The returned
+   * value is bounded between (0, 1].
    */
-  private[this] val unitWidth: Double = 1.0 / size
+  val unitWidth: Double = 1.0 / size
 
   /**
    * Returns the (zero-based) index between [0, `size`) which the
@@ -57,6 +58,9 @@ private class Ring(size: Int, rng: Rng) {
 
   /**
    * Returns the total number of indices that [offset, offset + width) intersects with.
+   *
+   * @note This returns the number of indices over which `pick` and `pick2` select.
+   * Thus, we interpret a width of 0 as picking one index.
    */
   def range(offset: Double, width: Double): Int = {
     if (width < 0 || width > 1.0)
@@ -95,6 +99,9 @@ private class Ring(size: Int, rng: Rng) {
 
   /**
    * Returns the indices where [offset, offset + width) intersects.
+   *
+   * @note This returns the indices over which `pick` and `pick2` select.
+   * Thus, we interpret a width of 0 as picking one index.
    */
   def indices(offset: Double, width: Double): Seq[Int] = {
     val seq = new ListBuffer[Int]
@@ -112,6 +119,9 @@ private class Ring(size: Int, rng: Rng) {
   /**
    * Pick a random index between [0, `size`) where the range of the
    * index intersects with [offset, offset + width).
+   *
+   * @param width The width of the range. We interpret a width of 0 as the range
+   * [offset, offset] and as such return a valid index.
    */
   def pick(offset: Double, width: Double): Int = {
     if (width < 0 || width > 1.0)
@@ -163,7 +173,8 @@ private class Ring(size: Int, rng: Rng) {
    * respective indices intersect with [offset, offset + width). The indices are
    * chosen uniformly and without replacement.
    *
-   * @param width The width of the range.
+   * @param width The width of the range. We interpret a width of 0 as the range
+   * [offset, offset] and as such return a valid index.
    */
   def pick2(offset: Double, width: Double): (Int, Int) = {
     val a = pick(offset, width)

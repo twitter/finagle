@@ -1,8 +1,8 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.finagle.http.{Request, Response}
-import com.twitter.finagle.http.netty.Bijections
-import com.twitter.finagle.http.netty.Bijections.responseFromNetty
+import com.twitter.finagle.http.netty3.Bijections
+import com.twitter.finagle.http.netty3.Bijections.responseFromNetty
 import java.nio.charset.{StandardCharsets => Charsets}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.handler.codec.embedder.{DecoderEmbedder, EncoderEmbedder}

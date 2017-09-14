@@ -9,6 +9,11 @@
       "id": "com.twitter.finagle.core.UseSuccessRateFailureAccrual",
       "description": "Use success rate-based FailureAccrual by default",
       "fraction": 0.0
+    },
+    {
+      "id": "com.twitter.finagle.core.UseDeterministicAperture",
+      "description": "Use deterministic aperture instead of a random aperture for client load balancing",
+      "fraction": 0.0
     }
   ]
 }

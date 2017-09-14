@@ -1,6 +1,6 @@
 package com.twitter.finagle.http2.transport
 
-import com.twitter.finagle.netty4.http.HttpCodecName
+import com.twitter.finagle.netty4.http.{HttpCodecName, Http2CodecName}
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle.stats.InMemoryStatsReceiver
@@ -50,7 +50,7 @@ class NpnOrAlpnHandlerTest extends FunSuite with BeforeAndAfter with MockitoSuga
     when(sslHandler.applicationProtocol()).thenReturn(http2)
     pipeline.fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS)
     assert(!pipeline.names().contains(HttpCodecName))
-    assert(pipeline.names().contains("Http2FrameCodec#0"))
+    assert(pipeline.names().contains(Http2CodecName))
     assert(stats.counters(Seq("upgrade", "success")) == 1)
   }
 
@@ -58,7 +58,7 @@ class NpnOrAlpnHandlerTest extends FunSuite with BeforeAndAfter with MockitoSuga
     when(sslHandler.applicationProtocol()).thenReturn(http11)
     pipeline.fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS)
     assert(pipeline.names().contains(HttpCodecName))
-    assert(!pipeline.names().contains("http2Codec"))
+    assert(!pipeline.names().contains(Http2CodecName))
     assert(!stats.counters.contains(Seq("upgrade", "success")))
   }
 }

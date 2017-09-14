@@ -9,6 +9,8 @@ import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport._
 import com.twitter.finagle.mux.{Handshake, Toggles}
 import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
+import com.twitter.finagle.netty4.ssl.server.Netty4ServerSslHandler
+import com.twitter.finagle.netty4.ssl.client.Netty4ClientSslHandler
 import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.param.{ProtocolLibrary, WithDefaultLoadBalancer}
 import com.twitter.finagle.pool.SingletonPool
@@ -21,7 +23,7 @@ import com.twitter.finagle.{param => fparam}
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
 import com.twitter.util.{Closable, Future, StorageUnit}
-import io.netty.channel.Channel
+import io.netty.channel.{Channel, ChannelPipeline}
 import java.net.SocketAddress
 
 /**
@@ -68,6 +70,17 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     case class OppTls(level: Option[OpportunisticTls.Level])
     object OppTls {
       implicit val param = Stack.Param(OppTls(None))
+    }
+
+    /**
+     * A class eligible for configuring how to enable TLS.
+     *
+     * Only for internal use and testing--not intended to be exposed for
+     * configuration to end-users.
+     */
+    private[finagle] case class TurnOnTlsFn(fn: (Stack.Params, ChannelPipeline) => Unit)
+    private[finagle] object TurnOnTlsFn {
+      implicit val param = Stack.Param(TurnOnTlsFn((_: Stack.Params, _: ChannelPipeline) => ()))
     }
 
     /**
@@ -130,7 +143,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
               _,
               removeTlsIfOpportunisticClient(params),
               transportFactory = { ch: Channel =>
-                OpportunisticTls.clientTransport(ch, params, new RefCountingTransport(ch))
+                OpportunisticTls.transport(ch, params, new RefCountingTransport(ch))
               }
             )
           else {
@@ -142,7 +155,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
               _,
               removeTlsIfOpportunisticClient(params),
               transportFactory = { ch: Channel =>
-                OpportunisticTls.clientTransport(ch, params, new ChannelTransport(ch))
+                OpportunisticTls.transport(ch, params, new ChannelTransport(ch))
               }
             )
           }
@@ -153,7 +166,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
             removeTlsIfOpportunisticServer(params),
             identity,
             transportFactory = { ch: Channel =>
-              OpportunisticTls.serverTransport(ch, params, new ChannelTransport(ch))
+              OpportunisticTls.transport(ch, params, new ChannelTransport(ch))
             }
         )
       )
@@ -253,8 +266,12 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
         }
     }
 
+    private[finagle] val tlsEnable: (Stack.Params, ChannelPipeline) => Unit = (params, pipeline) =>
+      pipeline.addFirst("opportunisticSslInit", new Netty4ClientSslHandler(params))
+
     private val params: Stack.Params = StackClient.defaultParams +
-      ProtocolLibrary("mux")
+      ProtocolLibrary("mux") +
+      param.TurnOnTlsFn(tlsEnable)
 
     private val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackClient.newStack
       .replace(StackClient.Role.pool, SingletonPool.module[mux.Request, mux.Response])
@@ -375,8 +392,12 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       .replace(StackServer.Role.protoTracing, new ServerProtoTracing)
       .prepend(PayloadSizeFilter.module(_.body.length, _.body.length))
 
+    private[finagle] val tlsEnable: (Stack.Params, ChannelPipeline) => Unit = (params, pipeline) =>
+      pipeline.addFirst("opportunisticSslInit", new Netty4ServerSslHandler(params))
+
     private val params: Stack.Params = StackServer.defaultParams +
-      ProtocolLibrary("mux")
+      ProtocolLibrary("mux") +
+      param.TurnOnTlsFn(tlsEnable)
 
     /**
      * Returns the headers that a server sends to a client.

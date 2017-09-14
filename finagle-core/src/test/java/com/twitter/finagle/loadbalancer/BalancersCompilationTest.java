@@ -1,5 +1,6 @@
 package com.twitter.finagle.loadbalancer;
 
+import scala.Option;
 import scala.collection.immutable.Vector;
 import scala.collection.immutable.VectorBuilder;
 
@@ -40,7 +41,7 @@ public class BalancersCompilationTest {
       .newBalancer(Activity.value(vec), noBrokers, emptyParams);
 
     Balancers
-      .aperture(Duration.fromSeconds(5), 0.5, 2, 1, 5, Rngs.threadLocal(), false)
+      .aperture(Duration.fromSeconds(5), 0.5, 2, 1, 5, Rngs.threadLocal(), Option.empty())
       .newBalancer(Activity.value(vec), noBrokers, emptyParams);
   }
 }

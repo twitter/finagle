@@ -1,6 +1,6 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.http.netty.Bijections
+import com.twitter.finagle.http.netty3.Bijections
 import com.twitter.finagle.netty3.BufChannelBuffer
 import com.twitter.util.Base64StringEncoder
 import com.twitter.io.Buf

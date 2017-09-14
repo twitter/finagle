@@ -55,6 +55,7 @@ class StandardTunableMapTest extends FunSuite {
       def environment: Option[String] = Some("staging")
       def instanceId: Option[Long] = Some(0)
       def id: String = "id"
+      def clusterId: String = id
     }
 
     val map = StandardTunableMap.loadJsonConfig("IdForStandardTunableMapTest", serverInfo)
@@ -85,6 +86,7 @@ class StandardTunableMapTest extends FunSuite {
       def environment: Option[String] = None
       def instanceId: Option[Long] = Some(0)
       def id: String = "id"
+      def clusterId: String = id
     }
 
     val map = StandardTunableMap.loadJsonConfig("IdForStandardTunableMapTest", serverInfo)
@@ -107,6 +109,7 @@ class StandardTunableMapTest extends FunSuite {
       def environment: Option[String] = Some("staging")
       def instanceId: Option[Long] = None
       def id: String = "id"
+      def clusterId: String = id
     }
 
     val map = StandardTunableMap.loadJsonConfig("IdForStandardTunableMapTest", serverInfo)
@@ -129,6 +132,7 @@ class StandardTunableMapTest extends FunSuite {
       def environment: Option[String] = None
       def instanceId: Option[Long] = None
       def id: String = "id"
+      def clusterId: String = id
     }
 
     val map = StandardTunableMap.loadJsonConfig("IdForStandardTunableMapTest", serverInfo)
@@ -147,6 +151,7 @@ class StandardTunableMapTest extends FunSuite {
       def environment: Option[String] = None
       def instanceId: Option[Long] = None
       def id: String = "id"
+      def clusterId: String = id
     }
 
     val map = StandardTunableMap.loadJsonConfig("IdWithNoFiles", serverInfo)

@@ -5,7 +5,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.{Service, Status}
 import com.twitter.finagle.http.{Fields, Request, Response, Status => HttpStatus, Version}
 import com.twitter.finagle.http.exp.StreamTransport
-import com.twitter.finagle.http.netty.Bijections._
+import com.twitter.finagle.http.netty3.Bijections._
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.netty3.http.Netty3ServerStreamTransport
 import com.twitter.finagle.stats.NullStatsReceiver

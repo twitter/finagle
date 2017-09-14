@@ -1,6 +1,6 @@
 package com.twitter.finagle.netty3.http
 
-import com.twitter.finagle.http.netty.Bijections
+import com.twitter.finagle.http.netty3.Bijections
 import com.twitter.finagle.http.{BadRequestResponse, Response}
 import org.jboss.netty.channel.{Channel, ChannelFutureListener, Channels, DownstreamMessageEvent}
 import org.jboss.netty.handler.codec.frame.TooLongFrameException

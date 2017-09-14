@@ -8,6 +8,7 @@ import com.twitter.util.security.X509CertificateFile
 import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerEngineFactory}
 import io.netty.buffer.ByteBufAllocator
 import io.netty.handler.ssl.{OpenSsl, SslContextBuilder}
+import scala.util.control.NonFatal
 
 /**
  * This engine factory uses Netty 4's `SslContextBuilder`. It is the
@@ -16,39 +17,45 @@ import io.netty.handler.ssl.{OpenSsl, SslContextBuilder}
 class Netty4ServerEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
     extends SslServerEngineFactory {
 
-  private[this] def startWithKey(keyCredentials: KeyCredentials): SslContextBuilder =
-    keyCredentials match {
+  private[this] def startWithKey(keyCredentials: KeyCredentials): SslContextBuilder = {
+    val builder = keyCredentials match {
       case KeyCredentials.Unspecified =>
         throw SslConfigurationException.notSupported(
           "KeyCredentials.Unspecified",
           "Netty4ServerEngineFactory"
         )
       case KeyCredentials.CertAndKey(certFile, keyFile) =>
-        SslContextBuilder.forServer(certFile, keyFile)
-      case KeyCredentials.CertKeyAndChain(certFile, keyFile, chainFile) => {
-        (for {
+        for {
+          key <- Netty4SslConfigurations.getPrivateKey(keyFile)
+          cert <- new X509CertificateFile(certFile).readX509Certificate()
+        } yield SslContextBuilder.forServer(key, cert)
+      case KeyCredentials.CertKeyAndChain(certFile, keyFile, chainFile) =>
+        for {
           key <- Netty4SslConfigurations.getPrivateKey(keyFile)
           cert <- new X509CertificateFile(certFile).readX509Certificate()
           chain <- new X509CertificateFile(chainFile).readX509Certificates()
-        } yield SslContextBuilder.forServer(key, (cert +: chain): _*)) match {
-          case Return(builder) => builder
-          case Throw(ex) => throw new SslConfigurationException(ex.getMessage, ex)
-        }
-      }
+        } yield SslContextBuilder.forServer(key, cert +: chain: _*)
     }
+
+    builder match {
+      case Return(sslContextBuilder) =>
+        sslContextBuilder
+      case Throw(NonFatal(nonFatal)) =>
+        throw new SslConfigurationException(nonFatal.getMessage, nonFatal)
+      case Throw(throwable) =>
+        throw throwable
+    }
+  }
 
   /**
    * Creates a new `Engine` based on an `SslServerConfiguration`.
    *
    * @param config A collection of parameters which the engine factory
    * should consider when creating the TLS server `Engine`.
-   *
    * @note `KeyCredentials` must be specified, as it is not possible
-   * with this engine to use one of the "isntalled security providers".
-   *
+   * with this engine to use one of the "installed security providers".
    * @note Using `TrustCredentials.Insecure` forces the underlying engine to be
    * a JDK engine and not a native engine, based on what Netty supports.
-   *
    * @note `ApplicationProtocols` other than Unspecified are only supported
    * by using a native engine via netty-tcnative.
    */
@@ -88,7 +95,6 @@ object Netty4ServerEngineFactory {
    * @param allocator The allocator which should be used as part of
    * `Engine` creation. See Netty's `SslContextBuilder` docs for
    * more information.
-   *
    * @note Whether this engine factory should be forced to use the
    * Jdk version is determined by whether Netty is able to load
    * a native engine library via netty-tcnative.

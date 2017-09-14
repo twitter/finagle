@@ -1,4 +1,4 @@
-package com.twitter.finagle.http
+package com.twitter.finagle.netty3.http
 
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.transport.Transport

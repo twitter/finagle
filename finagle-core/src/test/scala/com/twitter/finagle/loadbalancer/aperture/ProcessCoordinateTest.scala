@@ -19,6 +19,8 @@ class ProcessCoordinateTest extends FunSuite with GeneratorDrivenPropertyChecks 
   }
 
   test("setCoordinate") {
+    intercept[Exception] { ProcessCoordinate.setCoordinate(0, 0, 0) }
+
     val offset = 0
     val numInstances = 10
 
@@ -34,6 +36,11 @@ class ProcessCoordinateTest extends FunSuite with GeneratorDrivenPropertyChecks 
   }
 
   test("setCoordinate range") {
+    ProcessCoordinate.setCoordinate(0, 0, 1)
+    val sample = ProcessCoordinate()
+    assert(sample.isDefined)
+    assert(1.0 - sample.get.unitWidth <= 1e-6)
+
     forAll { (peerOffset: Int, instanceId: Int, numInstances: Int) =>
       whenever(numInstances > 0) {
         ProcessCoordinate.setCoordinate(peerOffset, instanceId, numInstances)
@@ -41,9 +48,9 @@ class ProcessCoordinateTest extends FunSuite with GeneratorDrivenPropertyChecks 
         assert(sample.isDefined)
         val offset = sample.get.offset
         val rng = new scala.util.Random(12345L)
-        val width = sample.get.width(units = rng.nextInt(numInstances))
+        val width = sample.get.unitWidth
         assert(offset >= 0 && offset < 1.0)
-        assert(width >= 0 && width < 1.0)
+        assert(width > 0 && width <= 1.0)
       }
     }
   }
