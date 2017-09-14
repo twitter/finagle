@@ -70,6 +70,21 @@ class Netty4ClientEngineFactoryTest extends FunSuite {
     }
   }
 
+  test("config with expired cert and valid key credential fails") {
+    val tempCertFile = TempFile.fromResourcePath("/ssl/certs/svc-test-client-expired.cert.pem")
+    // deleteOnExit is handled by TempFile
+
+    val tempKeyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-client-pkcs8.key.pem")
+    // deleteOnExit is handled by TempFile
+
+    val keyCredentials = KeyCredentials.CertAndKey(tempCertFile, tempKeyFile)
+    val config = SslClientConfiguration(keyCredentials = keyCredentials)
+
+    intercept[SslConfigurationException] {
+      factory(address, config)
+    }
+  }
+
   test("config with cert, key, and chain succeeds") {
     val tempCertFile = TempFile.fromResourcePath("/ssl/certs/svc-test-client.cert.pem")
     // deleteOnExit is handled by TempFile

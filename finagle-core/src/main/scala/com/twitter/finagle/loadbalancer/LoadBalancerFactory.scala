@@ -316,11 +316,17 @@ object DefaultBalancerFactory extends LoadBalancerFactory {
       case _ => Balancers.p2c()
     }
 
+  private def aperture(): LoadBalancerFactory =
+    exp.loadMetric() match {
+      case "ewma" => Balancers.aperturePeakEwma()
+      case _ => Balancers.aperture()
+    }
+
   private val underlying =
     defaultBalancer() match {
       case "heap" => Balancers.heap()
       case "choice" => p2c()
-      case "aperture" => Balancers.aperture()
+      case "aperture" => aperture()
       case x =>
         log.warning(s"""Invalid load balancer $x, using "choice" balancer.""")
         p2c()

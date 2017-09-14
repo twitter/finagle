@@ -181,7 +181,7 @@ private[netty4] class SimpleChannelSnooper(val name: String) extends ChannelSnoo
   }
 }
 
-private[netty4] object ChannelSnooper {
+private[finagle] object ChannelSnooper {
 
   /**
    * Makes a ChannelSnooper that will log however you want, printing out the

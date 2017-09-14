@@ -1,4 +1,4 @@
-package com.twitter.finagle.http.netty
+package com.twitter.finagle.http.netty3
 
 import java.nio.charset.Charset
 import org.jboss.netty.buffer._

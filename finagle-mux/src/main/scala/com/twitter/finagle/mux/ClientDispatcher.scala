@@ -54,18 +54,18 @@ private[finagle] class ClientDispatcher(trans: Transport[Message, Message])
     case exc: Throwable =>
       trans.close()
       val result = Throw(exc)
-      for (u <- messages.unmapAll()) {
+      for (u <- messages.synchronized(messages.unmapAll())) {
         u() = result
       }
   }
 
   private[this] def process(msg: Message): Unit = msg match {
     case Message.Rerr(_, err) =>
-      for (u <- messages.unmap(msg.tag))
+      for (u <- messages.synchronized(messages.unmap(msg.tag)))
         u() = Throw(ServerError(err))
 
     case Message.Rmessage(_) =>
-      for (u <- messages.unmap(msg.tag))
+      for (u <- messages.synchronized(messages.unmap(msg.tag)))
         u() = Return(msg)
 
     case _ => // do nothing.
@@ -77,7 +77,7 @@ private[finagle] class ClientDispatcher(trans: Transport[Message, Message])
    */
   def apply(f: Int => Message): Future[Message] = {
     val p = new Promise[Message]
-    messages.map(p) match {
+    messages.synchronized(messages.map(p)) match {
       case None => FutureExhaustedTagsException
       case Some(tag) =>
         val msg = f(tag)
@@ -85,17 +85,39 @@ private[finagle] class ClientDispatcher(trans: Transport[Message, Message])
           case Return(_) =>
             p.setInterruptHandler {
               case cause =>
-                // We replace the current Updatable, if any, with a stand-in to reserve
-                // the tag of discarded requests until Tdiscarded is acknowledged by the
-                // peer.
-                for (u <- messages.maybeRemap(msg.tag, Empty)) {
-                  trans.write(Message.Tdiscarded(msg.tag, cause.toString))
-                  u() = Throw(cause)
+                // We have to ensure that the Updatable in the TagMap is the same one that
+                // this dispatch created. If it is, we need to replace it with a stand-in
+                // to reserve the tag of discarded requests until Tdiscarded is
+                // acknowledged by the peer.
+                val interrupted = messages.synchronized {
+                  messages.maybeRemap(msg.tag, Updatable.Empty) match {
+                    case Some(u) if u eq p =>
+                      // We have to send the Tdiscarded from within the lock to ensure
+                      // that we don't race with receiving the response, unmapping the
+                      // Empty thus freeing the tag, and sending a new dispatch which
+                      // reuses the tag, then sending this Tdiscarded which will
+                      // mistakenly interrupt the wrong dispatch on the server side.
+                      // This noise could be avoided if we didn't reuse tags.
+                      trans.write(Message.Tdiscarded(msg.tag, cause.toString))
+                      true
+
+                    case Some(u) =>
+                      // Not our dispatch, so remap it.
+                      messages.maybeRemap(msg.tag, u)
+                      false
+
+                    case None =>
+                      false
+                  }
+                }
+
+                if (interrupted) {
+                  p.updateIfEmpty(Throw(cause))
                 }
             }
             p
           case t @ Throw(_) =>
-            messages.unmap(tag)
+            messages.synchronized(messages.unmap(tag))
             Future.const(t.cast[Message])
         }
     }
@@ -112,8 +134,6 @@ private[finagle] object ClientDispatcher {
   val InitialTagMapSize: Int = 256
 
   val FutureExhaustedTagsException = Future.exception(Failure.rejected("Exhausted tags"))
-
-  val Empty: Updatable[Try[Message]] = Updatable.empty()
 
   /**
    * Creates a mux client dispatcher that can handle mux Request/Responses.

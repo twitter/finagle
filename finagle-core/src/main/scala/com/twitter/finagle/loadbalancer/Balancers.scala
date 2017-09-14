@@ -225,7 +225,7 @@ object Balancers {
     minAperture: Int = 1,
     maxEffort: Int = MaxEffort,
     rng: Rng = Rng.threadLocal,
-    useDeterministicOrdering: Boolean = false
+    useDeterministicOrdering: Option[Boolean] = None
   ): LoadBalancerFactory = new LoadBalancerFactory {
     override def toString: String = "ApertureLeastLoaded"
     def newBalancer[Req, Rep](
@@ -314,7 +314,7 @@ object Balancers {
     minAperture: Int = 1,
     maxEffort: Int = MaxEffort,
     rng: Rng = Rng.threadLocal,
-    useDeterministicOrdering: Boolean = false
+    useDeterministicOrdering: Option[Boolean] = None
   ): LoadBalancerFactory = new LoadBalancerFactory {
     override def toString: String = "AperturePeakEwma"
     def newBalancer[Req, Rep](

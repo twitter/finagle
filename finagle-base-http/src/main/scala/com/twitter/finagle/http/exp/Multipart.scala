@@ -2,7 +2,7 @@ package com.twitter.finagle.http.exp
 
 import com.twitter.conversions.storage._
 import com.twitter.finagle.http.{Method, Request}
-import com.twitter.finagle.http.netty.Bijections
+import com.twitter.finagle.http.netty3.Bijections
 import com.twitter.io.Buf
 import com.twitter.util.StorageUnit
 import org.jboss.netty.handler.codec.http.multipart

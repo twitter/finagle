@@ -7,21 +7,17 @@ import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.PipeliningDispatcher
-import com.twitter.finagle.mux.transport.{IncompatibleNegotiationException, OpportunisticTls}
 import com.twitter.finagle.param.{Label, Stats, Tracer => PTracer}
 import com.twitter.finagle.service._
-import com.twitter.finagle.ssl.{TrustCredentials, KeyCredentials}
-import com.twitter.finagle.ssl.server.SslServerConfiguration
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.thrift.{ClientId, Protocols, ThriftClientRequest}
 import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
 import com.twitter.finagle.thriftmux.thriftscala._
-import com.twitter.finagle.toggle.flag
 import com.twitter.finagle.tracing.Annotation.{ClientSend, ServerRecv}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.io.{Buf, TempFile}
+import com.twitter.io.Buf
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import org.apache.thrift.TApplicationException
@@ -1657,70 +1653,5 @@ class EndToEndTest
     val builder: MethodBuilder = MethodBuilder.from(clientBuilder)
 
     testMethodBuilderRetries(stats, server, builder)
-  }
-
-  test("can talk to each other with opportunistic tls") {
-    val certFile = TempFile.fromResourcePath("/ssl/certs/svc-test-server.cert.pem")
-    // deleteOnExit is handled by TempFile
-
-    val keyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-server-pkcs8.key.pem")
-    // deleteOnExit is handled by TempFile
-
-    flag.overrides.let(Mux.param.MuxImpl.TlsHeadersToggleId, 1.0) {
-      val config = SslServerConfiguration(
-        keyCredentials = KeyCredentials.CertAndKey(certFile, keyFile),
-        trustCredentials = TrustCredentials.Insecure
-      )
-      val iface = new TestService.FutureIface {
-        def query(x: String): Future[String] = Future.value(x + x)
-      }
-      val server = ThriftMux.server.withTransport
-        .tls(config)
-        .withOpportunisticTls(OpportunisticTls.Desired)
-        .serveIface("localhost:*", iface)
-
-      val client = ThriftMux.client.withTransport.tlsWithoutValidation
-        .withOpportunisticTls(OpportunisticTls.Desired)
-        .newIface[TestService.FutureIface](
-          Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-          "client"
-        )
-
-      assert(Await.result(client.query("." * 10), 5.seconds) == "." * 20)
-      Await.result(server.close(), 5.seconds)
-    }
-  }
-
-  test("can't talk to each other with incompatible opportunistic tls") {
-    val certFile = TempFile.fromResourcePath("/ssl/certs/svc-test-server.cert.pem")
-    // deleteOnExit is handled by TempFile
-
-    val keyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-server-pkcs8.key.pem")
-    // deleteOnExit is handled by TempFile
-
-    flag.overrides.let(Mux.param.MuxImpl.TlsHeadersToggleId, 1.0) {
-      val config = SslServerConfiguration(
-        keyCredentials = KeyCredentials.CertAndKey(certFile, keyFile),
-        trustCredentials = TrustCredentials.Insecure
-      )
-      val iface = new TestService.FutureIface {
-        def query(x: String): Future[String] = Future.value(x + x)
-      }
-      val server = ThriftMux.server.withTransport
-        .tls(config)
-        .withOpportunisticTls(OpportunisticTls.Off)
-        .serveIface("localhost:*", iface)
-
-      val client = ThriftMux.client.withTransport.tlsWithoutValidation
-        .withOpportunisticTls(OpportunisticTls.Required)
-        .newIface[TestService.FutureIface](
-          Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-          "client"
-        )
-      intercept[IncompatibleNegotiationException] {
-        Await.result(client.query("." * 10), 5.seconds)
-      }
-      Await.result(server.close(), 5.seconds)
-    }
   }
 }

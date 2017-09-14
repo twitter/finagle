@@ -1,7 +1,9 @@
 package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle._
+import com.twitter.finagle.CoreToggles
 import com.twitter.finagle.loadbalancer.{Balancer, NodeT, DistributorT}
+import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.util.Rng
 import com.twitter.logging.Logger
 import com.twitter.util.{Future, Time}
@@ -10,6 +12,9 @@ import scala.collection.mutable.ListBuffer
 
 private object Aperture {
   private val log = Logger.get()
+
+  val dapertureToggleKey = "com.twitter.finagle.core.UseDeterministicAperture"
+  private val dapertureToggle = CoreToggles(dapertureToggleKey)
 }
 
 /**
@@ -63,7 +68,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    * Enables [[Aperture]] to read coordinate data from [[ProcessCoordinate]]
    * to derive an ordering for the endpoints used by this [[Balancer]] instance.
    */
-  protected def useDeterministicOrdering: Boolean
+  protected def useDeterministicOrdering: Option[Boolean]
 
   /**
    * Adjust the aperture by `n` serving units.
@@ -101,11 +106,24 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    */
   protected def label: String
 
+  // We set the toggle to take into account both the cluster id and the `label`
+  // for the client. Effectively, we want all the clients of a particular
+  // cluster to be included during the same experiment window since d-aperture
+  // needs all the respective clients to participate in order to be effective.
+  private[this] def dapertureToggleActive: Boolean =
+    dapertureToggle(s"${ServerInfo().clusterId}:$label".hashCode)
+
+  private[this] def dapertureActive: Boolean =
+    useDeterministicOrdering match {
+      case Some(bool) => bool
+      case None => dapertureToggleActive
+    }
+
   private[this] val gauges = Seq(
     statsReceiver.addGauge("aperture") { aperture },
     statsReceiver.addGauge("physical_aperture") { dist.physicalAperture },
     statsReceiver.addGauge("use_deterministic_ordering") {
-      if (useDeterministicOrdering) 1F else 0F
+      if (dapertureActive) 1F else 0F
     }
   )
 
@@ -183,7 +201,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     // need to guarantee visibility across threads and don't need to
     // provide other synchronization between threads.
     @volatile private[this] var _aperture: Int = initAperture
-    // Make sure the aperture is within bounds [minAperture, maxAperture].
+    // Make sure the aperture is within bounds [min, max].
     adjust(0)
 
     /**
@@ -209,10 +227,10 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     def rebuild(vec: Vector[Node]): This =
       if (vec.isEmpty) new EmptyVector(initAperture)
       else ProcessCoordinate() match {
-        case Some(coord) if useDeterministicOrdering =>
+        case Some(coord) if dapertureActive =>
           new DeterministicApeture(vec, initAperture, coord)
 
-        case None if useDeterministicOrdering =>
+        case None if dapertureActive =>
           noCoordinate.incr()
           new RandomAperture(vec, initAperture)
 
@@ -257,7 +275,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    * A distributor which has an aperture size but an empty vector to select
    * from, so it always returns the `failingNode`.
    */
-  private[this] class EmptyVector(initAperture: Int)
+  protected class EmptyVector(initAperture: Int)
     extends BaseDist(Vector.empty, initAperture) {
       require(vector.isEmpty, s"vector must be empty: $vector")
       def indices: Set[Int] = Set.empty
@@ -276,7 +294,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    *
    * @param initAperture The initial aperture to use.
    */
-  private[this] class RandomAperture(
+  protected class RandomAperture(
     vector: Vector[Node],
     initAperture: Int
   ) extends BaseDist(vector, initAperture) {
@@ -314,7 +332,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    * @param coord The [[ProcessCoordinate]] for this process which is used to narrow
    * the range of `pick2`.
    */
-  private[this] class DeterministicApeture(
+  protected class DeterministicApeture(
     vector: Vector[Node],
     initAperture: Int,
     coord: Coord
@@ -326,7 +344,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     // We log the contents of the aperture on each distributor rebuild when using
     // deterministic aperture. Rebuilds are not frequent and concentrated around
     // events where this information would be valuable (i.e. coordinate changes or
-    // host add/removes). Thus, we choose to log this at `info` instead of `debug`.
+    // host add/removes).
     {
       val apertureSlice: String = {
         val offset = coord.offset
@@ -339,30 +357,38 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
         }.mkString("[", ", ", "]")
       }
       val lbl = if (label.isEmpty) "<unlabelled>" else label
-      log.info(
-        s"Aperture updated for client $lbl: nodes=$apertureSlice"
-      )
+      log.debug(s"Aperture updated for client $lbl: nodes=$apertureSlice")
     }
 
-    override def min: Int = coord match {
-      // We want to additionally ensure that p2c can actually converge when there
-      // are weights present (i.e. servers aren't evenly divisible by clients).
-      // In order to do so, we need to pick over 4 or more servers. To see why, we can
-      // think about this in terms of picking one weighted node. If we only have one
-      // node to choose from, it's impossible to respect the weight since we will always
-      // return the single node – we need at least 2 servers in this case. The same
-      // holds true for pick2, except we need 4 so that the weight(s) hold.
-      case FromInstanceId(_, _, n) if vector.size % n != 0 =>
-        math.min(math.max(4, minAperture), vector.size)
-      case _ => super.min
-    }
+    // We want to additionally ensure that p2c can actually converge when there
+    // are weights present. In order to do so, we need to pick over 4 or more servers.
+    // To see why, we can think about this in terms of picking one weighted node.
+    // If we only have one node to choose from, it's impossible to respect the weight
+    // since we will always return the single node – we need at least 2 nodes in
+    // this case. The same holds true for pick2, except we need 4 so that the
+    // weight(s) hold. Additionally, a min value of 4 nodes is more practical
+    // for resiliency. Note that this definition ignores the user defined `minAperture`,
+    // but that isn't likely to hold much value given our definition of `min`
+    // and how we calculate the `apertureWidth`.
+    override def min: Int = math.min(4, vector.size)
 
     // Translates the logical `aperture` into a physical one that
-    // maps to the ring.
+    // maps to the ring. Note, we do this in terms of the peer
+    // unit width in order to ensure full ring coverage. As such,
+    // this width will be >= the aperture. Put differently, we may
+    // cover more servers than the `aperture` requested in service
+    // of global uniform load.
     private[this] def apertureWidth: Double = {
-      val range = ring.range(coord.offset, coord.width(1))
-      val units = math.ceil(aperture / range.toDouble).toInt
-      coord.width(units)
+      val unitWidth: Double = coord.unitWidth // (0, 1.0]
+      val unitAperture: Double  = aperture * ring.unitWidth // (0, 1.0]
+      val units: Int = math.ceil(unitAperture / unitWidth).toInt
+      val width: Double = units * unitWidth
+      // We know that `width` is bounded between (0, 1.0] since `units`
+      // at most will be the inverse of `unitWidth` (i.e. if `unitAperture`
+      // is 1, then units = 1/(1/x) = x, width = x*(1/x) = 1). However,
+      // practically, we take the min of 1.0 to account for any floating
+      // point stability issues.
+      math.min(1.0, width)
     }
 
     override def physicalAperture: Int = ring.range(coord.offset, apertureWidth)

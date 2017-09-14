@@ -1,12 +1,15 @@
-package com.twitter.finagle.http
+package com.twitter.finagle.http.netty3
 
-import org.jboss.netty.handler.codec.http.HttpHeaders
+import com.twitter.finagle.http.HeaderMap
+import org.jboss.netty.handler.codec.http.{DefaultHttpHeaders, HttpHeaders}
 import scala.collection.JavaConverters._
 
 /**
  * Mutable HttpMessage-backed [[HeaderMap]].
  */
-private final class Netty3HeaderMap(headers: HttpHeaders) extends HeaderMap {
+private[http] final class Netty3HeaderMap(headers: HttpHeaders) extends HeaderMap {
+
+  def this() = this(new DefaultHttpHeaders())
 
   def get(key: String): Option[String] =
     Option(headers.get(key))

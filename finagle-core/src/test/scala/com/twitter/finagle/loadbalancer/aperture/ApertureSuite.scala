@@ -18,7 +18,7 @@ private[loadbalancer] trait ApertureSuite {
     protected val emptyException = new Empty
     protected def maxEffort = 5
     protected def minAperture = 1
-    protected def useDeterministicOrdering = false
+    protected def useDeterministicOrdering: Option[Boolean] = None
     protected def label = ""
 
     protected[this] val maxEffortExhausted = statsReceiver.counter("max_effort_exhausted")
@@ -35,6 +35,8 @@ private[loadbalancer] trait ApertureSuite {
     def maxUnitsx: Int = maxUnits
     def distx: Distributor = dist
     def rebuildx(): Unit = rebuild()
+    def isDeterministicAperture: Boolean = dist.isInstanceOf[DeterministicApeture]
+    def isRandomAperture: Boolean = dist.isInstanceOf[RandomAperture]
   }
 
   case class Factory(i: Int) extends EndpointFactory[Unit, Unit] {
