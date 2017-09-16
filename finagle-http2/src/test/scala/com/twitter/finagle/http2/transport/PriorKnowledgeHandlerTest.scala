@@ -119,7 +119,7 @@ class PriorKnowledgeHandlerTest extends FunSuite with BeforeAndAfter with Mockit
     verify(dummyHandler, times(2)).channelRead(anyObject(), msgCapture.capture())
     assert(!pipeline.names().contains(PriorKnowledgeHandlerName))
     assert(!pipeline.names().contains(HttpCodecName))
-    assert(pipeline.names().contains(Http2CodecName))
+    assert(!pipeline.names().contains("http2Codec"))
 
     val capturedMessages = msgCapture.getAllValues
 

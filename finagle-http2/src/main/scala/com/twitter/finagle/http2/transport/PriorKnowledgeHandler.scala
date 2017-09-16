@@ -7,9 +7,15 @@ import com.twitter.finagle.netty4.http._
 import com.twitter.finagle.param.Stats
 import com.twitter.logging.Logger
 import io.netty.buffer.{ByteBuf, ByteBufUtil}
-import io.netty.channel.{Channel, ChannelHandlerContext, ChannelInboundHandlerAdapter, ChannelInitializer}
+import io.netty.channel.{
+  Channel,
+  ChannelHandlerContext,
+  ChannelInboundHandlerAdapter,
+  ChannelInitializer,
+  ChannelOption
+}
 import io.netty.handler.codec.http2.Http2CodecUtil.connectionPrefaceBuf
-import io.netty.handler.codec.http2.Http2MultiplexCodecBuilder
+import io.netty.handler.codec.http2.{Http2CodecBuilder, Http2StreamChannelBootstrap}
 
 /**
  * This handler allows an instant upgrade to HTTP/2 if the first bytes received from the client
@@ -75,11 +81,15 @@ private[http2] class PriorKnowledgeHandler(
           // we have read a complete preface. Setup HTTP/2 pipeline.
           val initialSettings = Settings.fromParams(params)
           val logger = new LoggerPerFrameTypeLogger(params[FrameLoggerNamePrefix].loggerNamePrefix)
-          val codec = Http2MultiplexCodecBuilder.forServer(initializer)
+          val bootstrap = new Http2StreamChannelBootstrap()
+            .option(ChannelOption.ALLOCATOR, ctx.alloc())
+            .handler(initializer)
+
+          val codec = new Http2CodecBuilder(true /* server */, bootstrap)
             .frameLogger(logger)
             .initialSettings(initialSettings)
             .build()
-          p.replace(HttpCodecName, Http2CodecName, codec)
+          p.replace(HttpCodecName, "http2Codec", codec)
           p.remove("upgradeHandler")
 
           // Since we changed the pipeline, our current ctx points to the wrong handler
