@@ -14,6 +14,30 @@ Runtime Behavior Changes
     validate loaded certificates in all cases to ensure that the current date
     range is within the validity range specified in the certificate. ``PHAB_ID=D88664``
 
+Deprecations
+~~~~~~~~~~~~
+
+  * finagle-base-http: With the intention to make `c.t.f.http.Cookie` immutable,
+  `set` methods on `c.t.f.http.Cookie` have been deprecated:
+      - `comment_=`
+      - `commentUrl_=`
+      - `domain_=`
+      - `maxAge_=`
+      - `path_=`
+      - `ports_=`
+      - `value_=`
+      - `version_=`
+      - `httpOnly_=`
+      - `isDiscard_=`
+      - `isSecure_=`
+    Use the `c.t.f.http.Cookie` to set `domain`, `maxAge`, `path`, `value`, `httpOnly`,
+    and `secure`. `comment`, `commentUrl`, `ports`, `version`, and `discard` have been removed
+    per RFC-6265. ``PHAB_ID=D82164``
+
+  * finagle-base-http: `c.t.f.http.Cookie.isSecure` and `c.t.f.http.Cookie.isDiscard`
+    have been deprecated. Use `c.t.f.http.Cookie.secure` for `c.t.f.http.Cookie.isSecure`.
+    `isDiscard` has been removed per RFC-6265. ``PHAB_ID=D82164``
+
 7.1.0
 ------
 
@@ -81,6 +105,9 @@ Breaking API Changes
 
   * finagle-memcached: Remove deprecated method `BaseClient.release()`. Use
     `BaseClient.close()` instead. ``PHAB_ID=D83168``
+
+Deprecations
+~~~~~~~~~~~~
 
   * finagle-memcached: Move `c.t.f.memcached.java.Client` to `c.t.f.memcached.JavaClient`,
     `c.t.f.memcached.java.ClientBase` to `c.t.f.memcached.JavaClientBase`, and

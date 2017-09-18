@@ -1,8 +1,8 @@
 package com.twitter.finagle.http.netty3
 
-import com.twitter.finagle.http.{HeaderMap, Message, Method, Request, Response, Status, Version}
+import com.twitter.finagle.http._
 import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
-import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.handler.codec.http.{Cookie => NettyCookie, _}
 
 private[finagle] trait Injection[A, B] {
   def apply(a: A): B
@@ -63,6 +63,37 @@ object Bijections {
   }
 
   def statusFromNetty(s: HttpResponseStatus) = Status.fromCode(s.getCode)
+
+  // Cookie
+
+  private[http] implicit val cookieToNettyInjection: Injection[Cookie, NettyCookie] =
+    new Injection[Cookie, NettyCookie] {
+      def apply(c: Cookie) = cookieToNetty(c)
+    }
+
+  private[http] def cookieToNetty(c: Cookie): NettyCookie = {
+    val nc = new DefaultCookie(c.name, c.value)
+
+    nc.setDomain(c.domain)
+    nc.setPath(c.path)
+    nc.setComment(c.comment)
+    nc.setCommentUrl(c.commentUrl)
+    nc.setMaxAge(c.maxAge.inSeconds)
+    nc.setVersion(c.version)
+    nc.setSecure(c.secure)
+    nc.setHttpOnly(c.httpOnly)
+    nc.setDiscard(c.discard)
+    nc.setPorts(c.ports.toSeq: _*)
+    nc
+  }
+
+  private[http] implicit val cookieFromNettyInjection: Injection[NettyCookie, Cookie] =
+    new Injection[NettyCookie, Cookie] {
+      def apply(nc: NettyCookie) = cookieFromNetty(nc)
+    }
+
+  private[http] def cookieFromNetty(nc: NettyCookie): Cookie =
+    new Cookie(nc)
 
   // Request
 
