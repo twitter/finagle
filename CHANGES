@@ -7,6 +7,11 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 7.x
 -----
 
+New Features
+~~~~~~~~~~~~
+
+  * finagle-mysql: Add ability to toggle the `CLIENT_FOUND_ROWS` flag. ``PHAB_ID=D91406``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
