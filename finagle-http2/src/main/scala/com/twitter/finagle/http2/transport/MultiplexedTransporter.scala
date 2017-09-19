@@ -87,7 +87,8 @@ private[http2] class MultiplexedTransporter(
     dead = true
     children.values.asScala.foreach { child =>
       if (child.curId > lastStreamId) {
-        child.handleCloseStream()
+        child.handleCloseStream(s"the stream id (${child.curId}) was higher than the last stream" +
+          s" id ($lastStreamId) on a GOAWAY")
       }
     }
   }
@@ -120,7 +121,7 @@ private[http2] class MultiplexedTransporter(
           underlying.write(Rst(streamId, Http2Error.STREAM_CLOSED.code))
         } else {
           dead = true
-          children.values.asScala.foreach(_.handleCloseStream())
+          children.values.asScala.foreach(_.handleCloseStream(s"stream $streamId not found"))
           underlying.write(
             // TODO: Properly utilize the DEBUG_DATA section of GOAWAY
             GoAway(
@@ -299,7 +300,7 @@ private[http2] class MultiplexedTransporter(
     private[this] def handleCheckFinished() = {
       state match {
         case a: Active if a.finished && queue.size == 0 =>
-          if (parent.dead) handleCloseStream()
+          if (parent.dead) handleCloseStream(s"parent MultiplexedTransporter already dead")
           else handleState(Idle)
 
         case _ => // nop
@@ -345,7 +346,7 @@ private[http2] class MultiplexedTransporter(
                 handleWriteAndCheck(obj)
               } else {
                 log.warning("Write to child with dead parent")
-                handleCloseStream()
+                handleCloseStream("tried to write to a child with a dead parent")
                 _onClose.unit
               }
 
@@ -368,8 +369,8 @@ private[http2] class MultiplexedTransporter(
     }
 
     private[this] val closeOnInterrupt: PartialFunction[Throwable, Unit] = {
-      case _: Throwable =>
-        exec.execute(new Runnable { def run(): Unit = handleCloseStream() })
+      case t: Throwable =>
+        exec.execute(new Runnable { def run(): Unit = handleCloseWith(t) })
     }
 
     def read(): Future[HttpObject] = {
@@ -449,12 +450,12 @@ private[http2] class MultiplexedTransporter(
     def peerCertificate: Option[Certificate] = underlying.peerCertificate
 
     def close(deadline: Time): Future[Unit] = {
-      exec.execute(new Runnable { def run(): Unit = handleCloseStream(deadline) })
+      exec.execute(new Runnable { def run(): Unit = handleCloseStream("close called on child transport", deadline) })
       _onClose.unit
     }
 
-    private[http2] def handleCloseStream(deadline: Time = Time.Bottom): Unit = {
-      handleCloseWith(new StreamClosedException(addr, _curId.toString), deadline)
+    private[http2] def handleCloseStream(whyFailed: String, deadline: Time = Time.Bottom): Unit = {
+      handleCloseWith(new StreamClosedException(Some(addr), _curId.toString, whyFailed), deadline)
     }
 
     private[http2] def handleCloseWith(exn: Throwable, deadline: Time = Time.Bottom): Unit = {
