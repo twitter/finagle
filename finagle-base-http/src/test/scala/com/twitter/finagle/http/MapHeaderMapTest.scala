@@ -1,40 +1,72 @@
 package com.twitter.finagle.http
 
-class MapHeaderMapTest extends AbstractHeaderMapTest {
+import org.scalacheck.Gen
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
+
+class MapHeaderMapTest extends AbstractHeaderMapTest with GeneratorDrivenPropertyChecks {
 
   final def newHeaderMap(headers: (String, String)*): HeaderMap = MapHeaderMap(headers: _*)
 
+  def genNonEmptyString: Gen[String] =
+    Gen.nonEmptyListOf(Gen.choose('a', 'z')).map(s => new String(s.toArray))
+
+  def genValidHeader: Gen[(String, String)] = for {
+    k <- genNonEmptyString
+    v1 <- genNonEmptyString
+    x <- Gen.oneOf("\r\n ", "\r\n\t")
+    v2 <-  genNonEmptyString
+  } yield (k, v1 + x + v2)
+
+  def genInvalidHeaderName: Gen[(String, String)] = for {
+    (k, v) <- genValidHeader
+    c <- Gen.oneOf(Seq[Char]('\t', '\n', '\f', '\r', ' ', ',', ':', ';', '=', 0x0b))
+  } yield (k + c, v)
+
+  def genNonAsciiHeaderName: Gen[(String, String)] = for {
+    (k, v) <- genValidHeader
+    c <- Gen.choose[Char](127, Char.MaxValue)
+  } yield (k + c, v)
+
+  def genInvalidHeaderValue: Gen[(String, String)] = for {
+    (k, v) <- genValidHeader
+    c <- Gen.oneOf(Seq[Char]('\f', 0x0b))
+  } yield (k, v + c)
+
+  def genInvalidClrfHeaderValue: Gen[(String, String)] = for {
+    (k, v) <- genValidHeader
+    c <- Gen.oneOf("\rx", "\nx", "\r", "\n")
+  } yield (k, v + c)
+
   test("apply()") {
-    assert(MapHeaderMap().size == 0)
     assert(MapHeaderMap().isEmpty)
   }
 
-  test("apply(kv1, kv2) is the same as adding headers") {
-    val testHeaders = Seq("a" -> "a1", "A" -> "a2", "b" -> "b")
-    val map1 = MapHeaderMap(testHeaders: _*)
+  test("validates header names & values (success)") {
+    forAll(genValidHeader) { case (k, v) =>
+      assert(MapHeaderMap(k -> v).get(k).contains(v))
+    }
+  }
 
-    val map2 = {
-      val m = MapHeaderMap()
-      testHeaders.foreach { case (k, v) => m.add(k, v) }
-      m
+  test("validates header names (failure)") {
+    forAll(genInvalidHeaderName) { h =>
+      val e = intercept[IllegalArgumentException](MapHeaderMap(h))
+      assert(e.getMessage.contains("prohibited characters"))
     }
 
-    assert(map1.get("a") == Some("a1"))
-    assert(map1.get("a") == map2.get("a"))
+    forAll(genNonAsciiHeaderName) { h =>
+      val e = intercept[IllegalArgumentException](MapHeaderMap(h))
+      assert(e.getMessage.contains("non-ASCII characters"))
+    }
+  }
 
-    assert(map1.get("A") == Some("a1"))
-    assert(map1.get("A") == map2.get("A"))
+  test("validates header values (failure)") {
+    forAll(genInvalidHeaderValue) { h =>
+      val e = intercept[IllegalArgumentException](MapHeaderMap(h))
+      assert(e.getMessage.contains("prohibited character"))
+    }
 
-    assert(map1.get("b") == Some("b"))
-    assert(map1.get("b") == map2.get("b"))
-
-    assert(map1.getAll("a") == Seq("a1", "a2"))
-    assert(map1.getAll("A") == map1.getAll("A"))
-
-    assert(map1.getAll("A") == Seq("a1", "a2"))
-    assert(map1.getAll("A") == map1.getAll("A"))
-
-    assert(map1.iterator.toSeq.sorted == Seq("A" -> "a2", "a" -> "a1", "b" -> "b"))
-    assert(map1.iterator.toSeq.sorted == map2.iterator.toSeq.sorted)
+    forAll(genInvalidClrfHeaderValue) { h =>
+      intercept[IllegalArgumentException](MapHeaderMap(h))
+    }
   }
 }
