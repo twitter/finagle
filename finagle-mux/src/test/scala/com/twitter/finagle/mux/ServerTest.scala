@@ -14,14 +14,12 @@ import com.twitter.io.Buf
 import com.twitter.util.{Await, Duration, Future, Promise, Return, Throw, Time}
 import java.security.cert.X509Certificate
 import java.net.SocketAddress
-import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, verify, when}
 import org.scalatest.FunSuite
-import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.junit.AssertionsForJUnit
+import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
 
   private class LeaseCtx {
@@ -100,28 +98,21 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
     import ctx._
 
     nackOnExpiredLease.parse("true")
-
-    issue(1.millisecond)
-
+    issue(1.minute)
     demonstrateNoNack()
   }
 
   test("unnack again after a > 0 lease") {
-    Time.withCurrentTimeFrozen { ctl =>
-      val ctx = new LeaseCtx
-      import ctx._
+    val ctx = new LeaseCtx
+    import ctx._
 
-      nackOnExpiredLease.parse("true")
+    nackOnExpiredLease.parse("true")
 
-      issue(Duration.Zero)
+    issue(Duration.Zero)
+    demonstrateNack()
 
-      demonstrateNack()
-
-      ctl.advance(2.seconds)
-      issue(1.second)
-
-      demonstrateNoNack()
-    }
+    issue(1.minute)
+    demonstrateNoNack()
   }
 
   test("does not leak pending on failures") {

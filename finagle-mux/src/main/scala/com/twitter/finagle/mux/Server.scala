@@ -1,7 +1,6 @@
 package com.twitter.finagle.mux
 
 import com.twitter.app.GlobalFlag
-import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.context.{Contexts, RemoteInfo}
 import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor, nackOnExpiredLease}
@@ -172,11 +171,6 @@ private[finagle] object ServerDispatcher {
   ): ServerDispatcher =
     newRequestResponse(trans, service, Lessor.nil, NullTracer, NullStatsReceiver)
 
-  /**
-   * Used when comparing the difference between leases.
-   */
-  val Epsilon = 1.second
-
   object State extends Enumeration {
     val Open, Draining, Closed = Value
   }
@@ -206,22 +200,24 @@ private[finagle] class ServerDispatcher(
   private[this] val state: AtomicReference[State.Value] =
     new AtomicReference(State.Open)
 
-  @volatile private[this] var lease = Message.Tlease.MaxLease
-  @volatile private[this] var curElapsed = NilStopwatch.start()
+  @volatile private[this] var leaseExpiration: Time = Time.Top
   lessor.register(this)
 
   private[this] def write(m: Message): Future[Unit] =
     trans.write(m)
 
-  private[this] def isAccepting: Boolean =
-    !tracker.isDraining && (!nackOnExpiredLease() || (lease > Duration.Zero))
+  private[this] def nackLeaseExpiration: Boolean =
+    nackOnExpiredLease() && leaseExpiration <= Time.now
+
+  private[this] def shouldNack: Boolean =
+    tracker.isDraining || nackLeaseExpiration
 
   private[this] def process(m: Message): Unit = {
     if (m.isInstanceOf[Message.Treq])
       legacyReqCounter.incr()
 
     m match {
-      case (_: Message.Tdispatch | _: Message.Treq) if isAccepting =>
+      case (_: Message.Tdispatch | _: Message.Treq) if !shouldNack =>
         lessor.observeArrival()
         val elapsed = Stopwatch.start()
 
@@ -257,7 +253,7 @@ private[finagle] class ServerDispatcher(
           service(m).transform(reply)
         }
 
-      // Dispatch when !isAccepting
+      // Dispatch when shouldNack
       case d: Message.Tdispatch =>
         write(Message.RdispatchNack(d.tag, Nil))
       case r: Message.Treq =>
@@ -364,22 +360,19 @@ private[finagle] class ServerDispatcher(
   }
 
   /**
-   * Emit a lease to the clients of this server.  If howlong is less than or
-   * equal to 0, also nack all requests until a new lease is issued.
+   * Emit a lease to the clients of this server. If the `nackOnExpiredLease` flag
+   * is set to `true` the server will nack all requests once the lease expires and
+   * continue to do so until a new non-zero lease is issued.
    */
   def issue(howlong: Duration): Unit = {
     require(howlong >= Message.Tlease.MinLease)
 
     synchronized {
-      val diff = (lease - curElapsed()).abs
-      if (diff > ServerDispatcher.Epsilon) {
-        curElapsed = Stopwatch.start()
-        lease = howlong
-        write(Message.Tlease(howlong min Message.Tlease.MaxLease))
-      } else if ((howlong < Duration.Zero) && (lease > Duration.Zero)) {
-        curElapsed = Stopwatch.start()
-        lease = howlong
-      }
+      leaseExpiration = Time.now + howlong
+      // This needs to be written in the synchronized block to avoid a race where
+      // two racing calls to `issue` cause the client and servers understanding of
+      // leaseExpiration to become inconsistent do to racing writes
+      write(Message.Tlease(howlong.min(Message.Tlease.MaxLease)))
     }
   }
 

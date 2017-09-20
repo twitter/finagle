@@ -65,6 +65,12 @@ Bug Fixes
     server but never unregistered. It is now unregistered on close of
     the StackServer. ``PHAB_ID=D83200``
 
+  * finagle-mux: Fix two issues with mux leases. In one bug, a new lease wouldn't be sent to
+    the client if it was issued within 1 second of when the existing lease was set to expire.
+    In a second bug, the server would only nack if the issued lease was 0, but didn't consider
+    whether the lease had expired. ``PHAB_ID=D91645``
+
+
   * finagle-netty4: `Netty4ClientEngineFactory` and `Netty4ServerEngineFactory` now
     properly load all chain certificates when the `SslClientConfiguration` or
     `SslServerConfiguration` uses `KeyCredentials.CertKeyAndChain` instead of just the
