@@ -10,6 +10,7 @@ scala_library(
     'finagle/finagle-benchmark-thrift/src/main/thrift:thrift-scala',
     'finagle/finagle-core/src/main/scala',
     'finagle/finagle-exp/src/main/scala',
+    'finagle/finagle-http/src/main/scala',
     'finagle/finagle-memcached/src/main/scala',
     'finagle/finagle-mux/src/main/scala',
     'finagle/finagle-netty3/src/main/scala',

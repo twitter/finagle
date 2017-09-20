@@ -673,6 +673,7 @@ lazy val finagleBenchmark = Project(
   finagleBenchmarkThrift,
   finagleCore,
   finagleExp,
+  finagleHttp,
   finagleMemcached,
   finagleMux,
   finagleNetty4,
