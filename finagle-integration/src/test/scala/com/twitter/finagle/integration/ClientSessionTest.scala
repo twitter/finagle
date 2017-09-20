@@ -8,7 +8,6 @@ import com.twitter.finagle.http.codec.HttpClientDispatcher
 import com.twitter.finagle.http.exp.IdentityStreamTransport
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.transport.{QueueTransport, Transport}
-import com.twitter.io.Buf
 import com.twitter.util._
 import com.twitter.util.TimeConversions._
 import org.mockito.Mockito.when
@@ -85,13 +84,13 @@ class ClientSessionTest extends FunSuite with MockitoSugar {
 
   class MyClient extends com.twitter.finagle.Memcached.Client {
     def newDisp(
-      transport: Transport[Buf, memcached.Response]
+      transport: Transport[memcached.Command, memcached.Response]
     ): Service[memcached.Command, memcached.Response] =
       super.newDispatcher(transport)
   }
 
   testSessionStatus(
-    "memcached-dispatcher", { tr: Transport[Buf, memcached.Response] =>
+    "memcached-dispatcher", { tr: Transport[memcached.Command, memcached.Response] =>
       val cl: MyClient = new MyClient
       val svc = cl.newDisp(tr)
       () =>

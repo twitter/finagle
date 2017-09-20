@@ -1,12 +1,10 @@
 package com.twitter.finagle.memcached.protocol.text.transport
 
-import com.twitter.finagle.memcached.protocol.Response
 import com.twitter.finagle.memcached.protocol.text.{
   ByteReaderDecoderHandler,
   FrameDecoder,
   FramingDecoder
 }
-import com.twitter.finagle.memcached.protocol.text.client.MemcachedClientDecoder
 import com.twitter.finagle.netty4.codec.BufCodec
 import com.twitter.finagle.netty4.decoder.DecoderHandler
 import com.twitter.finagle.netty4.encoder.BufEncoder
@@ -38,8 +36,4 @@ private[finagle] abstract class Netty4ClientFramer[T] extends (ChannelPipeline =
       new ByteReaderDecoderHandler(new FramingDecoder(newClientDecoder()))
     )
   }
-}
-
-private[finagle] object MemcachedNetty4ClientFramer extends Netty4ClientFramer[Response] {
-  protected def newClientDecoder: FrameDecoder[Response] = new MemcachedClientDecoder
 }

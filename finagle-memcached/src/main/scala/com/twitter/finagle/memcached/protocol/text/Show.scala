@@ -13,7 +13,7 @@ private object Encoder {
 /**
  * Class that can encode `Command`-type objects into `Buf`s. Used on the client side.
  */
-private[finagle] abstract class AbstractCommandToBuf[Cmd] {
+private[finagle] abstract class AbstractCommandToBuf[Cmd] extends MessageEncoder[Cmd] {
   import Encoder._
 
   protected final def encodeCommandWithData(

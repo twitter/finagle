@@ -4,36 +4,20 @@ import _root_.java.net.SocketAddress
 import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
 import com.twitter.finagle.client._
-import com.twitter.finagle.dispatch.{
-  GenSerialClientDispatcher,
-  PipeliningDispatcher,
-  SerialServerDispatcher,
-  StalledPipelineTimeout
-}
+import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, PipeliningDispatcher, SerialServerDispatcher, StalledPipelineTimeout}
 import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
 import com.twitter.finagle.loadbalancer.{Balancers, LoadBalancerFactory}
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.exp.LocalMemcached
 import com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory
 import com.twitter.finagle.memcached.partitioning.MemcachedPartitioningService
-import com.twitter.finagle.memcached.protocol.text.CommandToBuf
-import com.twitter.finagle.memcached.protocol.text.client.ClientTransport
 import com.twitter.finagle.memcached.protocol.text.server.ServerTransport
-import com.twitter.finagle.memcached.protocol.text.transport.{
-  MemcachedNetty4ClientFramer,
-  Netty4ServerFramer
-}
+import com.twitter.finagle.memcached.protocol.text.transport.{MemcachedNetty4ClientPipelineInit, Netty4ServerFramer}
 import com.twitter.finagle.memcached.protocol.{Command, Response, RetrievalCommand, Values}
 import com.twitter.finagle.memcached.Toggles
 import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
-import com.twitter.finagle.param.{
-  ExceptionStatsHandler => _,
-  Monitor => _,
-  ResponseClassifier => _,
-  Tracer => _,
-  _
-}
+import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server.{Listener, ServerInfo, StackServer, StdStackServer}
 import com.twitter.finagle.service._
@@ -296,18 +280,18 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
       params: Stack.Params = this.params
     ): Client = copy(stack, params)
 
-    protected type In = Buf
+    protected type In = Command
     protected type Out = Response
     protected type Context = TransportContext
 
     protected def newTransporter(addr: SocketAddress): Transporter[In, Out, Context] =
-      Netty4Transporter.raw(MemcachedNetty4ClientFramer, addr, params)
+      Netty4Transporter.raw(MemcachedNetty4ClientPipelineInit, addr, params)
 
-    protected def newDispatcher(transport: Transport[In, Out] {
+    protected def newDispatcher(transport: Transport[Command, Response] {
       type Context <: Client.this.Context
     }): Service[Command, Response] =
-      new PipeliningDispatcher(
-        new ClientTransport[Command, Response](new CommandToBuf, transport),
+      new PipeliningDispatcher[Command, Response](
+        transport,
         params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope),
         params[StalledPipelineTimeout].timeout,
         DefaultTimer

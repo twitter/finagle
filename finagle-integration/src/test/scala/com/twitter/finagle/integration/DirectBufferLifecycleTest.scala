@@ -4,6 +4,7 @@ import com.twitter.finagle.Stack
 import com.twitter.finagle.integration.thriftscala.Echo
 import com.twitter.finagle.memcached.protocol.Value
 import com.twitter.finagle.memcached.protocol.text.server.ResponseToBuf
+import com.twitter.finagle.memcached.protocol.text.transport.MemcachedNetty4ClientPipelineInit
 import com.twitter.finagle.memcached.{protocol => memcached}
 import com.twitter.finagle.mux.{transport => mux}
 import com.twitter.finagle.thrift.transport.{netty4 => thrift}
@@ -72,7 +73,7 @@ class DirectBufferLifecycleTest extends FunSuite {
     msg = ResponseToBuf.encode(
       memcached.Values(Seq(Value(Buf.Utf8("key"), Buf.Utf8("1"), None, None)))
     ),
-    pipelineInit = memcached.text.transport.MemcachedNetty4ClientFramer
+    pipelineInit = MemcachedNetty4ClientPipelineInit
   )
 
   testDirect[Array[Byte]](
