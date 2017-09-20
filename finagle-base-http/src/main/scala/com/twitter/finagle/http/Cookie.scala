@@ -222,11 +222,11 @@ class Cookie private (
    * Set the domain.
    * @note `domain` may be null.
    */
-  @deprecated("Set domain in the Cookie constructor", "2017-08-16")
+  @deprecated("Set domain in the Cookie constructor or use `Cookie.domain`", "2017-08-16")
   def domain_=(domain: String): Unit =
     _domain = Cookie.validateField(domain)
 
-  @deprecated("Set maxAge in the Cookie constructor", "2017-08-16")
+  @deprecated("Set maxAge in the Cookie constructor or use `Cookie.maxAge`", "2017-08-16")
   def maxAge_=(maxAge: Duration): Unit =
     _maxAge = maxAge
 
@@ -234,7 +234,7 @@ class Cookie private (
    * Set the path.
    * @note `path` may be null.
    */
-  @deprecated("Set path in the Cookie constructor", "2017-08-16")
+  @deprecated("Set path in the Cookie constructor or use `Cookie.path`", "2017-08-16")
   def path_=(path: String): Unit =
     _path = Cookie.validateField(path)
 
@@ -254,7 +254,7 @@ class Cookie private (
   def version_=(version: Int): Unit =
     _version = version
 
-  @deprecated("Set httpOnly in the Cookie constructor", "2017-08-16")
+  @deprecated("Set httpOnly in the Cookie constructor or use `Cookie.httpOnly`", "2017-08-16")
   def httpOnly_=(httpOnly: Boolean): Unit =
     _httpOnly = httpOnly
 
@@ -262,7 +262,7 @@ class Cookie private (
   def isDiscard_=(discard: Boolean): Unit =
     _discard = discard
 
-  @deprecated("Set secure in the Cookie constructor", "2017-08-16")
+  @deprecated("Set secure in the Cookie constructor or use `Cookie.secure`", "2017-08-16")
   def isSecure_=(secure: Boolean): Unit =
     _secure = secure
 
@@ -277,6 +277,55 @@ class Cookie private (
       else s0.equalsIgnoreCase(s1)
     }
   }
+
+  private[this] def copy(
+    name: String = _name,
+    value: String = _value,
+    domain: Option[String] = Some(_domain),
+    path: Option[String] = Some(_path),
+    maxAge: Option[Duration] = Some(_maxAge),
+    secure: Boolean = _secure,
+    httpOnly: Boolean = _httpOnly
+  ): Cookie =
+    new Cookie(
+      name = name,
+      value = value,
+      domain = domain,
+      path = path,
+      maxAge = maxAge,
+      secure = secure,
+      httpOnly = httpOnly
+    )
+
+  /**
+   * Create a new [[Cookie]] with the same set fields, and domain `domain`.
+   */
+  def domain(domain: Option[String]): Cookie =
+    copy(domain = domain)
+
+  /**
+   * Create a new [[Cookie]] with the same set fields, and maxAge `maxAge`
+   */
+  def maxAge(maxAge: Option[Duration]): Cookie =
+    copy(maxAge = maxAge)
+
+  /**
+   * Create a new [[Cookie]] with the same set fields, and path `path`.
+   */
+  def path(path: Option[String]): Cookie =
+    copy(path = path)
+
+  /**
+   * Create a new [[Cookie]] with the same set fields, and httpOnly `httpOnly`
+   */
+  def httpOnly(httpOnly: Boolean): Cookie =
+    copy(httpOnly = httpOnly)
+
+  /**
+   * Create a new [[Cookie]] with the same set fields, and secure `secure`
+   */
+  def secure(secure: Boolean): Cookie =
+    copy(secure = secure)
 
   /**
    * Returns true if `obj` equals `this`. Two cookies are considered equal if their names,

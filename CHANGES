@@ -23,7 +23,7 @@ Deprecations
 ~~~~~~~~~~~~
 
   * finagle-base-http: With the intention to make `c.t.f.http.Cookie` immutable,
-  `set` methods on `c.t.f.http.Cookie` have been deprecated:
+    `set` methods on `c.t.f.http.Cookie` have been deprecated:
       - `comment_=`
       - `commentUrl_=`
       - `domain_=`
@@ -35,9 +35,13 @@ Deprecations
       - `httpOnly_=`
       - `isDiscard_=`
       - `isSecure_=`
-    Use the `c.t.f.http.Cookie` to set `domain`, `maxAge`, `path`, `value`, `httpOnly`,
+    Use the `c.t.f.http.Cookie` constructor to set `domain`, `maxAge`, `path`, `value`, `httpOnly`,
     and `secure`. `comment`, `commentUrl`, `ports`, `version`, and `discard` have been removed
-    per RFC-6265. ``PHAB_ID=D82164``
+    per RFC-6265. ``PHAB_ID=D82164``.
+
+    Alternatively, use the `domain`, `maxAge`, `path`, `httpOnly`, and `secure` methods to create a
+    new `Cookie` with the existing fields set, and the respective field set to a given value.
+    ``PHAB_ID=D83226``
 
   * finagle-base-http: `c.t.f.http.Cookie.isSecure` and `c.t.f.http.Cookie.isDiscard`
     have been deprecated. Use `c.t.f.http.Cookie.secure` for `c.t.f.http.Cookie.isSecure`.

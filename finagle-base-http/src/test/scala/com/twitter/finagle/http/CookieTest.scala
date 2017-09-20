@@ -237,4 +237,21 @@ class CookieTest extends FunSuite {
       }
     }
   }
+
+  test(
+    "methods that copy existing params and create a new Cookie with an additional configured param "
+  ) {
+    val cookie = new Cookie("name", "value")
+      .domain(Some("domain"))
+      .maxAge(Some(99.seconds))
+      .httpOnly(true)
+      .secure(true)
+
+    assert(cookie.name == "name")
+    assert(cookie.value == "value")
+    assert(cookie.domain == "domain")
+    assert(cookie.maxAge == 99.seconds)
+    assert(cookie.httpOnly == true)
+    assert(cookie.secure == true)
+  }
 }
