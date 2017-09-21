@@ -6,7 +6,23 @@ import com.twitter.finagle.util.ByteArrays
 import com.twitter.io.Buf
 import com.twitter.util._
 import java.net.InetSocketAddress
+
+import com.twitter.app.GlobalFlag
+
 import scala.util.Random
+
+/**
+ * GlobalFlag to configure Span IDs to be generated as 128-bit rather than
+ * the default of 64-bit.
+ *
+ * When false, only 128-bit TraceID is honored.
+ * When true, Finagle will generate new SpanIDs as 128-bit.
+ */
+object generate128BitSpanIds
+  extends GlobalFlag[Boolean](
+    false,
+    "Enables the generation of 128-bit Span IDs"
+  )
 
 /**
  * This is a tracing system similar to Dapper:
@@ -48,7 +64,7 @@ object Trace {
     "com.twitter.finagle.tracing.TraceContext"
   ) {
     private val local = new ThreadLocal[Array[Byte]] {
-      override def initialValue(): Array[Byte] = new Array[Byte](32)
+      override def initialValue(): Array[Byte] = new Array[Byte](40)
     }
 
     def marshal(id: TraceId): Buf =
@@ -56,11 +72,12 @@ object Trace {
 
     /**
      * The wire format is (big-endian):
-     *     ''spanId:8 parentId:8 traceId:8 flags:8''
+     *     ''spanId:8 parentId:8 traceId:8 flags:8 (traceIdHigh:8)''
      */
     def tryUnmarshal(body: Buf): Try[TraceId] = {
-      if (body.length != 32)
-        return Throw(new IllegalArgumentException("Expected 32 bytes"))
+      // Allows for 64-bit or 128-bit trace identifiers
+      if (body.length != 32 && body.length != 40)
+        return Throw(new IllegalArgumentException("Expected 32 or 40 bytes"))
 
       val bytes = local.get()
       body.write(bytes, 0)
@@ -69,6 +86,7 @@ object Trace {
       val parent64 = ByteArrays.get64be(bytes, 8)
       val trace64 = ByteArrays.get64be(bytes, 16)
       val flags64 = ByteArrays.get64be(bytes, 24)
+      val traceIdHigh = if(body.length == 40) ByteArrays.get64be(bytes, 32) else 0L
 
       val flags = Flags(flags64)
       val sampled = if (flags.isFlagSet(Flags.SamplingKnown)) {
@@ -76,7 +94,7 @@ object Trace {
       } else None
 
       val traceId = TraceId(
-        if (trace64 == parent64) None else Some(SpanId(trace64)),
+        if (trace64 == parent64) None else Some(SpanId(traceIdHigh, trace64)),
         if (parent64 == span64) None else Some(SpanId(parent64)),
         SpanId(span64),
         sampled,
@@ -140,7 +158,8 @@ object Trace {
    * Create a derived id from the current TraceId.
    */
   def nextId: TraceId = {
-    val spanId = SpanId(rng.nextLong())
+    val generate128Bit = generate128BitSpanIds()
+    val spanId = if(generate128Bit) SpanId(rng.nextLong(), rng.nextLong()) else SpanId(rng.nextLong())
     idOption match {
       case Some(id) =>
         TraceId(Some(id.traceId), Some(id.spanId), spanId, id.sampled, id.flags)

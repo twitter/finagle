@@ -221,6 +221,18 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
     assert(nextId.flags == Flags())
   }
 
+  test("generates 64-bit SpanIDs by default") {
+    val nextId = Trace.nextId
+    assert(nextId.spanId.toString.length == 16)
+  }
+
+  test("generate128BitSpanIds flag enabled") {
+    generate128BitSpanIds.let(true) {
+      val nextId = Trace.nextId
+      assert(nextId.spanId.toString.length == 32)
+    }
+  }
+
   test("Trace.letTracerAndNextId: start with a default TraceId") {
     Time.withCurrentTimeFrozen { tc =>
       val tracer = mock[Tracer]
@@ -359,7 +371,7 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
     }
   }
 
-  test("trace ID serialization: valid ids") {
+  test("trace ID serialization: valid ids (64-bit)") {
     // TODO: Consider using scalacheck here. (CSL-595)
     def longs(seed: Long) = {
       val rng = new Random(seed)
@@ -380,6 +392,11 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
 
     for (id <- traceIds)
       assert(Trace.idCtx.tryUnmarshal(Trace.idCtx.marshal(id)) == Return(id))
+  }
+
+  test("trace ID serialization: valid ids (128-bit)") {
+    val traceId = TraceId(Some(SpanId(1L, 2L)), Some(SpanId(1L)), SpanId(2L), None, Flags(Flags.Debug))
+    assert(Trace.idCtx.tryUnmarshal(Trace.idCtx.marshal(traceId)) == Return(traceId))
   }
 
   test("trace ID serialization: throw in handle on invalid size") {
