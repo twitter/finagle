@@ -47,6 +47,12 @@ Deprecations
     have been deprecated. Use `c.t.f.http.Cookie.secure` for `c.t.f.http.Cookie.isSecure`.
     `isDiscard` has been removed per RFC-6265. ``PHAB_ID=D82164``
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-mysql: Moved `Cursors.cursor` method to `Client` trait, and removed `Cursors` trait.
+    This allows cursor queries to used with transactions.  ``PHAB_ID=D91789``
+
 7.1.0
 ------
 

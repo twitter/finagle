@@ -41,14 +41,14 @@ trait MysqlRichClient { self: com.twitter.finagle.Client[Request, Result] =>
   def newRichClient(
     dest: Name,
     label: String
-  ): mysql.Client with mysql.Transactions with mysql.Cursors =
+  ): mysql.Client with mysql.Transactions =
     mysql.Client(newClient(dest, label), richClientStatsReceiver, supportUnsigned)
 
   /**
    * Creates a new `RichClient` connected to the logical
    * destination described by `dest`.
    */
-  def newRichClient(dest: String): mysql.Client with mysql.Transactions with mysql.Cursors =
+  def newRichClient(dest: String): mysql.Client with mysql.Transactions =
     mysql.Client(newClient(dest), richClientStatsReceiver, supportUnsigned)
 }
 
