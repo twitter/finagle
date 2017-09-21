@@ -9,45 +9,37 @@ private final class MapHeaderMap extends HeaderMap {
 
   import MapHeaderMap._
 
-  private[this] val underlying = mutable.Map.empty[String, Vector[HeaderValuePair]]
+  private[this] val underlying = new Headers
 
-  def getAll(key: String): Seq[String] =
-    underlying.getOrElse(canonicalName(key), Vector.empty).map(_.value)
+  // ---- HeaderMap -----
+
+  def getAll(key: String): Seq[String] = underlying.getAll(key)
 
   def add(k: String, v: String): HeaderMap = {
-    val t = new HeaderValuePair(k, v)
-    underlying(t.canonicalName) = underlying.getOrElse(t.canonicalName, Vector.empty) :+ t
+    underlying.add(k, v)
     this
   }
 
   def set(key: String, value: String): HeaderMap = {
-    val t = new HeaderValuePair(key, value)
-    underlying(t.canonicalName) = Vector(t)
+    underlying.set(key, value)
     this
   }
 
-  // For Map/MapLike
-  def get(key: String): Option[String] = getAll(key).headOption
+  // ---- Map/MapLike -----
 
-  // For Map/MapLike
-  def iterator: Iterator[(String, String)] = {
-    for ((_, vs) <- underlying.iterator; v <- vs) yield (v.name, v.value)
-  }
+  def get(key: String): Option[String] = underlying.getFirst(key)
 
-  // For Map/MapLike
+  def iterator: Iterator[(String, String)] = underlying.flattenIterator
+
   def +=(kv: (String, String)): this.type = {
     set(kv._1, kv._2)
     this
   }
 
-  // For Map/MapLike
   def -=(key: String): this.type = {
     underlying.remove(canonicalName(key))
     this
   }
-
-  override def keys: Iterable[String] =
-    keySet
 
   override def keySet: Set[String] =
     underlying.values.flatten.map(_.name).toSet
@@ -57,13 +49,6 @@ private final class MapHeaderMap extends HeaderMap {
 }
 
 private object MapHeaderMap {
-
-  private class HeaderValuePair(val name: String, val value: String) {
-    validateName(name)
-    validateValue(value)
-
-    val canonicalName: String = MapHeaderMap.canonicalName(name)
-  }
 
   private def canonicalName(s: String): String = s.toLowerCase(Locale.US)
 
@@ -133,6 +118,73 @@ private object MapHeaderMap {
 
     if (state != 0) {
       throw new IllegalArgumentException("Header value must not end with '\\r' or '\\n':" + s)
+    }
+  }
+
+  private class Header(val name: String, val value: String) {
+    validateName(name)
+    validateValue(value)
+
+    val canonicalName: String = MapHeaderMap.canonicalName(name)
+  }
+
+  private val GetHeaderValue: Header => String = _.value
+  private val NewHeaders: () => mutable.ArrayBuffer[Header] = () => new mutable.ArrayBuffer[Header]
+  private val EmptyHeaders: mutable.ArrayBuffer[Header] = mutable.ArrayBuffer.empty
+
+  // An internal representation for a `MapHeaderMap` that enables efficient iteration
+  // by gaining access to `entriesIterator` (protected method).
+  private class Headers extends mutable.HashMap[String, mutable.ArrayBuffer[Header]] {
+    def flattenIterator: Iterator[(String, String)] = new Iterator[(String, String)] {
+      private[this] val it = entriesIterator
+      private[this] var i = 0
+      private[this] var current = EmptyHeaders
+
+      def hasNext: Boolean =
+        // We don't expect empty array-buffers in the map.
+        it.hasNext || i < current.length
+
+      def next(): (String, String) = {
+        if (i == current.length) {
+          current = it.next().value
+          i = 0
+        }
+
+        val result = current(i)
+        i += 1
+
+        (result.name, result.value)
+      }
+    }
+
+    def getFirst(key: String): Option[String] =
+      get(canonicalName(key)) match {
+        case Some(h) => Some(GetHeaderValue(h(0)))
+        case None => None
+      }
+
+    def getAll(key: String): Seq[String] =
+      get(canonicalName(key)) match {
+        case Some(h) => h.map(GetHeaderValue)
+        case None => Nil
+      }
+
+    def add(k: String, v: String): Unit = {
+      val p = new Header(k, v)
+      val h = getOrElseUpdate(p.canonicalName, NewHeaders())
+
+      h += p
+    }
+
+    def set(key: String, value: String): Unit = {
+      val p = new Header(key, value)
+      get(p.canonicalName) match {
+        case Some(h) =>
+          h.clear()
+          h += p
+        case None =>
+          update(p.canonicalName, mutable.ArrayBuffer(p))
+      }
     }
   }
 

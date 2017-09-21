@@ -11,21 +11,22 @@ abstract class HeaderMapBenchmark extends StdBenchAnnotations {
 
   protected def newMap(): HeaderMap
 
-  @Param(Array("0", "10"))
-  private var size: Int = _
-
-  private var map: HeaderMap = _
-
-  @Setup(Level.Invocation)
-  def setup(): Unit = {
-    map = Iterator
-      .fill(size * 2)(Random.alphanumeric.take(3).mkString)
-      .grouped(2)
-      .foldLeft(newMap())((map, h) => map.add(h.head, h.last))
-  }
+  // We supply 18 random strings of the length of 3 and build a 9-element
+  // header map of them. The 10th element is foo -> bar so we can reliably
+  // query it in the benchmark.
+  private val map = Iterator.fill(9 * 2)(Random.alphanumeric.take(3).mkString)
+    .grouped(2)
+    .foldLeft(newMap())((map, h) => map.add(h.head, h.last))
+    .add("foo", "bar")
 
   @Benchmark
-  def add(): HeaderMap = map.add("foo", "bar")
+  def create(): HeaderMap = newMap()
+
+  @Benchmark
+  def get(): Option[String] = map.get("foo")
+
+  @Benchmark
+  def createAndAdd(): HeaderMap = newMap().add("foo", "bar")
 
   @Benchmark
   def iterate(b: Blackhole): Unit = map.foreach(h => b.consume(h))
