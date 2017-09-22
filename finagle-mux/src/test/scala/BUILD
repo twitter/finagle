@@ -6,6 +6,7 @@ junit_tests(
     '3rdparty/jvm/org/scalacheck',
     '3rdparty/jvm/org/scalatest',
     'finagle/finagle-core/src/main/scala:scala',
+    'finagle/finagle-core/src/test/scala:pushsession-utils',
     'finagle/finagle-mux/src/main/scala:scala',
     'finagle/finagle-mux/src/test/resources',
     'finagle/finagle-netty4/src/main/scala:scala',

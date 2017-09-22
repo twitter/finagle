@@ -1,7 +1,6 @@
-package com.twitter.finagle.mux.exp.pushsession
+package com.twitter.finagle.exp.pushsession
 
 import com.twitter.finagle.Status
-import com.twitter.finagle.exp.pushsession.{PushChannelHandle, PushSession}
 import com.twitter.util.{Future, Promise, Time, Try}
 import java.net.SocketAddress
 import java.security.cert.Certificate

@@ -17,6 +17,17 @@ scala_library(
   strict_deps=True,
 )
 
+scala_library(name='pushsession-utils',
+  dependencies=[
+    'finagle/finagle-core/src/main/scala:scala'
+  ],
+  sources=[
+    './com/twitter/finagle/exp/pushsession/MockChannelHandle.scala'
+  ],
+  fatal_warnings=True,
+  strict_deps=True,
+)
+
 junit_tests(
   dependencies=[
     '3rdparty/jvm/com/github/ben-manes/caffeine:caffeine',
