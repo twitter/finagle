@@ -237,7 +237,7 @@ lazy val finagleIntegration = Project(
   name := "finagle-integration",
   libraryDependencies ++= Seq(util("core")) ++ scroogeLibs
 ).dependsOn(
-  finagleCore,
+  finagleCore % "compile->compile;test->test",
   finagleHttp,
   finagleHttp2,
   finagleMySQL,
