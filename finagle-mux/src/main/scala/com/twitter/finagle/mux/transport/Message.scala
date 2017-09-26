@@ -190,6 +190,8 @@ private[finagle] object Message {
           hd.writeByte(1) // key 1 size
           hd.writeByte(traceId.flags.toLong.toByte)
 
+          // TODO: support traceIdHigh
+
           hd.owned()
 
         case None =>
@@ -476,6 +478,7 @@ private[finagle] object Message {
       // TODO: technically we should probably check for duplicate
       // keys, but for now, just pick the latest one.
       key match {
+        // TODO: support traceIdHigh
         case Treq.Keys.TraceId =>
           if (vsize != 24)
             throwBadMessageException(s"bad traceid size $vsize")
@@ -505,6 +508,7 @@ private[finagle] object Message {
 
     val id = trace3 match {
       case Some((spanId, parentId, traceId)) =>
+        // TODO: support traceIdHigh
         Some(TraceId(Some(traceId), Some(parentId), spanId, None, Flags(traceFlags)))
       case None => None
     }
