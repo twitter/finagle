@@ -102,7 +102,7 @@ object TraceId {
     ByteArrays.put64be(bytes, 8, traceId.parentId.self)
     ByteArrays.put64be(bytes, 16, traceId.traceId.self)
     ByteArrays.put64be(bytes, 24, flags.toLong)
-    ByteArrays.put64be(bytes, 32, traceId.traceIdHigh.self)
+    if(traceId.traceIdHigh.isDefined) ByteArrays.put64be(bytes, 32, traceId.traceIdHigh.get.self)
     bytes
   }
 
@@ -118,7 +118,8 @@ object TraceId {
       val parent64 = ByteArrays.get64be(bytes, 8)
       val trace64 = ByteArrays.get64be(bytes, 16)
       val flags64 = ByteArrays.get64be(bytes, 24)
-      val traceIdHigh = if(bytes.length == 40) ByteArrays.get64be(bytes, 32) else 0L
+
+      val traceIdHigh = if(bytes.length == 40) ByteArrays.get64be(bytes, 32) else -1L
 
       val flags = Flags(flags64)
       val sampled = if (flags.isFlagSet(Flags.SamplingKnown)) {
@@ -131,7 +132,7 @@ object TraceId {
         SpanId(span64),
         sampled,
         flags,
-        Some(SpanId(traceIdHigh))
+        if(traceIdHigh == -1L) None else Some(SpanId(traceIdHigh))
       )
       Return(traceId)
     }
@@ -142,9 +143,9 @@ object TraceId {
    *
    * @param spanId A 64bit or 128bit Trace ID.
    *
-   * @return An <code>Option[(SpanId, SpanId)]</code> of 64bit or 128bit TraceID. Structure is (high, low).
+   * @return An <code>(Option[SpanId], Option[SpanId])</code> of 64bit or 128bit TraceID. Structure is (high, low).
    */
-  def mk128BitTraceId(spanId: String): Option[(SpanId, SpanId)] = {
+  def mk128BitTraceId(spanId: String): (Option[SpanId], Option[SpanId]) = {
     try {
       val length = spanId.length()
       val lower64Bits = if (length <= 16) spanId else spanId.substring(length - 16)
@@ -152,12 +153,12 @@ object TraceId {
 
       upper64bits match {
         case Some(high) =>
-          Some(SpanId(new RichU64String(high).toU64Long), SpanId(new RichU64String(lower64Bits).toU64Long))
+          (Some(SpanId(new RichU64String(high).toU64Long)), Some(SpanId(new RichU64String(lower64Bits).toU64Long)))
         case None =>
-          Some(SpanId(0L), SpanId(new RichU64String(lower64Bits).toU64Long))
+          (None, Some(SpanId(new RichU64String(lower64Bits).toU64Long)))
       }
     } catch {
-      case NonFatal(_) => None
+      case NonFatal(_) => (None, None)
     }
   }
 }
@@ -222,10 +223,7 @@ final case class TraceId(
     case Some(id) => id
   }
 
-  def traceIdHigh: SpanId = _traceIdHigh match {
-    case None => SpanId(0L)
-    case Some(id) => id
-  }
+  def traceIdHigh: Option[SpanId] = _traceIdHigh
 
   /**
    * Override [[_sampled]] to Some(true) if the debug flag is set.
@@ -253,5 +251,5 @@ final case class TraceId(
   override def hashCode(): Int =
     ids.hashCode()
 
-  override def toString = s"${if(traceIdHigh.self == 0) "" else traceIdHigh}$traceId.$spanId<:$parentId"
+  override def toString = s"${if(traceIdHigh.isEmpty) "" else traceIdHigh.get}$traceId.$spanId<:$parentId"
 }

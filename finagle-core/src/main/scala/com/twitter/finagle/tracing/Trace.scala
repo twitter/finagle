@@ -71,7 +71,8 @@ object Trace {
       val parent64 = ByteArrays.get64be(bytes, 8)
       val trace64 = ByteArrays.get64be(bytes, 16)
       val flags64 = ByteArrays.get64be(bytes, 24)
-      val traceIdHigh = if(body.length == 40) ByteArrays.get64be(bytes, 32) else 0L
+
+      val traceIdHigh = if(body.length == 40) ByteArrays.get64be(bytes, 32) else -1L
 
       val flags = Flags(flags64)
       val sampled = if (flags.isFlagSet(Flags.SamplingKnown)) {
@@ -84,7 +85,7 @@ object Trace {
         SpanId(span64),
         sampled,
         flags,
-        Some(SpanId(traceIdHigh))
+        if(traceIdHigh == -1L) None else Some(SpanId(traceIdHigh))
       )
 
       Return(traceId)
@@ -147,7 +148,7 @@ object Trace {
     val spanId = SpanId(rng.nextLong())
     idOption match {
       case Some(id) =>
-        TraceId(Some(id.traceId), Some(id.spanId), spanId, id.sampled, id.flags, Some(id.traceIdHigh))
+        TraceId(Some(id.traceId), Some(id.spanId), spanId, id.sampled, id.flags, id.traceIdHigh)
       case None =>
         TraceId(None, None, spanId, None, Flags(), None)
     }

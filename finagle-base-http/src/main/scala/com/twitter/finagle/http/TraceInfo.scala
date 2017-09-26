@@ -19,10 +19,7 @@ private object TraceInfo {
         spanId match {
           case None => None
           case Some(sid) =>
-            val (highTraceId, lowTraceId) = TraceId.mk128BitTraceId(request.headerMap(Header.TraceId)) match {
-              case Some((high: SpanId, low: SpanId)) => (Some(high), Some(low))
-              case None => (None, None)
-            }
+            val (highTraceId, lowTraceId) = TraceId.mk128BitTraceId(request.headerMap(Header.TraceId))
 
             val parentSpanId =
               if (request.headerMap.contains(Header.ParentSpanId))
