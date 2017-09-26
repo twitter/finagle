@@ -20,7 +20,7 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
 
   test("have a default id without parents, etc.") {
     assert(Trace.id match {
-      case TraceId(None, None, _, None, Flags(0)) => true
+      case TraceId(None, None, _, None, Flags(0), None) => true
       case _ => false
     })
   }
@@ -56,7 +56,7 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
     Trace.letId(Trace.nextId) {
       assert(Trace.id != defaultId)
       assert(Trace.id match {
-        case TraceId(None, None, _, None, Flags(0)) => true
+        case TraceId(None, None, _, None, Flags(0), None) => true
         case _ => false
       })
     }
@@ -67,7 +67,7 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
       val topId = Trace.id
       Trace.letId(Trace.nextId) {
         assert(Trace.id match {
-          case TraceId(Some(traceId), Some(parentId), _, None, Flags(0))
+          case TraceId(Some(traceId), Some(parentId), _, None, Flags(0), _)
               if traceId == topId.traceId && parentId == topId.spanId =>
             true
           case _ => false
@@ -226,13 +226,6 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
     assert(nextId.spanId.toString.length == 16)
   }
 
-  test("generate128BitSpanIds flag enabled") {
-    generate128BitSpanIds.let(true) {
-      val nextId = Trace.nextId
-      assert(nextId.spanId.toString.length == 32)
-    }
-  }
-
   test("Trace.letTracerAndNextId: start with a default TraceId") {
     Time.withCurrentTimeFrozen { tc =>
       val tracer = mock[Tracer]
@@ -242,7 +235,7 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
       Trace.letTracerAndNextId(tracer) {
         val currentId = Trace.id
         assert(currentId match {
-          case TraceId(None, None, _, None, Flags(0)) => true
+          case TraceId(None, None, _, None, Flags(0), None) => true
           case _ => false
         })
         assert(Trace.isTerminal == false)
@@ -266,7 +259,7 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
         Trace.letTracerAndNextId(tracer) {
           val currentId = Trace.id
           assert(currentId match {
-            case TraceId(Some(_traceId), Some(_parentId), _, Some(_sampled), Flags(0))
+            case TraceId(Some(_traceId), Some(_parentId), _, Some(_sampled), Flags(0), _)
                 if (_traceId == parentId.traceId) && (_parentId == parentId.spanId) &&
                   (_sampled == parentId.sampled.get) =>
               true
@@ -293,7 +286,7 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
       Trace.letTracerAndNextId(tracer, true) {
         val currentId = Trace.id
         assert(currentId match {
-          case TraceId(None, None, _, None, Flags(0)) => true
+          case TraceId(None, None, _, None, Flags(0), None) => true
           case _ => false
         })
         assert(Trace.isTerminal == true)
@@ -395,7 +388,8 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
   }
 
   test("trace ID serialization: valid ids (128-bit)") {
-    val traceId = TraceId(Some(SpanId(1L, 2L)), Some(SpanId(1L)), SpanId(2L), None, Flags(Flags.Debug))
+    val traceId = TraceId(Some(SpanId(1L)), Some(SpanId(1L)), SpanId(2L), None, Flags(Flags.Debug), Some(SpanId(2L)))
+
     assert(Trace.idCtx.tryUnmarshal(Trace.idCtx.marshal(traceId)) == Return(traceId))
   }
 

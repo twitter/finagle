@@ -19,7 +19,11 @@ private object TraceInfo {
         spanId match {
           case None => None
           case Some(sid) =>
-            val traceId = SpanId.fromString(request.headerMap(Header.TraceId))
+            val (highTraceId, lowTraceId) = TraceId.mk128BitTraceId(request.headerMap(Header.TraceId)) match {
+              case Some((high: SpanId, low: SpanId)) => (Some(high), Some(low))
+              case None => (None, None)
+            }
+
             val parentSpanId =
               if (request.headerMap.contains(Header.ParentSpanId))
                 SpanId.fromString(request.headerMap(Header.ParentSpanId))
@@ -36,7 +40,7 @@ private object TraceInfo {
             }
 
             val flags = getFlags(request)
-            Some(TraceId(traceId, parentSpanId, sid, sampled, flags))
+            Some(TraceId(lowTraceId, parentSpanId, sid, sampled, flags, highTraceId))
         }
       } else if (request.headerMap.contains(Header.Flags)) {
         // even if there are no id headers we want to get the debug flag

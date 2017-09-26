@@ -7,22 +7,7 @@ import com.twitter.io.Buf
 import com.twitter.util._
 import java.net.InetSocketAddress
 
-import com.twitter.app.GlobalFlag
-
 import scala.util.Random
-
-/**
- * GlobalFlag to configure Span IDs to be generated as 128-bit rather than
- * the default of 64-bit.
- *
- * When false, only 128-bit TraceID is honored.
- * When true, Finagle will generate new SpanIDs as 128-bit.
- */
-object generate128BitSpanIds
-  extends GlobalFlag[Boolean](
-    false,
-    "Enables the generation of 128-bit Span IDs"
-  )
 
 /**
  * This is a tracing system similar to Dapper:
@@ -94,11 +79,12 @@ object Trace {
       } else None
 
       val traceId = TraceId(
-        if (trace64 == parent64) None else Some(SpanId(traceIdHigh, trace64)),
+        if (trace64 == parent64) None else Some(SpanId(trace64)),
         if (parent64 == span64) None else Some(SpanId(parent64)),
         SpanId(span64),
         sampled,
-        flags
+        flags,
+        Some(SpanId(traceIdHigh))
       )
 
       Return(traceId)
@@ -106,7 +92,7 @@ object Trace {
   }
 
   private[this] val rng = new Random
-  private[this] val defaultId = TraceId(None, None, SpanId(rng.nextLong()), None, Flags())
+  private[this] val defaultId = TraceId(None, None, SpanId(rng.nextLong()), None, Flags(), None)
   @volatile private[this] var tracingEnabled = true
 
   private[this] val EmptyTraceCtxFn = () => TraceCtx.empty
@@ -158,13 +144,12 @@ object Trace {
    * Create a derived id from the current TraceId.
    */
   def nextId: TraceId = {
-    val generate128Bit = generate128BitSpanIds()
-    val spanId = if(generate128Bit) SpanId(rng.nextLong(), rng.nextLong()) else SpanId(rng.nextLong())
+    val spanId = SpanId(rng.nextLong())
     idOption match {
       case Some(id) =>
-        TraceId(Some(id.traceId), Some(id.spanId), spanId, id.sampled, id.flags)
+        TraceId(Some(id.traceId), Some(id.spanId), spanId, id.sampled, id.flags, Some(id.traceIdHigh))
       case None =>
-        TraceId(None, None, spanId, None, Flags())
+        TraceId(None, None, spanId, None, Flags(), None)
     }
   }
 

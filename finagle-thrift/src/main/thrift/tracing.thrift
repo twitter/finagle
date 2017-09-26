@@ -255,6 +255,7 @@ struct RequestHeader {
   // Support for destination (partially resolved names) and delegation tables.
   9: optional string dest
   10: optional list<Delegation> delegations
+  11: optional i64 trace_id_high
 }
 
 /**

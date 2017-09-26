@@ -7,21 +7,14 @@ import java.lang.{Boolean => JBool}
 import scala.util.control.NonFatal
 
 /**
- * Defines trace identifiers.  Span IDs name a particular (unique)
- * span, while TraceIds contain a span ID as well as context (parentId
- * and traceId). TraceIds support 128-bits while Span IDs remain 64-bits.
- */
-final class SpanId(val high: Long, val low: Long) extends Proxy {
-  def this(low: Long){
-    this(0, low)
-  }
+  * Defines trace identifiers.  Span IDs name a particular (unique)
+  * span, while TraceIds contain a span ID as well as context (parentId
+  * and traceId).
+  */
+final class SpanId(val self: Long) extends Proxy {
+  def toLong = self
 
-  // Note: This will truncate 128-bit Ids to 64-bit. Should this warn?
-  def toLong = low
-
-  override def toString: String = SpanId.toString(low, high)
-
-  lazy val self: (Long, Long) = (high, low)
+  override def toString: String = SpanId.toString(self)
 }
 
 object SpanId {
@@ -33,25 +26,13 @@ object SpanId {
       val s = "%02x".format(bb)
       Array(s(0), s(1))
     }
-  ).toArray
+    ).toArray
 
   private def byteToChars(b: Byte): Array[Char] = lut(b + 128)
 
   // This is invoked a lot, so they need to be fast.
-  def toString(l: Long, h: Long): String = {
-    val b = new StringBuilder(if(h > 0) 32 else 16)
-
-    if(h > 0) {
-      b.appendAll(byteToChars((h >> 56 & 0xff).toByte))
-      b.appendAll(byteToChars((h >> 48 & 0xff).toByte))
-      b.appendAll(byteToChars((h >> 40 & 0xff).toByte))
-      b.appendAll(byteToChars((h >> 32 & 0xff).toByte))
-      b.appendAll(byteToChars((h >> 24 & 0xff).toByte))
-      b.appendAll(byteToChars((h >> 16 & 0xff).toByte))
-      b.appendAll(byteToChars((h >> 8 & 0xff).toByte))
-      b.appendAll(byteToChars((h & 0xff).toByte))
-    }
-
+  def toString(l: Long): String = {
+    val b = new StringBuilder(16)
     b.appendAll(byteToChars((l >> 56 & 0xff).toByte))
     b.appendAll(byteToChars((l >> 48 & 0xff).toByte))
     b.appendAll(byteToChars((l >> 40 & 0xff).toByte))
@@ -60,28 +41,19 @@ object SpanId {
     b.appendAll(byteToChars((l >> 16 & 0xff).toByte))
     b.appendAll(byteToChars((l >> 8 & 0xff).toByte))
     b.appendAll(byteToChars((l & 0xff).toByte))
-
     b.toString
   }
 
-  // 64-bit span id
   def apply(spanId: Long): SpanId = new SpanId(spanId)
-
-  // 128-bit span id
-  def apply(high: Long, low: Long): SpanId = new SpanId(high, low)
 
   def fromString(spanId: String): Option[SpanId] =
     try {
+      // Tolerates 128 bit X-B3-TraceId by reading the right-most 16 hex
+      // characters (as opposed to overflowing a U64 and starting a new trace).
+      // For TraceId, prefer TraceId#make128BitTraceId.
       val length = spanId.length()
       val lower64Bits = if (length <= 16) spanId else spanId.substring(length - 16)
-      val upper64bits = if (length == 32) Some(spanId.substring(0, 16)) else None
-
-      upper64bits match {
-        case Some(high) =>
-          Some(SpanId(new RichU64String(high).toU64Long, new RichU64String(lower64Bits).toU64Long))
-        case None =>
-          Some(SpanId(new RichU64String(lower64Bits).toU64Long))
-      }
+      Some(SpanId(new RichU64String(lower64Bits).toU64Long))
     } catch {
       case NonFatal(_) => None
     }
@@ -90,7 +62,7 @@ object SpanId {
 object TraceId {
 
   /**
-   * Creates a TraceId with no flags set. See case class for more info.
+   * Creates a TraceId with no flags set and 64bit TraceID. See case class for more info.
    */
   def apply(
     traceId: Option[SpanId],
@@ -98,7 +70,19 @@ object TraceId {
     spanId: SpanId,
     sampled: Option[Boolean]
   ): TraceId =
-    TraceId(traceId, parentId, spanId, sampled, Flags())
+    TraceId(traceId, parentId, spanId, sampled, Flags(), None)
+
+  /**
+    * Creates a 64bit TraceID. See case class for more info.
+    */
+  def apply(
+    traceId: Option[SpanId],
+    parentId: Option[SpanId],
+    spanId: SpanId,
+    sampled: Option[Boolean],
+    flags: Flags
+  ): TraceId =
+    TraceId(traceId, parentId, spanId, sampled, flags, None)
 
   /**
    * Serialize a TraceId into an array of bytes.
@@ -114,11 +98,11 @@ object TraceId {
     }
 
     val bytes = new Array[Byte](40)
-    ByteArrays.put64be(bytes, 0, traceId.spanId.low)
-    ByteArrays.put64be(bytes, 8, traceId.parentId.low)
-    ByteArrays.put64be(bytes, 16, traceId.traceId.low)
+    ByteArrays.put64be(bytes, 0, traceId.spanId.self)
+    ByteArrays.put64be(bytes, 8, traceId.parentId.self)
+    ByteArrays.put64be(bytes, 16, traceId.traceId.self)
     ByteArrays.put64be(bytes, 24, flags.toLong)
-    ByteArrays.put64be(bytes, 32, traceId.traceId.high)
+    ByteArrays.put64be(bytes, 32, traceId.traceIdHigh.self)
     bytes
   }
 
@@ -142,13 +126,38 @@ object TraceId {
       } else None
 
       val traceId = TraceId(
-        if (trace64 == parent64) None else Some(SpanId(traceIdHigh, trace64)),
+        if (trace64 == parent64) None else Some(SpanId(trace64)),
         if (parent64 == span64) None else Some(SpanId(parent64)),
         SpanId(span64),
         sampled,
-        flags
+        flags,
+        Some(SpanId(traceIdHigh))
       )
       Return(traceId)
+    }
+  }
+
+  /**
+   * Extracts the high 64bits (if set) and low 64bits from a B3 TraceID's string representation.
+   *
+   * @param spanId A 64bit or 128bit Trace ID.
+   *
+   * @return An <code>Option[(SpanId, SpanId)]</code> of 64bit or 128bit TraceID. Structure is (high, low).
+   */
+  def mk128BitTraceId(spanId: String): Option[(SpanId, SpanId)] = {
+    try {
+      val length = spanId.length()
+      val lower64Bits = if (length <= 16) spanId else spanId.substring(length - 16)
+      val upper64bits = if (length == 32) Some(spanId.substring(0, 16)) else None
+
+      upper64bits match {
+        case Some(high) =>
+          Some(SpanId(new RichU64String(high).toU64Long), SpanId(new RichU64String(lower64Bits).toU64Long))
+        case None =>
+          Some(SpanId(0L), SpanId(new RichU64String(lower64Bits).toU64Long))
+      }
+    } catch {
+      case NonFatal(_) => None
     }
   }
 }
@@ -186,20 +195,22 @@ object TraceId {
  * SERVICE A  34429b04b6bbf478.34429b04b6bbf478<:34429b04b6bbf478
  * }}}
  *
- * @param _traceId The id for this request.
+ * @param _traceId The low 64bits of the id for this request.
  * @param _parentId The id for the request one step up the service stack.
  * @param spanId The id for this particular request
  * @param _sampled Should we sample this request or not? True means sample, false means don't, none means we defer
  *                decision to someone further down in the stack.
  * @param flags Flags relevant to this request. Could be things like debug mode on/off. The sampled flag could eventually
  *              be moved in here.
+ * @param _traceIdHigh The high 64bits of the id for this request, when the id is 128bits.
  */
 final case class TraceId(
   _traceId: Option[SpanId],
   _parentId: Option[SpanId],
   spanId: SpanId,
   _sampled: Option[Boolean],
-  flags: Flags
+  flags: Flags,
+  _traceIdHigh: Option[SpanId]
 ) {
   def traceId: SpanId = _traceId match {
     case None => parentId
@@ -208,6 +219,11 @@ final case class TraceId(
 
   def parentId: SpanId = _parentId match {
     case None => spanId
+    case Some(id) => id
+  }
+
+  def traceIdHigh: SpanId = _traceIdHigh match {
+    case None => SpanId(0L)
     case Some(id) => id
   }
 
@@ -227,7 +243,7 @@ final case class TraceId(
     case None => None
   }
 
-  private[TraceId] def ids = (traceId, parentId, spanId)
+  private[TraceId] def ids = (traceId, parentId, spanId, traceIdHigh)
 
   override def equals(other: Any) = other match {
     case other: TraceId => this.ids equals other.ids
@@ -237,5 +253,5 @@ final case class TraceId(
   override def hashCode(): Int =
     ids.hashCode()
 
-  override def toString = s"$traceId.$spanId<:$parentId"
+  override def toString = s"${if(traceIdHigh.self == 0) "" else traceIdHigh}$traceId.$spanId<:$parentId"
 }
