@@ -17,7 +17,7 @@ class TracingTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   lazy val flags = Flags().setDebug
   lazy val traceId = TraceId(Some(SpanId(1)), None, SpanId(2), Some(true), flags)
-  lazy val traceId128Bit = TraceId(Some(SpanId(1, 2)), None, SpanId(2), Some(true), flags)
+  lazy val traceId128Bit = TraceId(Some(SpanId(2L)), None, SpanId(2), Some(true), flags, Some(SpanId(1L)))
 
   test("set header") {
     Trace.letId(traceId) {
