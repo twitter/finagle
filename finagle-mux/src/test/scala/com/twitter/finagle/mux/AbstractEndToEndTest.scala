@@ -2,7 +2,7 @@ package com.twitter.finagle.mux
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.client.StdStackClient
+import com.twitter.finagle.client.EndpointerStackClient
 import com.twitter.finagle.context.RemoteInfo
 import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor}
 import com.twitter.finagle.mux.transport.{BadMessageException, Message}
@@ -28,8 +28,10 @@ abstract class AbstractEndToEndTest
     with BeforeAndAfter
     with AssertionsForJUnit {
 
+  type ClientT <: EndpointerStackClient[Request, Response, ClientT]
+
   def implName: String
-  def clientImpl(): StdStackClient[Request, Response, Mux.Client]
+  def clientImpl(): ClientT
   def serverImpl(): StdStackServer[Request, Response, Mux.Server]
 
   var saveBase: Dtab = Dtab.empty
@@ -248,39 +250,6 @@ abstract class AbstractEndToEndTest
     }
   }
 
-  // This is marked FLAKY because it allocates a nonephemeral port;
-  // this is unfortunately required for this type of testing (since we're
-  // interested in completely shutting down, and then restarting a
-  // server on the same port).
-  //
-  // Note also that, in the case of a single endpoint, the loadbalancer's
-  // fallback behavior circumvents status propagation bugs. This is
-  // because, in the event that all endpoints are down, the load balancer
-  // reverts its down list, and attempts to establish a session regardless
-  // of reported status.
-  //
-  // The following script patches up the load balancer to avoid this
-  // behavior.
-  /*
-ed - ../../../../../../../../finagle-core/src/main/scala/com/twitter/finagle/loadbalancer/HeapBalancer.scala <<EOF
-246a
-      if (n == null)
-        return Future.exception(emptyException)
-.
-216c
-    if (n.load >= 0) null
-    else if (n.factory.status == Status.Open) n
-    else {
-.
-201c
-      } else if (n.factory.status == Status.Open) {  // revived node
-.
-132c
-    nodes.count(_.factory.status == Status.Open)
-.
-w
-EOF
-   */
   if (!Option(System.getProperty("SKIP_FLAKY")).isDefined)
     test(s"$implName: draining and restart") {
       val echo =
@@ -312,73 +281,71 @@ EOF
     }
 
   test(s"$implName: responds to lease") {
-    Time.withCurrentTimeFrozen { ctl =>
-      class FakeLessor extends Lessor {
-        var list: List[Lessee] = Nil
+    class FakeLessor extends Lessor {
+      var list: List[Lessee] = Nil
 
-        def register(lessee: Lessee): Unit = {
-          list ::= lessee
-        }
-
-        def unregister(lessee: Lessee): Unit = ()
-
-        def observe(d: Duration): Unit = ()
-
-        def observeArrival(): Unit = ()
-      }
-      val lessor = new FakeLessor
-
-      val server = serverImpl
-        .configured(Lessor.Param(lessor))
-        .serve("localhost:*", new Service[mux.Request, mux.Response] {
-          def apply(req: Request) = ???
-        })
-
-      val sr = new InMemoryStatsReceiver
-
-      val factory = clientImpl
-        .configured(param.Stats(sr))
-        .newClient(
-          Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-          "client"
-        )
-
-      val fclient = factory()
-      eventually { assert(fclient.isDefined) }
-
-      val Some((_, available)) = sr.gauges.find {
-        case (_ +: Seq("loadbalancer", "available"), value) => true
-        case _ => false
+      def register(lessee: Lessee): Unit = {
+        list ::= lessee
       }
 
-      val Some((_, leaseDuration)) = sr.gauges.find {
-        case (_ +: Seq("mux", "current_lease_ms"), value) => true
-        case _ => false
-      }
+      def unregister(lessee: Lessee): Unit = ()
 
-      val leaseCtr: () => Long = { () =>
-        val Some((_, ctr)) = sr.counters.find {
-          case (_ +: Seq("mux", "leased"), value) => true
-          case _ => false
-        }
-        ctr
-      }
-      def format(duration: Duration): Float = duration.inMilliseconds.toFloat
+      def observe(d: Duration): Unit = ()
 
-      eventually { assert(leaseDuration() == format(Time.Top - Time.now)) }
-      eventually { assert(available() == 1) }
-      lessor.list.foreach(_.issue(Message.Tlease.MinLease))
-      eventually { assert(leaseCtr() == 1) }
-      ctl.advance(2.seconds) // must advance time to re-lease and expire
-      eventually { assert(leaseDuration() == format(Message.Tlease.MinLease - 2.seconds)) }
-      eventually { assert(available() == 0) }
-      lessor.list.foreach(_.issue(Message.Tlease.MaxLease))
-      eventually { assert(leaseCtr() == 2) }
-      eventually { assert(leaseDuration() == format(Message.Tlease.MaxLease)) }
-      eventually { assert(available() == 1) }
-
-      Closable.sequence(Await.result(fclient, 5.seconds), server, factory).close()
+      def observeArrival(): Unit = ()
     }
+    val lessor = new FakeLessor
+
+    val server = serverImpl
+      .configured(Lessor.Param(lessor))
+      .serve("localhost:*", new Service[mux.Request, mux.Response] {
+        def apply(req: Request) = ???
+      })
+
+    val sr = new InMemoryStatsReceiver
+
+    val factory = clientImpl
+      .configured(param.Stats(sr))
+      .newClient(
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+        "client"
+      )
+
+    val fclient = factory()
+    eventually { assert(fclient.isDefined) }
+
+    val Some((_, available)) = sr.gauges.find {
+      case (_ +: Seq("loadbalancer", "available"), value) => true
+      case _ => false
+    }
+
+    val Some((_, leaseDuration)) = sr.gauges.find {
+      case (_ +: Seq("mux", "current_lease_ms"), value) => true
+      case _ => false
+    }
+
+    val leaseCtr: () => Long = { () =>
+      val Some((_, ctr)) = sr.counters.find {
+        case (_ +: Seq("mux", "leased"), value) => true
+        case _ => false
+      }
+      ctr
+    }
+    def format(duration: Duration): Float = duration.inMilliseconds.toFloat
+
+    eventually { assert(leaseDuration() == format(Time.Top - Time.now)) }
+    eventually { assert(available() == 1) }
+    lessor.list.foreach(_.issue(Message.Tlease.MinLease))
+    eventually { assert(leaseCtr() == 1) }
+    eventually { assert(leaseDuration() <= format(Message.Tlease.MinLease)) }
+    eventually { assert(available() == 0) }
+    lessor.list.foreach(_.issue(Message.Tlease.MaxLease))
+    eventually { assert(leaseCtr() == 2) }
+    // Hopefully its finished within 10 seconds
+    eventually { assert(format(Message.Tlease.MaxLease) - 10.seconds.inMillis <= leaseDuration()) }
+    eventually { assert(available() == 1) }
+
+    Closable.sequence(Await.result(fclient, 5.seconds), server, factory).close()
   }
 
   test(s"$implName: measures payload sizes") {

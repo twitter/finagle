@@ -29,7 +29,7 @@ case class ServerApplicationError(what: String) extends Exception(what) with NoS
  * and transactions for outstanding messages and as such exposes an interface where
  * tag assignment can be deferred (i.e. Int => Message).
  */
-private[finagle] class ClientDispatcher(trans: Transport[Message, Message])
+private[mux] class ClientDispatcher(trans: Transport[Message, Message])
     extends Service[Int => Message, Message] {
   import ClientDispatcher._
 
@@ -133,7 +133,9 @@ private[finagle] object ClientDispatcher {
 
   val InitialTagMapSize: Int = 256
 
-  val FutureExhaustedTagsException = Future.exception(Failure.rejected("Exhausted tags"))
+  val ExhaustedTagsException = Failure.rejected("Exhausted tags")
+
+  val FutureExhaustedTagsException = Future.exception(ExhaustedTagsException)
 
   /**
    * Creates a mux client dispatcher that can handle mux Request/Responses.

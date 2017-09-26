@@ -1,8 +1,9 @@
 package com.twitter.finagle.exp.pushsession
 
 import com.twitter.finagle.Status
+import com.twitter.util.Return
 import com.twitter.util.{Future, Promise, Time, Try}
-import java.net.SocketAddress
+import java.net.{InetSocketAddress, SocketAddress}
 import java.security.cert.Certificate
 import java.util
 import java.util.concurrent.Executor
@@ -12,18 +13,26 @@ class MockChannelHandle[In, Out](var currentSession: PushSession[In, Out]) exten
   def this() = this(null)
 
   sealed trait SendCommand {
-    def msgs: Iterable[Out]
+    def msgs: Vector[Out]
+    def completeWith(result: Try[Unit]): Unit
+    def completeSuccess(): Unit = completeWith(Return.Unit)
   }
 
-  case class SendAndForgetMany(msgs: Iterable[Out]) extends SendCommand
-  case class SendMany(msgs: Iterable[Out], completion: Try[Unit] => Unit) extends SendCommand
+  case class SendAndForgetMany(msgs: Vector[Out]) extends SendCommand {
+    def completeWith(result: Try[Unit]): Unit = ()
+  }
+  case class SendMany(msgs: Vector[Out], completion: Try[Unit] => Unit) extends SendCommand {
+    def completeWith(result: Try[Unit]): Unit = completion(result)
+  }
 
   case class SendAndForgetOne(msg: Out) extends SendCommand {
-    def msgs: Iterable[Out] = Seq(msg)
+    def msgs: Vector[Out] = Vector(msg)
+    def completeWith(result: Try[Unit]): Unit = ()
   }
 
   case class SendOne(msg: Out, completion: Try[Unit] => Unit) extends SendCommand {
-    def msgs: Iterable[Out] = Seq(msg)
+    def msgs: Vector[Out] = Vector(msg)
+    def completeWith(result: Try[Unit]): Unit = completion(result)
   }
 
   val onClosePromise: Promise[Unit] = Promise[Unit]()
@@ -41,7 +50,7 @@ class MockChannelHandle[In, Out](var currentSession: PushSession[In, Out]) exten
 
   def send(messages: Iterable[Out])
     (onComplete: (Try[Unit]) => Unit): Unit = {
-    pendingWrites += SendMany(messages, onComplete)
+    pendingWrites += SendMany(messages.toVector, onComplete)
   }
 
   def send(message: Out)
@@ -54,14 +63,14 @@ class MockChannelHandle[In, Out](var currentSession: PushSession[In, Out]) exten
   }
 
   def sendAndForget(messages: Iterable[Out]): Unit = {
-    pendingWrites += SendAndForgetMany(messages)
+    pendingWrites += SendAndForgetMany(messages.toVector)
   }
 
   def peerCertificate: Option[Certificate] = None
 
-  def remoteAddress: SocketAddress = ???
+  val remoteAddress: SocketAddress = new InetSocketAddress(8888)
 
-  def localAddress: SocketAddress = ???
+  val localAddress: SocketAddress = new InetSocketAddress(8889)
 
   def onClose: Future[Unit] = onClosePromise
 

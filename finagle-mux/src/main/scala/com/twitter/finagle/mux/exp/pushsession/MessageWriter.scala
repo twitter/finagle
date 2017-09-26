@@ -61,6 +61,8 @@ private final class FragmentingMessageWriter(handle: PushChannelHandle[_, Buf], 
   // Exposed for testing
   private[pushsession] val messageQueue = new util.ArrayDeque[Message]
   private[this] val log = Logger.get
+  // State so we don't add log for every outstanding write
+  private[this] var observedWriteError: Boolean = false
 
   // We use this boolean to ensure that we have at most one flush loop at any time. If
   // we allow n loops we can end up effectively flushing n fragments for every time the
@@ -68,8 +70,11 @@ private final class FragmentingMessageWriter(handle: PushChannelHandle[_, Buf], 
   private[this] var flushing = false
 
   private[this] def onWriteError(ex: Throwable): Unit = {
-    log.info(s"Error obtained during write phase: $ex", ex)
-    handle.close()
+    if (!observedWriteError) {
+      observedWriteError = true
+      log.info(s"Error obtained during write phase: $ex", ex)
+      handle.close()
+    }
   }
 
   def write(msg: Message): Unit = msg match {

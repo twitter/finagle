@@ -12,7 +12,7 @@ import org.scalatest.mock.MockitoSugar
 class PipeliningMockChannelHandle[In, Out] extends MockChannelHandle[In, Out] {
 
   // The remote address is logged when the pipeline stalls
-  override def remoteAddress: SocketAddress = new InetSocketAddress("1.2.3.4", 100)
+  override val remoteAddress: SocketAddress = new InetSocketAddress("1.2.3.4", 100)
 }
 
 class PipeliningClientPushSessionTest extends FunSuite with MockitoSugar {
