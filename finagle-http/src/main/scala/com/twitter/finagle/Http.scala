@@ -7,20 +7,11 @@ import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.http._
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
 import com.twitter.finagle.http.exp.StreamTransport
-import com.twitter.finagle.http.filter.{
-  ClientContextFilter,
-  ClientNackFilter,
-  HttpNackFilter,
-  ServerContextFilter
-}
+import com.twitter.finagle.http.filter._
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.http2.{Http2Listener, Http2Transporter}
-import com.twitter.finagle.netty3.http.{
-  Netty3ClientStreamTransport,
-  Netty3Http,
-  Netty3ServerStreamTransport
-}
+import com.twitter.finagle.netty3.http.{Netty3ClientStreamTransport, Netty3Http, Netty3ServerStreamTransport}
 import com.twitter.finagle.netty4.http.{Netty4HttpListener, Netty4HttpTransporter}
 import com.twitter.finagle.netty4.http.{Netty4ClientStreamTransport, Netty4ServerStreamTransport}
 import com.twitter.finagle.server._
@@ -165,6 +156,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
   object Client {
     private val stack: Stack[ServiceFactory[Request, Response]] =
       StackClient.newStack
+        .insertBefore(StackClient.Role.prepConn, ClientDtabContextFilter.module)
         .insertBefore(StackClient.Role.prepConn, ClientContextFilter.module)
         // We insert the ClientNackFilter close to the bottom of the stack to
         // eagerly transform the HTTP nack representation to a `Failure`.
@@ -374,6 +366,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
         .replace(TraceInitializerFilter.role, new HttpServerTraceInitializer[Request, Response])
         .replace(StackServer.Role.preparer, HttpNackFilter.module)
         .prepend(nonChunkedPayloadSize)
+        .prepend(ServerDtabContextFilter.module)
         .prepend(ServerContextFilter.module)
         .prepend(
           new Stack.NoOpModule(http.filter.StatsFilter.role, http.filter.StatsFilter.description)
