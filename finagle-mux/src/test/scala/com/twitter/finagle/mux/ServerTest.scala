@@ -212,7 +212,7 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
 
       assert(!drain.isDefined) // one outstanding request
 
-      p.setValue(Response(Buf.Utf8("KO")))
+      p.setValue(Response(Nil, Buf.Utf8("KO")))
 
       assert(drain.isDefined) // zero outstanding requests
     }
@@ -332,8 +332,8 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
 
   test("propagates peer certificates") {
     val mockCert = mock[X509Certificate]
-    val okResponse = Response(Utf8("ok"))
-    val failResponse = Response(Utf8("fail"))
+    val okResponse = Response(Nil, Utf8("ok"))
+    val failResponse = Response(Nil, Utf8("fail"))
 
     val testService = new Service[Request, Response] {
       override def apply(request: Request): Future[Response] = Future.value {
@@ -354,8 +354,8 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
 
   test("propagates remote address to service dispatch") {
     val mockAddr = mock[SocketAddress]
-    val okResponse = Response(Utf8("ok"))
-    val failResponse = Response(Utf8("fail"))
+    val okResponse = Response(Nil, Utf8("ok"))
+    val failResponse = Response(Nil, Utf8("fail"))
 
     val testService = new Service[Request, Response] {
       override def apply(request: Request): Future[Response] = {

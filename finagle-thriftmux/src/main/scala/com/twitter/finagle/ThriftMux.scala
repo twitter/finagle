@@ -273,7 +273,7 @@ object ThriftMux
         ExceptionRemoteInfoFactory.letUpstream(Upstream.addr, ClientId.current.map(_.name)) {
           ClientId.let(clientId) {
             // TODO set the Path here.
-            val muxreq = mux.Request(Path.empty, Buf.ByteArray.Owned(req.message))
+            val muxreq = mux.Request(Path.empty, Nil, Buf.ByteArray.Owned(req.message))
             service(muxreq).map(rep => Buf.ByteArray.Owned.extract(rep.body))
           }
         }
@@ -478,7 +478,7 @@ object ThriftMux
         ): Future[mux.Response] = {
           val reqBytes = Buf.ByteArray.Owned.extract(request.body)
           service(reqBytes) map { repBytes =>
-            mux.Response(Buf.ByteArray.Owned(repBytes))
+            mux.Response(Nil, Buf.ByteArray.Owned(repBytes))
           }
         }
       }
@@ -496,7 +496,7 @@ object ThriftMux
           case e if !e.isInstanceOf[TException] =>
             val msg =
               UncaughtAppExceptionFilter.writeExceptionMessage(request.body, e, protocolFactory)
-            Future.value(mux.Response(msg))
+            Future.value(mux.Response(Nil, msg))
         }
     }
 

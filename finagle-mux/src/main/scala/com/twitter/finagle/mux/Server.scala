@@ -283,7 +283,7 @@ private[finagle] class ServerDispatcher(
   }
 
   private[this] def loop(): Unit =
-    Future.each(trans.read) { msg =>
+    Future.each(trans.read()) { msg =>
       val save = Local.save()
       process(msg)
       Local.restore(save)
@@ -398,9 +398,9 @@ private[finagle] object Processor extends Filter[Message, Message, Request, Resp
     Contexts.broadcast.letUnmarshal(tdispatch.contexts) {
       if (tdispatch.dtab.nonEmpty)
         Dtab.local ++= tdispatch.dtab
-      service(Request(tdispatch.dst, tdispatch.req)).transform {
+      service(Request(tdispatch.dst, Nil, tdispatch.req)).transform {
         case Return(rep) =>
-          Future.value(RdispatchOk(tdispatch.tag, Nil, rep.body))
+          Future.value(RdispatchOk(tdispatch.tag, rep.contexts, rep.body))
 
         // Previously, all Restartable failures were sent as RdispatchNack
         // messages. In order to keep backwards compatibility with clients that
@@ -422,7 +422,7 @@ private[finagle] object Processor extends Filter[Message, Message, Request, Resp
     service: Service[Request, Response]
   ): Future[Message] = {
     Trace.letIdOption(treq.traceId) {
-      service(Request(Path.empty, treq.req)).transform {
+      service(Request(Path.empty, Nil, treq.req)).transform {
         case Return(rep) =>
           Future.value(RreqOk(treq.tag, rep.body))
 

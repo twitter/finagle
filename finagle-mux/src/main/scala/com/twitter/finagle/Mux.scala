@@ -262,7 +262,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     private object MuxBindingFactory extends BindingFactory.Module[mux.Request, mux.Response] {
       protected[this] def boundPathFilter(residual: Path) =
         Filter.mk[mux.Request, mux.Response, mux.Request, mux.Response] { (req, service) =>
-          service(mux.Request(residual ++ req.destination, req.body))
+          service(mux.Request(residual ++ req.destination, Nil, req.body))
         }
     }
 

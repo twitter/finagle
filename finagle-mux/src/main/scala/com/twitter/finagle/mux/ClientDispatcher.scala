@@ -198,13 +198,13 @@ private[finagle] object ReqRepFilter {
 
   def reply(msg: Message): Try[Response] = msg match {
     case Message.RreqOk(_, rep) =>
-      Return(Response(rep))
+      Return(Response(Nil, rep))
 
     case Message.RreqError(_, error) =>
       Throw(ServerApplicationError(error))
 
-    case Message.RdispatchOk(_, _, rep) =>
-      Return(Response(rep))
+    case Message.RdispatchOk(_, contexts, rep) =>
+      Return(Response(contexts, rep))
 
     case Message.RdispatchError(_, contexts, error) =>
       val appError = ServerApplicationError(error)

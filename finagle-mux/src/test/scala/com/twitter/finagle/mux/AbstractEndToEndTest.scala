@@ -60,7 +60,7 @@ abstract class AbstractEndToEndTest
         val stringer = new StringWriter
         val printer = new PrintWriter(stringer)
         Dtab.local.print(printer)
-        Future.value(Response(Buf.Utf8(stringer.toString)))
+        Future.value(Response(Nil, Buf.Utf8(stringer.toString)))
       }
     )
 
@@ -72,7 +72,7 @@ abstract class AbstractEndToEndTest
     Dtab.unwind {
       Dtab.local ++= Dtab.read("/foo=>/bar; /web=>/$/inet/twitter.com/80")
       for (n <- 0 until 2) {
-        val rsp = Await.result(client(Request(Path.empty, Buf.Empty)), 30.seconds)
+        val rsp = Await.result(client(Request(Path.empty, Nil, Buf.Empty)), 30.seconds)
         val Buf.Utf8(str) = rsp.body
         assert(str == "Dtab(2)\n\t/foo => /bar\n\t/web => /$/inet/twitter.com/80\n")
       }
@@ -85,7 +85,7 @@ abstract class AbstractEndToEndTest
     val server = serverImpl.serve("localhost:*", Service.mk[Request, Response] { _ =>
       val bw = BufByteWriter.fixed(4)
       bw.writeIntBE(Dtab.local.size)
-      Future.value(Response(bw.owned()))
+      Future.value(Response(Nil, bw.owned()))
     })
 
     val client = clientImpl.newService(
@@ -118,7 +118,7 @@ abstract class AbstractEndToEndTest
       .serve("localhost:*", new Service[Request, Response] {
         def apply(req: Request) = {
           count += 1
-          if (count >= 1) Future.value(Response(req.body))
+          if (count >= 1) Future.value(Response(Nil, req.body))
           else client(req)
         }
       })
@@ -254,9 +254,9 @@ abstract class AbstractEndToEndTest
     test(s"$implName: draining and restart") {
       val echo =
         new Service[Request, Response] {
-          def apply(req: Request) = Future.value(Response(req.body))
+          def apply(req: Request) = Future.value(Response(Nil, req.body))
         }
-      val req = Request(Path.empty, Buf.Utf8("hello, world!"))
+      val req = Request(Path.empty, Nil, Buf.Utf8("hello, world!"))
 
       // We need to reserve a port here because we're going to be
       // rebinding the server.
@@ -351,7 +351,7 @@ abstract class AbstractEndToEndTest
   test(s"$implName: measures payload sizes") {
     val sr = new InMemoryStatsReceiver
     val service = new Service[Request, Response] {
-      def apply(req: Request) = Future.value(Response(req.body.concat(req.body)))
+      def apply(req: Request) = Future.value(Response(Nil, req.body.concat(req.body)))
     }
     val server = serverImpl
       .withLabel("server")
@@ -365,7 +365,7 @@ abstract class AbstractEndToEndTest
         "client"
       )
 
-    Await.ready(client(Request(Path.empty, Buf.Utf8("." * 10))), 5.seconds)
+    Await.ready(client(Request(Path.empty, Nil, Buf.Utf8("." * 10))), 5.seconds)
 
     assert(sr.stat("client", "request_payload_bytes")() == Seq(10.0f))
     assert(sr.stat("client", "response_payload_bytes")() == Seq(20.0f))

@@ -53,6 +53,8 @@ Breaking API Changes
   * finagle-mysql: Moved `Cursors.cursor` method to `Client` trait, and removed `Cursors` trait.
     This allows cursor queries to used with transactions.  ``PHAB_ID=D91789``
 
+  * finagle-mux: Expose transport contexts in mux.Request and mux.Response. ``PHAB_ID=D92998``
+
 7.1.0
 ------
 

@@ -36,7 +36,7 @@ class DispatcherTest extends FunSuite with Eventually with IntegrationPatience {
       new ClientSession(clientTrans, FailureDetector.NullConfig, "test", NullStatsReceiver)
     val client = ClientDispatcher.newRequestResponse(session)
 
-    val f = client(Request(Path.empty, Buf.Empty))
+    val f = client(Request(Path.empty, Nil, Buf.Empty))
     assert(!f.isDefined)
     assert(!p.isDefined)
     f.raise(new Exception())

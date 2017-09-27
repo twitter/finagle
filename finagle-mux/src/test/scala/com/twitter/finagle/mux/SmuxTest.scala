@@ -79,9 +79,9 @@ object SmuxTest {
   type TlsPair = (Option[OpportunisticTls.Level], Option[OpportunisticTls.Level])
 
   val concatService = new Service[Request, Response] {
-    def apply(req: Request) = Future.value(Response(req.body.concat(req.body)))
+    def apply(req: Request) = Future.value(Response(Nil, req.body.concat(req.body)))
   }
-  val request = Request(Path.empty, Buf.Utf8("." * 10))
+  val request = Request(Path.empty, Nil, Buf.Utf8("." * 10))
 
   def await[A](f: Future[A]): A = Await.result(f, 5.seconds)
 
