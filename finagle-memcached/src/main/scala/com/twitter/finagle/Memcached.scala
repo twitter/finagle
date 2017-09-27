@@ -169,6 +169,11 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
   private[this] val toggle = Toggles(UsePartitioningMemcachedClientToggle)
   private[this] def UsePartitioningMemcachedClient = toggle(ServerInfo().id.hashCode)
 
+  private[finagle] val UsePushMemcachedToggleName =
+    "com.twitter.finagle.memcached.UsePushMemcachedClient"
+  private[this] val usePushMemcachedToggle = Toggles(UsePushMemcachedToggleName)
+  private[this] def UsePushMemcached = usePushMemcachedToggle(ServerInfo().id.hashCode)
+
   /**
    * Memcached specific stack params.
    */
@@ -367,11 +372,11 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
     params: Stack.Params = Client.params
   ) extends EndpointerStackClient[Command, Response, Client]
       with MemcachedRichClient {
+    import Client.{EndpointerClient, NonPushClient, PushClient, mkDestination}
 
-    import Client.{EndpointerClient, NonPushClient, mkDestination}
-
-    // Hard-coded to use the non-push client. In the future, this will be a toggle.
-    private[this] val underlying: EndpointerClient = NonPushClient(stack, params)
+    private[this] val underlying: EndpointerClient =
+      if  (UsePushMemcached) PushClient(stack, params)
+      else NonPushClient(stack, params)
 
     protected def endpointer: Stackable[ServiceFactory[Command, Response]] = underlying.endptr
 
