@@ -72,7 +72,7 @@ object Trace {
       val trace64 = ByteArrays.get64be(bytes, 16)
       val flags64 = ByteArrays.get64be(bytes, 24)
 
-      val traceIdHigh = if(body.length == 40) ByteArrays.get64be(bytes, 32) else -1L
+      val traceIdHigh = if(body.length == 40) ByteArrays.get64be(bytes, 32) else 0L
 
       val flags = Flags(flags64)
       val sampled = if (flags.isFlagSet(Flags.SamplingKnown)) {
@@ -85,7 +85,7 @@ object Trace {
         SpanId(span64),
         sampled,
         flags,
-        if(traceIdHigh == -1L) None else Some(SpanId(traceIdHigh))
+        Some(SpanId(traceIdHigh))
       )
 
       Return(traceId)

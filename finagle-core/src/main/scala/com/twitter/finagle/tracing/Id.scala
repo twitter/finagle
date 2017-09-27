@@ -119,7 +119,7 @@ object TraceId {
       val trace64 = ByteArrays.get64be(bytes, 16)
       val flags64 = ByteArrays.get64be(bytes, 24)
 
-      val traceIdHigh = if(bytes.length == 40) ByteArrays.get64be(bytes, 32) else -1L
+      val traceIdHigh = if(bytes.length == 40) ByteArrays.get64be(bytes, 32) else 0L
 
       val flags = Flags(flags64)
       val sampled = if (flags.isFlagSet(Flags.SamplingKnown)) {
@@ -132,7 +132,7 @@ object TraceId {
         SpanId(span64),
         sampled,
         flags,
-        if(traceIdHigh == -1L) None else Some(SpanId(traceIdHigh))
+        Some(SpanId(traceIdHigh))
       )
       Return(traceId)
     }
@@ -223,7 +223,11 @@ final case class TraceId(
     case Some(id) => id
   }
 
-  def traceIdHigh: Option[SpanId] = _traceIdHigh
+  def traceIdHigh: Option[SpanId] = _traceIdHigh match {
+    case None => None
+    case Some(id) if id.self == 0L => None
+    case tid@Some(_) => tid
+  }
 
   /**
    * Override [[_sampled]] to Some(true) if the debug flag is set.
