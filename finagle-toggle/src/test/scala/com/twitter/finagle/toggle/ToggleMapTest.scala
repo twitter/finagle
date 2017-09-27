@@ -2,16 +2,13 @@ package com.twitter.finagle.toggle
 
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.logging.{BareFormatter, Level, Logger, StringHandler}
-import org.junit.runner.RunWith
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{FunSuite, Matchers}
 import scala.collection.immutable
 import scala.util.Random
 
-@RunWith(classOf[JUnitRunner])
 class ToggleMapTest extends FunSuite with GeneratorDrivenPropertyChecks with Matchers {
 
   private val IntGen = arbitrary[Int]
@@ -287,6 +284,20 @@ class ToggleMapTest extends FunSuite with GeneratorDrivenPropertyChecks with Mat
     flag.overrides.let(map) {
       assert(ToggleMap.flags.iterator.isEmpty)
     }
+  }
+
+  test("ToggleMap.Flags return values reflect bindings") {
+    val toggle = ToggleMap.flags("com.toggle.test")
+
+    val res1 = flag.overrides.let(Map("com.toggle.test" -> 1.0)) {
+      toggle(0)
+    }
+    assert(res1)
+
+    val res2 = flag.overrides.let(Map("com.toggle.test" -> 0.0)) {
+      toggle(0)
+    }
+    assert(!res2)
   }
 
   test("ToggleMap.Flags Toggles see changes to the flag") {
