@@ -31,6 +31,7 @@ scala_library(
   exports=[
     '3rdparty/jvm/io/netty:netty',
     'finagle/finagle-base-http',
+    'finagle/finagle-core',
     'util/util-core:util-core',
   ],
 )
