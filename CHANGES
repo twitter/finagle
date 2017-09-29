@@ -10,6 +10,9 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 New Features
 ~~~~~~~~~~~~
 
+  * finagle-core: DeadlineFilter may now be created from the class and used as a
+    regular Filter in addition to a stack module as before. ``PHAB_ID=D94517``
+
   * finagle-mysql: Add ability to toggle the `CLIENT_FOUND_ROWS` flag. ``PHAB_ID=D91406``
 
 Runtime Behavior Changes
