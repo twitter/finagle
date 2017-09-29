@@ -93,6 +93,7 @@ object Status {
   val NotModified = Status(304)
   val UseProxy = Status(305)
   val TemporaryRedirect = Status(307)
+  val PermanentRedirect = Status(308)
   val BadRequest = Status(400)
   val Unauthorized = Status(401)
   val PaymentRequired = Status(402)
@@ -155,6 +156,7 @@ object Status {
     304 -> NotModified,
     305 -> UseProxy,
     307 -> TemporaryRedirect,
+    308 -> PermanentRedirect,
     400 -> BadRequest,
     401 -> Unauthorized,
     402 -> PaymentRequired,
@@ -216,6 +218,7 @@ object Status {
     NotModified -> "Not Modified",
     UseProxy -> "Use Proxy",
     TemporaryRedirect -> "Temporary Redirect",
+    PermanentRedirect -> "Permanent Redirect",
     BadRequest -> "Bad Request",
     Unauthorized -> "Unauthorized",
     PaymentRequired -> "Payment Required",
