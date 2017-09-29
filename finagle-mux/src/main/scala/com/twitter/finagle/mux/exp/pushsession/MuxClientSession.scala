@@ -224,11 +224,19 @@ private[finagle] final class MuxClientSession(
 
       dispatchState = Drained
 
-      val pp = pingPromise
-      pingPromise = null
-      ClientSession.FuturePingNack.proxyTo(pp)
+      // Fail an outstanding Ping, if it exists
+      if (pingPromise != null) {
+        val pp = pingPromise
+        pingPromise = null
+        ClientSession.FuturePingNack.proxyTo(pp)
+      }
 
       dataPlane.shutdown(oexc, Some(handle.remoteAddress))
+
+      oexc match {
+        case Some(t) => log.info(t, s"Closing mux client session to $name due to error")
+        case None => ()
+      }
     }
   }
 
