@@ -172,7 +172,9 @@ val jmockSettings = Seq(
 lazy val noPublishSettings = Seq(
   publish := {},
   publishLocal := {},
-  publishArtifact := false
+  publishArtifact := false,
+  // sbt-pgp's publishSigned task needs this defined even though it is not publishing.
+  publishTo := Some(Resolver.file("Unused transient repository", file("target/unusedrepo")))
 )
 
 lazy val projectList = Seq[sbt.ProjectReference](
