@@ -62,10 +62,14 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
     /**
      * A class eligible for configuring if a client's TLS mode is opportunistic.
-     * If it's set, then mux will negotiate with the supplied level whether to
-     * use TLS or not before setting up TLS.
+     * If it's not None, then mux will negotiate with the supplied level whether
+     * to use TLS or not before setting up TLS.
      *
-     * @note this is not mutually intelligible with simple mux over TLS
+     * If it's None, it will not attempt to negotiate whether to use TLS or not
+     * with the remote peer, and if TLS is configured, it will use mux over TLS.
+     *
+     * @note opportunistic TLS is not mutually intelligible with simple mux
+     *       over TLS
      */
     case class OppTls(level: Option[OpportunisticTls.Level])
     object OppTls {
@@ -357,7 +361,9 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       val negotiatedTrans = mux.Handshake.client(
         trans = transport,
         version = LatestVersion,
-        headers = Client.headers(maxFrameSize, if (param.MuxImpl.tlsHeaders) level else None),
+        headers = Client.headers(
+          maxFrameSize,
+          if (param.MuxImpl.tlsHeaders) level.orElse(Some(OpportunisticTls.Off)) else None),
         negotiate = negotiate(
           maxFrameSize,
           statsReceiver,
@@ -485,7 +491,10 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       val negotiatedTrans = mux.Handshake.server(
         trans = transport,
         version = LatestVersion,
-        headers = Server.headers(_, maxFrameSize, if (cachedTlsHeaders) level else None),
+        headers = Server.headers(
+          _,
+          maxFrameSize,
+          if (cachedTlsHeaders) level.orElse(Some(OpportunisticTls.Off)) else None),
         negotiate = negotiate(
           maxFrameSize,
           statsReceiver,
