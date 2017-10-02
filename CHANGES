@@ -15,6 +15,11 @@ New Features
 
   * finagle-mysql: Add ability to toggle the `CLIENT_FOUND_ROWS` flag. ``PHAB_ID=D91406``
 
+  * finagle-http: Separated the DtabFilter.Extractor from the ServerContextFilter into
+    a new module: ServerDtabContextFilter. While this is still enabled in the default
+    Http server stack, it can be disabled independently of the ServerContextFilter.
+    ``PHAB_ID=D94306``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
