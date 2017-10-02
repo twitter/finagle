@@ -289,7 +289,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
      * @param maxFrameSize the maximum mux fragment size the client is willing to
      * receive from a server.
      */
-    private def headers(
+    private[finagle] def headers(
       maxFrameSize: StorageUnit,
       tlsLevel: Option[OpportunisticTls.Level]
     ): Handshake.Headers = {

@@ -14,6 +14,7 @@ import com.twitter.io.{Buf, BufByteWriter, ByteReader}
 import com.twitter.util._
 import java.io.{PrintWriter, StringWriter}
 import java.net.{InetAddress, InetSocketAddress, ServerSocket, Socket}
+import java.nio.ByteBuffer
 import java.util.concurrent.atomic.AtomicInteger
 import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
@@ -382,15 +383,39 @@ abstract class AbstractEndToEndTest
       private lazy val server = new ServerSocket()
       @volatile private var client: Socket = _
 
+      private[this] def swallowMessage(): Unit = {
+        val is = client.getInputStream
+        val sizeField = (3 to 0 by -1).foldLeft(0){  (acc: Int, i: Int) =>
+          acc | (is.read().toByte << i)
+        }
+        // swallow sizeField bytes
+        (0 until sizeField).foreach(_ => is.read())
+      }
+
+      private[this] def swallowAndWrite(data: Array[Byte]): Unit = {
+        swallowMessage()
+        val os = client.getOutputStream
+        data.foreach(os.write(_))
+        os.flush()
+      }
+
       private val serverThread = new Thread(new Runnable {
         override def run(): Unit = {
           client = server.accept()
           // Length of 4 bytes, header of 0x00 00 00 04 (illegal: message type 0x00)
-          val message = Array[Byte](0, 0, 0, 4, 0, 0, 0, 4)
+          val rerr = Message.encode(Message.Rerr(1, "didn't work!"))
+          val badMessage = Array[Byte](0, 0, 0, 4, 0, 0, 0, 4)
+
+          val lengthField = {
+            val len = new Array[Byte](4)
+            val bb = ByteBuffer.wrap(len)
+            bb.putInt(rerr.length)
+            len
+          }
 
           // write the message twice: once for handshaking and once for the failure
-          client.getOutputStream.write(message ++ message)
-          client.getOutputStream.flush()
+          swallowAndWrite(lengthField ++ Buf.ByteArray.Shared.extract(rerr))
+          swallowAndWrite(badMessage)
         }
       })
 

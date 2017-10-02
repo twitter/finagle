@@ -44,6 +44,12 @@ class MockChannelHandle[In, Out](var currentSession: PushSession[In, Out]) exten
 
   val serialExecutor: DeferredExecutor = new DeferredExecutor
 
+  def dequeAndCompleteWrite(): Vector[Out] = {
+    val write = pendingWrites.dequeue()
+    write.completeSuccess()
+    write.msgs
+  }
+
   def registerSession(newSession: PushSession[In, Out]): Unit = {
     currentSession = newSession
   }
