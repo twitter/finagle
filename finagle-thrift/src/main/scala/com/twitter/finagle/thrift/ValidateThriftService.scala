@@ -5,7 +5,7 @@ import java.util.logging.{Logger, Level}
 import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol.{TProtocolFactory, TMessageType}
 import org.apache.thrift.transport.TMemoryInputTransport
-import com.twitter.util.Future
+import com.twitter.util.{Future, Return}
 
 /**
  * Indicates that the connection on which a Thrift request was issued
@@ -13,7 +13,7 @@ import com.twitter.util.Future
  * [[com.twitter.finagle.thrift.ValidateThriftService]].
  */
 case class InvalidThriftConnectionException() extends ServiceException {
-  override def getMessage = "the thrift connection was invalidated"
+  override def getMessage: String = "the thrift connection was invalidated"
 }
 
 /**
@@ -33,19 +33,21 @@ class ValidateThriftService(
 ) extends ServiceProxy[ThriftClientRequest, Array[Byte]](self) {
   @volatile private[this] var isValid = true
 
-  override def apply(req: ThriftClientRequest) =
+  override def apply(req: ThriftClientRequest): Future[Array[Byte]] =
     if (!isValid) Future.exception(WriteException(InvalidThriftConnectionException()))
     else
-      self(req) onSuccess { bytes =>
-        if (!req.oneway && !isResponseValid(bytes)) {
-          isValid = false
-          Logger
-            .getLogger("finagle-thrift")
-            .log(Level.WARNING, "Thrift connection was invalidated!")
-        }
+      self(req).respond {
+        case Return(bytes) =>
+          if (!req.oneway && !isResponseValid(bytes)) {
+            isValid = false
+            Logger
+              .getLogger("finagle-thrift")
+              .log(Level.WARNING, "Thrift connection was invalidated!")
+          }
+        case _ =>
       }
 
-  override def status =
+  override def status: Status =
     if (!isValid) Status.Closed
     else self.status
 

@@ -35,34 +35,40 @@ import scala.collection.mutable
 private[finagle] object MemcachedTracingFilter {
 
   object Module extends Stack.Module1[param.Label, ServiceFactory[Command, Response]] {
-    val role = ClientTracingFilter.role
-    val description = "Add Memcached client specific annotations to the trace"
+    val role: Stack.Role = ClientTracingFilter.role
+    val description: String = "Add Memcached client specific annotations to the trace"
 
-    def make(_label: param.Label, next: ServiceFactory[Command, Response]) = {
+    def make(
+      _label: param.Label,
+      next: ServiceFactory[Command, Response]
+    ): ServiceFactory[Command, Response] = {
       val param.Label(label) = _label
       val annotations = new AnnotatingTracingFilter[Command, Response](
         label,
         Annotation.ClientSend(),
         Annotation.ClientRecv()
       )
-      annotations andThen TracingFilter andThen next
+      annotations.andThen(TracingFilter).andThen(next)
     }
   }
 
   object TracingFilter extends SimpleFilter[Command, Response] {
-    def apply(command: Command, service: Service[Command, Response]) = {
+    def apply(command: Command, service: Service[Command, Response]): Future[Response] = {
       val response = service(command)
       if (Trace.isActivelyTracing) {
         // Submitting rpc name here assumes there is no further tracing lower in the stack
         Trace.recordRpc(command.name)
         command match {
           case command: RetrievalCommand =>
-            response.onSuccess {
-              case Values(vals) =>
+            response.respond {
+              case Return(Values(vals)) =>
                 val cmd = command.asInstanceOf[RetrievalCommand]
                 val misses = mutable.Set.empty[String]
-                cmd.keys.foreach { case Buf.Utf8(key) => misses += key }
-                vals.foreach { value =>
+                cmd.keys.foreach {
+                  case Buf.Utf8(key) =>
+                    misses += key
+                }
+                vals.foreach { value => 
                   val Buf.Utf8(key) = value.key
                   Trace.recordBinary(key, "Hit")
                   misses.remove(key)
