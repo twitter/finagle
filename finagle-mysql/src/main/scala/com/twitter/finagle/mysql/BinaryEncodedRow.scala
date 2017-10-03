@@ -1,0 +1,83 @@
+package com.twitter.finagle.mysql
+
+import com.twitter.finagle.mysql.transport.{MysqlBuf, MysqlBufReader}
+import com.twitter.io.Buf
+
+/**
+ * Defines a Row where the data is presumed to be encoded with the
+ * mysql binary protocol.
+ * [[http://dev.mysql.com/doc/internals/en/binary-protocol-resultset-row.html]]
+ */
+private class BinaryEncodedRow(
+  rawRow: Buf,
+  val fields: IndexedSeq[Field],
+  indexMap: Map[String, Int],
+  ignoreUnsigned: Boolean
+) extends Row {
+  private val reader: MysqlBufReader = MysqlBuf.reader(rawRow)
+  reader.skip(1)
+
+  /**
+   * In a binary encoded row, null values are not sent from the
+   * server. Instead, the server sends a bit vector where
+   * each bit corresponds to the index of the column. If the bit
+   * is set, the value is null.
+   */
+  val nullBitmap: BigInt = {
+    val len = ((fields.size + 7 + 2) / 8).toInt
+    val bytesAsBigEndian = reader.take(len).reverse
+    BigInt(bytesAsBigEndian)
+  }
+
+  /**
+   * Check if the bit is set. Note, the
+   * first 2 bits are reserved.
+   */
+  def isNull(index: Int) = nullBitmap.testBit(index + 2)
+
+  /**
+   * Convert the binary representation of each value
+   * into an appropriate Value object.
+   *
+   * @see [[https://mariadb.com/kb/en/mariadb/resultset-row/]] for details
+   *     about the binary row format.
+   */
+  lazy val values: IndexedSeq[Value] =
+    for ((field, idx) <- fields.zipWithIndex) yield {
+      if (isNull(idx)) NullValue
+      else
+        field.fieldType match {
+          case Type.Tiny if isSigned(field) => ByteValue(reader.readByte())
+          case Type.Tiny => ShortValue(reader.readUnsignedByte())
+          case Type.Short if isSigned(field) => ShortValue(reader.readShortLE())
+          case Type.Short => IntValue(reader.readUnsignedShortLE())
+          case Type.Int24 if isSigned(field) =>
+            IntValue(reader.readIntLE()) // transferred as an Int32
+          case Type.Int24 =>
+            // The unsigned Int24 should always fit into the first 3 bytes of signed Int32
+            IntValue(reader.readIntLE())
+          case Type.Long if isSigned(field) => IntValue(reader.readIntLE())
+          case Type.Long => LongValue(reader.readUnsignedIntLE())
+          case Type.LongLong if isSigned(field) => LongValue(reader.readLongLE())
+          case Type.LongLong => BigIntValue(reader.readUnsignedLongLE())
+          case Type.Float => FloatValue(reader.readFloatLE())
+          case Type.Double => DoubleValue(reader.readDoubleLE())
+          case Type.Year => ShortValue(reader.readShortLE())
+          // Nonbinary strings as stored in the CHAR, VARCHAR, and TEXT data types
+          case Type.VarChar | Type.String | Type.VarString | Type.TinyBlob | Type.Blob |
+               Type.MediumBlob
+            if !Charset.isBinary(field.charset) && Charset.isCompatible(field.charset) =>
+            StringValue(reader.readLengthCodedString(Charset(field.charset)))
+
+          case Type.LongBlob =>
+            throw new UnsupportedOperationException("LongBlob is not supported!")
+          case typ => RawValue(typ, field.charset, isBinary = true, reader.readLengthCodedBytes())
+        }
+    }
+
+  def indexOf(name: String): Option[Int] = indexMap.get(name)
+
+  @inline
+  private[this] def isSigned(field: Field): Boolean =
+    ignoreUnsigned || field.isSigned
+}
