@@ -3,6 +3,7 @@ package com.twitter.finagle.http
 import java.util.Locale
 import scala.annotation.switch
 import scala.collection.mutable
+import scala.collection.JavaConverters._
 
 /** Mutable-Map-backed [[HeaderMap]] */
 private final class MapHeaderMap extends HeaderMap {
@@ -29,7 +30,7 @@ private final class MapHeaderMap extends HeaderMap {
 
   def get(key: String): Option[String] = underlying.getFirst(key)
 
-  def iterator: Iterator[(String, String)] = underlying.flattenIterator
+  def iterator: Iterator[(String, String)] = underlying.iterator
 
   def +=(kv: (String, String)): this.type = {
     set(kv._1, kv._2)
@@ -42,7 +43,7 @@ private final class MapHeaderMap extends HeaderMap {
   }
 
   override def keySet: Set[String] =
-    underlying.values.flatten.map(_.name).toSet
+    underlying.values.asScala.flatten.map(_.name).toSet
 
   override def keysIterator: Iterator[String] =
     keySet.iterator
@@ -129,14 +130,15 @@ private object MapHeaderMap {
   }
 
   private val GetHeaderValue: Header => String = _.value
-  private val NewHeaders: () => mutable.ArrayBuffer[Header] = () => new mutable.ArrayBuffer[Header]
-  private val EmptyHeaders: mutable.ArrayBuffer[Header] = mutable.ArrayBuffer.empty
+  private val EmptyHeaders = mutable.ArrayBuffer.empty[Header]
+  private val NewHeaders = new java.util.function.Function[String, mutable.ArrayBuffer[Header]] {
+    def apply(t: String): mutable.ArrayBuffer[Header] = new mutable.ArrayBuffer[Header]
+  }
 
-  // An internal representation for a `MapHeaderMap` that enables efficient iteration
-  // by gaining access to `entriesIterator` (protected method).
-  private class Headers extends mutable.HashMap[String, mutable.ArrayBuffer[Header]] {
-    def flattenIterator: Iterator[(String, String)] = new Iterator[(String, String)] {
-      private[this] val it = entriesIterator
+  // An internal representation for a `MapHeaderMap` that enables efficient iteration.
+  private class Headers extends java.util.HashMap[String, mutable.ArrayBuffer[Header]] {
+    def iterator: Iterator[(String, String)] = new Iterator[(String, String)] {
+      private[this] val it = entrySet().iterator()
       private[this] var i = 0
       private[this] var current = EmptyHeaders
 
@@ -146,7 +148,7 @@ private object MapHeaderMap {
 
       def next(): (String, String) = {
         if (i == current.length) {
-          current = it.next().value
+          current = it.next().getValue
           i = 0
         }
 
@@ -157,34 +159,31 @@ private object MapHeaderMap {
       }
     }
 
-    def getFirst(key: String): Option[String] =
-      get(canonicalName(key)) match {
-        case Some(h) => Some(GetHeaderValue(h(0)))
-        case None => None
-      }
-
-    def getAll(key: String): Seq[String] =
-      get(canonicalName(key)) match {
-        case Some(h) => h.map(GetHeaderValue)
-        case None => Nil
-      }
-
-    def add(k: String, v: String): Unit = {
-      val p = new Header(k, v)
-      val h = getOrElseUpdate(p.canonicalName, NewHeaders())
-
-      h += p
+    def getFirst(key: String): Option[String] = {
+      val result = get(canonicalName(key))
+      if (result == null) None
+      else Some(GetHeaderValue(result(0)))
     }
 
-    def set(key: String, value: String): Unit = {
-      val p = new Header(key, value)
-      get(p.canonicalName) match {
-        case Some(h) =>
-          h.clear()
-          h += p
-        case None =>
-          update(p.canonicalName, mutable.ArrayBuffer(p))
-      }
+    def getAll(key: String): Seq[String] = {
+      val result = get(canonicalName(key))
+      if (result == null) Nil
+      else result.map(GetHeaderValue)
+    }
+
+    def add(k: String, v: String): Unit = {
+      val h = new Header(k, v)
+      val hs = computeIfAbsent(h.canonicalName, NewHeaders)
+
+      hs += h
+    }
+
+    def set(k: String, v: String): Unit = {
+      val h = new Header(k, v)
+      val hs = computeIfAbsent(h.canonicalName, NewHeaders)
+
+      hs.clear()
+      hs += h
     }
   }
 
