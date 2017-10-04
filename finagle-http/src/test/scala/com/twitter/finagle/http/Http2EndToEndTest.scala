@@ -55,13 +55,15 @@ class Http2EndToEndTest extends AbstractEndToEndTest {
   }
 
   // TODO: Consolidate behavior between h1 and h2
-  test("Client sets & enforces MaxHeaderSize") {
+  // note that this behavior is implementation-dependent
+  // the spec says MaxHeaderListSize is advisory
+  test("Server sets & enforces MaxHeaderSize") {
     val server = serverImpl()
+      .withMaxHeaderSize(1.kilobyte)
       .serve("localhost:*", initService)
 
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
     val client = clientImpl()
-      .withMaxHeaderSize(1.kilobyte)
       .newService(s"${addr.getHostName}:${addr.getPort}", "client")
 
     initClient(client)

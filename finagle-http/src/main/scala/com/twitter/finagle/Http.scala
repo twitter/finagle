@@ -245,7 +245,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     def withMaxHeaderSize(size: StorageUnit): Client =
       this
         .configured(http.param.MaxHeaderSize(size))
-        .configured(http2.param.MaxHeaderListSize(Some(size)))
+        .configured(http2.param.MaxHeaderListSize(size))
 
     /**
      * Configures the maximum initial line length the client can
@@ -421,7 +421,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     def withMaxHeaderSize(size: StorageUnit): Server =
       this
         .configured(http.param.MaxHeaderSize(size))
-        .configured(http2.param.MaxHeaderListSize(Some(size)))
+        .configured(http2.param.MaxHeaderListSize(size))
 
     /**
      * Configures the maximum request size this server can receive.

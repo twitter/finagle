@@ -25,9 +25,7 @@ private[http2] object Settings {
     maxFrameSize.foreach { s =>
       settings.maxFrameSize(s.inBytes.toInt)
     }
-    maxHeaderListSize.foreach { s =>
-      settings.maxHeaderListSize(s.inBytes)
-    }
+    settings.maxHeaderListSize(maxHeaderListSize.inBytes)
     settings
   }
 }
