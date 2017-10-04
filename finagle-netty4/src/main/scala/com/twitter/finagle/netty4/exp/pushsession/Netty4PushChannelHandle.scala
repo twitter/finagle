@@ -2,6 +2,7 @@ package com.twitter.finagle.netty4.exp.pushsession
 
 import com.twitter.finagle.{ChannelException, Status}
 import com.twitter.finagle.exp.pushsession.{PushChannelHandle, PushSession}
+import com.twitter.logging.Logger
 import com.twitter.util._
 import io.netty.buffer.ByteBuf
 import io.netty.channel.{
@@ -168,11 +169,11 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel)
   }
 
   // Must be called from within the serialExecutor
-  private def handleFail(exc: Option[Throwable]): Unit =
+  private def handleFail(exc: Option[Throwable]): Unit = {
     if (!failed) {
       failed = true
       // We trampoline the satisfaction of the close promise to make sure
-      // users don't get inadvertant re-entrance due to the continuations
+      // users don't get inadvertent re-entrance due to the continuations
       // attached to the promise potentially being run right away.
       serialExecutor.execute(new Runnable {
         def run(): Unit = {
@@ -185,6 +186,7 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel)
 
       close()
     }
+  }
 
   private[this] def handleChannelExceptionCaught(exc: Throwable): Unit = {
     // We make sure these events are trampolined through the serial executor
@@ -231,18 +233,41 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel)
   private final class DelayedByteBufHandler extends ChannelInboundHandlerAdapter {
     // 8 is the minimum initial size allowed by the ArrayDeque implementation
     private[this] val pendingMessages = new java.util.ArrayDeque[ByteBuf](8)
+
+    // Because `Netty4PushChannelHandle.install` is called from within the channels
+    // `EventLoop`, we should be populating this field eagerly, during the call to
+    // Channel.pipeline.addLast(DelayedByteBufHandler, thisInstance) in
+    // `Netty4PushChannelHandle.install`.
     private[this] var ctx: ChannelHandlerContext = null
+
+    def installedInPipeline: Boolean = {
+      ctx != null && !ctx.isRemoved
+    }
 
     /** Removes itself from the pipeline and sends its messages */
     def installSessionDriver(session: PushSession[In, Out]): Unit = {
-      assert(ctx != null)
-      ch.pipeline.addLast(SessionDriver, new SessionDriver(session))
-      ch.pipeline.remove(this)
-      ch.config.setAutoRead(true)
+      if (!ctx.isRemoved) {
+        ch.pipeline.addLast(SessionDriver, new SessionDriver(session))
+        ch.pipeline.remove(this)
+        ch.config.setAutoRead(true)
 
-      // Empty our queue
-      while (!pendingMessages.isEmpty) {
-        ctx.fireChannelRead(pendingMessages.poll())
+        // Empty our queue
+        while (!pendingMessages.isEmpty) {
+          ctx.fireChannelRead(pendingMessages.poll())
+        }
+      } else if (!pendingMessages.isEmpty) {
+        // The pipeline must have closed on us and should
+        // have been drained on `channelInactive`, but wasn't.
+        // This should never happen, so fail aggressively.
+        val channelStateMsg =
+          "DelayStage has been removed from the pipeline but not drained: " +
+          s"Channel(isOpen: ${ch.isOpen}, isActive: ${ch.isActive})"
+
+        val exc = new IllegalStateException(channelStateMsg)
+        log.error(exc, channelStateMsg)
+
+        drainQueue()
+        handleFail(Some(exc))
       }
     }
 
@@ -253,10 +278,7 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel)
 
     // Need to make sure to release anything that is still laying around
     override def channelInactive(ctx: ChannelHandlerContext): Unit = {
-      while (!pendingMessages.isEmpty) {
-        pendingMessages.poll().release()
-      }
-
+      drainQueue()
       handleChannelInactive()
     }
 
@@ -268,12 +290,21 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel)
         ctx.fireExceptionCaught(ex)
     }
 
-    override def exceptionCaught(ctx: ChannelHandlerContext, e: Throwable): Unit =
+    override def exceptionCaught(ctx: ChannelHandlerContext, e: Throwable): Unit = {
       handleChannelExceptionCaught(e)
+    }
+
+    private[this] def drainQueue(): Unit = {
+      while (!pendingMessages.isEmpty) {
+        pendingMessages.poll().release()
+      }
+    }
   }
 }
 
 private object Netty4PushChannelHandle {
+  private val log: Logger = Logger.get
+
   val SessionDriver: String = "pushSessionDriver"
   val DelayedByteBufHandler: String = "delayedByteBufHandler"
 
@@ -284,15 +315,26 @@ private object Netty4PushChannelHandle {
    * resolved. The resultant `Future[T]` will resolve once the session has been installed
    * and the pipeline is receiving events from the socket.
    *
-   * @note this should be called from the thread associated with the Channel and with
-   *       an active channel or else shutdown logic will become racy since adding handlers
-   *       to a closed channel won't receive `channelInactive` events.
+   * @note This must be called from within the `EventLoop` this `Channel` belongs to to
+   *       avoid racy behavior in shutdown logic since adding handlers to a closed
+   *       `Channel` won't receive channelInactive events and we would otherwise have to
+   *       handle race conditions between `ChannelHandlerContext` instances resolving and
+   *       session resolution.
+   *
+   * @throws IllegalStateException if this method is called from outside of the Netty4
+   *                               `EventLoop` that this `Channel` belongs to.
    */
   def install[In, Out, T <: PushSession[In, Out]](
     ch: Channel,
     protocolInit: ChannelPipeline => Unit,
     sessionFactory: PushChannelHandle[In, Out] => Future[T]
   ): (Netty4PushChannelHandle[In, Out], Future[T]) = {
+    if (!ch.eventLoop.inEventLoop) {
+      throw new IllegalStateException(
+        s"Expected to be called from within the `Channel`s " +
+        s"associated `EventLoop` (${ch.eventLoop}), instead called " +
+        s"from thread ${Thread.currentThread}")
+    }
 
     val p = Promise[T]
     p.setInterruptHandler { case _ => ch.close() }
@@ -300,6 +342,11 @@ private object Netty4PushChannelHandle {
     val channelHandle = new Netty4PushChannelHandle[In, Out](ch)
     val delayStage = new channelHandle.DelayedByteBufHandler
     ch.pipeline.addLast(DelayedByteBufHandler, delayStage)
+
+    // This should've happened within the call to `.addLast` since we're
+    // running from inside the `EventLoop` the `Channel` belongs to.
+    assert(delayStage.installedInPipeline)
+
     // We initialize the protocol level stuff after adding the delay stage
     // so that the write path is fully formed but the delay stage is in
     // a position that we know will be dealing in ByteBuf's.
@@ -315,8 +362,8 @@ private object Netty4PushChannelHandle {
 
             case Throw(exc) =>
               channelHandle.handleFail(Some(exc))
-
           }
+
           p.updateIfEmpty(result)
         }
       })
