@@ -163,7 +163,7 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
   // thread-safety provided by synchronization on `this`
   private[this] var deltas: Option[CounterDeltas] = None
 
-  def apply(request: Request): Future[Response] = FuturePool.unboundedPool {
+  def apply(request: Request): Future[Response] = {
     if (registryLoaded.compareAndSet(false, true)) {
       GlobalRegistry.get
         .put(Seq("stats", "commons_metrics", "counters_latched"), useCounterDeltas().toString)
@@ -192,7 +192,7 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
 
     val asJson = json(pretty, filtered, counterDeltasOn)
     response.content = Buf.Utf8(asJson)
-    response
+    Future.value(response)
   }
 
   // package protected for testing
