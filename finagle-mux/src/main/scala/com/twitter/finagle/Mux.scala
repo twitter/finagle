@@ -15,13 +15,13 @@ import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.param.{ProtocolLibrary, WithDefaultLoadBalancer}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
-import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.{StatsReceiver, Counter}
 import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.{StatsTransport, Transport}
 import com.twitter.finagle.{param => fparam}
 import com.twitter.io.Buf
-import com.twitter.logging.Logger
+import com.twitter.logging.{Logger, Level}
 import com.twitter.util.{Closable, Future, StorageUnit}
 import io.netty.channel.{Channel, ChannelPipeline}
 import java.net.SocketAddress
@@ -191,7 +191,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     maxFrameSize: StorageUnit,
     statsReceiver: StatsReceiver,
     localEncryptLevel: OpportunisticTls.Level,
-    turnOnTlsFn: () => Unit
+    turnOnTlsFn: () => Unit,
+    upgrades: Counter
   ): Handshake.Negotiator = (peerHeaders, trans) => {
     import OpportunisticTls._
 
@@ -208,6 +209,11 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
     try {
       if (OpportunisticTls.negotiate(localEncryptLevel, remoteEncryptLevel)) {
+        if (log.isLoggable(Level.DEBUG)) {
+          log.debug(s"Successfully negotiated TLS with remote peer. " +
+            s"local level: $localEncryptLevel, remote level: $remoteEncryptLevel")
+        }
+        upgrades.incr()
         turnOnTlsFn()
       }
     } catch {
@@ -357,6 +363,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       val fparam.Label(name) = params[fparam.Label]
       val param.MaxFrameSize(maxFrameSize) = params[param.MaxFrameSize]
       val param.OppTls(level) = params[param.OppTls]
+      val upgrades = statsReceiver.counter("tls", "upgrade", "success")
 
       val negotiatedTrans = mux.Handshake.client(
         trans = transport,
@@ -368,7 +375,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
           maxFrameSize,
           statsReceiver,
           level.getOrElse(OpportunisticTls.Off),
-          transport.context.turnOnTls _
+          transport.context.turnOnTls _,
+          upgrades
         )
       )
 
@@ -487,6 +495,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       val fparam.ExceptionStatsHandler(excRecorder) = params[fparam.ExceptionStatsHandler]
       val param.MaxFrameSize(maxFrameSize) = params[param.MaxFrameSize]
       val param.OppTls(level) = params[param.OppTls]
+      val upgrades = statsReceiver.counter("tls", "upgrade", "success")
 
       val negotiatedTrans = mux.Handshake.server(
         trans = transport,
@@ -499,7 +508,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
           maxFrameSize,
           statsReceiver,
           level.getOrElse(OpportunisticTls.Off),
-          transport.context.turnOnTls _
+          transport.context.turnOnTls _,
+          upgrades
         )
       )
 

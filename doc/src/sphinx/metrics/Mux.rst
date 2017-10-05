@@ -55,3 +55,6 @@
   A counter indicating any exceptions that occur on the transport write path for mux.
   This includes exceptions in handshaking, thrift downgrading (for servers), etc.
 
+**<label>/mux/tls/upgrade/success**
+  A counter of the number of times the client or server has successfully
+  upgraded a connection to TLS.

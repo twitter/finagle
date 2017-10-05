@@ -445,6 +445,7 @@ object ThriftMux
       val param.Tracer(tracer) = params[param.Tracer]
       val Thrift.param.ProtocolFactory(pf) = params[Thrift.param.ProtocolFactory]
       val Mux.param.OppTls(level) = params[Mux.param.OppTls]
+      val upgrades = muxStatsReceiver.counter("tls", "upgrade", "success")
 
       val thriftEmulator = thriftmux.ThriftEmulator(transport, pf, statsReceiver.scope("thriftmux"))
 
@@ -456,7 +457,8 @@ object ThriftMux
           frameSize,
           muxStatsReceiver,
           level.getOrElse(OpportunisticTls.Off),
-          transport.context.turnOnTls _
+          transport.context.turnOnTls _,
+          upgrades
         )
       )
 
