@@ -19,7 +19,6 @@ scala_library(
     'util/util-logging',
     'util/util-stats',
   ],
-  strict_deps=True,
   fatal_warnings=True,
   sources=rglobs('*.scala'),
 )

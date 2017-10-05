@@ -27,7 +27,6 @@ scala_library(
   ],
   fatal_warnings=True,
   sources=rglobs('*.scala'),
-  strict_deps=True,
   exports=[
     '3rdparty/jvm/io/netty:netty',
     'finagle/finagle-base-http',

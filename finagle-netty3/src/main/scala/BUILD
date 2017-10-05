@@ -16,7 +16,6 @@ scala_library(
     'util/util-security/src/main/scala:scala',
     'util/util-stats/src/main/scala:scala',
   ],
-  strict_deps=True,
   exports=[
     '3rdparty/jvm/io/netty',
     'finagle/finagle-core/src/main/scala:scala',

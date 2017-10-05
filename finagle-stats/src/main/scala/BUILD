@@ -28,7 +28,6 @@ scala_library(
   # and so ideally we would mark this "scope=runtime". But there are enough consumers that also
   # need it at compiletime that it is non-trivial to split the target at this juncture.
   scope='forced',
-  strict_deps=True,
   exports=[
     'finagle/finagle-core/src/main/scala:scala',
     'util/util-stats:util-stats',

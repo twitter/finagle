@@ -28,7 +28,6 @@ scala_library(
     'util/util-stats/src/main/scala',
   ],
   sources=rglobs('*.scala'),
-  strict_deps=True,
 )
 
 jvm_binary(

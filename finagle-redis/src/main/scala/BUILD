@@ -12,7 +12,6 @@ scala_library(
     'util/util-stats',
   ],
   sources=rglobs('*.scala'),
-  strict_deps=True,
   exports=[
     'finagle/finagle-core:finagle-core',
     'util/util-core:util-core',
