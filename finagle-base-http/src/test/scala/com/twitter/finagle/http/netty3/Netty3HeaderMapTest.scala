@@ -1,4 +1,4 @@
-package com.twitter.finagle.netty3.http
+package com.twitter.finagle.http.netty3
 
 import com.twitter.finagle.http.{AbstractHeaderMapTest, HeaderMap, Request}
 import org.jboss.netty.handler.codec.http.DefaultHttpHeaders

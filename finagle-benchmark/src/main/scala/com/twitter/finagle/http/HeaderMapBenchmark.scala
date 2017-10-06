@@ -1,7 +1,7 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.benchmark.StdBenchAnnotations
-import com.twitter.finagle.netty3.http.Netty3HeaderMap
+import com.twitter.finagle.http.netty3.Netty3HeaderMap
 import org.openjdk.jmh.annotations._
 import org.openjdk.jmh.infra.Blackhole
 import scala.util.Random
