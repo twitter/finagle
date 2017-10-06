@@ -7,5 +7,4 @@ java_thrift_library(name='thrift-scala',
     name='finagle-exception-thrift',
     repo = artifactory,
   ),
-  strict_deps=True,
 )

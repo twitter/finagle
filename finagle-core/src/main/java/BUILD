@@ -11,5 +11,4 @@ java_library(
     'util/util-core/src/main/scala'
   ],
   fatal_warnings=True,
-  strict_deps=True,
 )
