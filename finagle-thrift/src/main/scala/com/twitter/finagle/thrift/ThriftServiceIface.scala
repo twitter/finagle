@@ -29,14 +29,14 @@ trait ServiceIfaceBuilder[ServiceIface <: ThriftServiceIface.Filterable[ServiceI
    * Build a client ServiceIface wrapping a binary thrift service.
    *
    * @param thriftService An underlying thrift service that works on byte arrays.
-   * @param clientParam RichClientParam wraps client params [[com.twitter.finagle.RichClientParam]].
+   * @param clientParam RichClientParam wraps client params [[com.twitter.finagle.thrift.RichClientParam]].
    */
   def newServiceIface(
     thriftService: Service[ThriftClientRequest, Array[Byte]],
     clientParam: RichClientParam
   ): ServiceIface
 
-  @deprecated("Use com.twitter.finagle.RichClientParam", "2017-08-16")
+  @deprecated("Use com.twitter.finagle.thrift.RichClientParam", "2017-08-16")
   def newServiceIface(
     thriftService: Service[ThriftClientRequest, Array[Byte]],
     pf: TProtocolFactory = Protocols.binaryFactory(),
@@ -48,7 +48,7 @@ trait ServiceIfaceBuilder[ServiceIface <: ThriftServiceIface.Filterable[ServiceI
     newServiceIface(thriftService, clientParam)
   }
 
-  @deprecated("Use com.twitter.finagle.RichClientParam", "2017-08-16")
+  @deprecated("Use com.twitter.finagle.thrift.RichClientParam", "2017-08-16")
   def newServiceIface(
     thriftService: Service[ThriftClientRequest, Array[Byte]],
     pf: TProtocolFactory,
@@ -140,7 +140,7 @@ object ThriftServiceIface {
       .andThen(thriftCodecFilter(method, clientParam.protocolFactory))
       .andThen(thriftService)
 
-  @deprecated("Use com.twitter.finagle.RichClientParam", "2017-08-16")
+  @deprecated("Use com.twitter.finagle.thrift.RichClientParam", "2017-08-16")
   def apply(
     method: ThriftMethod,
     thriftService: Service[ThriftClientRequest, Array[Byte]],

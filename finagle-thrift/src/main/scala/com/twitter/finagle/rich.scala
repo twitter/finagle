@@ -1,7 +1,6 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.stats._
 import com.twitter.finagle.thrift._
 import com.twitter.finagle.util.Showable
@@ -151,7 +150,7 @@ private[twitter] object ThriftUtil {
     }
   }
 
-  @deprecated("Use com.twitter.finagle.RichServerParam", "2017-08-16")
+  @deprecated("Use com.twitter.finagle.thrift.RichServerParam", "2017-08-16")
   def serverFromIface(
     impl: AnyRef,
     protocolFactory: TProtocolFactory,
@@ -182,7 +181,7 @@ private[twitter] object ThriftUtil {
     )
   }
 
-  @deprecated("Use com.twitter.finagle.RichServerParam", "2017-08-16")
+  @deprecated("Use com.twitter.finagle.thrift.RichServerParam", "2017-08-16")
   def serverFromIfaces(
     ifaces: Map[String, AnyRef],
     defaultService: Option[String],
@@ -208,7 +207,7 @@ private[twitter] object ThriftUtil {
    * interface using whichever Thrift code-generation toolchain is available.
    * (Legacy version for backward-compatibility).
    */
-  @deprecated("Use com.twitter.finagle.RichServerParam", "2017-08-16")
+  @deprecated("Use com.twitter.finagle.thrift.RichServerParam", "2017-08-16")
   def serverFromIface(
     impl: AnyRef,
     protocolFactory: TProtocolFactory,
@@ -353,7 +352,7 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
     constructIface(service, cls, clientConfigScoped)
   }
 
-  @deprecated("Use com.twitter.finagle.RichClientParam", "2017-8-16")
+  @deprecated("Use com.twitter.finagle.thrift.RichClientParam", "2017-8-16")
   def newIface[Iface](
     name: Name,
     label: String,
@@ -479,41 +478,6 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
 }
 
 /**
- * Produce a client with params wrapped in RichClientParam
- *
- * @param protocolFactory A `TProtocolFactory` creates protocol objects from transports
- * @param serviceName For client stats, (default: empty string)
- * @param maxThriftBufferSize The max size of a reusable buffer for the thrift response
- * @param responseClassifier  See [[com.twitter.finagle.service.ResponseClassifier]]
- * @param clientStats StatsReceiver for recording metrics
- */
-case class RichClientParam(
-  protocolFactory: TProtocolFactory = Thrift.param.protocolFactory,
-  serviceName: String = "",
-  maxThriftBufferSize: Int = Thrift.param.maxThriftBufferSize,
-  responseClassifier: ResponseClassifier = ResponseClassifier.Default,
-  clientStats: StatsReceiver = ClientStatsReceiver
-) {
-
-  def this(
-    protocolFactory: TProtocolFactory,
-    maxThriftBufferSize: Int,
-    responseClassifier: ResponseClassifier
-  ) = this(protocolFactory, "", maxThriftBufferSize, responseClassifier, ClientStatsReceiver)
-
-  def this(
-    protocolFactory: TProtocolFactory,
-    responseClassifier: ResponseClassifier
-  ) = this(protocolFactory, Thrift.param.maxThriftBufferSize, responseClassifier)
-
-  def this(
-    protocolFactory: TProtocolFactory
-  ) = this(protocolFactory, ResponseClassifier.Default)
-
-  def this() = this(Thrift.param.protocolFactory)
-}
-
-/**
  * A mixin trait to provide a rich Thrift server API.
  *
  * @define serveIface
@@ -627,29 +591,3 @@ trait ThriftRichServer { self: Server[Array[Byte], Array[Byte]] =>
     serve(addr, serverFromIfaces(ifaces, defaultService, serverParam))
 }
 
-/**
- * Produce a server with params wrapped in RichServerParam
- *
- * @param protocolFactory A `TProtocolFactory` creates protocol objects from transports
- * @param serviceName For server stats, (default: "thrift")
- * @param maxThriftBufferSize The max size of a reusable buffer for the thrift response
- * @param serverStats StatsReceiver for recording metrics
- */
-case class RichServerParam(
-  protocolFactory: TProtocolFactory = Thrift.param.protocolFactory,
-  serviceName: String = "thrift",
-  maxThriftBufferSize: Int = Thrift.param.maxThriftBufferSize,
-  serverStats: StatsReceiver = LoadedStatsReceiver
-) {
-
-  def this(
-    protocolFactory: TProtocolFactory,
-    maxThriftBufferSize: Int
-  ) = this(protocolFactory, "thrift", maxThriftBufferSize, LoadedStatsReceiver)
-
-  def this(
-    protocolFactory: TProtocolFactory
-  ) = this(protocolFactory, Thrift.param.maxThriftBufferSize)
-
-  def this() = this(Thrift.param.protocolFactory)
-}

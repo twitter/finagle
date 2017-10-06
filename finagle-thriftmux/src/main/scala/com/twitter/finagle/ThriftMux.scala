@@ -8,7 +8,7 @@ import com.twitter.finagle.client.{
 }
 import com.twitter.finagle.context.RemoteInfo.Upstream
 import com.twitter.finagle.mux.lease.exp.Lessor
-import com.twitter.finagle.mux.transport.{OpportunisticTls, MuxContext}
+import com.twitter.finagle.mux.transport.{MuxContext, OpportunisticTls}
 import com.twitter.finagle.param.{
   ExceptionStatsHandler => _,
   Monitor => _,
@@ -24,7 +24,13 @@ import com.twitter.finagle.stats.{
   ServerStatsReceiver,
   StatsReceiver
 }
-import com.twitter.finagle.thrift.{ClientId, ThriftClientRequest, UncaughtAppExceptionFilter}
+import com.twitter.finagle.thrift.{
+  ClientId,
+  RichClientParam,
+  RichServerParam,
+  ThriftClientRequest,
+  UncaughtAppExceptionFilter
+}
 import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
 import com.twitter.finagle.tracing.{Trace, Tracer}
 import com.twitter.finagle.transport.{StatsTransport, Transport}
