@@ -205,16 +205,13 @@ class Netty4PushTransporterTest extends FunSuite with Eventually with Integratio
     ) {
       connect()
 
-      intercept[ReadTimedOutException] {
-        Await.result(clientsideTransport.onClose, timeout)
-      }
+      Await.result(clientsideTransport.onClose, timeout)
 
       closeCtx()
     }
   }
 
   test("Failure before session resolution") {
-    val exc = new Exception("sadface")
     object FailingHandler extends ChannelInboundHandlerAdapter {
       @volatile
       private[this] var ctx: ChannelHandlerContext = null
@@ -222,7 +219,7 @@ class Netty4PushTransporterTest extends FunSuite with Eventually with Integratio
       val latch = Promise[Unit]
 
       latch.onSuccess { _ =>
-        if (ctx != null) ctx.fireExceptionCaught(exc)
+        if (ctx != null) ctx.fireExceptionCaught(new Exception("sadface"))
       }
 
       override def handlerAdded(ctx: ChannelHandlerContext): Unit = {
@@ -255,11 +252,7 @@ class Netty4PushTransporterTest extends FunSuite with Eventually with Integratio
 
       connect()
 
-      val observed = intercept[UnknownChannelException] {
-        Await.result(clientsideTransport.onClose, timeout)
-      }
-
-      assert(observed.getCause == exc)
+      Await.result(clientsideTransport.onClose, timeout)
 
       closeCtx()
     }
@@ -292,9 +285,7 @@ class Netty4PushTransporterTest extends FunSuite with Eventually with Integratio
       // We don't await on this since we discarded it's associated ChannelPromise in writeSwallower
       clientsideTransport.write("msg")
 
-      intercept[WriteTimedOutException] {
-        Await.result(clientsideTransport.onClose, timeout)
-      }
+      Await.result(clientsideTransport.onClose, timeout)
 
       closeCtx()
     }

@@ -159,7 +159,7 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel)
             if (future.isSuccess) Return.Unit
             else {
               val exc = ChannelException(future.cause, remoteAddress)
-              handleFail(Some(exc))
+              handleFail()
               Throw(exc)
             }
 
@@ -168,40 +168,41 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel)
       })
   }
 
+  // Bounce the call to `handleFail` through the executor to ensure that it happens 'later'
+  private[this] def scheduleFailure(): Unit = {
+    serialExecutor.execute(new Runnable {
+      def run(): Unit = handleFail()
+    })
+  }
+
+
   // Must be called from within the serialExecutor
-  private def handleFail(exc: Option[Throwable]): Unit = {
+  private def handleFail(): Unit = {
     if (!failed) {
       failed = true
       // We trampoline the satisfaction of the close promise to make sure
       // users don't get inadvertent re-entrance due to the continuations
       // attached to the promise potentially being run right away.
-      serialExecutor.execute(new Runnable {
-        def run(): Unit = {
-          closePromise.updateIfEmpty(exc match {
-            case Some(t) => Throw(t)
-            case None => Return.Unit
-          })
-        }
-      })
+      serialExecutor.execute(new Runnable { def run(): Unit = closePromise.setDone() })
 
       close()
     }
   }
 
   private[this] def handleChannelExceptionCaught(exc: Throwable): Unit = {
+    // Exceptions should have been logged by the `ChannelExceptionHandler` and
+    // there is little to no value in propagating them forward from here, so
+    // we just drop them.
+
     // We make sure these events are trampolined through the serial executor
     // to guard against re-entrance.
-    serialExecutor.execute(new Runnable {
-      def run(): Unit = handleFail(Some(ChannelException(exc, remoteAddress)))
-    })
+    scheduleFailure()
   }
 
   private[this] def handleChannelInactive(): Unit = {
     // We make sure these events are trampolined through the serial executor
     // to guard against re-entrance.
-    serialExecutor.execute(new Runnable {
-      def run(): Unit = handleFail(None)
-    })
+    scheduleFailure()
   }
 
   private[this] final class SessionDriver(@volatile private var session: PushSession[In, Out])
@@ -267,7 +268,7 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel)
         log.error(exc, channelStateMsg)
 
         drainQueue()
-        handleFail(Some(exc))
+        handleFail()
       }
     }
 
@@ -360,8 +361,9 @@ private object Netty4PushChannelHandle {
             case Return(session) =>
               delayStage.installSessionDriver(session)
 
-            case Throw(exc) =>
-              channelHandle.handleFail(Some(exc))
+            case Throw(_) =>
+              // make sure we clean up associated resources
+              channelHandle.handleFail()
           }
 
           p.updateIfEmpty(result)

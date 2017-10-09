@@ -86,15 +86,9 @@ class Netty4PushChannelHandleTest extends FunSuite {
     await(handle.onClose)
   }
 
-  test("Satisfies onClose when the channel throws an ExceptionT with Throw(ExceptionT)") {
+  test("Satisfies onClose when the channel throws an ExceptionT") {
     def testException(installDriver: Boolean): Unit = {
-      @volatile
-      var closed: Option[Option[Throwable]] = None
       val (ch, handle) = noopChannel()
-      handle.onClose.respond {
-        case Return(_) => closed = Some(None)
-        case Throw(t) => closed = Some(Some(t))
-      }
 
       if (installDriver) {
         ch.runPendingTasks() // loads the PushSession
@@ -105,12 +99,12 @@ class Netty4PushChannelHandleTest extends FunSuite {
         assert(ch.pipeline.get(Netty4PushChannelHandle.DelayedByteBufHandler) != null)
       }
 
-      val t = new Exception("boom!!!")
-      ch.pipeline().fireExceptionCaught(t)
+      ch.pipeline().fireExceptionCaught(new Exception("boom!!!"))
       ch.runPendingTasks()
 
-      assert(closed == Some(Some(ChannelException(t, ch.remoteAddress))))
+      await(handle.onClose)
       assert(handle.status == Status.Closed)
+      assert(!ch.isOpen)
     }
 
     testException(true)
@@ -256,18 +250,17 @@ class Netty4PushChannelHandleTest extends FunSuite {
     }
   }
 
-  test("writeAndForget failures are propagated through the onClose promise and fatal") {
+  test("writeAndForget failures are fatal and close the channel") {
     val (ch, handle) = failWritePipeline(0)
     // Failing a multi-write fails the channel
     handle.sendAndForget(1)
     ch.runPendingTasks()
     assert(!ch.isOpen)
     assert(handle.status == Status.Closed)
-    val sendResult = await(handle.onClose.liftToTry)
-    assert(sendResult == Throw(ChannelException(ex, ch.remoteAddress)))
+    await(handle.onClose.liftToTry)
   }
 
-  test("multi-writeAndForget failures are propagated through the onClose promise and fatal") {
+  test("multi-writeAndForget failures are fatal and close the channel") {
     (0 until 5).foreach { failAt =>
       val (ch, handle) = failWritePipeline(failAt)
       // Failing a multi-write fails the channel
@@ -275,8 +268,7 @@ class Netty4PushChannelHandleTest extends FunSuite {
       ch.runPendingTasks()
       assert(!ch.isOpen)
       assert(handle.status == Status.Closed)
-      val sendResult = await(handle.onClose.liftToTry)
-      assert(sendResult == Throw(ChannelException(ex, ch.remoteAddress)))
+      await(handle.onClose)
     }
   }
 
