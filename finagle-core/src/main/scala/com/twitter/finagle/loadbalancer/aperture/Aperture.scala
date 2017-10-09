@@ -5,7 +5,7 @@ import com.twitter.finagle.CoreToggles
 import com.twitter.finagle.loadbalancer.{Balancer, NodeT, DistributorT}
 import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.util.Rng
-import com.twitter.logging.Logger
+import com.twitter.logging.{Level, Logger}
 import com.twitter.util.{Future, Time}
 import scala.collection.immutable.VectorBuilder
 import scala.collection.mutable.ListBuffer
@@ -341,11 +341,25 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
 
     private[this] val ring = new Ring(vector.size, rng)
 
+    // We only need to order by status since the ring does the rest w.r.t
+    // to picking within the processes coordinate. Also, note, that the
+    // order of `vector` is stable across processes since it is sorted
+    // by `LoadBalancerFactory`.
+    private[this] val vec = statusOrder(vector)
+
     // We log the contents of the aperture on each distributor rebuild when using
     // deterministic aperture. Rebuilds are not frequent and concentrated around
     // events where this information would be valuable (i.e. coordinate changes or
     // host add/removes).
-    {
+    if (log.isLoggable(Level.DEBUG)) {
+      val lbl = if (label.isEmpty) "<unlabelled>" else label
+
+      def vectorString(vector: Vector[Node]): String =
+        vector.map(_.factory.address).mkString("[", ", ", "]")
+
+      log.debug(s"Aperture updated for client $lbl: full vector=${vectorString(vector)}")
+      log.debug(s"Aperture updated for client $lbl: full status-order vector=${vectorString(vec)}")
+      
       val apertureSlice: String = {
         val offset = coord.offset
         val width = apertureWidth
@@ -356,7 +370,6 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
           f"(index=$i, weight=$weight%1.3f, addr=$addr)"
         }.mkString("[", ", ", "]")
       }
-      val lbl = if (label.isEmpty) "<unlabelled>" else label
       log.debug(s"Aperture updated for client $lbl: nodes=$apertureSlice")
     }
 
@@ -392,12 +405,6 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     }
 
     override def physicalAperture: Int = ring.range(coord.offset, apertureWidth)
-
-    // We only need to order by status since the ring does the rest w.r.t
-    // to picking within the processes coordinate. Also, note, that the
-    // order of `vector` is stable across processes since it is sorted
-    // by [[LoadBalancerFactory]].
-    private[this] val vec = statusOrder(vector)
 
     def indices: Set[Int] = ring.indices(coord.offset, apertureWidth).toSet
 
