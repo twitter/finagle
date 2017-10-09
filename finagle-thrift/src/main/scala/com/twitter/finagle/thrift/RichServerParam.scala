@@ -1,6 +1,7 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle.Thrift
+import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.stats.{LoadedStatsReceiver, StatsReceiver}
 import org.apache.thrift.protocol.TProtocolFactory
 
@@ -16,13 +17,14 @@ case class RichServerParam(
   protocolFactory: TProtocolFactory = Thrift.param.protocolFactory,
   serviceName: String = "thrift",
   maxThriftBufferSize: Int = Thrift.param.maxThriftBufferSize,
-  serverStats: StatsReceiver = LoadedStatsReceiver
+  serverStats: StatsReceiver = LoadedStatsReceiver,
+  responseClassifier: ResponseClassifier = ResponseClassifier.Default
 ) {
 
   def this(
     protocolFactory: TProtocolFactory,
     maxThriftBufferSize: Int
-  ) = this(protocolFactory, "thrift", maxThriftBufferSize, LoadedStatsReceiver)
+  ) = this(protocolFactory, "thrift", maxThriftBufferSize, LoadedStatsReceiver, ResponseClassifier.Default)
 
   def this(
     protocolFactory: TProtocolFactory
