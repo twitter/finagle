@@ -354,12 +354,6 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     if (log.isLoggable(Level.DEBUG)) {
       val lbl = if (label.isEmpty) "<unlabelled>" else label
 
-      def vectorString(vector: Vector[Node]): String =
-        vector.map(_.factory.address).mkString("[", ", ", "]")
-
-      log.debug(s"Aperture updated for client $lbl: full vector=${vectorString(vector)}")
-      log.debug(s"Aperture updated for client $lbl: full status-order vector=${vectorString(vec)}")
-      
       val apertureSlice: String = {
         val offset = coord.offset
         val width = apertureWidth
@@ -371,6 +365,13 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
         }.mkString("[", ", ", "]")
       }
       log.debug(s"Aperture updated for client $lbl: nodes=$apertureSlice")
+    }
+
+    if (log.isLoggable(Level.TRACE)) {
+      val lbl = if (label.isEmpty) "<unlabelled>" else label
+      def vectorString(vector: Vector[Node]): String =
+        vector.map(_.factory.address).mkString("[", ", ", "]")
+      log.trace(s"Aperture updated for client $lbl: statusOrderedVector=${vectorString(vec)}")
     }
 
     // We want to additionally ensure that p2c can actually converge when there
