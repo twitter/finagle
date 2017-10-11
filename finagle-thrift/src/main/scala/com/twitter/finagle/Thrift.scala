@@ -428,8 +428,7 @@ object Thrift
     protected val serverParam: RichServerParam = RichServerParam(
       protocolFactory = params[Thrift.param.ProtocolFactory].protocolFactory,
       maxThriftBufferSize = params[Thrift.param.MaxReusableBufferSize].maxReusableBufferSize,
-      serverStats = params[Stats].statsReceiver,
-      responseClassifier = params[com.twitter.finagle.param.ResponseClassifier].responseClassifier
+      serverStats = params[Stats].statsReceiver
     )
 
     @deprecated("Use serverParam.serviceName", "2017-08-16")

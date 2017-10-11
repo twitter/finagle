@@ -590,3 +590,4 @@ trait ThriftRichServer { self: Server[Array[Byte], Array[Byte]] =>
   ): ListeningServer =
     serve(addr, serverFromIfaces(ifaces, defaultService, serverParam))
 }
+

@@ -406,9 +406,8 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     case ReqRep(Echo.Echo.Args(x), Throw(_: InvalidQueryException)) if x == "ok" =>
       ResponseClass.Success
     case ReqRep(_, Throw(_: InvalidQueryException)) => ResponseClass.NonRetryableFailure
-    case ReqRep(_, Throw(_: RequestTimeoutException)) |
-         ReqRep(_, Throw(_: java.util.concurrent.TimeoutException)) => ResponseClass.Success
-    case ReqRep(_, Return(_: String)) => ResponseClass.NonRetryableFailure
+    case ReqRep(_, Throw(_: RequestTimeoutException)) => ResponseClass.Success
+    case ReqRep(_, Return(s: String)) => ResponseClass.NonRetryableFailure
   }
 
   private val javaClassifier: ResponseClassifier = {
@@ -429,31 +428,13 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
         else
           Future.exception(new InvalidQueryException(x.length))
     }
-    val svc = new Echo.FinagledService(iface, RichServerParam())
+    val svc = new Echo.FinagledService(iface, Protocols.binaryFactory())
     Thrift.server
       .configured(Stats(NullStatsReceiver))
       .serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), svc)
   }
 
-  private def serverWithClassifier(sr: InMemoryStatsReceiver): ListeningServer = {
-    val iface = new Echo.FutureIface {
-      def echo(x: String) =
-        if (x == "safe")
-          Future.value("safe")
-        else if (x == "slow")
-          Future.sleep(1.second)(DefaultTimer).before(Future.value("slow"))
-        else
-          Future.exception(new InvalidQueryException(x.length))
-    }
-
-    Thrift.server
-      .withStatsReceiver(sr)
-      .withResponseClassifier(scalaClassifier)
-      .withRequestTimeout(100.milliseconds)
-      .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), iface)
-  }
-
-  private def testScalaClientResponseClassification(
+  private def testScalaFailureClassification(
     sr: InMemoryStatsReceiver,
     client: Echo.FutureIface
   ): Unit = {
@@ -479,45 +460,13 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     // this query produces a `Throw` response produced on the client side and
     // we want to ensure that we can translate it to a `Success`.
     intercept[RequestTimeoutException] {
-      Await.result(client.echo("slow"), 5.seconds)
+      Await.result(client.echo("slow"), 10.seconds)
     }
     assert(sr.counters(Seq("client", "requests")) == 4)
     assert(sr.counters(Seq("client", "success")) == 2)
   }
 
-  private def testScalaServerResponseClassification(
-    sr: InMemoryStatsReceiver,
-    client: Echo.FutureIface
-  ): Unit = {
-    val ex = intercept[InvalidQueryException] {
-      Await.result(client.echo("hi"), 5.seconds)
-    }
-    assert("hi".length == ex.errorCode)
-    assert(sr.counters(Seq("thrift", "echo", "requests")) == 1)
-    assert(sr.counters.get(Seq("thrift", "echo", "success")) == None)
-
-    // test that we can examine the request as well.
-    intercept[InvalidQueryException] {
-      Await.result(client.echo("ok"), 5.seconds)
-    }
-    assert(sr.counters(Seq("thrift", "echo", "requests")) == 2)
-    assert(sr.counters(Seq("thrift", "echo", "success")) == 1)
-
-    // test that we can mark a successfully deserialized result as a failure
-    assert("safe" == Await.result(client.echo("safe")))
-    assert(sr.counters(Seq("thrift", "echo", "requests")) == 3)
-    assert(sr.counters(Seq("thrift", "echo", "success")) == 1)
-
-    // this query produces a Timeout exception in server side and it should be
-    // translated to `Success`
-    intercept[TApplicationException] {
-      Await.result(client.echo("slow"), 5.seconds)
-    }
-    assert(sr.counters(Seq("thrift", "echo", "requests")) == 4)
-    assert(sr.counters(Seq("thrift", "echo", "success")) == 2)
-  }
-
-  private def testJavaResponseClassification(
+  private def testJavaFailureClassification(
     sr: InMemoryStatsReceiver,
     client: thriftjava.Echo.ServiceIface
   ): Unit = {
@@ -553,19 +502,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
         "client"
       )
 
-    testScalaClientResponseClassification(sr, client)
-    server.close()
-  }
-
-  test("scala thrift stack server using response classification") {
-    val sr = new InMemoryStatsReceiver()
-    val server = serverWithClassifier(sr)
-    val client = Thrift.client.newIface[Echo.FutureIface](
-      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-      "client"
-    )
-
-    testScalaServerResponseClassification(sr, client)
+    testScalaFailureClassification(sr, client)
     server.close()
   }
 
@@ -580,7 +517,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
         "client"
       )
 
-    testJavaResponseClassification(sr, client)
+    testJavaFailureClassification(sr, client)
     server.close()
   }
 
@@ -595,9 +532,9 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       .requestTimeout(100.milliseconds) // used in conjuection with a "slow" query
       .dest(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])))
       .build()
-    val client = new Echo.FinagledClient(clientBuilder, RichClientParam())
+    val client = new Echo.FinagledClient(clientBuilder)
 
-    testScalaClientResponseClassification(sr, client)
+    testScalaFailureClassification(sr, client)
     server.close()
   }
 
@@ -614,7 +551,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     val client =
       new thriftjava.Echo.ServiceToClient(clientBuilder, Protocols.binaryFactory(), javaClassifier)
 
-    testJavaResponseClassification(sr, client)
+    testJavaFailureClassification(sr, client)
     server.close()
   }
 
