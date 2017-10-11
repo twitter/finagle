@@ -2,7 +2,7 @@ package com.twitter.finagle.http2.transport
 
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.http.{HttpHeaders, HttpObject, HttpResponse}
-import io.netty.handler.codec.http2.Http2ServerDowngrader
+import io.netty.handler.codec.http2.Http2StreamFrameToHttpObjectCodec
 import java.util.{List => JList}
 import scala.collection.JavaConverters._
 
@@ -30,7 +30,7 @@ private[http2] object RichHttp2ServerDowngrader {
  */
 private[http2] class RichHttp2ServerDowngrader(
   validateHeaders: Boolean
-) extends Http2ServerDowngrader(validateHeaders) {
+) extends Http2StreamFrameToHttpObjectCodec(true /* isServer */, validateHeaders) {
   import RichHttp2ServerDowngrader._
 
   override def encode(ctx: ChannelHandlerContext, obj: HttpObject, out: JList[Object]): Unit = {

@@ -63,7 +63,7 @@ private[http2] object Http2ClientDowngrader extends Http2EventAdapter {
     endOfStream: Boolean
   ): Unit = {
     val msg = if (endOfStream) {
-      HttpConversionUtil.toHttpResponse(
+      HttpConversionUtil.toFullHttpResponse(
         streamId,
         headers,
         ctx.alloc(),

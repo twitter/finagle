@@ -1,8 +1,11 @@
 package com.twitter.finagle.http
 
 import com.twitter.conversions.storage._
+import com.twitter.conversions.time._
 import com.twitter.finagle
 import com.twitter.finagle.Service
+import com.twitter.finagle.util.DefaultTimer
+import com.twitter.io.Buf
 import com.twitter.util.Future
 import java.net.InetSocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
@@ -111,5 +114,27 @@ class Http2EndToEndTest extends AbstractEndToEndTest {
 
     val rh = await(client(Request("/"))).headerMap
     assert(rh.get("TE").get == "trailers")
+  }
+
+  test("The upgrade request is ineligible for flow control") {
+    val server = serverImpl()
+      .withMaxHeaderSize(1.kilobyte)
+      .serve("localhost:*", Service.mk[Request, Response] { _ =>
+        // we need to make this slow or else it'll race the window updating
+        Future.sleep(50.milliseconds)(DefaultTimer).map(_ => Response())
+      })
+
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+    val request = Request(Method.Post, "/")
+    // send a request that the client *should* have fragmented if it was
+    // sending an http/2 message
+    request.content = Buf.Utf8("*" * 70000)
+
+    // check that this doesn't throw an exception
+    val rep = await(client(request))
+    assert(rep.status == Status.Ok)
   }
 }

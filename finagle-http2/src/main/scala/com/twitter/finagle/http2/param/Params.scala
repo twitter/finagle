@@ -3,7 +3,7 @@ package com.twitter.finagle.http2.param
 import com.twitter.conversions.storage._
 import com.twitter.finagle.Stack
 import com.twitter.util.StorageUnit
-import io.netty.handler.codec.http2.{Http2Codec, Http2HeadersEncoder}
+import io.netty.handler.codec.http2.{Http2MultiplexCodec, Http2HeadersEncoder}
 
 /**
  * A class eligible for configuring whether to use the http/2 "prior knowledge"
@@ -134,7 +134,7 @@ object HeaderSensitivity {
  * to be turned on and off by changing the level of prefix.<FRAME_TYPE>, or turning everything
  * on by changing the level of prefix. The HTTP/2 frame logger logs at the level TRACE, so you
  * must set logger to that level to see the frame logs. The prefix if not set defaults to
- * io.netty.handler.codec.http2.Http2Codec
+ * io.netty.handler.codec.http2.Http2MultiplexCodec
  *
  * @param loggerNamePrefix The name of the logger to be used as the root logger name for
  *                         netty HTTP/2 frame logging.
@@ -145,7 +145,7 @@ case class FrameLoggerNamePrefix(loggerNamePrefix: String) {
 }
 
 object FrameLoggerNamePrefix {
-  private[this] val DefaultFrameLoggerPrefix: String = classOf[Http2Codec].getName()
+  private[this] val DefaultFrameLoggerPrefix: String = classOf[Http2MultiplexCodec].getName()
 
   implicit val param = Stack.Param(FrameLoggerNamePrefix(DefaultFrameLoggerPrefix))
 }

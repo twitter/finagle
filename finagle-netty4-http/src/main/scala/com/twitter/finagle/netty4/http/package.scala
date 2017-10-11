@@ -37,6 +37,11 @@ package object http {
    */
   private[finagle] val HttpCodecName = "httpCodec"
 
+  /**
+   * The name assigned to an `Http2MultiplexCodec` instance in a netty `ChannelPipeline`
+   */
+  private[finagle] val Http2CodecName = "http2Codec"
+
   private[finagle] def initClient(params: Stack.Params): ChannelPipeline => Unit = {
     val maxResponseSize = params[MaxResponseSize].size
     val decompressionEnabled = params[Decompression].enabled
