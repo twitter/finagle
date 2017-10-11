@@ -13,6 +13,9 @@ import scala.collection.mutable
  *
  * The map is a multi-map.  Use [[getAll]] to get all values for a key.  Use [[add]]
  * to append a key-value.
+ *
+ * @note This structure isn't thread-safe. Any concurrent access should be synchronized
+ *       externally.
  */
 abstract class HeaderMap
     extends mutable.Map[String, String]

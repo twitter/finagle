@@ -112,6 +112,12 @@ abstract class Message {
     if (chunked) clearContent()
   }
 
+  /**
+   * A [[HeaderMap]] (i.e., HTTP headers) associated with this message.
+   *
+   * @note This structure isn't thread-safe. Any concurrent access should be synchronized
+   *       externally.
+   */
   def headerMap: HeaderMap = _headerMap
 
   /**

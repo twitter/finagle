@@ -4,7 +4,10 @@ import java.util.Locale
 import scala.annotation.switch
 import scala.collection.mutable
 
-/** Mutable-Map-backed [[HeaderMap]] */
+/**
+ * Mutable, non-thread-safe [[HeaderMap]] implementation. Any concurrent access
+ * to instances of this class should be synchronized externally.
+ */
 private final class MapHeaderMap extends HeaderMap {
 
   import MapHeaderMap._
@@ -37,21 +40,18 @@ private final class MapHeaderMap extends HeaderMap {
   }
 
   def -=(key: String): this.type = {
-    underlying.remove(canonicalName(key))
+    underlying.removeAll(key)
     this
   }
 
   override def keySet: Set[String] =
-    underlying.values.flatten.map(_.name).toSet
+    underlying.values.flatMap(_.keys).toSet
 
   override def keysIterator: Iterator[String] =
     keySet.iterator
 }
 
 private object MapHeaderMap {
-
-  private def canonicalName(s: String): String = s.toLowerCase(Locale.US)
-
   // Adopted from Netty 3 HttpHeaders.
   private def validateName(s: String): Unit = {
     if (s == null) throw new NullPointerException("Header names cannot be null")
@@ -121,70 +121,100 @@ private object MapHeaderMap {
     }
   }
 
-  private class Header(val name: String, val value: String) {
+  private class Header(val name: String, val value: String, var next: Header = null) {
     validateName(name)
     validateValue(value)
 
-    val canonicalName: String = MapHeaderMap.canonicalName(name)
-  }
+    def values: Seq[String] =
+      if (next == null) value :: Nil
+      else {
+        val result = new mutable.ListBuffer[String] += value
 
-  private val GetHeaderValue: Header => String = _.value
-  private val NewHeaders: () => mutable.ArrayBuffer[Header] = () => new mutable.ArrayBuffer[Header]
-  private val EmptyHeaders: mutable.ArrayBuffer[Header] = mutable.ArrayBuffer.empty
+        var i = next
+        do {
+          result += i.value
+          i = i.next
+        } while (i != null)
+
+        result.toList
+      }
+
+    def keys: Seq[String] =
+      if (next == null) name :: Nil
+      else {
+        val result = new mutable.ListBuffer[String] += name
+
+        var i = next
+        do {
+          result += i.name
+          i = i.next
+        } while (i != null)
+
+        result.toList
+      }
+
+    def add(h: Header): Unit = {
+      var i = this
+      while (i.next != null) {
+        i = i.next
+      }
+
+      i.next = h
+    }
+  }
 
   // An internal representation for a `MapHeaderMap` that enables efficient iteration
   // by gaining access to `entriesIterator` (protected method).
-  private class Headers extends mutable.HashMap[String, mutable.ArrayBuffer[Header]] {
+  private class Headers extends mutable.HashMap[String, Header] {
+
+    @inline private final def canonicalName(s: String): String = s.toLowerCase(Locale.US)
+
     def flattenIterator: Iterator[(String, String)] = new Iterator[(String, String)] {
       private[this] val it = entriesIterator
-      private[this] var i = 0
-      private[this] var current = EmptyHeaders
+      private[this] var current: Header = _
 
       def hasNext: Boolean =
-        // We don't expect empty array-buffers in the map.
-        it.hasNext || i < current.length
+        it.hasNext || current != null
 
       def next(): (String, String) = {
-        if (i == current.length) {
+        if (current == null) {
           current = it.next().value
-          i = 0
         }
 
-        val result = current(i)
-        i += 1
-
-        (result.name, result.value)
+        val result = (current.name, current.value)
+        current = current.next
+        result
       }
     }
 
     def getFirst(key: String): Option[String] =
       get(canonicalName(key)) match {
-        case Some(h) => Some(GetHeaderValue(h(0)))
+        case Some(h) => Some(h.value)
         case None => None
       }
 
     def getAll(key: String): Seq[String] =
       get(canonicalName(key)) match {
-        case Some(h) => h.map(GetHeaderValue)
+        case Some(hs) => hs.values
         case None => Nil
       }
 
-    def add(k: String, v: String): Unit = {
-      val p = new Header(k, v)
-      val h = getOrElseUpdate(p.canonicalName, NewHeaders())
-
-      h += p
+    def add(key: String, value: String): Unit = {
+      val h = new Header(key, value)
+      val cn = canonicalName(key)
+      get(cn) match {
+        case Some(hs) => hs.add(h)
+        case None => update(cn, h)
+      }
     }
 
     def set(key: String, value: String): Unit = {
-      val p = new Header(key, value)
-      get(p.canonicalName) match {
-        case Some(h) =>
-          h.clear()
-          h += p
-        case None =>
-          update(p.canonicalName, mutable.ArrayBuffer(p))
-      }
+      val h = new Header(key, value)
+      update(canonicalName(key), h)
+    }
+
+    def removeAll(key: String): Unit = {
+      remove(canonicalName(key))
     }
   }
 
