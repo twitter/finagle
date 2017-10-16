@@ -7,10 +7,10 @@ import java.lang.{Boolean => JBool}
 import scala.util.control.NonFatal
 
 /**
-  * Defines trace identifiers.  Span IDs name a particular (unique)
-  * span, while TraceIds contain a span ID as well as context (parentId
-  * and traceId).
-  */
+ * Defines trace identifiers.  Span IDs name a particular (unique)
+ * span, while TraceIds contain a span ID as well as context (parentId
+ * and traceId).
+ */
 final class SpanId(val self: Long) extends Proxy {
   def toLong = self
 
@@ -26,7 +26,7 @@ object SpanId {
       val s = "%02x".format(bb)
       Array(s(0), s(1))
     }
-    ).toArray
+   ).toArray
 
   private def byteToChars(b: Byte): Array[Char] = lut(b + 128)
 
@@ -50,13 +50,36 @@ object SpanId {
     try {
       // Tolerates 128 bit X-B3-TraceId by reading the right-most 16 hex
       // characters (as opposed to overflowing a U64 and starting a new trace).
-      // For TraceId, prefer TraceId#make128BitTraceId.
+      // For TraceId, prefer TraceId128#apply.
       val length = spanId.length()
       val lower64Bits = if (length <= 16) spanId else spanId.substring(length - 16)
       Some(SpanId(new RichU64String(lower64Bits).toU64Long))
     } catch {
       case NonFatal(_) => None
     }
+}
+
+case class TraceId128(low: Option[SpanId], high: Option[SpanId])
+object TraceId128 {
+  val empty = TraceId128(None, None)
+
+  /**
+   * Extracts the high 64bits (if set and valid) and low 64bits (if valid) from a B3 TraceID's string representation.
+   *
+   * @param spanId A 64bit or 128bit Trace ID.
+   */
+  def apply(spanId : String) : TraceId128 = {
+    try {
+      val length = spanId.length()
+      val lower64Bits = if (length <= 16) spanId else spanId.substring(length - 16)
+      val low = Some(SpanId(new RichU64String(lower64Bits).toU64Long))
+
+      if (length == 32) TraceId128(low, Some(SpanId(new RichU64String(spanId.substring(0, 16)).toU64Long)))
+      else TraceId128(low, None)
+    } catch {
+      case NonFatal(_) => empty
+    }
+  }
 }
 
 object TraceId {
@@ -73,8 +96,8 @@ object TraceId {
     TraceId(traceId, parentId, spanId, sampled, Flags(), None)
 
   /**
-    * Creates a 64bit TraceID. See case class for more info.
-    */
+   * Creates a 64bit TraceID. See case class for more info.
+   */
   def apply(
     traceId: Option[SpanId],
     parentId: Option[SpanId],
@@ -97,20 +120,21 @@ object TraceId {
         traceId.flags.setFlag(Flags.SamplingKnown)
     }
 
-    val bytes = new Array[Byte](40)
-    ByteArrays.put64be(bytes, 0, traceId.spanId.self)
-    ByteArrays.put64be(bytes, 8, traceId.parentId.self)
-    ByteArrays.put64be(bytes, 16, traceId.traceId.self)
+    // For backward compatibility for TraceID: 40 bytes if 128bit, 32 bytes if 64bit
+    val bytes = new Array[Byte](if(traceId.traceIdHigh.isDefined) 40 else 32)
+    ByteArrays.put64be(bytes, 0, traceId.spanId.toLong)
+    ByteArrays.put64be(bytes, 8, traceId.parentId.toLong)
+    ByteArrays.put64be(bytes, 16, traceId.traceId.toLong)
     ByteArrays.put64be(bytes, 24, flags.toLong)
-    if(traceId.traceIdHigh.isDefined) ByteArrays.put64be(bytes, 32, traceId.traceIdHigh.get.self)
+    if(traceId.traceIdHigh.isDefined) ByteArrays.put64be(bytes, 32, traceId.traceIdHigh.get.toLong)
     bytes
   }
 
   /**
    * Deserialize a TraceId from an array of bytes.
+   * Allows for 64-bit or 128-bit trace identifiers.
    */
   def deserialize(bytes: Array[Byte]): Try[TraceId] = {
-    // Allows for 64-bit or 128-bit trace identifiers
     if (bytes.length != 32 && bytes.length != 40) {
       Throw(new IllegalArgumentException("Expected 32 or 40 bytes"))
     } else {
@@ -119,7 +143,7 @@ object TraceId {
       val trace64 = ByteArrays.get64be(bytes, 16)
       val flags64 = ByteArrays.get64be(bytes, 24)
 
-      val traceIdHigh = if(bytes.length == 40) ByteArrays.get64be(bytes, 32) else 0L
+      val traceIdHigh = if(bytes.length == 40) Some(SpanId(ByteArrays.get64be(bytes, 32))) else None
 
       val flags = Flags(flags64)
       val sampled = if (flags.isFlagSet(Flags.SamplingKnown)) {
@@ -132,33 +156,9 @@ object TraceId {
         SpanId(span64),
         sampled,
         flags,
-        Some(SpanId(traceIdHigh))
+        traceIdHigh
       )
       Return(traceId)
-    }
-  }
-
-  /**
-   * Extracts the high 64bits (if set) and low 64bits from a B3 TraceID's string representation.
-   *
-   * @param spanId A 64bit or 128bit Trace ID.
-   *
-   * @return An <code>(Option[SpanId], Option[SpanId])</code> of 64bit or 128bit TraceID. Structure is (high, low).
-   */
-  def mk128BitTraceId(spanId: String): (Option[SpanId], Option[SpanId]) = {
-    try {
-      val length = spanId.length()
-      val lower64Bits = if (length <= 16) spanId else spanId.substring(length - 16)
-      val upper64bits = if (length == 32) Some(spanId.substring(0, 16)) else None
-
-      upper64bits match {
-        case Some(high) =>
-          (Some(SpanId(new RichU64String(high).toU64Long)), Some(SpanId(new RichU64String(lower64Bits).toU64Long)))
-        case None =>
-          (None, Some(SpanId(new RichU64String(lower64Bits).toU64Long)))
-      }
-    } catch {
-      case NonFatal(_) => (None, None)
     }
   }
 }

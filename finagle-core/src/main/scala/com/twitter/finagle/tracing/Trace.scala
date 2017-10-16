@@ -6,7 +6,6 @@ import com.twitter.finagle.util.ByteArrays
 import com.twitter.io.Buf
 import com.twitter.util._
 import java.net.InetSocketAddress
-
 import scala.util.Random
 
 /**
@@ -145,7 +144,13 @@ object Trace {
    * Create a derived id from the current TraceId.
    */
   def nextId: TraceId = {
-    val spanId = SpanId(rng.nextLong())
+    var nextLong = rng.nextLong()
+    if (nextLong == 0) {
+      // NOTE: spanId of 0 is invalid, so guard against that here.
+      do nextLong = rng.nextLong() while (nextLong == 0)
+    }
+
+    val spanId = SpanId(nextLong)
     idOption match {
       case Some(id) =>
         TraceId(Some(id.traceId), Some(id.spanId), spanId, id.sampled, id.flags, id.traceIdHigh)

@@ -63,23 +63,27 @@ class IdTest extends FunSuite {
   test("extract 64bit only ids") {
     val low = 5208512171318403364L
     val spanId = hex(low)
-    val (highBits, lowBits) = TraceId.mk128BitTraceId(spanId)
+    val traceId = TraceId128(spanId)
 
-    assert(highBits.isDefined == false)
-    assert(lowBits.isDefined)
-    assert(lowBits.get.self == low)
+    assert(traceId.high.isDefined == false)
+    assert(traceId.low.isDefined)
+    assert(traceId.low.get.self == low)
   }
 
   test("extract 128bit ids") {
     val low = 5208512171318403364L
     val high = 5060571933882717101L
     val spanId =  hex(high) + hex(low)
-    val (highBits, lowBits) = TraceId.mk128BitTraceId(spanId)
+    val traceId = TraceId128(spanId)
 
-    assert(highBits.isDefined)
-    assert(highBits.get.self == high)
-    assert(lowBits.isDefined)
-    assert(lowBits.get.self == low)
+    assert(traceId.high.isDefined)
+    assert(traceId.high.get.self == high)
+    assert(traceId.low.isDefined)
+    assert(traceId.low.get.self == low)
+  }
+
+  test("extract to TraceId128Bit.empty when span id is invalid") {
+    assert(TraceId128("invalid") == TraceId128.empty)
   }
 
   test("drops invalid traceIdHigh = 0L") {
