@@ -758,9 +758,9 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       Await.ready(cc.echo("." * 10))
 
       // 40 bytes messages are from protocol negotiation made by TTwitter*Filter
-      assert(sr.stat("client", "request_payload_bytes")() == Seq(40.0f, 217.0f))
+      assert(sr.stat("client", "request_payload_bytes")() == Seq(40.0f, 209.0f))
       assert(sr.stat("client", "response_payload_bytes")() == Seq(40.0f, 45.0f))
-      assert(sr.stat("server", "request_payload_bytes")() == Seq(40.0f, 217.0f))
+      assert(sr.stat("server", "request_payload_bytes")() == Seq(40.0f, 209.0f))
       assert(sr.stat("server", "response_payload_bytes")() == Seq(40.0f, 45.0f))
 
       Await.ready(ss.close())
