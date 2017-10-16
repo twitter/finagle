@@ -11,7 +11,7 @@ class SpanIdBenchmark {
   import SpanIdBenchmark._
 
   @Benchmark
-  def timeOldToString64BitSpanId(state: SpanIdState64Bit) {
+  def timeOldToString(state: SpanIdState) {
     import state._
     var i = 0
     while (i < n) {
@@ -21,7 +21,7 @@ class SpanIdBenchmark {
   }
 
   @Benchmark
-  def timeToString64BitSpanId(state: SpanIdState64Bit) {
+  def timeToString(state: SpanIdState) {
     import state._
     var i = 0
     while (i < n) {
@@ -33,7 +33,7 @@ class SpanIdBenchmark {
 
 object SpanIdBenchmark {
   @State(Scope.Benchmark)
-  class SpanIdState64Bit {
+  class SpanIdState {
     val rng = new Random(31415926535897932L)
     val n = 1024
     val ids = Array.fill(n)(SpanId(rng.nextLong()))
