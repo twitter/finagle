@@ -508,7 +508,6 @@ private[finagle] object Message {
 
     val id = trace3 match {
       case Some((spanId, parentId, traceId)) =>
-        // TODO: support traceIdHigh
         Some(TraceId(Some(traceId), Some(parentId), spanId, None, Flags(traceFlags)))
       case None => None
     }
