@@ -235,17 +235,21 @@ class MuxClientSessionTest extends FunSuite {
     Time.withCurrentTimeFrozen { ctl =>
       new Ctx {
         assert(session.status == Status.Open)
+        assert(session.currentLease == None)
         assert(handle.status == Status.Open)
 
         session.receive(encode(Message.Tlease(1.millisecond)))
         assert(session.status == Status.Open)
+        assert(session.currentLease == Some(1.millisecond))
         assert(handle.status == Status.Open)
 
         ctl.advance(2.milliseconds)
         assert(session.status == Status.Busy)
+        assert(session.currentLease == Some(-1.millisecond))
         assert(handle.status == Status.Open)
 
         session.receive(encode(Message.Tlease(Message.Tlease.MaxLease)))
+        assert(session.currentLease == Some(Message.Tlease.MaxLease))
         assert(session.status === Status.Open)
         assert(handle.status == Status.Open)
       }

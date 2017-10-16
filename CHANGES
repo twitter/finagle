@@ -69,6 +69,10 @@ Breaking API Changes
 
   * finagle-mux: Expose transport contexts in mux.Request and mux.Response. ``PHAB_ID=D92998``
 
+  * finagle-mux: The "leased" gauge has been removed from the mux client implementation since the
+    metric is reported as the sum of the value over all clients which is unlikely to be useful.
+    ``PHAB_ID=D100357``
+
 7.1.0
 ------
 

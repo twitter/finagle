@@ -320,11 +320,6 @@ abstract class AbstractEndToEndTest
       case _ => false
     }
 
-    val Some((_, leaseDuration)) = sr.gauges.find {
-      case (_ +: Seq("mux", "current_lease_ms"), value) => true
-      case _ => false
-    }
-
     val leaseCtr: () => Long = { () =>
       val Some((_, ctr)) = sr.counters.find {
         case (_ +: Seq("mux", "leased"), value) => true
@@ -332,18 +327,13 @@ abstract class AbstractEndToEndTest
       }
       ctr
     }
-    def format(duration: Duration): Float = duration.inMilliseconds.toFloat
 
-    eventually { assert(leaseDuration() == format(Time.Top - Time.now)) }
     eventually { assert(available() == 1) }
     lessor.list.foreach(_.issue(Message.Tlease.MinLease))
     eventually { assert(leaseCtr() == 1) }
-    eventually { assert(leaseDuration() <= format(Message.Tlease.MinLease)) }
     eventually { assert(available() == 0) }
     lessor.list.foreach(_.issue(Message.Tlease.MaxLease))
     eventually { assert(leaseCtr() == 2) }
-    // Hopefully its finished within 10 seconds
-    eventually { assert(format(Message.Tlease.MaxLease) - 10.seconds.inMillis <= leaseDuration()) }
     eventually { assert(available() == 1) }
 
     Closable.sequence(Await.result(fclient, 5.seconds), server, factory).close()

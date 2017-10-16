@@ -9,7 +9,7 @@ import com.twitter.finagle.mux.{ClientSession, ReqRepFilter, Request, Response, 
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.exp.pushsession.{PushChannelHandle, PushSession}
 import com.twitter.finagle.mux.ReqRepFilter.CanDispatch
-import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.logging.{Level, Logger}
 import com.twitter.util._
@@ -69,15 +69,14 @@ private[finagle] final class MuxClientSession(
   private[this] var pingPromise: Promise[Unit] = null
 
   // Metrics
-  private[this] val leaseCounter = statsReceiver.counter("leased")
+  private[this] val leaseCounter = statsReceiver.counter(Verbosity.Debug, "leased")
   private[this] val drainingCounter = statsReceiver.counter("draining")
   private[this] val drainedCounter = statsReceiver.counter("drained")
 
-  private[this] val leaseGauge = statsReceiver.addGauge("current_lease_ms") {
-    dispatchState match {
-      case l: Leasing => l.remaining.inMilliseconds
-      case _ => (Time.Top - Time.now).inMilliseconds
-    }
+  // exposed for testing
+  private[pushsession] def currentLease: Option[Duration] = dispatchState match {
+    case l: Leasing => Some(l.remaining)
+    case _ => None
   }
 
   private[this] def isDraining: Boolean = dispatchState match {
@@ -129,7 +128,6 @@ private[finagle] final class MuxClientSession(
   def close(deadline: Time): Future[Unit] = {
     // We only close the socket connection on via explicit `close` calls to reproduce what
     // happens in the transport/dispatcher model.
-    leaseGauge.remove()
     handle.close(deadline)
   }
 

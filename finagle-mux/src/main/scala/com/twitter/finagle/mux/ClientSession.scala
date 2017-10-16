@@ -3,8 +3,8 @@ package com.twitter.finagle.mux
 import com.twitter.conversions.time._
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.mux.transport.Message
-import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.transport.{Transport, TransportContext, LegacyContext}
+import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
+import com.twitter.finagle.transport.{LegacyContext, Transport, TransportContext}
 import com.twitter.finagle.{Failure, Status}
 import com.twitter.util.{Duration, Future, Promise, Time}
 import java.net.SocketAddress
@@ -77,16 +77,15 @@ private[finagle] class ClientSession(
       case _: Throwable =>
     }
 
-  private[this] val leaseGauge = sr.addGauge("current_lease_ms") {
-    state match {
-      case l: Leasing => l.remaining.inMilliseconds
-      case _ => (Time.Top - Time.now).inMilliseconds
-    }
-  }
-
-  private[this] val leaseCounter = sr.counter("leased")
+  private[this] val leaseCounter = sr.counter(Verbosity.Debug, "leased")
   private[this] val drainingCounter = sr.counter("draining")
   private[this] val drainedCounter = sr.counter("drained")
+
+  // Exposed for testing
+  private[mux] def currentLease: Option[Duration] = state match {
+    case l: Leasing => Some(l.remaining)
+    case _ => None
+  }
 
   /**
    * Processes mux control messages and transitions the state accordingly.
@@ -230,7 +229,6 @@ private[finagle] class ClientSession(
   def peerCertificate: Option[Certificate] = trans.peerCertificate
 
   def close(deadline: Time): Future[Unit] = {
-    leaseGauge.remove()
     trans.close(deadline)
   }
   val context: TransportContext = new LegacyContext(this)
