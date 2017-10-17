@@ -5,8 +5,9 @@ import scala.collection.JavaConverters._
 
 class StatsFormatterTest extends FunSuite {
 
-  private[this] def newMetrics(): Metrics =
-    new Metrics(mkHistogram = ImmediateMetricsHistogram.apply _, separator = "/")
+  private[this] def newMetrics(): Metrics = Metrics.createDetached(
+      mkHistogram = ImmediateMetricsHistogram.apply _,
+      separator = "/")
 
   private val metrics = newMetrics()
   private val sr = new MetricsStatsReceiver(metrics)

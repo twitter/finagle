@@ -21,7 +21,7 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
   private val zeroSecs = Time.fromSeconds(1423166700)
 
   test("readBooleanParam") {
-    val exporter = new JsonExporter(new Metrics())
+    val exporter = new JsonExporter(Metrics.createDetached())
     val r = Request()
 
     def assertParam(r: Request, expected: Boolean, default: Boolean): Unit =
@@ -45,7 +45,7 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
   }
 
   test("samples can be filtered") {
-    val registry = new Metrics()
+    val registry = Metrics.createDetached()
     val exporter = new JsonExporter(registry) {
       override lazy val statsFilterRegex: Option[Regex] =
         commaSeparatedRegex("abc,ill_be_partially_matched.*")
@@ -67,7 +67,7 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
   }
 
   test("empty regex filter string should not result in a regex") {
-    val registry = new Metrics()
+    val registry = Metrics.createDetached()
     val exporter = new JsonExporter(registry)
     assert(
       commaSeparatedRegex("").isEmpty,
@@ -76,13 +76,13 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
   }
 
   test("statsFilterFile defaults without exception") {
-    val registry = new Metrics()
+    val registry = Metrics.createDetached()
     val exporter1 = new JsonExporter(registry)
     assert(exporter1.statsFilterRegex.isEmpty)
   }
 
   test("statsFilterFile reads empty files") {
-    val registry = new Metrics()
+    val registry = Metrics.createDetached()
 
     statsFilterFile.let(Set(new File("/dev/null"))) {
       val exporter = new JsonExporter(registry)
@@ -91,7 +91,7 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
   }
 
   test("statsFilterFile reads multiple files") {
-    val registry = new Metrics()
+    val registry = Metrics.createDetached()
 
     val tFile1 = File.createTempFile("regex", ".txt")
     tFile1.deleteOnExit()
@@ -119,7 +119,7 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
   }
 
   test("statsFilterFile and statsFilter combine") {
-    val registry = new Metrics()
+    val registry = Metrics.createDetached()
 
     val tFile = File.createTempFile("regex", ".txt")
     tFile.deleteOnExit()
@@ -140,7 +140,7 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
   }
 
   test("end-to-end fetching stats works") {
-    val registry = new Metrics()
+    val registry = Metrics.createDetached()
     val viewsCounter = registry.getOrCreateCounter(Verbosity.Default, Seq("views")).counter
     val gcCounter = registry.getOrCreateCounter(Verbosity.Default, Seq("jvm_gcs")).counter
     viewsCounter.incr()
@@ -188,7 +188,7 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
     val reqNoPeriod = Request("/admin/metrics.json")
 
     val name = "anCounter"
-    val registry = new Metrics()
+    val registry = Metrics.createDetached()
     val counter = registry.getOrCreateCounter(Verbosity.Default, Seq(name)).counter
 
     val timer = new MockTimer()
@@ -243,7 +243,7 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
   test("useCounterDeltas flag disabled") {
     val reqWithPeriod = Request("/admin/metrics.json?period=60")
 
-    val registry = new Metrics()
+    val registry = Metrics.createDetached()
     val counter = registry.getOrCreateCounter(Verbosity.Default, Seq("anCounter")).counter
     counter.incr(11)
 
@@ -271,7 +271,8 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
   }
 
   test("formatter flag") {
-    val registry = new Metrics(mkHistogram = ImmediateMetricsHistogram.apply _, separator = "/")
+    val registry = Metrics.createDetached(
+      mkHistogram = ImmediateMetricsHistogram.apply _, separator = "/")
     val sr = new MetricsStatsReceiver(registry)
     val histo = sr.stat("anHisto")
     histo.add(555)
@@ -292,7 +293,7 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
   }
 
   test("deadly gauge") {
-    val registry = new Metrics()
+    val registry = Metrics.createDetached()
     val sr =
       registry.registerGauge(Verbosity.Default, Seq("boom"), throw new RuntimeException("loolool"))
 
@@ -302,7 +303,7 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
   }
 
   test("respecting verbosity levels") {
-    val metrics = new Metrics()
+    val metrics = Metrics.createDetached()
     val sr = new MetricsStatsReceiver(metrics)
     sr.counter(Verbosity.Debug, "foo", "bar").incr(10)
     sr.counter(Verbosity.Debug, "foo", "baz").incr(20)
