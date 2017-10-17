@@ -7,6 +7,7 @@ import com.twitter.finagle.client.{
   StackClient
 }
 import com.twitter.finagle.context.RemoteInfo.Upstream
+import com.twitter.finagle.mux.exp.pushsession.MuxPush
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport.{MuxContext, OpportunisticTls}
 import com.twitter.finagle.param.{
@@ -16,7 +17,13 @@ import com.twitter.finagle.param.{
   Tracer => _,
   _
 }
-import com.twitter.finagle.server.{Listener, StackBasedServer, StackServer, StdStackServer}
+import com.twitter.finagle.server.{
+  Listener,
+  ServerInfo,
+  StackBasedServer,
+  StackServer,
+  StdStackServer
+}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{
   ClientStatsReceiver,
@@ -31,6 +38,7 @@ import com.twitter.finagle.thrift.{
   ThriftClientRequest,
   UncaughtAppExceptionFilter
 }
+import com.twitter.finagle.thriftmux.Toggles
 import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
 import com.twitter.finagle.tracing.{Trace, Tracer}
 import com.twitter.finagle.transport.{StatsTransport, Transport}
@@ -161,15 +169,28 @@ object ThriftMux
 
   object Client {
 
+    private[finagle] val UsePushMuxToggleName =
+      "com.twitter.finagle.thriftmux.UsePushMuxClient"
+    private[this] val usePushMuxToggle = Toggles(UsePushMuxToggleName)
+    private[this] def UsePushMuxClient: Boolean = usePushMuxToggle(ServerInfo().id.hashCode)
+
     def apply(): Client =
       new Client()
         .withLabel("thrift")
         .withStatsReceiver(ClientStatsReceiver)
 
-    private def muxer: StackClient[mux.Request, mux.Response] =
+    private[finagle] def pushMuxer: StackClient[mux.Request, mux.Response] =
+      MuxPush.client
+        .copy(stack = BaseClientStack)
+        .configured(ProtocolLibrary("thriftmux"))
+
+    private[finagle] def standardMuxer: StackClient[mux.Request, mux.Response] =
       Mux.client
         .copy(stack = BaseClientStack)
         .configured(ProtocolLibrary("thriftmux"))
+
+    private def defaultMuxer: StackClient[mux.Request, mux.Response] =
+      if (UsePushMuxClient) pushMuxer else standardMuxer
   }
 
   /**
@@ -179,7 +200,7 @@ object ThriftMux
    * @see [[https://twitter.github.io/finagle/guide/Protocols.html#thrift Thrift]] documentation
    * @see [[https://twitter.github.io/finagle/guide/Protocols.html#mux Mux]] documentation
    */
-  case class Client(muxer: StackClient[mux.Request, mux.Response] = Client.muxer)
+  case class Client(muxer: StackClient[mux.Request, mux.Response] = Client.defaultMuxer)
       extends StackBasedClient[ThriftClientRequest, Array[Byte]]
       with Stack.Parameterized[Client]
       with Stack.Transformable[Client]
