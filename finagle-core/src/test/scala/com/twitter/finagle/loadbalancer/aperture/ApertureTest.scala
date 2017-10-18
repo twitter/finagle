@@ -1,11 +1,13 @@
 package com.twitter.finagle.loadbalancer.aperture
 
+import com.twitter.finagle.Address.Inet
 import com.twitter.finagle._
 import com.twitter.finagle.loadbalancer.{EndpointFactory, FailingEndpointFactory, NodeT}
-import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.toggle
 import com.twitter.finagle.util.Rng
 import com.twitter.util.{Activity, Await, Duration, NullTimer}
+import java.net.InetSocketAddress
 import org.scalatest.FunSuite
 
 class ApertureTest extends FunSuite with ApertureSuite {
@@ -22,7 +24,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
    * us avoid down nodes with the important caveat that we only select over a subset.
    */
   private class Bal extends TestBal {
-    protected def statsReceiver = NullStatsReceiver
+    protected def statsReceiver: StatsReceiver = NullStatsReceiver
     protected class Node(val factory: EndpointFactory[Unit, Unit])
         extends ServiceFactoryProxy[Unit, Unit](factory)
         with NodeT[Unit, Unit]
@@ -332,5 +334,44 @@ class ApertureTest extends FunSuite with ApertureSuite {
       assert(bal.isRandomAperture)
       assert(bal.minUnitsx == 150)
     }
+  }
+
+  test("vectorHash") {
+
+    class WithAddressFactory(i: Int, addr: InetSocketAddress) extends Factory(i) {
+      override def address: Address = Inet(addr, Addr.Metadata.empty)
+    }
+
+    val sr = new InMemoryStatsReceiver
+
+    def getVectorHash: Float = sr.gauges(Seq("vector_hash")).apply()
+
+    val bal = new Bal {
+      override protected def statsReceiver = sr
+    }
+
+    def updateWithIps(ips: Vector[String]): Unit = bal.update(ips.map { addr =>
+      new WithAddressFactory(addr.##, new InetSocketAddress(addr, 80))
+    })
+
+    updateWithIps(Vector("1.1.1.1", "1.1.1.2"))
+    val hash1 = getVectorHash
+
+    updateWithIps(Vector("1.1.1.1", "1.1.1.3"))
+    val hash2 = getVectorHash
+
+    assert(hash1 != hash2)
+
+    // Doesn't have hysteresis
+    updateWithIps(Vector("1.1.1.1", "1.1.1.2"))
+    val hash3 = getVectorHash
+
+    assert(hash1 == hash3)
+
+    // Permutations have different hash codes
+    updateWithIps(Vector("1.1.1.2", "1.1.1.1"))
+    val hash4 = getVectorHash
+
+    assert(hash1 != hash4)
   }
 }

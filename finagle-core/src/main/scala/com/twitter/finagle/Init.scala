@@ -3,6 +3,7 @@ package com.twitter.finagle
 import com.twitter.concurrent.Once
 import com.twitter.finagle.exp.FinagleScheduler
 import com.twitter.finagle.loadbalancer.aperture
+import com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate.FromInstanceId
 import com.twitter.finagle.stats.{DefaultStatsReceiver, FinagleStatsReceiver}
 import com.twitter.finagle.util.{DefaultLogger, LoadService}
 import com.twitter.jvm.JvmStats
@@ -28,16 +29,23 @@ private[twitter] object Init {
     // `ExecutorService`, these metrics apply to both of the FuturePools.
     val pool = FuturePool.unboundedPool
     val fpoolStats = FinagleStatsReceiver.scope("future_pool")
+    val apertureStats = FinagleStatsReceiver.scope("aperture")
     Seq(
       fpoolStats.addGauge("pool_size") { pool.poolSize },
       fpoolStats.addGauge("active_tasks") { pool.numActiveTasks },
       fpoolStats.addGauge("completed_tasks") { pool.numCompletedTasks },
-      FinagleStatsReceiver.addGauge("aperture_coordinate") {
+      apertureStats.addGauge("coordinate") {
         aperture.ProcessCoordinate() match {
           case Some(coord) => coord.offset.toFloat
           // We know the coordinate's range is [0, 1.0), so anything outside
           // of this can be used to signify empty.
           case None => -1f
+        }
+      },
+      apertureStats.addGauge("peerset_size") {
+        aperture.ProcessCoordinate() match {
+          case Some(FromInstanceId(_, _, size)) => size.toFloat
+          case _ => -1f
         }
       }
     )

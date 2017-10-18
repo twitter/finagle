@@ -1,3 +1,13 @@
+Aperture
+<<<<<<<<
+
+**finagle/aperture/coordinate**
+  The process global coordinate for the process as sampled by
+  the Aperture implementation.
+
+**finagle/aperture/peerset_size**
+  A gauge of the size of the services peerset.
+
 FuturePool
 <<<<<<<<<<
 

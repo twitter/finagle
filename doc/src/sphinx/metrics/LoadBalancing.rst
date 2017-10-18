@@ -62,13 +62,12 @@ Aperture Based Load Balancers
   the width of the window over which endpoints are load-balanced may be
   wider than the `aperture` gauge. The `physical_aperture` represents this value.
 
-**coordinate**
-  The process global coordinate for the process as sampled by
-  the Aperture implementation.
-
 **use_deterministic_ordering**
   1 if the Aperture implementation uses deterministic ordering
   0, otherwise.
+
+**vector_hash**
+  A gauge of the hash of the distributors serverset vector.
 
 **coordinate_updates**
   A counter of the number of times the Aperture implementation receives

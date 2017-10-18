@@ -1,14 +1,16 @@
 package com.twitter.finagle.loadbalancer.aperture
 
+import com.twitter.finagle.Address.Inet
 import com.twitter.finagle._
 import com.twitter.finagle.CoreToggles
-import com.twitter.finagle.loadbalancer.{Balancer, NodeT, DistributorT}
+import com.twitter.finagle.loadbalancer.{Balancer, DistributorT, NodeT}
 import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.util.Rng
 import com.twitter.logging.{Level, Logger}
 import com.twitter.util.{Future, Time}
 import scala.collection.immutable.VectorBuilder
 import scala.collection.mutable.ListBuffer
+import scala.util.hashing.MurmurHash3
 
 private object Aperture {
   private val log = Logger.get()
@@ -119,12 +121,16 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       case None => dapertureToggleActive
     }
 
+  @volatile
+  private[this] var vectorHash: Int = -1
+
   private[this] val gauges = Seq(
     statsReceiver.addGauge("aperture") { aperture },
     statsReceiver.addGauge("physical_aperture") { dist.physicalAperture },
     statsReceiver.addGauge("use_deterministic_ordering") {
       if (dapertureActive) 1F else 0F
-    }
+    },
+    statsReceiver.addGauge("vector_hash") { vectorHash }
   )
 
   private[this] val coordinateUpdates = statsReceiver.counter("coordinate_updates")
@@ -224,7 +230,8 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     }
 
     def rebuild(): This = rebuild(vector)
-    def rebuild(vec: Vector[Node]): This =
+    def rebuild(vec: Vector[Node]): This = {
+      vectorHash = hashNodeVector(vec)
       if (vec.isEmpty) new EmptyVector(initAperture)
       else ProcessCoordinate() match {
         case Some(coord) if dapertureActive =>
@@ -237,6 +244,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
         case _ =>
           new RandomAperture(vec, initAperture)
       }
+    }
 
     /**
      * Pick the least loaded (and healthiest) of the two nodes `a` and `b`
@@ -269,6 +277,25 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     // previously busy node is now available.
     private[this] val busy = vector.filter(nodeBusy)
     def needsRebuild: Boolean = busy.exists(nodeOpen)
+
+    // Make a hash of the observed vector. Only an Inet address of the factory is
+    // considered and all other address types are ignored
+    private[this] def hashNodeVector(vec: Seq[Node]): Int = {
+      // A specialized reimplementation of MurmurHash3.listHash
+      val it = vec.iterator
+      var n = 0
+      var h = MurmurHash3.arraySeed
+      while (it.hasNext) it.next().factory.address match {
+        case Inet(addr, _) if !addr.isUnresolved =>
+          val d = MurmurHash3.bytesHash(addr.getAddress.getAddress)
+          h = MurmurHash3.mix(h, d)
+          n += 1
+
+        case _ => // no-op
+      }
+
+      MurmurHash3.finalizeHash(h, n)
+    }
   }
 
   /**
