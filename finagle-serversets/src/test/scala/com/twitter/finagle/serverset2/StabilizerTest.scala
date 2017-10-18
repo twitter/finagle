@@ -1,298 +1,494 @@
 package com.twitter.finagle.serverset2
 
-import com.twitter.conversions.time._
-import com.twitter.finagle.{Addr, Address}
 import com.twitter.finagle.addr.WeightedAddress
-import com.twitter.util.{Var, Event, Witness, Time}
+import com.twitter.finagle.serverset2.addr.ZkMetadata
+import com.twitter.finagle.{Addr, Address}
+import com.twitter.util._
+import java.net.{InetAddress, InetSocketAddress}
 import java.util.concurrent.atomic.AtomicReference
-import org.junit.runner.RunWith
-import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.fixture.FunSuite
 
-@RunWith(classOf[JUnitRunner])
-class StabilizerTest extends FunSuite {
-  class Ctx {
-    val addr1 = Address(1)
-    val addr2 = Address(2)
-    val addr3 = Address(3)
-    val waddr1 = WeightedAddress(addr1, 1D)
-    val waddr2 = WeightedAddress(addr1, 2D)
-    val waddr3 = WeightedAddress(addr2, 2D)
+object StabilizerTest {
 
-    val va = Var[Addr](Addr.Pending)
-    val removalEvent = Event[Unit]()
-    val batchEvent = Event[Unit]()
-    val removalEpoch = new Epoch(removalEvent, -1.seconds)
-    val batchEpoch = new Epoch(batchEvent, -1.seconds)
-
-    val slowBatchEpoch = new Epoch(batchEvent, 10.seconds)
-
-    val stable = Stabilizer(va, removalEpoch, batchEpoch)
-    val ref = new AtomicReference[Addr]
-    stable.changes.register(Witness(ref))
-
-    val batchStable = Stabilizer(va, removalEpoch, slowBatchEpoch)
-    val ref2 = new AtomicReference[Addr]
-    batchStable.changes.register(Witness(ref2))
-
-    val immediateRemovalEpoch = new Epoch(removalEvent, 0.seconds)
-    val immediateBatchEpoch = new Epoch(batchEvent, 0.seconds)
-    val immediate = Stabilizer(va, immediateRemovalEpoch, immediateBatchEpoch)
-    val ref3 = new AtomicReference[Addr]
-    immediate.changes.register(Witness(ref3))
-
-    def assertStabilized(addr: Addr) = assert(ref.get == addr)
-    def assertBatchStabilized(addr: Addr) = assert(ref2.get == addr)
-    def assertImmediateStabilized(addr: Addr) = assert(ref3.get == addr)
-    def pulse() = {
-      removalEvent.notify(())
-      batchEvent.notify(())
+  def newAddress(port: Int, shard: Option[Int] = None): Address = {
+    val inet = new InetSocketAddress(InetAddress.getLoopbackAddress, port)
+    val md = shard match {
+      case Some(_) => ZkMetadata.toAddrMetadata(ZkMetadata(shard))
+      case None => Addr.Metadata.empty
     }
-    def setVa(a: Addr) = {
-      va() = a
-      batchEvent.notify(())
+    new Address.Inet(inet, md) {
+      override def toString: String = {
+        shard match {
+          case Some(id) => s"Address($port)-($id)"
+          case None => s"Address($port)"
+        }
+      }
     }
-
-    assertStabilized(Addr.Pending)
   }
 
-  test(
-    "Additions are reflected immediately; " +
-      "removes are reflected after at least one removalEpoch"
-  )(new Ctx {
+  // Note, all these Addresses are defs to test against structural
+  // equality rather than reference equality
 
-    setVa(Addr.Bound(addr1))
-    assertStabilized(Addr.Bound(addr1))
-    setVa(Addr.Bound(addr2))
-    assertStabilized(Addr.Bound(addr1, addr2))
+  def addr1: Address = newAddress(1)
+  def addr2: Address = newAddress(2)
+  def addr3: Address = newAddress(3)
+  def addr4: Address = newAddress(4)
 
-    pulse()
-    assertStabilized(Addr.Bound(addr1, addr2))
-    setVa(Addr.Neg)
-    assertStabilized(Addr.Bound(addr1, addr2))
+  // Note, weights are stored as metadata in the
+  // original addrs.
+  def addr1w1: Address = WeightedAddress(addr1, 1D)
+  def addr1w2: Address = WeightedAddress(addr1, 2D)
+  def addr2w2: Address = WeightedAddress(addr2, 2D)
 
-    pulse()
-    assertStabilized(Addr.Bound(addr2))
+  def shard1: Address = newAddress(1, Some(1))
+  def shard2: Address = newAddress(2, Some(2))
+  def shard3: Address = newAddress(3, Some(3))
+  def shard4: Address = newAddress(4, Some(4))
+}
 
-    pulse()
-    assertStabilized(Addr.Neg)
-  })
+class StabilizerTest extends FunSuite {
+  import StabilizerTest._
 
-  test("Pending resolutions don't tick out successful results")(new Ctx {
-    setVa(Addr.Bound(addr1))
-    assertStabilized(Addr.Bound(addr1))
-    setVa(Addr.Bound(addr2))
-    assertStabilized(Addr.Bound(addr1, addr2))
+  // The period is irrelevant for most tests since we pulse the
+  // event manually. However, we parameterize it so that we
+  // can observe the special case of Duration(0).
+  case class FixtureParam(period: Duration = Duration.Top) {
+    val va = Var[Addr](Addr.Pending)
+    val event = Event[Unit]()
 
-    setVa(Addr.Failed(new Exception))
-    pulse()
-    pulse()
+    private val ref: AtomicReference[Addr] = {
+      val epoch = new Epoch(event, period)
+      val stabilized: Var[Addr] = Stabilizer(va, epoch)
+      val r = new AtomicReference[Addr]
+      stabilized.changes.register(Witness(r))
+      r
+    }
 
-    assertStabilized(Addr.Bound(addr1, addr2))
+    def pulse(): Unit = event.notify(())
+    def addrEquals(addr: Addr): Unit = assert(addr == ref.get)
+  }
 
-    setVa(Addr.Pending)
-    pulse()
-    pulse()
+  def withFixture(test: OneArgTest) = test(FixtureParam())
 
-    assertStabilized(Addr.Bound(addr1, addr2))
-  })
+  test("propagate Addr.Neg and Addr.Pending immediately") { ctx =>
+    import ctx._
 
-  test("Removes are delayed while failures are observed")(new Ctx {
-    setVa(Addr.Bound(addr1, addr2))
-    assertStabilized(Addr.Bound(addr1, addr2))
+    va() = Addr.Bound(addr1)
+    addrEquals(Addr.Bound(addr1))
 
-    pulse()
-    assertStabilized(Addr.Bound(addr1, addr2))
+    va() = Addr.Neg
+    addrEquals(Addr.Neg)
 
-    setVa(Addr.Bound(addr1))
-    assertStabilized(Addr.Bound(addr1, addr2))
+    va() = Addr.Pending
+    addrEquals(Addr.Pending)
+  }
 
-    pulse()
-    assertStabilized(Addr.Bound(addr1, addr2))
-    setVa(Addr.Failed(new Exception))
+  test("bound is cached in the presence of failures") { ctx =>
+    import ctx._
 
-    assertStabilized(Addr.Bound(addr1, addr2))
+    // we propagate Addr.Neg when there is no previously bound address.
+    va() = Addr.Failed(new Exception)
+    addrEquals(Addr.Neg)
 
-    pulse()
-    assertStabilized(Addr.Bound(addr1, addr2))
+    // The stream of events are: [Bound, Bound, Failure].
+    // We want to propagate the most recently seen bound.
 
-    pulse(); pulse(); pulse()
-    assertStabilized(Addr.Bound(addr1, addr2))
+    va() = Addr.Bound(addr1, addr2)
+    addrEquals(Addr.Bound(addr1, addr2))
 
-    setVa(Addr.Bound(addr1))
-    assertStabilized(Addr.Bound(addr1, addr2))
+    va() = Addr.Bound(addr1, addr2, addr3)
+    addrEquals(Addr.Bound(addr1, addr2))
 
-    pulse()
-    assertStabilized(Addr.Bound(addr1, addr2))
-    pulse()
-    assertStabilized(Addr.Bound(addr1))
-  })
+    va() = Addr.Failed(new Exception)
+    addrEquals(Addr.Bound(addr1, addr2))
 
-  test("Removes are delayed while failures are observed on empty serversets")(new Ctx {
-    setVa(Addr.Neg)
-    assertStabilized(Addr.Neg)
-
-    pulse()
-    setVa(Addr.Failed(new Exception))
-
-    assertStabilized(Addr.Neg)
-
-    pulse()
-    assertStabilized(Addr.Neg)
-
-    pulse(); pulse(); pulse()
-    assertStabilized(Addr.Neg)
-
-    setVa(Addr.Bound(addr1))
-    pulse()
-    assertStabilized(Addr.Bound(addr1))
-  })
-
-  test("Reflect additions while addrs are unstable")(new Ctx {
-    setVa(Addr.Bound(addr1, addr2))
-    assertStabilized(Addr.Bound(addr1, addr2))
-
-    pulse()
-    setVa(Addr.Failed(new Exception))
-    assertStabilized(Addr.Bound(addr1, addr2))
-
-    pulse()
-    assertStabilized(Addr.Bound(addr1, addr2))
-
-    pulse()
-    setVa(Addr.Bound(addr3))
-    assertStabilized(Addr.Bound(addr1, addr2, addr3))
-    setVa(Addr.Failed(new Exception))
-    pulse()
-  })
-
-  test("Merge WeightedSocketAddresses")(new Ctx {
-    setVa(Addr.Bound(waddr1, addr2, addr3))
-    assertStabilized(Addr.Bound(waddr1, addr2, addr3))
-
-    pulse()
-    setVa(Addr.Bound(waddr2, addr2))
-    assertStabilized(Addr.Bound(waddr2, addr2, addr3))
-
-    pulse()
-    assertStabilized(Addr.Bound(waddr2, addr2, addr3))
-
-    pulse()
-    assertStabilized(Addr.Bound(waddr2, addr2))
-
-    pulse()
-    setVa(Addr.Bound(waddr2, waddr3))
-    assertStabilized(Addr.Bound(waddr2, waddr3))
-
-    pulse()
-    assertStabilized(Addr.Bound(waddr2, waddr3))
-  })
-
-  test("Adds and removes are batched by batchEpoch")(new Ctx {
-    Time.withCurrentTimeFrozen { timeControl =>
-      timeControl.advance(30.seconds)
-      // update requires batchEpoch.notify
-      va() = Addr.Bound(addr1)
+    // we are pinned to the last bound addr so long
+    // as we don't receive anymore updates.
+    (0 to 10).foreach {  _ =>
       pulse()
-      assertBatchStabilized(Addr.Bound(addr1))
-
-      // adds are held until batchEpoch.notify
-      va() = Addr.Bound(addr1, addr2)
-      assertBatchStabilized(Addr.Bound(addr1))
-      timeControl.advance(30.seconds)
-      batchEvent.notify(())
-      assertBatchStabilized(Addr.Bound(addr1, addr2))
-
-      // removals are held until both removalEpoch and batchEpoch notify
-      va() = Addr.Bound(addr1, addr3)
-      assertBatchStabilized(Addr.Bound(addr1, addr2))
-      timeControl.advance(30.seconds)
-      batchEvent.notify(())
-      // no pulse, no removals yet
-      assertBatchStabilized(Addr.Bound(addr1, addr2, addr3))
-      removalEvent.notify(())
-      removalEvent.notify(())
-      timeControl.advance(30.seconds)
-      batchEvent.notify(())
-      assertBatchStabilized(Addr.Bound(addr1, addr3))
-
-      // multiple changes are batched into one update
-      va() = Addr.Bound(waddr1, addr3)
-      assertBatchStabilized(Addr.Bound(addr1, addr3))
-      removalEvent.notify(())
-      va() = Addr.Bound(waddr1, addr2, addr3)
-      removalEvent.notify(())
-      assertBatchStabilized(Addr.Bound(addr1, addr3))
-      timeControl.advance(30.seconds)
-      batchEvent.notify(())
-      assertBatchStabilized(Addr.Bound(waddr1, addr2, addr3))
+      addrEquals(Addr.Bound(addr1, addr2, addr3))
     }
-  })
 
-  test("Adds are published immediately when >1 epoch has passed since last update")(new Ctx {
-    Time.withCurrentTimeFrozen { timeControl =>
-      timeControl.advance(30.seconds)
-      va() = Addr.Bound(addr1)
-      assertBatchStabilized(Addr.Bound(addr1))
+    va() = Addr.Bound(addr1, addr2, addr3, addr4)
+    pulse()
+    addrEquals(Addr.Bound(addr1, addr2, addr3, addr4))
+  }
 
-      va() = Addr.Bound(addr1, addr2)
-      assertBatchStabilized(Addr.Bound(addr1))
-      timeControl.advance(30.seconds)
-      batchEvent.notify(())
-      assertBatchStabilized(Addr.Bound(addr1, addr2))
+  test("First update does not wait for epoch to turn") { ctx =>
+    import ctx._
 
-      timeControl.advance(30.seconds)
-      va() = Addr.Bound(addr1, addr2, addr3)
-      assertBatchStabilized(Addr.Bound(addr1, addr2, addr3))
-    }
-  })
+    va() = Addr.Bound(addr1)
+    addrEquals(Addr.Bound(addr1))
+  }
 
-  test("First update does not wait for epoch to turn")(new Ctx {
-    Time.withCurrentTimeFrozen { timeControl =>
-      timeControl.advance(1.seconds)
-      va() = Addr.Bound(addr1)
-      assertBatchStabilized(Addr.Bound(addr1))
-    }
-  })
+  test("adds are buffered for one epoch") { ctx =>
+    import ctx._
 
-  test("Removals are reflected immediately when removal window is 0 seconds")(new Ctx {
-    setVa(Addr.Bound(addr1, addr2))
-    assertStabilized(Addr.Bound(addr1, addr2))
-    assertImmediateStabilized(Addr.Bound(addr1, addr2))
+    // first add gets flushed immediately
+    va() = Addr.Bound(addr1, addr2)
+    addrEquals(Addr.Bound(addr1, addr2))
 
-    // addr2 leaves
-    setVa(Addr.Bound(addr1))
-    assertStabilized(Addr.Bound(addr1, addr2))
-    assertImmediateStabilized(Addr.Bound(addr1))
+    // `addr3` is added
+    va() = Addr.Bound(addr1, addr2, addr3)
+    addrEquals(Addr.Bound(addr1, addr2))
 
     pulse()
+    addrEquals(Addr.Bound(addr1, addr2, addr3))
+  }
+
+  test("removes are buffered for two epochs") { ctx =>
+    import ctx._
+
+    va() = Addr.Bound(addr1, addr2)
+    addrEquals(Addr.Bound(addr1, addr2))
+
+    va() = Addr.Bound(addr1)
+    addrEquals(Addr.Bound(addr1, addr2))
+
     pulse()
-    assertStabilized(Addr.Bound(addr1))
-    assertImmediateStabilized(Addr.Bound(addr1))
-  })
+    addrEquals(Addr.Bound(addr1, addr2))
 
-  test("Bound addresses are still cached when removal window is 0 seconds")(new Ctx {
-    setVa(Addr.Bound(addr1, addr2))
-    assertImmediateStabilized(Addr.Bound(addr1, addr2))
+    pulse()
+    addrEquals(Addr.Bound(addr1))
+  }
 
-    setVa(Addr.Failed(new Exception))
-    assertImmediateStabilized(Addr.Bound(addr1, addr2))
-  })
+  test("removal with addition") { ctx =>
+    import ctx._
 
-  test("Additions are reflected immediately when batch window is 0 seconds")(new Ctx {
-    Time.withCurrentTimeFrozen { timeControl =>
-      va() = Addr.Bound(addr1)
-      assertBatchStabilized(Addr.Bound(addr1))
-      assertImmediateStabilized(Addr.Bound(addr1))
+    va() = Addr.Bound(addr1, addr2)
+    addrEquals(Addr.Bound(addr1, addr2))
 
-      va() = Addr.Bound(addr1, addr2)
-      assertBatchStabilized(Addr.Bound(addr1))
-      assertImmediateStabilized(Addr.Bound(addr1, addr2))
+    // `addr2` is removed; `addr3` is added
+    va() = Addr.Bound(addr1, addr3)
+    addrEquals(Addr.Bound(addr1, addr2))
 
-      timeControl.advance(30.seconds)
-      batchEvent.notify(())
-      assertBatchStabilized(Addr.Bound(addr1, addr2))
-      assertImmediateStabilized(Addr.Bound(addr1, addr2))
+    pulse()
+    addrEquals(Addr.Bound(addr1, addr2, addr3))
+
+    pulse()
+    addrEquals(Addr.Bound(addr1, addr3))
+  }
+
+  test("multiple updates") { ctx =>
+    import ctx._
+
+    va() = Addr.Bound(addr1, addr2)
+    addrEquals(Addr.Bound(addr1, addr2))
+
+    va() = Addr.Bound(addr1, addr3)
+    addrEquals(Addr.Bound(addr1, addr2))
+
+    pulse()
+    addrEquals(Addr.Bound(addr1, addr2, addr3))
+
+    va() = Addr.Bound(addr1)
+    addrEquals(Addr.Bound(addr1, addr2, addr3))
+
+    pulse()
+    addrEquals(Addr.Bound(addr1, addr3))
+
+    pulse()
+    addrEquals(Addr.Bound(addr1))
+  }
+
+  test("flappy hosts") { ctx =>
+    import ctx._
+
+    va() = Addr.Bound(addr1, addr2)
+    addrEquals(Addr.Bound(addr1, addr2))
+
+    // `addr2` went away momentarily – we want
+    // to avoid this transient state.
+    va() = Addr.Bound(addr1)
+    addrEquals(Addr.Bound(addr1, addr2))
+
+    pulse()
+    addrEquals(Addr.Bound(addr1, addr2))
+
+    // `addr2` comes back before second pulse
+    va() = Addr.Bound(addr1, addr2)
+    addrEquals(Addr.Bound(addr1, addr2))
+
+    (0 to 100).foreach { _ =>
+      pulse()
+      addrEquals(Addr.Bound(addr1, addr2))
     }
-  })
+  }
+
+  test("transient hosts are published and then cleaned up in the next epoch") { ctx =>
+    import ctx._
+
+    va() = Addr.Bound(addr1)
+    addrEquals(Addr.Bound(addr1)) // published immediately
+
+    // we are still in the same epoch and add2 shows up briefly and leaves
+    va() = Addr.Bound(addr1, addr2) // addr2 joins the list
+    addrEquals(Addr.Bound(addr1))
+
+    va() = Addr.Bound(addr1, addr3) // addr2 leaves right away (addr3 joins)
+    addrEquals(Addr.Bound(addr1))
+
+    pulse()
+    addrEquals(Addr.Bound(addr1, addr2, addr3))
+
+    // addr2 goes away with the next pulse
+    pulse()
+    addrEquals(Addr.Bound(addr1, addr3))
+    pulse()
+    addrEquals(Addr.Bound(addr1, addr3))
+  }
+
+  test("Pending resolutions don't tick out successful results") { ctx =>
+    import ctx._
+
+    va() = Addr.Bound(addr1)
+    addrEquals(Addr.Bound(addr1))
+    va() = Addr.Bound(addr2)
+    // removal will take two pulses to flush
+    pulse()
+    addrEquals(Addr.Bound(addr1, addr2))
+    pulse()
+    addrEquals(Addr.Bound(addr2))
+
+    va() = Addr.Failed(new Exception)
+    pulse()
+    addrEquals(Addr.Bound(addr2))
+    pulse()
+    addrEquals(Addr.Bound(addr2))
+
+    // addr3 shows up momentarily, followed by Pending response. The addresses will be
+    // buffered as usual.
+    va() = Addr.Bound(addr3)
+    addrEquals(Addr.Bound(addr2))
+
+    va() = Addr.Pending
+    addrEquals(Addr.Bound(addr2))
+    pulse()
+    addrEquals(Addr.Bound(addr2, addr3))
+    pulse()
+    addrEquals(Addr.Bound(addr3))
+
+    va() = Addr.Bound(addr1, addr2, addr3)
+    addrEquals(Addr.Bound(addr3))
+    pulse()
+    addrEquals(Addr.Bound(addr1, addr2, addr3))
+    pulse()
+    addrEquals(Addr.Bound(addr1, addr2, addr3))
+  }
+
+  test("Removes are swallowed and epochs continue to promote addresses") { ctx =>
+    import ctx._
+
+    va() = Addr.Bound(addr1, addr2)
+    addrEquals(Addr.Bound(addr1, addr2))
+
+    pulse()
+    addrEquals(Addr.Bound(addr1, addr2))
+
+    va() = Addr.Bound(addr1)
+    addrEquals(Addr.Bound(addr1, addr2))
+
+    va() = Addr.Failed(new Exception)
+    addrEquals(Addr.Bound(addr1, addr2))
+
+    pulse()
+    addrEquals(Addr.Bound(addr1, addr2))
+
+    pulse()
+    addrEquals(Addr.Bound(addr1))
+
+    va() = Addr.Bound(addr1, addr3)
+    addrEquals(Addr.Bound(addr1))
+    pulse()
+    addrEquals(Addr.Bound(addr1, addr3))
+    pulse()
+    addrEquals(Addr.Bound(addr1, addr3))
+  }
+
+  test("Removes are delayed while failures are observed on empty serversets") { ctx =>
+    import ctx._
+
+    va() = Addr.Neg
+    addrEquals(Addr.Neg)
+
+    pulse()
+    va() = Addr.Failed(new Exception)
+
+    addrEquals(Addr.Neg)
+
+    pulse()
+    addrEquals(Addr.Neg)
+
+    pulse(); pulse(); pulse()
+    addrEquals(Addr.Neg)
+
+    va() = Addr.Bound(addr1)
+    pulse()
+    addrEquals(Addr.Bound(addr1))
+  }
+
+  test("Reflect updates while addrs are unstable") { ctx =>
+    import ctx._
+
+    va() = Addr.Bound(addr1, addr2)
+    addrEquals(Addr.Bound(addr1, addr2))
+
+    pulse()
+    addrEquals(Addr.Bound(addr1, addr2))
+
+    va() = Addr.Failed(new Exception)
+    addrEquals(Addr.Bound(addr1, addr2))
+
+    pulse()
+    addrEquals(Addr.Bound(addr1, addr2))
+
+    pulse()
+    addrEquals(Addr.Bound(addr1, addr2))
+
+    va() = Addr.Bound(addr3)
+    addrEquals(Addr.Bound(addr1, addr2))
+
+    va() = Addr.Failed(new Exception)
+    addrEquals(Addr.Bound(addr1, addr2))
+
+    pulse()
+    addrEquals(Addr.Bound(addr1, addr2, addr3))
+
+    pulse()
+    addrEquals(Addr.Bound(addr3))
+
+    pulse()
+    addrEquals(Addr.Bound(addr3))
+
+    va() = Addr.Bound(addr2)
+    addrEquals(Addr.Bound(addr3))
+
+    pulse()
+    addrEquals(Addr.Bound(addr2, addr3))
+
+    pulse()
+    addrEquals(Addr.Bound(addr2))
+
+    pulse()
+    addrEquals(Addr.Bound(addr2))
+  }
+
+  test("merge with weights") { ctx =>
+    import ctx._
+
+    va() = Addr.Bound(addr1w1, addr2, addr3)
+    addrEquals(Addr.Bound(addr1w1, addr2, addr3))
+    pulse()
+    addrEquals(Addr.Bound(addr1w1, addr2, addr3))
+
+    va() = Addr.Bound(addr1w2, addr2)
+    addrEquals(Addr.Bound(addr1w1, addr2, addr3))
+
+    // pulse twice to flush the removal
+    pulse()
+    addrEquals(Addr.Bound(addr1w2, addr2, addr3)) // weight change got reflected
+    pulse()
+    addrEquals(Addr.Bound(addr1w2, addr2))
+    pulse(); pulse()
+    addrEquals(Addr.Bound(addr1w2, addr2))
+
+    va() = Addr.Bound(addr1w2, addr2w2)
+    addrEquals(Addr.Bound(addr1w2, addr2))
+    pulse()
+    addrEquals(Addr.Bound(addr1w2, addr2w2))
+    pulse()
+    addrEquals(Addr.Bound(addr1w2, addr2w2))
+  }
+
+  test("merge with shard ids") { ctx =>
+    import ctx._
+
+    va() = Addr.Bound(shard1, shard2, shard3, shard4)
+    addrEquals(Addr.Bound(shard1, shard2, shard3, shard4))
+
+    // shard4 is removed and comes back with a new address
+    val newShard4 = newAddress(5, Some(4))
+    va() = Addr.Bound(shard1, shard2, shard3, newShard4)
+    addrEquals(Addr.Bound(shard1, shard2, shard3, shard4))
+    pulse()
+    addrEquals(Addr.Bound(shard1, shard2, shard3, newShard4))
+    pulse()
+    addrEquals(Addr.Bound(shard1, shard2, shard3, newShard4))
+  }
+
+  test("continuous restart of shards: one restart per epoch") { ctx =>
+    import ctx._
+
+    val initShards = Seq(shard1, shard2, shard3, shard4)
+    va() = Addr.Bound(initShards.toSet)
+    addrEquals(Addr.Bound(initShards.toSet))
+
+    var currentShards = initShards
+    (1 to initShards.size).foreach { n =>
+      var oldShards = currentShards
+      val newShard = newAddress(initShards.size + n, Some(n))
+      currentShards = currentShards.filter(!_.equals(initShards(n-1))) ++ Seq(newShard)
+      va() = Addr.Bound(currentShards.toSet)
+      addrEquals(Addr.Bound(oldShards.toSet))
+      pulse()
+      addrEquals(Addr.Bound(currentShards.toSet))
+    }
+    pulse()
+    addrEquals(Addr.Bound(currentShards.toSet))
+  }
+
+  test("multiple restarts in one epoch") { ctx =>
+    import ctx._
+
+    val initShards = Seq(shard1, shard2, shard3, shard4)
+    va() = Addr.Bound(initShards.toSet)
+    addrEquals(Addr.Bound(initShards.toSet))
+
+    var currentShards = initShards
+    (1 to initShards.size).foreach { n =>
+      val newShard = newAddress(initShards.size + n, Some(n))
+      currentShards = currentShards.filter(!_.equals(initShards(n-1))) ++ Seq(newShard)
+      va() = Addr.Bound(currentShards.toSet)
+      addrEquals(Addr.Bound(initShards.toSet))
+    }
+    pulse()
+    addrEquals(Addr.Bound(currentShards.toSet))
+  }
+
+  test("period=0; removals are immediate") { ctx =>
+    val zeroCtx = ctx.copy(period = Duration.fromSeconds(0))
+    import zeroCtx._
+
+    // removals are immediate; addr2 leaves
+    va() = Addr.Bound(addr1, addr2)
+    addrEquals(Addr.Bound(addr1, addr2))
+    va() = Addr.Bound(addr1)
+    addrEquals(Addr.Bound(addr1))
+    (0 to 100).foreach { _ =>
+      pulse()
+      addrEquals(Addr.Bound(addr1))
+    }
+  }
+
+  test("period=0; additions are immediate") { ctx =>
+    val zeroCtx = ctx.copy(period = Duration.fromSeconds(0))
+    import zeroCtx._
+
+    va() = Addr.Bound(addr1)
+    addrEquals(Addr.Bound(addr1))
+
+    va() = Addr.Bound(addr1, addr2)
+    addrEquals(Addr.Bound(addr1, addr2))
+  }
+
+  test("period=0; bound is cached in presence of failures") { ctx =>
+    val zeroCtx = ctx.copy(period = Duration.fromSeconds(0))
+    import zeroCtx._
+
+    va() = Addr.Bound(addr1, addr2)
+    addrEquals(Addr.Bound(addr1, addr2))
+
+    va() = Addr.Failed(new Exception)
+    addrEquals(Addr.Bound(addr1, addr2))
+  }
 }
