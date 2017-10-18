@@ -167,30 +167,6 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   ) extends DistributorT[Node](vector) {
     type This = BaseDist
 
-    /*
-     * Returns a new vector which is ordered by the node's status. Note, it is
-     * important that this is a stable sort since we care about the source order
-     * of `vec`.
-     */
-    protected def statusOrder(vec: Vector[Node]): Vector[Node] = {
-      val resultNodes = new VectorBuilder[Node]
-      val busyNodes = new ListBuffer[Node]
-      val closedNodes = new ListBuffer[Node]
-
-      val iter = vec.iterator
-      while (iter.hasNext) {
-        val node = iter.next()
-        node.status match {
-          case Status.Open => resultNodes += node
-          case Status.Busy => busyNodes += node
-          case Status.Closed => closedNodes += node
-        }
-      }
-
-      resultNodes ++= busyNodes ++= closedNodes
-      resultNodes.result
-    }
-
     /**
      * Returns the maximum size of the aperture window.
      */
@@ -264,20 +240,6 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
      */
     def indices: Set[Int]
 
-    /**
-     * Returns the least loaded node within the aperture window.
-     */
-    def pick(): Node
-
-    // To reduce the amount of rebuilds needed, we rely on the probabilistic
-    // nature of p2c pick. That is, we know that only when a significant
-    // portion of the underlying vector is unavailable will we return an
-    // unavailable node to the layer above and trigger a rebuild. We do however
-    // want to return to our "stable" ordering as soon as we notice that a
-    // previously busy node is now available.
-    private[this] val busy = vector.filter(nodeBusy)
-    def needsRebuild: Boolean = busy.exists(nodeOpen)
-
     // Make a hash of the observed vector. Only an Inet address of the factory is
     // considered and all other address types are ignored
     private[this] def hashNodeVector(vec: Seq[Node]): Int = {
@@ -307,6 +269,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       require(vector.isEmpty, s"vector must be empty: $vector")
       def indices: Set[Int] = Set.empty
       def pick(): Node = failingNode(emptyException)
+      def needsRebuild: Boolean = false
     }
 
   /**
@@ -327,6 +290,30 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   ) extends BaseDist(vector, initAperture) {
     require(vector.nonEmpty, "vector must be non empty")
 
+    /**
+     * Returns a new vector which is ordered by a node's status. Note, it is
+     * important that this is a stable sort since we care about the source order
+     * of `vec` to eliminate any unnecessary resource churn.
+     */
+    private[this] def statusOrder(vec: Vector[Node]): Vector[Node] = {
+      val resultNodes = new VectorBuilder[Node]
+      val busyNodes = new ListBuffer[Node]
+      val closedNodes = new ListBuffer[Node]
+
+      val iter = vec.iterator
+      while (iter.hasNext) {
+        val node = iter.next()
+        node.status match {
+          case Status.Open => resultNodes += node
+          case Status.Busy => busyNodes += node
+          case Status.Closed => closedNodes += node
+        }
+      }
+
+      resultNodes ++= busyNodes ++= closedNodes
+      resultNodes.result
+    }
+
     // Since we don't have any process coordinate, we sort the node
     // by `token` which is deterministic across rebuilds but random
     // globally, since `token` is assigned randomly per process
@@ -344,6 +331,15 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
         pick(vec(a), 1.0, vec(b), 1.0)
       }
     }
+
+    // To reduce the amount of rebuilds needed, we rely on the probabilistic
+    // nature of p2c pick. That is, we know that only when a significant
+    // portion of the underlying vector is unavailable will we return an
+    // unavailable node to the layer above and trigger a rebuild. We do however
+    // want to return to our "stable" ordering as soon as we notice that a
+    // previously busy node is now available.
+    private[this] val busy = vector.filter(nodeBusy)
+    def needsRebuild: Boolean = busy.exists(nodeOpen)
   }
 
   /**
@@ -368,12 +364,6 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
 
     private[this] val ring = new Ring(vector.size, rng)
 
-    // We only need to order by status since the ring does the rest w.r.t
-    // to picking within the processes coordinate. Also, note, that the
-    // order of `vector` is stable across processes since it is sorted
-    // by `LoadBalancerFactory`.
-    private[this] val vec = statusOrder(vector)
-
     // We log the contents of the aperture on each distributor rebuild when using
     // deterministic aperture. Rebuilds are not frequent and concentrated around
     // events where this information would be valuable (i.e. coordinate changes or
@@ -392,13 +382,13 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
         }.mkString("[", ", ", "]")
       }
       log.debug(s"Aperture updated for client $lbl: nodes=$apertureSlice")
-    }
 
-    if (log.isLoggable(Level.TRACE)) {
-      val lbl = if (label.isEmpty) "<unlabelled>" else label
-      def vectorString(vector: Vector[Node]): String =
-        vector.map(_.factory.address).mkString("[", ", ", "]")
-      log.trace(s"Aperture updated for client $lbl: statusOrderedVector=${vectorString(vec)}")
+      // In some cases, it may be useful see the raw server vector so we
+      // log it at trace.
+      if (log.isLoggable(Level.TRACE)) {
+        val vectorString = vector.map(_.factory.address).mkString("[", ", ", "]")
+        log.trace(s"Aperture updated for client $lbl: vector=$vectorString")
+      }
     }
 
     // We want to additionally ensure that p2c can actually converge when there
@@ -445,8 +435,12 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       val bw = ring.weight(b, offset, width)
       // Note, `aw` or `bw` can't be zero since `pick2` would not
       // have returned the indices in the first place.
-      pick(vec(a), aw, vec(b), bw)
+      pick(vector(a), aw, vector(b), bw)
     }
+
+    // rebuilds only need to happen when we receive ring updates (from
+    // the servers or our coordinate changing).
+    def needsRebuild: Boolean = false
   }
 
   protected def initDistributor(): Distributor = new EmptyVector(1)
