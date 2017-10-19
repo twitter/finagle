@@ -83,7 +83,7 @@ object SmuxTest {
   }
   val request = Request(Path.empty, Nil, Buf.Utf8("." * 10))
 
-  def await[A](f: Future[A]): A = Await.result(f, 5.seconds)
+  def await[A](f: Future[A]): A = Await.result(f, 30.seconds)
 
   def serve(
     serverLevel: Option[OpportunisticTls.Level]
