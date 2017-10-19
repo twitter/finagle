@@ -417,7 +417,7 @@ abstract class AbstractEndToEndTest
       }
 
       def close(): Unit = {
-        serverThread.join()
+        serverThread.join(30.seconds.inMillis)
         Option(client).foreach(_.close())
         server.close()
       }
