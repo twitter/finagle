@@ -108,8 +108,10 @@ This includes ``com.twitter.finagle.WriteException WriteExceptions`` and
 :ref:`retryable nacks <glossary_nack>`. As these should have already been retried,
 ``MethodBuilder`` will avoid retrying them again at this layer.
 
-The :ref:`classifier <response_classification>` set by ``withRetryForClassifier`` is also used
-to determine the :ref:`logical <mb_logical_req>` success metrics of the client.
+The :ref:`classifier <response_classification>` set by ``withRetryForClassifier`` is
+used to determine which requests are successful. This is the basis for measuring
+the :ref:`logical <mb_logical_req>` success metrics of the method and for logging_
+unsuccessful requests.
 
 Timeouts
 --------
@@ -170,6 +172,17 @@ Will produce the following metrics:
 ``MethodBuilder`` adds itself into the process registry which allows
 for introspection of runtime configuration via TwitterServer's `/admin/registry.json`
 `endpoint <https://twitter.github.io/twitter-server/Admin.html#admin-registry-json>`_.
+
+.. _logging:
+
+Logging
+-------
+
+Unsuccessful request, as determined by the :ref:`classifier <response_classification>`
+set by ``withRetryForClassifier``, are logged at ``com.twitter.logging.Level.DEBUG``
+level. Further details, including the request and response, are available at ``TRACE``
+level. There is a ``Logger`` per method, named with the format
+`"com.twitter.finagle.client.MethodBuilder.$clientName.$methodName"`.
 
 Lifecycle
 ---------
