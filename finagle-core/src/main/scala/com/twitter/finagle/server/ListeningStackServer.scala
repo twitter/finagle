@@ -30,7 +30,7 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
     trackSession: ClientConnection => Unit
   ): ListeningServer
 
-  final def serve(addr: SocketAddress, factory: ServiceFactory[Req, Rep]): ListeningServer =
+  def serve(addr: SocketAddress, factory: ServiceFactory[Req, Rep]): ListeningServer =
     new ListeningServer with CloseAwaitably {
       // Ensure that we have performed global initialization.
       com.twitter.finagle.Init()

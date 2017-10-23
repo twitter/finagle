@@ -49,8 +49,12 @@ trait HttpRichClient { self: Client[Request, Response] =>
 object Http extends Client[Request, Response] with HttpRichClient with Server[Request, Response] {
 
   // Toggles transport implementation to Http/2.
-  private[this] object useHttp2 {
-    private[this] val underlying: Toggle[Int] = Toggles("com.twitter.finagle.http.UseHttp2v2")
+  private[this] object useH2 {
+    private[this] val underlying: Toggle[Int] = Toggles("com.twitter.finagle.http.UseH2")
+    def apply(): Boolean = underlying(ServerInfo().id.hashCode)
+  }
+  private[this] object useH2C {
+    private[this] val underlying: Toggle[Int] = Toggles("com.twitter.finagle.http.UseH2C")
     def apply(): Boolean = underlying(ServerInfo().id.hashCode)
   }
 
@@ -174,13 +178,9 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
           new Stack.NoOpModule(http.filter.StatsFilter.role, http.filter.StatsFilter.description)
         )
 
-    private val params: Stack.Params = {
-      val vanilla = StackClient.defaultParams +
-        protocolLibrary +
-        responseClassifierParam
-
-      if (useHttp2()) vanilla ++ Http2 else vanilla
-    }
+    private def params: Stack.Params = StackClient.defaultParams +
+      protocolLibrary +
+      responseClassifierParam
   }
 
   case class Client(
@@ -194,7 +194,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     protected type Out = Any
     protected type Context = TransportContext
 
-    protected def endpointer: Stackable[ServiceFactory[Request, Response]] =
+    protected def endpointer: Stackable[ServiceFactory[Request, Response]] = {
       new EndpointerModule[Request, Response](
         Seq(implicitly[Stack.Param[HttpImpl]], implicitly[Stack.Param[param.Stats]]), {
           (prms: Stack.Params, addr: InetSocketAddress) =>
@@ -226,6 +226,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
             }
         }
       )
+    }
 
     protected def copy1(
       stack: Stack[ServiceFactory[Request, Response]] = this.stack,
@@ -350,6 +351,17 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       super.configuredParams(newParams)
     override def filtered(filter: Filter[Request, Response, Request, Response]): Client =
       super.filtered(filter)
+
+    protected def superNewClient(dest: Name, label0: String): ServiceFactory[Request, Response] = {
+      super.newClient(dest, label0)
+    }
+    override def newClient(dest: Name, label0: String): ServiceFactory[Request, Response] = {
+      val shouldHttp2 =
+        if (params[Transport.ClientSsl].sslClientConfiguration == None) useH2C()
+        else useH2()
+      val client = if (shouldHttp2) this.configuredParams(Http2) else this
+      client.superNewClient(dest, label0)
+    }
   }
 
   def client: Http.Client = Client()
@@ -372,13 +384,9 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
           new Stack.NoOpModule(http.filter.StatsFilter.role, http.filter.StatsFilter.description)
         )
 
-    private val params: Stack.Params = {
-      val vanilla = StackServer.defaultParams +
-        protocolLibrary +
-        responseClassifierParam
-
-      if (useHttp2()) vanilla ++ Http2 else vanilla
-    }
+    private val params: Stack.Params = StackServer.defaultParams +
+      protocolLibrary +
+      responseClassifierParam
   }
 
   case class Server(
@@ -517,6 +525,21 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     override def configured[P](psp: (P, Stack.Param[P])): Server = super.configured(psp)
     override def configuredParams(newParams: Stack.Params): Server =
       super.configuredParams(newParams)
+
+    protected def superServe(
+      addr: SocketAddress,
+      factory: ServiceFactory[Request, Response]): ListeningServer = {
+      super.serve(addr, factory)
+    }
+    override def serve(
+      addr: SocketAddress,
+      factory: ServiceFactory[Request, Response]): ListeningServer = {
+      val shouldHttp2 =
+        if (params[Transport.ServerSsl].sslServerConfiguration == None) useH2C()
+        else useH2()
+      val client = if (shouldHttp2) this.configuredParams(Http2) else this
+      client.superServe(addr, factory)
+    }
   }
 
   def server: Http.Server = Server()

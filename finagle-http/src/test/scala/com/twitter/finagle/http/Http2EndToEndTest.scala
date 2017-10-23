@@ -4,15 +4,14 @@ import com.twitter.conversions.storage._
 import com.twitter.conversions.time._
 import com.twitter.finagle
 import com.twitter.finagle.Service
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.toggle.flag.overrides
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
-import com.twitter.util.Future
+import com.twitter.util.{Closable, Future}
 import java.net.InetSocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class Http2EndToEndTest extends AbstractEndToEndTest {
   def implName: String = "netty4 http/2"
   def clientImpl(): finagle.Http.Client = finagle.Http.client.configuredParams(finagle.Http.Http2)
@@ -136,5 +135,47 @@ class Http2EndToEndTest extends AbstractEndToEndTest {
     // check that this doesn't throw an exception
     val rep = await(client(request))
     assert(rep.status == Status.Ok)
+  }
+
+  test("Upgrades to HTTP/2 only if both have the toggle on, and it's H2C, not H2") {
+    for {
+      clientUseHttp2 <- Seq(1D, 0D)
+      serverUseHttp2 <- Seq(1D, 0D)
+      toggleName <- Seq("com.twitter.finagle.http.UseH2", "com.twitter.finagle.http.UseH2C")
+    } {
+      val sr = new InMemoryStatsReceiver()
+      val server = overrides.let(Map(toggleName -> serverUseHttp2)) {
+        finagle.Http.server
+          .withStatsReceiver(sr)
+          .withLabel("server")
+          .serve("localhost:*", initService)
+      }
+      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+      val client = overrides.let(Map(toggleName -> clientUseHttp2)) {
+        finagle.Http.client
+          .withStatsReceiver(sr)
+          .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+      }
+      val rep = client(Request("/"))
+      await(rep)
+      if (
+        clientUseHttp2 == 1.0 &&
+          serverUseHttp2 == 1.0 &&
+          toggleName == "com.twitter.finagle.http.UseH2C"
+      ) {
+        assert(sr.counters.get(Seq("client", "upgrade", "success")) == Some(1),
+          "Failed to upgrade when both parties were toggled on")
+        assert(sr.counters.get(Seq("server", "upgrade", "success")) == Some(1),
+          "Failed to upgrade when both parties were toggled on")
+      } else {
+        val clientStatus = if (clientUseHttp2 == 1) "on" else "off"
+        val serverStatus = if (serverUseHttp2 == 1) "on" else "off"
+        val errorMsg = s"Upgraded when the client was $clientStatus, the server was " +
+          s"$serverStatus, the toggle was $toggleName"
+        assert(!sr.counters.contains(Seq("client", "upgrade", "success")), errorMsg)
+        assert(!sr.counters.contains(Seq("server", "upgrade", "success")), errorMsg)
+      }
+      await(Closable.all(client, server).close())
+    }
   }
 }
