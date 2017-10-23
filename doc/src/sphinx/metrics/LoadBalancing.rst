@@ -19,10 +19,14 @@ All Balancers
 **load**
   A gauge of the total load over all nodes being balanced across.
 
-**meanweight**
+**meanweight** `verbosity:debug`
   A gauge tracking the arithmetic mean of the weights of the endpoints
-  being load-balanced across. Does not apply to
-  :src:`HeapLeastLoaded <com/twitter/finagle/loadbalancer/heap/HeapLeastLoaded.scala>`.
+  being load-balanced across.
+
+**num_weight_classes**
+  The number of groups (or classes) of weights in the load balancer. Each class gets
+  a fresh instance of the client's load balancer and receives traffic proportional
+  to its weight.
 
 **adds**
   A counter of the number of hosts added to the loadbalancer.
