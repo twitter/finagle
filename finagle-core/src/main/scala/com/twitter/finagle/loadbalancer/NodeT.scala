@@ -23,4 +23,6 @@ private trait NodeT[Req, Rep] extends ServiceFactory[Req, Rep] {
    * The underlying service factory which this node proxies to.
    */
   def factory: EndpointFactory[Req, Rep]
+
+  override def toString: String = f"Node(load=$load%1.3f, pending=$pending%1.3f, factory=$factory)"
 }

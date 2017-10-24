@@ -13,8 +13,6 @@ import scala.collection.mutable.ListBuffer
 import scala.util.hashing.MurmurHash3
 
 private object Aperture {
-  private val log = Logger.get()
-
   val dapertureToggleKey = "com.twitter.finagle.core.UseDeterministicAperture"
   private val dapertureToggle = CoreToggles(dapertureToggleKey)
 }
@@ -121,8 +119,26 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       case None => dapertureToggleActive
     }
 
-  @volatile
-  private[this] var vectorHash: Int = -1
+  @volatile private[this] var vectorHash: Int = -1
+  // Make a hash of the passed in `vec` and set `vectorHash`.
+  // Only an Inet address of the factory is considered and all
+  // other address types are ignored.
+  private[this] def updateVectorHash(vec: Seq[Node]): Unit = {
+    // A specialized reimplementation of MurmurHash3.listHash
+    val it = vec.iterator
+    var n = 0
+    var h = MurmurHash3.arraySeed
+    while (it.hasNext) it.next().factory.address match {
+      case Inet(addr, _) if !addr.isUnresolved =>
+        val d = MurmurHash3.bytesHash(addr.getAddress.getAddress)
+        h = MurmurHash3.mix(h, d)
+        n += 1
+
+      case _ => // no-op
+    }
+
+    vectorHash = MurmurHash3.finalizeHash(h, n)
+  }
 
   private[this] val gauges = Seq(
     statsReceiver.addGauge("aperture") { aperture },
@@ -147,9 +163,11 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     self.rebuild()
   }
 
-  private[this] val nodeToken: ApertureNode => Int = _.token
-  private[this] val nodeOpen: ApertureNode => Boolean = _.status == Status.Open
-  private[this] val nodeBusy: ApertureNode => Boolean = _.status == Status.Busy
+  private[this] def lbl = if (label.isEmpty) "<unlabelled>" else label
+  // `pickLog` will log on the hot path so should be enabled judiciously.
+  private val pickLog = Logger.get(s"com.twitter.finagle.loadbalancer.aperture.Aperture.pick-log.$lbl")
+  // `rebuildLog` is used for rebuild level events which happen at a relatively low frequency.
+  private val rebuildLog = Logger.get(s"com.twitter.finagle.loadbalancer.aperture.Aperture.rebuild-log.$lbl")
 
   protected type Distributor = BaseDist
 
@@ -207,7 +225,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
 
     def rebuild(): This = rebuild(vector)
     def rebuild(vec: Vector[Node]): This = {
-      vectorHash = hashNodeVector(vec)
+      updateVectorHash(vec)
       if (vec.isEmpty) new EmptyVector(initAperture)
       else ProcessCoordinate() match {
         case Some(coord) if dapertureActive =>
@@ -239,25 +257,6 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
      * the indices over which `pick` selects.
      */
     def indices: Set[Int]
-
-    // Make a hash of the observed vector. Only an Inet address of the factory is
-    // considered and all other address types are ignored
-    private[this] def hashNodeVector(vec: Seq[Node]): Int = {
-      // A specialized reimplementation of MurmurHash3.listHash
-      val it = vec.iterator
-      var n = 0
-      var h = MurmurHash3.arraySeed
-      while (it.hasNext) it.next().factory.address match {
-        case Inet(addr, _) if !addr.isUnresolved =>
-          val d = MurmurHash3.bytesHash(addr.getAddress.getAddress)
-          h = MurmurHash3.mix(h, d)
-          n += 1
-
-        case _ => // no-op
-      }
-
-      MurmurHash3.finalizeHash(h, n)
-    }
   }
 
   /**
@@ -271,6 +270,11 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       def pick(): Node = failingNode(emptyException)
       def needsRebuild: Boolean = false
     }
+
+  // these are lifted out of `RandomAperture` to avoid unnecessary allocations.
+  private[this] val nodeToken: ApertureNode => Int = _.token
+  private[this] val nodeOpen: ApertureNode => Boolean = _.status == Status.Open
+  private[this] val nodeBusy: ApertureNode => Boolean = _.status == Status.Busy
 
   /**
    * A distributor which uses P2C to select nodes from within a window ("aperture").
@@ -320,6 +324,11 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     // when the node is created.
     private[this] val vec = statusOrder(vector.sortBy(nodeToken))
 
+    if (rebuildLog.isLoggable(Level.DEBUG)) {
+      val vecString = vec.take(aperture).map(_.factory.address).mkString("[", ", ", "]")
+      rebuildLog.debug(s"[RandomAperture.rebuild $lbl] nodes=$vecString")
+    }
+
     def indices: Set[Int] = (0 until aperture).toSet
 
     def pick(): Node = {
@@ -328,7 +337,16 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
         val a = rng.nextInt(aperture)
         var b = rng.nextInt(aperture - 1)
         if (b >= a) { b += 1 }
-        pick(vec(a), 1.0, vec(b), 1.0)
+
+        val nodeA = vec(a)
+        val nodeB = vec(b)
+        val picked = pick(nodeA, 1.0, nodeB, 1.0)
+
+        if (pickLog.isLoggable(Level.TRACE)) {
+          pickLog.trace(s"[RandomAperture.pick $lbl] a=$nodeA b=$nodeB picked=$picked")
+        }
+
+        picked
       }
     }
 
@@ -363,14 +381,11 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     require(vector.nonEmpty, "vector must be non empty")
 
     private[this] val ring = new Ring(vector.size, rng)
-
     // We log the contents of the aperture on each distributor rebuild when using
     // deterministic aperture. Rebuilds are not frequent and concentrated around
     // events where this information would be valuable (i.e. coordinate changes or
     // host add/removes).
-    if (log.isLoggable(Level.DEBUG)) {
-      val lbl = if (label.isEmpty) "<unlabelled>" else label
-
+    if (rebuildLog.isLoggable(Level.DEBUG)) {
       val apertureSlice: String = {
         val offset = coord.offset
         val width = apertureWidth
@@ -381,13 +396,13 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
           f"(index=$i, weight=$weight%1.3f, addr=$addr)"
         }.mkString("[", ", ", "]")
       }
-      log.debug(s"Aperture updated for client $lbl: nodes=$apertureSlice")
+      rebuildLog.debug(s"[DeterministicApeture.rebuild $lbl] nodes=$apertureSlice")
 
-      // In some cases, it may be useful see the raw server vector so we
-      // log it at trace.
-      if (log.isLoggable(Level.TRACE)) {
+      // It may be useful see the raw server vector for d-aperture since we expect
+      // uniformity across processes.
+      if (rebuildLog.isLoggable(Level.TRACE)) {
         val vectorString = vector.map(_.factory.address).mkString("[", ", ", "]")
-        log.trace(s"Aperture updated for client $lbl: vector=$vectorString")
+        rebuildLog.trace(s"[DeterministicApeture.rebuild $lbl] nodes=$vectorString")
       }
     }
 
@@ -422,7 +437,13 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       math.min(1.0, width)
     }
 
-    override def physicalAperture: Int = ring.range(coord.offset, apertureWidth)
+    override def physicalAperture: Int = {
+      val width = apertureWidth
+      if (rebuildLog.isLoggable(Level.DEBUG)) {
+        rebuildLog.debug(f"[DeterministicApeture.physicalAperture $lbl] ringUnit=${ring.unitWidth}%1.6f coordUnit=${coord.unitWidth}%1.6f coordOffset=${coord.offset}%1.6f apertureWidth=$width%1.6f")
+      }
+      ring.range(coord.offset, width)
+    }
 
     def indices: Set[Int] = ring.indices(coord.offset, apertureWidth).toSet
 
@@ -433,9 +454,18 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       val b = ring.tryPickSecond(a, offset, width)
       val aw = ring.weight(a, offset, width)
       val bw = ring.weight(b, offset, width)
+
+      val nodeA = vector(a)
+      val nodeB = vector(b)
       // Note, `aw` or `bw` can't be zero since `pick2` would not
       // have returned the indices in the first place.
-      pick(vector(a), aw, vector(b), bw)
+      val picked = pick(nodeA, aw, nodeB, bw)
+
+      if (pickLog.isLoggable(Level.TRACE)) {
+        pickLog.trace(f"[DeterministicApeture.pick] a=(index=$a, weight=$aw%1.3f, node=$nodeA) b=(index=$b, weight=$bw%1.3f, node=$nodeB) picked=$picked")
+      }
+
+      picked
     }
 
     // rebuilds only need to happen when we receive ring updates (from
