@@ -36,6 +36,9 @@ Runtime Behavior Changes
     with security managers.  This is only true for http/2--all other protocols will be unaffected.
     ``PHAB_ID=D98069``
 
+  * finagle-http: Netty 3 `HeaderMap` was replaced with our own implementation.
+    ``PHAB_ID=D99127``
+
 Deprecations
 ~~~~~~~~~~~~
 

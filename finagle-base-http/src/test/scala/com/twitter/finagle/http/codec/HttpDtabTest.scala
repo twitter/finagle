@@ -165,6 +165,6 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
 
     val foundHeaders = HttpDtab.strip(message)
 
-    assert(dtabHeaders == foundHeaders)
+    assert(dtabHeaders.toSet == foundHeaders.toSet)
   }
 }
