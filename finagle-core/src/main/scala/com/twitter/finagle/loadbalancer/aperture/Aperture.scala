@@ -332,10 +332,14 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     def indices: Set[Int] = (0 until aperture).toSet
 
     def pick(): Node = {
-      if (aperture <= 1) vec.head
+      val range = aperture
+      // We know we don't have to worry about the vector
+      // being empty because of the definition of rebuild
+      // in the `BaseDist`.
+      if (range <= 1) vec.head
       else {
-        val a = rng.nextInt(aperture)
-        var b = rng.nextInt(aperture - 1)
+        val a = rng.nextInt(range)
+        var b = rng.nextInt(range - 1)
         if (b >= a) { b += 1 }
 
         val nodeA = vec(a)
