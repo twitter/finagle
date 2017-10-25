@@ -27,6 +27,9 @@ Runtime Behavior Changes
     validate loaded certificates in all cases to ensure that the current date
     range is within the validity range specified in the certificate. ``PHAB_ID=D88664``
 
+  * finagle-netty4: `TrustCredentials.Insecure` now works with native SSL/TLS engines.
+    ``PHAB_ID=D103766``
+
   * finagle-http2: Upgraded to the new netty http/2 API in netty version 4.1.16.Final,
     which fixes several long-standing bugs but has some bugs around cleartext http/2.
     One of the work-arounds modifies the visibility of a private field, so it's incompatible
