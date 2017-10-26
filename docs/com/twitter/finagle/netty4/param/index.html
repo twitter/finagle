@@ -215,6 +215,12 @@ the netty4 event loop.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.netty4">netty4</a></dd></dl></div>
     </li><li class="current-entities indented5">
+                        <a class="object" href="TrackWorkerPoolExecutionDelay$.html" title=""></a>
+                        <a class="class" href="TrackWorkerPoolExecutionDelay.html" title="Control for tracking execution delay in the worker threads for a listener."></a>
+                        <a href="TrackWorkerPoolExecutionDelay.html" title="Control for tracking execution delay in the worker threads for a listener.">
+                          TrackWorkerPoolExecutionDelay
+                        </a>
+                      </li><li class="current-entities indented5">
                         <a class="object" href="WorkerPool$.html" title=""></a>
                         <a class="class" href="WorkerPool.html" title="A class eligible for configuring the io.netty.channel.EventLoopGroup used
 to execute I/O work for finagle clients and servers."></a>
@@ -236,6 +242,24 @@ to execute I/O work for finagle clients and servers.">
       <span class="symbol">
         <a title="" href="../ssl/index.html">
               <span class="name">ssl</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.netty4">netty4</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.netty4.threading" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="threading"></a><a id="threading:threading"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/netty4/index.html#threading" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../threading/index.html">
+              <span class="name">threading</span>
             </a>
       </span>
       
@@ -303,7 +327,32 @@ to execute I/O work for finagle clients and servers.">
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.netty4.param.WorkerPool" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.netty4.param.TrackWorkerPoolExecutionDelay" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="TrackWorkerPoolExecutionDelayextendsProductwithSerializable"></a><a id="TrackWorkerPoolExecutionDelay:TrackWorkerPoolExecutionDelay"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/netty4/param/index.html#TrackWorkerPoolExecutionDelayextendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Control for tracking execution delay in the worker threads for a listener." href="TrackWorkerPoolExecutionDelay.html">
+              <span class="name">TrackWorkerPoolExecutionDelay</span>
+            </a><span class="params">(<span name="enableTracking">enableTracking: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>, <span name="trackingTaskPeriod">trackingTaskPeriod: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>, <span name="threadDumpThreshold">threadDumpThreshold: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Control for tracking execution delay in the worker threads for a listener.</p><div class="fullcomment"><div class="comment cmt"><p>Control for tracking execution delay in the worker threads for a listener. This is intended
+to be enabled for perf tracking, and may impact performance as it adds tracking runnables to
+the event executors. Stats will be written to the stats receiver for the listener under
+workerpool/deviation_ms. When thread dumping is enabled, all logging is done at the warning
+level.
+</p></div><dl class="paramcmts block"><dt class="param">enableTracking</dt><dd class="cmt"><p>If true enable thread pause tracking.</p></dd><dt class="param">trackingTaskPeriod</dt><dd class="cmt"><p>The fixed time scheduling window for the execution delay runnable.</p></dd><dt class="param">threadDumpThreshold</dt><dd class="cmt"><p>If &gt; 0ms, enable stack dumping of threads when they have been delayed for
+                           more than the threshold. Thresholds of  &lt; 10ms will not work as
+                           expected as the underlying executors do not use high resolution timers.</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.netty4.param.WorkerPool" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="WorkerPoolextendsProductwithSerializable"></a><a id="WorkerPool:WorkerPool"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/netty4/param/index.html#WorkerPoolextendsProductwithSerializable" title="Permalink">
@@ -338,7 +387,25 @@ more granularly (e.g. <span class="extype" name="com.twitter.util.FuturePool">co
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="com.twitter.finagle.netty4.param.WorkerPool" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+                <li name="com.twitter.finagle.netty4.param.TrackWorkerPoolExecutionDelay" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TrackWorkerPoolExecutionDelay"></a><a id="TrackWorkerPoolExecutionDelay:TrackWorkerPoolExecutionDelay"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/netty4/param/index.html#TrackWorkerPoolExecutionDelay" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="TrackWorkerPoolExecutionDelay$.html">
+              <span class="name">TrackWorkerPoolExecutionDelay</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.netty4.param.WorkerPool" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="WorkerPool"></a><a id="WorkerPool:WorkerPool"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/netty4/param/index.html#WorkerPool" title="Permalink">

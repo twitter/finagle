@@ -407,10 +407,10 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       
-    </li><li name="com.twitter.finagle.http.netty" visbl="pub" class="indented5 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="netty"></a><a id="netty:netty"></a>
+    </li><li name="com.twitter.finagle.http.netty3" visbl="pub" class="indented5 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="netty3"></a><a id="netty3:netty3"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/index.html#netty" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#netty3" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -419,8 +419,8 @@ stabilized (moved elsewhere) at any time.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="netty/index.html">
-              <span class="name">netty</span>
+        <a title="" href="netty3/index.html">
+              <span class="name">netty3</span>
             </a>
       </span>
       
@@ -498,9 +498,9 @@ stabilized (moved elsewhere) at any time.
       
       
     </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="Cookie.html" title="Scala wrapper around Netty cookies."></a>
-                        <a href="Cookie.html" title="Scala wrapper around Netty cookies.">
+                        <a class="object" href="Cookie$.html" title=""></a>
+                        <a class="class" href="Cookie.html" title=""></a>
+                        <a href="Cookie.html" title="">
                           Cookie
                         </a>
                       </li><li class="current-entities indented4">
@@ -1475,12 +1475,12 @@ generator.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Scala wrapper around Netty cookies." href="Cookie.html">
+        <a title="" href="Cookie.html">
               <span class="name">Cookie</span>
             </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       
-      <p class="shortcomment cmt">Scala wrapper around Netty cookies.</p>
+      
     </li><li name="com.twitter.finagle.http.CookieMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="CookieMapextendsMap[String,com.twitter.finagle.http.Cookie]withMapLike[String,com.twitter.finagle.http.Cookie,com.twitter.finagle.http.CookieMap]"></a><a id="CookieMap:CookieMap"></a>
       <span class="permalink">
@@ -1564,7 +1564,8 @@ the <i>message</i>
       <p class="shortcomment cmt">Mutable message headers map.</p><div class="fullcomment"><div class="comment cmt"><p>Mutable message headers map.</p><p>Header names are case-insensitive.  For example, <code>get(&quot;accept&quot;)</code> is the same as
 get(&quot;Accept&quot;).</p><p>The map is a multi-map.  Use <a href="HeaderMap.html#getAll(key:String):Seq[String]" class="extmbr" name="com.twitter.finagle.http.HeaderMap#getAll">getAll</a> to get all values for a key.  Use <a href="HeaderMap.html#add(k:String,date:java.util.Date):com.twitter.finagle.http.HeaderMap" class="extmbr" name="com.twitter.finagle.http.HeaderMap#add">add</a>
 to append a key-value.
-</p></div></div>
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>This structure isn't thread-safe. Any concurrent access should be synchronized
+      externally.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.HttpMuxHandler" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="HttpMuxHandlerextendsService[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]"></a><a id="HttpMuxHandler:HttpMuxHandler"></a>
       <span class="permalink">
@@ -1734,12 +1735,14 @@ to retry via <span class="extype" name="com.twitter.finagle.service.RequeueFilte
 <a href="../Failure$.html#Restartable:Long" class="extmbr" name="com.twitter.finagle.Failure#Restartable">retryable nacks</a>. As these should have
 already been retried, we avoid retrying them again by ignoring them at this layer.</p><p>Additional information regarding retries can be found in the
 <a href="https://twitter.github.io/finagle/guide/Clients.html#retries" target="_blank">user guide</a>.</p><p>The classifier is also used to determine the logical success metrics of
-the client. Logical here means after any retries are run. For example
+the method. Logical here means after any retries are run. For example
 should a request result in retryable failure on the first attempt, but
 succeed upon retry, this is exposed through metrics as a success.
 Logical success rate metrics are scoped to
 &quot;clnt/your_client_label/method_name/logical&quot; and get &quot;success&quot; and
-&quot;requests&quot; counters along with a &quot;request_latency_ms&quot; stat.
+&quot;requests&quot; counters along with a &quot;request_latency_ms&quot; stat.</p><p>Unsuccessful requests are logged at <code>com.twitter.logging.Level.DEBUG</code> level.
+Further details, including the request and response, are available at
+<code>TRACE</code> level.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/MethodBuilder.html" target="_blank">user guide</a>.</p></span><span class="cmt"><p><a href="../Http$$Client.html#methodBuilder(dest:com.twitter.finagle.Name):com.twitter.finagle.http.MethodBuilder" class="extmbr" name="com.twitter.finagle.Http.Client#methodBuilder">com.twitter.finagle.Http.Client.methodBuilder</a> to construct instances.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.ParamMap" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="ParamMapextendsMap[String,String]withMapLike[String,String,com.twitter.finagle.http.ParamMap]"></a><a id="ParamMap:ParamMap"></a>
@@ -2107,7 +2110,25 @@ instances directly.</p></dd></dl></div>
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="com.twitter.finagle.http.EmptyParamMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+                <li name="com.twitter.finagle.http.Cookie" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Cookie"></a><a id="Cookie:Cookie"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#Cookie" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Cookie$.html">
+              <span class="name">Cookie</span>
+            </a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.http.EmptyParamMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="EmptyParamMap"></a><a id="EmptyParamMap:EmptyParamMap"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/index.html#EmptyParamMap" title="Permalink">

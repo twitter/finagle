@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>MethodBuilder &#8212; Finagle 7.1.0 documentation</title>
+    <title>MethodBuilder &#8212; Finagle 17.10.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '7.1.0',
+        VERSION:     '17.10.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 7.1.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 17.10.0 documentation" href="index.html" />
    
   
   <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
@@ -159,8 +159,10 @@ to retry via <a class="reference external" href="https://github.com/twitter/fina
 This includes <code class="docutils literal"><span class="pre">com.twitter.finagle.WriteException</span> <span class="pre">WriteExceptions</span></code> and
 <a class="reference internal" href="Glossary.html#glossary-nack"><span class="std std-ref">retryable nacks</span></a>. As these should have already been retried,
 <code class="docutils literal"><span class="pre">MethodBuilder</span></code> will avoid retrying them again at this layer.</p>
-<p>The <a class="reference internal" href="Clients.html#response-classification"><span class="std std-ref">classifier</span></a> set by <code class="docutils literal"><span class="pre">withRetryForClassifier</span></code> is also used
-to determine the <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> success metrics of the client.</p>
+<p>The <a class="reference internal" href="Clients.html#response-classification"><span class="std std-ref">classifier</span></a> set by <code class="docutils literal"><span class="pre">withRetryForClassifier</span></code> is
+used to determine which requests are successful. This is the basis for measuring
+the <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> success metrics of the method and for <a class="reference internal" href="#logging">logging</a>
+unsuccessful requests.</p>
 </div>
 <div class="section" id="timeouts">
 <h2>Timeouts<a class="headerlink" href="#timeouts" title="Permalink to this headline">¶</a></h2>
@@ -214,6 +216,14 @@ requests are retried.</li>
 <p><code class="docutils literal"><span class="pre">MethodBuilder</span></code> adds itself into the process registry which allows
 for introspection of runtime configuration via TwitterServer&#8217;s <cite>/admin/registry.json</cite>
 <a class="reference external" href="https://twitter.github.io/twitter-server/Admin.html#admin-registry-json">endpoint</a>.</p>
+</div>
+<div class="section" id="logging">
+<span id="id2"></span><h2>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h2>
+<p>Unsuccessful request, as determined by the <a class="reference internal" href="Clients.html#response-classification"><span class="std std-ref">classifier</span></a>
+set by <code class="docutils literal"><span class="pre">withRetryForClassifier</span></code>, are logged at <code class="docutils literal"><span class="pre">com.twitter.logging.Level.DEBUG</span></code>
+level. Further details, including the request and response, are available at <code class="docutils literal"><span class="pre">TRACE</span></code>
+level. There is a <code class="docutils literal"><span class="pre">Logger</span></code> per method, named with the format
+<cite>&#8220;com.twitter.finagle.client.MethodBuilder.$clientName.$methodName&#8221;</cite>.</p>
 </div>
 <div class="section" id="lifecycle">
 <h2>Lifecycle<a class="headerlink" href="#lifecycle" title="Permalink to this headline">¶</a></h2>
@@ -424,6 +434,7 @@ both the initial attempt and the retry.</p>
 <li><a class="reference internal" href="#retries">Retries</a></li>
 <li><a class="reference internal" href="#timeouts">Timeouts</a></li>
 <li><a class="reference internal" href="#metrics">Metrics</a></li>
+<li><a class="reference internal" href="#logging">Logging</a></li>
 <li><a class="reference internal" href="#lifecycle">Lifecycle</a></li>
 <li><a class="reference internal" href="#migrating-from-clientbuilder">Migrating from ClientBuilder</a></li>
 <li><a class="reference internal" href="#application-level-failure-handling">Application-level failure handling</a></li>

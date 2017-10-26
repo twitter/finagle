@@ -309,6 +309,22 @@ was issued to a server that requires them.">
                           Protocols
                         </a>
                       </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="RichClientParam.html" title="Produce a client with params wrapped in RichClientParam
+"></a>
+                        <a href="RichClientParam.html" title="Produce a client with params wrapped in RichClientParam
+">
+                          RichClientParam
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="RichServerParam.html" title="Produce a server with params wrapped in RichServerParam
+"></a>
+                        <a href="RichServerParam.html" title="Produce a server with params wrapped in RichServerParam
+">
+                          RichServerParam
+                        </a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="SeqIdFilter$.html" title=""></a>
                         <a class="class" href="SeqIdFilter.html" title="A Filter that overrides Thrift request sequence IDs,
 replacing them with our own randomly-assigned i32s."></a>
@@ -551,9 +567,9 @@ of a <code>ServiceIface</code>.</p>
       
       
     </li><li name="com.twitter.finagle.thrift.ThriftServiceIface#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="apply(method:com.twitter.scrooge.ThriftMethod,thriftService:com.twitter.finagle.Service[com.twitter.finagle.thrift.ThriftClientRequest,Array[Byte]],pf:org.apache.thrift.protocol.TProtocolFactory,stats:com.twitter.finagle.stats.StatsReceiver,responseClassifier:com.twitter.finagle.service.ResponseClassifier):com.twitter.finagle.Service[method.Args,method.SuccessType]"></a><a id="apply(ThriftMethod,Service[ThriftClientRequest,Array[Byte]],TProtocolFactory,StatsReceiver,ResponseClassifier):Service[Args,SuccessType]"></a>
+      <a id="apply(method:com.twitter.scrooge.ThriftMethod,thriftService:com.twitter.finagle.Service[com.twitter.finagle.thrift.ThriftClientRequest,Array[Byte]],clientParam:com.twitter.finagle.thrift.RichClientParam):com.twitter.finagle.Service[method.Args,method.SuccessType]"></a><a id="apply(ThriftMethod,Service[ThriftClientRequest,Array[Byte]],RichClientParam):Service[Args,SuccessType]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/thrift/ThriftServiceIface$.html#apply(method:com.twitter.scrooge.ThriftMethod,thriftService:com.twitter.finagle.Service[com.twitter.finagle.thrift.ThriftClientRequest,Array[Byte]],pf:org.apache.thrift.protocol.TProtocolFactory,stats:com.twitter.finagle.stats.StatsReceiver,responseClassifier:com.twitter.finagle.service.ResponseClassifier):com.twitter.finagle.Service[method.Args,method.SuccessType]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/ThriftServiceIface$.html#apply(method:com.twitter.scrooge.ThriftMethod,thriftService:com.twitter.finagle.Service[com.twitter.finagle.thrift.ThriftClientRequest,Array[Byte]],clientParam:com.twitter.finagle.thrift.RichClientParam):com.twitter.finagle.Service[method.Args,method.SuccessType]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -562,7 +578,7 @@ of a <code>ServiceIface</code>.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="method">method: <span class="extype" name="com.twitter.scrooge.ThriftMethod">ThriftMethod</span></span>, <span name="thriftService">thriftService: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>, <span name="pf">pf: <span class="extype" name="org.apache.thrift.protocol.TProtocolFactory">TProtocolFactory</span></span>, <span name="stats">stats: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>, <span name="responseClassifier">responseClassifier: <a href="../service/index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a></span>)</span><span class="result">: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.scrooge.ThriftMethod.Args">Args</span>, <span class="extype" name="com.twitter.scrooge.ThriftMethod.SuccessType">SuccessType</span>]</span>
+        <span class="name">apply</span><span class="params">(<span name="method">method: <span class="extype" name="com.twitter.scrooge.ThriftMethod">ThriftMethod</span></span>, <span name="thriftService">thriftService: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>, <span name="clientParam">clientParam: <a href="RichClientParam.html" class="extype" name="com.twitter.finagle.thrift.RichClientParam">RichClientParam</a></span>)</span><span class="result">: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.scrooge.ThriftMethod.Args">Args</span>, <span class="extype" name="com.twitter.scrooge.ThriftMethod.SuccessType">SuccessType</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Build a Service from a given Thrift method.</p>
@@ -874,7 +890,29 @@ of a <code>ServiceIface</code>.</p>
 
         
 
-        
+        <div class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="com.twitter.finagle.thrift.ThriftServiceIface#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="apply(method:com.twitter.scrooge.ThriftMethod,thriftService:com.twitter.finagle.Service[com.twitter.finagle.thrift.ThriftClientRequest,Array[Byte]],pf:org.apache.thrift.protocol.TProtocolFactory,stats:com.twitter.finagle.stats.StatsReceiver,responseClassifier:com.twitter.finagle.service.ResponseClassifier):com.twitter.finagle.Service[method.Args,method.SuccessType]"></a><a id="apply(ThriftMethod,Service[ThriftClientRequest,Array[Byte]],TProtocolFactory,StatsReceiver,ResponseClassifier):Service[Args,SuccessType]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/ThriftServiceIface$.html#apply(method:com.twitter.scrooge.ThriftMethod,thriftService:com.twitter.finagle.Service[com.twitter.finagle.thrift.ThriftClientRequest,Array[Byte]],pf:org.apache.thrift.protocol.TProtocolFactory,stats:com.twitter.finagle.stats.StatsReceiver,responseClassifier:com.twitter.finagle.service.ResponseClassifier):com.twitter.finagle.Service[method.Args,method.SuccessType]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2017-08-16) Use com.twitter.finagle.thrift.RichClientParam">apply</span><span class="params">(<span name="method">method: <span class="extype" name="com.twitter.scrooge.ThriftMethod">ThriftMethod</span></span>, <span name="thriftService">thriftService: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>, <span name="pf">pf: <span class="extype" name="org.apache.thrift.protocol.TProtocolFactory">TProtocolFactory</span></span>, <span name="stats">stats: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>, <span name="responseClassifier">responseClassifier: <a href="../service/index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a></span>)</span><span class="result">: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.scrooge.ThriftMethod.Args">Args</span>, <span class="extype" name="com.twitter.scrooge.ThriftMethod.SuccessType">SuccessType</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-08-16)</i> Use com.twitter.finagle.thrift.RichClientParam</p></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">

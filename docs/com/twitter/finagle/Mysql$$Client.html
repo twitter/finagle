@@ -461,9 +461,9 @@ client which exposes a rich mysql api.
       <p class="shortcomment cmt">Creates a new StackClient with parameter <code>psp._1</code> and Stack Param type <code>psp._2</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new StackClient with parameter <code>psp._1</code> and Stack Param type <code>psp._2</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a> → <a href="client/EndpointerStackClient.html" class="extype" name="com.twitter.finagle.client.EndpointerStackClient">EndpointerStackClient</a> → <a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a> → <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="com.twitter.finagle.client.EndpointerStackClient#configured" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="configured[P](p:P)(implicitevidence$2:com.twitter.finagle.Stack.Param[P]):This"></a><a id="configured[P](P)(Param[P]):Client"></a>
+      <a id="configured[P](p:P)(implicitevidence$1:com.twitter.finagle.Stack.Param[P]):This"></a><a id="configured[P](P)(Param[P]):Client"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/Mysql$$Client.html#configured[P](p:P)(implicitevidence$2:com.twitter.finagle.Stack.Param[P]):This" title="Permalink">
+      <a href="../../../com/twitter/finagle/Mysql$$Client.html#configured[P](p:P)(implicitevidence$1:com.twitter.finagle.Stack.Param[P]):This" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -721,9 +721,9 @@ Together with a <code>Transporter</code>, it forms the foundation of a
 finagle client. Concrete implementations are expected to specify this.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a> → <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="dispatch/GenSerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher">com.twitter.finagle.dispatch.GenSerialServerDispatcher</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.MysqlRichClient#newRichClient" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="newRichClient(dest:String):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactionswithcom.twitter.finagle.mysql.Cursors"></a><a id="newRichClient(String):mysql.ClientwithTransactionswithCursors"></a>
+      <a id="newRichClient(dest:String):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactions"></a><a id="newRichClient(String):mysql.ClientwithTransactions"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/Mysql$$Client.html#newRichClient(dest:String):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactionswithcom.twitter.finagle.mysql.Cursors" title="Permalink">
+      <a href="../../../com/twitter/finagle/Mysql$$Client.html#newRichClient(dest:String):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactions" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -732,7 +732,7 @@ finagle client. Concrete implementations are expected to specify this.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newRichClient</span><span class="params">(<span name="dest">dest: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="mysql/Client.html" class="extype" name="com.twitter.finagle.mysql.Client">mysql.Client</a> with <a href="mysql/Transactions.html" class="extype" name="com.twitter.finagle.mysql.Transactions">Transactions</a> with <a href="mysql/Cursors.html" class="extype" name="com.twitter.finagle.mysql.Cursors">Cursors</a></span>
+        <span class="name">newRichClient</span><span class="params">(<span name="dest">dest: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="mysql/Client.html" class="extype" name="com.twitter.finagle.mysql.Client">mysql.Client</a> with <a href="mysql/Transactions.html" class="extype" name="com.twitter.finagle.mysql.Transactions">Transactions</a></span>
       </span>
       
       <p class="shortcomment cmt">Creates a new <code>RichClient</code> connected to the logical
@@ -740,9 +740,9 @@ destination described by <code>dest</code>.</p><div class="fullcomment"><div cla
 destination described by <code>dest</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="MysqlRichClient.html" class="extype" name="com.twitter.finagle.MysqlRichClient">MysqlRichClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.MysqlRichClient#newRichClient" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="newRichClient(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactionswithcom.twitter.finagle.mysql.Cursors"></a><a id="newRichClient(Name,String):mysql.ClientwithTransactionswithCursors"></a>
+      <a id="newRichClient(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactions"></a><a id="newRichClient(Name,String):mysql.ClientwithTransactions"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/Mysql$$Client.html#newRichClient(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactionswithcom.twitter.finagle.mysql.Cursors" title="Permalink">
+      <a href="../../../com/twitter/finagle/Mysql$$Client.html#newRichClient(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactions" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -751,7 +751,7 @@ destination described by <code>dest</code>.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newRichClient</span><span class="params">(<span name="dest">dest: <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a></span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="mysql/Client.html" class="extype" name="com.twitter.finagle.mysql.Client">mysql.Client</a> with <a href="mysql/Transactions.html" class="extype" name="com.twitter.finagle.mysql.Transactions">Transactions</a> with <a href="mysql/Cursors.html" class="extype" name="com.twitter.finagle.mysql.Cursors">Cursors</a></span>
+        <span class="name">newRichClient</span><span class="params">(<span name="dest">dest: <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a></span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="mysql/Client.html" class="extype" name="com.twitter.finagle.mysql.Client">mysql.Client</a> with <a href="mysql/Transactions.html" class="extype" name="com.twitter.finagle.mysql.Transactions">Transactions</a></span>
       </span>
       
       <p class="shortcomment cmt">Creates a new <code>RichClient</code> connected to the logical
@@ -1082,6 +1082,26 @@ about its implementation at runtime.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a> → <a href="param/WithClientAdmissionControl.html" class="extype" name="com.twitter.finagle.param.WithClientAdmissionControl">WithClientAdmissionControl</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.Mysql.Client#withAffectedRows" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withAffectedRows():com.twitter.finagle.Mysql.Client"></a><a id="withAffectedRows():Client"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Mysql$$Client.html#withAffectedRows():com.twitter.finagle.Mysql.Client" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withAffectedRows</span><span class="params">()</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Don't set the CLIENT_FOUND_ROWS flag when establishing a new
+session.</p><div class="fullcomment"><div class="comment cmt"><p>Don't set the CLIENT_FOUND_ROWS flag when establishing a new
+session. This will make &quot;INSERT ... ON DUPLICATE KEY UPDATE&quot;
+statements return the &quot;correct&quot; update count.</p><p>See https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_row-count
+</p></div></div>
     </li><li name="com.twitter.finagle.Mysql.Client#withCharset" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="withCharset(charset:Short):com.twitter.finagle.Mysql.Client"></a><a id="withCharset(Short):Client"></a>
       <span class="permalink">

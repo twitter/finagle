@@ -319,7 +319,7 @@ is now part of a topology with a sense of order and proximity.
     </span>
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
         <span class="name">offset</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Double" class="extype" target="_top">Double</a></span>
@@ -327,25 +327,23 @@ is now part of a topology with a sense of order and proximity.
       
       <p class="shortcomment cmt">Returns a position between the range [0, 1.0) which represents this
 process' offset on the shared coordinate space.</p>
-    </li><li name="com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate.Coord#width" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="width(units:Int):Double"></a><a id="width(Int):Double"></a>
+    </li><li name="com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate.Coord#unitWidth" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="unitWidth:Double"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$$Coord.html#width(units:Int):Double" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$$Coord.html#unitWidth:Double" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">width</span><span class="params">(<span name="units">units: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Double" class="extype" target="_top">Double</a></span>
+        <span class="name">unitWidth</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Double" class="extype" target="_top">Double</a></span>
       </span>
       
-      <p class="shortcomment cmt">Computes the width of this processes range given the number of <code>units</code>
-to span.</p><div class="fullcomment"><div class="comment cmt"><p>Computes the width of this processes range given the number of <code>units</code>
-to span. That is, [offset, offset + width(x)) represents the range of this
-process.
+      <p class="shortcomment cmt">Returns the uniform width of a peer which is part of this peer group.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the uniform width of a peer which is part of this peer group.
+The returned value is bounded between (0, 1].
 </p></div></div>
     </li></ol>
             </div>

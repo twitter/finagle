@@ -227,10 +227,10 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.http">http</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.netty" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="netty"></a><a id="netty:netty"></a>
+    </li><li name="com.twitter.finagle.http.netty3" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="netty3"></a><a id="netty3:netty3"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/index.html#netty" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#netty3" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -239,8 +239,8 @@ resources for using Finagle.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="netty/index.html">
-              <span class="name">netty</span>
+        <a title="" href="netty3/index.html">
+              <span class="name">netty3</span>
             </a>
       </span>
       
@@ -318,9 +318,9 @@ resources for using Finagle.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.http">http</a></dd></dl></div>
     </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="Cookie.html" title="Scala wrapper around Netty cookies."></a>
-                        <a href="Cookie.html" title="Scala wrapper around Netty cookies.">
+                        <a class="object" href="Cookie$.html" title=""></a>
+                        <a class="class" href="Cookie.html" title=""></a>
+                        <a href="Cookie.html" title="">
                           Cookie
                         </a>
                       </li><li class="current-entities indented4">
@@ -627,12 +627,14 @@ to retry via <span class="extype" name="com.twitter.finagle.service.RequeueFilte
 <a href="../Failure$.html#Restartable:Long" class="extmbr" name="com.twitter.finagle.Failure#Restartable">retryable nacks</a>. As these should have
 already been retried, we avoid retrying them again by ignoring them at this layer.</p><p>Additional information regarding retries can be found in the
 <a href="https://twitter.github.io/finagle/guide/Clients.html#retries" target="_blank">user guide</a>.</p><p>The classifier is also used to determine the logical success metrics of
-the client. Logical here means after any retries are run. For example
+the method. Logical here means after any retries are run. For example
 should a request result in retryable failure on the first attempt, but
 succeed upon retry, this is exposed through metrics as a success.
 Logical success rate metrics are scoped to
 &quot;clnt/your_client_label/method_name/logical&quot; and get &quot;success&quot; and
-&quot;requests&quot; counters along with a &quot;request_latency_ms&quot; stat.
+&quot;requests&quot; counters along with a &quot;request_latency_ms&quot; stat.</p><p>Unsuccessful requests are logged at <code>com.twitter.logging.Level.DEBUG</code> level.
+Further details, including the request and response, are available at
+<code>TRACE</code> level.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/MethodBuilder.html" target="_blank">user guide</a>.</p></span><span class="cmt"><p><a href="../Http$$Client.html#methodBuilder(dest:com.twitter.finagle.Name):com.twitter.finagle.http.MethodBuilder" class="extmbr" name="com.twitter.finagle.Http.Client#methodBuilder">com.twitter.finagle.Http.Client.methodBuilder</a> to construct instances.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
@@ -1084,7 +1086,9 @@ builder.withRetryDisabled</pre></li></ol>
       
       <p class="shortcomment cmt">Retry based on <span class="extype" name="ResponseClassifier">ResponseClassifier</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Retry based on <span class="extype" name="ResponseClassifier">ResponseClassifier</span>.</p><p>The default behavior is to use the client's classifier which is typically
 configured through <code>theClient.withResponseClassifier</code> or
-<code>ClientBuilder.withResponseClassifier</code>.
+<code>ClientBuilder.withResponseClassifier</code>.</p><p>This classifier is used to determine which requests are unsuccessful.
+This is the basis for measuring the logical success metrics as well as
+logging unsuccessful requests at debug level.
 </p></div><dl class="paramcmts block"><dt class="param">classifier</dt><dd class="cmt"><p>when a <a href="../service/ResponseClass$$Failed.html" class="extype" name="com.twitter.finagle.service.ResponseClass.Failed">Failed</a>
                   with <code>retryable</code> is <code>true</code> is returned for a given <code>ReqRep</code>, the
                   request will be retried. This is often a

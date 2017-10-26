@@ -228,7 +228,7 @@ ToggleMap.">
 
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p><code>GlobalFlag</code> source for the Flag-based
-<a href="../ToggleMap.html" class="extype" name="com.twitter.finagle.toggle.ToggleMap">ToggleMap</a>.</p><p>Usage is of the form:</p><pre>-com.twitter.finagle.toggle.flag.overrides=com.twitter.finagle.NewThing=<span class="num">0.1</span>,com.twitter.finagle.OtherThing=<span class="num">0.99</span></pre><p>Methods <a href="#let(id:String,fraction:Double)(f:=&gt;Unit):Unit" class="extmbr" name="com.twitter.finagle.toggle.flag.overrides#let">overrides$.let(id:String,fraction:Double*</a> and <a href="#letClear(id:String)(f:=&gt;Unit):Unit" class="extmbr" name="com.twitter.finagle.toggle.flag.overrides#letClear">overrides.letClear</a>
+<a href="../ToggleMap.html" class="extype" name="com.twitter.finagle.toggle.ToggleMap">ToggleMap</a>.</p><p>Usage is of the form:</p><pre>-com.twitter.finagle.toggle.flag.overrides=com.twitter.finagle.NewThing=<span class="num">0.1</span>,com.twitter.finagle.OtherThing=<span class="num">0.99</span></pre><p>Methods <span class="extype" name="overrides$.let(id:String,fraction:Double*">overrides$.let(id:String,fraction:Double*</span> and <a href="#letClear[R](id:String)(f:=&gt;R):R" class="extmbr" name="com.twitter.finagle.toggle.flag.overrides#letClear">overrides.letClear</a>
 are available to help writing unit tests that manipulate
 flag-based <code>Toggle</code> values.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="../ToggleMap$.html#flags:com.twitter.finagle.toggle.ToggleMap" class="extmbr" name="com.twitter.finagle.toggle.ToggleMap#flags">com.twitter.finagle.toggle.ToggleMap.flags</a></p></span></dd></dl><div class="toggleContainer block">
@@ -621,9 +621,9 @@ flag-based <code>Toggle</code> values.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.toggle.flag.overrides#let" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="let(id:String,fraction:Double)(f:=&gt;Unit):Unit"></a><a id="let(String,Double)(⇒Unit):Unit"></a>
+      <a id="let[R](id:String,fraction:Double)(f:=&gt;R):R"></a><a id="let[R](String,Double)(⇒R):R"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/toggle/flag/overrides$.html#let(id:String,fraction:Double)(f:=&gt;Unit):Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/toggle/flag/overrides$.html#let[R](id:String,fraction:Double)(f:=&gt;R):R" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -632,14 +632,14 @@ flag-based <code>Toggle</code> values.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">let</span><span class="params">(<span name="id">id: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="fraction">fraction: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Double" class="extype" target="_top">Double</a></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">let</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="id">id: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="fraction">fraction: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Double" class="extype" target="_top">Double</a></span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.toggle.flag.overrides.let.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.toggle.flag.overrides.let.R">R</span></span>
       </span>
       
       <p class="shortcomment cmt">Run <code>f</code> with the given <code>Toggles</code> set to <code>fraction</code>.</p>
     </li><li name="com.twitter.app.Flag#let" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="let(t:T)(f:=&gt;Unit):Unit"></a><a id="let(Map[String,Double])(⇒Unit):Unit"></a>
+      <a id="let[R](t:T)(f:=&gt;R):R"></a><a id="let[R](Map[String,Double])(⇒R):R"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/toggle/flag/overrides$.html#let(t:T)(f:=&gt;Unit):Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/toggle/flag/overrides$.html#let[R](t:T)(f:=&gt;R):R" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -648,14 +648,14 @@ flag-based <code>Toggle</code> values.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">let</span><span class="params">(<span name="t">t: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Double" class="extype" target="_top">Double</a>]</span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">let</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="t">t: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Double" class="extype" target="_top">Double</a>]</span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.app.Flag.let.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.app.Flag.let.R">R</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li name="com.twitter.finagle.toggle.flag.overrides#letClear" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="letClear(id:String)(f:=&gt;Unit):Unit"></a><a id="letClear(String)(⇒Unit):Unit"></a>
+      <a id="letClear[R](id:String)(f:=&gt;R):R"></a><a id="letClear[R](String)(⇒R):R"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/toggle/flag/overrides$.html#letClear(id:String)(f:=&gt;Unit):Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/toggle/flag/overrides$.html#letClear[R](id:String)(f:=&gt;R):R" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -664,15 +664,15 @@ flag-based <code>Toggle</code> values.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">letClear</span><span class="params">(<span name="id">id: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">letClear</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="id">id: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.toggle.flag.overrides.letClear.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.toggle.flag.overrides.letClear.R">R</span></span>
       </span>
       
       <p class="shortcomment cmt">Run <code>f</code> with the given <code>Toggle</code> not assigned
 in the flag-based <code>ToggleMap</code>.</p>
     </li><li name="com.twitter.app.Flag#letClear" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="letClear(f:=&gt;Unit):Unit"></a><a id="letClear(⇒Unit):Unit"></a>
+      <a id="letClear[R](f:=&gt;R):R"></a><a id="letClear[R](⇒R):R"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/toggle/flag/overrides$.html#letClear(f:=&gt;Unit):Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/toggle/flag/overrides$.html#letClear[R](f:=&gt;R):R" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -681,7 +681,7 @@ in the flag-based <code>ToggleMap</code>.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">letClear</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">letClear</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.app.Flag.letClear.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.app.Flag.letClear.R">R</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>

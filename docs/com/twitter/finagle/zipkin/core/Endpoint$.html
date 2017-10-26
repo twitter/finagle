@@ -526,7 +526,7 @@ communication.">
       </span>
       
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>If possible, convert from a SocketAddress object to an Endpoint.
-If not, return Unknown Endpoint.</p></dd></dl></div>
+If not, return <code>Unknown</code> Endpoint.</p></dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -670,7 +670,8 @@ If not, return Unknown Endpoint.</p></dd></dl></div>
         <span class="name">toIpv4</span><span class="params">(<span name="inetAddress">inetAddress: <span class="extype" name="java.net.InetAddress">InetAddress</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Returns <code>0</code> if <code>inetAddress</code> is null, which will be the
+case for unresolved <code>InetSocketAddress</code>-es.</p>
     </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">

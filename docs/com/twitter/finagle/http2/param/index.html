@@ -251,7 +251,25 @@ protocol or not.">
                         <a href="PushEnabled.html" title=" A class for configuring overrides to the default pushEnabled setting.">
                           PushEnabled
                         </a>
-                      </li>
+                      </li><li name="com.twitter.finagle.http2.transport" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="transport"></a><a id="transport:transport"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http2/index.html#transport" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../transport/index.html">
+              <span class="name">transport</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.http2">http2</a></dd></dl></div>
+    </li>
               </ul>
             </div>
           </div>
@@ -354,7 +372,7 @@ protocol or not.">
 to be turned on and off by changing the level of prefix.&lt;FRAME_TYPE&gt;, or turning everything
 on by changing the level of prefix. The HTTP/2 frame logger logs at the level TRACE, so you
 must set logger to that level to see the frame logs. The prefix if not set defaults to
-io.netty.handler.codec.http2.Http2Codec
+io.netty.handler.codec.http2.Http2MultiplexCodec
 </p></div><dl class="paramcmts block"><dt class="param">loggerNamePrefix</dt><dd class="cmt"><p>The name of the logger to be used as the root logger name for
                         netty HTTP/2 frame logging.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.http2.param.HeaderSensitivity" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -462,7 +480,7 @@ io.netty.handler.codec.http2.Http2Codec
       <span class="symbol">
         <a title="A class for configuring overrides to the default maxHeaderListSize setting." href="MaxHeaderListSize.html">
               <span class="name">MaxHeaderListSize</span>
-            </a><span class="params">(<span name="maxHeaderListSize">maxHeaderListSize: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+            </a><span class="params">(<span name="maxHeaderListSize">maxHeaderListSize: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A class for configuring overrides to the default maxHeaderListSize setting.</p>

@@ -1062,7 +1062,12 @@ ClientBuilder.">
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"></div>
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <span class="toggle">
+            Linear Supertypes
+          </span>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+        </div></div>
         
 
       <div id="mbrsel">
@@ -1080,10 +1085,22 @@ ClientBuilder.">
             <ol>
               
               <li class="alpha in"><span>Alphabetic</span></li>
-              
+              <li class="inherit out"><span>By Inheritance</span></li>
             </ol>
           </div>
-          
+          <div class="ancestors">
+                  <span class="filtertype">Inherited<br />
+                  </span>
+                  <ol id="linearization">
+                    <li class="in" name="com.twitter.finagle.thriftmux"><span>thriftmux</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  </ol>
+                </div><div class="ancestors">
+              <span class="filtertype"></span>
+              <ol>
+                <li class="hideall out"><span>Hide All</span></li>
+                <li class="showall in"><span>Show All</span></li>
+              </ol>
+            </div>
           <div id="visbl">
               <span class="filtertype">Visibility</span>
               <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
@@ -1179,12 +1196,14 @@ to retry via <span class="extype" name="com.twitter.finagle.service.RequeueFilte
 <a href="../Failure$.html#Restartable:Long" class="extmbr" name="com.twitter.finagle.Failure#Restartable">retryable nacks</a>. As these should have
 already been retried, we avoid retrying them again by ignoring them at this layer.</p><p>Additional information regarding retries can be found in the
 <a href="https://twitter.github.io/finagle/guide/Clients.html#retries" target="_blank">user guide</a>.</p><p>The classifier is also used to determine the logical success metrics of
-the client. Logical here means after any retries are run. For example
+the method. Logical here means after any retries are run. For example
 should a request result in retryable failure on the first attempt, but
 succeed upon retry, this is exposed through metrics as a success.
 Logical success rate metrics are scoped to
 &quot;clnt/your_client_label/method_name/logical&quot; and get &quot;success&quot; and
-&quot;requests&quot; counters along with a &quot;request_latency_ms&quot; stat.
+&quot;requests&quot; counters along with a &quot;request_latency_ms&quot; stat.</p><p>Unsuccessful requests are logged at <code>com.twitter.logging.Level.DEBUG</code> level.
+Further details, including the request and response, are available at
+<code>TRACE</code> level.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/MethodBuilder.html" target="_blank">user guide</a>.</p></span><span class="cmt"><p><a href="../ThriftMux$$Client.html#methodBuilder(dest:com.twitter.finagle.Name):com.twitter.finagle.thriftmux.MethodBuilder" class="extmbr" name="com.twitter.finagle.ThriftMux.Client#methodBuilder">com.twitter.finagle.ThriftMux.Client.methodBuilder</a> to construct instances.</p></span></dd></dl></div>
     </li></ol>
             </div>
@@ -1222,7 +1241,11 @@ Logical success rate metrics are scoped to
         </div>
 
         <div id="inheritedMembers">
-        
+        <div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+            </div>
         
         </div>
 

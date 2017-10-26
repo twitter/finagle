@@ -455,9 +455,9 @@ resources for using Finagle.
       <p class="shortcomment cmt">Creates a new StackClient with parameter <code>psp._1</code> and Stack Param type <code>psp._2</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new StackClient with parameter <code>psp._1</code> and Stack Param type <code>psp._2</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Http.Client">Client</a> → <a href="client/EndpointerStackClient.html" class="extype" name="com.twitter.finagle.client.EndpointerStackClient">EndpointerStackClient</a> → <a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a> → <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="com.twitter.finagle.client.EndpointerStackClient#configured" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="configured[P](p:P)(implicitevidence$2:com.twitter.finagle.Stack.Param[P]):This"></a><a id="configured[P](P)(Param[P]):Client"></a>
+      <a id="configured[P](p:P)(implicitevidence$1:com.twitter.finagle.Stack.Param[P]):This"></a><a id="configured[P](P)(Param[P]):Client"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/Http$$Client.html#configured[P](p:P)(implicitevidence$2:com.twitter.finagle.Stack.Param[P]):This" title="Permalink">
+      <a href="../../../com/twitter/finagle/Http$$Client.html#configured[P](p:P)(implicitevidence$1:com.twitter.finagle.Stack.Param[P]):This" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -669,10 +669,10 @@ services but instead wrap the resulting service with a rich API.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.client.EndpointerStackClient#newClient" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="newClient(dest:com.twitter.finagle.Name,label0:String):com.twitter.finagle.ServiceFactory[Req,Rep]"></a><a id="newClient(Name,String):ServiceFactory[Request,Response]"></a>
+    </li><li name="com.twitter.finagle.Http.Client#newClient" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="newClient(dest:com.twitter.finagle.Name,label0:String):com.twitter.finagle.ServiceFactory[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]"></a><a id="newClient(Name,String):ServiceFactory[Request,Response]"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/Http$$Client.html#newClient(dest:com.twitter.finagle.Name,label0:String):com.twitter.finagle.ServiceFactory[Req,Rep]" title="Permalink">
+      <a href="../../../com/twitter/finagle/Http$$Client.html#newClient(dest:com.twitter.finagle.Name,label0:String):com.twitter.finagle.ServiceFactory[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -690,7 +690,7 @@ for details on destination names.</p><p>Argument <code>label</code> is used to a
 The label is used to display stats, etc.
 </p></div><dl class="paramcmts block"><dt class="param">label0</dt><dd class="cmt"><p>if an empty String is provided, then the label
               from the <span class="extype" name="Label">Label</span> <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Stack.Params</a> is used.
-              If that is also an empty String, then <code>dest</code> is used.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="client/EndpointerStackClient.html" class="extype" name="com.twitter.finagle.client.EndpointerStackClient">EndpointerStackClient</a> → <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
+              If that is also an empty String, then <code>dest</code> is used.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Http.Client">Client</a> → <a href="client/EndpointerStackClient.html" class="extype" name="com.twitter.finagle.client.EndpointerStackClient">EndpointerStackClient</a> → <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Client#newClient" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newClient(dest:String,label:String):com.twitter.finagle.ServiceFactory[Req,Rep]"></a><a id="newClient(String,String):ServiceFactory[Request,Response]"></a>
       <span class="permalink">
@@ -869,6 +869,22 @@ about its implementation at runtime.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Http.Client">Client</a> → <a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.Http.Client#superNewClient" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="superNewClient(dest:com.twitter.finagle.Name,label0:String):com.twitter.finagle.ServiceFactory[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]"></a><a id="superNewClient(Name,String):ServiceFactory[Request,Response]"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Http$$Client.html#superNewClient(dest:com.twitter.finagle.Name,label0:String):com.twitter.finagle.ServiceFactory[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">superNewClient</span><span class="params">(<span name="dest">dest: <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a></span>, <span name="label0">label0: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

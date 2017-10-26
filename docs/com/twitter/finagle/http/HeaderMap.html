@@ -227,10 +227,10 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.http">http</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.netty" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="netty"></a><a id="netty:netty"></a>
+    </li><li name="com.twitter.finagle.http.netty3" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="netty3"></a><a id="netty3:netty3"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/index.html#netty" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#netty3" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -239,8 +239,8 @@ resources for using Finagle.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="netty/index.html">
-              <span class="name">netty</span>
+        <a title="" href="netty3/index.html">
+              <span class="name">netty3</span>
             </a>
       </span>
       
@@ -318,9 +318,9 @@ resources for using Finagle.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.http">http</a></dd></dl></div>
     </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="Cookie.html" title="Scala wrapper around Netty cookies."></a>
-                        <a href="Cookie.html" title="Scala wrapper around Netty cookies.">
+                        <a class="object" href="Cookie$.html" title=""></a>
+                        <a class="class" href="Cookie.html" title=""></a>
+                        <a href="Cookie.html" title="">
                           Cookie
                         </a>
                       </li><li class="current-entities indented4">
@@ -583,7 +583,8 @@ its credentials from a provided CredentialSource...">
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Mutable message headers map.</p><p>Header names are case-insensitive.  For example, <code>get(&quot;accept&quot;)</code> is the same as
 get(&quot;Accept&quot;).</p><p>The map is a multi-map.  Use <a href="#getAll(key:String):Seq[String]" class="extmbr" name="com.twitter.finagle.http.HeaderMap#getAll">getAll</a> to get all values for a key.  Use <a href="#add(k:String,date:java.util.Date):com.twitter.finagle.http.HeaderMap" class="extmbr" name="com.twitter.finagle.http.HeaderMap#add">add</a>
 to append a key-value.
-</p></div><div class="toggleContainer block">
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>This structure isn't thread-safe. Any concurrent access should be synchronized
+      externally.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -3363,7 +3364,7 @@ but with standard formatting for dates in HTTP headers.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toSet</span><span class="tparams">[<span name="B">B &gt;: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.collection.immutable.Set" class="extype" target="_top">Set</a>[<span class="extype" name="scala.collection.TraversableOnce.toSet.B">B</span>]</span>
+        <span class="name">toSet</span><span class="tparams">[<span name="B">B &gt;: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)</span>]</span><span class="result">: <span class="extype" name="scala.collection.immutable.Set">Set</span>[<span class="extype" name="scala.collection.TraversableOnce.toSet.B">B</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableOnce → GenTraversableOnce</dd></dl></div>

@@ -289,12 +289,6 @@ a lazy stream of rows.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="trait" href="Cursors.html" title=""></a>
-                        <a href="Cursors.html" title="">
-                          Cursors
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="object" href="DateValue$.html" title=""></a>
                         <a href="DateValue$.html" title="">
                           DateValue
@@ -714,6 +708,27 @@ received from a mysql server.">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Client#cursor" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="cursor(sql:String):com.twitter.finagle.mysql.CursoredStatement"></a><a id="cursor(String):CursoredStatement"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Client.html#cursor(sql:String):com.twitter.finagle.mysql.CursoredStatement" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cursor</span><span class="params">(<span name="sql">sql: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="CursoredStatement.html" class="extype" name="com.twitter.finagle.mysql.CursoredStatement">CursoredStatement</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Create a CursoredStatement with the given parameterized sql query.</p><div class="fullcomment"><div class="comment cmt"><p>Create a CursoredStatement with the given parameterized sql query.
+The returned cursored statement can be reused and applied with varying
+parameters.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>The cursored statements are built on a prepare -&gt; execute -&gt; fetch flow
+that requires state tracking. It is important to either fully consume the resulting
+stream, or explicitly call <code>close()</code></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.mysql.Client#ping" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ping():com.twitter.util.Future[com.twitter.finagle.mysql.Result]"></a><a id="ping():Future[Result]"></a>
       <span class="permalink">

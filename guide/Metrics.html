@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &#8212; Finagle 7.1.0 documentation</title>
+    <title>Metrics &#8212; Finagle 17.10.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '7.1.0',
+        VERSION:     '17.10.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 7.1.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 17.10.0 documentation" href="index.html" />
     <link rel="next" title="Unsuccessful Responses" href="UnsuccessfulResponses.html" />
     <link rel="prev" title="Protocols" href="Protocols.html" />
    
@@ -203,6 +203,16 @@ connections in the load balancer.</dd>
 <div class="section" id="finagle">
 <h2>Finagle<a class="headerlink" href="#finagle" title="Permalink to this headline">¶</a></h2>
 <p id="finagle-stats">These metrics track various Finagle internals.</p>
+<div class="section" id="aperture">
+<h3>Aperture<a class="headerlink" href="#aperture" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>finagle/aperture/coordinate</strong></dt>
+<dd>The process global coordinate for the process as sampled by
+the Aperture implementation.</dd>
+<dt><strong>finagle/aperture/peerset_size</strong></dt>
+<dd>A gauge of the size of the services peerset.</dd>
+</dl>
+</div>
 <div class="section" id="futurepool">
 <h3>FuturePool<a class="headerlink" href="#futurepool" title="Permalink to this headline">¶</a></h3>
 <p>These metrics correspond to the state of <code class="docutils literal"><span class="pre">FuturePool.unboundedPool</span></code> and
@@ -293,29 +303,31 @@ implementation, the Netty 4 library and available under <cite>finagle/netty4</ci
 on any instance running Finagle with Netty 4.</p>
 <dl class="docutils">
 <dt><strong>pooling/allocations/huge</strong> <cite>verbosity:debug</cite></dt>
-<dd>A gauge (a counter) of total number of HUGE <em>direct allocations</em>
+<dd>A gauge of the total number of HUGE <em>direct allocations</em>
 (i.e., unpooled allocations that exceed the current chunk size).</dd>
 <dt><strong>pooling/allocations/normal</strong> <cite>verbosity:debug</cite></dt>
-<dd>A gauge (a counter) of total number of NORMAL <em>direct allocations</em>
+<dd>A gauge of the total number of NORMAL <em>direct allocations</em>
 (i.e., less than a current chunk size).</dd>
 <dt><strong>pooling/allocations/small</strong> <cite>verbosity:debug</cite></dt>
-<dd>A gauge (a counter) of total number of SMALL <em>direct allocations</em>
+<dd>A gauge of the total number of SMALL <em>direct allocations</em>
 (i.e., less than a page size, 8192 bytes).</dd>
 <dt><strong>pooling/allocations/tiny</strong> <cite>verbosity:debug</cite></dt>
-<dd>A gauge (a counter) of total number of TINY <em>direct allocations</em>
+<dd>A gauge of the total number of TINY <em>direct allocations</em>
 (i.e., less than 512 bytes).</dd>
 <dt><strong>pooling/deallocations/huge</strong> <cite>verbosity:debug</cite></dt>
-<dd>A gauge (a counter) of total number of HUGE <em>direct deallocations</em>
+<dd>A gauge of the total number of HUGE <em>direct deallocations</em>
 (i.e., unpooled allocations that exceed the current chunk size).</dd>
 <dt><strong>pooling/deallocations/normal</strong> <cite>verbosity:debug</cite></dt>
-<dd>A gauge (a counter) of total number of NORMAL <em>direct deallocations</em>
+<dd>A gauge of the total number of NORMAL <em>direct deallocations</em>
 (i.e., less than a chunk size).</dd>
 <dt><strong>pooling/deallocations/small</strong> <cite>verbosity:debug</cite></dt>
-<dd>A gauge (a counter) of total number of SMALL <em>direct deallocations</em>
+<dd>A gauge of the total number of SMALL <em>direct deallocations</em>
 (i.e., less than a page size, 8192 bytes).</dd>
 <dt><strong>pooling/deallocations/tiny</strong> <cite>verbosity:debug</cite></dt>
-<dd>A gauge (a counter) of total number of TINY <em>direct deallocations</em>
+<dd>A gauge of the total number of TINY <em>direct deallocations</em>
 (i.e., less than 512 bytes).</dd>
+<dt><strong>pooling/used*</strong> <cite>verbosity:debug</cite></dt>
+<dd>A gauge of the number of bytes used for <em>direct allocations</em>.</dd>
 <dt><strong>reference_leaks</strong></dt>
 <dd>A counter of detected reference leaks. See longer note on
 <cite>com.twitter.finagle.netty4.trackReferenceLeaks</cite> for details.</dd>
@@ -343,10 +355,13 @@ These nodes are current unavailable for service.</dd>
 These nodes will never be available for service.</dd>
 <dt><strong>load</strong></dt>
 <dd>A gauge of the total load over all nodes being balanced across.</dd>
-<dt><strong>meanweight</strong></dt>
+<dt><strong>meanweight</strong> <cite>verbosity:debug</cite></dt>
 <dd>A gauge tracking the arithmetic mean of the weights of the endpoints
-being load-balanced across. Does not apply to
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/loadbalancer/heap/HeapLeastLoaded.scala">HeapLeastLoaded</a>.</dd>
+being load-balanced across.</dd>
+<dt><strong>num_weight_classes</strong></dt>
+<dd>The number of groups (or classes) of weights in the load balancer. Each class gets
+a fresh instance of the client&#8217;s load balancer and receives traffic proportional
+to its weight.</dd>
 <dt><strong>adds</strong></dt>
 <dd>A counter of the number of hosts added to the loadbalancer.</dd>
 <dt><strong>removes</strong></dt>
@@ -379,12 +394,11 @@ load-balanced.</dd>
 <dd>When using deterministic aperture (i.e. <cite>useDeterministicOrdering</cite> is set),
 the width of the window over which endpoints are load-balanced may be
 wider than the <cite>aperture</cite> gauge. The <cite>physical_aperture</cite> represents this value.</dd>
-<dt><strong>coordinate</strong></dt>
-<dd>The process global coordinate for the process as sampled by
-the Aperture implementation.</dd>
 <dt><strong>use_deterministic_ordering</strong></dt>
 <dd>1 if the Aperture implementation uses deterministic ordering
 0, otherwise.</dd>
+<dt><strong>vector_hash</strong></dt>
+<dd>A gauge of the hash of the distributors serverset vector.</dd>
 <dt><strong>coordinate_updates</strong></dt>
 <dd>A counter of the number of times the Aperture implementation receives
 updates from the <cite>ProcessCoordinate</cite> process global.</dd>
@@ -1073,9 +1087,9 @@ because the backing set of servers has changed.</dd>
 <dl class="docutils">
 <dt><strong>&lt;server_label&gt;/mux/draining</strong></dt>
 <dd>A counter of the number of times the server has initiated session draining.</dd>
-<dt><strong>&lt;server_label&gt;/mux/drained</strong></dt>
-<dd>A counter of the number of times the server has successfully completed the
-draining protocol within its allotted time.</dd>
+<dt><strong>&lt;server_label&gt;/mux/leased</strong> <cite>verbosity:debug</cite></dt>
+<dd>A counter of the number of leases issued by the server when the session is
+is in a state other than draining or drained.</dd>
 <dt><strong>&lt;client_label&gt;/mux/draining</strong></dt>
 <dd>A counter of the number of times a server initiated session draining.</dd>
 <dt><strong>&lt;client_label&gt;/mux/drained</strong></dt>
@@ -1113,6 +1127,9 @@ This includes exceptions in handshaking, thrift downgrading (for servers), etc.<
 <dt><strong>&lt;label&gt;/mux/transport/write/failures/</strong></dt>
 <dd>A counter indicating any exceptions that occur on the transport write path for mux.
 This includes exceptions in handshaking, thrift downgrading (for servers), etc.</dd>
+<dt><strong>&lt;label&gt;/mux/tls/upgrade/success</strong></dt>
+<dd>A counter of the number of times the client or server has successfully
+upgraded a connection to TLS.</dd>
 </dl>
 </div>
 <div class="section" id="thriftmux">
@@ -1125,6 +1142,9 @@ connection. This does not include downgraded Thrift connections.</dd>
 <dt><strong>&lt;server_label&gt;/thriftmux/downgraded_connects</strong></dt>
 <dd>A counter of the number of times the server has created a downgraded
 connection for &#8220;plain&#8221; Thrift.</dd>
+<dt><strong>&lt;label&gt;/thriftmux/tls/upgrade/success</strong></dt>
+<dd>A counter of the number of times the client or server has successfully
+upgraded a connection to TLS.</dd>
 </dl>
 </div>
 </div>
@@ -1163,6 +1183,7 @@ connection for &#8220;plain&#8221; Thrift.</dd>
 </ul>
 </li>
 <li><a class="reference internal" href="#finagle">Finagle</a><ul>
+<li><a class="reference internal" href="#aperture">Aperture</a></li>
 <li><a class="reference internal" href="#futurepool">FuturePool</a></li>
 <li><a class="reference internal" href="#scheduler">Scheduler</a></li>
 <li><a class="reference internal" href="#timer">Timer</a></li>

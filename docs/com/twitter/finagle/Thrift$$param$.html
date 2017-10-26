@@ -375,6 +375,28 @@ ThriftMux.server.serveIface(<span class="lit">":*"</span>, <span class="kw">new<
 If this is set to false, a buffered transport is used.  Framed
 transports are enabled by default.
 </p></div><dl class="paramcmts block"><dt class="param">enabled</dt><dd class="cmt"><p>Whether a framed transport should be used.</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.Thrift.param.MaxReusableBufferSize" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="MaxReusableBufferSizeextendsProductwithSerializable"></a><a id="MaxReusableBufferSize:MaxReusableBufferSize"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Thrift$$param$.html#MaxReusableBufferSizeextendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="A Param to set the max size of a reusable buffer for the thrift response." href="Thrift$$param$$MaxReusableBufferSize.html">
+              <span class="name">MaxReusableBufferSize</span>
+            </a><span class="params">(<span name="maxReusableBufferSize">maxReusableBufferSize: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A <code>Param</code> to set the max size of a reusable buffer for the thrift response.</p><div class="fullcomment"><div class="comment cmt"><p>A <code>Param</code> to set the max size of a reusable buffer for the thrift response.
+If the buffer size exceeds the specified value, the buffer is not reused,
+and a new buffer is used for the next thrift response.
+The default max size is 16Kb.
+</p></div><dl class="paramcmts block"><dt class="param">maxReusableBufferSize</dt><dd class="cmt"><p>Max buffer size in bytes.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.Thrift.param.ProtocolFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ProtocolFactoryextendsProductwithSerializable"></a><a id="ProtocolFactory:ProtocolFactory"></a>
       <span class="permalink">
@@ -589,6 +611,22 @@ transports are enabled by default.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.Thrift.param#maxThriftBufferSize" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="maxThriftBufferSize:Int"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Thrift$$param$.html#maxThriftBufferSize:Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">maxThriftBufferSize</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -637,6 +675,32 @@ transports are enabled by default.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.Thrift.param#protocolFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="protocolFactory:org.apache.thrift.protocol.TProtocolFactory"></a><a id="protocolFactory:TProtocolFactory"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Thrift$$param$.html#protocolFactory:org.apache.thrift.protocol.TProtocolFactory" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">protocolFactory</span><span class="result">: <span class="extype" name="org.apache.thrift.protocol.TProtocolFactory">TProtocolFactory</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">The vanilla Thrift <code>Transporter</code> and <code>Listener</code> factories deviate from other protocols in
+the result of the netty pipeline: most other protocols expect to receive a framed <code>Buf</code>
+while vanilla thrift produces an <code>Array[Byte]</code>.</p><div class="fullcomment"><div class="comment cmt"><p>The vanilla Thrift <code>Transporter</code> and <code>Listener</code> factories deviate from other protocols in
+the result of the netty pipeline: most other protocols expect to receive a framed <code>Buf</code>
+while vanilla thrift produces an <code>Array[Byte]</code>. This has two related motivations. First, the
+end result needed by the thrift implementations is an <code>Array[Byte]</code>, which is relatively
+trivial to deal with and is a JVM native type so it's unnecessary to go through a <code>Buf</code>.
+By avoiding an indirection through <code>Buf</code> we can avoid an unnecessary copy in the netty4
+pipeline that would be required to ensure that the bytes were on the heap before
+entering the Finagle transport types.
+</p></div></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
@@ -786,6 +850,24 @@ transports are enabled by default.
         <a title="" href="Thrift$$param$$Framed$.html">
               <span class="name">Framed</span>
             </a><span class="result"> extends <a href="Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a>[<a href="Thrift$$param$$Framed.html" class="extype" name="com.twitter.finagle.Thrift.param.Framed">Framed</a>] with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.Thrift.param.MaxReusableBufferSize" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MaxReusableBufferSize"></a><a id="MaxReusableBufferSize:MaxReusableBufferSize"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Thrift$$param$.html#MaxReusableBufferSize" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Thrift$$param$$MaxReusableBufferSize$.html">
+              <span class="name">MaxReusableBufferSize</span>
+            </a><span class="result"> extends <a href="Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a>[<a href="Thrift$$param$$MaxReusableBufferSize.html" class="extype" name="com.twitter.finagle.Thrift.param.MaxReusableBufferSize">MaxReusableBufferSize</a>] with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       
       

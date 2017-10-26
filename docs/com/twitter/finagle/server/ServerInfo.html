@@ -202,10 +202,8 @@ the given SocketAddress.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="trait" href="StackBasedServer.html" title="A Server that is
-parameterized."></a>
-                        <a href="StackBasedServer.html" title="A Server that is
-parameterized.">
+                        <a class="trait" href="StackBasedServer.html" title=" A Server that is parametrized."></a>
+                        <a href="StackBasedServer.html" title=" A Server that is parametrized.">
                           StackBasedServer
                         </a>
                       </li><li class="current-entities indented4">
@@ -334,7 +332,27 @@ that uses the transport + dispatcher pattern.">
 
         <div class="values members">
               <h3>Abstract Value Members</h3>
-              <ol><li name="com.twitter.finagle.server.ServerInfo#environment" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.server.ServerInfo#clusterId" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="clusterId:String"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/server/ServerInfo.html#clusterId:String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clusterId</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">An identifier which represents the &quot;cluster&quot; that this server
+belongs to.</p><div class="fullcomment"><div class="comment cmt"><p>An identifier which represents the &quot;cluster&quot; that this server
+belongs to. Note, in some cases where the server isn't part of
+a cluster, this can be equivalent to <code>id</code>.
+</p></div></div>
+    </li><li name="com.twitter.finagle.server.ServerInfo#environment" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="environment:Option[String]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/server/ServerInfo.html#environment:Option[String]" title="Permalink">

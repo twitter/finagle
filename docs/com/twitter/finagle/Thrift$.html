@@ -2194,22 +2194,6 @@ ThriftMux.server.serveIface(<span class="lit">":*"</span>, <span class="kw">new<
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.Thrift#maxThriftBufferSize" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="maxThriftBufferSize:Int"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Thrift$.html#maxThriftBufferSize:Int" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">maxThriftBufferSize</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
-      </span>
-      
-      
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -2372,32 +2356,6 @@ for details on destination names.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.Thrift#protocolFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="protocolFactory:org.apache.thrift.protocol.TProtocolFactory"></a><a id="protocolFactory:TProtocolFactory"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Thrift$.html#protocolFactory:org.apache.thrift.protocol.TProtocolFactory" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">protocolFactory</span><span class="result">: <span class="extype" name="org.apache.thrift.protocol.TProtocolFactory">TProtocolFactory</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">The vanilla Thrift <code>Transporter</code> and <code>Listener</code> factories deviate from other protocols in
-the result of the netty pipeline: most other protocols expect to receive a framed <code>Buf</code>
-while vanilla thrift produces an <code>Array[Byte]</code>.</p><div class="fullcomment"><div class="comment cmt"><p>The vanilla Thrift <code>Transporter</code> and <code>Listener</code> factories deviate from other protocols in
-the result of the netty pipeline: most other protocols expect to receive a framed <code>Buf</code>
-while vanilla thrift produces an <code>Array[Byte]</code>. This has two related motivations. First, the
-end result needed by the thrift implementations is an <code>Array[Byte]</code>, which is relatively
-trivial to deal with and is a JVM native type so it's unnecessary to go through a <code>Buf</code>.
-By avoiding an indirection through <code>Buf</code> we can avoid an unnecessary copy in the netty4
-pipeline that would be required to ensure that the bytes were on the heap before
-entering the Finagle transport types.
-</p></div></div>
     </li><li name="com.twitter.finagle.Thrift#serve" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="serve(addr:java.net.SocketAddress,service:com.twitter.finagle.ServiceFactory[Array[Byte],Array[Byte]]):com.twitter.finagle.ListeningServer"></a><a id="serve(SocketAddress,ServiceFactory[Array[Byte],Array[Byte]]):ListeningServer"></a>
       <span class="permalink">

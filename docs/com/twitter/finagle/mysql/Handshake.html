@@ -289,12 +289,6 @@ a lazy stream of rows.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="trait" href="Cursors.html" title=""></a>
-                        <a href="Cursors.html" title="">
-                          Cursors
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="object" href="DateValue$.html" title=""></a>
                         <a href="DateValue$.html" title="">
                           DateValue
@@ -639,7 +633,7 @@ received from a mysql server.">
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Handshake</span><span class="params">(<span name="username">username: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="password">password: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="database">database: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="clientCap">clientCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.mysql.Capability">Capability</a> = <span class="symbol"><span class="name"><a href="Capability$.html">Capability.baseCap</a></span></span></span>, <span name="charset">charset: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Short" class="extype" target="_top">Short</a> = <span class="symbol"><span class="name"><a href="../../../index.html">Utf8_general_ci</a></span></span></span>, <span name="maxPacketSize">maxPacketSize: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span> = <span class="symbol"><span class="name"><a href="../../../index.html">1.gigabyte</a></span></span></span>)</span><span class="result"> extends (<a href="HandshakeInit.html" class="extype" name="com.twitter.finagle.mysql.HandshakeInit">HandshakeInit</a>) ⇒ <span class="extype" name="com.twitter.util.Try">Try</span>[<a href="HandshakeResponse.html" class="extype" name="com.twitter.finagle.mysql.HandshakeResponse">HandshakeResponse</a>] with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <span class="name">Handshake</span><span class="params">(<span name="username">username: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="password">password: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="database">database: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="clientCap">clientCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.mysql.Capability">Capability</a> = <span class="symbol"><span class="name"><a href="Capability$.html">Capability.baseCap</a></span></span></span>, <span name="charset">charset: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Short" class="extype" target="_top">Short</a> = <span class="symbol"><span class="name"><a href="../../../index.html">Utf8_general_ci</a></span></span></span>, <span name="enableFoundRows">enableFoundRows: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">true</span></span>, <span name="maxPacketSize">maxPacketSize: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span> = <span class="symbol"><span class="name"><a href="../../../index.html">1.gigabyte</a></span></span></span>)</span><span class="result"> extends (<a href="HandshakeInit.html" class="extype" name="com.twitter.finagle.mysql.HandshakeInit">HandshakeInit</a>) ⇒ <span class="extype" name="com.twitter.util.Try">Try</span>[<a href="HandshakeResponse.html" class="extype" name="com.twitter.finagle.mysql.HandshakeResponse">HandshakeResponse</a>] with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
 
@@ -648,7 +642,9 @@ received from a mysql server.">
 client handshake (HandshakeResponse) using the given
 parameters. This facilitates the connection phase of
 the mysql protocol.
-</p></div><dl class="paramcmts block"><dt class="param">username</dt><dd class="cmt"><p>MySQL username used to login.</p></dd><dt class="param">password</dt><dd class="cmt"><p>MySQL password used to login.</p></dd><dt class="param">database</dt><dd class="cmt"><p>initial database to use for the session.</p></dd><dt class="param">clientCap</dt><dd class="cmt"><p>The capability this client has.</p></dd><dt class="param">charset</dt><dd class="cmt"><p>default character established with the server.</p></dd><dt class="param">maxPacketSize</dt><dd class="cmt"><p>max size of a command packet that the
+</p></div><dl class="paramcmts block"><dt class="param">username</dt><dd class="cmt"><p>MySQL username used to login.</p></dd><dt class="param">password</dt><dd class="cmt"><p>MySQL password used to login.</p></dd><dt class="param">database</dt><dd class="cmt"><p>initial database to use for the session.</p></dd><dt class="param">clientCap</dt><dd class="cmt"><p>The capability this client has.</p></dd><dt class="param">charset</dt><dd class="cmt"><p>default character established with the server.</p></dd><dt class="param">enableFoundRows</dt><dd class="cmt"><p>if the server should return the number
+of found (matched) rows, not the number of changed rows for
+UPDATE and INSERT ... ON DUPLICATE KEY UPDATE statements.</p></dd><dt class="param">maxPacketSize</dt><dd class="cmt"><p>max size of a command packet that the
 client intends to send to the server. The largest possible
 packet that can be transmitted to or from a MySQL 5.5 server or
 client is 1GB.</p></dd><dt>returns</dt><dd class="cmt"><p>A Try[HandshakeResponse] that encodes incompatibility
@@ -703,9 +699,9 @@ with the server.</p></dd></dl><div class="toggleContainer block">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.mysql.Handshake#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(username:Option[String],password:Option[String],database:Option[String],clientCap:com.twitter.finagle.mysql.Capability,charset:Short,maxPacketSize:com.twitter.util.StorageUnit):com.twitter.finagle.mysql.Handshake"></a><a id="&lt;init&gt;:Handshake"></a>
+      <a id="&lt;init&gt;(username:Option[String],password:Option[String],database:Option[String],clientCap:com.twitter.finagle.mysql.Capability,charset:Short,enableFoundRows:Boolean,maxPacketSize:com.twitter.util.StorageUnit):com.twitter.finagle.mysql.Handshake"></a><a id="&lt;init&gt;:Handshake"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mysql/Handshake.html#&lt;init&gt;(username:Option[String],password:Option[String],database:Option[String],clientCap:com.twitter.finagle.mysql.Capability,charset:Short,maxPacketSize:com.twitter.util.StorageUnit):com.twitter.finagle.mysql.Handshake" title="Permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Handshake.html#&lt;init&gt;(username:Option[String],password:Option[String],database:Option[String],clientCap:com.twitter.finagle.mysql.Capability,charset:Short,enableFoundRows:Boolean,maxPacketSize:com.twitter.util.StorageUnit):com.twitter.finagle.mysql.Handshake" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -714,10 +710,12 @@ with the server.</p></dd></dl><div class="toggleContainer block">
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Handshake</span><span class="params">(<span name="username">username: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="password">password: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="database">database: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="clientCap">clientCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.mysql.Capability">Capability</a> = <span class="symbol"><span class="name"><a href="Capability$.html">Capability.baseCap</a></span></span></span>, <span name="charset">charset: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Short" class="extype" target="_top">Short</a> = <span class="symbol"><span class="name"><a href="../../../index.html">Utf8_general_ci</a></span></span></span>, <span name="maxPacketSize">maxPacketSize: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span> = <span class="symbol"><span class="name"><a href="../../../index.html">1.gigabyte</a></span></span></span>)</span>
+        <span class="name">Handshake</span><span class="params">(<span name="username">username: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="password">password: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="database">database: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="clientCap">clientCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.mysql.Capability">Capability</a> = <span class="symbol"><span class="name"><a href="Capability$.html">Capability.baseCap</a></span></span></span>, <span name="charset">charset: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Short" class="extype" target="_top">Short</a> = <span class="symbol"><span class="name"><a href="../../../index.html">Utf8_general_ci</a></span></span></span>, <span name="enableFoundRows">enableFoundRows: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">true</span></span>, <span name="maxPacketSize">maxPacketSize: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span> = <span class="symbol"><span class="name"><a href="../../../index.html">1.gigabyte</a></span></span></span>)</span>
       </span>
       
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">username</dt><dd class="cmt"><p>MySQL username used to login.</p></dd><dt class="param">password</dt><dd class="cmt"><p>MySQL password used to login.</p></dd><dt class="param">database</dt><dd class="cmt"><p>initial database to use for the session.</p></dd><dt class="param">clientCap</dt><dd class="cmt"><p>The capability this client has.</p></dd><dt class="param">charset</dt><dd class="cmt"><p>default character established with the server.</p></dd><dt class="param">maxPacketSize</dt><dd class="cmt"><p>max size of a command packet that the
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">username</dt><dd class="cmt"><p>MySQL username used to login.</p></dd><dt class="param">password</dt><dd class="cmt"><p>MySQL password used to login.</p></dd><dt class="param">database</dt><dd class="cmt"><p>initial database to use for the session.</p></dd><dt class="param">clientCap</dt><dd class="cmt"><p>The capability this client has.</p></dd><dt class="param">charset</dt><dd class="cmt"><p>default character established with the server.</p></dd><dt class="param">enableFoundRows</dt><dd class="cmt"><p>if the server should return the number
+of found (matched) rows, not the number of changed rows for
+UPDATE and INSERT ... ON DUPLICATE KEY UPDATE statements.</p></dd><dt class="param">maxPacketSize</dt><dd class="cmt"><p>max size of a command packet that the
 client intends to send to the server. The largest possible
 packet that can be transmitted to or from a MySQL 5.5 server or
 client is 1GB.</p></dd></dl></div>
@@ -916,6 +914,22 @@ client is 1GB.</p></dd></dl></div>
       </span>
       <span class="symbol">
         <span class="name">database</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.mysql.Handshake#enableFoundRows" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="enableFoundRows:Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Handshake.html#enableFoundRows:Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">enableFoundRows</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       
       

@@ -976,6 +976,22 @@ was issued to a server that requires them.">
                           Protocols
                         </a>
                       </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="RichClientParam.html" title="Produce a client with params wrapped in RichClientParam
+"></a>
+                        <a href="RichClientParam.html" title="Produce a client with params wrapped in RichClientParam
+">
+                          RichClientParam
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="RichServerParam.html" title="Produce a server with params wrapped in RichServerParam
+"></a>
+                        <a href="RichServerParam.html" title="Produce a server with params wrapped in RichServerParam
+">
+                          RichServerParam
+                        </a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="SeqIdFilter$.html" title=""></a>
                         <a class="class" href="SeqIdFilter.html" title="A Filter that overrides Thrift request sequence IDs,
 replacing them with our own randomly-assigned i32s."></a>
@@ -1410,6 +1426,48 @@ was issued to a server that requires them.</p><div class="fullcomment"><div clas
 was issued to a server that requires them. See
 <a href="ClientIdRequiredFilter.html" class="extype" name="com.twitter.finagle.thrift.ClientIdRequiredFilter">com.twitter.finagle.thrift.ClientIdRequiredFilter</a> for details.
 </p></div></div>
+    </li><li name="com.twitter.finagle.thrift.RichClientParam" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="RichClientParamextendsProductwithSerializable"></a><a id="RichClientParam:RichClientParam"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/index.html#RichClientParamextendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Produce a client with params wrapped in RichClientParam
+" href="RichClientParam.html">
+              <span class="name">RichClientParam</span>
+            </a><span class="params">(<span name="protocolFactory">protocolFactory: <span class="extype" name="org.apache.thrift.protocol.TProtocolFactory">TProtocolFactory</span> = <span class="symbol"><span class="name"><a href="../../../index.html">Thrift.param.protocolFactory</a></span></span></span>, <span name="serviceName">serviceName: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="maxThriftBufferSize">maxThriftBufferSize: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol"><span class="name"><a href="../../../index.html">Thrift.param.maxThriftBufferSize</a></span></span></span>, <span name="responseClassifier">responseClassifier: <a href="../service/index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a> = <span class="symbol"><span class="name"><a href="../../../index.html">ResponseClassifier.Default</a></span></span></span>, <span name="clientStats">clientStats: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span> = <span class="symbol"><span class="name"><a href="../../../index.html">ClientStatsReceiver</a></span></span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Produce a client with params wrapped in RichClientParam
+</p><div class="fullcomment"><div class="comment cmt"><p>Produce a client with params wrapped in RichClientParam
+</p></div><dl class="paramcmts block"><dt class="param">protocolFactory</dt><dd class="cmt"><p>A <code>TProtocolFactory</code> creates protocol objects from transports</p></dd><dt class="param">serviceName</dt><dd class="cmt"><p>For client stats, (default: empty string)</p></dd><dt class="param">maxThriftBufferSize</dt><dd class="cmt"><p>The max size of a reusable buffer for the thrift response</p></dd><dt class="param">responseClassifier</dt><dd class="cmt"><p>See <a href="../service/index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">com.twitter.finagle.service.ResponseClassifier</a></p></dd><dt class="param">clientStats</dt><dd class="cmt"><p>StatsReceiver for recording metrics</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.thrift.RichServerParam" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="RichServerParamextendsProductwithSerializable"></a><a id="RichServerParam:RichServerParam"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/index.html#RichServerParamextendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Produce a server with params wrapped in RichServerParam
+" href="RichServerParam.html">
+              <span class="name">RichServerParam</span>
+            </a><span class="params">(<span name="protocolFactory">protocolFactory: <span class="extype" name="org.apache.thrift.protocol.TProtocolFactory">TProtocolFactory</span> = <span class="symbol"><span class="name"><a href="../../../index.html">Thrift.param.protocolFactory</a></span></span></span>, <span name="serviceName">serviceName: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;thrift&quot;</span></span>, <span name="maxThriftBufferSize">maxThriftBufferSize: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol"><span class="name"><a href="../../../index.html">Thrift.param.maxThriftBufferSize</a></span></span></span>, <span name="serverStats">serverStats: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span> = <span class="symbol"><span class="name"><a href="../../../index.html">LoadedStatsReceiver</a></span></span></span>, <span name="responseClassifier">responseClassifier: <a href="../service/index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a> = <span class="symbol"><span class="name"><a href="../../../index.html">ResponseClassifier.Default</a></span></span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Produce a server with params wrapped in RichServerParam
+</p><div class="fullcomment"><div class="comment cmt"><p>Produce a server with params wrapped in RichServerParam
+</p></div><dl class="paramcmts block"><dt class="param">protocolFactory</dt><dd class="cmt"><p>A <code>TProtocolFactory</code> creates protocol objects from transports</p></dd><dt class="param">serviceName</dt><dd class="cmt"><p>For server stats, (default: &quot;thrift&quot;)</p></dd><dt class="param">maxThriftBufferSize</dt><dd class="cmt"><p>The max size of a reusable buffer for the thrift response</p></dd><dt class="param">serverStats</dt><dd class="cmt"><p>StatsReceiver for recording metrics</p></dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.SeqIdFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="SeqIdFilterextendsSimpleFilter[com.twitter.finagle.thrift.ThriftClientRequest,Array[Byte]]"></a><a id="SeqIdFilter:SeqIdFilter"></a>
       <span class="permalink">

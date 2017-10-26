@@ -502,9 +502,9 @@ ThriftMux.server.serveIface(<span class="lit">":*"</span>, <span class="kw">new<
       <p class="shortcomment cmt">Creates a new StackServer with parameter <code>psp._1</code> and Stack Param type <code>psp._2</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new StackServer with parameter <code>psp._1</code> and Stack Param type <code>psp._2</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a> → <a href="server/ListeningStackServer.html" class="extype" name="com.twitter.finagle.server.ListeningStackServer">ListeningStackServer</a> → <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a> → <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="com.twitter.finagle.server.ListeningStackServer#configured" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="configured[P](p:P)(implicitevidence$2:com.twitter.finagle.Stack.Param[P]):This"></a><a id="configured[P](P)(Param[P]):Server"></a>
+      <a id="configured[P](p:P)(implicitevidence$1:com.twitter.finagle.Stack.Param[P]):This"></a><a id="configured[P](P)(Param[P]):Server"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/Thrift$$Server.html#configured[P](p:P)(implicitevidence$2:com.twitter.finagle.Stack.Param[P]):This" title="Permalink">
+      <a href="../../../com/twitter/finagle/Thrift$$Server.html#configured[P](p:P)(implicitevidence$1:com.twitter.finagle.Stack.Param[P]):This" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -624,22 +624,6 @@ case class.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.Thrift.Server#maxThriftBufferSize" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="maxThriftBufferSize:Int"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Thrift$$Server.html#maxThriftBufferSize:Int" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">maxThriftBufferSize</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a> → <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -676,7 +660,8 @@ case class.
 <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a>. Together with a <code>Listener</code>, it
 forms the foundation of a finagle server. Concrete implementations
 are expected to specify this.
-</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a> → <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="dispatch/GenSerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher">com.twitter.finagle.dispatch.GenSerialServerDispatcher</a></p></span></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a> → <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a></dd><dt>Note</dt><dd><span class="cmt"><p>The dispatcher must be prepared to handle the situation where it
+      receives an already-closed transport.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="dispatch/GenSerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher">com.twitter.finagle.dispatch.GenSerialServerDispatcher</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.Thrift.Server#newListener" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newListener():com.twitter.finagle.server.Listener[Server.this.In,Server.this.Out,Server.this.Context]"></a><a id="newListener():Listener[In,Out,Context]"></a>
       <span class="permalink">
@@ -762,22 +747,6 @@ to facilitate connection resource management.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a> → <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a> → <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a> → <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.Thrift.Server#protocolFactory" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="protocolFactory:org.apache.thrift.protocol.TProtocolFactory"></a><a id="protocolFactory:TProtocolFactory"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Thrift$$Server.html#protocolFactory:org.apache.thrift.protocol.TProtocolFactory" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">protocolFactory</span><span class="result">: <span class="extype" name="org.apache.thrift.protocol.TProtocolFactory">TProtocolFactory</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a> → <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></dd></dl></div>
     </li><li name="com.twitter.finagle.server.ListeningStackServer#serve" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="serve(addr:java.net.SocketAddress,factory:com.twitter.finagle.ServiceFactory[Req,Rep]):com.twitter.finagle.ListeningServer"></a><a id="serve(SocketAddress,ServiceFactory[Array[Byte],Array[Byte]]):ListeningServer"></a>
       <span class="permalink">
@@ -786,7 +755,7 @@ to facilitate connection resource management.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier">final </span>
+        <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
@@ -1080,10 +1049,10 @@ breaking the old clients:</p><pre><span class="kw">val</span> server = Thrift.se
 existing non-multiplexed server to a multiplexed one without
 breaking the old clients:</p><pre><span class="kw">val</span> server = Thrift.server.serveIfaces(
   address, serviceMap, defaultService = <span class="std">Some</span>(<span class="lit">"extendedEcho"</span>))</pre></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.ThriftRichServer#serverLabel" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="serverLabel:String"></a>
+    </li><li name="com.twitter.finagle.Thrift.Server#serverParam" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="serverParam:com.twitter.finagle.thrift.RichServerParam"></a><a id="serverParam:RichServerParam"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/Thrift$$Server.html#serverLabel:String" title="Permalink">
+      <a href="../../../com/twitter/finagle/Thrift$$Server.html#serverParam:com.twitter.finagle.thrift.RichServerParam" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1092,26 +1061,10 @@ breaking the old clients:</p><pre><span class="kw">val</span> server = Thrift.se
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">serverLabel</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+        <span class="name">serverParam</span><span class="result">: <a href="thrift/RichServerParam.html" class="extype" name="com.twitter.finagle.thrift.RichServerParam">RichServerParam</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.ThriftRichServer#serverStats" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="serverStats:com.twitter.finagle.stats.StatsReceiver"></a><a id="serverStats:StatsReceiver"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Thrift$$Server.html#serverStats:com.twitter.finagle.stats.StatsReceiver" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">lazy val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">serverStats</span><span class="result">: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a> → <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Thrift.Server#stack" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Array[Byte],Array[Byte]]]"></a><a id="stack:Stack[ServiceFactory[Array[Byte],Array[Byte]]]"></a>
       <span class="permalink">
@@ -1298,7 +1251,9 @@ from different clients/servers to a single stats receiver.
 size of the reusable buffer for thrift responses.</p><div class="fullcomment"><div class="comment cmt"><p>Produce a <a href="" class="extype" name="com.twitter.finagle.Thrift.Server">com.twitter.finagle.Thrift.Server</a> with the specified max
 size of the reusable buffer for thrift responses. If this size
 is exceeded, the buffer is not reused and a new buffer is
-allocated for the next thrift response.</p></div><dl class="paramcmts block"><dt class="param">size</dt><dd class="cmt"><p>Max size of the reusable buffer for thrift responses in bytes.</p></dd></dl></div>
+allocated for the next thrift response.
+The default max size is 16Kb.
+</p></div><dl class="paramcmts block"><dt class="param">size</dt><dd class="cmt"><p>Max size of the reusable buffer for thrift responses in bytes.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.Thrift.Server#withMonitor" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withMonitor(monitor:com.twitter.util.Monitor):com.twitter.finagle.Thrift.Server"></a><a id="withMonitor(Monitor):Server"></a>
       <span class="permalink">
@@ -1526,7 +1481,86 @@ HTTP classification tools.</p></span></dd></dl></div>
 
         
 
-        
+        <div class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="com.twitter.finagle.Thrift.Server#maxThriftBufferSize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="maxThriftBufferSize:Int"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Thrift$$Server.html#maxThriftBufferSize:Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2017-08-16) Use serverParam.maxThriftBufferSize">maxThriftBufferSize</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a> → <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-08-16)</i> Use serverParam.maxThriftBufferSize</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.Thrift.Server#protocolFactory" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="protocolFactory:org.apache.thrift.protocol.TProtocolFactory"></a><a id="protocolFactory:TProtocolFactory"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Thrift$$Server.html#protocolFactory:org.apache.thrift.protocol.TProtocolFactory" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2017-08-16) Use serverParam.protocolFactory">protocolFactory</span><span class="result">: <span class="extype" name="org.apache.thrift.protocol.TProtocolFactory">TProtocolFactory</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a> → <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-08-16)</i> Use serverParam.protocolFactory</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.Thrift.Server#serverLabel" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="serverLabel:String"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Thrift$$Server.html#serverLabel:String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2017-08-16) Use serverParam.serviceName">serverLabel</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a> → <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-08-16)</i> Use serverParam.serviceName</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.Thrift.Server#serverStats" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="serverStats:com.twitter.finagle.stats.StatsReceiver"></a><a id="serverStats:StatsReceiver"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Thrift$$Server.html#serverStats:com.twitter.finagle.stats.StatsReceiver" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2017-08-16) Use serverParam.serverStats">serverStats</span><span class="result">: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a> → <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-08-16)</i> Use serverParam.serverStats</p></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">
