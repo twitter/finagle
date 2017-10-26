@@ -11,7 +11,7 @@ import com.twitter.app.GlobalFlag
 
 import scala.util.Random
 
-object traceId128Bit extends GlobalFlag(false, "When true, new root spans will have 128-bit trace IDs. Defaults to false (64-bit).")
+object traceId128Bit extends GlobalFlag[Boolean](false, "When true, new root spans will have 128-bit trace IDs. Defaults to false (64-bit).")
 
 
 /**

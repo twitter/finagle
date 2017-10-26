@@ -40,6 +40,6 @@ private[finagle] class RichRequestHeader(val header: RequestHeader) extends AnyV
       SpanId(header.getSpan_id),
       if (header.isSetSampled) Some(header.isSampled) else None,
       if (header.isSetFlags) Flags(header.getFlags) else Flags(),
-      None // TODO: Regenerate tracing.thrift, and update to support high bits in 128 TraceID
+      if (header.isSetTrace_id_high) Some(SpanId(header.getTrace_id_high)) else None
     )
 }
