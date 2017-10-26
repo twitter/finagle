@@ -69,6 +69,8 @@ public class Constants {
    */
   public static final String SERVER_SEND = "ss";
 
+  public static final String SERVER_SEND_ERROR = "Server Send Error";
+
   /**
    * The server received ("sr") a request from a client. There is only one
    * request per span.  For example, if duplicate responses were received, each
