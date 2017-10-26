@@ -1,7 +1,6 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.benchmark.StdBenchAnnotations
-import com.twitter.finagle.netty3.http.Netty3HeaderMap
 import org.openjdk.jmh.annotations._
 import org.openjdk.jmh.infra.Blackhole
 import scala.util.Random
@@ -32,11 +31,6 @@ abstract class HeaderMapBenchmark extends StdBenchAnnotations {
   def iterate(b: Blackhole): Unit = map.foreach(h => b.consume(h))
 }
 
-class MapHeaderMapBenchmark extends HeaderMapBenchmark {
-  protected def newMap(): HeaderMap = MapHeaderMap()
+class DefaultHeaderMapBenchmark extends HeaderMapBenchmark {
+  protected def newMap(): HeaderMap = HeaderMap()
 }
-
-class N3HeaderMapBenchmark extends HeaderMapBenchmark {
-  protected def newMap(): HeaderMap = new Netty3HeaderMap()
-}
-

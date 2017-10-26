@@ -8,9 +8,9 @@ import scala.collection.mutable
  * Mutable, non-thread-safe [[HeaderMap]] implementation. Any concurrent access
  * to instances of this class should be synchronized externally.
  */
-private final class MapHeaderMap extends HeaderMap {
+private final class DefaultHeaderMap extends HeaderMap {
 
-  import MapHeaderMap._
+  import DefaultHeaderMap._
 
   private[this] val underlying = new Headers
 
@@ -51,7 +51,7 @@ private final class MapHeaderMap extends HeaderMap {
     keySet.iterator
 }
 
-private object MapHeaderMap {
+private object DefaultHeaderMap {
   // Adopted from Netty 3 HttpHeaders.
   private def validateName(s: String): Unit = {
     if (s == null) throw new NullPointerException("Header names cannot be null")
@@ -223,7 +223,7 @@ private object MapHeaderMap {
    * @note the headers are added to this `HeaderMap` via an `add` operation.
    */
   def apply(headers: (String, String)*): HeaderMap = {
-    val result = new MapHeaderMap
+    val result = new DefaultHeaderMap
     headers.foreach(t => result.add(t._1, t._2))
     result
   }

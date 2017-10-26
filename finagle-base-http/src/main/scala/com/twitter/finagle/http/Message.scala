@@ -23,7 +23,7 @@ abstract class Message {
   private[this] var _version: Version = Version.Http11
   private[this] var _chunked: Boolean = false
 
-  private[this] lazy val _headerMap: HeaderMap = MapHeaderMap()
+  private[this] lazy val _headerMap: HeaderMap = HeaderMap()
 
   /**
    * A read-only handle to the internal stream of bytes, representing the

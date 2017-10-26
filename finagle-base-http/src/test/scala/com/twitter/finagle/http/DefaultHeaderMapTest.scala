@@ -3,9 +3,9 @@ package com.twitter.finagle.http
 import org.scalacheck.Gen
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
-class MapHeaderMapTest extends AbstractHeaderMapTest with GeneratorDrivenPropertyChecks {
+class DefaultHeaderMapTest extends AbstractHeaderMapTest with GeneratorDrivenPropertyChecks {
 
-  final def newHeaderMap(headers: (String, String)*): HeaderMap = MapHeaderMap(headers: _*)
+  final def newHeaderMap(headers: (String, String)*): HeaderMap = DefaultHeaderMap(headers: _*)
 
   def genNonEmptyString: Gen[String] =
     Gen.nonEmptyListOf(Gen.choose('a', 'z')).map(s => new String(s.toArray))
@@ -38,35 +38,35 @@ class MapHeaderMapTest extends AbstractHeaderMapTest with GeneratorDrivenPropert
   } yield (k, v + c)
 
   test("apply()") {
-    assert(MapHeaderMap().isEmpty)
+    assert(DefaultHeaderMap().isEmpty)
   }
 
   test("validates header names & values (success)") {
     forAll(genValidHeader) { case (k, v) =>
-      assert(MapHeaderMap(k -> v).get(k).contains(v))
+      assert(DefaultHeaderMap(k -> v).get(k).contains(v))
     }
   }
 
   test("validates header names (failure)") {
     forAll(genInvalidHeaderName) { h =>
-      val e = intercept[IllegalArgumentException](MapHeaderMap(h))
+      val e = intercept[IllegalArgumentException](DefaultHeaderMap(h))
       assert(e.getMessage.contains("prohibited characters"))
     }
 
     forAll(genNonAsciiHeaderName) { h =>
-      val e = intercept[IllegalArgumentException](MapHeaderMap(h))
+      val e = intercept[IllegalArgumentException](DefaultHeaderMap(h))
       assert(e.getMessage.contains("non-ASCII characters"))
     }
   }
 
   test("validates header values (failure)") {
     forAll(genInvalidHeaderValue) { h =>
-      val e = intercept[IllegalArgumentException](MapHeaderMap(h))
+      val e = intercept[IllegalArgumentException](DefaultHeaderMap(h))
       assert(e.getMessage.contains("prohibited character"))
     }
 
     forAll(genInvalidClrfHeaderValue) { h =>
-      intercept[IllegalArgumentException](MapHeaderMap(h))
+      intercept[IllegalArgumentException](DefaultHeaderMap(h))
     }
   }
 }

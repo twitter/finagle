@@ -68,7 +68,7 @@ abstract class HeaderMap
   def +=(kv: (String, Date)): HeaderMap =
     +=((kv._1, HeaderMap.format(kv._2)))
 
-  override def empty: HeaderMap = MapHeaderMap()
+  override def empty: HeaderMap = DefaultHeaderMap()
 }
 
 object HeaderMap {
@@ -78,7 +78,7 @@ object HeaderMap {
    * @note the headers are added to the new `HeaderMap` via `add` operations.
    */
   def apply(headers: (String, String)*): HeaderMap =
-    MapHeaderMap(headers: _*)
+    DefaultHeaderMap(headers: _*)
 
   /** Create a new, empty HeaderMap. */
   def newHeaderMap: HeaderMap = apply()

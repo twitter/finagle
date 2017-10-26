@@ -10,9 +10,6 @@ import java.net.InetSocketAddress
 private[finagle] object Bijections {
 
   object netty {
-    def headersToFinagle(headers: NettyHttp.HttpHeaders): FinagleHttp.HeaderMap =
-      new Netty4HeaderMap(headers)
-
     def versionToFinagle(v: NettyHttp.HttpVersion): FinagleHttp.Version = v match {
       case NettyHttp.HttpVersion.HTTP_1_0 => FinagleHttp.Version.Http10
       case NettyHttp.HttpVersion.HTTP_1_1 => FinagleHttp.Version.Http11
@@ -109,20 +106,15 @@ private[finagle] object Bijections {
 
   object finagle {
 
-    def headersToNetty(h: FinagleHttp.HeaderMap): NettyHttp.HttpHeaders = h match {
-      case map: Netty4HeaderMap =>
-        map.underlying
-
-      case _ =>
-        // We don't want to validate headers here since they are already validated
-        // by Netty 3 DefaultHttpHeaders. This not only allows us to be efficient
-        // but also preserves the behavior of Netty 3.
-        val result = new NettyHttp.DefaultHttpHeaders(false /*validate headers*/ )
-        h.foreach {
-          case (k, v) =>
-            result.add(k, v)
-        }
-        result
+    def headersToNetty(h: FinagleHttp.HeaderMap): NettyHttp.HttpHeaders = {
+      // We don't want to validate headers here since they are already validated
+      // by Finagle's own HeaderMap.
+      val result = new NettyHttp.DefaultHttpHeaders(false /*validate headers*/ )
+      h.foreach {
+        case (k, v) =>
+          result.add(k, v)
+      }
+      result
     }
 
     def statusToNetty(s: FinagleHttp.Status): NettyHttp.HttpResponseStatus =
