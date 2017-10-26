@@ -345,13 +345,20 @@ class ChannelClosedException(underlying: Option[Throwable], remoteAddress: Optio
  * Indicates that a given stream was closed, for instance if the stream
  * was reset by a peer or a proxy.
  */
-class StreamClosedException(remoteAddress: Option[SocketAddress], streamId: String)
+class StreamClosedException(
+  remoteAddress: Option[SocketAddress],
+  streamId: String,
+  whyFailed: String)
     extends ChannelException(None, remoteAddress)
     with NoStackTrace {
+  def this(remoteAddress: Option[SocketAddress], streamId: String) =
+    this(remoteAddress, streamId, null)
+
   def this(remoteAddress: SocketAddress, streamId: String) =
-    this(Option(remoteAddress), streamId)
+    this(Option(remoteAddress), streamId, null)
   override def exceptionMessage(): String = {
-    s"Stream: $streamId was closed at remote address: $remoteAddress"
+    if (whyFailed == null) s"Stream: $streamId was closed at remote address: $remoteAddress"
+    else s"Stream: $streamId was closed at remote address: $remoteAddress, because $whyFailed"
   }
 }
 

@@ -2,20 +2,19 @@ package com.twitter.finagle.netty4
 
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle.{ListeningServer, Stack}
-import com.twitter.finagle.netty4.channel.{
-  Netty4FramedServerChannelInitializer,
-  Netty4RawServerChannelInitializer
-}
-import com.twitter.finagle.param.Timer
+import com.twitter.finagle.netty4.channel.{Netty4FramedServerChannelInitializer, Netty4RawServerChannelInitializer}
+import com.twitter.finagle.netty4.threading.EventLoopGroupExecutionDelayTracker
+import com.twitter.finagle.param.{Stats, Timer}
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.transport.Transport
+import com.twitter.logging.Logger
 import com.twitter.util.{CloseAwaitably, Future, Promise, Time}
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel._
 import io.netty.channel.epoll.{EpollEventLoopGroup, EpollServerSocketChannel}
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
-import io.netty.util.concurrent.{Future => NettyFuture, FutureListener}
+import io.netty.util.concurrent.{FutureListener, Future => NettyFuture}
 import java.lang.{Boolean => JBool, Integer => JInt}
 import java.net.SocketAddress
 import java.util.concurrent.TimeUnit
@@ -191,5 +190,16 @@ private class ListeningServerBuilder(
       }
 
       def boundAddress: SocketAddress = ch.localAddress()
+
+
+      private[this] val workerPoolExecutionDelayTrackingSettings = params[param.TrackWorkerPoolExecutionDelay]
+      if (workerPoolExecutionDelayTrackingSettings.enableTracking) {
+        EventLoopGroupExecutionDelayTracker.track(params[param.WorkerPool].eventLoopGroup,
+          workerPoolExecutionDelayTrackingSettings.trackingTaskPeriod,
+          workerPoolExecutionDelayTrackingSettings.threadDumpThreshold,
+          params[Stats].statsReceiver, s"finagle/netty-4/delayTracking/${boundAddress}",
+          Logger.get("com.twitter.finagle.netty4.Netty4Listener.threadDelay")
+        )
+      }
     }
 }

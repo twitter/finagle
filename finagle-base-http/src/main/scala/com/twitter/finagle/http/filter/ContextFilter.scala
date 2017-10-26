@@ -28,11 +28,29 @@ private[finagle] object ServerContextFilter {
       val role = ServerContextFilter.role
       val description = "Extract context information from requests"
 
-      val dtab = new DtabFilter.Extractor
       val context = new ServerContextFilter[Request, Response]
 
       def make(next: ServiceFactory[Request, Response]) =
-        dtab.andThen(context).andThen(next)
+        context.andThen(next)
+    }
+}
+
+object ServerDtabContextFilter {
+  val role = Stack.Role("ServerDtabContext")
+
+  /**
+   * A stack module that extracts context information and sets it on the local Context:
+   *   - Dtab
+   */
+  private[finagle] val module: Stackable[ServiceFactory[Request, Response]] =
+    new Stack.Module0[ServiceFactory[Request, Response]] {
+      val role = ServerDtabContextFilter.role
+      val description = "Extract context information from requests"
+
+      val dtab = new DtabFilter.Extractor
+
+      def make(next: ServiceFactory[Request, Response]) =
+        dtab.andThen(next)
     }
 }
 
@@ -53,7 +71,6 @@ private[finagle] object ClientContextFilter {
 
   /**
    * A stack module that sets Context information on outgoing requests:
-   *   - Dtab
    *   - Deadline
    */
   val module: Stackable[ServiceFactory[Request, Response]] =
@@ -61,10 +78,28 @@ private[finagle] object ClientContextFilter {
       val role = ClientContextFilter.role
       val description = "Set context information on outgoing requests"
 
-      val dtab = new DtabFilter.Injector
       val context = new ClientContextFilter[Request, Response]
 
       def make(next: ServiceFactory[Request, Response]) =
-        context.andThen(dtab).andThen(next)
+        context.andThen(next)
+    }
+}
+
+object ClientDtabContextFilter {
+  val role = Stack.Role("DtabContext")
+
+  /**
+   * A stack module that sets Context information on outgoing requests:
+   *   - Dtab
+   */
+  private[finagle] val module: Stackable[ServiceFactory[Request, Response]] =
+    new Stack.Module0[ServiceFactory[Request, Response]] {
+      val role = ClientDtabContextFilter.role
+      val description = "Set dtab context information on outgoing requests"
+
+      val dtab = new DtabFilter.Injector
+
+      def make(next: ServiceFactory[Request, Response]) =
+        dtab.andThen(next)
     }
 }

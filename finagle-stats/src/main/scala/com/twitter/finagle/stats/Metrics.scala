@@ -7,9 +7,9 @@ import java.util.concurrent.atomic.LongAdder
 import scala.collection.JavaConverters._
 import scala.util.control.NonFatal
 
-private[stats] object Metrics {
+object Metrics {
 
-  val log = Logger.get()
+  private val log = Logger.get()
 
   private def defaultHistogramFactory(
     name: String,
@@ -21,7 +21,28 @@ private[stats] object Metrics {
   private case object GaugeRepr extends Repr
   private case object CounterRepr extends Repr
 
-  class StoreCounterImpl(override val name: String) extends MetricsStore.StoreCounter {
+  private val DefaultMetricsMaps: MetricsMaps = newMetricsMaps
+
+  /**
+   * Create a new [[Metrics]] that does not share gauges, counters, or stats (by default,
+   * these are shared across [[Metrics]] instances)
+   */
+  def createDetached(
+    mkHistogram: (String, IndexedSeq[Double]) => MetricsHistogram,
+    separator: String
+  ): Metrics =
+    new Metrics(mkHistogram, separator, newMetricsMaps)
+
+  def createDetached(): Metrics =
+    createDetached(Metrics.defaultHistogramFactory, scopeSeparator())
+
+  private[this] def newMetricsMaps: MetricsMaps = MetricsMaps(
+    countersMap = new ConcurrentHashMap[Seq[String], MetricsStore.StoreCounter](),
+    statsMap = new ConcurrentHashMap[Seq[String], MetricsStore.StoreStat](),
+    gaugesMap = new ConcurrentHashMap[Seq[String], MetricsStore.StoreGauge]()
+  )
+
+  private class StoreCounterImpl(override val name: String) extends MetricsStore.StoreCounter {
     private[this] val adder = new LongAdder()
 
     val counter: Counter = new Counter {
@@ -33,11 +54,11 @@ private[stats] object Metrics {
     def count: Long = adder.sum()
   }
 
-  class StoreGaugeImpl(override val name: String, f: => Number) extends MetricsStore.StoreGauge {
+  private class StoreGaugeImpl(override val name: String, f: => Number) extends MetricsStore.StoreGauge {
     override def read: Number = f
   }
 
-  class StoreStatImpl(histo: MetricsHistogram, override val name: String, doLog: Boolean)
+  private class StoreStatImpl(histo: MetricsHistogram, override val name: String, doLog: Boolean)
       extends MetricsStore.StoreStat {
     def snapshot: Snapshot = histo.snapshot
 
@@ -53,6 +74,11 @@ private[stats] object Metrics {
     def clear(): Unit = histo.clear()
   }
 
+  private case class MetricsMaps(
+    countersMap: ConcurrentHashMap[Seq[String], MetricsStore.StoreCounter],
+    statsMap: ConcurrentHashMap[Seq[String], MetricsStore.StoreStat],
+    gaugesMap: ConcurrentHashMap[Seq[String], MetricsStore.StoreGauge]
+  )
 }
 
 /**
@@ -74,27 +100,34 @@ private[stats] class MetricCollisionException(msg: String) extends IllegalArgume
  * @note A verbosity level is only attached once, when metric is being created. Any subsequent
  *       creation/querying of the same metric (i.e., metric with the same name), doesn't affect
  *       its initial verbosity.
+ *
+ * @note By default, instances of [[Metrics]] share underlying [[Metrics.MetricsMaps]]. In the
+ *       case of multiple [[StatsReceiver]]s, this avoids duplicate metrics. To use per-instance
+ *       [[Metrics.MetricsMaps]], create the instance using `Metrics.createDetached`.
  */
-private[finagle] class Metrics(
+private[finagle] class Metrics private(
   mkHistogram: (String, IndexedSeq[Double]) => MetricsHistogram,
-  separator: String
+  separator: String,
+  metricsMaps: Metrics.MetricsMaps
 ) extends MetricsStore
     with MetricsView {
 
-  def this() = this(Metrics.defaultHistogramFactory, scopeSeparator())
+  def this() = this(Metrics.defaultHistogramFactory, scopeSeparator(), Metrics.DefaultMetricsMaps)
+
+  def this(
+    mkHistogram: (String, IndexedSeq[Double]) => MetricsHistogram,
+    separator: String
+  ) = this(mkHistogram, separator, Metrics.DefaultMetricsMaps)
 
   import Metrics._
 
   private[this] val loggedStats: Set[String] = debugLoggedStatNames()
 
-  private[this] val countersMap =
-    new ConcurrentHashMap[Seq[String], MetricsStore.StoreCounter]()
+  private[this] val countersMap = metricsMaps.countersMap
 
-  private[this] val statsMap =
-    new ConcurrentHashMap[Seq[String], MetricsStore.StoreStat]()
+  private[this] val statsMap = metricsMaps.statsMap
 
-  private[this] val gaugesMap =
-    new ConcurrentHashMap[Seq[String], MetricsStore.StoreGauge]()
+  private[this] val gaugesMap = metricsMaps.gaugesMap
 
   private[this] val verbosityMap =
     new ConcurrentHashMap[String, Verbosity]()

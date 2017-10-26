@@ -24,7 +24,6 @@ scala_library(
     'util/util-stats/src/main/scala:scala',
   ],
   sources=rglobs('*.scala'),
-  strict_deps=True,
 )
 
 def binary(name, main=None):

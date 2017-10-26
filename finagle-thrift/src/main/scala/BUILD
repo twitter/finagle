@@ -20,7 +20,6 @@ scala_library(
     'util/util-logging/src/main/scala:scala',
     'util/util-stats/src/main/scala:scala',
   ],
-  strict_deps=True,
   sources=rglobs('*.scala'),
   fatal_warnings=True,
   exports=[
@@ -30,7 +29,6 @@ scala_library(
     'finagle/finagle-thrift/src/main/java:java',
     'util/util-stats/src/main/scala:scala',
   ]
-
 )
 
 # For usecases (like scrooge codegen) where this dependency is used, but not detected as

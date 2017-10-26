@@ -29,7 +29,7 @@ case class ServerApplicationError(what: String) extends Exception(what) with NoS
  * and transactions for outstanding messages and as such exposes an interface where
  * tag assignment can be deferred (i.e. Int => Message).
  */
-private[finagle] class ClientDispatcher(trans: Transport[Message, Message])
+private[mux] class ClientDispatcher(trans: Transport[Message, Message])
     extends Service[Int => Message, Message] {
   import ClientDispatcher._
 
@@ -133,7 +133,9 @@ private[finagle] object ClientDispatcher {
 
   val InitialTagMapSize: Int = 256
 
-  val FutureExhaustedTagsException = Future.exception(Failure.rejected("Exhausted tags"))
+  val ExhaustedTagsException = Failure.rejected("Exhausted tags")
+
+  val FutureExhaustedTagsException = Future.exception(ExhaustedTagsException)
 
   /**
    * Creates a mux client dispatcher that can handle mux Request/Responses.
@@ -154,38 +156,6 @@ private class ReqRepFilter extends Filter[Request, Response, Int => Message, Mes
   // instead.
   @volatile private[this] var canDispatch: CanDispatch.State = CanDispatch.Unknown
 
-  private[this] def reply(msg: Try[Message]): Future[Response] = msg match {
-    case Return(Message.RreqOk(_, rep)) =>
-      Future.value(Response(rep))
-
-    case Return(Message.RreqError(_, error)) =>
-      Future.exception(ServerApplicationError(error))
-
-    case Return(Message.RdispatchOk(_, _, rep)) =>
-      Future.value(Response(rep))
-
-    case Return(Message.RdispatchError(_, contexts, error)) =>
-      val appError = ServerApplicationError(error)
-      val exn = MuxFailure.fromContexts(contexts) match {
-        case Some(f) => Failure(appError, f.finagleFlags)
-        case None => appError
-      }
-      Future.exception(exn)
-
-    case Return(Message.RdispatchNack(_, contexts)) =>
-      val exn = MuxFailure.fromContexts(contexts) match {
-        case Some(f) => Failure(Failure.RetryableNackFailure.why, f.finagleFlags)
-        case None => Failure.RetryableNackFailure
-      }
-      Future.exception(exn)
-
-    case Return(Message.RreqNack(_)) =>
-      Failure.FutureRetryableNackFailure
-
-    case t @ Throw(_) => Future.const(t.cast[Response])
-    case Return(m) => Future.exception(Failure(s"unexpected response: $m"))
-  }
-
   def apply(req: Request, svc: Service[Int => Message, Message]): Future[Response] = {
     val couldDispatch = canDispatch
 
@@ -200,7 +170,7 @@ private class ReqRepFilter extends Filter[Request, Response, Int => Message, Mes
       }
     }
 
-    if (couldDispatch != CanDispatch.Unknown) svc(msg).transform(reply)
+    if (couldDispatch != CanDispatch.Unknown) svc(msg).transform(replyFn)
     else
       svc(msg).transform {
         case Throw(ServerError(_)) =>
@@ -209,16 +179,53 @@ private class ReqRepFilter extends Filter[Request, Response, Int => Message, Mes
           canDispatch = CanDispatch.No
           apply(req, svc)
 
-        case r @ Return(_) =>
+        case Return(m) =>
           canDispatch = CanDispatch.Yes
-          reply(r)
+          Future.const(reply(m))
 
-        case t @ Throw(_) => reply(t)
+        case t @ Throw(_) =>
+          Future.const(t.cast[Response])
       }
   }
 }
 
-private object ReqRepFilter {
+private[finagle] object ReqRepFilter {
+
+  private val replyFn: Try[Message] => Future[Response] = {
+    case Return(m) => Future.const(reply(m))
+    case t @ Throw(_) => Future.const(t.cast[Response])
+  }
+
+  def reply(msg: Message): Try[Response] = msg match {
+    case Message.RreqOk(_, rep) =>
+      Return(Response(Nil, rep))
+
+    case Message.RreqError(_, error) =>
+      Throw(ServerApplicationError(error))
+
+    case Message.RdispatchOk(_, contexts, rep) =>
+      Return(Response(contexts, rep))
+
+    case Message.RdispatchError(_, contexts, error) =>
+      val appError = ServerApplicationError(error)
+      val exn = MuxFailure.fromContexts(contexts) match {
+        case Some(f) => Failure(appError, f.finagleFlags)
+        case None => appError
+      }
+      Throw(exn)
+
+    case Message.RdispatchNack(_, contexts) =>
+      val exn = MuxFailure.fromContexts(contexts) match {
+        case Some(f) => Failure(Failure.RetryableNackFailure.why, f.finagleFlags)
+        case None => Failure.RetryableNackFailure
+      }
+      Throw(exn)
+
+    case Message.RreqNack(_) =>
+      Throw(Failure.RetryableNackFailure)
+
+    case m => Throw(Failure(s"unexpected response: $m"))
+  }
 
   /** Indicates if our peer can accept `Tdispatch` messages. */
   object CanDispatch extends Enumeration {

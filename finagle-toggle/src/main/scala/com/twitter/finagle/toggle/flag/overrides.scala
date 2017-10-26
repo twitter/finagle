@@ -28,14 +28,14 @@ object overrides
   /**
    * Run `f` with the given `Toggles` set to `fraction`.
    */
-  def let(id: String, fraction: Double)(f: => Unit): Unit =
+  def let[R](id: String, fraction: Double)(f: => R): R =
     let(apply() + (id -> fraction))(f)
 
   /**
    * Run `f` with the given `Toggle` not assigned
    * in the flag-based `ToggleMap`.
    */
-  def letClear(id: String)(f: => Unit): Unit =
+  def letClear[R](id: String)(f: => R): R =
     let(apply() - id)(f)
 
 }

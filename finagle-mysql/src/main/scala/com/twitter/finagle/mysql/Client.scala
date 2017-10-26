@@ -15,7 +15,7 @@ object Client {
   def apply(
     factory: ServiceFactory[Request, Result],
     statsReceiver: StatsReceiver = NullStatsReceiver
-  ): Client with Transactions with Cursors = apply(factory, statsReceiver, false)
+  ): Client with Transactions = apply(factory, statsReceiver, false)
 
   /**
    * Creates a new Client based on a ServiceFactory.
@@ -24,7 +24,7 @@ object Client {
     factory: ServiceFactory[Request, Result],
     statsReceiver: StatsReceiver,
     supportUnsigned: Boolean
-  ): Client with Transactions with Cursors = new StdClient(factory, supportUnsigned, statsReceiver)
+  ): Client with Transactions = new StdClient(factory, supportUnsigned, statsReceiver)
 }
 
 trait Client extends Closable {
@@ -52,6 +52,17 @@ trait Client extends Closable {
    * outstanding PreparedStatements.
    */
   def prepare(sql: String): PreparedStatement
+
+  /**
+   * Create a CursoredStatement with the given parameterized sql query.
+   * The returned cursored statement can be reused and applied with varying
+   * parameters.
+   *
+   * @note The cursored statements are built on a prepare -> execute -> fetch flow
+   * that requires state tracking. It is important to either fully consume the resulting
+   * stream, or explicitly call `close()`
+   */
+  def cursor(sql: String): CursoredStatement
 
   /**
    * Returns the result of pinging the server.
@@ -107,27 +118,12 @@ trait Transactions {
   def transactionWithIsolation[T](isolationLevel: IsolationLevel)(f: Client => Future[T]): Future[T]
 }
 
-trait Cursors {
-
-  /**
-   * Create a CursoredStatement with the given parameterized sql query.
-   * The returned cursored statement can be reused and applied with varying
-   * parameters.
-   *
-   * @note The cursored statements are built on a prepare -> execute -> fetch flow
-   * that requires state tracking. It is important to either fully consume the resulting
-   * stream, or explicitly call `close()`
-   */
-  def cursor(sql: String): CursoredStatement
-}
-
 private class StdClient(
   factory: ServiceFactory[Request, Result],
   supportUnsigned: Boolean,
   statsReceiver: StatsReceiver
 ) extends Client
-    with Transactions
-    with Cursors {
+    with Transactions {
 
   private[this] val service = factory.toService
 

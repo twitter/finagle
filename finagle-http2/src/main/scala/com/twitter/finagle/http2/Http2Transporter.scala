@@ -293,21 +293,16 @@ private[finagle] class Http2Transporter(
           }
 
           if (alpnUpgrade) {
-            trans.read().onSuccess {
-              case UpgradeEvent.UPGRADE_REJECTED =>
+            trans.read().respond {
+              case Return(UpgradeEvent.UPGRADE_REJECTED) =>
                 p.setValue(None)
-              case UpgradeEvent.UPGRADE_SUCCESSFUL =>
+              case Return(UpgradeEvent.UPGRADE_SUCCESSFUL) =>
                 val inOutCasted = Transport.cast[StreamMessage, StreamMessage](trans)
-                val contextCasted = inOutCasted.asInstanceOf[
-                  Transport[StreamMessage, StreamMessage] {
-                    type Context = TransportContext with HasExecutor
-                  }
-                ]
-                p.setValue(
-                  Some(new MultiplexedTransporter(contextCasted, trans.remoteAddress, params))
-                )
-              case msg =>
+                val contextCasted = inOutCasted.asInstanceOf[Transport[StreamMessage, StreamMessage] { type Context = TransportContext with HasExecutor }]
+                p.setValue(Some(new MultiplexedTransporter(contextCasted, trans.remoteAddress, params)))
+              case Return(msg) =>
                 log.error(s"Non-upgrade event detected $msg")
+              case _ =>
             }
 
             useExistingConnection(p)

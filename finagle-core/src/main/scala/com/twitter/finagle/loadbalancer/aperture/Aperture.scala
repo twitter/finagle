@@ -1,15 +1,20 @@
 package com.twitter.finagle.loadbalancer.aperture
 
+import com.twitter.finagle.Address.Inet
 import com.twitter.finagle._
-import com.twitter.finagle.loadbalancer.{Balancer, NodeT, DistributorT}
+import com.twitter.finagle.CoreToggles
+import com.twitter.finagle.loadbalancer.{Balancer, DistributorT, NodeT}
+import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.util.Rng
-import com.twitter.logging.Logger
+import com.twitter.logging.{Level, Logger}
 import com.twitter.util.{Future, Time}
 import scala.collection.immutable.VectorBuilder
 import scala.collection.mutable.ListBuffer
+import scala.util.hashing.MurmurHash3
 
 private object Aperture {
-  private val log = Logger.get()
+  val dapertureToggleKey = "com.twitter.finagle.core.UseDeterministicAperture"
+  private val dapertureToggle = CoreToggles(dapertureToggleKey)
 }
 
 /**
@@ -101,20 +106,47 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    */
   protected def label: String
 
+  // We set the toggle to take into account both the cluster id and the `label`
+  // for the client. Effectively, we want all the clients of a particular
+  // cluster to be included during the same experiment window since d-aperture
+  // needs all the respective clients to participate in order to be effective.
+  private[this] def dapertureToggleActive: Boolean =
+    dapertureToggle(s"${ServerInfo().clusterId}:$label".hashCode)
+
   private[this] def dapertureActive: Boolean =
     useDeterministicOrdering match {
       case Some(bool) => bool
-      // The third state will be used to automatically
-      // toggle this feature on.
-      case None => false
+      case None => dapertureToggleActive
     }
+
+  @volatile private[this] var vectorHash: Int = -1
+  // Make a hash of the passed in `vec` and set `vectorHash`.
+  // Only an Inet address of the factory is considered and all
+  // other address types are ignored.
+  private[this] def updateVectorHash(vec: Seq[Node]): Unit = {
+    // A specialized reimplementation of MurmurHash3.listHash
+    val it = vec.iterator
+    var n = 0
+    var h = MurmurHash3.arraySeed
+    while (it.hasNext) it.next().factory.address match {
+      case Inet(addr, _) if !addr.isUnresolved =>
+        val d = MurmurHash3.bytesHash(addr.getAddress.getAddress)
+        h = MurmurHash3.mix(h, d)
+        n += 1
+
+      case _ => // no-op
+    }
+
+    vectorHash = MurmurHash3.finalizeHash(h, n)
+  }
 
   private[this] val gauges = Seq(
     statsReceiver.addGauge("aperture") { aperture },
     statsReceiver.addGauge("physical_aperture") { dist.physicalAperture },
     statsReceiver.addGauge("use_deterministic_ordering") {
       if (dapertureActive) 1F else 0F
-    }
+    },
+    statsReceiver.addGauge("vector_hash") { vectorHash }
   )
 
   private[this] val coordinateUpdates = statsReceiver.counter("coordinate_updates")
@@ -131,9 +163,11 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     self.rebuild()
   }
 
-  private[this] val nodeToken: ApertureNode => Int = _.token
-  private[this] val nodeOpen: ApertureNode => Boolean = _.status == Status.Open
-  private[this] val nodeBusy: ApertureNode => Boolean = _.status == Status.Busy
+  private[this] def lbl = if (label.isEmpty) "<unlabelled>" else label
+  // `pickLog` will log on the hot path so should be enabled judiciously.
+  private val pickLog = Logger.get(s"com.twitter.finagle.loadbalancer.aperture.Aperture.pick-log.$lbl")
+  // `rebuildLog` is used for rebuild level events which happen at a relatively low frequency.
+  private val rebuildLog = Logger.get(s"com.twitter.finagle.loadbalancer.aperture.Aperture.rebuild-log.$lbl")
 
   protected type Distributor = BaseDist
 
@@ -151,30 +185,6 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   ) extends DistributorT[Node](vector) {
     type This = BaseDist
 
-    /*
-     * Returns a new vector which is ordered by the node's status. Note, it is
-     * important that this is a stable sort since we care about the source order
-     * of `vec`.
-     */
-    protected def statusOrder(vec: Vector[Node]): Vector[Node] = {
-      val resultNodes = new VectorBuilder[Node]
-      val busyNodes = new ListBuffer[Node]
-      val closedNodes = new ListBuffer[Node]
-
-      val iter = vec.iterator
-      while (iter.hasNext) {
-        val node = iter.next()
-        node.status match {
-          case Status.Open => resultNodes += node
-          case Status.Busy => busyNodes += node
-          case Status.Closed => closedNodes += node
-        }
-      }
-
-      resultNodes ++= busyNodes ++= closedNodes
-      resultNodes.result
-    }
-
     /**
      * Returns the maximum size of the aperture window.
      */
@@ -191,7 +201,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     // need to guarantee visibility across threads and don't need to
     // provide other synchronization between threads.
     @volatile private[this] var _aperture: Int = initAperture
-    // Make sure the aperture is within bounds [minAperture, maxAperture].
+    // Make sure the aperture is within bounds [min, max].
     adjust(0)
 
     /**
@@ -214,7 +224,8 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     }
 
     def rebuild(): This = rebuild(vector)
-    def rebuild(vec: Vector[Node]): This =
+    def rebuild(vec: Vector[Node]): This = {
+      updateVectorHash(vec)
       if (vec.isEmpty) new EmptyVector(initAperture)
       else ProcessCoordinate() match {
         case Some(coord) if dapertureActive =>
@@ -227,6 +238,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
         case _ =>
           new RandomAperture(vec, initAperture)
       }
+    }
 
     /**
      * Pick the least loaded (and healthiest) of the two nodes `a` and `b`
@@ -245,32 +257,24 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
      * the indices over which `pick` selects.
      */
     def indices: Set[Int]
-
-    /**
-     * Returns the least loaded node within the aperture window.
-     */
-    def pick(): Node
-
-    // To reduce the amount of rebuilds needed, we rely on the probabilistic
-    // nature of p2c pick. That is, we know that only when a significant
-    // portion of the underlying vector is unavailable will we return an
-    // unavailable node to the layer above and trigger a rebuild. We do however
-    // want to return to our "stable" ordering as soon as we notice that a
-    // previously busy node is now available.
-    private[this] val busy = vector.filter(nodeBusy)
-    def needsRebuild: Boolean = busy.exists(nodeOpen)
   }
 
   /**
    * A distributor which has an aperture size but an empty vector to select
    * from, so it always returns the `failingNode`.
    */
-  private[this] class EmptyVector(initAperture: Int)
+  protected class EmptyVector(initAperture: Int)
     extends BaseDist(Vector.empty, initAperture) {
       require(vector.isEmpty, s"vector must be empty: $vector")
       def indices: Set[Int] = Set.empty
       def pick(): Node = failingNode(emptyException)
+      def needsRebuild: Boolean = false
     }
+
+  // these are lifted out of `RandomAperture` to avoid unnecessary allocations.
+  private[this] val nodeToken: ApertureNode => Int = _.token
+  private[this] val nodeOpen: ApertureNode => Boolean = _.status == Status.Open
+  private[this] val nodeBusy: ApertureNode => Boolean = _.status == Status.Busy
 
   /**
    * A distributor which uses P2C to select nodes from within a window ("aperture").
@@ -284,11 +288,35 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    *
    * @param initAperture The initial aperture to use.
    */
-  private[this] class RandomAperture(
+  protected class RandomAperture(
     vector: Vector[Node],
     initAperture: Int
   ) extends BaseDist(vector, initAperture) {
     require(vector.nonEmpty, "vector must be non empty")
+
+    /**
+     * Returns a new vector which is ordered by a node's status. Note, it is
+     * important that this is a stable sort since we care about the source order
+     * of `vec` to eliminate any unnecessary resource churn.
+     */
+    private[this] def statusOrder(vec: Vector[Node]): Vector[Node] = {
+      val resultNodes = new VectorBuilder[Node]
+      val busyNodes = new ListBuffer[Node]
+      val closedNodes = new ListBuffer[Node]
+
+      val iter = vec.iterator
+      while (iter.hasNext) {
+        val node = iter.next()
+        node.status match {
+          case Status.Open => resultNodes += node
+          case Status.Busy => busyNodes += node
+          case Status.Closed => closedNodes += node
+        }
+      }
+
+      resultNodes ++= busyNodes ++= closedNodes
+      resultNodes.result
+    }
 
     // Since we don't have any process coordinate, we sort the node
     // by `token` which is deterministic across rebuilds but random
@@ -296,17 +324,44 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     // when the node is created.
     private[this] val vec = statusOrder(vector.sortBy(nodeToken))
 
+    if (rebuildLog.isLoggable(Level.DEBUG)) {
+      val vecString = vec.take(aperture).map(_.factory.address).mkString("[", ", ", "]")
+      rebuildLog.debug(s"[RandomAperture.rebuild $lbl] nodes=$vecString")
+    }
+
     def indices: Set[Int] = (0 until aperture).toSet
 
     def pick(): Node = {
-      if (aperture <= 1) vec.head
+      val range = aperture
+      // We know we don't have to worry about the vector
+      // being empty because of the definition of rebuild
+      // in the `BaseDist`.
+      if (range <= 1) vec.head
       else {
-        val a = rng.nextInt(aperture)
-        var b = rng.nextInt(aperture - 1)
+        val a = rng.nextInt(range)
+        var b = rng.nextInt(range - 1)
         if (b >= a) { b += 1 }
-        pick(vec(a), 1.0, vec(b), 1.0)
+
+        val nodeA = vec(a)
+        val nodeB = vec(b)
+        val picked = pick(nodeA, 1.0, nodeB, 1.0)
+
+        if (pickLog.isLoggable(Level.TRACE)) {
+          pickLog.trace(s"[RandomAperture.pick $lbl] a=$nodeA b=$nodeB picked=$picked")
+        }
+
+        picked
       }
     }
+
+    // To reduce the amount of rebuilds needed, we rely on the probabilistic
+    // nature of p2c pick. That is, we know that only when a significant
+    // portion of the underlying vector is unavailable will we return an
+    // unavailable node to the layer above and trigger a rebuild. We do however
+    // want to return to our "stable" ordering as soon as we notice that a
+    // previously busy node is now available.
+    private[this] val busy = vector.filter(nodeBusy)
+    def needsRebuild: Boolean = busy.exists(nodeOpen)
   }
 
   /**
@@ -322,7 +377,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    * @param coord The [[ProcessCoordinate]] for this process which is used to narrow
    * the range of `pick2`.
    */
-  private[this] class DeterministicApeture(
+  protected class DeterministicApeture(
     vector: Vector[Node],
     initAperture: Int,
     coord: Coord
@@ -330,12 +385,11 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     require(vector.nonEmpty, "vector must be non empty")
 
     private[this] val ring = new Ring(vector.size, rng)
-
     // We log the contents of the aperture on each distributor rebuild when using
     // deterministic aperture. Rebuilds are not frequent and concentrated around
     // events where this information would be valuable (i.e. coordinate changes or
-    // host add/removes). Thus, we choose to log this at `info` instead of `debug`.
-    {
+    // host add/removes).
+    if (rebuildLog.isLoggable(Level.DEBUG)) {
       val apertureSlice: String = {
         val offset = coord.offset
         val width = apertureWidth
@@ -346,10 +400,14 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
           f"(index=$i, weight=$weight%1.3f, addr=$addr)"
         }.mkString("[", ", ", "]")
       }
-      val lbl = if (label.isEmpty) "<unlabelled>" else label
-      log.info(
-        s"Aperture updated for client $lbl: nodes=$apertureSlice"
-      )
+      rebuildLog.debug(s"[DeterministicApeture.rebuild $lbl] nodes=$apertureSlice")
+
+      // It may be useful see the raw server vector for d-aperture since we expect
+      // uniformity across processes.
+      if (rebuildLog.isLoggable(Level.TRACE)) {
+        val vectorString = vector.map(_.factory.address).mkString("[", ", ", "]")
+        rebuildLog.trace(s"[DeterministicApeture.rebuild $lbl] nodes=$vectorString")
+      }
     }
 
     // We want to additionally ensure that p2c can actually converge when there
@@ -383,13 +441,13 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       math.min(1.0, width)
     }
 
-    override def physicalAperture: Int = ring.range(coord.offset, apertureWidth)
-
-    // We only need to order by status since the ring does the rest w.r.t
-    // to picking within the processes coordinate. Also, note, that the
-    // order of `vector` is stable across processes since it is sorted
-    // by [[LoadBalancerFactory]].
-    private[this] val vec = statusOrder(vector)
+    override def physicalAperture: Int = {
+      val width = apertureWidth
+      if (rebuildLog.isLoggable(Level.DEBUG)) {
+        rebuildLog.debug(f"[DeterministicApeture.physicalAperture $lbl] ringUnit=${ring.unitWidth}%1.6f coordUnit=${coord.unitWidth}%1.6f coordOffset=${coord.offset}%1.6f apertureWidth=$width%1.6f")
+      }
+      ring.range(coord.offset, width)
+    }
 
     def indices: Set[Int] = ring.indices(coord.offset, apertureWidth).toSet
 
@@ -400,10 +458,23 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       val b = ring.tryPickSecond(a, offset, width)
       val aw = ring.weight(a, offset, width)
       val bw = ring.weight(b, offset, width)
+
+      val nodeA = vector(a)
+      val nodeB = vector(b)
       // Note, `aw` or `bw` can't be zero since `pick2` would not
       // have returned the indices in the first place.
-      pick(vec(a), aw, vec(b), bw)
+      val picked = pick(nodeA, aw, nodeB, bw)
+
+      if (pickLog.isLoggable(Level.TRACE)) {
+        pickLog.trace(f"[DeterministicApeture.pick] a=(index=$a, weight=$aw%1.3f, node=$nodeA) b=(index=$b, weight=$bw%1.3f, node=$nodeB) picked=$picked")
+      }
+
+      picked
     }
+
+    // rebuilds only need to happen when we receive ring updates (from
+    // the servers or our coordinate changing).
+    def needsRebuild: Boolean = false
   }
 
   protected def initDistributor(): Distributor = new EmptyVector(1)

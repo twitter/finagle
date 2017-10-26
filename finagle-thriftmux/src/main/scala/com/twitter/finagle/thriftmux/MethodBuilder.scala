@@ -214,12 +214,16 @@ object MethodBuilder {
  * [[https://twitter.github.io/finagle/guide/Clients.html#retries user guide]].
  *
  * The classifier is also used to determine the logical success metrics of
- * the client. Logical here means after any retries are run. For example
+ * the method. Logical here means after any retries are run. For example
  * should a request result in retryable failure on the first attempt, but
  * succeed upon retry, this is exposed through metrics as a success.
  * Logical success rate metrics are scoped to
  * "clnt/your_client_label/method_name/logical" and get "success" and
  * "requests" counters along with a "request_latency_ms" stat.
+ *
+ * Unsuccessful requests are logged at `com.twitter.logging.Level.DEBUG` level.
+ * Further details, including the request and response, are available at
+ * `TRACE` level.
  *
  * @see [[com.twitter.finagle.ThriftMux.Client.methodBuilder]] to construct instances.
  *

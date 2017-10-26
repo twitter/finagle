@@ -1,9 +1,10 @@
 package com.twitter.finagle.client
 
-import com.twitter.finagle.{Filter, param}
+import com.twitter.finagle.{Filter, Service, param}
 import com.twitter.finagle.service.{RequeueFilter, _}
 import com.twitter.finagle.stats.{BlacklistStatsReceiver, ExceptionStatsHandler, StatsReceiver}
-import com.twitter.util.{Throw, Try}
+import com.twitter.logging.{Level, Logger}
+import com.twitter.util.{Future, Stopwatch, Throw, Try}
 
 /**
  * @see [[MethodBuilderScaladoc]]
@@ -57,6 +58,20 @@ private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (mb: MethodB
       mb.params[StatsFilter.Param].unit
     )
 
+  private[client] def logFailuresFilter(
+    clientName: String,
+    methodName: String
+  ): Filter.TypeAgnostic = new Filter.TypeAgnostic {
+    def toFilter[Req1, Rep1]: Filter[Req1, Rep1, Req1, Rep1] =
+      new LogFailuresFilter[Req1, Rep1](
+        Logger.get(s"com.twitter.finagle.client.MethodBuilder.$clientName.$methodName"),
+        clientName,
+        methodName,
+        mb.config.retry.responseClassifier,
+        Stopwatch.systemMillis
+      )
+  }
+
   private[client] def registryEntries: Iterable[(Seq[String], String)] = {
     Seq(
       (Seq("retry"), mb.config.retry.toString)
@@ -107,6 +122,42 @@ private[client] object MethodBuilderRetry {
         case (_, Throw(RequeueFilter.Requeueable(_))) => false
         case _ => true
       }
+
+  private[client] class LogFailuresFilter[Req, Rep](
+      logger: Logger,
+      clientLabel: String,
+      methodName: String,
+      responseClassifier: ResponseClassifier,
+      nowMs: () => Long)
+    extends Filter[Req, Rep, Req, Rep] {
+
+    def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
+      val start = nowMs()
+      service(request).respond { response =>
+        val reqRep = ReqRep(request, response)
+        responseClassifier.applyOrElse(reqRep, ResponseClassifier.Default) match {
+          case ResponseClass.Failed(_) => log(start, request, response)
+          case _ => // don't log successful responses
+        }
+      }
+    }
+
+    private[this] def log(startMs: Long, request: Req, response: Try[Rep]): Unit = {
+      if (logger.isLoggable(Level.DEBUG)) {
+        val elapsedMs = nowMs() - startMs
+        val exception = response match {
+          case Throw(e) => e
+          case _ => null // note: nulls are allowed/ignored in this logging API
+        }
+        val msg = s"Request failed for $clientLabel/$methodName, elapsed=$elapsedMs ms"
+        if (logger.isLoggable(Level.TRACE)) {
+          logger.trace(exception, s"$msg (request=$request, response=$response)")
+        } else {
+          logger.debug(exception, msg)
+        }
+      }
+    }
+  }
 
   /** The stats scope used for logical success rate. */
   private val LogicalScope = "logical"

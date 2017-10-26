@@ -11,6 +11,8 @@ scala_library(
     'finagle/finagle-mux/src/main/scala:scala',
     'finagle/finagle-thrift',
     'finagle/finagle-thrift/src/main/java:java',
+    'finagle/finagle-thriftmux/src/main/resources',
+    'finagle/finagle-toggle/src/main/scala:scala',
     'util/util-core/src/main/scala:scala',
     'util/util-logging/src/main/scala:scala',
     'util/util-stats/src/main/scala:scala',
@@ -21,5 +23,4 @@ scala_library(
   ],
   fatal_warnings=True,
   sources=rglobs('*.scala'),
-  strict_deps=True,
 )

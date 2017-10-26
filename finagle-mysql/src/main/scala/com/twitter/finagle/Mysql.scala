@@ -41,14 +41,14 @@ trait MysqlRichClient { self: com.twitter.finagle.Client[Request, Result] =>
   def newRichClient(
     dest: Name,
     label: String
-  ): mysql.Client with mysql.Transactions with mysql.Cursors =
+  ): mysql.Client with mysql.Transactions =
     mysql.Client(newClient(dest, label), richClientStatsReceiver, supportUnsigned)
 
   /**
    * Creates a new `RichClient` connected to the logical
    * destination described by `dest`.
    */
-  def newRichClient(dest: String): mysql.Client with mysql.Transactions with mysql.Cursors =
+  def newRichClient(dest: String): mysql.Client with mysql.Transactions =
     mysql.Client(newClient(dest), richClientStatsReceiver, supportUnsigned)
 }
 
@@ -226,6 +226,16 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
      */
     def withCharset(charset: Short): Client =
       configured(Handshake.Charset(charset))
+
+    /**
+      * Don't set the CLIENT_FOUND_ROWS flag when establishing a new
+      * session. This will make "INSERT ... ON DUPLICATE KEY UPDATE"
+      * statements return the "correct" update count.
+      *
+      * See https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_row-count
+      */
+    def withAffectedRows(): Client =
+      configured(Handshake.FoundRows(false))
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905

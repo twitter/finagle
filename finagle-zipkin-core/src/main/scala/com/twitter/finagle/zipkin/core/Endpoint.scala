@@ -3,7 +3,6 @@ package com.twitter.finagle.zipkin.core
 import com.twitter.finagle.thrift.thrift
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import java.nio.ByteBuffer
-import java.util.logging.Logger
 import scala.util.control.NonFatal
 
 /**
@@ -28,13 +27,11 @@ case class Endpoint(ipv4: Int, port: Short) {
 }
 
 object Endpoint {
-  private[this] val log = Logger.getLogger(getClass.toString)
+  val Loopback: Int = Endpoint.toIpv4(InetAddress.getByAddress(Array[Byte](127, 0, 0, 1)))
 
-  val Loopback = Endpoint.toIpv4(InetAddress.getByAddress(Array[Byte](127, 0, 0, 1)))
+  val Unknown: Endpoint = new Endpoint(0, 0)
 
-  val Unknown = new Endpoint(0, 0)
-
-  val Local = {
+  val Local: Endpoint = {
     try {
       val ipv4 = Endpoint.toIpv4(InetAddress.getLoopbackAddress)
       Endpoint(ipv4, 0)
@@ -43,8 +40,14 @@ object Endpoint {
     }
   }
 
-  def toIpv4(inetAddress: InetAddress): Int =
-    ByteBuffer.wrap(inetAddress.getAddress).getInt
+  /**
+   * Returns `0` if `inetAddress` is null, which will be the
+   * case for unresolved `InetSocketAddress`-es.
+   */
+  def toIpv4(inetAddress: InetAddress): Int = {
+    if (inetAddress == null) 0
+    else ByteBuffer.wrap(inetAddress.getAddress).getInt
+  }
 
   /**
    * Get the local host as an integer.
@@ -53,13 +56,12 @@ object Endpoint {
 
   /**
    * @return If possible, convert from a SocketAddress object to an Endpoint.
-   * If not, return Unknown Endpoint.
+   * If not, return `Unknown` Endpoint.
    */
   def fromSocketAddress(socketAddress: SocketAddress): Endpoint = {
     socketAddress match {
-      case inet: InetSocketAddress => {
+      case inet: InetSocketAddress =>
         Endpoint(toIpv4(inet.getAddress), inet.getPort.toShort)
-      }
       case _ => Endpoint.Unknown
     }
   }

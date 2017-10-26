@@ -16,7 +16,6 @@ scala_library(name='external',
     'util/util-core/src/main/scala:scala',
   ],
   sources=EXTERNAL_SOURCES,
-  strict_deps=True,
 )
 
 junit_tests(
@@ -45,5 +44,4 @@ junit_tests(
   ],
   fatal_warnings=True,
   sources=rglobs('*.scala', exclude=[EXTERNAL_SOURCES]),
-  strict_deps=True,
 )

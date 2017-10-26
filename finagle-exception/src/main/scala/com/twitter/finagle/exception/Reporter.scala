@@ -14,7 +14,7 @@ import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsR
 import com.twitter.finagle.thrift.Protocols
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.ReporterFactory
-import com.twitter.util.{Future, GZIPStringEncoder, Monitor, NullMonitor, Time}
+import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 
 trait ClientMonitorFactory extends (String => Monitor)
@@ -154,13 +154,14 @@ sealed case class Reporter(
   def handle(t: Throwable): Boolean = {
     client
       .log(createEntry(t) :: Nil)
-      .onSuccess {
-        case ResultCode.Ok => okCounter.incr()
-        case ResultCode.TryLater => tryLaterCounter.incr()
-        case ResultCode.EnumUnknownResultCode(_) => // ignored
-      }
-      .onFailure { e =>
-        statsReceiver.counter("report_exception_" + e.toString).incr()
+      .respond {
+        case Return(ResultCode.Ok) =>
+          okCounter.incr()
+        case Return(ResultCode.TryLater) =>
+          tryLaterCounter.incr()
+        case Return(ResultCode.EnumUnknownResultCode(_)) =>
+        case Throw(e) =>
+          statsReceiver.counter("report_exception_" + e.toString).incr()
       }
 
     false // did not actually handle

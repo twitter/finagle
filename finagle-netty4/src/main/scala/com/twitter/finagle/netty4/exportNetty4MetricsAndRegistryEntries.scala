@@ -96,6 +96,14 @@ private object exportNetty4MetricsAndRegistryEntries {
         metric.directArenas().asScala.foldLeft(0.0f)(sumTinyDeallocations)
       )
     )
+
+    // Used.
+
+    gauges.add(
+      poolingStats.addGauge("used")(
+        metric.usedDirectMemory()
+      )
+    )
   }
 
   private[this] val exportRegistryEntries = Once {

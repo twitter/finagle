@@ -12,7 +12,7 @@ public class StackParamCompilationTest {
   public void testParams() {
     Http.client()
       .withStack(Http.client().stack())
-      .configured(new MaxHeaderListSize(Option.empty()).mk());
+      .configured(new MaxFrameSize(Option.empty()).mk());
   }
 
 }

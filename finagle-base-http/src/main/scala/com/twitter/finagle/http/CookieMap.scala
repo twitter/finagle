@@ -1,5 +1,7 @@
 package com.twitter.finagle.http
 
+import com.twitter.finagle.http.netty3.Bijections
+import com.twitter.finagle.http.netty3.Bijections._
 import org.jboss.netty.handler.codec.http.{
   HttpHeaders,
   CookieDecoder => NettyCookieDecoder,
@@ -23,7 +25,8 @@ class CookieMap(message: Message)
 
   override def empty: CookieMap = new CookieMap(Request())
 
-  private[this] val underlying = mutable.Map[String, Set[Cookie]]().withDefaultValue(Set.empty)
+  private[this] val underlying =
+    mutable.Map[String, Set[Cookie]]().withDefaultValue(Set.empty)
 
   /**
    * Checks if there was a parse error. Invalid cookies are ignored.
@@ -40,7 +43,7 @@ class CookieMap(message: Message)
   private[this] def decodeCookies(header: String): Iterable[Cookie] = {
     val decoder = new NettyCookieDecoder
     try {
-      decoder.decode(header).asScala map { new Cookie(_) }
+      decoder.decode(header).asScala.map { Bijections.from(_) }
     } catch {
       case e: IllegalArgumentException =>
         _isValid = false
@@ -57,14 +60,14 @@ class CookieMap(message: Message)
       val encoder = new NettyCookieEncoder(false)
       foreach {
         case (_, cookie) =>
-          encoder.addCookie(cookie.underlying)
+          encoder.addCookie(Bijections.from(cookie))
       }
       message.headerMap.set(cookieHeaderName, encoder.encode())
     } else {
       val encoder = new NettyCookieEncoder(true)
       foreach {
         case (_, cookie) =>
-          encoder.addCookie(cookie.underlying)
+          encoder.addCookie(Bijections.from(cookie))
           message.headerMap.add(cookieHeaderName, encoder.encode())
       }
     }

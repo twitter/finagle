@@ -1,10 +1,13 @@
 package com.twitter.finagle.loadbalancer.aperture
 
+import com.twitter.finagle.Address.Inet
 import com.twitter.finagle._
 import com.twitter.finagle.loadbalancer.{EndpointFactory, FailingEndpointFactory, NodeT}
-import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.toggle
 import com.twitter.finagle.util.Rng
 import com.twitter.util.{Activity, Await, Duration, NullTimer}
+import java.net.InetSocketAddress
 import org.scalatest.FunSuite
 
 class ApertureTest extends FunSuite with ApertureSuite {
@@ -21,7 +24,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
    * us avoid down nodes with the important caveat that we only select over a subset.
    */
   private class Bal extends TestBal {
-    protected def statsReceiver = NullStatsReceiver
+    protected def statsReceiver: StatsReceiver = NullStatsReceiver
     protected class Node(val factory: EndpointFactory[Unit, Unit])
         extends ServiceFactoryProxy[Unit, Unit](factory)
         with NodeT[Unit, Unit]
@@ -226,6 +229,9 @@ class ApertureTest extends FunSuite with ApertureSuite {
 
     ProcessCoordinate.setCoordinate(offset = 0, instanceId = 1, totalInstances = 10)
     bal.update(counts.range(10))
+    bal.rebuildx()
+    assert(bal.isDeterministicAperture)
+    assert(bal.minUnitsx == 4)
     bal.applyn(1000)
     assert(counts.nonzero == Set(1, 2, 3, 4))
   }
@@ -238,6 +244,8 @@ class ApertureTest extends FunSuite with ApertureSuite {
 
     ProcessCoordinate.setCoordinate(offset = 0, instanceId = 1, totalInstances = 4)
     bal.update(counts.range(10))
+    bal.rebuildx()
+    assert(bal.isDeterministicAperture)
     assert(bal.minUnitsx == 4)
     bal.applyn(1000)
     // The range is 2.5, so we need a physical aperture of at least 2 to satisfy
@@ -300,5 +308,70 @@ class ApertureTest extends FunSuite with ApertureSuite {
     for (i <- servers.indices) {
       assert(servers(i) == bal.distx.vector(i).factory)
     }
+  }
+
+  test("daperture toggle") {
+    toggle.flag.overrides.let(Aperture.dapertureToggleKey, 1.0) {
+      val bal = new Bal {
+        override val minAperture = 150
+      }
+      ProcessCoordinate.setCoordinate(0, 0, 150)
+      bal.update(Vector.tabulate(150)(Factory))
+      bal.rebuildx()
+      assert(bal.isDeterministicAperture)
+      // ignore 150, since we are using d-aperture and instead
+      // default to 4.
+      assert(bal.minUnitsx == 4)
+    }
+
+    toggle.flag.overrides.let(Aperture.dapertureToggleKey, 0.0) {
+      val bal = new Bal {
+        override val minAperture = 150
+      }
+      ProcessCoordinate.setCoordinate(0, 0, 150)
+      bal.update(Vector.tabulate(150)(Factory))
+      bal.rebuildx()
+      assert(bal.isRandomAperture)
+      assert(bal.minUnitsx == 150)
+    }
+  }
+
+  test("vectorHash") {
+
+    class WithAddressFactory(i: Int, addr: InetSocketAddress) extends Factory(i) {
+      override def address: Address = Inet(addr, Addr.Metadata.empty)
+    }
+
+    val sr = new InMemoryStatsReceiver
+
+    def getVectorHash: Float = sr.gauges(Seq("vector_hash")).apply()
+
+    val bal = new Bal {
+      override protected def statsReceiver = sr
+    }
+
+    def updateWithIps(ips: Vector[String]): Unit = bal.update(ips.map { addr =>
+      new WithAddressFactory(addr.##, new InetSocketAddress(addr, 80))
+    })
+
+    updateWithIps(Vector("1.1.1.1", "1.1.1.2"))
+    val hash1 = getVectorHash
+
+    updateWithIps(Vector("1.1.1.1", "1.1.1.3"))
+    val hash2 = getVectorHash
+
+    assert(hash1 != hash2)
+
+    // Doesn't have hysteresis
+    updateWithIps(Vector("1.1.1.1", "1.1.1.2"))
+    val hash3 = getVectorHash
+
+    assert(hash1 == hash3)
+
+    // Permutations have different hash codes
+    updateWithIps(Vector("1.1.1.2", "1.1.1.1"))
+    val hash4 = getVectorHash
+
+    assert(hash1 != hash4)
   }
 }

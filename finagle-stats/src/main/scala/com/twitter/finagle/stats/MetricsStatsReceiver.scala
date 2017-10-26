@@ -29,7 +29,7 @@ object scopeSeparator
 
 object MetricsStatsReceiver {
   val defaultRegistry = new Metrics()
-  private[stats] val defaultHostRegistry = new Metrics()
+  private[stats] val defaultHostRegistry = Metrics.createDetached()
 
   /**
    * A semi-arbitrary value, but should a service call any counter/stat/addGauge

@@ -39,7 +39,6 @@ scala_library(
   # NB: This is not an actual dependency, but is necessary to have Pants behave
   #     like SBT, throwing an error for "import java.*" statements.
   java_sources=['finagle/finagle-memcached/src/main/java'],
-  strict_deps=True,
   exports=[
     '3rdparty/jvm/com/twitter/bijection:core',
     'finagle/finagle-core/src/main/scala:scala',

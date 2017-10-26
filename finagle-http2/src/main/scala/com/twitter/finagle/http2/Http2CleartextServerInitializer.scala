@@ -6,18 +6,18 @@ import com.twitter.finagle.http2.param.FrameLoggerNamePrefix
 import com.twitter.finagle.http2.transport.{
   Http2NackHandler,
   PriorKnowledgeHandler,
-  RichHttp2ServerDowngrader
+  RichHttp2ServerDowngrader,
+  RstHandler
 }
 import com.twitter.finagle.netty4.http.{HttpCodecName, initServer}
+import com.twitter.finagle.netty4.param.Allocator
 import com.twitter.finagle.param.Stats
 import com.twitter.logging.Logger
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.{
   Channel,
   ChannelHandlerContext,
-  ChannelInboundHandlerAdapter,
-  ChannelInitializer,
-  ChannelOption
+  ChannelInitializer
 }
 import io.netty.handler.codec.http.HttpServerUpgradeHandler.{
   SourceCodec,
@@ -41,18 +41,12 @@ private[http2] class Http2CleartextServerInitializer(
 
   val initializer = new ChannelInitializer[Channel] {
     def initChannel(ch: Channel): Unit = {
+      ch.config().setAllocator(params[Allocator].allocator)
+
       ch.pipeline.addLast(new Http2NackHandler)
 
       ch.pipeline.addLast(new RichHttp2ServerDowngrader(validateHeaders = false))
-
-      // we want to drop reset frames because the Http2ServerDowngrader doesn't know what to
-      // do with them, and our dispatchers expect to only get http/1.1 message types.
-      ch.pipeline.addLast(new ChannelInboundHandlerAdapter() {
-        override def channelRead(ctx: ChannelHandlerContext, msg: Object): Unit = {
-          if (!msg.isInstanceOf[Http2ResetFrame])
-            super.channelRead(ctx, msg)
-        }
-      })
+      ch.pipeline.addLast(new RstHandler())
       initServer(params)(ch.pipeline)
       ch.pipeline.addLast(init)
     }
@@ -61,16 +55,13 @@ private[http2] class Http2CleartextServerInitializer(
   def upgradeCodecFactory(channel: Channel): UpgradeCodecFactory = new UpgradeCodecFactory {
     override def newUpgradeCodec(protocol: CharSequence): UpgradeCodec = {
       if (AsciiString.contentEquals(Http2CodecUtil.HTTP_UPGRADE_PROTOCOL_NAME, protocol)) {
-        val initialSettings = Settings.fromParams(params)
         val logger = new LoggerPerFrameTypeLogger(params[FrameLoggerNamePrefix].loggerNamePrefix)
-        val bootstrap = new Http2StreamChannelBootstrap()
-          .option(ChannelOption.ALLOCATOR, channel.alloc())
-          .handler(initializer)
 
-        val codec = new Http2CodecBuilder(true /* server */, bootstrap)
+        val codec = UpgradeMultiplexCodecBuilder.forServer(initializer)
           .frameLogger(logger)
-          .initialSettings(initialSettings)
+          .initialSettings(Settings.fromParams(params))
           .build()
+
         new Http2ServerUpgradeCodec(codec) {
           override def upgradeTo(ctx: ChannelHandlerContext, upgradeRequest: FullHttpRequest) {
             upgradeCounter.incr()

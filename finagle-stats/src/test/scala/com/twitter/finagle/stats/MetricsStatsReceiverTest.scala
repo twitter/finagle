@@ -46,14 +46,14 @@ class MetricsStatsReceiverTest extends FunSuite {
   }
 
   test("toString") {
-    val sr = new MetricsStatsReceiver(new Metrics())
+    val sr = new MetricsStatsReceiver(Metrics.createDetached())
     assert("MetricsStatsReceiver" == sr.toString)
     assert("MetricsStatsReceiver/s1" == sr.scope("s1").toString)
     assert("MetricsStatsReceiver/s1/s2" == sr.scope("s1").scope("s2").toString)
   }
 
   test("reading histograms initializes correctly") {
-    val sr = new MetricsStatsReceiver(new Metrics())
+    val sr = new MetricsStatsReceiver(Metrics.createDetached())
     val stat = sr.stat("my_cool_stat")
 
     val reader = sr.registry.histoDetails.get("my_cool_stat")
@@ -66,14 +66,14 @@ class MetricsStatsReceiverTest extends FunSuite {
   }
 
   test("separate gauge/stat/metric between detached Metrics and root Metrics") {
-    val detachedReceiver = new MetricsStatsReceiver(new Metrics())
+    val detachedReceiver = new MetricsStatsReceiver(Metrics.createDetached())
     val g1 = detachedReceiver.addGauge("xxx")(1.0f)
     val g2 = rootReceiver.addGauge("xxx")(2.0f)
     assert(readGauge(detachedReceiver, "xxx") != readGauge(rootReceiver, "xxx"))
   }
 
   test("keep track of debug metrics ") {
-    val metrics = new Metrics()
+    val metrics = Metrics.createDetached()
     val sr = new MetricsStatsReceiver(metrics)
 
     sr.counter(Verbosity.Debug, "foo")
@@ -86,7 +86,7 @@ class MetricsStatsReceiverTest extends FunSuite {
   }
 
   test("does not keep track of default metrics ") {
-    val metrics = new Metrics()
+    val metrics = Metrics.createDetached()
     val sr = new MetricsStatsReceiver(metrics)
 
     sr.counter(Verbosity.Default, "foo")
@@ -99,7 +99,7 @@ class MetricsStatsReceiverTest extends FunSuite {
   }
 
   test("only assign verbosity at creation") {
-    val metrics = new Metrics()
+    val metrics = Metrics.createDetached()
     val sr = new MetricsStatsReceiver(metrics)
 
     sr.counter(Verbosity.Default, "foo")
@@ -113,5 +113,25 @@ class MetricsStatsReceiverTest extends FunSuite {
     assert(!metrics.verbosity.containsKey("foo"))
     assert(!metrics.verbosity.containsKey("bar"))
     assert(!metrics.verbosity.containsKey("baz"))
+  }
+
+  test("StatsReceivers share underlying metrics maps by default") {
+    val metrics1 = new Metrics()
+    val metrics2 = new Metrics()
+
+    val sr1 = new MetricsStatsReceiver(metrics1)
+    val sr2 = new MetricsStatsReceiver(metrics2)
+
+    sr1.counter("foo")
+    assert(metrics1.counters.containsKey("foo"))
+    assert(metrics2.counters.containsKey("foo"))
+
+    sr1.addGauge("bar")(1f)
+    assert(metrics1.gauges.containsKey("bar"))
+    assert(metrics2.gauges.containsKey("bar"))
+
+    sr1.stat("baz")
+    assert(metrics1.histograms.containsKey("baz"))
+    assert(metrics2.histograms.containsKey("baz"))
   }
 }

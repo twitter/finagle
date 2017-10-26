@@ -3,7 +3,7 @@ package com.twitter.finagle.netty4.ssl.server
 import com.twitter.finagle.{SslVerificationFailedException, FailureFlags}
 import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerSessionVerifier}
 import com.twitter.logging.{HasLogLevel, Level}
-import com.twitter.util.{Promise, Throw}
+import com.twitter.util.{Promise, Return, Throw}
 import io.netty.channel.{Channel, ChannelHandlerContext, ChannelInboundHandlerAdapter}
 import io.netty.handler.ssl.SslHandler
 import io.netty.util.concurrent.{GenericFutureListener, Future => NettyFuture}
@@ -42,8 +42,10 @@ private[netty4] class SslServerVerificationHandler(
   }
 
   override def channelActive(ctx: ChannelHandlerContext): Unit = {
-    onHandshakeComplete.onSuccess { _ =>
-      ctx.fireChannelActive()
+    onHandshakeComplete.respond {
+      case Return(_) =>
+        ctx.fireChannelActive()
+      case _ =>
     }
 
     if (!ctx.channel().config().isAutoRead) {

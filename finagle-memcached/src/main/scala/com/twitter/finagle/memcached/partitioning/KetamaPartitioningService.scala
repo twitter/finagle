@@ -110,6 +110,6 @@ private[finagle] abstract class KetamaPartitioningService[Req, Rep, Key](
   private[this] def partitionForKey(key: Key): Future[Service[Req, Rep]] = {
     val bytes = getKeyBytes(key)
     val hash = keyHasher.hashKey(bytes)
-    nodeManager.getDistributor.nodeForHash(hash)
+    nodeManager.getServiceForHash(hash)
   }
 }

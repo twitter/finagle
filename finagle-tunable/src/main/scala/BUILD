@@ -11,7 +11,6 @@ scala_library(
     'util/util-tunable/src/main/scala:scala',
   ],
   fatal_warnings=True,
-  strict_deps=True,
   sources=rglobs('*.scala'),
   exports=[
   ]

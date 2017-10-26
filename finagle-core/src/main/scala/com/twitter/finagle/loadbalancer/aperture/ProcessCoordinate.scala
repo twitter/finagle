@@ -40,7 +40,7 @@ object ProcessCoordinate {
    * the coordinate space in order to avoid alignment with other client groups of
    * the same size (i.e. to add some entropy to the system).
    */
-  private[aperture] case class FromInstanceId(peerOffset: Int, instanceId: Int, totalInstances: Int) extends Coord {
+  private[finagle] case class FromInstanceId(peerOffset: Int, instanceId: Int, totalInstances: Int) extends Coord {
     require(totalInstances > 0, s"totalInstances expected to be > 0 but was $totalInstances")
 
     val unitWidth: Double = 1.0 / totalInstances

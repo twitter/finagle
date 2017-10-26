@@ -48,8 +48,8 @@ private final class ConnectionBuilder(
   private[this] val cancelledConnects = statsReceiver.counter("cancelled_connects")
 
   /**
-   * Creates a new connection then passes it to the provided builder function, returning
-   * the result asynchronously.
+   * Creates a new connection then, from within the channels event loop, passes it to the
+   * provided builder function, returning the result asynchronously.
    *
    * @note Unless the `Future` returned from this method is interrupted (vide infra), the
    *       ownership of the `Channel` is transferred to the builder function meaning it's
@@ -123,16 +123,32 @@ private final class ConnectionBuilder(
             // the rest of failures could benefit from retries
             case NonFatal(e) => Failure.rejected(new ConnectionFailedException(e, addr))
           })
+        } else if (!channelF.channel.isOpen) {
+          // Somehow the channel ended up closed before we got here, likely as
+          // a result of `init` `ChannelInitializer` behavior.
+          transportP.setException(
+            Failure.rejected("Netty4 Channel was found in a closed state"))
         } else {
           connectLatencyStat.add(latency)
-          val result = builder(channelF.channel)
+          val ch = channelF.channel
+          // We need to call builder from within the `Channel`s `EventLoop`, which
+          // we do since the continuations attached to a `ChannelFuture` are executed
+          // in their channels event loop.
+          val result =
+            try builder(ch)
+            catch {
+              case NonFatal(t) =>
+                ch.close()
+                Future.exception(t)
+            }
+
           result.proxyTo(transportP)
           // On cancellation we should be aggressive with cleanup, both forcing the channel
           // closed and interrupting `result` with the exception to ensure we don't leak
           // connections.
           transportP.setInterruptHandler {
             case t =>
-              channelF.channel().close()
+              ch.close()
               result.raise(t)
           }
         }

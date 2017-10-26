@@ -65,7 +65,7 @@ abstract class PushStackClient[Req, Rep, This <: PushStackClient[Req, Rep, This]
             // we do not want to capture and request specific Locals
             // that would live for the life of the session.
             Contexts.letClearAll {
-              transporter(newSession).flatMap(toService)
+              transporter(endpointClient.newSession).flatMap(endpointClient.toService)
             }
           }
       }

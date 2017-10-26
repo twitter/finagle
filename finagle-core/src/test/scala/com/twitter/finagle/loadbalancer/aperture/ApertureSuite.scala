@@ -35,11 +35,13 @@ private[loadbalancer] trait ApertureSuite {
     def maxUnitsx: Int = maxUnits
     def distx: Distributor = dist
     def rebuildx(): Unit = rebuild()
+    def isDeterministicAperture: Boolean = dist.isInstanceOf[DeterministicApeture]
+    def isRandomAperture: Boolean = dist.isInstanceOf[RandomAperture]
   }
 
   case class Factory(i: Int) extends EndpointFactory[Unit, Unit] {
     def remake() = {}
-    def address = Address.Failed(new Exception)
+    def address: Address = Address.Failed(new Exception)
 
     var _total = 0
     var _outstanding = 0

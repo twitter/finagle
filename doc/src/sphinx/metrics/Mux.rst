@@ -1,9 +1,9 @@
 **<server_label>/mux/draining**
   A counter of the number of times the server has initiated session draining.
 
-**<server_label>/mux/drained**
-  A counter of the number of times the server has successfully completed the
-  draining protocol within its allotted time.
+**<server_label>/mux/leased** `verbosity:debug`
+  A counter of the number of leases issued by the server when the session is
+  is in a state other than draining or drained.
 
 **<client_label>/mux/draining**
   A counter of the number of times a server initiated session draining.
@@ -55,3 +55,6 @@
   A counter indicating any exceptions that occur on the transport write path for mux.
   This includes exceptions in handshaking, thrift downgrading (for servers), etc.
 
+**<label>/mux/tls/upgrade/success**
+  A counter of the number of times the client or server has successfully
+  upgraded a connection to TLS.

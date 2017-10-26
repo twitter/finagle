@@ -2,29 +2,19 @@ package com.twitter.finagle.mux
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.client.StdStackClient
+import com.twitter.finagle.client.EndpointerStackClient
 import com.twitter.finagle.context.RemoteInfo
 import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor}
-import com.twitter.finagle.mux.transport.{
-  BadMessageException,
-  Message,
-  OpportunisticTls,
-  IncompatibleNegotiationException
-}
-import com.twitter.finagle.netty4.channel.ChannelSnooper
+import com.twitter.finagle.mux.transport.{BadMessageException, Message}
 import com.twitter.finagle.server.StdStackServer
 import com.twitter.finagle.service.Retries
-import com.twitter.finagle.ssl.{TrustCredentials, KeyCredentials}
-import com.twitter.finagle.ssl.server.SslServerConfiguration
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.toggle.flag
 import com.twitter.finagle.tracing._
-import com.twitter.io.{Buf, BufByteWriter, ByteReader, TempFile}
+import com.twitter.io.{Buf, BufByteWriter, ByteReader}
 import com.twitter.util._
-import io.netty.channel.ChannelPipeline
 import java.io.{PrintWriter, StringWriter}
-import java.lang.StringBuffer
 import java.net.{InetAddress, InetSocketAddress, ServerSocket, Socket}
+import java.nio.ByteBuffer
 import java.util.concurrent.atomic.AtomicInteger
 import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
@@ -39,8 +29,10 @@ abstract class AbstractEndToEndTest
     with BeforeAndAfter
     with AssertionsForJUnit {
 
+  type ClientT <: EndpointerStackClient[Request, Response, ClientT]
+
   def implName: String
-  def clientImpl(): StdStackClient[Request, Response, Mux.Client]
+  def clientImpl(): ClientT
   def serverImpl(): StdStackServer[Request, Response, Mux.Server]
 
   var saveBase: Dtab = Dtab.empty
@@ -69,7 +61,7 @@ abstract class AbstractEndToEndTest
         val stringer = new StringWriter
         val printer = new PrintWriter(stringer)
         Dtab.local.print(printer)
-        Future.value(Response(Buf.Utf8(stringer.toString)))
+        Future.value(Response(Nil, Buf.Utf8(stringer.toString)))
       }
     )
 
@@ -81,7 +73,7 @@ abstract class AbstractEndToEndTest
     Dtab.unwind {
       Dtab.local ++= Dtab.read("/foo=>/bar; /web=>/$/inet/twitter.com/80")
       for (n <- 0 until 2) {
-        val rsp = Await.result(client(Request(Path.empty, Buf.Empty)), 30.seconds)
+        val rsp = Await.result(client(Request(Path.empty, Nil, Buf.Empty)), 30.seconds)
         val Buf.Utf8(str) = rsp.body
         assert(str == "Dtab(2)\n\t/foo => /bar\n\t/web => /$/inet/twitter.com/80\n")
       }
@@ -94,7 +86,7 @@ abstract class AbstractEndToEndTest
     val server = serverImpl.serve("localhost:*", Service.mk[Request, Response] { _ =>
       val bw = BufByteWriter.fixed(4)
       bw.writeIntBE(Dtab.local.size)
-      Future.value(Response(bw.owned()))
+      Future.value(Response(Nil, bw.owned()))
     })
 
     val client = clientImpl.newService(
@@ -127,7 +119,7 @@ abstract class AbstractEndToEndTest
       .serve("localhost:*", new Service[Request, Response] {
         def apply(req: Request) = {
           count += 1
-          if (count >= 1) Future.value(Response(req.body))
+          if (count >= 1) Future.value(Response(Nil, req.body))
           else client(req)
         }
       })
@@ -259,46 +251,13 @@ abstract class AbstractEndToEndTest
     }
   }
 
-  // This is marked FLAKY because it allocates a nonephemeral port;
-  // this is unfortunately required for this type of testing (since we're
-  // interested in completely shutting down, and then restarting a
-  // server on the same port).
-  //
-  // Note also that, in the case of a single endpoint, the loadbalancer's
-  // fallback behavior circumvents status propagation bugs. This is
-  // because, in the event that all endpoints are down, the load balancer
-  // reverts its down list, and attempts to establish a session regardless
-  // of reported status.
-  //
-  // The following script patches up the load balancer to avoid this
-  // behavior.
-  /*
-ed - ../../../../../../../../finagle-core/src/main/scala/com/twitter/finagle/loadbalancer/HeapBalancer.scala <<EOF
-246a
-      if (n == null)
-        return Future.exception(emptyException)
-.
-216c
-    if (n.load >= 0) null
-    else if (n.factory.status == Status.Open) n
-    else {
-.
-201c
-      } else if (n.factory.status == Status.Open) {  // revived node
-.
-132c
-    nodes.count(_.factory.status == Status.Open)
-.
-w
-EOF
-   */
   if (!Option(System.getProperty("SKIP_FLAKY")).isDefined)
     test(s"$implName: draining and restart") {
       val echo =
         new Service[Request, Response] {
-          def apply(req: Request) = Future.value(Response(req.body))
+          def apply(req: Request) = Future.value(Response(Nil, req.body))
         }
-      val req = Request(Path.empty, Buf.Utf8("hello, world!"))
+      val req = Request(Path.empty, Nil, Buf.Utf8("hello, world!"))
 
       // We need to reserve a port here because we're going to be
       // rebinding the server.
@@ -323,79 +282,67 @@ EOF
     }
 
   test(s"$implName: responds to lease") {
-    Time.withCurrentTimeFrozen { ctl =>
-      class FakeLessor extends Lessor {
-        var list: List[Lessee] = Nil
+    class FakeLessor extends Lessor {
+      var list: List[Lessee] = Nil
 
-        def register(lessee: Lessee): Unit = {
-          list ::= lessee
-        }
-
-        def unregister(lessee: Lessee): Unit = ()
-
-        def observe(d: Duration): Unit = ()
-
-        def observeArrival(): Unit = ()
-      }
-      val lessor = new FakeLessor
-
-      val server = serverImpl
-        .configured(Lessor.Param(lessor))
-        .serve("localhost:*", new Service[mux.Request, mux.Response] {
-          def apply(req: Request) = ???
-        })
-
-      val sr = new InMemoryStatsReceiver
-
-      val factory = clientImpl
-        .configured(param.Stats(sr))
-        .newClient(
-          Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-          "client"
-        )
-
-      val fclient = factory()
-      eventually { assert(fclient.isDefined) }
-
-      val Some((_, available)) = sr.gauges.find {
-        case (_ +: Seq("loadbalancer", "available"), value) => true
-        case _ => false
+      def register(lessee: Lessee): Unit = {
+        list ::= lessee
       }
 
-      val Some((_, leaseDuration)) = sr.gauges.find {
-        case (_ +: Seq("mux", "current_lease_ms"), value) => true
-        case _ => false
-      }
+      def unregister(lessee: Lessee): Unit = ()
 
-      val leaseCtr: () => Long = { () =>
-        val Some((_, ctr)) = sr.counters.find {
-          case (_ +: Seq("mux", "leased"), value) => true
-          case _ => false
-        }
-        ctr
-      }
-      def format(duration: Duration): Float = duration.inMilliseconds.toFloat
+      def observe(d: Duration): Unit = ()
 
-      eventually { assert(leaseDuration() == format(Time.Top - Time.now)) }
-      eventually { assert(available() == 1) }
-      lessor.list.foreach(_.issue(Message.Tlease.MinLease))
-      eventually { assert(leaseCtr() == 1) }
-      ctl.advance(2.seconds) // must advance time to re-lease and expire
-      eventually { assert(leaseDuration() == format(Message.Tlease.MinLease - 2.seconds)) }
-      eventually { assert(available() == 0) }
-      lessor.list.foreach(_.issue(Message.Tlease.MaxLease))
-      eventually { assert(leaseCtr() == 2) }
-      eventually { assert(leaseDuration() == format(Message.Tlease.MaxLease)) }
-      eventually { assert(available() == 1) }
-
-      Closable.sequence(Await.result(fclient, 5.seconds), server, factory).close()
+      def observeArrival(): Unit = ()
     }
+    val lessor = new FakeLessor
+
+    val server = serverImpl
+      .configured(Lessor.Param(lessor))
+      .serve("localhost:*", new Service[mux.Request, mux.Response] {
+        def apply(req: Request) = ???
+      })
+
+    val sr = new InMemoryStatsReceiver
+
+    val factory = clientImpl
+      .configured(param.Stats(sr))
+      .newClient(
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+        "client"
+      )
+
+    val fclient = factory()
+    eventually { assert(fclient.isDefined) }
+
+    val Some((_, available)) = sr.gauges.find {
+      case (_ +: Seq("loadbalancer", "available"), value) => true
+      case _ => false
+    }
+
+    val leaseCtr: () => Long = { () =>
+      val Some((_, ctr)) = sr.counters.find {
+        case (_ +: Seq("mux", "leased"), value) => true
+        case _ => false
+      }
+      ctr
+    }
+
+    eventually { assert(available() == 1) }
+    lessor.list.foreach(_.issue(Message.Tlease.MinLease))
+    eventually { assert(leaseCtr() == 1) }
+    eventually { assert(available() == 0) }
+    lessor.list.foreach(_.issue(Message.Tlease.MaxLease))
+    eventually { assert(leaseCtr() == 2) }
+    eventually { assert(available() == 1) }
+
+    Closable.sequence(Await.result(fclient, 5.seconds), server, factory).close()
   }
 
   test(s"$implName: measures payload sizes") {
     val sr = new InMemoryStatsReceiver
     val service = new Service[Request, Response] {
-      def apply(req: Request) = Future.value(Response(req.body.concat(req.body)))
+      def apply(req: Request) = Future.value(Response(Nil, req.body.concat(req.body)))
     }
     val server = serverImpl
       .withLabel("server")
@@ -409,7 +356,7 @@ EOF
         "client"
       )
 
-    Await.ready(client(Request(Path.empty, Buf.Utf8("." * 10))), 5.seconds)
+    Await.ready(client(Request(Path.empty, Nil, Buf.Utf8("." * 10))), 5.seconds)
 
     assert(sr.stat("client", "request_payload_bytes")() == Seq(10.0f))
     assert(sr.stat("client", "response_payload_bytes")() == Seq(20.0f))
@@ -426,15 +373,39 @@ EOF
       private lazy val server = new ServerSocket()
       @volatile private var client: Socket = _
 
+      private[this] def swallowMessage(): Unit = {
+        val is = client.getInputStream
+        val sizeField = (3 to 0 by -1).foldLeft(0){  (acc: Int, i: Int) =>
+          acc | (is.read().toByte << i)
+        }
+        // swallow sizeField bytes
+        (0 until sizeField).foreach(_ => is.read())
+      }
+
+      private[this] def swallowAndWrite(data: Array[Byte]): Unit = {
+        swallowMessage()
+        val os = client.getOutputStream
+        data.foreach(os.write(_))
+        os.flush()
+      }
+
       private val serverThread = new Thread(new Runnable {
         override def run(): Unit = {
           client = server.accept()
           // Length of 4 bytes, header of 0x00 00 00 04 (illegal: message type 0x00)
-          val message = Array[Byte](0, 0, 0, 4, 0, 0, 0, 4)
+          val rerr = Message.encode(Message.Rerr(1, "didn't work!"))
+          val badMessage = Array[Byte](0, 0, 0, 4, 0, 0, 0, 4)
+
+          val lengthField = {
+            val len = new Array[Byte](4)
+            val bb = ByteBuffer.wrap(len)
+            bb.putInt(rerr.length)
+            len
+          }
 
           // write the message twice: once for handshaking and once for the failure
-          client.getOutputStream.write(message ++ message)
-          client.getOutputStream.flush()
+          swallowAndWrite(lengthField ++ Buf.ByteArray.Shared.extract(rerr))
+          swallowAndWrite(badMessage)
         }
       })
 
@@ -446,7 +417,7 @@ EOF
       }
 
       def close(): Unit = {
-        serverThread.join()
+        serverThread.join(30.seconds.inMillis)
         Option(client).foreach(_.close())
         server.close()
       }
@@ -497,133 +468,6 @@ EOF
       }
     } finally {
       server.close()
-    }
-  }
-
-  test(s"$implName: can talk to each other with opportunistic tls") {
-    val certFile = TempFile.fromResourcePath("/ssl/certs/svc-test-server.cert.pem")
-    // deleteOnExit is handled by TempFile
-
-    val keyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-server-pkcs8.key.pem")
-    // deleteOnExit is handled by TempFile
-
-    val buffer = new StringBuffer()
-    val recordingPrinter: (Stack.Params, ChannelPipeline) => Unit = (params, pipeline) => {
-      Mux.Client.tlsEnable(params, pipeline)
-      pipeline.addFirst(ChannelSnooper.byteSnooper("whatever") { (string, _) =>
-        buffer.append(string)
-      })
-    }
-
-    flag.overrides.let(Mux.param.MuxImpl.TlsHeadersToggleId, 1.0) {
-      val config = SslServerConfiguration(
-        keyCredentials = KeyCredentials.CertAndKey(certFile, keyFile),
-        trustCredentials = TrustCredentials.Insecure
-      )
-      val service = new Service[Request, Response] {
-        def apply(req: Request) = Future.value(Response(req.body.concat(req.body)))
-      }
-      val server = serverImpl.withTransport
-        .tls(config)
-        .withOpportunisticTls(OpportunisticTls.Desired)
-        .serve("localhost:*", service)
-
-      val client = clientImpl.withTransport.tlsWithoutValidation
-        .withOpportunisticTls(OpportunisticTls.Desired)
-        .configured(Mux.param.TurnOnTlsFn(recordingPrinter))
-        .newService(
-          Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-          "client"
-        )
-
-      val rep = Await.result(client(Request(Path.empty, Buf.Utf8("." * 10))), 5.seconds)
-      val Buf.Utf8(repString) = rep.body
-      assert(repString == "." * 20)
-
-      // we check that it's non-empty to ensure that it was correctly installed
-      assert(!buffer.toString.isEmpty)
-      // check that the payload isn't in cleartext over the wire
-      assert(!buffer.toString.contains("." * 10))
-      Await.result(Closable.all(server, client).close(), 5.seconds)
-    }
-  }
-
-  test(s"$implName: can talk to each other when one party is off") {
-    val certFile = TempFile.fromResourcePath("/ssl/certs/svc-test-server.cert.pem")
-    // deleteOnExit is handled by TempFile
-
-    val keyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-server-pkcs8.key.pem")
-    // deleteOnExit is handled by TempFile
-
-    val buffer = new StringBuffer()
-    val recordingPrinter: (Stack.Params, ChannelPipeline) => Unit = (params, pipeline) => {
-      Mux.Client.tlsEnable(params, pipeline)
-      pipeline.addFirst(ChannelSnooper.byteSnooper("whatever") { (string, _) =>
-        buffer.append(string)
-      })
-    }
-
-    flag.overrides.let(Mux.param.MuxImpl.TlsHeadersToggleId, 1.0) {
-      val config = SslServerConfiguration(
-        keyCredentials = KeyCredentials.CertAndKey(certFile, keyFile),
-        trustCredentials = TrustCredentials.Insecure
-      )
-      val service = new Service[Request, Response] {
-        def apply(req: Request) = Future.value(Response(req.body.concat(req.body)))
-      }
-      val server = serverImpl.withTransport
-        .tls(config)
-        .withOpportunisticTls(OpportunisticTls.Off)
-        .serve("localhost:*", service)
-
-      val client = clientImpl.withTransport.tlsWithoutValidation
-        .withOpportunisticTls(OpportunisticTls.Desired)
-        .configured(Mux.param.TurnOnTlsFn(recordingPrinter))
-        .newService(
-          Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-          "client"
-        )
-
-      val rep = Await.result(client(Request(Path.empty, Buf.Utf8("." * 10))), 5.seconds)
-      val Buf.Utf8(repString) = rep.body
-      assert(repString == "." * 20)
-      assert(buffer.toString.isEmpty)
-      Await.result(Closable.all(server, client).close(), 5.seconds)
-    }
-  }
-
-  test(s"$implName: can't talk to each other with incompatible opportunistic tls") {
-    val certFile = TempFile.fromResourcePath("/ssl/certs/svc-test-server.cert.pem")
-    // deleteOnExit is handled by TempFile
-
-    val keyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-server-pkcs8.key.pem")
-    // deleteOnExit is handled by TempFile
-
-    flag.overrides.let(Mux.param.MuxImpl.TlsHeadersToggleId, 1.0) {
-      val config = SslServerConfiguration(
-        keyCredentials = KeyCredentials.CertAndKey(certFile, keyFile),
-        trustCredentials = TrustCredentials.Insecure
-      )
-      val service = new Service[Request, Response] {
-        def apply(req: Request) = Future.value(Response(req.body.concat(req.body)))
-      }
-      val server = serverImpl.withTransport
-        .tls(config)
-        .withOpportunisticTls(OpportunisticTls.Off)
-        .serve("localhost:*", service)
-
-      val client = clientImpl.withTransport.tlsWithoutValidation
-        .withOpportunisticTls(OpportunisticTls.Required)
-        .newService(
-          Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-          "client"
-        )
-      intercept[IncompatibleNegotiationException] {
-        Await.result(client(Request(Path.empty, Buf.Utf8("." * 10))), 5.seconds)
-      }
-      intercept[IncompatibleNegotiationException] {
-        Await.result(Closable.all(server, client).close(), 5.seconds)
-      }
     }
   }
 }

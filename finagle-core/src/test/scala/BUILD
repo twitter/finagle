@@ -14,7 +14,16 @@ scala_library(
     './com/twitter/finagle/server/StringServer.scala'
   ],
   fatal_warnings=True,
-  strict_deps=True,
+)
+
+scala_library(name='pushsession-utils',
+  dependencies=[
+    'finagle/finagle-core/src/main/scala:scala'
+  ],
+  sources=[
+    './com/twitter/finagle/exp/pushsession/MockChannelHandle.scala'
+  ],
+  fatal_warnings=True,
 )
 
 junit_tests(
@@ -42,5 +51,4 @@ junit_tests(
   ],
   sources=rglobs('*.scala'),
   fatal_warnings=True,
-  strict_deps=True,
 )

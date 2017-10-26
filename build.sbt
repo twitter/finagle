@@ -11,7 +11,7 @@ val scroogeVersion = "4.20.0" + suffix
 
 val libthriftVersion = "0.5.0-7"
 
-val netty4Version = "4.1.14.Final"
+val netty4Version = "4.1.16.Final"
 
 // zkVersion should be kept in sync with the 'util-zk' dependency version
 val zkVersion = "3.5.0-alpha"
@@ -38,7 +38,7 @@ val netty4LibsTest = Seq(
 )
 val netty4Http = "io.netty" % "netty-codec-http" % netty4Version
 val netty4Http2 = "io.netty" % "netty-codec-http2" % netty4Version
-val netty4StaticSsl = "io.netty" % "netty-tcnative-boringssl-static" % "2.0.5.Final" % "test"
+val netty4StaticSsl = "io.netty" % "netty-tcnative-boringssl-static" % "2.0.6.Final" % "test"
 val jacksonVersion = "2.8.4"
 val jacksonLibs = Seq(
   "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
@@ -172,7 +172,9 @@ val jmockSettings = Seq(
 lazy val noPublishSettings = Seq(
   publish := {},
   publishLocal := {},
-  publishArtifact := false
+  publishArtifact := false,
+  // sbt-pgp's publishSigned task needs this defined even though it is not publishing.
+  publishTo := Some(Resolver.file("Unused transient repository", file("target/unusedrepo")))
 )
 
 lazy val projectList = Seq[sbt.ProjectReference](
@@ -237,7 +239,7 @@ lazy val finagleIntegration = Project(
   name := "finagle-integration",
   libraryDependencies ++= Seq(util("core")) ++ scroogeLibs
 ).dependsOn(
-  finagleCore,
+  finagleCore % "compile->compile;test->test",
   finagleHttp,
   finagleHttp2,
   finagleMySQL,
@@ -561,14 +563,15 @@ lazy val finagleRedis = Project(
   base = file("finagle-redis")
 ).settings(
   sharedSettings
+).configs(
+  IntegrationTest extend(Test)
+).settings(
+  Defaults.itSettings: _*
 ).settings(
   name := "finagle-redis",
   libraryDependencies ++= Seq(
     util("logging")
-  ),
-  testOptions in Test := Seq(Tests.Filter {
-    name => !name.startsWith("com.twitter.finagle.redis.integration")
-  })
+  )
 ).dependsOn(finagleCore, finagleNetty4)
 
 lazy val finagleMux = Project(
@@ -584,7 +587,7 @@ lazy val finagleMux = Project(
     util("logging"),
     util("stats"))
 ).dependsOn(
-  finagleCore,
+  finagleCore % "compile->compile;test->test",
   finagleExp,
   finagleNetty4,
   finagleToggle)
@@ -672,6 +675,7 @@ lazy val finagleBenchmark = Project(
   finagleBenchmarkThrift,
   finagleCore,
   finagleExp,
+  finagleHttp,
   finagleMemcached,
   finagleMux,
   finagleNetty4,

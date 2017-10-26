@@ -1,3 +1,13 @@
+Aperture
+<<<<<<<<
+
+**finagle/aperture/coordinate**
+  The process global coordinate for the process as sampled by
+  the Aperture implementation.
+
+**finagle/aperture/peerset_size**
+  A gauge of the size of the services peerset.
+
 FuturePool
 <<<<<<<<<<
 
@@ -102,36 +112,40 @@ implementation, the Netty 4 library and available under `finagle/netty4`
 on any instance running Finagle with Netty 4.
 
 **pooling/allocations/huge** `verbosity:debug`
-  A gauge (a counter) of total number of HUGE *direct allocations*
+  A gauge of the total number of HUGE *direct allocations*
   (i.e., unpooled allocations that exceed the current chunk size).
 
 **pooling/allocations/normal** `verbosity:debug`
-  A gauge (a counter) of total number of NORMAL *direct allocations*
+  A gauge of the total number of NORMAL *direct allocations*
   (i.e., less than a current chunk size).
 
 **pooling/allocations/small** `verbosity:debug`
-  A gauge (a counter) of total number of SMALL *direct allocations*
+  A gauge of the total number of SMALL *direct allocations*
   (i.e., less than a page size, 8192 bytes).
 
 **pooling/allocations/tiny** `verbosity:debug`
-  A gauge (a counter) of total number of TINY *direct allocations*
+  A gauge of the total number of TINY *direct allocations*
   (i.e., less than 512 bytes).
 
 **pooling/deallocations/huge** `verbosity:debug`
-  A gauge (a counter) of total number of HUGE *direct deallocations*
+  A gauge of the total number of HUGE *direct deallocations*
   (i.e., unpooled allocations that exceed the current chunk size).
 
 **pooling/deallocations/normal** `verbosity:debug`
-  A gauge (a counter) of total number of NORMAL *direct deallocations*
+  A gauge of the total number of NORMAL *direct deallocations*
   (i.e., less than a chunk size).
 
 **pooling/deallocations/small** `verbosity:debug`
-  A gauge (a counter) of total number of SMALL *direct deallocations*
+  A gauge of the total number of SMALL *direct deallocations*
   (i.e., less than a page size, 8192 bytes).
 
 **pooling/deallocations/tiny** `verbosity:debug`
-  A gauge (a counter) of total number of TINY *direct deallocations*
+  A gauge of the total number of TINY *direct deallocations*
   (i.e., less than 512 bytes).
+
+**pooling/used*** `verbosity:debug`
+  A gauge of the number of bytes used for *direct allocations*.
+
 
 **reference_leaks**
   A counter of detected reference leaks. See longer note on 

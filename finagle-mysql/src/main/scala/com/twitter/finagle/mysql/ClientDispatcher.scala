@@ -39,9 +39,10 @@ private[mysql] class PrepareCache(
     val listener = new RemovalListener[Request, Future[Result]] {
       // make sure prepared futures get removed eventually
       def onRemoval(request: Request, response: Future[Result], cause: RemovalCause): Unit = {
-        response.onSuccess {
-          case r: PrepareOK => Closable.closeOnCollect(closable(r.id), r)
-          case _ => // nop
+        response.respond {
+          case Return(r: PrepareOK) =>
+            Closable.closeOnCollect(closable(r.id), r)
+          case _ =>
         }
       }
     }

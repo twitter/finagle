@@ -11,7 +11,7 @@ class TagMapTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   implicit val genTagSet: Arbitrary[Range] =
     Arbitrary(for {
-      start <- Gen.choose(0, max)
+      start <- Gen.choose(0, max - min)
       end <- Gen.choose(start, max - min)
     } yield start to end + min)
 

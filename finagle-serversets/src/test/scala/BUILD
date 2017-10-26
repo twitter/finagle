@@ -32,8 +32,6 @@ junit_tests(name='defaultloader',
     'util/util-stats/src/main/scala:scala'
   ],
   sources=globs('com/twitter/finagle/serverset2/client/apache/*.scala'),
-  strict_deps=True,
-
 )
 
 junit_tests(name='client',
@@ -45,8 +43,6 @@ junit_tests(name='client',
   ],
   fatal_warnings=True,
   sources=globs('com/twitter/finagle/serverset2/client/*.scala'),
-  strict_deps=True,
-
 )
 
 junit_tests(name='serversets',
@@ -71,6 +67,4 @@ junit_tests(name='serversets',
     'com/twitter/finagle/serverset2/naming/*.scala',
     'com/twitter/finagle/zookeeper/*.scala',
   ),
-  strict_deps=True,
-
 )

@@ -24,7 +24,6 @@ scala_library(
     'util/util-stats',
     'util/util-tunable/src/main/scala:scala',
   ],
-  strict_deps=True,
   exports=[
     'util/util-core/src/main/scala:scala',
     'util/util-logging',

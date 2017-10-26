@@ -38,15 +38,16 @@ class Netty4ClientEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
       case KeyCredentials.Unspecified =>
         Return(builder) // Do Nothing
       case KeyCredentials.CertAndKey(certFile, keyFile) =>
-        Try {
-          builder.keyManager(certFile, keyFile)
-        }
+        for {
+          key <- Netty4SslConfigurations.getPrivateKey(keyFile)
+          cert <- new X509CertificateFile(certFile).readX509Certificate()
+        } yield builder.keyManager(key, cert)
       case KeyCredentials.CertKeyAndChain(certFile, keyFile, chainFile) =>
         for {
           key <- Netty4SslConfigurations.getPrivateKey(keyFile)
           cert <- new X509CertificateFile(certFile).readX509Certificate()
           chain <- new X509CertificateFile(chainFile).readX509Certificates()
-        } yield builder.keyManager(key, (cert +: chain): _*)
+        } yield builder.keyManager(key, cert +: chain: _*)
     }
 
   /**
