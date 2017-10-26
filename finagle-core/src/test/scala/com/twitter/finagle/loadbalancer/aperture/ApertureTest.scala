@@ -227,7 +227,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
       override protected val useDeterministicOrdering = Some(true)
     }
 
-    ProcessCoordinate.setCoordinate(offset = 0, instanceId = 1, totalInstances = 10)
+    ProcessCoordinate.setCoordinate(peerOffset = 0, instanceId = 1, totalInstances = 10)
     bal.update(counts.range(10))
     bal.rebuildx()
     assert(bal.isDeterministicAperture)
@@ -242,7 +242,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
       override protected val useDeterministicOrdering = Some(true)
     }
 
-    ProcessCoordinate.setCoordinate(offset = 0, instanceId = 1, totalInstances = 4)
+    ProcessCoordinate.setCoordinate(peerOffset = 0, instanceId = 1, totalInstances = 4)
     bal.update(counts.range(10))
     bal.rebuildx()
     assert(bal.isDeterministicAperture)
@@ -290,7 +290,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
     bal.adjustx(2)
     assert(bal.aperturex == 3)
 
-    ProcessCoordinate.setCoordinate(offset = 0, instanceId = 3, totalInstances = 5)
+    ProcessCoordinate.setCoordinate(peerOffset = 0, instanceId = 3, totalInstances = 5)
 
     // We just happen to know that based on our ordering, instance 2 is in the aperture.
     // Note, we have an aperture of 3 and 1 down, so the probability of picking the down

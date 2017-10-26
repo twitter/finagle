@@ -397,7 +397,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
         indices.map { i =>
           val addr = vector(i).factory.address
           val weight = ring.weight(i, offset, width)
-          f"(index=$i, weight=$weight%1.3f, addr=$addr)"
+          f"(index=$i, weight=$weight%1.6f, addr=$addr)"
         }.mkString("[", ", ", "]")
       }
       rebuildLog.debug(s"[DeterministicApeture.rebuild $lbl] nodes=$apertureSlice")

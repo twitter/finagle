@@ -1,5 +1,6 @@
 package com.twitter.finagle.loadbalancer.aperture
 
+import com.twitter.util.Closable
 import org.scalatest.FunSuite
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
@@ -53,5 +54,18 @@ class ProcessCoordinateTest extends FunSuite with GeneratorDrivenPropertyChecks 
         assert(width > 0 && width <= 1.0)
       }
     }
+  }
+
+  test("apply returns the most current value") {
+    val closables = (1 to 100).map { i =>
+      val closable = ProcessCoordinate.changes.respond { coord =>
+        assert(ProcessCoordinate() == coord)
+      }
+      ProcessCoordinate.setCoordinate(1, 2, i)
+      closable
+    }
+
+    // Cleanup global state
+    Closable.all(closables:_*).close()
   }
 }

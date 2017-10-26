@@ -1,7 +1,6 @@
 package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.util.{Event, Witness}
-import java.util.concurrent.atomic.AtomicReference
 
 /**
  * [[ProcessCoordinate]] exposes a mechanism that allows a process to be
@@ -57,8 +56,7 @@ object ProcessCoordinate {
    * An [[Event]] which tracks the current process coordinate.
    */
   private[this] val coordinate: Event[Option[Coord]] with Witness[Option[Coord]] = Event()
-  private[this] val ref: AtomicReference[Option[Coord]] = new AtomicReference(None)
-  coordinate.register(Witness(ref))
+  @volatile private[this] var ref: Option[Coord] = None
 
   /**
    * An [[Event]] which triggers every time the process coordinate changes. This exposes
@@ -69,7 +67,7 @@ object ProcessCoordinate {
   /**
    * Returns the current coordinate, if there is one set.
    */
-  def apply(): Option[Coord] = ref.get
+  def apply(): Option[Coord] = ref
 
   /**
    * Globally set the coordinate for this process from the respective instance
@@ -86,15 +84,21 @@ object ProcessCoordinate {
    * @param totalInstances The total number of instances in this process' peer
    * cluster.
    */
-  def setCoordinate(offset: Int, instanceId: Int, totalInstances: Int): Unit = {
-    coordinate.notify(Some(FromInstanceId(offset, instanceId, totalInstances)))
-  }
+  def setCoordinate(peerOffset: Int, instanceId: Int, totalInstances: Int): Unit =
+    updateCoordinate(Some(FromInstanceId(peerOffset, instanceId, totalInstances)))
 
   /**
    * Disables the ordering for this process and forces each Finagle client that
    * uses [[Aperture]] to derive a random ordering.
    */
-  def unsetCoordinate(): Unit = {
-    coordinate.notify(None)
+  def unsetCoordinate(): Unit = updateCoordinate(None)
+
+  private[this] def updateCoordinate(newCoord: Option[Coord]): Unit = {
+    // We update the atomic ref directly in this method because we want the most
+    // up-to-date information in the `apply()` method and it avoids potential race
+    // conditions where updating ref via a witness happens *after* other
+    // registered witnesses call the `apply()` method.
+    ref = newCoord
+    coordinate.notify(newCoord)
   }
 }
