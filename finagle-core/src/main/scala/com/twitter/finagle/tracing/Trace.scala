@@ -6,9 +6,7 @@ import com.twitter.finagle.util.ByteArrays
 import com.twitter.io.Buf
 import com.twitter.util._
 import java.net.InetSocketAddress
-
 import com.twitter.app.GlobalFlag
-
 import scala.util.Random
 
 object traceId128Bit extends GlobalFlag[Boolean](false, "When true, new root spans will have 128-bit trace IDs. Defaults to false (64-bit).")
