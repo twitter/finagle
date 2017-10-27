@@ -1,6 +1,6 @@
 resolvers += Classpaths.sbtPluginReleases
 
-val releaseVersion = "17.10.0"
+val releaseVersion = "17.11.0-SNAPSHOT"
 
 addSbtPlugin("com.twitter" % "scrooge-sbt-plugin" % releaseVersion)
 
