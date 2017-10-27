@@ -221,7 +221,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       case exn: IncompatibleNegotiationException =>
         log.fatal(
           exn,
-          s"The client wanted $localEncryptLevel and the server wanted" +
+          s"The local peer wanted $localEncryptLevel and the remote peer wanted" +
             s" $remoteEncryptLevel which are incompatible."
         )
         throw exn
