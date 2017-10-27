@@ -86,10 +86,6 @@ class IdTest extends FunSuite {
     assert(TraceId128("invalid") == TraceId128.empty)
   }
 
-  test("drops invalid traceIdHigh = 0L") {
-    assert(TraceId(Some(SpanId(1L)), None, SpanId(2L), None, Flags(), Some(SpanId(0L))).traceIdHigh.isEmpty)
-  }
-
   test("SpanId.toString: each bit must be correct") {
     for (b <- 0 until 64)
       assert(hex(1 << b) == SpanId(1 << b).toString)

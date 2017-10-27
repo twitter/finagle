@@ -75,7 +75,7 @@ object Trace {
       val trace64 = ByteArrays.get64be(bytes, 16)
       val flags64 = ByteArrays.get64be(bytes, 24)
 
-      val traceIdHigh = if(body.length == 40) ByteArrays.get64be(bytes, 32) else 0L
+      val traceIdHigh = if(body.length == 40) Some(SpanId(ByteArrays.get64be(bytes, 32))) else None
 
       val flags = Flags(flags64)
       val sampled = if (flags.isFlagSet(Flags.SamplingKnown)) {
@@ -88,7 +88,7 @@ object Trace {
         SpanId(span64),
         sampled,
         flags,
-        Some(SpanId(traceIdHigh))
+        traceIdHigh
       )
 
       Return(traceId)
@@ -150,9 +150,9 @@ object Trace {
    */
   def nextId: TraceId = {
     var nextLong = rng.nextLong()
-    if (nextLong == 0) {
+    if (nextLong == 0L) {
       // NOTE: spanId of 0 is invalid, so guard against that here.
-      do nextLong = rng.nextLong() while (nextLong == 0)
+      do nextLong = rng.nextLong() while (nextLong == 0L)
     }
 
     val spanId = SpanId(nextLong)

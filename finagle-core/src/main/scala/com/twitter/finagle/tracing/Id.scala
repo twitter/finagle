@@ -211,7 +211,7 @@ final case class TraceId(
   spanId: SpanId,
   _sampled: Option[Boolean],
   flags: Flags,
-  _traceIdHigh: Option[SpanId]
+  traceIdHigh: Option[SpanId]
 ) {
   def traceId: SpanId = _traceId match {
     case None => parentId
@@ -221,12 +221,6 @@ final case class TraceId(
   def parentId: SpanId = _parentId match {
     case None => spanId
     case Some(id) => id
-  }
-
-  def traceIdHigh: Option[SpanId] = _traceIdHigh match {
-    case None => None
-    case Some(id) if id.self == 0L => None
-    case tid@Some(_) => tid
   }
 
   /**
