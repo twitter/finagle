@@ -2,12 +2,8 @@ import Tests._
 import sbtunidoc.Plugin.UnidocKeys._
 import scoverage.ScoverageKeys
 
-val branch = Process("git" :: "rev-parse" :: "--abbrev-ref" :: "HEAD" :: Nil).!!.trim
-val suffix = if (branch == "master") "" else "-SNAPSHOT"
-
-val libVersion = "7.1.0" + suffix
-val utilVersion = "7.1.0" + suffix
-val scroogeVersion = "4.20.0" + suffix
+// All Twitter library releases are date versioned as YY.MM.patch
+val releaseVersion = "17.11.0-SNAPSHOT"
 
 val libthriftVersion = "0.5.0-7"
 
@@ -51,16 +47,16 @@ val thriftLibs = Seq(
   "org.slf4j" % "slf4j-api" % "1.7.7" % "provided"
 )
 val scroogeLibs = thriftLibs ++ Seq(
-  "com.twitter" %% "scrooge-core" % scroogeVersion)
+  "com.twitter" %% "scrooge-core" % releaseVersion)
 
 def util(which: String) =
-  "com.twitter" %% ("util-"+which) % utilVersion excludeAll(
+  "com.twitter" %% ("util-"+ which) % releaseVersion excludeAll(
     ExclusionRule(organization = "junit"),
     ExclusionRule(organization = "org.scala-tools.testing"),
     ExclusionRule(organization = "org.mockito"))
 
 val sharedSettings = Seq(
-  version := libVersion,
+  version := releaseVersion,
   organization := "com.twitter",
   scalaVersion := "2.12.1",
   crossScalaVersions := Seq("2.11.11", "2.12.1"),

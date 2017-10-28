@@ -4,8 +4,17 @@
 
 Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in commits.
 
-7.x
------
+Unreleased
+----------
+
+17.10.0
+-------
+
+Release Version Format
+~~~~~~~~~~~~~~~~~~~~~~
+
+  * From now on, release versions will be based on release date in the format of
+    YY.MM.x where x is a patch number. ``PHAB_ID=D101244``
 
 New Features
 ~~~~~~~~~~~~
