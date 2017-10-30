@@ -9,9 +9,9 @@ import io.netty.channel._
 import java.lang.{Integer => JInt}
 import java.net.SocketAddress
 
-private[finagle] object Netty4Listener {
+object Netty4Listener {
 
-  val TrafficClass: ChannelOption[JInt] = ChannelOption.newInstance("trafficClass")
+  private[finagle] val TrafficClass: ChannelOption[JInt] = ChannelOption.newInstance("trafficClass")
 
   /**
    * A [[com.twitter.finagle.Stack.Param]] used to configure the ability to
@@ -60,7 +60,7 @@ private[finagle] object Netty4Listener {
  * @see [[com.twitter.finagle.transport.Transport]]
  * @see [[com.twitter.finagle.param]]
  */
-private[finagle] case class Netty4Listener[In, Out, Ctx <: TransportContext](
+case class Netty4Listener[In, Out, Ctx <: TransportContext](
   pipelineInit: ChannelPipeline => Unit,
   params: Stack.Params,
   setupMarshalling: ChannelInitializer[Channel] => ChannelHandler,

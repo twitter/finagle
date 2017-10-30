@@ -7,6 +7,13 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+  * finagle-netty4: `Netty4Transporter` and `Netty4Listener` are now accessible, which
+    allows external users to create their own protocols for use with Finagle on Netty 4.
+    ``PHAB_ID=D105627``
+
 17.10.0
 -------
 
