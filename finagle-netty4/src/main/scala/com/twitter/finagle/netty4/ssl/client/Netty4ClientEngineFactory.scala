@@ -6,7 +6,7 @@ import com.twitter.finagle.netty4.ssl.Netty4SslConfigurations
 import com.twitter.finagle.ssl._
 import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientEngineFactory}
 import com.twitter.util.{Try, Return, Throw}
-import com.twitter.util.security.X509CertificateFile
+import com.twitter.util.security.{PrivateKeyFile, X509CertificateFile}
 import io.netty.buffer.ByteBufAllocator
 import io.netty.handler.ssl.{OpenSsl, SslContext, SslContextBuilder}
 import javax.net.ssl.SSLEngine
@@ -39,12 +39,12 @@ class Netty4ClientEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
         Return(builder) // Do Nothing
       case KeyCredentials.CertAndKey(certFile, keyFile) =>
         for {
-          key <- Netty4SslConfigurations.getPrivateKey(keyFile)
+          key <- new PrivateKeyFile(keyFile).readPrivateKey()
           cert <- new X509CertificateFile(certFile).readX509Certificate()
         } yield builder.keyManager(key, cert)
       case KeyCredentials.CertKeyAndChain(certFile, keyFile, chainFile) =>
         for {
-          key <- Netty4SslConfigurations.getPrivateKey(keyFile)
+          key <- new PrivateKeyFile(keyFile).readPrivateKey()
           cert <- new X509CertificateFile(certFile).readX509Certificate()
           chain <- new X509CertificateFile(chainFile).readX509Certificates()
         } yield builder.keyManager(key, cert +: chain: _*)
