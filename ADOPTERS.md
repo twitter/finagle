@@ -74,6 +74,9 @@ URLs if possible) and [submit a pull request][1]!
 * [Twitter](https://twitter.com/)
   * ["Finagle: A Protocol-Agnostic RPC System"][11]
 * [wasted.io](http://wasted.io/)
+* [XiaoMi](https://www.mi.com/)
+  * ["Linden: A distributed and real-time search engine built on top of
+    Lucene"][13]
 
 [0]: https://twitter.com/finagle
 [1]: https://github.com/twitter/finagle/blob/master/CONTRIBUTING.md
@@ -88,3 +91,5 @@ URLs if possible) and [submit a pull request][1]!
 [10]: https://typesafe.com/
 [11]: https://blog.twitter.com/2011/finagle-a-protocol-agnostic-rpc-system
 [12]: https://www.slideshare.net/ShigekazuTakei/scalafinaglesmartnewsenglish
+[13]: https://github.com/XiaoMi/linden
+
