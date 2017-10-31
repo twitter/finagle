@@ -186,7 +186,7 @@ class Netty4ClientEngineFactoryTest extends FunSuite {
     val appProtocols = ApplicationProtocols.Supported(Seq("h2"))
     val config = SslClientConfiguration(applicationProtocols = appProtocols)
 
-    intercept[UnsupportedOperationException] {
+    intercept[RuntimeException] {
       val engine = factory(address, config)
     }
   }

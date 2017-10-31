@@ -43,15 +43,50 @@ private[ssl] object Netty4SslConfigurations {
    * method mutates the `SslContextBuilder`, and returns it as the result.
    *
    * @note This sets which application level protocol negotiation to
+   * use ALPN.
+   *
+   * @note This also sets the `SelectorFailureBehavior` to NO_ADVERTISE,
+   * and the `SelectedListenerFailureBehavior` to ACCEPT as those are the
+   * only modes supported by both JDK and Native engines.
+   */
+  def configureClientApplicationProtocols(
+    builder: SslContextBuilder,
+    applicationProtocols: ApplicationProtocols
+  ): SslContextBuilder = {
+    // don't use NPN because https://github.com/netty/netty/issues/7346 breaks
+    // web crawlers
+    configureApplicationProtocols(builder, applicationProtocols, Protocol.ALPN)
+  }
+
+  /**
+   * Configures the application protocols of the `SslContextBuilder`. This
+   * method mutates the `SslContextBuilder`, and returns it as the result.
+   *
+   * @note This sets which application level protocol negotiation to
    * use NPN and ALPN.
    *
    * @note This also sets the `SelectorFailureBehavior` to NO_ADVERTISE,
    * and the `SelectedListenerFailureBehavior` to ACCEPT as those are the
    * only modes supported by both JDK and Native engines.
    */
-  def configureApplicationProtocols(
+  def configureServerApplicationProtocols(
     builder: SslContextBuilder,
     applicationProtocols: ApplicationProtocols
+  ): SslContextBuilder =
+    configureApplicationProtocols(builder, applicationProtocols, Protocol.NPN_AND_ALPN)
+
+  /**
+   * Configures the application protocols of the `SslContextBuilder`. This
+   * method mutates the `SslContextBuilder`, and returns it as the result.
+   *
+   * @note This also sets the `SelectorFailureBehavior` to NO_ADVERTISE,
+   * and the `SelectedListenerFailureBehavior` to ACCEPT as those are the
+   * only modes supported by both JDK and Native engines.
+   */
+  private[this] def configureApplicationProtocols(
+    builder: SslContextBuilder,
+    applicationProtocols: ApplicationProtocols,
+    negotiationProtocol: Protocol
   ): SslContextBuilder = {
     applicationProtocols match {
       case ApplicationProtocols.Unspecified =>
@@ -59,8 +94,7 @@ private[ssl] object Netty4SslConfigurations {
       case ApplicationProtocols.Supported(protos) =>
         builder.applicationProtocolConfig(
           new ApplicationProtocolConfig(
-            Protocol.NPN_AND_ALPN,
-            // NO_ADVERTISE and ACCEPT are the only modes supported by both OpenSSL and JDK SSL.
+            negotiationProtocol,
             SelectorFailureBehavior.NO_ADVERTISE,
             SelectedListenerFailureBehavior.ACCEPT,
             protos.asJava

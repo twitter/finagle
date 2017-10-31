@@ -72,8 +72,9 @@ class Netty4ClientEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
     }
     val withProvider = Netty4SslConfigurations.configureProvider(withKey, forceJdk)
     val withTrust = Netty4SslConfigurations.configureTrust(withProvider, config.trustCredentials)
-    val withAppProtocols =
-      Netty4SslConfigurations.configureApplicationProtocols(withTrust, config.applicationProtocols)
+    val withAppProtocols = Netty4SslConfigurations.configureClientApplicationProtocols(
+      withTrust,
+      config.applicationProtocols)
     val context = withAppProtocols.build()
     val engine = new Engine(mkSslEngine(context, address, config))
     SslClientEngineFactory.configureEngine(engine, config)
