@@ -4,7 +4,6 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle._
 import com.twitter.finagle.mux.ClientSession.{Dispatching, Drained, Draining, Leasing}
-import com.twitter.finagle.mux.transport.Message.PreEncodedTping
 import com.twitter.finagle.mux.{ClientSession, ReqRepFilter, Request, Response, ServerError}
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.exp.pushsession.{PushChannelHandle, PushSession}
@@ -189,7 +188,7 @@ private[finagle] final class MuxClientSession(
         if (isDrained || pingPromise != null) ClientSession.FuturePingNack.proxyTo(pp)
         else {
           pingPromise = pp
-          messageWriter.write(PreEncodedTping)
+          messageWriter.write(Message.PreEncoded.Tping)
         }
       }
     })
@@ -240,6 +239,9 @@ private[finagle] final class MuxClientSession(
 
   private[this] def handleProcessMessage(msg: Message): Unit = {
     msg match {
+      case Message.Tping(Message.Tags.PingTag) =>
+        messageWriter.write(Message.PreEncoded.Rping)
+
       case Message.Tping(tag) =>
         messageWriter.write(Message.Rping(tag))
 

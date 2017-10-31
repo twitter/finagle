@@ -4,7 +4,7 @@ import com.twitter.finagle.netty4.Bufs
 import com.twitter.finagle.tracing.{Flags, SpanId, TraceId}
 import com.twitter.finagle.{Dentry, Dtab, Failure, NameTree, Path}
 import com.twitter.io.{Buf, BufByteWriter, ByteReader}
-import com.twitter.util.{Duration, Time}
+import com.twitter.util.{Duration, Future, Time}
 import java.nio.charset.{StandardCharsets => Charsets}
 import scala.collection.mutable.ArrayBuffer
 
@@ -352,14 +352,25 @@ private[finagle] object Message {
 
   /**
    * We pre-encode a ping message with the reserved ping tag
-   * (PingTag) in order to avoid re-encoding this frequently sent
-   * message.
+   * (PingTag) in order to avoid re-encoding these frequently sent
+   * messages.
    */
-  object PreEncodedTping extends Message {
-    def typ: Byte = Types.Tping
-    def tag: Int = Tags.PingTag
-    val buf: Buf = encode(Tping(Tags.PingTag))
+  object PreEncoded {
+    val Tping: Message = new Message {
+      def typ: Byte = Types.Tping
+      def tag: Int = Tags.PingTag
+      val buf: Buf = encode(Message.Tping(Tags.PingTag))
+    }
+
+    val Rping: Message = new Message {
+      def typ: Byte = Types.Rping
+      def tag: Int = Tags.PingTag
+      val buf: Buf = encode(Message.Rping(Tags.PingTag))
+    }
+
+    val FutureRping: Future[Message] = Future.value(Rping)
   }
+
 
   /** Response to a `Tping` message */
   case class Rping(tag: Int) extends EmptyMessage { def typ = Types.Rping }
@@ -675,7 +686,8 @@ private[finagle] object Message {
   }
 
   def encode(msg: Message): Buf = msg match {
-    case PreEncodedTping => PreEncodedTping.buf
+    case PreEncoded.Tping => PreEncoded.Tping.buf
+    case PreEncoded.Rping => PreEncoded.Rping.buf
     case m: Message =>
       if (m.tag < Tags.MarkerTag || (m.tag & ~Tags.TagMSB) > Tags.MaxTag)
         throwBadMessageException(s"invalid tag number ${m.tag}")

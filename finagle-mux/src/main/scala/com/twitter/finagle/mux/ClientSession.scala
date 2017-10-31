@@ -123,6 +123,8 @@ private[finagle] class ClientSession(
         // a irrecoverable states.
       } finally lock.unlockWrite(writeStamp)
 
+    case Message.Tping(Message.Tags.PingTag) => trans.write(Message.PreEncoded.Rping)
+
     case Message.Tping(tag) => trans.write(Message.Rping(tag))
 
     case _ => // do nothing
@@ -198,7 +200,7 @@ private[finagle] class ClientSession(
   def ping(): Future[Unit] = {
     val done = new Promise[Unit]
     if (pingPromise.compareAndSet(null, done)) {
-      trans.write(Message.PreEncodedTping).before(done)
+      trans.write(Message.PreEncoded.Tping).before(done)
     } else {
       FuturePingNack
     }

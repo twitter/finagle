@@ -438,6 +438,7 @@ private[finagle] object Processor extends Filter[Message, Message, Request, Resp
   def apply(req: Message, service: Service[Request, Response]): Future[Message] = req match {
     case d: Message.Tdispatch => dispatch(d, service)
     case r: Message.Treq => dispatch(r, service)
+    case Message.Tping(Message.Tags.PingTag) => Message.PreEncoded.FutureRping
     case Message.Tping(tag) => Future.value(Message.Rping(tag))
     case m => Future.exception(new IllegalArgumentException(s"Cannot process message $m"))
   }
