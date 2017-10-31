@@ -274,7 +274,7 @@ private[finagle] final class MethodBuilder[Req, Rep](
   //   retry: DefaultResponseClassifier
   //   timeout/total: 100.milliseconds
   //   timeout/per_request: 30.milliseconds
-  private[this] def addToRegisty(name: String): Unit = {
+  private[this] def addToRegistry(name: String): Unit = {
     val entry = registryEntry()
     val keyPrefix = registryKeyPrefix(name)
     ClientRegistry.register(entry, keyPrefix :+ "statsReceiver", statsReceiver(name).toString)
@@ -289,7 +289,7 @@ private[finagle] final class MethodBuilder[Req, Rep](
   }
 
   def wrappedService(name: String): Service[Req, Rep] = {
-    addToRegisty(name)
+    addToRegistry(name)
     refCounted.open()
     new ServiceProxy[Req, Rep](refCounted.get) {
       private[this] val isClosed = new AtomicBoolean(false)
