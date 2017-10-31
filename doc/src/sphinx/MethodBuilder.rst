@@ -250,7 +250,7 @@ Notes and caveats:
 - Per-request timeout defaults to using the ``ClientBuilder.requestTimeout`` configuration.
 - The ``ClientBuilder`` metrics scoped to "tries" are not included. These
   are superseded by the logical ``MethodBuilder`` metrics.
-- The ``ClientBuilder`` retry policy will be applied and users must migrate
+- The ``ClientBuilder`` retry policy will **not** be applied and users must migrate
   to using ``withRetryForClassifier``.
 - The ``ClientBuilder`` must have a destination set via one of
   ``hosts``, ``addrs``, ``dest``, ``cluster``, or ``group``.
