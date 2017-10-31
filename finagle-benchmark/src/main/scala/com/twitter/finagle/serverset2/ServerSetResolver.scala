@@ -59,10 +59,7 @@ class ServerSetResolver {
 
     val stabilizationWindow = Duration.fromSeconds(stabilizationSec)
     val resolver = new Zk2Resolver(
-      NullStatsReceiver,
-      stabilizationWindow,
-      stabilizationWindow,
-      stabilizationWindow
+      NullStatsReceiver
     )
 
     val serverSetPaths = LocalServerSetService.createServerSetPaths(serverSetsToResolve)
