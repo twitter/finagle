@@ -75,7 +75,7 @@ object Trace {
       val trace64 = ByteArrays.get64be(bytes, 16)
       val flags64 = ByteArrays.get64be(bytes, 24)
 
-      val traceIdHigh = if(body.length == 40) Some(SpanId(ByteArrays.get64be(bytes, 32))) else None
+      val traceIdHigh = if (body.length == 40) Some(SpanId(ByteArrays.get64be(bytes, 32))) else None
 
       val flags = Flags(flags64)
       val sampled = if (flags.isFlagSet(Flags.SamplingKnown)) {

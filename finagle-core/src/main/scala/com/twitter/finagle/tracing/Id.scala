@@ -26,7 +26,7 @@ object SpanId {
       val s = "%02x".format(bb)
       Array(s(0), s(1))
     }
-   ).toArray
+  ).toArray
 
   private def byteToChars(b: Byte): Array[Char] = lut(b + 128)
 
@@ -61,7 +61,7 @@ object SpanId {
 
 case class TraceId128(low: Option[SpanId], high: Option[SpanId])
 object TraceId128 {
-  val empty = TraceId128(None, None)
+  val empty : TraceId128 = TraceId128(None, None)
 
   /**
    * Extracts the high 64bits (if set and valid) and low 64bits (if valid) from a B3 TraceID's string representation.
@@ -126,7 +126,7 @@ object TraceId {
     ByteArrays.put64be(bytes, 8, traceId.parentId.toLong)
     ByteArrays.put64be(bytes, 16, traceId.traceId.toLong)
     ByteArrays.put64be(bytes, 24, flags.toLong)
-    if(traceId.traceIdHigh.isDefined) ByteArrays.put64be(bytes, 32, traceId.traceIdHigh.get.toLong)
+    if (traceId.traceIdHigh.isDefined) ByteArrays.put64be(bytes, 32, traceId.traceIdHigh.get.toLong)
     bytes
   }
 
@@ -136,14 +136,14 @@ object TraceId {
    */
   def deserialize(bytes: Array[Byte]): Try[TraceId] = {
     if (bytes.length != 32 && bytes.length != 40) {
-      Throw(new IllegalArgumentException("Expected 32 or 40 bytes"))
+      Throw(new IllegalArgumentException("Expected 32 or 40 bytes, was: " + bytes.length))
     } else {
       val span64 = ByteArrays.get64be(bytes, 0)
       val parent64 = ByteArrays.get64be(bytes, 8)
       val trace64 = ByteArrays.get64be(bytes, 16)
       val flags64 = ByteArrays.get64be(bytes, 24)
 
-      val traceIdHigh = if(bytes.length == 40) Some(SpanId(ByteArrays.get64be(bytes, 32))) else None
+      val traceIdHigh = if (bytes.length == 40) Some(SpanId(ByteArrays.get64be(bytes, 32))) else None
 
       val flags = Flags(flags64)
       val sampled = if (flags.isFlagSet(Flags.SamplingKnown)) {
@@ -249,5 +249,5 @@ final case class TraceId(
   override def hashCode(): Int =
     ids.hashCode()
 
-  override def toString = s"${if(traceIdHigh.isEmpty) "" else traceIdHigh.get}$traceId.$spanId<:$parentId"
+  override def toString = s"${if (traceIdHigh.isEmpty) "" else traceIdHigh.get}$traceId.$spanId<:$parentId"
 }
