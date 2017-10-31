@@ -110,7 +110,7 @@ sealed trait Stack[T] {
    * unmodified stack is returned.
    */
   def replace(target: Role, replacement: Stackable[T]): Stack[T] = transform {
-    case n @ Node(hd, _, next) if hd.role == target =>
+    case Node(hd, _, next) if hd.role == target =>
       replacement +: next
     case stk => stk
   }
@@ -190,6 +190,12 @@ sealed trait Stack[T] {
     stk +: this
 
   /**
+   * A copy of this Stack with `element` prepended using the given [[Stack.Role]].
+   */
+  def prepend[U](role: Stack.Role, element: U)(implicit csf: CanStackFrom[U, T]): Stack[T] =
+    prepend(csf.toStackable(role, element))
+
+  /**
    * A copy of this Stack with `stk` prepended.
    */
   def +:(stk: Stackable[T]): Stack[T] =
@@ -197,8 +203,8 @@ sealed trait Stack[T] {
 
   override def toString: String = {
     val elems = tails map {
-      case Node(hd, mk, _) => s"Node(role = ${hd.role}, description = ${hd.description})"
-      case Leaf(hd, t) => s"Leaf(role = ${hd.role}, description = ${hd.description})"
+      case Node(hd, _, _) => s"Node(role = ${hd.role}, description = ${hd.description})"
+      case Leaf(hd, _) => s"Leaf(role = ${hd.role}, description = ${hd.description})"
     }
     elems.mkString("\n")
   }
@@ -214,8 +220,6 @@ object Stack {
    * Base trait for Stack roles. A stack's role is indicative of its
    * functionality. Roles provide a way to group similarly-purposed stacks and
    * slot stack elements into specific usages.
-   *
-   * TODO: CSL-869
    */
   case class Role(name: String) {
     // Override `toString` to return the flat, lowercase object name for use in stats.
@@ -598,7 +602,10 @@ object Stack {
  * `Stack.Params` forwarder to provide a clean Java API.
  */
 object StackParams {
-  val empty = Stack.Params.empty
+  /**
+   * Same as [[Stack.Params.empty]].
+   */
+  val empty: Stack.Params = Stack.Params.empty
 }
 
 /**
