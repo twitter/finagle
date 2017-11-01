@@ -1,10 +1,10 @@
 #!/bin/bash
 
-sbtver=0.13.15
+sbtver=1.0.0
 sbtjar=sbt-launch.jar
-sbtsha128=61bfa3f5791325235f6d7cc37a7e7f6bfeb83531
+sbtsha128=69f23f5233d372b073ead640375774367502e81b
 
-sbtrepo=http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch
+sbtrepo="https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch"
 
 if [ ! -f $sbtjar ]; then
   echo "downloading $PWD/$sbtjar" 1>&2

@@ -1,5 +1,4 @@
 import Tests._
-import sbtunidoc.Plugin.UnidocKeys._
 import scoverage.ScoverageKeys
 
 // All Twitter library releases are date versioned as YY.MM.patch
@@ -139,7 +138,7 @@ val sharedSettings = Seq(
 
   // Prevent eviction warnings
   dependencyOverrides ++= (scalaVersion { vsn =>
-    Set(
+    Seq(
       "com.twitter" % "libthrift" % libthriftVersion
     )
   }).value,
@@ -147,7 +146,7 @@ val sharedSettings = Seq(
   resourceGenerators in Compile += Def.task {
     val dir = (resourceManaged in Compile).value
     val file = dir / "com" / "twitter" / name.value / "build.properties"
-    val buildRev = Process("git" :: "rev-parse" :: "HEAD" :: Nil).!!.trim
+    val buildRev = scala.sys.process.Process("git" :: "rev-parse" :: "HEAD" :: Nil).!!.trim
     val buildName = new java.text.SimpleDateFormat("yyyyMMdd-HHmmss").format(new java.util.Date)
     val contents = s"name=${name.value}\nversion=${version.value}\nbuild_revision=$buildRev\nbuild_name=$buildName"
     IO.write(file, contents)
@@ -206,10 +205,12 @@ lazy val projectList = Seq[sbt.ProjectReference](
 lazy val finagle = Project(
   id = "finagle",
   base = file(".")
+).enablePlugins(
+  ScalaUnidocPlugin
 ).settings(
   sharedSettings ++
   noPublishSettings ++
-  unidocSettings ++ Seq(
+  Seq(
     unidocProjectFilter in(ScalaUnidoc, unidoc) :=
       inAnyProject -- inProjects(
         finagleBenchmark,
