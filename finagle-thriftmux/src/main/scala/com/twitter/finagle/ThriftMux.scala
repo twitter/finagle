@@ -7,6 +7,7 @@ import com.twitter.finagle.client.{
   StackClient
 }
 import com.twitter.finagle.context.RemoteInfo.Upstream
+import com.twitter.finagle.mux.OpportunisticTlsParams
 import com.twitter.finagle.mux.exp.pushsession.MuxPush
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport.{MuxContext, OpportunisticTls}
@@ -211,7 +212,8 @@ object ThriftMux
       with WithClientSession[Client]
       with WithSessionQualifier[Client]
       with WithDefaultLoadBalancer[Client]
-      with ThriftRichClient {
+      with ThriftRichClient
+      with OpportunisticTlsParams[Client] {
 
     def stack: Stack[ServiceFactory[mux.Request, mux.Response]] =
       muxer.stack
@@ -378,30 +380,6 @@ object ThriftMux
     override def withRetryBackoff(backoff: Stream[Duration]): Client =
       super.withRetryBackoff(backoff)
 
-    /**
-     * Configures the client to negotiate whether to speak tls or not.
-     *
-     * The valid levels are Off, which indicates this client will never speak TLS,
-     * Desired, which indicates it may speak TLS, but may also not speak TLS,
-     * and Required, which indicates it must speak TLS.
-     *
-     * Clients that are configured to be Required cannot speak to servers that are
-     * configured Off, and vice versa.
-     *
-     * Note that opportunistic TLS is negotiated in a cleartext handshake, and is
-     * incompatible with mux over TLS.
-     */
-    def withOpportunisticTls(level: OpportunisticTls.Level): Client =
-      configured(Mux.param.OppTls(Some(level)))
-
-    /**
-     * Disables oportunistic TLS.
-     *
-     * If the client is still TLS configured, it will speak mux over TLS.  To instead
-     * configure the client to be `Off`, use `withOpportunisticTls(OpportunisticTls.Off)`.
-     */
-    def noOpportunisticTls: Client = configured(Mux.param.OppTls(None))
-
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
   }
 
@@ -558,7 +536,8 @@ object ThriftMux
       with CommonParams[Server]
       with WithServerTransport[Server]
       with WithServerSession[Server]
-      with WithServerAdmissionControl[Server] {
+      with WithServerAdmissionControl[Server]
+      with OpportunisticTlsParams[Server] {
 
     import Server.MuxToArrayFilter
 
@@ -592,30 +571,6 @@ object ThriftMux
      */
     def withProtocolFactory(pf: TProtocolFactory): Server =
       configured(Thrift.param.ProtocolFactory(pf))
-
-    /**
-     * Configures the server to negotiate whether to speak tls or not.
-     *
-     * The valid levels are Off, which indicates this server will never speak TLS,
-     * Desired, which indicates it may speak TLS, but may also not speak TLS,
-     * and Required, which indicates it must speak TLS.
-     *
-     * Servers that are configured to be Required cannot speak to clients that are
-     * configured Off, and vice versa.
-     *
-     * Note that opportunistic TLS is negotiated in a cleartext handshake, and is
-     * incompatible with mux over TLS.
-     */
-    def withOpportunisticTls(level: OpportunisticTls.Level): Server =
-      configured(Mux.param.OppTls(Some(level)))
-
-    /**
-     * Disables oportunistic TLS.
-     *
-     * If the server is still TLS configured, it will speak mux over TLS.  To instead
-     * configure the server to be `Off`, use `withOpportunisticTls(OpportunisticTls.Off)`.
-     */
-    def noOpportunisticTls: Server = configured(Mux.param.OppTls(None))
 
     /**
      * Produce a [[com.twitter.finagle.ThriftMux.Server]] using the provided stack.

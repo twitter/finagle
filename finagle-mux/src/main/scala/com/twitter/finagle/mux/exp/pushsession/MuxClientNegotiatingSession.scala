@@ -1,10 +1,11 @@
 package com.twitter.finagle.mux.exp.pushsession
 
-import com.twitter.finagle.{ChannelClosedException, Failure, Mux, Status}
+import com.twitter.finagle.{ChannelClosedException, Failure, Status}
 import com.twitter.finagle.mux.Handshake.{CanTinitMsg, Headers, TinitTag}
 import com.twitter.finagle.mux.exp.pushsession.MuxClientNegotiatingSession._
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.exp.pushsession.{PushChannelHandle, PushSession}
+import com.twitter.finagle.mux.Handshake
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.logging.Logger
 import com.twitter.util._
@@ -18,7 +19,7 @@ private[finagle] final class MuxClientNegotiatingSession(
   handle: PushChannelHandle[ByteReader, Buf],
   version: Short,
   negotiator: Option[Headers] => MuxClientSession,
-  maxFrameSize: StorageUnit,
+  headers: Handshake.Headers,
   name: String
 ) extends PushSession[ByteReader, Buf](handle) {
 
@@ -85,8 +86,6 @@ private[finagle] final class MuxClientNegotiatingSession(
 
   private[this] def phaseReceiveMarkerRerr(message: Message): Unit = message match {
     case Message.Rerr(`TinitTag`, `CanTinitMsg`) => // we can negotiate
-      // TODO: need to support OptTls
-      val headers = Mux.Client.headers(maxFrameSize, None)
       phase = phaseReceiveRinit
       handle.sendAndForget(Message.encode(Message.Tinit(TinitTag, version, headers)))
 
@@ -109,12 +108,20 @@ private[finagle] final class MuxClientNegotiatingSession(
       failHandshake(exc)
   }
 
+  // This must be the only successful pathway forward since we must always yield to the
+  // result of `negotiate` even if we don't send+receive any headers from the peer.
   private[this] def finishNegotiation(serverHeaders: Option[Headers]): Unit = {
     log.debug("Init result: %s", serverHeaders)
-    val clientSession = negotiator(serverHeaders)
-    handle.registerSession(clientSession)
-    if (!negotiatedSession.updateIfEmpty(Return(clientSession))) {
-      log.debug("Finished negotiation with %s but handle already closed.", name)
+    Try(negotiator(serverHeaders)) match {
+      case Return(clientSession) =>
+        handle.registerSession(clientSession)
+        if (!negotiatedSession.updateIfEmpty(Return(clientSession))) {
+          log.debug("Finished negotiation with %s but handle already closed.", name)
+        }
+
+      case Throw(exc) =>
+        log.warning(exc, "Mux negotiation failed.")
+        failHandshake(exc)
     }
   }
 

@@ -2,8 +2,8 @@ package com.twitter.finagle.mux.exp.pushsession
 
 import com.twitter.conversions.storage._
 import com.twitter.conversions.time._
-import com.twitter.finagle.{ChannelClosedException, Path, liveness}
-import com.twitter.finagle.Mux.param.MaxFrameSize
+import com.twitter.finagle.{ChannelClosedException, Failure, Mux, Path, liveness}
+import com.twitter.finagle.Mux.param.{MaxFrameSize, OppTls}
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle.exp.pushsession.{MockChannelHandle, PushChannelHandle}
 import com.twitter.finagle.mux.Handshake.{CanTinitMsg, Headers, TinitTag}
@@ -57,8 +57,14 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
 
   private def withMockHandle(negotiator: Negotiator, params: Params): (ChannelHandleT, MuxClientNegotiatingSession) = {
     val handle = new MockChannelHandle[ByteReader, Buf](null)
+    val headers = Mux.Client.headers(params[MaxFrameSize].size, params[OppTls].level)
     val session = new MuxClientNegotiatingSession(
-      handle, 1, negotiator(handle, _), params[MaxFrameSize].size, "client")
+      handle = handle,
+      version = 1,
+      negotiator = negotiator(handle, _),
+      headers = headers,
+      name = "client"
+    )
     handle.registerSession(session)
     handle -> session
   }
@@ -132,6 +138,26 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
     }
   }
 
+  test("Marker Rerr followed by non-Rinit fails new session") {
+
+    val (handle, negotiatingSession) = withMockHandle((_, _) => ???, fragmentingParams)
+    val sessionF = negotiatingSession.negotiate()
+
+    assert(decodeClientWrite(handle.dequeAndCompleteWrite()).isInstanceOf[Message.Rerr])
+    negotiatingSession.receive(asByteReader(Message.Rerr(TinitTag, CanTinitMsg)))
+
+    decodeClientWrite(handle.dequeAndCompleteWrite()) match {
+      case Message.Tinit(_, _, _) => // sweet
+      case other => fail(s"Unexpected message: $other")
+    }
+
+    negotiatingSession.receive(asByteReader(Message.Rerr(1, "what....")))
+
+    intercept[Failure] {
+      await(sessionF)
+    }
+  }
+
   test("Handle onClose failure cancels the handshake") {
     def negotiate(handle: PushChannelHandle[ByteReader, Buf], hs: Option[Headers]): MuxClientSession =
       MuxPush.negotiateClientSession(handle, fragmentingParams, hs)
@@ -161,5 +187,30 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
     intercept[ChannelClosedException] {
       await(sessionF)
     }
+  }
+
+  test("negotiation failure") {
+    val exc = new Exception("boom")
+    def negotiate(handle: PushChannelHandle[ByteReader, Buf], hs: Option[Headers]): MuxClientSession =
+      throw exc
+
+    val (handle, negotiatingSession) = withMockHandle(negotiate, fragmentingParams)
+    val sessionF = negotiatingSession.negotiate()
+
+    assert(decodeClientWrite(handle.dequeAndCompleteWrite()).isInstanceOf[Message.Rerr])
+    negotiatingSession.receive(asByteReader(Message.Rerr(TinitTag, CanTinitMsg)))
+
+    decodeClientWrite(handle.dequeAndCompleteWrite()) match {
+      case Message.Tinit(_, _, _) => // sweet
+      case other => fail(s"Unexpected message: $other")
+    }
+
+    negotiatingSession.receive(asByteReader(Message.Rinit(TinitTag, 1, Seq.empty)))
+
+    val e = intercept[Exception] {
+      await(sessionF)
+    }
+
+    assert(e == exc)
   }
 }

@@ -7,7 +7,7 @@ import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport._
-import com.twitter.finagle.mux.{Handshake, Toggles}
+import com.twitter.finagle.mux.{Handshake, OpportunisticTlsParams, Toggles}
 import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
 import com.twitter.finagle.netty4.ssl.server.Netty4ServerSslHandler
 import com.twitter.finagle.netty4.ssl.client.Netty4ClientSslHandler
@@ -15,13 +15,13 @@ import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.param.{ProtocolLibrary, WithDefaultLoadBalancer}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
-import com.twitter.finagle.stats.{StatsReceiver, Counter}
+import com.twitter.finagle.stats.{Counter, StatsReceiver}
 import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.{StatsTransport, Transport}
 import com.twitter.finagle.{param => fparam}
 import com.twitter.io.Buf
-import com.twitter.logging.{Logger, Level}
+import com.twitter.logging.{Level, Logger}
 import com.twitter.util.{Closable, Future, StorageUnit}
 import io.netty.channel.{Channel, ChannelPipeline}
 import java.net.SocketAddress
@@ -105,9 +105,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     }
 
     // tells the Netty4Transporter not to turn on TLS so we can turn it on later
-    private[this] def removeTlsIfOpportunisticClient(params: Stack.Params): Stack.Params = {
-      val param.OppTls(level) = params[param.OppTls]
-      level match {
+    private[finagle] def removeTlsIfOpportunisticClient(params: Stack.Params): Stack.Params = {
+      params[param.OppTls].level match {
         case None => params
         case _ => params + Transport.ClientSsl(None)
       }
@@ -115,8 +114,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
     // tells the Netty4Listener not to turn on TLS so we can turn it on later
     private[this] def removeTlsIfOpportunisticServer(params: Stack.Params): Stack.Params = {
-      val param.OppTls(level) = params[param.OppTls]
-      level match {
+      params[param.OppTls].level match {
         case None => params
         case _ => params + Transport.ServerSsl(None)
       }
@@ -207,12 +205,14 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       case None => Off
     }
 
+
     try {
-      if (OpportunisticTls.negotiate(localEncryptLevel, remoteEncryptLevel)) {
-        if (log.isLoggable(Level.DEBUG)) {
-          log.debug(s"Successfully negotiated TLS with remote peer. " +
-            s"local level: $localEncryptLevel, remote level: $remoteEncryptLevel")
-        }
+      val useTls = OpportunisticTls.negotiate(localEncryptLevel, remoteEncryptLevel)
+      if (log.isLoggable(Level.DEBUG)) {
+        log.debug(s"Successfully negotiated TLS with remote peer. Using TLS: $useTls " +
+          s"local level: $localEncryptLevel, remote level: $remoteEncryptLevel")
+      }
+      if (useTls) {
         upgrades.incr()
         turnOnTlsFn()
       }
@@ -279,7 +279,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     private[finagle] val tlsEnable: (Stack.Params, ChannelPipeline) => Unit = (params, pipeline) =>
       pipeline.addFirst("opportunisticSslInit", new Netty4ClientSslHandler(params))
 
-    private val params: Stack.Params = StackClient.defaultParams +
+    private[finagle] val params: Stack.Params = StackClient.defaultParams +
       ProtocolLibrary("mux") +
       param.TurnOnTlsFn(tlsEnable)
 
@@ -312,7 +312,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Client.stack,
     params: Stack.Params = Client.params
   ) extends StdStackClient[mux.Request, mux.Response, Client]
-      with WithDefaultLoadBalancer[Client] {
+      with WithDefaultLoadBalancer[Client]
+      with OpportunisticTlsParams[Client] {
 
     protected def copy1(
       stack: Stack[ServiceFactory[mux.Request, mux.Response]] = this.stack,
@@ -327,33 +328,6 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
     protected def newTransporter(addr: SocketAddress): Transporter[In, Out, MuxContext] =
       params[param.MuxImpl].transporter(params)(addr)
-
-    /**
-     * Configures the client to negotiate whether to speak TLS or not.
-     *
-     * By default, the client doesn't use opportunistic TLS, and will instead try
-     * to speak mux over TLS if TLS has been configured.
-     *
-     * The valid levels are Off, which indicates this client will never speak TLS,
-     * Desired, which indicates it may speak TLS, but may also not speak TLS,
-     * and Required, which indicates it must speak TLS.
-     *
-     * Clients that are configured to be Required cannot speak to servers that are
-     * configured Off, and vice versa.
-     *
-     * Note that opportunistic TLS is negotiated in a cleartext handshake, and is
-     * incompatible with mux over TLS.
-     */
-    def withOpportunisticTls(level: OpportunisticTls.Level): Client =
-      configured(param.OppTls(Some(level)))
-
-    /**
-     * Disables oportunistic TLS.
-     *
-     * If the client is still TLS configured, it will speak mux over TLS.  To instead
-     * configure the client to be `Off`, use `withOpportunisticTls(OpportunisticTls.Off)`.
-     */
-    def noOpportunisticTls: Client = configured(param.OppTls(None))
 
     protected def newDispatcher(
       transport: Transport[In, Out] { type Context <: Client.this.Context }
@@ -440,7 +414,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
   case class Server(
     stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Server.stack,
     params: Stack.Params = Server.params
-  ) extends StdStackServer[mux.Request, mux.Response, Server] {
+  ) extends StdStackServer[mux.Request, mux.Response, Server]
+    with OpportunisticTlsParams[Server] {
 
     protected def copy1(
       stack: Stack[ServiceFactory[mux.Request, mux.Response]] = this.stack,
@@ -452,33 +427,6 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     protected type Context = MuxContext
 
     private[this] val statsReceiver = params[fparam.Stats].statsReceiver.scope("mux")
-
-    /**
-     * Configures the server to negotiate whether to speak TLS or not.
-     *
-     * By default, the server doesn't use opportunistic TLS, and will instead try
-     * to speak mux over TLS if TLS has been configured.
-     *
-     * The valid levels are Off, which indicates this server will never speak TLS,
-     * Desired, which indicates it may speak TLS, but may also not speak TLS,
-     * and Required, which indicates it must speak TLS.
-     *
-     * Servers that are configured to be Required cannot speak to clients that are
-     * configured Off, and vice versa.
-     *
-     * Note that opportunistic TLS is negotiated in a cleartext handshake, and is
-     * incompatible with mux over TLS.
-     */
-    def withOpportunisticTls(level: OpportunisticTls.Level): Server =
-      configured(param.OppTls(Some(level)))
-
-    /**
-     * Disables oportunistic TLS.
-     *
-     * If the server is still TLS configured, it will speak mux over TLS.  To instead
-     * configure the server to be `Off`, use `withOpportunisticTls(OpportunisticTls.Off)`.
-     */
-    def noOpportunisticTls: Server = configured(param.OppTls(None))
 
     protected def newListener(): Listener[In, Out, MuxContext] =
       params[param.MuxImpl].listener(params)

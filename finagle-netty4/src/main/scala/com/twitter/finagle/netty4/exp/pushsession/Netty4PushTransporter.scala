@@ -5,7 +5,7 @@ import com.twitter.finagle.netty4.channel.RawNetty4ClientChannelInitializer
 import com.twitter.finagle.netty4.ConnectionBuilder
 import com.twitter.finagle.exp.pushsession.{PushChannelHandle, PushSession, PushTransporter}
 import com.twitter.util.Future
-import io.netty.channel.ChannelPipeline
+import io.netty.channel.{Channel, ChannelPipeline}
 import java.net.SocketAddress
 
 object Netty4PushTransporter {
@@ -33,8 +33,7 @@ object Netty4PushTransporter {
   }
 }
 
-// Constructor exposed for testing
-private final class Netty4PushTransporter[In, Out] private[pushsession] (
+private[finagle] class Netty4PushTransporter[In, Out](
   transportInit: ChannelPipeline => Unit,
   protocolInit: ChannelPipeline => Unit,
   val remoteAddress: SocketAddress,
@@ -47,14 +46,24 @@ private final class Netty4PushTransporter[In, Out] private[pushsession] (
     params
   )
 
-  def apply[T <: PushSession[In, Out]](
+  /**
+   * Create a future [[PushSession]]
+   *
+   * Subtypes can override this behavior to add functionality such as
+   * interacting with the Netty4 `Channel`.
+   */
+  protected def initSession[T <: PushSession[In, Out]](
+    channel: Channel,
+    protocolInit: ChannelPipeline => Unit,
+    sessionBuilder: PushChannelHandle[In, Out] => Future[T]): Future[T] = {
+    val (_, sessionF) =
+      Netty4PushChannelHandle.install[In, Out, T](channel, protocolInit, sessionBuilder)
+    sessionF
+  }
+
+  final def apply[T <: PushSession[In, Out]](
     sessionBuilder: (PushChannelHandle[In, Out]) => Future[T]
-  ): Future[T] =
-    builder.build { channel =>
-      val (_, sessionF) =
-        Netty4PushChannelHandle.install[In, Out, T](channel, protocolInit, sessionBuilder)
-      sessionF
-    }
+  ): Future[T] = builder.build(initSession(_, protocolInit, sessionBuilder))
 
   override def toString: String = "Netty4PushTransporter"
 }

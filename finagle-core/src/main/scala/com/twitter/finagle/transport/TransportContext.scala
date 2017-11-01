@@ -12,7 +12,7 @@ import java.security.cert.Certificate
 abstract class TransportContext extends Closable {
 
   /**
-   * The status of this transport; see [[com.twitter.finagle.Status$]] for
+   * The status of this transport; see [[com.twitter.finagle.Status]] for
    * status definitions.
    */
   def status: Status
