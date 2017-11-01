@@ -14,6 +14,12 @@ New Features
     allows external users to create their own protocols for use with Finagle on Netty 4.
     ``PHAB_ID=D105627``
 
+Bug Fixes
+~~~~~~~~~
+
+  * finagle-exp: Fix race condition in `LatencyHistogram` which could lead to the wrong
+    value returned for `quantile`. ``PHAB_ID=D106330``
+
 17.10.0
 -------
 

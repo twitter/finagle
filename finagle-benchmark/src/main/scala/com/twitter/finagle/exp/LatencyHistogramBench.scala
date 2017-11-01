@@ -13,12 +13,12 @@ class LatencyHistogramBench extends StdBenchAnnotations {
   @Param(Array("1000"))
   var maxDurationMs = 1000L
 
-  @Param(Array("-1.0", "0.01", "0.05"))
+  @Param(Array("0.0", "0.01", "0.05"))
   var error = 0.0
 
-  var i = 0L
+  private[this] var i = 0L
 
-  var histo: LatencyHistogram = _
+  private[this] var histo: LatencyHistogram = _
 
   @Setup
   def setup(): Unit = {
