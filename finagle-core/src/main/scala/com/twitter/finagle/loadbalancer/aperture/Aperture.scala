@@ -1,8 +1,9 @@
 package com.twitter.finagle.loadbalancer.aperture
 
-import com.twitter.finagle.Address.Inet
 import com.twitter.finagle._
+import com.twitter.finagle.Address.Inet
 import com.twitter.finagle.CoreToggles
+import com.twitter.finagle.loadbalancer.p2c.P2CPick
 import com.twitter.finagle.loadbalancer.{Balancer, DistributorT, NodeT}
 import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.util.Rng
@@ -241,18 +242,6 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     }
 
     /**
-     * Pick the least loaded (and healthiest) of the two nodes `a` and `b`
-     * taking into account their respective weights.
-     */
-    protected def pick(a: Node, aw: Double, b: Node, bw: Double): Node = {
-      if (a.status == b.status) {
-        if (a.load / aw <= b.load / bw) a else b
-      } else {
-        if (Status.best(a.status, b.status) == a.status) a else b
-      }
-    }
-
-    /**
      * Returns the indices which are currently part of the aperture. That is,
      * the indices over which `pick` selects.
      */
@@ -288,10 +277,11 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    *
    * @param initAperture The initial aperture to use.
    */
-  protected class RandomAperture(
+  protected final class RandomAperture(
     vector: Vector[Node],
     initAperture: Int
-  ) extends BaseDist(vector, initAperture) {
+  ) extends BaseDist(vector, initAperture)
+    with P2CPick[Node] {
     require(vector.nonEmpty, "vector must be non empty")
 
     /**
@@ -322,7 +312,10 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     // by `token` which is deterministic across rebuilds but random
     // globally, since `token` is assigned randomly per process
     // when the node is created.
-    private[this] val vec = statusOrder(vector.sortBy(nodeToken))
+    protected val vec = statusOrder(vector.sortBy(nodeToken))
+    protected def bound: Int = aperture
+    protected def emptyNode: Node = failingNode(emptyException)
+    protected def rng: Rng = self.rng
 
     if (rebuildLog.isLoggable(Level.DEBUG)) {
       val vecString = vec.take(aperture).map(_.factory.address).mkString("[", ", ", "]")
@@ -330,29 +323,6 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     }
 
     def indices: Set[Int] = (0 until aperture).toSet
-
-    def pick(): Node = {
-      val range = aperture
-      // We know we don't have to worry about the vector
-      // being empty because of the definition of rebuild
-      // in the `BaseDist`.
-      if (range <= 1) vec.head
-      else {
-        val a = rng.nextInt(range)
-        var b = rng.nextInt(range - 1)
-        if (b >= a) { b += 1 }
-
-        val nodeA = vec(a)
-        val nodeB = vec(b)
-        val picked = pick(nodeA, 1.0, nodeB, 1.0)
-
-        if (pickLog.isLoggable(Level.TRACE)) {
-          pickLog.trace(s"[RandomAperture.pick $lbl] a=$nodeA b=$nodeB picked=$picked")
-        }
-
-        picked
-      }
-    }
 
     // To reduce the amount of rebuilds needed, we rely on the probabilistic
     // nature of p2c pick. That is, we know that only when a significant
@@ -377,7 +347,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    * @param coord The [[ProcessCoordinate]] for this process which is used to narrow
    * the range of `pick2`.
    */
-  protected class DeterministicApeture(
+  protected final class DeterministicApeture(
     vector: Vector[Node],
     initAperture: Int,
     coord: Coord
@@ -451,6 +421,26 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
 
     def indices: Set[Int] = ring.indices(coord.offset, apertureWidth).toSet
 
+    /**
+     * Pick the least loaded (and healthiest) of the two nodes `a` and `b`
+     * taking into account their respective weights.
+     */
+    private[this] def pick(a: Node, aw: Double, b: Node, bw: Double): Node = {
+      val aStatus = a.status
+      val bStatus = b.status
+      if (aStatus == bStatus) {
+        // Note, `aw` or `bw` can't be zero since `pick2` would not
+        // have returned the indices in the first place. However,
+        // we check anyways to safeguard against any numerical
+        // stability issues.
+        val _aw = if (aw == 0) 1.0 else aw
+        val _bw = if (bw == 0) 1.0 else bw
+        if (a.load / _aw <= b.load / _bw) a else b
+      } else {
+        if (Status.best(aStatus, bStatus) == aStatus) a else b
+      }
+    }
+
     def pick(): Node = {
       val offset = coord.offset
       val width = apertureWidth
@@ -461,12 +451,10 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
 
       val nodeA = vector(a)
       val nodeB = vector(b)
-      // Note, `aw` or `bw` can't be zero since `pick2` would not
-      // have returned the indices in the first place.
       val picked = pick(nodeA, aw, nodeB, bw)
 
       if (pickLog.isLoggable(Level.TRACE)) {
-        pickLog.trace(f"[DeterministicApeture.pick] a=(index=$a, weight=$aw%1.3f, node=$nodeA) b=(index=$b, weight=$bw%1.3f, node=$nodeB) picked=$picked")
+        pickLog.trace(f"[DeterministicApeture.pick] a=(index=$a, weight=$aw%1.6f, node=$nodeA) b=(index=$b, weight=$bw%1.6f, node=$nodeB) picked=$picked")
       }
 
       picked
