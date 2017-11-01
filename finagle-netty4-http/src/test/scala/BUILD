@@ -8,7 +8,7 @@ junit_tests(
     '3rdparty/jvm/org/mockito:mockito-all',
     '3rdparty/jvm/org/scalacheck',
     '3rdparty/jvm/org/scalatest',
-    'finagle/finagle-base-http/src/main/scala:scala',
+    'finagle/finagle-base-http',
     'finagle/finagle-base-http:tests',
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-netty4',

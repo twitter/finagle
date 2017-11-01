@@ -1,9 +1,9 @@
 package com.twitter.finagle.netty4.http
 
-import com.twitter.finagle.http.{Fields, HeaderMap}
-import com.twitter.finagle.netty4.{ByteBufAsBuf, BufAsByteBuf}
+import com.twitter.finagle.http.{Fields, HeaderMap, Request}
+import com.twitter.finagle.netty4.{BufAsByteBuf, ByteBufAsBuf}
 import com.twitter.finagle.{http => FinagleHttp}
-import com.twitter.io.{BufReader, Reader}
+import com.twitter.io.{BufReader, Reader, Writer}
 import io.netty.handler.codec.{http => NettyHttp}
 import java.net.InetSocketAddress
 
@@ -22,43 +22,41 @@ private[finagle] object Bijections {
     def statusToFinagle(s: NettyHttp.HttpResponseStatus): FinagleHttp.Status =
       FinagleHttp.Status.fromCode(s.code)
 
+    private def requestToFinagleHelper(
+      in: NettyHttp.HttpRequest,
+      r: Reader,
+      remoteAddr: InetSocketAddress,
+      chunked: Boolean
+    ): Request = {
+      val result = new Request.Impl(
+        reader = r,
+        writer = Writer.FailingWriter,
+        remoteSocketAddress = remoteAddr,
+        multipartDecoder = Netty4MultipartDecoder
+      )
+
+      result.setChunked(chunked)
+      result.version = Bijections.netty.versionToFinagle(in.protocolVersion)
+      result.method = Bijections.netty.methodToFinagle(in.method)
+      result.uri = in.uri
+
+      writeNettyHeadersToFinagle(in.headers, result.headerMap)
+
+      result
+    }
+
     def chunkedRequestToFinagle(
       in: NettyHttp.HttpRequest,
       r: Reader,
       remoteAddr: InetSocketAddress
-    ): FinagleHttp.Request = {
-
-      val result =
-        FinagleHttp.Request.chunked(
-          version = Bijections.netty.versionToFinagle(in.protocolVersion),
-          method = Bijections.netty.methodToFinagle(in.method),
-          uri = in.uri,
-          reader = r,
-          remoteAddr = remoteAddr
-        )
-
-      result.setChunked(true)
-      writeNettyHeadersToFinagle(in.headers, result.headerMap)
-      result
-    }
+    ): FinagleHttp.Request = requestToFinagleHelper(in, r, remoteAddr, chunked = true)
 
     def fullRequestToFinagle(
-      r: NettyHttp.FullHttpRequest,
+      in: NettyHttp.FullHttpRequest,
       remoteAddr: InetSocketAddress
     ): FinagleHttp.Request = {
-
-      val payload = ByteBufAsBuf(r.content)
-
-      val result = FinagleHttp.Request.chunked(
-        method = methodToFinagle(r.method),
-        uri = r.uri,
-        version = versionToFinagle(r.protocolVersion),
-        reader = BufReader(payload),
-        remoteAddr = remoteAddr
-      )
-
-      result.setChunked(false)
-      writeNettyHeadersToFinagle(r.headers, result.headerMap)
+      val payload = ByteBufAsBuf(in.content)
+      val result = requestToFinagleHelper(in, BufReader(payload), remoteAddr, chunked = false)
       result.content = payload
 
       result

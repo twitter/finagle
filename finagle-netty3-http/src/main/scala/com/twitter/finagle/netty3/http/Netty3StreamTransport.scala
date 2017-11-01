@@ -4,11 +4,11 @@ import com.twitter.finagle.dispatch.GenSerialClientDispatcher.wrapWriteException
 import com.twitter.finagle.http._
 import com.twitter.finagle.http.exp.{Multi, StreamTransportProxy}
 import com.twitter.finagle.http.netty3.Bijections._
-import com.twitter.finagle.http.netty3.{Bijections, Injection}
+import com.twitter.finagle.http.netty3.{Bijections, Injection, Netty3MultipartDecoder}
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.netty3.http.ReaderUtils.{readChunk, streamChunks}
 import com.twitter.finagle.transport.Transport
-import com.twitter.io.{BufReader, Reader}
+import com.twitter.io.{BufReader, Reader, Writer}
 import com.twitter.util.Future
 import java.net.InetSocketAddress
 import org.jboss.netty.handler.codec.http.{HttpMessage, HttpRequest, HttpResponse}
@@ -66,20 +66,19 @@ private[finagle] class Netty3ServerStreamTransport(transport: Transport[Any, Any
             case _ => new InetSocketAddress(0)
           }
 
-          val finagleRequest = Request.chunked(
-            Bijections.from(req.getProtocolVersion),
-            Bijections.from(req.getMethod),
-            req.getUri,
+          val finagleReq = new Request.Impl(
             readerIn,
-            remoteSocketAddress
+            Writer.FailingWriter,
+            remoteSocketAddress,
+            Netty3MultipartDecoder
           )
 
-          if (!req.isChunked) {
-            finagleRequest.setChunked(false)
-          }
+          finagleReq.version = Bijections.versionFromNetty(req.getProtocolVersion)
+          finagleReq.method = Bijections.methodFromNetty(req.getMethod)
+          finagleReq.uri = req.getUri
 
-          Bijections.copyHeadersAndContentFromNetty(req, finagleRequest)
+          Bijections.copyHeadersAndContentFromNetty(req, finagleReq)
 
-          finagleRequest
+          finagleReq
       }
     )

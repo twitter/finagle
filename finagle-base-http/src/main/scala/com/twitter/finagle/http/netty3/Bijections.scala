@@ -14,7 +14,7 @@ object Bijections {
   // Version
 
   implicit val versionToNettyInjection = new Injection[Version, HttpVersion] {
-    def apply(v: Version) = versionToNetty(v)
+    def apply(v: Version): HttpVersion = versionToNetty(v)
   }
 
   def versionToNetty(v: Version): HttpVersion = v match {
@@ -27,9 +27,10 @@ object Bijections {
   // However, netty 3 only decodes HTTP/1.0 and HTTP/1.1 messages so whatever came over
   // the wire at least looks like HTTP/1.x, so we take a guess in the base case.
   implicit val versionFromNettyInjection = new Injection[HttpVersion, Version] {
-    def apply(v: HttpVersion) = versionFromNetty(v)
+    def apply(v: HttpVersion): Version = versionFromNetty(v)
   }
-  def versionFromNetty(v: HttpVersion) = v match {
+
+  def versionFromNetty(v: HttpVersion): Version = v match {
     case HttpVersion.HTTP_1_1 => Version.Http11
     case HttpVersion.HTTP_1_0 => Version.Http10
     case _ => Version.Http11
@@ -53,22 +54,22 @@ object Bijections {
   // Status
 
   implicit val statusToNettyInjection = new Injection[Status, HttpResponseStatus] {
-    def apply(s: Status) = statusToNetty(s)
+    def apply(s: Status): HttpResponseStatus = statusToNetty(s)
   }
 
-  def statusToNetty(s: Status) = HttpResponseStatus.valueOf(s.code)
+  def statusToNetty(s: Status): HttpResponseStatus = HttpResponseStatus.valueOf(s.code)
 
   implicit val statusFromNettyInjection = new Injection[HttpResponseStatus, Status] {
-    def apply(s: HttpResponseStatus) = statusFromNetty(s)
+    def apply(s: HttpResponseStatus): Status = statusFromNetty(s)
   }
 
-  def statusFromNetty(s: HttpResponseStatus) = Status.fromCode(s.getCode)
+  def statusFromNetty(s: HttpResponseStatus): Status = Status.fromCode(s.getCode)
 
   // Cookie
 
   private[http] implicit val cookieToNettyInjection: Injection[Cookie, NettyCookie] =
     new Injection[Cookie, NettyCookie] {
-      def apply(c: Cookie) = cookieToNetty(c)
+      def apply(c: Cookie): NettyCookie = cookieToNetty(c)
     }
 
   private[http] def cookieToNetty(c: Cookie): NettyCookie = {
@@ -89,7 +90,7 @@ object Bijections {
 
   private[http] implicit val cookieFromNettyInjection: Injection[NettyCookie, Cookie] =
     new Injection[NettyCookie, Cookie] {
-      def apply(nc: NettyCookie) = cookieFromNetty(nc)
+      def apply(nc: NettyCookie): Cookie = cookieFromNetty(nc)
     }
 
   private[http] def cookieFromNetty(nc: NettyCookie): Cookie =

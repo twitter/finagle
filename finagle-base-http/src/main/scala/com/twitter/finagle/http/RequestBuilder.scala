@@ -7,11 +7,7 @@ import com.twitter.io.Buf
 import java.net.{URI, URL}
 import java.nio.charset.StandardCharsets
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.handler.codec.http.multipart.{
-  DefaultHttpDataFactory,
-  HttpDataFactory,
-  HttpPostRequestEncoder
-}
+import org.jboss.netty.handler.codec.http.multipart.{DefaultHttpDataFactory, HttpDataFactory, HttpPostRequestEncoder}
 import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest}
 import scala.annotation.implicitNotFound
 import scala.collection.JavaConverters._
@@ -468,12 +464,11 @@ class RequestBuilder[HasUrl, HasForm] private[http] (
 
   private[http] def withoutContent(method: Method): Request = {
     val req = Request(config.version, method, resource)
-    config.headers foreach {
-      case (field, values) =>
-        values.foreach { v =>
-          req.headerMap.add(field, v)
-        }
+
+    config.headers.foreach { case (field, values) =>
+      values.foreach { v => req.headerMap.add(field, v) }
     }
+
     req
   }
 

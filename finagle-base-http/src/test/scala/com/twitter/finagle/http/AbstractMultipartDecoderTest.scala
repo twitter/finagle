@@ -1,13 +1,10 @@
-package com.twitter.finagle.http.exp
+package com.twitter.finagle.http
 
-import org.junit.runner.RunWith
+import com.twitter.finagle.http.exp.{Multipart, MultipartDecoder}
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import com.twitter.finagle.http.{FileElement, Request, RequestBuilder, SimpleElement, Method}
-import com.twitter.io.{Files, Buf}
+import com.twitter.io.{Buf, Files}
 
-@RunWith(classOf[JUnitRunner])
-class MultipartTest extends FunSuite {
+abstract class AbstractMultipartDecoderTest(decoder: MultipartDecoder) extends FunSuite {
 
   /*
    * The generated request is equivalent to the following form:
@@ -26,31 +23,13 @@ class MultipartTest extends FunSuite {
       .add(SimpleElement("type", "text"))
       .buildFormPost(multipart = true)
 
-  test("sanity check") {
-    val req = Request()
-    req.method = Method.Post
-    req.contentString = "abc=foo&def=123&abc=bar"
-
-    assert(
-      req.multipart == Some(
-        Multipart(
-          Map(
-            "abc" -> Seq("foo", "bar"),
-            "def" -> Seq("123")
-          ),
-          Map.empty[String, Seq[Multipart.FileUpload]]
-        )
-      )
-    )
-  }
-
   test("Attribute") {
-    assert(newRequest(Buf.Empty).multipart.get.attributes("type").head == "text")
+    assert(decoder(newRequest(Buf.Empty)).get.attributes("type").head == "text")
   }
 
   test("FileUpload (in-memory)") {
     val foo = Buf.Utf8("foo")
-    val multipart = newRequest(foo).multipart.get
+    val multipart = decoder(newRequest(foo)).get
 
     val Multipart.InMemoryFileUpload(buf, contentType, fileName, contentTransferEncoding) =
       multipart.files("groups").head
@@ -65,7 +44,7 @@ class MultipartTest extends FunSuite {
 
   test("FileUpload (on-disk)") {
     val foo = Buf.Utf8("." * (Multipart.MaxInMemoryFileSize.inBytes.toInt + 10))
-    val multipart = newRequest(foo).multipart.get
+    val multipart = decoder(newRequest(foo)).get
 
     val Multipart.OnDiskFileUpload(file, contentType, fileName, contentTransferEncoding) =
       multipart.files("groups").head
