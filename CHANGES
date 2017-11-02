@@ -10,6 +10,10 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
+  * finagle-core: Add `ResponseClassifier`s, RetryOnTimeout and RetryOnChannelClosed,
+    for exceptions that are commonly retried when building from ClientBuilder but had
+    no MethodBuilder equivalents. ``PHAB_ID=D106706``
+
   * finagle-netty4: `Netty4Transporter` and `Netty4Listener` are now accessible, which
     allows external users to create their own protocols for use with Finagle on Netty 4.
     ``PHAB_ID=D105627``

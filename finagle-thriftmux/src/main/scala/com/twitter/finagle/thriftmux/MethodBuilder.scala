@@ -198,6 +198,16 @@ object MethodBuilder {
  * [[com.twitter.finagle.service.ResponseClass.RetryableFailure marked as retryable]].
  * See [[withRetryForClassifier]] for details.
  *
+ * An example of configuring classifiers for ChannelClosed and Timeout exceptions:
+ * {{{
+ * import com.twitter.finagle.service.ResponseClassifier._
+ * import com.twitter.finagle.thriftmux.MethodBuilder
+ *
+ * val builder: MethodBuilder = ???
+ * builder
+ *   .withRetryForClassifier(RetryOnChannelClosed.orElse(RetryOnTimeout))
+ * }}}
+ *
  * A [[com.twitter.finagle.service.RetryBudget]] is used to prevent retries from overwhelming
  * the backend service. The budget is shared across clients created from
  * an initial `MethodBuilder`. As such, even if the retry rules

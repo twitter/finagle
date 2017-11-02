@@ -1,7 +1,8 @@
 package com.twitter.finagle.service
 
 import com.twitter.finagle.service.RetryPolicy.RetryableWriteException
-import com.twitter.util.{Throw, Return}
+import com.twitter.finagle.{ChannelClosedException, Failure, TimeoutException}
+import com.twitter.util.{Throw, TimeoutException => UtilTimeoutException, Return}
 
 object ResponseClassifier {
 
@@ -29,7 +30,7 @@ object ResponseClassifier {
    * It is a total function covering the entire input domain and as
    * such it is recommended that it is used with user's classifiers:
    * {{{
-   * theirClassier.applyOrElse(theirReqRep, ResponseClassifier.Default)
+   * theirClassifier.applyOrElse(theirReqRep, ResponseClassifier.Default)
    * }}}
    */
   val Default: ResponseClassifier = named("DefaultResponseClassifier") {
@@ -48,4 +49,30 @@ object ResponseClassifier {
     case ReqRep(_, Throw(_)) => ResponseClass.RetryableFailure
   }
 
+  /**
+   *  Implementation for the [[ResponseClassifier]] that retries requests on all timeout
+   *  exceptions.
+   *
+   *  This would be useful for instances of idempotent requests, for example
+   *  on database reads or similar.  May also be useful for non-idempotent requests
+   *  depending on how the remote service handles duplicate requests.
+   */
+  val RetryOnTimeout: ResponseClassifier = named("RetryOnTimeoutClassifier") {
+    case ReqRep(_, Throw(Failure(Some(_: TimeoutException)))) =>
+      ResponseClass.RetryableFailure
+    case ReqRep(_, Throw(Failure(Some(_: UtilTimeoutException)))) =>
+      ResponseClass.RetryableFailure
+    case ReqRep(_, Throw(_: TimeoutException)) => ResponseClass.RetryableFailure
+    case ReqRep(_, Throw(_: UtilTimeoutException)) => ResponseClass.RetryableFailure
+  }
+
+  /**
+   *  Implementation for the [[ResponseClassifier]] that retries requests on all channel
+   *  closed exceptions.
+   *
+   *  This is safe to use for idempotent requests.
+   */
+  val RetryOnChannelClosed: ResponseClassifier = named("RetryOnChannelClosedClassifier") {
+    case ReqRep(_, Throw(_: ChannelClosedException)) => ResponseClass.RetryableFailure
+  }
 }
