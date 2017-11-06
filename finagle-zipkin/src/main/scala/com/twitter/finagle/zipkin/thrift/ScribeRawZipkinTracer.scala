@@ -23,6 +23,7 @@ import java.net.InetSocketAddress
 import java.util.concurrent.ArrayBlockingQueue
 import org.apache.thrift.TByteArrayOutputStream
 import scala.collection.mutable.ArrayBuffer
+import scala.language.reflectiveCalls
 import scala.util.control.NonFatal
 
 object ScribeRawZipkinTracer {
