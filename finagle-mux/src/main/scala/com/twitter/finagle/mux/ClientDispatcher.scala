@@ -165,8 +165,13 @@ private class ReqRepFilter extends Filter[Request, Response, Int => Message, Mes
       }
 
       case CanDispatch.Yes | CanDispatch.Unknown => { tag: Int =>
-        val contexts = Contexts.broadcast.marshal()
-        Message.Tdispatch(tag, contexts.toSeq, req.destination, Dtab.local, req.body)
+        val contexts = if (req.contexts.nonEmpty) {
+          req.contexts ++ Contexts.broadcast.marshal()
+        } else {
+          Contexts.broadcast.marshal().toSeq
+        }
+        // NOTE: context values may be duplicated with "local" context values appearing earlier than "broadcast" context values.
+        Message.Tdispatch(tag, contexts, req.destination, Dtab.local, req.body)
       }
     }
 

@@ -21,7 +21,7 @@ import org.mockito.stubbing.Answer
 import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSuite, OneInstancePerTest, Tag}
 
 private object TestContext {
@@ -358,5 +358,25 @@ class ClientServerTestDispatch extends ClientServerTest {
     when(service(req)).thenReturn(Future.value(rep))
     assert(Await.result(client(req), 5.seconds) == rep)
     verify(service)(req)
+  }
+
+  test("propagate explicit request contexts") {
+    val ctx = new Ctx
+    import ctx._
+
+    val ctxts = Seq((Buf.Utf8("HELLO"), Buf.Utf8("WORLD")))
+    val request = Request(Path.empty, ctxts, Buf.Empty)
+
+    when(service(request)).thenAnswer(
+      new Answer[Future[Response]] {
+        def answer(invocation: InvocationOnMock) = {
+          Future.value(Response(request.contexts, Buf.Empty))
+        }
+      }
+    )
+
+    val response = Await.result(client(request), 5.seconds)
+    assert(response.contexts.nonEmpty)
+    assert(response.contexts == ctxts)
   }
 }

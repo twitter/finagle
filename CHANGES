@@ -24,6 +24,12 @@ Bug Fixes
   * finagle-exp: Fix race condition in `LatencyHistogram` which could lead to the wrong
     value returned for `quantile`. ``PHAB_ID=D106330``
 
+  * finagle-thrift: Correctly send `mux.Request#contexts` in all cases. There were some
+    cases in which `mux.Request#contexts` were not always propagated. The contexts are
+    now always written across the transport. Note that there may be duplicated contexts
+    between "local" context values and "broadcast" context values. Local values will
+    precede broadcast values in sequence. ``PHAB_ID=D107921``
+
 17.10.0
 -------
 

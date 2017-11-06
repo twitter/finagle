@@ -398,7 +398,7 @@ private[finagle] object Processor extends Filter[Message, Message, Request, Resp
     Contexts.broadcast.letUnmarshal(tdispatch.contexts) {
       if (tdispatch.dtab.nonEmpty)
         Dtab.local ++= tdispatch.dtab
-      service(Request(tdispatch.dst, Nil, tdispatch.req)).transform {
+      service(Request(tdispatch.dst, tdispatch.contexts, tdispatch.req)).transform {
         case Return(rep) =>
           Future.value(RdispatchOk(tdispatch.tag, rep.contexts, rep.body))
 
