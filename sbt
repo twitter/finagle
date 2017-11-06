@@ -1,8 +1,8 @@
 #!/bin/bash
 
-sbtver=1.0.0
+sbtver=1.0.3
 sbtjar=sbt-launch.jar
-sbtsha128=69f23f5233d372b073ead640375774367502e81b
+sbtsha128=f55b2016e6cace9af7ac4a667dc0092572811cfb
 
 sbtrepo="https://repo1.maven.org/maven2/org/scala-sbt/sbt-launch"
 
