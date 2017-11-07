@@ -31,7 +31,7 @@ object Netty4Listener {
     pipelineInit: ChannelPipeline => Unit,
     params: Stack.Params,
     setupMarshalling: ChannelInitializer[Channel] => ChannelHandler
-  )(implicit mIn: Manifest[In], mOut: Manifest[Out]) =
+  )(implicit mIn: Manifest[In], mOut: Manifest[Out]): Netty4Listener[In, Out, TransportContext] =
     Netty4Listener[In, Out, TransportContext](
       pipelineInit,
       params,
@@ -42,7 +42,7 @@ object Netty4Listener {
   def apply[In, Out](
     pipelineInit: ChannelPipeline => Unit,
     params: Stack.Params
-  )(implicit mIn: Manifest[In], mOut: Manifest[Out]) =
+  )(implicit mIn: Manifest[In], mOut: Manifest[Out]): Netty4Listener[In, Out, TransportContext] =
     Netty4Listener[In, Out, TransportContext](
       pipelineInit,
       params,
