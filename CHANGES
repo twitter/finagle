@@ -24,6 +24,12 @@ Bug Fixes
   * finagle-exp: Fix race condition in `LatencyHistogram` which could lead to the wrong
     value returned for `quantile`. ``PHAB_ID=D106330``
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: Numerous overloads of `c.t.f.Server.serve` have been marked final.
+    ``PHAB_ID=D107280``
+
   * finagle-thrift: Correctly send `mux.Request#contexts` in all cases. There were some
     cases in which `mux.Request#contexts` were not always propagated. The contexts are
     now always written across the transport. Note that there may be duplicated contexts

@@ -131,6 +131,15 @@ private[finagle] object MuxPush
           name = name))
     }
 
+    override def newClient(
+      dest: Name,
+      label0: String
+    ): ServiceFactory[Request, Response] = {
+      // We want to fail fast if the client's TLS configuration is inconsistent
+      Mux.Client.validateTlsParamConsistency(params)
+      super.newClient(dest, label0)
+    }
+
     protected def newPushTransporter(
       inetSocketAddress: InetSocketAddress
     ): PushTransporter[ByteReader, Buf] = {

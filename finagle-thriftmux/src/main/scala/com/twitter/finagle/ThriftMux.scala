@@ -7,7 +7,7 @@ import com.twitter.finagle.client.{
   StackClient
 }
 import com.twitter.finagle.context.RemoteInfo.Upstream
-import com.twitter.finagle.mux.OpportunisticTlsParams
+import com.twitter.finagle.mux.{OpportunisticTlsParams, Request, Response}
 import com.twitter.finagle.mux.exp.pushsession.MuxPush
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport.{MuxContext, OpportunisticTls}
@@ -426,6 +426,16 @@ object ThriftMux
     protected type Context = MuxContext
 
     private[this] val statsReceiver = params[Stats].statsReceiver
+
+
+    override def serve(
+      addr: SocketAddress,
+      factory: ServiceFactory[Request, Response]
+    ): ListeningServer = {
+      // // We want to fail fast if the server's OppTls configuration is invalid
+      Mux.Server.validateTlsParamConsistency(params)
+      super.serve(addr, factory)
+    }
 
     protected def copy1(
       stack: Stack[ServiceFactory[mux.Request, mux.Response]] = this.stack,

@@ -122,7 +122,7 @@ trait EndpointerStackClient[Req, Rep, This <: EndpointerStackClient[Req, Rep, Th
     clientStack.make(clientParams)
   }
 
-  override def newService(dest: Name, label: String): Service[Req, Rep] = {
+  def newService(dest: Name, label: String): Service[Req, Rep] = {
     val client = copy1(
       params = params + FactoryToService.Enabled(true)
     ).newClient(dest, label)

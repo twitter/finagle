@@ -14,7 +14,7 @@ import com.twitter.finagle.toggle.flag
 import com.twitter.io.{Buf, TempFile}
 import com.twitter.util.{Await, Closable, Future, Try}
 import io.netty.channel.ChannelPipeline
-import java.net.InetSocketAddress
+import java.net.{InetAddress, InetSocketAddress}
 import org.scalatest.FunSuite
 
 // duplicated in ThriftSmuxTest, please update there too
@@ -115,6 +115,26 @@ abstract class AbstractSmuxTest extends FunSuite {
       assert(repString == "." * 20)
       assert(string.isEmpty)
     })
+  }
+
+  test("smux: can't create a client with an invalid OppTls config") {
+    for (level <- Seq(OpportunisticTls.Required, OpportunisticTls.Desired)) {
+      val client = clientImpl()
+      intercept[IllegalStateException] {
+        client.withOpportunisticTls(level).newService("0.0.0.0:8080")
+      }
+    }
+  }
+
+  test("smux: can't create a server with an invalid OppTls config") {
+    for (level <- Seq(OpportunisticTls.Required, OpportunisticTls.Desired)) {
+      val server = serverImpl()
+      intercept[IllegalStateException] {
+        val addr = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
+        server.withOpportunisticTls(level).serve(
+          addr, Service.const(Future.exception(new Exception())))
+      }
+    }
   }
 
   test("smux: can't talk to each other with incompatible opportunistic tls") {

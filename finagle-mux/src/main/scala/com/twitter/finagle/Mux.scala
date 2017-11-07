@@ -7,7 +7,7 @@ import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport._
-import com.twitter.finagle.mux.{Handshake, OpportunisticTlsParams, Toggles}
+import com.twitter.finagle.mux.{Handshake, OpportunisticTlsParams, Request, Response, Toggles}
 import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
 import com.twitter.finagle.netty4.ssl.server.Netty4ServerSslHandler
 import com.twitter.finagle.netty4.ssl.client.Netty4ClientSslHandler
@@ -18,6 +18,7 @@ import com.twitter.finagle.server._
 import com.twitter.finagle.stats.{Counter, StatsReceiver}
 import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing._
+import com.twitter.finagle.transport.Transport.{ClientSsl, ServerSsl}
 import com.twitter.finagle.transport.{StatsTransport, Transport}
 import com.twitter.finagle.{param => fparam}
 import com.twitter.io.Buf
@@ -74,6 +75,12 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     case class OppTls(level: Option[OpportunisticTls.Level])
     object OppTls {
       implicit val param = Stack.Param(OppTls(None))
+
+      /** Determine whether opportunistic TLS is configured to `Desired` or `Required`. */
+      def enabled(params: Stack.Params): Boolean = params[OppTls].level match {
+        case Some(OpportunisticTls.Desired | OpportunisticTls.Required) => true
+        case _ => false
+      }
     }
 
     /**
@@ -306,6 +313,17 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
         case _ => Seq(muxFrameHeader)
       }
     }
+
+    /**
+     * Check the opportunistic TLS configuration to ensure it's in a consistent state
+     */
+    private[finagle] def validateTlsParamConsistency(params: Stack.Params): Unit = {
+      if (param.OppTls.enabled(params) && params[ClientSsl].sslClientConfiguration.isEmpty) {
+        val level = params[param.OppTls].level
+        throw new IllegalStateException(
+          s"Client desired opportunistic TLS ($level) but ClientSsl param is empty.")
+      }
+    }
   }
 
   case class Client(
@@ -328,6 +346,15 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
     protected def newTransporter(addr: SocketAddress): Transporter[In, Out, MuxContext] =
       params[param.MuxImpl].transporter(params)(addr)
+
+    override def newClient(
+      dest: Name,
+      label0: String
+    ): ServiceFactory[Request, Response] = {
+      // We want to fail fast if the client's TLS configuration is inconsistent
+      Client.validateTlsParamConsistency(params)
+      super.newClient(dest, label0)
+    }
 
     protected def newDispatcher(
       transport: Transport[In, Out] { type Context <: Client.this.Context }
@@ -409,6 +436,18 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
         case _ => Seq(muxFrameHeader)
       }
     }
+
+    /**
+     * Check the opportunistic TLS configuration to ensure it's in a consistent state
+     */
+    private[finagle] def validateTlsParamConsistency(params: Stack.Params): Unit = {
+      // We need to make sure
+      if (param.OppTls.enabled(params) && params[ServerSsl].sslServerConfiguration.isEmpty) {
+        val level = params[param.OppTls].level
+        throw new IllegalStateException(
+          s"Server desired opportunistic TLS ($level) but ServerSsl param is empty.")
+      }
+    }
   }
 
   case class Server(
@@ -427,6 +466,15 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     protected type Context = MuxContext
 
     private[this] val statsReceiver = params[fparam.Stats].statsReceiver.scope("mux")
+
+    override def serve(
+      addr: SocketAddress,
+      factory: ServiceFactory[Request, Response]
+    ): ListeningServer = {
+      // We want to fail fast if the server's TLS configuration is inconsistent
+      Server.validateTlsParamConsistency(params)
+      super.serve(addr, factory)
+    }
 
     protected def newListener(): Listener[In, Out, MuxContext] =
       params[param.MuxImpl].listener(params)
