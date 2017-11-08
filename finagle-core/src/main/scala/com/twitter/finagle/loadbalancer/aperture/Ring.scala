@@ -5,13 +5,11 @@ import scala.collection.mutable.ListBuffer
 
 private object Ring {
   /**
-   * Used for double comparison – we don't care to distinguish
-   * ranges at this granularity.
-   */
-  val epsilon: Double = 1e-6
-
-  /**
    * Returns the length of the intersection between the two ranges.
+   *
+   * @note this implementations assumes that the min(e0, e1) is greater
+   * than max(b0, b1). It's up to the caller to handle the case where
+   * the line segments wrap around the ring.
    */
   def intersect(b0: Double, e0: Double, b1: Double, e1: Double): Double = {
     val len = math.min(e0, e1) - math.max(b0, b1)
@@ -66,14 +64,26 @@ private class Ring(size: Int, rng: Rng) {
     if (width < 0 || width > 1.0)
       throw new IllegalArgumentException(s"width must be between [0, 1.0]: $width")
 
-    if (1.0 - width <= epsilon) size else {
-      val ab = index(offset)
-      // We want to compute the range [offset, offset + width) exclusive of
-      // offset + width, so we discount a small portion of it. Note, this
-      // is important for cases where `ae` lands exactly on an index.
-      val ae = index(((offset + width) * (1 - epsilon)) % 1.0)
-      // Add 1 so the range is inclusive of the first element.
-      val diff = (ae - ab) + 1
+    // We will wrap around the entire ring, so return the size.
+    if (width == 1) size
+    // We only have one index to select from. Arguably, returning
+    // a diff of zero here is correct too. However, in order to
+    // project what `pick2` will do we return a range of 1.
+    else if (width == 0) 1
+    else {
+      val ab = {
+        val i = index(offset)
+        val w = weight(i, offset, width)
+        if (w > 0) i else i + 1
+      }
+
+      val ae = {
+        val i = index((offset + width) % 1.0)
+        val w = weight(i, offset, width)
+        if (w > 0) i + 1 else i
+      }
+
+      val diff = ae - ab
       if (diff < 0) diff + size else diff
     }
   }
@@ -150,21 +160,21 @@ private class Ring(size: Int, rng: Rng) {
     val ae: Double = ab + unitWidth
 
     val overlap = intersect(ab, ae, offset, offset + width)
-    val width1 = width - overlap
+    val rem = width - overlap
 
-    // The range [offset, offset + width) is equivalent to [ab, ae).
-    if (width1 <= epsilon) {
-      a
-    } else {
+    if (rem > 0) {
       // Instead of actually splitting the range into two, we offset
       // any pick that takes place in the second range if there is a
       // possibility that our second choice falls within [ab, ae].
       //
       // Note, special care must be taken to not bias towards ae + overlap, so
       // we treat the entire range greater than it uniformly.
-      var pos = offset + (rng.nextDouble() * width1)
+      var pos = offset + (rng.nextDouble() * rem)
       if (pos >= ae - overlap) { pos += overlap }
       index(pos % 1.0)
+    } else {
+      // The range [offset, offset + width) is equivalent to [ab, ae).
+      a
     }
   }
 
