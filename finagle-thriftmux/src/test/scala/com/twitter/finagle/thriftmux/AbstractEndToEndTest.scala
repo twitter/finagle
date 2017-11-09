@@ -269,6 +269,59 @@ abstract class AbstractEndToEndTest
     await(server.close())
   }
 
+  test("thriftmux server + Finagle thrift client: 128 bit traceId should be passed from client to server") {
+    @volatile var cltTraceId: Option[TraceId] = None
+    @volatile var srvTraceId: Option[TraceId] = None
+    val tracer = new Tracer {
+      def record(record: Record) {
+        record match {
+          case Record(id, _, ServerRecv(), _) => srvTraceId = Some(id)
+          case Record(id, _, ClientSend(), _) => cltTraceId = Some(id)
+          case _ =>
+        }
+      }
+      def sampleTrace(traceId: TraceId): Option[Boolean] = None
+    }
+
+    Time.withTimeAt(Time.fromSeconds(1465510280)) { tc => // Thursday, June 9, 2016 10:11:20 PM
+      traceId128Bit.let(true) {
+        val server = ThriftMux.server
+          .configured(PTracer(tracer))
+          .serveIface(
+            new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+            new TestService.FutureIface {
+              def query(x: String): Future[String] = Future.value(x + x)
+            }
+          )
+
+        val client = Thrift.client
+          .configured(PTracer(tracer))
+          .newIface[TestService.FutureIface](
+          Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+          "client"
+        )
+
+        await(client.query("ok"))
+
+        (srvTraceId, cltTraceId) match {
+          case (Some(id1), Some(id2)) =>
+            assert(id1 == id2)
+            assert(id1.traceIdHigh.isDefined)
+            assert(id2.traceIdHigh.isDefined)
+            assert(id1.traceIdHigh.get.toString.startsWith("5759e988"))
+            assert(id2.traceIdHigh.get.toString.startsWith("5759e988"))
+          case _ =>
+            assert(
+              false,
+              s"the trace ids sent by client and received by server do not match srv: $srvTraceId clt: $cltTraceId"
+            )
+        }
+
+        await(server.close())
+      }
+    }
+  }
+
   test("thriftmux server + Finagle thrift client: clientId should be passed from client to server") {
     val server = serverImpl.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),

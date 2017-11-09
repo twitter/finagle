@@ -1,6 +1,6 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.tracing.{Flags, SpanId, Trace, TraceId}
+import com.twitter.finagle.tracing.{Flags, SpanId, Trace, TraceId, TraceId128}
 import java.lang.{Boolean => JBoolean, Long => JLong}
 
 private object TraceInfo {
@@ -19,7 +19,8 @@ private object TraceInfo {
         spanId match {
           case None => None
           case Some(sid) =>
-            val traceId = SpanId.fromString(request.headerMap(Header.TraceId))
+            val trace128Bit = TraceId128(request.headerMap(Header.TraceId))
+
             val parentSpanId =
               if (request.headerMap.contains(Header.ParentSpanId))
                 SpanId.fromString(request.headerMap(Header.ParentSpanId))
@@ -36,7 +37,7 @@ private object TraceInfo {
             }
 
             val flags = getFlags(request)
-            Some(TraceId(traceId, parentSpanId, sid, sampled, flags))
+            Some(TraceId(trace128Bit.low, parentSpanId, sid, sampled, flags, trace128Bit.high))
         }
       } else if (request.headerMap.contains(Header.Flags)) {
         // even if there are no id headers we want to get the debug flag
