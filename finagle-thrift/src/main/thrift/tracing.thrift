@@ -45,6 +45,7 @@ const string CLIENT_SEND = "cs"
  * recorded separately as SERVER_ADDR when CLIENT_SEND is logged.
  */
 const string CLIENT_RECV = "cr"
+const string CLIENT_RECV_ERROR = "Client Receive Error"
 /**
  * The server sent ("ss") a response to a client. There is only one response
  * per span. If there's a transport error, each attempt can be logged as a
@@ -61,6 +62,7 @@ const string CLIENT_RECV = "cr"
  * recorded separately as CLIENT_ADDR when SERVER_RECV is logged.
  */
 const string SERVER_SEND = "ss"
+const string SERVER_SEND_ERROR = "Server Send Error"
 /**
  * The server received ("sr") a request from a client. There is only one
  * request per span.  For example, if duplicate responses were received, each
@@ -89,6 +91,7 @@ const string WIRE_SEND = "ws"
  * and client or server receive might indicate queuing or processing delay.
  */
 const string WIRE_RECV = "wr"
+const string WIRE_RECV_ERROR = "Wire Receive Error"
 /**
  * Optionally logs progress of a (CLIENT_SEND, WIRE_SEND). For example, this
  * could be one chunk in a chunked request.
@@ -255,6 +258,7 @@ struct RequestHeader {
   // Support for destination (partially resolved names) and delegation tables.
   9: optional string dest
   10: optional list<Delegation> delegations
+  11: optional i64 trace_id_high
 }
 
 /**

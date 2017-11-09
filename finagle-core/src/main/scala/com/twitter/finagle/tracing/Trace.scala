@@ -6,7 +6,11 @@ import com.twitter.finagle.util.ByteArrays
 import com.twitter.io.Buf
 import com.twitter.util._
 import java.net.InetSocketAddress
+import com.twitter.app.GlobalFlag
 import scala.util.Random
+
+object traceId128Bit extends GlobalFlag[Boolean](false, "When true, new root spans will have 128-bit trace IDs. Defaults to false (64-bit).")
+
 
 /**
  * This is a tracing system similar to Dapper:
@@ -48,7 +52,7 @@ object Trace {
     "com.twitter.finagle.tracing.TraceContext"
   ) {
     private val local = new ThreadLocal[Array[Byte]] {
-      override def initialValue(): Array[Byte] = new Array[Byte](32)
+      override def initialValue(): Array[Byte] = new Array[Byte](40)
     }
 
     def marshal(id: TraceId): Buf =
@@ -56,11 +60,12 @@ object Trace {
 
     /**
      * The wire format is (big-endian):
-     *     ''spanId:8 parentId:8 traceId:8 flags:8''
+     *     ''spanId:8 parentId:8 traceId:8 flags:8 (traceIdHigh:8)''
      */
     def tryUnmarshal(body: Buf): Try[TraceId] = {
-      if (body.length != 32)
-        return Throw(new IllegalArgumentException("Expected 32 bytes"))
+      // Allows for 64-bit or 128-bit trace identifiers
+      if (body.length != 32 && body.length != 40)
+        return Throw(new IllegalArgumentException("Expected 32 or 40 bytes"))
 
       val bytes = local.get()
       body.write(bytes, 0)
@@ -69,6 +74,8 @@ object Trace {
       val parent64 = ByteArrays.get64be(bytes, 8)
       val trace64 = ByteArrays.get64be(bytes, 16)
       val flags64 = ByteArrays.get64be(bytes, 24)
+
+      val traceIdHigh = if (body.length == 40) Some(SpanId(ByteArrays.get64be(bytes, 32))) else None
 
       val flags = Flags(flags64)
       val sampled = if (flags.isFlagSet(Flags.SamplingKnown)) {
@@ -80,7 +87,8 @@ object Trace {
         if (parent64 == span64) None else Some(SpanId(parent64)),
         SpanId(span64),
         sampled,
-        flags
+        flags,
+        traceIdHigh
       )
 
       Return(traceId)
@@ -88,7 +96,8 @@ object Trace {
   }
 
   private[this] val rng = new Random
-  private[this] val defaultId = TraceId(None, None, SpanId(rng.nextLong()), None, Flags())
+  private[this] val defaultId =
+    TraceId(None, None, SpanId(rng.nextLong()), None, Flags(), if (traceId128Bit()) Some(nextTraceIdHigh()) else None)
   @volatile private[this] var tracingEnabled = true
 
   private[this] val EmptyTraceCtxFn = () => TraceCtx.empty
@@ -140,12 +149,20 @@ object Trace {
    * Create a derived id from the current TraceId.
    */
   def nextId: TraceId = {
-    val spanId = SpanId(rng.nextLong())
+    var nextLong = rng.nextLong()
+    if (nextLong == 0L) {
+      // NOTE: spanId of 0 is invalid, so guard against that here.
+      do nextLong = rng.nextLong() while (nextLong == 0L)
+    }
+
+    val spanId = SpanId(nextLong)
     idOption match {
       case Some(id) =>
-        TraceId(Some(id.traceId), Some(id.spanId), spanId, id.sampled, id.flags)
-      case None =>
-        TraceId(None, None, spanId, None, Flags())
+        TraceId(Some(id.traceId), Some(id.spanId), spanId, id.sampled, id.flags, id.traceIdHigh)
+      case None => {
+        val traceIdHigh = if (traceId128Bit()) Some(nextTraceIdHigh()) else None
+        TraceId(None, None, spanId, None, Flags(), traceIdHigh)
+      }
     }
   }
 
@@ -366,5 +383,20 @@ object Trace {
         recordBinary(key, value)
       }
     }
+  }
+
+  /**
+   * Some tracing systems such as Amazon X-Ray encode the orginal timestamp in
+   * order enable even partitions in the backend. As sampling only occurs on
+   * low 64-bits anyway, we encode epoch seconds into high-bits to support
+   * downstreams who have a timestamp requirement.
+   *
+   * The 128-bit trace ID (composed of high/low) composes to the following:
+   * |---- 32 bits for epoch seconds --- | ---- 96 bits for random number --- |
+   */
+  def nextTraceIdHigh(): SpanId = {
+    val epochSeconds = Time.now.sinceEpoch.inSeconds
+    val random = rng.nextInt()
+    SpanId((epochSeconds & 0xffffffffL) << 32 | (random & 0xffffffffL))
   }
 }

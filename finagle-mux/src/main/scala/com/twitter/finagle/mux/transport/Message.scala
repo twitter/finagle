@@ -168,6 +168,8 @@ private[finagle] object Message {
    *
    * Note, Treq messages are deprecated in favor of [[Tdispatch]] and will likely
    * be removed in a future version of mux.
+   *
+   * Treq does not support 128bit TraceId.
    */
   case class Treq(tag: Int, traceId: Option[TraceId], req: Buf) extends Message {
     import Treq._
@@ -487,6 +489,7 @@ private[finagle] object Message {
       // TODO: technically we should probably check for duplicate
       // keys, but for now, just pick the latest one.
       key match {
+        // NOTE: Treq is deprecated and therefore won't support 128bit TraceID. see Tdispatch/Rdispatch.
         case Treq.Keys.TraceId =>
           if (vsize != 24)
             throwBadMessageException(s"bad traceid size $vsize")
