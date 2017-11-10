@@ -1110,6 +1110,34 @@ abstract class AbstractEndToEndTest
     await(server.close())
   }
 
+  test("non-streaming clients can disable decompression") {
+    val svc = new Service[Request, Response] {
+      def apply(request: Request) = {
+        val response = Response()
+        response.contentString = "raw content"
+        Future.value(response)
+      }
+    }
+    val server = serverImpl()
+      .withStatsReceiver(NullStatsReceiver)
+      .withCompressionLevel(5)
+      .serve("localhost:*", svc)
+
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .withDecompression(false)
+      .withStatsReceiver(NullStatsReceiver)
+      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+    val req = Request("/")
+    req.headerMap.set("accept-encoding", "gzip")
+    val rep = await(client(req))
+    assert(rep.headerMap("content-encoding") == "gzip")
+    assert(rep.contentString != "raw content")
+    await(client.close())
+    await(server.close())
+  }
+
   test("request remote address") {
     val svc = new Service[Request, Response] {
       def apply(request: Request) = {

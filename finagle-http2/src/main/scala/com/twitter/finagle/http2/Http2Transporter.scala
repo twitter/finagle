@@ -95,22 +95,13 @@ private[finagle] object Http2Transporter {
   // constructing an http2 cleartext transport
   private[http2] def init(params: Stack.Params): ChannelPipeline => Unit = {
     pipeline: ChannelPipeline =>
-      val connection = new DefaultHttp2Connection(false /*server*/ )
-
-      // decompresses data frames according to the content-encoding header
-      val adapter = new DelegatingDecompressorFrameListener(
-        connection,
-        // adapts http2 to http 1.1
-        Http2ClientDowngrader
-      )
-
       val EncoderIgnoreMaxHeaderListSize(ignoreMaxHeaderListSize) =
         params[EncoderIgnoreMaxHeaderListSize]
 
       val connectionHandlerBuilder = new RichHttpToHttp2ConnectionHandlerBuilder()
-        .frameListener(adapter)
+        .frameListener(Http2ClientDowngrader)
         .frameLogger(new LoggerPerFrameTypeLogger(params[FrameLoggerNamePrefix].loggerNamePrefix))
-        .connection(connection)
+        .connection(new DefaultHttp2Connection(false /*server*/ ))
         .initialSettings(Settings.fromParams(params))
         .encoderIgnoreMaxHeaderListSize(ignoreMaxHeaderListSize)
 
