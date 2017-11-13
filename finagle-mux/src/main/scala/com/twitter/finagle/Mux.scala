@@ -5,6 +5,7 @@ import com.twitter.finagle.client._
 import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.liveness.FailureDetector
+import com.twitter.finagle.mux.Handshake.Headers
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport._
 import com.twitter.finagle.mux.{Handshake, OpportunisticTlsParams, Request, Response, Toggles}
@@ -198,20 +199,18 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     localEncryptLevel: OpportunisticTls.Level,
     turnOnTlsFn: () => Unit,
     upgrades: Counter
-  ): Handshake.Negotiator = (peerHeaders, trans) => {
+  ): Handshake.Negotiator = (optionalPeerHeaders: Option[Headers], trans: Transport[Buf, Buf]) => {
     import OpportunisticTls._
 
-    val remoteMaxFrameSize = Handshake
-      .valueOf(MuxFramer.Header.KeyBuf, peerHeaders)
-      .map { cb =>
-        MuxFramer.Header.decodeFrameSize(cb)
-      }
+    val peerHeaders = optionalPeerHeaders.getOrElse(Seq.empty)
 
+    // If the peer didn't handshake, or didn't specify an opportunistic TLS preference,
+    // we default to a removeEncryptionLevel of `Off` since we cannot know if the peer
+    // supports opportunistic TLS.
     val remoteEncryptLevel = Handshake.valueOf(OpportunisticTls.Header.KeyBuf, peerHeaders) match {
       case Some(buf) => OpportunisticTls.Header.decodeLevel(buf)
       case None => Off
     }
-
 
     try {
       val useTls = OpportunisticTls.negotiate(localEncryptLevel, remoteEncryptLevel)
@@ -234,22 +233,34 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
         throw exn
     }
 
-    // Decorate the transport with the MuxFramer. We need to handle the
-    // cross product of local and remote configuration. The idea is that
-    // both clients and servers can specify the maximum frame size they
-    // would like their peer to send.
-    val framerStats = statsReceiver.scope("framer")
-    (maxFrameSize, remoteMaxFrameSize) match {
-      // The remote peer has suggested a max frame size less than the
-      // sentinel value. We need to configure the framer to fragment.
-      case (_, s @ Some(remote)) if remote < Int.MaxValue =>
-        MuxFramer(trans, s, framerStats)
-      // The local instance has requested a max frame size less than the
-      // sentinel value. We need to be prepared for the remote to send
-      // fragments.
-      case (local, _) if local.inBytes < Int.MaxValue =>
-        MuxFramer(trans, None, framerStats)
-      case (_, _) => trans.map(Message.encode, Message.decode)
+    if (optionalPeerHeaders == None) {
+      // We didn't actually negotiate, so we fall back to the base protocol.
+      // Note that we default to `remoteEncryptionLevel = Off` in the case
+      // of not negotiating, so if we required TLS, we would have thrown an
+      // exception above via the `OpportunisticTls.negotiate` function.
+      trans.map(Message.encode, Message.decode)
+    } else {
+      // Decorate the transport with the MuxFramer. We need to handle the
+      // cross product of local and remote configuration. The idea is that
+      // both clients and servers can specify the maximum frame size they
+      // would like their peer to send.
+      val remoteMaxFrameSize = Handshake
+        .valueOf(MuxFramer.Header.KeyBuf, peerHeaders)
+        .map(MuxFramer.Header.decodeFrameSize)
+
+      val framerStats = statsReceiver.scope("framer")
+      (maxFrameSize, remoteMaxFrameSize) match {
+        // The remote peer has suggested a max frame size less than the
+        // sentinel value. We need to configure the framer to fragment.
+        case (_, s @ Some(remote)) if remote < Int.MaxValue =>
+          MuxFramer(trans, s, framerStats)
+        // The local instance has requested a max frame size less than the
+        // sentinel value. We need to be prepared for the remote to send
+        // fragments.
+        case (local, _) if local.inBytes < Int.MaxValue =>
+          MuxFramer(trans, None, framerStats)
+        case (_, _) => trans.map(Message.encode, Message.decode)
+      }
     }
   }
 

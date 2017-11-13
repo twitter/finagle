@@ -109,6 +109,9 @@ private[mux] object TagMap {
 
     private[this] def inRange(tag: Int): Boolean =
       tag >= set.range.start && tag <= set.range.end
+
+    override def toString: String =
+      values.keySet.asScala.mkString("TagMap[", ", ", "]")
   }
 
   /**

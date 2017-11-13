@@ -2,6 +2,7 @@ package com.twitter.finagle.mux
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
+import com.twitter.finagle.mux.Handshake.Headers
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.transport.QueueTransport
 import com.twitter.finagle.{Failure, Status}
@@ -9,13 +10,10 @@ import com.twitter.io.Buf
 import com.twitter.util.{Await, Return}
 import java.net.SocketAddress
 import java.security.cert.{Certificate, X509Certificate}
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
-import org.scalatest.{OneInstancePerTest, FunSuite}
+import org.scalatest.{FunSuite, OneInstancePerTest}
 import scala.collection.immutable.Queue
 
-@RunWith(classOf[JUnitRunner])
 class HandshakeTest extends FunSuite with OneInstancePerTest with MockitoSugar {
 
   import Message.{encode => enc, decode => dec}
@@ -198,15 +196,15 @@ class HandshakeTest extends FunSuite with OneInstancePerTest with MockitoSugar {
     assert(f.isDefined && Await.result(f.liftToTry, 5.seconds).isReturn)
   }
 
-  test("client fails gracefully") {
-    var negotiated = false
+  test("client runs negotiation if server doesn't handshake") {
+    var negotiatedHeaders: Option[Headers] = null
 
     val client = Handshake.client(
       trans = clientTransport,
       version = 0x0001,
       headers = Seq.empty,
-      negotiate = (_, trans) => {
-        negotiated = true
+      negotiate = (hdrs, trans) => {
+        negotiatedHeaders = hdrs
         trans.map(enc, dec)
       }
     )
@@ -217,12 +215,12 @@ class HandshakeTest extends FunSuite with OneInstancePerTest with MockitoSugar {
       dec(Await.result(clientToServer.poll(), 5.seconds)) ==
         Message.Rerr(1, "tinit check")
     )
-    assert(!negotiated)
+    assert(negotiatedHeaders == null)
     assert(!f.isDefined)
 
     serverToClient.offer(enc(Message.Rerr(1, "unexpected message Rerr")))
 
-    assert(!negotiated)
+    assert(negotiatedHeaders == None)
     assert(f.isDefined && Await.result(f.liftToTry, 5.seconds).isReturn)
   }
 
@@ -298,15 +296,15 @@ class HandshakeTest extends FunSuite with OneInstancePerTest with MockitoSugar {
     assert(server.status == Status.Closed)
   }
 
-  test("server passes non-init messages through") {
-    var negotiated = false
+  test("server runs negotiation if client doesn't handshake") {
+    var negotiatedHeaders: Option[Headers] = null
 
     val server = Handshake.server(
       trans = serverTransport,
       version = 0x0001,
       headers = identity,
-      negotiate = (_, trans) => {
-        negotiated = true
+      negotiate = (optHeaders, trans) => {
+        negotiatedHeaders = optHeaders
         trans.map(enc, dec)
       }
     )
@@ -314,6 +312,6 @@ class HandshakeTest extends FunSuite with OneInstancePerTest with MockitoSugar {
     clientToServer.offer(enc(Message.Tping(1)))
     assert(serverToClient.drain() == Return(Queue.empty))
     assert(Await.result(server.read(), 5.seconds) == Message.Tping(1))
-    assert(!negotiated)
+    assert(negotiatedHeaders == None)
   }
 }
