@@ -13,7 +13,7 @@ import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
 import com.twitter.finagle.netty4.ssl.server.Netty4ServerSslHandler
 import com.twitter.finagle.netty4.ssl.client.Netty4ClientSslHandler
 import com.twitter.finagle.netty4.transport.ChannelTransport
-import com.twitter.finagle.param.{ProtocolLibrary, WithDefaultLoadBalancer}
+import com.twitter.finagle.param.{Label, ProtocolLibrary, WithDefaultLoadBalancer}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
 import com.twitter.finagle.stats.{Counter, StatsReceiver}
@@ -157,8 +157,9 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
               }
             )
           else {
-            log.info(
-              "disabled Netty4RefCountingControl decoder due to non-sentinel MaxFrameSize value"
+            val lbl = params[Label].label
+            log.debug(
+              s"$lbl disabled Netty4RefCountingControl decoder due to non-sentinel MaxFrameSize value"
             )
             Netty4Transporter.raw(
               CopyingFramer,
