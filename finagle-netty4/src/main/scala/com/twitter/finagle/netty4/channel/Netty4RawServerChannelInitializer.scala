@@ -27,8 +27,11 @@ private[netty4] class Netty4RawServerChannelInitializer(params: Stack.Params)
   private[this] val Label(label) = params[Label]
   private[this] val Stats(stats) = params[Stats]
 
-  private[this] val channelStatsHandler =
-    if (!stats.isNull) Some(new ChannelStatsHandler(stats)) else None
+  private[this] val sharedChannelStats =
+    if (!stats.isNull)
+      Some(new ChannelStatsHandler.SharedChannelStats(stats))
+    else
+      None
 
   private[this] val channelSnooper =
     if (params[Transport.Verbose].enabled)
@@ -47,7 +50,11 @@ private[netty4] class Netty4RawServerChannelInitializer(params: Stack.Params)
     val pipeline = ch.pipeline
 
     channelSnooper.foreach(pipeline.addFirst(ChannelLoggerHandlerKey, _))
-    channelStatsHandler.foreach(pipeline.addFirst(ChannelStatsHandlerKey, _))
+    
+    sharedChannelStats.foreach { sharedStats =>
+      val channelStatsHandler = new ChannelStatsHandler(sharedStats)
+      pipeline.addFirst(ChannelStatsHandlerKey, channelStatsHandler)
+    }
 
     // Add SslHandler to the pipeline.
     pipeline.addFirst("tlsInit", new Netty4ServerSslHandler(params))

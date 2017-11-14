@@ -13,7 +13,7 @@ class HandlerEventTest extends FunSuite with MockitoSugar {
   // verify that custom channel handlers don't swallow pipeline events.
   val handlers = List(
     new ChannelRequestStatsHandler(new InMemoryStatsReceiver),
-    new ChannelStatsHandler(new InMemoryStatsReceiver),
+    new ChannelStatsHandler(new ChannelStatsHandler.SharedChannelStats(new InMemoryStatsReceiver)),
     new SimpleChannelSnooper("test"),
     new ByteBufSnooper("test")
   )
