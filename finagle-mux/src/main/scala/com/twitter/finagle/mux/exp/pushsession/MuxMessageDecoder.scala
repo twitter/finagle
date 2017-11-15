@@ -2,6 +2,7 @@ package com.twitter.finagle.mux.exp.pushsession
 
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.mux.transport.Message.{Tags, Tdiscarded}
+import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
 import com.twitter.io.{Buf, ByteReader}
 import io.netty.util.collection.IntObjectHashMap
 
@@ -27,13 +28,22 @@ private[finagle] abstract class MuxMessageDecoder {
   protected def doDecode(reader: ByteReader): Message
 }
 
-private class FragmentDecoder extends MuxMessageDecoder {
+private class FragmentDecoder(statsReceiver: StatsReceiver) extends MuxMessageDecoder {
+
   // The keys of the fragment map are 'normalized' since fragments are signaled
   // in the MSB of the tag field. See `getKey` below.
   private[this] val fragments = new IntObjectHashMap[Buf]
 
+  private[this] val readStreamBytes = statsReceiver.stat(Verbosity.Debug, "read_stream_bytes")
+  private[this] val readStreamsGauge = statsReceiver.addGauge(Verbosity.Debug, "pending_read_streams") {
+    // Note that this is technically racy since we are not imposing any explicit memory barriers
+    // but it should be sufficient for a debug metric.
+    fragments.size
+  }
+
   // Doesn't take ownership of the `ByteReader`
   protected def doDecode(reader: ByteReader): Message = {
+    readStreamBytes.add(reader.remaining)
     val header = reader.readIntBE()
     val typ = Tags.extractType(header)
     val tag = Tags.extractTag(header)
@@ -57,7 +67,6 @@ private class FragmentDecoder extends MuxMessageDecoder {
         case Tdiscarded(tagToRemove, _) => tagToRemove
         case _ => tag
       }
-
       fragments.remove(getKey(tagToRemove))
       msg
     } else {

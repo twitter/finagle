@@ -8,7 +8,7 @@ import com.twitter.finagle.mux.{Request, Response}
 import com.twitter.finagle.mux.exp.pushsession.MessageWriter.DiscardResult
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.mux.transport.Message._
-import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.util.{Await, Awaitable, Return, Time}
@@ -35,14 +35,14 @@ class MuxClientSessionTest extends FunSuite {
     val handle = new MockChannelHandle[ByteReader, Buf]()
 
     def newMessageWriter(handle: PushChannelHandle[_, Buf]): MessageWriter =
-      new FragmentingMessageWriter(handle, Int.MaxValue)
+      new FragmentingMessageWriter(handle, Int.MaxValue, NullStatsReceiver)
 
     @volatile
     var failureDetectorStatus: Status = Status.Open
 
     val session = new MuxClientSession(
       handle = handle,
-      decoder = new FragmentDecoder,
+      decoder = new FragmentDecoder(NullStatsReceiver),
       messageWriter = newMessageWriter(handle),
       detectorConfig = FailureDetector.MockConfig(() => failureDetectorStatus),
       name = name,

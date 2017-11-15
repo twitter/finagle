@@ -4,6 +4,7 @@ import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.mux.transport.Message._
 import com.twitter.finagle.exp.pushsession.PushChannelHandle
 import com.twitter.finagle.mux.exp.pushsession.MessageWriter.DiscardResult
+import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
 import com.twitter.util.{Return, Throw, Try}
@@ -54,13 +55,25 @@ private[finagle] object MessageWriter {
  * @note this class is _very_ stateful and expects to enjoy the benefits of executing inside of
  *       a `PushSession`s serial `Executor`.
  */
-private final class FragmentingMessageWriter(handle: PushChannelHandle[_, Buf], windowBytes: Int)
-    extends MessageWriter {
+private final class FragmentingMessageWriter(
+    handle: PushChannelHandle[_, Buf],
+    windowBytes: Int,
+    statsReceiver: StatsReceiver)
+  extends MessageWriter {
+
+  private[this] val log = Logger.get
 
   // The messages must have normalized tags, even fragments
-  // Exposed for testing
-  private[pushsession] val messageQueue = new util.ArrayDeque[Message]
-  private[this] val log = Logger.get
+  private[this] val messageQueue = new util.ArrayDeque[Message]
+
+  private[this] val writeStreamBytes = statsReceiver.stat(Verbosity.Debug, "write_stream_bytes")
+  private[this] val pendingWriteStreamsGuage = statsReceiver.addGauge(Verbosity.Debug, "pending_write_streams") {
+    // Note: this access is intrinsically racy since access is not explicitly synchronized,
+    // and therefore its possible to see invalid data, but this is expected to be rare enough
+    // to be tolerable for a debug metric.
+    messageQueue.size
+  }
+
   // State so we don't add log for every outstanding write
   private[this] var observedWriteError: Boolean = false
 
@@ -135,9 +148,8 @@ private final class FragmentingMessageWriter(handle: PushChannelHandle[_, Buf], 
 
       if (i == 1) {
         // fast path: no need to allocate a collection. This is a micro-opt.
-        val rawMsg = messageQueue.poll()
-        val msg = takeFragment(rawMsg)
-        handle.send(Message.encode(msg))(lastWrite)
+        val msgBuf = takeBufFragment()
+        handle.send(msgBuf)(lastWrite)
       } else {
         // Multiple messages. Prepare and load them into an ArrayBuffer.
         // Note: we don't accumulate the Buf because the pipeline will
@@ -145,9 +157,7 @@ private final class FragmentingMessageWriter(handle: PushChannelHandle[_, Buf], 
         val messages = new ArrayBuffer[Buf](i)
         while (i > 0) {
           i -= 1
-          val rawMsg = messageQueue.poll()
-          val chunk = takeFragment(rawMsg)
-          messages += Message.encode(chunk)
+          messages += takeBufFragment()
         }
 
         handle.send(messages)(lastWrite)
@@ -163,8 +173,19 @@ private final class FragmentingMessageWriter(handle: PushChannelHandle[_, Buf], 
     case _ => false
   }
 
-  // potentially fragments a message, storing any leftovers and returning the chunk to write
-  private[this] def takeFragment(msg: Message): Message = {
+  // Take a message chunk and encode it for writing to the wire.
+  // Note: Presumes at least one chunk exists in the write queue
+  private[this] def takeBufFragment(): Buf = {
+    val msg = takeFragment()
+    val msgBuf = Message.encode(msg)
+    writeStreamBytes.add(msgBuf.length)
+    msgBuf
+  }
+
+  // Take a chunk of a pending message, restoring any leftovers at the end of the write queue.
+  // Note: Presumes at least one chunk exists in the write queue
+  private[this] def takeFragment(): Message = {
+    val msg = messageQueue.poll()
     if (!needsFragmenting(msg)) msg
     else {
       val msgBuf = msg.buf

@@ -10,6 +10,7 @@ import com.twitter.finagle.mux.Handshake.{CanTinitMsg, Headers, TinitTag}
 import com.twitter.finagle.mux.Request
 import com.twitter.finagle.mux.transport.Message.Tdispatch
 import com.twitter.finagle.mux.transport.{Message, MuxFramer}
+import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.util.{Await, Awaitable}
 import org.scalactic.source.Position
@@ -118,7 +119,7 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
     // Make sure we are fragmenting the messages
 
     // Server only wants 100 byte chunks, so make the message at lest 150 bytes
-    val decoder = new FragmentDecoder
+    val decoder = new FragmentDecoder(NullStatsReceiver)
     val data = Buf.ByteArray((0 until 150).map(_.toByte):_*)
 
     service.apply(Request(Path(), data))

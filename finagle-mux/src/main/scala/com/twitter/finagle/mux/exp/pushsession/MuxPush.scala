@@ -76,12 +76,14 @@ private[finagle] object MuxPush
         throw exn
     }
 
+    val framingStats = statsReceiver.scope("framer")
+
     val writeManager = {
       val fragmentSize = peerHeaders
         .flatMap(Handshake.valueOf(MuxFramer.Header.KeyBuf, _))
         .map(MuxFramer.Header.decodeFrameSize(_))
         .getOrElse(Int.MaxValue)
-      new FragmentingMessageWriter(handle, fragmentSize)
+      new FragmentingMessageWriter(handle, fragmentSize, framingStats)
     }
 
     val FailureDetector.Param(detectorConfig) = params[FailureDetector.Param]
@@ -90,7 +92,7 @@ private[finagle] object MuxPush
 
     new MuxClientSession(
       handle,
-      new FragmentDecoder,
+      new FragmentDecoder(framingStats),
       writeManager,
       detectorConfig,
       name,
