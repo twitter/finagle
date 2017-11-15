@@ -47,19 +47,27 @@ private[finagle] abstract class PartitioningService[Req, Rep] extends Service[Re
    */
   protected def mergeResponses(responses: Seq[Rep]): Rep
 
+  // Call `applyService` instead of `map` below to avoid extra fn allocation
+  private[this] def applyService(request: Req, service: Future[Service[Req, Rep]]): Future[Rep] = {
+    service.transform {
+      case Return(svc) => svc(request)
+      case t @ Throw(_) => Future.const(t.cast[Rep])
+    }
+  }
+
   final def apply(request: Req): Future[Rep] = {
     // Note that the services will be constructed in the implementing classes. So the
     // implementations will be responsible for closing them too.
     partitionRequest(request) match {
       case Seq(_) =>
         // single partition request (all keys belong to the same partition)
-        getPartitionFor(request).flatMap(_(request))
+        applyService(request, getPartitionFor(request))
       case servicesSeq =>
         // multiple partitions
         Future
           .collect(
             servicesSeq.map { partitionedRequest =>
-              getPartitionFor(partitionedRequest).flatMap(_(partitionedRequest))
+              applyService(partitionedRequest, getPartitionFor(partitionedRequest))
             }
           )
           .map(mergeResponses)
