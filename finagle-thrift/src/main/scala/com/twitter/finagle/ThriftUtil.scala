@@ -41,14 +41,12 @@ private[twitter] object ThriftUtil {
     cls: Class[_],
     clientParam: RichClientParam
   ): Iface = {
-    val clsName = cls.getName
-
     // This is used with Scrooge's Java generated code.
     // The class name passed in should be ServiceName$ServiceIface.
     // Will try to create a ServiceName$ServiceToClient instance.
-    def tryJavaServiceNameDotServiceIface: Option[Iface] =
+    def tryJavaServiceNameDotServiceIface(iface: Class[_]): Option[Iface] =
       for {
-        baseName <- findRootWithSuffix(clsName, "$ServiceIface")
+        baseName <- findRootWithSuffix(iface.getName, "$ServiceIface")
         clientCls <- findClass[Iface](baseName + "$ServiceToClient")
         cons <- findConstructor(
           clientCls,
@@ -60,13 +58,14 @@ private[twitter] object ThriftUtil {
       }
 
     // This is used with Scrooge's Scala generated code.
-    // The class name passed in should be ServiceName$FutureIface
+    // The class name passed in should be ServiceName$MethodPerEndpoint
     // or the higher-kinded version, ServiceName[Future].
     // Will try to create a ServiceName$FinagledClient instance.
-    def tryScalaServiceNameIface: Option[Iface] =
+    def tryScalaServiceNameIface(iface: Class[_]): Option[Iface] =
       for {
-        baseName <- findRootWithSuffix(clsName, "$FutureIface")
-          .orElse(Some(clsName))
+        baseName <- findRootWithSuffix(iface.getName, "$FutureIface")
+          .orElse(findRootWithSuffix(iface.getName, "$MethodPerEndpoint"))
+          .orElse(Some(cls.getName))
         clientCls <- findClass[Iface](baseName + "$FinagledClient")
         cons <- findConstructor(
           clientCls,
@@ -75,14 +74,18 @@ private[twitter] object ThriftUtil {
         )
       } yield cons.newInstance(underlying, clientParam)
 
-    val iface =
-      tryJavaServiceNameDotServiceIface
-        .orElse(tryScalaServiceNameIface)
+    def tryClass(cls: Class[_]): Option[Iface] =
+      tryJavaServiceNameDotServiceIface(cls)
+        .orElse(tryScalaServiceNameIface(cls))
+        .orElse {
+          (Option(cls.getSuperclass) ++ cls.getInterfaces).view.flatMap(tryClass).headOption
+        }
 
-    iface.getOrElse {
+    tryClass(cls).getOrElse {
       throw new IllegalArgumentException(
-        s"Iface $clsName is not a valid thrift iface. For Scala generated code, " +
-          "try `YourServiceName$FutureIface` or `YourServiceName[Future]. " +
+        s"Iface $cls is not a valid thrift iface. For Scala generated code, " +
+          "try `YourServiceName$FutureIface`(deprecated), " +
+          "`YourServiceName$MethodPerEndpoint` or `YourServiceName[Future]` " +
           "For Java generated code, try `YourServiceName$ServiceIface`."
       )
     }
@@ -109,14 +112,17 @@ private[twitter] object ThriftUtil {
       }
 
     // This is used with Scrooge's Scala generated code.
-    // The class passed in should be ServiceName$FutureIface,
-    // ServiceName$FutureIface, or ServiceName.
+    // The class passed in should be ServiceName$MethodPerEndpoint,
+    // or the higher-kinded version, ServiceName[Future].
     // Will try to create a ServiceName$FinagleService.
     def tryScroogeFinagleService(iface: Class[_]): Option[BinaryService] =
       (for {
         baseName <- findRootWithSuffix(iface.getName, "$FutureIface")
-        // handles ServiceB extends ServiceA, then using ServiceB$MethodIface
+          .orElse(findRootWithSuffix(iface.getName, "$MethodPerEndpoint"))
+          // handles ServiceB extends ServiceA, then using ServiceB$MethodIface
           .orElse(findRootWithSuffix(iface.getName, "$MethodIface"))
+          // handles ServiceB extends ServiceA, then using ServiceB$MethodPerEndpoint$MethodPerEndpointImpl
+          .orElse(findRootWithSuffix(iface.getName, "$MethodPerEndpoint$MethodPerEndpointImpl"))
           .orElse(Some(iface.getName))
         serviceCls <- findClass[BinaryService](baseName + "$FinagleService")
         baseClass <- findClass1(baseName)
@@ -140,7 +146,8 @@ private[twitter] object ThriftUtil {
     tryClass(impl.getClass).getOrElse {
       throw new IllegalArgumentException(
         s"$impl implements no candidate ifaces. For Scala generated code, " +
-          "try `YourServiceName$FutureIface`, `YourServiceName$MethodIface` or `YourServiceName`. " +
+          "try `YourServiceName$FutureIface`(deprecated), `YourServiceName$MethodIface`(deprecated)" +
+          "`YourServiceName$MethodPerEndpoint` or `YourServiceName`. " +
           "For Java generated code, try `YourServiceName$ServiceIface`."
       )
     }

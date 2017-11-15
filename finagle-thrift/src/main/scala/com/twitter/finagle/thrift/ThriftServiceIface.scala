@@ -23,6 +23,7 @@ object maxReusableBufferSize
  * Typeclass ServiceIfaceBuilder[T] creates T-typed interfaces from thrift clients.
  * Scrooge generates implementations of this builder.
  */
+@deprecated("Use com.twitter.finagle.thrift.service.ServicePerEndpointBuilder", "2017-11-13")
 trait ServiceIfaceBuilder[ServiceIface <: ThriftServiceIface.Filterable[ServiceIface]] {
 
   /**
@@ -66,6 +67,7 @@ trait ServiceIfaceBuilder[ServiceIface <: ThriftServiceIface.Filterable[ServiceI
  *
  * Scrooge generates implementations of this builder.
  */
+@deprecated("Use com.twitter.finagle.thrift.service.MethodPerEndpointBuilder", "2017-11-13")
 trait MethodIfaceBuilder[ServiceIface, MethodIface] {
 
   /**
@@ -163,7 +165,7 @@ object ThriftServiceIface {
    * Used in conjunction with [[ServiceIfaceBuilder]] to allow for filtering
    * of a `ServiceIface`.
    */
-  trait Filterable[T] {
+  trait Filterable[+T] {
 
     /**
      * Prepend the given type-agnostic [[Filter]].

@@ -4,6 +4,7 @@ import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.thrift.ThriftServiceIface.Filterable
+import com.twitter.finagle.thrift.service.ServicePerEndpointBuilder
 import org.apache.thrift.protocol.TProtocolFactory
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito._
@@ -62,6 +63,30 @@ class ThriftRichClientTest extends FunSuite with MockitoSugar with OneInstancePe
     val name = Name.empty
     val client = spy(ThriftRichClientMock)
     client.newServiceIface(name, "tweetypie_client")(builder = mockBuilder)
+
+    assert(captor.getValue.clientStats.toString == "NullStatsReceiver/clnt/tweetypie_client")
+    verify(client).newService(name, "tweetypie_client")
+  }
+
+  test("ThriftRichClientTest servicePerEndpoint takes dest String and stats scoping label arguments") {
+    val captor = ArgumentCaptor.forClass(classOf[RichClientParam])
+    val mockBuilder = mock[ServicePerEndpointBuilder[SvcIface]]
+    doReturn(svcIface).when(mockBuilder).servicePerEndpoint(any(), captor.capture())
+    val client = spy(ThriftRichClientMock)
+    client.servicePerEndpoint("/s/tweetypie/tweetypie", "tweetypie_client")(builder = mockBuilder)
+
+    assert(captor.getValue.clientStats.toString == "NullStatsReceiver/clnt/tweetypie_client")
+    verify(client).newService("/s/tweetypie/tweetypie", "tweetypie_client")
+  }
+
+  test("ThriftRichClientTest servicePerEndpoint takes dest Name and stats scoping label arguments") {
+    val captor = ArgumentCaptor.forClass(classOf[RichClientParam])
+    val mockBuilder = mock[ServicePerEndpointBuilder[SvcIface]]
+    doReturn(svcIface).when(mockBuilder).servicePerEndpoint(any(), captor.capture())
+
+    val name = Name.empty
+    val client = spy(ThriftRichClientMock)
+    client.servicePerEndpoint(name, "tweetypie_client")(builder = mockBuilder)
 
     assert(captor.getValue.clientStats.toString == "NullStatsReceiver/clnt/tweetypie_client")
     verify(client).newService(name, "tweetypie_client")
