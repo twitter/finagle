@@ -14,7 +14,7 @@ import io.netty.handler.codec.http.{HttpObject, HttpRequest, LastHttpContent}
 import io.netty.handler.codec.http2.Http2Error
 import java.net.SocketAddress
 import java.security.cert.Certificate
-import java.util.concurrent.atomic.{AtomicInteger, AtomicReference}
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.ConcurrentHashMap
 import scala.collection.JavaConverters._
 
@@ -69,15 +69,23 @@ private[http2] class MultiplexedTransporter(
 
   private[this] val FailureDetector.Param(detectorConfig) = params[FailureDetector.Param]
   private[this] val Stats(statsReceiver) = params[Stats]
-  private[this] val pingPromise = new AtomicReference[Promise[Unit]]()
 
-  private[this] def ping(): Future[Unit] = {
+  private[this] var pingPromise: Promise[Unit] = null
+
+  // exposed for testing
+  private[http2] def ping(): Future[Unit] = {
     val done = new Promise[Unit]
-    if (pingPromise.compareAndSet(null, done)) {
-      underlying.write(Ping).before(done)
-    } else {
-      FuturePingNack
-    }
+    exec.execute(new Runnable {
+      def run(): Unit = {
+        if (pingPromise == null) {
+          pingPromise = done
+          underlying.write(Ping)
+        } else {
+          done.setException(PingOutstandingFailure)
+        }
+      }
+    })
+    done
   }
 
   private[this] val detector =
@@ -140,7 +148,7 @@ private[http2] class MultiplexedTransporter(
     case Rst(streamId, errorCode) =>
       val error =
         if (errorCode == Http2Error.REFUSED_STREAM.code) Failure.RetryableNackFailure
-        else if (errorCode == Http2Error.ENHANCE_YOUR_CALM.code) Failure.NonRetryableNackFailure
+       else if (errorCode == Http2Error.ENHANCE_YOUR_CALM.code) Failure.NonRetryableNackFailure
         else new StreamClosedException(addr, streamId.toString)
 
       val c = children.get(streamId)
@@ -153,7 +161,12 @@ private[http2] class MultiplexedTransporter(
     // of an RST for an absent stream ID as this could cause a loop.
 
     case Ping =>
-      pingPromise.get.setDone()
+      if (pingPromise != null) {
+        pingPromise.setDone()
+        pingPromise = null
+      } else {
+        log.debug(s"Got unmatched PING message for address $addr")
+      }
 
     case rep =>
       if (log.isLoggable(Level.DEBUG)) {
@@ -216,6 +229,7 @@ private[http2] class MultiplexedTransporter(
 
   def status: Status = detector.status
 
+
   /**
    * ChildTransport represents a single http/2 stream at a time.  Once the stream
    * has finished, the transport can be used again for a different stream.
@@ -237,8 +251,9 @@ private[http2] class MultiplexedTransporter(
     // Exposed for testing
     private[http2] def curId: Int = _curId
 
-    private[this] val queue: AsyncQueue[HttpObject] =
-      new AsyncQueue[HttpObject](ChildMaxPendingOffers)
+    private[this] val queue: AsyncQueue[HttpObject] = new AsyncQueue[HttpObject] {
+
+    }
 
     @volatile private[MultiplexedTransporter] var _state: ChildState = Idle
 
@@ -479,8 +494,8 @@ private[http2] class MultiplexedTransporter(
 }
 
 private[http2] object MultiplexedTransporter {
-  val FuturePingNack: Future[Nothing] =
-    Future.exception(Failure("A ping is already outstanding on this session."))
+  val PingOutstandingFailure: Failure =
+    Failure("A ping is already outstanding on this session.")
 
   val ChildMaxPendingOffers = 1000
 
