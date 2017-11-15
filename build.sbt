@@ -2,7 +2,7 @@ import Tests._
 import scoverage.ScoverageKeys
 
 // All Twitter library releases are date versioned as YY.MM.patch
-val releaseVersion = "17.11.0-SNAPSHOT"
+val releaseVersion = "17.11.0"
 
 val libthriftVersion = "0.5.0-7"
 
