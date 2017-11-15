@@ -20,6 +20,7 @@ import scala.reflect.ClassTag
  *
  * For Java generated code, the `Class` passed in should be
  * `ServiceName$ServiceIface`.
+ *
  * @define serviceIface
  *
  * Construct a Finagle `Service` interface for a Scrooge-generated Thrift object.
@@ -35,9 +36,29 @@ import scala.reflect.ClassTag
  * you can construct a client interface with a Finagle Service per Thrift method:
  *
  * {{{
- *   val loggerService = Thrift.client.newServiceIface[Logger.ServiceIface]("localhost:8000", "client_label")
- *   val response = loggerService.log(Logger.Log.Args("log message", 1))
+ *   val loggerService: Logger.ServiceIface = Thrift.client.newServiceIface[Logger.ServiceIface]("localhost:8000", "client_label")
+ *   val response: String = loggerService.log(Logger.Log.Args("log message", 1))
  * }}}
+ *
+ * @define servicePerEndpoint
+ *
+ * Construct a Finagle `Service` interface for a Scrooge-generated Thrift object.
+ *
+ * E.g. given a Thrift service
+ * {{{
+ *   service Logger {
+ *     string log(1: string message, 2: i32 logLevel);
+ *     i32 getLogSize();
+ *   }
+ * }}}
+ *
+ * you can construct a client interface with a Finagle Service per Thrift method:
+ *
+ * {{{
+ *   val loggerService: Logger.ServicePerEndpoint = Thrift.client.servicePerEndpoint[Logger.ServicePerEndpoint]("localhost:8000", "client_label")
+ *   val response: String = loggerService.log(Logger.Log.Args("log message", 1))
+ * }}}
+ *
  * @define buildMultiplexClient
  *
  * Build client interfaces for multiplexed thrift serivces.
