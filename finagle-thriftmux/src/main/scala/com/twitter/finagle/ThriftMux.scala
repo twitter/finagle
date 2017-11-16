@@ -263,10 +263,13 @@ object ThriftMux
         extends Filter[ThriftClientRequest, Array[Byte], mux.Request, mux.Response] {
 
       private val extractResponseBytesFn = (response: mux.Response) => {
+        val responseCtx = Contexts.local.getOrElse(Headers.Response.Key, EmptyResponseHeadersFn)
+        responseCtx.put(response.contexts)
         Buf.ByteArray.Owned.extract(response.body)
       }
 
-      private val EmptyRequestHeadersFn: () => Headers.Values = () => Headers.Request.empty
+      private val EmptyRequestHeadersFn: () => Headers.Values = () => Headers.Request.newValues
+      private val EmptyResponseHeadersFn: () => Headers.Values = () => Headers.Response.newValues
 
       def apply(
         req: ThriftClientRequest,
@@ -483,7 +486,7 @@ object ThriftMux
           val reqBytes = Buf.ByteArray.Owned.extract(request.body)
           Contexts.local.let(
             Headers.Request.Key, Headers.Values(request.contexts),
-            Headers.Response.Key, Headers.Response.empty
+            Headers.Response.Key, Headers.Response.newValues
           ) {
             service(reqBytes).map(responseBytesToMuxResponseFn)
           }

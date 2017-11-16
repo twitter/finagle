@@ -3,8 +3,6 @@ package com.twitter.finagle.thrift.service
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.thrift.Headers.Response.empty
-import com.twitter.finagle.thrift.Headers.Values
 import com.twitter.finagle.thrift.{Headers, RichClientParam, ThriftClientRequest, ThriftMethodStats}
 import com.twitter.finagle.{Filter, Service, SimpleFilter}
 import com.twitter.scrooge
@@ -84,8 +82,6 @@ object ThriftReqRepServicePerEndpoint {
 
   /* Private */
 
-  private val EmptyResponseHeadersFn: () => Values = () => empty
-
   /**
    * A [[Filter]] that updates success and failure stats for a [[ThriftMethod]].
    *
@@ -121,10 +117,15 @@ object ThriftReqRepServicePerEndpoint {
         request: scrooge.Request[method.Args],
         service: Service[method.Args, method.SuccessType]
       ): Future[scrooge.Response[method.SuccessType]] = {
-        val responseCtx = Contexts.local.getOrElse(Headers.Response.Key, EmptyResponseHeadersFn)
-        Contexts.local.let(Headers.Request.Key, Headers.Values(request.headers.toBufSeq)) {
+        Contexts.local.let(
+          Headers.Request.Key,
+          Headers.Values(request.headers.toBufSeq),
+          Headers.Response.Key,
+          Headers.Response.newValues
+        ) {
           service(request.args).transform {
             case Return(success) =>
+              val responseCtx = Contexts.local(Headers.Response.Key)
               Future.value(scrooge.Response(responseCtx.values, success))
             case t @ Throw(_) =>
               Future.const(t.cast[scrooge.Response[method.SuccessType]])

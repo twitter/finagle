@@ -36,7 +36,7 @@ object Headers {
    * well as an empty header values constant.
    */
   object Request {
-    val empty: Values = Values(Seq.empty[(Buf, Buf)])
+    def newValues: Values = Values(Seq.empty[(Buf, Buf)])
     val Key: Key[Headers.Values] = new Contexts.local.Key[Headers.Values]
   }
 
@@ -46,7 +46,7 @@ object Headers {
    * well as an empty header values constant.
    */
   object Response {
-    val empty: Values = Values(Seq.empty[(Buf, Buf)])
+    def newValues: Values = Values(Seq.empty[(Buf, Buf)])
     val Key: Key[Headers.Values] = new Contexts.local.Key[Headers.Values]
   }
 }
