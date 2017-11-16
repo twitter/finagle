@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>MethodBuilder &#8212; Finagle 17.10.0 documentation</title>
+    <title>MethodBuilder &#8212; Finagle 17.11.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '17.10.0',
+        VERSION:     '17.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 17.10.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 17.11.0 documentation" href="index.html" />
    
   
   <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
@@ -282,7 +282,7 @@ work on migrating their code off of <code class="docutils literal"><span class="
 <li>Per-request timeout defaults to using the <code class="docutils literal"><span class="pre">ClientBuilder.requestTimeout</span></code> configuration.</li>
 <li>The <code class="docutils literal"><span class="pre">ClientBuilder</span></code> metrics scoped to &#8220;tries&#8221; are not included. These
 are superseded by the logical <code class="docutils literal"><span class="pre">MethodBuilder</span></code> metrics.</li>
-<li>The <code class="docutils literal"><span class="pre">ClientBuilder</span></code> retry policy will be applied and users must migrate
+<li>The <code class="docutils literal"><span class="pre">ClientBuilder</span></code> retry policy will <strong>not</strong> be applied and users must migrate
 to using <code class="docutils literal"><span class="pre">withRetryForClassifier</span></code>.</li>
 <li>The <code class="docutils literal"><span class="pre">ClientBuilder</span></code> must have a destination set via one of
 <code class="docutils literal"><span class="pre">hosts</span></code>, <code class="docutils literal"><span class="pre">addrs</span></code>, <code class="docutils literal"><span class="pre">dest</span></code>, <code class="docutils literal"><span class="pre">cluster</span></code>, or <code class="docutils literal"><span class="pre">group</span></code>.</li>
