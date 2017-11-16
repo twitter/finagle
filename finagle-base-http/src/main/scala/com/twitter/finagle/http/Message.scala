@@ -1,13 +1,13 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.http.Message.BufOutputStream
+import com.twitter.finagle.http.util.StringUtil
 import com.twitter.io.{Buf, BufInputStream, Reader => BufReader, Writer => BufWriter}
 import com.twitter.util.{Closable, Duration, Future}
 import java.io._
 import java.util.{Iterator => JIterator}
 import java.nio.charset.Charset
 import java.util.{Date, Locale, TimeZone}
-import org.apache.commons.lang.StringUtils
 import org.apache.commons.lang.time.FastDateFormat
 import scala.collection.JavaConverters._
 
@@ -189,7 +189,7 @@ abstract class Message {
   /** Get charset from Content-Type header */
   def charset: Option[String] = {
     contentType.foreach { contentType =>
-      val parts = StringUtils.split(contentType, ';')
+      val parts = StringUtil.split(contentType, ';')
       1.to(parts.length - 1) foreach { i =>
         val part = parts(i).trim
         if (part.startsWith("charset=")) {
@@ -205,7 +205,7 @@ abstract class Message {
   /** Set charset in Content-Type header.  This does not change the content. */
   def charset_=(value: String): Unit = {
     val contentType = this.contentType.getOrElse("")
-    val parts = StringUtils.split(contentType, ';')
+    val parts = StringUtil.split(contentType, ';')
     if (parts.isEmpty) {
       this.contentType = ";charset=" + value // malformed
       return
@@ -371,7 +371,7 @@ abstract class Message {
   def mediaType_=(value: String): Unit = {
     contentType match {
       case Some(contentType) =>
-        val parts = StringUtils.split(contentType, ";", 2)
+        val parts = StringUtil.split(contentType, ';', 2)
         if (parts.length == 2) {
           this.contentType = value + ";" + parts(1)
         } else {
