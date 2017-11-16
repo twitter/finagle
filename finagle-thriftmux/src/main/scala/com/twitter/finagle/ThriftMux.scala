@@ -1,44 +1,17 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.client.{
-  ClientRegistry,
-  ExceptionRemoteInfoFactory,
-  StackBasedClient,
-  StackClient
-}
+import com.twitter.finagle.client.{ClientRegistry, ExceptionRemoteInfoFactory, StackBasedClient, StackClient}
+import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.context.RemoteInfo.Upstream
 import com.twitter.finagle.mux.{OpportunisticTlsParams, Request, Response}
 import com.twitter.finagle.mux.exp.pushsession.MuxPush
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport.{MuxContext, OpportunisticTls}
-import com.twitter.finagle.param.{
-  ExceptionStatsHandler => _,
-  Monitor => _,
-  ResponseClassifier => _,
-  Tracer => _,
-  _
-}
-import com.twitter.finagle.server.{
-  Listener,
-  ServerInfo,
-  StackBasedServer,
-  StackServer,
-  StdStackServer
-}
+import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
+import com.twitter.finagle.server.{Listener, ServerInfo, StackBasedServer, StackServer, StdStackServer}
 import com.twitter.finagle.service._
-import com.twitter.finagle.stats.{
-  ClientStatsReceiver,
-  ExceptionStatsHandler,
-  ServerStatsReceiver,
-  StatsReceiver
-}
-import com.twitter.finagle.thrift.{
-  ClientId,
-  RichClientParam,
-  RichServerParam,
-  ThriftClientRequest,
-  UncaughtAppExceptionFilter
-}
+import com.twitter.finagle.stats.{ClientStatsReceiver, ExceptionStatsHandler, ServerStatsReceiver, StatsReceiver}
+import com.twitter.finagle.thrift.{ClientId, Headers, RichClientParam, RichServerParam, ThriftClientRequest, UncaughtAppExceptionFilter}
 import com.twitter.finagle.thriftmux.Toggles
 import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
 import com.twitter.finagle.tracing.{Trace, Tracer}
@@ -288,6 +261,13 @@ object ThriftMux
 
     private[this] object ThriftMuxToMux
         extends Filter[ThriftClientRequest, Array[Byte], mux.Request, mux.Response] {
+
+      private val extractResponseBytesFn = (response: mux.Response) => {
+        Buf.ByteArray.Owned.extract(response.body)
+      }
+
+      private val EmptyRequestHeadersFn: () => Headers.Values = () => Headers.Request.empty
+
       def apply(
         req: ThriftClientRequest,
         service: Service[mux.Request, mux.Response]
@@ -301,9 +281,10 @@ object ThriftMux
         // context to be set when dispatching.
         ExceptionRemoteInfoFactory.letUpstream(Upstream.addr, ClientId.current.map(_.name)) {
           ClientId.let(clientId) {
+            val requestCtx = Contexts.local.getOrElse(Headers.Request.Key, EmptyRequestHeadersFn)
             // TODO set the Path here.
-            val muxreq = mux.Request(Path.empty, Nil, Buf.ByteArray.Owned(req.message))
-            service(muxreq).map(rep => Buf.ByteArray.Owned.extract(rep.body))
+            val muxRequest = mux.Request(Path.empty, requestCtx.values, Buf.ByteArray.Owned(req.message))
+            service(muxRequest).map(extractResponseBytesFn)
           }
         }
       }
@@ -489,13 +470,22 @@ object ThriftMux
   object Server {
     private val MuxToArrayFilter =
       new Filter[mux.Request, mux.Response, Array[Byte], Array[Byte]] {
+        private[this] val responseBytesToMuxResponseFn = (responseBytes: Array[Byte]) => {
+          mux.Response(
+            ctxts = Contexts.local(Headers.Response.Key).values,
+            buf = Buf.ByteArray.Owned(responseBytes))
+        }
+
         def apply(
           request: mux.Request,
           service: Service[Array[Byte], Array[Byte]]
         ): Future[mux.Response] = {
           val reqBytes = Buf.ByteArray.Owned.extract(request.body)
-          service(reqBytes) map { repBytes =>
-            mux.Response(Nil, Buf.ByteArray.Owned(repBytes))
+          Contexts.local.let(
+            Headers.Request.Key, Headers.Values(request.contexts),
+            Headers.Response.Key, Headers.Response.empty
+          ) {
+            service(reqBytes).map(responseBytesToMuxResponseFn)
           }
         }
       }

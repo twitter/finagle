@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+  * finagle-thrift, finagle-thriftmux: Add support for Scrooge
+    `ReqRepServicePerEndpoint` functionality. ``PHAB_ID=D107397``
+
 17.11.0
 -------
 
