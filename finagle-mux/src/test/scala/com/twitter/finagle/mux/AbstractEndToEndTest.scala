@@ -138,10 +138,8 @@ abstract class AbstractEndToEndTest
       Seq(
         Annotation.ServiceName("theClient"),
         Annotation.ClientSend(),
-        Annotation.BinaryAnnotation("clnt/mux/enabled", true),
         Annotation.ServiceName("theServer"),
         Annotation.ServerRecv(),
-        Annotation.BinaryAnnotation("srv/mux/enabled", true),
         Annotation.ServerSend(),
         Annotation.ClientRecv()
       )

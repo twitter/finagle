@@ -24,7 +24,7 @@ import com.twitter.finagle.transport.{StatsTransport, Transport}
 import com.twitter.finagle.{param => fparam}
 import com.twitter.io.Buf
 import com.twitter.logging.{Level, Logger}
-import com.twitter.util.{Closable, Future, StorageUnit}
+import com.twitter.util.{Closable, StorageUnit}
 import io.netty.channel.{Channel, ChannelPipeline}
 import java.net.SocketAddress
 
@@ -32,7 +32,7 @@ import java.net.SocketAddress
  * A client and server for the mux protocol described in [[com.twitter.finagle.mux]].
  */
 object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mux.Response] {
-  private val log = Logger.get
+  private val log = Logger.get()
 
   /**
    * The current version of the mux protocol.
@@ -236,7 +236,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
         throw exn
     }
 
-    if (optionalPeerHeaders == None) {
+    if (optionalPeerHeaders.isEmpty) {
       // We didn't actually negotiate, so we fall back to the base protocol.
       // Note that we default to `remoteEncryptionLevel = Off` in the case
       // of not negotiating, so if we required TLS, we would have thrown an
@@ -267,26 +267,6 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     }
   }
 
-  private[finagle] abstract class ProtoTracing(
-    process: String,
-    val role: Stack.Role
-  ) extends Stack.Module0[ServiceFactory[mux.Request, mux.Response]] {
-    val description = s"Mux specific $process traces"
-
-    private[this] val tracingFilter = new SimpleFilter[mux.Request, mux.Response] {
-      def apply(req: mux.Request, svc: Service[mux.Request, mux.Response]): Future[mux.Response] = {
-        Trace.recordBinary(s"$process/mux/enabled", true)
-        svc(req)
-      }
-    }
-
-    def make(next: ServiceFactory[mux.Request, mux.Response]) =
-      tracingFilter andThen next
-  }
-
-  private[finagle] class ClientProtoTracing
-      extends ProtoTracing("clnt", StackClient.Role.protoTracing)
-
   object Client {
 
     /** Prepends bound residual paths to outbound Mux requests's destinations. */
@@ -306,7 +286,6 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
     private val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackClient.newStack
       .replace(StackClient.Role.pool, SingletonPool.module[mux.Request, mux.Response])
-      .replace(StackClient.Role.protoTracing, new ClientProtoTracing)
       .replace(BindingFactory.role, MuxBindingFactory)
       .prepend(PayloadSizeFilter.module(_.body.length, _.body.length))
       // Since NackAdmissionFilter should operate on all requests sent over
@@ -422,13 +401,9 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
   def newClient(dest: Name, label: String): ServiceFactory[mux.Request, mux.Response] =
     client.newClient(dest, label)
 
-  private[finagle] class ServerProtoTracing
-      extends ProtoTracing("srv", StackServer.Role.protoTracing)
-
   object Server {
     private val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackServer.newStack
       .remove(TraceInitializerFilter.role)
-      .replace(StackServer.Role.protoTracing, new ServerProtoTracing)
       .prepend(PayloadSizeFilter.module(_.body.length, _.body.length))
 
     private[finagle] val tlsEnable: (Stack.Params, ChannelPipeline) => Unit = (params, pipeline) =>

@@ -136,7 +136,6 @@ object ThriftMux
         StackClient.Role.prepFactory,
         NackAdmissionFilter.module[mux.Request, mux.Response]
       )
-      .replace(StackClient.Role.protoTracing, ClientRpcTracing)
 
   /**
    * Base [[com.twitter.finagle.Stack]] for ThriftMux servers.
@@ -159,25 +158,6 @@ object ThriftMux
     } catch {
       case NonFatal(_) =>
     }
-
-  private object ClientRpcTracing extends Mux.ClientProtoTracing {
-    private[this] val rpcTracer = new SimpleFilter[mux.Request, mux.Response] {
-      def apply(
-        request: mux.Request,
-        svc: Service[mux.Request, mux.Response]
-      ): Future[mux.Response] = {
-        if (Trace.isActivelyTracing) {
-          recordRpc(Buf.ByteArray.Owned.extract(request.body))
-        }
-        svc(request)
-      }
-    }
-
-    override def make(
-      next: ServiceFactory[mux.Request, mux.Response]
-    ): ServiceFactory[mux.Request, mux.Response] =
-      rpcTracer.andThen(super.make(next))
-  }
 
   object Client {
 
