@@ -1,3 +1,4 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -6,14 +7,14 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Unsuccessful Responses &#8212; Finagle 17.11.0 documentation</title>
+    <title>Unsuccessful Responses &mdash; Finagle 17.11.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '17.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -24,11 +25,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
     <link rel="top" title="Finagle 17.11.0 documentation" href="index.html" />
-    <link rel="next" title="FAQ" href="FAQ.html" />
-    <link rel="prev" title="Metrics" href="Metrics.html" />
    
   
   <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
@@ -44,30 +41,24 @@
   </script>
 
   </head>
-  <body role="document">
+  <body>
   
   
 
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="FAQ.html" title="FAQ"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="Metrics.html" title="Metrics"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
+        <li><a href="index.html">Finagle</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body" role="main">
+          <div class="body">
             
   <div class="section" id="unsuccessful-responses">
 <h1>Unsuccessful Responses<a class="headerlink" href="#unsuccessful-responses" title="Permalink to this headline">¶</a></h1>
@@ -140,14 +131,14 @@ In those cases, Finagle is unable to act appropriately unless a
 these flags are set appropriately. However, for user specified unsuccessful
 responses, this information does not automatically exist.</p>
 <p>Users have two mechanisms available to provide this information:
-<a class="reference internal" href="Clients.html#response-classification"><span class="std std-ref">ResponseClassifiers</span></a> and
-<a class="reference internal" href="Clients.html#client-retries"><span class="std std-ref">RetryPolicies</span></a>. Response classification is used for stats
-recording and <a class="reference internal" href="Clients.html#client-circuit-breaking"><span class="std std-ref">circuit breaking</span></a>. <cite>RetryPolicies</cite>
+<a class="reference internal" href="Clients.html#response-classification"><em>ResponseClassifiers</em></a> and
+<a class="reference internal" href="Clients.html#client-retries"><em>RetryPolicies</em></a>. Response classification is used for stats
+recording and <a class="reference internal" href="Clients.html#client-circuit-breaking"><em>circuit breaking</em></a>. <cite>RetryPolicies</cite>
 are used to control which responses will be retried.</p>
 <p>Users should also handle exceptions in application code via <cite>Future#handle</cite> or
 <cite>Future#rescue</cite>. This may also take place in a filter which transforms responses,
 allowing for additional composition.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">SimpleFilter</span><span class="o">,</span> <span class="nc">Service</span><span class="o">,</span> <span class="nc">Protocol</span><span class="o">}</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">SimpleFilter</span><span class="o">,</span> <span class="nc">Service</span><span class="o">,</span> <span class="nc">Protocol</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.protocol.</span><span class="o">{</span><span class="nc">Response</span><span class="o">,</span> <span class="nc">Request</span><span class="o">,</span> <span class="nc">NotFoundError</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.service.StatsReceiver</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
@@ -180,16 +171,16 @@ mechanisms should respond with a <cite>Throwable</cite> that extends <cite>Failu
 flags set appropriately. An easy way to create a generic unnamed response like
 this is by using the convenience methods in <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">Failure.scala</a></p>
 <p>In a situation where a service would normally be able to process a request but
-is temporarily overloaded, a <a class="reference internal" href="Glossary.html#glossary-nack"><span class="std std-ref">nack</span></a> response is appropriate.
+is temporarily overloaded, a <a class="reference internal" href="Glossary.html#glossary-nack"><em>nack</em></a> response is appropriate.
 The client receiving this will automatically retry the request via the <cite>Retries</cite>
 module. This is the recommended way of exerting
-<a class="reference internal" href="Glossary.html#glossary-back-pressure"><span class="std std-ref">back pressure</span></a> on clients.</p>
+<a class="reference internal" href="Glossary.html#glossary-back-pressure"><em>back pressure</em></a> on clients.</p>
 <div class="admonition caution">
 <p class="first admonition-title">Caution</p>
 <p class="last">A nack response implies that no work has been done to process the request.
 This contract should be adhered to when using back pressure.</p>
 </div>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Failure</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.Failure</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
 
 <span class="c1">// Using Failure.rejected - Creates an exception with FailureFlags</span>
@@ -200,8 +191,8 @@ This contract should be adhered to when using back pressure.</p>
 <p>Sometimes it is useful to explicitly disable retries on a request on the client
 side. By constructing a response as shown below, the NonRetryable flag will
 propagate back across service boundaries. This can be used to mitigate
-<a class="reference internal" href="Glossary.html#glossary-retry-storm"><span class="std std-ref">retry storms</span></a>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Failure</span>
+<a class="reference internal" href="Glossary.html#glossary-retry-storm"><em>retry storms</em></a>.</p>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.Failure</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
 
 <span class="c1">// Create a rejected response, and flag it as non-retryable.</span>
@@ -285,7 +276,7 @@ user&#8217;s guide.</td></tr>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
   <img class="logo" src="_static/logo_small.png" alt="Logo"/>
 </a></p><a href="index.html"><h3>Finagle</h3></a>
@@ -314,8 +305,6 @@ user&#8217;s guide.</td></tr>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="Metrics.html" title="previous chapter">Metrics</a></li>
-      <li>Next: <a href="FAQ.html" title="next chapter">FAQ</a></li>
   </ul></li>
 </ul>
 <div id="searchbox" style="display: none">

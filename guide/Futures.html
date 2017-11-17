@@ -1,3 +1,4 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -6,14 +7,14 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Concurrent Programming with Futures &#8212; Finagle 17.11.0 documentation</title>
+    <title>Concurrent Programming with Futures &mdash; Finagle 17.11.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '17.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -24,11 +25,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
     <link rel="top" title="Finagle 17.11.0 documentation" href="index.html" />
-    <link rel="next" title="Services &amp; Filters" href="ServicesAndFilters.html" />
-    <link rel="prev" title="Quickstart" href="Quickstart.html" />
    
   
   <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
@@ -44,30 +41,24 @@
   </script>
 
   </head>
-  <body role="document">
+  <body>
   
   
 
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="ServicesAndFilters.html" title="Services &amp; Filters"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="Quickstart.html" title="Quickstart"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
+        <li><a href="index.html">Finagle</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body" role="main">
+          <div class="body">
             
   <div class="section" id="concurrent-programming-with-futures">
 <h1>Concurrent Programming with Futures<a class="headerlink" href="#concurrent-programming-with-futures" title="Permalink to this headline">¶</a></h1>
@@ -92,16 +83,16 @@ Finagle uses thread biasing to reduce context switching costs.</p>
 </ul>
 <p>Note that these operations are all fallible: remote hosts could
 crash, computations might throw an exception, disks could fail, etc.
-A <code class="docutils literal"><span class="pre">Future[T]</span></code>, then, occupies exactly one of three states:</p>
+A <tt class="docutils literal"><span class="pre">Future[T]</span></tt>, then, occupies exactly one of three states:</p>
 <ul class="simple">
 <li>Empty (pending)</li>
-<li>Succeeded (with a result of type <code class="docutils literal"><span class="pre">T</span></code>)</li>
-<li>Failed (with a <code class="docutils literal"><span class="pre">Throwable</span></code>)</li>
+<li>Succeeded (with a result of type <tt class="docutils literal"><span class="pre">T</span></tt>)</li>
+<li>Failed (with a <tt class="docutils literal"><span class="pre">Throwable</span></tt>)</li>
 </ul>
 <p>While it is possible to directly query this state, this is rarely useful.
 Instead, a callback may be registered to receive the results once
 they are made available:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
 
 <span class="k">val</span> <span class="n">f</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
 
@@ -112,7 +103,7 @@ they are made available:</p>
 </div>
 <p>which will be invoked only on success. Callbacks may also be registered
 to account for failures:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
 
 <span class="k">val</span> <span class="n">f</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
 
@@ -138,12 +129,12 @@ from a website (ala Pinterest). This typically involves:</p>
 </ol>
 <p>This is an example of <em>sequential</em> composition: in order to do the
 next step, we must have successfully completed the previous one. With
-Futures, this is called <code class="docutils literal"><span class="pre">flatMap</span></code> <a class="footnote-reference" href="#flatmap" id="id2">[3]</a>. The result of <code class="docutils literal"><span class="pre">flatMap</span></code> is a Future
+Futures, this is called <tt class="docutils literal"><span class="pre">flatMap</span></tt> <a class="footnote-reference" href="#flatmap" id="id2">[3]</a>. The result of <tt class="docutils literal"><span class="pre">flatMap</span></tt> is a Future
 representing the result of this composite operation. Given some helper
-methods —&nbsp;<code class="docutils literal"><span class="pre">fetchUrl</span></code> fetches the given URL, <code class="docutils literal"><span class="pre">findImageUrls</span></code> parses an HTML
+methods —&nbsp;<tt class="docutils literal"><span class="pre">fetchUrl</span></tt> fetches the given URL, <tt class="docutils literal"><span class="pre">findImageUrls</span></tt> parses an HTML
 page to find image links —&nbsp;we can implement our Pinterest-style thumbnail
 extract like this:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
 
 <span class="k">def</span> <span class="n">fetchUrl</span><span class="o">(</span><span class="n">url</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Byte</span><span class="o">]]</span> <span class="k">=</span> <span class="o">???</span>
 <span class="k">def</span> <span class="n">findImageUrls</span><span class="o">(</span><span class="n">bytes</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">Byte</span><span class="o">])</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
@@ -163,15 +154,15 @@ extract like this:</p>
 <span class="o">}</span>
 </pre></div>
 </div>
-<p><code class="docutils literal"><span class="pre">f</span></code> represents the <em>composite</em> operation. It is the result of first
+<p><tt class="docutils literal"><span class="pre">f</span></tt> represents the <em>composite</em> operation. It is the result of first
 retrieving the web page, and then the first image link. If either of
-the smaller operations fail (the first or second <code class="docutils literal"><span class="pre">fetchUrl</span></code> or if
-<code class="docutils literal"><span class="pre">findImageUrls</span></code> doesn&#8217;t successfully find any images), the composite
+the smaller operations fail (the first or second <tt class="docutils literal"><span class="pre">fetchUrl</span></tt> or if
+<tt class="docutils literal"><span class="pre">findImageUrls</span></tt> doesn&#8217;t successfully find any images), the composite
 operation also fails.</p>
 <p>The astute reader may have noticed something peculiar: this is
 typically the job of the semicolon! That is not far from the truth:
 semicolons sequence two statements, and with traditional I/O
-operations, have the same effect as <code class="docutils literal"><span class="pre">flatMap</span></code> does above (the
+operations, have the same effect as <tt class="docutils literal"><span class="pre">flatMap</span></tt> does above (the
 exception mechanism takes the role of a failed future). Futures
 are much more versatile, however, as we&#8217;ll see.</p>
 </div>
@@ -179,8 +170,8 @@ are much more versatile, however, as we&#8217;ll see.</p>
 <h2>Concurrent composition<a class="headerlink" href="#concurrent-composition" title="Permalink to this headline">¶</a></h2>
 <p>It is also possible to compose Futures <em>concurrently</em>. We can extend
 our above example to demonstrate: let&#8217;s fetch <em>all</em> the images.
-Concurrent composition is provided by <code class="docutils literal"><span class="pre">Future.collect</span></code>:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+Concurrent composition is provided by <tt class="docutils literal"><span class="pre">Future.collect</span></tt>:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
 
 <span class="k">val</span> <span class="n">collected</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Seq</span><span class="o">[</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Byte</span><span class="o">]]]</span> <span class="k">=</span>
   <span class="n">fetchUrl</span><span class="o">(</span><span class="n">url</span><span class="o">).</span><span class="n">flatMap</span> <span class="o">{</span> <span class="n">bytes</span> <span class="k">=&gt;</span>
@@ -193,7 +184,7 @@ Concurrent composition is provided by <code class="docutils literal"><span class
 first we fetch the web page, then we collect the results of fetching
 all of the underlying images.</p>
 <p>As with sequential composition, concurrent composition propagates
-failures: the future <code class="docutils literal"><span class="pre">collected</span></code> will fail if any of the underlying
+failures: the future <tt class="docutils literal"><span class="pre">collected</span></tt> will fail if any of the underlying
 futures do <a class="footnote-reference" href="#collecttotry" id="id3">[2]</a>.</p>
 <p>It is also simple to write your own combinators that operate over
 Futures. This is quite useful, and gives rise to a great amount of
@@ -204,12 +195,12 @@ abstracted.</p>
 <span id="future-failure"></span><h2>Recovering from failure<a class="headerlink" href="#recovering-from-failure" title="Permalink to this headline">¶</a></h2>
 <p>Composed futures fail whenever any of their constituent futures
 fail. However it is often useful to recover from such failures. The
-<code class="docutils literal"><span class="pre">rescue</span></code> combinator on <code class="docutils literal"><span class="pre">Future</span></code> is the dual to <code class="docutils literal"><span class="pre">flatMap</span></code>: whereas
-<code class="docutils literal"><span class="pre">flatMap</span></code> operates over <em>values</em>, <code class="docutils literal"><span class="pre">rescue</span></code> operates over <em>exceptions</em>. They
+<tt class="docutils literal"><span class="pre">rescue</span></tt> combinator on <tt class="docutils literal"><span class="pre">Future</span></tt> is the dual to <tt class="docutils literal"><span class="pre">flatMap</span></tt>: whereas
+<tt class="docutils literal"><span class="pre">flatMap</span></tt> operates over <em>values</em>, <tt class="docutils literal"><span class="pre">rescue</span></tt> operates over <em>exceptions</em>. They
 are otherwise identical. It is often desirable to handle only a subset
-of possible exceptions. To accommodate for this <code class="docutils literal"><span class="pre">rescue</span></code> accepts
-a <code class="docutils literal"><span class="pre">PartialFunction</span></code>, mapping a <code class="docutils literal"><span class="pre">Throwable</span></code> to a <code class="docutils literal"><span class="pre">Future</span></code>:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">trait</span> <span class="nc">Future</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span> <span class="o">{</span>
+of possible exceptions. To accommodate for this <tt class="docutils literal"><span class="pre">rescue</span></tt> accepts
+a <tt class="docutils literal"><span class="pre">PartialFunction</span></tt>, mapping a <tt class="docutils literal"><span class="pre">Throwable</span></tt> to a <tt class="docutils literal"><span class="pre">Future</span></tt>:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">trait</span> <span class="nc">Future</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span> <span class="o">{</span>
   <span class="o">..</span>
   <span class="k">def</span> <span class="n">rescue</span><span class="o">[</span><span class="kt">B</span> <span class="k">&gt;:</span> <span class="kt">A</span><span class="o">](</span><span class="n">f</span><span class="k">:</span> <span class="kt">PartialFunction</span><span class="o">[</span><span class="kt">Throwable</span>, <span class="kt">Future</span><span class="o">[</span><span class="kt">B</span><span class="o">]])</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">B</span><span class="o">]</span>
   <span class="o">..</span>
@@ -217,8 +208,8 @@ a <code class="docutils literal"><span class="pre">PartialFunction</span></code>
 </pre></div>
 </div>
 <p>The following retries a request infinitely should it fail with a
-<code class="docutils literal"><span class="pre">TimeoutException</span></code>:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+<tt class="docutils literal"><span class="pre">TimeoutException</span></tt>:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.TimeoutException</span>
 
@@ -246,7 +237,7 @@ differences.</li>
 <table class="docutils footnote" frame="void" id="futures" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Finagle uses its own <code class="docutils literal"><span class="pre">Future</span></code> implementation by a variety of reasons
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Finagle uses its own <tt class="docutils literal"><span class="pre">Future</span></tt> implementation by a variety of reasons
 (fewer context switches, interruptibility, support for continuation-local variables,
 tail-call elimination), but mostly because it&#8217;s preceded <a class="reference external" href="http://docs.scala-lang.org/sips/completed/futures-promises.html">SIP-14</a> by over a year.</td></tr>
 </tbody>
@@ -254,14 +245,14 @@ tail-call elimination), but mostly because it&#8217;s preceded <a class="referen
 <table class="docutils footnote" frame="void" id="collecttotry" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id3">[2]</a></td><td>Use <code class="docutils literal"><span class="pre">Future.collectToTry</span></code> to concurrently collect a sequence of
+<tr><td class="label"><a class="fn-backref" href="#id3">[2]</a></td><td>Use <tt class="docutils literal"><span class="pre">Future.collectToTry</span></tt> to concurrently collect a sequence of
 futures while accumulating errors instead of failing fast.</td></tr>
 </tbody>
 </table>
 <table class="docutils footnote" frame="void" id="flatmap" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id2">[3]</a></td><td>The name <code class="docutils literal"><span class="pre">flatMap</span></code> may seem strange and unrelated to our present
+<tr><td class="label"><a class="fn-backref" href="#id2">[3]</a></td><td>The name <tt class="docutils literal"><span class="pre">flatMap</span></tt> may seem strange and unrelated to our present
 discussion, but its etymology is impeccable: it derives from a deeper relationship
 between the sort of sequential composition we do with futures, to a similar sort of
 composition we can perform over collections. See the <a class="reference external" href="http://en.wikipedia.org/wiki/Monad_(functional_programming)">this</a> page for more details.</td></tr>
@@ -274,7 +265,7 @@ composition we can perform over collections. See the <a class="reference externa
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
   <img class="logo" src="_static/logo_small.png" alt="Logo"/>
 </a></p><a href="index.html"><h3>Finagle</h3></a>
@@ -301,8 +292,6 @@ composition we can perform over collections. See the <a class="reference externa
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="Quickstart.html" title="previous chapter">Quickstart</a></li>
-      <li>Next: <a href="ServicesAndFilters.html" title="next chapter">Services &amp; Filters</a></li>
   </ul></li>
 </ul>
 <div id="searchbox" style="display: none">

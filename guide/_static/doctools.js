@@ -4,7 +4,7 @@
  *
  * Sphinx JavaScript utilities for all documentation.
  *
- * :copyright: Copyright 2007-2016 by the Sphinx team, see AUTHORS.
+ * :copyright: Copyright 2007-2011 by the Sphinx team, see AUTHORS.
  * :license: BSD, see LICENSE for details.
  *
  */
@@ -32,7 +32,7 @@ if (!window.console || !console.firebug) {
  */
 jQuery.urldecode = function(x) {
   return decodeURIComponent(x).replace(/\+/g, ' ');
-};
+}
 
 /**
  * small helper function to urlencode strings
@@ -59,6 +59,18 @@ jQuery.getQueryParameters = function(s) {
       result[key] = [value];
   }
   return result;
+};
+
+/**
+ * small function to check if an array contains
+ * a given item.
+ */
+jQuery.contains = function(arr, item) {
+  for (var i = 0; i < arr.length; i++) {
+    if (arr[i] == item)
+      return true;
+  }
+  return false;
 };
 
 /**
@@ -91,30 +103,6 @@ jQuery.fn.highlightText = function(text, className) {
   });
 };
 
-/*
- * backward compatibility for jQuery.browser
- * This will be supported until firefox bug is fixed.
- */
-if (!jQuery.browser) {
-  jQuery.uaMatch = function(ua) {
-    ua = ua.toLowerCase();
-
-    var match = /(chrome)[ \/]([\w.]+)/.exec(ua) ||
-      /(webkit)[ \/]([\w.]+)/.exec(ua) ||
-      /(opera)(?:.*version|)[ \/]([\w.]+)/.exec(ua) ||
-      /(msie) ([\w.]+)/.exec(ua) ||
-      ua.indexOf("compatible") < 0 && /(mozilla)(?:.*? rv:([\w.]+)|)/.exec(ua) ||
-      [];
-
-    return {
-      browser: match[ 1 ] || "",
-      version: match[ 2 ] || "0"
-    };
-  };
-  jQuery.browser = {};
-  jQuery.browser[jQuery.uaMatch(navigator.userAgent).browser] = true;
-}
-
 /**
  * Small JavaScript module for the documentation.
  */
@@ -124,7 +112,6 @@ var Documentation = {
     this.fixFirefoxAnchorBug();
     this.highlightSearchWords();
     this.initIndexTable();
-    
   },
 
   /**
@@ -177,10 +164,9 @@ var Documentation = {
 
   /**
    * workaround a firefox stupidity
-   * see: https://bugzilla.mozilla.org/show_bug.cgi?id=645075
    */
   fixFirefoxAnchorBug : function() {
-    if (document.location.hash)
+    if (document.location.hash && $.browser.mozilla)
       window.setTimeout(function() {
         document.location.href += '';
       }, 10);
@@ -194,9 +180,6 @@ var Documentation = {
     var terms = (params.highlight) ? params.highlight[0].split(/\s+/) : [];
     if (terms.length) {
       var body = $('div.body');
-      if (!body.length) {
-        body = $('body');
-      }
       window.setTimeout(function() {
         $.each(terms, function() {
           body.highlightText(this.toLowerCase(), 'highlighted');
@@ -253,29 +236,6 @@ var Documentation = {
     });
     var url = parts.join('/');
     return path.substring(url.lastIndexOf('/') + 1, path.length - 1);
-  },
-
-  initOnKeyListeners: function() {
-    $(document).keyup(function(event) {
-      var activeElementType = document.activeElement.tagName;
-      // don't navigate when in search box or textarea
-      if (activeElementType !== 'TEXTAREA' && activeElementType !== 'INPUT' && activeElementType !== 'SELECT') {
-        switch (event.keyCode) {
-          case 37: // left
-            var prevHref = $('link[rel="prev"]').prop('href');
-            if (prevHref) {
-              window.location.href = prevHref;
-              return false;
-            }
-          case 39: // right
-            var nextHref = $('link[rel="next"]').prop('href');
-            if (nextHref) {
-              window.location.href = nextHref;
-              return false;
-            }
-        }
-      }
-    });
   }
 };
 

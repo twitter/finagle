@@ -1,3 +1,4 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -6,14 +7,14 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Protocols &#8212; Finagle 17.11.0 documentation</title>
+    <title>Protocols &mdash; Finagle 17.11.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '17.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -24,11 +25,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
     <link rel="top" title="Finagle 17.11.0 documentation" href="index.html" />
-    <link rel="next" title="Metrics" href="Metrics.html" />
-    <link rel="prev" title="Names and Naming in Finagle" href="Names.html" />
    
   
   <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
@@ -44,30 +41,24 @@
   </script>
 
   </head>
-  <body role="document">
+  <body>
   
   
 
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="Metrics.html" title="Metrics"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="Names.html" title="Names and Naming in Finagle"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
+        <li><a href="index.html">Finagle</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body" role="main">
+          <div class="body">
             
   <div class="section" id="protocols">
 <h1>Protocols<a class="headerlink" href="#protocols" title="Permalink to this headline">¶</a></h1>
@@ -103,14 +94,14 @@ uses the Thrift framed codec and the binary protocol for serialization.</p>
 <p class="first admonition-title">Note</p>
 <p class="last">Some Thrift server implementations do not handle this protocol
 negotiation well. If your client should run into this, you can disable
-it by calling <code class="docutils literal"><span class="pre">Thrift.client.withNoAttemptTTwitterUpgrade</span></code>.</p>
+it by calling <tt class="docutils literal"><span class="pre">Thrift.client.withNoAttemptTTwitterUpgrade</span></tt>.</p>
 </div>
 <div class="section" id="using-finagle-thrift">
 <h3>Using finagle-thrift<a class="headerlink" href="#using-finagle-thrift" title="Permalink to this headline">¶</a></h3>
 <p>At Twitter, we use our open-source Thrift code-generator called
 <a class="reference external" href="https://twitter.github.io/scrooge/">Scrooge</a>. Scrooge is written in Scala and
 can generate source code in Scala or Java. Given the following IDL:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>service LoggerService {
+<div class="highlight-text"><div class="highlight"><pre>service LoggerService {
   string log(1: string message, 2: i32 logLevel) throws (1: WriteException writeEx);
   i32 getLogSize() throws (1: ReadException readEx);
 }
@@ -119,12 +110,12 @@ can generate source code in Scala or Java. Given the following IDL:</p>
 <p>Scrooge will generate code that can be used by <cite>finagle-thrift</cite> with the
 following rich APIs:</p>
 <p id="finagle-thrift-server">Serving the IDL:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Thrift</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">serveIface</span><span class="o">(</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Thrift</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">serveIface</span><span class="o">(</span>
   <span class="s">&quot;localhost:1234&quot;</span><span class="o">,</span>
   <span class="k">new</span> <span class="nc">LoggerService</span><span class="o">[</span><span class="kt">Future</span><span class="o">]</span> <span class="o">{</span>
     <span class="k">def</span> <span class="n">log</span><span class="o">(</span><span class="n">message</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">logLevel</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
-      <span class="n">println</span><span class="o">(</span><span class="s">s&quot;[</span><span class="si">$logLevel</span><span class="s">] Server received: &#39;</span><span class="si">$message</span><span class="s">&#39;&quot;</span><span class="o">)</span>
-      <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="s">s&quot;You&#39;ve sent: (&#39;</span><span class="si">$message</span><span class="s">&#39;, </span><span class="si">$logLevel</span><span class="s">)&quot;</span><span class="o">)</span>
+      <span class="n">println</span><span class="o">(</span><span class="n">s</span><span class="s">&quot;[$logLevel] Server received: &#39;$message&#39;&quot;</span><span class="o">)</span>
+      <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="n">s</span><span class="s">&quot;You&#39;ve sent: (&#39;$message&#39;, $logLevel)&quot;</span><span class="o">)</span>
     <span class="o">}</span>
 
     <span class="k">var</span> <span class="n">counter</span> <span class="k">=</span> <span class="mi">0</span>
@@ -132,10 +123,10 @@ following rich APIs:</p>
     <span class="k">def</span> <span class="n">getLogSize</span><span class="o">()</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
       <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
       <span class="k">if</span> <span class="o">(</span><span class="n">counter</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">println</span><span class="o">(</span><span class="s">s&quot;Server: getLogSize ReadException&quot;</span><span class="o">)</span>
+        <span class="n">println</span><span class="o">(</span><span class="n">s</span><span class="s">&quot;Server: getLogSize ReadException&quot;</span><span class="o">)</span>
         <span class="nc">Future</span><span class="o">.</span><span class="n">exception</span><span class="o">(</span><span class="k">new</span> <span class="nc">ReadException</span><span class="o">())</span>
       <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
-        <span class="n">println</span><span class="o">(</span><span class="s">s&quot;Server: getLogSize Success&quot;</span><span class="o">)</span>
+        <span class="n">println</span><span class="o">(</span><span class="n">s</span><span class="s">&quot;Server: getLogSize Success&quot;</span><span class="o">)</span>
         <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="mi">4</span><span class="o">)</span>
       <span class="o">}</span>
     <span class="o">}</span>
@@ -144,16 +135,16 @@ following rich APIs:</p>
 </pre></div>
 </div>
 <p id="finagle-thrift-client">Construct a client:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>val clientServiceIface: LoggerService.ServiceIface =
+<div class="highlight-text"><div class="highlight"><pre>val clientServiceIface: LoggerService.ServiceIface =
   Thrift.client.newServiceIface[LoggerService.ServiceIface](&quot;localhost:1234&quot;, &quot;thrift_client&quot;)
 </pre></div>
 </div>
 <p>A ServiceIface is a collection of Services, one for each Thrift method. Call the log method:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>val result: Future[Log.SuccessType] = clientServiceIface.log(Log.Args(&quot;hello&quot;, 1))
+<div class="highlight-text"><div class="highlight"><pre>val result: Future[Log.SuccessType] = clientServiceIface.log(Log.Args(&quot;hello&quot;, 1))
 </pre></div>
 </div>
 <p>Thrift services can be combined with <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Filter$">Filters</a>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">uppercaseFilter</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">SimpleFilter</span><span class="o">[</span><span class="kt">Log.Args</span>, <span class="kt">Log.SuccessType</span><span class="o">]</span> <span class="o">{</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">uppercaseFilter</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">SimpleFilter</span><span class="o">[</span><span class="kt">Log.Args</span>, <span class="kt">Log.SuccessType</span><span class="o">]</span> <span class="o">{</span>
   <span class="k">def</span> <span class="n">apply</span><span class="o">(</span>
     <span class="n">req</span><span class="k">:</span> <span class="kt">Log.Args</span><span class="o">,</span>
     <span class="n">service</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Log.Args</span>, <span class="kt">Log.SuccessType</span><span class="o">]</span>
@@ -177,7 +168,7 @@ following rich APIs:</p>
 </pre></div>
 </div>
 <p>Here&#8217;s an example of a retry policy that retries on Thrift exceptions:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">retryPolicy</span> <span class="k">=</span> <span class="nc">RetryPolicy</span><span class="o">.</span><span class="n">tries</span><span class="o">[</span><span class="kt">Try</span><span class="o">[</span><span class="kt">GetLogSize.Result</span><span class="o">]](</span><span class="mi">3</span><span class="o">,</span> <span class="o">{</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">retryPolicy</span> <span class="k">=</span> <span class="nc">RetryPolicy</span><span class="o">.</span><span class="n">tries</span><span class="o">[</span><span class="kt">Try</span><span class="o">[</span><span class="kt">GetLogSize.Result</span><span class="o">]](</span><span class="mi">3</span><span class="o">,</span> <span class="o">{</span>
   <span class="k">case</span> <span class="nc">Throw</span><span class="o">(</span><span class="n">ex</span><span class="k">:</span> <span class="kt">ReadException</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="kc">true</span>
 <span class="o">})</span>
 
@@ -189,7 +180,7 @@ following rich APIs:</p>
 </pre></div>
 </div>
 <p>Another way to construct Thrift clients is using the method interface:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">client</span><span class="k">:</span> <span class="kt">LoggerService.FutureIface</span> <span class="o">=</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">client</span><span class="k">:</span> <span class="kt">LoggerService.FutureIface</span> <span class="o">=</span>
   <span class="nc">Thrift</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">newIface</span><span class="o">[</span><span class="kt">LoggerService.FutureIface</span><span class="o">](</span><span class="s">&quot;localhost:1234&quot;</span><span class="o">)</span>
 <span class="n">client</span><span class="o">.</span><span class="n">log</span><span class="o">(</span><span class="s">&quot;message&quot;</span><span class="o">,</span> <span class="mi">4</span><span class="o">)</span> <span class="n">onSuccess</span> <span class="o">{</span> <span class="n">response</span> <span class="k">=&gt;</span>
   <span class="n">println</span><span class="o">(</span><span class="s">&quot;Client received response: &quot;</span> <span class="o">+</span> <span class="n">response</span><span class="o">)</span>
@@ -197,7 +188,7 @@ following rich APIs:</p>
 </pre></div>
 </div>
 <p>To convert the Service interface to the method interface use <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Thrift$">Thrift.newMethodIface</a>:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">filteredMethodIface</span><span class="k">:</span> <span class="kt">LoggerService</span><span class="o">[</span><span class="kt">Future</span><span class="o">]</span> <span class="k">=</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">filteredMethodIface</span><span class="k">:</span> <span class="kt">LoggerService</span><span class="o">[</span><span class="kt">Future</span><span class="o">]</span> <span class="k">=</span>
   <span class="nc">Thrift</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">newMethodIface</span><span class="o">(</span><span class="n">clientServiceIface</span><span class="o">.</span><span class="n">copy</span><span class="o">(</span><span class="n">log</span> <span class="k">=</span> <span class="n">filteredLog</span><span class="o">))</span>
 <span class="nc">Await</span><span class="o">.</span><span class="n">result</span><span class="o">(</span><span class="n">filteredMethodIface</span><span class="o">.</span><span class="n">log</span><span class="o">(</span><span class="s">&quot;ping&quot;</span><span class="o">,</span> <span class="mi">3</span><span class="o">).</span><span class="n">map</span><span class="o">(</span><span class="n">println</span><span class="o">))</span>
 </pre></div>
@@ -258,11 +249,11 @@ intelligent back-pressure, slow start, and GC-avoidance.</p>
 <h2>Mysql<a class="headerlink" href="#mysql" title="Permalink to this headline">¶</a></h2>
 <p><em>finagle-mysql</em> is an asynchronous implementation of the MySQL protocol built on top of Finagle.
 The project provides a simple query API with support for prepared statements and
-transactions while taking advantage of Finagle&#8217;s <a class="reference internal" href="Clients.html#client-modules"><span class="std std-ref">client stack</span></a> for
+transactions while taking advantage of Finagle&#8217;s <a class="reference internal" href="Clients.html#client-modules"><em>client stack</em></a> for
 connection pooling. The implementation supports both the MySQL binary and string protocols.</p>
 <p>A client can be constructed using the
 <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Mysql$">Mysql</a> protocol object:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">Mysql</span><span class="o">.</span><span class="n">client</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">Mysql</span><span class="o">.</span><span class="n">client</span>
   <span class="o">.</span><span class="n">withCredentials</span><span class="o">(</span><span class="s">&quot;&lt;user&gt;&quot;</span><span class="o">,</span> <span class="s">&quot;&lt;password&gt;&quot;</span><span class="o">)</span>
   <span class="o">.</span><span class="n">withDatabase</span><span class="o">(</span><span class="s">&quot;test&quot;</span><span class="o">)</span>
   <span class="o">.</span><span class="n">configured</span><span class="o">(</span><span class="nc">DefaultPool</span><span class="o">.</span><span class="nc">Param</span><span class="o">(</span>
@@ -274,10 +265,10 @@ connection pooling. The implementation supports both the MySQL binary and string
 </pre></div>
 </div>
 <p>We configure the <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/client/DefaultPool">client&#8217;s connection pool</a> to be
-compatible with our MySQL server. The constructor returns a Finagle <a class="reference internal" href="ServicesAndFilters.html#service-factory"><span class="std std-ref">ServiceFactory</span></a>
+compatible with our MySQL server. The constructor returns a Finagle <a class="reference internal" href="ServicesAndFilters.html#service-factory"><em>ServiceFactory</em></a>
 from <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/mysql/Request">mysql.Request</a> to <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/mysql/Result">mysql.Result</a>
 which we can use to query the db:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">product</span> <span class="k">=</span> <span class="n">client</span><span class="o">().</span><span class="n">flatMap</span> <span class="o">{</span> <span class="n">service</span> <span class="k">=&gt;</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">product</span> <span class="k">=</span> <span class="n">client</span><span class="o">().</span><span class="n">flatMap</span> <span class="o">{</span> <span class="n">service</span> <span class="k">=&gt;</span>
   <span class="c1">// `service` is checked out from the pool.</span>
   <span class="n">service</span><span class="o">(</span><span class="nc">QueryRequest</span><span class="o">(</span><span class="s">&quot;SELECT 5*5 AS `product`&quot;</span><span class="o">))</span> <span class="n">map</span> <span class="o">{</span>
     <span class="k">case</span> <span class="n">rs</span><span class="k">:</span> <span class="kt">ResultSet</span> <span class="o">=&gt;</span> <span class="n">rs</span><span class="o">.</span><span class="n">rows</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">processRow</span><span class="o">)</span>
@@ -292,7 +283,7 @@ which we can use to query the db:</p>
 <p>A <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/mysql/ResultSet">ResultSet</a> makes it easy to extract
 <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/mysql/Value">Values</a> based on column names. For example, we can
 implement the above <cite>processRow</cite> as a pattern match on expected values:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">processRow</span><span class="o">(</span><span class="n">row</span><span class="k">:</span> <span class="kt">Row</span><span class="o">)</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">Long</span><span class="o">]</span> <span class="k">=</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">def</span> <span class="n">processRow</span><span class="o">(</span><span class="n">row</span><span class="k">:</span> <span class="kt">Row</span><span class="o">)</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">Long</span><span class="o">]</span> <span class="k">=</span>
   <span class="n">row</span><span class="o">(</span><span class="s">&quot;product&quot;</span><span class="o">).</span><span class="n">flatMap</span> <span class="o">{</span>
     <span class="k">case</span> <span class="nc">LongValue</span><span class="o">(</span><span class="n">l</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="nc">Some</span><span class="o">(</span><span class="n">l</span><span class="o">)</span>
     <span class="k">case</span> <span class="nc">IntValue</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="nc">Some</span><span class="o">(</span><span class="n">i</span><span class="o">.</span><span class="n">toLong</span><span class="o">)</span>
@@ -302,7 +293,7 @@ implement the above <cite>processRow</cite> as a pattern match on expected value
 </div>
 <p>The ServiceFactory API gives you more fine-grained control over the pool. This isn&#8217;t always necessary
 - to simplify <em>finagle-mysql</em> offers a rich API that wraps the ServiceFactory returned from <cite>newClient</cite>:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">richClient</span> <span class="k">=</span> <span class="nc">Mysql</span><span class="o">.</span><span class="n">client</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">richClient</span> <span class="k">=</span> <span class="nc">Mysql</span><span class="o">.</span><span class="n">client</span>
   <span class="o">.</span><span class="n">withCredentials</span><span class="o">(</span><span class="s">&quot;&lt;user&gt;&quot;</span><span class="o">,</span> <span class="s">&quot;&lt;password&gt;&quot;</span><span class="o">)</span>
   <span class="o">.</span><span class="n">withDatabase</span><span class="o">(</span><span class="s">&quot;test&quot;</span><span class="o">)</span>
   <span class="o">.</span><span class="n">configured</span><span class="o">(</span><span class="nc">DefaultPool</span><span class="o">.</span><span class="nc">Param</span><span class="o">(</span>
@@ -314,7 +305,7 @@ implement the above <cite>processRow</cite> as a pattern match on expected value
 </pre></div>
 </div>
 <p>and we can select:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">product</span> <span class="k">=</span> <span class="n">richClient</span><span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="s">&quot;SELECT 5*5 AS `product`&quot;</span><span class="o">)(</span><span class="n">processRow</span><span class="o">)</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">product</span> <span class="k">=</span> <span class="n">richClient</span><span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="s">&quot;SELECT 5*5 AS `product`&quot;</span><span class="o">)(</span><span class="n">processRow</span><span class="o">)</span>
 </pre></div>
 </div>
 <p>Note that <cite>select</cite> takes care of checking out the service and returning it to the pool. <cite>select</cite> and
@@ -336,7 +327,7 @@ from the call to <cite>newRichClient</cite>.</p>
 <dd><p class="first">A list of dtab overrides for this request. Note: if your server accepts requests from untrusted clients, you may want to restrict this header to
 only trusted clients. This would prevent bad actors from redirecting requests to possibly unsafe locations. You can disable this behavior by
 removing the ServerDtabContextFilter from the server stack, or by adding your own module which removes these headers from untrusted requests.</p>
-<p class="last">See <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-http/src/main/scala/com/twitter/finagle/http/codec/HttpDtab.scala">HttpDtab.scala</a> and <a class="reference internal" href="Names.html#dtabs"><span class="std std-ref">dtabs</span></a>.</p>
+<p class="last">See <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-http/src/main/scala/com/twitter/finagle/http/codec/HttpDtab.scala">HttpDtab.scala</a> and <a class="reference internal" href="Names.html#dtabs"><em>dtabs</em></a>.</p>
 </dd>
 <dt><cite>finagle-http-nack</cite></dt>
 <dd>Makes finagle treat this reply as a retryable nack. See <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-base-http/src/main/scala/com/twitter/finagle/http/filter/HttpNackFilter.scala">HttpNackFilter.scala</a></dd>
@@ -350,7 +341,7 @@ removing the ServerDtabContextFilter from the server stack, or by adding your ow
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
   <img class="logo" src="_static/logo_small.png" alt="Logo"/>
 </a></p><a href="index.html"><h3>Finagle</h3></a>
@@ -379,8 +370,6 @@ removing the ServerDtabContextFilter from the server stack, or by adding your ow
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="Names.html" title="previous chapter">Names and Naming in Finagle</a></li>
-      <li>Next: <a href="Metrics.html" title="next chapter">Metrics</a></li>
   </ul></li>
 </ul>
 <div id="searchbox" style="display: none">

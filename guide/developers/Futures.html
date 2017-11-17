@@ -1,3 +1,4 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -6,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Twitter Futures &#8212; Finagle 17.11.0 documentation</title>
+    <title>Twitter Futures &mdash; Finagle 17.11.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -24,11 +25,7 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
-    <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
     <link rel="top" title="Finagle 17.11.0 documentation" href="../index.html" />
-    <link rel="next" title="Signaling Failure within Finagle" href="SignalingFailure.html" />
-    <link rel="prev" title="Extending Finagle" href="Extending.html" />
    
   
   <link media="only screen and (max-device-width: 480px)" href="../_static/small_flask.css" type= "text/css" rel="stylesheet" />
@@ -44,30 +41,24 @@
   </script>
 
   </head>
-  <body role="document">
+  <body>
   
   
 
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="SignalingFailure.html" title="Signaling Failure within Finagle"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="Extending.html" title="Extending Finagle"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">Finagle</a> &#187;</li> 
+        <li><a href="../index.html">Finagle</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body" role="main">
+          <div class="body">
             
   <div class="section" id="twitter-futures">
 <h1>Twitter Futures<a class="headerlink" href="#twitter-futures" title="Permalink to this headline">¶</a></h1>
@@ -118,12 +109,12 @@ that the stack traces aren&#8217;t as useful (in practice we sometimes &#8220;ru
 </dl>
 <p>To illustrate this, imagine that we&#8217;re doing three pieces of work, doWorkA, doWorkB, doWorkC.</p>
 <p>We write it as:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>Future.value(doWorkA()).map { a =&gt; doWorkB(a) }.map { b =&gt; doWorkC(b) }
+<div class="highlight-text"><div class="highlight"><pre>Future.value(doWorkA()).map { a =&gt; doWorkB(a) }.map { b =&gt; doWorkC(b) }
 </pre></div>
 </div>
 <p>So what does this turn into at run time?  The answer is different depending upon which model we have for Future.</p>
 <p>With Scala, it becomes:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>val executor = new ForkJoinPool(2 /* parallelism */)
+<div class="highlight-text"><div class="highlight"><pre>val executor = new ForkJoinPool(2 /* parallelism */)
 val a = doWorkA()
 executor.submit(new Runnable() { def run(): Unit = {
   val b = doWorkB(a)
@@ -132,7 +123,7 @@ executor.submit(new Runnable() { def run(): Unit = {
 </pre></div>
 </div>
 <p>With Java, it becomes:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>def workA(): C = {
+<div class="highlight-text"><div class="highlight"><pre>def workA(): C = {
   val a = doWorkA()
   workB(a)
 }
@@ -147,7 +138,7 @@ workA()
 </pre></div>
 </div>
 <p>With Twitter, it becomes:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>val a = doWorkA()
+<div class="highlight-text"><div class="highlight"><pre>val a = doWorkA()
 val b = doWorkB(a)
 doWorkC(b)
 </pre></div>
@@ -210,7 +201,7 @@ constructed explicitly by saying <cite>Promise.attached(underlying)</cite> like 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper"><p class="logo"><a href="../index.html">
   <img class="logo" src="../_static/logo_small.png" alt="Logo"/>
 </a></p><a href="index.html"><h3>Finagle</h3></a>
@@ -237,8 +228,6 @@ constructed explicitly by saying <cite>Promise.attached(underlying)</cite> like 
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="Extending.html" title="previous chapter">Extending Finagle</a></li>
-      <li>Next: <a href="SignalingFailure.html" title="next chapter">Signaling Failure within Finagle</a></li>
   </ul></li>
 </ul>
 <div id="searchbox" style="display: none">

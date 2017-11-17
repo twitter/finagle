@@ -4,7 +4,7 @@
  *
  * Sphinx stylesheet -- basic theme.
  *
- * :copyright: Copyright 2007-2016 by the Sphinx team, see AUTHORS.
+ * :copyright: Copyright 2007-2011 by the Sphinx team, see AUTHORS.
  * :license: BSD, see LICENSE for details.
  *
  */
@@ -52,8 +52,6 @@ div.sphinxsidebar {
     width: 230px;
     margin-left: -100%;
     font-size: 90%;
-    word-wrap: break-word;
-    overflow-wrap : break-word;
 }
 
 div.sphinxsidebar ul {
@@ -85,9 +83,12 @@ div.sphinxsidebar #searchbox input[type="text"] {
     width: 170px;
 }
 
+div.sphinxsidebar #searchbox input[type="submit"] {
+    width: 30px;
+}
+
 img {
     border: 0;
-    max-width: 100%;
 }
 
 /* -- search page ----------------------------------------------------------- */
@@ -185,13 +186,6 @@ div.genindex-jumpbox {
 
 /* -- general body styles --------------------------------------------------- */
 
-div.body p, div.body dd, div.body li, div.body blockquote {
-    -moz-hyphens: auto;
-    -ms-hyphens: auto;
-    -webkit-hyphens: auto;
-    hyphens: auto;
-}
-
 a.headerlink {
     visibility: hidden;
 }
@@ -202,10 +196,7 @@ h3:hover > a.headerlink,
 h4:hover > a.headerlink,
 h5:hover > a.headerlink,
 h6:hover > a.headerlink,
-dt:hover > a.headerlink,
-caption:hover > a.headerlink,
-p.caption:hover > a.headerlink,
-div.code-block-caption:hover > a.headerlink {
+dt:hover > a.headerlink {
     visibility: visible;
 }
 
@@ -322,13 +313,6 @@ table.docutils {
     border-collapse: collapse;
 }
 
-table caption span.caption-number {
-    font-style: italic;
-}
-
-table caption span.caption-text {
-}
-
 table.docutils td, table.docutils th {
     padding: 1px 8px 1px 5px;
     border-top: 0;
@@ -358,25 +342,6 @@ table.citation {
 table.citation td {
     border-bottom: none;
 }
-
-/* -- figures --------------------------------------------------------------- */
-
-div.figure {
-    margin: 0.5em;
-    padding: 0.5em;
-}
-
-div.figure p.caption {
-    padding: 0.3em;
-}
-
-div.figure p.caption span.caption-number {
-    font-style: italic;
-}
-
-div.figure p.caption span.caption-text {
-}
-
 
 /* -- other body styles ----------------------------------------------------- */
 
@@ -436,12 +401,12 @@ dl.glossary dt {
     margin: 0;
 }
 
-.optional {
-    font-size: 1.3em;
+.refcount {
+    color: #060;
 }
 
-.sig-paren {
-    font-size: larger;
+.optional {
+    font-size: 1.3em;
 }
 
 .versionmodified {
@@ -494,13 +459,6 @@ pre {
     overflow-y: hidden;  /* fixes display issues on Chrome browsers */
 }
 
-span.pre {
-    -moz-hyphens: none;
-    -ms-hyphens: none;
-    -webkit-hyphens: none;
-    hyphens: none;
-}
-
 td.linenos pre {
     padding: 5px 0px;
     border: 0;
@@ -516,51 +474,22 @@ table.highlighttable td {
     padding: 0 0.5em 0 0.5em;
 }
 
-div.code-block-caption {
-    padding: 2px 5px;
-    font-size: small;
-}
-
-div.code-block-caption code {
-    background-color: transparent;
-}
-
-div.code-block-caption + div > div.highlight > pre {
-    margin-top: 0;
-}
-
-div.code-block-caption span.caption-number {
-    padding: 0.1em 0.3em;
-    font-style: italic;
-}
-
-div.code-block-caption span.caption-text {
-}
-
-div.literal-block-wrapper {
-    padding: 1em 1em 0;
-}
-
-div.literal-block-wrapper div.highlight {
-    margin: 0;
-}
-
-code.descname {
+tt.descname {
     background-color: transparent;
     font-weight: bold;
     font-size: 1.2em;
 }
 
-code.descclassname {
+tt.descclassname {
     background-color: transparent;
 }
 
-code.xref, a code {
+tt.xref, a tt {
     background-color: transparent;
     font-weight: bold;
 }
 
-h1 code, h2 code, h3 code, h4 code, h5 code, h6 code {
+h1 tt, h2 tt, h3 tt, h4 tt, h5 tt, h6 tt {
     background-color: transparent;
 }
 

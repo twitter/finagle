@@ -1,3 +1,4 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -6,14 +7,14 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Contents &#8212; Finagle 17.11.0 documentation</title>
+    <title>Contents &mdash; Finagle 17.11.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '17.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -24,10 +25,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
     <link rel="top" title="Finagle 17.11.0 documentation" href="#" />
-    <link rel="next" title="Quickstart" href="Quickstart.html" />
    
   
   <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
@@ -43,50 +41,47 @@
   </script>
 
   </head>
-  <body role="document">
+  <body>
   
   
   <div class=indexwrapper>
   
 
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="Quickstart.html" title="Quickstart"
-             accesskey="N">next</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">Finagle</a> &#187;</li> 
+        <li><a href="#">Finagle</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body" role="main">
+          <div class="body">
             
   <img alt="_images/logo_medium.png" class="logo" src="_images/logo_medium.png" />
 <p>Finagle is an extensible RPC system for the JVM, used to construct
 high-concurrency servers. Finagle implements uniform client and
 server APIs for several protocols, and is designed for high
 performance and concurrency. Most of Finagle&#8217;s code is protocol
-agnostic, simplifying the implementation of new <a class="reference internal" href="Protocols.html"><span class="doc">protocols</span></a>.</p>
+agnostic, simplifying the implementation of new <a class="reference internal" href="Protocols.html"><em>protocols</em></a>.</p>
 <p>Finagle uses a <em>clean</em>, <em>simple</em>, and <em>safe</em> concurrent programming
-model, based on <a class="reference internal" href="Futures.html"><span class="doc">Futures</span></a>. This leads to safe and
+model, based on <a class="reference internal" href="Futures.html"><em>Futures</em></a>. This leads to safe and
 modular programs that are also simple to reason about.</p>
 <p>Finagle clients and servers expose statistics for monitoring and
 diagnostics. They are also traceable through a mechanism similar to
 <a class="reference external" href="http://research.google.com/pubs/pub36356.html">Dapper</a>&#8216;s (another Twitter open source project, <a class="reference external" href="http://zipkin.io">Zipkin</a>, provides
 trace aggregation and visualization).</p>
-<p>The <a class="reference internal" href="Quickstart.html"><span class="doc">quickstart</span></a> has an overview of the most
+<p>The <a class="reference internal" href="Quickstart.html"><em>quickstart</em></a> has an overview of the most
 important concepts, walking you through the setup of a simple HTTP
 server and client.</p>
-<p>A section on <a class="reference internal" href="Futures.html"><span class="doc">Futures</span></a> follows, motivating and
+<p>A section on <a class="reference internal" href="Futures.html"><em>Futures</em></a> follows, motivating and
 explaining the important ideas behind the concurrent programming
 model used in Finagle. The next section documents
-<a class="reference internal" href="ServicesAndFilters.html"><span class="doc">Services &amp; Filters</span></a> which are the core
+<a class="reference internal" href="ServicesAndFilters.html"><em>Services &amp; Filters</em></a> which are the core
 abstractions used to represent clients and servers and modify
 their behavior.</p>
 <p>Other useful resources include:</p>
@@ -99,46 +94,13 @@ their behavior.</p>
 </ul>
 <div class="section" id="contents">
 <h1>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound" id="user-s-guide">
-<p class="caption"><span class="caption-text">User&#8217;s Guide</span><a class="headerlink" href="#user-s-guide" title="Permalink to this toctree">¶</a></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="Quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Futures.html">Concurrent Programming with Futures</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ServicesAndFilters.html">Services &amp; Filters</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Configuration.html">Configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Servers.html">Servers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Clients.html">Clients</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Contexts.html">Contexts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Names.html">Names and Naming in Finagle</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Protocols.html">Protocols</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Metrics.html">Metrics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="UnsuccessfulResponses.html">Unsuccessful Responses</a></li>
-<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Glossary.html">Glossary of Terms</a></li>
-</ul>
-</div>
-<div class="toctree-wrapper compound" id="developer-s-guide">
-<p class="caption"><span class="caption-text">Developer&#8217;s Guide</span><a class="headerlink" href="#developer-s-guide" title="Permalink to this toctree">¶</a></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="developers/Extending.html">Extending Finagle</a></li>
-<li class="toctree-l1"><a class="reference internal" href="developers/Futures.html">Twitter Futures</a></li>
-<li class="toctree-l1"><a class="reference internal" href="developers/SignalingFailure.html">Signaling Failure within Finagle</a></li>
-</ul>
-</div>
-<div class="toctree-wrapper compound" id="notes">
-<p class="caption"><span class="caption-text">Notes</span><a class="headerlink" href="#notes" title="Permalink to this toctree">¶</a></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
-<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
-</ul>
-</div>
 </div>
 
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper"><a href="index.html"><h3>Finagle</h3></a>
 <p>
   Finagle is a network stack for distributed systems.
