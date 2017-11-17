@@ -1,6 +1,7 @@
 package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle._
 import com.twitter.util._
@@ -375,5 +376,51 @@ class RetriesTest extends FunSuite {
     // closing the factory should remove the gauge
     svcFactory.close(Duration.Zero)
     assert(budgetGauge.isEmpty)
+  }
+
+  test("Sets RetryBudget param for lower modules when none is configured") {
+    val verifyModule =
+      new Stack.Module[ServiceFactory[Unit, Unit]] {
+        val role = Stack.Role("verifyRetryBudget")
+        val description = "Verify that the retry budget was added to the params"
+
+        val parameters = Seq.empty
+
+        def make(params: Stack.Params, next: Stack[ServiceFactory[Unit, Unit]]) = {
+          assert(params.size == 1 && params.head._2.isInstanceOf[Retries.Budget])
+          Stack.Leaf(this, next.make(params))
+        }
+      }
+
+    val factory = new StackBuilder[ServiceFactory[Unit, Unit]](nilStack[Unit, Unit])
+      .push(verifyModule)
+      .push(Retries.moduleRequeueable)
+      .make(Stack.Params.empty)
+
+    factory()
+  }
+
+  test("Sets same RetryBudget param for lower modules when one is configured") {
+    val budget = Retries.Budget(newBudget())
+
+    val verifyModule =
+      new Stack.Module[ServiceFactory[Unit, Unit]] {
+        val role = Stack.Role("verifyRetryBudget")
+        val description = "Verify that the same retry budget was added to the params"
+
+        val parameters = Seq.empty
+
+        def make(params: Stack.Params, next: Stack[ServiceFactory[Unit, Unit]]) = {
+          assert(params.size == 1 && (params[Retries.Budget] eq budget))
+          Stack.Leaf(this, next.make(params))
+        }
+      }
+
+    val factory = new StackBuilder[ServiceFactory[Unit, Unit]](nilStack[Unit, Unit])
+      .push(verifyModule)
+      .push(Retries.moduleRequeueable)
+      .make(Stack.Params.empty + budget)
+
+    factory()
   }
 }
