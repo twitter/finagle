@@ -1,19 +1,24 @@
 package com.twitter.finagle.mysql
 
+import com.twitter.finagle.Mysql
+import com.twitter.finagle.filter.NackAdmissionFilter
 import com.twitter.util.Time
-import org.junit.runner.RunWith
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
-import org.scalatest.{MustMatchers, FunSuite}
+import org.scalatest.{FunSuite, MustMatchers}
 
 /**
  * Tests the functionality of the MySQL client.
  */
-@RunWith(classOf[JUnitRunner])
 class ClientTest extends FunSuite with MockitoSugar with MustMatchers {
   private val sqlQuery = "SELECT * FROM FOO"
+
+  test("client stack excludes NackAdmissionFilter") {
+    val client = Mysql.client
+    val stack = client.stack
+    assert(!stack.contains(NackAdmissionFilter.role))
+  }
 
   test("basic test creates a new service for each query") {
     val service = new MockService()

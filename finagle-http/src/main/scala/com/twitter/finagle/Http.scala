@@ -3,7 +3,7 @@ package com.twitter.finagle
 import com.twitter.finagle.client._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
-import com.twitter.finagle.filter.PayloadSizeFilter
+import com.twitter.finagle.filter.{NackAdmissionFilter, PayloadSizeFilter}
 import com.twitter.finagle.http._
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
 import com.twitter.finagle.http.exp.StreamTransport
@@ -11,7 +11,11 @@ import com.twitter.finagle.http.filter._
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.http2.{Http2Listener, Http2Transporter}
-import com.twitter.finagle.netty3.http.{Netty3ClientStreamTransport, Netty3Http, Netty3ServerStreamTransport}
+import com.twitter.finagle.netty3.http.{
+  Netty3ClientStreamTransport,
+  Netty3Http,
+  Netty3ServerStreamTransport
+}
 import com.twitter.finagle.netty4.http.{Netty4HttpListener, Netty4HttpTransporter}
 import com.twitter.finagle.netty4.http.{Netty4ClientStreamTransport, Netty4ServerStreamTransport}
 import com.twitter.finagle.server._
@@ -168,6 +172,14 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
         // We add a DelayedRelease module at the bottom of the stack to ensure
         // that the pooling levels above don't discard an active session.
         .replace(StackClient.Role.prepConn, DelayedRelease.module)
+        // Since NackAdmissionFilter should operate on all requests sent over
+        // the wire including retries, it must be below `Retries`. Since it
+        // aggregates the status of the entire cluster, it must be above
+        // `LoadBalancerFactory` (not part of the endpoint stack).
+        .insertBefore(
+          StackClient.Role.prepFactory,
+          NackAdmissionFilter.module[http.Request, http.Response]
+        )
         // Ensure that FactoryToService doesn't release the connection to the layers
         // below when the response body hasn't been fully consumed.
         .replace(StackClient.Role.prepFactory, DelayedRelease.module)
@@ -178,9 +190,10 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
           new Stack.NoOpModule(http.filter.StatsFilter.role, http.filter.StatsFilter.description)
         )
 
-    private def params: Stack.Params = StackClient.defaultParams +
-      protocolLibrary +
-      responseClassifierParam
+    private def params: Stack.Params =
+      StackClient.defaultParams +
+        protocolLibrary +
+        responseClassifierParam
   }
 
   case class Client(
@@ -528,12 +541,14 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
 
     protected def superServe(
       addr: SocketAddress,
-      factory: ServiceFactory[Request, Response]): ListeningServer = {
+      factory: ServiceFactory[Request, Response]
+    ): ListeningServer = {
       super.serve(addr, factory)
     }
     override def serve(
       addr: SocketAddress,
-      factory: ServiceFactory[Request, Response]): ListeningServer = {
+      factory: ServiceFactory[Request, Response]
+    ): ListeningServer = {
       val shouldHttp2 =
         if (params[Transport.ServerSsl].sslServerConfiguration == None) useH2C()
         else useH2()

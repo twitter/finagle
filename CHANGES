@@ -13,6 +13,14 @@ New Features
   * finagle-thrift, finagle-thriftmux: Add support for Scrooge
     `ReqRepServicePerEndpoint` functionality. ``PHAB_ID=D107397``
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: Remove `NackAdmissionControl` from the default client stack.
+    Add it to the finagle-{http,mux,thriftmux} client stacks; note that it is
+    added to finagle-http2 via finagle-http. It is no longer part of the
+    finagle-{memcached,mysql,redis} client stacks. ``PHAB_ID=D111722``
+
 17.11.0
 -------
 
