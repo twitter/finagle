@@ -252,24 +252,31 @@ private class DeferredTransport(
   // we create a derivative promise while `underlying` is not defined
   // because the transport is multiplexed and interrupting on one
   // stream shouldn't affect the result of the handshake.
-  private[this] def gate() = underlying.interruptible()
+  private[this] def gate(): Future[Transport[Message, Message]] =
+    underlying.interruptible()
 
-  def write(msg: Message): Future[Unit] = gate().flatMap(_.write(msg))
+  def write(msg: Message): Future[Unit] = gate().transform {
+    case Return(trans) => trans.write(msg)
+    case t @ Throw(_) => Future.const(t.cast[Unit])
+  }
 
-  private[this] val read0: Transport[Message, Message] => Future[Message] = _.read()
-  def read(): Future[Message] = gate().flatMap(read0)
+  private[this] val read0: Try[Transport[Message, Message]] => Future[Message] = {
+    case Return(trans) => trans.read()
+    case t @ Throw(_) => Future.const(t.cast[Message])
+  }
+  def read(): Future[Message] = gate().transform(read0)
 
   def status: Status = underlying.poll match {
-    case Some(Return(t)) => t.status
+    case Some(Return(t)) => t.context.status
     case None => Status.Busy
     case _ => Status.Closed
   }
 
-  val onClose: Future[Throwable] = gate().flatMap(_.onClose)
+  val onClose: Future[Throwable] = gate().flatMap(_.context.onClose)
 
-  def localAddress: SocketAddress = init.localAddress
-  def remoteAddress: SocketAddress = init.remoteAddress
-  def peerCertificate: Option[Certificate] = init.peerCertificate
+  def localAddress: SocketAddress = init.context.localAddress
+  def remoteAddress: SocketAddress = init.context.remoteAddress
+  def peerCertificate: Option[Certificate] = init.context.peerCertificate
 
   def close(deadline: Time): Future[Unit] = gate().flatMap(_.close(deadline))
   val context: TransportContext = new LegacyContext(this)
