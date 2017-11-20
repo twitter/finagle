@@ -203,7 +203,7 @@ object TraceId {
  *                decision to someone further down in the stack.
  * @param flags Flags relevant to this request. Could be things like debug mode on/off. The sampled flag could eventually
  *              be moved in here.
- * @param _traceIdHigh The high 64bits of the id for this request, when the id is 128bits.
+ * @param traceIdHigh The high 64bits of the id for this request, when the id is 128bits.
  */
 final case class TraceId(
   _traceId: Option[SpanId],

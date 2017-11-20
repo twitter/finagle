@@ -67,7 +67,12 @@ private object TraceInfo {
     removeAllHeaders(request.headerMap)
 
     val traceId = Trace.id
-    request.headerMap.add(Header.TraceId, traceId.traceId.toString)
+    val traceIdString = if (traceId.traceIdHigh.isEmpty) {
+      traceId.traceId.toString
+    } else {
+      traceId.traceIdHigh.get.toString + traceId.traceId.toString
+    }
+    request.headerMap.add(Header.TraceId, traceIdString)
     request.headerMap.add(Header.SpanId, traceId.spanId.toString)
     // no parent id set means this is the root span
     traceId._parentId match {
@@ -81,7 +86,9 @@ private object TraceInfo {
         request.headerMap.add(Header.Sampled, sampled.toString)
       case None => ()
     }
-    request.headerMap.add(Header.Flags, JLong.toString(traceId.flags.toLong))
+    if (traceId.flags.toLong != 0L) {
+      request.headerMap.add(Header.Flags, JLong.toString(traceId.flags.toLong))
+    }
     traceRpc(request)
   }
 
