@@ -5,7 +5,8 @@ import com.twitter.logging.Logger
 import io.netty.channel._
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
-import io.netty.handler.codec.http.{LastHttpContent, HttpObject}
+import io.netty.handler.codec.http.{HttpObject, LastHttpContent}
+import io.netty.util.ReferenceCountUtil
 import io.netty.util.concurrent.PromiseCombiner
 import scala.collection.mutable.HashMap
 
@@ -122,6 +123,7 @@ private[http2] class AdapterProxyChannelHandler(setupFn: ChannelPipeline => Unit
       val wrongType = new IllegalArgumentException(
         s"Expected a StreamMessage or UpgradeEvent, got ${msg.getClass.getName} instead."
       )
+      ReferenceCountUtil.release(msg)
       log.error(wrongType, "Tried to write the wrong type to the http2 client pipeline")
       ctx.fireExceptionCaught(wrongType)
   }
@@ -142,6 +144,7 @@ private[http2] class AdapterProxyChannelHandler(setupFn: ChannelPipeline => Unit
         val wrongType = new IllegalArgumentException(
           s"Expected a StreamMessage, got ${msg.getClass.getName} instead."
         )
+        ReferenceCountUtil.release(msg)
         log.error(wrongType, "Tried to write the wrong type to the http2 client pipeline")
         promise.setFailure(wrongType)
     }

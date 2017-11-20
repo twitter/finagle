@@ -1,9 +1,9 @@
 package com.twitter.finagle.http2.transport
 
-import com.twitter.finagle.http.filter.HttpNackFilter.{RetryableNackHeader, NonRetryableNackHeader}
+import com.twitter.finagle.http.filter.HttpNackFilter.{NonRetryableNackHeader, RetryableNackHeader}
 import io.netty.channel.{
-  ChannelOutboundHandlerAdapter,
   ChannelHandlerContext,
+  ChannelOutboundHandlerAdapter,
   ChannelPromise,
   ChannelPromiseNotifier
 }
@@ -13,6 +13,7 @@ import io.netty.handler.codec.http2.{
   Http2HeadersFrame,
   Http2ResetFrame
 }
+import io.netty.util.ReferenceCountUtil
 
 /**
  * Converts finagle's nack-via headers messages into true NACKs using HTTP/2
@@ -37,20 +38,19 @@ private[http2] class Http2NackHandler extends ChannelOutboundHandlerAdapter {
   ): Unit =
     if (continue == null) {
       msg match {
-        case headersFrame: Http2HeadersFrame =>
-          val headers = headersFrame.headers
-          if (headers.contains(RetryableNackHeader)) {
-            continue = p
-            super.write(ctx, Http2NackHandler.retryableNack, p)
-          } else if (headers.contains(NonRetryableNackHeader)) {
-            continue = p
-            super.write(ctx, Http2NackHandler.nonRetryableNack, p)
-          } else {
-            super.write(ctx, msg, p)
-          }
-        case _ => super.write(ctx, msg, p)
+        case frame: Http2HeadersFrame if frame.headers.contains(RetryableNackHeader) =>
+          continue = p
+          ReferenceCountUtil.release(msg)
+          super.write(ctx, Http2NackHandler.retryableNack, p)
+        case frame: Http2HeadersFrame if frame.headers.contains(NonRetryableNackHeader) =>
+          continue = p
+          ReferenceCountUtil.release(msg)
+          super.write(ctx, Http2NackHandler.nonRetryableNack, p)
+        case _ =>
+          super.write(ctx, msg, p)
       }
     } else {
+      ReferenceCountUtil.release(msg)
       val listener = new ChannelPromiseNotifier(p)
       continue.addListener(listener)
     }

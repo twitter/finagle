@@ -1,12 +1,13 @@
 package com.twitter.finagle.http2.transport
 
-import com.twitter.finagle.http2.transport.Http2ClientDowngrader.{GoAway, Message, Rst, Ping}
+import com.twitter.finagle.http2.transport.Http2ClientDowngrader.{GoAway, Message, Ping, Rst}
 import com.twitter.logging.Logger
 import io.netty.buffer.Unpooled
 import io.netty.channel.{ChannelHandlerContext, ChannelPromise}
 import io.netty.handler.codec.http._
 import io.netty.handler.codec.http2.Http2Exception.HeaderListSizeException
 import io.netty.handler.codec.http2._
+import io.netty.util.ReferenceCountUtil
 import io.netty.util.concurrent.PromiseCombiner
 import scala.util.control.NonFatal
 
@@ -109,7 +110,8 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
         encoder.writeRstStream(ctx, streamId, errorCode, promise)
       case Ping =>
         encoder.writePing(ctx, false /* ack */, Http2CodecUtil.emptyPingBuf, promise)
-      case GoAway(_, streamId, errorCode) =>
+      case GoAway(obj, streamId, errorCode) =>
+        ReferenceCountUtil.release(obj)
         encoder.writeGoAway(
           ctx,
           streamId,
@@ -121,6 +123,7 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
         val wrongType = new IllegalArgumentException(
           s"Expected a Message, got ${msg.getClass.getName} instead."
         )
+        ReferenceCountUtil.release(msg)
         log.error(wrongType, "Tried to write the wrong type to the http2 client pipeline")
         promise.setFailure(wrongType)
     }

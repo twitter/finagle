@@ -25,6 +25,7 @@ private[http2] class RstHandler extends ChannelDuplexHandler {
     case rst: Http2ResetFrame =>
       // we don't propagate reset frames because http/1.1 doesn't know how to handle it.
       errorCode = Some(rst.errorCode)
+      ReferenceCountUtil.release(msg)
     case _ =>
       super.channelRead(ctx, msg)
   }
@@ -34,8 +35,8 @@ class ClientDiscardedRequestException private[transport] (
   errorCode: Long,
   private[finagle] val flags: Long = FailureFlags.NonRetryable
 ) extends Exception(
-  s"Attempted to write to a stream after receiving an RST with error code $errorCode"
-)
+      s"Attempted to write to a stream after receiving an RST with error code $errorCode"
+    )
     with FailureFlags[ClientDiscardedRequestException]
     with HasLogLevel {
   def logLevel: Level = Level.DEBUG
