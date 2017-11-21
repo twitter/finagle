@@ -364,6 +364,32 @@ abstract class AbstractEndToEndTest
     Await.ready(Closable.all(server, client).close(), 5.seconds)
   }
 
+  test(s"$implName: correctly scopes non-mux stats") {
+    val sr = new InMemoryStatsReceiver
+    val service = new Service[Request, Response] {
+      def apply(req: Request) = Future.value(Response(Nil, req.body.concat(req.body)))
+    }
+    val server = serverImpl
+      .withLabel("server")
+      .withStatsReceiver(sr)
+      .serve("localhost:*", service)
+
+    val client = clientImpl
+      .withStatsReceiver(sr)
+      .newService(
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+        "client"
+      )
+
+    Await.ready(client(Request(Path.empty, Nil, Buf.Utf8("." * 10))), 5.seconds)
+
+    // Stats defined in the ChannelStatsHandler
+    assert(sr.counter("client", "connects")() > 0)
+    assert(sr.counter("server", "connects")() > 0)
+
+    Await.ready(Closable.all(server, client).close(), 5.seconds)
+  }
+
   test(s"$implName: Default client stack will add RemoteInfo on BadMessageException") {
 
     class Server {

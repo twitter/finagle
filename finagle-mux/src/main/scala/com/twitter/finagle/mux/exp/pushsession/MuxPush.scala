@@ -153,7 +153,7 @@ private[finagle] object MuxPush
         _ => (),
         MuxServerPipelineInit,
         inetSocketAddress,
-        Mux.param.removeTlsIfOpportunisticClient(buildParams)
+        Mux.param.removeTlsIfOpportunisticClient(params) // we don't want to scope these metrics to mux
       ) {
         override protected def initSession[T <: PushSession[ByteReader, Buf]](
           channel: Channel,
