@@ -2,30 +2,30 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Metrics &mdash; Finagle 17.11.0 documentation</title>
-    
+    <title>Metrics &#8212; Finagle 17.12.0-SNAPSHOT documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
-        VERSION:     '17.11.0',
+        URL_ROOT:    './',
+        VERSION:     '17.12.0-SNAPSHOT',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="Finagle 17.11.0 documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Unsuccessful Responses" href="UnsuccessfulResponses.html" />
+    <link rel="prev" title="Protocols" href="Protocols.html" />
    
   
   <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
@@ -45,38 +45,44 @@
   
   
 
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li><a href="index.html">Finagle</a> &raquo;</li> 
+        <li class="right" >
+          <a href="UnsuccessfulResponses.html" title="Unsuccessful Responses"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Protocols.html" title="Protocols"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="metrics">
 <h1>Metrics<a class="headerlink" href="#metrics" title="Permalink to this headline">¶</a></h1>
 <p>This section aims to be a comprehensive list of all of the metrics that Finagle
 exposes. The metrics are organized by layer and then by class.</p>
-<p>Finagle leverages <a class="reference external" href="https://twitter.github.io/util/guide/util-stats/basics.html#verbosity-levels">verbosity levels</a> and defines some of its low-utility metrics as &#8220;debug&#8221;.
-Unless explicitly stated, assume <tt class="docutils literal"><span class="pre">Verbosity.Default</span></tt> is used to define a given metric.</p>
+<p>Finagle leverages <a class="reference external" href="https://twitter.github.io/util/guide/util-stats/basics.html#verbosity-levels">verbosity levels</a> and defines some of its low-utility metrics as “debug”.
+Unless explicitly stated, assume <code class="docutils literal"><span class="pre">Verbosity.Default</span></code> is used to define a given metric.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p>Some of the metrics are only for clients, some only for servers, and some are for both.</p>
 <p class="last">Some metrics are only visible when certain optional classes are used.</p>
 </div>
-<p>NB: Finagle sometimes uses <tt class="docutils literal"><span class="pre">RollupStatsReceivers</span></tt> internally, which will take
-stats like &#8220;failures/twitter/TimeoutException&#8221; and roll them up, aggregating
-into &#8220;failures/twitter&#8221; and also &#8220;failures&#8221;. For example, if there are 3
-&#8220;failures/twitter/TimeoutException&#8221; counted, and 4
-&#8220;failures/twitter/ConnectTimeoutException&#8221;, then it will count 7 for
-&#8220;failures/twitter&#8221;.</p>
+<p>NB: Finagle sometimes uses <code class="docutils literal"><span class="pre">RollupStatsReceivers</span></code> internally, which will take
+stats like “failures/twitter/TimeoutException” and roll them up, aggregating
+into “failures/twitter” and also “failures”. For example, if there are 3
+“failures/twitter/TimeoutException” counted, and 4
+“failures/twitter/ConnectTimeoutException”, then it will count 7 for
+“failures/twitter”.</p>
 <div class="section" id="public">
 <h2>Public<a class="headerlink" href="#public" title="Permalink to this headline">¶</a></h2>
 <p id="public-stats">These stats come from the public interface, and are the ones that you should look at first
@@ -95,9 +101,9 @@ They are also useful in diagnosing what contributes to request latency.</p>
 <dd>A gauge of the current total number of outstanding requests.</dd>
 <dt><strong>failures/&lt;exception_name&gt;+</strong></dt>
 <dd>A counter of the number of times a specific exception has been thrown.
-If you are using a <tt class="docutils literal"><span class="pre">ResponseClassifier</span></tt> that classifies non-Exceptions
+If you are using a <code class="docutils literal"><span class="pre">ResponseClassifier</span></code> that classifies non-Exceptions
 as failures, it will use a synthetic Exception,
-<tt class="docutils literal"><span class="pre">com.twitter.finagle.service.ResponseClassificationSyntheticException</span></tt>,
+<code class="docutils literal"><span class="pre">com.twitter.finagle.service.ResponseClassificationSyntheticException</span></code>,
 to account for these. See the
 <a class="reference external" href="https://twitter.github.io/finagle/guide/FAQ.html#what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception">FAQ</a>
 for more details.</dd>
@@ -125,10 +131,10 @@ failures include additional information on what service caused the failure.</dd>
 <h3>StatsFactoryWrapper<a class="headerlink" href="#statsfactorywrapper" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils" id="service-factory-failures">
 <dt><strong>failures/&lt;exception_class_name&gt;</strong></dt>
-<dd>A counter of the number of times <a class="reference internal" href="ServicesAndFilters.html"><em>Service</em></a>
+<dd>A counter of the number of times <a class="reference internal" href="ServicesAndFilters.html"><span class="doc">Service</span></a>
 creation has failed with this specific exception.</dd>
 <dt><strong>failures</strong></dt>
-<dd>A counter of the number of times <a class="reference internal" href="ServicesAndFilters.html"><em>Service</em></a>
+<dd>A counter of the number of times <a class="reference internal" href="ServicesAndFilters.html"><span class="doc">Service</span></a>
 creation has failed.</dd>
 <dt><strong>service_acquisition_latency_ms</strong></dt>
 <dd>A stat of the latency, in milliseconds, to acquire a service.
@@ -140,7 +146,7 @@ This entails establishing a connection or waiting for a connection from a pool.<
 <dl class="docutils">
 <dt><strong>handletime_us</strong></dt>
 <dd>A  stat of the time it takes to handle the request in microseconds.
-This is how long it takes to set up the chain of <tt class="docutils literal"><span class="pre">Future</span></tt>s to be used in the
+This is how long it takes to set up the chain of <code class="docutils literal"><span class="pre">Future</span></code>s to be used in the
 response without waiting for the response. Large values suggest blocking code
 on a Finagle thread.</dd>
 <dt><strong>transit_latency_ms</strong></dt>
@@ -163,9 +169,9 @@ on simultaneous requests.</dd>
 <h3>PayloadSizeFilter (enabled for Mux, HTTP (non-chunked), Thrift)<a class="headerlink" href="#payloadsizefilter-enabled-for-mux-http-non-chunked-thrift" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
 <dt><strong>request_payload_bytes</strong> <cite>verbosity:debug</cite></dt>
-<dd>A histogram of the number of bytes per request&#8217;s payload.</dd>
+<dd>A histogram of the number of bytes per request’s payload.</dd>
 <dt><strong>response_payload_bytes</strong> <cite>verbosity:debug</cite></dt>
-<dd>A histogram of the number of bytes per response&#8217;s payload.</dd>
+<dd>A histogram of the number of bytes per response’s payload.</dd>
 </dl>
 </div>
 </div>
@@ -206,9 +212,9 @@ the Aperture implementation.</dd>
 </div>
 <div class="section" id="futurepool">
 <h3>FuturePool<a class="headerlink" href="#futurepool" title="Permalink to this headline">¶</a></h3>
-<p>These metrics correspond to the state of <tt class="docutils literal"><span class="pre">FuturePool.unboundedPool</span></tt> and
-<tt class="docutils literal"><span class="pre">FuturePool.interruptibleUnboundedPool</span></tt>. Only one set of metrics is
-exported as they share their underlying &#8220;thread pool&#8221;.</p>
+<p>These metrics correspond to the state of <code class="docutils literal"><span class="pre">FuturePool.unboundedPool</span></code> and
+<code class="docutils literal"><span class="pre">FuturePool.interruptibleUnboundedPool</span></code>. Only one set of metrics is
+exported as they share their underlying “thread pool”.</p>
 <dl class="docutils">
 <dt><strong>finagle/future_pool/pool_size</strong></dt>
 <dd>A gauge of the number of threads in the pool.</dd>
@@ -223,15 +229,15 @@ exported as they share their underlying &#8220;thread pool&#8221;.</p>
 <dl class="docutils">
 <dt><strong>scheduler/dispatches</strong></dt>
 <dd>A gauge of the number of dispatches performed by the
-<tt class="docutils literal"><span class="pre">com.twitter.concurrent.Scheduler</span></tt>.</dd>
+<code class="docutils literal"><span class="pre">com.twitter.concurrent.Scheduler</span></code>.</dd>
 <dt><strong>scheduler/blocking_ms</strong></dt>
-<dd>A gauge of how much time, in milliseconds, the <tt class="docutils literal"><span class="pre">com.twitter.concurrent.Scheduler</span></tt>
+<dd>A gauge of how much time, in milliseconds, the <code class="docutils literal"><span class="pre">com.twitter.concurrent.Scheduler</span></code>
 is spending doing blocking operations on threads that have opted into tracking.
-Of the built-in <tt class="docutils literal"><span class="pre">Schedulers</span></tt>, this is only enabled for the
-<tt class="docutils literal"><span class="pre">com.twitter.concurrent.LocalScheduler</span></tt> which is the default <tt class="docutils literal"><span class="pre">Scheduler</span></tt>
+Of the built-in <code class="docutils literal"><span class="pre">Schedulers</span></code>, this is only enabled for the
+<code class="docutils literal"><span class="pre">com.twitter.concurrent.LocalScheduler</span></code> which is the default <code class="docutils literal"><span class="pre">Scheduler</span></code>
 implementation. Note that this does not include time spent doing blocking code
-outside of <tt class="docutils literal"><span class="pre">com.twitter.util.Await.result</span></tt>/<tt class="docutils literal"><span class="pre">Await.ready</span></tt>. For example,
-<tt class="docutils literal"><span class="pre">Future(someSlowSynchronousIO)</span></tt> would not be accounted for in this metric.</dd>
+outside of <code class="docutils literal"><span class="pre">com.twitter.util.Await.result</span></code>/<code class="docutils literal"><span class="pre">Await.ready</span></code>. For example,
+<code class="docutils literal"><span class="pre">Future(someSlowSynchronousIO)</span></code> would not be accounted for in this metric.</dd>
 </dl>
 </div>
 <div class="section" id="timer">
@@ -269,12 +275,12 @@ lookup in <a class="reference external" href="https://github.com/twitter/finagle
 <dd>A counter of the number of DNS lookups attempted by <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">InetResolver</a> and failed.</dd>
 <dt><strong>inet/dns/lookup_ms</strong></dt>
 <dd>A histogram of the latency, in milliseconds, of the time to lookup
-every host (successfully or not) in a <tt class="docutils literal"><span class="pre">com.twitter.finagle.Addr</span></tt>.</dd>
+every host (successfully or not) in a <code class="docutils literal"><span class="pre">com.twitter.finagle.Addr</span></code>.</dd>
 <dt><strong>inet/dns/successes</strong></dt>
-<dd>A counter of the number of <tt class="docutils literal"><span class="pre">com.twitter.finagle.Addr</span></tt> s with
+<dd>A counter of the number of <code class="docutils literal"><span class="pre">com.twitter.finagle.Addr</span></code> s with
 at least one resolved host.</dd>
 <dt><strong>inet/dns/failures</strong></dt>
-<dd>A counter of the number of <tt class="docutils literal"><span class="pre">com.twitter.finagle.Addr</span></tt> s with
+<dd>A counter of the number of <code class="docutils literal"><span class="pre">com.twitter.finagle.Addr</span></code> s with
 no resolved hosts.</dd>
 <dt><strong>inet/dns/cache/size</strong></dt>
 <dd>A gauge of the approximate number of cached DNS resolutions in
@@ -289,7 +295,7 @@ evicted from <a class="reference external" href="https://github.com/twitter/fina
 </div>
 <div class="section" id="netty-4">
 <h3>Netty 4<a class="headerlink" href="#netty-4" title="Permalink to this headline">¶</a></h3>
-<p>These metrics are exported from Finagle&#8217;s underlying transport
+<p>These metrics are exported from Finagle’s underlying transport
 implementation, the Netty 4 library and available under <cite>finagle/netty4</cite>
 on any instance running Finagle with Netty 4.</p>
 <dl class="docutils">
@@ -328,7 +334,7 @@ on any instance running Finagle with Netty 4.</p>
 <div class="section" id="load-balancing">
 <h2>Load Balancing<a class="headerlink" href="#load-balancing" title="Permalink to this headline">¶</a></h2>
 <p id="loadbalancer-stats">The client stats under the <cite>loadbalancer</cite> scope expose the innards of
-what&#8217;s going on with load balancing, and the management of equivalent
+what’s going on with load balancing, and the management of equivalent
 groups of hosts.</p>
 <div class="section" id="all-balancers">
 <h3>All Balancers<a class="headerlink" href="#all-balancers" title="Permalink to this headline">¶</a></h3>
@@ -351,7 +357,7 @@ These nodes will never be available for service.</dd>
 being load-balanced across.</dd>
 <dt><strong>num_weight_classes</strong></dt>
 <dd>The number of groups (or classes) of weights in the load balancer. Each class gets
-a fresh instance of the client&#8217;s load balancer and receives traffic proportional
+a fresh instance of the client’s load balancer and receives traffic proportional
 to its weight.</dd>
 <dt><strong>adds</strong></dt>
 <dd>A counter of the number of hosts added to the loadbalancer.</dd>
@@ -364,11 +370,11 @@ to its weight.</dd>
 <dd>A counter of the number of times the underlying namer triggers
 the loadbalancer to rebuild its state (e.g., because the server set
 has changed). Note that these kind of events are usually collapsed
-so the actual number of <tt class="docutils literal"><span class="pre">rebuilds</span></tt> is usually less than the number
-of <tt class="docutils literal"><span class="pre">updates</span></tt>.</dd>
+so the actual number of <code class="docutils literal"><span class="pre">rebuilds</span></code> is usually less than the number
+of <code class="docutils literal"><span class="pre">updates</span></code>.</dd>
 <dt><strong>max_effort_exhausted</strong></dt>
 <dd>A counter of the number of times a balancer failed to find a node that was
-<tt class="docutils literal"><span class="pre">Status.Open</span></tt> within <tt class="docutils literal"><span class="pre">com.twitter.finagle.loadbalancer.Balancer.maxEffort</span></tt>
+<code class="docutils literal"><span class="pre">Status.Open</span></code> within <code class="docutils literal"><span class="pre">com.twitter.finagle.loadbalancer.Balancer.maxEffort</span></code>
 attempts. When this occurs, a non-open node may be selected for that
 request.</dd>
 <dt><strong>algorithm/{type}</strong></dt>
@@ -405,7 +411,7 @@ have fallen out of the aperture window and become idle.</dd>
 <div class="section" id="fail-fast">
 <h2>Fail Fast<a class="headerlink" href="#fail-fast" title="Permalink to this headline">¶</a></h2>
 <p id="fail-fast-stats">The client stats under the <cite>failfast</cite> scope give insight into how
-Finagle handles services where it can&#8217;t establish a connection.</p>
+Finagle handles services where it can’t establish a connection.</p>
 <div class="section" id="failfastfactory">
 <h3>FailFastFactory<a class="headerlink" href="#failfastfactory" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
@@ -449,7 +455,7 @@ reactivated after the penalty period has elapsed.</dd>
 <div class="section" id="idle-apoptosis">
 <h2>Idle Apoptosis<a class="headerlink" href="#idle-apoptosis" title="Permalink to this headline">¶</a></h2>
 <p id="idle-apoptosis-stats">These client stats keep track of how frequently
-<a class="reference internal" href="ServicesAndFilters.html"><em>Services</em></a> are closed due to prolonged idleness.</p>
+<a class="reference internal" href="ServicesAndFilters.html"><span class="doc">Services</span></a> are closed due to prolonged idleness.</p>
 <div class="section" id="expiringservice">
 <h3>ExpiringService<a class="headerlink" href="#expiringservice" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
@@ -464,7 +470,7 @@ expiration duration.</dd>
 </div>
 <div class="section" id="rate-limiting">
 <h2>Rate Limiting<a class="headerlink" href="#rate-limiting" title="Permalink to this headline">¶</a></h2>
-<p id="rate-limiting-stats">These client stats show how much you&#8217;re hitting your rate limit if you&#8217;re using rate limiting.</p>
+<p id="rate-limiting-stats">These client stats show how much you’re hitting your rate limit if you’re using rate limiting.</p>
 <div class="section" id="ratelimitingfilter">
 <h3>RateLimitingFilter<a class="headerlink" href="#ratelimitingfilter" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
@@ -537,20 +543,20 @@ Note that application level failures
 <strong>are not</strong> included, which is particularly important for protocols that include
 exceptions, such as Thrift. The number of retries allowed is controlled by the
 same dynamic budget used for requeues.</p>
-<p>Somewhat confusingly for clients created via <tt class="docutils literal"><span class="pre">ClientBuilder</span></tt> there
-are an additional set of metrics scoped to <cite>tries</cite> that come from <tt class="docutils literal"><span class="pre">StatsFilter</span></tt>.
+<p>Somewhat confusingly for clients created via <code class="docutils literal"><span class="pre">ClientBuilder</span></code> there
+are an additional set of metrics scoped to <cite>tries</cite> that come from <code class="docutils literal"><span class="pre">StatsFilter</span></code>.
 Those metrics represent logical requests, while the metrics below
 are for the  physical requests, including the retries. You can replicate
-this behavior for clients built with the <tt class="docutils literal"><span class="pre">Stack</span></tt> API by wrapping the service
-with a <tt class="docutils literal"><span class="pre">StatsFilter</span></tt> scoped to <cite>tries</cite>.</p>
+this behavior for clients built with the <code class="docutils literal"><span class="pre">Stack</span></code> API by wrapping the service
+with a <code class="docutils literal"><span class="pre">StatsFilter</span></code> scoped to <cite>tries</cite>.</p>
 <dl class="docutils">
 <dt><strong>retries</strong></dt>
 <dd>A stat of the number of times requests are retried as per a policy
-defined by the <tt class="docutils literal"><span class="pre">RetryPolicy</span></tt> from a <tt class="docutils literal"><span class="pre">ClientBuilder</span></tt>.</dd>
+defined by the <code class="docutils literal"><span class="pre">RetryPolicy</span></code> from a <code class="docutils literal"><span class="pre">ClientBuilder</span></code>.</dd>
 <dt><strong>retries/requeues</strong></dt>
 <dd>A counter of the number of times requests are requeued. Failed requests which are
 eligible for requeues are failures which are known to be safe&nbsp;—&nbsp;see
-<tt class="docutils literal"><span class="pre">com.twitter.finagle.service.RetryPolicy.RetryableWriteException</span></tt>.</dd>
+<code class="docutils literal"><span class="pre">com.twitter.finagle.service.RetryPolicy.RetryableWriteException</span></code>.</dd>
 <dt><strong>retries/requeues_per_request</strong></dt>
 <dd>A stat of the number of times requests are requeued.</dd>
 <dt><strong>retries/budget</strong></dt>
@@ -562,18 +568,18 @@ eligible for requeues are failures which are known to be safe&nbsp;—&nbsp;see
 request has been reached.</dd>
 <dt><strong>retries/not_open</strong></dt>
 <dd>A counter of the number of times a request was deemed retryable but
-was not retried due to the underlying <tt class="docutils literal"><span class="pre">Service</span></tt> not having a status
-of <tt class="docutils literal"><span class="pre">Open</span></tt>.</dd>
+was not retried due to the underlying <code class="docutils literal"><span class="pre">Service</span></code> not having a status
+of <code class="docutils literal"><span class="pre">Open</span></code>.</dd>
 <dt><strong>retries/cannot_retry</strong></dt>
 <dd>A counter of the number of times a request was deemed requeueable but
-was not requeued due to the underlying <tt class="docutils literal"><span class="pre">ServiceFactory</span></tt> not having a
-status of <tt class="docutils literal"><span class="pre">Open</span></tt>.</dd>
+was not requeued due to the underlying <code class="docutils literal"><span class="pre">ServiceFactory</span></code> not having a
+status of <code class="docutils literal"><span class="pre">Open</span></code>.</dd>
 </dl>
 </div>
 <div class="section" id="dispatching">
 <h2>Dispatching<a class="headerlink" href="#dispatching" title="Permalink to this headline">¶</a></h2>
 <p id="id2">The client metrics scoped under <cite>dispatcher</cite> represent information about a
-client&#8217;s dispatching layer.</p>
+client’s dispatching layer.</p>
 <p>Depending on the underlying protocol, dispatchers may have different request
 queueing rules.</p>
 <dl class="docutils">
@@ -587,11 +593,11 @@ pipelined requests are currently outstanding.</dd>
 </div>
 <div class="section" id="thread-usage">
 <h2>Thread Usage<a class="headerlink" href="#thread-usage" title="Permalink to this headline">¶</a></h2>
-<p id="threadusage">Metrics scoped under &#8220;thread_usage/requests&#8221; can be used as a signal for
+<p id="threadusage">Metrics scoped under “thread_usage/requests” can be used as a signal for
 seeing if your connections or threads are imbalanced on a server.</p>
 <p>There are caveats which can make these metrics unreliable or not applicable:</p>
 <ul class="simple">
-<li>Work is done on a <tt class="docutils literal"><span class="pre">FuturePool</span></tt> instead of the server&#8217;s thread.</li>
+<li>Work is done on a <code class="docutils literal"><span class="pre">FuturePool</span></code> instead of the server’s thread.</li>
 <li>The amount of work done per request is highly inconsistent.</li>
 <li>Low number of requests.</li>
 </ul>
@@ -601,10 +607,10 @@ seeing if your connections or threads are imbalanced on a server.</p>
 the number of requests handled by each thread. Put another way, the closer this
 is to 0.0 the less variance there is in the number of requests handled per thread.</p>
 <p class="last">If this value is large, before taking action, you may want to first verify the metric
-by looking at the node&#8217;s thread utilization. Examples include <cite>mpstat -P ALL</cite>
+by looking at the node’s thread utilization. Examples include <cite>mpstat -P ALL</cite>
 and <cite>top -p $pid -H</cite>. You may also want to look at the debug metrics for
-&#8220;mean&#8221; and &#8220;stdev&#8221; to help quantify the amount of imbalance. One solution to
-mitigate imbalance is to move work to a <tt class="docutils literal"><span class="pre">FuturePool</span></tt>.</p>
+“mean” and “stdev” to help quantify the amount of imbalance. One solution to
+mitigate imbalance is to move work to a <code class="docutils literal"><span class="pre">FuturePool</span></code>.</p>
 </dd>
 <dt><strong>mean</strong> <cite>verbosity:debug</cite></dt>
 <dd>A gauge of the arithemetic mean, or average, of the number of requests handled
@@ -683,10 +689,10 @@ they succeeded.</dd>
 <dl class="docutils">
 <dt><strong>read_timeout</strong></dt>
 <dd>A counter of the number of times the netty channel has caught a
-<tt class="docutils literal"><span class="pre">ReadTimeoutException</span></tt> while reading.</dd>
+<code class="docutils literal"><span class="pre">ReadTimeoutException</span></code> while reading.</dd>
 <dt><strong>write_timeout</strong></dt>
 <dd>A counter of the number of times the netty channel has caught a
-<tt class="docutils literal"><span class="pre">WriteTimeoutException</span></tt> while writing.</dd>
+<code class="docutils literal"><span class="pre">WriteTimeoutException</span></code> while writing.</dd>
 </dl>
 </div>
 <div class="section" id="channelrequeststatshandler">
@@ -705,7 +711,7 @@ connection.</dd>
 <dt><strong>closes</strong></dt>
 <dd>A counter of the total number of channel close operations initiated. To see the
 total number of closes completed, use the total count from one of the
-&#8220;connection_duration&#8221;, &#8220;connection_received_bytes&#8221;, or &#8220;connection_sent_bytes&#8221;
+“connection_duration”, “connection_received_bytes”, or “connection_sent_bytes”
 histograms.</dd>
 <dt><strong>connection_duration</strong> <cite>verbosity:debug</cite></dt>
 <dd>A histogram of the duration of the lifetime of a connection.</dd>
@@ -746,7 +752,7 @@ for thrift responses. The thrift server maintains a growable reusable buffer
 for responses. Once the buffer reaches the threshold size it is discarded and
 reset to a smaller size. This is done to accommodate variable response sizes.
 A high resetCount means the server is allocating and releasing memory
-frequently. Use the <tt class="docutils literal"><span class="pre">com.twitter.finagle.Thrift.param.MaxReusableBufferSize</span></tt>
+frequently. Use the <code class="docutils literal"><span class="pre">com.twitter.finagle.Thrift.param.MaxReusableBufferSize</span></code>
 param to set the max buffer size to the size of a typical thrift response for
 your server.</dd>
 </dl>
@@ -757,7 +763,7 @@ your server.</dd>
 <p id="id4">These metrics track the state of name resolution and service discovery.</p>
 <div class="section" id="id5">
 <h3>Name Resolution<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
-<p>Finagle clients resolve <a class="reference internal" href="Names.html"><em>names</em></a> into sets of network
+<p>Finagle clients resolve <a class="reference internal" href="Names.html"><span class="doc">names</span></a> into sets of network
 addresses to which sockets can be opened. A number of the moving parts
 involved in this process are cached (i.e.
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Dtab.scala">Dtabs</a>,
@@ -772,15 +778,15 @@ visibility into this caching.</p>
 <dt><strong>evicts</strong></dt>
 <dd>A counter of the number of cache evictions.</dd>
 <dt><strong>expires</strong></dt>
-<dd>A counter of the number of idle <tt class="docutils literal"><span class="pre">ServiceFactory</span></tt>s
+<dd>A counter of the number of idle <code class="docutils literal"><span class="pre">ServiceFactory</span></code>s
 that were actively evicted.</dd>
 <dt><strong>idle</strong></dt>
-<dd>A gauge of the number of cached idle <tt class="docutils literal"><span class="pre">ServiceFactory</span></tt>s.</dd>
+<dd>A gauge of the number of cached idle <code class="docutils literal"><span class="pre">ServiceFactory</span></code>s.</dd>
 <dt><strong>oneshots</strong></dt>
-<dd>A counter of the number of &#8220;one-off&#8221; <tt class="docutils literal"><span class="pre">ServiceFactory</span></tt>s that are
-created in the event that no idle <tt class="docutils literal"><span class="pre">ServiceFactory</span></tt>s are cached.</dd>
+<dd>A counter of the number of “one-off” <code class="docutils literal"><span class="pre">ServiceFactory</span></code>s that are
+created in the event that no idle <code class="docutils literal"><span class="pre">ServiceFactory</span></code>s are cached.</dd>
 <dt><strong>namer/bind_latency_us</strong></dt>
-<dd>A stat of the total time spent resolving <tt class="docutils literal"><span class="pre">Name</span></tt>s.</dd>
+<dd>A stat of the total time spent resolving <code class="docutils literal"><span class="pre">Name</span></code>s.</dd>
 </dl>
 </div>
 <div class="section" id="initial-resolution">
@@ -800,10 +806,10 @@ created in the event that no idle <tt class="docutils literal"><span class="pre"
 </ol>
 <p>Note that hosts added to a cluster are reflected immediately.</p>
 <p>The following metrics are scoped under the concatenation of <cite>zk2/</cite> and
-the ServerSet&#8217;s ZooKeeper path.</p>
+the ServerSet’s ZooKeeper path.</p>
 <dl class="docutils">
 <dt><strong>limbo</strong></dt>
-<dd>A gauge tracking the number of endpoints that are in &#8220;limbo&#8221;. When a
+<dd>A gauge tracking the number of endpoints that are in “limbo”. When a
 member leaves a cluster, it is placed in limbo. Hosts in limbo are
 still presented to the load balancer as belonging to the cluster,
 but are staged for removal. They are removed if they do not recover
@@ -854,7 +860,7 @@ within vector znodes.</dd>
 <dd>A histogram of the latency, in milliseconds, of ephemeral node creation.</dd>
 <dt><strong>watch_successes</strong></dt>
 <dd>A counter of the number successful watch-related operations
-(i.e. &#8220;watch exists&#8221;, &#8220;get watch data&#8221;, and &#8220;get child watches&#8221;
+(i.e. “watch exists”, “get watch data”, and “get child watches”
 operations).</dd>
 <dt><strong>watch_failures</strong></dt>
 <dd>A counter of the number failed watch-related operations.</dd>
@@ -898,7 +904,7 @@ operations).</dd>
 </div>
 <div class="section" id="jvm">
 <h2>JVM<a class="headerlink" href="#jvm" title="Permalink to this headline">¶</a></h2>
-<p id="jvm-metrics">A wide variety of metrics are exported which provide insight into the JVM&#8217;s
+<p id="jvm-metrics">A wide variety of metrics are exported which provide insight into the JVM’s
 runtime. These include garbage collection, allocations, threads, uptime,
 and more.</p>
 <p>If you are using a Hotspot VM, additional metrics are exported that
@@ -912,7 +918,7 @@ and tenuring threshold (<cite>jvm/tenuring_threshold</cite>).</p>
 relevant metric for service developers. The vast majority of allocations are
 done into the eden space, so this metric can be used to calculate the allocations
 per request which in turn can be used to validate code changes
-don&#8217;t increase garbage collection pressure on the hot path.</dd>
+don’t increase garbage collection pressure on the hot path.</dd>
 <dt><strong>jvm/gc/msec</strong></dt>
 <dd>A gauge of the total elapsed time doing collections, in milliseconds.</dd>
 <dt><strong>jvm/gc/cycles</strong></dt>
@@ -1005,7 +1011,7 @@ include direct and mapped, though the names are subject to change.</dd>
 </div>
 <div class="section" id="toggles">
 <h2>Toggles<a class="headerlink" href="#toggles" title="Permalink to this headline">¶</a></h2>
-<p>These metrics correspond to <a class="reference internal" href="Configuration.html#toggles"><em>feature toggles</em></a>.</p>
+<p>These metrics correspond to <a class="reference internal" href="Configuration.html#toggles"><span class="std std-ref">feature toggles</span></a>.</p>
 <dl class="docutils">
 <dt><strong>toggles/&lt;libraryName&gt;/checksum</strong></dt>
 <dd>A gauge summarizing the current state of a <cite>ToggleMap</cite> which may be useful
@@ -1074,7 +1080,7 @@ because the backing set of servers has changed.</dd>
 </div>
 <div class="section" id="mux">
 <h2>Mux<a class="headerlink" href="#mux" title="Permalink to this headline">¶</a></h2>
-<p id="mux-stats">These stats pertain to the <a class="reference internal" href="Protocols.html#mux"><em>Mux</em></a> protocol.</p>
+<p id="mux-stats">These stats pertain to the <a class="reference internal" href="Protocols.html#mux"><span class="std std-ref">Mux</span></a> protocol.</p>
 <dl class="docutils">
 <dt><strong>&lt;server_label&gt;/mux/draining</strong></dt>
 <dd>A counter of the number of times the server has initiated session draining.</dd>
@@ -1125,14 +1131,14 @@ upgraded a connection to TLS.</dd>
 </div>
 <div class="section" id="thriftmux">
 <h2>ThriftMux<a class="headerlink" href="#thriftmux" title="Permalink to this headline">¶</a></h2>
-<p id="thriftmux-stats">These stats pertain to the <a class="reference internal" href="FAQ.html#whats-thriftmux"><em>ThriftMux</em></a> protocol.</p>
+<p id="thriftmux-stats">These stats pertain to the <a class="reference internal" href="FAQ.html#whats-thriftmux"><span class="std std-ref">ThriftMux</span></a> protocol.</p>
 <dl class="docutils">
 <dt><strong>&lt;server_label&gt;/thriftmux/connects</strong></dt>
 <dd>A counter of the number of times the server has created a ThriftMux
 connection. This does not include downgraded Thrift connections.</dd>
 <dt><strong>&lt;server_label&gt;/thriftmux/downgraded_connects</strong></dt>
 <dd>A counter of the number of times the server has created a downgraded
-connection for &#8220;plain&#8221; Thrift.</dd>
+connection for “plain” Thrift.</dd>
 <dt><strong>&lt;label&gt;/thriftmux/tls/upgrade/success</strong></dt>
 <dd>A counter of the number of times the client or server has successfully
 upgraded a connection to TLS.</dd>
@@ -1144,7 +1150,7 @@ upgraded a connection to TLS.</dd>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
   <img class="logo" src="_static/logo_small.png" alt="Logo"/>
 </a></p><a href="index.html"><h3>Finagle</h3></a>
@@ -1256,6 +1262,8 @@ upgraded a connection to TLS.</dd>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="Protocols.html" title="previous chapter">Protocols</a></li>
+      <li>Next: <a href="UnsuccessfulResponses.html" title="next chapter">Unsuccessful Responses</a></li>
   </ul></li>
 </ul>
 <div id="searchbox" style="display: none">

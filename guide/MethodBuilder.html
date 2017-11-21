@@ -2,30 +2,28 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>MethodBuilder &mdash; Finagle 17.11.0 documentation</title>
-    
+    <title>MethodBuilder &#8212; Finagle 17.12.0-SNAPSHOT documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
-        VERSION:     '17.11.0',
+        URL_ROOT:    './',
+        VERSION:     '17.12.0-SNAPSHOT',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="Finagle 17.11.0 documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
    
   
   <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
@@ -45,33 +43,33 @@
   
   
 
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li><a href="index.html">Finagle</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="methodbuilder">
 <span id="id1"></span><h1>MethodBuilder<a class="headerlink" href="#methodbuilder" title="Permalink to this headline">¶</a></h1>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">Currently there is <tt class="docutils literal"><span class="pre">MethodBuilder</span></tt> support for HTTP and ThriftMux.
+<p class="last">Currently there is <code class="docutils literal"><span class="pre">MethodBuilder</span></code> support for HTTP and ThriftMux.
 We are waiting on user interest before expanding to more protocols.</p>
 </div>
-<p><tt class="docutils literal"><span class="pre">MethodBuilder</span></tt> is a collection of APIs for client configuration at a higher
-level than the  <a class="reference internal" href="Configuration.html#finagle6apis"><em>Finagle 6 APIs</em></a> while improving upon the deprecated
-<tt class="docutils literal"><span class="pre">ClientBuilder</span></tt>. <tt class="docutils literal"><span class="pre">MethodBuilder</span></tt> provides:</p>
+<p><code class="docutils literal"><span class="pre">MethodBuilder</span></code> is a collection of APIs for client configuration at a higher
+level than the  <a class="reference internal" href="Configuration.html#finagle6apis"><span class="std std-ref">Finagle 6 APIs</span></a> while improving upon the deprecated
+<code class="docutils literal"><span class="pre">ClientBuilder</span></code>. <code class="docutils literal"><span class="pre">MethodBuilder</span></code> provides:</p>
 <ul class="simple">
-<li><a class="reference internal" href="#mb-logical-req"><em>Logical</em></a> success rate metrics.</li>
+<li><a class="reference internal" href="#mb-logical-req"><span class="std std-ref">Logical</span></a> success rate metrics.</li>
 <li>Retries based on application-level requests and responses (e.g. an HTTP
 503 response code or a Thrift exception).</li>
 <li>Configuration of per-attempt and total timeouts.</li>
@@ -81,12 +79,12 @@ underlying Finagle client. Concretely, a single service might offer both
 <cite>GET statuses/show/:id</cite> as well as <cite>POST statuses/update</cite>, whilst each having wildly
 different characteristics. The <cite>GET</cite> is idempotent and has a tight latency distribution
 while the <cite>POST</cite> is not idempotent and has a wide latency distribution. If users want
-different configurations, without <tt class="docutils literal"><span class="pre">MethodBuilder</span></tt> they must create separate
+different configurations, without <code class="docutils literal"><span class="pre">MethodBuilder</span></code> they must create separate
 Finagle clients for each grouping. While long-lived clients in Finagle are not
 expensive, they are not free. They create duplicate metrics and waste heap,
 file descriptors, and CPU.</p>
 <p id="mb-example-http">Turning the example into code, first in Scala:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="n">http</span><span class="o">,</span> <span class="nc">Http</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">ReqRep</span><span class="o">,</span> <span class="nc">ResponseClass</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.Return</span>
@@ -130,7 +128,7 @@ file descriptors, and CPU.</p>
 </pre></div>
 </div>
 <p>A similar example, for Java:</p>
-<div class="highlight-java"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">com.twitter.finagle.Http</span><span class="o">;</span>
+<div class="highlight-java"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">com.twitter.finagle.Http</span><span class="o">;</span>
 <span class="kn">import</span> <span class="nn">com.twitter.finagle.Service</span><span class="o">;</span>
 <span class="kn">import</span> <span class="nn">com.twitter.finagle.http.Request</span><span class="o">;</span>
 <span class="kn">import</span> <span class="nn">com.twitter.finagle.http.Response</span><span class="o">;</span>
@@ -145,59 +143,59 @@ file descriptors, and CPU.</p>
 </div>
 <div class="section" id="retries">
 <h2>Retries<a class="headerlink" href="#retries" title="Permalink to this headline">¶</a></h2>
-<p><tt class="docutils literal"><span class="pre">MethodBuilder</span></tt> defaults to using the client&#8217;s <a class="reference internal" href="Clients.html#response-classification"><em>classifier</em></a>
+<p><code class="docutils literal"><span class="pre">MethodBuilder</span></code> defaults to using the client’s <a class="reference internal" href="Clients.html#response-classification"><span class="std std-ref">classifier</span></a>
 to retry failures that are marked as retryable
-(<tt class="docutils literal"><span class="pre">com.twitter.finagle.service.ResponseClass.RetryableFailure</span></tt>).</p>
+(<code class="docutils literal"><span class="pre">com.twitter.finagle.service.ResponseClass.RetryableFailure</span></code>).</p>
 <p>A budget is used to prevent retries from overwhelming
 the backend service. The budget is shared across clients created from
-an initial <tt class="docutils literal"><span class="pre">MethodBuilder</span></tt>. As such, even if the retry rules
+an initial <code class="docutils literal"><span class="pre">MethodBuilder</span></code>. As such, even if the retry rules
 deem the request retryable, it may not be retried if there is insufficient
 budget.</p>
 <p>Finagle automatically retries failures that are known to be safe
 to retry via <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/RequeueFilter.scala">RequeueFilter</a>.
-This includes <tt class="docutils literal"><span class="pre">com.twitter.finagle.WriteException</span> <span class="pre">WriteExceptions</span></tt> and
-<a class="reference internal" href="Glossary.html#glossary-nack"><em>retryable nacks</em></a>. As these should have already been retried,
-<tt class="docutils literal"><span class="pre">MethodBuilder</span></tt> will avoid retrying them again at this layer.</p>
-<p>The <a class="reference internal" href="Clients.html#response-classification"><em>classifier</em></a> set by <tt class="docutils literal"><span class="pre">withRetryForClassifier</span></tt> is
+This includes <code class="docutils literal"><span class="pre">com.twitter.finagle.WriteException</span> <span class="pre">WriteExceptions</span></code> and
+<a class="reference internal" href="Glossary.html#glossary-nack"><span class="std std-ref">retryable nacks</span></a>. As these should have already been retried,
+<code class="docutils literal"><span class="pre">MethodBuilder</span></code> will avoid retrying them again at this layer.</p>
+<p>The <a class="reference internal" href="Clients.html#response-classification"><span class="std std-ref">classifier</span></a> set by <code class="docutils literal"><span class="pre">withRetryForClassifier</span></code> is
 used to determine which requests are successful. This is the basis for measuring
-the <a class="reference internal" href="#mb-logical-req"><em>logical</em></a> success metrics of the method and for <a class="reference internal" href="#logging">logging</a>
+the <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> success metrics of the method and for <a class="reference internal" href="#logging">logging</a>
 unsuccessful requests.</p>
 </div>
 <div class="section" id="timeouts">
 <h2>Timeouts<a class="headerlink" href="#timeouts" title="Permalink to this headline">¶</a></h2>
-<p>For per-request timeouts the defaults come from the client&#8217;s configuration
+<p>For per-request timeouts the defaults come from the client’s configuration
 for <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/TimeoutFilter.scala">TimeoutFilter.Param</a>
-which is typically set on a client via <tt class="docutils literal"><span class="pre">com.twitter.finagle.$Protocol.withRequestTimeout</span></tt>.</p>
-<p>For total total timeouts, the defaults come from the client&#8217;s configuration
+which is typically set on a client via <code class="docutils literal"><span class="pre">com.twitter.finagle.$Protocol.withRequestTimeout</span></code>.</p>
+<p>For total total timeouts, the defaults come from the client’s configuration
 for <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/TimeoutFilter.scala">TimeoutFilter.TotalTimeout</a>.</p>
-<p>The total timeout is how long the <a class="reference internal" href="#mb-logical-req"><em>logical request</em></a> is given to complete. This includes
+<p>The total timeout is how long the <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical request</span></a> is given to complete. This includes
 the time spent on developer configured retries as well as automatic retries issued by
 Finagle. Per request timeouts apply to each attempt issued, irrespective of if
-it is the initial request, a Finagle requeue, or a retry based on the developer&#8217;s policy.</p>
-<p>Take a <tt class="docutils literal"><span class="pre">MethodBuilder</span></tt> configured with 100 ms per-request timeout,
+it is the initial request, a Finagle requeue, or a retry based on the developer’s policy.</p>
+<p>Take a <code class="docutils literal"><span class="pre">MethodBuilder</span></code> configured with 100 ms per-request timeout,
 150 ms total timeout, and a policy that will retry all timeouts as an example.
 If the first request to the backend gets a retryable nack back in 10 ms,
 Finagle will automatically issue a retry with 100 ms for its timeout.
 If this retry happens to time out, the application level retry policy on
-the <tt class="docutils literal"><span class="pre">MethodBuilder</span></tt> applies, and this retry will have 40 ms remaining (150 ms total
+the <code class="docutils literal"><span class="pre">MethodBuilder</span></code> applies, and this retry will have 40 ms remaining (150 ms total
 - 10 ms - 100 ms).</p>
 </div>
 <div class="section" id="metrics">
 <h2>Metrics<a class="headerlink" href="#metrics" title="Permalink to this headline">¶</a></h2>
-<p>Metrics are scoped to your client&#8217;s label and method name.</p>
+<p>Metrics are scoped to your client’s label and method name.</p>
 <ul class="simple">
 <li><cite>clnt/your_client_label/method_name/logical/requests</cite> — A counter of the total
-number of <a class="reference internal" href="#mb-logical-req"><em>logical</em></a> successes and failures.
+number of <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> successes and failures.
 This does not include any retries.</li>
 <li><cite>clnt/your_client_label/method_name/logical/success</cite> — A counter of the total
-number of <a class="reference internal" href="#mb-logical-req"><em>logical</em></a> successes.</li>
+number of <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> successes.</li>
 <li><cite>clnt/your_client_label/method_name/logical/request_latency_ms</cite> — A stat of
-the latency of the <a class="reference internal" href="#mb-logical-req"><em>logical</em></a> requests, in milliseconds.</li>
+the latency of the <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> requests, in milliseconds.</li>
 <li><cite>clnt/your_client_label/method_name/retries</cite> — A stat of the number of times
 requests are retried.</li>
 </ul>
 <p>For example:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 
 <span class="k">val</span> <span class="n">builder</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
   <span class="o">.</span><span class="n">withLabel</span><span class="o">(</span><span class="s">&quot;example_client&quot;</span><span class="o">)</span>
@@ -212,27 +210,27 @@ requests are retried.</li>
 <li><cite>clnt/example_client/get_statuses/logical/request_latency_ms</cite></li>
 <li><cite>clnt/example_client/get_statuses/retries</cite></li>
 </ul>
-<p><tt class="docutils literal"><span class="pre">MethodBuilder</span></tt> adds itself into the process registry which allows
-for introspection of runtime configuration via TwitterServer&#8217;s <cite>/admin/registry.json</cite>
+<p><code class="docutils literal"><span class="pre">MethodBuilder</span></code> adds itself into the process registry which allows
+for introspection of runtime configuration via TwitterServer’s <cite>/admin/registry.json</cite>
 <a class="reference external" href="https://twitter.github.io/twitter-server/Admin.html#admin-registry-json">endpoint</a>.</p>
 </div>
 <div class="section" id="logging">
 <span id="id2"></span><h2>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h2>
-<p>Unsuccessful request, as determined by the <a class="reference internal" href="Clients.html#response-classification"><em>classifier</em></a>
-set by <tt class="docutils literal"><span class="pre">withRetryForClassifier</span></tt>, are logged at <tt class="docutils literal"><span class="pre">com.twitter.logging.Level.DEBUG</span></tt>
-level. Further details, including the request and response, are available at <tt class="docutils literal"><span class="pre">TRACE</span></tt>
-level. There is a <tt class="docutils literal"><span class="pre">Logger</span></tt> per method, named with the format
-<cite>&#8220;com.twitter.finagle.client.MethodBuilder.$clientName.$methodName&#8221;</cite>.</p>
+<p>Unsuccessful request, as determined by the <a class="reference internal" href="Clients.html#response-classification"><span class="std std-ref">classifier</span></a>
+set by <code class="docutils literal"><span class="pre">withRetryForClassifier</span></code>, are logged at <code class="docutils literal"><span class="pre">com.twitter.logging.Level.DEBUG</span></code>
+level. Further details, including the request and response, are available at <code class="docutils literal"><span class="pre">TRACE</span></code>
+level. There is a <code class="docutils literal"><span class="pre">Logger</span></code> per method, named with the format
+<cite>“com.twitter.finagle.client.MethodBuilder.$clientName.$methodName”</cite>.</p>
 </div>
 <div class="section" id="lifecycle">
 <h2>Lifecycle<a class="headerlink" href="#lifecycle" title="Permalink to this headline">¶</a></h2>
-<p>A <tt class="docutils literal"><span class="pre">MethodBuilder</span></tt> is tied to a single logical destination via a
-<a class="reference internal" href="Names.html#finagle-names"><em>Name</em></a>, though using <a class="reference internal" href="Names.html#dtabs"><em>dtabs</em></a> allows
+<p>A <code class="docutils literal"><span class="pre">MethodBuilder</span></code> is tied to a single logical destination via a
+<a class="reference internal" href="Names.html#finagle-names"><span class="std std-ref">Name</span></a>, though using <a class="reference internal" href="Names.html#dtabs"><span class="std std-ref">dtabs</span></a> allows
 clients to talk to different physical locations.</p>
-<p>Because <tt class="docutils literal"><span class="pre">MethodBuilder</span></tt> is immutable, its methods chain together, and create
+<p>Because <code class="docutils literal"><span class="pre">MethodBuilder</span></code> is immutable, its methods chain together, and create
 new instances backed by the original underlying client. This allows for common
 customizations to be shared across endpoints:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="n">http</span><span class="o">,</span> <span class="nc">Http</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">ReqRep</span><span class="o">,</span> <span class="nc">ResponseClass</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.Return</span>
@@ -259,34 +257,34 @@ customizations to be shared across endpoints:</p>
 </div>
 <p>As a consequence of the Finagle client being shared, its underlying
 resources (e.g. connections) are shared as well. Specifically, all
-<tt class="docutils literal"><span class="pre">Service</span></tt>s constructed by a <tt class="docutils literal"><span class="pre">MethodBuilder</span></tt> must be <tt class="docutils literal"><span class="pre">close</span></tt>-ed
+<code class="docutils literal"><span class="pre">Service</span></code>s constructed by a <code class="docutils literal"><span class="pre">MethodBuilder</span></code> must be <code class="docutils literal"><span class="pre">close</span></code>-ed
 for the underlying resources to be closed.</p>
 <p>One other effect of sharing the Finagle client is that the load balancer
 and connection pool (when applicable, e.g. HTTP/1.1) are shared resources
 as well. For most usage patterns this is unlikely to be an issue. In some cases,
-it may manifest as poor distribution of the different method&#8217;s requests across
+it may manifest as poor distribution of the different method’s requests across
 backends. Should it be an issue, we recommend creating and using
 separate Finagle clients for those methods.</p>
 </div>
 <div class="section" id="migrating-from-clientbuilder">
 <span id="mb-cb-migration"></span><h2>Migrating from ClientBuilder<a class="headerlink" href="#migrating-from-clientbuilder" title="Permalink to this headline">¶</a></h2>
-<p><tt class="docutils literal"><span class="pre">MethodBuilder</span></tt> is in part intended as a replacement for <tt class="docutils literal"><span class="pre">ClientBuilder</span></tt> and
+<p><code class="docutils literal"><span class="pre">MethodBuilder</span></code> is in part intended as a replacement for <code class="docutils literal"><span class="pre">ClientBuilder</span></code> and
 as such there is relatively easy migration path. Users should prefer using the
-Finagle 6 style <tt class="docutils literal"><span class="pre">StackClient</span></tt>s directly for creating a <tt class="docutils literal"><span class="pre">MethodBuilder</span></tt> and
-work on migrating their code off of <tt class="docutils literal"><span class="pre">ClientBuilder</span></tt>.</p>
+Finagle 6 style <code class="docutils literal"><span class="pre">StackClient</span></code>s directly for creating a <code class="docutils literal"><span class="pre">MethodBuilder</span></code> and
+work on migrating their code off of <code class="docutils literal"><span class="pre">ClientBuilder</span></code>.</p>
 <p>Notes and caveats:</p>
 <ul class="simple">
-<li>Metrics will be scoped to the <tt class="docutils literal"><span class="pre">ClientBuilder.name</span></tt> and then the method name.</li>
-<li>Total timeout defaults to using the <tt class="docutils literal"><span class="pre">ClientBuilder.timeout</span></tt> configuration.</li>
-<li>Per-request timeout defaults to using the <tt class="docutils literal"><span class="pre">ClientBuilder.requestTimeout</span></tt> configuration.</li>
-<li>The <tt class="docutils literal"><span class="pre">ClientBuilder</span></tt> metrics scoped to &#8220;tries&#8221; are not included. These
-are superseded by the logical <tt class="docutils literal"><span class="pre">MethodBuilder</span></tt> metrics.</li>
-<li>The <tt class="docutils literal"><span class="pre">ClientBuilder</span></tt> retry policy will <strong>not</strong> be applied and users must migrate
-to using <tt class="docutils literal"><span class="pre">withRetryForClassifier</span></tt>.</li>
-<li>The <tt class="docutils literal"><span class="pre">ClientBuilder</span></tt> must have a destination set via one of
-<tt class="docutils literal"><span class="pre">hosts</span></tt>, <tt class="docutils literal"><span class="pre">addrs</span></tt>, <tt class="docutils literal"><span class="pre">dest</span></tt>, <tt class="docutils literal"><span class="pre">cluster</span></tt>, or <tt class="docutils literal"><span class="pre">group</span></tt>.</li>
+<li>Metrics will be scoped to the <code class="docutils literal"><span class="pre">ClientBuilder.name</span></code> and then the method name.</li>
+<li>Total timeout defaults to using the <code class="docutils literal"><span class="pre">ClientBuilder.timeout</span></code> configuration.</li>
+<li>Per-request timeout defaults to using the <code class="docutils literal"><span class="pre">ClientBuilder.requestTimeout</span></code> configuration.</li>
+<li>The <code class="docutils literal"><span class="pre">ClientBuilder</span></code> metrics scoped to “tries” are not included. These
+are superseded by the logical <code class="docutils literal"><span class="pre">MethodBuilder</span></code> metrics.</li>
+<li>The <code class="docutils literal"><span class="pre">ClientBuilder</span></code> retry policy will <strong>not</strong> be applied and users must migrate
+to using <code class="docutils literal"><span class="pre">withRetryForClassifier</span></code>.</li>
+<li>The <code class="docutils literal"><span class="pre">ClientBuilder</span></code> must have a destination set via one of
+<code class="docutils literal"><span class="pre">hosts</span></code>, <code class="docutils literal"><span class="pre">addrs</span></code>, <code class="docutils literal"><span class="pre">dest</span></code>, <code class="docutils literal"><span class="pre">cluster</span></code>, or <code class="docutils literal"><span class="pre">group</span></code>.</li>
 </ul>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.client.ClientBuilder</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.client.ClientBuilder</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="n">http</span><span class="o">,</span> <span class="nc">Http</span><span class="o">}</span>
 
 <span class="k">val</span> <span class="n">stackClient</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span><span class="o">()</span>
@@ -301,25 +299,25 @@ to using <tt class="docutils literal"><span class="pre">withRetryForClassifier</
 </div>
 <div class="section" id="application-level-failure-handling">
 <h2>Application-level failure handling<a class="headerlink" href="#application-level-failure-handling" title="Permalink to this headline">¶</a></h2>
-<p>While <tt class="docutils literal"><span class="pre">MethodBuilder</span></tt> encourages developers to consider
+<p>While <code class="docutils literal"><span class="pre">MethodBuilder</span></code> encourages developers to consider
 failure modes in the broadest sense through response classification,
 this is often insufficient for application developers who need to
 do more than that. Examples include logging, fallback to a different
-data source, hiding functionality, and more. As <tt class="docutils literal"><span class="pre">MethodBuilder</span></tt>
-gives you a standard <a class="reference internal" href="ServicesAndFilters.html#services"><em>Service</em></a>, developers are encouraged
-to compose them with <a class="reference internal" href="ServicesAndFilters.html#filters"><em>Filters</em></a> and/or transform the
-<tt class="docutils literal"><span class="pre">Service</span></tt>s returned <a class="reference internal" href="Futures.html#future-failure"><em>Future</em></a> to handle more
+data source, hiding functionality, and more. As <code class="docutils literal"><span class="pre">MethodBuilder</span></code>
+gives you a standard <a class="reference internal" href="ServicesAndFilters.html#services"><span class="std std-ref">Service</span></a>, developers are encouraged
+to compose them with <a class="reference internal" href="ServicesAndFilters.html#filters"><span class="std std-ref">Filters</span></a> and/or transform the
+<code class="docutils literal"><span class="pre">Service</span></code>s returned <a class="reference internal" href="Futures.html#future-failure"><span class="std std-ref">Future</span></a> to handle more
 granular failures.</p>
 </div>
 <div class="section" id="using-with-thriftmux">
 <h2>Using with ThriftMux<a class="headerlink" href="#using-with-thriftmux" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference internal" href="#mb-example-http"><em>Above</em></a> we saw an example using HTTP. Next
-let&#8217;s walk through a ThriftMux example, using a hypothetical
+<p><a class="reference internal" href="#mb-example-http"><span class="std std-ref">Above</span></a> we saw an example using HTTP. Next
+let’s walk through a ThriftMux example, using a hypothetical
 social graph service with two endpoints, <cite>followers</cite> and <cite>follow</cite>,
 where <cite>followers</cite> is idempotent and has a tight latency profile
 and <cite>follow</cite> is only retryable for a specific error code and has a wide
 latency distribution. Given the IDL:</p>
-<div class="highlight-none"><div class="highlight"><pre>#@namespace scala com.twitter.finagle.example.graph
+<div class="highlight-none"><div class="highlight"><pre><span></span>#@namespace scala com.twitter.finagle.example.graph
 
 exception NotFoundException { 1: i32 code }
 
@@ -329,14 +327,14 @@ service GraphService {
 }
 </pre></div>
 </div>
-<p>We create <tt class="docutils literal"><span class="pre">MethodBuilder</span></tt>s which work on Scrooge&#8217;s generated
-Service-per-method, <tt class="docutils literal"><span class="pre">ServiceIface</span></tt>.</p>
+<p>We create <code class="docutils literal"><span class="pre">MethodBuilder</span></code>s which work on Scrooge’s generated
+Service-per-method, <code class="docutils literal"><span class="pre">ServiceIface</span></code>.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">Scrooge does not yet generate <tt class="docutils literal"><span class="pre">ServiceIface</span></tt> for Java users,
+<p class="last">Scrooge does not yet generate <code class="docutils literal"><span class="pre">ServiceIface</span></code> for Java users,
 so this is limited to Scala.</p>
 </div>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Service</span><span class="o">,</span> <span class="nc">ThriftMux</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.example.graph._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">ReqRep</span><span class="o">,</span> <span class="nc">ResponseClass</span><span class="o">}</span>
@@ -369,9 +367,9 @@ so this is limited to Scala.</p>
     <span class="o">.</span><span class="n">follow</span>
 </pre></div>
 </div>
-<p>If you are working with code that prefers Scrooge&#8217;s <tt class="docutils literal"><span class="pre">FutureIface</span></tt> you can
-convert the <tt class="docutils literal"><span class="pre">ServiceIface</span></tt> by wrapping it with a <tt class="docutils literal"><span class="pre">MethodIface</span></tt>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<p>If you are working with code that prefers Scrooge’s <code class="docutils literal"><span class="pre">FutureIface</span></code> you can
+convert the <code class="docutils literal"><span class="pre">ServiceIface</span></code> by wrapping it with a <code class="docutils literal"><span class="pre">MethodIface</span></code>.</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Filter</span><span class="o">,</span> <span class="nc">ThriftMux</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.example.graph._</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
@@ -396,13 +394,13 @@ convert the <tt class="docutils literal"><span class="pre">ServiceIface</span></
   <span class="n">futureIface</span><span class="o">.</span><span class="n">follow</span><span class="o">(</span><span class="n">follower</span> <span class="k">=</span> <span class="mi">568825492L</span><span class="o">,</span> <span class="n">followee</span> <span class="k">=</span> <span class="mi">4196983835L</span><span class="o">)</span>
 </pre></div>
 </div>
-<p>Further details on the differences between <tt class="docutils literal"><span class="pre">ServiceIface</span></tt> and <tt class="docutils literal"><span class="pre">FutureIface</span></tt>
+<p>Further details on the differences between <code class="docutils literal"><span class="pre">ServiceIface</span></code> and <code class="docutils literal"><span class="pre">FutureIface</span></code>
 and how to work with them are in
-<a class="reference external" href="https://twitter.github.io/scrooge/Finagle.html">Scrooge&#8217;s Finagle docs</a>.</p>
+<a class="reference external" href="https://twitter.github.io/scrooge/Finagle.html">Scrooge’s Finagle docs</a>.</p>
 </div>
 <div class="section" id="logical-request-definition">
 <span id="mb-logical-req"></span><h2>Logical request definition<a class="headerlink" href="#logical-request-definition" title="Permalink to this headline">¶</a></h2>
-<p><tt class="docutils literal"><span class="pre">MethodBuilder</span></tt>&#8216;s logical requests represent the result of the
+<p><code class="docutils literal"><span class="pre">MethodBuilder</span></code>’s logical requests represent the result of the
 initial request, after any retries have occurred. Concretely, should a request result
 in a retryable failure on the first attempt, but succeed upon retry, this is considered
 a single successful logical request while the logical request latency is the sum of
@@ -414,7 +412,7 @@ both the initial attempt and the retry.</p>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
   <img class="logo" src="_static/logo_small.png" alt="Logo"/>
 </a></p><a href="index.html"><h3>Finagle</h3></a>

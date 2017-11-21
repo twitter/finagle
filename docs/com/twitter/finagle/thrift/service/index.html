@@ -201,12 +201,28 @@ generator.
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.thrift">thrift</a></dd></dl></div>
     </li><li class="current-entities indented5">
                         <span class="separator"></span>
+                        <a class="trait" href="Filterable.html" title="Used in conjunction with a ServicePerEndpoint builder to allow for filtering of a ServicePerEndpoint."></a>
+                        <a href="Filterable.html" title="Used in conjunction with a ServicePerEndpoint builder to allow for filtering of a ServicePerEndpoint.">Filterable</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
                         <a class="trait" href="MethodPerEndpointBuilder.html" title="A typeclass to construct a MethodPerEndpoint by wrapping a ServicePerEndpoint."></a>
                         <a href="MethodPerEndpointBuilder.html" title="A typeclass to construct a MethodPerEndpoint by wrapping a ServicePerEndpoint.">MethodPerEndpointBuilder</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
+                        <a class="trait" href="ReqRepMethodPerEndpointBuilder.html" title="A typeclass to construct a MethodPerEndpoint by wrapping a ReqRepServicePerEndpoint."></a>
+                        <a href="ReqRepMethodPerEndpointBuilder.html" title="A typeclass to construct a MethodPerEndpoint by wrapping a ReqRepServicePerEndpoint.">ReqRepMethodPerEndpointBuilder</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="trait" href="ReqRepServicePerEndpointBuilder.html" title="Typeclass ReqRepServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients."></a>
+                        <a href="ReqRepServicePerEndpointBuilder.html" title="Typeclass ReqRepServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients.">ReqRepServicePerEndpointBuilder</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
                         <a class="trait" href="ServicePerEndpointBuilder.html" title="Typeclass ServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients."></a>
                         <a href="ServicePerEndpointBuilder.html" title="Typeclass ServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients.">ServicePerEndpointBuilder</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="object" href="ThriftReqRepServicePerEndpoint$.html" title="Construct Service[scrooge.Request[method.Args],scrooge.Response[method.SuccessType]] interface for a ThriftMethod."></a>
+                        <a href="ThriftReqRepServicePerEndpoint$.html" title="Construct Service[scrooge.Request[method.Args],scrooge.Response[method.SuccessType]] interface for a ThriftMethod.">ThriftReqRepServicePerEndpoint</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
                         <a class="object" href="ThriftResponseClassifier$.html" title="ResponseClassifiers for use with finagle-thrift request/responses."></a>
@@ -306,7 +322,24 @@ generator.
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.thrift.service.MethodPerEndpointBuilder" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.thrift.service.Filterable" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="Filterable[+T]extendsAnyRef"></a><a id="Filterable[+T]:Filterable[T]"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/thrift/service/index.html#Filterable[+T]extendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Used in conjunction with a ServicePerEndpoint builder to allow for filtering of a ServicePerEndpoint." href="Filterable.html"><span class="name">Filterable</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Used in conjunction with a <code>ServicePerEndpoint</code> builder to allow for filtering
+of a <code>ServicePerEndpoint</code>.</p>
+    </li><li name="com.twitter.finagle.thrift.service.MethodPerEndpointBuilder" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="MethodPerEndpointBuilder[ServicePerEndpoint,MethodPerEndpoint]extendsAnyRef"></a><a id="MethodPerEndpointBuilder[ServicePerEndpoint,MethodPerEndpoint]:MethodPerEndpointBuilder[ServicePerEndpoint,MethodPerEndpoint]"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/thrift/service/index.html#MethodPerEndpointBuilder[ServicePerEndpoint,MethodPerEndpoint]extendsAnyRef" title="Permalink">
@@ -325,8 +358,43 @@ generator.
 This is a compatibility constructor to replace an existing Future interface
 with one built from a ServicePerEndpoint.</p><p>Scrooge generates implementations of this builder.
 </p></div></div>
+    </li><li name="com.twitter.finagle.thrift.service.ReqRepMethodPerEndpointBuilder" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ReqRepMethodPerEndpointBuilder[ReqRepServicePerEndpoint,MethodPerEndpoint]extendsAnyRef"></a><a id="ReqRepMethodPerEndpointBuilder[ReqRepServicePerEndpoint,MethodPerEndpoint]:ReqRepMethodPerEndpointBuilder[ReqRepServicePerEndpoint,MethodPerEndpoint]"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/thrift/service/index.html#ReqRepMethodPerEndpointBuilder[ReqRepServicePerEndpoint,MethodPerEndpoint]extendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="A typeclass to construct a MethodPerEndpoint by wrapping a ReqRepServicePerEndpoint." href="ReqRepMethodPerEndpointBuilder.html"><span class="name">ReqRepMethodPerEndpointBuilder</span></a><span class="tparams">[<span name="ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</span>, <span name="MethodPerEndpoint">MethodPerEndpoint</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A typeclass to construct a MethodPerEndpoint by wrapping a ReqRepServicePerEndpoint.</p><div class="fullcomment"><div class="comment cmt"><p>A typeclass to construct a MethodPerEndpoint by wrapping a ReqRepServicePerEndpoint.</p><p>This is a compatibility constructor to replace an existing Future interface with one built from
+a ReqRepServicePerEndpoint.</p><p>Scrooge generates implementations of this builder.
+</p></div></div>
+    </li><li name="com.twitter.finagle.thrift.service.ReqRepServicePerEndpointBuilder" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ReqRepServicePerEndpointBuilder[ReqRepServicePerEndpoint&lt;:com.twitter.finagle.thrift.service.Filterable[ReqRepServicePerEndpoint]]extendsAnyRef"></a><a id="ReqRepServicePerEndpointBuilder[ReqRepServicePerEndpoint&lt;:Filterable[ReqRepServicePerEndpoint]]:ReqRepServicePerEndpointBuilder[ReqRepServicePerEndpoint]"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/thrift/service/index.html#ReqRepServicePerEndpointBuilder[ReqRepServicePerEndpoint&lt;:com.twitter.finagle.thrift.service.Filterable[ReqRepServicePerEndpoint]]extendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Typeclass ReqRepServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients." href="ReqRepServicePerEndpointBuilder.html"><span class="name">ReqRepServicePerEndpointBuilder</span></a><span class="tparams">[<span name="ReqRepServicePerEndpoint">ReqRepServicePerEndpoint &lt;: <a href="Filterable.html" class="extype" name="com.twitter.finagle.thrift.service.Filterable">Filterable</a>[<span class="extype" name="com.twitter.finagle.thrift.service.ReqRepServicePerEndpointBuilder.ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</span>]</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Typeclass ReqRepServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients.</p><div class="fullcomment"><div class="comment cmt"><p>Typeclass ReqRepServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients.</p><p>Scrooge generates implementations of this builder.
+</p></div></div>
     </li><li name="com.twitter.finagle.thrift.service.ServicePerEndpointBuilder" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="ServicePerEndpointBuilder[ServicePerEndpoint&lt;:com.twitter.finagle.thrift.ThriftServiceIface.Filterable[ServicePerEndpoint]]extendsAnyRef"></a><a id="ServicePerEndpointBuilder[ServicePerEndpoint&lt;:Filterable[ServicePerEndpoint]]:ServicePerEndpointBuilder[ServicePerEndpoint]"></a>
+      <a id="ServicePerEndpointBuilder[ServicePerEndpoint&lt;:com.twitter.finagle.thrift.ThriftServiceIface.Filterable[ServicePerEndpoint]]extendsAnyRef"></a><a id="ServicePerEndpointBuilder[ServicePerEndpoint&lt;:ThriftServiceIface.Filterable[ServicePerEndpoint]]:ServicePerEndpointBuilder[ServicePerEndpoint]"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/thrift/service/index.html#ServicePerEndpointBuilder[ServicePerEndpoint&lt;:com.twitter.finagle.thrift.ThriftServiceIface.Filterable[ServicePerEndpoint]]extendsAnyRef" title="Permalink">
         <i class="material-icons"></i>
@@ -337,7 +405,7 @@ with one built from a ServicePerEndpoint.</p><p>Scrooge generates implementation
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="Typeclass ServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients." href="ServicePerEndpointBuilder.html"><span class="name">ServicePerEndpointBuilder</span></a><span class="tparams">[<span name="ServicePerEndpoint">ServicePerEndpoint &lt;: <a href="../ThriftServiceIface$$Filterable.html" class="extype" name="com.twitter.finagle.thrift.ThriftServiceIface.Filterable">Filterable</a>[<span class="extype" name="com.twitter.finagle.thrift.service.ServicePerEndpointBuilder.ServicePerEndpoint">ServicePerEndpoint</span>]</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+        <a title="Typeclass ServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients." href="ServicePerEndpointBuilder.html"><span class="name">ServicePerEndpointBuilder</span></a><span class="tparams">[<span name="ServicePerEndpoint">ServicePerEndpoint &lt;: <a href="../ThriftServiceIface$.html#Filterable[+T]=com.twitter.finagle.thrift.service.Filterable[T]" class="extmbr" name="com.twitter.finagle.thrift.ThriftServiceIface.Filterable">ThriftServiceIface.Filterable</a>[<span class="extype" name="com.twitter.finagle.thrift.service.ServicePerEndpointBuilder.ServicePerEndpoint">ServicePerEndpoint</span>]</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">Typeclass ServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients.</p><div class="fullcomment"><div class="comment cmt"><p>Typeclass ServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients.
@@ -351,7 +419,33 @@ Scrooge generates implementations of this builder.
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="com.twitter.finagle.thrift.service.ThriftResponseClassifier" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+                <li name="com.twitter.finagle.thrift.service.ThriftReqRepServicePerEndpoint" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ThriftReqRepServicePerEndpoint"></a><a id="ThriftReqRepServicePerEndpoint:ThriftReqRepServicePerEndpoint"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/thrift/service/index.html#ThriftReqRepServicePerEndpoint" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Construct Service[scrooge.Request[method.Args],scrooge.Response[method.SuccessType]] interface for a ThriftMethod." href="ThriftReqRepServicePerEndpoint$.html"><span class="name">ThriftReqRepServicePerEndpoint</span></a>
+      </span>
+      
+      <p class="shortcomment cmt">Construct <code>Service[scrooge.Request[method.Args],scrooge.Response[method.SuccessType]]</code> interface for a <span class="extype" name="ThriftMethod">ThriftMethod</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Construct <code>Service[scrooge.Request[method.Args],scrooge.Response[method.SuccessType]]</code> interface for a <span class="extype" name="ThriftMethod">ThriftMethod</span>.</p><p>There are two ways to use a Scrooge-generated Thrift <code>Service</code> with Finagle:</p><p>1. Using a Service interface, i.e. a collection of Finagle <code>Services</code>, e.g., ReqRepServicePerEndpoint.</p><p>2. Using a method interface, i.e. a collection of methods returning <code>Futures</code>, e.g, MethodPerEndpoint.</p><p>Example: for a Thrift service IDL:</p><pre>service Logger {
+  string log(<span class="num">1</span>: string message, <span class="num">2</span>: i32 logLevel);
+  i32 getLogSize();
+}</pre><p>the <code>Service</code> interface, or <code>ReqRepServicePerEndpoint</code>, is</p><pre><span class="kw">trait</span> LoggerServiceIface {
+  <span class="kw">val</span> log: com.twitter.finagle.Service[scrooge.Request[Logger.Log.Args], scrooge.Response[Logger.Log.SuccessType]]
+  <span class="kw">val</span> getLogSize: com.twitter.finagle.Service[[scrooge.Request[Logger.GetLogSize.Args], scrooge.Response[Logger.GetLogSize.SuccessType]]
+}</pre><p>and the method interface, or <code>MethodPerEndpoint</code>, is</p><pre><span class="kw">trait</span> Logger[Future] {
+  <span class="kw">def</span> log(message: <span class="std">String</span>, logLevel: <span class="std">Int</span>): Future[<span class="std">String</span>]
+  <span class="kw">def</span> getLogSize(): Future[<span class="std">Int</span>]
+}</pre><p>ReqRepServicePerEndpoints can be modified and composed with Finagle <code>Filters</code>.
+</p></div></div>
+    </li><li name="com.twitter.finagle.thrift.service.ThriftResponseClassifier" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ThriftResponseClassifier"></a><a id="ThriftResponseClassifier:ThriftResponseClassifier"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/thrift/service/index.html#ThriftResponseClassifier" title="Permalink">

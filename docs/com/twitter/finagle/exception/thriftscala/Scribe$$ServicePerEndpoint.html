@@ -233,6 +233,22 @@ resources for using Finagle.
                         <a href="Scribe$$MethodPerEndpointBuilder$.html" title="">MethodPerEndpointBuilder</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
+                        <a class="object" href="Scribe$$ReqRepMethodPerEndpoint$.html" title=""></a>
+                        <a href="Scribe$$ReqRepMethodPerEndpoint$.html" title="">ReqRepMethodPerEndpoint</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="object" href="Scribe$$ReqRepMethodPerEndpointBuilder$.html" title=""></a>
+                        <a href="Scribe$$ReqRepMethodPerEndpointBuilder$.html" title="">ReqRepMethodPerEndpointBuilder</a>
+                      </li><li class="current-entities indented6">
+                        <a class="object" href="Scribe$$ReqRepServicePerEndpoint$.html" title=""></a>
+                        <a class="trait" href="Scribe$$ReqRepServicePerEndpoint.html" title=""></a>
+                        <a href="Scribe$$ReqRepServicePerEndpoint.html" title="">ReqRepServicePerEndpoint</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="object" href="Scribe$$ReqRepServicePerEndpointBuilder$.html" title=""></a>
+                        <a href="Scribe$$ReqRepServicePerEndpointBuilder$.html" title="">ReqRepServicePerEndpointBuilder</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="class" href="Scribe$$ServiceIface.html" title=""></a>
                         <a href="Scribe$$ServiceIface.html" title="">ServiceIface</a>
                       </li><li class="current-entities indented6">
@@ -272,7 +288,7 @@ resources for using Finagle.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <span class="name">ServicePerEndpoint</span><span class="result"> extends <span class="extype" name="com.twitter.scrooge.ToThriftService">ToThriftService</span> with <a href="../../thrift/ThriftServiceIface$$Filterable.html" class="extype" name="com.twitter.finagle.thrift.ThriftServiceIface.Filterable">Filterable</a>[<a href="" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.ServicePerEndpoint">ServicePerEndpoint</a>]</span>
+        <span class="name">ServicePerEndpoint</span><span class="result"> extends <span class="extype" name="com.twitter.scrooge.ToThriftService">ToThriftService</span> with <a href="../../thrift/ThriftServiceIface$.html#Filterable[+T]=com.twitter.finagle.thrift.service.Filterable[T]" class="extmbr" name="com.twitter.finagle.thrift.ThriftServiceIface.Filterable">Filterable</a>[<a href="" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.ServicePerEndpoint">ServicePerEndpoint</a>]</span>
       </span>
       </h4>
 
@@ -281,7 +297,7 @@ resources for using Finagle.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="../../thrift/ThriftServiceIface$$Filterable.html" class="extype" name="com.twitter.finagle.thrift.ThriftServiceIface.Filterable">Filterable</a>[<a href="" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.ServicePerEndpoint">ServicePerEndpoint</a>], <span class="extype" name="com.twitter.scrooge.ToThriftService">ToThriftService</span>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="../../thrift/service/Filterable.html" class="extype" name="com.twitter.finagle.thrift.service.Filterable">Filterable</a>[<a href="" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.ServicePerEndpoint">ServicePerEndpoint</a>], <span class="extype" name="com.twitter.scrooge.ToThriftService">ToThriftService</span>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
         </div></div>
         
 
@@ -307,7 +323,7 @@ resources for using Finagle.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.exception.thriftscala.Scribe.ServicePerEndpoint"><span>ServicePerEndpoint</span></li><li class="in" name="com.twitter.finagle.thrift.ThriftServiceIface.Filterable"><span>Filterable</span></li><li class="in" name="com.twitter.scrooge.ToThriftService"><span>ToThriftService</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.exception.thriftscala.Scribe.ServicePerEndpoint"><span>ServicePerEndpoint</span></li><li class="in" name="com.twitter.finagle.thrift.service.Filterable"><span>Filterable</span></li><li class="in" name="com.twitter.scrooge.ToThriftService"><span>ToThriftService</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -491,7 +507,7 @@ resources for using Finagle.
       <p class="shortcomment cmt">Prepends the given type-agnostic <code>Filter</code> to all of the <code>Services</code>
 and returns a copy of the <code>ServicePerEndpoint</code> now including the filter.</p><div class="fullcomment"><div class="comment cmt"><p>Prepends the given type-agnostic <code>Filter</code> to all of the <code>Services</code>
 and returns a copy of the <code>ServicePerEndpoint</code> now including the filter.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.ServicePerEndpoint">ServicePerEndpoint</a> → <a href="../../thrift/ThriftServiceIface$$Filterable.html" class="extype" name="com.twitter.finagle.thrift.ThriftServiceIface.Filterable">Filterable</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.ServicePerEndpoint">ServicePerEndpoint</a> → <a href="../../thrift/service/Filterable.html" class="extype" name="com.twitter.finagle.thrift.service.Filterable">Filterable</a></dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
@@ -669,7 +685,7 @@ and returns a copy of the <code>ServicePerEndpoint</code> now including the filt
         <span class="name">toThriftService</span><span class="result">: <span class="extype" name="com.twitter.scrooge.ThriftService">ThriftService</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.ServicePerEndpoint">ServicePerEndpoint</a> → ToThriftService</dd></dl></div>
+      <p class="shortcomment cmt">Converts the <code>ServicePerEndpoint</code> to a <code>ThriftService</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Converts the <code>ServicePerEndpoint</code> to a <code>ThriftService</code>.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.ServicePerEndpoint">ServicePerEndpoint</a> → ToThriftService</dd><dt>See also</dt><dd><span class="cmt"><p>_root_.com.twitter.scrooge.ToThriftService</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
@@ -764,8 +780,8 @@ and returns a copy of the <code>ServicePerEndpoint</code> now including the filt
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="com.twitter.finagle.thrift.ThriftServiceIface.Filterable">
-              <h3>Inherited from <a href="../../thrift/ThriftServiceIface$$Filterable.html" class="extype" name="com.twitter.finagle.thrift.ThriftServiceIface.Filterable">Filterable</a>[<a href="" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.ServicePerEndpoint">ServicePerEndpoint</a>]</h3>
+        <div class="parent" name="com.twitter.finagle.thrift.service.Filterable">
+              <h3>Inherited from <a href="../../thrift/service/Filterable.html" class="extype" name="com.twitter.finagle.thrift.service.Filterable">Filterable</a>[<a href="" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.ServicePerEndpoint">ServicePerEndpoint</a>]</h3>
             </div><div class="parent" name="com.twitter.scrooge.ToThriftService">
               <h3>Inherited from <span class="extype" name="com.twitter.scrooge.ToThriftService">ToThriftService</span></h3>
             </div><div class="parent" name="scala.AnyRef">

@@ -2,30 +2,30 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Quickstart &mdash; Finagle 17.11.0 documentation</title>
-    
+    <title>Quickstart &#8212; Finagle 17.12.0-SNAPSHOT documentation</title>
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
-        VERSION:     '17.11.0',
+        URL_ROOT:    './',
+        VERSION:     '17.12.0-SNAPSHOT',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-    <link rel="top" title="Finagle 17.11.0 documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Concurrent Programming with Futures" href="Futures.html" />
+    <link rel="prev" title="Contents" href="index.html" />
    
   
   <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
@@ -45,61 +45,67 @@
   
   
 
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li><a href="index.html">Finagle</a> &raquo;</li> 
+        <li class="right" >
+          <a href="Futures.html" title="Concurrent Programming with Futures"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Contents"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="quickstart">
 <h1>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">¶</a></h1>
-<p>In this section we&#8217;ll use Finagle to build a very simple HTTP server
+<p>In this section we’ll use Finagle to build a very simple HTTP server
 that is also an HTTP client — an HTTP proxy. We assume that you
 are familiar with <a class="reference external" href="http://www.scala-lang.org">Scala</a> (if not, may we recommend
 <a class="reference external" href="http://twitter.github.com/scala_school/">Scala School</a>).</p>
 <p>The entire example is available, together with a self-contained
 script to launch sbt, in the Finagle git repository:</p>
-<div class="highlight-text"><div class="highlight"><pre>$ git clone https://github.com/twitter/finagle.git
+<div class="highlight-text"><div class="highlight"><pre><span></span>$ git clone https://github.com/twitter/finagle.git
 $ cd finagle/doc/src/sphinx/code/quickstart
 $ ./sbt compile
 </pre></div>
 </div>
 <div class="section" id="setting-up-sbt">
 <h2>Setting up SBT<a class="headerlink" href="#setting-up-sbt" title="Permalink to this headline">¶</a></h2>
-<p>We&#8217;ll use <a class="reference external" href="http://www.scala-sbt.org">sbt</a> to build our project. Finagle is published to Maven Central,
-so little setup is needed: see the <tt class="docutils literal"><span class="pre">build.sbt</span></tt> in the <tt class="docutils literal"><span class="pre">quickstart</span></tt> directory.
-We no longer support <tt class="docutils literal"><span class="pre">scala</span></tt> <tt class="docutils literal"><span class="pre">2.10</span></tt>.</p>
+<p>We’ll use <a class="reference external" href="http://www.scala-sbt.org">sbt</a> to build our project. Finagle is published to Maven Central,
+so little setup is needed: see the <code class="docutils literal"><span class="pre">build.sbt</span></code> in the <code class="docutils literal"><span class="pre">quickstart</span></code> directory.
+We no longer support <code class="docutils literal"><span class="pre">scala</span></code> <code class="docutils literal"><span class="pre">2.10</span></code>.</p>
 <pre class="literal-block">
 name := &quot;quickstart&quot;
 
 version := &quot;1.0&quot;
 
-libraryDependencies += &quot;com.twitter&quot; %% &quot;finagle-http&quot; % &quot;17.11.0&quot;
+libraryDependencies += &quot;com.twitter&quot; %% &quot;finagle-http&quot; % &quot;17.12.0-SNAPSHOT&quot;
 </pre>
-<p>Any file in this directory will now be compiled by <tt class="docutils literal"><span class="pre">sbt</span></tt>.</p>
+<p>Any file in this directory will now be compiled by <code class="docutils literal"><span class="pre">sbt</span></code>.</p>
 </div>
 <div class="section" id="a-minimal-http-server">
 <h2>A minimal HTTP server<a class="headerlink" href="#a-minimal-http-server" title="Permalink to this headline">¶</a></h2>
-<p>We&#8217;ll need to import a few things into our namespace.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Http</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
+<p>We’ll need to import a few things into our namespace.</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Http</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.</span><span class="o">{</span><span class="nc">Await</span><span class="o">,</span> <span class="nc">Future</span><span class="o">}</span>
 </pre></div>
 </div>
-<p><tt class="docutils literal"><span class="pre">Service</span></tt> is the interface used to represent a server or a client
-(<a class="reference internal" href="ServicesAndFilters.html"><em>about which more later</em></a>). <tt class="docutils literal"><span class="pre">Http</span></tt> is Finagle&#8217;s HTTP
+<p><code class="docutils literal"><span class="pre">Service</span></code> is the interface used to represent a server or a client
+(<a class="reference internal" href="ServicesAndFilters.html"><span class="doc">about which more later</span></a>). <code class="docutils literal"><span class="pre">Http</span></code> is Finagle’s HTTP
 client and server.</p>
-<p>Next, we&#8217;ll define a <tt class="docutils literal"><span class="pre">Service</span></tt> to serve our HTTP requests:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">service</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Service</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Response</span><span class="o">]</span> <span class="o">{</span>
+<p>Next, we’ll define a <code class="docutils literal"><span class="pre">Service</span></code> to serve our HTTP requests:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">service</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Service</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Response</span><span class="o">]</span> <span class="o">{</span>
   <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">http.Request</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span>
     <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span>
       <span class="n">http</span><span class="o">.</span><span class="nc">Response</span><span class="o">(</span><span class="n">req</span><span class="o">.</span><span class="n">version</span><span class="o">,</span> <span class="n">http</span><span class="o">.</span><span class="nc">Status</span><span class="o">.</span><span class="nc">Ok</span><span class="o">)</span>
@@ -107,26 +113,26 @@ client and server.</p>
 <span class="o">}</span>
 </pre></div>
 </div>
-<p>Services are functions from a request type (<tt class="docutils literal"><span class="pre">com.twitter.finagle.http.Request</span></tt>)
-to a <tt class="docutils literal"><span class="pre">Future</span></tt> of a response type (<tt class="docutils literal"><span class="pre">com.twitter.finagle.http.Response</span></tt>).
+<p>Services are functions from a request type (<code class="docutils literal"><span class="pre">com.twitter.finagle.http.Request</span></code>)
+to a <code class="docutils literal"><span class="pre">Future</span></code> of a response type (<code class="docutils literal"><span class="pre">com.twitter.finagle.http.Response</span></code>).
 Put another way: given a <em>request</em>, we must promise a <em>response</em> some
 time in the future. In this case, we just return a trivial HTTP-200
-response immediately (through <tt class="docutils literal"><span class="pre">Future.value</span></tt>), using the same
+response immediately (through <code class="docutils literal"><span class="pre">Future.value</span></code>), using the same
 version of HTTP with which the request was dispatched.</p>
-<p>Now that we&#8217;ve defined our <tt class="docutils literal"><span class="pre">Service</span></tt>, we&#8217;ll need to export
-it. We use Finagle&#8217;s Http server for this:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">serve</span><span class="o">(</span><span class="s">&quot;:8080&quot;</span><span class="o">,</span> <span class="n">service</span><span class="o">)</span>
+<p>Now that we’ve defined our <code class="docutils literal"><span class="pre">Service</span></code>, we’ll need to export
+it. We use Finagle’s Http server for this:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">serve</span><span class="o">(</span><span class="s">&quot;:8080&quot;</span><span class="o">,</span> <span class="n">service</span><span class="o">)</span>
 <span class="nc">Await</span><span class="o">.</span><span class="n">ready</span><span class="o">(</span><span class="n">server</span><span class="o">)</span>
 </pre></div>
 </div>
-<p>The <tt class="docutils literal"><span class="pre">serve</span></tt> method takes a <em>bind target</em> (which port to expose the
+<p>The <code class="docutils literal"><span class="pre">serve</span></code> method takes a <em>bind target</em> (which port to expose the
 server) and the service itself. The server is responsible for
 listening for incoming connections, translating the HTTP wire protocol
-into <tt class="docutils literal"><span class="pre">com.twitter.finagle.http.Request</span></tt> objects, and translating
-our <tt class="docutils literal"><span class="pre">com.twitter.finagle.http.Response</span></tt> object back into its wire
+into <code class="docutils literal"><span class="pre">com.twitter.finagle.http.Request</span></code> objects, and translating
+our <code class="docutils literal"><span class="pre">com.twitter.finagle.http.Response</span></code> object back into its wire
 format, sending replies back to the client.</p>
 <p>The complete server:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Http</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Http</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.</span><span class="o">{</span><span class="nc">Await</span><span class="o">,</span> <span class="nc">Future</span><span class="o">}</span>
 
@@ -142,46 +148,46 @@ format, sending replies back to the client.</p>
 <span class="o">}</span>
 </pre></div>
 </div>
-<p>We&#8217;re now ready to run it:</p>
-<div class="highlight-text"><div class="highlight"><pre>$ ./sbt &#39;run-main Server&#39;
+<p>We’re now ready to run it:</p>
+<div class="highlight-text"><div class="highlight"><pre><span></span>$ ./sbt &#39;run-main Server&#39;
 </pre></div>
 </div>
 <p>Which exposes an HTTP server on port 8080 which
-dispatches requests to <tt class="docutils literal"><span class="pre">service</span></tt>:</p>
-<div class="highlight-text"><div class="highlight"><pre>$ curl -D - localhost:8080
+dispatches requests to <code class="docutils literal"><span class="pre">service</span></code>:</p>
+<div class="highlight-text"><div class="highlight"><pre><span></span>$ curl -D - localhost:8080
 HTTP/1.1 200 OK
 </pre></div>
 </div>
 </div>
 <div class="section" id="using-clients">
 <h2>Using clients<a class="headerlink" href="#using-clients" title="Permalink to this headline">¶</a></h2>
-<p>In our server example, we define a <tt class="docutils literal"><span class="pre">Service</span></tt> to respond to requests.
-Clients work the other way around: we&#8217;re given a <tt class="docutils literal"><span class="pre">Service</span></tt> to <em>use</em>. Just as we
-exported services with the <tt class="docutils literal"><span class="pre">Http.serve</span></tt>, method, we can <em>import</em> them
-with a <tt class="docutils literal"><span class="pre">Http.newService</span></tt>, giving us an instance of
-<tt class="docutils literal"><span class="pre">Service[http.Request,</span> <span class="pre">http.Response]</span></tt>:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">client</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;www.scala-lang.org:80&quot;</span><span class="o">)</span>
+<p>In our server example, we define a <code class="docutils literal"><span class="pre">Service</span></code> to respond to requests.
+Clients work the other way around: we’re given a <code class="docutils literal"><span class="pre">Service</span></code> to <em>use</em>. Just as we
+exported services with the <code class="docutils literal"><span class="pre">Http.serve</span></code>, method, we can <em>import</em> them
+with a <code class="docutils literal"><span class="pre">Http.newService</span></code>, giving us an instance of
+<code class="docutils literal"><span class="pre">Service[http.Request,</span> <span class="pre">http.Response]</span></code>:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">client</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;www.scala-lang.org:80&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
-<p><tt class="docutils literal"><span class="pre">client</span></tt> is a <tt class="docutils literal"><span class="pre">Service</span></tt> to which we can dispatch an <tt class="docutils literal"><span class="pre">http.Request</span></tt>
-and in return receive a <tt class="docutils literal"><span class="pre">Future[http.Response]</span></tt> — the promise of an
-<tt class="docutils literal"><span class="pre">http.Response</span></tt> (or an error) some time in the future. We furnish
-<tt class="docutils literal"><span class="pre">newService</span></tt> with the <em>target</em> of the client: the host or set of hosts
+<p><code class="docutils literal"><span class="pre">client</span></code> is a <code class="docutils literal"><span class="pre">Service</span></code> to which we can dispatch an <code class="docutils literal"><span class="pre">http.Request</span></code>
+and in return receive a <code class="docutils literal"><span class="pre">Future[http.Response]</span></code> — the promise of an
+<code class="docutils literal"><span class="pre">http.Response</span></code> (or an error) some time in the future. We furnish
+<code class="docutils literal"><span class="pre">newService</span></code> with the <em>target</em> of the client: the host or set of hosts
 to which requests are dispatched.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">request</span> <span class="k">=</span> <span class="n">http</span><span class="o">.</span><span class="nc">Request</span><span class="o">(</span><span class="n">http</span><span class="o">.</span><span class="nc">Method</span><span class="o">.</span><span class="nc">Get</span><span class="o">,</span> <span class="s">&quot;/&quot;</span><span class="o">)</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">request</span> <span class="k">=</span> <span class="n">http</span><span class="o">.</span><span class="nc">Request</span><span class="o">(</span><span class="n">http</span><span class="o">.</span><span class="nc">Method</span><span class="o">.</span><span class="nc">Get</span><span class="o">,</span> <span class="s">&quot;/&quot;</span><span class="o">)</span>
 <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="k">=</span> <span class="s">&quot;www.scala-lang.org&quot;</span>
 <span class="k">val</span> <span class="n">response</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span> <span class="n">client</span><span class="o">(</span><span class="n">request</span><span class="o">)</span>
 </pre></div>
 </div>
-<p>Now that we have <tt class="docutils literal"><span class="pre">response</span></tt>, a <tt class="docutils literal"><span class="pre">Future[http.Response]</span></tt>, we can register
+<p>Now that we have <code class="docutils literal"><span class="pre">response</span></code>, a <code class="docutils literal"><span class="pre">Future[http.Response]</span></code>, we can register
 a callback to notify us when the result is ready:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="nc">Await</span><span class="o">.</span><span class="n">result</span><span class="o">(</span><span class="n">response</span><span class="o">.</span><span class="n">onSuccess</span> <span class="o">{</span> <span class="n">rep</span><span class="k">:</span> <span class="kt">http.Response</span> <span class="o">=&gt;</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="nc">Await</span><span class="o">.</span><span class="n">result</span><span class="o">(</span><span class="n">response</span><span class="o">.</span><span class="n">onSuccess</span> <span class="o">{</span> <span class="n">rep</span><span class="k">:</span> <span class="kt">http.Response</span> <span class="o">=&gt;</span>
   <span class="n">println</span><span class="o">(</span><span class="s">&quot;GET success: &quot;</span> <span class="o">+</span> <span class="n">rep</span><span class="o">)</span>
 <span class="o">})</span>
 </pre></div>
 </div>
 <p>Completing the client:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Http</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Http</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.</span><span class="o">{</span><span class="nc">Await</span><span class="o">,</span> <span class="nc">Future</span><span class="o">}</span>
 
@@ -198,7 +204,7 @@ a callback to notify us when the result is ready:</p>
 </pre></div>
 </div>
 <p>which in turn is run by:</p>
-<div class="highlight-text"><div class="highlight"><pre>$ ./sbt &#39;run-main Client&#39;
+<div class="highlight-text"><div class="highlight"><pre><span></span>$ ./sbt &#39;run-main Client&#39;
 ...
 GET success: Response(&quot;HTTP/1.1 Status(200)&quot;)
 ...
@@ -207,11 +213,11 @@ GET success: Response(&quot;HTTP/1.1 Status(200)&quot;)
 </div>
 <div class="section" id="putting-it-together">
 <h2>Putting it together<a class="headerlink" href="#putting-it-together" title="Permalink to this headline">¶</a></h2>
-<p>Now we&#8217;re ready to create an HTTP proxy! Notice the symmetry above:
-servers <em>provide</em> a <tt class="docutils literal"><span class="pre">Service</span></tt>, while a client <em>uses</em> it. Indeed, an HTTP
+<p>Now we’re ready to create an HTTP proxy! Notice the symmetry above:
+servers <em>provide</em> a <code class="docutils literal"><span class="pre">Service</span></code>, while a client <em>uses</em> it. Indeed, an HTTP
 proxy can be constructed by just replacing the service we defined in the Server
-example with one that was imported with a <tt class="docutils literal"><span class="pre">Http.newService</span></tt>:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Http</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
+example with one that was imported with a <code class="docutils literal"><span class="pre">Http.newService</span></code>:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Http</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.Await</span>
 
@@ -226,7 +232,7 @@ example with one that was imported with a <tt class="docutils literal"><span cla
 </div>
 <p>And we can run it and dispatch requests to it
 (be sure to shutdown the Server example from earlier):</p>
-<div class="highlight-text"><div class="highlight"><pre>$ ./sbt &#39;run-main Proxy&#39; &amp;
+<div class="highlight-text"><div class="highlight"><pre><span></span>$ ./sbt &#39;run-main Proxy&#39; &amp;
 $ curl --dump-header - --header &quot;Host: twitter.com&quot; localhost:8080
 HTTP/1.1 301 Moved Permanently
 content-length: 0
@@ -242,7 +248,7 @@ location: https://twitter.com/
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
   <img class="logo" src="_static/logo_small.png" alt="Logo"/>
 </a></p><a href="index.html"><h3>Finagle</h3></a>
@@ -268,6 +274,8 @@ location: https://twitter.com/
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Contents</a></li>
+      <li>Next: <a href="Futures.html" title="next chapter">Concurrent Programming with Futures</a></li>
   </ul></li>
 </ul>
 <div id="searchbox" style="display: none">
