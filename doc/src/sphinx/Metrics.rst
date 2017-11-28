@@ -142,9 +142,6 @@ queueing rules.
   A gauge used by serial dispatchers that can only have a single request
   per connection at a time that represents the number of pending requests.
 
-**pipelining/pending**
-  A gauge used by pipelining dispatchers that represents how many
-  pipelined requests are currently outstanding.
 
 Thread Usage
 ------------

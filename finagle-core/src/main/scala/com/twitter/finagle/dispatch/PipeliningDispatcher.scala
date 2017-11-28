@@ -37,10 +37,8 @@ abstract class GenPipeliningDispatcher[Req, Rep, In, Out, T](
   private[this] var stalled = false
   private[this] val q = new AsyncQueue[Pending[T, Rep]]
 
-  private[this] val queueSize =
-    statsReceiver.scope("pipelining").addGauge("pending") {
-      q.size
-    }
+  // exposed for testing
+  private[dispatch] def queueSize: Int = q.size
 
   private[this] val transRead: Try[Pending[T, Rep]] => Unit = {
     case Return(p) =>

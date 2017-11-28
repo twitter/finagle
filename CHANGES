@@ -21,6 +21,9 @@ Runtime Behavior Changes
     added to finagle-http2 via finagle-http. It is no longer part of the
     finagle-{memcached,mysql,redis} client stacks. ``PHAB_ID=D111722``
 
+  * finagle-core: The "pipelining/pending" stat has been removed from protocols
+    using `c.t.f.dispatch.PipeliningClientDispatcher`. Refer to the "pending" stat
+    for the number of outstanding requests. ``PHAB_ID=D113424``
 
 Deprecations
 ~~~~~~~~~~~~

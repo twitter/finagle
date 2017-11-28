@@ -110,12 +110,9 @@ class PipeliningClientPushSessionTest extends FunSuite with MockitoSugar {
     }
   }
 
-  test("queue_size gauge") {
+  test("queue size") {
     val stats = new InMemoryStatsReceiver()
     val timer = new MockTimer
-
-    def assertGaugeSize(size: Int): Unit =
-      assert(size == stats.gauges(Seq("pipelining", "pending"))())
 
     var p0, p1, p2 = new Promise[String]()
     val handle = new PipeliningMockChannelHandle[String, String]()
@@ -127,23 +124,23 @@ class PipeliningClientPushSessionTest extends FunSuite with MockitoSugar {
         timer
       )
     val service = session.toService
-    assertGaugeSize(0)
+    assert(session.getQueueSize == 0)
 
     service("0")
     service("1")
     service("2")
     handle.serialExecutor.executeAll()
-    assertGaugeSize(3)
+    assert(session.getQueueSize == 3)
 
     session.receive("resp")
-    assertGaugeSize(2)
+    assert(session.getQueueSize == 2)
 
 
     session.receive("resp")
-    assertGaugeSize(1)
+    assert(session.getQueueSize == 1)
 
     session.receive("resp")
-    assertGaugeSize(0)
+    assert(session.getQueueSize == 0)
   }
 
 }

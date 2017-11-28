@@ -34,10 +34,8 @@ private[finagle] final class PipeliningClientPushSession[In, Out](
   @volatile private[this] var queueSize: Int = 0  // avoids synchronization on `queue`
   @volatile private[this] var running: Boolean = true
 
-  private[this] val queueSizeGauge =
-    statsReceiver.scope("pipelining").addGauge("pending") {
-      queueSize
-    }
+  // exposed for testing
+  private[pushsession] def getQueueSize: Int = queueSize
 
   handle.onClose.respond { result =>
     if (running) handle.serialExecutor.execute(new Runnable {
