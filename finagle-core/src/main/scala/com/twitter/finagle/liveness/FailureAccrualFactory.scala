@@ -381,33 +381,46 @@ class FailureAccrualFactory[Req, Rep](
     }
   }
 
-  def apply(conn: ClientConnection) = {
-    underlying(conn)
-      .map { service =>
-        // N.B. the reason we can't simply filter the service factory is so that
-        // we can override the session status to reflect the broader endpoint status.
-        new Service[Req, Rep] {
-          def apply(request: Req): Future[Rep] = {
-            // If service has just been revived, accept no further requests.
-            // Note: Another request may have come in before state transitions to
-            // ProbeClosed, so > 1 requests may be processing while in the
-            // ProbeClosed state. The result of first to complete will determine
-            // whether the factory transitions to Alive (successful) or Dead
-            // (unsuccessful).
-            stopProbing()
+  private[this] def makeService(service: Service[Req, Rep]): Service[Req, Rep] = {
+    // N.B. the reason we can't simply filter the service factory is so that
+    // we can override the session status to reflect the broader endpoint status.
+    new Service[Req, Rep] {
+      def apply(request: Req): Future[Rep] = {
+        // If service has just been revived, accept no further requests.
+        // Note: Another request may have come in before state transitions to
+        // ProbeClosed, so > 1 requests may be processing while in the
+        // ProbeClosed state. The result of first to complete will determine
+        // whether the factory transitions to Alive (successful) or Dead
+        // (unsuccessful).
+        stopProbing()
 
-            service(request).respond { rep =>
-              if (isSuccess(ReqRep(request, rep))) didSucceed()
-              else didFail()
-            }
-          }
-
-          override def close(deadline: Time): Future[Unit] = service.close(deadline)
-          override def status: Status =
-            Status.worst(service.status, FailureAccrualFactory.this.status)
+        service(request).respond { rep =>
+          if (isSuccess(ReqRep(request, rep))) didSucceed()
+          else didFail()
         }
       }
-      .onFailure(onServiceAcquisitionFailure)
+
+      override def close(deadline: Time): Future[Unit] = service.close(deadline)
+
+      override def status: Status =
+        Status.worst(service.status, FailureAccrualFactory.this.status)
+    }
+  }
+
+  private[this] val applyService: Try[Service[Req, Rep]] => Future[Service[Req, Rep]] = {
+    case Return(svc) => Future.value(makeService(svc))
+    case t @ Throw(_) => Future.const(t.cast[Service[Req, Rep]])
+  }
+
+  private[this] val handleFailure: Try[Service[Req, Rep]] => Unit = {
+    case Throw(t) => onServiceAcquisitionFailure(t)
+    case _ =>
+  }
+
+  def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
+    underlying(conn)
+      .transform(applyService)
+      .respond(handleFailure)
   }
 
   override def status: Status = state match {
