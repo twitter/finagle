@@ -2,14 +2,16 @@ package com.twitter.finagle.netty4.exp.pushsession
 
 import com.twitter.finagle.{ChannelException, Status}
 import com.twitter.finagle.exp.pushsession.{PushChannelHandle, PushSession}
+import com.twitter.finagle.stats.FinagleStatsReceiver
 import com.twitter.logging.Logger
-import com.twitter.util._
+import com.twitter.util.{NonFatal => _, _}
 import io.netty.buffer.ByteBuf
 import io.netty.channel.{
   Channel,
   ChannelHandlerContext,
   ChannelInboundHandlerAdapter,
-  ChannelPipeline
+  ChannelPipeline,
+  EventLoop
 }
 import io.netty.handler.ssl.SslHandler
 import io.netty.util
@@ -17,6 +19,7 @@ import io.netty.util.concurrent.GenericFutureListener
 import java.net.SocketAddress
 import java.security.cert.Certificate
 import java.util.concurrent.Executor
+import scala.util.control.NonFatal
 
 /**
  * Netty 4 implementation of the [[PushChannelHandle]]
@@ -36,11 +39,32 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel)
 
   import Netty4PushChannelHandle._
 
+  private[this] class SafeExecutor(eventLoop: EventLoop) extends Executor {
+
+    // A proxy runnable that catches unhandled exceptions thrown by the underlying
+    // `Runnable` and closes the handle instead of letting netty swallow them.
+    private class SafeRunnable(underlying: Runnable) extends Runnable {
+      def run(): Unit = {
+
+        try underlying.run()
+        catch {
+          case NonFatal(t) =>
+            log.error(t, "Unhandled exception detected in push-session serial executor. Shutting down.")
+            FinagleStatsReceiver.counter("push", "unhandled_exceptions", t.getClass.getName).incr()
+            // This is happening in the channels event loop so we're thread safe.
+            handleFail()
+        }
+      }
+    }
+
+    def execute(command: Runnable): Unit = eventLoop.execute(new SafeRunnable(command))
+  }
+
   @volatile
   private[this] var failed: Boolean = false
   private[this] val closePromise = Promise[Unit]()
 
-  val serialExecutor: Executor = ch.eventLoop
+  val serialExecutor: Executor = new SafeExecutor(ch.eventLoop)
 
   def onClose: Future[Unit] = closePromise
 

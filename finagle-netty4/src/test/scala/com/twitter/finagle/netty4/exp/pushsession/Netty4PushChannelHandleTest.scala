@@ -350,4 +350,21 @@ class Netty4PushChannelHandleTest extends FunSuite {
     assert(session1.received.isEmpty)
     assert(session2.received.dequeue() == write2)
   }
+
+  test("Uncaught exceptions thrown in the serial executor close the handle") {
+    val (ch, handler) = noopChannel()
+
+    assert(handler.status == Status.Open)
+    assert(ch.isOpen)
+
+    handler.serialExecutor.execute(new Runnable {
+      def run(): Unit = throw new Exception("lol")
+    })
+
+    ch.runPendingTasks()
+
+    assert(handler.status == Status.Closed)
+    assert(!ch.isOpen)
+    assert(handler.onClose.isDefined)
+  }
 }

@@ -24,6 +24,12 @@ exported as they share their underlying "thread pool".
 **finagle/future_pool/completed_tasks**
   A gauge of the number of total tasks that have completed execution.
 
+Push Based Abstractions
+<<<<<<<<<<<<<<<<<<<<<<<
+
+**finagle/push/unhandled_exceptions**
+  Family of counters for unhandled exceptions caught by the serial executor.
+
 Scheduler
 <<<<<<<<<
 
