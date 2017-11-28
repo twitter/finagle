@@ -10,10 +10,34 @@ private object Encoder {
   val END = "END".getBytes(StandardCharsets.UTF_8)
 }
 
+private[finagle] object AbstractCommandToBuf {
+  def lengthAsString(x: Int): Int = {
+    if (x < 0) throw new IllegalArgumentException(s"x must be non-negative: $x")
+    var c: Int = 9
+    var size: Int = 1
+    while (x > c) {
+      size += 1
+      c = 10*c + 9
+    }
+    size
+  }
+
+  private[this] val ascii0: Int = '0'.toInt
+
+  def writeDigits(x: Int, bw: BufByteWriter): Unit = {
+    if (x < 0) throw new IllegalArgumentException(s"x must be non-negative: $x")
+    if (10 <= x) {
+      writeDigits(x / 10, bw)
+    }
+    bw.writeByte(ascii0 + (x % 10))
+  }
+}
+
 /**
  * Class that can encode `Command`-type objects into `Buf`s. Used on the client side.
  */
 private[finagle] abstract class AbstractCommandToBuf[Cmd] extends MessageEncoder[Cmd] {
+  import AbstractCommandToBuf._
   import Encoder._
 
   protected final def encodeCommandWithData(
@@ -24,8 +48,7 @@ private[finagle] abstract class AbstractCommandToBuf[Cmd] extends MessageEncoder
     data: Buf,
     casUnique: Option[Buf] = None
   ): Buf = {
-
-    val lengthString = Integer.toString(data.length)
+    val dataLength = data.length
 
     val messageSize = {
       val casLength = casUnique match {
@@ -38,7 +61,7 @@ private[finagle] abstract class AbstractCommandToBuf[Cmd] extends MessageEncoder
         key.length + 1 +
         flags.length + 1 +
         expiry.length + 1 +
-        lengthString.length + // trailing space accounted for in casLength, if it's necessary
+        lengthAsString(dataLength) + // trailing space accounted for in casLength, if it's necessary
         casLength + 2 + // CAS + '\r\n'
         data.length + 2 // data + '\r\n'
     }
@@ -57,7 +80,7 @@ private[finagle] abstract class AbstractCommandToBuf[Cmd] extends MessageEncoder
     bw.writeBytes(expiry)
     bw.writeBytes(SPACE)
 
-    bw.writeString(lengthString, StandardCharsets.US_ASCII)
+    writeDigits(dataLength, bw)
 
     casUnique match {
       case Some(token) =>
