@@ -21,6 +21,13 @@ Runtime Behavior Changes
     added to finagle-http2 via finagle-http. It is no longer part of the
     finagle-{memcached,mysql,redis} client stacks. ``PHAB_ID=D111722``
 
+
+Deprecations
+~~~~~~~~~~~~
+  
+  * finagle-core: `c.t.f.BackupRequestLost` has been deprecated. Please use a
+    `c.t.f.Failure` flagged `c.t.f.Failure.Ignorable` instead. ``PHAB_ID=D113466``
+
 17.11.0
 -------
 

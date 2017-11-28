@@ -577,6 +577,7 @@ class ChannelBufferUsageException(description: String) extends Exception(descrip
  * their corresponding backup requests succeeded first. See
  * `com.twitter.finagle.exp.BackupRequestFilter` for details.
  */
+@deprecated("Use Failure flagged Failure.Ignorable", "2017-11-20")
 object BackupRequestLost extends Exception with NoStackTrace with HasLogLevel {
   def logLevel: Level = Level.TRACE
 }

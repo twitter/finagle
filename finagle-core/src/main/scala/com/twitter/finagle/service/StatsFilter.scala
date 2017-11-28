@@ -149,15 +149,10 @@ class StatsFilter[Req, Rep](
   private[this] val outstandingRequestCountGauge =
     statsReceiver.addGauge("pending") { outstandingRequestCount.sum() }
 
-  private[this] def isBlackholeResponse(rep: Try[Rep]): Boolean = rep match {
+  private[this] def isIgnorableResponse(rep: Try[Rep]): Boolean = rep match {
+    case Throw(f: FailureFlags[_]) if f.isFlagged(FailureFlags.Ignorable) =>
+      true
     case Throw(BackupRequestLost) | Throw(WriteException(BackupRequestLost)) =>
-      // We blackhole this request. It doesn't count for anything.
-      // After the Failure() patch, this should no longer need to
-      // be a special case.
-      //
-      // In theory, we should probably unwind the whole cause
-      // chain to look for a BackupRequestLost, but in practice it
-      // is wrapped only once.
       true
     case _ =>
       false
@@ -177,7 +172,7 @@ class StatsFilter[Req, Rep](
 
     result.respond { response =>
       outstandingRequestCount.decrement()
-      if (!isBlackholeResponse(response)) {
+      if (!isIgnorableResponse(response)) {
         dispatchCount.incr()
         responseClassifier.applyOrElse(
           ReqRep(request, response),
