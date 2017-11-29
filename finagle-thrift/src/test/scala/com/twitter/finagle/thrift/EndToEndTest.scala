@@ -271,7 +271,6 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       assert(
         traces.collect { case Record(_, _, Annotation.BinaryAnnotation(k, v), _) => () }.size == 3
       )
-      assert(traces.collect { case Record(_, _, Annotation.Rpc("multiply"), _) => () }.size == 2)
       assert(traces.collect { case Record(_, _, Annotation.ServerAddr(_), _) => () }.size == 2)
       // With Stack, we get an extra ClientAddr because of the
       // TTwitter upgrade request (ThriftTracing.CanTraceMethodName)

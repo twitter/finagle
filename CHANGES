@@ -31,9 +31,12 @@ Runtime Behavior Changes
     using `c.t.f.dispatch.PipeliningClientDispatcher`. Refer to the "pending" stat
     for the number of outstanding requests. ``PHAB_ID=D113424``
 
+  * finagle-thrift,thriftmux: Tracing of RPC method names has been removed. This
+    concern has moved into Scrooge. ``PHAB_ID=D115294``
+
 Deprecations
 ~~~~~~~~~~~~
-  
+
   * finagle-core: `c.t.f.BackupRequestLost` has been deprecated. Please use a
     `c.t.f.Failure` flagged `c.t.f.Failure.Ignorable` instead. ``PHAB_ID=D113466``
 

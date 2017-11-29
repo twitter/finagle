@@ -37,15 +37,13 @@ import com.twitter.finagle.stats.{
 import com.twitter.finagle.thrift._
 import com.twitter.finagle.thriftmux.Toggles
 import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
-import com.twitter.finagle.tracing.{Trace, Tracer}
+import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.transport.{StatsTransport, Transport}
 import com.twitter.io.Buf
 import com.twitter.util._
 import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory
 import org.apache.thrift.TException
-import org.apache.thrift.transport.TMemoryInputTransport
-import scala.util.control.NonFatal
 
 /**
  * The `ThriftMux` object is both a `com.twitter.finagle.Client` and a
@@ -141,16 +139,6 @@ object ThriftMux
   // byte arrays. see CSL-1351
     ThriftMuxUtil.protocolRecorder +:
       Mux.server.stack.replace(StackServer.Role.preparer, Server.ExnHandler)
-
-  private[this] def recordRpc(buffer: Array[Byte]): Unit =
-    try {
-      val inputTransport = new TMemoryInputTransport(buffer)
-      val iprot = protocolFactory.getProtocol(inputTransport)
-      val msg = iprot.readMessageBegin()
-      Trace.recordRpc(msg.name)
-    } catch {
-      case NonFatal(_) =>
-    }
 
   object Client {
 
@@ -619,23 +607,11 @@ object ThriftMux
     def withParams(ps: Stack.Params): Server =
       copy(muxer = muxer.withParams(ps))
 
-    private[this] val tracingFilter = new SimpleFilter[Array[Byte], Array[Byte]] {
-      def apply(
-        request: Array[Byte],
-        svc: Service[Array[Byte], Array[Byte]]
-      ): Future[Array[Byte]] = {
-        if (Trace.isActivelyTracing) {
-          recordRpc(request)
-        }
-        svc(request)
-      }
-    }
-
     def serve(
       addr: SocketAddress,
       factory: ServiceFactory[Array[Byte], Array[Byte]]
     ): ListeningServer = {
-      muxer.serve(addr, MuxToArrayFilter.andThen(tracingFilter).andThen(factory))
+      muxer.serve(addr, MuxToArrayFilter.andThen(factory))
     }
 
     // Java-friendly forwarders
