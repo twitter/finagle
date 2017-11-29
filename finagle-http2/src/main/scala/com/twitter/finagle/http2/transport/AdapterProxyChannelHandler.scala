@@ -85,7 +85,11 @@ private[http2] class AdapterProxyChannelHandler(setupFn: ChannelPipeline => Unit
         combiner.add(p)
         value.embedded.close(p)
     }
-    combiner.finish(promise)
+    val streamsClosed = ctx.newPromise()
+    combiner.finish(streamsClosed)
+    streamsClosed.addListener(new ChannelFutureListener {
+      def operationComplete(f: ChannelFuture): Unit = ctx.close(promise)
+    })
   }
 
   private[this] val flushTuple: ((Int, CompletingChannel)) => Unit = {

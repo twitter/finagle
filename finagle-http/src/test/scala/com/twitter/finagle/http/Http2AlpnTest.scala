@@ -109,4 +109,26 @@ class Http2AlpnTest extends AbstractEndToEndTest {
       await(Closable.all(client, server).close())
     }
   }
+
+  test("client closes properly when closed") {
+    val sr = new InMemoryStatsReceiver()
+    val server = serverImpl()
+      .serve("localhost:*", initService)
+
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .withStatsReceiver(sr)
+      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+    initClient(client)
+
+    val request = Request(Method.Post, "/")
+
+    val rep = await(client(request))
+
+    await(client.close())
+    assert(sr.counters(Seq("client", "closes")) == 1)
+
+    await(server.close())
+  }
 }
