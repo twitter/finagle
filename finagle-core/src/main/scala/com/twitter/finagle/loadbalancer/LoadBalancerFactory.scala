@@ -86,7 +86,9 @@ object LoadBalancerFactory {
   }
 
   object Param {
-    implicit val param = Stack.Param(Param(DefaultBalancerFactory))
+    implicit val param = new Stack.Param[Param] {
+      def default: Param = Param(defaultBalancerFactory)
+    }
   }
 
   /**
@@ -105,7 +107,6 @@ object LoadBalancerFactory {
   }
 
   object AddressOrdering {
-
     implicit val param = new Stack.Param[AddressOrdering] {
       def default: AddressOrdering = AddressOrdering(defaultAddressOrdering)
     }
@@ -307,8 +308,17 @@ abstract class LoadBalancerFactory {
   ): ServiceFactory[Req, Rep]
 }
 
-object DefaultBalancerFactory extends LoadBalancerFactory {
+/**
+ * A [[LoadBalancerFactory]] proxy which instantiates the underlying
+ * based on flags (see flags.scala for applicable flags).
+ */
+object FlagBalancerFactory extends LoadBalancerFactory {
   private val log = Logger.getLogger(getClass.getName)
+
+  /**
+   * Java friendly getter.
+   */
+  def get: LoadBalancerFactory = this
 
   private def p2c(): LoadBalancerFactory =
     exp.loadMetric() match {
@@ -322,7 +332,7 @@ object DefaultBalancerFactory extends LoadBalancerFactory {
       case _ => Balancers.aperture()
     }
 
-  private val underlying =
+  private val underlying: LoadBalancerFactory =
     defaultBalancer() match {
       case "heap" => Balancers.heap()
       case "choice" => p2c()
@@ -338,5 +348,16 @@ object DefaultBalancerFactory extends LoadBalancerFactory {
     params: Stack.Params
   ): ServiceFactory[Req, Rep] = {
     underlying.newBalancer(endpoints, emptyException, params)
+  }
+}
+
+@deprecated("Use com.twitter.finagle.loadbalancer.FlagBalancerFactory instead.", "2017-11-28")
+object DefaultBalancerFactory extends LoadBalancerFactory {
+  def newBalancer[Req, Rep](
+    endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
+    emptyException: NoBrokersAvailableException,
+    params: Stack.Params
+  ): ServiceFactory[Req, Rep] = {
+    FlagBalancerFactory.newBalancer(endpoints, emptyException, params)
   }
 }

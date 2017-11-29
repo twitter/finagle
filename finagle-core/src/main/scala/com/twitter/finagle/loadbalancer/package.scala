@@ -63,4 +63,26 @@ package object loadbalancer {
    * is used, outside of Finagle, the default ordering should be overriden.
    */
   def defaultAddressOrdering: Ordering[Address] = addressOrdering
+
+  /**
+   * A reference to the current [[LoadBalancerFactory]] used by the stack
+   * params in all the Finagle clients within this process.
+   */
+  @volatile private[this] var lbf: LoadBalancerFactory = FlagBalancerFactory
+
+  /**
+   * Set the default [[LoadBalancerFactory]] for the entire process (outside of
+   * clients which override it).
+   *
+   * @see [[LoadBalancerFactory.Param]] for more info.
+   */
+  def defaultBalancerFactory(factory: LoadBalancerFactory): Unit = {
+    lbf = factory
+  }
+
+  /**
+   * Returns the default process global [[LoadBalancerFactory]] as set via
+   * `defaultBalancerFactory`.
+   */
+  def defaultBalancerFactory: LoadBalancerFactory = lbf
 }

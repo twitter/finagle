@@ -387,7 +387,7 @@ class TrafficDistributorTest extends FunSuite {
     def mkBalancer(
       set: Activity[Set[EndpointFactory[Int, Int]]]
     ): ServiceFactory[Int, Int] = {
-      DefaultBalancerFactory.newBalancer(
+      defaultBalancerFactory.newBalancer(
         set.map(_.toVector),
         new NoBrokersAvailableException("test"),
         Stack.Params.empty
