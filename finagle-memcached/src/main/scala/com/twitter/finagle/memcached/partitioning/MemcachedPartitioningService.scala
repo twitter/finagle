@@ -97,4 +97,9 @@ private[finagle] class MemcachedPartitioningService(
         throw new IllegalStateException(s"Expected Values, instead found $nonvalue")
     })
   }
+
+  protected def isSinglePartition(request: Command): Boolean = request match {
+    case _: StorageCommand | _: ArithmeticCommand | _: Delete => true
+    case _ => false
+  }
 }

@@ -47,30 +47,38 @@ private[finagle] abstract class PartitioningService[Req, Rep] extends Service[Re
    */
   protected def mergeResponses(responses: Seq[Rep]): Rep
 
-  // Call `applyService` instead of `map` below to avoid extra fn allocation
-  private[this] def applyService(request: Req, service: Future[Service[Req, Rep]]): Future[Rep] = {
+  protected[this] def applyService(request: Req, service: Future[Service[Req, Rep]]): Future[Rep] = {
     service.transform {
       case Return(svc) => svc(request)
       case t @ Throw(_) => Future.const(t.cast[Rep])
     }
   }
 
+  /**
+   * Determines whether the request's keys live on only one partition or on more than one partition.
+   * In the former case we can skip `partitionRequest` and immediately call `applyService`. In the
+   * latter case we need to call `partitionRequest`.
+   *
+   * @param request: incoming request
+   * @return whether the keys live on the same partition
+   */
+  protected def isSinglePartition(request: Req): Boolean
+
   final def apply(request: Req): Future[Rep] = {
     // Note that the services will be constructed in the implementing classes. So the
     // implementations will be responsible for closing them too.
-    partitionRequest(request) match {
-      case Seq(_) =>
-        // single partition request (all keys belong to the same partition)
-        applyService(request, getPartitionFor(request))
-      case servicesSeq =>
-        // multiple partitions
-        Future
-          .collect(
-            servicesSeq.map { partitionedRequest =>
-              applyService(partitionedRequest, getPartitionFor(partitionedRequest))
-            }
-          )
-          .map(mergeResponses)
+    if (isSinglePartition(request)) {
+      // single partition request (all keys belong to the same partition)
+      applyService(request, getPartitionFor(request))
+    } else {
+      // multiple partitions
+      Future
+        .collect(
+          partitionRequest(request).map { partitionedRequest =>
+            applyService(partitionedRequest, getPartitionFor(partitionedRequest))
+          }
+        )
+        .map(mergeResponses)
     }
   }
 }
