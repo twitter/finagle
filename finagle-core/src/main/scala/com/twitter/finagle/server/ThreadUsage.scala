@@ -2,7 +2,7 @@ package com.twitter.finagle.server
 
 import com.github.benmanes.caffeine.cache.{Cache, Caffeine}
 import com.twitter.conversions.time._
-import com.twitter.finagle.stats.{Gauge, StatsReceiver, Verbosity}
+import com.twitter.finagle.stats.{Counter, Gauge, StatsReceiver, Verbosity}
 import com.twitter.finagle.{
   Filter,
   Service,
@@ -41,7 +41,13 @@ private class ThreadUsage(
     Collections.newSetFromMap[LongAdder](cache.asMap())
   }
 
-  private[this] val perThreadCount = new ThreadLocal[LongAdder] {
+  private[this] val perThreadCounter = new ThreadLocal[Counter] {
+    override def initialValue(): Counter =
+      statsReceiver.scope("per_thread")
+        .counter(Verbosity.Debug, Thread.currentThread.getName)
+  }
+
+  private[this] val aggregateCounter = new ThreadLocal[LongAdder] {
     override def initialValue(): LongAdder = {
       val value = new LongAdder()
       allCounts.add(value)
@@ -102,8 +108,10 @@ private class ThreadUsage(
   /**
    * Called when the current thread is handling a request.
    */
-  def increment(): Unit =
-    perThreadCount.get.increment()
+  def increment(): Unit = {
+    aggregateCounter.get.increment()
+    perThreadCounter.get.incr()
+  }
 
   def close(deadline: Time): Future[Unit] = {
     computeTask.cancel()

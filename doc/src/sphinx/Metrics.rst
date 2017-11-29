@@ -143,8 +143,8 @@ queueing rules.
   per connection at a time that represents the number of pending requests.
 
 
-Thread Usage
-------------
+Server Thread Usage
+-------------------
 
 .. _threadusage:
 
@@ -176,6 +176,8 @@ There are caveats which can make these metrics unreliable or not applicable:
   A gauge of the standard of deviation of the number of requests handled
   by each thread.
 
+**per_thread/<thread_name>** `verbosity:debug`
+ A counter which indicates the number of requests that a specific thread has received.
 
 Admission Control
 -----------------
