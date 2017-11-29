@@ -5,7 +5,6 @@ import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.{Memcached, _}
 import com.twitter.hashing.KeyHasher
 import com.twitter.io.Buf
-import java.nio.charset.StandardCharsets.UTF_8
 
 /**
  * MemcachedPartitioningService provides Ketama consistent hashing based partitioning for the
@@ -18,7 +17,7 @@ private[finagle] object MemcachedPartitioningService {
     "Partitioning Service based on Ketama consistent hashing for memcached protocol"
 
   def module: Stackable[ServiceFactory[Command, Response]] =
-    new KetamaPartitioningService.Module[Command, Response, String] {
+    new KetamaPartitioningService.Module[Command, Response, Buf] {
 
       override val role: Stack.Role = MemcachedPartitioningService.role
       override val description: String = MemcachedPartitioningService.description
@@ -26,7 +25,7 @@ private[finagle] object MemcachedPartitioningService {
       def newKetamaPartitioningService(
         underlying: Stack[ServiceFactory[Command, Response]],
         params: Params
-      ): KetamaPartitioningService[Command, Response, String] = {
+      ): KetamaPartitioningService[Command, Response, Buf] = {
 
         val Memcached.param.KeyHasher(hasher) = params[Memcached.param.KeyHasher]
         val Memcached.param.NumReps(numReps) = params[Memcached.param.NumReps]
@@ -41,33 +40,27 @@ private[finagle] class MemcachedPartitioningService(
   params: Stack.Params,
   keyHasher: KeyHasher = KeyHasher.KETAMA,
   numReps: Int = KetamaPartitioningService.DefaultNumReps
-) extends KetamaPartitioningService[Command, Response, String](
+) extends KetamaPartitioningService[Command, Response, Buf](
       underlying,
       params,
       keyHasher,
       numReps
     ) {
 
-  final override protected def getKeyBytes(key: String): Array[Byte] = {
-    key.getBytes(UTF_8)
+  final override protected def getKeyBytes(key: Buf): Array[Byte] = {
+    Buf.ByteArray.Owned.extract(key)
   }
 
-  final override protected def getPartitionKeys(command: Command): Seq[String] = {
-
-    def extractKey(keyBuf: Buf): String = {
-      val Buf.Utf8(key: String) = keyBuf
-      key
-    }
-
+  final override protected def getPartitionKeys(command: Command): Seq[Buf] = {
     command match {
       case rc: RetrievalCommand =>
-        rc.keys.map(extractKey)
+        rc.keys
       case sc: StorageCommand =>
-        Seq(extractKey(sc.key))
+        Seq(sc.key)
       case ac: ArithmeticCommand =>
-        Seq(extractKey(ac.key))
+        Seq(ac.key)
       case delete: Delete =>
-        Seq(extractKey(delete.key))
+        Seq(delete.key)
       case _ =>
         throw new IllegalStateException(s"Unexpected command: $command")
     }
@@ -79,15 +72,15 @@ private[finagle] class MemcachedPartitioningService(
    */
   final override protected def createPartitionRequestForKeys(
     command: Command,
-    pKeys: Seq[String]
+    pKeys: Seq[Buf]
   ): Command = {
     command match {
       case get: Get =>
-        get.copy(keys = pKeys.map(Buf.Utf8(_)))
+        get.copy(keys = pKeys)
       case gets: Gets =>
-        gets.copy(keys = pKeys.map(Buf.Utf8(_)))
+        gets.copy(keys = pKeys)
       case getv: Getv =>
-        getv.copy(keys = pKeys.map(Buf.Utf8(_)))
+        getv.copy(keys = pKeys)
       case _ =>
         throw new IllegalStateException(s"Unexpected invocation: $command")
     }
