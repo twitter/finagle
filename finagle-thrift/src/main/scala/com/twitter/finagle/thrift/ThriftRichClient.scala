@@ -444,7 +444,7 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
 
   /**
    * Converts from a Service interface (`ServicePerEndpoint`) to the
-   * method interface (`newIface`).
+   * method interface (`MethodPerEndpoint`).
    */
   def methodPerEndpoint[ServicePerEndpoint, MethodPerEndpoint](servicePerEndpoint: ServicePerEndpoint)(
     implicit builder: MethodPerEndpointBuilder[ServicePerEndpoint, MethodPerEndpoint]
@@ -452,11 +452,11 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
 
   /**
    * Converts from a Scrooge Request/Response Service interface (`ReqRepServicePerEndpoint`) to the
-   * method interface (`newIface`).
+   * method interface (`MethodPerEndpoint`).
    */
-  def reqRepMethodPerEndpoint[ReqRepServicePerEndpoint, FutureIface](servicePerEndpoint: ReqRepServicePerEndpoint)(
-    implicit builder: ReqRepMethodPerEndpointBuilder[ReqRepServicePerEndpoint, FutureIface]
-  ): FutureIface = builder.methodPerEndpoint(servicePerEndpoint)
+  def reqRepMethodPerEndpoint[ReqRepServicePerEndpoint, MethodPerEndpoint](servicePerEndpoint: ReqRepServicePerEndpoint)(
+    implicit builder: ReqRepMethodPerEndpointBuilder[ReqRepServicePerEndpoint, MethodPerEndpoint]
+  ): MethodPerEndpoint = builder.methodPerEndpoint(servicePerEndpoint)
 
   /**
    * $buildMultiplexClient
