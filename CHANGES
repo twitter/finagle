@@ -13,6 +13,12 @@ New Features
   * finagle-thrift, finagle-thriftmux: Add support for Scrooge
     `ReqRepServicePerEndpoint` functionality. ``PHAB_ID=D107397``
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-thrift: Move `ThriftRichClient` and `ThriftRichServer` to
+    `c.t.finagle.thrift` package. ``PHAB_ID=D115284``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

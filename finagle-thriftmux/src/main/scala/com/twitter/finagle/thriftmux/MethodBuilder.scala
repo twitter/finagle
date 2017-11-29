@@ -1,6 +1,6 @@
 package com.twitter.finagle.thriftmux
 
-import com.twitter.finagle.thrift.{ServiceIfaceBuilder, ThriftClientRequest, ThriftServiceIface}
+import com.twitter.finagle.thrift.{ServiceIfaceBuilder, ThriftClientRequest, ThriftRichClient, ThriftServiceIface}
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
 import com.twitter.finagle.client.RefcountedClosable

@@ -1,8 +1,8 @@
-package com.twitter.finagle
+package com.twitter.finagle.thrift
 
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.stats._
-import com.twitter.finagle.thrift._
+import com.twitter.finagle.{ListeningServer, Server, Stack, Thrift}
 import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory
 

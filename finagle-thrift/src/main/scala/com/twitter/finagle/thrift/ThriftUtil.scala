@@ -1,7 +1,7 @@
-package com.twitter.finagle
+package com.twitter.finagle.thrift
 
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.thrift.{MultiplexedFinagleService, RichClientParam, RichServerParam, ThriftClientRequest}
+import com.twitter.finagle.{Service, Thrift}
 import java.lang.reflect.Constructor
 import org.apache.thrift.protocol.TProtocolFactory
 

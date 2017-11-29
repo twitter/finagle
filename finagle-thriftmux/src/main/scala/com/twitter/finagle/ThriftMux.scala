@@ -34,14 +34,7 @@ import com.twitter.finagle.stats.{
   ServerStatsReceiver,
   StatsReceiver
 }
-import com.twitter.finagle.thrift.{
-  ClientId,
-  Headers,
-  RichClientParam,
-  RichServerParam,
-  ThriftClientRequest,
-  UncaughtAppExceptionFilter
-}
+import com.twitter.finagle.thrift._
 import com.twitter.finagle.thriftmux.Toggles
 import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
 import com.twitter.finagle.tracing.{Trace, Tracer}
@@ -120,7 +113,7 @@ import scala.util.control.NonFatal
  * configuration documentation]].
  */
 object ThriftMux
-    extends Client[ThriftClientRequest, Array[Byte]]
+  extends Client[ThriftClientRequest, Array[Byte]]
     with Server[Array[Byte], Array[Byte]] {
 
   /**
@@ -128,24 +121,24 @@ object ThriftMux
    */
   private[twitter] val BaseClientStack: Stack[ServiceFactory[mux.Request, mux.Response]] =
     (ThriftMuxUtil.protocolRecorder +: Mux.client.stack)
-    // Since NackAdmissionFilter should operate on all requests sent over
-    // the wire including retries, it must be below `Retries`. Since it
-    // aggregates the status of the entire cluster, it must be above
-    // `LoadBalancerFactory` (not part of the endpoint stack).
+      // Since NackAdmissionFilter should operate on all requests sent over
+      // the wire including retries, it must be below `Retries`. Since it
+      // aggregates the status of the entire cluster, it must be above
+      // `LoadBalancerFactory` (not part of the endpoint stack).
       .insertBefore(
-        StackClient.Role.prepFactory,
-        NackAdmissionFilter.module[mux.Request, mux.Response]
-      )
+      StackClient.Role.prepFactory,
+      NackAdmissionFilter.module[mux.Request, mux.Response]
+    )
 
   /**
    * Base [[com.twitter.finagle.Stack]] for ThriftMux servers.
    */
   private[twitter] val BaseServerStack: Stack[ServiceFactory[mux.Request, mux.Response]] =
-    // NOTE: ideally this would not use the `prepConn` role, but it's conveniently
-    // located in the right location of the stack and is defaulted to a no-op.
-    // We would like this located anywhere before the StatsFilter so that success
-    // and failure can be measured properly before converting the exceptions into
-    // byte arrays. see CSL-1351
+  // NOTE: ideally this would not use the `prepConn` role, but it's conveniently
+  // located in the right location of the stack and is defaulted to a no-op.
+  // We would like this located anywhere before the StatsFilter so that success
+  // and failure can be measured properly before converting the exceptions into
+  // byte arrays. see CSL-1351
     ThriftMuxUtil.protocolRecorder +:
       Mux.server.stack.replace(StackServer.Role.preparer, Server.ExnHandler)
 
@@ -193,7 +186,7 @@ object ThriftMux
    * @see [[https://twitter.github.io/finagle/guide/Protocols.html#mux Mux]] documentation
    */
   case class Client(muxer: StackClient[mux.Request, mux.Response] = Client.defaultMuxer)
-      extends StackBasedClient[ThriftClientRequest, Array[Byte]]
+    extends StackBasedClient[ThriftClientRequest, Array[Byte]]
       with Stack.Parameterized[Client]
       with Stack.Transformable[Client]
       with CommonParams[Client]
@@ -278,7 +271,7 @@ object ThriftMux
     private[this] def clientId: Option[ClientId] = params[Thrift.param.ClientId].clientId
 
     private[this] object ThriftMuxToMux
-        extends Filter[ThriftClientRequest, Array[Byte], mux.Request, mux.Response] {
+      extends Filter[ThriftClientRequest, Array[Byte], mux.Request, mux.Response] {
 
       private val extractResponseBytesFn = (response: mux.Response) => {
         val responseCtx = Contexts.local.getOrElse(Headers.Response.Key, EmptyResponseHeadersFn)
@@ -359,7 +352,7 @@ object ThriftMux
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
     override val withTransport: ClientTransportParams[Client] =
-      new ClientTransportParams(this)
+    new ClientTransportParams(this)
     override val withSession: ClientSessionParams[Client] =
       new ClientSessionParams(this)
     override val withLoadBalancer: DefaultLoadBalancingParams[Client] =
@@ -515,7 +508,7 @@ object ThriftMux
     // Convert unhandled exceptions to TApplicationExceptions, but pass
     // com.twitter.finagle.FailureFlags to mux for transmission.
     private[this] class ExnFilter(protocolFactory: TProtocolFactory)
-        extends SimpleFilter[mux.Request, mux.Response] {
+      extends SimpleFilter[mux.Request, mux.Response] {
       def apply(
         request: mux.Request,
         service: Service[mux.Request, mux.Response]
@@ -552,7 +545,7 @@ object ThriftMux
    * @see [[https://twitter.github.io/finagle/guide/Protocols.html#mux Mux]] documentation
    */
   case class Server(muxer: StackServer[mux.Request, mux.Response] = serverMuxer)
-      extends StackBasedServer[Array[Byte], Array[Byte]]
+    extends StackBasedServer[Array[Byte], Array[Byte]]
       with ThriftRichServer
       with Stack.Parameterized[Server]
       with CommonParams[Server]
@@ -648,7 +641,7 @@ object ThriftMux
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
     override val withTransport: ServerTransportParams[Server] =
-      new ServerTransportParams(this)
+    new ServerTransportParams(this)
     override val withSession: SessionParams[Server] =
       new SessionParams(this)
     override val withAdmissionControl: ServerAdmissionControlParams[Server] =

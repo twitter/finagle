@@ -1,11 +1,9 @@
-package com.twitter.finagle
+package com.twitter.finagle.thrift
 
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver}
-import com.twitter.finagle.thrift.service.{MethodPerEndpointBuilder, ServicePerEndpointBuilder}
-import com.twitter.finagle.thrift.{MethodIfaceBuilder, Protocols, RichClientParam, ServiceIfaceBuilder, ThriftClientRequest, ThriftServiceIface}
-import com.twitter.finagle.thrift._
-import com.twitter.finagle.thrift.service.{Filterable, ReqRepMethodPerEndpointBuilder, ReqRepServicePerEndpointBuilder}
+import com.twitter.finagle.thrift.service.{Filterable, MethodPerEndpointBuilder, ReqRepMethodPerEndpointBuilder, ReqRepServicePerEndpointBuilder, ServicePerEndpointBuilder}
 import com.twitter.finagle.util.Showable
+import com.twitter.finagle.{Client, Name, Resolver, Service, Stack}
 import org.apache.thrift.protocol.TProtocolFactory
 import scala.reflect.ClassTag
 
