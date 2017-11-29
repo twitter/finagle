@@ -1,9 +1,8 @@
 package com.twitter.finagle.netty4.channel
 
+import com.twitter.finagle.netty4.channel.ChannelRequestStatsHandler.SharedChannelRequestStats
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import io.netty.channel._
-import io.netty.util.{AttributeKey, Attribute}
-import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
 import org.mockito.Mockito.when
 import org.scalatest.FunSuite
@@ -13,36 +12,29 @@ import org.scalatest.mock.MockitoSugar
 @RunWith(classOf[JUnitRunner])
 class ChannelRequestStatsHandlerTest extends FunSuite with MockitoSugar {
 
-  def mkAttr(ai: AtomicInteger): Attribute[AtomicInteger] = new Attribute[AtomicInteger] {
-    def set(value: AtomicInteger): Unit = ai.set(value.get())
-    def get(): AtomicInteger = ai
+  def requestsEqual(sr: InMemoryStatsReceiver, requests: Seq[Float]): Unit =
+    assert(
+      sr.stat("connection_requests")() == requests
+    )
 
-    def key(): AttributeKey[AtomicInteger] = ???
-    def getAndRemove(): AtomicInteger = ???
-    def remove(): Unit = ???
-    def compareAndSet(oldValue: AtomicInteger, newValue: AtomicInteger): Boolean = ???
-    def setIfAbsent(value: AtomicInteger): AtomicInteger = ???
-    def getAndSet(value: AtomicInteger): AtomicInteger = ???
-  }
-
-  test("ChannelRequestStatsHandler counts messages") {
-    val sr = new InMemoryStatsReceiver()
-
-    def requestsEqual(requests: Seq[Float]) =
-      assert(
-        sr.stat("connection_requests")() == requests
-      )
-
-    val handler = new ChannelRequestStatsHandler(sr)
-    requestsEqual(Seq.empty[Float])
+  private class TestContext(sharedStats: SharedChannelRequestStats) {
+    val handler = new ChannelRequestStatsHandler(sharedStats)
 
     val ctx = mock[ChannelHandlerContext]
     val chan = mock[Channel]
-    val reqAttr = mkAttr(new AtomicInteger(0))
     when(ctx.channel).thenReturn(chan)
-    when(chan.attr(ChannelRequestStatsHandler.ConnectionRequestsKey)).thenReturn(reqAttr)
 
     val msg = new Object
+  }
+
+  test("ChannelRequestStatsHandler counts messages") {
+    val sr = new InMemoryStatsReceiver
+    requestsEqual(sr, Seq.empty[Float])
+
+    val testCtx = new TestContext(new SharedChannelRequestStats(sr))
+    val handler = testCtx.handler
+    val ctx = testCtx.ctx
+    val msg = testCtx.msg
 
     // first connection sends two messages
     handler.handlerAdded(ctx)
@@ -59,6 +51,53 @@ class ChannelRequestStatsHandlerTest extends FunSuite with MockitoSugar {
     handler.channelRead(ctx, msg)
     handler.channelInactive(ctx)
 
-    requestsEqual(Seq(2.0f, 0.0f, 1.0f))
+    requestsEqual(sr, Seq(2.0f, 0.0f, 1.0f))
+  }
+
+  test("ChannelRequestStatsHandler handles multiple channelInactive calls") {
+    val sr = new InMemoryStatsReceiver
+    requestsEqual(sr, Seq.empty[Float])
+
+    val testCtx = new TestContext(new SharedChannelRequestStats(sr))
+    val handler = testCtx.handler
+    val ctx = testCtx.ctx
+    val msg = testCtx.msg
+
+    handler.handlerAdded(ctx)
+    handler.channelRead(ctx, msg)
+    requestsEqual(sr, Seq())
+
+    handler.channelInactive(ctx)
+    requestsEqual(sr, Seq(1.0f))
+
+    handler.channelInactive(ctx)
+    requestsEqual(sr, Seq(1.0f))
+  }
+
+  test("SharedChannelRequestStats collects all handlers' connection requests") {
+    val sr = new InMemoryStatsReceiver
+    requestsEqual(sr, Seq.empty[Float])
+
+    val testCtx1 = new TestContext(new SharedChannelRequestStats(sr))
+    val testCtx2 = new TestContext(new SharedChannelRequestStats(sr))
+    val ctx1 = testCtx1.ctx
+    val ctx2 = testCtx2.ctx
+    val handler1 = testCtx1.handler
+    val handler2 = testCtx2.handler
+    val msg1 = testCtx1.msg
+    val msg2 = testCtx2.msg
+
+    handler1.handlerAdded(ctx1)
+    handler1.channelRead(ctx1, msg1)
+    handler1.channelRead(ctx1, msg1)
+    handler2.handlerAdded(ctx2)
+    handler2.channelRead(ctx2, msg2)
+    requestsEqual(sr, Seq())
+
+    handler1.channelInactive(ctx1)
+    requestsEqual(sr, Seq(2.0f))
+
+    handler2.channelInactive(ctx2)
+    requestsEqual(sr, Seq(2.0f, 1.0f))
   }
 }
