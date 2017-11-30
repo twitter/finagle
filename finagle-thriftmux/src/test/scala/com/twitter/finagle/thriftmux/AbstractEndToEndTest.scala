@@ -18,6 +18,7 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
+import com.twitter.scrooge
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import org.apache.thrift.TApplicationException
@@ -44,9 +45,9 @@ abstract class AbstractEndToEndTest
     }
   }
 
-  protected def clientImpl(): ThriftMux.Client
+  protected def clientImpl: ThriftMux.Client
 
-  protected def serverImpl(): ThriftMux.Server
+  protected def serverImpl: ThriftMux.Server
 
   // Used for testing ThriftMux's Context functionality. Duplicated from the
   // finagle-mux package as a workaround because you can't easily depend on a
@@ -1262,7 +1263,7 @@ abstract class AbstractEndToEndTest
 
   test("gracefully reject sessions") {
     @volatile var n = 0
-    val server1 = serverImpl().serve(
+    val server1 = serverImpl.serve(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new ServiceFactory {
         def apply(conn: ClientConnection): Future[Nothing] = {
@@ -1273,7 +1274,7 @@ abstract class AbstractEndToEndTest
       }
     )
 
-    val server2 = serverImpl().serve(
+    val server2 = serverImpl.serve(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new ServiceFactory {
         def apply(conn: ClientConnection): Future[Nothing] = {
@@ -1285,7 +1286,7 @@ abstract class AbstractEndToEndTest
     )
 
     val client =
-        clientImpl()
+        clientImpl
         .newIface[TestService.FutureIface](
         Name.bound(
           Address(server1.boundAddress.asInstanceOf[InetSocketAddress]),
@@ -1522,6 +1523,7 @@ abstract class AbstractEndToEndTest
     builder: MethodBuilder
   ): Unit = {
     // these should never complete within the timeout
+    // ServiceIface
     val shortTimeout: Service[TestService.Query.Args, TestService.Query.SuccessType] =
       builder
         .withTimeoutPerRequest(5.millis)
@@ -1536,24 +1538,67 @@ abstract class AbstractEndToEndTest
       assert(stats.counter("a_label", "fast", "logical", "success")() == 0)
     }
 
+    // ServicePerEndpoint
+    val shortTimeoutSvcPerEndpoint: Service[TestService.Query.Args, TestService.Query.SuccessType] =
+      builder
+        .withTimeoutPerRequest(5.millis)
+        .servicePerEndpoint[TestService.ServicePerEndpoint]("fast")
+        .query
+
+    intercept[IndividualRequestTimeoutException] {
+      await(shortTimeoutSvcPerEndpoint(TestService.Query.Args("shorty")))
+    }
+    // ReqRepServicePerEndpoint
+    val shortTimeoutReqRepSvcPerEndpoint: Service[scrooge.Request[TestService.Query.Args], scrooge.Response[TestService.Query.SuccessType]] =
+      builder
+        .withTimeoutPerRequest(5.millis)
+        .reqRepServicePerEndpoint[TestService.ReqRepServicePerEndpoint]("fast")
+        .query
+
+    intercept[IndividualRequestTimeoutException] {
+      await(shortTimeoutReqRepSvcPerEndpoint(scrooge.Request(TestService.Query.Args("shorty"))))
+    }
+
     // these should always complete within the timeout
+    // ServiceIface
     val longTimeout =
       builder
         .withTimeoutPerRequest(5.seconds)
         .newServiceIface[TestService.ServiceIface]("slow")
         .query
 
-    val result = await(longTimeout(TestService.Query.Args("looong")))
+  var result = await(longTimeout(TestService.Query.Args("looong")))
     assert("looong" == result)
     eventually {
       assert(stats.counter("a_label", "slow", "logical", "requests")() == 1)
       assert(stats.counter("a_label", "slow", "logical", "success")() == 1)
     }
+
+    // ServicePerEndpoint
+    val longTimeoutSvcPerEndpoint =
+      builder
+        .withTimeoutPerRequest(5.seconds)
+        .servicePerEndpoint[TestService.ServicePerEndpoint]("slow")
+        .query
+
+    result = await(longTimeoutSvcPerEndpoint(TestService.Query.Args("looong")))
+    assert("looong" == result)
+
+    // ReqRepServicePerEndpoint
+    val longTimeoutReqRepSvcPerEndpoint =
+      builder
+        .withTimeoutPerRequest(5.seconds)
+        .reqRepServicePerEndpoint[TestService.ReqRepServicePerEndpoint]("slow")
+        .query
+
+    val response = await(longTimeoutReqRepSvcPerEndpoint(scrooge.Request(TestService.Query.Args("looong"))))
+    assert("looong" == response.value)
+
     await(server.close())
   }
 
   test("methodBuilder timeouts from Stack") {
-    implicit val timer = DefaultTimer
+    implicit val timer: Timer = DefaultTimer
     val service = new TestService.FutureIface {
       def query(x: String): Future[String] = {
         Future.sleep(50.millis).before { Future.value(x) }
@@ -1574,7 +1619,7 @@ abstract class AbstractEndToEndTest
   }
 
   test("methodBuilder timeouts from ClientBuilder") {
-    implicit val timer = DefaultTimer
+    implicit val timer: Timer = DefaultTimer
     val service = new TestService.FutureIface {
       def query(x: String): Future[String] = {
         Future.sleep(50.millis).before { Future.value(x) }
@@ -1598,7 +1643,7 @@ abstract class AbstractEndToEndTest
   }
 
   test("methodBuilder timeouts from configured ClientBuilder") {
-    implicit val timer = DefaultTimer
+    implicit val timer: Timer = DefaultTimer
     val service = new TestService.FutureIface {
       def query(x: String): Future[String] = {
         Future.sleep(50.millis).before { Future.value(x) }
@@ -1623,6 +1668,7 @@ abstract class AbstractEndToEndTest
     val mb = MethodBuilder.from(clientBuilder)
 
     // these should never complete within the timeout
+    // ServiceIface
     val asIs: Service[TestService.Query.Args, TestService.Query.SuccessType] =
       mb.newServiceIface[TestService.ServiceIface]("as_is").query
     intercept[RequestTimeoutException] {
@@ -1633,19 +1679,53 @@ abstract class AbstractEndToEndTest
       assert(stats.counter("a_label", "as_is", "logical", "success")() == 0)
     }
 
+    // ServicePerEndpoint
+    val asIsSvcPerEndpoint: Service[TestService.Query.Args, TestService.Query.SuccessType] =
+      mb.servicePerEndpoint[TestService.ServicePerEndpoint]("as_is").query
+    intercept[RequestTimeoutException] {
+      await(asIsSvcPerEndpoint(TestService.Query.Args("nope")))
+    }
+    // ReqRepServicePerEndpoint
+    val asIsReqRepSvcPerEndpoint: Service[scrooge.Request[TestService.Query.Args], scrooge.Response[TestService.Query.SuccessType]] =
+      mb.reqRepServicePerEndpoint[TestService.ReqRepServicePerEndpoint]("as_is").query
+    intercept[RequestTimeoutException] {
+      await(asIsReqRepSvcPerEndpoint(scrooge.Request(TestService.Query.Args("nope"))))
+    }
+
     // increase the timeouts via MB and now the request should succeed
-    val longTimeout =
+    // ServiceIface
+    val longTimeout: Service[TestService.Query.Args, TestService.Query.SuccessType] =
       mb.withTimeoutPerRequest(5.seconds)
         .withTimeoutTotal(5.seconds)
         .newServiceIface[TestService.ServiceIface]("good")
         .query
 
-    val result = await(longTimeout(TestService.Query.Args("yep")))
+    var result = await(longTimeout(TestService.Query.Args("yep")))
     assert("yep" == result)
     eventually {
       assert(stats.counter("a_label", "good", "logical", "requests")() == 1)
       assert(stats.counter("a_label", "good", "logical", "success")() == 1)
     }
+
+    // ServicePerEndpoint
+    val longTimeoutSvcPerEndpoint: Service[TestService.Query.Args, TestService.Query.SuccessType] =
+      mb.withTimeoutPerRequest(5.seconds)
+        .withTimeoutTotal(5.seconds)
+        .servicePerEndpoint[TestService.ServicePerEndpoint]("good")
+        .query
+
+    result = await(longTimeoutSvcPerEndpoint(TestService.Query.Args("yep")))
+    assert("yep" == result)
+    // ReqRepServicePerEndpoint
+    val longTimeoutReqRepSvcPerEndpoint: Service[scrooge.Request[TestService.Query.Args], scrooge.Response[TestService.Query.SuccessType]] =
+      mb.withTimeoutPerRequest(5.seconds)
+        .withTimeoutTotal(5.seconds)
+        .reqRepServicePerEndpoint[TestService.ReqRepServicePerEndpoint]("good")
+        .query
+
+    val response = await(longTimeoutReqRepSvcPerEndpoint(scrooge.Request(TestService.Query.Args("yep"))))
+    assert("yep" == response.value)
+
     await(server.close())
   }
 
@@ -1654,13 +1734,15 @@ abstract class AbstractEndToEndTest
     server: ListeningServer,
     builder: MethodBuilder
   ): Unit = {
-    val retryInvalid = builder
-      .withRetryForClassifier {
-        case ReqRep(_, Throw(InvalidQueryException(_))) =>
-          ResponseClass.RetryableFailure
-      }
-      .newServiceIface[TestService.ServiceIface]("all_invalid")
-      .query
+    // ServiceIface
+    val retryInvalid: Service[TestService.Query.Args, TestService.Query.SuccessType] =
+      builder
+        .withRetryForClassifier {
+          case ReqRep(_, Throw(InvalidQueryException(_))) =>
+            ResponseClass.RetryableFailure
+        }
+        .newServiceIface[TestService.ServiceIface]("all_invalid")
+        .query
 
     intercept[InvalidQueryException] {
       await(retryInvalid(TestService.Query.Args("fail0")))
@@ -1670,16 +1752,44 @@ abstract class AbstractEndToEndTest
       assert(stats.counter("a_label", "all_invalid", "logical", "success")() == 0)
       assert(stats.stat("a_label", "all_invalid", "retries")() == Seq(2))
     }
+    // ServicePerEndpoint
+    val retryInvalidSvcPerEndpoint: Service[TestService.Query.Args, TestService.Query.SuccessType] =
+      builder
+        .withRetryForClassifier {
+          case ReqRep(_, Throw(InvalidQueryException(_))) =>
+            ResponseClass.RetryableFailure
+        }
+        .servicePerEndpoint[TestService.ServicePerEndpoint]("all_invalid")
+        .query
 
-    val errCode1Succeeds = builder
-      .withRetryForClassifier {
-        case ReqRep(_, Throw(InvalidQueryException(errorCode))) if errorCode == 0 =>
-          ResponseClass.NonRetryableFailure
-        case ReqRep(_, Throw(InvalidQueryException(errorCode))) if errorCode == 1 =>
-          ResponseClass.Success
-      }
-      .newServiceIface[TestService.ServiceIface]("err_1")
-      .query
+    intercept[InvalidQueryException] {
+      await(retryInvalidSvcPerEndpoint(TestService.Query.Args("fail0")))
+    }
+    // ReqRepServicePerEndpoint
+    val retryInvalidReqRepSvcPerEndpoint: Service[scrooge.Request[TestService.Query.Args], scrooge.Response[TestService.Query.SuccessType]] =
+      builder
+        .withRetryForClassifier {
+          case ReqRep(_, Throw(InvalidQueryException(_))) =>
+            ResponseClass.RetryableFailure
+        }
+        .reqRepServicePerEndpoint[TestService.ReqRepServicePerEndpoint]("all_invalid")
+        .query
+
+    intercept[InvalidQueryException] {
+      await(retryInvalidReqRepSvcPerEndpoint(scrooge.Request(TestService.Query.Args("fail0"))))
+    }
+
+    // ServiceIface
+    val errCode1Succeeds: Service[TestService.Query.Args, TestService.Query.SuccessType] =
+      builder
+        .withRetryForClassifier {
+          case ReqRep(_, Throw(InvalidQueryException(errorCode))) if errorCode == 0 =>
+            ResponseClass.NonRetryableFailure
+          case ReqRep(_, Throw(InvalidQueryException(errorCode))) if errorCode == 1 =>
+            ResponseClass.Success
+        }
+        .newServiceIface[TestService.ServiceIface]("err_1")
+        .query
 
     intercept[InvalidQueryException] {
       // this is a non-retryable failure
@@ -1699,6 +1809,48 @@ abstract class AbstractEndToEndTest
       assert(stats.counter("a_label", "err_1", "logical", "requests")() == 2)
       assert(stats.counter("a_label", "err_1", "logical", "success")() == 1)
     }
+
+    // ServicePerEndpoint
+    val errCode1SucceedsSvcPerEndpoint: Service[TestService.Query.Args, TestService.Query.SuccessType] =
+      builder
+        .withRetryForClassifier {
+          case ReqRep(_, Throw(InvalidQueryException(errorCode))) if errorCode == 0 =>
+            ResponseClass.NonRetryableFailure
+          case ReqRep(_, Throw(InvalidQueryException(errorCode))) if errorCode == 1 =>
+            ResponseClass.Success
+        }
+        .servicePerEndpoint[TestService.ServicePerEndpoint]("err_1")
+        .query
+
+    intercept[InvalidQueryException] {
+      // this is a non-retryable failure
+      await(errCode1SucceedsSvcPerEndpoint(TestService.Query.Args("fail0")))
+    }
+    intercept[InvalidQueryException] {
+      // this is a "successful" "failure"
+      await(errCode1SucceedsSvcPerEndpoint(TestService.Query.Args("fail1")))
+    }
+    // ReqRepServicePerEndpoint
+    val errCode1SucceedsReqRepSvcPerEndpoint: Service[scrooge.Request[TestService.Query.Args], scrooge.Response[TestService.Query.SuccessType]] =
+      builder
+        .withRetryForClassifier {
+          case ReqRep(_, Throw(InvalidQueryException(errorCode))) if errorCode == 0 =>
+            ResponseClass.NonRetryableFailure
+          case ReqRep(_, Throw(InvalidQueryException(errorCode))) if errorCode == 1 =>
+            ResponseClass.Success
+        }
+        .reqRepServicePerEndpoint[TestService.ReqRepServicePerEndpoint]("err_1")
+        .query
+
+    intercept[InvalidQueryException] {
+      // this is a non-retryable failure
+      await(errCode1SucceedsReqRepSvcPerEndpoint(scrooge.Request(TestService.Query.Args("fail0"))))
+    }
+    intercept[InvalidQueryException] {
+      // this is a "successful" "failure"
+      await(errCode1SucceedsReqRepSvcPerEndpoint(scrooge.Request(TestService.Query.Args("fail1"))))
+    }
+
     await(server.close())
   }
 
@@ -1722,8 +1874,51 @@ abstract class AbstractEndToEndTest
     testMethodBuilderRetries(stats, server, builder)
   }
 
+  test("methodBuilder retries from Stack with MethodPerEndpoint") {
+    val service = new TestService.MethodPerEndpoint {
+      def query(x: String): Future[String] = x match {
+        case "fail0" => Future.exception(InvalidQueryException(0))
+        case "fail1" => Future.exception(InvalidQueryException(1))
+        case _ => Future.value(x)
+      }
+    }
+    val server =
+      serverImpl.serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), service)
+    val stats = new InMemoryStatsReceiver()
+    val client = clientImpl
+      .withStatsReceiver(stats)
+      .withLabel("a_label")
+    val name = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
+    val builder: MethodBuilder = client.methodBuilder(name)
+
+    testMethodBuilderRetries(stats, server, builder)
+  }
+
   test("methodBuilder retries from ClientBuilder") {
     val service = new TestService.FutureIface {
+      def query(x: String): Future[String] = x match {
+        case "fail0" => Future.exception(InvalidQueryException(0))
+        case "fail1" => Future.exception(InvalidQueryException(1))
+        case _ => Future.value(x)
+      }
+    }
+    val server =
+      serverImpl.serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), service)
+    val stats = new InMemoryStatsReceiver()
+    val client = clientImpl
+    val clientBuilder = ClientBuilder()
+      .reportTo(stats)
+      .name("a_label")
+      .stack(client)
+      .dest(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])))
+
+    val builder: MethodBuilder = MethodBuilder.from(clientBuilder)
+
+    testMethodBuilderRetries(stats, server, builder)
+  }
+
+  test("methodBuilder retries from ClientBuilder with MethodPerEndpoint") {
+    val service = new TestService.MethodPerEndpoint {
       def query(x: String): Future[String] = x match {
         case "fail0" => Future.exception(InvalidQueryException(0))
         case "fail1" => Future.exception(InvalidQueryException(1))

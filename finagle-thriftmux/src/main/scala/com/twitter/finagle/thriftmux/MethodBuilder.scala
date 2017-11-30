@@ -1,10 +1,11 @@
 package com.twitter.finagle.thriftmux
 
-import com.twitter.finagle.thrift.{ServiceIfaceBuilder, ThriftClientRequest, ThriftRichClient, ThriftServiceIface}
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
 import com.twitter.finagle.client.RefcountedClosable
 import com.twitter.finagle.service.ResponseClassifier
+import com.twitter.finagle.thrift.service.{Filterable, ReqRepServicePerEndpointBuilder, ServicePerEndpointBuilder}
+import com.twitter.finagle.thrift.{ServiceIfaceBuilder, ThriftClientRequest, ThriftRichClient}
 import com.twitter.util.Duration
 
 object MethodBuilder {
@@ -18,7 +19,7 @@ object MethodBuilder {
    * The value for "your_client_label" is taken from the `withLabel` setting
    * (from [[param.Label]]). If that is not set, `dest` is used.
    * The value for "method_name" is set when an method-specific client
-   * is constructed, as in [[MethodBuilder.newServiceIface]].
+   * is constructed, as in [[MethodBuilder.servicePerEndpoint]].
    *
    * @param dest where requests are dispatched to.
    *             See the [[https://twitter.github.io/finagle/guide/Names.html user guide]]
@@ -40,7 +41,7 @@ object MethodBuilder {
    * The value for "your_client_label" is taken from the `withLabel` setting
    * (from [[param.Label]]). If that is not set, `dest` is used.
    * The value for "method_name" is set when an method-specific client
-   * is constructed, as in [[MethodBuilder.newServiceIface]].
+   * is constructed, as in [[MethodBuilder.servicePerEndpoint]].
    *
    * @param dest where requests are dispatched to.
    *             See the [[https://twitter.github.io/finagle/guide/Names.html user guide]]
@@ -80,7 +81,7 @@ object MethodBuilder {
    * The value for "clientbuilders_name" is taken from the [[ClientBuilder.name]]
    * configuration, using "client" if unspecified.
    * The value for "method_name" is set when an method-specific client
-   * is constructed, as in [[MethodBuilder.newServiceIface]].
+   * is constructed, as in [[MethodBuilder.servicePerEndpoint]].
    *
    *  - The [[ClientBuilder.timeout]] configuration will be used as the default
    *  value for [[MethodBuilder.withTimeoutTotal]].
@@ -112,7 +113,7 @@ object MethodBuilder {
 }
 
 /**
- *  * `MethodBuilder` is a collection of APIs for client configuration at
+ * `MethodBuilder` is a collection of APIs for client configuration at
  * a higher level than the Finagle 6 APIs while improving upon the deprecated
  * [[ClientBuilder]]. `MethodBuilder` provides:
  *
@@ -261,7 +262,8 @@ class MethodBuilder(
    *
    * @param methodName used for scoping metrics (e.g. "clnt/your_client_label/method_name").
    */
-  def newServiceIface[ServiceIface <: ThriftServiceIface.Filterable[ServiceIface]](
+  @deprecated("Use servicePerEndpoint", "2017-11-29")
+  def newServiceIface[ServiceIface <: Filterable[ServiceIface]](
     methodName: String
   )(
     implicit builder: ServiceIfaceBuilder[ServiceIface]
@@ -272,5 +274,41 @@ class MethodBuilder(
       mb.params[param.Label].label
     )(builder)
     serviceIface.filtered(filters)
+  }
+
+  /**
+   * Construct a `ServicePerEndpoint` to be used for the `methodName` function.
+   *
+   * @param methodName used for scoping metrics (e.g. "clnt/your_client_label/method_name").
+   */
+  def servicePerEndpoint[ServicePerEndpoint <: Filterable[ServicePerEndpoint]](
+    methodName: String
+  )(
+    implicit builder: ServicePerEndpointBuilder[ServicePerEndpoint]
+  ): ServicePerEndpoint = {
+    val filters: Filter.TypeAgnostic = mb.filters(methodName)
+    val servicePerEndpoint: ServicePerEndpoint = rich.servicePerEndpoint(
+      mb.wrappedService(methodName),
+      mb.params[param.Label].label
+    )(builder)
+    servicePerEndpoint.filtered(filters)
+  }
+
+  /**
+   * Construct a `ReqRepServicePerEndpoint` to be used for the `methodName` function.
+   *
+   * @param methodName used for scoping metrics (e.g. "clnt/your_client_label/method_name").
+   */
+  def reqRepServicePerEndpoint[ReqRepServicePerEndpoint <: Filterable[ReqRepServicePerEndpoint]](
+    methodName: String
+  )(
+    implicit builder: ReqRepServicePerEndpointBuilder[ReqRepServicePerEndpoint]
+  ): ReqRepServicePerEndpoint = {
+    val filters: Filter.TypeAgnostic = mb.filters(methodName)
+    val reqRepServicePerEndpoint: ReqRepServicePerEndpoint = rich.reqRepServicePerEndpoint(
+      mb.wrappedService(methodName),
+      mb.params[param.Label].label
+    )(builder)
+    reqRepServicePerEndpoint.filtered(filters)
   }
 }
