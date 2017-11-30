@@ -1,6 +1,5 @@
 junit_tests(
   dependencies=[
-    '3rdparty/jvm/com/google/guava:guava',
     '3rdparty/jvm/io/netty',
     '3rdparty/jvm/junit',
     'finagle/finagle-core',
