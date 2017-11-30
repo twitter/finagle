@@ -1,11 +1,11 @@
 package com.twitter.finagle.memcached
 
-import com.google.common.hash.Hashing
 import com.twitter.finagle.Service
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.util.{AtomicMap, ParserUtils}
 import com.twitter.io.Buf
 import com.twitter.util.{Future, Time}
+import scala.util.hashing.MurmurHash3
 
 /**
  * Evaluates a given Memcached operation and returns the result.
@@ -94,11 +94,11 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
         Values(
           keys.flatMap { key =>
             map.lock(key) { data =>
-              data.get(key) filter { entry =>
+              data.get(key).filter { entry =>
                 if (!entry.valid)
                   data.remove(key) // expired
                 entry.valid
-              } map { entry =>
+              }.map { entry =>
                 Value(key, entry.value)
               }
             }
@@ -168,23 +168,17 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
 
 private[memcached] object Interpreter {
   /*
-   * Using non-cryptographic goodFastHash Hashing Algorithm
+   * Using non-cryptographic MurmurHash3
    * for we only care about speed for testing.
    *
    * The real memcached uses uint64_t for cas tokens,
-   * so we convert the hash to a String
+   * so we convert the 32-bit hash to a String
    * representation of an unsigned Long so it can be
    * used as a cas token.
    */
   private[memcached] def generateCasUnique(value: Buf): Buf = {
-    val hashAsUnsignedLong = Hashing
-      .goodFastHash(32)
-      .newHasher(value.length)
-      .putBytes(Buf.ByteArray.Owned.extract(value))
-      .hash()
-      .padToLong
-      .abs
-    Buf.Utf8(hashAsUnsignedLong.toString)
+    val hashed = MurmurHash3.arrayHash(Buf.ByteArray.Owned.extract(value)).toLong.abs
+    Buf.Utf8(hashed.toString)
   }
 }
 
@@ -197,5 +191,5 @@ case class Entry(value: Buf, expiry: Time) {
 }
 
 class InterpreterService(interpreter: Interpreter) extends Service[Command, Response] {
-  def apply(command: Command) = Future(interpreter(command))
+  def apply(command: Command): Future[Response] = Future(interpreter(command))
 }
