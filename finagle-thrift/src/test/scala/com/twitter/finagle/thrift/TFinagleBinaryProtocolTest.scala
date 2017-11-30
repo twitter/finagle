@@ -1,17 +1,14 @@
 package com.twitter.finagle.thrift
 
-import com.google.common.base.Charsets
-import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.thrift.Protocols.TFinagleBinaryProtocol
 import java.nio.ByteBuffer
-import org.apache.thrift.transport.TMemoryBuffer
+import java.nio.charset.StandardCharsets
 import org.apache.thrift.protocol.TBinaryProtocol
-import org.junit.runner.RunWith
+import org.apache.thrift.transport.TMemoryBuffer
 import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
-import org.scalatest.junit.JUnitRunner
 import scala.util.Random
 
-@RunWith(classOf[JUnitRunner])
 class TFinagleBinaryProtocolTest extends FunSuite with BeforeAndAfter with Matchers {
 
   private val NullCounter = NullStatsReceiver.counter("")
@@ -19,7 +16,7 @@ class TFinagleBinaryProtocolTest extends FunSuite with BeforeAndAfter with Match
   private def assertSerializedBytes(
     expectedBytes: Array[Byte],
     trans: TMemoryBuffer
-  ) {
+  ): Unit = {
     // 4 bytes for the string length
     trans.length() should be(expectedBytes.length + 4)
     trans.getArray().drop(4).take(expectedBytes.length) should be(expectedBytes)
@@ -28,8 +25,8 @@ class TFinagleBinaryProtocolTest extends FunSuite with BeforeAndAfter with Match
   private def assertSerializedBytes(
     expected: String,
     trans: TMemoryBuffer
-  ) {
-    val expectedBytes = expected.getBytes(Charsets.UTF_8)
+  ): Unit = {
+    val expectedBytes = expected.getBytes(StandardCharsets.UTF_8)
     assertSerializedBytes(expectedBytes, trans)
   }
 
