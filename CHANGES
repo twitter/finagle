@@ -20,9 +20,12 @@ New Features
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-base-http: Remove deprecated [Request|Response].[encode|decode][Bytes|String]
+    methods. Use c.t.f.h.codec.HttpCodec methods instead. ``PHAB_ID=D116350``
+
   * finagle-thrift: Move `ThriftRichClient` and `ThriftRichServer` to
     `c.t.finagle.thrift` package. ``PHAB_ID=D115284``
-
+  
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

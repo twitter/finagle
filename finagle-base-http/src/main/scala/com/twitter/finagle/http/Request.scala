@@ -1,7 +1,6 @@
 package com.twitter.finagle.http
 
 import com.twitter.collection.RecordSchema
-import com.twitter.finagle.http.codec.HttpCodec
 import com.twitter.finagle.http.exp.{Multipart, MultipartDecoder}
 import com.twitter.finagle.http.netty3.Netty3MultipartDecoder
 import com.twitter.io.{Buf, Reader, Writer}
@@ -212,16 +211,6 @@ abstract class Request private extends Message {
   @deprecated("Use the Response constructor functions", "2016-12-29")
   def getResponse(): Response = response
 
-  /** Encode an HTTP message to String. */
-  @deprecated("Use HttpCodec.encodeRequestToString", "2017-08-15")
-  def encodeString(): String =
-    HttpCodec.encodeRequestToString(this)
-
-  /** Encode an HTTP message to Array[Byte] */
-  @deprecated("Use HttpCodec.encodeRequestToBytes", "2017-08-15")
-  def encodeBytes(): Array[Byte] =
-    HttpCodec.encodeRequestToBytes(this)
-
   override def toString: String =
     s"""Request("$method $uri", from $remoteSocketAddress)"""
 }
@@ -234,16 +223,6 @@ object Request {
    * for Request.ctx.
    */
   val Schema: RecordSchema = new RecordSchema
-
-  /** Decode a Request from a String */
-  @deprecated("Use HttpCodec.decodeStringToRequest", "2017-08-15")
-  def decodeString(s: String): Request =
-    HttpCodec.decodeStringToRequest(s)
-
-  /** Decode a Request from Array[Byte] */
-  @deprecated("Use HttpCodec.decodeBytesToRequest", "2017-08-15")
-  def decodeBytes(b: Array[Byte]): Request =
-    HttpCodec.decodeBytesToRequest(b)
 
   /**
    * Create an HTTP/1.1 GET Request from query string parameters.
