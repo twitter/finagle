@@ -1,17 +1,16 @@
 package com.twitter.finagle.memcached.unit.util
 
 import com.twitter.conversions.time._
-import com.twitter.finagle._
 import com.twitter.finagle.Memcached.{UsePartitioningMemcachedClientToggle, UsePushMemcachedToggleName}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.factory.TimeoutFactory
-import com.twitter.finagle.filter.NackAdmissionFilter
 import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
 import com.twitter.finagle.memcached.{Client, KetamaPartitionedClient, TwemcacheClient}
 import com.twitter.finagle.pool.SingletonPool
-import com.twitter.finagle.param.Stats
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle._
+import com.twitter.finagle.param.Stats
 import com.twitter.finagle.toggle.flag
 import com.twitter.util.{Await, Time}
 import org.scalatest.FunSuite
@@ -39,7 +38,6 @@ abstract class MemcachedTest
     val stack = client.stack
     assert(stack.contains(FailureAccrualFactory.role))
     assert(stack.contains(SingletonPool.role))
-    assert(!stack.contains(NackAdmissionFilter.role))
 
     val params = client.params
 

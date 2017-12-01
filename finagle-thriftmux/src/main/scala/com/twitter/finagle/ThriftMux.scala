@@ -1,32 +1,14 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.client.{
-  ClientRegistry,
-  ExceptionRemoteInfoFactory,
-  StackBasedClient,
-  StackClient
-}
+import com.twitter.finagle.client.{ClientRegistry, ExceptionRemoteInfoFactory, StackBasedClient, StackClient}
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.context.RemoteInfo.Upstream
-import com.twitter.finagle.filter.NackAdmissionFilter
 import com.twitter.finagle.mux.{OpportunisticTlsParams, Request, Response}
 import com.twitter.finagle.mux.exp.pushsession.MuxPush
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport.{MuxContext, OpportunisticTls}
-import com.twitter.finagle.param.{
-  ExceptionStatsHandler => _,
-  Monitor => _,
-  ResponseClassifier => _,
-  Tracer => _,
-  _
-}
-import com.twitter.finagle.server.{
-  Listener,
-  ServerInfo,
-  StackBasedServer,
-  StackServer,
-  StdStackServer
-}
+import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
+import com.twitter.finagle.server.{Listener, ServerInfo, StackBasedServer, StackServer, StdStackServer}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{
   ClientStatsReceiver,
@@ -119,14 +101,6 @@ object ThriftMux
    */
   private[twitter] val BaseClientStack: Stack[ServiceFactory[mux.Request, mux.Response]] =
     (ThriftMuxUtil.protocolRecorder +: Mux.client.stack)
-      // Since NackAdmissionFilter should operate on all requests sent over
-      // the wire including retries, it must be below `Retries`. Since it
-      // aggregates the status of the entire cluster, it must be above
-      // `LoadBalancerFactory` (not part of the endpoint stack).
-      .insertBefore(
-      StackClient.Role.prepFactory,
-      NackAdmissionFilter.module[mux.Request, mux.Response]
-    )
 
   /**
    * Base [[com.twitter.finagle.Stack]] for ThriftMux servers.
@@ -285,8 +259,7 @@ object ThriftMux
           ClientId.let(clientId) {
             val requestCtx = Contexts.local.getOrElse(Headers.Request.Key, EmptyRequestHeadersFn)
             // TODO set the Path here.
-            val muxRequest =
-              mux.Request(Path.empty, requestCtx.values, Buf.ByteArray.Owned(req.message))
+            val muxRequest = mux.Request(Path.empty, requestCtx.values, Buf.ByteArray.Owned(req.message))
             service(muxRequest).map(extractResponseBytesFn)
           }
         }
@@ -411,6 +384,7 @@ object ThriftMux
 
     private[this] val statsReceiver = params[Stats].statsReceiver
 
+
     override def serve(
       addr: SocketAddress,
       factory: ServiceFactory[Request, Response]
@@ -475,8 +449,7 @@ object ThriftMux
         private[this] val responseBytesToMuxResponseFn = (responseBytes: Array[Byte]) => {
           mux.Response(
             ctxts = Contexts.local(Headers.Response.Key).values,
-            buf = Buf.ByteArray.Owned(responseBytes)
-          )
+            buf = Buf.ByteArray.Owned(responseBytes))
         }
 
         def apply(
@@ -635,10 +608,9 @@ object ThriftMux
     override def configured[P](psp: (P, Stack.Param[P])): Server = super.configured(psp)
   }
 
-  def server: ThriftMux.Server =
-    Server()
-      .configured(Label("thrift"))
-      .configured(Stats(ServerStatsReceiver))
+  def server: ThriftMux.Server = Server()
+    .configured(Label("thrift"))
+    .configured(Stats(ServerStatsReceiver))
 
   def serve(
     addr: SocketAddress,

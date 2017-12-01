@@ -3,7 +3,7 @@ package com.twitter.finagle
 import com.twitter.conversions.storage._
 import com.twitter.finagle.client._
 import com.twitter.finagle.naming.BindingFactory
-import com.twitter.finagle.filter.{NackAdmissionFilter, PayloadSizeFilter}
+import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.mux.Handshake.Headers
 import com.twitter.finagle.mux.lease.exp.Lessor
@@ -216,10 +216,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     try {
       val useTls = OpportunisticTls.negotiate(localEncryptLevel, remoteEncryptLevel)
       if (log.isLoggable(Level.DEBUG)) {
-        log.debug(
-          s"Successfully negotiated TLS with remote peer. Using TLS: $useTls " +
-            s"local level: $localEncryptLevel, remote level: $remoteEncryptLevel"
-        )
+        log.debug(s"Successfully negotiated TLS with remote peer. Using TLS: $useTls " +
+          s"local level: $localEncryptLevel, remote level: $remoteEncryptLevel")
       }
       if (useTls) {
         upgrades.incr()
@@ -288,14 +286,6 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       .replace(StackClient.Role.pool, SingletonPool.module[mux.Request, mux.Response])
       .replace(BindingFactory.role, MuxBindingFactory)
       .prepend(PayloadSizeFilter.module(_.body.length, _.body.length))
-      // Since NackAdmissionFilter should operate on all requests sent over
-      // the wire including retries, it must be below `Retries`. Since it
-      // aggregates the status of the entire cluster, it must be above
-      // `LoadBalancerFactory` (not part of the endpoint stack).
-      .insertBefore(
-        StackClient.Role.prepFactory,
-        NackAdmissionFilter.module[mux.Request, mux.Response]
-      )
 
     /**
      * Returns the headers that a client sends to a server.
@@ -322,8 +312,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       if (param.OppTls.enabled(params) && params[ClientSsl].sslClientConfiguration.isEmpty) {
         val level = params[param.OppTls].level
         throw new IllegalStateException(
-          s"Client desired opportunistic TLS ($level) but ClientSsl param is empty."
-        )
+          s"Client desired opportunistic TLS ($level) but ClientSsl param is empty.")
       }
     }
   }
@@ -373,8 +362,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
         version = LatestVersion,
         headers = Client.headers(
           maxFrameSize,
-          if (param.MuxImpl.tlsHeaders) level.orElse(Some(OpportunisticTls.Off)) else None
-        ),
+          if (param.MuxImpl.tlsHeaders) level.orElse(Some(OpportunisticTls.Off)) else None),
         negotiate = negotiate(
           maxFrameSize,
           statsReceiver,
@@ -444,8 +432,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       if (param.OppTls.enabled(params) && params[ServerSsl].sslServerConfiguration.isEmpty) {
         val level = params[param.OppTls].level
         throw new IllegalStateException(
-          s"Server desired opportunistic TLS ($level) but ServerSsl param is empty."
-        )
+          s"Server desired opportunistic TLS ($level) but ServerSsl param is empty.")
       }
     }
   }
@@ -454,7 +441,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Server.stack,
     params: Stack.Params = Server.params
   ) extends StdStackServer[mux.Request, mux.Response, Server]
-      with OpportunisticTlsParams[Server] {
+    with OpportunisticTlsParams[Server] {
 
     protected def copy1(
       stack: Stack[ServiceFactory[mux.Request, mux.Response]] = this.stack,
@@ -499,8 +486,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
         headers = Server.headers(
           _,
           maxFrameSize,
-          if (cachedTlsHeaders) level.orElse(Some(OpportunisticTls.Off)) else None
-        ),
+          if (cachedTlsHeaders) level.orElse(Some(OpportunisticTls.Off)) else None),
         negotiate = negotiate(
           maxFrameSize,
           statsReceiver,
