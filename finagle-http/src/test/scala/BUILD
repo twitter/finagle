@@ -1,7 +1,6 @@
 junit_tests(
   dependencies=[
     '3rdparty/jvm/com/google/code/findbugs:jsr305',
-    '3rdparty/jvm/com/google/guava',
     scoped('3rdparty/jvm/commons-lang', scope='forced'),
     '3rdparty/jvm/io/netty',
     '3rdparty/jvm/io/netty:netty4-handler-proxy',

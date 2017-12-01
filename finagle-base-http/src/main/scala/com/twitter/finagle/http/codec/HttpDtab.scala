@@ -1,11 +1,12 @@
 package com.twitter.finagle.http.codec
 
-import com.google.common.io.BaseEncoding
 import com.twitter.finagle._
 import com.twitter.finagle.http.Message
-import com.twitter.util.{Throw, Try, Return}
-import java.nio.charset.Charset
+import com.twitter.util.{Return, Throw, Try}
+import java.nio.charset.StandardCharsets.{US_ASCII, UTF_8}
+import java.util.Base64
 import scala.collection.mutable.ArrayBuffer
+import scala.util.control.NonFatal
 
 /**
  * Dtab serialization for Http. Dtabs are encoded into Http
@@ -23,17 +24,22 @@ object HttpDtab {
   private val Header = "dtab-local"
   private val Prefix = "x-dtab-"
   private val Maxsize = 100
-  private val Utf8 = Charset.forName("UTF-8")
-  private val Base64 = BaseEncoding.base64()
+  private val Base64Encoder = Base64.getEncoder()
+  private val Base64Decoder = Base64.getDecoder()
 
-  private val indexstr: Int => String =
-    ((0 until Maxsize) map (i => i -> "%02d".format(i))).toMap
+  private def b64Encode(v: String): String = {
+    val encoded = Base64Encoder.encode(v.getBytes(UTF_8))
+    new String(encoded, US_ASCII)
+  }
 
-  private def b64Encode(v: String): String =
-    Base64.encode(v.getBytes(Utf8))
-
-  private def b64Decode(v: String): Try[String] =
-    Try { Base64.decode(v) } map (new String(_, Utf8))
+  private def b64Decode(v: String): Try[String] = {
+    try {
+      val decoded = Base64Decoder.decode(v)
+      Return(new String(decoded, UTF_8))
+    } catch {
+      case NonFatal(t) => Throw(t)
+    }
+  }
 
   private val unmatchedFailure =
     Failure("Unmatched X-Dtab headers")
@@ -49,7 +55,7 @@ object HttpDtab {
 
   private def decodePrefix(b64pfx: String): Try[Dentry.Prefix] =
     b64Decode(b64pfx) match {
-      case Throw(e: IllegalArgumentException) => Throw(decodingFailure(b64pfx))
+      case Throw(_: IllegalArgumentException) => Throw(decodingFailure(b64pfx))
       case Throw(e) => Throw(e)
       case Return(pfxStr) =>
         Try(Dentry.Prefix.read(pfxStr)).rescue {
@@ -59,7 +65,7 @@ object HttpDtab {
 
   private def decodeName(b64name: String): Try[NameTree[Path]] =
     b64Decode(b64name) match {
-      case Throw(e: IllegalArgumentException) => Throw(decodingFailure(b64name))
+      case Throw(_: IllegalArgumentException) => Throw(decodingFailure(b64name))
       case Throw(e) => Throw(e)
       case Return(nameStr) =>
         Try(NameTree.read(nameStr)).rescue {
