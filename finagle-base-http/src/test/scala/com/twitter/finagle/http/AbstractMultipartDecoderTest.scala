@@ -56,4 +56,15 @@ abstract class AbstractMultipartDecoderTest(decoder: MultipartDecoder) extends F
     assert(contentTransferEncoding == "binary")
     assert(attr == "text")
   }
+
+  test("Not a multipart request") {
+    assert(decoder(Request()).isEmpty)
+    assert(decoder(Request(Method.Post, "/")).isEmpty)
+    assert(
+      decoder({val r = Request(Method.Post, "/"); r.contentType = "application/json"; r}).isEmpty
+    )
+    assert(
+      decoder({val r = Request(Method.Put, "/"); r.contentType = "multipart/form-data"; r}).isEmpty
+    )
+  }
 }
