@@ -8,12 +8,8 @@ import com.twitter.finagle.zipkin.core.{BinaryAnnotation, Span, ZipkinAnnotation
 import com.twitter.finagle.zipkin.thriftscala.{Scribe, ResultCode, LogEntry}
 import com.twitter.util._
 import java.net.{InetSocketAddress, InetAddress}
-
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 
-@RunWith(classOf[JUnitRunner])
 class ScribeRawZipkinTracerTest extends FunSuite {
 
   val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None, Flags().setDebug)
