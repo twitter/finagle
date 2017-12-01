@@ -6,7 +6,7 @@ import com.twitter.finagle.exp.pushsession.PushChannelHandle
 import com.twitter.finagle.mux.exp.pushsession.MessageWriter.DiscardResult
 import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
 import com.twitter.io.Buf
-import com.twitter.logging.Logger
+import com.twitter.logging.{HasLogLevel, Level, Logger}
 import com.twitter.util.{Return, Throw, Try}
 import java.util
 import scala.annotation.tailrec
@@ -85,8 +85,14 @@ private final class FragmentingMessageWriter(
   private[this] def onWriteError(ex: Throwable): Unit = {
     if (!observedWriteError) {
       observedWriteError = true
-      log.info(s"Error obtained during write phase: $ex", ex)
       handle.close()
+
+      val logLevel = ex match {
+        case hasLevel: HasLogLevel => hasLevel.logLevel
+        case _ => Level.WARNING
+      }
+
+      log.log(logLevel, ex, "session closed due to exception")
     }
   }
 
