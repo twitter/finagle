@@ -4,13 +4,10 @@ import com.twitter.finagle.{Dentry, Dtab, Failure, Path, tracing}
 import com.twitter.io.Buf
 import com.twitter.util.Time
 import com.twitter.util.TimeConversions.intToTimeableNumber
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import scala.collection.mutable
 
-@RunWith(classOf[JUnitRunner])
-class MessageTest extends FunSuite with AssertionsForJUnit {
+class MessageTest extends FunSuite {
   import Message._
 
   def buf(n: Int) = Buf.ByteArray.Owned((0 until n).toArray.map(_.toByte))
@@ -228,6 +225,19 @@ class MessageTest extends FunSuite with AssertionsForJUnit {
         assert(data(0) == 1 && data(1) == 2)
 
       case other => fail(s"Unexpected representation: $other")
+    }
+  }
+
+  test("Message.encode(Message.PreEncoded)") {
+    val preEncodedMessages = Seq(
+      PreEncoded.Rping,
+      PreEncoded.Tping
+    )
+
+    preEncodedMessages.foreach { msg: PreEncoded =>
+      assert(Message.encode(msg.underlying) == msg.encodedBuf)
+      assert(msg.encodedBuf eq Message.encode(msg))
+      assert(msg.toString == msg.underlying.toString)
     }
   }
 }

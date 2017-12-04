@@ -21,7 +21,7 @@ private[finagle] sealed trait Message {
 
   /**
    * Values should correspond to the constants defined in
-   * [[com.twitter.finagle.mux.Message.Types]]
+   * [[com.twitter.finagle.mux.transport.Message.Types]]
    */
   def typ: Byte
 
@@ -352,23 +352,33 @@ private[finagle] object Message {
   /** Used to check liveness */
   case class Tping(tag: Int) extends EmptyMessage { def typ = Types.Tping }
 
+  /** Representation of messages that we pre-encode for performance reasons */
+  final class PreEncoded private (val underlying: Message) extends Message {
+    def typ: Byte = underlying.typ
+    def tag: Int = underlying.tag
+
+    // We coerce bufs to the `ByteArray` form since they are the fastest Buf
+    // representation and we expect them to be reused heavily.
+    val buf: Buf = Buf.ByteArray.coerce(underlying.buf)
+
+    /**
+     * Pre-encoded representation of the parent message including type and tag.
+     * The resulting `Buf` is identical in content to `Message.encode(parentMessage)`.
+     */
+    val encodedBuf: Buf = Buf.ByteArray.coerce(encode(underlying))
+
+    override def toString: String = underlying.toString
+  }
+
   /**
-   * We pre-encode a ping message with the reserved ping tag
+   * We pre-encode a ping messages with the reserved ping tag
    * (PingTag) in order to avoid re-encoding these frequently sent
    * messages.
    */
   object PreEncoded {
-    val Tping: Message = new Message {
-      def typ: Byte = Types.Tping
-      def tag: Int = Tags.PingTag
-      val buf: Buf = encode(Message.Tping(Tags.PingTag))
-    }
+    val Tping: PreEncoded = new PreEncoded(Message.Tping(Tags.PingTag))
 
-    val Rping: Message = new Message {
-      def typ: Byte = Types.Rping
-      def tag: Int = Tags.PingTag
-      val buf: Buf = encode(Message.Rping(Tags.PingTag))
-    }
+    val Rping: PreEncoded = new PreEncoded(Message.Rping(Tags.PingTag))
 
     val FutureRping: Future[Message] = Future.value(Rping)
   }
@@ -689,8 +699,7 @@ private[finagle] object Message {
   }
 
   def encode(msg: Message): Buf = msg match {
-    case PreEncoded.Tping => PreEncoded.Tping.buf
-    case PreEncoded.Rping => PreEncoded.Rping.buf
+    case msg: PreEncoded => msg.encodedBuf
     case m: Message =>
       if (m.tag < Tags.MarkerTag || (m.tag & ~Tags.TagMSB) > Tags.MaxTag)
         throwBadMessageException(s"invalid tag number ${m.tag}")
