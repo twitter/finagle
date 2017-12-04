@@ -11,7 +11,7 @@ import com.twitter.finagle.mux.transport.Message._
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.{Buf, ByteReader}
-import com.twitter.util.{Await, Awaitable, Return, Time}
+import com.twitter.util.{Await, Awaitable, Future, Return, Time}
 import org.scalatest.FunSuite
 
 class MuxClientSessionTest extends FunSuite {
@@ -139,6 +139,8 @@ class MuxClientSessionTest extends FunSuite {
           def removeForTag(id: Int): DiscardResult = res
           // note that we always write the message but spoof the `DiscardResult` for the tests
           def write(message: Message): Unit = handle.sendAndForget(Message.encode(message))
+
+          def drain: Future[Unit] = ???
         }
 
       assert(session.status == Status.Open)

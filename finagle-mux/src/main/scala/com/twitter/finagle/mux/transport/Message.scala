@@ -79,10 +79,10 @@ private[finagle] object Message {
 
   object Tags {
     val MarkerTag = 0
-    // We reserve a tag for a default ping message so that we
-    // can cache a full ping message and avoid encoding it
-    // every time.
-    val PingTag = 1
+    // We reserve a tag for control messages. This allows us to cache
+    // control messages and avoid encoding them every time.
+    val ControlTag = 1
+    val PingTag = ControlTag
     val MinTag = PingTag + 1
     val MaxTag = (1 << 23) - 1
     val TagMSB = (1 << 23)

@@ -21,7 +21,8 @@ scala_library(name='pushsession-utils',
     'finagle/finagle-core/src/main/scala:scala'
   ],
   sources=[
-    './com/twitter/finagle/exp/pushsession/MockChannelHandle.scala'
+    './com/twitter/finagle/exp/pushsession/DeferredExecutor.scala',
+    './com/twitter/finagle/exp/pushsession/MockChannelHandle.scala',
   ],
   fatal_warnings=True,
 )

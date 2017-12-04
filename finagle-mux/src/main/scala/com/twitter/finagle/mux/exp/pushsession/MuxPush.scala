@@ -1,28 +1,28 @@
 package com.twitter.finagle.mux.exp.pushsession
 
-
 import com.twitter.finagle.Mux.param.{MaxFrameSize, OppTls}
 import com.twitter.finagle.Stack.Params
-import com.twitter.finagle.exp.pushsession.{PushChannelHandle, PushSession, PushStackClient, PushTransporter}
+import com.twitter.finagle.exp.pushsession.{PushChannelHandle, PushListener, PushSession, PushStackClient, PushStackServer, PushTransporter}
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.mux.Handshake.Headers
 import com.twitter.finagle.mux.transport.{IncompatibleNegotiationException, MuxFramer, OpportunisticTls}
 import com.twitter.finagle.mux.{Handshake, OpportunisticTlsParams, Request, Response}
-import com.twitter.finagle.netty4.exp.pushsession.Netty4PushTransporter
-import com.twitter.finagle.param.WithDefaultLoadBalancer
-import com.twitter.finagle.{Client, Mux, Name, Service, ServiceFactory, Stack, mux, param}
+import com.twitter.finagle.netty4.exp.pushsession.{Netty4PushListener, Netty4PushTransporter}
+import com.twitter.finagle.server.StackServer
+import com.twitter.finagle.{Client, ListeningServer, Mux, Name, Server, Service, ServiceFactory, Stack, mux, param}
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.logging.{Level, Logger}
 import com.twitter.util.Future
 import io.netty.channel.{Channel, ChannelPipeline}
-import java.net.InetSocketAddress
+import java.net.{InetSocketAddress, SocketAddress}
 
 
 /**
  * A push-based client for the mux protocol described in [[com.twitter.finagle.mux]].
  */
 private[finagle] object MuxPush
-    extends Client[mux.Request, mux.Response] {
+    extends Client[mux.Request, mux.Response]
+      with Server[mux.Request, mux.Response] {
   private val log = Logger.get
 
   def newService(dest: Name, label: String): Service[mux.Request, mux.Response] =
@@ -30,6 +30,11 @@ private[finagle] object MuxPush
 
   def newClient(dest: Name, label: String): ServiceFactory[mux.Request, mux.Response] =
     client.newClient(dest, label)
+
+  def serve(
+    addr: SocketAddress,
+    service: ServiceFactory[mux.Request, mux.Response]
+  ): ListeningServer = server.serve(addr, service)
 
   private[pushsession] def negotiateClientSession(
     handle: PushChannelHandle[ByteReader, Buf],
@@ -103,11 +108,11 @@ private[finagle] object MuxPush
 
   def client: Client = Client()
 
-  case class Client(
+  final case class Client(
     stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Mux.Client().stack,
     params: Stack.Params = Mux.Client.params
   ) extends PushStackClient[mux.Request, mux.Response, Client]
-      with WithDefaultLoadBalancer[Client]
+      with param.WithDefaultLoadBalancer[Client]
       with OpportunisticTlsParams[Client] {
 
     private[this] def statsReceiver = params[param.Stats].statsReceiver.scope("mux")
@@ -180,5 +185,63 @@ private[finagle] object MuxPush
       stack: Stack[ServiceFactory[Request, Response]],
       params: Stack.Params
     ): Client = copy(stack, params)
+  }
+
+  def server: Server = Server()
+
+  object Server {
+    type SessionF = (
+      Stack.Params,
+      PushChannelHandle[ByteReader, Buf],
+      Service[Request, Response]
+    ) => PushSession[ByteReader, Buf]
+
+    // TODO: implement negotiation
+    def defaultSessionFactory(
+      params: Stack.Params,
+      handle: PushChannelHandle[ByteReader, Buf],
+      service: Service[Request, Response]
+    ): MuxServerSession = {
+      val statsReceiver = params[param.Stats].statsReceiver
+      new MuxServerSession(
+        params,
+        new FragmentDecoder(statsReceiver),
+        new FragmentingMessageWriter(handle, Int.MaxValue, statsReceiver),
+        handle,
+        service
+      )
+    }
+  }
+
+  // TODO: support opp-TLS
+  final case class Server(
+    stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Mux.Server().stack,
+    params: Stack.Params = StackServer.defaultParams + param.ProtocolLibrary("mux"),
+    sessionFactory: Server.SessionF = Server.defaultSessionFactory
+  ) extends PushStackServer[mux.Request, mux.Response, Server] {
+
+    protected type PipelineReq = ByteReader
+    protected type PipelineRep = Buf
+
+    private[this] val scopedStatsParams = params + param.Stats(
+      params[param.Stats].statsReceiver.scope("mux"))
+
+    protected def newListener(): PushListener[ByteReader, Buf] =
+      new Netty4PushListener[ByteReader, Buf](
+        MuxServerPipelineInit,
+        params, // we don't want to use the scoped stats receiver
+        identity
+      )
+
+    protected def newSession(
+      handle: PushChannelHandle[ByteReader, Buf],
+      service: Service[Request, Response]
+    ): PushSession[ByteReader, Buf] =
+      sessionFactory(scopedStatsParams, handle, service)
+
+    protected def copy1(
+      stack: Stack[ServiceFactory[Request, Response]],
+      params: Stack.Params
+    ): Server = copy(stack, params)
   }
 }

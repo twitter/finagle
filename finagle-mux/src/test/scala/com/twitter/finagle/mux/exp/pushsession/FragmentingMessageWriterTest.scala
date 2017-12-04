@@ -4,7 +4,7 @@ import com.twitter.finagle.exp.pushsession.MockChannelHandle
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.{Dtab, Path}
 import com.twitter.finagle.mux.transport.Message.Tdispatch
-import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.io.Buf
 import com.twitter.util.Return
 import org.scalatest.FunSuite
@@ -94,5 +94,50 @@ class FragmentingMessageWriterTest extends FunSuite {
 
     assert(writer.removeForTag(Tag + 1) == MessageWriter.DiscardResult.Unwritten)
     assert(sr.pendingStreamCount == 1)
+  }
+
+  test("drain() notifies after writes finish") {
+    val handle = new MockChannelHandle[Any, Buf]()
+    val writer = new FragmentingMessageWriter(handle, Int.MaxValue, NullStatsReceiver)
+
+    // We reuse the same message, even though its illegal per the mux spec, for convenience
+    val msg = Tdispatch(Tag, Seq.empty, Path(), Dtab.empty, Data)
+
+    // write one message
+    writer.write(msg)
+    val drainP = writer.drain()
+    assert(!drainP.isDefined)
+    handle.dequeAndCompleteWrite() // Don't care about the data
+    assert(drainP.isDefined) // should be done now
+  }
+
+  test("drain() will allow further writes if we're draining") {
+    val handle = new MockChannelHandle[Any, Buf]()
+    val writer = new FragmentingMessageWriter(handle, Int.MaxValue, NullStatsReceiver)
+
+    // We reuse the same message, even though its illegal per the mux spec, for convenience
+    val msg = Tdispatch(Tag, Seq.empty, Path(), Dtab.empty, Data)
+
+    // write one message
+    writer.write(msg)
+    val drainP = writer.drain()
+    assert(!drainP.isDefined)
+
+    // Now two messages
+    writer.write(msg)
+
+    handle.dequeAndCompleteWrite() // Don't care about the data
+    assert(!drainP.isDefined) // Still a pending message
+
+    handle.dequeAndCompleteWrite() // Don't care about the data
+    assert(drainP.isDefined) // Should be done now
+  }
+
+  test("drain() notifies immediately if nothing is pending") {
+    val handle = new MockChannelHandle[Any, Buf]()
+    val writer = new FragmentingMessageWriter(handle, Int.MaxValue, NullStatsReceiver)
+
+    // Already idle
+    assert(writer.drain().isDefined)
   }
 }

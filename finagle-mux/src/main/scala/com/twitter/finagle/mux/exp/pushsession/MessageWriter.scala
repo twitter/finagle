@@ -7,11 +7,18 @@ import com.twitter.finagle.mux.exp.pushsession.MessageWriter.DiscardResult
 import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
 import com.twitter.io.Buf
 import com.twitter.logging.{HasLogLevel, Level, Logger}
-import com.twitter.util.{Return, Throw, Try}
+import com.twitter.util.{Future, Promise, Return, Throw, Try}
 import java.util
 import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
 
+/**
+ * Abstraction for queuing mux messages for serialization to the socket
+ *
+ * @note Implementations are expected to be _very_ stateful and expects
+ *       to enjoy the benefits of executing inside of a `PushSession`s
+ *       serial `Executor`.
+ */
 private[finagle] trait MessageWriter {
 
   /**
@@ -23,9 +30,16 @@ private[finagle] trait MessageWriter {
    * Remove any pending writes for the specified tag
    */
   def removeForTag(id: Int): DiscardResult
+
+  /**
+   * Start draining the writer, providing a Future which is satisfied once
+   * draining has completed.
+   */
+  def drain(): Future[Unit]
 }
 
 private[finagle] object MessageWriter {
+
   /** Result of attempting to remove a tag from the `MessageWriter` */
   sealed trait DiscardResult
   object DiscardResult {
@@ -61,7 +75,7 @@ private final class FragmentingMessageWriter(
     statsReceiver: StatsReceiver)
   extends MessageWriter {
 
-  private[this] val log = Logger.get
+  import FragmentingMessageWriter._
 
   // The messages must have normalized tags, even fragments
   private[this] val messageQueue = new util.ArrayDeque[Message]
@@ -74,35 +88,49 @@ private final class FragmentingMessageWriter(
     messageQueue.size
   }
 
-  // State so we don't add log for every outstanding write
-  private[this] var observedWriteError: Boolean = false
+  // State of the MessageWriter. Transitions can be:
+  // Idle <-> Flushing
+  // Flushing -> Draining
+  // Idle, Flushing, Draining -> Closed
+  private[this] var state: State = Idle
 
-  // We use this boolean to ensure that we have at most one flush loop at any time. If
-  // we allow n loops we can end up effectively flushing n fragments for every time the
-  // byte stream is flushed which defeats the purpose of the fragmenting.
-  private[this] var flushing = false
+  def drain(): Future[Unit] = state match {
+    case Idle =>
+      state = Closed(Return.Unit)
+      Future.Done
 
-  private[this] def onWriteError(ex: Throwable): Unit = {
-    if (!observedWriteError) {
-      observedWriteError = true
-      handle.close()
+    case Flushing =>
+      val p = Promise[Unit]()
+      state = Draining(p)
+      p
 
-      val logLevel = ex match {
-        case hasLevel: HasLogLevel => hasLevel.logLevel
-        case _ => Level.WARNING
-      }
+    case Draining(p) =>
+      p
 
-      log.log(logLevel, ex, "session closed due to exception")
-    }
+    case Closed(cause) =>
+      Future.const(cause)
   }
 
-  def write(msg: Message): Unit = msg match {
-    case f: Fragment => // should never happen
-      throw new IllegalStateException(s"Only full messages are valid: $f")
+  def write(msg: Message): Unit = {
+    if (msg.isInstanceOf[Fragment])
+      throw new IllegalStateException(s"Only full messages are valid: $msg")
 
-    case _ =>
-      messageQueue.add(msg)
-      checkWrite()
+    state match {
+      case Idle =>
+        messageQueue.add(msg)
+        state = Flushing
+        batchWrite()
+
+      case _: FlushingState =>
+        // Add message to the queue for the pending write to handle
+        messageQueue.add(msg)
+
+      case Closed(Throw(ex)) =>
+        log.debug(ex, "Discarding message %s due to previous write failure", msg)
+
+      case Closed(Return(_)) =>
+        log.debug("Discarding message %s due to being closed", msg)
+    }
   }
 
   def removeForTag(tag: Int): DiscardResult = {
@@ -120,7 +148,7 @@ private final class FragmentingMessageWriter(
           messageQueue.add(msg)
         } else if (result != DiscardResult.NotFound) {
           val ex = new IllegalStateException(s"Found multiple fragments for tag $tag")
-          onWriteError(ex)
+          onError(ex)
         } else {
           result = msg match {
             case Fragment(_, _, _) => DiscardResult.PartialWrite
@@ -139,35 +167,71 @@ private final class FragmentingMessageWriter(
 
   private[this] val lastWrite: Try[Unit] => Unit = {
     case Return(_) =>
-      flushing = false
-      checkWrite() // we might start right back up again
+      state match {
+        case Idle => // should never happen
+          throw new IllegalStateException("After completing write, found state to be Idle")
+
+        case Flushing =>
+          if (!messageQueue.isEmpty) batchWrite()
+          else {
+            state = Idle
+          }
+
+        case Draining(p) =>
+          if (!messageQueue.isEmpty) batchWrite()
+          else {
+            // finished
+            state = Closed(Return.Unit)
+            p.setDone()
+          }
+
+        case Closed(Throw(ex)) =>
+          log.debug(ex, "Write completed to find closed-with-error state")
+
+        case Closed(Return(_)) =>
+          log.debug("Write completed to find closed state")
+      }
 
     case Throw(ex) =>
-      onWriteError(ex)
+      onError(ex)
   }
 
-  // Checks if we're waiting on a flush, and if not, schedule writes to the socket.
-  private[this] def checkWrite(): Unit = {
-    if (!flushing && !messageQueue.isEmpty) {
-      flushing = true
-      var i = messageQueue.size
+  private[this] def onError(ex: Throwable): Unit = state match {
+    case Closed(_) => // nop, already closed
+    case _ =>
+      state = Closed(Throw(ex))
+      handle.close()
 
-      if (i == 1) {
-        // fast path: no need to allocate a collection. This is a micro-opt.
-        val msgBuf = takeBufFragment()
-        handle.send(msgBuf)(lastWrite)
-      } else {
-        // Multiple messages. Prepare and load them into an ArrayBuffer.
-        // Note: we don't accumulate the Buf because the pipeline will
-        // be responsible for prepending the lengths.
-        val messages = new ArrayBuffer[Buf](i)
-        while (i > 0) {
-          i -= 1
-          messages += takeBufFragment()
-        }
-
-        handle.send(messages)(lastWrite)
+      val logLevel = ex match {
+        case hasLevel: HasLogLevel => hasLevel.logLevel
+        case _ => Level.WARNING
       }
+
+      log.log(logLevel, ex, "session closed due to exception")
+  }
+
+  // Schedule writes to the socket, notifying `lastWrite` when its done.
+  private[this] def batchWrite(): Unit = {
+    assert(state.isInstanceOf[FlushingState])
+    assert(!messageQueue.isEmpty)
+
+    var i = messageQueue.size
+
+    if (i == 1) {
+      // fast path: no need to allocate a collection. This is a micro-opt.
+      val msgBuf = takeBufFragment()
+      handle.send(msgBuf)(lastWrite)
+    } else {
+      // Multiple messages. Prepare and load them into an ArrayBuffer.
+      // Note: we don't accumulate the Buf because the pipeline will
+      // be responsible for prepending the lengths.
+      val messages = new ArrayBuffer[Buf](i)
+      while (i > 0) {
+        i -= 1
+        messages += takeBufFragment()
+      }
+
+      handle.send(messages)(lastWrite)
     }
   }
 
@@ -202,4 +266,18 @@ private final class FragmentingMessageWriter(
       f1
     }
   }
+}
+
+private object FragmentingMessageWriter {
+  private val log = Logger.get
+
+  private sealed trait State
+
+  private case object Idle extends State
+
+  private sealed trait FlushingState extends State
+  private case object Flushing extends FlushingState
+  private case class Draining(listeners: Promise[Unit]) extends FlushingState
+
+  private case class Closed(cause: Try[Unit]) extends State
 }

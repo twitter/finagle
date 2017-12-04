@@ -5,8 +5,6 @@ import com.twitter.util.Return
 import com.twitter.util.{Future, Promise, Time, Try}
 import java.net.{InetSocketAddress, SocketAddress}
 import java.security.cert.Certificate
-import java.util
-import java.util.concurrent.Executor
 import scala.collection.mutable
 
 class MockChannelHandle[In, Out](var currentSession: PushSession[In, Out]) extends PushChannelHandle[In, Out] {
@@ -83,17 +81,5 @@ class MockChannelHandle[In, Out](var currentSession: PushSession[In, Out]) exten
   def close(deadline: Time): Future[Unit] = {
     closedCalled = true
     onClose
-  }
-}
-
-class DeferredExecutor extends Executor {
-  private[this] val queue = new util.ArrayDeque[Runnable]()
-  def execute(command: Runnable): Unit = queue.add(command)
-
-  /** Execute all pending messages, including those queued during a previous execution */
-  def executeAll(): Unit = {
-    while (!queue.isEmpty) {
-      queue.poll().run()
-    }
   }
 }

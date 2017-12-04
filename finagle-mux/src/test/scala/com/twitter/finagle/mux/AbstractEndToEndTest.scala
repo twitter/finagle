@@ -6,7 +6,7 @@ import com.twitter.finagle.client.EndpointerStackClient
 import com.twitter.finagle.context.RemoteInfo
 import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor}
 import com.twitter.finagle.mux.transport.{BadMessageException, Message}
-import com.twitter.finagle.server.StdStackServer
+import com.twitter.finagle.server.ListeningStackServer
 import com.twitter.finagle.service.Retries
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.tracing._
@@ -30,10 +30,11 @@ abstract class AbstractEndToEndTest
     with AssertionsForJUnit {
 
   type ClientT <: EndpointerStackClient[Request, Response, ClientT]
+  type ServerT <: ListeningStackServer[Request, Response, ServerT]
 
   def implName: String
   def clientImpl(): ClientT
-  def serverImpl(): StdStackServer[Request, Response, Mux.Server]
+  def serverImpl(): ServerT
 
   var saveBase: Dtab = Dtab.empty
 
@@ -281,6 +282,7 @@ abstract class AbstractEndToEndTest
 
   test(s"$implName: responds to lease") {
     class FakeLessor extends Lessor {
+      @volatile
       var list: List[Lessee] = Nil
 
       def register(lessee: Lessee): Unit = {
@@ -314,13 +316,13 @@ abstract class AbstractEndToEndTest
     eventually { assert(fclient.isDefined) }
 
     val Some((_, available)) = sr.gauges.find {
-      case (_ +: Seq("loadbalancer", "available"), value) => true
+      case (_ +: Seq("loadbalancer", "available"), _) => true
       case _ => false
     }
 
     val leaseCtr: () => Long = { () =>
       val Some((_, ctr)) = sr.counters.find {
-        case (_ +: Seq("mux", "leased"), value) => true
+        case (_ +: Seq("mux", "leased"), _) => true
         case _ => false
       }
       ctr
