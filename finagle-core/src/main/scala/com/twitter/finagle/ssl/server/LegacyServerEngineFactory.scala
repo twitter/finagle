@@ -81,6 +81,9 @@ object LegacyServerEngineFactory extends SslServerEngineFactory {
           cipherSuites.orNull,
           appProtos.orNull
         )
+      case KeyCredentials.KeyAndCertChain(_, _) =>
+        throw SslConfigurationException.notSupported(
+          "KeyCredentials.KeyAndCertChain", "LegacyKeyServerEngineFactor")
     }
 
     // Explicitly set this to server mode, since calls to Ssl.server do not.

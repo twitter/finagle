@@ -1,8 +1,11 @@
 package com.twitter.finagle.ssl
 
+import java.security.KeyStore
+import java.security.cert.Certificate
+
 import com.twitter.util.security.{Pkcs8KeyManagerFactory, X509TrustManagerFactory}
 import com.twitter.util.{Return, Throw}
-import javax.net.ssl.{KeyManager, SSLContext, SSLEngine, TrustManager}
+import javax.net.ssl._
 
 private[ssl] object SslConfigurations {
 
@@ -28,6 +31,13 @@ private[ssl] object SslConfigurations {
           case Return(kms) => Some(kms)
           case Throw(ex) => throw SslConfigurationException(ex.getMessage, ex)
         }
+      case KeyCredentials.KeyAndCertChain(key, certChain) =>
+        val keyStore = KeyStore.getInstance(KeyStore.getDefaultType)
+        keyStore.load(null, null)
+        keyStore.setKeyEntry("key_credentials", key, Array.emptyCharArray, certChain.asInstanceOf[Array[Certificate]])
+        val kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm)
+        kmf.init(keyStore, Array.emptyCharArray)
+        Some(kmf.getKeyManagers)
       case _: KeyCredentials.CertKeyAndChain =>
         throw SslConfigurationException.notSupported(
           "KeyCredentials.CertKeyAndChain",
@@ -58,6 +68,12 @@ private[ssl] object SslConfigurations {
           case Return(tms) => Some(tms)
           case Throw(ex) => throw SslConfigurationException(ex.getMessage, ex)
         }
+      case TrustCredentials.Certificates(certs) =>
+        val keyStore = KeyStore.getInstance(KeyStore.getDefaultType)
+        keyStore.load(null, null)
+        val tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm)
+        tmf.init(keyStore)
+        Some(tmf.getTrustManagers)
     }
 
   /**
@@ -132,6 +148,9 @@ private[ssl] object SslConfigurations {
           "KeyCredentials.CertKeyAndChain",
           engineFactoryName
         )
+      case KeyCredentials.KeyAndCertChain(_, _) =>
+        throw SslConfigurationException.notSupported(
+          "KeyCredentials.KeyAndCertChain", engineFactoryName)
     }
 
   /**
@@ -151,6 +170,9 @@ private[ssl] object SslConfigurations {
           "TrustCredentials.CertCollection",
           engineFactoryName
         )
+      case TrustCredentials.Certificates(_) =>
+        throw SslConfigurationException.notSupported(
+          "TrustCredentials.Certificates", engineFactoryName)
     }
 
   /**

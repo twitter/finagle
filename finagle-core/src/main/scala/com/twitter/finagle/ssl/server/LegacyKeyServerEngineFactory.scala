@@ -45,6 +45,9 @@ object LegacyKeyServerEngineFactory extends SslServerEngineFactory {
           case Return(kms) => Some(kms)
           case Throw(ex) => throw SslConfigurationException(ex.getMessage, ex)
         }
+      case KeyCredentials.KeyAndCertChain(_, _) =>
+        throw SslConfigurationException.notSupported(
+          "KeyCredentials.KeyAndCertChain", "LegacyKeyServerEngineFactor")
     }
 
   /**

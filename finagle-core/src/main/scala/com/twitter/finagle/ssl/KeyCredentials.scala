@@ -1,6 +1,8 @@
 package com.twitter.finagle.ssl
 
 import java.io.File
+import java.security.PrivateKey
+import java.security.cert.X509Certificate
 
 /**
  * KeyCredentials represent the items necessary for this configured
@@ -48,4 +50,17 @@ object KeyCredentials {
    */
   case class CertKeyAndChain(certificateFile: File, keyFile: File, caCertificateFile: File)
       extends KeyCredentials
+
+  /**
+    * Indicates that this certificate and key should be used by the
+    * engine factory.
+    *
+    * @param key a PKCS#8 private key. It should not require a password.
+    *
+    * @param keyCertChain the X.509 certificate chain
+    */
+  case class KeyAndCertChain(
+      key: PrivateKey,
+      keyCertChain: Array[X509Certificate])
+    extends KeyCredentials
 }

@@ -1,6 +1,7 @@
 package com.twitter.finagle.ssl
 
 import java.io.File
+import java.security.cert.X509Certificate
 
 /**
  * TrustCredentials represent the items necessary for this configured
@@ -34,4 +35,12 @@ object TrustCredentials {
    * in PEM format.
    */
   case class CertCollection(file: File) extends TrustCredentials
+
+  /**
+    * The collection of certificates which should be used in
+    * verifying a remote peer's credentials.
+    *
+    * @certs a collection of X.509 certificates
+    */
+  case class Certificates(certs: Array[X509Certificate]) extends TrustCredentials
 }

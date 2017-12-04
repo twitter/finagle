@@ -1,5 +1,10 @@
 package com.twitter.finagle.netty4.ssl.server
 
+import java.util
+import java.security.KeyStore
+import javax.net.ssl._
+
+import com.twitter.finagle.Stack
 import com.twitter.finagle.netty4.ssl.Alpn
 import com.twitter.finagle.ssl.{ApplicationProtocols, Engine}
 import com.twitter.finagle.ssl.server.{
@@ -8,9 +13,74 @@ import com.twitter.finagle.ssl.server.{
   SslServerSessionVerifier
 }
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.Stack
-import io.netty.channel.{Channel, ChannelInitializer, ChannelPipeline}
-import io.netty.handler.ssl.SslHandler
+import com.twitter.util.{Future => TwitterFuture}
+import io.netty.buffer.ByteBufAllocator
+import io.netty.channel._
+import io.netty.handler.ssl._
+
+final case class SniSupport(mapping: SniSupport.ServerNameToContext)
+
+object SniSupport {
+
+  type ServerNameToContext = String => TwitterFuture[Option[SslServerConfiguration]]
+
+  implicit val param: Stack.Param[SniSupport] = Stack.Param(SniSupport( (_: String) => {
+    TwitterFuture.exception(new IllegalStateException("sni support without mapping makes no sense"))
+  }))
+
+  private object DenialSNIMatcher extends SNIMatcher(StandardConstants.SNI_HOST_NAME) {
+    override def matches(sniServerName: SNIServerName): Boolean = false
+  }
+
+  /**
+    * Uses JDK SslContext to create an engine rejecting all host names. Is needed to
+    * send the 'unrecognized_name' alert to the client.
+    */
+  private[ssl] val DenialSslContext = {
+    new SslContext() {
+
+      val delegate = {
+        val emptyKeyStore = KeyStore.getInstance(KeyStore.getDefaultType)
+        emptyKeyStore.load(null, Array.empty)
+        val kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm)
+        kmf.init(emptyKeyStore, Array.empty)
+        SslContextBuilder.forServer(kmf).sslProvider(SslProvider.JDK).build()
+      }
+      val matchers: util.Collection[SNIMatcher] = util.Collections.singleton(DenialSNIMatcher)
+      private def setSNIMatcher(engine: SSLEngine): SSLEngine = {
+        val params = engine.getSSLParameters
+        params.setSNIMatchers(matchers)
+        engine.setSSLParameters(params)
+        engine
+      }
+
+      override def sessionContext(): SSLSessionContext = delegate.sessionContext()
+
+      override def newEngine(alloc: ByteBufAllocator): SSLEngine = {
+        setSNIMatcher(delegate.newEngine(alloc))
+      }
+
+      override def newEngine(alloc: ByteBufAllocator, peerHost: String, peerPort: Int): SSLEngine = {
+        setSNIMatcher(delegate.newEngine(alloc, peerHost, peerPort))
+      }
+
+      override def isClient: Boolean = false
+
+      override def applicationProtocolNegotiator(): ApplicationProtocolNegotiator = delegate.applicationProtocolNegotiator()
+
+      override def sessionCacheSize(): Long = delegate.sessionCacheSize()
+
+      override def cipherSuites(): util.List[String] = delegate.cipherSuites()
+
+      override def sessionTimeout(): Long = delegate.sessionTimeout()
+    }
+
+  }
+
+  def fromOption(mapping: String => Option[SslServerConfiguration]): SniSupport = SniSupport((serverName: String) => {
+    TwitterFuture.value(mapping(serverName))
+  })
+}
 
 /**
  * A channel handler that takes [[Stack.Params]] and upgrades the pipeline with missing
@@ -74,6 +144,12 @@ private[finagle] class Netty4ServerSslHandler(params: Stack.Params)
     pipeline.addFirst("ssl", sslHandler)
   }
 
+  private[this] def addSniHandler(channel: Channel, factory: SslServerEngineFactory): Unit = {
+    val SniSupport(mapping) = params[SniSupport]
+    val SslServerSessionVerifier.Param(sessionVerifier) = params[SslServerSessionVerifier.Param]
+    channel.pipeline().addFirst("sni", new Netty4SniHandler(mapping, factory, sessionVerifier))
+  }
+
   /**
    * In this method, an `Engine` is created by an `SslServerEngineFactory` via
    * an `SslServerConfiguration`. The `Engine` is then used to create the appropriate
@@ -84,12 +160,15 @@ private[finagle] class Netty4ServerSslHandler(params: Stack.Params)
 
     for (config <- configuration) {
       val factory: SslServerEngineFactory = selectEngineFactory(ch)
-      val combined: SslServerConfiguration = combineApplicationProtocols(config)
-      val engine: Engine = factory(combined)
-      val sslHandler: SslHandler = createSslHandler(engine)
-      val sslConnectHandler: SslServerVerificationHandler =
-        createSslConnectHandler(sslHandler, combined)
-      addHandlersToPipeline(ch.pipeline, sslHandler, sslConnectHandler)
+      if( params.contains[SniSupport] ) {
+        addSniHandler(ch, factory)
+      } else {
+        val combined: SslServerConfiguration = combineApplicationProtocols(config)
+        val engine: Engine = factory(combined)
+        val sslHandler: SslHandler = createSslHandler(engine)
+        val sslConnectHandler: SslServerVerificationHandler = createSslConnectHandler(sslHandler, combined)
+        addHandlersToPipeline(ch.pipeline, sslHandler, sslConnectHandler)
+      }
     }
   }
 

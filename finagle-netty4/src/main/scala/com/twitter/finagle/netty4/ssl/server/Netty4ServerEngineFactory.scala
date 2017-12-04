@@ -29,6 +29,8 @@ class Netty4ServerEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
           key <- new PrivateKeyFile(keyFile).readPrivateKey()
           cert <- new X509CertificateFile(certFile).readX509Certificate()
         } yield SslContextBuilder.forServer(key, cert)
+      case KeyCredentials.KeyAndCertChain(key, certChain) =>
+        Return(SslContextBuilder.forServer(key, certChain: _*))
       case KeyCredentials.CertKeyAndChain(certFile, keyFile, chainFile) =>
         for {
           key <- new PrivateKeyFile(keyFile).readPrivateKey()
