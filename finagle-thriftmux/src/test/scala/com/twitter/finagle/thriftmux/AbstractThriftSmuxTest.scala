@@ -11,7 +11,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.mux.exp.pushsession.MuxPush
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.io.TempFile
-import com.twitter.util.{Await, Closable, Future, Try}
+import com.twitter.util.{Await, Future, Try}
 import io.netty.channel.ChannelPipeline
 import java.net.{InetAddress, InetSocketAddress}
 import org.scalatest.FunSuite
@@ -71,7 +71,7 @@ abstract class AbstractThriftSmuxTest extends FunSuite {
         val results = await(client.query("." * 10).liftToTry)
         testFn(results, buffer.toString, stats)
 
-        Await.ready(Closable.all(server).close(), 5.seconds)
+        Await.ready(server.close(), 10.seconds)
       }
     }
   }
@@ -159,7 +159,7 @@ object AbstractThriftSmuxTest {
     def query(x: String): Future[String] = Future.value(x.concat(x))
   }
 
-  def await[A](f: Future[A]): A = Await.result(f, 5.seconds)
+  def await[A](f: Future[A]): A = Await.result(f, 10.seconds)
 
   def mkConfig(): SslServerConfiguration = {
     val certFile = TempFile.fromResourcePath("/ssl/certs/svc-test-server.cert.pem")
