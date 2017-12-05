@@ -1,9 +1,7 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.http.util.StringUtil
-import java.nio.charset.Charset
 import java.util.{List => JList, Map => JMap}
-import org.jboss.netty.handler.codec.http.{QueryStringDecoder, QueryStringEncoder}
 import scala.collection.immutable
 import scala.collection.JavaConverters._
 
@@ -111,14 +109,7 @@ abstract class ParamMap
       case None => default
     }
 
-  override def toString: String = {
-    val encoder = new QueryStringEncoder("", Charset.forName("utf-8"))
-    iterator.foreach {
-      case (k, v) =>
-        encoder.addParam(k, v)
-    }
-    encoder.toString
-  }
+  override def toString: String = QueryParamEncoder.encode(this)
 }
 
 /** Map-backed ParamMap. */
@@ -201,10 +192,9 @@ class RequestParamMap(val request: Request) extends ParamMap {
   // Convert IllegalArgumentException to ParamMapException so it can be handled
   // appropriately (e.g., 400 Bad Request).
   private[this] def parseParams(s: String): JMap[String, JList[String]] = {
-    try {
-      new QueryStringDecoder(s).getParameters
-    } catch {
-      case e: IllegalArgumentException =>
+    try QueryParamDecoder.decode(s)
+    catch {
+      case _: IllegalArgumentException =>
         _isValid = false
         ParamMap.EmptyJMap
     }
