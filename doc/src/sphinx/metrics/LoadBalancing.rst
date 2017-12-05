@@ -19,10 +19,14 @@ All Balancers
 **load**
   A gauge of the total load over all nodes being balanced across.
 
-**meanweight**
+**meanweight** `verbosity:debug`
   A gauge tracking the arithmetic mean of the weights of the endpoints
-  being load-balanced across. Does not apply to
-  :src:`HeapLeastLoaded <com/twitter/finagle/loadbalancer/heap/HeapLeastLoaded.scala>`.
+  being load-balanced across.
+
+**num_weight_classes**
+  The number of groups (or classes) of weights in the load balancer. Each class gets
+  a fresh instance of the client's load balancer and receives traffic proportional
+  to its weight.
 
 **adds**
   A counter of the number of hosts added to the loadbalancer.
@@ -62,13 +66,12 @@ Aperture Based Load Balancers
   the width of the window over which endpoints are load-balanced may be
   wider than the `aperture` gauge. The `physical_aperture` represents this value.
 
-**coordinate**
-  The process global coordinate for the process as sampled by
-  the Aperture implementation.
-
 **use_deterministic_ordering**
   1 if the Aperture implementation uses deterministic ordering
   0, otherwise.
+
+**vector_hash**
+  A gauge of the hash of the distributors serverset vector.
 
 **coordinate_updates**
   A counter of the number of times the Aperture implementation receives

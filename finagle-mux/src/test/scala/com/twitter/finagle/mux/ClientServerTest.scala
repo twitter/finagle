@@ -21,7 +21,7 @@ import org.mockito.stubbing.Answer
 import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSuite, OneInstancePerTest, Tag}
 
 private object TestContext {
@@ -106,7 +106,7 @@ private[mux] abstract class ClientServerTest
 
     val p1, p2, p3 = new Promise[Response]
     val reqs = (1 to 3) map { i =>
-      Request(Path.empty, buf(i.toByte))
+      Request(Path.empty, Nil, buf(i.toByte))
     }
     when(service(reqs(0))).thenReturn(p1)
     when(service(reqs(1))).thenReturn(p2)
@@ -123,7 +123,7 @@ private[mux] abstract class ClientServerTest
       assert(f.poll == None)
 
     val reps = Seq(10, 20, 9) map { i =>
-      Response(buf(i.toByte))
+      Response(Nil, buf(i.toByte))
     }
     p2.setValue(reps(1))
     assert(f1.poll == None)
@@ -156,7 +156,7 @@ private[mux] abstract class ClientServerTest
     val ctx = new Ctx
     import ctx._
 
-    val req1 = Request(Path.empty, buf(1))
+    val req1 = Request(Path.empty, Nil, buf(1))
     val p1 = new Promise[Response]
     when(service(req1)).thenReturn(p1)
 
@@ -164,14 +164,14 @@ private[mux] abstract class ClientServerTest
     verify(service)(req1)
     server.close(Time.now)
     assert(f1.poll == None)
-    val req2 = Request(Path.empty, buf(2))
+    val req2 = Request(Path.empty, Nil, buf(2))
     client(req2).poll match {
       case Some(Throw(f: Failure)) => assert(f.isFlagged(Failure.Restartable))
       case _ => fail()
     }
     verify(service, never)(req2)
 
-    val rep1 = Response(buf(123))
+    val rep1 = Response(Nil, buf(123))
     p1.setValue(rep1)
     assert(f1.poll == Some(Return(rep1)))
   }
@@ -180,7 +180,7 @@ private[mux] abstract class ClientServerTest
     val ctx = new Ctx
     import ctx._
 
-    val req1 = Request(Path.empty, buf(1))
+    val req1 = Request(Path.empty, Nil, buf(1))
     val p1 = new Promise[Response]
     when(service(req1)).thenReturn(Future.exception(Failure.rejected("come back tomorrow")))
 
@@ -194,7 +194,7 @@ private[mux] abstract class ClientServerTest
     val ctx = new Ctx
     import ctx._
 
-    val req = Request(Path.empty, buf(1))
+    val req = Request(Path.empty, Nil, buf(1))
     when(service(req)).thenReturn(Future.exception(new Exception("sad panda")))
     assert(
       client(req).poll == Some(Throw(ServerApplicationError("java.lang.Exception: sad panda")))
@@ -205,7 +205,7 @@ private[mux] abstract class ClientServerTest
     val ctx = new Ctx
     import ctx._
 
-    val req = Request(Path.empty, buf(1))
+    val req = Request(Path.empty, Nil, buf(1))
     val p = new Promise[Response]
     when(service(req)).thenReturn(p)
     val f = client(req)
@@ -229,13 +229,13 @@ private[mux] abstract class ClientServerTest
     when(service(any[Request])).thenAnswer(
       new Answer[Future[Response]]() {
         def answer(invocation: InvocationOnMock) =
-          Future.value(Response(Buf.Utf8(Trace.id.toString)))
+          Future.value(Response(Nil, Buf.Utf8(Trace.id.toString)))
       }
     )
 
     val id = Trace.nextId
     val resp = Trace.letId(id) {
-      client(Request(Path.empty, buf(1)))
+      client(Request(Path.empty, Nil, buf(1)))
     }
     assert(resp.poll.isDefined)
     val Buf.Utf8(respStr) = Await.result(resp, 5.seconds).body
@@ -251,7 +251,7 @@ private[mux] abstract class ClientServerTest
         def answer(invocation: InvocationOnMock) = {
           val bw = BufByteWriter.fixed(8)
           bw.writeLongBE(Trace.id.flags.toLong)
-          Future.value(Response(bw.owned()))
+          Future.value(Response(Nil, bw.owned()))
         }
       }
     )
@@ -259,7 +259,7 @@ private[mux] abstract class ClientServerTest
     val flags = Flags().setDebug
     val id = Trace.nextId.copy(flags = flags)
     val resp = Trace.letId(id) {
-      val p = client(Request(Path.empty, buf(1)))
+      val p = client(Request(Path.empty, Nil, buf(1)))
       p
     }
     assert(resp.poll.isDefined)
@@ -304,9 +304,9 @@ class ClientServerTestNoDispatch extends ClientServerTest {
     val ctx = new Ctx
     import ctx._
 
-    val withDst = Request(Path.read("/dst/name"), buf(123))
-    val withoutDst = Request(Path.empty, buf(123))
-    val rep = Response(buf(23))
+    val withDst = Request(Path.read("/dst/name"), Nil, buf(123))
+    val withoutDst = Request(Path.empty, Nil, buf(123))
+    val rep = Response(Nil, buf(23))
     when(service(withoutDst)).thenReturn(Future.value(rep))
     assert(Await.result(client(withDst), 5.seconds) == rep)
     verify(service)(withoutDst)
@@ -330,6 +330,7 @@ class ClientServerTestDispatch extends ClientServerTest {
         def answer(invocation: InvocationOnMock) =
           Future.value(
             Response(
+              Nil,
               Contexts.broadcast
                 .get(testContext)
                 .getOrElse(Buf.Empty)
@@ -339,7 +340,7 @@ class ClientServerTestDispatch extends ClientServerTest {
     )
 
     // No context set
-    assert(Await.result(client(Request(Path.empty, Buf.Empty)), 5.seconds).body.isEmpty)
+    assert(Await.result(client(Request(Path.empty, Nil, Buf.Empty)), 5.seconds).body.isEmpty)
 
     val f = Contexts.broadcast.let(testContext, Buf.Utf8("My context!")) {
       client(Request.empty)
@@ -352,10 +353,30 @@ class ClientServerTestDispatch extends ClientServerTest {
     val ctx = new Ctx
     import ctx._
 
-    val req = Request(Path.read("/dst/name"), buf(123))
-    val rep = Response(buf(23))
+    val req = Request(Path.read("/dst/name"), Nil, buf(123))
+    val rep = Response(Nil, buf(23))
     when(service(req)).thenReturn(Future.value(rep))
     assert(Await.result(client(req), 5.seconds) == rep)
     verify(service)(req)
+  }
+
+  test("propagate explicit request contexts") {
+    val ctx = new Ctx
+    import ctx._
+
+    val ctxts = Seq((Buf.Utf8("HELLO"), Buf.Utf8("WORLD")))
+    val request = Request(Path.empty, ctxts, Buf.Empty)
+
+    when(service(request)).thenAnswer(
+      new Answer[Future[Response]] {
+        def answer(invocation: InvocationOnMock) = {
+          Future.value(Response(request.contexts, Buf.Empty))
+        }
+      }
+    )
+
+    val response = Await.result(client(request), 5.seconds)
+    assert(response.contexts.nonEmpty)
+    assert(response.contexts == ctxts)
   }
 }

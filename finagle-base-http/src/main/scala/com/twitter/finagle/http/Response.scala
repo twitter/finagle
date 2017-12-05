@@ -1,7 +1,6 @@
 package com.twitter.finagle.http
 
 import com.twitter.collection.RecordSchema
-import com.twitter.finagle.http.codec.HttpCodec
 import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util.Closable
 
@@ -71,11 +70,6 @@ abstract class Response private extends Message {
   @deprecated("2017-02-17", "Use [[statusCode(Int)]] instead")
   final def setStatusCode(value: Int): Unit = { statusCode = value }
 
-  /** Encode as an HTTP message */
-  @deprecated("Use HttpCodec.encodeResponseToString", "2017-08-15")
-  def encodeString(): String =
-    HttpCodec.encodeResponseToString(this)
-
   override def toString =
     "Response(\"" + version + " " + status + "\")"
 }
@@ -96,16 +90,6 @@ object Response {
    * for Response.ctx.
    */
   val Schema: RecordSchema = new RecordSchema
-
-  /** Decode a [[Response]] from a String */
-  @deprecated("Use HttpCodec.decodeStringToResponse", "2017-08-15")
-  def decodeString(s: String): Response =
-    HttpCodec.decodeStringToResponse(s)
-
-  /** Decode a [[Response]] from a byte array */
-  @deprecated("Use HttpCodec.decodeBytesToResponse", "2017-08-15")
-  def decodeBytes(b: Array[Byte]): Response =
-    HttpCodec.decodeBytesToResponse(b)
 
   /** Create Response. */
   def apply(): Response =

@@ -141,5 +141,5 @@ private final class LazyEndpointFactory[Req, Rep](
     case Made(underlying) => underlying.status
   }
 
-  override def toString: String = s"EndpointFactory($address)"
+  override def toString: String = s"EndpointFactory(addr=$address, status=$status)"
 }

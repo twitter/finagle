@@ -1,7 +1,7 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{RichServerParam, Service}
+import com.twitter.finagle.Service
 import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.test._
 import com.twitter.util.{Await, Future}

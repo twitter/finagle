@@ -4,7 +4,7 @@ import com.twitter.finagle.netty4.param.Allocator
 import com.twitter.finagle.netty4.ssl.Netty4SslConfigurations
 import com.twitter.finagle.ssl._
 import com.twitter.util.{Return, Throw}
-import com.twitter.util.security.X509CertificateFile
+import com.twitter.util.security.{PrivateKeyFile, X509CertificateFile}
 import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerEngineFactory}
 import io.netty.buffer.ByteBufAllocator
 import io.netty.handler.ssl.{OpenSsl, SslContextBuilder}
@@ -26,12 +26,12 @@ class Netty4ServerEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
         )
       case KeyCredentials.CertAndKey(certFile, keyFile) =>
         for {
-          key <- Netty4SslConfigurations.getPrivateKey(keyFile)
+          key <- new PrivateKeyFile(keyFile).readPrivateKey()
           cert <- new X509CertificateFile(certFile).readX509Certificate()
         } yield SslContextBuilder.forServer(key, cert)
       case KeyCredentials.CertKeyAndChain(certFile, keyFile, chainFile) =>
         for {
-          key <- Netty4SslConfigurations.getPrivateKey(keyFile)
+          key <- new PrivateKeyFile(keyFile).readPrivateKey()
           cert <- new X509CertificateFile(certFile).readX509Certificate()
           chain <- new X509CertificateFile(chainFile).readX509Certificates()
         } yield SslContextBuilder.forServer(key, cert +: chain: _*)
@@ -63,8 +63,10 @@ class Netty4ServerEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
     val builder = startWithKey(config.keyCredentials)
     val withProvider = Netty4SslConfigurations.configureProvider(builder, forceJdk)
     val withTrust = Netty4SslConfigurations.configureTrust(withProvider, config.trustCredentials)
-    val withAppProtocols =
-      Netty4SslConfigurations.configureApplicationProtocols(withTrust, config.applicationProtocols)
+    val withAppProtocols = Netty4SslConfigurations.configureServerApplicationProtocols(
+      withTrust,
+      config.applicationProtocols)
+
     val context = withAppProtocols.build()
     val engine = new Engine(context.newEngine(allocator))
     SslServerEngineFactory.configureEngine(engine, config)

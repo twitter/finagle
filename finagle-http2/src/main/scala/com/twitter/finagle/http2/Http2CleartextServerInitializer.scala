@@ -24,7 +24,7 @@ import io.netty.handler.codec.http.HttpServerUpgradeHandler.{
   UpgradeCodec,
   UpgradeCodecFactory
 }
-import io.netty.handler.codec.http.{FullHttpRequest, HttpServerUpgradeHandler, HttpHeaders}
+import io.netty.handler.codec.http.{FullHttpRequest, HttpServerUpgradeHandler}
 import io.netty.handler.codec.http2._
 import io.netty.util.AsciiString
 
@@ -38,10 +38,6 @@ private[http2] class Http2CleartextServerInitializer(
 
   private[this] val Stats(statsReceiver) = params[Stats]
   private[this] val upgradeCounter = statsReceiver.scope("upgrade").counter("success")
-  private[this] val multiplexField = classOf[Http2MultiplexCodec].getDeclaredField("ctx");
-  private[this] val frameField = classOf[Http2FrameCodec].getDeclaredField("ctx");
-  multiplexField.setAccessible(true);
-  frameField.setAccessible(true);
 
   val initializer = new ChannelInitializer[Channel] {
     def initChannel(ch: Channel): Unit = {
@@ -59,33 +55,16 @@ private[http2] class Http2CleartextServerInitializer(
   def upgradeCodecFactory(channel: Channel): UpgradeCodecFactory = new UpgradeCodecFactory {
     override def newUpgradeCodec(protocol: CharSequence): UpgradeCodec = {
       if (AsciiString.contentEquals(Http2CodecUtil.HTTP_UPGRADE_PROTOCOL_NAME, protocol)) {
-        val initialSettings = Settings.fromParams(params)
         val logger = new LoggerPerFrameTypeLogger(params[FrameLoggerNamePrefix].loggerNamePrefix)
 
-        val codec = Http2MultiplexCodecBuilder.forServer(initializer)
+        val codec = UpgradeMultiplexCodecBuilder.forServer(initializer)
           .frameLogger(logger)
-          .initialSettings(initialSettings)
+          .initialSettings(Settings.fromParams(params))
           .build()
 
         new Http2ServerUpgradeCodec(codec) {
-          override def prepareUpgradeResponse(
-            ctx: ChannelHandlerContext,
-            upgradeRequest: FullHttpRequest,
-            headers: HttpHeaders
-          ): Boolean = {
-
-            // we need to set these private fields because of a bug in netty
-            // https://github.com/netty/netty/issues/7173
-            multiplexField.set(codec, ctx)
-            frameField.set(codec, ctx)
-            super.prepareUpgradeResponse(ctx, upgradeRequest, headers)
-          }
-
           override def upgradeTo(ctx: ChannelHandlerContext, upgradeRequest: FullHttpRequest) {
             upgradeCounter.incr()
-
-            // we retain because of a bug in netty https://github.com/netty/netty/issues/7172
-            upgradeRequest.retain()
             // we turn off backpressure because Http2 only works with autoread on for now
             ctx.channel.config.setAutoRead(true)
             super.upgradeTo(ctx, upgradeRequest)

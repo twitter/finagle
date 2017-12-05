@@ -142,12 +142,9 @@ queueing rules.
   A gauge used by serial dispatchers that can only have a single request
   per connection at a time that represents the number of pending requests.
 
-**pipelining/pending**
-  A gauge used by pipelining dispatchers that represents how many
-  pipelined requests are currently outstanding.
 
-Thread Usage
-------------
+Server Thread Usage
+-------------------
 
 .. _threadusage:
 
@@ -179,6 +176,8 @@ There are caveats which can make these metrics unreliable or not applicable:
   A gauge of the standard of deviation of the number of requests handled
   by each thread.
 
+**per_thread/<thread_name>** `verbosity:debug`
+ A counter which indicates the number of requests that a specific thread has received.
 
 Admission Control
 -----------------

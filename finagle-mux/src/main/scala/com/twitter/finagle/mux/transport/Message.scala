@@ -4,7 +4,7 @@ import com.twitter.finagle.netty4.Bufs
 import com.twitter.finagle.tracing.{Flags, SpanId, TraceId}
 import com.twitter.finagle.{Dentry, Dtab, Failure, NameTree, Path}
 import com.twitter.io.{Buf, BufByteWriter, ByteReader}
-import com.twitter.util.{Duration, Time}
+import com.twitter.util.{Duration, Future, Time}
 import java.nio.charset.{StandardCharsets => Charsets}
 import scala.collection.mutable.ArrayBuffer
 
@@ -21,7 +21,7 @@ private[finagle] sealed trait Message {
 
   /**
    * Values should correspond to the constants defined in
-   * [[com.twitter.finagle.mux.Message.Types]]
+   * [[com.twitter.finagle.mux.transport.Message.Types]]
    */
   def typ: Byte
 
@@ -79,10 +79,10 @@ private[finagle] object Message {
 
   object Tags {
     val MarkerTag = 0
-    // We reserve a tag for a default ping message so that we
-    // can cache a full ping message and avoid encoding it
-    // every time.
-    val PingTag = 1
+    // We reserve a tag for control messages. This allows us to cache
+    // control messages and avoid encoding them every time.
+    val ControlTag = 1
+    val PingTag = ControlTag
     val MinTag = PingTag + 1
     val MaxTag = (1 << 23) - 1
     val TagMSB = (1 << 23)
@@ -168,6 +168,8 @@ private[finagle] object Message {
    *
    * Note, Treq messages are deprecated in favor of [[Tdispatch]] and will likely
    * be removed in a future version of mux.
+   *
+   * Treq does not support 128bit TraceId.
    */
   case class Treq(tag: Int, traceId: Option[TraceId], req: Buf) extends Message {
     import Treq._
@@ -350,16 +352,37 @@ private[finagle] object Message {
   /** Used to check liveness */
   case class Tping(tag: Int) extends EmptyMessage { def typ = Types.Tping }
 
-  /**
-   * We pre-encode a ping message with the reserved ping tag
-   * (PingTag) in order to avoid re-encoding this frequently sent
-   * message.
-   */
-  object PreEncodedTping extends Message {
-    def typ: Byte = Types.Tping
-    def tag: Int = Tags.PingTag
-    val buf: Buf = encode(Tping(Tags.PingTag))
+  /** Representation of messages that we pre-encode for performance reasons */
+  final class PreEncoded private (val underlying: Message) extends Message {
+    def typ: Byte = underlying.typ
+    def tag: Int = underlying.tag
+
+    // We coerce bufs to the `ByteArray` form since they are the fastest Buf
+    // representation and we expect them to be reused heavily.
+    val buf: Buf = Buf.ByteArray.coerce(underlying.buf)
+
+    /**
+     * Pre-encoded representation of the parent message including type and tag.
+     * The resulting `Buf` is identical in content to `Message.encode(parentMessage)`.
+     */
+    val encodedBuf: Buf = Buf.ByteArray.coerce(encode(underlying))
+
+    override def toString: String = underlying.toString
   }
+
+  /**
+   * We pre-encode a ping messages with the reserved ping tag
+   * (PingTag) in order to avoid re-encoding these frequently sent
+   * messages.
+   */
+  object PreEncoded {
+    val Tping: PreEncoded = new PreEncoded(Message.Tping(Tags.PingTag))
+
+    val Rping: PreEncoded = new PreEncoded(Message.Rping(Tags.PingTag))
+
+    val FutureRping: Future[Message] = Future.value(Rping)
+  }
+
 
   /** Response to a `Tping` message */
   case class Rping(tag: Int) extends EmptyMessage { def typ = Types.Rping }
@@ -476,6 +499,7 @@ private[finagle] object Message {
       // TODO: technically we should probably check for duplicate
       // keys, but for now, just pick the latest one.
       key match {
+        // NOTE: Treq is deprecated and therefore won't support 128bit TraceID. see Tdispatch/Rdispatch.
         case Treq.Keys.TraceId =>
           if (vsize != 24)
             throwBadMessageException(s"bad traceid size $vsize")
@@ -675,7 +699,7 @@ private[finagle] object Message {
   }
 
   def encode(msg: Message): Buf = msg match {
-    case PreEncodedTping => PreEncodedTping.buf
+    case msg: PreEncoded => msg.encodedBuf
     case m: Message =>
       if (m.tag < Tags.MarkerTag || (m.tag & ~Tags.TagMSB) > Tags.MaxTag)
         throwBadMessageException(s"invalid tag number ${m.tag}")

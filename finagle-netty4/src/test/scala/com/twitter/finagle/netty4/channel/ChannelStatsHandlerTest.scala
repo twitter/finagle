@@ -1,30 +1,18 @@
 package com.twitter.finagle.netty4.channel
 
+import com.twitter.finagle.netty4.channel.ChannelStatsHandler.SharedChannelStats
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.TimeConversions.intToTimeableNumber
-import com.twitter.util.{Duration, Stopwatch, Time}
+import com.twitter.util.{Duration, Time}
 import io.netty.buffer.Unpooled.wrappedBuffer
 import io.netty.channel._
 import io.netty.channel.embedded.EmbeddedChannel
-import io.netty.util.{Attribute, AttributeKey}
 import java.util.concurrent.TimeoutException
-import java.util.concurrent.atomic.LongAdder
 import org.mockito.Mockito.when
 import org.scalatest.FunSuite
 import org.scalatest.mockito.MockitoSugar
 
 class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
-  def mkAttr[T](initial: T): Attribute[T] = new Attribute[T] {
-    var _v = initial
-    def set(value: T): Unit = _v = value
-    def key(): AttributeKey[T] = ???
-    def get(): T = _v
-    def getAndRemove(): T = ???
-    def remove(): Unit = ???
-    def compareAndSet(oldValue: T, newValue: T): Boolean = ???
-    def setIfAbsent(value: T): T = ???
-    def getAndSet(value: T): T = ???
-  }
 
   trait SocketTest {
     val chan = mock[Channel]
@@ -32,14 +20,12 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
 
     when(chan.isWritable).thenReturn(false, true, false)
     when(ctx.channel).thenReturn(chan)
-    when(chan.attr(ChannelStatsHandler.ChannelWasWritableKey)).thenReturn(mkAttr(true))
-    when(chan.attr(ChannelStatsHandler.ChannelWritableDurationKey))
-      .thenReturn(mkAttr(Stopwatch.start()))
   }
 
-  trait InMemoryStatsTest extends SocketTest {
+  private trait InMemoryStatsTest extends SocketTest {
     val sr = new InMemoryStatsReceiver()
-    val handler = new ChannelStatsHandler(sr)
+    val handler = new ChannelStatsHandler(new ChannelStatsHandler.SharedChannelStats(sr))
+    handler.handlerAdded(ctx)
   }
 
   test("counters are collected correctly") {
@@ -62,22 +48,14 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
   }
 
   private class TestContext(
-    bytesReceived: LongAdder = new LongAdder(),
-    bytesWritten: LongAdder = new LongAdder()
+    sharedStats: SharedChannelStats
   ) {
     val ctx = mock[ChannelHandlerContext]
+    val channelStatsHandler = new ChannelStatsHandler(sharedStats)
     private val chan = new EmbeddedChannel()
     private val start = Time.now
 
-    when(ctx.channel).thenReturn(chan)
-    chan
-      .attr(ChannelStatsHandler.ConnectionStatsKey)
-      .set(ChannelStats(bytesReceived, bytesWritten))
-
-    val durationAttr: () => Duration = () => Time.now - start
-    chan.attr(ChannelStatsHandler.ConnectionDurationKey).set(durationAttr)
-    chan.attr(ChannelStatsHandler.ChannelWasWritableKey).set(true)
-    chan.attr(ChannelStatsHandler.ChannelWritableDurationKey).set(Stopwatch.start())
+    channelStatsHandler.handlerAdded(ctx)
   }
 
   private def connectionCountEquals(sr: InMemoryStatsReceiver, num: Float): Unit = {
@@ -86,39 +64,42 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
 
   test("ChannelStatsHandler counts connections") {
     val sr = new InMemoryStatsReceiver
-    val handler = new ChannelStatsHandler(sr)
-    val ctx1 = new TestContext().ctx
-    val ctx2 = new TestContext().ctx
+    val sharedStats = new SharedChannelStats(sr)
+    val ctx1 = new TestContext(sharedStats)
+    val ctx2 = new TestContext(sharedStats)
+    val handler1 = ctx1.channelStatsHandler
+    val handler2 = ctx2.channelStatsHandler
 
     connectionCountEquals(sr, 0)
 
-    handler.channelActive(ctx1)
+    handler1.channelActive(ctx1.ctx)
     connectionCountEquals(sr, 1)
 
-    handler.channelActive(ctx2)
+    handler2.channelActive(ctx2.ctx)
     connectionCountEquals(sr, 2)
 
-    handler.channelInactive(ctx1)
+    handler1.channelInactive(ctx1.ctx)
     connectionCountEquals(sr, 1)
 
-    handler.channelInactive(ctx2)
+    handler2.channelInactive(ctx2.ctx)
     connectionCountEquals(sr, 0)
   }
 
   test("ChannelStatsHandler handles multiple channelInactive calls") {
     val sr = new InMemoryStatsReceiver
-    val handler = new ChannelStatsHandler(sr)
-    val ctx1 = new TestContext().ctx
+    val sharedStats = new SharedChannelStats(sr)
+    val ctx1 = new TestContext(sharedStats)
+    val handler = ctx1.channelStatsHandler
 
     connectionCountEquals(sr, 0)
 
-    handler.channelActive(ctx1)
+    handler.channelActive(ctx1.ctx)
     connectionCountEquals(sr, 1)
 
-    handler.channelInactive(ctx1)
+    handler.channelInactive(ctx1.ctx)
     connectionCountEquals(sr, 0)
 
-    handler.channelInactive(ctx1)
+    handler.channelInactive(ctx1.ctx)
     connectionCountEquals(sr, 0)
   }
 
@@ -127,11 +108,12 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
     f: (ChannelDuplexHandler, ChannelHandlerContext) => Unit
   ) = test(s"ChannelStatsHandler counts $counterName") {
     val sr = new InMemoryStatsReceiver
-    val handler = new ChannelStatsHandler(sr)
-    val ctx = new TestContext().ctx
+    val sharedStats = new SharedChannelStats(sr)
+    val ctx = new TestContext(sharedStats)
+    val handler = ctx.channelStatsHandler
 
     assert(!sr.counters.contains(Seq(counterName)))
-    f(handler, ctx)
+    f(handler, ctx.ctx)
     assert(sr.counters(Seq(counterName)) == 1)
   }
 
@@ -148,29 +130,33 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
   test("ChannelStatsHandler records connection duration") {
     Time.withCurrentTimeFrozen { control =>
       val sr = new InMemoryStatsReceiver
-      val handler = new ChannelStatsHandler(sr)
-      val ctx1 = new TestContext().ctx
-      val ctx2 = new TestContext().ctx
+      val sharedStats = new SharedChannelStats(sr)
+      val ctx1 = new TestContext(sharedStats)
+      val ctx2 = new TestContext(sharedStats)
 
-      handler.channelActive(ctx1)
-      handler.channelActive(ctx2)
+      val handler1 = ctx1.channelStatsHandler
+      val handler2 = ctx2.channelStatsHandler
+
+      handler1.channelActive(ctx1.ctx)
+      handler2.channelActive(ctx2.ctx)
       control.advance(Duration.fromMilliseconds(100))
-      handler.channelInactive(ctx1)
+      handler1.channelInactive(ctx1.ctx)
       assert(sr.stat("connection_duration")() == Seq(100.0))
       control.advance(Duration.fromMilliseconds(200))
-      handler.channelInactive(ctx2)
+      handler2.channelInactive(ctx2.ctx)
       assert(sr.stat("connection_duration")() == Seq(100.0, 300.0))
     }
   }
 
   test("ChannelStatsHandler counts exceptions") {
     val sr = new InMemoryStatsReceiver
-    val handler = new ChannelStatsHandler(sr)
-    val ctx = new TestContext().ctx
+    val sharedStats = new SharedChannelStats(sr)
+    val ctx = new TestContext(sharedStats)
+    val handler = ctx.channelStatsHandler
 
-    handler.exceptionCaught(ctx, new RuntimeException)
-    handler.exceptionCaught(ctx, new TimeoutException)
-    handler.exceptionCaught(ctx, new Exception)
+    handler.exceptionCaught(ctx.ctx, new RuntimeException)
+    handler.exceptionCaught(ctx.ctx, new TimeoutException)
+    handler.exceptionCaught(ctx.ctx, new Exception)
     assert(sr.counters(Seq("exn", "java.lang.RuntimeException")) == 1)
     assert(sr.counters(Seq("exn", "java.lang.Exception")) == 1)
     assert(sr.counters(Seq("exn", "java.util.concurrent.TimeoutException")) == 1)
@@ -178,34 +164,27 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
 
   test("ChannelStatsHandler counts sent and received bytes") {
     val sr = new InMemoryStatsReceiver
-    val handler = new ChannelStatsHandler(sr)
-    val bytesRead = new LongAdder()
-    val bytesWritten = new LongAdder()
-    val ctx1 = new TestContext(bytesRead, bytesWritten).ctx
-
-    val ch = ctx1.channel
-    val attr = ch.attr(ChannelStatsHandler.ConnectionStatsKey)
+    val sharedStats = new SharedChannelStats(sr)
+    val ctx1 = new TestContext(sharedStats)
+    val handler1 = ctx1.channelStatsHandler
 
     // note: if `handlerAdded` is called it'd overwrite our setup
-    handler.channelActive(ctx1)
-    handler.write(ctx1, wrappedBuffer(Array.fill(42)(0.toByte)), mock[ChannelPromise])
-    handler.channelInactive(ctx1)
+    handler1.channelActive(ctx1.ctx)
+    handler1.write(ctx1.ctx, wrappedBuffer(Array.fill(42)(0.toByte)), mock[ChannelPromise])
+    handler1.channelInactive(ctx1.ctx)
 
     assert(sr.counter("sent_bytes")() == 42)
-    assert(bytesWritten.sum() == 42)
     assert(sr.stat("connection_received_bytes")() == Seq(0.0))
     assert(sr.stat("connection_sent_bytes")() == Seq(42.0))
 
-    bytesRead.reset()
-    bytesWritten.reset()
+    val ctx2 = new TestContext(sharedStats)
+    val handler2 = ctx2.channelStatsHandler
 
-    val ctx2 = new TestContext(bytesRead, bytesWritten).ctx
-    handler.channelActive(ctx2)
-    handler.channelRead(ctx2, wrappedBuffer(Array.fill(123)(0.toByte)))
-    handler.channelInactive(ctx2)
+    handler2.channelActive(ctx2.ctx)
+    handler2.channelRead(ctx2.ctx, wrappedBuffer(Array.fill(123)(0.toByte)))
+    handler2.channelInactive(ctx2.ctx)
 
     assert(sr.counter("received_bytes")() == 123)
-    assert(bytesRead.sum() == 123)
     assert(sr.stat("connection_received_bytes")() == Seq(0.0, 123.0))
     assert(sr.stat("connection_sent_bytes")() == Seq(42.0, 0.0))
   }

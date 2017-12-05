@@ -6,6 +6,7 @@ import com.twitter.finagle
 import com.twitter.finagle._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.context.{Contexts, Deadline, Retries}
+import com.twitter.finagle.http.exp.Multipart
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.service._
@@ -124,7 +125,7 @@ abstract class AbstractEndToEndTest
     val server = serverImpl()
       .withLabel("server")
       .withStatsReceiver(statsRecv)
-      .withMaxRequestSize(100.bytes)
+      .withMaxRequestSize(200.bytes)
       .serve("localhost:*", ref)
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
     val client = clientImpl()
@@ -226,10 +227,10 @@ abstract class AbstractEndToEndTest
       val client = connect(service)
 
       val tooBig = Request("/")
-      tooBig.content = Buf.ByteArray.Owned(new Array[Byte](200))
+      tooBig.content = Buf.ByteArray.Owned(new Array[Byte](300))
 
       val justRight = Request("/")
-      justRight.content = Buf.ByteArray.Owned(Array[Byte](100))
+      justRight.content = Buf.ByteArray.Owned(new Array[Byte](200))
 
       assert(await(client(tooBig)).status == Status.RequestEntityTooLarge)
       assert(await(client(justRight)).status == Status.Ok)
@@ -1109,6 +1110,34 @@ abstract class AbstractEndToEndTest
     await(server.close())
   }
 
+  test("non-streaming clients can disable decompression") {
+    val svc = new Service[Request, Response] {
+      def apply(request: Request) = {
+        val response = Response()
+        response.contentString = "raw content"
+        Future.value(response)
+      }
+    }
+    val server = serverImpl()
+      .withStatsReceiver(NullStatsReceiver)
+      .withCompressionLevel(5)
+      .serve("localhost:*", svc)
+
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .withDecompression(false)
+      .withStatsReceiver(NullStatsReceiver)
+      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+    val req = Request("/")
+    req.headerMap.set("accept-encoding", "gzip")
+    val rep = await(client(req))
+    assert(rep.headerMap("content-encoding") == "gzip")
+    assert(rep.contentString != "raw content")
+    await(client.close())
+    await(server.close())
+  }
+
   test("request remote address") {
     val svc = new Service[Request, Response] {
       def apply(request: Request) = {
@@ -1580,5 +1609,26 @@ abstract class AbstractEndToEndTest
     assert(res.contentLength.contains(body.length.toLong))
     await(client.close())
     await(server.close())
+  }
+
+  private class MultipartCapturingService extends HttpService {
+    @volatile var multipart: Multipart = _
+    def apply(req: Request): Future[Response] = {
+      multipart = req.multipart.get
+      Future.value(Response())
+    }
+  }
+
+  test(implName + ": decodes multipart") {
+    val req = RequestBuilder()
+      .url("http://example.com")
+      .add(SimpleElement("foo", "bar"))
+      .buildFormPost(multipart = true)
+
+    val service = new MultipartCapturingService
+    val client = nonStreamingConnect(service)
+    Await.ready(client(req).ensure(client.close()), 10.seconds)
+
+    assert(service.multipart.attributes == Map("foo" -> Seq("bar")))
   }
 }

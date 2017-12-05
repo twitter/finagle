@@ -1,10 +1,7 @@
 package com.twitter.finagle.http.util
 
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class StringUtilTest extends FunSuite {
 
   test("toSomeShort") {
@@ -38,5 +35,16 @@ class StringUtilTest extends FunSuite {
     assert(StringUtil.toBoolean("T") == true)
     assert(StringUtil.toBoolean("True") == true)
     assert(StringUtil.toBoolean("TRUE") == true)
+  }
+
+  test("split") {
+    assert(StringUtil.split("abc;defgh;ij;k", ';') == Seq("abc", "defgh", "ij", "k"))
+    assert(StringUtil.split("abc;defgh;ij;k", ',') == Seq("abc;defgh;ij;k"))
+    assert(StringUtil.split("", '.') == Seq())
+    assert(StringUtil.split(null, ',') == Seq())
+    assert(StringUtil.split(";", ';') == Seq())
+    assert(StringUtil.split(";;", ';') == Seq("", ""))
+    assert(StringUtil.split("1;2;3;4", ';', 2) == Seq("1", "2;3;4"))
+    assert(StringUtil.split("1;123;1234;", ';') == Seq("1", "123", "1234"))
   }
 }

@@ -3,15 +3,9 @@ package com.twitter.finagle.http2.transport
 import com.twitter.finagle.netty4.http.initClient
 import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.{Stack, FailureFlags}
-import com.twitter.util.Promise
-import io.netty.channel.{
-  ChannelDuplexHandler,
-  ChannelHandlerContext,
-  ChannelPromise,
-  ChannelFutureListener,
-  ChannelFuture
-}
+import com.twitter.finagle.{FailureFlags, Stack}
+import com.twitter.util.{Promise, Return}
+import io.netty.channel._
 import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
 import io.netty.handler.codec.http.LastHttpContent
 import scala.collection.JavaConverters.iterableAsScalaIterableConverter
@@ -53,26 +47,28 @@ private[http2] class UpgradeRequestHandler(params: Stack.Params) extends Channel
         ctx.channel.config.setAutoRead(false)
         ctx.pipeline.remove(this)
       case successful @ UpgradeEvent.UPGRADE_SUCCESSFUL =>
-        writeFinished.onSuccess { _ =>
-          val p = ctx.pipeline
-          p.asScala.toList
-            .dropWhile(_.getKey != HandlerName)
-            .tail
-            .takeWhile(_.getKey != ChannelTransport.HandlerName)
-            .foreach { entry =>
-              p.remove(entry.getValue)
-            }
-          p.addBefore(
-            ChannelTransport.HandlerName,
-            "aggregate",
-            new AdapterProxyChannelHandler({ pipeline =>
-              pipeline.addLast("schemifier", new SchemifyingHandler("http"))
-              initClient(params)(pipeline)
-            })
-          )
-          upgradeCounter.incr()
-          ctx.fireChannelRead(successful)
-          ctx.pipeline.remove(this)
+        writeFinished.respond {
+          case Return(_) =>
+            val p = ctx.pipeline
+            p.asScala.toList
+              .dropWhile(_.getKey != HandlerName)
+              .tail
+              .takeWhile(_.getKey != ChannelTransport.HandlerName)
+              .foreach {
+                entry => p.remove(entry.getValue)
+              }
+            p.addBefore(
+              ChannelTransport.HandlerName,
+              "aggregate",
+              new AdapterProxyChannelHandler({ pipeline: ChannelPipeline =>
+                pipeline.addLast("schemifier", new SchemifyingHandler("http"))
+                initClient(params)(pipeline)
+             })
+            )
+            upgradeCounter.incr()
+            ctx.fireChannelRead(successful)
+            ctx.pipeline.remove(this)
+          case _ =>
         }
       case _ => // nop
     }

@@ -45,7 +45,7 @@ before_cache:
 
 scala:
   - 2.11.11
-  - 2.12.1
+  - 2.12.4
 
 jdk:
   - oraclejdk8

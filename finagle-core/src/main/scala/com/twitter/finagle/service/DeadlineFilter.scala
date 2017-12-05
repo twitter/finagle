@@ -22,10 +22,10 @@ import com.twitter.util.{Future, Duration, Stopwatch, Time, TokenBucket}
  */
 object DeadlineFilter {
 
-  private[this] val DefaultRejectPeriod = 10.seconds
+  private val DefaultRejectPeriod = 10.seconds
 
   // In the case of large delays, don't want to reject too many requests
-  private[this] val DefaultMaxRejectFraction = 0.2
+  private val DefaultMaxRejectFraction = 0.2
 
   // Token Bucket is integer-based, so use a scale factor to facilitate
   // usage with the Double `maxRejectFraction`
@@ -112,17 +112,19 @@ object DeadlineFilter {
  *
  * @param rejectPeriod No more than `maxRejectFraction` of requests will be
  *        discarded over the `rejectPeriod`. Must be `>= 1 second` and `<= 60 seconds`.
+ *        Default is 10.seconds.
  * @param maxRejectFraction Maximum fraction of requests per-connection that can be
  *        rejected over `rejectPeriod`. Must be between 0.0 and 1.0.
+ *        Default is 0.2.
  * @param statsReceiver for stats reporting, typically scoped to
  *        ".../admission_control/deadline/"
  * @param nowMillis current time in milliseconds
  * @see The [[https://twitter.github.io/finagle/guide/Servers.html#request-deadline user guide]]
  *      for more details.
  */
-private[finagle] class DeadlineFilter[Req, Rep](
-  rejectPeriod: Duration,
-  maxRejectFraction: Double,
+class DeadlineFilter[Req, Rep](
+  rejectPeriod: Duration = DeadlineFilter.DefaultRejectPeriod,
+  maxRejectFraction: Double = DeadlineFilter.DefaultMaxRejectFraction,
   statsReceiver: StatsReceiver,
   nowMillis: () => Long = Stopwatch.systemMillis
 ) extends SimpleFilter[Req, Rep] {

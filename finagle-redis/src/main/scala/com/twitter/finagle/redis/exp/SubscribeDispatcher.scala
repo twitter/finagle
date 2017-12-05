@@ -3,7 +3,7 @@ package com.twitter.finagle.redis.exp
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Future, Promise}
+import com.twitter.util.{Future, Promise, Return, Throw}
 import java.util.concurrent.atomic.AtomicReference
 import scala.util.control.NonFatal
 
@@ -15,45 +15,46 @@ class SubscribeDispatcher(trans: Transport[Command, Reply])
   loop()
 
   private[this] def loop(): Unit =
-    trans
-      .read()
-      .onSuccess { reply =>
+    trans.read().respond {
+      case Return(reply) =>
         handler.get().onMessage(reply)
         loop()
-      }
-      .onFailure {
-        case NonFatal(ex) =>
-          Option(handler.get()).foreach(_.onException(this, ex))
-      }
+      case Throw(NonFatal(ex)) =>
+        Option(handler.get()).foreach(_.onException(this, ex))
+      case _ =>
+    }
 
   protected def dispatch(req: Command, p: Promise[Reply]): Future[Unit] = {
-    trans
-      .write(req)
-      .onSuccess { _ =>
+    trans.write(req).respond {
+      case Return(_) =>
         p.setValue(NoReply)
-      }
-      .onFailure { case NonFatal(ex) => p.setException(ex) }
+      case Throw(NonFatal(ex)) =>
+        p.setException(ex)
+      case _ =>
+    }
   }
 
   override def apply(req: Command): Future[Reply] = {
     req match {
       case cmd: SubscribeCommand =>
         handler.compareAndSet(null, cmd.handler)
-        super.apply(cmd).masked.onSuccess { _ =>
-          req match {
-            case Subscribe(channels, handler) =>
-              channels.foreach(handler.onSuccess(_, this))
-            case PSubscribe(patterns, handler) =>
-              patterns.foreach(handler.onSuccess(_, this))
-            case _ =>
-          }
+        super.apply(cmd).masked.respond {
+          case Return(_) =>
+            req match {
+              case Subscribe(channels, handler) =>
+                channels.foreach(handler.onSuccess(_, this))
+              case PSubscribe(patterns, handler) =>
+                patterns.foreach(handler.onSuccess(_, this))
+              case _ =>
+            }
+          case _ =>
         }
       case _ =>
         throw new IllegalArgumentException("Not a subscribe/unsubscribe command")
     }
   }
 
-  override def close(deadline: com.twitter.util.Time) = {
+  override def close(deadline: com.twitter.util.Time): Future[Unit] = {
     super.close(deadline)
   }
 }

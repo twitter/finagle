@@ -53,11 +53,6 @@ private[finagle] class TTwitterServerFilter(
         // as it really requires a dispatcher.
         Dtab.local ++= richHeader.dtab
 
-        Trace.recordRpc({
-          val msg = new InputBuffer(request_, protocolFactory)().readMessageBegin()
-          msg.name
-        })
-
         // If `header.client_id` field is non-null, then allow it to take
         // precedence over an id potentially provided by in the key-value pairs
         // when performing tracing.
@@ -103,7 +98,6 @@ private[finagle] class TTwitterServerFilter(
         successfulUpgradeReply
       } else {
         // request from client without tracing support
-        Trace.recordRpc(msg.name)
         Trace.recordBinary("srv/thrift/ttwitter", false)
         service(request)
       }

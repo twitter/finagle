@@ -33,14 +33,20 @@ private[loadbalancer] trait P2CPick[Node <: NodeT[_, _]] { self: DistributorT[No
   protected def bound: Int
 
   /**
+   * Allows implementations to pre-process the `vector` which
+   * `pick` will select from.
+   */
+  protected val vec: Vector[Node]
+
+  /**
    * Picks two nodes randomly, and uniformly, from `vector` within `bound` and
    * selects between the two first by `status` and then by `load`. Effectively,
    * we want to select the most healthy, least loaded of the two.
    */
   def pick(): Node = {
     val range = bound
-    if (vector.isEmpty) emptyNode
-    else if (range == 1 || vector.size == 1) vector.head
+    if (vec.isEmpty) emptyNode
+    else if (range == 1 || vec.size == 1) vec.head
     else {
       // We want to pick two distinct nodes. We do this without replacement by
       // restricting the bounds of the second selection, `b`, to be one less than the
@@ -53,15 +59,17 @@ private[loadbalancer] trait P2CPick[Node <: NodeT[_, _]] { self: DistributorT[No
       var b = rng.nextInt(range - 1)
       if (b >= a) { b = b + 1 }
 
-      val nodeA = vector(a)
-      val nodeB = vector(b)
+      val nodeA = vec(a)
+      val nodeB = vec(b)
 
       // If both nodes are in the same health status, we pick the least loaded
       // one. Otherwise we pick the one that's healthier.
-      if (nodeA.status == nodeB.status) {
-        if (nodeA.load < nodeB.load) nodeA else nodeB
+      val aStatus = nodeA.status
+      val bStatus = nodeB.status
+      if (aStatus == bStatus) {
+        if (nodeA.load <= nodeB.load) nodeA else nodeB
       } else {
-        if (Status.best(nodeA.status, nodeB.status) == nodeA.status) nodeA else nodeB
+        if (Status.best(aStatus, bStatus) == aStatus) nodeA else nodeB
       }
     }
   }

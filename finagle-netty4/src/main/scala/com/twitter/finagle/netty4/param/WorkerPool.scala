@@ -19,11 +19,12 @@ import java.util.concurrent.{Executor, Executors}
  * more granularly (e.g. [[com.twitter.util.FuturePool]] is a good tool for this).
  */
 case class WorkerPool(eventLoopGroup: EventLoopGroup) {
+
   def this(executor: Executor, numWorkers: Int) = this(
     if (nativeEpoll.enabled) new EpollEventLoopGroup(numWorkers, executor)
     else new NioEventLoopGroup(numWorkers, executor))
 
-  def mk(): (WorkerPool, Stack.Param[WorkerPool]) =
+  def mk() : (WorkerPool, Stack.Param[WorkerPool]) =
     (this, WorkerPool.workerPoolParam)
 }
 

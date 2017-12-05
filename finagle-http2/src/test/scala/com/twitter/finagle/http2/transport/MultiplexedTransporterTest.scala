@@ -329,4 +329,23 @@ class MultiplexedTransporterTest extends FunSuite {
     }
     assert(multi.numChildren == 0)
   }
+
+  test("PINGs receive replies every time") {
+    val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
+    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+      type Context = TransportContext with HasExecutor
+    }]
+    val addr = new SocketAddress {}
+    var cur: Status = Status.Open
+    val params = Stack.Params.empty + FailureDetector.Param(
+      new FailureDetector.MockConfig(() => cur)
+    )
+    val multi = new MultiplexedTransporter(transport, addr, params)
+
+    for (_ <- 1 to 10) {
+      multi.ping()
+      assert(Await.result(writeq.poll(), 5.seconds) == Ping)
+      readq.offer(Ping)
+    }
+  }
 }

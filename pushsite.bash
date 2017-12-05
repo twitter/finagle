@@ -6,7 +6,7 @@ dir=/tmp/finagle.$$
 trap "rm -fr $dir" 0 1 2
 
 echo 'making site...' 1>&2
-./sbt --warn finagle-doc/make-site
+./sbt --warn finagle-doc/makeSite
 
 echo 'making unidoc...' 1>&2
 ./sbt --warn unidoc

@@ -17,8 +17,6 @@ import java.util.Collections;
 import java.util.BitSet;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.apache.thrift.*;
 import org.apache.thrift.async.*;
@@ -44,6 +42,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
   private static final TField CONTEXTS_FIELD_DESC = new TField("contexts", TType.LIST, (short)8);
   private static final TField DEST_FIELD_DESC = new TField("dest", TType.STRING, (short)9);
   private static final TField DELEGATIONS_FIELD_DESC = new TField("delegations", TType.LIST, (short)10);
+  private static final TField TRACE_ID_HIGH_FIELD_DESC = new TField("trace_id_high", TType.I64, (short)11);
 
   public long trace_id;
   public long span_id;
@@ -54,6 +53,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
   public List<RequestContext> contexts;
   public String dest;
   public List<Delegation> delegations;
+  public long trace_id_high;
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements TFieldIdEnum {
@@ -65,7 +65,8 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     FLAGS((short)7, "flags"),
     CONTEXTS((short)8, "contexts"),
     DEST((short)9, "dest"),
-    DELEGATIONS((short)10, "delegations");
+    DELEGATIONS((short)10, "delegations"),
+    TRACE_ID_HIGH((short)11, "trace_id_high");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -98,6 +99,8 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
           return DEST;
         case 10: // DELEGATIONS
           return DELEGATIONS;
+        case 11: // TRACE_ID_HIGH
+          return TRACE_ID_HIGH;
         default:
           return null;
       }
@@ -143,7 +146,8 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
   private static final int __PARENT_SPAN_ID_ISSET_ID = 2;
   private static final int __SAMPLED_ISSET_ID = 3;
   private static final int __FLAGS_ISSET_ID = 4;
-  private BitSet __isset_bit_vector = new BitSet(5);
+  private static final int __TRACE_ID_HIGH_ISSET_ID = 5;
+  private BitSet __isset_bit_vector = new BitSet(6);
 
   public static final Map<_Fields, FieldMetaData> metaDataMap;
   static {
@@ -168,6 +172,8 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     tmpMap.put(_Fields.DELEGATIONS, new FieldMetaData("delegations", TFieldRequirementType.OPTIONAL,
         new ListMetaData(TType.LIST,
             new StructMetaData(TType.STRUCT, Delegation.class))));
+    tmpMap.put(_Fields.TRACE_ID_HIGH, new FieldMetaData("trace_id_high", TFieldRequirementType.OPTIONAL,
+        new FieldValueMetaData(TType.I64)));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     FieldMetaData.addStructMetaDataMap(RequestHeader.class, metaDataMap);
   }
@@ -219,6 +225,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
       }
       this.delegations = __this__delegations;
     }
+    this.trace_id_high = other.trace_id_high;
   }
 
   public RequestHeader deepCopy() {
@@ -241,6 +248,8 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     this.contexts = null;
     this.dest = null;
     this.delegations = null;
+    setTrace_id_highIsSet(false);
+    this.trace_id_high = 0;
   }
 
   public long getTrace_id() {
@@ -484,6 +493,29 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     }
   }
 
+  public long getTrace_id_high() {
+    return this.trace_id_high;
+  }
+
+  public RequestHeader setTrace_id_high(long trace_id_high) {
+    this.trace_id_high = trace_id_high;
+    setTrace_id_highIsSet(true);
+    return this;
+  }
+
+  public void unsetTrace_id_high() {
+    __isset_bit_vector.clear(__TRACE_ID_HIGH_ISSET_ID);
+  }
+
+  /** Returns true if field trace_id_high is set (has been asigned a value) and false otherwise */
+  public boolean isSetTrace_id_high() {
+    return __isset_bit_vector.get(__TRACE_ID_HIGH_ISSET_ID);
+  }
+
+  public void setTrace_id_highIsSet(boolean value) {
+    __isset_bit_vector.set(__TRACE_ID_HIGH_ISSET_ID, value);
+  }
+
   @SuppressWarnings("unchecked")
   public void setFieldValue(_Fields field, Object value) {
     switch (field) {
@@ -559,6 +591,14 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
       }
       break;
 
+    case TRACE_ID_HIGH:
+      if (value == null) {
+        unsetTrace_id_high();
+      } else {
+        setTrace_id_high((Long)value);
+      }
+      break;
+
     }
   }
 
@@ -591,6 +631,9 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     case DELEGATIONS:
       return getDelegations();
 
+    case TRACE_ID_HIGH:
+      return new Long(getTrace_id_high());
+
     }
     throw new IllegalStateException();
   }
@@ -620,6 +663,8 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
       return isSetDest();
     case DELEGATIONS:
       return isSetDelegations();
+    case TRACE_ID_HIGH:
+      return isSetTrace_id_high();
     }
     throw new IllegalStateException();
   }
@@ -715,6 +760,15 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
       if (!(this_present_delegations && that_present_delegations))
         return false;
       if (!this.delegations.equals(that.delegations))
+        return false;
+    }
+
+    boolean this_present_trace_id_high = true && this.isSetTrace_id_high();
+    boolean that_present_trace_id_high = true && that.isSetTrace_id_high();
+    if (this_present_trace_id_high || that_present_trace_id_high) {
+      if (!(this_present_trace_id_high && that_present_trace_id_high))
+        return false;
+      if (this.trace_id_high != that.trace_id_high)
         return false;
     }
 
@@ -820,6 +874,16 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     }
     if (isSetDelegations()) {
       lastComparison = TBaseHelper.compareTo(this.delegations, typedOther.delegations);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
+    lastComparison = Boolean.valueOf(isSetTrace_id_high()).compareTo(typedOther.isSetTrace_id_high());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetTrace_id_high()) {
+      lastComparison = TBaseHelper.compareTo(this.trace_id_high, typedOther.trace_id_high);
       if (lastComparison != 0) {
         return lastComparison;
       }
@@ -932,6 +996,14 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
+        case 11: // TRACE_ID_HIGH
+          if (field.type == TType.I64) {
+            this.trace_id_high = iprot.readI64();
+            setTrace_id_highIsSet(true);
+          } else {
+            TProtocolUtil.skip(iprot, field.type);
+          }
+          break;
         default:
           TProtocolUtil.skip(iprot, field.type);
       }
@@ -1008,6 +1080,11 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
         oprot.writeFieldEnd();
       }
     }
+    if (isSetTrace_id_high()) {
+      oprot.writeFieldBegin(TRACE_ID_HIGH_FIELD_DESC);
+      oprot.writeI64(this.trace_id_high);
+      oprot.writeFieldEnd();
+    }
     oprot.writeFieldStop();
     oprot.writeStructEnd();
   }
@@ -1078,6 +1155,12 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
       } else {
         sb.append(this.delegations);
       }
+      first = false;
+    }
+    if (isSetTrace_id_high()) {
+      if (!first) sb.append(", ");
+      sb.append("trace_id_high:");
+      sb.append(this.trace_id_high);
       first = false;
     }
     sb.append(")");

@@ -47,18 +47,20 @@ private[serverset2] object Zk2Resolver {
  * Resolution is achieved by looking up registered ServerSet paths within a
  * service discovery ZooKeeper cluster. See `Zk2Resolver.bind` for details.
  *
- * @param statsReceiver: maintains stats and gauges used in resolution
- * @param removalWindow: how long a member stays in limbo before it is removed from a ServerSet
- * @param batchWindow: how long do we batch up change notifications before finalizing a ServerSet
- * @param unhealthyWindow: how long must the zk client be unhealthy for us to report before
- *                       reporting trouble
- * @param inetResolver: used to perform address resolution
- * @param timer: timer to use for stabilization and zk sessions
+ * @param statsReceiver maintains stats and gauges used in resolution
+ *
+ * @param stabilizerWindow the window over which we stabilize updates from zk as per
+ * the semantics of the [[Stabilizer]].
+ *
+ * @param unhealthyWindow how long must the zk client be unhealthy before reporting trouble
+ *
+ * @param inetResolver used to perform address resolution
+ *
+ * @param timer timer to use for stabilization and zk sessions
  */
 class Zk2Resolver(
   statsReceiver: StatsReceiver,
-  removalWindow: Duration,
-  batchWindow: Duration,
+  stabilizerWindow: Duration,
   unhealthyWindow: Duration,
   inetResolver: InetResolver,
   timer: Timer
@@ -67,15 +69,13 @@ class Zk2Resolver(
 
   def this(
     statsReceiver: StatsReceiver,
-    removalWindow: Duration,
-    batchWindow: Duration,
+    stabilizerWindow: Duration,
     unhealthyWindow: Duration,
     timer: Timer
   ) =
     this(
       statsReceiver,
-      removalWindow,
-      batchWindow,
+      stabilizerWindow,
       unhealthyWindow,
       FixedInetResolver(
         statsReceiver,
@@ -88,14 +88,13 @@ class Zk2Resolver(
 
   def this(
     statsReceiver: StatsReceiver,
-    removalWindow: Duration,
-    batchWindow: Duration,
+    stabilizerWindow: Duration,
     unhealthyWindow: Duration
   ) =
-    this(statsReceiver, removalWindow, batchWindow, unhealthyWindow, DefaultTimer)
+    this(statsReceiver, stabilizerWindow, unhealthyWindow, DefaultTimer)
 
   def this(statsReceiver: StatsReceiver) =
-    this(statsReceiver, 40.seconds, 5.seconds, 5.minutes)
+    this(statsReceiver, 10.seconds, 5.minutes)
 
   def this() =
     this(DefaultStatsReceiver.scope("zk2"))
@@ -105,8 +104,7 @@ class Zk2Resolver(
   private[this] implicit val injectTimer = timer
 
   private[this] val sessionTimeout = 10.seconds
-  private[this] val removalEpoch = Epoch(removalWindow)
-  private[this] val batchEpoch = Epoch(batchWindow)
+  private[this] val stabilizerEpoch = Epoch(stabilizerWindow)
   private[this] val unhealthyEpoch = Epoch(unhealthyWindow)
   private[this] val nsets = new AtomicInteger(0)
   private[this] val logger = Logger(getClass)
@@ -168,7 +166,7 @@ class Zk2Resolver(
           case Activity.Pending => Var.value(Addr.Pending)
           case Activity.Failed(exc) => Var.value(Addr.Failed(exc))
           case Activity.Ok(weightedEntries) =>
-            val endpoint = endpointOption.getOrElse(null)
+            val endpoint = endpointOption.orNull
             val hosts: Seq[(String, Int, Addr.Metadata)] = weightedEntries.collect {
               case (Endpoint(names, host, port, shardId, Endpoint.Status.Alive, _), weight)
                   if names.contains(endpoint) &&
@@ -190,9 +188,9 @@ class Zk2Resolver(
         }
 
         // The stabilizer ensures that we qualify changes by putting
-        // removes in a limbo state for at least one removalEpoch, and emitting
-        // at most one update per batchEpoch.
-        val stabilized = Stabilizer(va, removalEpoch, batchEpoch)
+        // removes in a limbo state for at least one batch epoch, and emitting
+        // at most one update per two batch epochs.
+        val stabilized = Stabilizer(va, stabilizerEpoch)
 
         // Finally we output `State`s, which are always nonpending
         // address coupled with statistics from the stabilization
@@ -312,6 +310,6 @@ class Zk2Resolver(
       addrOf(hosts, path, Some(endpoint))
 
     case _ =>
-      throw new IllegalArgumentException(s"Invalid address '${arg}'")
+      throw new IllegalArgumentException(s"Invalid address '$arg'")
   }
 }

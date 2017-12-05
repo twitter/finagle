@@ -4,6 +4,7 @@ junit_tests(
     '3rdparty/jvm/org/mockito:mockito-all',
     '3rdparty/jvm/org/scalatest',
     'finagle/finagle-core/src/main/scala:scala',
+    'finagle/finagle-core/src/test/scala:pushsession-utils',
     'finagle/finagle-http/src/main/scala:scala',
     'finagle/finagle-http2/src/main/scala:scala',
     'finagle/finagle-integration/src/test/thrift:thrift-scala',
@@ -21,5 +22,4 @@ junit_tests(
   ],
   fatal_warnings=True,
   sources=rglobs('*.scala'),
-  strict_deps=True,
 )

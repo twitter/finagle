@@ -1,16 +1,17 @@
 package com.twitter.finagle.exp
 
 import com.twitter.util.WindowedAdder
+import java.util.concurrent.locks.StampedLock
 
 private[finagle] object LatencyHistogram {
 
-  /** Default number of slices to use for [[WindowedAdder]] */
+  /** Default number of slices to use for time windowed adder */
   val DefaultSlices = 5
 
 }
 
 /**
- * A concurrent histogram implementation.
+ * A windowed, thread-safe, histogram implementation.
  *
  * This histogram has no dynamic range - it
  * must be configured a priori; but this is
@@ -33,7 +34,7 @@ private[finagle] object LatencyHistogram {
  *
  * @param history how long to hold onto data for
  *
- * @param slices the number of slices to use. See [[WindowedAdder]].
+ * @param slices the number of slices to use. See util's `WindowedAdder`.
  *
  * @param now the current time. for testing.
  */
@@ -53,10 +54,21 @@ private[finagle] class LatencyHistogram(
     if (error == 0.0) 1
     else math.max(1, (clipDuration * error).toInt)
 
+  private[this] val lock: StampedLock = new StampedLock()
+
   private[this] val numBuckets: Int = (clipDuration / width).toInt + 1
 
+  /**
+   * Number of data points observed in total over the time window.
+   */
   private[this] val n = WindowedAdder(history, slices, now)
-  private[this] val tab = Array.fill(numBuckets) { WindowedAdder(history, slices, now) }
+
+  /**
+   * Number of data points observed, indexed by duration, over the time window.
+   */
+  private[this] val tab = Array.fill(numBuckets) {
+    WindowedAdder(history, slices, now)
+  }
 
   /**
    * Compute the quantile `which` from the underlying
@@ -68,14 +80,19 @@ private[finagle] class LatencyHistogram(
   def quantile(which: Int): Long = {
     require(which < 100 && which >= 0)
 
-    // The number of samples before the request quantile.
-    val target = n.sum() * which / 100 + 1
     var i = 0
-    var sum = 0L
-    do {
-      sum += tab(i).sum()
-      i += 1
-    } while (i < numBuckets && sum < target)
+    val stamp = lock.writeLock()
+    try {
+      // The number of samples before the request quantile.
+      val target = n.sum() * which / 100 + 1
+      var sum = 0L
+      do {
+        sum += tab(i).sum()
+        i += 1
+      } while (i < numBuckets && sum < target)
+    } finally {
+      lock.unlockWrite(stamp)
+    }
 
     ((i - 1) * width) + (width / 2)
   }
@@ -89,9 +106,16 @@ private[finagle] class LatencyHistogram(
    */
   def add(d: Long): Unit = {
     if (d >= 0) {
-      val ms: Long = math.min(d, clipDuration)
-      tab((ms / width).toInt).incr()
-      n.incr()
+      val dur: Long = math.min(d, clipDuration)
+      val bucket = tab((dur / width).toInt)
+
+      val stamp = lock.readLock()
+      try {
+        bucket.incr()
+        n.incr()
+      } finally {
+        lock.unlockRead(stamp)
+      }
     }
   }
 }

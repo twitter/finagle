@@ -1,8 +1,6 @@
 package com.twitter.finagle.netty4.ssl
 
 import com.twitter.finagle.ssl.{ApplicationProtocols, TrustCredentials}
-import com.twitter.util.Try
-import com.twitter.util.security.Pkcs8EncodedKeySpecFile
 import io.netty.handler.ssl.{ApplicationProtocolConfig, SslContextBuilder, SslProvider}
 import io.netty.handler.ssl.ApplicationProtocolConfig.{
   Protocol,
@@ -10,9 +8,6 @@ import io.netty.handler.ssl.ApplicationProtocolConfig.{
   SelectorFailureBehavior
 }
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory
-import java.io.File
-import java.security.{KeyFactory, PrivateKey}
-import java.security.spec.InvalidKeySpecException
 import scala.collection.JavaConverters._
 
 /**
@@ -28,10 +23,6 @@ private[ssl] object Netty4SslConfigurations {
    * @note TrustCredentials.Unspecified does not change the builder,
    * as it is not possible to set the trustManager to use the system
    * trust credentials, like with the JDK engine factories.
-   *
-   * @note TrustCredentials.Insecure forces the `SslProvider` of the
-   * `SslContextBuilder` to be a JDK instance, as Netty's
-   * `InsecureTrustManagerFactory` is not supported for native engines.
    */
   def configureTrust(
     builder: SslContextBuilder,
@@ -41,12 +32,30 @@ private[ssl] object Netty4SslConfigurations {
       case TrustCredentials.Unspecified =>
         builder // Do Nothing
       case TrustCredentials.Insecure =>
-        builder
-          .sslProvider(SslProvider.JDK)
-          .trustManager(InsecureTrustManagerFactory.INSTANCE)
+        builder.trustManager(InsecureTrustManagerFactory.INSTANCE)
       case TrustCredentials.CertCollection(file) =>
         builder.trustManager(file)
     }
+  }
+
+  /**
+   * Configures the application protocols of the `SslContextBuilder`. This
+   * method mutates the `SslContextBuilder`, and returns it as the result.
+   *
+   * @note This sets which application level protocol negotiation to
+   * use ALPN.
+   *
+   * @note This also sets the `SelectorFailureBehavior` to NO_ADVERTISE,
+   * and the `SelectedListenerFailureBehavior` to ACCEPT as those are the
+   * only modes supported by both JDK and Native engines.
+   */
+  def configureClientApplicationProtocols(
+    builder: SslContextBuilder,
+    applicationProtocols: ApplicationProtocols
+  ): SslContextBuilder = {
+    // don't use NPN because https://github.com/netty/netty/issues/7346 breaks
+    // web crawlers
+    configureApplicationProtocols(builder, applicationProtocols, Protocol.ALPN)
   }
 
   /**
@@ -60,9 +69,24 @@ private[ssl] object Netty4SslConfigurations {
    * and the `SelectedListenerFailureBehavior` to ACCEPT as those are the
    * only modes supported by both JDK and Native engines.
    */
-  def configureApplicationProtocols(
+  def configureServerApplicationProtocols(
     builder: SslContextBuilder,
     applicationProtocols: ApplicationProtocols
+  ): SslContextBuilder =
+    configureApplicationProtocols(builder, applicationProtocols, Protocol.NPN_AND_ALPN)
+
+  /**
+   * Configures the application protocols of the `SslContextBuilder`. This
+   * method mutates the `SslContextBuilder`, and returns it as the result.
+   *
+   * @note This also sets the `SelectorFailureBehavior` to NO_ADVERTISE,
+   * and the `SelectedListenerFailureBehavior` to ACCEPT as those are the
+   * only modes supported by both JDK and Native engines.
+   */
+  private[this] def configureApplicationProtocols(
+    builder: SslContextBuilder,
+    applicationProtocols: ApplicationProtocols,
+    negotiationProtocol: Protocol
   ): SslContextBuilder = {
     applicationProtocols match {
       case ApplicationProtocols.Unspecified =>
@@ -70,8 +94,7 @@ private[ssl] object Netty4SslConfigurations {
       case ApplicationProtocols.Supported(protos) =>
         builder.applicationProtocolConfig(
           new ApplicationProtocolConfig(
-            Protocol.NPN_AND_ALPN,
-            // NO_ADVERTISE and ACCEPT are the only modes supported by both OpenSSL and JDK SSL.
+            negotiationProtocol,
             SelectorFailureBehavior.NO_ADVERTISE,
             SelectedListenerFailureBehavior.ACCEPT,
             protos.asJava
@@ -91,33 +114,5 @@ private[ssl] object Netty4SslConfigurations {
   ): SslContextBuilder =
     if (forceJdk) builder.sslProvider(SslProvider.JDK)
     else builder
-
-  /**
-   * Attempts to load an unencrypted private key file into a `PrivateKey`. The file
-   * is loaded into a `PrivateKey` in order to use specific methods provided by
-   * Netty for accommodating a key and multiple certificates.
-   */
-  def getPrivateKey(keyFile: File): Try[PrivateKey] = {
-    val encodedKeySpec = new Pkcs8EncodedKeySpecFile(keyFile).readPkcs8EncodedKeySpec()
-
-    // keeps identical behavior to netty
-    // https://github.com/netty/netty/blob/netty-4.1.11.Final/handler/src/main/java/io/netty/handler/ssl/SslContext.java#L1006
-    encodedKeySpec.flatMap { keySpec =>
-      Try {
-        KeyFactory.getInstance("RSA").generatePrivate(keySpec)
-      }.handle {
-          case _: InvalidKeySpecException =>
-            KeyFactory.getInstance("DSA").generatePrivate(keySpec)
-        }
-        .handle {
-          case _: InvalidKeySpecException =>
-            KeyFactory.getInstance("EC").generatePrivate(keySpec)
-        }
-        .handle {
-          case ex: InvalidKeySpecException =>
-            throw new InvalidKeySpecException("None of RSA, DSA, EC worked", ex)
-        }
-    }
-  }
 
 }

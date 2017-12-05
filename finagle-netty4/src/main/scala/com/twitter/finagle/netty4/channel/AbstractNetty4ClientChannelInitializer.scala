@@ -37,9 +37,9 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(params: St
     else
       None
 
-  private[this] val (channelRequestStatsHandler, channelStatsHandler) =
+  private[this] val (sharedChannelRequestStats, sharedChannelStats) =
     if (!stats.isNull)
-      (Some(new ChannelRequestStatsHandler(stats)), Some(new ChannelStatsHandler(stats)))
+      (Some(new ChannelRequestStatsHandler.SharedChannelRequestStats(stats)), Some(new ChannelStatsHandler.SharedChannelStats(stats)))
     else
       (None, None)
 
@@ -56,9 +56,17 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(params: St
 
     val pipe = ch.pipeline
 
-    channelStatsHandler.foreach(pipe.addFirst(ChannelStatsHandlerKey, _))
+    sharedChannelStats.foreach { sharedStats =>
+      val channelStatsHandler = new ChannelStatsHandler(sharedStats)
+      pipe.addFirst(ChannelStatsHandlerKey, channelStatsHandler)
+    }
+
     channelSnooper.foreach(pipe.addFirst(ChannelLoggerHandlerKey, _))
-    channelRequestStatsHandler.foreach(pipe.addLast(ChannelRequestStatsHandlerKey, _))
+
+    sharedChannelRequestStats.foreach { sharedStats =>
+      val channelRequestStatsHandler = new ChannelRequestStatsHandler(sharedStats)
+      pipe.addLast(ChannelRequestStatsHandlerKey, channelRequestStatsHandler)
+    }
 
     if (readTimeout.isFinite && readTimeout > Duration.Zero) {
       val (timeoutValue, timeoutUnit) = readTimeout.inTimeUnit

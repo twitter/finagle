@@ -114,15 +114,15 @@ trait Server[Req, Rep] {
   def serve(addr: SocketAddress, service: ServiceFactory[Req, Rep]): ListeningServer
 
   /** $addr */
-  def serve(addr: SocketAddress, service: Service[Req, Rep]): ListeningServer =
+  final def serve(addr: SocketAddress, service: Service[Req, Rep]): ListeningServer =
     serve(addr, ServiceFactory.const(service))
 
   /** $addr */
-  def serve(addr: String, service: ServiceFactory[Req, Rep]): ListeningServer =
+  final def serve(addr: String, service: ServiceFactory[Req, Rep]): ListeningServer =
     serve(ServerRegistry.register(addr), service)
 
   /** $addr */
-  def serve(addr: String, service: Service[Req, Rep]): ListeningServer =
+  final def serve(addr: String, service: Service[Req, Rep]): ListeningServer =
     serve(addr, ServiceFactory.const(service))
 
   /** $serveAndAnnounce */

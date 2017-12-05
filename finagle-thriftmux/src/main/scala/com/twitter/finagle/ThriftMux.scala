@@ -1,22 +1,14 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.client.{
-  ClientRegistry,
-  ExceptionRemoteInfoFactory,
-  StackBasedClient,
-  StackClient
-}
+import com.twitter.finagle.client.{ClientRegistry, ExceptionRemoteInfoFactory, StackBasedClient, StackClient}
+import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.context.RemoteInfo.Upstream
+import com.twitter.finagle.mux.{OpportunisticTlsParams, Request, Response}
+import com.twitter.finagle.mux.exp.pushsession.MuxPush
 import com.twitter.finagle.mux.lease.exp.Lessor
-import com.twitter.finagle.mux.transport.{OpportunisticTls, MuxContext}
-import com.twitter.finagle.param.{
-  ExceptionStatsHandler => _,
-  Monitor => _,
-  ResponseClassifier => _,
-  Tracer => _,
-  _
-}
-import com.twitter.finagle.server.{Listener, StackBasedServer, StackServer, StdStackServer}
+import com.twitter.finagle.mux.transport.{MuxContext, OpportunisticTls}
+import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
+import com.twitter.finagle.server.{Listener, ServerInfo, StackBasedServer, StackServer, StdStackServer}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{
   ClientStatsReceiver,
@@ -24,17 +16,16 @@ import com.twitter.finagle.stats.{
   ServerStatsReceiver,
   StatsReceiver
 }
-import com.twitter.finagle.thrift.{ClientId, ThriftClientRequest, UncaughtAppExceptionFilter}
+import com.twitter.finagle.thrift._
+import com.twitter.finagle.thriftmux.Toggles
 import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
-import com.twitter.finagle.tracing.{Trace, Tracer}
+import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.transport.{StatsTransport, Transport}
 import com.twitter.io.Buf
 import com.twitter.util._
 import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory
 import org.apache.thrift.TException
-import org.apache.thrift.transport.TMemoryInputTransport
-import scala.util.control.NonFatal
 
 /**
  * The `ThriftMux` object is both a `com.twitter.finagle.Client` and a
@@ -102,7 +93,7 @@ import scala.util.control.NonFatal
  * configuration documentation]].
  */
 object ThriftMux
-    extends Client[ThriftClientRequest, Array[Byte]]
+  extends Client[ThriftClientRequest, Array[Byte]]
     with Server[Array[Byte], Array[Byte]] {
 
   /**
@@ -110,60 +101,43 @@ object ThriftMux
    */
   private[twitter] val BaseClientStack: Stack[ServiceFactory[mux.Request, mux.Response]] =
     (ThriftMuxUtil.protocolRecorder +: Mux.client.stack)
-      .replace(StackClient.Role.protoTracing, ClientRpcTracing)
 
   /**
    * Base [[com.twitter.finagle.Stack]] for ThriftMux servers.
    */
   private[twitter] val BaseServerStack: Stack[ServiceFactory[mux.Request, mux.Response]] =
-    // NOTE: ideally this would not use the `prepConn` role, but it's conveniently
-    // located in the right location of the stack and is defaulted to a no-op.
-    // We would like this located anywhere before the StatsFilter so that success
-    // and failure can be measured properly before converting the exceptions into
-    // byte arrays. see CSL-1351
+  // NOTE: ideally this would not use the `prepConn` role, but it's conveniently
+  // located in the right location of the stack and is defaulted to a no-op.
+  // We would like this located anywhere before the StatsFilter so that success
+  // and failure can be measured properly before converting the exceptions into
+  // byte arrays. see CSL-1351
     ThriftMuxUtil.protocolRecorder +:
       Mux.server.stack.replace(StackServer.Role.preparer, Server.ExnHandler)
 
-  private[this] def recordRpc(buffer: Array[Byte]): Unit =
-    try {
-      val inputTransport = new TMemoryInputTransport(buffer)
-      val iprot = protocolFactory.getProtocol(inputTransport)
-      val msg = iprot.readMessageBegin()
-      Trace.recordRpc(msg.name)
-    } catch {
-      case NonFatal(_) =>
-    }
-
-  private object ClientRpcTracing extends Mux.ClientProtoTracing {
-    private[this] val rpcTracer = new SimpleFilter[mux.Request, mux.Response] {
-      def apply(
-        request: mux.Request,
-        svc: Service[mux.Request, mux.Response]
-      ): Future[mux.Response] = {
-        if (Trace.isActivelyTracing) {
-          recordRpc(Buf.ByteArray.Owned.extract(request.body))
-        }
-        svc(request)
-      }
-    }
-
-    override def make(
-      next: ServiceFactory[mux.Request, mux.Response]
-    ): ServiceFactory[mux.Request, mux.Response] =
-      rpcTracer.andThen(super.make(next))
-  }
-
   object Client {
+
+    private[finagle] val UsePushMuxToggleName =
+      "com.twitter.finagle.thriftmux.UsePushMuxClient"
+    private[this] val usePushMuxToggle = Toggles(UsePushMuxToggleName)
+    private[this] def UsePushMuxClient: Boolean = usePushMuxToggle(ServerInfo().id.hashCode)
 
     def apply(): Client =
       new Client()
         .withLabel("thrift")
         .withStatsReceiver(ClientStatsReceiver)
 
-    private def muxer: StackClient[mux.Request, mux.Response] =
+    private[finagle] def pushMuxer: StackClient[mux.Request, mux.Response] =
+      MuxPush.client
+        .copy(stack = BaseClientStack)
+        .configured(ProtocolLibrary("thriftmux"))
+
+    private[finagle] def standardMuxer: StackClient[mux.Request, mux.Response] =
       Mux.client
         .copy(stack = BaseClientStack)
         .configured(ProtocolLibrary("thriftmux"))
+
+    private def defaultMuxer: StackClient[mux.Request, mux.Response] =
+      if (UsePushMuxClient) pushMuxer else standardMuxer
   }
 
   /**
@@ -173,8 +147,8 @@ object ThriftMux
    * @see [[https://twitter.github.io/finagle/guide/Protocols.html#thrift Thrift]] documentation
    * @see [[https://twitter.github.io/finagle/guide/Protocols.html#mux Mux]] documentation
    */
-  case class Client(muxer: StackClient[mux.Request, mux.Response] = Client.muxer)
-      extends StackBasedClient[ThriftClientRequest, Array[Byte]]
+  case class Client(muxer: StackClient[mux.Request, mux.Response] = Client.defaultMuxer)
+    extends StackBasedClient[ThriftClientRequest, Array[Byte]]
       with Stack.Parameterized[Client]
       with Stack.Transformable[Client]
       with CommonParams[Client]
@@ -184,7 +158,8 @@ object ThriftMux
       with WithClientSession[Client]
       with WithSessionQualifier[Client]
       with WithDefaultLoadBalancer[Client]
-      with ThriftRichClient {
+      with ThriftRichClient
+      with OpportunisticTlsParams[Client] {
 
     def stack: Stack[ServiceFactory[mux.Request, mux.Response]] =
       muxer.stack
@@ -258,7 +233,17 @@ object ThriftMux
     private[this] def clientId: Option[ClientId] = params[Thrift.param.ClientId].clientId
 
     private[this] object ThriftMuxToMux
-        extends Filter[ThriftClientRequest, Array[Byte], mux.Request, mux.Response] {
+      extends Filter[ThriftClientRequest, Array[Byte], mux.Request, mux.Response] {
+
+      private val extractResponseBytesFn = (response: mux.Response) => {
+        val responseCtx = Contexts.local.getOrElse(Headers.Response.Key, EmptyResponseHeadersFn)
+        responseCtx.put(response.contexts)
+        Buf.ByteArray.Owned.extract(response.body)
+      }
+
+      private val EmptyRequestHeadersFn: () => Headers.Values = () => Headers.Request.newValues
+      private val EmptyResponseHeadersFn: () => Headers.Values = () => Headers.Response.newValues
+
       def apply(
         req: ThriftClientRequest,
         service: Service[mux.Request, mux.Response]
@@ -272,9 +257,10 @@ object ThriftMux
         // context to be set when dispatching.
         ExceptionRemoteInfoFactory.letUpstream(Upstream.addr, ClientId.current.map(_.name)) {
           ClientId.let(clientId) {
+            val requestCtx = Contexts.local.getOrElse(Headers.Request.Key, EmptyRequestHeadersFn)
             // TODO set the Path here.
-            val muxreq = mux.Request(Path.empty, Buf.ByteArray.Owned(req.message))
-            service(muxreq).map(rep => Buf.ByteArray.Owned.extract(rep.body))
+            val muxRequest = mux.Request(Path.empty, requestCtx.values, Buf.ByteArray.Owned(req.message))
+            service(muxRequest).map(extractResponseBytesFn)
           }
         }
       }
@@ -327,7 +313,7 @@ object ThriftMux
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
     override val withTransport: ClientTransportParams[Client] =
-      new ClientTransportParams(this)
+    new ClientTransportParams(this)
     override val withSession: ClientSessionParams[Client] =
       new ClientSessionParams(this)
     override val withLoadBalancer: DefaultLoadBalancingParams[Client] =
@@ -350,30 +336,6 @@ object ThriftMux
     override def withRetryBudget(budget: RetryBudget): Client = super.withRetryBudget(budget)
     override def withRetryBackoff(backoff: Stream[Duration]): Client =
       super.withRetryBackoff(backoff)
-
-    /**
-     * Configures the client to negotiate whether to speak tls or not.
-     *
-     * The valid levels are Off, which indicates this client will never speak TLS,
-     * Desired, which indicates it may speak TLS, but may also not speak TLS,
-     * and Required, which indicates it must speak TLS.
-     *
-     * Clients that are configured to be Required cannot speak to servers that are
-     * configured Off, and vice versa.
-     *
-     * Note that opportunistic TLS is negotiated in a cleartext handshake, and is
-     * incompatible with mux over TLS.
-     */
-    def withOpportunisticTls(level: OpportunisticTls.Level): Client =
-      configured(Mux.param.OppTls(Some(level)))
-
-    /**
-     * Disables oportunistic TLS.
-     *
-     * If the client is still TLS configured, it will speak mux over TLS.  To instead
-     * configure the client to be `Off`, use `withOpportunisticTls(OpportunisticTls.Off)`.
-     */
-    def noOpportunisticTls: Client = configured(Mux.param.OppTls(None))
 
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
   }
@@ -422,6 +384,16 @@ object ThriftMux
 
     private[this] val statsReceiver = params[Stats].statsReceiver
 
+
+    override def serve(
+      addr: SocketAddress,
+      factory: ServiceFactory[Request, Response]
+    ): ListeningServer = {
+      // // We want to fail fast if the server's OppTls configuration is invalid
+      Mux.Server.validateTlsParamConsistency(params)
+      super.serve(addr, factory)
+    }
+
     protected def copy1(
       stack: Stack[ServiceFactory[mux.Request, mux.Response]] = this.stack,
       params: Stack.Params = this.params
@@ -445,6 +417,7 @@ object ThriftMux
       val param.Tracer(tracer) = params[param.Tracer]
       val Thrift.param.ProtocolFactory(pf) = params[Thrift.param.ProtocolFactory]
       val Mux.param.OppTls(level) = params[Mux.param.OppTls]
+      val upgrades = muxStatsReceiver.counter("tls", "upgrade", "success")
 
       val thriftEmulator = thriftmux.ThriftEmulator(transport, pf, statsReceiver.scope("thriftmux"))
 
@@ -456,7 +429,8 @@ object ThriftMux
           frameSize,
           muxStatsReceiver,
           level.getOrElse(OpportunisticTls.Off),
-          transport.context.turnOnTls _
+          transport.context.turnOnTls _,
+          upgrades
         )
       )
 
@@ -472,13 +446,22 @@ object ThriftMux
   object Server {
     private val MuxToArrayFilter =
       new Filter[mux.Request, mux.Response, Array[Byte], Array[Byte]] {
+        private[this] val responseBytesToMuxResponseFn = (responseBytes: Array[Byte]) => {
+          mux.Response(
+            ctxts = Contexts.local(Headers.Response.Key).values,
+            buf = Buf.ByteArray.Owned(responseBytes))
+        }
+
         def apply(
           request: mux.Request,
           service: Service[Array[Byte], Array[Byte]]
         ): Future[mux.Response] = {
           val reqBytes = Buf.ByteArray.Owned.extract(request.body)
-          service(reqBytes) map { repBytes =>
-            mux.Response(Buf.ByteArray.Owned(repBytes))
+          Contexts.local.let(
+            Headers.Request.Key, Headers.Values(request.contexts),
+            Headers.Response.Key, Headers.Response.newValues
+          ) {
+            service(reqBytes).map(responseBytesToMuxResponseFn)
           }
         }
       }
@@ -486,7 +469,7 @@ object ThriftMux
     // Convert unhandled exceptions to TApplicationExceptions, but pass
     // com.twitter.finagle.FailureFlags to mux for transmission.
     private[this] class ExnFilter(protocolFactory: TProtocolFactory)
-        extends SimpleFilter[mux.Request, mux.Response] {
+      extends SimpleFilter[mux.Request, mux.Response] {
       def apply(
         request: mux.Request,
         service: Service[mux.Request, mux.Response]
@@ -496,7 +479,7 @@ object ThriftMux
           case e if !e.isInstanceOf[TException] =>
             val msg =
               UncaughtAppExceptionFilter.writeExceptionMessage(request.body, e, protocolFactory)
-            Future.value(mux.Response(msg))
+            Future.value(mux.Response(Nil, msg))
         }
     }
 
@@ -523,13 +506,14 @@ object ThriftMux
    * @see [[https://twitter.github.io/finagle/guide/Protocols.html#mux Mux]] documentation
    */
   case class Server(muxer: StackServer[mux.Request, mux.Response] = serverMuxer)
-      extends StackBasedServer[Array[Byte], Array[Byte]]
+    extends StackBasedServer[Array[Byte], Array[Byte]]
       with ThriftRichServer
       with Stack.Parameterized[Server]
       with CommonParams[Server]
       with WithServerTransport[Server]
       with WithServerSession[Server]
-      with WithServerAdmissionControl[Server] {
+      with WithServerAdmissionControl[Server]
+      with OpportunisticTlsParams[Server] {
 
     import Server.MuxToArrayFilter
 
@@ -565,30 +549,6 @@ object ThriftMux
       configured(Thrift.param.ProtocolFactory(pf))
 
     /**
-     * Configures the server to negotiate whether to speak tls or not.
-     *
-     * The valid levels are Off, which indicates this server will never speak TLS,
-     * Desired, which indicates it may speak TLS, but may also not speak TLS,
-     * and Required, which indicates it must speak TLS.
-     *
-     * Servers that are configured to be Required cannot speak to clients that are
-     * configured Off, and vice versa.
-     *
-     * Note that opportunistic TLS is negotiated in a cleartext handshake, and is
-     * incompatible with mux over TLS.
-     */
-    def withOpportunisticTls(level: OpportunisticTls.Level): Server =
-      configured(Mux.param.OppTls(Some(level)))
-
-    /**
-     * Disables oportunistic TLS.
-     *
-     * If the server is still TLS configured, it will speak mux over TLS.  To instead
-     * configure the server to be `Off`, use `withOpportunisticTls(OpportunisticTls.Off)`.
-     */
-    def noOpportunisticTls: Server = configured(Mux.param.OppTls(None))
-
-    /**
      * Produce a [[com.twitter.finagle.ThriftMux.Server]] using the provided stack.
      */
     def withStack(stack: Stack[ServiceFactory[mux.Request, mux.Response]]): Server =
@@ -620,29 +580,17 @@ object ThriftMux
     def withParams(ps: Stack.Params): Server =
       copy(muxer = muxer.withParams(ps))
 
-    private[this] val tracingFilter = new SimpleFilter[Array[Byte], Array[Byte]] {
-      def apply(
-        request: Array[Byte],
-        svc: Service[Array[Byte], Array[Byte]]
-      ): Future[Array[Byte]] = {
-        if (Trace.isActivelyTracing) {
-          recordRpc(request)
-        }
-        svc(request)
-      }
-    }
-
     def serve(
       addr: SocketAddress,
       factory: ServiceFactory[Array[Byte], Array[Byte]]
     ): ListeningServer = {
-      muxer.serve(addr, MuxToArrayFilter.andThen(tracingFilter).andThen(factory))
+      muxer.serve(addr, MuxToArrayFilter.andThen(factory))
     }
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
     override val withTransport: ServerTransportParams[Server] =
-      new ServerTransportParams(this)
+    new ServerTransportParams(this)
     override val withSession: SessionParams[Server] =
       new SessionParams(this)
     override val withAdmissionControl: ServerAdmissionControlParams[Server] =

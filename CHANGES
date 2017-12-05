@@ -4,8 +4,97 @@
 
 Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in commits.
 
-7.x
------
+Unreleased
+----------
+
+New Features
+~~~~~~~~~~~~
+
+  * finagle-thrift, finagle-thriftmux: Add support for Scrooge
+    `ReqRepServicePerEndpoint` functionality. ``PHAB_ID=D107397``
+
+  * finagle-thriftmux: Add support for Scrooge `ServicePerEndpoint` and
+    `ReqRepServicePerEndpoint` functionality to `thriftmux.MethodBuilder`.
+    ``PHAB_ID=D116081``
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-base-http: Remove deprecated [Request|Response].[encode|decode][Bytes|String]
+    methods. Use c.t.f.h.codec.HttpCodec methods instead. ``PHAB_ID=D116350``
+
+  * finagle-thrift: Move `ThriftRichClient` and `ThriftRichServer` to
+    `c.t.finagle.thrift` package. ``PHAB_ID=D115284``
+  
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: The "pipelining/pending" stat has been removed from protocols
+    using `c.t.f.dispatch.PipeliningClientDispatcher`. Refer to the "pending" stat
+    for the number of outstanding requests. ``PHAB_ID=D113424``
+
+  * finagle-thrift,thriftmux: Tracing of RPC method names has been removed. This
+    concern has moved into Scrooge. ``PHAB_ID=D115294``
+
+Deprecations
+~~~~~~~~~~~~
+
+  * finagle-core: `c.t.f.BackupRequestLost` has been deprecated. Please use a
+    `c.t.f.Failure` flagged `c.t.f.Failure.Ignorable` instead. ``PHAB_ID=D113466``
+
+17.11.0
+-------
+
+New Features
+~~~~~~~~~~~~
+
+  * finagle-core: Add `ResponseClassifier`s, RetryOnTimeout and RetryOnChannelClosed,
+    for exceptions that are commonly retried when building from ClientBuilder but had
+    no MethodBuilder equivalents. ``PHAB_ID=D106706``
+
+  * finagle-netty4: `Netty4Transporter` and `Netty4Listener` are now accessible, which
+    allows external users to create their own protocols for use with Finagle on Netty 4.
+    ``PHAB_ID=D105627``
+
+Bug Fixes
+~~~~~~~~~
+
+  * finagle-exp: Fix race condition in `LatencyHistogram` which could lead to the wrong
+    value returned for `quantile`. ``PHAB_ID=D106330``
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: Numerous overloads of `c.t.f.Server.serve` have been marked final.
+    ``PHAB_ID=D107280``
+
+  * finagle-thrift: Correctly send `mux.Request#contexts` in all cases. There were some
+    cases in which `mux.Request#contexts` were not always propagated. The contexts are
+    now always written across the transport. Note that there may be duplicated contexts
+    between "local" context values and "broadcast" context values. Local values will
+    precede broadcast values in sequence. ``PHAB_ID=D107921``
+
+17.10.0
+-------
+
+Release Version Format
+~~~~~~~~~~~~~~~~~~~~~~
+
+  * From now on, release versions will be based on release date in the format of
+    YY.MM.x where x is a patch number. ``PHAB_ID=D101244``
+
+New Features
+~~~~~~~~~~~~
+
+  * finagle-core: DeadlineFilter may now be created from the class and used as a
+    regular Filter in addition to a stack module as before. ``PHAB_ID=D94517``
+
+  * finagle-mysql: Add ability to toggle the `CLIENT_FOUND_ROWS` flag. ``PHAB_ID=D91406``
+
+  * finagle-http: Separated the DtabFilter.Extractor from the ServerContextFilter into
+    a new module: ServerDtabContextFilter. While this is still enabled in the default
+    Http server stack, it can be disabled independently of the ServerContextFilter.
+    ``PHAB_ID=D94306``
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -13,6 +102,58 @@ Runtime Behavior Changes
   * finagle-netty4: `Netty4ClientEngineFactory` and `Netty4ServerEngineFactory` now
     validate loaded certificates in all cases to ensure that the current date
     range is within the validity range specified in the certificate. ``PHAB_ID=D88664``
+
+  * finagle-netty4: `TrustCredentials.Insecure` now works with native SSL/TLS engines.
+    ``PHAB_ID=D103766``
+
+  * finagle-http2: Upgraded to the new netty http/2 API in netty version 4.1.16.Final,
+    which fixes several long-standing bugs but has some bugs around cleartext http/2.
+    One of the work-arounds modifies the visibility of a private field, so it's incompatible
+    with security managers.  This is only true for http/2--all other protocols will be unaffected.
+    ``PHAB_ID=D98069``
+
+  * finagle-http: Netty 3 `HeaderMap` was replaced with our own implementation.
+    ``PHAB_ID=D99127``
+
+Deprecations
+~~~~~~~~~~~~
+
+  * finagle-base-http: With the intention to make `c.t.f.http.Cookie` immutable,
+    `set` methods on `c.t.f.http.Cookie` have been deprecated:
+      - `comment_=`
+      - `commentUrl_=`
+      - `domain_=`
+      - `maxAge_=`
+      - `path_=`
+      - `ports_=`
+      - `value_=`
+      - `version_=`
+      - `httpOnly_=`
+      - `isDiscard_=`
+      - `isSecure_=`
+    Use the `c.t.f.http.Cookie` constructor to set `domain`, `maxAge`, `path`, `value`, `httpOnly`,
+    and `secure`. `comment`, `commentUrl`, `ports`, `version`, and `discard` have been removed
+    per RFC-6265. ``PHAB_ID=D82164``.
+
+    Alternatively, use the `domain`, `maxAge`, `path`, `httpOnly`, and `secure` methods to create a
+    new `Cookie` with the existing fields set, and the respective field set to a given value.
+    ``PHAB_ID=D83226``
+
+  * finagle-base-http: `c.t.f.http.Cookie.isSecure` and `c.t.f.http.Cookie.isDiscard`
+    have been deprecated. Use `c.t.f.http.Cookie.secure` for `c.t.f.http.Cookie.isSecure`.
+    `isDiscard` has been removed per RFC-6265. ``PHAB_ID=D82164``
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-mysql: Moved `Cursors.cursor` method to `Client` trait, and removed `Cursors` trait.
+    This allows cursor queries to used with transactions.  ``PHAB_ID=D91789``
+
+  * finagle-mux: Expose transport contexts in mux.Request and mux.Response. ``PHAB_ID=D92998``
+
+  * finagle-mux: The "leased" gauge has been removed from the mux client implementation since the
+    metric is reported as the sum of the value over all clients which is unlikely to be useful.
+    ``PHAB_ID=D100357``
 
 7.1.0
 ------
@@ -36,6 +177,12 @@ Bug Fixes
     server but never unregistered. It is now unregistered on close of
     the StackServer. ``PHAB_ID=D83200``
 
+  * finagle-mux: Fix two issues with mux leases. In one bug, a new lease wouldn't be sent to
+    the client if it was issued within 1 second of when the existing lease was set to expire.
+    In a second bug, the server would only nack if the issued lease was 0, but didn't consider
+    whether the lease had expired. ``PHAB_ID=D91645``
+
+
   * finagle-netty4: `Netty4ClientEngineFactory` and `Netty4ServerEngineFactory` now
     properly load all chain certificates when the `SslClientConfiguration` or
     `SslServerConfiguration` uses `KeyCredentials.CertKeyAndChain` instead of just the
@@ -53,12 +200,6 @@ Runtime Behavior Changes
 
   * finagle-netty4: `ChannelTransport` no longer considers the `Channel.isWritable` result
     when determining status. ``PHAB_ID=D82670``
-
-  * finagle-http2: Upgraded to the new netty http/2 API in netty version 4.1.15.Final,
-    which fixes several long-standing bugs but has some bugs around cleartext http/2.
-    One of the work-arounds modifies the visibility of a private field, so it's incompatible
-    with security managers.  This is only true for http/2--all other protocols will be unaffected.
-    ``PHAB_ID=D87685``
 
 Deprecations
 ~~~~~~~~~~~~
@@ -87,6 +228,9 @@ Breaking API Changes
 
   * finagle-memcached: Remove deprecated method `BaseClient.release()`. Use
     `BaseClient.close()` instead. ``PHAB_ID=D83168``
+
+Deprecations
+~~~~~~~~~~~~
 
   * finagle-memcached: Move `c.t.f.memcached.java.Client` to `c.t.f.memcached.JavaClient`,
     `c.t.f.memcached.java.ClientBase` to `c.t.f.memcached.JavaClientBase`, and

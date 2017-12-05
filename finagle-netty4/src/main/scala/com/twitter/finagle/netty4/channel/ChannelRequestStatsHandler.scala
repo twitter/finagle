@@ -1,14 +1,18 @@
 package com.twitter.finagle.netty4.channel
 
+import com.twitter.finagle.netty4.channel.ChannelRequestStatsHandler.SharedChannelRequestStats
 import com.twitter.finagle.stats.StatsReceiver
 import io.netty.channel._
-import io.netty.channel.ChannelHandler.Sharable
-import io.netty.util.AttributeKey
-import java.util.concurrent.atomic.AtomicInteger
 
-private[finagle] object ChannelRequestStatsHandler {
-  private[channel] val ConnectionRequestsKey: AttributeKey[AtomicInteger] =
-    AttributeKey.valueOf("ChannelRequestStatsHandler.connection_requests")
+private object ChannelRequestStatsHandler {
+
+  /**
+   * Stores all stats that are aggregated across all channels for the client
+   * or server.
+   */
+  class SharedChannelRequestStats(statsReceiver: StatsReceiver) {
+    val requestCount = statsReceiver.stat("connection_requests")
+  }
 }
 
 /**
@@ -16,28 +20,31 @@ private[finagle] object ChannelRequestStatsHandler {
  * statistics. This handler should be after the request codec in the
  * stack as it assumes messages are POJOs with request/responses.
  *
- * @param statsReceiver the [[StatsReceiver]] to which stats are reported
+ * @param sharedChannelRequestStats Aggregates statistics across all channels.
  */
-@Sharable
-private[finagle] class ChannelRequestStatsHandler(statsReceiver: StatsReceiver)
+private class ChannelRequestStatsHandler(sharedChannelRequestStats: SharedChannelRequestStats)
     extends ChannelInboundHandlerAdapter {
-  import ChannelRequestStatsHandler.ConnectionRequestsKey
 
-  private[this] val requestCount = statsReceiver.stat("connection_requests")
+  private[this] var channelActive: Boolean = false
+  private[this] var requestCount: Long = _
 
   override def handlerAdded(ctx: ChannelHandlerContext): Unit = {
-    ctx.channel.attr(ConnectionRequestsKey).set(new AtomicInteger(0))
+    channelActive = true
+    requestCount = 0L
     super.handlerAdded(ctx)
   }
 
   override def channelInactive(ctx: ChannelHandlerContext): Unit = {
-    requestCount.add(ctx.channel.attr(ConnectionRequestsKey).get.get)
-    super.channelInactive(ctx)
+    // Protect against multiple calls
+    if (channelActive) {
+      sharedChannelRequestStats.requestCount.add(requestCount)
+      super.channelInactive(ctx)
+    }
+    channelActive = false
   }
 
   override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit = {
-    val readCount = ctx.channel.attr(ConnectionRequestsKey).get
-    readCount.incrementAndGet()
+    requestCount += 1
     super.channelRead(ctx, msg)
   }
 }

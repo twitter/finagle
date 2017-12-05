@@ -95,22 +95,13 @@ private[finagle] object Http2Transporter {
   // constructing an http2 cleartext transport
   private[http2] def init(params: Stack.Params): ChannelPipeline => Unit = {
     pipeline: ChannelPipeline =>
-      val connection = new DefaultHttp2Connection(false /*server*/ )
-
-      // decompresses data frames according to the content-encoding header
-      val adapter = new DelegatingDecompressorFrameListener(
-        connection,
-        // adapts http2 to http 1.1
-        Http2ClientDowngrader
-      )
-
       val EncoderIgnoreMaxHeaderListSize(ignoreMaxHeaderListSize) =
         params[EncoderIgnoreMaxHeaderListSize]
 
       val connectionHandlerBuilder = new RichHttpToHttp2ConnectionHandlerBuilder()
-        .frameListener(adapter)
+        .frameListener(Http2ClientDowngrader)
         .frameLogger(new LoggerPerFrameTypeLogger(params[FrameLoggerNamePrefix].loggerNamePrefix))
-        .connection(connection)
+        .connection(new DefaultHttp2Connection(false /*server*/ ))
         .initialSettings(Settings.fromParams(params))
         .encoderIgnoreMaxHeaderListSize(ignoreMaxHeaderListSize)
 
@@ -293,21 +284,16 @@ private[finagle] class Http2Transporter(
           }
 
           if (alpnUpgrade) {
-            trans.read().onSuccess {
-              case UpgradeEvent.UPGRADE_REJECTED =>
+            trans.read().respond {
+              case Return(UpgradeEvent.UPGRADE_REJECTED) =>
                 p.setValue(None)
-              case UpgradeEvent.UPGRADE_SUCCESSFUL =>
+              case Return(UpgradeEvent.UPGRADE_SUCCESSFUL) =>
                 val inOutCasted = Transport.cast[StreamMessage, StreamMessage](trans)
-                val contextCasted = inOutCasted.asInstanceOf[
-                  Transport[StreamMessage, StreamMessage] {
-                    type Context = TransportContext with HasExecutor
-                  }
-                ]
-                p.setValue(
-                  Some(new MultiplexedTransporter(contextCasted, trans.remoteAddress, params))
-                )
-              case msg =>
+                val contextCasted = inOutCasted.asInstanceOf[Transport[StreamMessage, StreamMessage] { type Context = TransportContext with HasExecutor }]
+                p.setValue(Some(new MultiplexedTransporter(contextCasted, trans.remoteAddress, params)))
+              case Return(msg) =>
                 log.error(s"Non-upgrade event detected $msg")
+              case _ =>
             }
 
             useExistingConnection(p)

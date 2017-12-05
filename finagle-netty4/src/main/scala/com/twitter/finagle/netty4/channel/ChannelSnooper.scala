@@ -82,6 +82,7 @@ private[netty4] class ByteBufSnooper(val name: String) extends ChannelSnooper {
 }
 
 /** Log raw channel events without decoding channel messages */
+@Sharable
 private[netty4] class SimpleChannelSnooper(val name: String) extends ChannelSnooper {
 
   // outbound events

@@ -1,6 +1,5 @@
 junit_tests(
   dependencies=[
-    '3rdparty/jvm/com/google/guava:guava',
     '3rdparty/jvm/io/netty',
     '3rdparty/jvm/junit',
     '3rdparty/jvm/org/apache/thrift:libthrift-0.5.0',
@@ -22,6 +21,4 @@ junit_tests(
   ],
   sources=rglobs('*.scala'),
   fatal_warnings=True,
-  strict_deps=True,
-
 )

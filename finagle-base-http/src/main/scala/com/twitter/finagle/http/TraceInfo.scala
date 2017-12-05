@@ -1,6 +1,6 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.tracing.{Flags, SpanId, Trace, TraceId}
+import com.twitter.finagle.tracing.{Flags, SpanId, Trace, TraceId, TraceId128}
 import java.lang.{Boolean => JBoolean, Long => JLong}
 
 private object TraceInfo {
@@ -19,7 +19,8 @@ private object TraceInfo {
         spanId match {
           case None => None
           case Some(sid) =>
-            val traceId = SpanId.fromString(request.headerMap(Header.TraceId))
+            val trace128Bit = TraceId128(request.headerMap(Header.TraceId))
+
             val parentSpanId =
               if (request.headerMap.contains(Header.ParentSpanId))
                 SpanId.fromString(request.headerMap(Header.ParentSpanId))
@@ -36,7 +37,7 @@ private object TraceInfo {
             }
 
             val flags = getFlags(request)
-            Some(TraceId(traceId, parentSpanId, sid, sampled, flags))
+            Some(TraceId(trace128Bit.low, parentSpanId, sid, sampled, flags, trace128Bit.high))
         }
       } else if (request.headerMap.contains(Header.Flags)) {
         // even if there are no id headers we want to get the debug flag
@@ -66,7 +67,12 @@ private object TraceInfo {
     removeAllHeaders(request.headerMap)
 
     val traceId = Trace.id
-    request.headerMap.add(Header.TraceId, traceId.traceId.toString)
+    val traceIdString = if (traceId.traceIdHigh.isEmpty) {
+      traceId.traceId.toString
+    } else {
+      traceId.traceIdHigh.get.toString + traceId.traceId.toString
+    }
+    request.headerMap.add(Header.TraceId, traceIdString)
     request.headerMap.add(Header.SpanId, traceId.spanId.toString)
     // no parent id set means this is the root span
     traceId._parentId match {
@@ -80,7 +86,9 @@ private object TraceInfo {
         request.headerMap.add(Header.Sampled, sampled.toString)
       case None => ()
     }
-    request.headerMap.add(Header.Flags, JLong.toString(traceId.flags.toLong))
+    if (traceId.flags.toLong != 0L) {
+      request.headerMap.add(Header.Flags, JLong.toString(traceId.flags.toLong))
+    }
     traceRpc(request)
   }
 

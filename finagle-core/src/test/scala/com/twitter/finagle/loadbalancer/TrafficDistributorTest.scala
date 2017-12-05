@@ -387,7 +387,7 @@ class TrafficDistributorTest extends FunSuite {
     def mkBalancer(
       set: Activity[Set[EndpointFactory[Int, Int]]]
     ): ServiceFactory[Int, Int] = {
-      DefaultBalancerFactory.newBalancer(
+      defaultBalancerFactory.newBalancer(
         set.map(_.toVector),
         new NoBrokersAvailableException("test"),
         Stack.Params.empty
@@ -406,6 +406,7 @@ class TrafficDistributorTest extends FunSuite {
     assert(dist.status == Status.Open)
   })
 
+  if (!sys.props.contains("SKIP_FLAKY"))
   test("increment weights on a shard") {
     val server = StringServer.server.serve(":*", Service.mk { r: String =>
       Future.value(r.reverse)

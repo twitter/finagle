@@ -9,10 +9,9 @@ import com.twitter.finagle.Stack
 import com.twitter.io.Buf
 import com.twitter.util.Future
 import io.netty.channel._
-
 import java.net.SocketAddress
 
-private[finagle] object Netty4Transporter {
+object Netty4Transporter {
 
   /**
    * A [[com.twitter.finagle.Stack.Param]] used to configure the ability to

@@ -56,21 +56,16 @@ class RingTest extends FunSuite {
     }
   }
 
-  test("range") {
-    val r0 = new Ring(1, rng)
-    assert(r0.range(rng.nextDouble, 0.0) == 1)
-    assert(r0.range(rng.nextDouble, 0.5) == 1)
-    assert(r0.range(rng.nextDouble, 1.0) == 1)
+  test("pick2: no range") {
+    val ring = new Ring(10, rng)
+    val (a, b) = ring.pick2(3/4D, 0D)
+    assert(a == 7)
+    assert(a == b)
 
-    val size = 2 + (rng.nextDouble * 10000).toInt
-    val r1 = new Ring(size, rng)
-    assert(r1.range(rng.nextDouble, 0.0) == 1)
-    assert(r1.range(rng.nextDouble, 1.0) == size)
-
-    // wrap around
-    val r2 = new Ring(10, rng)
-    assert(r2.range(1/4D, 1/4D) == 3) // [2, 3, 4]
-    assert(r2.range(3/4D, 1/2D) == 6) // [7, 8, 9, 0, 1, 2]
+    for (_ <- 0 to 100) {
+      val (a, b) = ring.pick2(rng.nextDouble, 0D)
+      assert(a == b)
+    }
   }
 
   test("pick2: full range") {
@@ -114,18 +109,39 @@ class RingTest extends FunSuite {
     assert(b/a - 0.5 < 1e-1)
   }
 
+  test("range + indices") {
+    val r0 = new Ring(1, rng)
+    assert(r0.range(rng.nextDouble, 0.0) == 1)
+    assert(r0.range(rng.nextDouble, 0.5) == 1)
+    assert(r0.range(rng.nextDouble, 1.0) == 1)
+
+    val size = 2 + (rng.nextDouble * 10000).toInt
+    val r1 = new Ring(size, rng)
+    assert(r1.range(rng.nextDouble, 0.0) == 1)
+    assert(r1.range(rng.nextDouble, 1.0) == size)
+
+    val r2 = new Ring(10, rng)
+    assert(r2.range(1/4D, 1/4D) == 3)
+    assert(r2.indices(1/4D, 1/4D) == Seq(2, 3, 4))
+
+    // wrap around
+    assert(r2.range(3/4D, 1/2D) == 6)
+    assert(r2.indices(3/4D, 1/2D) == Seq(7, 8, 9, 0, 1, 2))
+
+    // walk the indices
+    for (i <- 0 to 10) {
+      withClue(s"offset=${i/10D} width=${1/10D}") {
+        assert(r2.range(i/10D, 1/10D) == 1)
+        assert(r2.indices(i/10D, 1/10D) == Seq(i % 10))
+      }
+    }
+  }
+
   test("weight") {
     val ring = new Ring(10, rng)
     assert(1.0 - ring.weight(5, 1/2D, 1/10D) <= 1e-6)
     assert(1.0 - ring.weight(5, 1/2D, 1.0) <= 1e-6)
     // wrap around: intersection between [0.0, 0.1) and [0.75, 1.25)
     assert(1.0 - ring.weight(0, 3/4D, 1/2D) <= 1e-6)
-  }
-
-  test("indices") {
-    val ring = new Ring(10, rng)
-    val indices = ring.indices(3/4D, 1/2D)
-    assert(indices.size == ring.range(3/4D, 1/2D))
-    assert(indices == Seq(7, 8, 9, 0, 1, 2))
   }
 }

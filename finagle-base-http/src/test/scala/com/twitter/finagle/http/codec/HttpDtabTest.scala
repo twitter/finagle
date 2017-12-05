@@ -1,9 +1,9 @@
 package com.twitter.finagle.http.codec
 
-import com.google.common.io.BaseEncoding
 import com.twitter.finagle.http.{Message, Method, Request, Version}
 import com.twitter.finagle.{Dentry, Dtab, Failure, NameTree}
-import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets.{US_ASCII, UTF_8}
+import java.util.Base64
 import org.scalatest.FunSuite
 import org.scalatest.junit.AssertionsForJUnit
 
@@ -15,10 +15,8 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
     dest <- okDests
   } yield Dentry(Dentry.Prefix.read(prefix), NameTree.read(dest))
 
-  val Utf8 = Charset.forName("UTF-8")
-  val Base64 = BaseEncoding.base64()
   private def b64Encode(v: String): String =
-    Base64.encode(v.getBytes(Utf8))
+    new String(Base64.getEncoder.encode(v.getBytes(UTF_8)), US_ASCII)
 
   val okDtabs =
     Dtab.empty +: (okDentries.permutations map (ds => Dtab(ds))).toIndexedSeq
@@ -165,6 +163,6 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
 
     val foundHeaders = HttpDtab.strip(message)
 
-    assert(dtabHeaders == foundHeaders)
+    assert(dtabHeaders.toSet == foundHeaders.toSet)
   }
 }

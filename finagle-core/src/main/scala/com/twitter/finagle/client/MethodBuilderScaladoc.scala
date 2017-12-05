@@ -83,6 +83,10 @@ private[finagle] trait MethodBuilderScaladoc[T] {
    * configured through `theClient.withResponseClassifier` or
    * `ClientBuilder.withResponseClassifier`.
    *
+   * This classifier is used to determine which requests are unsuccessful.
+   * This is the basis for measuring the logical success metrics as well as
+   * logging unsuccessful requests at debug level.
+   *
    * @example
    * For example, retrying on a 418 status code:
    * {{{

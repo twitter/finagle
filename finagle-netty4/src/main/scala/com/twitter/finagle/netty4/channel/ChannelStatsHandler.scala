@@ -1,76 +1,85 @@
 package com.twitter.finagle.netty4.channel
 
 import com.twitter.finagle.Failure
+import com.twitter.finagle.netty4.channel.ChannelStatsHandler.SharedChannelStats
 import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
 import com.twitter.util.{Duration, Monitor, Stopwatch}
 import io.netty.buffer.ByteBuf
-import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.{ChannelDuplexHandler, ChannelHandlerContext, ChannelPromise}
 import io.netty.handler.timeout.TimeoutException
-import io.netty.util.AttributeKey
 import java.io.IOException
 import java.util.concurrent.atomic.LongAdder
 import java.util.logging.{Level, Logger}
 
-private[channel] case class ChannelStats(bytesRead: LongAdder, bytesWritten: LongAdder)
+private object ChannelStatsHandler {
+  private val log = Logger.getLogger(getClass.getName)
 
-private[netty4] object ChannelStatsHandler {
-  private[channel] val ConnectionStatsKey = AttributeKey.valueOf[ChannelStats]("channel_stats")
-  private[channel] val ConnectionDurationKey =
-    AttributeKey.valueOf[Stopwatch.Elapsed]("connection_duration")
-  private[channel] val ChannelWasWritableKey =
-    AttributeKey.valueOf[Boolean]("channel_has_been_writable")
-  private[channel] val ChannelWritableDurationKey =
-    AttributeKey.valueOf[Stopwatch.Elapsed]("channel_writable_duration")
+  /**
+   * Stores all stats that are aggregated across all channels for the client
+   * or server.
+   */
+  class SharedChannelStats(statsReceiver: StatsReceiver) {
+    private val connectionCount = new LongAdder()
+    def connectionCountIncrement(): Unit = connectionCount.increment()
+    def connectionCountDecrement(): Unit = connectionCount.decrement()
+
+    val connects = statsReceiver.counter("connects")
+
+    val connectionDuration =
+      statsReceiver.stat(Verbosity.Debug, "connection_duration")
+    val connectionReceivedBytes =
+      statsReceiver.stat(Verbosity.Debug, "connection_received_bytes")
+    val connectionSentBytes =
+      statsReceiver.stat(Verbosity.Debug, "connection_sent_bytes")
+    val writable =
+      statsReceiver.counter(Verbosity.Debug, "socket_writable_ms")
+    val unwritable =
+      statsReceiver.counter(Verbosity.Debug, "socket_unwritable_ms")
+
+    val receivedBytes = statsReceiver.counter("received_bytes")
+    val sentBytes = statsReceiver.counter("sent_bytes")
+    val exceptions = statsReceiver.scope("exn")
+    val closesCount = statsReceiver.counter("closes")
+    private val connections = statsReceiver.addGauge("connections") {
+      connectionCount.sum()
+    }
+  }
 }
 
 /**
  * A [[io.netty.channel.ChannelDuplexHandler]] that tracks channel/connection
- * statistics. The handler is meant to be shared by all
- * [[io.netty.channel.Channel Channels]] within a Finagle client or
- * server in order to consolidate statistics across a number of channels.
+ * statistics. The handler is meant to be specific to a single
+ * [[io.netty.channel.Channel Channel]] within a Finagle client or
+ * server. Aggregate statistics are consolidated in the given
+ * [[com.twitter.finagle.netty4.channel.ChannelStatsHandler.SharedChannelStats]] instance.
  */
-@Sharable
-private[netty4] class ChannelStatsHandler(statsReceiver: StatsReceiver)
+private class ChannelStatsHandler(sharedChannelStats: SharedChannelStats)
     extends ChannelDuplexHandler {
   import ChannelStatsHandler._
 
-  private[this] val log = Logger.getLogger(getClass.getName)
-  private[this] val connectionCount = new LongAdder()
-
-  private[this] val connects = statsReceiver.counter("connects")
-
-  private[this] val connectionDuration =
-    statsReceiver.stat(Verbosity.Debug, "connection_duration")
-  private[this] val connectionReceivedBytes =
-    statsReceiver.stat(Verbosity.Debug, "connection_received_bytes")
-  private[this] val connectionSentBytes =
-    statsReceiver.stat(Verbosity.Debug, "connection_sent_bytes")
-  private[this] val writable =
-    statsReceiver.counter(Verbosity.Debug, "socket_writable_ms")
-  private[this] val unwritable =
-    statsReceiver.counter(Verbosity.Debug, "socket_unwritable_ms")
-
-  private[this] val receivedBytes = statsReceiver.counter("received_bytes")
-  private[this] val sentBytes = statsReceiver.counter("sent_bytes")
-  private[this] val exceptions = statsReceiver.scope("exn")
-  private[this] val closesCount = statsReceiver.counter("closes")
-  private[this] val connections = statsReceiver.addGauge("connections") {
-    connectionCount.sum()
-  }
+  // `channelBytesRead` and `channelBytesWritten` are thread-safe since they
+  // are used only in their `channelStatsHandler` instance.
+  private[this] var channelBytesRead: Long = _
+  private[this] var channelBytesWritten: Long = _
+  private[this] var connectionDuration: Stopwatch.Elapsed = _
+  private[this] var channelWasWritable: Boolean = _
+  private[this] var channelWritableDuration: Stopwatch.Elapsed = _
+  private[this] var channelActive: Boolean = false
 
   override def handlerAdded(ctx: ChannelHandlerContext): Unit = {
-    ctx.channel.attr(ConnectionStatsKey).set(ChannelStats(new LongAdder(), new LongAdder()))
-    ctx.channel.attr(ChannelWasWritableKey).set(true) //netty channels start in writable state
-    ctx.channel.attr(ChannelWritableDurationKey).set(Stopwatch.start())
+    channelBytesRead = 0L
+    channelBytesWritten = 0L
+    channelWasWritable = true // Netty channels start in writable state
+    channelWritableDuration = Stopwatch.start()
     super.handlerAdded(ctx)
   }
 
   override def channelActive(ctx: ChannelHandlerContext): Unit = {
-    connects.incr()
-    connectionCount.increment()
+    sharedChannelStats.connects.incr()
+    sharedChannelStats.connectionCountIncrement()
 
-    ctx.channel.attr(ConnectionDurationKey).set(Stopwatch.start())
+    connectionDuration = Stopwatch.start()
+    channelActive = true
     super.channelActive(ctx)
   }
 
@@ -78,11 +87,8 @@ private[netty4] class ChannelStatsHandler(statsReceiver: StatsReceiver)
     msg match {
       case buffer: ByteBuf =>
         val readableBytes = buffer.readableBytes
-        sentBytes.incr(readableBytes)
-        ctx.channel.attr(ConnectionStatsKey).get match {
-          case null =>
-          case connStats => connStats.bytesWritten.add(readableBytes)
-        }
+        sharedChannelStats.sentBytes.incr(readableBytes)
+        channelBytesWritten += readableBytes
       case _ =>
         log.warning("ChannelStatsHandler received non-ByteBuf write: " + msg)
     }
@@ -94,45 +100,46 @@ private[netty4] class ChannelStatsHandler(statsReceiver: StatsReceiver)
     msg match {
       case buffer: ByteBuf =>
         val readableBytes = buffer.readableBytes
-        receivedBytes.incr(readableBytes)
-        ctx.channel.attr(ConnectionStatsKey).get match {
-          case null =>
-          case connStats => connStats.bytesRead.add(readableBytes)
-        }
+        sharedChannelStats.receivedBytes.incr(readableBytes)
+        channelBytesRead += readableBytes
       case _ =>
         log.warning("ChannelStatsHandler received non-ByteBuf read: " + msg)
     }
-
     super.channelRead(ctx, msg)
   }
 
   override def close(ctx: ChannelHandlerContext, p: ChannelPromise): Unit = {
-    closesCount.incr()
+    sharedChannelStats.closesCount.incr()
     super.close(ctx, p)
   }
 
   override def channelInactive(ctx: ChannelHandlerContext): Unit = {
     // protect against Netty calling this multiple times
-    ctx.channel.attr(ConnectionStatsKey).getAndSet(null) match {
-      case ChannelStats(bytesRead, bytesWritten) =>
-        connectionReceivedBytes.add(bytesRead.sum())
-        connectionSentBytes.add(bytesWritten.sum())
-      case null =>
-    }
-    // protect against multiple calls, and also a channel can go
-    // inactive without ever seeing `channelActive`
-    ctx.channel.attr(ConnectionDurationKey).getAndSet(null) match {
-      case null =>
-      case elapsed =>
-        connectionDuration.add(elapsed().inMilliseconds)
-        connectionCount.decrement()
-    }
+    if (channelActive) {
+      val oldChannelBytesRead = channelBytesRead
+      val oldChannelBytesWritten = channelBytesWritten
+      channelBytesRead = 0
+      channelBytesWritten = 0
+      sharedChannelStats.connectionReceivedBytes.add(oldChannelBytesRead)
+      sharedChannelStats.connectionSentBytes.add(oldChannelBytesWritten)
 
-    super.channelInactive(ctx)
+      // a channel can go inactive without ever seeing `channelActive`
+      val oldConnectionDuration = connectionDuration
+      connectionDuration = null
+      oldConnectionDuration match {
+        case null =>
+        case elapsed =>
+          sharedChannelStats.connectionDuration.add(elapsed().inMilliseconds)
+          sharedChannelStats.connectionCountDecrement()
+      }
+
+      super.channelInactive(ctx)
+    }
+    channelActive = false
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable): Unit = {
-    exceptions.counter(cause.getClass.getName).incr()
+    sharedChannelStats.exceptions.counter(cause.getClass.getName).incr()
     // If no Monitor is active, then log the exception so we don't fail silently.
     if (!Monitor.isActive) {
       val level = cause match {
@@ -148,15 +155,13 @@ private[netty4] class ChannelStatsHandler(statsReceiver: StatsReceiver)
 
   override def channelWritabilityChanged(ctx: ChannelHandlerContext): Unit = {
     val isWritable = ctx.channel.isWritable()
-    val wasWritableAttr = ctx.channel.attr(ChannelWasWritableKey)
-    if (isWritable != wasWritableAttr.get) {
-      val writableDuration = ctx.channel.attr(ChannelWritableDurationKey)
-      val elapsed: Duration = writableDuration.get().apply()
-      val stat = if (wasWritableAttr.get) writable else unwritable
+    if (isWritable != channelWasWritable) {
+      val elapsed: Duration = channelWritableDuration()
+      val stat = if (channelWasWritable) sharedChannelStats.writable else sharedChannelStats.unwritable
       stat.incr(elapsed.inMilliseconds.toInt)
 
-      wasWritableAttr.set(isWritable)
-      writableDuration.set(Stopwatch.start())
+      channelWasWritable = isWritable
+      channelWritableDuration = Stopwatch.start()
     }
     super.channelWritabilityChanged(ctx)
   }

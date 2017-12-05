@@ -10,10 +10,11 @@ import com.twitter.finagle.netty4.codec.BufCodec
 import com.twitter.finagle.netty4.decoder.{DecoderHandler, TestFramer}
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
-import com.twitter.util.{Await, Duration, Future, Promise, Time}
+import com.twitter.util.{Await, Duration, Future, Promise, Return, Time}
 import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel.{
   ChannelHandlerContext,
+  ChannelInboundHandlerAdapter,
   ChannelOutboundHandlerAdapter,
   ChannelPipeline,
   ChannelPromise
@@ -85,16 +86,27 @@ class Netty4PushTransporterTest extends FunSuite with Eventually with Integratio
     var server: ServerSocket = null
     var acceptedSocket: Socket = null
 
+    protected def makeSession(handle: PushChannelHandle[In, Out]): Future[TestSession[In, Out]] = {
+      Future.value(new TestSession[In, Out](handle))
+    }
+
     def connect(): Unit = {
       server = new ServerSocket(0, 50, InetAddress.getLoopbackAddress)
       val transporter = transporterFn(
         new InetSocketAddress(InetAddress.getLoopbackAddress, server.getLocalPort),
         Params.empty
       )
-      val f = transporter(h => Future.value(new TestSession[In, Out](h)))
-      acceptedSocket = server.accept()
-      clientsideTransport = Await.result(f, timeout)
+      val f = transporter(makeSession)
 
+      acceptedSocket = server.accept()
+
+      clientsideTransport = Await.result(f, timeout)
+    }
+
+    def closeCtx(): Unit = {
+      if (server != null) server.close()
+      if (acceptedSocket != null) acceptedSocket.close()
+      if (clientsideTransport != null) clientsideTransport.close()
     }
   }
 
@@ -137,7 +149,7 @@ class Netty4PushTransporterTest extends FunSuite with Eventually with Integratio
           .mkString
       )
 
-      server.close()
+      closeCtx()
     }
   }
 
@@ -153,7 +165,7 @@ class Netty4PushTransporterTest extends FunSuite with Eventually with Integratio
       assert(new String(bytes) == data)
 
       is.close()
-      server.close()
+      closeCtx()
     }
   }
 
@@ -187,15 +199,62 @@ class Netty4PushTransporterTest extends FunSuite with Eventually with Integratio
         Netty4PushTransporter.raw[String, String](
           withStringFramer,
           addr,
-          params + Transport.Liveness(readTimeout = 1.millisecond, Duration.Top, None)
+          params + Transport.Liveness(readTimeout = 1.second, Duration.Top, None)
         )
       }
     ) {
       connect()
 
-      intercept[ReadTimedOutException] {
-        Await.result(clientsideTransport.onClose, timeout)
+      Await.result(clientsideTransport.onClose, timeout)
+
+      closeCtx()
+    }
+  }
+
+  test("Failure before session resolution") {
+    object FailingHandler extends ChannelInboundHandlerAdapter {
+      @volatile
+      private[this] var ctx: ChannelHandlerContext = null
+
+      val latch = Promise[Unit]
+
+      latch.onSuccess { _ =>
+        if (ctx != null) ctx.fireExceptionCaught(new Exception("sadface"))
       }
+
+      override def handlerAdded(ctx: ChannelHandlerContext): Unit = {
+        this.ctx = ctx
+      }
+    }
+
+    new Ctx(
+      { (addr, params) =>
+        new Netty4PushTransporter[String, String](
+          _.addLast(FailingHandler),
+          withStringFramer,
+          addr,
+          params
+        )
+      }
+    ) {
+
+      override protected def makeSession(handle: PushChannelHandle[String, String]): Future[TestSession[String, String]] = {
+        val p = Promise[TestSession[String, String]]()
+        // We don't resolve the session until the handle closes due to the exception
+        handle.onClose.ensure {
+          p.updateIfEmpty(Return(new TestSession[String, String](handle)))
+        }
+
+        FailingHandler.latch.setDone()
+
+        p
+      }
+
+      connect()
+
+      Await.result(clientsideTransport.onClose, timeout)
+
+      closeCtx()
     }
   }
 
@@ -226,9 +285,9 @@ class Netty4PushTransporterTest extends FunSuite with Eventually with Integratio
       // We don't await on this since we discarded it's associated ChannelPromise in writeSwallower
       clientsideTransport.write("msg")
 
-      intercept[WriteTimedOutException] {
-        Await.result(clientsideTransport.onClose, timeout)
-      }
+      Await.result(clientsideTransport.onClose, timeout)
+
+      closeCtx()
     }
   }
 

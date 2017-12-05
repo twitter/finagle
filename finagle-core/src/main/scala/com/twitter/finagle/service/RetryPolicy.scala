@@ -28,6 +28,10 @@ import scala.collection.JavaConverters._
  * a [[Duration]] field for how long to wait for the next retry as well
  * as the next `RetryPolicy` to use.
  *
+ * Finagle will handle retryable Throws automatically but you will need to
+ * supply a custom [[ResponseClassifier]] to inform Finagle which application
+ * level exceptions are retryable.
+ *
  * @see [[SimpleRetryPolicy]] for a Java friendly API.
  */
 abstract class RetryPolicy[-A] extends (A => Option[(Duration, RetryPolicy[A])]) {
@@ -180,6 +184,9 @@ object RetryPolicy extends JavaSingleton {
     case Throw(RetryableWriteException(_)) => true
   }
 
+  /**
+   * Use [[ResponseClassifier.RetryOnTimeout]] for the [[ResponseClassifier]] equivalent.
+   */
   val TimeoutAndWriteExceptionsOnly: PartialFunction[Try[Nothing], Boolean] =
     WriteExceptionsOnly.orElse {
       case Throw(Failure(Some(_: TimeoutException))) => true
@@ -188,6 +195,9 @@ object RetryPolicy extends JavaSingleton {
       case Throw(_: UtilTimeoutException) => true
     }
 
+  /**
+   * Use [[ResponseClassifier.RetryOnChannelClosed]] for the [[ResponseClassifier]] equivalent.
+   */
   val ChannelClosedExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = {
     case Throw(_: ChannelClosedException) => true
   }

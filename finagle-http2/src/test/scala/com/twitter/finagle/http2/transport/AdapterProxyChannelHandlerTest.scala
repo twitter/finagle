@@ -157,6 +157,17 @@ class AdapterProxyChannelHandlerTest extends FunSuite {
     channel.writeOutbound(Message(last, 3))
     assert(handler.numConnections == 0)
   }
+
+  test("close closes the underlying connection") {
+    val handler = new AdapterProxyChannelHandler({ pipeline =>
+      ()
+    })
+    val channel = new EmbeddedChannel()
+    channel.pipeline.addLast(handler)
+
+    channel.close()
+    assert(!channel.isOpen)
+  }
 }
 
 class Aggregator extends ChannelDuplexHandler {

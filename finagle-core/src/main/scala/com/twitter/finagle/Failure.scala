@@ -128,6 +128,11 @@ object Failure {
   val Interrupted: Long = FailureFlags.Interrupted
 
   /**
+   * Flag ignorable indicates that the failure can be ignored and should not be surfaced via stats.
+   */
+  val Ignorable: Long = FailureFlags.Ignorable
+
+  /**
    * Flag wrapped indicates that this failure was wrapped, and should
    * not be presented to the user (directly, or via stats). Rather, it must
    * first be unwrapped: the inner cause is the presentable failure.
@@ -308,6 +313,12 @@ object Failure {
       FailureFlags.Retryable | FailureFlags.Rejected,
       logLevel = Level.DEBUG
     )
+
+  /**
+   * Create a new [[Ignorable]] failure with the given message.
+   */
+  def ignorable(why: String): Failure =
+    new Failure(why, None, FailureFlags.Ignorable, logLevel = Level.TRACE)
 
   /**
    * A default [[Restartable]] failure.

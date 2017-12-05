@@ -102,7 +102,7 @@ private[serverset2] class ZkSession(
       @volatile var closed = false
 
       def loop(): Future[Unit] = {
-        if (!closed) safeRetry(go) respond {
+        if (!closed) safeRetry(go).respond {
           case Throw(e @ KeeperException.SessionExpired(_)) =>
             // don't retry. The session has expired while trying to set the watch.
             // In case our activity is still active, notify the listener
@@ -328,12 +328,17 @@ private[serverset2] object ZkSession {
         .filter {
           _ == WatchState.SessionState(SessionState.SyncConnected)
         }
-        .toFuture
-        .unit before zkSession.addAuthInfo("digest", Buf.Utf8(authInfo)) onSuccess { _ =>
-        logger.info(s"New ZKSession is connected. Session ID: ${zkSession.sessionIdAsHex}")
-        v() = zkSession
-        backoff.reset()
-      }
+        .toFuture()
+        .unit.before {
+          zkSession.addAuthInfo("digest", Buf.Utf8(authInfo))
+        }
+        .respond {
+          case Return(_) =>
+            logger.info(s"New ZKSession is connected. Session ID: ${zkSession.sessionIdAsHex}")
+            v() = zkSession
+            backoff.reset()
+          case _ =>
+        }
 
       // Kick off a delayed reconnection on session expiration.
       zkSession.state.changes

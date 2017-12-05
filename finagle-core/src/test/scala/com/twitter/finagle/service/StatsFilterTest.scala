@@ -134,6 +134,22 @@ class StatsFilterTest extends FunSuite {
     }
   }
 
+  test("don't report failures flagged Failure.Ignorable") {
+    val (promise, receiver, statsService) = getService()
+
+    assert(!receiver.counters.contains(Seq("requests")))
+    assert(!receiver.counters.keys.exists(_ contains "failure"))
+    statsService("foo")
+
+    assert(receiver.gauges(Seq("pending"))() == 1.0)
+    promise.setException(Failure.ignorable("Ignore me (disappear)."))
+
+    assert(!receiver.counters.keys.exists(_ contains "failure"))
+    assert(!receiver.counters.contains(Seq("requests")))
+    assert(!receiver.counters.contains(Seq("success")))
+    assert(receiver.gauges(Seq("pending"))() == 0.0)
+  }
+
   test("report pending requests on success") {
     val (promise, receiver, statsService) = getService()
     assert(receiver.gauges(Seq("pending"))() == 0.0)

@@ -39,6 +39,7 @@ private[finagle] class RichRequestHeader(val header: RequestHeader) extends AnyV
       if (header.isSetParent_span_id) Some(SpanId(header.getParent_span_id)) else None,
       SpanId(header.getSpan_id),
       if (header.isSetSampled) Some(header.isSampled) else None,
-      if (header.isSetFlags) Flags(header.getFlags) else Flags()
+      if (header.isSetFlags) Flags(header.getFlags) else Flags(),
+      if (header.isSetTrace_id_high) Some(SpanId(header.getTrace_id_high)) else None
     )
 }

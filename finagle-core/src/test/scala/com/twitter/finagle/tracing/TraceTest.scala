@@ -20,7 +20,7 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
 
   test("have a default id without parents, etc.") {
     assert(Trace.id match {
-      case TraceId(None, None, _, None, Flags(0)) => true
+      case TraceId(None, None, _, None, Flags(0), None) => true
       case _ => false
     })
   }
@@ -56,7 +56,7 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
     Trace.letId(Trace.nextId) {
       assert(Trace.id != defaultId)
       assert(Trace.id match {
-        case TraceId(None, None, _, None, Flags(0)) => true
+        case TraceId(None, None, _, None, Flags(0), None) => true
         case _ => false
       })
     }
@@ -67,7 +67,7 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
       val topId = Trace.id
       Trace.letId(Trace.nextId) {
         assert(Trace.id match {
-          case TraceId(Some(traceId), Some(parentId), _, None, Flags(0))
+          case TraceId(Some(traceId), Some(parentId), _, None, Flags(0), _)
               if traceId == topId.traceId && parentId == topId.spanId =>
             true
           case _ => false
@@ -221,6 +221,11 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
     assert(nextId.flags == Flags())
   }
 
+  test("generates 64-bit SpanIDs by default") {
+    val nextId = Trace.nextId
+    assert(nextId.spanId.toString.length == 16)
+  }
+
   test("Trace.letTracerAndNextId: start with a default TraceId") {
     Time.withCurrentTimeFrozen { tc =>
       val tracer = mock[Tracer]
@@ -230,7 +235,7 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
       Trace.letTracerAndNextId(tracer) {
         val currentId = Trace.id
         assert(currentId match {
-          case TraceId(None, None, _, None, Flags(0)) => true
+          case TraceId(None, None, _, None, Flags(0), None) => true
           case _ => false
         })
         assert(Trace.isTerminal == false)
@@ -254,7 +259,7 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
         Trace.letTracerAndNextId(tracer) {
           val currentId = Trace.id
           assert(currentId match {
-            case TraceId(Some(_traceId), Some(_parentId), _, Some(_sampled), Flags(0))
+            case TraceId(Some(_traceId), Some(_parentId), _, Some(_sampled), Flags(0), _)
                 if (_traceId == parentId.traceId) && (_parentId == parentId.spanId) &&
                   (_sampled == parentId.sampled.get) =>
               true
@@ -281,7 +286,7 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
       Trace.letTracerAndNextId(tracer, true) {
         val currentId = Trace.id
         assert(currentId match {
-          case TraceId(None, None, _, None, Flags(0)) => true
+          case TraceId(None, None, _, None, Flags(0), None) => true
           case _ => false
         })
         assert(Trace.isTerminal == true)
@@ -359,7 +364,7 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
     }
   }
 
-  test("trace ID serialization: valid ids") {
+  test("trace ID serialization: valid ids (64-bit)") {
     // TODO: Consider using scalacheck here. (CSL-595)
     def longs(seed: Long) = {
       val rng = new Random(seed)
@@ -380,6 +385,20 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
 
     for (id <- traceIds)
       assert(Trace.idCtx.tryUnmarshal(Trace.idCtx.marshal(id)) == Return(id))
+  }
+
+  test("trace ID serialization: valid ids (128-bit)") {
+    val traceId = TraceId(Some(SpanId(1L)), Some(SpanId(1L)), SpanId(2L), None, Flags(Flags.Debug), Some(SpanId(2L)))
+
+    assert(Trace.idCtx.tryUnmarshal(Trace.idCtx.marshal(traceId)) == Return(traceId))
+  }
+
+  // example from X-Amzn-Trace-Id: Root=1-5759e988-bd862e3fe1be46a994272793;Sampled=1
+  test("Trace.nextTraceIdHigh: encodes epoch seconds") {
+    Time.withTimeAt(Time.fromSeconds(1465510280)) { tc => // Thursday, June 9, 2016 10:11:20 PM
+      val traceIdHigh = Trace.nextTraceIdHigh()
+      assert(traceIdHigh.toString.startsWith("5759e988")) == true
+    }
   }
 
   test("trace ID serialization: throw in handle on invalid size") {

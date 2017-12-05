@@ -3,7 +3,7 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.finagle._
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.service.{DelayedFactory, FailingFactory, ServiceFactoryRef}
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver, Verbosity}
 import com.twitter.finagle.util.{Drv, Rng}
 import com.twitter.util._
 
@@ -252,22 +252,20 @@ private class TrafficDistributor[Req, Rep](
   private[this] val pending = new Promise[ServiceFactory[Req, Rep]]
   private[this] val init: ServiceFactory[Req, Rep] = new DelayedFactory(pending)
 
-  @volatile
-  private[this] var meanWeight = 0.0f
+  @volatile private[this] var meanWeight = 0.0F
+  @volatile private[this] var numWeightClasses = 0.0F
 
-  private[this] val meanWeightGauge = statsReceiver.addGauge("meanweight") { meanWeight }
+  private[this] val gauges = Seq(
+    statsReceiver.addGauge(Verbosity.Debug, "meanweight") { meanWeight },
+    statsReceiver.addGauge("num_weight_classes") { numWeightClasses }
+  )
 
-  private[this] def updateMeanWeight(classes: Iterable[WeightClass[Req, Rep]]): Unit = {
-    val size = classes.map(_.size).sum
-    meanWeight =
-      if (size != 0)
-        classes
-          .map { c =>
-            c.weight * c.size
-          }
-          .sum
-          .toFloat / size
-      else 0.0F
+  private[this] def updateGauges(classes: Iterable[WeightClass[Req, Rep]]): Unit = {
+    numWeightClasses = classes.size.toFloat
+    val numEndpoints = classes.map(_.size).sum
+    meanWeight = if (numEndpoints == 0) 0.0F else {
+      classes.map { c => c.weight * c.size }.sum.toFloat / numEndpoints
+    }
   }
 
   // Translate the stream of weightClasses into a stream of underlying
@@ -277,20 +275,19 @@ private class TrafficDistributor[Req, Rep](
       case (_, Activity.Ok(wcs)) if wcs.isEmpty =>
         // Defer the handling of an empty destination set to `newBalancer`
         val emptyBal = newBalancer(Activity(Var(Activity.Ok(Set.empty[EndpointFactory[Req, Rep]]))))
-        updateMeanWeight(wcs)
+        updateGauges(wcs)
         pending.updateIfEmpty(Return(emptyBal))
         emptyBal
       case (_, Activity.Ok(wcs)) =>
         val dist = new Distributor(wcs, rng)
-        updateMeanWeight(wcs)
+        updateGauges(wcs)
         pending.updateIfEmpty(Return(dist))
         dist
       case (_, Activity.Failed(e)) =>
-        updateMeanWeight(Iterable.empty)
+        updateGauges(Iterable.empty)
         val failing = new FailingFactory[Req, Rep](e)
         pending.updateIfEmpty(Return(failing))
         failing
-
       case (staleState, Activity.Pending) =>
         // This should only happen on initialization and never be seen again
         // due to the logic in safelyScanLeft.
@@ -306,7 +303,7 @@ private class TrafficDistributor[Req, Rep](
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] = ref(conn)
 
   def close(deadline: Time): Future[Unit] = {
-    meanWeightGauge.remove()
+    gauges.foreach(_.remove())
     // Note, we want to sequence here since we want to stop
     // flushing to `ref` before we call close on it.
     Closable.sequence(obs, ref).close(deadline)

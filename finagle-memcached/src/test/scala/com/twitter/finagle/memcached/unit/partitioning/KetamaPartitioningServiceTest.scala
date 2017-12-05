@@ -324,4 +324,6 @@ private[this] class TestKetamaPartitioningService(
     // typically be a key-value map.
     responses.mkString(ResponseDelimiter)
   }
+
+  protected def isSinglePartition(request: String): Boolean = false
 }

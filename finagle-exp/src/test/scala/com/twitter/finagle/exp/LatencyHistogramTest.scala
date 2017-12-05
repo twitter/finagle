@@ -1,15 +1,12 @@
 package com.twitter.finagle.exp
 
 import com.twitter.conversions.time._
-import com.twitter.util.{Duration, Time, Stopwatch}
-import org.junit.runner.RunWith
-import org.scalatest.{Matchers, FunSuite}
-import org.scalatest.junit.JUnitRunner
+import com.twitter.util.{Duration, Stopwatch, Time}
+import org.scalatest.{FunSuite, Matchers}
 import scala.util.Random
 
-@RunWith(classOf[JUnitRunner])
 class LatencyHistogramTest extends FunSuite with Matchers {
-  val range = 10 * 1000 // 10 seconds
+  private val range = 10 * 1000 // 10 seconds
 
   def testRandom(rng: Random, N: Int, err: Double): Unit = {
     val histo = new LatencyHistogram(

@@ -124,6 +124,25 @@ class StackTest extends FunSuite {
     assert(stk2.make(empty) == Seq(40, 30, 20, 10, 1, 2, 3, 4))
   }
 
+  test("Stack.prepend with CanStackFrom") {
+    val stk0 = newStack()
+    assert(stk0.make(empty) == Seq(20, 10, 1, 2, 3, 4))
+
+    val fn1: List[Int] => List[Int] = { ints =>
+      30 :: ints
+    }
+
+    val stk1 = stk0.prepend(testRole1, fn1)
+    assert(stk1.make(empty) == Seq(30, 20, 10, 1, 2, 3, 4))
+
+    val fn2: List[Int] => List[Int] = { ints =>
+      40 :: ints
+    }
+
+    val stk2 = stk1.prepend(testRole1, fn2)
+    assert(stk2.make(empty) == Seq(40, 30, 20, 10, 1, 2, 3, 4))
+  }
+
   case class TestParam(p1: Int) {
     def mk() = (this, TestParam.param)
   }

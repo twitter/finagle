@@ -5,7 +5,6 @@ scala_library(
     repo = artifactory,
   ),
   dependencies=[
-    '3rdparty/jvm/com/google/guava:guava',
     '3rdparty/jvm/org/apache/thrift:libthrift-0.5.0',
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-thrift',
@@ -21,5 +20,4 @@ scala_library(
   sources=rglobs('*.scala'),
   # Exposes a service-loaded class.
   scope='forced',
-  strict_deps=True,
 )

@@ -4,7 +4,7 @@ import com.twitter.finagle.Stack.{Module1, Role}
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
 import com.twitter.finagle._
-import com.twitter.util.Future
+import com.twitter.util.{Future, Return, Try}
 
 /**
  * A filter that exports two histograms to a given [[StatsReceiver]].
@@ -21,12 +21,15 @@ private[finagle] class PayloadSizeFilter[Req, Rep](
   private[this] val requestBytes = statsReceiver.stat(Verbosity.Debug, "request_payload_bytes")
   private[this] val responseBytes = statsReceiver.stat(Verbosity.Debug, "response_payload_bytes")
 
-  private[this] val recordRepSize: Rep => Unit =
-    rep => responseBytes.add(repSize(rep).toFloat)
+  private[this] val recordRepSize: Try[Rep] => Unit = {
+    case Return(rep) =>
+      responseBytes.add(repSize(rep).toFloat)
+    case _ =>
+  }
 
   def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
     requestBytes.add(reqSize(req).toFloat)
-    service(req).onSuccess(recordRepSize)
+    service(req).respond(recordRepSize)
   }
 }
 

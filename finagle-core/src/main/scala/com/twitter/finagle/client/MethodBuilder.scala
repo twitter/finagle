@@ -211,13 +211,14 @@ private[finagle] final class MethodBuilder[Req, Rep](
   private[client] def withConfig(config: Config): MethodBuilder[Req, Rep] =
     new MethodBuilder(refCounted, dest, stack, stackParams, config)
 
-  private[this] def statsReceiver(name: String): StatsReceiver = {
-    val clientName = stackParams[param.Label].label match {
+  private[this] def clientName: String =
+    stackParams[param.Label].label match {
       case param.Label.Default => Showable.show(dest)
       case label => label
     }
-    stackParams[param.Stats].statsReceiver.scope(clientName, name)
-  }
+
+  private[this] def statsReceiver(methodName: String): StatsReceiver =
+    stackParams[param.Stats].statsReceiver.scope(clientName, methodName)
 
   def filters(methodName: String): Filter.TypeAgnostic = {
     // Ordering of filters:
@@ -225,6 +226,7 @@ private[finagle] final class MethodBuilder[Req, Rep](
     // Responses flow back from the bottom up.
     //
     // - Logical Stats
+    // - Failure logging
     // - Annotate method name for a `Failure`
     // - Total Timeout
     // - Retries
@@ -236,6 +238,7 @@ private[finagle] final class MethodBuilder[Req, Rep](
 
     retries
       .logicalStatsFilter(stats)
+      .andThen(retries.logFailuresFilter(clientName, methodName))
       .andThen(addFailureSource(methodName))
       .andThen(timeouts.totalFilter)
       .andThen(retries.filter(stats))
@@ -271,7 +274,7 @@ private[finagle] final class MethodBuilder[Req, Rep](
   //   retry: DefaultResponseClassifier
   //   timeout/total: 100.milliseconds
   //   timeout/per_request: 30.milliseconds
-  private[this] def addToRegisty(name: String): Unit = {
+  private[this] def addToRegistry(name: String): Unit = {
     val entry = registryEntry()
     val keyPrefix = registryKeyPrefix(name)
     ClientRegistry.register(entry, keyPrefix :+ "statsReceiver", statsReceiver(name).toString)
@@ -286,7 +289,7 @@ private[finagle] final class MethodBuilder[Req, Rep](
   }
 
   def wrappedService(name: String): Service[Req, Rep] = {
-    addToRegisty(name)
+    addToRegistry(name)
     refCounted.open()
     new ServiceProxy[Req, Rep](refCounted.get) {
       private[this] val isClosed = new AtomicBoolean(false)

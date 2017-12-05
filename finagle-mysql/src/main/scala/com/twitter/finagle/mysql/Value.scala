@@ -97,11 +97,11 @@ class TimestampValue(val injectionTimeZone: TimeZone, val extractionTimeZone: Ti
   def unapply(v: Value): Option[Timestamp] = v match {
     case RawValue(t, charset, false, bytes) if t == Type.Timestamp || t == Type.DateTime =>
       val str = new String(bytes, Charset(charset))
-      val ts = fromString(str, extractionTimeZone)
+      val ts = fromString(str)
       Some(ts)
 
     case RawValue(t, _, true, bytes) if t == Type.Timestamp || t == Type.DateTime =>
-      val ts = fromBytes(bytes, extractionTimeZone)
+      val ts = fromBytes(bytes)
       Some(ts)
 
     case _ => None
@@ -125,9 +125,8 @@ class TimestampValue(val injectionTimeZone: TimeZone, val extractionTimeZone: Ti
    *
    * @param str A string representing a TIMESTAMP written in the
    * MySQL text protocol.
-   * @param timeZone The timezone in which to interpret the timestamp.
    */
-  private[this] def fromString(str: String, timeZone: TimeZone): Timestamp = {
+  private[this] def fromString(str: String): Timestamp = {
     if (str == Zero.toString) {
       return Zero
     }
@@ -174,9 +173,8 @@ class TimestampValue(val injectionTimeZone: TimeZone, val extractionTimeZone: Ti
    *
    * @param bytes A byte-array representing a TIMESTAMP written in the
    * MySQL binary protocol.
-   * @param timeZone The timezone in which to interpret the timestamp.
    */
-  private[this] def fromBytes(bytes: Array[Byte], timeZone: TimeZone): Timestamp = {
+  private[this] def fromBytes(bytes: Array[Byte]): Timestamp = {
     if (bytes.isEmpty) {
       return Zero
     }
@@ -207,7 +205,7 @@ class TimestampValue(val injectionTimeZone: TimeZone, val extractionTimeZone: Ti
         micro = br.readIntLE()
       }
 
-      val cal = Calendar.getInstance(timeZone)
+      val cal = Calendar.getInstance(extractionTimeZone)
       cal.set(year, month - 1, day, hour, min, sec)
 
       val ts = new Timestamp(0)

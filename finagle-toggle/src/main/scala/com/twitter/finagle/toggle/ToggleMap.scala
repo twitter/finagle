@@ -175,7 +175,7 @@ object ToggleMap {
         Seq(underlying)
 
       // mixes in `Toggle.Captured` to provide visibility into how
-      // toggles are in use at rutime.
+      // toggles are in use at runtime.
       override def apply(id: String): Toggle[Int] = {
         val delegate = super.apply(id)
         new Toggle[Int](delegate.id) with Toggle.Captured {

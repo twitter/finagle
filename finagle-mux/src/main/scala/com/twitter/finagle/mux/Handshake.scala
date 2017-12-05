@@ -1,10 +1,10 @@
 package com.twitter.finagle.mux
 
 import com.twitter.finagle.mux.transport.Message
-import com.twitter.finagle.transport.{Transport, TransportProxy, TransportContext, LegacyContext}
+import com.twitter.finagle.transport.{LegacyContext, Transport, TransportContext, TransportProxy}
 import com.twitter.finagle.{Failure, Status}
 import com.twitter.io.Buf
-import com.twitter.util.{Future, Return, Throw, Time}
+import com.twitter.util.{Future, Return, Throw, Time, Try}
 import java.net.SocketAddress
 import java.security.cert.Certificate
 import java.util.concurrent.atomic.AtomicBoolean
@@ -26,7 +26,7 @@ private[finagle] object Handshake {
    * than mux `Message` types to more easily allow for features that need to
    * operate on the raw byte frame (e.g. compression, checksums, etc).
    */
-  type Negotiator = (Headers, Transport[Buf, Buf]) => Transport[Message, Message]
+  type Negotiator = (Option[Headers], Transport[Buf, Buf]) => Transport[Message, Message]
 
   /**
    * Returns Some(value) if `key` exists in `headers`, otherwise None.
@@ -117,7 +117,7 @@ private[finagle] object Handshake {
           msgTrans.write(Message.Tinit(TinitTag, version, headers)).before {
             msgTrans.read().transform {
               case Return(Message.Rinit(_, v, serverHeaders)) if v == version =>
-                Future(negotiate(serverHeaders, trans))
+                Future(negotiate(Some(serverHeaders), trans))
 
               case Return(Message.Rerr(_, msg)) =>
                 Future.exception(Failure(msg))
@@ -127,12 +127,12 @@ private[finagle] object Handshake {
             }
           }
 
-        // If we can't init, we return the session as is and assume that we
-        // can speak mux pre version 1 and pre handshaking. Any subsequent
-        // failures will be handled by the layers above (i.e. the dispatcher).
-        // This is a workaround since our initial implementation of mux didn't
-        // implement handshaking.
-        case Return(false) => Future.value(msgTrans)
+        // If we can't init. Negotiation may be required for features like TLS
+        // negotiation where this client demands encryption. It's important to
+        // distinguish between receiving an Rinit without headers (Some(Seq.empty))
+        // vs not negotiating (None) since we implicitly assume that if the server
+        // can negotiate it supports fragmenting.
+        case Return(false) => Future.value(negotiate(None, trans))
 
         case t @ Throw(_) =>
           Future.const(t.cast[Transport[Message, Message]])
@@ -178,7 +178,7 @@ private[finagle] object Handshake {
         case Return(Message.Tinit(tag, ver, clientHeaders)) if ver == version =>
           val serverHeaders = headers(clientHeaders)
           msgTrans.write(Message.Rinit(tag, version, serverHeaders)).before {
-            Future(negotiate(clientHeaders, trans))
+            Future(negotiate(Some(clientHeaders), trans))
           }
 
         // A Tinit with a version mismatch. Write an Rerr and then return
@@ -192,22 +192,35 @@ private[finagle] object Handshake {
         // A marker Rerr that queries whether or not we can do handshaking.
         // Echo back the Rerr message to indicate that we can and recurse
         // so we can be ready to handshake again.
-        case Return(rerr @ Message.Rerr(tag, msg)) =>
+        case Return(rerr @ Message.Rerr(_, _)) =>
           msgTrans.write(rerr).before {
             Future.value(server(trans, version, headers, negotiate))
           }
 
-        // Client did not start a session with handshaking but we've consumed
-        // a message from the transport. Replace the message and return the
-        // original transport.
+        // Client did not start a session with negotiation. We need to run the
+        // negotiation logic regardless since the configuration may demand
+        // negotiable feature like TLS.
+        // After completing negotiation, we need to inject the message that has
+        // been consumed from the transport back into the message stream for
+        // the session to consume.
         case Return(msg) =>
-          Future.value(new TransportProxy(msgTrans) {
-            private[this] val first = new AtomicBoolean(true)
-            def read(): Future[Message] =
-              if (first.compareAndSet(true, false)) Future.value(msg)
-              else msgTrans.read()
-            def write(req: Message): Future[Unit] = msgTrans.write(req)
-          })
+          Try(negotiate(None, trans)) match {
+            case Return(t) =>
+              Future.value(new TransportProxy(t) {
+                private[this] val first = new AtomicBoolean(true)
+                def read(): Future[Message] =
+                  if (first.compareAndSet(true, false)) Future.value(msg)
+                  else msgTrans.read()
+                def write(req: Message): Future[Unit] = msgTrans.write(req)
+              })
+
+            case Throw(t) =>
+              val errorMessage = s"Negotiation failed: ${t.getMessage}"
+              msgTrans.write(Message.Rerr(msg.tag, errorMessage)).before {
+                Future.exception(t)
+              }
+          }
+
 
         case Throw(_) => Future.value(msgTrans)
       }
@@ -239,24 +252,31 @@ private class DeferredTransport(
   // we create a derivative promise while `underlying` is not defined
   // because the transport is multiplexed and interrupting on one
   // stream shouldn't affect the result of the handshake.
-  private[this] def gate() = underlying.interruptible()
+  private[this] def gate(): Future[Transport[Message, Message]] =
+    underlying.interruptible()
 
-  def write(msg: Message): Future[Unit] = gate().flatMap(_.write(msg))
+  def write(msg: Message): Future[Unit] = gate().transform {
+    case Return(trans) => trans.write(msg)
+    case t @ Throw(_) => Future.const(t.cast[Unit])
+  }
 
-  private[this] val read0: Transport[Message, Message] => Future[Message] = _.read()
-  def read(): Future[Message] = gate().flatMap(read0)
+  private[this] val read0: Try[Transport[Message, Message]] => Future[Message] = {
+    case Return(trans) => trans.read()
+    case t @ Throw(_) => Future.const(t.cast[Message])
+  }
+  def read(): Future[Message] = gate().transform(read0)
 
   def status: Status = underlying.poll match {
-    case Some(Return(t)) => t.status
+    case Some(Return(t)) => t.context.status
     case None => Status.Busy
     case _ => Status.Closed
   }
 
-  val onClose: Future[Throwable] = gate().flatMap(_.onClose)
+  val onClose: Future[Throwable] = gate().flatMap(_.context.onClose)
 
-  def localAddress: SocketAddress = init.localAddress
-  def remoteAddress: SocketAddress = init.remoteAddress
-  def peerCertificate: Option[Certificate] = init.peerCertificate
+  def localAddress: SocketAddress = init.context.localAddress
+  def remoteAddress: SocketAddress = init.context.remoteAddress
+  def peerCertificate: Option[Certificate] = init.context.peerCertificate
 
   def close(deadline: Time): Future[Unit] = gate().flatMap(_.close(deadline))
   val context: TransportContext = new LegacyContext(this)

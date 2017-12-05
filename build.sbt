@@ -1,17 +1,12 @@
 import Tests._
-import sbtunidoc.Plugin.UnidocKeys._
 import scoverage.ScoverageKeys
 
-val branch = Process("git" :: "rev-parse" :: "--abbrev-ref" :: "HEAD" :: Nil).!!.trim
-val suffix = if (branch == "master") "" else "-SNAPSHOT"
-
-val libVersion = "7.1.0" + suffix
-val utilVersion = "7.1.0" + suffix
-val scroogeVersion = "4.20.0" + suffix
+// All Twitter library releases are date versioned as YY.MM.patch
+val releaseVersion = "17.12.0-SNAPSHOT"
 
 val libthriftVersion = "0.5.0-7"
 
-val netty4Version = "4.1.15.Final"
+val netty4Version = "4.1.16.Final"
 
 // zkVersion should be kept in sync with the 'util-zk' dependency version
 val zkVersion = "3.5.0-alpha"
@@ -38,7 +33,7 @@ val netty4LibsTest = Seq(
 )
 val netty4Http = "io.netty" % "netty-codec-http" % netty4Version
 val netty4Http2 = "io.netty" % "netty-codec-http2" % netty4Version
-val netty4StaticSsl = "io.netty" % "netty-tcnative-boringssl-static" % "2.0.5.Final" % "test"
+val netty4StaticSsl = "io.netty" % "netty-tcnative-boringssl-static" % "2.0.6.Final" % "test"
 val jacksonVersion = "2.8.4"
 val jacksonLibs = Seq(
   "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
@@ -47,23 +42,22 @@ val jacksonLibs = Seq(
   guavaLib
 )
 val thriftLibs = Seq(
-  "com.twitter" % "libthrift" % libthriftVersion intransitive(),
-  "org.slf4j" % "slf4j-api" % "1.7.7" % "provided"
+  "com.twitter" % "libthrift" % libthriftVersion intransitive()
 )
 val scroogeLibs = thriftLibs ++ Seq(
-  "com.twitter" %% "scrooge-core" % scroogeVersion)
+  "com.twitter" %% "scrooge-core" % releaseVersion)
 
 def util(which: String) =
-  "com.twitter" %% ("util-"+which) % utilVersion excludeAll(
+  "com.twitter" %% ("util-"+ which) % releaseVersion excludeAll(
     ExclusionRule(organization = "junit"),
     ExclusionRule(organization = "org.scala-tools.testing"),
     ExclusionRule(organization = "org.mockito"))
 
 val sharedSettings = Seq(
-  version := libVersion,
+  version := releaseVersion,
   organization := "com.twitter",
-  scalaVersion := "2.12.1",
-  crossScalaVersions := Seq("2.11.11", "2.12.1"),
+  scalaVersion := "2.12.4",
+  crossScalaVersions := Seq("2.11.11", "2.12.4"),
   libraryDependencies ++= Seq(
     "org.scalacheck" %% "scalacheck" % "1.13.4" % "test",
     "org.scalatest" %% "scalatest" % "3.0.0" % "test",
@@ -143,7 +137,7 @@ val sharedSettings = Seq(
 
   // Prevent eviction warnings
   dependencyOverrides ++= (scalaVersion { vsn =>
-    Set(
+    Seq(
       "com.twitter" % "libthrift" % libthriftVersion
     )
   }).value,
@@ -151,7 +145,7 @@ val sharedSettings = Seq(
   resourceGenerators in Compile += Def.task {
     val dir = (resourceManaged in Compile).value
     val file = dir / "com" / "twitter" / name.value / "build.properties"
-    val buildRev = Process("git" :: "rev-parse" :: "HEAD" :: Nil).!!.trim
+    val buildRev = scala.sys.process.Process("git" :: "rev-parse" :: "HEAD" :: Nil).!!.trim
     val buildName = new java.text.SimpleDateFormat("yyyyMMdd-HHmmss").format(new java.util.Date)
     val contents = s"name=${name.value}\nversion=${version.value}\nbuild_revision=$buildRev\nbuild_name=$buildName"
     IO.write(file, contents)
@@ -172,7 +166,9 @@ val jmockSettings = Seq(
 lazy val noPublishSettings = Seq(
   publish := {},
   publishLocal := {},
-  publishArtifact := false
+  publishArtifact := false,
+  // sbt-pgp's publishSigned task needs this defined even though it is not publishing.
+  publishTo := Some(Resolver.file("Unused transient repository", file("target/unusedrepo")))
 )
 
 lazy val projectList = Seq[sbt.ProjectReference](
@@ -208,10 +204,12 @@ lazy val projectList = Seq[sbt.ProjectReference](
 lazy val finagle = Project(
   id = "finagle",
   base = file(".")
+).enablePlugins(
+  ScalaUnidocPlugin
 ).settings(
   sharedSettings ++
   noPublishSettings ++
-  unidocSettings ++ Seq(
+  Seq(
     unidocProjectFilter in(ScalaUnidoc, unidoc) :=
       inAnyProject -- inProjects(
         finagleBenchmark,
@@ -237,7 +235,7 @@ lazy val finagleIntegration = Project(
   name := "finagle-integration",
   libraryDependencies ++= Seq(util("core")) ++ scroogeLibs
 ).dependsOn(
-  finagleCore,
+  finagleCore % "compile->compile;test->test",
   finagleHttp,
   finagleHttp2,
   finagleMySQL,
@@ -585,7 +583,7 @@ lazy val finagleMux = Project(
     util("logging"),
     util("stats"))
 ).dependsOn(
-  finagleCore,
+  finagleCore % "compile->compile;test->test",
   finagleExp,
   finagleNetty4,
   finagleToggle)
@@ -673,6 +671,7 @@ lazy val finagleBenchmark = Project(
   finagleBenchmarkThrift,
   finagleCore,
   finagleExp,
+  finagleHttp,
   finagleMemcached,
   finagleMux,
   finagleNetty4,

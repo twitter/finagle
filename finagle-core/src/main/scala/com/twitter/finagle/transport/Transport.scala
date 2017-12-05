@@ -33,7 +33,7 @@ trait Transport[In, Out] extends Closable { self =>
   def read(): Future[Out]
 
   /**
-   * The status of this transport; see [[com.twitter.finagle.Status$]] for
+   * The status of this transport; see [[com.twitter.finagle.Status]] for
    * status definitions.
    */
   @deprecated("Please use Transport.context.status instead", "2017-08-21")

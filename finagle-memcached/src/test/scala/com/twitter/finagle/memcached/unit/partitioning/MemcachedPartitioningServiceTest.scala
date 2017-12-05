@@ -2,14 +2,17 @@ package com.twitter.finagle.memcached.unit.partitioning
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
+import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.memcached.TwemcacheClient
 import com.twitter.finagle.memcached.partitioning.MemcachedPartitioningService
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.naming.BindingFactory
+import com.twitter.finagle.serverset2.addr.ZkMetadata
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.io.Buf
-import com.twitter.util.{Await, Awaitable, Duration, Future}
+import com.twitter.util.{Command => _, _}
+import java.net.{InetAddress, InetSocketAddress}
 import org.junit.runner.RunWith
 import org.mockito.Matchers._
 import org.mockito.Mockito._
@@ -32,7 +35,16 @@ class MemcachedPartitioningServiceTest
   private[this] var client: TwemcacheClient = _
   private[this] var statsReceiver: InMemoryStatsReceiver = _
 
-  private[this] def createClient(dest: Name) = {
+  def newAddress(port: Int, shardId: Int, weight: Int = 1): Address = {
+    val inet = new InetSocketAddress(InetAddress.getLoopbackAddress, port)
+    val md = ZkMetadata.toAddrMetadata(ZkMetadata(Some(shardId)))
+    val addr = new Address.Inet(inet, md) {
+      override def toString: String = s"Address($port)-($shardId)"
+    }
+    WeightedAddress(addr, weight)
+  }
+
+  private[this] def createClient(dest: Name, sr: InMemoryStatsReceiver) = {
     val stack = {
       val builder = new StackBuilder[ServiceFactory[Command, Response]](nilStack[Command, Response])
       builder.push(MockService.module)
@@ -41,9 +53,9 @@ class MemcachedPartitioningServiceTest
       builder.result
     }
     val params = Stack.Params.empty +
-      param.Stats(statsReceiver.scope(clientName)) +
+      param.Stats(sr.scope(clientName)) +
       BindingFactory.Dest(dest)
-    TwemcacheClient(Await.result(stack.make(params)()))
+    TwemcacheClient(awaitResult(stack.make(params)()))
   }
 
   private[this] def awaitResult[T](awaitable: Awaitable[T]): T = Await.result(awaitable, Timeout)
@@ -52,7 +64,8 @@ class MemcachedPartitioningServiceTest
     mockService = mock[Service[Command, Response]]
     statsReceiver = new InMemoryStatsReceiver
     client = createClient(
-      dest = Name.bound((1 to numServers).map(Address("localhost", _)): _*)
+      dest = Name.bound((1 to numServers).map(i => newAddress(i, i)): _*),
+      statsReceiver
     )
   }
 
@@ -153,6 +166,79 @@ class MemcachedPartitioningServiceTest
     when(mockService.apply(any[Command])).thenReturn(Future.value(Deleted))
     awaitResult(client.delete("foo")) must be(java.lang.Boolean.TRUE)
     verify(mockService, times(1)).apply(any[Delete])
+  }
+
+  test("adds and removes") {
+    val sr = new InMemoryStatsReceiver
+    val va: ReadWriteVar[Addr] = new ReadWriteVar(Addr.Bound())
+    val client = createClient(dest = Name.Bound.singleton(va), sr)
+
+    // start with 3 nodes
+    val addr11 = newAddress(1, 1)
+    val addr22 = newAddress(2, 2)
+    val addr33 = newAddress(3, 3)
+
+    va() = Addr.Bound(addr11, addr22, addr33)
+
+    assert(sr.counters(Seq(clientName, "partitioner", "redistributes")) == 1)
+    assert(sr.counters(Seq(clientName, "partitioner", "joins")) == 3)
+
+    // bring down addr33 and add addr44
+    val addr44 = newAddress(4, 4)
+    va() = Addr.Bound(addr11, addr22, addr44)
+    assert(sr.counters(Seq(clientName, "partitioner", "redistributes")) == 2)
+    assert(sr.counters(Seq(clientName, "partitioner", "joins")) == 4)
+    assert(sr.counters(Seq(clientName, "partitioner", "leaves")) == 1)
+
+    // remove addr11
+    va() = Addr.Bound(addr22, addr44)
+    assert(sr.counters(Seq(clientName, "partitioner", "redistributes")) == 3)
+    assert(sr.counters(Seq(clientName, "partitioner", "joins")) == 4)
+    assert(sr.counters(Seq(clientName, "partitioner", "leaves")) == 2)
+
+    // restart shard#2 (replace addr22 with addr52)
+    val addr52 = newAddress(5, 2)
+    va() = Addr.Bound(addr52, addr44)
+    assert(sr.counters(Seq(clientName, "partitioner", "redistributes")) == 4)
+    assert(sr.counters(Seq(clientName, "partitioner", "joins")) == 5)
+    assert(sr.counters(Seq(clientName, "partitioner", "leaves")) == 3)
+
+    // only weight changed. That should force node recreation (join++ and leaves++)
+    val addr52w2 = newAddress(5, 2, 2)
+    va() = Addr.Bound(addr52w2, addr44)
+    assert(sr.counters(Seq(clientName, "partitioner", "redistributes")) == 5)
+    assert(sr.counters(Seq(clientName, "partitioner", "joins")) == 6)
+    assert(sr.counters(Seq(clientName, "partitioner", "leaves")) == 4)
+  }
+
+  test("client fails requests if initial serverset is empty") {
+    val sr = new InMemoryStatsReceiver
+    val va: ReadWriteVar[Addr] = new ReadWriteVar(Addr.Bound())
+    val client = createClient(dest = Name.Bound.singleton(va), sr)
+
+    intercept[ShardNotAvailableException] {
+      awaitResult(client.get("foo"))
+    }
+
+    when(mockService.apply(any[Get])).thenReturn(
+      Future.value(
+        Values(
+          Seq(
+            Value(Buf.Utf8("foo"), Buf.Utf8("bar"))
+          )
+        )
+      )
+    )
+    val addr11 = newAddress(1, 1)
+    val addr22 = newAddress(2, 2)
+    val addr33 = newAddress(3, 3)
+    va() = Addr.Bound(addr11, addr22, addr33)
+
+    val result = awaitResult(client.get(Seq("foo"))).map {
+      case (k, Buf.Utf8(v)) =>
+        (k, v)
+    }
+    result must be(Map("foo" -> "bar"))
   }
 
   object MockService {

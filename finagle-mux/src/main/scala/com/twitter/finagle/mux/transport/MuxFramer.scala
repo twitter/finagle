@@ -60,7 +60,7 @@ private[finagle] object MuxFramer {
   }
 
   /**
-   * Represents a tag stream while writing fragments. To avoid unncessary allocations
+   * Represents a tag stream while writing fragments. To avoid unnecessary allocations
    * `FragmentStream` carries some mutable state. In particular, `fragments` is a mutable
    * iterator and its contents should not be written concurrently.
    */

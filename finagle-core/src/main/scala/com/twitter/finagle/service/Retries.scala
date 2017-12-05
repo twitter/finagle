@@ -66,7 +66,7 @@ object Retries {
 
     /**
      * Default backoff stream to use for automatic retries.
-     * All Zero's.
+     * All Zeros.
      */
     val emptyBackoffSchedule = Backoff.constant(Duration.Zero)
 
@@ -95,33 +95,45 @@ object Retries {
    * (see [[RetryPolicy.RetryableWriteException]]).
    */
   private[finagle] def moduleRequeueable[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module3[Stats, Budget, HighResTimer, ServiceFactory[Req, Rep]] {
+    new Stack.Module[ServiceFactory[Req, Rep]] {
       def role: Stack.Role = Retries.Role
 
       def description: String =
         "Retries requests, at the service application level, that have been rejected"
 
+      val parameters = Seq(
+        implicitly[Stack.Param[Stats]],
+        implicitly[Stack.Param[Budget]],
+        implicitly[Stack.Param[HighResTimer]]
+      )
+
       def make(
-        statsP: param.Stats,
-        budgetP: Budget,
-        timerP: HighResTimer,
-        next: ServiceFactory[Req, Rep]
-      ): ServiceFactory[Req, Rep] = {
-        val statsRecv = statsP.statsReceiver
+        params: Stack.Params,
+        next: Stack[ServiceFactory[Req, Rep]]
+      ): Stack[ServiceFactory[Req, Rep]] = {
+        val statsRecv = params[Stats].statsReceiver
         val scoped = statsRecv.scope("retries")
         val requeues = scoped.counter("requeues")
-        val retryBudget = budgetP.retryBudget
-        val timer = timerP.timer
+        val budget = params[Budget]
+        val timer = params[HighResTimer].timer
+
+        // Filters/factories lower in the stack may also make use of the [[RetryBudget]] param.
+        // However, if this param is not configured explicitly, the default is used, which creates
+        // a new, unshared [[RetryBudget]]. In order to have a per-client budget shared across
+        // retry modules and all modules lower in the stack, we explicitly configure the param
+        // here.
+        val nextSvcFac = next.make(params + budget)
 
         val filters = newRequeueFilter(
-          retryBudget,
-          budgetP.requeueBackoffs,
+          budget.retryBudget,
+          budget.requeueBackoffs,
           withdrawsOnly = false,
           scoped,
           timer,
-          next
+          nextSvcFac
         )
-        svcFactory(retryBudget, filters, scoped, requeues, next)
+
+        Stack.Leaf(this, svcFactory(budget.retryBudget, filters, scoped, requeues, nextSvcFac))
       }
     }
 

@@ -1,16 +1,10 @@
 package com.twitter.finagle.zipkin.thrift
 
-import com.google.common.io.BaseEncoding
 import com.twitter.conversions.storage._
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Service, SimpleFilter, Thrift}
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.stats.{
-  BlacklistStatsReceiver,
-  ClientStatsReceiver,
-  NullStatsReceiver,
-  StatsReceiver
-}
+import com.twitter.finagle.stats.{BlacklistStatsReceiver, ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.Protocols
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.DefaultTimer
@@ -18,10 +12,12 @@ import com.twitter.finagle.zipkin.core.{RawZipkinTracer, Span, TracerCache}
 import com.twitter.finagle.zipkin.thriftscala.{LogEntry, ResultCode, Scribe}
 import com.twitter.scrooge.TReusableMemoryTransport
 import com.twitter.util._
-import java.io.CharArrayWriter
 import java.net.InetSocketAddress
+import java.nio.charset.StandardCharsets
+import java.util.{Arrays, Base64}
 import java.util.concurrent.ArrayBlockingQueue
 import org.apache.thrift.TByteArrayOutputStream
+import org.apache.thrift.protocol.TProtocol
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.NonFatal
 
@@ -188,50 +184,61 @@ private[thrift] class ScribeRawZipkinTracer(
   private[this] val initialSizeInBytes = initialBufferSize.inBytes.toInt
   private[this] val maxSizeInBytes = maxBufferSize.inBytes.toInt
 
+  private class LimitedSizeByteArrayOutputStream(
+    initSize: Int,
+    maxSize: Int
+  ) extends TByteArrayOutputStream(initSize) {
+
+    override def reset(): Unit = synchronized {
+      if (buf.length > maxSize) {
+         buf = new Array[Byte](maxSize)
+      }
+      super.reset()
+    }
+  }
+
   /**
    * A wrapper around the TReusableMemoryTransport from Scrooge that
    * also resets the size of the underlying buffer if it grows larger
    * than `maxBufferSize`
    */
-  private[this] val encoder = BaseEncoding.base64()
   private class ReusableTransport {
-    private[this] val baos = new TByteArrayOutputStream(initialSizeInBytes) {
-      private[this] val writer = new CharArrayWriter(initialSizeInBytes) {
-        override def reset(): Unit = {
-          super.reset()
-          if (buf.length > maxSizeInBytes) {
-            buf = new Array[Char](initialSizeInBytes)
-          }
-        }
-      }
-      @volatile private[this] var outStream = encoder.encodingStream(writer)
+    private[this] val thriftOutput =
+      new LimitedSizeByteArrayOutputStream(initialSizeInBytes, maxSizeInBytes)
 
-      override def reset(): Unit = {
-        writer.reset()
-        outStream = encoder.encodingStream(writer)
-        super.reset()
-      }
+    private[this] val transport = new TReusableMemoryTransport(thriftOutput)
+    val protocol: TProtocol = Protocols.binaryFactory().getProtocol(transport)
 
-      override def write(bytes: Array[Byte], off: Int, len: Int): Unit = {
-        outStream.write(bytes, off, len)
-      }
+    private[this] val base64Output =
+      new LimitedSizeByteArrayOutputStream(initialSizeInBytes, maxSizeInBytes)
 
-      def toBase64Line(): String = {
-        outStream.close()
-        writer.write('\n')
-        writer.toString()
-      }
+    def reset(): Unit = {
+      transport.reset()
+      base64Output.reset()
     }
 
-    private[this] val transport = new TReusableMemoryTransport(baos)
-    val protocol = Protocols.binaryFactory().getProtocol(transport)
+    def toBase64Line: String = {
+      // encode into a reusable OutputStream
+      val out = Base64.getEncoder.wrap(base64Output)
+      out.write(thriftOutput.get(), 0, thriftOutput.len())
+      out.flush()
+      out.close()
 
-    def reset(): Unit = transport.reset()
-    def toBase64Line(): String = baos.toBase64Line()
+      // ensure there is space in the byte array for a trailing \n
+      val encBytes = base64Output.get()
+      val encLen = base64Output.len()
+      val withNewline: Array[Byte] =
+        if (encLen + 1 <= encBytes.length) encBytes
+        else Arrays.copyOf(encBytes, encBytes.length + 1)
+
+      // add the trailing '\n'
+      withNewline(encLen) = '\n'
+      new String(withNewline, 0, encLen + 1, StandardCharsets.US_ASCII)
+    }
   }
 
   private[this] val bufferPool = new ArrayBlockingQueue[ReusableTransport](poolSize)
-  (0 until poolSize) foreach { _ =>
+  0.until(poolSize).foreach { _ =>
     bufferPool.add(new ReusableTransport)
   }
 
@@ -241,11 +248,11 @@ private[thrift] class ScribeRawZipkinTracer(
   private[this] def createLogEntries(spans: Seq[Span]): Seq[LogEntry] = {
     val entries = new ArrayBuffer[LogEntry](spans.size)
 
-    spans foreach { span =>
+    spans.foreach { span =>
       val transport = bufferPool.take()
       try {
         span.toThrift.write(transport.protocol)
-        entries.append(LogEntry(category = scribeCategory, message = transport.toBase64Line()))
+        entries.append(LogEntry(category = scribeCategory, message = transport.toBase64Line))
       } catch {
         case NonFatal(e) => errorReceiver.counter(e.getClass.getName).incr()
       } finally {
@@ -266,7 +273,7 @@ private[thrift] class ScribeRawZipkinTracer(
       .respond {
         case Return(ResultCode.Ok) => okCounter.incr()
         case Return(ResultCode.TryLater) => tryLaterCounter.incr()
-        case Return(_) => Unit
+        case Return(_) => ()
         case Throw(e) => errorReceiver.counter(e.getClass.getName).incr()
       }
       .unit

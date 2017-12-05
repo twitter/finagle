@@ -1,0 +1,9 @@
+{
+  "toggles": [
+    {
+      "id": "com.twitter.finagle.thriftmux.UsePushMuxClient",
+      "description": "Use the push-based Mux implementation for the underlying muxer",
+      "fraction": 0.0
+    }
+  ]
+}

@@ -1,10 +1,9 @@
 package com.twitter.finagle.thrift
 
-import com.google.common.base.Charsets
 import com.twitter.finagle.stats.{Counter, DefaultStatsReceiver, StatsReceiver}
 import com.twitter.logging.Logger
 import java.nio.{ByteBuffer, CharBuffer}
-import java.nio.charset.{CharsetEncoder, CoderResult, CodingErrorAction}
+import java.nio.charset.{CharsetEncoder, CoderResult, CodingErrorAction, StandardCharsets}
 import java.security.{PrivilegedExceptionAction, AccessController}
 import org.apache.thrift.protocol.{
   TMultiplexedProtocol,
@@ -38,7 +37,7 @@ object Protocols {
             }
           })
         } catch {
-          case NonFatal(t) =>
+          case NonFatal(_) =>
             Logger.get().info("%s unable to initialize sun.misc.Unsafe", getClass.getName)
             null
         }
@@ -92,7 +91,7 @@ object Protocols {
 
   def multiplex(serviceName: String, protocolFactory: TProtocolFactory): TProtocolFactory = {
     new TProtocolFactory {
-      def getProtocol(transport: TTransport) = {
+      def getProtocol(transport: TTransport): TMultiplexedProtocol = {
         new TMultiplexedProtocol(protocolFactory.getProtocol(transport), serviceName)
       }
     }
@@ -143,8 +142,8 @@ object Protocols {
       .getOrElse(Long.MinValue)
 
     private val charsetEncoder = new ThreadLocal[CharsetEncoder] {
-      override def initialValue() =
-        Charsets.UTF_8
+      override def initialValue(): CharsetEncoder =
+        StandardCharsets.UTF_8
           .newEncoder()
           .onMalformedInput(CodingErrorAction.REPLACE)
           .onUnmappableCharacter(CodingErrorAction.REPLACE)
@@ -154,7 +153,7 @@ object Protocols {
     private[thrift] val OutBufferSize = 16384
 
     private val outByteBuffer = new ThreadLocal[ByteBuffer] {
-      override def initialValue() = ByteBuffer.allocate(OutBufferSize)
+      override def initialValue(): ByteBuffer = ByteBuffer.allocate(OutBufferSize)
     }
   }
 

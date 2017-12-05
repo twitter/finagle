@@ -41,7 +41,7 @@ private[loadbalancer] trait ApertureSuite {
 
   case class Factory(i: Int) extends EndpointFactory[Unit, Unit] {
     def remake() = {}
-    def address = Address.Failed(new Exception)
+    def address: Address = Address.Failed(new Exception)
 
     var _total = 0
     var _outstanding = 0

@@ -14,7 +14,10 @@ import java.net.InetSocketAddress
 import scala.collection.{breakOut, mutable}
 
 /**
- * Helper class for managing the nodes in the Ketama ring
+ * Helper class for managing the nodes in the Ketama ring. Note that it tracks all addresses
+ * as weighted addresses, which means a weight change for a given node will be considered a
+ * node restart. This way implementations can adjust their partitions if weight is a factor
+ * in partitioning.
  */
 private[partitioning] class KetamaNodeManager[Req, Rep, Key](
   underlying: Stack[ServiceFactory[Req, Rep]],
@@ -103,7 +106,7 @@ private[partitioning] class KetamaNodeManager[Req, Rep, Key](
           self.synchronized {
             // Add new nodes for new addresses by finding the difference between the two sets
             mapped ++= (currAddrs &~ prevAddrs).collect {
-              case WeightedAddress(addr @ Address.Inet(ia, metadata), w) =>
+              case weightedAddr @ WeightedAddress(addr @ Address.Inet(ia, metadata), w) =>
                 val (shardIdOpt: Option[String], boundAddress: Addr) =
                   metadata match {
                     case CacheNodeMetadata(_, shardId) =>
@@ -121,7 +124,7 @@ private[partitioning] class KetamaNodeManager[Req, Rep, Key](
                 val key = KetamaClientKey.fromCacheNode(node)
                 val service = mkService(boundAddress, key)
 
-                addr -> (
+                weightedAddr -> (
                   key -> KetamaNode[Future[Service[Req, Rep]]](
                     key.identifier,
                     node.weight,
@@ -129,7 +132,7 @@ private[partitioning] class KetamaNodeManager[Req, Rep, Key](
                   )
                 )
             }
-            // Remove old nodes no longer in the serverset
+            // Remove old nodes no longer in the serverset.
             mapped --= prevAddrs &~ currAddrs
             prevAddrs = currAddrs
           }
@@ -244,8 +247,8 @@ private[partitioning] class KetamaNodeManager[Req, Rep, Key](
     }
   }
 
-  def getDistributor: Distributor[Future[Service[Req, Rep]]] = {
-    currentDistributor
+  def getServiceForHash(hash: Long): Future[Service[Req, Rep]] = {
+    currentDistributor.nodeForHash(hash)
   }
 
   def close(deadline: Time): Future[Unit] = {

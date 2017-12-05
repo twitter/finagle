@@ -5,7 +5,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.common.zookeeper.ZooKeeperClient
 import com.twitter.finagle.service.Backoff
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.util.{Duration, JavaTimer, FuturePool}
+import com.twitter.util.{Duration, FuturePool, JavaTimer, Return, Throw}
 import org.apache.zookeeper.Watcher.Event.KeeperState
 import org.apache.zookeeper.{WatchedEvent, Watcher}
 import scala.collection.JavaConversions._
@@ -93,23 +93,26 @@ trait ZookeeperStateMonitor {
     ): Unit = {
       DefaultFuturePool {
         op()
-      } onFailure { ex =>
-        zkWorkFailedCounter.incr()
-        backoff match {
-          case wait #:: rest =>
-            DefaultTimer.doLater(wait) { scheduleReadCachePoolConfig(op, rest) }
-        }
-      } onSuccess { _ =>
-        zkWorkSucceededCounter.incr()
-        loopZookeeperWork
+      }.respond {
+        case Return(_) =>
+          zkWorkSucceededCounter.incr()
+          loopZookeeperWork()
+        case Throw(ex) =>
+          zkWorkFailedCounter.incr()
+          backoff match {
+            case wait #:: rest =>
+              DefaultTimer.doLater(wait) {
+                scheduleReadCachePoolConfig(op, rest)
+              }
+          }
       }
     }
 
     // get one work item off the broker and schedule it into the future pool
-    zookeeperWorkQueue.recv.sync() onSuccess {
-      case op: (() => Unit) => {
+    zookeeperWorkQueue.recv.sync().respond {
+      case Return(op: (() => Unit)) =>
         scheduleReadCachePoolConfig(op)
-      }
+      case _ =>
     }
   }
 

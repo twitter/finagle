@@ -3,11 +3,8 @@ package com.twitter.finagle.http
 import com.twitter.conversions.time._
 import com.twitter.io.Buf
 import java.util.Date
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class MessageTest extends FunSuite {
 
   private def defaultMessages(): Seq[Message] = Seq(Request(), Response())

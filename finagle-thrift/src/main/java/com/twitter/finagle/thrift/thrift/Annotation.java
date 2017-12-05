@@ -17,8 +17,6 @@ import java.util.Collections;
 import java.util.BitSet;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.apache.thrift.*;
 import org.apache.thrift.async.*;
@@ -28,6 +26,10 @@ import org.apache.thrift.protocol.*;
 
 // No additional import required for struct/union.
 
+/**
+ * An annotation is similar to a log statement. It includes a host field which
+ * allows these events to be attributed properly, and also aggregatable.
+ */
 public class Annotation implements TBase<Annotation, Annotation._Fields>, java.io.Serializable, Cloneable {
   private static final TStruct STRUCT_DESC = new TStruct("Annotation");
 
@@ -37,12 +39,20 @@ public class Annotation implements TBase<Annotation, Annotation._Fields>, java.i
 
   public long timestamp;
   public String value;
+  /**
+   * Always the host that recorded the event. By specifying the host you allow
+   * rollup of all events (such as client requests to a service) by IP address.
+   */
   public Endpoint host;
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements TFieldIdEnum {
     TIMESTAMP((short)1, "timestamp"),
     VALUE((short)2, "value"),
+    /**
+     * Always the host that recorded the event. By specifying the host you allow
+     * rollup of all events (such as client requests to a service) by IP address.
+     */
     HOST((short)3, "host");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
@@ -105,8 +115,7 @@ public class Annotation implements TBase<Annotation, Annotation._Fields>, java.i
 
   // isset id assignments
   private static final int __TIMESTAMP_ISSET_ID = 0;
-  private static final int __DURATION_ISSET_ID = 1;
-  private BitSet __isset_bit_vector = new BitSet(2);
+  private BitSet __isset_bit_vector = new BitSet(1);
 
   public static final Map<_Fields, FieldMetaData> metaDataMap;
   static {
@@ -208,10 +217,18 @@ public class Annotation implements TBase<Annotation, Annotation._Fields>, java.i
     }
   }
 
+  /**
+   * Always the host that recorded the event. By specifying the host you allow
+   * rollup of all events (such as client requests to a service) by IP address.
+   */
   public Endpoint getHost() {
     return this.host;
   }
 
+  /**
+   * Always the host that recorded the event. By specifying the host you allow
+   * rollup of all events (such as client requests to a service) by IP address.
+   */
   public Annotation setHost(Endpoint host) {
     this.host = host;
     return this;

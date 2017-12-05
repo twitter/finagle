@@ -17,8 +17,6 @@ import java.util.Collections;
 import java.util.BitSet;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.apache.thrift.*;
 import org.apache.thrift.async.*;
@@ -28,6 +26,15 @@ import org.apache.thrift.protocol.*;
 
 // No additional import required for struct/union.
 
+/**
+ * Indicates the network context of a service recording an annotation with two
+ * exceptions.
+ *
+ * When a BinaryAnnotation, and key is CLIENT_ADDR or SERVER_ADDR,
+ * the endpoint indicates the source or destination of an RPC. This exception
+ * allows zipkin to display network context of uninstrumented services, or
+ * clients such as web browsers.
+ */
 public class Endpoint implements TBase<Endpoint, Endpoint._Fields>, java.io.Serializable, Cloneable {
   private static final TStruct STRUCT_DESC = new TStruct("Endpoint");
 

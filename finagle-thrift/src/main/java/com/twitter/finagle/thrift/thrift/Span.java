@@ -17,8 +17,6 @@ import java.util.Collections;
 import java.util.BitSet;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.apache.thrift.*;
 import org.apache.thrift.async.*;
@@ -28,6 +26,13 @@ import org.apache.thrift.protocol.*;
 
 // No additional import required for struct/union.
 
+/**
+ * A trace is a series of spans (often RPC calls) which form a latency tree.
+ *
+ * The root span is where trace_id = id and parent_id = Nil. The root span is
+ * usually the longest interval in the trace, starting with a SERVER_RECV
+ * annotation and ending with a SERVER_SEND.
+ */
 public class Span implements TBase<Span, Span._Fields>, java.io.Serializable, Cloneable {
   private static final TStruct STRUCT_DESC = new TStruct("Span");
 

@@ -1,8 +1,8 @@
 package com.twitter.finagle.http
 
 import com.twitter.collection.RecordSchema
-import com.twitter.finagle.http.codec.HttpCodec
-import com.twitter.finagle.http.exp.Multipart
+import com.twitter.finagle.http.exp.{Multipart, MultipartDecoder}
+import com.twitter.finagle.http.netty3.Netty3MultipartDecoder
 import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util.Closable
 import java.net.{InetAddress, InetSocketAddress}
@@ -48,11 +48,7 @@ abstract class Request private extends Message {
    * multipart HTTP data and it will likely be changed in future in order
    * to support streaming requests.
    */
-  def multipart: Option[Multipart] = _multipart
-  private[this] lazy val _multipart: Option[Multipart] =
-    if (!isChunked && method == Method.Post)
-      Some(Multipart.decodeNonChunked(this))
-    else None
+  def multipart: Option[Multipart]
 
   /**
    * Returns the HTTP method of this request.
@@ -215,16 +211,6 @@ abstract class Request private extends Message {
   @deprecated("Use the Response constructor functions", "2016-12-29")
   def getResponse(): Response = response
 
-  /** Encode an HTTP message to String. */
-  @deprecated("Use HttpCodec.encodeRequestToString", "2017-08-15")
-  def encodeString(): String =
-    HttpCodec.encodeRequestToString(this)
-
-  /** Encode an HTTP message to Array[Byte] */
-  @deprecated("Use HttpCodec.encodeRequestToBytes", "2017-08-15")
-  def encodeBytes(): Array[Byte] =
-    HttpCodec.encodeRequestToBytes(this)
-
   override def toString: String =
     s"""Request("$method $uri", from $remoteSocketAddress)"""
 }
@@ -237,16 +223,6 @@ object Request {
    * for Request.ctx.
    */
   val Schema: RecordSchema = new RecordSchema
-
-  /** Decode a Request from a String */
-  @deprecated("Use HttpCodec.decodeStringToRequest", "2017-08-15")
-  def decodeString(s: String): Request =
-    HttpCodec.decodeStringToRequest(s)
-
-  /** Decode a Request from Array[Byte] */
-  @deprecated("Use HttpCodec.decodeBytesToRequest", "2017-08-15")
-  def decodeBytes(b: Array[Byte]): Request =
-    HttpCodec.decodeBytesToRequest(b)
 
   /**
    * Create an HTTP/1.1 GET Request from query string parameters.
@@ -272,26 +248,26 @@ object Request {
   }
 
   /**
-   * Create an HTTP/1.1 GET Request from URI string.
-   * */
+   * Create an HTTP/1.1 GET request from URI string.
+   */
   def apply(uri: String): Request =
     apply(Method.Get, uri)
 
   /**
-   * Create an HTTP/1.1 GET Request from method and URI string.
+   * Create an HTTP/1.1 request from method and URI string.
    */
   def apply(method: Method, uri: String): Request =
     apply(Version.Http11, method, uri)
 
   /**
-   * Create an HTTP/1.1 GET Request from version, method, and URI string.
+   * Create an HTTP/1.1 request from version, method, and URI string.
    */
   def apply(version: Version, method: Method, uri: String): Request = {
     // Since this is a user made `Request` we use the joined Reader.writable so they
     // can keep a handle to the writer half and the client implementation can use
     // the reader half.
     val rw = Reader.writable()
-    val req = new RequestImpl(rw, rw, new InetSocketAddress(0))
+    val req = new Request.Impl(rw, rw, new InetSocketAddress(0), Netty3MultipartDecoder)
     req.version = version
     req.method = method
     req.uri = uri
@@ -299,7 +275,7 @@ object Request {
   }
 
   /**
-   * Create an HTTP/1.1 GET Request from Version, Method, URI, and Reader.
+   * Create an HTTP/1.1 request from Version, Method, URI, and Reader.
    *
    * A [[com.twitter.io.Reader]] is a stream of bytes serialized to HTTP chunks.
    * `Reader`s are useful for representing streaming data in the body of the
@@ -321,16 +297,14 @@ object Request {
     method: Method,
     uri: String,
     reader: Reader
-  ): Request = chunked(version, method, uri, reader, new InetSocketAddress(0))
-
-  private[finagle] def chunked(
-    version: Version,
-    method: Method,
-    uri: String,
-    reader: Reader,
-    remoteAddr: InetSocketAddress
   ): Request = {
-    val req = new RequestImpl(reader, Writer.FailingWriter, remoteAddr)
+    val req = new Request.Impl(
+      reader,
+      Writer.FailingWriter,
+      new InetSocketAddress(0),
+      Netty3MultipartDecoder
+    )
+
     req.setChunked(true)
     req.version = version
     req.method = method
@@ -388,6 +362,7 @@ object Request {
     def uri: String = request.uri
 
     // These should never need to be overridden
+    final def multipart: Option[Multipart] = request.multipart
     final def method: Method = request.method
     final def method_=(method: Method): Unit = request.method_=(method)
     final def uri_=(uri: String): Unit = request.uri_=(uri)
@@ -399,13 +374,16 @@ object Request {
     final override def setChunked(chunked: Boolean): Unit = request.setChunked(chunked)
   }
 
-  final private class RequestImpl(
+  private[finagle] final class Impl(
     val reader: Reader,
     val writer: Writer with Closable,
-    val remoteSocketAddress: InetSocketAddress
+    val remoteSocketAddress: InetSocketAddress,
+    val multipartDecoder: MultipartDecoder
   ) extends Request {
+
     private var _method: Method = Method.Get
     private var _uri: String = ""
+    private lazy val _multipart: Option[Multipart] = multipartDecoder(this)
 
     def method: Method = _method
     def method_=(method: Method): Unit = {
@@ -416,5 +394,7 @@ object Request {
     def uri_=(uri: String): Unit = {
       _uri = uri
     }
+
+    def multipart: Option[Multipart] = _multipart
   }
 }

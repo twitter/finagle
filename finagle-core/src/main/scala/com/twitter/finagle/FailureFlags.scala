@@ -45,6 +45,11 @@ object FailureFlags {
   val NonRetryable: Long = 1L << 4
 
   /**
+   * Ignorable indicates that this failure can be ignored and should not be surfaced via stats.
+   */
+  private[twitter] val Ignorable: Long = 1L << 5
+
+  /**
    * Naming indicates a naming failure. This is Finagle-internal.
    */
   private[finagle] val Naming: Long = 1L << 32

@@ -5,10 +5,10 @@ import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.service.Retries
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.finagle.thrift.Protocols
+import com.twitter.finagle.thrift.{Protocols, ThriftUtil}
 import com.twitter.finagle.thriftmux.thriftscala.TestService
 import com.twitter.io.Buf
-import com.twitter.util.{Return, Await, Future}
+import com.twitter.util.{Await, Future, Return}
 import java.net.{InetAddress, InetSocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite

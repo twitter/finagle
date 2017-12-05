@@ -17,8 +17,6 @@ import java.util.Collections;
 import java.util.BitSet;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.apache.thrift.*;
 import org.apache.thrift.async.*;
@@ -28,6 +26,21 @@ import org.apache.thrift.protocol.*;
 
 // No additional import required for struct/union.
 
+/**
+ * Binary annotations are tags applied to a Span to give it context. For
+ * example, a binary annotation of "http.uri" could convert the path to a resource
+ * in an RPC call.
+ *
+ * Binary annotations of type STRING are always queryable, though more of a
+ * historical implementation detail than a structural concern.
+ *
+ * Binary annotations can repeat, and vary on the host. Similar to Annotation,
+ * the host indicates who logged the event. This allows you to tell the
+ * difference between the client and server side of the same key. For example,
+ * the key "http.uri" might be different on the client and server side due to
+ * rewriting, like "/api/v1/myresource" vs "/myresource. Via the host field,
+ * you can see the different points of view, which often help in debugging.
+ */
 public class BinaryAnnotation implements TBase<BinaryAnnotation, BinaryAnnotation._Fields>, java.io.Serializable, Cloneable {
   private static final TStruct STRUCT_DESC = new TStruct("BinaryAnnotation");
 
@@ -43,6 +56,14 @@ public class BinaryAnnotation implements TBase<BinaryAnnotation, BinaryAnnotatio
    * @see AnnotationType
    */
   public AnnotationType annotation_type;
+  /**
+   * The host that recorded tag, which allows you to differentiate between
+   * multiple tags with the same key. There are two exceptions to this:
+   *
+   * When the key is CLIENT_ADDR or SERVER_ADDR, host indicates the source or
+   * destination of an RPC. This exception allows zipkin to display network
+   * context of uninstrumented services, or clients such as web browsers.
+   */
   public Endpoint host;
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
@@ -54,6 +75,14 @@ public class BinaryAnnotation implements TBase<BinaryAnnotation, BinaryAnnotatio
      * @see AnnotationType
      */
     ANNOTATION_TYPE((short)3, "annotation_type"),
+    /**
+     * The host that recorded tag, which allows you to differentiate between
+     * multiple tags with the same key. There are two exceptions to this.
+     *
+     * When the key is CLIENT_ADDR or SERVER_ADDR, host indicates the source or
+     * destination of an RPC. This exception allows zipkin to display network
+     * context of uninstrumented services, or clients such as web browsers.
+     */
     HOST((short)4, "host");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
@@ -268,10 +297,26 @@ public class BinaryAnnotation implements TBase<BinaryAnnotation, BinaryAnnotatio
     }
   }
 
+  /**
+   * The host that recorded tag, which allows you to differentiate between
+   * multiple tags with the same key. There are two exceptions to this.
+   *
+   * When the key is CLIENT_ADDR or SERVER_ADDR, host indicates the source or
+   * destination of an RPC. This exception allows zipkin to display network
+   * context of uninstrumented services, or clients such as web browsers.
+   */
   public Endpoint getHost() {
     return this.host;
   }
 
+  /**
+   * The host that recorded tag, which allows you to differentiate between
+   * multiple tags with the same key. There are two exceptions to this.
+   *
+   * When the key is CLIENT_ADDR or SERVER_ADDR, host indicates the source or
+   * destination of an RPC. This exception allows zipkin to display network
+   * context of uninstrumented services, or clients such as web browsers.
+   */
   public BinaryAnnotation setHost(Endpoint host) {
     this.host = host;
     return this;

@@ -8,7 +8,6 @@ scala_library(
     '3rdparty/jvm/com/fasterxml/jackson/core:jackson-databind',
     '3rdparty/jvm/com/fasterxml/jackson/module:jackson-module-scala',
     '3rdparty/jvm/com/github/ben-manes/caffeine:caffeine',
-    '3rdparty/jvm/com/google/guava',
     '3rdparty/jvm/com/google/inject:guice',
     '3rdparty/jvm/com/twitter/bijection:core',
     '3rdparty/jvm/io/netty:netty4',
@@ -39,7 +38,6 @@ scala_library(
   # NB: This is not an actual dependency, but is necessary to have Pants behave
   #     like SBT, throwing an error for "import java.*" statements.
   java_sources=['finagle/finagle-memcached/src/main/java'],
-  strict_deps=True,
   exports=[
     '3rdparty/jvm/com/twitter/bijection:core',
     'finagle/finagle-core/src/main/scala:scala',

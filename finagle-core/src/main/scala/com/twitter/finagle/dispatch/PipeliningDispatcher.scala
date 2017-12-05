@@ -6,7 +6,7 @@ import com.twitter.finagle.{Failure, Stack}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.logging.Logger
-import com.twitter.util.{Duration, Future, Promise, Time, Timer, Try}
+import com.twitter.util._
 
 /**
  * A generic pipelining dispatcher, which assumes that servers will
@@ -37,20 +37,20 @@ abstract class GenPipeliningDispatcher[Req, Rep, In, Out, T](
   private[this] var stalled = false
   private[this] val q = new AsyncQueue[Pending[T, Rep]]
 
-  private[this] val queueSize =
-    statsReceiver.scope("pipelining").addGauge("pending") {
-      q.size
-    }
+  // exposed for testing
+  private[dispatch] def queueSize: Int = q.size
 
-  private[this] val transRead: Pending[T, Rep] => Unit =
-    p =>
+  private[this] val transRead: Try[Pending[T, Rep]] => Unit = {
+    case Return(p) =>
       trans.read().respond { out =>
         try respond(p.value, p.promise, out)
         finally loop()
-    }
+      }
+    case _ =>
+  }
 
   private[this] def loop(): Unit =
-    q.poll().onSuccess(transRead)
+    q.poll().respond(transRead)
 
   loop()
 
