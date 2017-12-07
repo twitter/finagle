@@ -1,11 +1,12 @@
 package com.twitter.finagle.http
 
-import com.twitter.{finagle => ctf}
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.{Name, Resolver, Service, client}
 import com.twitter.util.Duration
+import com.twitter.util.tunable.Tunable
+import com.twitter.{finagle => ctf}
 
 object MethodBuilder {
 
@@ -204,7 +205,13 @@ class MethodBuilder private (mb: client.MethodBuilder[Request, Response])
   def withTimeoutTotal(howLong: Duration): MethodBuilder =
     new MethodBuilder(mb.withTimeout.total(howLong))
 
+  def withTimeoutTotal(howLong: Tunable[Duration]): MethodBuilder =
+    new MethodBuilder(mb.withTimeout.total(howLong))
+
   def withTimeoutPerRequest(howLong: Duration): MethodBuilder =
+    new MethodBuilder(mb.withTimeout.perRequest(howLong))
+
+  def withTimeoutPerRequest(howLong: Tunable[Duration]): MethodBuilder =
     new MethodBuilder(mb.withTimeout.perRequest(howLong))
 
   def withRetryForClassifier(classifier: ResponseClassifier): MethodBuilder =

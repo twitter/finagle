@@ -10,6 +10,10 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
+  * finagle-core: Expose Tunables for MethodBuilder timeout configuration. Update
+    the http.MethodBuilder and thriftmux.MethodBuilder to accept Tunables for
+    configuring total and per-request timeouts. ``PHAB_ID=D118114``
+
   * finagle-thrift, finagle-thriftmux: Add support for Scrooge
     `ReqRepServicePerEndpoint` functionality. ``PHAB_ID=D107397``
 

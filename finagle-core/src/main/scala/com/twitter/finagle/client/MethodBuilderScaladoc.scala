@@ -2,6 +2,7 @@ package com.twitter.finagle.client
 
 import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.util.Duration
+import com.twitter.util.tunable.Tunable
 
 /**
  * @note This interface primarily exists to share Scaladocs across
@@ -23,6 +24,7 @@ private[finagle] trait MethodBuilderScaladoc[T] {
    * {{{
    * import com.twitter.conversions.time._
    * import com.twitter.finagle.http.Http
+   * import com.twitter.util.Duration
    *
    * val client: Http.Client = ???
    * val builder = client.methodBuilder("inet!example.com:80")
@@ -39,6 +41,40 @@ private[finagle] trait MethodBuilderScaladoc[T] {
    * @return a new instance with all other settings copied
    */
   def withTimeoutTotal(howLong: Duration): T
+
+  /**
+   * Set a total timeout with a [[Tunable]], including time spent on retries.
+   *
+   * If the request does not complete in this time, the response
+   * will be satisfied with a [[com.twitter.finagle.GlobalRequestTimeoutException]].
+   *
+   * Defaults to using the client's configuration for
+   * [[com.twitter.finagle.service.TimeoutFilter.TotalTimeout(timeout)]].
+   *
+   * @example
+   * For example, a total timeout of 200 milliseconds:
+   * {{{
+   * import com.twitter.conversions.time._
+   * import com.twitter.finagle.http.Http
+   * import com.twitter.util.Duration
+   * import com.twitter.util.tunable.Tunable
+   *
+   * val client: Http.Client = ???
+   * val tunableTimeout: Tunable[Duration] = Tunable.const("id", 200.milliseconds)
+   * val builder = client.methodBuilder("inet!example.com:80")
+   * builder.withTimeoutTotal(tunableTimeout))
+   * }}}
+   *
+   * @param howLong how long, from the initial request issuance,
+   *                is the request given to complete.
+   *                If it is not finite (e.g. `Duration.Top`),
+   *                no method specific timeout will be applied.
+   *
+   * @see [[withTimeoutPerRequest(Tunable[Duration])]]
+   *
+   * @return a new instance with all other settings copied
+   */
+  def withTimeoutTotal(howLong: Tunable[Duration]): T
 
   /**
    * How long a '''single''' request is given to complete.
@@ -59,6 +95,7 @@ private[finagle] trait MethodBuilderScaladoc[T] {
    * {{{
    * import com.twitter.conversions.time._
    * import com.twitter.finagle.http.Http
+   * import com.twitter.util.Duration
    *
    * val client: Http.Client = ???
    * val builder = client.methodBuilder("inet!example.com:80")
@@ -75,6 +112,45 @@ private[finagle] trait MethodBuilderScaladoc[T] {
    * @return a new instance with all other settings copied
    */
   def withTimeoutPerRequest(howLong: Duration): T
+
+  /**
+   * How long a '''single''' request is given to complete.
+   *
+   * If there are [[withRetryForClassifier retries]], each attempt is given up
+   * to this amount of time.
+   *
+   * If a request does not complete within this time, the response
+   * will be satisfied with a [[com.twitter.finagle.IndividualRequestTimeoutException]].
+   *
+   * Defaults to using the client's configuration for
+   * [[com.twitter.finagle.service.TimeoutFilter.Param(timeout)]],
+   * which is typically set via
+   * [[com.twitter.finagle.param.CommonParams.withRequestTimeout]].
+   *
+   * @example
+   * For example, a per-request timeout of 50 milliseconds:
+   * {{{
+   * import com.twitter.conversions.time._
+   * import com.twitter.finagle.http.Http
+   * import com.twitter.util.Duration
+   * import com.twitter.util.tunable.Tunable
+   *
+   * val client: Http.Client = ???
+   * val tunableTimeout: Tunable[Duration] = Tunable.const("id", 50.milliseconds)
+   * val builder = client.methodBuilder("inet!example.com:80")
+   * builder.withTimeoutPerRequest(tunableTimeout))
+   * }}}
+   *
+   * @param howLong how long, from the initial request issuance,
+   *                an individual attempt given to complete.
+   *                If it is not finite (e.g. `Duration.Top`),
+   *                no method specific timeout will be applied.
+   *
+   * @see [[withTimeoutTotal(Tunable[Duration])]]
+   *
+   * @return a new instance with all other settings copied
+   */
+  def withTimeoutPerRequest(howLong: Tunable[Duration]): T
 
   /**
    * Retry based on [[ResponseClassifier]].
