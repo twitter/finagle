@@ -229,7 +229,12 @@ class PgClientChannelHandler(
         val sslHandler = new SslHandler(engine)
         pipeline.addFirst("ssl", sslHandler)
 
-        val verifier = SslClientSessionVerifier.AlwaysValid
+        val verifier: SSLSession => Boolean = inetAddr match {
+          case Some(inet) =>
+            session => HostnameVerifier(Address(inet), SslClientConfiguration(hostname = Some(inet.getHostName)),session)
+          case None =>
+            _ => true
+        }
 
         connection.receive(SwitchToSsl).foreach {
           Channels.fireMessageReceived(ctx, _)
