@@ -9,6 +9,7 @@ import com.twitter.finagle.toggle.flag.overrides
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
 import com.twitter.util.{Closable, Future}
+import io.netty.handler.codec.http2.Http2CodecUtil
 import java.net.InetSocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -177,5 +178,18 @@ class Http2EndToEndTest extends AbstractEndToEndTest {
       }
       await(Closable.all(client, server).close())
     }
+  }
+
+  test("We delete the HTTP2-SETTINGS header properly") {
+    @volatile var headers: HeaderMap = null
+    val server = serverImpl().serve("localhost:*", Service.mk { req: Request =>
+      headers = req.headerMap
+      Future.value(Response())
+    })
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl().newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
+
+    await(client(Request("/")))
+    assert(!headers.contains(Http2CodecUtil.HTTP_UPGRADE_SETTINGS_HEADER.toString))
   }
 }

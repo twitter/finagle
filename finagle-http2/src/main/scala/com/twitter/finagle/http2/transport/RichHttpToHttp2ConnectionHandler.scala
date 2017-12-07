@@ -34,7 +34,6 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
       val combiner = new PromiseCombiner()
       msg match {
         case req: HttpRequest =>
-          RichHttp2ServerDowngrader.stripConnectionHeaders(req.headers)
           val headers = HttpConversionUtil.toHttp2Headers(req, false /* validateHeaders */ )
           val endStream = req match {
             case full: FullHttpRequest if !full.content.isReadable => true

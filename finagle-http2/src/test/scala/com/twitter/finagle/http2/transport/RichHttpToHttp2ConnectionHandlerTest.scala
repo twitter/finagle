@@ -6,8 +6,7 @@ import io.netty.channel.{DefaultChannelPromise, ChannelHandlerContext}
 import io.netty.handler.codec.http.{
   DefaultFullHttpRequest,
   HttpMethod,
-  HttpVersion,
-  HttpHeaderNames
+  HttpVersion
 }
 import io.netty.handler.codec.http2.HttpConversionUtil.ExtensionHeaderNames
 import io.netty.handler.codec.http2._
@@ -87,30 +86,6 @@ class RichHttpToHttp2ConnectionHandlerTest extends FunSuite with BeforeAndAfter 
       anyObject(),
       meq(streamDependencyId),
       meq(weight),
-      meq(false),
-      meq(0),
-      meq(true),
-      meq(promise)
-    )
-  }
-
-  test("Client properly strips bad headers") {
-    val streamId: Int = 1
-    val defaultStreamDependency = 0
-    val defaultWeight = Http2CodecUtil.DEFAULT_PRIORITY_WEIGHT
-    request.headers.add(HttpHeaderNames.TE, "cool")
-    request.headers.add(HttpHeaderNames.CONNECTION, "bad")
-    request.headers.add("bad", "news")
-
-    val message = Message(request, 1)
-
-    connectionHandler.write(mockCtx, message, promise)
-    verify(mockEncoder).writeHeaders(
-      meq(mockCtx),
-      meq(streamId),
-      anyObject(),
-      meq(defaultStreamDependency),
-      meq(defaultWeight),
       meq(false),
       meq(0),
       meq(true),

@@ -62,6 +62,7 @@ private[http2] class UpgradeRequestHandler(params: Stack.Params) extends Channel
               "aggregate",
               new AdapterProxyChannelHandler({ pipeline: ChannelPipeline =>
                 pipeline.addLast("schemifier", new SchemifyingHandler("http"))
+                pipeline.addLast(StripHeadersHandler.HandlerName, StripHeadersHandler)
                 initClient(params)(pipeline)
              })
             )

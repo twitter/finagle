@@ -6,8 +6,8 @@ import com.twitter.finagle.http2.param.FrameLoggerNamePrefix
 import com.twitter.finagle.http2.transport.{
   Http2NackHandler,
   PriorKnowledgeHandler,
-  RichHttp2ServerDowngrader,
-  RstHandler
+  RstHandler,
+  StripHeadersHandler
 }
 import com.twitter.finagle.netty4.http.{HttpCodecName, initServer}
 import com.twitter.finagle.netty4.param.Allocator
@@ -42,10 +42,12 @@ private[http2] class Http2CleartextServerInitializer(
   val initializer = new ChannelInitializer[Channel] {
     def initChannel(ch: Channel): Unit = {
       ch.config().setAllocator(params[Allocator].allocator)
-
       ch.pipeline.addLast(new Http2NackHandler)
-
-      ch.pipeline.addLast(new RichHttp2ServerDowngrader(validateHeaders = false))
+      ch.pipeline.addLast(new Http2StreamFrameToHttpObjectCodec(
+        true /* isServer */,
+        false /* validateHeaders */
+      ))
+      ch.pipeline.addLast(StripHeadersHandler.HandlerName, StripHeadersHandler)
       ch.pipeline.addLast(new RstHandler())
       initServer(params)(ch.pipeline)
       ch.pipeline.addLast(init)

@@ -23,6 +23,7 @@ private[http2] class ClientNpnOrAlpnHandler(connectionHandler: ChannelHandler, p
           "aggregate",
           new AdapterProxyChannelHandler({ pipeline =>
             pipeline.addLast("schemifier", new SchemifyingHandler("https"))
+            pipeline.addLast(StripHeadersHandler.HandlerName, StripHeadersHandler)
             initClient(params)(pipeline)
           })
         )
