@@ -3,7 +3,7 @@ package com.twitter.finagle
 import com.twitter.finagle.Stack.{Param, Params, Role}
 import com.twitter.finagle.client.{StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.dispatch.SerialClientDispatcher
-import com.twitter.finagle.factory.BindingFactory.Dest
+import com.twitter.finagle.naming.BindingFactory.Dest
 import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.param._
 import com.twitter.finagle.postgres.codec._
@@ -13,7 +13,7 @@ import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.service._
 import com.twitter.finagle.ssl.client.SslClientEngineFactory
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.{Monitor => _, _}
 import com.twitter.logging.Logger
 import java.net.SocketAddress
@@ -103,6 +103,7 @@ object Postgres {
     with WithSessionPool[Client] with WithDefaultLoadBalancer[Client] {
     type In = PgRequest
     type Out = PgResponse
+    type Context = TransportContext
 
     def newRichClient(): postgres.PostgresClientImpl = {
 
@@ -154,9 +155,9 @@ object Postgres {
 
     def conditionally(bool: Boolean, conf: Client => Client) = if(bool) conf(this) else this
 
-    protected def newTransporter(addr: SocketAddress): Transporter[In, Out] = mkTransport(params, addr)
+    protected def newTransporter(addr: SocketAddress): Transporter[In, Out, Context] = mkTransport(params, addr)
 
-    protected def newDispatcher(transport: Transport[In, Out]): Service[PgRequest, PgResponse] = {
+    protected def newDispatcher(transport: Transport[In, Out] { type Context <: Client.this.Context }): Service[PgRequest, PgResponse] = {
       new Dispatcher(
         transport,
         params[Stats].statsReceiver
