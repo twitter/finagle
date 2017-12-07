@@ -97,7 +97,7 @@ abstract class AbstractSmuxTest extends FunSuite {
       // we check that it's non-empty to ensure that it was correctly installed
       assert(!string.isEmpty)
       // check that the payload isn't in cleartext over the wire
-      assert(!string.contains("." * 10))
+      assert(!string.contains("2e" * 10))
     })
   }
 

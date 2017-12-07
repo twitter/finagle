@@ -1,6 +1,6 @@
 package com.twitter.finagle.netty4.channel
 
-import io.netty.buffer.ByteBuf
+import io.netty.buffer.{ByteBuf, ByteBufUtil}
 import io.netty.buffer.Unpooled.wrappedBuffer
 import io.netty.channel._
 import java.net.InetSocketAddress
@@ -23,7 +23,7 @@ class ChannelSnooperTest extends FunSuite with MockitoSugar {
         messageCount += 1
         assert(buf == msgBuffer)
         super.dump({ (_: Channel, m: String) =>
-          assert(msg == m)
+          assert(ByteBufUtil.hexDump(msgBuffer) == m)
         }, ch, buf)
       }
     }

@@ -60,18 +60,20 @@ abstract class AbstractThriftSmuxTest extends FunSuite {
     for {
       (clientLevel, serverLevel) <- testCases
     } {
-      val buffer = new StringBuffer()
-      val stats = new InMemoryStatsReceiver
+      withClue(s"clientOppTlsLevel=$clientLevel serverOppTlsLevel=$serverLevel") {
+        val buffer = new StringBuffer()
+        val stats = new InMemoryStatsReceiver
 
-      flag.overrides.let(Mux.param.MuxImpl.TlsHeadersToggleId, 1.0) {
-        val server = serve(serverLevel)
-        val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+        flag.overrides.let(Mux.param.MuxImpl.TlsHeadersToggleId, 1.0) {
+          val server = serve(serverLevel)
+          val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
 
-        val client = newService(clientLevel, record(buffer), stats, addr)
-        val results = await(client.query("." * 10).liftToTry)
-        testFn(results, buffer.toString, stats)
+          val client = newService(clientLevel, record(buffer), stats, addr)
+          val results = await(client.query("." * 10).liftToTry)
+          testFn(results, buffer.toString, stats)
 
-        Await.ready(server.close(), 10.seconds)
+          Await.ready(server.close(), 10.seconds)
+        }
       }
     }
   }
@@ -83,7 +85,7 @@ abstract class AbstractThriftSmuxTest extends FunSuite {
       // we check that it's non-empty to ensure that it was correctly installed
       assert(!string.isEmpty)
       // check that the payload isn't in cleartext over the wire
-      assert(!string.toString.contains("." * 10))
+      assert(!string.toString.contains("2e" * 10))
     })
   }
 
@@ -103,24 +105,28 @@ abstract class AbstractThriftSmuxTest extends FunSuite {
 
   test("thriftsmux: can't create a client with an invalid OppTls config") {
     for (level <- Seq(OpportunisticTls.Required, OpportunisticTls.Desired)) {
-      val client = clientImpl()
-      intercept[IllegalStateException] {
-        val addr = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-        client.withOpportunisticTls(level)
-          .newIface[TestService.FutureIface](
-          Name.bound(Address(addr)),
-          "client"
-        )
+      withClue(s"level=$level") {
+        val client = clientImpl()
+        intercept[IllegalStateException] {
+          val addr = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
+          client.withOpportunisticTls(level)
+            .newIface[TestService.FutureIface](
+            Name.bound(Address(addr)),
+            "client"
+          )
+        }
       }
     }
   }
 
   test("thriftsmux: can't create a server with an invalid OppTls config") {
     for (level <- Seq(OpportunisticTls.Required, OpportunisticTls.Desired)) {
-      val server = serverImpl()
-      intercept[IllegalStateException] {
-        val addr = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-        server.withOpportunisticTls(level).serveIface(addr, concatIface)
+      withClue(s"level=$level") {
+        val server = serverImpl()
+        intercept[IllegalStateException] {
+          val addr = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
+          server.withOpportunisticTls(level).serveIface(addr, concatIface)
+        }
       }
     }
   }
@@ -177,8 +183,8 @@ object AbstractThriftSmuxTest {
   def record(buffer: StringBuffer)(client: ThriftMux.Client): ThriftMux.Client = {
     val recordingPrinter: (Stack.Params, ChannelPipeline) => Unit = (params, pipeline) => {
       Mux.Client.tlsEnable(params, pipeline)
-      pipeline.addFirst(ChannelSnooper.byteSnooper("whatever") { (string, _) =>
-        buffer.append(string)
+      pipeline.addFirst(ChannelSnooper.byteSnooper("snoop") { (string, _) =>
+        buffer.append(string + "\n")
       })
     }
 
