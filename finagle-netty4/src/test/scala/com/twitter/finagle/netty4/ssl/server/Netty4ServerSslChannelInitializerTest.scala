@@ -12,15 +12,12 @@ import com.twitter.io.TempFile
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.ssl.SslHandler
 import javax.net.ssl.SSLContext
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class Netty4ServerSslHandlerTest extends FunSuite {
 
   def channel(ps: Stack.Params): EmbeddedChannel =
-    new EmbeddedChannel(new Netty4ServerSslHandler(ps))
+    new EmbeddedChannel(new Netty4ServerSslChannelInitializer(ps))
 
   def useKeyCredentials(): KeyCredentials = {
     val tempCertFile = TempFile.fromResourcePath("/ssl/certs/svc-test-server.cert.pem")
@@ -60,8 +57,8 @@ class Netty4ServerSslHandlerTest extends FunSuite {
       val ch = channel(params)
       val pipeline = ch.pipeline()
 
-      val serverHandler = pipeline.get(classOf[Netty4ServerSslHandler])
-      assert(serverHandler == null)
+      val channelInitializer = pipeline.get(classOf[Netty4ServerSslChannelInitializer])
+      assert(channelInitializer == null)
 
       ch.finishAndReleaseAll()
     }

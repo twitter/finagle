@@ -14,15 +14,12 @@ import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.ssl.SslHandler
 import java.net.InetSocketAddress
 import javax.net.ssl.SSLContext
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
-class Netty4ClientSslHandlerTest extends FunSuite {
+class Netty4ClientSslChannelInitializerTest extends FunSuite {
 
   def channel(ps: Stack.Params): EmbeddedChannel =
-    new EmbeddedChannel(new Netty4ClientSslHandler(ps))
+    new EmbeddedChannel(new Netty4ClientSslChannelInitializer(ps))
 
   def useKeyCredentials(): KeyCredentials = {
     val tempCertFile = TempFile.fromResourcePath("/ssl/certs/svc-test-client.cert.pem")
@@ -71,8 +68,8 @@ class Netty4ClientSslHandlerTest extends FunSuite {
       val ch = channel(params)
       val pipeline = ch.pipeline()
 
-      val clientHandler = pipeline.get(classOf[Netty4ClientSslHandler])
-      assert(clientHandler == null)
+      val channelInitializer = pipeline.get(classOf[Netty4ClientSslChannelInitializer])
+      assert(channelInitializer == null)
 
       ch.finishAndReleaseAll()
     }

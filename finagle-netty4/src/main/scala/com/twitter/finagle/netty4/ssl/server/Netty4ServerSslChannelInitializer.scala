@@ -13,13 +13,10 @@ import io.netty.channel.{Channel, ChannelInitializer, ChannelPipeline}
 import io.netty.handler.ssl.SslHandler
 
 /**
- * A channel handler that takes [[Stack.Params]] and upgrades the pipeline with missing
+ * A channel initializer that takes [[Stack.Params]] and upgrades the pipeline with missing
  * SSL/TLS pieces required for server-side transport encryption.
- *
- * No matter if the underlying pipeline has been modified or not (or exception was thrown), this
- * handler removes itself from the pipeline on `handlerAdded`.
  */
-private[finagle] class Netty4ServerSslHandler(params: Stack.Params)
+private[finagle] class Netty4ServerSslChannelInitializer(params: Stack.Params)
     extends ChannelInitializer[Channel] {
 
   /**

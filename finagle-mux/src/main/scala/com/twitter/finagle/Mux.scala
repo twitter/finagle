@@ -10,8 +10,8 @@ import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport._
 import com.twitter.finagle.mux.{Handshake, OpportunisticTlsParams, Request, Response, Toggles}
 import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
-import com.twitter.finagle.netty4.ssl.server.Netty4ServerSslHandler
-import com.twitter.finagle.netty4.ssl.client.Netty4ClientSslHandler
+import com.twitter.finagle.netty4.ssl.server.Netty4ServerSslChannelInitializer
+import com.twitter.finagle.netty4.ssl.client.Netty4ClientSslChannelInitializer
 import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.param.{Label, ProtocolLibrary, WithDefaultLoadBalancer}
 import com.twitter.finagle.pool.SingletonPool
@@ -276,7 +276,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     }
 
     private[finagle] val tlsEnable: (Stack.Params, ChannelPipeline) => Unit = (params, pipeline) =>
-      pipeline.addFirst("opportunisticSslInit", new Netty4ClientSslHandler(params))
+      pipeline.addFirst("opportunisticSslInit", new Netty4ClientSslChannelInitializer(params))
 
     private[finagle] val params: Stack.Params = StackClient.defaultParams +
       ProtocolLibrary("mux") +
@@ -395,7 +395,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       .prepend(PayloadSizeFilter.module(_.body.length, _.body.length))
 
     private[finagle] val tlsEnable: (Stack.Params, ChannelPipeline) => Unit = (params, pipeline) =>
-      pipeline.addFirst("opportunisticSslInit", new Netty4ServerSslHandler(params))
+      pipeline.addFirst("opportunisticSslInit", new Netty4ServerSslChannelInitializer(params))
 
     private val params: Stack.Params = StackServer.defaultParams +
       ProtocolLibrary("mux") +
