@@ -8,11 +8,10 @@ import com.twitter.finagle.postgres.ResultSet
 import com.twitter.finagle.postgres.connection.{AuthenticationRequired, Connection, RequestingSsl, WrongStateForEvent}
 import com.twitter.finagle.postgres.messages._
 import com.twitter.finagle.postgres.values.Md5Encryptor
-// import com.twitter.finagle.ssl.SessionVerifier
-import com.twitter.finagle.ssl.client.{ SslClientConfiguration, SslClientEngineFactory, SslClientSessionVerifier }
+import com.twitter.finagle.ssl.client.{ HostnameVerifier, SslClientConfiguration, SslClientEngineFactory, SslClientSessionVerifier }
 import com.twitter.logging.Logger
 import com.twitter.util.Future
-import javax.net.ssl.{SSLContext, SSLEngine, TrustManagerFactory}
+import javax.net.ssl.{SSLContext, SSLEngine, SSLSession, TrustManagerFactory}
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel._
