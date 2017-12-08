@@ -409,7 +409,7 @@ class IntegrationSpec extends Spec {
           client.isAvailable must equal(true)
           client.status must equal(Status.Open)
         }
-        "client is bad" in {
+        "client is bad" ignore {
           val badClient: PostgresClient = getBadClient
           badClient.isAvailable must equal(false)
           badClient.status must equal(Status.Closed)
