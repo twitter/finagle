@@ -698,6 +698,17 @@ private[finagle] object Message {
       }
   }
 
+  private def makeHeader(typ: Byte, tag: Int): Buf = {
+    val arr = Array(
+      typ,
+      (tag >> 16 & 0xff).toByte,
+      (tag >> 8 & 0xff).toByte,
+      (tag & 0xff).toByte
+    )
+
+    new Buf.ByteArray(arr, 0, 4)
+  }
+
   def encode(msg: Message): Buf = msg match {
     case msg: PreEncoded => msg.encodedBuf
     case m: Message =>
@@ -715,15 +726,6 @@ private[finagle] object Message {
   private[transport] def encodeFragments(msg: Message, maxSize: Int): Iterator[Buf] = msg match {
     case m: Fragmentable => new FragmentIterator(m, maxSize)
     case _ => Iterator.single(Message.encode(msg))
-  }
-
-  private def makeHeader(typ: Byte, tag: Int): Buf = {
-    Buf.ByteArray.Owned(Array[Byte](
-      typ,
-      (tag >> 16 & 0xff).toByte,
-      (tag >> 8 & 0xff).toByte,
-      (tag & 0xff).toByte
-    ))
   }
 
   private class FragmentIterator(msg: Fragmentable, maxSize: Int) extends Iterator[Buf] {
