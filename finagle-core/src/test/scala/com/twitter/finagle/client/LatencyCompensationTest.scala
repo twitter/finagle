@@ -231,11 +231,11 @@ class LatencyCompensationTest
           whileConnected(compensatedEchoClient) { client =>
             val nm = client("nm")
             assert(!nm.isDefined)
-            assert(respond.interrupted == None)
+            assert(respond.interrupted.isEmpty)
 
             awaitReceipt()
             assert(!nm.isDefined)
-            assert(respond.interrupted == None)
+            assert(respond.interrupted.isEmpty)
 
             clock.advance(2.seconds)
             timer.tick() // triggers the timeout

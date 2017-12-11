@@ -1,7 +1,6 @@
 package com.twitter.finagle.http
 
-import java.util.Locale
-import scala.annotation.switch
+import scala.annotation.{switch, tailrec}
 import scala.collection.mutable
 
 /**
@@ -45,7 +44,7 @@ private final class DefaultHeaderMap extends HeaderMap {
   }
 
   override def keySet: Set[String] =
-    underlying.values.flatMap(_.keys).toSet
+    underlying.values.flatMap(_.names).toSet
 
   override def keysIterator: Iterator[String] =
     keySet.iterator
@@ -121,7 +120,8 @@ private object DefaultHeaderMap {
     }
   }
 
-  private class Header(val name: String, val value: String, var next: Header = null) {
+  private final class Header(val name: String, val value: String, var next: Header = null) {
+
     validateName(name)
     validateValue(value)
 
@@ -139,7 +139,7 @@ private object DefaultHeaderMap {
         result.toList
       }
 
-    def keys: Seq[String] =
+    def names: Seq[String] =
       if (next == null) name :: Nil
       else {
         val result = new mutable.ListBuffer[String] += name
@@ -163,11 +163,48 @@ private object DefaultHeaderMap {
     }
   }
 
-  // An internal representation for a `MapHeaderMap` that enables efficient iteration
-  // by gaining access to `entriesIterator` (protected method).
-  private class Headers extends mutable.HashMap[String, Header] {
+  // An internal representation for a `MapHeaderMap` that enables efficient
+  //
+  // - iteration by gaining access to `entriesIterator` (protected method).
+  // - get/add functions by providing custom hashCode and equals methods for a key
+  private final class Headers extends mutable.HashMap[String, Header] {
 
-    @inline private final def canonicalName(s: String): String = s.toLowerCase(Locale.US)
+    private def hashChar(c: Char): Int =
+      if (c >= 'A' && c <= 'Z') c + 32
+      else c
+
+    // Adopted from Netty 3 HttpHeaders.
+    override protected def elemHashCode(key: String): Int = {
+      var result = 0
+      var i = key.length - 1
+
+      while (i >= 0) {
+        val c = hashChar(key.charAt(i))
+        result = 31 * result + c
+        i = i - 1
+      }
+
+      result
+    }
+
+    // Adopted from Netty 3 HttpHeaders.
+    override protected def elemEquals(key1: String, key2: String): Boolean =
+      if (key1 eq key2) true
+      else if (key1.length != key2.length) false
+      else {
+        @tailrec
+        def loop(i: Int): Boolean =
+          if (i == key1.length) true
+          else {
+            val a = key1.charAt(i)
+            val b = key2.charAt(i)
+
+            if (a == b || hashChar(a) == hashChar(b)) loop(i + 1)
+            else false
+          }
+
+        loop(0)
+      }
 
     def flattenIterator: Iterator[(String, String)] = new Iterator[(String, String)] {
       private[this] val it = entriesIterator
@@ -188,33 +225,32 @@ private object DefaultHeaderMap {
     }
 
     def getFirst(key: String): Option[String] =
-      get(canonicalName(key)) match {
+      get(key) match {
         case Some(h) => Some(h.value)
         case None => None
       }
 
     def getAll(key: String): Seq[String] =
-      get(canonicalName(key)) match {
+      get(key) match {
         case Some(hs) => hs.values
         case None => Nil
       }
 
     def add(key: String, value: String): Unit = {
       val h = new Header(key, value)
-      val cn = canonicalName(key)
-      get(cn) match {
+      get(key) match {
         case Some(hs) => hs.add(h)
-        case None => update(cn, h)
+        case None => update(key, h)
       }
     }
 
     def set(key: String, value: String): Unit = {
       val h = new Header(key, value)
-      update(canonicalName(key), h)
+      update(key, h)
     }
 
     def removeAll(key: String): Unit = {
-      remove(canonicalName(key))
+      remove(key)
     }
   }
 

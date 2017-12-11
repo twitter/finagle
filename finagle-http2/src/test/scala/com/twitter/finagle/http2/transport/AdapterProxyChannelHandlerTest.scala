@@ -7,11 +7,8 @@ import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http._
 import io.netty.util.concurrent.PromiseCombiner
 import java.nio.charset.StandardCharsets
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
 
-@RunWith(classOf[JUnitRunner])
 class AdapterProxyChannelHandlerTest extends FunSuite {
   val moon = Unpooled.copiedBuffer("goodnight moon", StandardCharsets.UTF_8)
   val stars = Unpooled.copiedBuffer("goodnight stars", StandardCharsets.UTF_8)

@@ -132,6 +132,7 @@ private[finagle] object Http2Transporter {
         pipeline.addLast("buffer", new BufferingHandler())
         pipeline.addLast("aggregate", new AdapterProxyChannelHandler({ pipeline =>
           pipeline.addLast("schemifier", new SchemifyingHandler("http"))
+          pipeline.addLast(StripHeadersHandler.HandlerName, StripHeadersHandler)
           initClient(params)(pipeline)
         }))
       } else {

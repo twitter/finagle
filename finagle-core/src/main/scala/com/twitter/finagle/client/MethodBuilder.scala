@@ -1,5 +1,6 @@
 package com.twitter.finagle.client
 
+import com.twitter.finagle.client.MethodBuilderTimeout.TunableDuration
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.{Showable, StackRegistry}
@@ -82,9 +83,9 @@ private[finagle] object MethodBuilder {
       Config(
         MethodBuilderRetry.Config(params[param.ResponseClassifier].responseClassifier),
         MethodBuilderTimeout.Config(
-          stackHadTotalTimeout = originalStack.contains(TimeoutFilter.totalTimeoutRole),
-          total = params[TimeoutFilter.TotalTimeout].timeout,
-          perRequest = params[TimeoutFilter.Param].timeout
+          stackTotalTimeoutDefined = originalStack.contains(TimeoutFilter.totalTimeoutRole),
+          total = TunableDuration(id = "total", duration = params[TimeoutFilter.TotalTimeout].timeout),
+          perRequest = TunableDuration(id = "perRequest", duration = params[TimeoutFilter.Param].timeout)
         )
       )
     }

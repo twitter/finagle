@@ -277,8 +277,8 @@ class MethodBuilderTest extends FunSuite with Matchers with Eventually with Inte
       val sundaeEntries = Set(
         Entry(key("sundae", "statsReceiver"), s"InMemoryStatsReceiver/$clientName/sundae"),
         Entry(key("sundae", "retry"), "Config(Disabled)"),
-        Entry(key("sundae", "timeout", "total"), "10.seconds"),
-        Entry(key("sundae", "timeout", "per_request"), "1.seconds")
+        Entry(key("sundae", "timeout", "total"), "TunableDuration(total,10.seconds,Tunable(com.twitter.util.tunable.NoneTunable))"),
+        Entry(key("sundae", "timeout", "per_request"), "TunableDuration(perRequest,1.seconds,Tunable(com.twitter.util.tunable.NoneTunable))")
       )
       filteredRegistry should contain theSameElementsAs (vanillaEntries ++ sundaeEntries)
 

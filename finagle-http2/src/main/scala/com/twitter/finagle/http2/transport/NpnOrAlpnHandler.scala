@@ -7,7 +7,7 @@ import com.twitter.finagle.http2.{LoggerPerFrameTypeLogger, Settings}
 import com.twitter.finagle.netty4.http._
 import com.twitter.finagle.netty4.param.Allocator
 import io.netty.channel.{Channel, ChannelHandlerContext, ChannelInitializer}
-import io.netty.handler.codec.http2.Http2MultiplexCodecBuilder
+import io.netty.handler.codec.http2.{Http2MultiplexCodecBuilder, Http2StreamFrameToHttpObjectCodec}
 import io.netty.handler.ssl.{ApplicationProtocolNames, ApplicationProtocolNegotiationHandler}
 
 private[http2] class NpnOrAlpnHandler(init: ChannelInitializer[Channel], params: Stack.Params)
@@ -27,7 +27,11 @@ private[http2] class NpnOrAlpnHandler(init: ChannelInitializer[Channel], params:
             val alloc = params[Allocator].allocator
             ctx.channel.config().setAllocator(alloc)
             ch.pipeline.addLast(new Http2NackHandler)
-            ch.pipeline.addLast(new RichHttp2ServerDowngrader(validateHeaders = false))
+            ch.pipeline.addLast(new Http2StreamFrameToHttpObjectCodec(
+              true /* isServer */,
+              false /* validateHeaders */
+            ))
+            ch.pipeline.addLast(StripHeadersHandler.HandlerName, StripHeadersHandler)
             ch.pipeline.addLast(new RstHandler())
             initServer(params)(ch.pipeline)
             ch.pipeline.addLast(init)

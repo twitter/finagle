@@ -7,6 +7,7 @@ import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.thrift.service.{Filterable, ReqRepServicePerEndpointBuilder, ServicePerEndpointBuilder}
 import com.twitter.finagle.thrift.{ServiceIfaceBuilder, ThriftClientRequest, ThriftRichClient}
 import com.twitter.util.Duration
+import com.twitter.util.tunable.Tunable
 
 object MethodBuilder {
   import client.MethodBuilder._
@@ -248,7 +249,13 @@ class MethodBuilder(
   def withTimeoutTotal(howLong: Duration): MethodBuilder =
     new MethodBuilder(rich, mb.withTimeout.total(howLong))
 
+  def withTimeoutTotal(howLong: Tunable[Duration]): MethodBuilder =
+    new MethodBuilder(rich, mb.withTimeout.total(howLong))
+
   def withTimeoutPerRequest(howLong: Duration): MethodBuilder =
+    new MethodBuilder(rich, mb.withTimeout.perRequest(howLong))
+
+  def withTimeoutPerRequest(howLong: Tunable[Duration]): MethodBuilder =
     new MethodBuilder(rich, mb.withTimeout.perRequest(howLong))
 
   def withRetryForClassifier(classifier: ResponseClassifier): MethodBuilder =
