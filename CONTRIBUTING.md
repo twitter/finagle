@@ -197,10 +197,10 @@ your system before you can build the site locally.
 
 Once you've got Sphinx installed, you can make changes to the [RST][7] files in
 the `doc/src/sphinx` directory and then build the site with the following
-command:
+command from the `finagle` directory:
 
 ``` bash
-./sbt 'project finagle-doc' make-site
+./sbt 'project finagle-doc' makeSite
 ```
 
 You can then view the site locally at `doc/target/site/index.html`.
