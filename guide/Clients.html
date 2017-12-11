@@ -1,21 +1,23 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Clients &#8212; Finagle 17.12.0-SNAPSHOT documentation</title>
+    
+    <title>Clients &#8212; Finagle 17.12.0 documentation</title>
+    
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '17.12.0-SNAPSHOT',
+        VERSION:     '17.12.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
+        HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
@@ -24,6 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="Finagle 17.12.0 documentation" href="index.html" />
     <link rel="next" title="Contexts" href="Contexts.html" />
     <link rel="prev" title="Servers" href="Servers.html" />
    
@@ -41,7 +44,7 @@
   </script>
 
   </head>
-  <body>
+  <body role="document">
   
   
 
@@ -92,7 +95,7 @@ results in a uniform way to construct clients, <code class="docutils literal"><s
 </pre></div>
 </div>
 <p>Clients can further furnish the resulting <cite>ServiceFactory</cite> with protocol
-specific API’s. A common pattern is to expose a <code class="docutils literal"><span class="pre">newRichClient</span></code> method that
+specific API&#8217;s. A common pattern is to expose a <code class="docutils literal"><span class="pre">newRichClient</span></code> method that
 does exactly this. For cases like Thrift, where IDLs are part of
 the rich API, a more specialized API is exposed. See the protocols section on
 <a class="reference internal" href="Protocols.html#thrift-and-scrooge"><span class="std std-ref">Thrift</span></a> for more details.</p>
@@ -123,7 +126,7 @@ to <cite>twitter.com</cite>.</p>
 </div>
 <p>While this setup may look somewhat counter intuitive with regards to where the ultimate destination
 and the proxy server address are applied, it enables a variety of resiliency features by utilizing
-Finagle’s naming and load balancing subsystems. Given a web proxy server address/name falls under
+Finagle&#8217;s naming and load balancing subsystems. Given a web proxy server address/name falls under
 a standard name resolution process, it might be (and should be) backed by a replica set (multiple
 hosts) to get the greatest out of a client.</p>
 <div class="admonition note">
@@ -131,7 +134,7 @@ hosts) to get the greatest out of a client.</p>
 <p class="last">There is also a legacy support to web proxy servers available in Finagle via the
 <cite>Transporter.HttpProxy</cite> stack param. In that case, proxy server is forced to represented as a single
 <cite>SocketAddress</cite>, which not only introduces a single point of failure within a client (i.e., a
-client goes offline if a web proxy server is down), but also disables Finagle’s resiliency features
+client goes offline if a web proxy server is down), but also disables Finagle&#8217;s resiliency features
 such as failure detection and load balancing.</p>
 </div>
 </div>
@@ -206,16 +209,16 @@ output. To override this, use the following sample.</p>
 <span id="client-retries"></span><h3>Retries<a class="headerlink" href="#retries" title="Permalink to this headline">¶</a></h3>
 <p>Every Finagle client contains a <cite>Retries</cite> module in the stack, above load balancers,
 so that it can retry failures from the underlying modules: circuit breakers, timeouts,
-load balancers and connection pools. Retries can help improve the client’s logical success
+load balancers and connection pools. Retries can help improve the client&#8217;s logical success
 rate when subsequent attempts succeed.</p>
 <p>For the most part, service owners will be interested in the logical success rate of a clients.
 Logical requests represent the result of the initial request, after any retries have occurred.
 Concretely, should a request result in a retryable failure on the first attempt, but succeed upon
-retry, this is considered a single successful logical request. By default, a Finagle client’s
+retry, this is considered a single successful logical request. By default, a Finagle client&#8217;s
 success rate metrics include the individual attempts and this can cause confusion.
-<a class="reference internal" href="MethodBuilder.html#methodbuilder"><span class="std std-ref">MethodBuilder</span></a> offers logical metrics scoped to “logical” for both
+<a class="reference internal" href="MethodBuilder.html#methodbuilder"><span class="std std-ref">MethodBuilder</span></a> offers logical metrics scoped to &#8220;logical&#8221; for both
 success rate and latency. The deprecated <code class="docutils literal"><span class="pre">ClientBuilder</span></code> code also offers similar metrics
-scoped to “tries”.</p>
+scoped to &#8220;tries&#8221;.</p>
 <p>Failures that are known to be safe to retry (for example, exceptions that occurred before the
 bytes were written to the wire and protocol level NACKs) will be automatically retried by Finagle.
 These retries come out of a <code class="docutils literal"><span class="pre">RetryBudget</span></code> that allows for approximately 20% of the total requests
@@ -268,7 +271,7 @@ construct a new instance of <code class="docutils literal"><span class="pre">Ret
 <li><cite>percentCanRetry</cite> - the percentage of requests that might be retried</li>
 </ol>
 <p>While the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/RequeueFilter.scala">RequeueFilter</a> (configured via <code class="docutils literal"><span class="pre">Retries</span></code>)
-is inserted into every client’s stack by default so all the failures from the underlying modules will be
+is inserted into every client&#8217;s stack by default so all the failures from the underlying modules will be
 retried, the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/RetryFilter.scala">RetryFilter</a> handling application level
 exceptions from the remote server should be applied explicitly.</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
@@ -313,7 +316,7 @@ of maximum attempts</li>
 <p>See <a class="reference internal" href="Metrics.html#id1"><span class="std std-ref">Retries metrics</span></a> for more details.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">It’s highly recommended to <cite>share</cite> a single instance of <code class="docutils literal"><span class="pre">RetryBudget</span></code> between both
+<p class="last">It&#8217;s highly recommended to <cite>share</cite> a single instance of <code class="docutils literal"><span class="pre">RetryBudget</span></code> between both
 <code class="docutils literal"><span class="pre">RetryFilter</span></code> and <code class="docutils literal"><span class="pre">RequeueFilter</span></code> to prevent <cite>retry storms</cite>.</p>
 </div>
 </div>
@@ -325,7 +328,7 @@ the maximum time allotted to a request to wait for an available service/session.
 that exceed this timeout are failed with a <code class="docutils literal"><span class="pre">ServiceTimeoutException</span></code>. This module is
 implemented by the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/factory/TimeoutFactory.scala">TimeoutFactory</a></p>
 <p>The default timeout value for the <cite>Session Timeout</cite> module is unbounded (i.e., <code class="docutils literal"><span class="pre">Duration.Top</span></code>),
-which simply means it’s disabled. Although, it’s possible to override the default setting with
+which simply means it&#8217;s disabled. Although, it&#8217;s possible to override the default setting with
 stack params <a class="footnote-reference" href="#example" id="id7">[3]</a>.</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
@@ -405,7 +408,7 @@ a <a class="reference external" href="https://github.com/twitter/finagle/blob/ma
 <p id="load-balancer">Finagle clients come equipped with a load balancer, a pivotal component in the client stack, whose
 responsibility is to dynamically distribute load across a collection of interchangeable endpoints.
 This gives Finagle an opportunity to maximize success and optimize request distribution in an attempt
-to tighten the client’s tail latencies. To achieve this in a non-cooperative distributed environment,
+to tighten the client&#8217;s tail latencies. To achieve this in a non-cooperative distributed environment,
 the balancer must pass accurate judgments about endpoints based only on its local view. An effective
 feedback mechanism in such environments is latency; the balancers load metrics make use of this
 either implicitly or explicitly.</p>
@@ -448,7 +451,7 @@ updated atomically by each request and thus represents a highly contended resour
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">In order to take an advantage of any of the load balancers supported in Finagle, a client
-should be configured to talk to a <cite>replica set</cite> (the default finagle stack doesn’t do <cite>sharding</cite>
+should be configured to talk to a <cite>replica set</cite> (the default finagle stack doesn&#8217;t do <cite>sharding</cite>
 and assumes all hosts in the set are interchangeable.)
 (see <a class="reference internal" href="Names.html#finagle-names"><span class="std std-ref">Names and Naming in Finagle</span></a> for more details) rather than a single
 endpoint.</p>
@@ -469,21 +472,21 @@ weighted nodes <a class="footnote-reference" href="#weights-api" id="id14">[8]</
 <span class="k">val</span> <span class="n">balancer</span><span class="k">:</span> <span class="kt">LoadBalancerFactory</span> <span class="o">=</span> <span class="nc">Balancers</span><span class="o">.</span><span class="n">p2c</span><span class="o">(</span><span class="n">maxEffort</span> <span class="k">=</span> <span class="mi">100</span><span class="o">)</span>
 </pre></div>
 </div>
-<p id="max-effort">The <code class="docutils literal"><span class="pre">maxEffort</span></code> param (default value is 5) from the example above is the maximum amount of “effort”
-we’re willing to expend on a load balancing decision without rebuilding its internal state. Simply
+<p id="max-effort">The <code class="docutils literal"><span class="pre">maxEffort</span></code> param (default value is 5) from the example above is the maximum amount of &#8220;effort&#8221;
+we&#8217;re willing to expend on a load balancing decision without rebuilding its internal state. Simply
 speaking this is the number of times a load balancer is able to retry because the previously picked
 node was <em>marked unavailable</em> (i.e., an underlying circuit breaker is activated). If the <code class="docutils literal"><span class="pre">maxEffort</span></code>
-is exhausted and the <em>alive</em> node still hasn’t been found, the load balancer will send a request to
+is exhausted and the <em>alive</em> node still hasn&#8217;t been found, the load balancer will send a request to
 the last picked one.</p>
 </div>
 <div class="section" id="power-of-two-choices-p2c-peak-ewma">
 <h4>Power of Two Choices (P2C) + Peak EWMA <a class="footnote-reference" href="#experimental" id="id16">[2]</a><a class="headerlink" href="#power-of-two-choices-p2c-peak-ewma" title="Permalink to this headline">¶</a></h4>
-<p>Backed by the P2C distributor, Peak EWMA uses a moving average over an endpoint’s round-trip time (RTT)
+<p>Backed by the P2C distributor, Peak EWMA uses a moving average over an endpoint&#8217;s round-trip time (RTT)
 that is highly sensitive to peaks. This average is then weighted by the number of outstanding requests,
 effectively increasing our resolution per-request. It is designed to react to slow endpoints more quickly than
 <cite>least loaded</cite> by penalizing them when they exhibit slow response times. This load metric operates under
 the assumption that a loaded endpoint takes time to recover and so it is generally safe for the
-advertised load to incorporate an endpoint’s history. However, this assumption breaks down in the
+advertised load to incorporate an endpoint&#8217;s history. However, this assumption breaks down in the
 presence of long polling clients.</p>
 <p>Use <code class="docutils literal"><span class="pre">Balancers.p2cPeakEwma</span></code> to construct an instance of <code class="docutils literal"><span class="pre">LoadBalancerFactory</span></code> <a class="footnote-reference" href="#example" id="id17">[3]</a>.</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
@@ -495,7 +498,7 @@ presence of long polling clients.</p>
 </div>
 <p>The <code class="docutils literal"><span class="pre">p2cPeakEwma</span></code> factory method takes two arguments:</p>
 <ol class="arabic simple">
-<li><cite>maxEffort</cite> (default: 5) - see <a class="reference internal" href="#max-effort"><span class="std std-ref">P2C’s max effort</span></a></li>
+<li><cite>maxEffort</cite> (default: 5) - see <a class="reference internal" href="#max-effort"><span class="std std-ref">P2C&#8217;s max effort</span></a></li>
 <li><cite>decayTime</cite> (default: 10 seconds) - the window of latency observations</li>
 </ol>
 </div>
@@ -504,7 +507,7 @@ presence of long polling clients.</p>
 <p>All the previously mentioned configurations operate optimally under high load. That is, without
 sufficient concurrent load, the previous distributors can degrade to random selection. The Aperture
 distributor aims to remedy this among other things. By employing a simple feedback controller based
-on the client’s load, the distributor balances across a subset of servers to meet a specified
+on the client&#8217;s load, the distributor balances across a subset of servers to meet a specified
 target load band. The principle of hysteresis is applied to the aperture to avoid rapid fluctuations
 and dampen the effects of large load spikes.</p>
 <p>The benefits of Aperture are promising:</p>
@@ -534,7 +537,7 @@ work well, requires concurrent load.</li>
 </div>
 <p>The <code class="docutils literal"><span class="pre">aperture</span></code> factory method takes five arguments:</p>
 <ol class="arabic simple">
-<li><cite>maxEffort</cite> (default: 5) - see <a class="reference internal" href="#max-effort"><span class="std std-ref">P2C’s max effort</span></a></li>
+<li><cite>maxEffort</cite> (default: 5) - see <a class="reference internal" href="#max-effort"><span class="std std-ref">P2C&#8217;s max effort</span></a></li>
 <li><cite>smoothWin</cite> (default: 5 seconds) - the window of concurrent load observation</li>
 <li>[<cite>lowLoad</cite>, <cite>highLoad</cite>] (default: [0.5, 2]) - the load band used to adjust an aperture size
 such that a concurrent load for each endpoint stays within the given interval</li>
@@ -548,7 +551,7 @@ applicable defaults.</p>
 </div>
 <div class="section" id="role-of-balancers-in-resiliency">
 <h4>Role of Balancers in Resiliency<a class="headerlink" href="#role-of-balancers-in-resiliency" title="Permalink to this headline">¶</a></h4>
-<p>The balancer’s primary goal is to attempt to optimize request latency. Coincidentally, to do this
+<p>The balancer&#8217;s primary goal is to attempt to optimize request latency. Coincidentally, to do this
 well, it also needs to properly qualify sessions. These two concerns are treated separately in the
 client stack. Finagle has dedicated modules which track failures and control the <cite>com.twitter.finagle.Status</cite>
 of an endpoint. The balancers selection process takes this status into account. However, without
@@ -558,13 +561,13 @@ We are exploring better (explicit) session qualification with protocol support (
 Historically, Finagle has employed solutions like <cite>com.twitter.finagle.addr.StabilizingAddr</cite> and
 <cite>com.twitter.finagle.serverset2.Stabilizer</cite> to validate changes to the balancers endpoint collection.
 Since we have information about the availability of an endpoint in the balancer, it may represent
-a viable intersection to validate such changes. Balancers have a “probation” capability built-in
+a viable intersection to validate such changes. Balancers have a &#8220;probation&#8221; capability built-in
 behind a client parameter <a class="footnote-reference" href="#probation" id="id20">[9]</a>.</p>
 </div>
 <div class="section" id="behavior-when-no-nodes-are-available">
 <h4>Behavior when no nodes are available<a class="headerlink" href="#behavior-when-no-nodes-are-available" title="Permalink to this headline">¶</a></h4>
 <p>When there are no nodes in the <cite>com.twitter.finagle.Status.Open</cite> state, the balancers
-must make a decision. Finagle’s default behavior makes an optimistic decision
+must make a decision. Finagle&#8217;s default behavior makes an optimistic decision
 that its view of the nodes may be out-of-date and picks a node it hopes has become available.
 This can be customized to fail the request immediately through
 <code class="docutils literal"><span class="pre">LoadBalancerFactory.WhenNoNodesOpenParam</span></code> which will cause clients to see
@@ -603,7 +606,7 @@ During the time that a host is marked down, the factory is marked unavailable (a
 the load balancer above it will avoid its use). The factory becomes available
 again on success or when the back-off schedule runs out.</p>
 <p>See the FAQ to <a class="reference internal" href="FAQ.html#faq-failedfastexception"><span class="std std-ref">better understand</span></a> why clients
-might be seeing <code class="docutils literal"><span class="pre">com.twitter.finagle.FailedFastException</span></code>’s.</p>
+might be seeing <code class="docutils literal"><span class="pre">com.twitter.finagle.FailedFastException</span></code>&#8216;s.</p>
 <p id="disabling-fail-fast">The <cite>Fail Fast</cite> module is enabled by default for all of the Finagle clients except for
 <code class="docutils literal"><span class="pre">Memcached.client</span></code> one. The following example demonstrates how to explicitly disable it for a
 particular client.</p>
@@ -616,8 +619,8 @@ particular client.</p>
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">It’s important to disable <cite>Fail Fast</cite> when only have one host in the replica set because
-Finagle doesn’t have any other path to choose.</p>
+<p class="last">It&#8217;s important to disable <cite>Fail Fast</cite> when only have one host in the replica set because
+Finagle doesn&#8217;t have any other path to choose.</p>
 </div>
 <p><a class="reference internal" href="Metrics.html#fail-fast-stats"><span class="std std-ref">Related stats</span></a></p>
 </div>
@@ -688,10 +691,10 @@ dead for</li>
 </ol>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">It’s highly recommended to use <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/Backoff.scala">Backoff</a>
+<p class="last">It&#8217;s highly recommended to use <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/Backoff.scala">Backoff</a>
 API for constructing instances of <code class="docutils literal"><span class="pre">Stream[Duration]</span></code> instead of using the error-prone Stream API directly.</p>
 </div>
-<p>Finally, it’s possible to completely disable the <cite>Failure Accrual</cite> module for a given
+<p>Finally, it&#8217;s possible to completely disable the <cite>Failure Accrual</cite> module for a given
 client.</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 
@@ -707,9 +710,9 @@ client.</p>
 <p>Many protocols benefit from having persistent connections that are reused across requests.
 Pooling is designed to balance connection churn and service acquisition latency at the cost of holding
 resources open.</p>
-<p>Depending on the configuration, a Finagle client’s stack might contain up to _three_ connection pools
+<p>Depending on the configuration, a Finagle client&#8217;s stack might contain up to _three_ connection pools
 stacked on each other: watermark, caching and buffering pools.</p>
-<p>The only Finagle protocol that doesn’t require any connection pooling (a multiplexing protocol) is
+<p>The only Finagle protocol that doesn&#8217;t require any connection pooling (a multiplexing protocol) is
 <cite>Mux</cite> so it uses <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/pool/SingletonPool.scala">SingletonPool</a> that maintains
 a single connection per endpoint. For every other Finagle-supported protocol (i.e., HTTP/1.1, Thrift),
 there a connection pooling setup built with watermark and caching pools.</p>
@@ -759,8 +762,8 @@ application consistently requires more than lower bound connections.</p>
 <p id="id29">To reduce connection churn, there is a separate facility for caching, with some TTL,
 services above the lower bound. The <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/pool/CachingPool.scala">CachingPool</a>
 caches <em>regardless</em> of whether there are more than lower-bound open services;
-it’s always caching up to (upper-bound - lower-bound) services. The cache reaches
-its peak value when you reach your peak concurrency (i.e. “load”),
+it&#8217;s always caching up to (upper-bound - lower-bound) services. The cache reaches
+its peak value when you reach your peak concurrency (i.e. &#8220;load&#8221;),
 and then slowly decays, based on the TTL.</p>
 <p><a class="reference internal" href="Metrics.html#pool-stats"><span class="std std-ref">Related stats</span></a></p>
 </div>
@@ -771,7 +774,7 @@ and then slowly decays, based on the TTL.</p>
 <p>Clients are configured with the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/filter/NackAdmissionFilter.scala">NackAdmissionFilter</a>
 which will probabilistically drop some requests to unhealthy clusters. This aims
 to decrease the request volume to those clusters with little to no effect on a
-client’s already unhealthy success rate. The filter works by keeping a moving
+client&#8217;s already unhealthy success rate. The filter works by keeping a moving
 average of the fraction of requests that are <a class="reference internal" href="Glossary.html#glossary-nack"><span class="std std-ref">nacked</span></a>. When
 this fraction hits a given threshold, the filter will probabilistically drop
 requests in proportion to that fraction.
@@ -815,7 +818,7 @@ straightforward manner, for example, in a ThriftMux client:</p>
   <span class="o">.</span><span class="n">withResponseClassifier</span><span class="o">(</span><span class="nc">HttpResponseClassifier</span><span class="o">.</span><span class="nc">ServerErrorsAsFailures</span><span class="o">)</span>
 </pre></div>
 </div>
-<p>If a classifier is not specified on a client or server or if a user’s classifier isn’t
+<p>If a classifier is not specified on a client or server or if a user&#8217;s classifier isn&#8217;t
 defined for a given request/response pair then <code class="docutils literal"><span class="pre">ResponseClassifier.Default</span></code>
 is used. This gives us the simple classification rules of responses that are
 <code class="docutils literal"><span class="pre">Returns</span></code> are successful and <code class="docutils literal"><span class="pre">Throws</span></code> are failures.</p>
@@ -824,7 +827,7 @@ is used. This gives us the simple classification rules of responses that are
 <p>Writing a custom classifier requires understanding of the few classes used. A
 <code class="docutils literal"><span class="pre">ResponseClassifier</span></code> is a <code class="docutils literal"><span class="pre">PartialFunction</span></code> from <code class="docutils literal"><span class="pre">ReqRep</span></code> to
 <code class="docutils literal"><span class="pre">ResponseClass</span></code>.</p>
-<p>Let’s work our way backwards through those, beginning with <code class="docutils literal"><span class="pre">ResponseClass</span></code>.
+<p>Let&#8217;s work our way backwards through those, beginning with <code class="docutils literal"><span class="pre">ResponseClass</span></code>.
 This can be either <code class="docutils literal"><span class="pre">Successful</span></code> or <code class="docutils literal"><span class="pre">Failed</span></code> and those values are
 self-explanatory. There are three constants which will cover the vast majority
 of usage: <code class="docutils literal"><span class="pre">Success</span></code>, <code class="docutils literal"><span class="pre">NonRetryableFailure</span></code> and <code class="docutils literal"><span class="pre">RetryableFailure</span></code>. While
@@ -847,7 +850,7 @@ Here is an example that counts HTTP 503s as failures:</p>
 <span class="o">}</span>
 </pre></div>
 </div>
-<p>Note that this <code class="docutils literal"><span class="pre">PartialFunction</span></code> isn’t total which is ok due to Finagle
+<p>Note that this <code class="docutils literal"><span class="pre">PartialFunction</span></code> isn&#8217;t total which is ok due to Finagle
 always using user defined classifiers in combination with
 <code class="docutils literal"><span class="pre">ResponseClassifier.Default</span></code> which will cover all cases.</p>
 </div>
@@ -856,11 +859,11 @@ always using user defined classifiers in combination with
 <p>Thrift and ThriftMux classifiers require a bit more care as the request and
 response types are not as obvious. This is because there is only a single
 <code class="docutils literal"><span class="pre">Service</span></code> from <code class="docutils literal"><span class="pre">Array[Byte]</span></code> to <code class="docutils literal"><span class="pre">Array[Byte]</span></code> for all the methods of an
-IDL’s service. To make this workable, there is support in Scrooge and
+IDL&#8217;s service. To make this workable, there is support in Scrooge and
 <code class="docutils literal"><span class="pre">Thrift/ThriftMux.newService</span></code> and <code class="docutils literal"><span class="pre">Thrift/ThriftMux.newClient</span></code> code to
 deserialize the responses into the expected application types so that
 classifiers can be written in terms of the Scrooge generated request type,
-<code class="docutils literal"><span class="pre">$Service.$Method.Args</span></code>, and the method’s response type. Given an IDL:</p>
+<code class="docutils literal"><span class="pre">$Service.$Method.Args</span></code>, and the method&#8217;s response type. Given an IDL:</p>
 <div class="highlight-none"><div class="highlight"><pre><span></span>exception NotFoundException { 1: string reason }
 
 service SocialGraph {
@@ -886,9 +889,9 @@ service SocialGraph {
 <span class="o">}</span>
 </pre></div>
 </div>
-<p>If you examine that classifier you’ll note a few things. First (#1), the
+<p>If you examine that classifier you&#8217;ll note a few things. First (#1), the
 deserialized <code class="docutils literal"><span class="pre">NotFoundException</span></code> can be treated as a failure. Next (#2), a
-“successful” response can be examined to enable services using status codes to
+&#8220;successful&#8221; response can be examined to enable services using status codes to
 classify errors. Lastly (#3), the request can be introspected to make the
 decision.</p>
 </div>
@@ -924,7 +927,7 @@ level than the  <a class="reference internal" href="Configuration.html#finagle6a
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id4">2</a>, <a class="fn-backref" href="#id5">3</a>, <a class="fn-backref" href="#id22">4</a>)</em> Most of the backoff strategies implemented in Finagle are inspired by Mark
-Brooker’s <a class="reference external" href="http://www.awsarchitectureblog.com/2015/03/backoff.html">blog post</a>.</td></tr>
+Brooker&#8217;s <a class="reference external" href="http://www.awsarchitectureblog.com/2015/03/backoff.html">blog post</a>.</td></tr>
 </tbody>
 </table>
 <table class="docutils footnote" frame="void" id="experimental" rules="none">
@@ -948,7 +951,7 @@ to production systems.</td></tr>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#id10">[4]</a></td><td>The <cite>Future#within</cite> variant creates a new future that invokes raise on the future
 when the timeout occurs. The affects of which are dependent on the producer of the future.
-In most cases, Finagle will attempt to cancel the request if it hasn’t already been dispatched.
+In most cases, Finagle will attempt to cancel the request if it hasn&#8217;t already been dispatched.
 If it has been dispatched, the behavior is dependent on the protocol (without protocol
 support Finagle needs to tear down the session to signal cancellation).</td></tr>
 </tbody>
@@ -983,7 +986,7 @@ P2CBalancer.leastLoadedGetAndPut 1000  avgt  10 1692.388 ± 103.164 ns/op
 <tr><td class="label"><a class="fn-backref" href="#id14">[8]</a></td><td>Weights are built into all the balancers except for the <code class="docutils literal"><span class="pre">HeapBalancer</span></code>.
 The API exposed for this is in <code class="docutils literal"><span class="pre">com.twitter.finagle.WeightedSocketAddress</span></code>. The name
 resolver that translates logical destinations to <code class="docutils literal"><span class="pre">com.twitter.finagle.Addr</span></code> can wrap
-concrete address with a <cite>Double</cite> which influences the balancer’s distributor during the
+concrete address with a <cite>Double</cite> which influences the balancer&#8217;s distributor during the
 selection process.</td></tr>
 </tbody>
 </table>
@@ -997,7 +1000,7 @@ selection process.</td></tr>
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#id21">[10]</a></td><td>See <cite>Failure Detectors</cite> section from
-Alvaro Videla’s <a class="reference external" href="http://videlalvaro.github.io/2015/12/learning-about-distributed-systems.html">blog post</a>.</td></tr>
+Alvaro Videla&#8217;s <a class="reference external" href="http://videlalvaro.github.io/2015/12/learning-about-distributed-systems.html">blog post</a>.</td></tr>
 </tbody>
 </table>
 </div>

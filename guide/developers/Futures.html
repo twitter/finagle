@@ -1,21 +1,23 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Twitter Futures &#8212; Finagle 17.12.0-SNAPSHOT documentation</title>
+    
+    <title>Twitter Futures &#8212; Finagle 17.12.0 documentation</title>
+    
     <link rel="stylesheet" href="../_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '17.12.0-SNAPSHOT',
+        VERSION:     '17.12.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
+        HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
@@ -24,6 +26,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="top" title="Finagle 17.12.0 documentation" href="../index.html" />
     <link rel="next" title="Signaling Failure within Finagle" href="SignalingFailure.html" />
     <link rel="prev" title="Extending Finagle" href="Extending.html" />
    
@@ -41,7 +44,7 @@
   </script>
 
   </head>
-  <body>
+  <body role="document">
   
   
 
@@ -79,7 +82,7 @@ future is satisfied, and doing other things in the mean time, but this is manual
 managing it manually, we could use Future#get exclusively, which would force us to use a thread per
 concurrent request.</p>
 <p>We wanted to try using an evented system instead, so we chose to describe what we want to do after
-we get a response, effectively a closure.  This is a common API for asynchronous results, so it’s a
+we get a response, effectively a closure.  This is a common API for asynchronous results, so it&#8217;s a
 natural match for asynchronous values.  Scala had a Futures implementation, <cite>scala.actors.Future</cite>,
 but it was tightly coupled to their Actors library, which needed some work.  We ended up working on
 our own Futures implementation, which turned into Twitter Futures.  Around the same time, Akka was
@@ -91,29 +94,29 @@ can attach closures to, <cite>java.util.concurrent.CompletableFuture</cite>.</p>
 <h2>Scheduling<a class="headerlink" href="#scheduling" title="Permalink to this headline">¶</a></h2>
 <p>Each of the modern Futures implementations, Scala, Java, and Twitter, represents a different way of
 scheduling the closures that should run on satisfaction.</p>
-<p>It’s worth noting that our scheduler is configurable (this is also true for Scala Futures, on a
-more granular basis), so this model isn’t set in stone.  With that said, we often unthinkingly
+<p>It&#8217;s worth noting that our scheduler is configurable (this is also true for Scala Futures, on a
+more granular basis), so this model isn&#8217;t set in stone.  With that said, we often unthinkingly
 program against the semantics of the default scheduler, so it would be a significant undertaking to
 change the scheduler.</p>
 <dl class="docutils">
 <dt>Scala</dt>
 <dd>Someone else run this.  Typically this means that we schedule the closure to be run in a thread
-pool somewhere.  This has the advantage that there’s a fixed cost of satisfying a future per
+pool somewhere.  This has the advantage that there&#8217;s a fixed cost of satisfying a future per
 closure hanging off of it, which is just the cost of scheduling each closure.  It can also allow
-parallelism if you’re doing CPU-intensive work, and is kinder to blocking work.  The
+parallelism if you&#8217;re doing CPU-intensive work, and is kinder to blocking work.  The
 disadvantage is that it requires doing the work on another thread, and comes with all of the
 costs of passing the message to the other thread.  The way work gets scheduled in Scala can be
 changed on a per-closure basis, but the default is to be backed by a thread pool.</dd>
 <dt>Java</dt>
-<dd>I’ll run this now.  This can be good for caching behavior, and lets us get better stack traces,
+<dd>I&#8217;ll run this now.  This can be good for caching behavior, and lets us get better stack traces,
 because we can see the causal link between satisfying a Future and running the closures.  The
 disadvantage is that this is no longer stack-safe, because hanging subsequent closures off will
 deepen the stack.  Note that at each point of asynchrony, the stack trace is broken.</dd>
 <dt>Twitter</dt>
-<dd>I’ll run this later.  This still helps with caching, but can be stack-safe.  The disadvantage is
-that the stack traces aren’t as useful (in practice we sometimes “run it now”).</dd>
+<dd>I&#8217;ll run this later.  This still helps with caching, but can be stack-safe.  The disadvantage is
+that the stack traces aren&#8217;t as useful (in practice we sometimes &#8220;run it now&#8221;).</dd>
 </dl>
-<p>To illustrate this, imagine that we’re doing three pieces of work, doWorkA, doWorkB, doWorkC.</p>
+<p>To illustrate this, imagine that we&#8217;re doing three pieces of work, doWorkA, doWorkB, doWorkC.</p>
 <p>We write it as:</p>
 <div class="highlight-text"><div class="highlight"><pre><span></span>Future.value(doWorkA()).map { a =&gt; doWorkB(a) }.map { b =&gt; doWorkC(b) }
 </pre></div>
@@ -149,26 +152,26 @@ val b = doWorkB(a)
 doWorkC(b)
 </pre></div>
 </div>
-<p>We’ve chosen this style for performance and for stack safety, and have been quite happy with it
+<p>We&#8217;ve chosen this style for performance and for stack safety, and have been quite happy with it
 historically.</p>
 </div>
 <div class="section" id="interruption">
 <h2>Interruption<a class="headerlink" href="#interruption" title="Permalink to this headline">¶</a></h2>
 <p>The other main difference that the different future types have is how they deal with cancellation.
 It can be useful to cancel asynchronous work to free up the resources, even though the thread itself
-is not blocked, for example if you’re consuming resources on a remote host.  Note that this breaks
+is not blocked, for example if you&#8217;re consuming resources on a remote host.  Note that this breaks
 the model of what a Future is, since it represents an asynchronous value.  Being able to cancel to
 prevent work points out that the asynchronous work must be happening somewhere, and asks the future
-to keep a reference to where that work is being done, so it can be cancelled.  Scala simply doesn’t
+to keep a reference to where that work is being done, so it can be cancelled.  Scala simply doesn&#8217;t
 implement cancellation, so that if you want to support it, you need to handle it in another way.
 Java only supports cancellation by immediately satisfying the future with CancellationException.  If
 you want to subsequently cancel the work, you need to ensure that that Future handles the
 CancellationException gracefully.  Twitter futures allow users to set interrupt handlers, and can
 propagate interruptions up the flatMap chain, so that if a future is no longer needed, it can cancel
 the underlying work that will later produce that future.  This means that futures do the right thing
-by default, and we don’t need to treat each Future#flatMap specially to propagate interrupts.
+by default, and we don&#8217;t need to treat each Future#flatMap specially to propagate interrupts.
 Interruptions are also advisory for Twitter futures, so that we can choose to ignore them if we
-wish.  One nice thing about this style is that it’s analogous to the Java interrupt mechanism, where
+wish.  One nice thing about this style is that it&#8217;s analogous to the Java interrupt mechanism, where
 we in effect set a field that an implementor can choose to respect or not.</p>
 </div>
 <div class="section" id="guts">
@@ -180,11 +183,11 @@ later.  <cite>Promise</cite> uses a state machine, which can be in one of a few 
 Interruptible, Transforming, Interrupted, Linked, and Done.  New <cite>Promises</cite> start in Waiting, and
 all of them are unsatisfied except for Done.  You can move from Waiting to Interruptible by calling
 <cite>Promise#setInterruptHandler</cite>.  If a <cite>Promise</cite> is constructed with a <cite>Future#transform</cite> method (like
-<cite>Future#flatMap</cite>, or <cite>Future#rescue</cite>) it’s in Transforming mode.  If a promise is interrupted when
-Interruptible, it fires the interrupt handler, and moves to the Interrupted state.  If it’s
+<cite>Future#flatMap</cite>, or <cite>Future#rescue</cite>) it&#8217;s in Transforming mode.  If a promise is interrupted when
+Interruptible, it fires the interrupt handler, and moves to the Interrupted state.  If it&#8217;s
 interrupted when Transforming, it delegates the interrupt to the underlying Future, and moves to the
 Interrupted state.  When a future is constructed with a <cite>Future#transform</cite> method and the underlying
-future has been satisfied, but the newly constructed one hasn’t yet, the <cite>Promise</cite> moves to the
+future has been satisfied, but the newly constructed one hasn&#8217;t yet, the <cite>Promise</cite> moves to the
 Linked state, where it delegates all work to the new constructed one.  This allows infinite future
 recursion without space leaks, which is quite neat.  Scala 2.12 futures have since used our trick to
 do it themselves, so they can also do recursion without space leaks.  <cite>Promise#updateIfEmpty</cite> and
@@ -195,10 +198,10 @@ the calling thread that satisfied the <cite>Promise</cite>.</p>
 <div class="section" id="detachable">
 <h2>Detachable<a class="headerlink" href="#detachable" title="Permalink to this headline">¶</a></h2>
 <p>When more than one execution dependency depends on the result of a future, it can be dangerous to
-interrupt it, since you might inadvertantly fail other folks’ work.  However, if you never interrupt
+interrupt it, since you might inadvertantly fail other folks&#8217; work.  However, if you never interrupt
 it, you can end up with memory leaks if the future is never satisfied and we continuously add work
-to it.  Detachable Promises are an attempt to fix this, so that we can mark promises as “may not be
-needed later, though the underlying future they depend on will be useful”, and must be
+to it.  Detachable Promises are an attempt to fix this, so that we can mark promises as &#8220;may not be
+needed later, though the underlying future they depend on will be useful&#8221;, and must be
 constructed explicitly by saying <cite>Promise.attached(underlying)</cite> like <a class="reference external" href="https://github.com/twitter/finagle/blob/2ae7cdd6124d5d10c9bcbf7c68a0ef2784abf968/finagle-core/src/main/scala/com/twitter/finagle/service/DelayedFactory.scala#L34">here</a>.</p>
 </div>
 </div>

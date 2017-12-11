@@ -1,21 +1,23 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Contents &#8212; Finagle 17.12.0-SNAPSHOT documentation</title>
+    
+    <title>Contents &#8212; Finagle 17.12.0 documentation</title>
+    
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '17.12.0-SNAPSHOT',
+        VERSION:     '17.12.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
+        HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
@@ -24,6 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="Finagle 17.12.0 documentation" href="#" />
     <link rel="next" title="Quickstart" href="Quickstart.html" />
    
   
@@ -40,7 +43,7 @@
   </script>
 
   </head>
-  <body>
+  <body role="document">
   
   
   <div class=indexwrapper>
@@ -68,14 +71,14 @@
 <p>Finagle is an extensible RPC system for the JVM, used to construct
 high-concurrency servers. Finagle implements uniform client and
 server APIs for several protocols, and is designed for high
-performance and concurrency. Most of Finagle’s code is protocol
+performance and concurrency. Most of Finagle&#8217;s code is protocol
 agnostic, simplifying the implementation of new <a class="reference internal" href="Protocols.html"><span class="doc">protocols</span></a>.</p>
 <p>Finagle uses a <em>clean</em>, <em>simple</em>, and <em>safe</em> concurrent programming
 model, based on <a class="reference internal" href="Futures.html"><span class="doc">Futures</span></a>. This leads to safe and
 modular programs that are also simple to reason about.</p>
 <p>Finagle clients and servers expose statistics for monitoring and
 diagnostics. They are also traceable through a mechanism similar to
-<a class="reference external" href="http://research.google.com/pubs/pub36356.html">Dapper</a>’s (another Twitter open source project, <a class="reference external" href="http://zipkin.io">Zipkin</a>, provides
+<a class="reference external" href="http://research.google.com/pubs/pub36356.html">Dapper</a>&#8216;s (another Twitter open source project, <a class="reference external" href="http://zipkin.io">Zipkin</a>, provides
 trace aggregation and visualization).</p>
 <p>The <a class="reference internal" href="Quickstart.html"><span class="doc">quickstart</span></a> has an overview of the most
 important concepts, walking you through the setup of a simple HTTP
@@ -90,14 +93,14 @@ their behavior.</p>
 <ul class="simple">
 <li><a class="reference external" href="http://monkey.org/~marius/funsrv.pdf">Your Server as a Function</a>, a paper motivating the core abstractions behind finagle (<a class="reference external" href="http://sigops.org/sosp/sosp13/plos.html">PLOS’13</a>).</li>
 <li><a class="reference external" href="https://blog.twitter.com/2011/finagle-a-protocol-agnostic-rpc-system">Twitter engineering blog entry introducing Finagle</a></li>
-<li>Twitter’s <a class="reference external" href="http://twitter.github.com/scala_school/">Scala School</a> has a section <a class="reference external" href="http://twitter.github.com/scala_school/finagle.html">introducing Finagle</a> and another <a class="reference external" href="http://twitter.github.com/scala_school/searchbird.html">constructing a distributed search engine using Finagle</a></li>
+<li>Twitter&#8217;s <a class="reference external" href="http://twitter.github.com/scala_school/">Scala School</a> has a section <a class="reference external" href="http://twitter.github.com/scala_school/finagle.html">introducing Finagle</a> and another <a class="reference external" href="http://twitter.github.com/scala_school/searchbird.html">constructing a distributed search engine using Finagle</a></li>
 <li><a class="reference external" href="http://kostyukov.net/posts/finagle-101/">Finagle 101</a> by Vladimir Kostyukov</li>
 <li>Alex Martins’ <a class="reference external" href="http://alexmartins.me/2015/12/30/building-fault-tolerant-clients-with-finagle-part-1.html">post</a> on configuring fault tolerant Finagle clients (Part 1)</li>
 </ul>
 <div class="section" id="contents">
 <h1>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">User's Guide</span></p>
+<div class="toctree-wrapper compound" id="user-s-guide">
+<p class="caption"><span class="caption-text">User&#8217;s Guide</span><a class="headerlink" href="#user-s-guide" title="Permalink to this toctree">¶</a></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Futures.html">Concurrent Programming with Futures</a></li>
@@ -114,16 +117,16 @@ their behavior.</p>
 <li class="toctree-l1"><a class="reference internal" href="Glossary.html">Glossary of Terms</a></li>
 </ul>
 </div>
-<div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Developer's Guide</span></p>
+<div class="toctree-wrapper compound" id="developer-s-guide">
+<p class="caption"><span class="caption-text">Developer&#8217;s Guide</span><a class="headerlink" href="#developer-s-guide" title="Permalink to this toctree">¶</a></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="developers/Extending.html">Extending Finagle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developers/Futures.html">Twitter Futures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developers/SignalingFailure.html">Signaling Failure within Finagle</a></li>
 </ul>
 </div>
-<div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Notes</span></p>
+<div class="toctree-wrapper compound" id="notes">
+<p class="caption"><span class="caption-text">Notes</span><a class="headerlink" href="#notes" title="Permalink to this toctree">¶</a></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>

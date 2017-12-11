@@ -439,6 +439,10 @@ and Updating).
                         <a class="trait" href="EndpointFactory.html" title="A specialized ServiceFactory which admits that it backs a concrete endpoint."></a>
                         <a href="EndpointFactory.html" title="A specialized ServiceFactory which admits that it backs a concrete endpoint.">EndpointFactory</a>
                       </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="FlagBalancerFactory$.html" title="A LoadBalancerFactory proxy which instantiates the underlying based on flags (see flags.scala for applicable flags)."></a>
+                        <a href="FlagBalancerFactory$.html" title="A LoadBalancerFactory proxy which instantiates the underlying based on flags (see flags.scala for applicable flags).">FlagBalancerFactory</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="LoadBalancerFactory$.html" title="Exposes a Stack.Module which composes load balancing into the respective Stack."></a>
                         <a class="class" href="LoadBalancerFactory.html" title="A thin interface around a Balancer's constructor that allows Finagle to pass in context from the stack to the balancers at construction time."></a>
                         <a href="LoadBalancerFactory.html" title="A thin interface around a Balancer's constructor that allows Finagle to pass in context from the stack to the balancers at construction time.">LoadBalancerFactory</a>
@@ -1217,6 +1221,42 @@ is used, outside of Finagle, the default ordering should be overriden.
 which override it).</p><div class="fullcomment"><div class="comment cmt"><p>Set the default <a href="../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a> ordering for the entire process (outside of clients
 which override it).
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="LoadBalancerFactory$$AddressOrdering.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.AddressOrdering">LoadBalancerFactory.AddressOrdering</a> for more info.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.loadbalancer#defaultBalancerFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="defaultBalancerFactory:com.twitter.finagle.loadbalancer.LoadBalancerFactory"></a><a id="defaultBalancerFactory:LoadBalancerFactory"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/loadbalancer/index.html#defaultBalancerFactory:com.twitter.finagle.loadbalancer.LoadBalancerFactory" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">defaultBalancerFactory</span><span class="result">: <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns the default process global <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a> as set via
+<code>defaultBalancerFactory</code>.</p>
+    </li><li name="com.twitter.finagle.loadbalancer#defaultBalancerFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="defaultBalancerFactory(factory:com.twitter.finagle.loadbalancer.LoadBalancerFactory):Unit"></a><a id="defaultBalancerFactory(LoadBalancerFactory):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/loadbalancer/index.html#defaultBalancerFactory(factory:com.twitter.finagle.loadbalancer.LoadBalancerFactory):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">defaultBalancerFactory</span><span class="params">(<span name="factory">factory: <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Set the default <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a> for the entire process (outside of
+clients which override it).</p><div class="fullcomment"><div class="comment cmt"><p>Set the default <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a> for the entire process (outside of
+clients which override it).
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="LoadBalancerFactory$$Param.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.Param">LoadBalancerFactory.Param</a> for more info.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.loadbalancer.Balancers" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Balancers"></a><a id="Balancers:Balancers"></a>
       <span class="permalink">
@@ -1242,10 +1282,10 @@ to easily inject a balancer into the Finagle client stack via the
   .newClient(...)</pre></li></ol>
             </div><dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#load-balancing" target="_blank">user guide</a>
 for more details.</p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.loadbalancer.DefaultBalancerFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="DefaultBalancerFactory"></a><a id="DefaultBalancerFactory:DefaultBalancerFactory"></a>
+    </li><li name="com.twitter.finagle.loadbalancer.FlagBalancerFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="FlagBalancerFactory"></a><a id="FlagBalancerFactory:FlagBalancerFactory"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/loadbalancer/index.html#DefaultBalancerFactory" title="Permalink">
+      <a href="../../../../com/twitter/finagle/loadbalancer/index.html#FlagBalancerFactory" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1254,10 +1294,11 @@ for more details.</p></span></dd></dl></div>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="DefaultBalancerFactory$.html"><span class="name">DefaultBalancerFactory</span></a><span class="result"> extends <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a></span>
+        <a title="A LoadBalancerFactory proxy which instantiates the underlying based on flags (see flags.scala for applicable flags)." href="FlagBalancerFactory$.html"><span class="name">FlagBalancerFactory</span></a><span class="result"> extends <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a></span>
       </span>
       
-      
+      <p class="shortcomment cmt">A <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a> proxy which instantiates the underlying
+based on flags (see flags.scala for applicable flags).</p>
     </li><li name="com.twitter.finagle.loadbalancer.LoadBalancerFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="LoadBalancerFactory"></a><a id="LoadBalancerFactory:LoadBalancerFactory"></a>
       <span class="permalink">
@@ -1344,7 +1385,29 @@ is large. However, they can be quite useful for debugging.
 
         
 
-        
+        <div class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="com.twitter.finagle.loadbalancer.DefaultBalancerFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="DefaultBalancerFactory"></a><a id="DefaultBalancerFactory:DefaultBalancerFactory"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/loadbalancer/index.html#DefaultBalancerFactory" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="DefaultBalancerFactory$.html"><span class="name deprecated" title="Deprecated: (Since version 2017-11-28) Use com.twitter.finagle.loadbalancer.FlagBalancerFactory instead.">DefaultBalancerFactory</span></a><span class="result"> extends <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-11-28)</i> Use com.twitter.finagle.loadbalancer.FlagBalancerFactory instead.</p></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">

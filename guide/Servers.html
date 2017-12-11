@@ -1,21 +1,23 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Servers &#8212; Finagle 17.12.0-SNAPSHOT documentation</title>
+    
+    <title>Servers &#8212; Finagle 17.12.0 documentation</title>
+    
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '17.12.0-SNAPSHOT',
+        VERSION:     '17.12.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
+        HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
@@ -24,6 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="Finagle 17.12.0 documentation" href="index.html" />
     <link rel="next" title="Clients" href="Clients.html" />
     <link rel="prev" title="Configuration" href="Configuration.html" />
    
@@ -41,7 +44,7 @@
   </script>
 
   </head>
-  <body>
+  <body role="document">
   
   
 
@@ -157,14 +160,14 @@ straightforward manner, for example, in a ThriftMux client:</p>
   <span class="o">.</span><span class="n">withResponseClassifier</span><span class="o">(</span><span class="nc">HttpResponseClassifier</span><span class="o">.</span><span class="nc">ServerErrorsAsFailures</span><span class="o">)</span>
 </pre></div>
 </div>
-<p>If a classifier is not specified on a client or server or if a user’s classifier isn’t
+<p>If a classifier is not specified on a client or server or if a user&#8217;s classifier isn&#8217;t
 defined for a given request/response pair then <code class="docutils literal"><span class="pre">ResponseClassifier.Default</span></code>
 is used. This gives us the simple classification rules of responses that are
 <code class="docutils literal"><span class="pre">Returns</span></code> are successful and <code class="docutils literal"><span class="pre">Throws</span></code> are failures.</p>
 <p>Writing a custom classifier requires understanding of the few classes used. A
 <code class="docutils literal"><span class="pre">ResponseClassifier</span></code> is a <code class="docutils literal"><span class="pre">PartialFunction</span></code> from <code class="docutils literal"><span class="pre">ReqRep</span></code> to
 <code class="docutils literal"><span class="pre">ResponseClass</span></code>.</p>
-<p>Let’s work our way backwards through those, beginning with <code class="docutils literal"><span class="pre">ResponseClass</span></code>.
+<p>Let&#8217;s work our way backwards through those, beginning with <code class="docutils literal"><span class="pre">ResponseClass</span></code>.
 This can be either <code class="docutils literal"><span class="pre">Successful</span></code> or <code class="docutils literal"><span class="pre">Failed</span></code> and those values are
 self-explanatory. There are three constants which will cover the vast majority
 of usage: <code class="docutils literal"><span class="pre">Success</span></code>, <code class="docutils literal"><span class="pre">NonRetryableFailure</span></code> and <code class="docutils literal"><span class="pre">RetryableFailure</span></code>. While
@@ -187,17 +190,17 @@ Here is an example that counts HTTP 503s as failures:</p>
 <span class="o">}</span>
 </pre></div>
 </div>
-<p>Note that this <code class="docutils literal"><span class="pre">PartialFunction</span></code> isn’t total which is ok due to Finagle
+<p>Note that this <code class="docutils literal"><span class="pre">PartialFunction</span></code> isn&#8217;t total which is ok due to Finagle
 always using user defined classifiers in combination with
 <code class="docutils literal"><span class="pre">ResponseClassifier.Default</span></code> which will cover all cases.</p>
 <p>Thrift and ThriftMux classifiers require a bit more care as the request and
 response types are not as obvious. This is because there is only a single
 <code class="docutils literal"><span class="pre">Service</span></code> from <code class="docutils literal"><span class="pre">Array[Byte]</span></code> to <code class="docutils literal"><span class="pre">Array[Byte]</span></code> for all the methods of an
-IDL’s service. To make this workable, there is support in Scrooge and
+IDL&#8217;s service. To make this workable, there is support in Scrooge and
 <code class="docutils literal"><span class="pre">Thrift/ThriftMux.newService</span></code> and <code class="docutils literal"><span class="pre">Thrift/ThriftMux.newClient</span></code> code to
 deserialize the responses into the expected application types so that
 classifiers can be written in terms of the Scrooge generated request type,
-<code class="docutils literal"><span class="pre">$Service.$Method.Args</span></code>, and the method’s response type. Given an IDL:</p>
+<code class="docutils literal"><span class="pre">$Service.$Method.Args</span></code>, and the method&#8217;s response type. Given an IDL:</p>
 <div class="highlight-none"><div class="highlight"><pre><span></span>exception NotFoundException { 1: string reason }
 
 service SocialGraph {
@@ -223,9 +226,9 @@ service SocialGraph {
 <span class="o">}</span>
 </pre></div>
 </div>
-<p>If you examine that classifier you’ll note a few things. First (#1), the
+<p>If you examine that classifier you&#8217;ll note a few things. First (#1), the
 deserialized <code class="docutils literal"><span class="pre">NotFoundException</span></code> can be treated as a failure. Next (#2), a
-“successful” response can be examined to enable services using status codes to
+&#8220;successful&#8221; response can be examined to enable services using status codes to
 classify errors. Lastly (#3), the request can be introspected to make the
 decision.</p>
 <p>If you have a response classifier that categorizes <code class="docutils literal"><span class="pre">Returns</span></code> as
@@ -239,7 +242,7 @@ for more details.</p>
 <p>The <cite>Concurrency Limit</cite> module is implemented by
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/filter/RequestSemaphoreFilter.scala">RequestSemaphoreFilter</a> and maintains
 the <cite>concurrency</cite> of the Finagle server.</p>
-<p>By default, this module is disabled, which means a Finagle server’s requests concurrency is unbounded.
+<p>By default, this module is disabled, which means a Finagle server&#8217;s requests concurrency is unbounded.
 To enable the <cite>Concurrency Limit</cite> module and put some bounds in terms of maximum number of requests
 that might be handled concurrently by your server, use the following example <a class="footnote-reference" href="#example" id="id1">[2]</a>.</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
@@ -267,7 +270,7 @@ that might be handled concurrently by your server, use the following example <a 
 <p>A service may explicitly reject requests on a case-by-case basis. To generate a rejection response,
 have the server return a Future.exception of <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">Failure</a> with
 the <cite>Rejected</cite> flag set. A convenience method, <cite>Failure.rejected</cite> exists for this. By default, this
-also sets the <cite>Restartable</cite> flag which indicates the failure is safe to retry. The client’s
+also sets the <cite>Restartable</cite> flag which indicates the failure is safe to retry. The client&#8217;s
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/RequeueFilter.scala">RequeueFilter</a> will automatically retry such
 failures.
 For requests that should not be retried, the server should return a <cite>Failure</cite> with the <cite>NonRetryable</cite>
@@ -284,13 +287,13 @@ flag set.</p>
 <h3>Request Timeout<a class="headerlink" href="#request-timeout" title="Permalink to this headline">¶</a></h3>
 <p>The <cite>Request Timeout</cite> module is implemented by
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/TimeoutFilter.scala">TimeoutFilter</a> and simply <cite>fails</cite> all the
-requests that a given server hasn’t be able to handle in the given amount of time. As well as for
+requests that a given server hasn&#8217;t be able to handle in the given amount of time. As well as for
 Finagle clients, this module is disabled by default (the timeout is unbounded). See
 <a class="reference internal" href="Clients.html#configuring-timeouts"><span class="std std-ref">this example</span></a> to override this behaviour.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">The <cite>Request Timeout</cite> module doesn’t <cite>reject</cite> the incoming request, but <cite>fails</cite> it. This
-means it won’t by default be retried by a remote client given it’s not known whether
+<p class="last">The <cite>Request Timeout</cite> module doesn&#8217;t <cite>reject</cite> the incoming request, but <cite>fails</cite> it. This
+means it won&#8217;t by default be retried by a remote client given it&#8217;s not known whether
 the request has been timed out being in the queue (waiting for processing) or being
 processed.</p>
 </div>

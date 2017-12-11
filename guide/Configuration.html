@@ -1,21 +1,23 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Configuration &#8212; Finagle 17.12.0-SNAPSHOT documentation</title>
+    
+    <title>Configuration &#8212; Finagle 17.12.0 documentation</title>
+    
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '17.12.0-SNAPSHOT',
+        VERSION:     '17.12.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
+        HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
@@ -24,6 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="Finagle 17.12.0 documentation" href="index.html" />
     <link rel="next" title="Servers" href="Servers.html" />
     <link rel="prev" title="Services &amp; Filters" href="ServicesAndFilters.html" />
    
@@ -41,7 +44,7 @@
   </script>
 
   </head>
-  <body>
+  <body role="document">
   
   
 
@@ -115,8 +118,8 @@ demonstrates how to use <code class="docutils literal"><span class="pre">.config
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">The expert-level API requires deep knowledge of Finagle internals and
-it’s recommended to avoid it unless you’re sure of what
-you’re doing or the corresponding configuration has not yet
+it&#8217;s recommended to avoid it unless you&#8217;re sure of what
+you&#8217;re doing or the corresponding configuration has not yet
 been exposed through <code class="docutils literal"><span class="pre">with</span></code>-prefixed methods.</p>
 </div>
 <div class="section" id="design-principles">
@@ -131,17 +134,17 @@ exception from this rule: some of the parameters only make sense when viewed as 
 rather than separately (e.g. it makes no sense to specify SOCKS proxy credentials when
 the proxy itself is disabled).</li>
 <li><strong>No boolean flags (i.e., enabled, yesOrNo)</strong>: Boolean values are usually hard to
-reason about because their type doesn’t encode it’s mission in the domain (e.g. in
-most of the cases it’s impossible to tell what <code class="docutils literal"><span class="pre">true</span></code> or <code class="docutils literal"><span class="pre">false</span></code> means in a function
+reason about because their type doesn&#8217;t encode it&#8217;s mission in the domain (e.g. in
+most of the cases it&#8217;s impossible to tell what <code class="docutils literal"><span class="pre">true</span></code> or <code class="docutils literal"><span class="pre">false</span></code> means in a function
 call). Instead of boolean flags, we use a pair of methods <code class="docutils literal"><span class="pre">x</span></code> and <code class="docutils literal"><span class="pre">noX</span></code> to indicate
 whether the <code class="docutils literal"><span class="pre">x</span></code> feature is enabled or disabled.</li>
 <li><strong>Less primitive number types in the API</strong>: We promote a sane level of type-full
 programming, where a reasonable level of guarantees is encoded into a type-system.
 Thus, we never use primitive number types for durations and storage units given that
 there are utility types: <code class="docutils literal"><span class="pre">Duration</span></code> and <code class="docutils literal"><span class="pre">StorageUnit</span></code>.</li>
-<li><strong>No experimental and/or advanced features</strong>: While, it’s relatively safe to configure
+<li><strong>No experimental and/or advanced features</strong>: While, it&#8217;s relatively safe to configure
 parameters exposed via <code class="docutils literal"><span class="pre">with</span></code>-prefixed methods, you should never assume the same about
-the <cite>Stack API</cite> (i.e., <code class="docutils literal"><span class="pre">.configured</span></code>). It’s <em>easy</em> to configure basic parameters; it’s
+the <cite>Stack API</cite> (i.e., <code class="docutils literal"><span class="pre">.configured</span></code>). It&#8217;s <em>easy</em> to configure basic parameters; it&#8217;s
 <em>possible</em> to configure expert-level parameters.</li>
 </ol>
 </div>
@@ -194,7 +197,7 @@ used only at startup this is unnecessary.</p>
 </div>
 <p>Note that we pass a <cite>ToggleMap</cite> into the constructor and typically this would be
 the instance created via
-<cite>StandardToggleMap.apply(“com.example.service”, com.twitter.finagle.stats.DefaultStatsReceiver)</cite>.
+<cite>StandardToggleMap.apply(&#8220;com.example.service&#8221;, com.twitter.finagle.stats.DefaultStatsReceiver)</cite>.
 This allows for testing of the code with control of whether the <cite>Toggle</cite> is
 enabled or disabled by using <cite>ToggleMap.On</cite> or <cite>ToggleMap.Off</cite>. This could have also been
 achieved by passing the <cite>Toggle</cite> into the constructor and then using <cite>Toggle.on</cite> or
@@ -211,7 +214,7 @@ allows for descriptions and comments.</p>
 <p>Dynamically changing the values across a cluster is specific to a particular deployment
 and can be wired in via a
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/ServiceLoadedToggleMap.scala">service-loaded ToggleMap</a>.</p>
-<p>Deterministic unit tests can be written that modify a <cite>Toggle</cite>’s settings via
+<p>Deterministic unit tests can be written that modify a <cite>Toggle</cite>&#8216;s settings via
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/flag/overrides.scala">flag overrides</a>
 using:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.toggle.flag</span>
@@ -225,8 +228,8 @@ using:</p>
 </div>
 <div class="section" id="service-owners">
 <h4>Service Owners<a class="headerlink" href="#service-owners" title="Permalink to this headline">¶</a></h4>
-<p>At runtime, the in-process <cite>Toggle</cite> values can be modified using TwitterServer’s
-“/admin/toggles” <a class="reference external" href="https://twitter.github.io/twitter-server/Admin.html#admin-toggles">API endpoint</a>.
+<p>At runtime, the in-process <cite>Toggle</cite> values can be modified using TwitterServer&#8217;s
+&#8220;/admin/toggles&#8221; <a class="reference external" href="https://twitter.github.io/twitter-server/Admin.html#admin-toggles">API endpoint</a>.
 This provides a quick way to try out a change in a limited fashion.</p>
 <p>For setting more permanent <cite>Toggle</cite> values, include a JSON configuration file at
 <cite>resources/com/twitter/toggles/configs/$libraryName-service.json</cite>.
@@ -248,7 +251,7 @@ is used to determine which one to load.</p>
 parameters of clients and servers at runtime.</p>
 <div class="section" id="id2">
 <h3>Concepts<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
-<p>A <a class="reference external" href="https://github.com/twitter/util/blob/master/util-tunable/src/main/scala/com/twitter/util/tunable/Tunable.scala">Tunable</a> is like a Function0;
+<p>A <a class="reference external" href="https://github.com/twitter/util/blob/master/util-tunable/src/main/scala/com/twitter/util/tunable/Tunable.scala">Tunable</a> is like a <cite>Function0</cite>;
 it produces a value when applied. Dynamic configuration facilitates this value changing
 across invocations at runtime.</p>
 <p><cite>Tunables</cite> are accessed by means of a
@@ -260,8 +263,8 @@ have a separate <cite>TunableMap</cite> that is used for configuration, and the 
 <h3>Usage<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
 <p>Accessing the <cite>TunableMap</cite> for a given id is done via
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-tunable/src/main/scala/com/twitter/finagle/tunable/StandardTunableMap.scala">StandardTunableMap</a>,
-using <cite>StandardTunableMap.apply(“myId”)</cite>.
-The returned map composes in-memory, local-file, and service-loaded configurations.</p>
+using <cite>StandardTunableMap.apply(&#8220;myId&#8221;)</cite>.
+The returned map composes in-memory, service-loaded configurations and local files.</p>
 <p>Here is an example of configuring the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/TimeoutFilter.scala">TimeoutFilter</a>
 on an HTTP client with a <cite>Tunable</cite>:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">package</span> <span class="nn">com.example.service</span>
@@ -287,15 +290,20 @@ on an HTTP client with a <cite>Tunable</cite>:</p>
 </div>
 <div class="section" id="id4">
 <h3>Configuration<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
-<p>The value of a given <cite>Tunable</cite> is the result of the composition of in-memory, local-file,
-and service-loaded configurations, in that order. If a configuration does not exist, the value
-from the next configuration is used.</p>
+<p>The value of a given <cite>Tunable</cite> is the result of the composition of in-memory, service-loaded
+configurations and local files, in that order. If a configuration does not exist
+the value from the next configuration is used.</p>
 <p>For example, if a server starts up with a file-based configuration for a given id, those values will
 be used. If the in-memory configuration is then set, those new values will be used.</p>
 <div class="section" id="in-memory">
 <h4>In-Memory<a class="headerlink" href="#in-memory" title="Permalink to this headline">¶</a></h4>
-<p>The <cite>Tunable</cite> values used by a given instance can be modified using TwitterServer’s
-“/admin/tunables” <a class="reference external" href="https://twitter.github.io/twitter-server/Admin.html#admin-tunables">API endpoint</a>.</p>
+<p>In-memory configuration is provided through a
+<a class="reference external" href="https://github.com/twitter/util/blob/master/util-tunable/src/main/scala/com/twitter/util/tunable/TunableMap.scala">TunableMap</a>. The Tunable values used
+by a given instance can be modified using TwitterServer&#8217;s <cite>/admin/tunables</cite>
+<a class="reference external" href="https://twitter.github.io/twitter-server/Admin.html#admin-tunables">API endpoint</a>.</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">map</span> <span class="k">=</span> <span class="nc">TunableMap</span><span class="o">.</span><span class="n">newMutable</span><span class="o">(</span><span class="n">source</span><span class="o">)</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="file-based">
 <h4>File-Based<a class="headerlink" href="#file-based" title="Permalink to this headline">¶</a></h4>

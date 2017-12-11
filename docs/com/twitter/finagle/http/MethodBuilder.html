@@ -1012,6 +1012,42 @@ builder.withRetryForClassifier {
 the client.</p></li></ol>
             </div><dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#response-classification" target="_blank">response classification user guide</a></p></span><span class="cmt"><p><a href="#withRetryDisabled:com.twitter.finagle.http.MethodBuilder" class="extmbr" name="com.twitter.finagle.http.MethodBuilder#withRetryDisabled">withRetryDisabled</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.MethodBuilder#withTimeoutPerRequest" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withTimeoutPerRequest(howLong:com.twitter.util.tunable.Tunable[com.twitter.util.Duration]):com.twitter.finagle.http.MethodBuilder"></a><a id="withTimeoutPerRequest(Tunable[Duration]):MethodBuilder"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/MethodBuilder.html#withTimeoutPerRequest(howLong:com.twitter.util.tunable.Tunable[com.twitter.util.Duration]):com.twitter.finagle.http.MethodBuilder" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withTimeoutPerRequest</span><span class="params">(<span name="howLong">howLong: <a href="https://twitter.github.io/util/docs/com/twitter/util/tunable/Tunable.html#com.twitter.util.tunable.Tunable" class="extype" name="com.twitter.util.tunable.Tunable">Tunable</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">How long a <b>single</b> request is given to complete.</p><div class="fullcomment"><div class="comment cmt"><p>How long a <b>single</b> request is given to complete.</p><p>If there are <a href="#withRetryForClassifier(classifier:com.twitter.finagle.service.ResponseClassifier):com.twitter.finagle.http.MethodBuilder" class="extmbr" name="com.twitter.finagle.http.MethodBuilder#withRetryForClassifier">retries</a>, each attempt is given up
+to this amount of time.</p><p>If a request does not complete within this time, the response
+will be satisfied with a <a href="../IndividualRequestTimeoutException.html" class="extype" name="com.twitter.finagle.IndividualRequestTimeoutException">com.twitter.finagle.IndividualRequestTimeoutException</a>.</p><p>Defaults to using the client's configuration for
+<span class="extype" name="com.twitter.finagle.service.TimeoutFilter.Param(timeout)">com.twitter.finagle.service.TimeoutFilter.Param(timeout)</span>,
+which is typically set via
+<a href="../param/CommonParams.html#withRequestTimeout(timeout:com.twitter.util.tunable.Tunable[com.twitter.util.Duration]):A" class="extmbr" name="com.twitter.finagle.param.CommonParams#withRequestTimeout">com.twitter.finagle.param.CommonParams.withRequestTimeout</a>.
+</p></div><dl class="paramcmts block"><dt class="param">howLong</dt><dd class="cmt"><p>how long, from the initial request issuance,
+               an individual attempt given to complete.
+               If it is not finite (e.g. <code>Duration.Top</code>),
+               no method specific timeout will be applied.</p></dd><dt>returns</dt><dd class="cmt"><p>a new instance with all other settings copied</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a> → MethodBuilderScaladoc</dd><div class="block">Example:
+               <ol><li class="cmt"><p>
+For example, a per-request timeout of 50 milliseconds:</p><pre><span class="kw">import</span> com.twitter.conversions.time._
+<span class="kw">import</span> com.twitter.finagle.http.Http
+<span class="kw">import</span> com.twitter.util.Duration
+<span class="kw">import</span> com.twitter.util.tunable.Tunable
+
+<span class="kw">val</span> client: Http.Client = ???
+<span class="kw">val</span> tunableTimeout: Tunable[Duration] = Tunable.const(<span class="lit">"id"</span>, <span class="num">50.</span>milliseconds)
+<span class="kw">val</span> builder = client.methodBuilder(<span class="lit">"inet!example.com:80"</span>)
+builder.withTimeoutPerRequest(tunableTimeout))</pre></li></ol>
+            </div><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="withTimeoutTotal(Tunable[Duration])">withTimeoutTotal(Tunable[Duration])</span></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.MethodBuilder#withTimeoutPerRequest" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withTimeoutPerRequest(howLong:com.twitter.util.Duration):com.twitter.finagle.http.MethodBuilder"></a><a id="withTimeoutPerRequest(Duration):MethodBuilder"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/MethodBuilder.html#withTimeoutPerRequest(howLong:com.twitter.util.Duration):com.twitter.finagle.http.MethodBuilder" title="Permalink">
@@ -1039,11 +1075,45 @@ which is typically set via
                <ol><li class="cmt"><p>
 For example, a per-request timeout of 50 milliseconds:</p><pre><span class="kw">import</span> com.twitter.conversions.time._
 <span class="kw">import</span> com.twitter.finagle.http.Http
+<span class="kw">import</span> com.twitter.util.Duration
 
 <span class="kw">val</span> client: Http.Client = ???
 <span class="kw">val</span> builder = client.methodBuilder(<span class="lit">"inet!example.com:80"</span>)
 builder.withTimeoutPerRequest(<span class="num">50.</span>milliseconds))</pre></li></ol>
             </div><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="withTimeoutTotal(Duration)">withTimeoutTotal(Duration)</span></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.MethodBuilder#withTimeoutTotal" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withTimeoutTotal(howLong:com.twitter.util.tunable.Tunable[com.twitter.util.Duration]):com.twitter.finagle.http.MethodBuilder"></a><a id="withTimeoutTotal(Tunable[Duration]):MethodBuilder"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/MethodBuilder.html#withTimeoutTotal(howLong:com.twitter.util.tunable.Tunable[com.twitter.util.Duration]):com.twitter.finagle.http.MethodBuilder" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withTimeoutTotal</span><span class="params">(<span name="howLong">howLong: <a href="https://twitter.github.io/util/docs/com/twitter/util/tunable/Tunable.html#com.twitter.util.tunable.Tunable" class="extype" name="com.twitter.util.tunable.Tunable">Tunable</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Set a total timeout with a <span class="extype" name="Tunable">Tunable</span>, including time spent on retries.</p><div class="fullcomment"><div class="comment cmt"><p>Set a total timeout with a <span class="extype" name="Tunable">Tunable</span>, including time spent on retries.</p><p>If the request does not complete in this time, the response
+will be satisfied with a <a href="../GlobalRequestTimeoutException.html" class="extype" name="com.twitter.finagle.GlobalRequestTimeoutException">com.twitter.finagle.GlobalRequestTimeoutException</a>.</p><p>Defaults to using the client's configuration for
+<span class="extype" name="com.twitter.finagle.service.TimeoutFilter.TotalTimeout(timeout)">com.twitter.finagle.service.TimeoutFilter.TotalTimeout(timeout)</span>.
+</p></div><dl class="paramcmts block"><dt class="param">howLong</dt><dd class="cmt"><p>how long, from the initial request issuance,
+               is the request given to complete.
+               If it is not finite (e.g. <code>Duration.Top</code>),
+               no method specific timeout will be applied.</p></dd><dt>returns</dt><dd class="cmt"><p>a new instance with all other settings copied</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a> → MethodBuilderScaladoc</dd><div class="block">Example:
+               <ol><li class="cmt"><p>
+For example, a total timeout of 200 milliseconds:</p><pre><span class="kw">import</span> com.twitter.conversions.time._
+<span class="kw">import</span> com.twitter.finagle.http.Http
+<span class="kw">import</span> com.twitter.util.Duration
+<span class="kw">import</span> com.twitter.util.tunable.Tunable
+
+<span class="kw">val</span> client: Http.Client = ???
+<span class="kw">val</span> tunableTimeout: Tunable[Duration] = Tunable.const(<span class="lit">"id"</span>, <span class="num">200.</span>milliseconds)
+<span class="kw">val</span> builder = client.methodBuilder(<span class="lit">"inet!example.com:80"</span>)
+builder.withTimeoutTotal(tunableTimeout))</pre></li></ol>
+            </div><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="withTimeoutPerRequest(Tunable[Duration])">withTimeoutPerRequest(Tunable[Duration])</span></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.MethodBuilder#withTimeoutTotal" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withTimeoutTotal(howLong:com.twitter.util.Duration):com.twitter.finagle.http.MethodBuilder"></a><a id="withTimeoutTotal(Duration):MethodBuilder"></a>
       <span class="permalink">
@@ -1069,6 +1139,7 @@ will be satisfied with a <a href="../GlobalRequestTimeoutException.html" class="
                <ol><li class="cmt"><p>
 For example, a total timeout of 200 milliseconds:</p><pre><span class="kw">import</span> com.twitter.conversions.time._
 <span class="kw">import</span> com.twitter.finagle.http.Http
+<span class="kw">import</span> com.twitter.util.Duration
 
 <span class="kw">val</span> client: Http.Client = ???
 <span class="kw">val</span> builder = client.methodBuilder(<span class="lit">"inet!example.com:80"</span>)

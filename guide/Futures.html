@@ -1,21 +1,23 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Concurrent Programming with Futures &#8212; Finagle 17.12.0-SNAPSHOT documentation</title>
+    
+    <title>Concurrent Programming with Futures &#8212; Finagle 17.12.0 documentation</title>
+    
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '17.12.0-SNAPSHOT',
+        VERSION:     '17.12.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
+        HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
@@ -24,6 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="Finagle 17.12.0 documentation" href="index.html" />
     <link rel="next" title="Services &amp; Filters" href="ServicesAndFilters.html" />
     <link rel="prev" title="Quickstart" href="Quickstart.html" />
    
@@ -41,7 +44,7 @@
   </script>
 
   </head>
-  <body>
+  <body role="document">
   
   
 
@@ -163,19 +166,19 @@ extract like this:</p>
 <p><code class="docutils literal"><span class="pre">f</span></code> represents the <em>composite</em> operation. It is the result of first
 retrieving the web page, and then the first image link. If either of
 the smaller operations fail (the first or second <code class="docutils literal"><span class="pre">fetchUrl</span></code> or if
-<code class="docutils literal"><span class="pre">findImageUrls</span></code> doesn’t successfully find any images), the composite
+<code class="docutils literal"><span class="pre">findImageUrls</span></code> doesn&#8217;t successfully find any images), the composite
 operation also fails.</p>
 <p>The astute reader may have noticed something peculiar: this is
 typically the job of the semicolon! That is not far from the truth:
 semicolons sequence two statements, and with traditional I/O
 operations, have the same effect as <code class="docutils literal"><span class="pre">flatMap</span></code> does above (the
 exception mechanism takes the role of a failed future). Futures
-are much more versatile, however, as we’ll see.</p>
+are much more versatile, however, as we&#8217;ll see.</p>
 </div>
 <div class="section" id="concurrent-composition">
 <h2>Concurrent composition<a class="headerlink" href="#concurrent-composition" title="Permalink to this headline">¶</a></h2>
 <p>It is also possible to compose Futures <em>concurrently</em>. We can extend
-our above example to demonstrate: let’s fetch <em>all</em> the images.
+our above example to demonstrate: let&#8217;s fetch <em>all</em> the images.
 Concurrent composition is provided by <code class="docutils literal"><span class="pre">Future.collect</span></code>:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
 
@@ -245,7 +248,7 @@ differences.</li>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Finagle uses its own <code class="docutils literal"><span class="pre">Future</span></code> implementation by a variety of reasons
 (fewer context switches, interruptibility, support for continuation-local variables,
-tail-call elimination), but mostly because it’s preceded <a class="reference external" href="http://docs.scala-lang.org/sips/completed/futures-promises.html">SIP-14</a> by over a year.</td></tr>
+tail-call elimination), but mostly because it&#8217;s preceded <a class="reference external" href="http://docs.scala-lang.org/sips/completed/futures-promises.html">SIP-14</a> by over a year.</td></tr>
 </tbody>
 </table>
 <table class="docutils footnote" frame="void" id="collecttotry" rules="none">

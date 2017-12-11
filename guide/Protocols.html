@@ -1,21 +1,23 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Protocols &#8212; Finagle 17.12.0-SNAPSHOT documentation</title>
+    
+    <title>Protocols &#8212; Finagle 17.12.0 documentation</title>
+    
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '17.12.0-SNAPSHOT',
+        VERSION:     '17.12.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
+        HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
@@ -24,6 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="Finagle 17.12.0 documentation" href="index.html" />
     <link rel="next" title="Metrics" href="Metrics.html" />
     <link rel="prev" title="Names and Naming in Finagle" href="Names.html" />
    
@@ -41,7 +44,7 @@
   </script>
 
   </head>
-  <body>
+  <body role="document">
   
   
 
@@ -173,7 +176,7 @@ following rich APIs:</p>
 <span class="c1">// [2] Server received: &#39;HELLO&#39;</span>
 </pre></div>
 </div>
-<p>Here’s an example of a retry policy that retries on Thrift exceptions:</p>
+<p>Here&#8217;s an example of a retry policy that retries on Thrift exceptions:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">retryPolicy</span> <span class="k">=</span> <span class="nc">RetryPolicy</span><span class="o">.</span><span class="n">tries</span><span class="o">[</span><span class="kt">Try</span><span class="o">[</span><span class="kt">GetLogSize.Result</span><span class="o">]](</span><span class="mi">3</span><span class="o">,</span> <span class="o">{</span>
   <span class="k">case</span> <span class="nc">Throw</span><span class="o">(</span><span class="n">ex</span><span class="k">:</span> <span class="kt">ReadException</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="kc">true</span>
 <span class="o">})</span>
@@ -255,7 +258,7 @@ intelligent back-pressure, slow start, and GC-avoidance.</p>
 <h2>Mysql<a class="headerlink" href="#mysql" title="Permalink to this headline">¶</a></h2>
 <p><em>finagle-mysql</em> is an asynchronous implementation of the MySQL protocol built on top of Finagle.
 The project provides a simple query API with support for prepared statements and
-transactions while taking advantage of Finagle’s <a class="reference internal" href="Clients.html#client-modules"><span class="std std-ref">client stack</span></a> for
+transactions while taking advantage of Finagle&#8217;s <a class="reference internal" href="Clients.html#client-modules"><span class="std std-ref">client stack</span></a> for
 connection pooling. The implementation supports both the MySQL binary and string protocols.</p>
 <p>A client can be constructed using the
 <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Mysql$">Mysql</a> protocol object:</p>
@@ -270,7 +273,7 @@ connection pooling. The implementation supports both the MySQL binary and string
   <span class="o">.</span><span class="n">newClient</span><span class="o">(</span><span class="s">&quot;127.0.0.1:3306&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
-<p>We configure the <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/client/DefaultPool">client’s connection pool</a> to be
+<p>We configure the <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/client/DefaultPool">client&#8217;s connection pool</a> to be
 compatible with our MySQL server. The constructor returns a Finagle <a class="reference internal" href="ServicesAndFilters.html#service-factory"><span class="std std-ref">ServiceFactory</span></a>
 from <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/mysql/Request">mysql.Request</a> to <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/mysql/Result">mysql.Result</a>
 which we can use to query the db:</p>
@@ -297,7 +300,7 @@ implement the above <cite>processRow</cite> as a pattern match on expected value
   <span class="o">}</span>
 </pre></div>
 </div>
-<p>The ServiceFactory API gives you more fine-grained control over the pool. This isn’t always necessary
+<p>The ServiceFactory API gives you more fine-grained control over the pool. This isn&#8217;t always necessary
 - to simplify <em>finagle-mysql</em> offers a rich API that wraps the ServiceFactory returned from <cite>newClient</cite>:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">richClient</span> <span class="k">=</span> <span class="nc">Mysql</span><span class="o">.</span><span class="n">client</span>
   <span class="o">.</span><span class="n">withCredentials</span><span class="o">(</span><span class="s">&quot;&lt;user&gt;&quot;</span><span class="o">,</span> <span class="s">&quot;&lt;password&gt;&quot;</span><span class="o">)</span>

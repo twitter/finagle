@@ -1,21 +1,23 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Services &amp; Filters &#8212; Finagle 17.12.0-SNAPSHOT documentation</title>
+    
+    <title>Services &amp; Filters &#8212; Finagle 17.12.0 documentation</title>
+    
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '17.12.0-SNAPSHOT',
+        VERSION:     '17.12.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
+        HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
@@ -24,6 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="Finagle 17.12.0 documentation" href="index.html" />
     <link rel="next" title="Configuration" href="Configuration.html" />
     <link rel="prev" title="Concurrent Programming with Futures" href="Futures.html" />
    
@@ -41,7 +44,7 @@
   </script>
 
   </head>
-  <body>
+  <body role="document">
   
   
 
@@ -70,7 +73,7 @@
 <h1>Services &amp; Filters<a class="headerlink" href="#services-filters" title="Permalink to this headline">¶</a></h1>
 <p>Services and filters constitute the core abstractions with which
 clients and servers are constructed with the Finagle network library.
-They are very simple, but also quite versatile. Most of Finagle’s
+They are very simple, but also quite versatile. Most of Finagle&#8217;s
 internals are structured around Services and Filters.</p>
 <div class="section" id="services">
 <span id="id1"></span><h2>Services<a class="headerlink" href="#services" title="Permalink to this headline">¶</a></h2>
@@ -107,7 +110,7 @@ of a service is used through a client; a server <em>implements</em> a <code clas
 </div>
 <p>Services implement <em>application logic</em>. You might, for instance,
 define a <code class="docutils literal"><span class="pre">Service[http.Request,</span> <span class="pre">http.Response]</span></code> to implement your
-application’s external API.</p>
+application&#8217;s external API.</p>
 </div>
 <div class="section" id="filters">
 <span id="id2"></span><h2>Filters<a class="headerlink" href="#filters" title="Permalink to this headline">¶</a></h2>
@@ -182,15 +185,15 @@ then <code class="docutils literal"><span class="pre">timeoutFilter</span></code
 </div>
 <div class="section" id="servicefactory">
 <span id="service-factory"></span><h2>ServiceFactory<a class="headerlink" href="#servicefactory" title="Permalink to this headline">¶</a></h2>
-<p>In certain modules, it’s important to take into account the process of acquiring
+<p>In certain modules, it&#8217;s important to take into account the process of acquiring
 a <code class="docutils literal"><span class="pre">Service</span></code>. For example, a connection pool would need to play a significant role
 in the <code class="docutils literal"><span class="pre">Service</span></code> acquisition phase. The <code class="docutils literal"><span class="pre">ServiceFactory</span></code> exists for this exact reason.
-It produces <code class="docutils literal"><span class="pre">Service</span></code>’s over which requests can be dispatched. Its definition:</p>
+It produces <code class="docutils literal"><span class="pre">Service</span></code>&#8216;s over which requests can be dispatched. Its definition:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">abstract</span> <span class="k">class</span> <span class="nc">ServiceFactory</span><span class="o">[</span><span class="kt">-Req</span>, <span class="kt">+Rep</span><span class="o">]</span>
   <span class="nc">extends</span> <span class="o">(</span><span class="nc">ClientConnection</span> <span class="k">=&gt;</span> <span class="nc">Future</span><span class="o">[</span><span class="kt">Service</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">]])</span>
 </pre></div>
 </div>
-<p>Internally, Finagle makes heavy use of this. In Finagle’s client and server stacks, modules
+<p>Internally, Finagle makes heavy use of this. In Finagle&#8217;s client and server stacks, modules
 are lifted into ServiceFactories and then composed using the aforementioned combinators.</p>
 </div>
 </div>

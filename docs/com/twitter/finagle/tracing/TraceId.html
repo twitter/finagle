@@ -297,7 +297,7 @@ they are not present for the very first span in a request. In this case all
 three ids in the resulting TraceId are the same:</p><pre>           TRACE ID         SPAN ID           PARENT ID
 SERVICE A  <span class="num">34429</span>b04b6bbf478.<span class="num">34429</span>b04b6bbf478<span class="kw">&lt;:</span><span class="num">34429</span>b04b6bbf478</pre></div><dl class="paramcmts block"><dt class="param">_traceId</dt><dd class="cmt"><p>The low 64bits of the id for this request.</p></dd><dt class="param">_parentId</dt><dd class="cmt"><p>The id for the request one step up the service stack.</p></dd><dt class="param">spanId</dt><dd class="cmt"><p>The id for this particular request</p></dd><dt class="param">_sampled</dt><dd class="cmt"><p>Should we sample this request or not? True means sample, false means don't, none means we defer
                decision to someone further down in the stack.</p></dd><dt class="param">flags</dt><dd class="cmt"><p>Flags relevant to this request. Could be things like debug mode on/off. The sampled flag could eventually
-             be moved in here.</p></dd></dl><div class="toggleContainer block">
+             be moved in here.</p></dd><dt class="param">traceIdHigh</dt><dd class="cmt"><p>The high 64bits of the id for this request, when the id is 128bits.</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -380,7 +380,7 @@ SERVICE A  <span class="num">34429</span>b04b6bbf478.<span class="num">34429</sp
       
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">_traceId</dt><dd class="cmt"><p>The low 64bits of the id for this request.</p></dd><dt class="param">_parentId</dt><dd class="cmt"><p>The id for the request one step up the service stack.</p></dd><dt class="param">spanId</dt><dd class="cmt"><p>The id for this particular request</p></dd><dt class="param">_sampled</dt><dd class="cmt"><p>Should we sample this request or not? True means sample, false means don't, none means we defer
                decision to someone further down in the stack.</p></dd><dt class="param">flags</dt><dd class="cmt"><p>Flags relevant to this request. Could be things like debug mode on/off. The sampled flag could eventually
-             be moved in here.</p></dd></dl></div>
+             be moved in here.</p></dd><dt class="param">traceIdHigh</dt><dd class="cmt"><p>The high 64bits of the id for this request, when the id is 128bits.</p></dd></dl></div>
     </li></ol>
             </div>
 

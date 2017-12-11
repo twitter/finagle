@@ -1340,14 +1340,6 @@ generator.
                         <a href="ThriftMux$.html" title="The ThriftMux object is both a com.twitter.finagle.Client and a com.twitter.finagle.Server for the Thrift protocol served over com.twitter.finagle.mux.">ThriftMux</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
-                        <a class="trait" href="ThriftRichClient.html" title="A mixin trait to provide a rich Thrift client API."></a>
-                        <a href="ThriftRichClient.html" title="A mixin trait to provide a rich Thrift client API.">ThriftRichClient</a>
-                      </li><li class="current-entities indented3">
-                        <span class="separator"></span>
-                        <a class="trait" href="ThriftRichServer.html" title="A mixin trait to provide a rich Thrift server API."></a>
-                        <a href="ThriftRichServer.html" title="A mixin trait to provide a rich Thrift server API.">ThriftRichServer</a>
-                      </li><li class="current-entities indented3">
-                        <span class="separator"></span>
                         <a class="trait" href="TimeoutException.html" title="Indicates that an operation exceeded some timeout duration before completing."></a>
                         <a href="TimeoutException.html" title="Indicates that an operation exceeded some timeout duration before completing.">TimeoutException</a>
                       </li><li class="current-entities indented3">
@@ -1401,7 +1393,7 @@ generator.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">BackupRequestLost</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a> with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a></span>
+        <span class="name deprecated" title="Deprecated: (Since version 2017-11-20) Use Failure flagged Failure.Ignorable">BackupRequestLost</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a> with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a></span>
       </span>
       </h4>
 
@@ -1409,7 +1401,10 @@ generator.
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>An exception that is raised on requests that are discarded because
 their corresponding backup requests succeeded first. See
 <code>com.twitter.finagle.exp.BackupRequestFilter</code> for details.
-</p></div><div class="toggleContainer block">
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-11-20)</i> Use Failure flagged Failure.Ignorable</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>

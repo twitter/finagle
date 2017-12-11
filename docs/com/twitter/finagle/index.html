@@ -1335,14 +1335,6 @@ generator.
                         <a href="ThriftMux$.html" title="The ThriftMux object is both a com.twitter.finagle.Client and a com.twitter.finagle.Server for the Thrift protocol served over com.twitter.finagle.mux.">ThriftMux</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
-                        <a class="trait" href="ThriftRichClient.html" title="A mixin trait to provide a rich Thrift client API."></a>
-                        <a href="ThriftRichClient.html" title="A mixin trait to provide a rich Thrift client API.">ThriftRichClient</a>
-                      </li><li class="current-entities indented3">
-                        <span class="separator"></span>
-                        <a class="trait" href="ThriftRichServer.html" title="A mixin trait to provide a rich Thrift server API."></a>
-                        <a href="ThriftRichServer.html" title="A mixin trait to provide a rich Thrift server API.">ThriftRichServer</a>
-                      </li><li class="current-entities indented3">
-                        <span class="separator"></span>
                         <a class="trait" href="TimeoutException.html" title="Indicates that an operation exceeded some timeout duration before completing."></a>
                         <a href="TimeoutException.html" title="Indicates that an operation exceeded some timeout duration before completing.">TimeoutException</a>
                       </li><li class="current-entities indented3">
@@ -3097,38 +3089,6 @@ to indicate the health of <a href="Service.html" class="extype" name="com.twitte
       
       <p class="shortcomment cmt">Indicates that a given stream was closed, for instance if the stream
 was reset by a peer or a proxy.</p>
-    </li><li name="com.twitter.finagle.ThriftRichClient" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="ThriftRichClientextendsAnyRef"></a><a id="ThriftRichClient:ThriftRichClient"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#ThriftRichClientextendsAnyRef" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a title="A mixin trait to provide a rich Thrift client API." href="ThriftRichClient.html"><span class="name">ThriftRichClient</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">A mixin trait to provide a rich Thrift client API.</p>
-    </li><li name="com.twitter.finagle.ThriftRichServer" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="ThriftRichServerextendsAnyRef"></a><a id="ThriftRichServer:ThriftRichServer"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#ThriftRichServerextendsAnyRef" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a title="A mixin trait to provide a rich Thrift server API." href="ThriftRichServer.html"><span class="name">ThriftRichServer</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">A mixin trait to provide a rich Thrift server API.</p>
     </li><li name="com.twitter.finagle.TimeoutException" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="TimeoutExceptionextendsExceptionwithSourcedExceptionwithHasLogLevel"></a><a id="TimeoutException:TimeoutException"></a>
       <span class="permalink">
@@ -3414,26 +3374,6 @@ to assign labels to groups that ascribe meaning to them.
       </span>
       
       
-    </li><li name="com.twitter.finagle.BackupRequestLost" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="BackupRequestLost"></a><a id="BackupRequestLost:BackupRequestLost"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#BackupRequestLost" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="An exception that is raised on requests that are discarded because their corresponding backup requests succeeded first." href="BackupRequestLost$.html"><span class="name">BackupRequestLost</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a> with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">An exception that is raised on requests that are discarded because
-their corresponding backup requests succeeded first.</p><div class="fullcomment"><div class="comment cmt"><p>An exception that is raised on requests that are discarded because
-their corresponding backup requests succeeded first. See
-<code>com.twitter.finagle.exp.BackupRequestFilter</code> for details.
-</p></div></div>
     </li><li name="com.twitter.finagle.CanStackFrom" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="CanStackFrom"></a><a id="CanStackFrom:CanStackFrom"></a>
       <span class="permalink">
@@ -4194,7 +4134,33 @@ prefix and servers with &quot;srv/thrift&quot;. If you'd like more configuration
 
         
 
-        
+        <div class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="com.twitter.finagle.BackupRequestLost" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="BackupRequestLost"></a><a id="BackupRequestLost:BackupRequestLost"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#BackupRequestLost" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="An exception that is raised on requests that are discarded because their corresponding backup requests succeeded first." href="BackupRequestLost$.html"><span class="name deprecated" title="Deprecated: (Since version 2017-11-20) Use Failure flagged Failure.Ignorable">BackupRequestLost</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a> with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">An exception that is raised on requests that are discarded because
+their corresponding backup requests succeeded first.</p><div class="fullcomment"><div class="comment cmt"><p>An exception that is raised on requests that are discarded because
+their corresponding backup requests succeeded first. See
+<code>com.twitter.finagle.exp.BackupRequestFilter</code> for details.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-11-20)</i> Use Failure flagged Failure.Ignorable</p></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">

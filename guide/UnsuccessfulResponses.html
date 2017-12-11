@@ -1,21 +1,23 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Unsuccessful Responses &#8212; Finagle 17.12.0-SNAPSHOT documentation</title>
+    
+    <title>Unsuccessful Responses &#8212; Finagle 17.12.0 documentation</title>
+    
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '17.12.0-SNAPSHOT',
+        VERSION:     '17.12.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
+        HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
@@ -24,6 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="Finagle 17.12.0 documentation" href="index.html" />
     <link rel="next" title="FAQ" href="FAQ.html" />
     <link rel="prev" title="Metrics" href="Metrics.html" />
    
@@ -41,7 +44,7 @@
   </script>
 
   </head>
-  <body>
+  <body role="document">
   
   
 
@@ -68,8 +71,8 @@
             
   <div class="section" id="unsuccessful-responses">
 <h1>Unsuccessful Responses<a class="headerlink" href="#unsuccessful-responses" title="Permalink to this headline">¶</a></h1>
-<p>In normal operation, the majority of requests follow the “successful
-response” code path. This is generally easy to reason about and receives lots of
+<p>In normal operation, the majority of requests follow the &#8220;successful
+response&#8221; code path. This is generally easy to reason about and receives lots of
 developer attention. However, many things can and do go wrong in complex systems
 that are caused by subtle behaviors which can be hard to detect and plan for.
 Finagle aims to help services gracefully degrade whenever possible.</p>
@@ -77,7 +80,7 @@ Finagle aims to help services gracefully degrade whenever possible.</p>
 a request unsuccessfully. Some, but not all of those responses may be due to
 exceptional cases. In Finagle, each response is represented as a
 <a class="reference external" href="https://github.com/twitter/util/blob/master/util-core/src/main/scala/com/twitter/util/Future.scala">Future</a> which may be satisfied
-with either a <cite>Return</cite> or <cite>Throw</cite>. From a user’s point of view, either case could be
+with either a <cite>Return</cite> or <cite>Throw</cite>. From a user&#8217;s point of view, either case could be
 considered successful or not, even though considering a <cite>Throw</cite> result as a
 successful response is an anti-pattern.</p>
 <p>For instance, an unsuccessful HTTP request may be satisfied with a
@@ -172,7 +175,7 @@ allowing for additional composition.</p>
 </div>
 <div class="section" id="sending-unsuccessful-responses">
 <h2>Sending Unsuccessful Responses<a class="headerlink" href="#sending-unsuccessful-responses" title="Permalink to this headline">¶</a></h2>
-<p>A service that wishes to tap into Finagle’s client-side exception handling
+<p>A service that wishes to tap into Finagle&#8217;s client-side exception handling
 mechanisms should respond with a <cite>Throwable</cite> that extends <cite>FailureFlags</cite> with
 flags set appropriately. An easy way to create a generic unnamed response like
 this is by using the convenience methods in <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">Failure.scala</a></p>
@@ -219,10 +222,10 @@ services should use those exceptions. For situations where the response should
 propagate across multiple server/client boundaries or to use any signaling with
 <cite>FailureFlags</cite>, respond with a <cite>Throwable</cite> that extends <cite>FailureFlags</cite> as
 suggested above. A quick way to create such a response (if its name is not
-important) is to use <cite>Failure</cite>’s convenience methods.</p>
+important) is to use <cite>Failure</cite>&#8216;s convenience methods.</p>
 <p>If a custom <cite>Throwable</cite> is used, only its message and <cite>FailureFlags</cite> (if any) will
 propagate across multiple service boundaries. Any other information,
-such as stack traces, will be discarded. Due to Finagle’s asynchronous nature,
+such as stack traces, will be discarded. Due to Finagle&#8217;s asynchronous nature,
 stack traces are not particularly useful. Instead Finagle provides built-in
 support for <a class="reference external" href="http://zipkin.io">Zipkin</a>, the distributed tracing system.</p>
 </div>
@@ -233,7 +236,7 @@ support for <a class="reference external" href="http://zipkin.io">Zipkin</a>, th
 provide extra information for stats gathering or other measurements. This list
 of flags is not comprehensive as some flags are stripped out as they leave
 Finagle clients and are not exposed to users. The following table describes these
-flags, what they mean, how they’re used internally, and which protocols support
+flags, what they mean, how they&#8217;re used internally, and which protocols support
 passing them through.</p>
 <table border="1" class="docutils">
 <colgroup>
@@ -270,9 +273,9 @@ passing them through.</p>
 <table class="docutils footnote" frame="void" id="standard" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>“Finagle client” or “Finagle server” here refers to the typical
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>&#8220;Finagle client&#8221; or &#8220;Finagle server&#8221; here refers to the typical
 stack client or server that one creates by following methods outlined in the
-user’s guide.</td></tr>
+user&#8217;s guide.</td></tr>
 </tbody>
 </table>
 </div>

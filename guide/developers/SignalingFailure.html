@@ -1,21 +1,23 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Signaling Failure within Finagle &#8212; Finagle 17.12.0-SNAPSHOT documentation</title>
+    
+    <title>Signaling Failure within Finagle &#8212; Finagle 17.12.0 documentation</title>
+    
     <link rel="stylesheet" href="../_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '17.12.0-SNAPSHOT',
+        VERSION:     '17.12.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
+        HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
@@ -24,6 +26,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="top" title="Finagle 17.12.0 documentation" href="../index.html" />
     <link rel="next" title="Changelog" href="../changelog.html" />
     <link rel="prev" title="Twitter Futures" href="Futures.html" />
    
@@ -41,7 +44,7 @@
   </script>
 
   </head>
-  <body>
+  <body role="document">
   
   
 
@@ -72,7 +75,7 @@
 signal an unsuccessful response in Finagle. When extending Finagle, it is
 important to use the correct signaling mechanisms.</p>
 <p>For more information on how these are presented to users outside of Finagle, see
-the <a class="reference internal" href="../UnsuccessfulResponses.html"><span class="doc">Unsuccessful Responses</span></a> page in the User’s Guide.</p>
+the <a class="reference internal" href="../UnsuccessfulResponses.html"><span class="doc">Unsuccessful Responses</span></a> page in the User&#8217;s Guide.</p>
 <div class="section" id="history">
 <h2>History<a class="headerlink" href="#history" title="Permalink to this headline">¶</a></h2>
 <p>Historically, Finagle relied exclusively on a hierarchy of classes of exceptions
@@ -84,14 +87,14 @@ unwieldy and <cite>Failures</cite>, were introduced as uniform way for Finagle t
 failure internally. Failures are more general and the successor to ad-hoc
 Exceptions. They are composable, immutable, and allow us to send signals across
 process boundaries.</p>
-<p>However, when fleshing out Finagle’s back pressure strategy, it became useful
+<p>However, when fleshing out Finagle&#8217;s back pressure strategy, it became useful
 for exceptions other than just <cite>Failure</cite> to also be able to be flagged with
 various attributes that propagate across service boundaries. In order to
 accomplish this, the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/FailureFlags.scala">FailureFlags</a>
 trait was introduced. <cite>FailureFlags</cite> can be applied to any <cite>Throwable</cite>, which
 simplifies the migration strategy as the type of <cite>Throwable</cite> no longer has to
 change.</p>
-<p>Currently, a <cite>Failure</cite> can be thought of as a “Finagle runtime exception” as
+<p>Currently, a <cite>Failure</cite> can be thought of as a &#8220;Finagle runtime exception&#8221; as
 it contains no type-based information. <cite>Failure</cite> provides a convenient API for
 building <cite>FailureFlag</cite>-style exceptions, but should not be used for inspection.</p>
 </div>
@@ -149,7 +152,7 @@ off unsafe <cite>FailureFlags</cite>.</p>
 </div>
 <div class="section" id="propagating-responses">
 <h2>Propagating Responses<a class="headerlink" href="#propagating-responses" title="Permalink to this headline">¶</a></h2>
-<p>There’s some nuance as to how <cite>FailureFlags</cite> and unflagged exceptions traverse
+<p>There&#8217;s some nuance as to how <cite>FailureFlags</cite> and unflagged exceptions traverse
 client/service boundaries and differ across protocols. These tables cover
 how unsuccessful responses propagate from service to client over the two most
 common protocols: HTTP and ThriftMux. The columns indicate how the response is
@@ -198,12 +201,12 @@ transformed along the way.</p>
 <p><cite>Failure.rejected</cite> creates a <cite>Failure</cite> with <cite>Rejected</cite> and <cite>Retryable</cite> flags.</p>
 <p>If a custom <cite>Throwable</cite> is used, its message and <cite>FailureFlags</cite> (if any) will
 propagate but it will be converted in to a <cite>Failure</cite>. Any other information,
-such as stack traces, will be discarded. Due to Finagle’s asynchronous nature,
+such as stack traces, will be discarded. Due to Finagle&#8217;s asynchronous nature,
 stack traces are not particularly useful. Instead Finagle provides built in
 support for <a class="reference external" href="http://zipkin.io">Zipkin</a>, the distributed tracing system.</p>
 <p>When sending these responses across service boundaries, <cite>toString</cite> is called on
 each hop. This means that messages will appear like
-“Failure(Failure(Failure(Underlying cause… ” when logged. This may change in
+&#8220;Failure(Failure(Failure(Underlying cause... &#8221; when logged. This may change in
 the future.</p>
 </div>
 <div class="section" id="http">
@@ -234,12 +237,12 @@ any information (stack trace, message, etc) except for the flags. See
 </tr>
 <tr class="row-odd"><td>any <cite>Throwable with HasFailureFlags</cite> flagged <cite>Rejected</cite> and <cite>NonRetryable</cite></td>
 <td><cite>T: HasFailureFlags</cite></td>
-<td><cite>503 Service Unavailable</cite> w/ ‘finagle-http-nack’ header</td>
+<td><cite>503 Service Unavailable</cite> w/ &#8216;finagle-http-nack&#8217; header</td>
 <td><cite>Failure</cite> flagged <cite>Rejected</cite> and <cite>NonRetryable</cite></td>
 </tr>
 <tr class="row-even"><td>any <cite>Throwable with HasFailureFlags</cite> flagged <cite>Rejected</cite></td>
 <td><cite>T: HasFailureFlags</cite></td>
-<td><cite>503 Service Unavailable</cite> w/ ‘finagle-http-nonretryable-nack’ header</td>
+<td><cite>503 Service Unavailable</cite> w/ &#8216;finagle-http-nonretryable-nack&#8217; header</td>
 <td><cite>Failure</cite> flagged <cite>Rejected</cite> and <cite>NonRetryable</cite></td>
 </tr>
 </tbody>

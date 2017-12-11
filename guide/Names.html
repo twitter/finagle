@@ -1,21 +1,23 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Names and Naming in Finagle &#8212; Finagle 17.12.0-SNAPSHOT documentation</title>
+    
+    <title>Names and Naming in Finagle &#8212; Finagle 17.12.0 documentation</title>
+    
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '17.12.0-SNAPSHOT',
+        VERSION:     '17.12.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
+        HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
@@ -24,6 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="Finagle 17.12.0 documentation" href="index.html" />
     <link rel="next" title="Protocols" href="Protocols.html" />
     <link rel="prev" title="Contexts" href="Contexts.html" />
    
@@ -41,7 +44,7 @@
   </script>
 
   </head>
-  <body>
+  <body role="document">
   
   
 
@@ -76,8 +79,8 @@ or through implementations of <a class="reference external" href="https://twitte
 <dl class="docutils">
 <dt><code class="docutils literal"><span class="pre">case</span> <span class="pre">class</span> <span class="pre">Name.Bound(va:</span> <span class="pre">Var[Addr])</span></code></dt>
 <dd>Identifies a set of network locations. <code class="docutils literal"><span class="pre">Var[Addr]</span></code> (see <a class="reference internal" href="#addr"><span class="std std-ref">Addr</span></a>)
-represents a set of changeable Internet addresses — or host,
-port pairs — described below.</dd>
+represents a set of changeable Internet addresses &#8212; or host,
+port pairs &#8212; described below.</dd>
 <dt><code class="docutils literal"><span class="pre">case</span> <span class="pre">class</span> <span class="pre">Name.Path(path:</span> <span class="pre">Path)</span></code></dt>
 <dd>Represents a name denoted by a hierarchical <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Path">path</a>, represented by a sequence of byte
 strings.</dd>
@@ -111,7 +114,7 @@ named by <code class="docutils literal"><span class="pre">myzkhost.mycompany.com
 <div class="section" id="paths">
 <h2>Paths<a class="headerlink" href="#paths" title="Permalink to this headline">¶</a></h2>
 <p>Names beginning with the character <code class="docutils literal"><span class="pre">/</span></code> are hierarchical <em>paths</em> in the
-tradition of Unix. They denote an abstract location — i.e. <em>what</em> you
+tradition of Unix. They denote an abstract location &#8212; i.e. <em>what</em> you
 want. Path names must be bound by the current namespace in order to
 identify <em>where</em> the network location(s) are.</p>
 <p>The name</p>
@@ -122,7 +125,7 @@ identify <em>where</em> the network location(s) are.</p>
 </div>
 <div class="section" id="interpreting-paths-with-delegation-tables">
 <span id="dtabs"></span><h2>Interpreting Paths With Delegation Tables<a class="headerlink" href="#interpreting-paths-with-delegation-tables" title="Permalink to this headline">¶</a></h2>
-<p>A delegation table (or “dtab”) defines the namespace for a Finagle
+<p>A delegation table (or &#8220;dtab&#8221;) defines the namespace for a Finagle
 transaction. A dtab comprises an ordered list of delegations which
 together define how a path is interpreted. A delegation is a rewrite
 rule <code class="docutils literal"><span class="pre">src</span> <span class="pre">=&gt;</span> <span class="pre">dest</span></code>. When a name has <code class="docutils literal"><span class="pre">src</span></code> as a prefix, the prefix
@@ -162,7 +165,7 @@ any component. For example</p>
 <div class="highlight-text"><div class="highlight"><pre><span></span>/t/bah/baz
 </pre></div>
 </div>
-<p>Paths beginning with <code class="docutils literal"><span class="pre">/$/</span></code> are called “system paths.” They are interpreted
+<p>Paths beginning with <code class="docutils literal"><span class="pre">/$/</span></code> are called &#8220;system paths.&#8221; They are interpreted
 specially by Finagle, similarly to resolver schemes. Paths of the form</p>
 <div class="highlight-text"><div class="highlight"><pre><span></span>/$/namer/path..
 </pre></div>
@@ -221,11 +224,11 @@ example follows.</p>
 6.      /$/com.twitter.serverset/zk.local.twitter.com:2181/prod/crawler
 </pre></div>
 </div>
-<p>We’ve turned the path /s/crawler into the <a class="reference external" href="https://twitter.github.io/commons/apidocs/com/twitter/common/zookeeper/ServerSet.html">serverset</a> <code class="docutils literal"><span class="pre">/prod/crawler</span></code>
+<p>We&#8217;ve turned the path /s/crawler into the <a class="reference external" href="https://twitter.github.io/commons/apidocs/com/twitter/common/zookeeper/ServerSet.html">serverset</a> <code class="docutils literal"><span class="pre">/prod/crawler</span></code>
 on <cite>zk.local.twitter.com:2181</cite>. We use the <code class="docutils literal"><span class="pre">#</span></code> character to denote
-handlers — the path <code class="docutils literal"><span class="pre">/s#</span></code> “handles” <code class="docutils literal"><span class="pre">/s</span></code> and so on. To
+handlers &#8212; the path <code class="docutils literal"><span class="pre">/s#</span></code> &#8220;handles&#8221; <code class="docutils literal"><span class="pre">/s</span></code> and so on. To
 see why this indirection is necessary, consider redefining <code class="docutils literal"><span class="pre">/s</span></code> by
-adding a prefix — a common namespacing operation. The entry</p>
+adding a prefix &#8212; a common namespacing operation. The entry</p>
 <div class="highlight-text"><div class="highlight"><pre><span></span>/s      =&gt;      /s/prefix
 </pre></div>
 </div>
@@ -236,7 +239,7 @@ adding a prefix — a common namespacing operation. The entry</p>
 ...
 </pre></div>
 </div>
-<p>and so on. With <code class="docutils literal"><span class="pre">/s#</span></code>, we’d instead add</p>
+<p>and so on. With <code class="docutils literal"><span class="pre">/s#</span></code>, we&#8217;d instead add</p>
 <div class="highlight-text"><div class="highlight"><pre><span></span>/s      =&gt;      /s#/prefix
 </pre></div>
 </div>
@@ -248,7 +251,7 @@ adding a prefix — a common namespacing operation. The entry</p>
 </div>
 <p>We can easily manipulate our Dtab to affect certain parts of the resolution.
 For example, if we wanted to use staging instances of services instead of their
-production ones, we’d append the delegation <code class="docutils literal"><span class="pre">/s#</span> <span class="pre">=&gt;</span> <span class="pre">/s##/staging</span></code> making the
+production ones, we&#8217;d append the delegation <code class="docutils literal"><span class="pre">/s#</span> <span class="pre">=&gt;</span> <span class="pre">/s##/staging</span></code> making the
 Dtab</p>
 <div class="highlight-text"><div class="highlight"><pre><span></span>/zk#  =&gt; /$/com.twitter.serverset;         (a)
 /zk   =&gt; /zk#;                             (b)
@@ -272,7 +275,7 @@ labelled with the rule applied from the above Dtab.</p>
 attempted before earlier ones; if a rewrite rooted at a delegation
 fails to produce an address, rewriting resumes from the next matching
 delegation.</p>
-<p>The combined effect is a fallback mechanism — if the
+<p>The combined effect is a fallback mechanism &#8212; if the
 <code class="docutils literal"><span class="pre">crawler</span></code> exists in the staging environment, it is used; otherwise
 we fall back to its production definition.</p>
 <p>In the above example, if <code class="docutils literal"><span class="pre">/staging/crawler</span></code> did not exist on
@@ -293,7 +296,7 @@ producing the following set of rewrites:</p>
 <p>We now see that delegations provide a simple and flexible means by
 which to define a namespace. Its effect is similar to that of a Unix
 mount table: Names stand on their own, but the minutiae of binding is
-handled by the environment — i.e. the dtab.</p>
+handled by the environment &#8212; i.e. the dtab.</p>
 <p>Delegations are passed between servers if a supported protocol is
 used. Thus a server alters the interpretation of names in the context
 of the <em>entire request graph</em>, allowing a server to affect downstream
@@ -304,7 +307,7 @@ orchestrating the originator (for example, an HTTP frontend) to add a
 delegation expressing this override.</p>
 <p>Finagle has protocol support for delegation passing in <a class="reference internal" href="Protocols.html#thrift-and-scrooge"><span class="std std-ref">TTwitter</span></a>, <a class="reference internal" href="Protocols.html#mux"><span class="std std-ref">Mux</span></a>, its variant <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/ThriftMux$">ThriftMux</a>, and <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Http$">HTTP</a>. When these protocols are used,
 delegations that are added dynamically to a request are in effect
-throughout the distributed request graph — i.e. scope of the
+throughout the distributed request graph &#8212; i.e. scope of the
 namespace is a transaction. Delegations are added dynamically through
 the <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Dtab$">Dtab</a> API.</p>
 <p>(This is a powerful facility that should be used with care.)</p>

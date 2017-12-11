@@ -1340,14 +1340,6 @@ generator.
                         <a href="ThriftMux$.html" title="The ThriftMux object is both a com.twitter.finagle.Client and a com.twitter.finagle.Server for the Thrift protocol served over com.twitter.finagle.mux.">ThriftMux</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
-                        <a class="trait" href="ThriftRichClient.html" title="A mixin trait to provide a rich Thrift client API."></a>
-                        <a href="ThriftRichClient.html" title="A mixin trait to provide a rich Thrift client API.">ThriftRichClient</a>
-                      </li><li class="current-entities indented3">
-                        <span class="separator"></span>
-                        <a class="trait" href="ThriftRichServer.html" title="A mixin trait to provide a rich Thrift server API."></a>
-                        <a href="ThriftRichServer.html" title="A mixin trait to provide a rich Thrift server API.">ThriftRichServer</a>
-                      </li><li class="current-entities indented3">
-                        <span class="separator"></span>
                         <a class="trait" href="TimeoutException.html" title="Indicates that an operation exceeded some timeout duration before completing."></a>
                         <a href="TimeoutException.html" title="Indicates that an operation exceeded some timeout duration before completing.">TimeoutException</a>
                       </li><li class="current-entities indented3">
@@ -1530,6 +1522,22 @@ generator.
       
       <p class="shortcomment cmt">Representation of a future nack response that is retryable
 </p>
+    </li><li name="com.twitter.finagle.Failure#Ignorable" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Ignorable:Long"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Failure$.html#Ignorable:Long" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Ignorable</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Flag ignorable indicates that the failure can be ignored and should not be surfaced via stats.</p>
     </li><li name="com.twitter.finagle.Failure#Interrupted" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Interrupted:Long"></a>
       <span class="permalink">
@@ -1906,6 +1914,22 @@ it returns a new failure with the given flags.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.Failure#ignorable" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ignorable(why:String):com.twitter.finagle.Failure"></a><a id="ignorable(String):Failure"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Failure$.html#ignorable(why:String):com.twitter.finagle.Failure" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ignorable</span><span class="params">(<span name="why">why: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Create a new <a href="#Ignorable:Long" class="extmbr" name="com.twitter.finagle.Failure#Ignorable">Ignorable</a> failure with the given message.</p>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">

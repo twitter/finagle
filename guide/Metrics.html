@@ -1,21 +1,23 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Metrics &#8212; Finagle 17.12.0-SNAPSHOT documentation</title>
+    
+    <title>Metrics &#8212; Finagle 17.12.0 documentation</title>
+    
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '17.12.0-SNAPSHOT',
+        VERSION:     '17.12.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
+        HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
@@ -24,6 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="Finagle 17.12.0 documentation" href="index.html" />
     <link rel="next" title="Unsuccessful Responses" href="UnsuccessfulResponses.html" />
     <link rel="prev" title="Protocols" href="Protocols.html" />
    
@@ -41,7 +44,7 @@
   </script>
 
   </head>
-  <body>
+  <body role="document">
   
   
 
@@ -70,7 +73,7 @@
 <h1>Metrics<a class="headerlink" href="#metrics" title="Permalink to this headline">¶</a></h1>
 <p>This section aims to be a comprehensive list of all of the metrics that Finagle
 exposes. The metrics are organized by layer and then by class.</p>
-<p>Finagle leverages <a class="reference external" href="https://twitter.github.io/util/guide/util-stats/basics.html#verbosity-levels">verbosity levels</a> and defines some of its low-utility metrics as “debug”.
+<p>Finagle leverages <a class="reference external" href="https://twitter.github.io/util/guide/util-stats/basics.html#verbosity-levels">verbosity levels</a> and defines some of its low-utility metrics as &#8220;debug&#8221;.
 Unless explicitly stated, assume <code class="docutils literal"><span class="pre">Verbosity.Default</span></code> is used to define a given metric.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
@@ -78,11 +81,11 @@ Unless explicitly stated, assume <code class="docutils literal"><span class="pre
 <p class="last">Some metrics are only visible when certain optional classes are used.</p>
 </div>
 <p>NB: Finagle sometimes uses <code class="docutils literal"><span class="pre">RollupStatsReceivers</span></code> internally, which will take
-stats like “failures/twitter/TimeoutException” and roll them up, aggregating
-into “failures/twitter” and also “failures”. For example, if there are 3
-“failures/twitter/TimeoutException” counted, and 4
-“failures/twitter/ConnectTimeoutException”, then it will count 7 for
-“failures/twitter”.</p>
+stats like &#8220;failures/twitter/TimeoutException&#8221; and roll them up, aggregating
+into &#8220;failures/twitter&#8221; and also &#8220;failures&#8221;. For example, if there are 3
+&#8220;failures/twitter/TimeoutException&#8221; counted, and 4
+&#8220;failures/twitter/ConnectTimeoutException&#8221;, then it will count 7 for
+&#8220;failures/twitter&#8221;.</p>
 <div class="section" id="public">
 <h2>Public<a class="headerlink" href="#public" title="Permalink to this headline">¶</a></h2>
 <p id="public-stats">These stats come from the public interface, and are the ones that you should look at first
@@ -169,9 +172,9 @@ on simultaneous requests.</dd>
 <h3>PayloadSizeFilter (enabled for Mux, HTTP (non-chunked), Thrift)<a class="headerlink" href="#payloadsizefilter-enabled-for-mux-http-non-chunked-thrift" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
 <dt><strong>request_payload_bytes</strong> <cite>verbosity:debug</cite></dt>
-<dd>A histogram of the number of bytes per request’s payload.</dd>
+<dd>A histogram of the number of bytes per request&#8217;s payload.</dd>
 <dt><strong>response_payload_bytes</strong> <cite>verbosity:debug</cite></dt>
-<dd>A histogram of the number of bytes per response’s payload.</dd>
+<dd>A histogram of the number of bytes per response&#8217;s payload.</dd>
 </dl>
 </div>
 </div>
@@ -214,7 +217,7 @@ the Aperture implementation.</dd>
 <h3>FuturePool<a class="headerlink" href="#futurepool" title="Permalink to this headline">¶</a></h3>
 <p>These metrics correspond to the state of <code class="docutils literal"><span class="pre">FuturePool.unboundedPool</span></code> and
 <code class="docutils literal"><span class="pre">FuturePool.interruptibleUnboundedPool</span></code>. Only one set of metrics is
-exported as they share their underlying “thread pool”.</p>
+exported as they share their underlying &#8220;thread pool&#8221;.</p>
 <dl class="docutils">
 <dt><strong>finagle/future_pool/pool_size</strong></dt>
 <dd>A gauge of the number of threads in the pool.</dd>
@@ -222,6 +225,13 @@ exported as they share their underlying “thread pool”.</p>
 <dd>A gauge of the number of tasks actively executing.</dd>
 <dt><strong>finagle/future_pool/completed_tasks</strong></dt>
 <dd>A gauge of the number of total tasks that have completed execution.</dd>
+</dl>
+</div>
+<div class="section" id="push-based-abstractions">
+<h3>Push Based Abstractions<a class="headerlink" href="#push-based-abstractions" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>finagle/push/unhandled_exceptions</strong></dt>
+<dd>Family of counters for unhandled exceptions caught by the serial executor.</dd>
 </dl>
 </div>
 <div class="section" id="scheduler">
@@ -295,7 +305,7 @@ evicted from <a class="reference external" href="https://github.com/twitter/fina
 </div>
 <div class="section" id="netty-4">
 <h3>Netty 4<a class="headerlink" href="#netty-4" title="Permalink to this headline">¶</a></h3>
-<p>These metrics are exported from Finagle’s underlying transport
+<p>These metrics are exported from Finagle&#8217;s underlying transport
 implementation, the Netty 4 library and available under <cite>finagle/netty4</cite>
 on any instance running Finagle with Netty 4.</p>
 <dl class="docutils">
@@ -334,7 +344,7 @@ on any instance running Finagle with Netty 4.</p>
 <div class="section" id="load-balancing">
 <h2>Load Balancing<a class="headerlink" href="#load-balancing" title="Permalink to this headline">¶</a></h2>
 <p id="loadbalancer-stats">The client stats under the <cite>loadbalancer</cite> scope expose the innards of
-what’s going on with load balancing, and the management of equivalent
+what&#8217;s going on with load balancing, and the management of equivalent
 groups of hosts.</p>
 <div class="section" id="all-balancers">
 <h3>All Balancers<a class="headerlink" href="#all-balancers" title="Permalink to this headline">¶</a></h3>
@@ -357,7 +367,7 @@ These nodes will never be available for service.</dd>
 being load-balanced across.</dd>
 <dt><strong>num_weight_classes</strong></dt>
 <dd>The number of groups (or classes) of weights in the load balancer. Each class gets
-a fresh instance of the client’s load balancer and receives traffic proportional
+a fresh instance of the client&#8217;s load balancer and receives traffic proportional
 to its weight.</dd>
 <dt><strong>adds</strong></dt>
 <dd>A counter of the number of hosts added to the loadbalancer.</dd>
@@ -411,7 +421,7 @@ have fallen out of the aperture window and become idle.</dd>
 <div class="section" id="fail-fast">
 <h2>Fail Fast<a class="headerlink" href="#fail-fast" title="Permalink to this headline">¶</a></h2>
 <p id="fail-fast-stats">The client stats under the <cite>failfast</cite> scope give insight into how
-Finagle handles services where it can’t establish a connection.</p>
+Finagle handles services where it can&#8217;t establish a connection.</p>
 <div class="section" id="failfastfactory">
 <h3>FailFastFactory<a class="headerlink" href="#failfastfactory" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
@@ -470,7 +480,7 @@ expiration duration.</dd>
 </div>
 <div class="section" id="rate-limiting">
 <h2>Rate Limiting<a class="headerlink" href="#rate-limiting" title="Permalink to this headline">¶</a></h2>
-<p id="rate-limiting-stats">These client stats show how much you’re hitting your rate limit if you’re using rate limiting.</p>
+<p id="rate-limiting-stats">These client stats show how much you&#8217;re hitting your rate limit if you&#8217;re using rate limiting.</p>
 <div class="section" id="ratelimitingfilter">
 <h3>RateLimitingFilter<a class="headerlink" href="#ratelimitingfilter" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
@@ -579,25 +589,22 @@ status of <code class="docutils literal"><span class="pre">Open</span></code>.</
 <div class="section" id="dispatching">
 <h2>Dispatching<a class="headerlink" href="#dispatching" title="Permalink to this headline">¶</a></h2>
 <p id="id2">The client metrics scoped under <cite>dispatcher</cite> represent information about a
-client’s dispatching layer.</p>
+client&#8217;s dispatching layer.</p>
 <p>Depending on the underlying protocol, dispatchers may have different request
 queueing rules.</p>
 <dl class="docutils">
 <dt><strong>serial/queue_size</strong></dt>
 <dd>A gauge used by serial dispatchers that can only have a single request
 per connection at a time that represents the number of pending requests.</dd>
-<dt><strong>pipelining/pending</strong></dt>
-<dd>A gauge used by pipelining dispatchers that represents how many
-pipelined requests are currently outstanding.</dd>
 </dl>
 </div>
-<div class="section" id="thread-usage">
-<h2>Thread Usage<a class="headerlink" href="#thread-usage" title="Permalink to this headline">¶</a></h2>
-<p id="threadusage">Metrics scoped under “thread_usage/requests” can be used as a signal for
+<div class="section" id="server-thread-usage">
+<h2>Server Thread Usage<a class="headerlink" href="#server-thread-usage" title="Permalink to this headline">¶</a></h2>
+<p id="threadusage">Metrics scoped under &#8220;thread_usage/requests&#8221; can be used as a signal for
 seeing if your connections or threads are imbalanced on a server.</p>
 <p>There are caveats which can make these metrics unreliable or not applicable:</p>
 <ul class="simple">
-<li>Work is done on a <code class="docutils literal"><span class="pre">FuturePool</span></code> instead of the server’s thread.</li>
+<li>Work is done on a <code class="docutils literal"><span class="pre">FuturePool</span></code> instead of the server&#8217;s thread.</li>
 <li>The amount of work done per request is highly inconsistent.</li>
 <li>Low number of requests.</li>
 </ul>
@@ -607,9 +614,9 @@ seeing if your connections or threads are imbalanced on a server.</p>
 the number of requests handled by each thread. Put another way, the closer this
 is to 0.0 the less variance there is in the number of requests handled per thread.</p>
 <p class="last">If this value is large, before taking action, you may want to first verify the metric
-by looking at the node’s thread utilization. Examples include <cite>mpstat -P ALL</cite>
+by looking at the node&#8217;s thread utilization. Examples include <cite>mpstat -P ALL</cite>
 and <cite>top -p $pid -H</cite>. You may also want to look at the debug metrics for
-“mean” and “stdev” to help quantify the amount of imbalance. One solution to
+&#8220;mean&#8221; and &#8220;stdev&#8221; to help quantify the amount of imbalance. One solution to
 mitigate imbalance is to move work to a <code class="docutils literal"><span class="pre">FuturePool</span></code>.</p>
 </dd>
 <dt><strong>mean</strong> <cite>verbosity:debug</cite></dt>
@@ -618,6 +625,8 @@ by each thread.</dd>
 <dt><strong>stddev</strong> <cite>verbosity:debug</cite></dt>
 <dd>A gauge of the standard of deviation of the number of requests handled
 by each thread.</dd>
+<dt><strong>per_thread/&lt;thread_name&gt;</strong> <cite>verbosity:debug</cite></dt>
+<dd>A counter which indicates the number of requests that a specific thread has received.</dd>
 </dl>
 </div>
 <div class="section" id="admission-control">
@@ -711,7 +720,7 @@ connection.</dd>
 <dt><strong>closes</strong></dt>
 <dd>A counter of the total number of channel close operations initiated. To see the
 total number of closes completed, use the total count from one of the
-“connection_duration”, “connection_received_bytes”, or “connection_sent_bytes”
+&#8220;connection_duration&#8221;, &#8220;connection_received_bytes&#8221;, or &#8220;connection_sent_bytes&#8221;
 histograms.</dd>
 <dt><strong>connection_duration</strong> <cite>verbosity:debug</cite></dt>
 <dd>A histogram of the duration of the lifetime of a connection.</dd>
@@ -783,7 +792,7 @@ that were actively evicted.</dd>
 <dt><strong>idle</strong></dt>
 <dd>A gauge of the number of cached idle <code class="docutils literal"><span class="pre">ServiceFactory</span></code>s.</dd>
 <dt><strong>oneshots</strong></dt>
-<dd>A counter of the number of “one-off” <code class="docutils literal"><span class="pre">ServiceFactory</span></code>s that are
+<dd>A counter of the number of &#8220;one-off&#8221; <code class="docutils literal"><span class="pre">ServiceFactory</span></code>s that are
 created in the event that no idle <code class="docutils literal"><span class="pre">ServiceFactory</span></code>s are cached.</dd>
 <dt><strong>namer/bind_latency_us</strong></dt>
 <dd>A stat of the total time spent resolving <code class="docutils literal"><span class="pre">Name</span></code>s.</dd>
@@ -806,10 +815,10 @@ created in the event that no idle <code class="docutils literal"><span class="pr
 </ol>
 <p>Note that hosts added to a cluster are reflected immediately.</p>
 <p>The following metrics are scoped under the concatenation of <cite>zk2/</cite> and
-the ServerSet’s ZooKeeper path.</p>
+the ServerSet&#8217;s ZooKeeper path.</p>
 <dl class="docutils">
 <dt><strong>limbo</strong></dt>
-<dd>A gauge tracking the number of endpoints that are in “limbo”. When a
+<dd>A gauge tracking the number of endpoints that are in &#8220;limbo&#8221;. When a
 member leaves a cluster, it is placed in limbo. Hosts in limbo are
 still presented to the load balancer as belonging to the cluster,
 but are staged for removal. They are removed if they do not recover
@@ -860,7 +869,7 @@ within vector znodes.</dd>
 <dd>A histogram of the latency, in milliseconds, of ephemeral node creation.</dd>
 <dt><strong>watch_successes</strong></dt>
 <dd>A counter of the number successful watch-related operations
-(i.e. “watch exists”, “get watch data”, and “get child watches”
+(i.e. &#8220;watch exists&#8221;, &#8220;get watch data&#8221;, and &#8220;get child watches&#8221;
 operations).</dd>
 <dt><strong>watch_failures</strong></dt>
 <dd>A counter of the number failed watch-related operations.</dd>
@@ -904,7 +913,7 @@ operations).</dd>
 </div>
 <div class="section" id="jvm">
 <h2>JVM<a class="headerlink" href="#jvm" title="Permalink to this headline">¶</a></h2>
-<p id="jvm-metrics">A wide variety of metrics are exported which provide insight into the JVM’s
+<p id="jvm-metrics">A wide variety of metrics are exported which provide insight into the JVM&#8217;s
 runtime. These include garbage collection, allocations, threads, uptime,
 and more.</p>
 <p>If you are using a Hotspot VM, additional metrics are exported that
@@ -918,7 +927,7 @@ and tenuring threshold (<cite>jvm/tenuring_threshold</cite>).</p>
 relevant metric for service developers. The vast majority of allocations are
 done into the eden space, so this metric can be used to calculate the allocations
 per request which in turn can be used to validate code changes
-don’t increase garbage collection pressure on the hot path.</dd>
+don&#8217;t increase garbage collection pressure on the hot path.</dd>
 <dt><strong>jvm/gc/msec</strong></dt>
 <dd>A gauge of the total elapsed time doing collections, in milliseconds.</dd>
 <dt><strong>jvm/gc/cycles</strong></dt>
@@ -1138,7 +1147,7 @@ upgraded a connection to TLS.</dd>
 connection. This does not include downgraded Thrift connections.</dd>
 <dt><strong>&lt;server_label&gt;/thriftmux/downgraded_connects</strong></dt>
 <dd>A counter of the number of times the server has created a downgraded
-connection for “plain” Thrift.</dd>
+connection for &#8220;plain&#8221; Thrift.</dd>
 <dt><strong>&lt;label&gt;/thriftmux/tls/upgrade/success</strong></dt>
 <dd>A counter of the number of times the client or server has successfully
 upgraded a connection to TLS.</dd>
@@ -1182,6 +1191,7 @@ upgraded a connection to TLS.</dd>
 <li><a class="reference internal" href="#finagle">Finagle</a><ul>
 <li><a class="reference internal" href="#aperture">Aperture</a></li>
 <li><a class="reference internal" href="#futurepool">FuturePool</a></li>
+<li><a class="reference internal" href="#push-based-abstractions">Push Based Abstractions</a></li>
 <li><a class="reference internal" href="#scheduler">Scheduler</a></li>
 <li><a class="reference internal" href="#timer">Timer</a></li>
 <li><a class="reference internal" href="#clientregistry">ClientRegistry</a></li>
@@ -1219,7 +1229,7 @@ upgraded a connection to TLS.</dd>
 <li><a class="reference internal" href="#pendingrequestfilter">PendingRequestFilter</a></li>
 <li><a class="reference internal" href="#retries">Retries</a></li>
 <li><a class="reference internal" href="#dispatching">Dispatching</a></li>
-<li><a class="reference internal" href="#thread-usage">Thread Usage</a></li>
+<li><a class="reference internal" href="#server-thread-usage">Server Thread Usage</a></li>
 <li><a class="reference internal" href="#admission-control">Admission Control</a><ul>
 <li><a class="reference internal" href="#deadline-admission-control">Deadline Admission Control</a></li>
 <li><a class="reference internal" href="#nack-admission-control">Nack Admission Control</a></li>
