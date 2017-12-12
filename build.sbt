@@ -37,8 +37,7 @@ val jacksonVersion = "2.8.4"
 val jacksonLibs = Seq(
   "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
-  "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion exclude("com.google.guava", "guava"),
-  guavaLib
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion exclude("com.google.guava", "guava")
 )
 val thriftLibs = Seq(
   "com.twitter" % "libthrift" % libthriftVersion intransitive()
@@ -451,7 +450,6 @@ lazy val finagleHttp = Project(
     util("collection"),
     util("logging"),
     "commons-lang" % "commons-lang" % "2.6",
-    guavaLib,
     netty4StaticSsl
   )
 ).dependsOn(finagleBaseHttp, finagleNetty3Http, finagleNetty4Http, finagleHttp2, finagleToggle)
@@ -535,7 +533,6 @@ lazy val finagleMemcached = Project(
   libraryDependencies ++= Seq(
     util("hashing"),
     util("zk-test") % "test",
-    guavaLib,
     "com.twitter" %% "bijection-core" % "0.9.4",
     "com.twitter" % "libthrift" % libthriftVersion
   ),
