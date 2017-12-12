@@ -3,7 +3,7 @@ package com.twitter.finagle
 import com.twitter.finagle.client._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
-import com.twitter.finagle.filter.PayloadSizeFilter
+import com.twitter.finagle.filter.{NackAdmissionFilter, PayloadSizeFilter}
 import com.twitter.finagle.http._
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
 import com.twitter.finagle.http.exp.StreamTransport
@@ -165,6 +165,14 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
         // We insert the ClientNackFilter close to the bottom of the stack to
         // eagerly transform the HTTP nack representation to a `Failure`.
         .insertBefore(StackClient.Role.prepConn, ClientNackFilter.module)
+        // Since NackAdmissionFilter should operate on all requests sent over
+        // the wire including retries, it must be below `Retries`. Since it
+        // aggregates the status of the entire cluster, it must be above
+        // `LoadBalancerFactory` (not part of the endpoint stack).
+        .insertBefore(
+          StackClient.Role.prepFactory,
+          NackAdmissionFilter.module[http.Request, http.Response]
+        )
         // We add a DelayedRelease module at the bottom of the stack to ensure
         // that the pooling levels above don't discard an active session.
         .replace(StackClient.Role.prepConn, DelayedRelease.module)

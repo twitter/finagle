@@ -3,7 +3,7 @@ package com.twitter.finagle
 import com.twitter.conversions.storage._
 import com.twitter.finagle.client._
 import com.twitter.finagle.naming.BindingFactory
-import com.twitter.finagle.filter.PayloadSizeFilter
+import com.twitter.finagle.filter.{NackAdmissionFilter, PayloadSizeFilter}
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.mux.Handshake.Headers
 import com.twitter.finagle.mux.lease.exp.Lessor
@@ -286,6 +286,14 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       .replace(StackClient.Role.pool, SingletonPool.module[mux.Request, mux.Response])
       .replace(BindingFactory.role, MuxBindingFactory)
       .prepend(PayloadSizeFilter.module(_.body.length, _.body.length))
+      // Since NackAdmissionFilter should operate on all requests sent over
+      // the wire including retries, it must be below `Retries`. Since it
+      // aggregates the status of the entire cluster, it must be above
+      // `LoadBalancerFactory` (not part of the endpoint stack).
+      .insertBefore(
+        StackClient.Role.prepFactory,
+        NackAdmissionFilter.module[mux.Request, mux.Response]
+      )
 
     /**
      * Returns the headers that a client sends to a server.
