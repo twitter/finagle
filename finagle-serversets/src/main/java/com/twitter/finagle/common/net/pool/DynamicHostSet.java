@@ -16,7 +16,7 @@
 
 package com.twitter.finagle.common.net.pool;
 
-import com.google.common.collect.ImmutableSet;
+import java.util.Set;
 
 /**
  * A host set that can be monitored for changes.
@@ -62,7 +62,7 @@ public interface DynamicHostSet<T> {
      *
      * @param hostSet the current set of available ServiceInstances
      */
-    void onChange(ImmutableSet<T> hostSet);
+    void onChange(Set<T> hostSet);
   }
 
   public static class MonitorException extends Exception {

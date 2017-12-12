@@ -32,7 +32,15 @@ Breaking API Changes
 
   * finagle-thrift: Move `ThriftRichClient` and `ThriftRichServer` to
     `c.t.finagle.thrift` package. ``PHAB_ID=D115284``
-  
+
+  * finagle-serversets: Removed Guava dependency which broke some APIs. ``PHAB_ID=D119555``
+
+    - `c.t.f.common.zookeeper.ServerSets.TO_ENDPOINT` is now a `java.util.function.Function`.
+    - `c.t.f.common.net.pool.DynamicHostSet.HostChangeMonitor.onChange` now takes a `java.util.Set`.
+    - `c.t.f.common.zookeeper.ZooKeeperUtils.OPEN_ACL_UNSAFE` is is now a `java.util.List`.
+    - `c.t.f.common.zookeeper.ZooKeeperUtils.EVERYONE_READ_CREATOR_ALL` is is now a `java.util.List`.
+    - `c.t.f.common.zookeeper.ZooKeeperClient` constructor now takes a `java.util.Optional`.
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

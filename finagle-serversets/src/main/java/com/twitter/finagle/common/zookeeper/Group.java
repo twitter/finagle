@@ -16,20 +16,20 @@
 
 package com.twitter.finagle.common.zookeeper;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
-
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -58,7 +58,7 @@ public class Group {
   private static final String DEFAULT_NODE_NAME_PREFIX = "member_";
 
   private final ZooKeeperClient zkClient;
-  private final ImmutableList<ACL> acl;
+  private final List<ACL> acl;
   private final String path;
 
   private final NodeScheme nodeScheme;
@@ -82,16 +82,14 @@ public class Group {
    * @param nodeScheme the scheme that defines how nodes are created
    */
   public Group(ZooKeeperClient zkClient, Iterable<ACL> acl, String path, NodeScheme nodeScheme) {
-    this.zkClient = Preconditions.checkNotNull(zkClient);
-    this.acl = ImmutableList.copyOf(acl);
-    this.path = ZooKeeperUtils.normalizePath(Preconditions.checkNotNull(path));
+    this.zkClient = Objects.requireNonNull(zkClient);
+    List<ACL> copy = new ArrayList<>();
+    acl.iterator().forEachRemaining(copy::add);
+    this.acl = Collections.unmodifiableList(copy);
+    this.path = ZooKeeperUtils.normalizePath(Objects.requireNonNull(path));
 
-    this.nodeScheme = Preconditions.checkNotNull(nodeScheme);
-    nodeNameFilter = new Predicate<String>() {
-      @Override public boolean apply(String nodeName) {
-        return Group.this.nodeScheme.isMember(nodeName);
-      }
-    };
+    this.nodeScheme = Objects.requireNonNull(nodeScheme);
+    nodeNameFilter = Group.this.nodeScheme::isMember;
 
     backoffHelper = new BackoffHelper();
   }
@@ -125,12 +123,17 @@ public class Group {
    */
   public String getMemberId(String nodePath) {
     MorePreconditions.checkNotBlank(nodePath);
-    Preconditions.checkArgument(nodePath.startsWith(path + "/"),
-        "Not a member of this group[%s]: %s", path, nodePath);
+    if (!nodePath.startsWith(path + "/")) {
+      throw new IllegalArgumentException(
+          String.format("Not a member of this group[%s]: %s", path, nodePath));
+    }
 
     String memberId = StringUtils.substringAfterLast(nodePath, "/");
-    Preconditions.checkArgument(nodeScheme.isMember(memberId),
-        "Not a group member: %s", memberId);
+    if (!nodeScheme.isMember(memberId)) {
+      throw new IllegalArgumentException(
+          String.format("Not a group member: %s", memberId));
+    }
+
     return memberId;
   }
 
@@ -144,7 +147,10 @@ public class Group {
    */
   public Iterable<String> getMemberIds()
       throws ZooKeeperConnectionException, KeeperException, InterruptedException {
-    return Iterables.filter(zkClient.get().getChildren(path, false), nodeNameFilter);
+    return zkClient.get().getChildren(path, false)
+        .stream()
+        .filter(nodeNameFilter)
+        .collect(Collectors.toList());
   }
 
   /**
@@ -263,7 +269,7 @@ public class Group {
   public final Membership join(Supplier<byte[]> memberData, @Nullable Runnable onLoseMembership)
       throws JoinException, InterruptedException {
 
-    Preconditions.checkNotNull(memberData);
+    Objects.requireNonNull(memberData);
     ensurePersistentGroupPath();
 
     final ActiveMembership groupJoiner = new ActiveMembership(memberData, onLoseMembership);
@@ -543,7 +549,7 @@ public class Group {
    */
   public final Runnable watch(final GroupChangeListener groupChangeListener)
       throws WatchException, InterruptedException {
-    Preconditions.checkNotNull(groupChangeListener);
+    Objects.requireNonNull(groupChangeListener);
 
     try {
       ensurePersistentGroupPath();
@@ -642,7 +648,10 @@ public class Group {
       }
 
       List<String> children = zkClient.get().getChildren(path, groupWatcher);
-      setMembers(Iterables.filter(children, nodeNameFilter));
+      setMembers(children.stream()
+        .filter(nodeNameFilter)
+        .collect(Collectors.toList())
+      );
     }
 
     private void stopWatching() {
@@ -667,10 +676,11 @@ public class Group {
         });
       }
 
-      Set<String> membership = ImmutableSet.copyOf(members);
+      Set<String> membership = new HashSet<>();
+      members.iterator().forEachRemaining(membership::add);
       if (!membership.equals(this.members)) {
         groupChangeListener.onGroupChange(members);
-        this.members = membership;
+        this.members = Collections.unmodifiableSet(membership);
       }
     }
   }

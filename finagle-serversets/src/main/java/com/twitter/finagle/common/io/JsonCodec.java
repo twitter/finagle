@@ -24,8 +24,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.BitSet;
+import java.util.Objects;
 
-import com.google.common.base.Preconditions;
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
@@ -68,8 +68,8 @@ public final class JsonCodec<T> implements Codec<T> {
   }
 
   private JsonCodec(Class<T> clazz, Gson gson) {
-    Preconditions.checkNotNull(clazz);
-    Preconditions.checkNotNull(gson);
+    Objects.requireNonNull(clazz);
+    Objects.requireNonNull(gson);
     this.clazz = clazz;
     this.gson = gson;
   }

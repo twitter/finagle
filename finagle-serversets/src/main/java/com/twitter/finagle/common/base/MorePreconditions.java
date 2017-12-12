@@ -16,13 +16,12 @@
 
 package com.twitter.finagle.common.base;
 
-import com.google.common.base.Preconditions;
+import java.util.Objects;
 
 import org.apache.commons.lang.StringUtils;
 
 /**
- * A utility helpful in concisely checking preconditions on arguments.  This utility is a complement
- * to {@link com.google.common.base.Preconditions}.
+ * A utility helpful in concisely checking preconditions on arguments.
  *
  * @author John Sirois
  */
@@ -40,8 +39,10 @@ public final class MorePreconditions {
    * @see #checkNotBlank(String, String, Object...)
    */
   public static String checkNotBlank(String argument) {
-    Preconditions.checkNotNull(argument, ARG_NOT_BLANK_MSG);
-    Preconditions.checkArgument(!StringUtils.isBlank(argument), ARG_NOT_BLANK_MSG);
+    Objects.requireNonNull(argument, ARG_NOT_BLANK_MSG);
+    if (StringUtils.isBlank(argument)) {
+      throw new IllegalArgumentException(ARG_NOT_BLANK_MSG);
+    }
     return argument;
   }
 }

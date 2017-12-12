@@ -16,7 +16,7 @@
 
 package com.twitter.finagle.common.util;
 
-import com.google.common.base.Preconditions;
+import java.util.Objects;
 
 import com.twitter.util.Duration;
 
@@ -40,10 +40,14 @@ public class TruncatedBinaryBackoff implements BackoffStrategy {
    */
   public TruncatedBinaryBackoff(Duration initialBackoff,
       Duration maxBackoff, boolean stopAtMax) {
-    Preconditions.checkNotNull(initialBackoff);
-    Preconditions.checkNotNull(maxBackoff);
-    Preconditions.checkArgument(initialBackoff.inMillis() > 0);
-    Preconditions.checkArgument(maxBackoff.compareTo(initialBackoff) >= 0);
+    Objects.requireNonNull(initialBackoff);
+    Objects.requireNonNull(maxBackoff);
+    if (initialBackoff.inMillis() <= 0) {
+      throw new IllegalArgumentException();
+    }
+    if (maxBackoff.compareTo(initialBackoff) < 0) {
+      throw new IllegalArgumentException();
+    }
     initialBackoffMs = initialBackoff.inMillis();
     maxBackoffIntervalMs = maxBackoff.inMillis();
     this.stopAtMax = stopAtMax;
@@ -61,7 +65,9 @@ public class TruncatedBinaryBackoff implements BackoffStrategy {
 
   @Override
   public long calculateBackoffMs(long lastBackoffMs) {
-    Preconditions.checkArgument(lastBackoffMs >= 0);
+    if (lastBackoffMs < 0) {
+      throw new IllegalArgumentException();
+    }
     long backoff = (lastBackoffMs == 0) ? initialBackoffMs
         : Math.min(maxBackoffIntervalMs, lastBackoffMs * 2);
     return backoff;
@@ -69,7 +75,9 @@ public class TruncatedBinaryBackoff implements BackoffStrategy {
 
   @Override
   public boolean shouldContinue(long lastBackoffMs) {
-    Preconditions.checkArgument(lastBackoffMs >= 0);
+    if (lastBackoffMs < 0) {
+      throw new IllegalArgumentException();
+    }
     boolean stop = stopAtMax && (lastBackoffMs >= maxBackoffIntervalMs);
 
     return !stop;

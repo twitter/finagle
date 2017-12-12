@@ -16,11 +16,11 @@
 
 package com.twitter.finagle.common.zookeeper;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
@@ -52,17 +52,19 @@ public final class ZooKeeperUtils {
   /**
    * An ACL that gives all permissions any user authenticated or not.
    */
-  public static final ImmutableList<ACL> OPEN_ACL_UNSAFE =
-      ImmutableList.copyOf(Ids.OPEN_ACL_UNSAFE);
+  public static final List<ACL> OPEN_ACL_UNSAFE =
+      Collections.unmodifiableList(new ArrayList<>(Ids.OPEN_ACL_UNSAFE));
 
   /**
    * An ACL that gives all permissions to node creators and read permissions only to everyone else.
    */
-  public static final ImmutableList<ACL> EVERYONE_READ_CREATOR_ALL =
-      ImmutableList.<ACL>builder()
-          .addAll(Ids.CREATOR_ALL_ACL)
-          .addAll(Ids.READ_ACL_UNSAFE)
-          .build();
+  public static final List<ACL> EVERYONE_READ_CREATOR_ALL;
+  static {
+    List<ACL> list = new ArrayList<>(Ids.CREATOR_ALL_ACL.size() + Ids.READ_ACL_UNSAFE.size());
+    list.addAll(Ids.CREATOR_ALL_ACL);
+    list.addAll(Ids.READ_ACL_UNSAFE);
+    EVERYONE_READ_CREATOR_ALL = Collections.unmodifiableList(list);
+  }
 
   /**
    * Returns true if the given exception indicates an error that can be resolved by retrying the
@@ -72,7 +74,7 @@ public final class ZooKeeperUtils {
    * @return true if the causing operation is strictly retryable
    */
   public static boolean isRetryable(KeeperException e) {
-    Preconditions.checkNotNull(e);
+    Objects.requireNonNull(e);
 
     switch (e.code()) {
       case CONNECTIONLOSS:
@@ -122,9 +124,11 @@ public final class ZooKeeperUtils {
    */
   public static void ensurePath(ZooKeeperClient zkClient, List<ACL> acl, String path)
       throws ZooKeeperConnectionException, InterruptedException, KeeperException {
-    Preconditions.checkNotNull(zkClient);
-    Preconditions.checkNotNull(path);
-    Preconditions.checkArgument(path.startsWith("/"));
+    Objects.requireNonNull(zkClient);
+    Objects.requireNonNull(path);
+    if (!path.startsWith("/")) {
+      throw new IllegalArgumentException();
+    }
 
     ensurePathInternal(zkClient, acl, path);
   }

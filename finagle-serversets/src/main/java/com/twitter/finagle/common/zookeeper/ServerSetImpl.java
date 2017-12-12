@@ -24,33 +24,26 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletionException;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Charsets;
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicates;
-import com.google.common.base.Throwables;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Sets.SetView;
-import com.google.common.util.concurrent.UncheckedExecutionException;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
+
 import com.google.gson.Gson;
 
 import org.apache.zookeeper.KeeperException;
@@ -70,8 +63,6 @@ import com.twitter.finagle.common.zookeeper.ZooKeeperClient.ZooKeeperConnectionE
 import com.twitter.thrift.Endpoint;
 import com.twitter.thrift.ServiceInstance;
 import com.twitter.thrift.Status;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * ZooKeeper-backed implementation of {@link ServerSet}.
@@ -124,15 +115,15 @@ public class ServerSetImpl implements ServerSet {
    *     from a byte array
    */
   public ServerSetImpl(ZooKeeperClient zkClient, Group group, Codec<ServiceInstance> codec) {
-    this.zkClient = checkNotNull(zkClient);
-    this.group = checkNotNull(group);
-    this.codec = checkNotNull(codec);
+    this.zkClient = Objects.requireNonNull(zkClient);
+    this.group = Objects.requireNonNull(group);
+    this.codec = Objects.requireNonNull(codec);
 
     // TODO(John Sirois): Inject the helper so that backoff strategy can be configurable.
     backoffHelper = new BackoffHelper();
   }
 
-  @VisibleForTesting
+  /** VisibleForTesting */
   ZooKeeperClient getZkClient() {
     return zkClient;
   }
@@ -145,7 +136,7 @@ public class ServerSetImpl implements ServerSet {
 
     LOG.log(Level.WARNING,
         "Joining a ServerSet without a shard ID is deprecated and will soon break.");
-    return join(endpoint, additionalEndpoints, Optional.<Integer>absent());
+    return join(endpoint, additionalEndpoints, Optional.empty());
   }
 
   @Override
@@ -162,8 +153,8 @@ public class ServerSetImpl implements ServerSet {
       Map<String, InetSocketAddress> additionalEndpoints,
       Optional<Integer> shardId) throws JoinException, InterruptedException {
 
-    checkNotNull(endpoint);
-    checkNotNull(additionalEndpoints);
+    Objects.requireNonNull(endpoint);
+    Objects.requireNonNull(additionalEndpoints);
 
     final MemberStatus memberStatus =
         new MemberStatus(endpoint, additionalEndpoints, shardId);
@@ -176,7 +167,7 @@ public class ServerSetImpl implements ServerSet {
 
     return new EndpointStatus() {
       @Override public void update(Status status) throws UpdateException {
-        checkNotNull(status);
+        Objects.requireNonNull(status);
         LOG.warning("This method is deprecated. Please use leave() instead.");
         if (status == Status.DEAD) {
           leave();
@@ -252,7 +243,9 @@ public class ServerSetImpl implements ServerSet {
     byte[] serializeServiceInstance() {
       ServiceInstance serviceInstance = new ServiceInstance(
           ServerSets.toEndpoint(endpoint),
-          Maps.transformValues(additionalEndpoints, ServerSets.TO_ENDPOINT),
+          additionalEndpoints.entrySet().stream().collect(Collectors.toMap(
+            Map.Entry::getKey,
+            e -> ServerSets.TO_ENDPOINT.apply(e.getValue()))),
           Status.ALIVE);
 
       if (shardId.isPresent()) {
@@ -281,10 +274,16 @@ public class ServerSetImpl implements ServerSet {
     }
   }
 
+  private static <E> Set<E> setDifference(final Set<E> set1, final Set<E> set2) {
+    return set1.stream()
+      .filter(e -> !set2.contains(e))
+      .collect(Collectors.toSet());
+  }
+
   private class ServerSetWatcher {
     private final ZooKeeperClient zkClient;
     private final HostChangeMonitor<ServiceInstance> monitor;
-    @Nullable private ImmutableSet<ServiceInstance> serverSet;
+    @Nullable private Set<ServiceInstance> serverSet;
 
     ServerSetWatcher(ZooKeeperClient zkClient, HostChangeMonitor<ServiceInstance> monitor) {
       this.zkClient = zkClient;
@@ -357,14 +356,12 @@ public class ServerSetImpl implements ServerSet {
     }
 
     private final LoadingCache<String, ServiceInstance> servicesByMemberId =
-        CacheBuilder.newBuilder().build(new CacheLoader<String, ServiceInstance>() {
-          @Override public ServiceInstance load(String memberId) {
-            return getServiceInstance(group.getMemberPath(memberId));
-          }
-        });
+        Caffeine.newBuilder().build(memberId ->
+            getServiceInstance(group.getMemberPath(memberId)));
 
     private void rebuildServerSet() {
-      Set<String> memberIds = ImmutableSet.copyOf(servicesByMemberId.asMap().keySet());
+      Set<String> memberIds =
+          Collections.unmodifiableSet(new HashSet<>(servicesByMemberId.asMap().keySet()));
       servicesByMemberId.invalidateAll();
       notifyGroupChange(memberIds);
     }
@@ -375,42 +372,44 @@ public class ServerSetImpl implements ServerSet {
       return memberId;
     }
 
-    private final Function<String, ServiceInstance> maybeFetchNode =
-        new Function<String, ServiceInstance>() {
-          @Override public ServiceInstance apply(String memberId) {
-            // This get will trigger a fetch
-            try {
-              return servicesByMemberId.getUnchecked(memberId);
-            } catch (UncheckedExecutionException e) {
-              Throwable cause = e.getCause();
-              if (!(cause instanceof ServiceInstanceDeletedException)) {
-                Throwables.propagateIfInstanceOf(cause, ServiceInstanceFetchException.class);
-                throw new IllegalStateException(
-                    "Unexpected error fetching member data for: " + memberId, e);
-              }
-              return null;
-            }
+    private final Function<String, ServiceInstance> maybeFetchNode = memberId -> {
+      // This get will trigger a fetch
+      try {
+        return servicesByMemberId.get(memberId);
+      } catch (CompletionException e) {
+        Throwable cause = e.getCause();
+        if (!(cause instanceof ServiceInstanceDeletedException)) {
+          if (ServiceInstanceFetchException.class.isInstance(cause)) {
+            throw ServiceInstanceFetchException.class.cast(cause);
+          } else {
+            throw new IllegalStateException(
+              "Unexpected error fetching member data for: " + memberId, e);
           }
-        };
+        }
+        return null;
+      }
+    };
 
     private synchronized void notifyGroupChange(Iterable<String> memberIds) {
-      ImmutableSet<String> newMemberIds = ImmutableSortedSet.copyOf(memberIds);
+      Set<String> newMemberIds = new HashSet<>();
+      memberIds.iterator().forEachRemaining(newMemberIds::add);
       Set<String> existingMemberIds = servicesByMemberId.asMap().keySet();
 
       // Ignore no-op state changes except for the 1st when we've seen no group yet.
       if ((serverSet == null) || !newMemberIds.equals(existingMemberIds)) {
-        SetView<String> deletedMemberIds = Sets.difference(existingMemberIds, newMemberIds);
+        Set<String> deletedMemberIds = setDifference(existingMemberIds, newMemberIds);
         // Implicit removal from servicesByMemberId.
-        existingMemberIds.removeAll(ImmutableSet.copyOf(deletedMemberIds));
+        existingMemberIds.removeAll(deletedMemberIds);
 
-        Iterable<ServiceInstance> serviceInstances = Iterables.filter(
-            Iterables.transform(newMemberIds, maybeFetchNode), Predicates.notNull());
-
-        notifyServerSetChange(ImmutableSet.copyOf(serviceInstances));
+        Set<ServiceInstance> serviceInstances = newMemberIds.stream()
+            .map(maybeFetchNode)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+        notifyServerSetChange(Collections.unmodifiableSet(serviceInstances));
       }
     }
 
-    private void notifyServerSetChange(ImmutableSet<ServiceInstance> currentServerSet) {
+    private void notifyServerSetChange(Set<ServiceInstance> currentServerSet) {
       // ZK nodes may have changed if there was a session expiry for a server in the server set, but
       // if the server's status has not changed, we can skip any onChange updates.
       if (!currentServerSet.equals(serverSet)) {
@@ -430,23 +429,27 @@ public class ServerSetImpl implements ServerSet {
       }
     }
 
-    private void logChange(Level level, ImmutableSet<ServiceInstance> newServerSet) {
+    private void logChange(Level level, Set<ServiceInstance> newServerSet) {
       StringBuilder message = new StringBuilder("server set " + group.getPath() + " change: ");
       if (serverSet.size() != newServerSet.size()) {
         message.append("from ").append(serverSet.size())
             .append(" members to ").append(newServerSet.size());
       }
 
-      Joiner joiner = Joiner.on("\n\t\t");
-
-      SetView<ServiceInstance> left = Sets.difference(serverSet, newServerSet);
+      Set<ServiceInstance> left = setDifference(serverSet, newServerSet);
       if (!left.isEmpty()) {
-        message.append("\n\tleft:\n\t\t").append(joiner.join(left));
+        String gone = left.stream()
+            .map(Objects::toString)
+            .collect(Collectors.joining("\n\t\t"));
+        message.append("\n\tleft:\n\t\t").append(gone);
       }
 
-      SetView<ServiceInstance> joined = Sets.difference(newServerSet, serverSet);
+      Set<ServiceInstance> joined = setDifference(newServerSet, serverSet);
       if (!joined.isEmpty()) {
-        message.append("\n\tjoined:\n\t\t").append(joiner.join(joined));
+        String added = joined.stream()
+            .map(Objects::toString)
+            .collect(Collectors.joining("\n\t\t"));
+        message.append("\n\tjoined:\n\t\t").append(added);
       }
 
       LOG.log(level, message.toString());
@@ -458,7 +461,7 @@ public class ServerSetImpl implements ServerSet {
     private final Integer port;
 
     EndpointSchema(Endpoint endpoint) {
-      Preconditions.checkNotNull(endpoint);
+      Objects.requireNonNull(endpoint);
       this.host = endpoint.getHost();
       this.port = endpoint.getPort();
     }
@@ -481,16 +484,13 @@ public class ServerSetImpl implements ServerSet {
     ServiceInstanceSchema(ServiceInstance instance) {
       this.serviceEndpoint = new EndpointSchema(instance.getServiceEndpoint());
       if (instance.getAdditionalEndpoints() != null) {
-        this.additionalEndpoints = Maps.transformValues(
-            instance.getAdditionalEndpoints(),
-            new Function<Endpoint, EndpointSchema>() {
-              @Override public EndpointSchema apply(Endpoint endpoint) {
-                return new EndpointSchema(endpoint);
-              }
-            }
-        );
+        this.additionalEndpoints = instance.getAdditionalEndpoints().entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                e -> new EndpointSchema(e.getValue()))
+            );
       } else {
-        this.additionalEndpoints = Maps.newHashMap();
+        this.additionalEndpoints = new HashMap<>();
       }
       this.status  = instance.getStatus();
       this.shard = instance.isSetShard() ? instance.getShard() : null;
@@ -518,7 +518,7 @@ public class ServerSetImpl implements ServerSet {
    * __isset_bit_vector internal thrift struct field that tracks primitive types.
    */
   private static class AdaptedJsonCodec implements Codec<ServiceInstance> {
-    private static final Charset ENCODING = Charsets.UTF_8;
+    private static final Charset ENCODING = StandardCharsets.UTF_8;
     private static final Class<ServiceInstanceSchema> CLASS = ServiceInstanceSchema.class;
     private final Gson gson = new Gson();
 
@@ -534,16 +534,13 @@ public class ServerSetImpl implements ServerSet {
       ServiceInstanceSchema output = gson.fromJson(new InputStreamReader(source, ENCODING), CLASS);
       Endpoint primary = new Endpoint(
           output.getServiceEndpoint().getHost(), output.getServiceEndpoint().getPort());
-      Map<String, Endpoint> additional = Maps.transformValues(
-          output.getAdditionalEndpoints(),
-          new Function<EndpointSchema, Endpoint>() {
-            @Override public Endpoint apply(EndpointSchema endpoint) {
-              return new Endpoint(endpoint.getHost(), endpoint.getPort());
-            }
-          }
-      );
+      Map<String, Endpoint> additional = output.getAdditionalEndpoints().entrySet().stream()
+          .collect(Collectors.toMap(
+              Map.Entry::getKey,
+              e -> new Endpoint(e.getValue().getHost(), e.getValue().getPort()))
+          );
       ServiceInstance instance =
-          new ServiceInstance(primary, ImmutableMap.copyOf(additional), output.getStatus());
+          new ServiceInstance(primary, Collections.unmodifiableMap(additional), output.getStatus());
       if (output.getShard() != null) {
         instance.setShard(output.getShard());
       }

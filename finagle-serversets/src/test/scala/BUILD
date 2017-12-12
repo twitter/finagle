@@ -48,7 +48,6 @@ junit_tests(name='client',
 junit_tests(name='serversets',
   dependencies=[
     ':core',
-    '3rdparty/jvm/com/google/guava:guava',
     '3rdparty/jvm/com/google/inject:guice',
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-serversets/src/main/scala:scala',
