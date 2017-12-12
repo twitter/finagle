@@ -6,7 +6,6 @@ import com.twitter.finagle._
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
-import com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory
 import com.twitter.finagle.memcached.partitioning.MemcachedPartitioningService
 import com.twitter.finagle.memcached.protocol.{Command, Response}
 import com.twitter.finagle.memcached.{Client, TwemcacheClient}
@@ -38,7 +37,6 @@ abstract class MemcachedPartitioningClientTest extends MemcachedTest {
     // create a partitioning aware finagle client by inserting the PartitioningService appropriately
     StackClient
       .newStack[Command, Response]
-      .replace(LoadBalancerFactory.role, ConcurrentLoadBalancerFactory.module[Command, Response])
       .insertAfter(
         BindingFactory.role,
         MemcachedPartitioningService.module
@@ -51,6 +49,7 @@ abstract class MemcachedPartitioningClientTest extends MemcachedTest {
         .configured(Memcached.param.KeyHasher(KeyHasher.KETAMA))
         .configured(TimeoutFilter.Param(10000.milliseconds))
         .configured(Memcached.param.EjectFailedHost(false))
+        .configured(LoadBalancerFactory.ReplicateAddresses(2))
         .withStack(newClientStack())
         .newService(dest, label)
     )

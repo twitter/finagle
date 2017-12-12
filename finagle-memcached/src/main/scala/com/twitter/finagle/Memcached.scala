@@ -1,6 +1,5 @@
 package com.twitter.finagle
 
-import java.net.{InetSocketAddress, SocketAddress}
 import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
 import com.twitter.finagle.client.{EndpointerStackClient, _}
@@ -10,7 +9,6 @@ import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy
 import com.twitter.finagle.loadbalancer.{Balancers, LoadBalancerFactory}
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.exp.LocalMemcached
-import com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory
 import com.twitter.finagle.memcached.partitioning.MemcachedPartitioningService
 import com.twitter.finagle.memcached.protocol.text.server.ServerTransport
 import com.twitter.finagle.memcached.protocol.text.transport.{MemcachedNetty4ClientPipelineInit, Netty4ServerFramer}
@@ -26,10 +24,11 @@ import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.{Transport, TransportContext}
-import com.twitter.{finagle, hashing}
 import com.twitter.io.Buf
-import com.twitter.util.registry.GlobalRegistry
 import com.twitter.util._
+import com.twitter.util.registry.GlobalRegistry
+import com.twitter.{finagle, hashing}
+import java.net.{InetSocketAddress, SocketAddress}
 import scala.collection.mutable
 
 private[finagle] object MemcachedTracingFilter {
@@ -68,7 +67,7 @@ private[finagle] object MemcachedTracingFilter {
                   case Buf.Utf8(key) =>
                     misses += key
                 }
-                vals.foreach { value => 
+                vals.foreach { value =>
                   val Buf.Utf8(key) = value.key
                   Trace.recordBinary(key, "Hit")
                   misses.remove(key)
@@ -223,7 +222,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
      * backend removed from the cache ring.
      * per_conn_rps = total_rps / (number_of_clients * number_of_backends * number_of_conn_per_client)
      */
-    private[this] val defaultFailureAccrualPolicy = () =>
+    private val defaultFailureAccrualPolicy = () =>
       FailureAccrualPolicy.consecutiveFailures(10, Backoff.const(30.seconds))
 
     /**
@@ -231,7 +230,12 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
      * we set a limit to the number of pending requests allowed. Requests overflowing this limit
      * will return a RejectedExecutionException.
      */
-    private[this] val defaultPendingRequestLimit = Some(100)
+    private val defaultPendingRequestLimit = Some(100)
+
+    private val UseTwoConnections: Boolean =
+      Toggles("com.twitter.finagle.memcached.UseTwoConnections")(ServerInfo().id.hashCode)
+
+    private val defaultNumConnections: Int = if (UseTwoConnections) 2 else 4
 
     /**
      * Default stack parameters used for memcached client. We change the
@@ -242,6 +246,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
       FailureAccrualFactory.Param(defaultFailureAccrualPolicy) +
       FailFastFactory.FailFast(false) +
       LoadBalancerFactory.Param(Balancers.p2cPeakEwma()) +
+      LoadBalancerFactory.ReplicateAddresses(defaultNumConnections) +
       PendingRequestFilter.Param(limit = defaultPendingRequestLimit) +
       ProtocolLibrary(ProtocolLibraryName)
 
@@ -252,7 +257,6 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
      * has a single pipelined connection.
      */
     private val stack: Stack[ServiceFactory[Command, Response]] = StackClient.newStack
-      .replace(LoadBalancerFactory.role, ConcurrentLoadBalancerFactory.module[Command, Response])
       .replace(DefaultPool.Role, SingletonPool.module[Command, Response])
       .replace(ClientTracingFilter.role, MemcachedTracingFilter.Module)
 
@@ -490,7 +494,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
      * increased at the cost of additional connection overhead.
      */
     def connectionsPerEndpoint(connections: Int): Client =
-      configured(ConcurrentLoadBalancerFactory.Param(connections))
+      configured(LoadBalancerFactory.ReplicateAddresses(connections))
 
     override val withTransport: ClientTransportParams[Client] =
       new ClientTransportParams(this)

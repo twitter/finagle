@@ -256,4 +256,41 @@ class LoadBalancerFactoryTest extends FunSuite with Eventually with IntegrationP
       assert(eps(i) == sortedAddresses(i))
     }
   }
+
+  test("Respects ReplicateAddresses param") {
+    val endpoint: Stack[ServiceFactory[String, String]] =
+      Stack.Leaf(
+        Stack.Role("endpoint"),
+        ServiceFactory.const[String, String](Service.mk[String, String](req => ???))
+      )
+
+    val stack = LoadBalancerFactory.module[String, String].toStack(endpoint)
+
+    var eps: Set[Address] = Set.empty
+    val mockBalancer = new LoadBalancerFactory {
+      def newBalancer[Req, Rep](
+        endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
+        emptyException: NoBrokersAvailableException,
+        params: Stack.Params
+      ): ServiceFactory[Req, Rep] = {
+        eps = endpoints.sample().toSet.map { ep: EndpointFactory[_, _] => ep.address }
+        ServiceFactory.const(Service.mk(_ => ???))
+      }
+    }
+
+    val size = 10
+    val addresses = (0 until size).map { i =>
+      Address(InetSocketAddress.createUnresolved(s"inet-address-$i", 0))
+    }
+
+    val replicateCount = 2
+    stack.make(
+      Stack.Params.empty +
+        LoadBalancerFactory.Param(mockBalancer) +
+        LoadBalancerFactory.Dest(Var(Addr.Bound(addresses.toSet))) +
+        LoadBalancerFactory.ReplicateAddresses(replicateCount)
+    )
+
+    assert(eps.size == size * replicateCount)
+  }
 }

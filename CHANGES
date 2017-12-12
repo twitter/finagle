@@ -7,6 +7,13 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-memcached: `ConcurrentLoadBalancerFactory` was removed and its behavior
+    was replaced by a Stack.Param inside finagle-core's `LoadBalancerFactory`.
+    ``PHAB_ID=D119394``
+
 17.12.0
 -------
 
@@ -30,8 +37,9 @@ Breaking API Changes
   * finagle-base-http: Remove deprecated [Request|Response].[encode|decode][Bytes|String]
     methods. Use c.t.f.h.codec.HttpCodec methods instead. ``PHAB_ID=D116350``
 
-  * finagle-thrift: Move `ThriftRichClient` and `ThriftRichServer` to
-    `c.t.finagle.thrift` package. ``PHAB_ID=D115284``
+  * finagle-memcached: `ConcurrentLoadBalancerFactory` was removed and its behavior
+    was replaced by a Stack.Param inside finagle-core's `LoadBalancerFactory`.
+    ``PHAB_ID=D119394``
 
   * finagle-serversets: Removed Guava dependency which broke some APIs. ``PHAB_ID=D119555``
 
@@ -40,6 +48,9 @@ Breaking API Changes
     - `c.t.f.common.zookeeper.ZooKeeperUtils.OPEN_ACL_UNSAFE` is is now a `java.util.List`.
     - `c.t.f.common.zookeeper.ZooKeeperUtils.EVERYONE_READ_CREATOR_ALL` is is now a `java.util.List`.
     - `c.t.f.common.zookeeper.ZooKeeperClient` constructor now takes a `java.util.Optional`.
+
+  * finagle-thrift: Move `ThriftRichClient` and `ThriftRichServer` to
+    `c.t.finagle.thrift` package. ``PHAB_ID=D115284``
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
