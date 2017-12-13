@@ -11,6 +11,7 @@ scala_library(
     '3rdparty/jvm/io/netty:netty4-handler-proxy',
     '3rdparty/jvm/io/netty:netty4-http',
     '3rdparty/jvm/io/netty:netty4-http2',
+    '3rdparty/jvm/io/netty:netty4-tcnative-boringssl-static',
     'finagle/finagle-base-http',
     'finagle/finagle-core',
     'finagle/finagle-netty4',
