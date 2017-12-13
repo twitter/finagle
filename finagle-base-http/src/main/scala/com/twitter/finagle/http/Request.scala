@@ -7,7 +7,6 @@ import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util.Closable
 import java.net.{InetAddress, InetSocketAddress}
 import java.util.{AbstractMap, List => JList, Map => JMap, Set => JSet}
-import org.jboss.netty.handler.codec.http._
 import scala.beans.BeanProperty
 import scala.annotation.varargs
 import scala.collection.JavaConverters._
@@ -238,14 +237,8 @@ object Request {
    *
    * @param params a list of key-value pairs representing the query string.
    */
-  def apply(uri: String, params: Tuple2[String, String]*): Request = {
-    val encoder = new QueryStringEncoder(uri)
-    params.foreach {
-      case (key, value) =>
-        encoder.addParam(key, value)
-    }
-    apply(Method.Get, encoder.toString)
-  }
+  def apply(uri: String, params: Tuple2[String, String]*): Request =
+    apply(Method.Get, queryString(uri, params: _*))
 
   /**
    * Create an HTTP/1.1 GET request from URI string.
@@ -314,12 +307,7 @@ object Request {
 
   /** Create a query string from URI and parameters. */
   def queryString(uri: String, params: Tuple2[String, String]*): String = {
-    val encoder = new QueryStringEncoder(uri)
-    params.foreach {
-      case (key, value) =>
-        encoder.addParam(key, value)
-    }
-    encoder.toString
+    uri + QueryParamEncoder.encode(params)
   }
 
   /**
