@@ -59,9 +59,9 @@ private[http2] class UpgradeRequestHandler(params: Stack.Params) extends Channel
               }
             p.addBefore(
               ChannelTransport.HandlerName,
-              "aggregate",
+              AdapterProxyChannelHandler.HandlerName,
               new AdapterProxyChannelHandler({ pipeline: ChannelPipeline =>
-                pipeline.addLast("schemifier", new SchemifyingHandler("http"))
+                pipeline.addLast(SchemifyingHandler.HandlerName, new SchemifyingHandler("http"))
                 pipeline.addLast(StripHeadersHandler.HandlerName, StripHeadersHandler)
                 initClient(params)(pipeline)
              })

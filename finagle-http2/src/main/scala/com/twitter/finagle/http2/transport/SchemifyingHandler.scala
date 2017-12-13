@@ -35,3 +35,7 @@ private[http2] class SchemifyingHandler(defaultScheme: String) extends ChannelDu
     ctx.write(msg, promise)
   }
 }
+
+private[http2] object SchemifyingHandler {
+  val HandlerName =  "schemifier"
+}

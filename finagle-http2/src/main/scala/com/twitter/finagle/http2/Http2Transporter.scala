@@ -6,7 +6,6 @@ import com.twitter.finagle.http2.param._
 import com.twitter.finagle.http2.transport._
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader.StreamMessage
 import com.twitter.finagle.netty4.Netty4Transporter
-import com.twitter.finagle.netty4.channel.BufferingChannelOutboundHandler
 import com.twitter.finagle.netty4.http.{HttpCodecName, Netty4HttpTransporter, initClient}
 import com.twitter.finagle.netty4.transport.HasExecutor
 import com.twitter.finagle.param.{Timer => TimerParam}
@@ -14,13 +13,7 @@ import com.twitter.finagle.transport.{Transport, TransportProxy, TransportContex
 import com.twitter.finagle.{Stack, Status}
 import com.twitter.logging.{HasLogLevel, Level, Logger}
 import com.twitter.util._
-import io.netty.channel.{
-  ChannelHandlerContext,
-  ChannelInboundHandlerAdapter,
-  ChannelOutboundHandlerAdapter,
-  ChannelPipeline,
-  ChannelPromise
-}
+import io.netty.channel.ChannelPipeline
 import io.netty.handler.codec.http._
 import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
 import io.netty.handler.codec.http2._
@@ -54,44 +47,6 @@ private[finagle] object Http2Transporter {
     }
   }
 
-  /**
-   * Buffers until `channelActive` so we can ensure the connection preface is
-   * the first message we send.
-   */
-  class BufferingHandler extends ChannelInboundHandlerAdapter with BufferingChannelOutboundHandler {
-    self =>
-
-    override def channelActive(ctx: ChannelHandlerContext): Unit = {
-      ctx.fireChannelActive()
-      // removing a BufferingChannelOutboundHandler writes and flushes too.
-      ctx.pipeline.remove(self)
-    }
-
-    def bind(ctx: ChannelHandlerContext, addr: SocketAddress, promise: ChannelPromise): Unit = {
-      ctx.bind(addr, promise)
-    }
-    def close(ctx: ChannelHandlerContext, promise: ChannelPromise): Unit = {
-      ctx.close(promise)
-    }
-    def connect(
-      ctx: ChannelHandlerContext,
-      local: SocketAddress,
-      remote: SocketAddress,
-      promise: ChannelPromise
-    ): Unit = {
-      ctx.connect(local, remote, promise)
-    }
-    def deregister(ctx: ChannelHandlerContext, promise: ChannelPromise): Unit = {
-      ctx.deregister(promise)
-    }
-    def disconnect(ctx: ChannelHandlerContext, promise: ChannelPromise): Unit = {
-      ctx.disconnect(promise)
-    }
-    def read(ctx: ChannelHandlerContext): Unit = {
-      ctx.read()
-    }
-  }
-
   // constructing an http2 cleartext transport
   private[http2] def init(params: Stack.Params): ChannelPipeline => Unit = {
     pipeline: ChannelPipeline =>
@@ -107,12 +62,22 @@ private[finagle] object Http2Transporter {
 
       val PriorKnowledge(priorKnowledge) = params[PriorKnowledge]
       val Transport.ClientSsl(config) = params[Transport.ClientSsl]
-      val HeaderSensitivity(sensitivityDetector) = params[HeaderSensitivity]
       val tlsEnabled = config.isDefined
+      val sensitivityDetector = params[HeaderSensitivity].sensitivityDetector
+
+      val maxChunkSize = params[http.param.MaxChunkSize].size
+      val maxHeaderSize = params[http.param.MaxHeaderSize].size
+      val maxInitialLineSize = params[http.param.MaxInitialLineSize].size
+      val sourceCodec = new HttpClientCodec(
+        maxInitialLineSize.inBytes.toInt,
+        maxHeaderSize.inBytes.toInt,
+        maxChunkSize.inBytes.toInt
+      )
+
 
       if (tlsEnabled) {
         val p = Promise[Unit]()
-        val buffer = new ChannelOutboundHandlerAdapter with BufferingChannelOutboundHandler
+        val buffer = BufferingHandler.alpn()
         val connectionHandler = connectionHandlerBuilder
           .onActive { () =>
             // need to stop buffering after we've sent the connection preface
@@ -125,28 +90,21 @@ private[finagle] object Http2Transporter {
           })
           .build()
         pipeline.addLast("alpn", new ClientNpnOrAlpnHandler(connectionHandler, params))
-        pipeline.addLast("buffer", buffer)
+        pipeline.addLast(BufferingHandler.HandlerName, buffer)
       } else if (priorKnowledge) {
         val connectionHandler = connectionHandlerBuilder.build()
         pipeline.addLast(HttpCodecName, connectionHandler)
-        pipeline.addLast("buffer", new BufferingHandler())
-        pipeline.addLast("aggregate", new AdapterProxyChannelHandler({ pipeline =>
-          pipeline.addLast("schemifier", new SchemifyingHandler("http"))
-          pipeline.addLast(StripHeadersHandler.HandlerName, StripHeadersHandler)
-          initClient(params)(pipeline)
-        }))
+        pipeline.addLast(BufferingHandler.HandlerName, BufferingHandler.priorKnowledge())
+        pipeline.addLast(
+          AdapterProxyChannelHandler.HandlerName,
+          new AdapterProxyChannelHandler({ pipeline =>
+            pipeline.addLast(SchemifyingHandler.HandlerName, new SchemifyingHandler("http"))
+            pipeline.addLast(StripHeadersHandler.HandlerName, StripHeadersHandler)
+            initClient(params)(pipeline)
+          })
+        )
       } else {
         val connectionHandler = connectionHandlerBuilder.build()
-        val maxChunkSize = params[http.param.MaxChunkSize].size
-        val maxHeaderSize = params[http.param.MaxHeaderSize].size
-        val maxInitialLineSize = params[http.param.MaxInitialLineSize].size
-
-        val sourceCodec = new HttpClientCodec(
-          maxInitialLineSize.inBytes.toInt,
-          maxHeaderSize.inBytes.toInt,
-          maxChunkSize.inBytes.toInt
-        )
-
         val upgradeCodec = new Http2ClientUpgradeCodec(connectionHandler)
         val upgradeHandler = new HttpClientUpgradeHandler(sourceCodec, upgradeCodec, Int.MaxValue)
         pipeline.addLast(HttpCodecName, sourceCodec)
@@ -281,23 +239,49 @@ private[finagle] class Http2Transporter(
       conn.transform {
         case Return(trans) =>
           trans.onClose.ensure {
-            tryEvict(p)
+            if (p.isDefined) {
+              // we should only evict if we haven't successfully downgraded
+              // before.  if we successfully downgraded, it's unlikely that
+              // attempting the upgrade again will be fruitful.
+              p.respond {
+                case Return(None) => // nop
+                case _ => tryEvict(p)
+              }
+            } else {
+              tryEvict(p)
+            }
           }
 
           if (alpnUpgrade) {
-            trans.read().respond {
+            trans.read().transform {
               case Return(UpgradeEvent.UPGRADE_REJECTED) =>
                 p.setValue(None)
+                // we continue using the same transport, since by now it has
+                // been transformed into an http/1.1 connection.
+                Future.value(trans)
               case Return(UpgradeEvent.UPGRADE_SUCCESSFUL) =>
                 val inOutCasted = Transport.cast[StreamMessage, StreamMessage](trans)
-                val contextCasted = inOutCasted.asInstanceOf[Transport[StreamMessage, StreamMessage] { type Context = TransportContext with HasExecutor }]
-                p.setValue(Some(new MultiplexedTransporter(contextCasted, trans.remoteAddress, params)))
+                val contextCasted =
+                  inOutCasted.asInstanceOf[
+                    Transport[StreamMessage, StreamMessage] {
+                      type Context = TransportContext with HasExecutor
+                    }
+                  ]
+                p.setValue(Some(
+                  new MultiplexedTransporter(contextCasted, trans.remoteAddress, params)))
+                useExistingConnection(p)
               case Return(msg) =>
                 log.error(s"Non-upgrade event detected $msg")
-              case _ =>
+                trans.close()
+                p.setValue(None)
+                useExistingConnection(p)
+              case Throw(exn) =>
+                log.error(exn, "Failed to clearly negotiate either HTTP/2 or HTTP/1.1.  " +
+                  "Falling back to HTTP/1.1.")
+                trans.close()
+                p.setValue(None)
+                useExistingConnection(p)
             }
-
-            useExistingConnection(p)
           } else {
             val ref = new RefTransport(trans)
             ref.update { t =>

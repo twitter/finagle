@@ -34,7 +34,7 @@ class Http2AlpnTest extends AbstractEndToEndTest {
   // we need this to turn off ALPN in ci
   override def skipWholeTest: Boolean = sys.props.contains("SKIP_FLAKY")
 
-  def implName: String = "prior knowledge http/2"
+  def implName: String = "alpn http/2"
   def clientImpl(): finagle.Http.Client =
     finagle.Http.client
       .configuredParams(finagle.Http.Http2)
@@ -66,7 +66,7 @@ class Http2AlpnTest extends AbstractEndToEndTest {
     await(client.close())
   }
 
-  test("Upgrades to HTTP/2 only if both have the toggle on and it's H2C, not H2") {
+  test("Upgrades to HTTP/2 only if both have the toggle on and it's H2, not H2C") {
     for {
       clientUseHttp2 <- Seq(1D, 0D)
       serverUseHttp2 <- Seq(1D, 0D)
@@ -128,6 +128,33 @@ class Http2AlpnTest extends AbstractEndToEndTest {
 
     await(client.close())
     assert(sr.counters(Seq("client", "closes")) == 1)
+
+    await(server.close())
+  }
+
+  test("clients don't leak connections when h2 is rejected") {
+    val sr = new InMemoryStatsReceiver()
+    val server = finagle.Http.server
+      .configured(Transport.ServerSsl(Some(serverConfiguration())))
+      .serve("localhost:*", Service.mk { req: Request =>
+        Future.value(Response())
+      })
+
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .withStatsReceiver(sr)
+      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+    val request = Request("/")
+    request.contentLength = 0
+
+    val rep = await(client(request))
+
+    assert(sr.counters(Seq("client", "connects")) == 1)
+    await(client.close())
+    eventually {
+      assert(sr.counters(Seq("client", "closes")) == 1)
+    }
 
     await(server.close())
   }

@@ -217,6 +217,7 @@ private[http2] class AdapterProxyChannelHandler(setupFn: ChannelPipeline => Unit
 }
 
 private[http2] object AdapterProxyChannelHandler {
+  val HandlerName = "aggregate"
 
   /**
    * Creates a new promise that can be used instead of the `sink` promise, but
