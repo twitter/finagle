@@ -1,14 +1,24 @@
 package com.twitter.finagle.mux.lease.exp
 
-import com.twitter.util.{Time, StorageUnit}
+import com.twitter.util.{StorageUnit, Time}
 import com.twitter.conversions.time._
 import com.twitter.conversions.storage.intToStorageUnitableWholeNumber
-import org.junit.runner.RunWith
-import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
+import org.scalactic.source.Position
+import org.scalatest.{FunSuite, Tag}
 
-@RunWith(classOf[JUnitRunner])
 class AlarmTest extends FunSuite with LocalConductors {
+
+  val skipWholeTest: Boolean = sys.props.contains("SKIP_FLAKY")
+
+  override def test(testName: String, testTags: Tag*)(
+    testFun: => Any
+  )(implicit pos: Position): Unit = {
+    if (skipWholeTest)
+      ignore(testName)(testFun)
+    else
+      super.test(testName, testTags: _*)(testFun)
+  }
+
   test("DurationAlarm should work") {
     val conductor = new Conductor
     import conductor._
