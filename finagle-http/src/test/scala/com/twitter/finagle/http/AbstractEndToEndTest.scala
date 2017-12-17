@@ -125,6 +125,7 @@ abstract class AbstractEndToEndTest
     val server = serverImpl()
       .withLabel("server")
       .withStatsReceiver(statsRecv)
+      .withMaxHeaderSize(8.kilobytes)
       .withMaxRequestSize(200.bytes)
       .serve("localhost:*", ref)
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
