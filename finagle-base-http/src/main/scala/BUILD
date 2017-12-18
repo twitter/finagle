@@ -6,7 +6,6 @@ scala_library(
   ),
   dependencies=[
     '3rdparty/jvm/com/google/code/findbugs:jsr305',
-    '3rdparty/jvm/commons-lang',
     '3rdparty/jvm/io/netty',
     'finagle/finagle-core',
     'finagle/finagle-netty3',
@@ -19,7 +18,6 @@ scala_library(
   fatal_warnings=True,
   sources=rglobs('*.scala'),
   exports=[
-    '3rdparty/jvm/commons-lang',
     '3rdparty/jvm/io/netty',
     'util/util-collection',
     'util/util-core:util-core',

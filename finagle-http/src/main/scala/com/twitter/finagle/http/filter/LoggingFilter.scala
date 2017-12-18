@@ -6,9 +6,10 @@ import com.twitter.finagle.filter.{
 }
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.logging.Logger
-import com.twitter.util.{Duration, Time}
-import java.util.TimeZone
-import org.apache.commons.lang.time.FastDateFormat
+import com.twitter.util.Duration
+import java.time.{ZoneId, ZonedDateTime}
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 trait LogFormatter extends CoreLogFormatter[Request, Response] {
   def escape(s: String): String = LogFormatter.escape(s)
@@ -77,7 +78,12 @@ class CommonLogFormatter extends LogFormatter {
    *   %D: response time in milliseconds
    *   "%{User-Agent}i": user agent
    */
-  val DateFormat = FastDateFormat.getInstance("dd/MMM/yyyy:HH:mm:ss Z", TimeZone.getTimeZone("GMT"))
+  val DateFormat: DateTimeFormatter =
+    DateTimeFormatter
+      .ofPattern("dd/MMM/yyyy:HH:mm:ss Z")
+      .withLocale(Locale.ENGLISH)
+      .withZone(ZoneId.of("GMT"))
+
   def format(request: Request, response: Response, responseTime: Duration) = {
     val remoteAddr = request.remoteAddress.getHostAddress
 
@@ -113,7 +119,7 @@ class CommonLogFormatter extends LogFormatter {
     throw new UnsupportedOperationException("Log throwables as empty 500s instead")
 
   def formattedDate(): String =
-    DateFormat.format(Time.now.toDate)
+    ZonedDateTime.now.format(DateFormat)
 }
 
 /**

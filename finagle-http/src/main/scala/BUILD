@@ -6,7 +6,6 @@ scala_library(
   ),
   dependencies=[
     '3rdparty/jvm/com/google/code/findbugs:jsr305',
-    '3rdparty/jvm/commons-lang',
     '3rdparty/jvm/io/netty',
     'finagle/finagle-base-http',
     'finagle/finagle-core',

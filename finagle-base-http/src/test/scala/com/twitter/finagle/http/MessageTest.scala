@@ -2,6 +2,7 @@ package com.twitter.finagle.http
 
 import com.twitter.conversions.time._
 import com.twitter.io.Buf
+import java.time.ZonedDateTime
 import java.util.Date
 import org.scalatest.FunSuite
 
@@ -328,5 +329,19 @@ class MessageTest extends FunSuite {
 
   test("httpDateFormat") {
     assert(Message.httpDateFormat(new Date(0L)) == "Thu, 01 Jan 1970 00:00:00 GMT")
+
+    val timeGMT: Date = Date.from(ZonedDateTime.parse("2012-06-30T12:30:40Z[GMT]").toInstant)
+    val timeUTC: Date = Date.from(ZonedDateTime.parse("2012-06-30T12:30:40Z[UTC]").toInstant)
+    val timeLASummer: Date = Date.from(ZonedDateTime.parse("2012-06-30T12:30:40-07:00[America/Los_Angeles]").toInstant)
+    val timeLAWinter: Date = Date.from(ZonedDateTime.parse("2012-12-30T12:30:40-07:00[America/Los_Angeles]").toInstant)
+    val timeSH: Date = Date.from(ZonedDateTime.parse("2012-06-03T12:30:40+08:00[Asia/Shanghai]").toInstant)
+    val timeEurope: Date = Date.from(ZonedDateTime.parse("2012-06-30T12:30:40+01:00[Europe/London]").toInstant)
+
+    assert(Message.httpDateFormat(timeGMT) == "Sat, 30 Jun 2012 12:30:40 GMT")
+    assert(Message.httpDateFormat(timeUTC) == "Sat, 30 Jun 2012 12:30:40 GMT")
+    assert(Message.httpDateFormat(timeLASummer) == "Sat, 30 Jun 2012 19:30:40 GMT")
+    assert(Message.httpDateFormat(timeLAWinter) == "Sun, 30 Dec 2012 20:30:40 GMT")
+    assert(Message.httpDateFormat(timeSH) == "Sun, 03 Jun 2012 04:30:40 GMT")
+    assert(Message.httpDateFormat(timeEurope) == "Sat, 30 Jun 2012 11:30:40 GMT")
   }
 }

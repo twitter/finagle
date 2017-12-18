@@ -5,10 +5,10 @@ import com.twitter.finagle.http.util.StringUtil
 import com.twitter.io.{Buf, BufInputStream, Reader => BufReader, Writer => BufWriter}
 import com.twitter.util.{Closable, Duration, Future}
 import java.io._
-import java.util.{Iterator => JIterator}
+import java.util.{Date, Locale, Iterator => JIterator}
 import java.nio.charset.Charset
-import java.util.{Date, Locale, TimeZone}
-import org.apache.commons.lang.time.FastDateFormat
+import java.time.{ZoneId, ZoneOffset}
+import java.time.format.DateTimeFormatter
 import scala.collection.JavaConverters._
 
 /**
@@ -588,11 +588,13 @@ object Message {
   val ContentTypeJavascript = MediaType.Javascript + ";" + CharsetUtf8
   val ContentTypeWwwForm = MediaType.WwwForm + ";" + CharsetUtf8
 
-  private val HttpDateFormat = FastDateFormat.getInstance(
-    "EEE, dd MMM yyyy HH:mm:ss",
-    TimeZone.getTimeZone("GMT"),
-    Locale.ENGLISH
-  )
-  def httpDateFormat(date: Date): String =
-    HttpDateFormat.format(date) + " GMT"
+  private val HttpDateFormat: DateTimeFormatter =
+    DateTimeFormatter
+      .ofPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'")
+      .withLocale(Locale.ENGLISH)
+      .withZone(ZoneId.of("GMT"))
+
+  def httpDateFormat(date: Date): String = {
+    date.toInstant.atOffset(ZoneOffset.UTC).format(HttpDateFormat)
+  }
 }

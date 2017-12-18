@@ -449,7 +449,6 @@ lazy val finagleHttp = Project(
     util("codec"),
     util("collection"),
     util("logging"),
-    "commons-lang" % "commons-lang" % "2.6",
     netty4StaticSsl
   )
 ).dependsOn(finagleBaseHttp, finagleNetty3Http, finagleNetty4Http, finagleHttp2, finagleToggle)
@@ -464,7 +463,6 @@ lazy val finagleBaseHttp = Project(
   libraryDependencies ++= Seq(
     util("collection"),
     util("logging"),
-    "commons-lang" % "commons-lang" % "2.6"
   )
 ).dependsOn(finagleCore, finagleNetty3)
 
