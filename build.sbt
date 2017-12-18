@@ -12,6 +12,7 @@ val netty4Version = "4.1.16.Final"
 val zkVersion = "3.5.0-alpha"
 
 val caffeineLib = "com.github.ben-manes.caffeine" % "caffeine" % "2.3.4"
+val hdrHistogramLib = "org.hdrhistogram" % "HdrHistogram" % "2.1.10"
 val jsr305Lib = "com.google.code.findbugs" % "jsr305" % "2.0.1"
 val netty3Lib = "io.netty" % "netty" % "3.10.1.Final"
 val netty4Libs = Seq(
@@ -290,6 +291,7 @@ lazy val finagleCore = Project(
     util("stats"),
     util("tunable"),
     caffeineLib,
+    hdrHistogramLib,
     jsr305Lib
   ) ++ netty4LibsTest,
   unmanagedClasspath in Test ++= (fullClasspath in (LocalProject("finagle-netty4"), Compile)).value
