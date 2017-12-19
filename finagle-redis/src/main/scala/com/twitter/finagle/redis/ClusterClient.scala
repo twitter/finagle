@@ -3,7 +3,7 @@ package com.twitter.finagle.redis
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.ServiceFactory
 
-object ClusterClient {
+private[redis] object ClusterClient {
   /**
    * Construct a client client from a single host.
    * @param host a String of host:port combination.
@@ -19,7 +19,7 @@ object ClusterClient {
     new ClusterClient(raw)
 }
 
-class ClusterClient(factory: ServiceFactory[Command, Reply])
+private[redis] class ClusterClient(factory: ServiceFactory[Command, Reply])
     extends BaseClient(factory)
     with BasicServerCommands
     with KeyCommands
