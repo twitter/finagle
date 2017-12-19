@@ -2,7 +2,7 @@ import Tests._
 import scoverage.ScoverageKeys
 
 // All Twitter library releases are date versioned as YY.MM.patch
-val releaseVersion = "17.12.0"
+val releaseVersion = "18.1.0-SNAPSHOT"
 
 val libthriftVersion = "0.5.0-7"
 
@@ -11,8 +11,8 @@ val netty4Version = "4.1.16.Final"
 // zkVersion should be kept in sync with the 'util-zk' dependency version
 val zkVersion = "3.5.0-alpha"
 
-val guavaLib = "com.google.guava" % "guava" % "19.0"
 val caffeineLib = "com.github.ben-manes.caffeine" % "caffeine" % "2.3.4"
+val hdrHistogramLib = "org.hdrhistogram" % "HdrHistogram" % "2.1.10"
 val jsr305Lib = "com.google.code.findbugs" % "jsr305" % "2.0.1"
 val netty3Lib = "io.netty" % "netty" % "3.10.1.Final"
 val netty4Libs = Seq(
@@ -33,13 +33,12 @@ val netty4LibsTest = Seq(
 )
 val netty4Http = "io.netty" % "netty-codec-http" % netty4Version
 val netty4Http2 = "io.netty" % "netty-codec-http2" % netty4Version
-val netty4StaticSsl = "io.netty" % "netty-tcnative-boringssl-static" % "2.0.6.Final" % "test"
+val netty4StaticSsl = "io.netty" % "netty-tcnative-boringssl-static" % "2.0.6.Final"
 val jacksonVersion = "2.8.4"
 val jacksonLibs = Seq(
   "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
-  "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion exclude("com.google.guava", "guava"),
-  guavaLib
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion exclude("com.google.guava", "guava")
 )
 val thriftLibs = Seq(
   "com.twitter" % "libthrift" % libthriftVersion intransitive()
@@ -292,6 +291,7 @@ lazy val finagleCore = Project(
     util("stats"),
     util("tunable"),
     caffeineLib,
+    hdrHistogramLib,
     jsr305Lib
   ) ++ netty4LibsTest,
   unmanagedClasspath in Test ++= (fullClasspath in (LocalProject("finagle-netty4"), Compile)).value
@@ -406,7 +406,6 @@ lazy val finagleServersets = Project(
     caffeineLib,
     util("cache"),
     util("zk-test") % "test",
-    guavaLib,
     "com.google.code.gson" % "gson" % "2.3.1",
     "org.apache.zookeeper" % "zookeeper" % zkVersion excludeAll(
       ExclusionRule("com.sun.jdmk", "jmxtools"),
@@ -452,8 +451,6 @@ lazy val finagleHttp = Project(
     util("codec"),
     util("collection"),
     util("logging"),
-    "commons-lang" % "commons-lang" % "2.6",
-    guavaLib,
     netty4StaticSsl
   )
 ).dependsOn(finagleBaseHttp, finagleNetty3Http, finagleNetty4Http, finagleHttp2, finagleToggle)
@@ -468,7 +465,6 @@ lazy val finagleBaseHttp = Project(
   libraryDependencies ++= Seq(
     util("collection"),
     util("logging"),
-    "commons-lang" % "commons-lang" % "2.6"
   )
 ).dependsOn(finagleCore, finagleNetty3)
 
@@ -509,6 +505,7 @@ lazy val finagleHttp2 = Project(
   libraryDependencies ++= Seq(
     netty4Http,
     netty4Http2,
+    netty4StaticSsl,
     util("cache"),
     util("core"),
     util("logging")
@@ -537,7 +534,6 @@ lazy val finagleMemcached = Project(
   libraryDependencies ++= Seq(
     util("hashing"),
     util("zk-test") % "test",
-    guavaLib,
     "com.twitter" %% "bijection-core" % "0.9.4",
     "com.twitter" % "libthrift" % libthriftVersion
   ),

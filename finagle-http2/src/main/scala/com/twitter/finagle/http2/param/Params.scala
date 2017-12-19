@@ -89,7 +89,9 @@ case class MaxHeaderListSize(maxHeaderListSize: StorageUnit) {
 }
 
 object MaxHeaderListSize {
-  implicit val param = Stack.Param(MaxHeaderListSize(8.kilobytes))
+  // TODO: revert to 8.kilobytes after we resolve https://github.com/netty/netty/issues/7511
+  // Netty is double counting header names right now.
+  implicit val param = Stack.Param(MaxHeaderListSize(16.kilobytes))
 }
 
 /**

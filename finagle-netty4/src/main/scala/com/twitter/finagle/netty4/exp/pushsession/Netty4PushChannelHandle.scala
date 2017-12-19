@@ -31,7 +31,7 @@ import scala.util.control.NonFatal
  * auto-read is set to `true` and this implementation won't request or modify the read
  * interests for the remainder of its lifecycle.
  *
- * @see [[com.twitter.finagle.netty4.ssl.client.Netty4ClientSslHandler]] for the tools
+ * @see [[com.twitter.finagle.netty4.ssl.client.Netty4ClientSslChannelInitializer]] for the tools
  *     used to initialize TLS and delay the connect promise until negotiation is complete.
  */
 private final class Netty4PushChannelHandle[In, Out] private (ch: Channel)

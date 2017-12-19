@@ -16,15 +16,8 @@ import com.twitter.finagle.http.param._
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.transport.TransportContext
 import com.twitter.util.{Future, Promise}
-import io.netty.channel.{Channel, ChannelFuture, ChannelFutureListener, ChannelPipeline}
-import io.netty.handler.codec.http.{
-  HttpClientCodec,
-  HttpContentCompressor,
-  HttpContentDecompressor,
-  HttpObjectAggregator,
-  HttpServerCodec,
-  HttpServerExpectContinueHandler
-}
+import io.netty.channel._
+import io.netty.handler.codec.http._
 import java.net.SocketAddress
 
 /**
@@ -42,33 +35,47 @@ package object http {
    */
   private[finagle] val Http2CodecName = "http2Codec"
 
-  private[finagle] def initClient(params: Stack.Params): ChannelPipeline => Unit = {
+  private[finagle] def initClientBefore(
+    role: String,
+    params: Stack.Params
+  ): ChannelPipeline => Unit = { pipeline =>
+    initClientFn(params, pipeline.addBefore(role, _, _))(pipeline)
+  }
+
+  private[finagle] def initClient(params: Stack.Params): ChannelPipeline => Unit = { pipeline =>
+    initClientFn(params, pipeline.addLast(_, _))(pipeline)
+  }
+
+  private[finagle] def initClientFn(
+    params: Stack.Params,
+    fn: (String, ChannelHandler) => Unit
+  ): ChannelPipeline => Unit = {
     val maxResponseSize = params[MaxResponseSize].size
     val decompressionEnabled = params[Decompression].enabled
     val streaming = params[Streaming].enabled
 
     { pipeline: ChannelPipeline =>
       if (decompressionEnabled)
-        pipeline.addLast("httpDecompressor", new HttpContentDecompressor)
+        fn("httpDecompressor", new HttpContentDecompressor)
 
       if (streaming) {
         // 8 KB is the size of the maxChunkSize parameter used in netty3,
         // which is where it stops attempting to aggregate messages that lack
         // a 'Transfer-Encoding: chunked' header.
-        pipeline.addLast("fixedLenAggregator", new FixedLengthMessageAggregator(8.kilobytes))
+        fn("fixedLenAggregator", new FixedLengthMessageAggregator(8.kilobytes))
       } else {
-        pipeline.addLast(
+        fn(
           "httpDechunker",
           new HttpObjectAggregator(maxResponseSize.inBytes.toInt)
         )
       }
       // Map some client related channel exceptions to something meaningful to finagle
-      pipeline.addLast("clientExceptionMapper", ClientExceptionMapper)
+      fn("clientExceptionMapper", ClientExceptionMapper)
 
       // Given that Finagle's channel transports aren't doing anything special (yet)
       // about resource management, we have to turn pooled resources into unpooled ones as
       // the very last step of the pipeline.
-      pipeline.addLast("unpoolHttp", UnpoolHttpHandler)
+      fn("unpoolHttp", UnpoolHttpHandler)
     }
   }
 

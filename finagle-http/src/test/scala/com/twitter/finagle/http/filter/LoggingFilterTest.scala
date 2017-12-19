@@ -4,6 +4,7 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Method, Request, Response, Version}
 import com.twitter.logging.{BareFormatter, Logger, StringHandler}
 import com.twitter.util.{Await, Future, Time}
+import java.time.ZonedDateTime
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -189,4 +190,11 @@ class LoggingFilterTest extends FunSuite {
         assert(LogFormatter.escape(input) == escaped)
     }
   }
+
+  test("DateFormat keeps consistent") {
+    val logFormatter = new CommonLogFormatter
+    val timeGMT: ZonedDateTime = ZonedDateTime.parse("2012-06-30T12:30:40Z[GMT]")
+    assert(timeGMT.format(logFormatter.DateFormat) == "30/Jun/2012:12:30:40 +0000")
+  }
+
 }

@@ -33,6 +33,7 @@ junit_tests(
     '3rdparty/jvm/io/netty:netty',
     '3rdparty/jvm/io/netty:netty4-http',
     '3rdparty/jvm/junit',
+    '3rdparty/jvm/org/hdrhistogram:hdrhistogram',
     '3rdparty/jvm/org/mockito:mockito-all',
     '3rdparty/jvm/org/scalacheck',
     '3rdparty/jvm/org/scalatest',

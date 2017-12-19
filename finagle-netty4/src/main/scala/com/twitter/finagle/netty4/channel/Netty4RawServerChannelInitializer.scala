@@ -1,6 +1,6 @@
 package com.twitter.finagle.netty4.channel
 
-import com.twitter.finagle.netty4.ssl.server.Netty4ServerSslHandler
+import com.twitter.finagle.netty4.ssl.server.Netty4ServerSslChannelInitializer
 import com.twitter.finagle.param._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.Stack
@@ -50,13 +50,13 @@ private[netty4] class Netty4RawServerChannelInitializer(params: Stack.Params)
     val pipeline = ch.pipeline
 
     channelSnooper.foreach(pipeline.addFirst(ChannelLoggerHandlerKey, _))
-    
+
     sharedChannelStats.foreach { sharedStats =>
       val channelStatsHandler = new ChannelStatsHandler(sharedStats)
       pipeline.addFirst(ChannelStatsHandlerKey, channelStatsHandler)
     }
 
-    // Add SslHandler to the pipeline.
-    pipeline.addFirst("tlsInit", new Netty4ServerSslHandler(params))
+    // Add SSL/TLS Channel Initializer to the pipeline.
+    pipeline.addFirst("tlsInit", new Netty4ServerSslChannelInitializer(params))
   }
 }

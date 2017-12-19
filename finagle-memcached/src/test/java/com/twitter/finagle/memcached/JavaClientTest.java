@@ -4,7 +4,6 @@ import scala.Option;
 
 import com.twitter.finagle.Memcached;
 import com.twitter.finagle.Service;
-import com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory;
 import com.twitter.finagle.memcached.protocol.Command;
 import com.twitter.finagle.memcached.protocol.Response;
 import com.twitter.io.Buf;
@@ -20,7 +19,7 @@ public final class JavaClientTest {
   @SuppressWarnings("unchecked")
   public static void main(String[] args) throws Exception {
     Service<Command, Response> service = Memcached.client()
-          .configured(new ConcurrentLoadBalancerFactory.Param(1).mk())
+          .connectionsPerEndpoint(1)
           .newService("localhost:11211");
 
     JavaClient client = JavaClient.newInstance(service);

@@ -18,6 +18,11 @@ package com.twitter.finagle.common.zookeeper;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -26,18 +31,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import javax.annotation.Nullable;
-
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.base.Objects;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.zookeeper.KeeperException;
@@ -123,7 +120,7 @@ public class ZooKeeperClient {
    */
   public static Credentials digestCredentials(String username, String password) {
     MorePreconditions.checkNotBlank(username);
-    Preconditions.checkNotNull(password);
+    Objects.requireNonNull(password);
 
     // TODO(John Sirois): DigestAuthenticationProvider is broken - uses platform default charset
     // (on server) and so we just have to hope here that clients are deployed in compatible jvms.
@@ -141,7 +138,7 @@ public class ZooKeeperClient {
    */
   public static Credentials credentials(final String scheme, final byte[] authToken) {
     MorePreconditions.checkNotBlank(scheme);
-    Preconditions.checkNotNull(authToken);
+    Objects.requireNonNull(authToken);
 
     return new Credentials() {
       @Override public void authenticate(ZooKeeper zooKeeper) {
@@ -169,7 +166,7 @@ public class ZooKeeperClient {
       }
 
       @Override public int hashCode() {
-        return Objects.hashCode(scheme, authToken);
+        return Arrays.hashCode(new Object[] {scheme, authToken});
       }
     };
   }
@@ -202,7 +199,10 @@ public class ZooKeeperClient {
 
   private static Iterable<InetSocketAddress> combine(InetSocketAddress address,
       InetSocketAddress... addresses) {
-    return ImmutableSet.<InetSocketAddress>builder().add(address).add(addresses).build();
+    HashSet<InetSocketAddress> addrs = new HashSet<>(addresses.length + 1);
+    addrs.add(address);
+    addrs.addAll(Arrays.asList(addresses));
+    return Collections.unmodifiableSet(addrs);
   }
 
   /**
@@ -227,7 +227,7 @@ public class ZooKeeperClient {
    */
   public ZooKeeperClient(Duration sessionTimeout,
       Iterable<InetSocketAddress> zooKeeperServers) {
-    this(sessionTimeout, Credentials.NONE, Optional.<String>absent(), zooKeeperServers);
+    this(sessionTimeout, Credentials.NONE, Optional.empty(), zooKeeperServers);
   }
 
   /**
@@ -242,7 +242,7 @@ public class ZooKeeperClient {
    */
   public ZooKeeperClient(Duration sessionTimeout, Credentials credentials,
       InetSocketAddress zooKeeperServer, InetSocketAddress... zooKeeperServers) {
-    this(sessionTimeout, credentials, Optional.<String>absent(),
+    this(sessionTimeout, credentials, Optional.empty(),
          combine(zooKeeperServer, zooKeeperServers));
   }
 
@@ -257,7 +257,7 @@ public class ZooKeeperClient {
    */
   public ZooKeeperClient(Duration sessionTimeout, Credentials credentials,
       Iterable<InetSocketAddress> zooKeeperServers) {
-        this(sessionTimeout, credentials, Optional.<String>absent(), zooKeeperServers);
+        this(sessionTimeout, credentials, Optional.empty(), zooKeeperServers);
       }
 
   /**
@@ -270,18 +270,21 @@ public class ZooKeeperClient {
    * @param chrootPath an optional chroot path
    * @param zooKeeperServers the set of servers forming the ZK cluster
    */
-  public ZooKeeperClient(Duration sessionTimeout, Credentials credentials,
-      Optional<String> chrootPath, Iterable<InetSocketAddress> zooKeeperServers) {
-    this.sessionTimeoutMs = (int) Preconditions.checkNotNull(sessionTimeout).inMillis();
-    this.credentials = Preconditions.checkNotNull(credentials);
+  public ZooKeeperClient(Duration sessionTimeout,
+                         Credentials credentials,
+                         Optional<String> chrootPath,
+                         Iterable<InetSocketAddress> zooKeeperServers) {
+    this.sessionTimeoutMs = (int) Objects.requireNonNull(sessionTimeout).inMillis();
+    this.credentials = Objects.requireNonNull(credentials);
 
     if (chrootPath.isPresent()) {
       PathUtils.validatePath(chrootPath.get());
     }
 
-    Preconditions.checkNotNull(zooKeeperServers);
-    Preconditions.checkArgument(!Iterables.isEmpty(zooKeeperServers),
-        "Must present at least 1 ZK server");
+    Objects.requireNonNull(zooKeeperServers);
+    if (!zooKeeperServers.iterator().hasNext()) {
+      throw new IllegalArgumentException("Must present at least 1 ZK server");
+    }
 
     Thread watcherProcessor = new Thread("ZookeeperClient-watcherProcessor") {
       @Override
@@ -299,15 +302,10 @@ public class ZooKeeperClient {
     watcherProcessor.setDaemon(true);
     watcherProcessor.start();
 
-    Iterable<String> servers =
-        Iterables.transform(ImmutableSet.copyOf(zooKeeperServers),
-          new Function<InetSocketAddress, String>() {
-            @Override public String apply(InetSocketAddress addr) {
-              return addr.getHostName() + ":" + addr.getPort();
-            }
-          });
-    this.zooKeeperServers = Joiner.on(',').join(servers);
-    this.connectString = this.zooKeeperServers.concat(chrootPath.or(""));
+    this.zooKeeperServers = StreamSupport.stream(zooKeeperServers.spliterator(), false)
+        .map(addr -> addr.getHostName() + ":" + addr.getPort())
+        .collect(Collectors.joining(","));
+    this.connectString = this.zooKeeperServers.concat(chrootPath.orElse(""));
   }
 
   /**
@@ -317,7 +315,9 @@ public class ZooKeeperClient {
    * @return {@code true} if this client is configured with non-empty credentials.
    */
   public boolean hasCredentials() {
-    return !Strings.isNullOrEmpty(credentials.scheme()) && (credentials.authToken() != null);
+    return credentials.scheme() != null
+        && !credentials.scheme().isEmpty()
+        && credentials.authToken() != null;
   }
 
   /**
@@ -506,12 +506,12 @@ public class ZooKeeperClient {
     }
   }
 
-  @VisibleForTesting
+  /** VisibleForTesting */
   synchronized boolean isClosed() {
     return zooKeeper == null;
   }
 
-  @VisibleForTesting
+  /** VisibleForTesting */
   ZooKeeper getZooKeeperClientForTests() {
     return zooKeeper;
   }

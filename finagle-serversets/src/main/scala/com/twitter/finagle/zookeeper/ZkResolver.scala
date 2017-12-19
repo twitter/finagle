@@ -1,20 +1,18 @@
 package com.twitter.finagle.zookeeper
 
-import com.google.common.collect.ImmutableSet
+import com.twitter.concurrent.{Broker, Offer}
+import com.twitter.finagle.addr.StabilizingAddr
 import com.twitter.finagle.common.net.pool.DynamicHostSet
 import com.twitter.finagle.common.net.pool.DynamicHostSet.MonitorException
 import com.twitter.finagle.common.zookeeper.{ServerSet, ServerSetImpl}
-import com.twitter.concurrent.{Broker, Offer}
-import com.twitter.finagle.addr.StabilizingAddr
 import com.twitter.finagle.stats.DefaultStatsReceiver
-import com.twitter.finagle.{Address, Group, Resolver, Addr}
-import com.twitter.thrift.Endpoint
-import com.twitter.thrift.ServiceInstance
+import com.twitter.finagle.{Addr, Address, Group, Resolver}
+import com.twitter.thrift.{Endpoint, ServiceInstance}
 import com.twitter.util.Var
 import java.net.InetSocketAddress
+import java.util.logging.{Level, Logger}
 import scala.collection.JavaConverters._
 import scala.collection.mutable
-import java.util.logging.{Level, Logger}
 
 /**
  * Indicates that a failure occurred while attempting to resolve a cluster
@@ -33,7 +31,7 @@ private[finagle] class ZkGroup(serverSet: ServerSet, path: String)
 
   override def run() {
     serverSet.watch(new DynamicHostSet.HostChangeMonitor[ServiceInstance] {
-      def onChange(newSet: ImmutableSet[ServiceInstance]) = synchronized {
+      def onChange(newSet: java.util.Set[ServiceInstance]): Unit = synchronized {
         set() = newSet.asScala.toSet
       }
     })
@@ -52,7 +50,7 @@ private class ZkOffer(serverSet: ServerSet, path: String)
   override def run() {
     try {
       serverSet.watch(new DynamicHostSet.HostChangeMonitor[ServiceInstance] {
-        def onChange(newSet: ImmutableSet[ServiceInstance]) {
+        def onChange(newSet: java.util.Set[ServiceInstance]): Unit = {
           inbound !! newSet.asScala.toSet
         }
       })

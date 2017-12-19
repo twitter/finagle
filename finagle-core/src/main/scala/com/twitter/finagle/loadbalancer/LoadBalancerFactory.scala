@@ -132,6 +132,36 @@ object LoadBalancerFactory {
   }
 
   /**
+   * A class eligible for configuring the way endpoints are created for
+   * a load balancer. In particular, each endpoint that is resolved is replicated
+   * by the given parameter. This increases concurrency for each identical endpoint
+   * and allows them to be load balanced over. This is useful for pipelining or
+   * multiplexing protocols that may incur head-of-line blocking (e.g. from the
+   * server's processing threads or the network) without this replication.
+   */
+  case class ReplicateAddresses(count: Int) {
+    require(count >= 1, s"count must be >= 1 but was $count")
+    def mk(): (ReplicateAddresses, Stack.Param[ReplicateAddresses]) =
+      (this, ReplicateAddresses.param)
+  }
+
+  object ReplicateAddresses {
+    implicit val param = Stack.Param(ReplicateAddresses(1))
+
+    // Note, we need to change the structure of each replicated address
+    // so that the load balancer doesn't dedup them by their inet address.
+    // We do this by injecting an id into the addresses metadata map.
+    private val ReplicaKey = "lb_replicated_address_id"
+    private[finagle] def replicateFunc(num: Int): Address => Set[Address] = {
+      case Address.Inet(ia, metadata) =>
+        for (i: Int <- 0.until(num).toSet) yield {
+          Address.Inet(ia, metadata + (ReplicaKey -> i))
+        }
+      case addr => Set(addr)
+    }
+  }
+
+  /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]].
    * The module creates a new `ServiceFactory` based on the module above it for each `Addr`
    * in `LoadBalancerFactory.Dest`. Incoming requests are balanced using the load balancer
@@ -156,7 +186,17 @@ object LoadBalancerFactory {
       params: Stack.Params,
       next: Stack[ServiceFactory[Req, Rep]]
     ): Stack[ServiceFactory[Req, Rep]] = {
-      val Dest(dest) = params[Dest]
+
+      val _dest = params[Dest].va
+      val count = params[ReplicateAddresses].count
+      val dest = if (count == 1) _dest else {
+        val f = ReplicateAddresses.replicateFunc(count)
+        _dest.map {
+          case bound@Addr.Bound(set, _) => bound.copy(addrs = set.flatMap(f))
+          case addr => addr
+        }
+      }
+
       val Param(loadBalancerFactory) = params[Param]
       val EnableProbation(probationEnabled) = params[EnableProbation]
 

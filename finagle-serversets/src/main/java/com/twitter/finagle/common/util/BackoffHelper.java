@@ -16,10 +16,9 @@
 
 package com.twitter.finagle.common.util;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-
-import com.google.common.base.Preconditions;
 
 import com.twitter.finagle.common.base.ExceptionalSupplier;
 import com.twitter.util.Duration;
@@ -84,7 +83,7 @@ public class BackoffHelper {
    * @param backoffStrategy the backoff strategy to use
    */
   public BackoffHelper(BackoffStrategy backoffStrategy) {
-    this.backoffStrategy = Preconditions.checkNotNull(backoffStrategy);
+    this.backoffStrategy = Objects.requireNonNull(backoffStrategy);
   }
 
   /**

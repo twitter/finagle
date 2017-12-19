@@ -7,6 +7,25 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-http2: Supplies a dependency on io.netty.netty-tcnative-boringssl-static,
+    which adds support for ALPN, which is necessary for encrypted http/2.  To use a
+    different static ssl dependency, exclude the tcnative-boringssl dependency and
+    manually depend on the one you want to use.  ``PHAB_ID=D119555``
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-base-http, finagle-http: Removed Apache Commons Lang dependency,
+    `org.apache.commons.lang3.time.FastDateFormat` now is `java.time.format.DateTimeFormatter`.
+    ``PHAB_ID=D121479``
+
+  * finagle-memcached: `ConcurrentLoadBalancerFactory` was removed and its behavior
+    was replaced by a Stack.Param inside finagle-core's `LoadBalancerFactory`.
+    ``PHAB_ID=D119394``
+
 17.12.0
 -------
 
@@ -30,11 +49,29 @@ Breaking API Changes
   * finagle-base-http: Remove deprecated [Request|Response].[encode|decode][Bytes|String]
     methods. Use c.t.f.h.codec.HttpCodec methods instead. ``PHAB_ID=D116350``
 
+  * finagle-memcached: `ConcurrentLoadBalancerFactory` was removed and its behavior
+    was replaced by a Stack.Param inside finagle-core's `LoadBalancerFactory`.
+    ``PHAB_ID=D119394``
+
+  * finagle-serversets: Removed Guava dependency which broke some APIs. ``PHAB_ID=D119555``
+
+    - `c.t.f.common.zookeeper.ServerSets.TO_ENDPOINT` is now a `java.util.function.Function`.
+    - `c.t.f.common.net.pool.DynamicHostSet.HostChangeMonitor.onChange` now takes a `java.util.Set`.
+    - `c.t.f.common.zookeeper.ZooKeeperUtils.OPEN_ACL_UNSAFE` is is now a `java.util.List`.
+    - `c.t.f.common.zookeeper.ZooKeeperUtils.EVERYONE_READ_CREATOR_ALL` is is now a `java.util.List`.
+    - `c.t.f.common.zookeeper.ZooKeeperClient` constructor now takes a `java.util.Optional`.
+
   * finagle-thrift: Move `ThriftRichClient` and `ThriftRichServer` to
     `c.t.finagle.thrift` package. ``PHAB_ID=D115284``
-  
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: Remove `NackAdmissionControl` from the default client stack.
+    Add it to the finagle-{http,mux} client stacks; note that it is added to 
+    finagle-http2 via finagle-http and finagle-thriftmux via finalge-mux. It is
+    no longer part of the finagle-{memcached,mysql,redis} client stacks. 
+    ``PHAB_ID=D116722``
 
   * finagle-core: The "pipelining/pending" stat has been removed from protocols
     using `c.t.f.dispatch.PipeliningClientDispatcher`. Refer to the "pending" stat

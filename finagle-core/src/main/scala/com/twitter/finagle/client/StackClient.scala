@@ -255,13 +255,6 @@ object StackClient {
      *    appear below `FactoryToService` so that services are not
      *    prematurely closed by `FactoryToService`.
      *
-     *  * `NackAdmissionFilter` probabilistically drops requests if the client
-     *    is receiving a large fraction of nack responses. This indicates an
-     *    overload situation. Since this filter should operate on all requests
-     *    sent over the wire including retries, it must be below `Retries`.
-     *    Since it aggregates the status of the entire cluster, it must be above
-     *    `LoadBalancerFactory` (not part of the endpoint stack).
-     *
      *  * `FactoryToService` acquires a new endpoint service from the
      *    load balancer on each request (and closes it after the
      *    response completes).
@@ -284,7 +277,6 @@ object StackClient {
     stk.push(Role.requestDraining, (fac: ServiceFactory[Req, Rep]) => new RefcountedFactory(fac))
     stk.push(TimeoutFactory.module)
     stk.push(Role.prepFactory, identity[ServiceFactory[Req, Rep]](_))
-    stk.push(NackAdmissionFilter.module)
     stk.push(FactoryToService.module)
     stk.push(Retries.moduleRequeueable)
     stk.push(ClearContextValueFilter.module(context.Retries))

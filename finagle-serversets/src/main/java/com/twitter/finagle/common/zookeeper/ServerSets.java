@@ -5,8 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Map;
-
-import com.google.common.base.Function;
+import java.util.function.Function;
 
 import com.twitter.finagle.common.io.Codec;
 import com.twitter.thrift.Endpoint;
@@ -25,12 +24,7 @@ public final class ServerSets {
   /**
    * A function that invokes {@link #toEndpoint(InetSocketAddress)}.
    */
-  public static final Function<InetSocketAddress, Endpoint> TO_ENDPOINT =
-      new Function<InetSocketAddress, Endpoint>() {
-        @Override public Endpoint apply(InetSocketAddress address) {
-          return ServerSets.toEndpoint(address);
-        }
-      };
+  public static final Function<InetSocketAddress, Endpoint> TO_ENDPOINT = ServerSets::toEndpoint;
 
   /**
    * Returns a serialized Thrift service instance object, with given endpoints and codec.

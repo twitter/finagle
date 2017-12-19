@@ -1,5 +1,6 @@
 package com.twitter.finagle
 
+import com.twitter.finagle.filter.NackAdmissionFilter
 import com.twitter.finagle.http.{Request, Response, serverErrorsAsFailures}
 import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
@@ -11,6 +12,13 @@ class HttpTest extends FunSuite {
 
   private def classifier(params: Stack.Params): ResponseClassifier =
     params[param.ResponseClassifier].responseClassifier
+
+  test("client stack includes exactly one NackAdmissionFilter") {
+    val client = Http.client
+    val stack = client.stack
+
+    assert(stack.tails.count(_.head.role == NackAdmissionFilter.role) == 1)
+  }
 
   test("client uses custom response classifier by default") {
     val customRc: ResponseClassifier = {

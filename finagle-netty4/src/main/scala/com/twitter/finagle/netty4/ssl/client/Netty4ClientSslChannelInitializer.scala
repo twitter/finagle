@@ -15,13 +15,10 @@ import io.netty.handler.ssl.SslHandler
 import io.netty.util.concurrent.{Future => NettyFuture, GenericFutureListener}
 
 /**
- * A channel handler that takes [[Stack.Params]] and upgrades the pipeline with missing
+ * A channel initializer that takes [[Stack.Params]] and upgrades the pipeline with missing
  * SSL/TLS pieces required for client-side transport encryption.
- *
- * No matter if the underlying pipeline has been modified or not (or exception was thrown), this
- * handler removes itself from the pipeline on `handlerAdded`.
  */
-private[finagle] class Netty4ClientSslHandler(params: Stack.Params)
+private[finagle] class Netty4ClientSslChannelInitializer(params: Stack.Params)
     extends ChannelInitializer[Channel] {
 
   // The reason we can't close the channel immediately is because we're in process of decoding an
