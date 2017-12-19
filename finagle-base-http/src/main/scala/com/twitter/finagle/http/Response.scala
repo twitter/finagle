@@ -16,8 +16,7 @@ abstract class Response private extends Message {
    * out-of-band mechanisms, to make the connection between the response and its
    * associated context explicit.
    */
-  def ctx: Response.Schema.Record = _ctx
-  private[this] val _ctx: Response.Schema.Record = Response.Schema.newRecord()
+  def ctx: Response.Schema.Record
 
   final def isRequest = false
 
@@ -105,7 +104,7 @@ object Response {
     // can keep a handle to the writer half and the server implementation can use
     // the reader half.
     val rw = Reader.writable()
-    val resp = new ResponseImpl(rw, rw)
+    val resp = new Impl(rw, rw)
     resp.version = version
     resp.status = status
     resp
@@ -119,7 +118,7 @@ object Response {
   }
 
   private[finagle] def chunked(version: Version, status: Status, reader: Reader): Response = {
-    val resp = new ResponseImpl(reader, Writer.FailingWriter)
+    val resp = new Impl(reader, Writer.FailingWriter)
     resp.version = version
     resp.status = status
     resp.setChunked(true)
@@ -129,9 +128,12 @@ object Response {
   /** Create 200 Response with the same HTTP version as the provided Request */
   def apply(request: Request): Response = apply(request.version, Status.Ok)
 
-  final private class ResponseImpl(val reader: Reader, val writer: Writer with Closable)
+  final private class Impl(val reader: Reader, val writer: Writer with Closable)
       extends Response {
     private[this] var _status: Status = Status.Ok
+    val headerMap: HeaderMap = HeaderMap()
+    val ctx: Response.Schema.Record = Response.Schema.newRecord()
+
     override def status: Status = _status
     override def status_=(value: Status): Unit = {
       _status = value
@@ -147,9 +149,9 @@ object Response {
 
     def reader: Reader = response.reader
     def writer: Writer with Closable = response.writer
-    override def ctx: Response.Schema.Record = response.ctx
+    def ctx: Response.Schema.Record = response.ctx
     override lazy val cookies: CookieMap = response.cookies
-    override def headerMap: HeaderMap = response.headerMap
+    def headerMap: HeaderMap = response.headerMap
 
     // These things should never need to be modified
     final def status: Status = response.status

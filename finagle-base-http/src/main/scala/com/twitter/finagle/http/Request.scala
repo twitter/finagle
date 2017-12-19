@@ -25,8 +25,7 @@ abstract class Request private extends Message {
    * out-of-band mechanisms, to make the connection between the request and its
    * associated context explicit.
    */
-  def ctx: Request.Schema.Record = _ctx
-  private[this] val _ctx = Request.Schema.newRecord()
+  def ctx: Request.Schema.Record
 
   final def isRequest: Boolean = true
 
@@ -339,12 +338,12 @@ object Request {
      */
     def request: Request
 
-    override def ctx: Schema.Record = request.ctx
+    def ctx: Schema.Record = request.ctx
     def remoteSocketAddress: InetSocketAddress = request.remoteSocketAddress
     def reader: Reader = request.reader
     def writer: Writer with Closable = request.writer
     override lazy val cookies: CookieMap = request.cookies
-    override def headerMap: HeaderMap = request.headerMap
+    def headerMap: HeaderMap = request.headerMap
     override def params: ParamMap = request.params
     override lazy val response: Response = request.response
     def uri: String = request.uri
@@ -372,6 +371,8 @@ object Request {
     private var _method: Method = Method.Get
     private var _uri: String = ""
     private lazy val _multipart: Option[Multipart] = multipartDecoder(this)
+    val headerMap: HeaderMap = HeaderMap()
+    val ctx: Request.Schema.Record = Request.Schema.newRecord()
 
     def method: Method = _method
     def method_=(method: Method): Unit = {

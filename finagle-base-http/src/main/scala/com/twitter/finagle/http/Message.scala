@@ -23,8 +23,6 @@ abstract class Message {
   private[this] var _version: Version = Version.Http11
   private[this] var _chunked: Boolean = false
 
-  private[this] lazy val _headerMap: HeaderMap = HeaderMap()
-
   /**
    * A read-only handle to the internal stream of bytes, representing the
    * message body. See [[com.twitter.io.Reader]] for more information.
@@ -116,7 +114,7 @@ abstract class Message {
    * @note This structure isn't thread-safe. Any concurrent access should be synchronized
    *       externally.
    */
-  def headerMap: HeaderMap = _headerMap
+  def headerMap: HeaderMap
 
   /**
    * Cookies. In a request, this uses the Cookie headers.
