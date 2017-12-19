@@ -80,6 +80,7 @@ object BackupRequestFilter {
  * onto a different endpoint from the original. Eventually, this
  * should be implemented as a sort of queueing policy.
  */
+@deprecated("Use com.twitter.finagle.client.BackupRequestFilter", "2017-12-18")
 class BackupRequestFilter[Req, Rep] private[exp] (
   quantile: Int,
   clipDuration: Duration,

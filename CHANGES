@@ -26,6 +26,12 @@ Breaking API Changes
     was replaced by a Stack.Param inside finagle-core's `LoadBalancerFactory`.
     ``PHAB_ID=D119394``
 
+Deprecations
+~~~~~~~~~~~~
+
+  * finagle-exp: `c.t.f.exp.BackupRequestFilter` has been deprecated. Please use
+    `c.t.f.client.BackupRequestFilter` instead. ``PHAB_ID=D122344``
+
 17.12.0
 -------
 
