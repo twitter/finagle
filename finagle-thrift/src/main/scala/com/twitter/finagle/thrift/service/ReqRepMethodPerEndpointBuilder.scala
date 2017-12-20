@@ -8,10 +8,5 @@ package com.twitter.finagle.thrift.service
  *
  * Scrooge generates implementations of this builder.
  */
-trait ReqRepMethodPerEndpointBuilder[ReqRepServicePerEndpoint, MethodPerEndpoint] {
-
-  /**
-   * Build a MethodPerEndpoint wrapping a ReqRepServicePerEndpoint.
-   */
-  def methodPerEndpoint(reqRepServicePerEndpoint: ReqRepServicePerEndpoint): MethodPerEndpoint
-}
+trait ReqRepMethodPerEndpointBuilder[ReqRepServicePerEndpoint, MethodPerEndpoint]
+  extends MethodPerEndpointBuilder[ReqRepServicePerEndpoint, MethodPerEndpoint]
