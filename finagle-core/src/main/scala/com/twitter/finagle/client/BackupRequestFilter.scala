@@ -55,6 +55,41 @@ object BackupRequestFilter {
   def Configured(maxExtraLoad: Double, sendInterrupts: Boolean): Param =
     Param.Configured(maxExtraLoad, sendInterrupts)
 
+  private[this] def mkFilterFromParams[Req, Rep](
+    maxExtraLoad: Double,
+    sendInterrupts: Boolean,
+    params: Stack.Params
+  ): BackupRequestFilter[Req, Rep] =
+    new BackupRequestFilter[Req, Rep](
+      maxExtraLoad,
+      sendInterrupts,
+      params[param.ResponseClassifier].responseClassifier,
+      params[Retries.Budget].retryBudget,
+      params[param.Stats].statsReceiver.scope("backups"),
+      params[param.Timer].timer
+    )
+
+  /**
+   * Returns `service` with a [[BackupRequestFilter]] prepended, according to the configuration
+   * params in `params`. If the [[BackupRequestFilter]] has not been configured, returns the
+   * same `service`.
+   */
+  private[client] def filterService[Req, Rep](
+    params: Stack.Params,
+    service: Service[Req, Rep]
+  ): Service[Req, Rep] =
+    params[BackupRequestFilter.Param] match {
+      case BackupRequestFilter.Param.Configured(maxExtraLoad, sendInterrupts) =>
+        val brf = mkFilterFromParams[Req, Rep](maxExtraLoad, sendInterrupts, params)
+        new ServiceProxy[Req, Rep](brf.andThen(service)) {
+          override def close(deadline: Time): Future[Unit] = {
+            Future.join(Seq(brf.close(deadline), service.close(deadline)))
+          }
+        }
+      case BackupRequestFilter.Param.Disabled =>
+        service
+    }
+
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.ModuleParams[ServiceFactory[Req, Rep]] {
       val role = BackupRequestFilter.role
@@ -71,20 +106,30 @@ object BackupRequestFilter {
       def make(params: Params, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = {
         params[BackupRequestFilter.Param] match {
           case Param.Configured(maxExtraLoad, sendInterrupts) =>
-            new BackupRequestFilter[Req, Rep](
+            new BackupRequestFactory[Req, Rep](
               next,
-              maxExtraLoad,
-              sendInterrupts,
-              params[param.ResponseClassifier].responseClassifier,
-              params[Retries.Budget].retryBudget,
-              params[param.Stats].statsReceiver.scope("backups"),
-              params[param.Timer].timer
+              mkFilterFromParams(maxExtraLoad, sendInterrupts, params)
             )
           case Param.Disabled =>
             next
         }
       }
     }
+}
+
+private[client] class BackupRequestFactory[Req, Rep](
+    underlying: ServiceFactory[Req, Rep],
+    filter: BackupRequestFilter[Req, Rep])
+  extends ServiceFactoryProxy[Req, Rep](underlying) {
+
+  private[this] val applyBrf: Service[Req, Rep] => Service[Req, Rep] = svc =>
+    filter.andThen(svc)
+
+  override def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
+    underlying(conn).map(applyBrf)
+
+  override def close(deadline: Time): Future[Unit] =
+    Future.join(Seq(underlying.close(deadline), filter.close(deadline)))
 }
 
 /**
@@ -113,8 +158,7 @@ object BackupRequestFilter {
  *       so tail latency improvements as a result of this filter will not be reflected in the
  *       request latency stats.
  */
-private class BackupRequestFilter[Req, Rep] private[client](
-    underlying: ServiceFactory[Req, Rep],
+private[client] class BackupRequestFilter[Req, Rep](
     maxExtraLoad: Double,
     sendInterrupts: Boolean,
     responseClassifier: ResponseClassifier,
@@ -124,17 +168,10 @@ private class BackupRequestFilter[Req, Rep] private[client](
     statsReceiver: StatsReceiver,
     timer: Timer,
     windowedPercentileHistogramFac: () => WindowedPercentileHistogram)
-  extends ServiceFactoryProxy[Req, Rep](underlying) {
-
+  extends SimpleFilter[Req, Rep] with Closable {
   import BackupRequestFilter._
 
-  require(
-    maxExtraLoad > 0 && maxExtraLoad < 1.0,
-    s"maxExtraLoad must be between 0.0 and 1.0, was $maxExtraLoad"
-  )
-
   def this(
-    underlying: ServiceFactory[Req, Rep],
     maxExtraLoad: Double,
     sendInterrupts: Boolean,
     responseClassifier: ResponseClassifier,
@@ -142,7 +179,6 @@ private class BackupRequestFilter[Req, Rep] private[client](
     statsReceiver: StatsReceiver,
     timer: Timer
   ) = this(
-    underlying,
     maxExtraLoad,
     sendInterrupts,
     responseClassifier,
@@ -162,6 +198,11 @@ private class BackupRequestFilter[Req, Rep] private[client](
       numBuckets = 3,
       bucketSize = 10.seconds,
       timer))
+
+  require(
+    maxExtraLoad > 0 && maxExtraLoad < 1.0,
+    s"maxExtraLoad must be between 0.0 and 1.0, was $maxExtraLoad"
+  )
 
   private[this] val percentile: Double = (1.0 - maxExtraLoad) * 100
 
@@ -219,59 +260,53 @@ private class BackupRequestFilter[Req, Rep] private[client](
   // issuing a retry. However, since `backupRequestRetryBudget` is likely to be the limiting factor,
   // this should rarely happen and we tolerate it.
   private[this] def canIssueBackup(): Boolean =
-    backupRequestRetryBudget.tryWithdraw() && clientRetryBudget.tryWithdraw()
+  backupRequestRetryBudget.tryWithdraw() && clientRetryBudget.tryWithdraw()
 
-  private[this] val filter = new SimpleFilter[Req, Rep] {
-    def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
-      backupRequestRetryBudget.deposit()
-      val orig = record(req, service(req))
-      val howLong = sendBackupAfter
+  def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
+    backupRequestRetryBudget.deposit()
+    val orig = record(req, service(req))
+    val howLong = sendBackupAfter
 
-      if (howLong == 0)
-        return orig
+    if (howLong == 0)
+      return orig
 
-      orig.within(
-        timer,
-        Duration.fromMilliseconds(howLong),
-        OrigRequestTimeout
-      ).transform {
-        case Throw(OrigRequestTimeout) =>
-          // If we've waited long enough to fire the backup normally, do so and
-          // pass on the first successful result we get back.
-          if (canIssueBackup()) {
-            backupsSent.incr()
-            val backup = record(req, service(req))
-            orig.select(backup).transform { _ =>
-              val winner = if (orig.isDefined) orig else backup
-              val loser = if (winner eq orig) backup else orig
-              winner.transform { response =>
-                if (backup eq winner) backupsWon.incr()
-                if (isSuccess(ReqRep(req, response))) {
-                  if (sendInterrupts) {
-                    loser.raise(SupersededRequestFailure)
-                  }
-                  Future.const(response)
-                } else {
-                  loser
+    orig.within(
+      timer,
+      Duration.fromMilliseconds(howLong),
+      OrigRequestTimeout
+    ).transform {
+      case Throw(OrigRequestTimeout) =>
+        // If we've waited long enough to fire the backup normally, do so and
+        // pass on the first successful result we get back.
+        if (canIssueBackup()) {
+          backupsSent.incr()
+          val backup = record(req, service(req))
+          orig.select(backup).transform { _ =>
+            val winner = if (orig.isDefined) orig else backup
+            val loser = if (winner eq orig) backup else orig
+            winner.transform { response =>
+              if (backup eq winner) backupsWon.incr()
+              if (isSuccess(ReqRep(req, response))) {
+                if (sendInterrupts) {
+                  loser.raise(SupersededRequestFailure)
                 }
+                Future.const(response)
+              } else {
+                loser
               }
             }
-          } else {
-            budgetExhausted.incr()
-            orig
           }
-        case _ =>
-          // Return the original request when it completed first (regardless of success)
+        } else {
+          budgetExhausted.incr()
           orig
-      }
-
+        }
+      case _ =>
+        // Return the original request when it completed first (regardless of success)
+        orig
     }
   }
 
-  override def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
-    underlying(conn).map(filter.andThen(_))
-
-  override def close(deadline: Time): Future[Unit] = underlying.close(deadline).ensure {
+  def close(deadline: Time): Future[Unit] = {
     refreshSendBackupAfterTimerTask.cancel()
     windowedPercentile.close(deadline)
   }

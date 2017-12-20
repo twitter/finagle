@@ -6,6 +6,7 @@ import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier, R
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.util.WindowedPercentileHistogram
 import com.twitter.util._
+import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.scalatest.{FunSuite, Matchers, OneInstancePerTest}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
@@ -65,7 +66,6 @@ class BackupRequestFilterTest extends FunSuite
 
   private[this] def newBrf: BackupRequestFilter[String, String] =
     new BackupRequestFilter[String, String](
-      fac,
       0.5,
       true,
       classifier,
@@ -79,7 +79,7 @@ class BackupRequestFilterTest extends FunSuite
   private[this] def newService(
     brf: BackupRequestFilter[String, String] = newBrf
   ): Service[String, String] =
-    Await.result(brf(ClientConnection.nil), 5.seconds)
+    brf.andThen(underlying)
 
   private[this] val rng = new Random(123)
 
@@ -110,18 +110,25 @@ class BackupRequestFilterTest extends FunSuite
     intercept[IllegalArgumentException] {
       BackupRequestFilter.Configured(-5.0, false)
     }
+    val mkBadFilter = () => new BackupRequestFilter[String, String](
+      -5.0,
+      false,
+      ResponseClassifier.Default,
+      RetryBudget.Infinite,
+      RetryBudget.Infinite,
+      Stopwatch.timeMillis,
+      NullStatsReceiver,
+      timer,
+      () => wp
+    )
     intercept[IllegalArgumentException] {
-      new BackupRequestFilter[String, String](
+      new BackupRequestFactory[String, String](
         fac,
-        -5.0,
-        false,
-        ResponseClassifier.Default,
-        RetryBudget.Infinite,
-        RetryBudget.Infinite,
-        Stopwatch.timeMillis,
-        NullStatsReceiver,
-        timer,
-        () => wp)
+        mkBadFilter()
+      )
+    }
+    intercept[IllegalArgumentException] {
+      mkBadFilter()
     }
   }
 
@@ -129,18 +136,25 @@ class BackupRequestFilterTest extends FunSuite
     intercept[IllegalArgumentException] {
       BackupRequestFilter.Configured(2.0, false)
     }
+    val mkBadFilter = () => new BackupRequestFilter[String, String](
+      2.0,
+      false,
+      ResponseClassifier.Default,
+      RetryBudget.Infinite,
+      RetryBudget.Infinite,
+      Stopwatch.timeMillis,
+      NullStatsReceiver,
+      timer,
+      () => wp
+    )
     intercept[IllegalArgumentException] {
-      new BackupRequestFilter[String, String](
+      new BackupRequestFactory[String, String](
         fac,
-        2.0,
-        false,
-        ResponseClassifier.Default,
-        RetryBudget.Infinite,
-        RetryBudget.Infinite,
-        Stopwatch.timeMillis,
-        NullStatsReceiver,
-        timer,
-        () => wp)
+        mkBadFilter()
+      )
+    }
+    intercept[IllegalArgumentException] {
+      mkBadFilter()
     }
   }
 
@@ -275,7 +289,6 @@ class BackupRequestFilterTest extends FunSuite
   ): Future[String] = {
 
     val brf = (new BackupRequestFilter[String, String](
-      fac,
       0.5,
       sendInterrupts,
       classifier,
@@ -286,7 +299,7 @@ class BackupRequestFilterTest extends FunSuite
       timer,
       () => wp))
 
-    val service = Await.result(brf(ClientConnection.nil), 5.seconds)
+    val service = brf.andThen(underlying)
 
     warmFilterForBackup(tc, service, brf)
 
@@ -519,10 +532,23 @@ class BackupRequestFilterTest extends FunSuite
     }
   }
 
-  test("Closes WindowedPercentileHistogram when closed") {
+  test("Filter closes WindowedPercentileHistogram when closed") {
     val brf = newBrf
     Await.result(brf.close(), 2.seconds)
     assert(wp.closed)
+  }
+
+  test("Factory closes Filter and underlying when closed") {
+    val underlying = mock[ServiceFactory[String, String]]
+    when(underlying.close(any[Time]())).thenReturn(Future.Done)
+    val filter = mock[BackupRequestFilter[String, String]]
+    when(filter.close(any[Time]())).thenReturn(Future.Done)
+    val factory = new BackupRequestFactory[String, String](
+      underlying,
+      filter)
+    Await.result(factory.close(Duration.Top), 2.seconds)
+    verify(underlying, times(1)).close(any[Time]())
+    verify(filter, times(1)).close(any[Time]())
   }
 
   def testCannotSendBackupIfBudgetExhausted(retryBudget: RetryBudget, budgetName: String): Unit = {
@@ -568,5 +594,20 @@ class BackupRequestFilterTest extends FunSuite
       origPromise.setException(new IndividualRequestTimeoutException(2.seconds))
       assert(wp.percentile(50.0) == (WarmupRequestLatency + 1.second).inMillis)
     }
+  }
+
+  test("filterService returns the passed-in service if BRF not configured") {
+    val params = Stack.Params.empty
+    assert(BackupRequestFilter.filterService(params, underlying) eq underlying)
+  }
+
+  test("Service returned by filterService closes the underlying service when closed") {
+    val params = Stack.Params.empty + BackupRequestFilter.Configured(0.5, false)
+    val svc = BackupRequestFilter.filterService(params, underlying)
+    assert(svc ne underlying)
+
+    when(underlying.close(any[Time]())).thenReturn(Future.Done)
+    svc.close(Time.Top)
+    verify(underlying, times(1)).close(any[Time]())
   }
 }
