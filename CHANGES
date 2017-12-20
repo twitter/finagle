@@ -7,11 +7,11 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
-Breaking API Changes
-~~~~~~~~~~~~~~~~~~~~
+Bug Fixes
+~~~~~~~~~
 
-  * finagle-base-http: `c.t.f.http.Message.headerMap` is now an abstract method.
-    ``PHAB_ID=D120931``
+  * finagle-mysql: Fix a bug with transactions where an exception during a rollback
+    could leave the connection with a partially committed transaction. ``PHAB_ID=D122771``
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -27,6 +27,9 @@ Breaking API Changes
   * finagle-base-http, finagle-http: Removed Apache Commons Lang dependency,
     `org.apache.commons.lang3.time.FastDateFormat` now is `java.time.format.DateTimeFormatter`.
     ``PHAB_ID=D121479``
+
+  * finagle-base-http: `c.t.f.http.Message.headerMap` is now an abstract method.
+    ``PHAB_ID=D120931``
 
   * finagle-memcached: `ConcurrentLoadBalancerFactory` was removed and its behavior
     was replaced by a Stack.Param inside finagle-core's `LoadBalancerFactory`.

@@ -5,19 +5,13 @@ import com.twitter.finagle.decoder.LengthFieldFramer
 import com.twitter.finagle.mysql._
 import com.twitter.finagle.mysql.transport.Packet
 import com.twitter.finagle.netty4.Netty4Transporter
-import com.twitter.finagle.param.{
-  ExceptionStatsHandler => _,
-  Monitor => _,
-  ResponseClassifier => _,
-  Tracer => _,
-  _
-}
+import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.io.Buf
-import com.twitter.util.{Duration, Monitor}
+import com.twitter.util.{Duration, Future, Monitor}
 import java.net.SocketAddress
 
 /**
@@ -54,22 +48,24 @@ trait MysqlRichClient { self: com.twitter.finagle.Client[Request, Result] =>
 
 object MySqlClientTracingFilter {
   object Stackable extends Stack.Module1[param.Label, ServiceFactory[Request, Result]] {
-    val role = ClientTracingFilter.role
-    val description = "Add MySql client specific annotations to the trace"
-    def make(_label: param.Label, next: ServiceFactory[Request, Result]) = {
-      val param.Label(label) = _label
+    val role: Stack.Role = ClientTracingFilter.role
+    val description: String = "Add MySql client specific annotations to the trace"
+    def make(
+      _label: param.Label,
+      next: ServiceFactory[Request, Result]
+    ): ServiceFactory[Request, Result] = {
       // TODO(jeff): should be able to get this directly from ClientTracingFilter
       val annotations = new AnnotatingTracingFilter[Request, Result](
-        label,
+        _label.label,
         Annotation.ClientSend(),
         Annotation.ClientRecv()
       )
-      annotations andThen TracingFilter andThen next
+      annotations.andThen(TracingFilter).andThen(next)
     }
   }
 
   object TracingFilter extends SimpleFilter[Request, Result] {
-    def apply(request: Request, service: Service[Request, Result]) = {
+    def apply(request: Request, service: Service[Request, Result]): Future[Result] = {
       if (Trace.isActivelyTracing) {
         request match {
           case QueryRequest(sqlStatement) => Trace.recordBinary("mysql.query", sqlStatement)
@@ -94,7 +90,7 @@ object MySqlClientTracingFilter {
  */
 object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichClient {
 
-  protected val supportUnsigned = param.UnsignedColumns.param.default.supported
+  protected val supportUnsigned: Boolean = param.UnsignedColumns.param.default.supported
 
   object param {
 
@@ -136,6 +132,44 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
   }
 
   object Client {
+
+    private object PoisonConnection {
+      val Role: Stack.Role = Stack.Role("PoisonConnection")
+
+      def module: Stackable[ServiceFactory[Request, Result]] =
+        new Stack.Module0[ServiceFactory[Request, Result]] {
+          def role: Stack.Role = Role
+
+          def description: String = "Allows the connection to be poisoned and recycled"
+
+          def make(next: ServiceFactory[Request, Result]): ServiceFactory[Request, Result] =
+            new PoisonConnection(next)
+        }
+    }
+
+    /**
+     * This is a workaround for connection pooling that allows us to close a connection.
+     */
+    private class PoisonConnection(underlying: ServiceFactory[Request, Result])
+      extends ServiceFactoryProxy(underlying) {
+
+      override def apply(conn: ClientConnection): Future[Service[Request, Result]] = {
+        super.apply(conn).map { svc =>
+          new ServiceProxy[Request, Result](svc) {
+            override def apply(request: Request): Future[Result] = {
+              if (request eq PoisonConnectionRequest) {
+                underlying.close().before {
+                  Future.value(PoisonedConnectionResult)
+                }
+              } else {
+                super.apply(request)
+              }
+            }
+          }
+        }
+      }
+    }
+
     private val params: Stack.Params = StackClient.defaultParams +
       ProtocolLibrary("mysql") +
       DefaultPool.Param(
@@ -148,6 +182,8 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
 
     private val stack: Stack[ServiceFactory[Request, Result]] = StackClient.newStack
       .replace(ClientTracingFilter.role, MySqlClientTracingFilter.Stackable)
+      // Note: there is a stack overflow in insertAfter using CanStackFrom, thus the module.
+      .insertAfter(DefaultPool.Role, PoisonConnection.module)
   }
 
   /**
@@ -167,7 +203,7 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
       with WithDefaultLoadBalancer[Client]
       with MysqlRichClient {
 
-    protected val supportUnsigned = params[param.UnsignedColumns].supported
+    protected val supportUnsigned: Boolean = params[param.UnsignedColumns].supported
 
     protected def copy1(
       stack: Stack[ServiceFactory[Request, Result]] = this.stack,

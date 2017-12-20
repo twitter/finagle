@@ -1,7 +1,8 @@
 package com.twitter.finagle.mysql
 
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.{ClientConnection, ServiceFactory, ServiceProxy}
+import com.twitter.finagle.{ChannelClosedException, ClientConnection, Service, ServiceFactory, ServiceProxy}
+import com.twitter.logging.Logger
 import com.twitter.util._
 
 object Client {
@@ -15,7 +16,7 @@ object Client {
   def apply(
     factory: ServiceFactory[Request, Result],
     statsReceiver: StatsReceiver = NullStatsReceiver
-  ): Client with Transactions = apply(factory, statsReceiver, false)
+  ): Client with Transactions = apply(factory, statsReceiver, supportUnsigned = false)
 
   /**
    * Creates a new Client based on a ServiceFactory.
@@ -118,12 +119,29 @@ trait Transactions {
   def transactionWithIsolation[T](isolationLevel: IsolationLevel)(f: Client => Future[T]): Future[T]
 }
 
+private object StdClient {
+  val log: Logger = Logger.get()
+}
+
+/**
+ * @param rollbackQuery the query used to rollback a transaction, "ROLLBACK".
+ *                      This is customizable to allow for failure testing.
+ */
 private class StdClient(
   factory: ServiceFactory[Request, Result],
   supportUnsigned: Boolean,
-  statsReceiver: StatsReceiver
+  statsReceiver: StatsReceiver,
+  rollbackQuery: String
 ) extends Client
     with Transactions {
+
+  import StdClient._
+
+  def this(
+    factory: ServiceFactory[Request, Result],
+    supportUnsigned: Boolean,
+    statsReceiver: StatsReceiver
+  ) = this(factory, supportUnsigned, statsReceiver, "ROLLBACK")
 
   private[this] val service = factory.toService
 
@@ -133,23 +151,17 @@ private class StdClient(
   def ping(): Future[Result] = service(PingRequest)
 
   def select[T](sql: String)(f: Row => T): Future[Seq[T]] =
-    query(sql) map {
+    query(sql).map {
       case rs: ResultSet => rs.rows.map(f)
       case _ => Nil
     }
 
   def prepare(sql: String): PreparedStatement = new PreparedStatement {
-    def apply(ps: Parameter*): Future[Result] = factory() flatMap { svc =>
+    def apply(ps: Parameter*): Future[Result] = factory().flatMap { svc =>
       svc(PrepareRequest(sql)).flatMap {
         case ok: PrepareOK => svc(ExecuteRequest(ok.id, ps.toIndexedSeq))
-        case r =>
-          Future.exception(
-            new Exception(
-              "Unexpected result %s when preparing %s"
-                .format(r, sql)
-            )
-          )
-      } ensure {
+        case r => Future.exception(new Exception(s"Unexpected result $r when preparing $sql"))
+      }.ensure {
         svc.close()
       }
     }
@@ -157,10 +169,10 @@ private class StdClient(
 
   def cursor(sql: String): CursoredStatement = {
     new CursoredStatement {
-      override def apply[T](rowsPerFetch: Int, params: Parameter*)(
+      def apply[T](rowsPerFetch: Int, params: Parameter*)(
         f: (Row) => T
       ): Future[CursorResult[T]] = {
-        assert(rowsPerFetch > 0, "rowsPerFetch must be positive")
+        assert(rowsPerFetch > 0, s"rowsPerFetch must be positive: $rowsPerFetch")
 
         factory().map { svc =>
           new StdCursorResult[T](cursorStats, svc, sql, rowsPerFetch, params, f, supportUnsigned)
@@ -184,16 +196,17 @@ private class StdClient(
     f: Client => Future[T]
   ): Future[T] = {
     val singleton = new ServiceFactory[Request, Result] {
-      val svc = factory()
+      private val svc: Future[Service[Request, Result]] = factory()
+
       // Because the `singleton` is used in the context of a `FactoryToService` we override
       // `Service#close` to ensure that we can control the checkout lifetime of the `Service`.
-      val proxiedService = svc map { service =>
+      private val proxiedService: Future[Service[Request, Result]] = svc.map { service =>
         new ServiceProxy(service) {
-          override def close(deadline: Time) = Future.Done
+          override def close(deadline: Time): Future[Unit] = Future.Done
         }
       }
 
-      def apply(conn: ClientConnection) = proxiedService
+      def apply(conn: ClientConnection): Future[Service[Request, Result]] = proxiedService
       def close(deadline: Time): Future[Unit] = svc.flatMap(_.close(deadline))
     }
     val client = Client(singleton, statsReceiver, supportUnsigned)
@@ -211,14 +224,42 @@ private class StdClient(
 
     // handle failures and put connection back in the pool
 
-    transaction transform {
+    def closeWith(e: Throwable): Future[T] = {
+      singleton.close()
+      Future.exception(e)
+//        .before {
+//        Future.exception(e)
+//      }
+    }
+
+    transaction.transform {
       case Return(r) =>
         singleton.close()
         Future.value(r)
       case Throw(e) =>
-        client.query("ROLLBACK") transform { _ =>
-          singleton.close()
-          Future.exception(e)
+        client.query(rollbackQuery).transform {
+          case Return(_) =>
+            closeWith(e)
+          case Throw(_: ChannelClosedException) =>
+            closeWith(e)
+          case Throw(rollbackEx) =>
+            log.info(rollbackEx, "Failure during rollback, closing connection")
+            // the rollback failed and we don't want any uncommitted state to leak
+            // to the next usage of the connection. issue a "poisoned" request to close
+            // the underlying connection. this is necessary due to the connection
+            // pooling underneath. then, close the service.
+            singleton().flatMap { svc =>
+              svc(PoisonConnectionRequest)
+            }.transform {
+              case Return(_) =>
+                closeWith(e)
+              case Throw(e2) =>
+                log.critical(e2, "Failure closing connection after rollback failure")
+                // this might be a bit drastic, but we do not want to leave the
+                // connection in an indeterminate state.
+                factory.close()
+                Future.exception(e)
+            }
         }
     }
   }

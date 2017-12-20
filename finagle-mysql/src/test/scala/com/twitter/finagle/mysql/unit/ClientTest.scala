@@ -2,10 +2,11 @@ package com.twitter.finagle.mysql
 
 import com.twitter.finagle.Mysql
 import com.twitter.finagle.filter.NackAdmissionFilter
+import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.util.Time
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSuite, MustMatchers}
 
 /**
@@ -23,7 +24,7 @@ class ClientTest extends FunSuite with MockitoSugar with MustMatchers {
   test("basic test creates a new service for each query") {
     val service = new MockService()
     val factory = spy(new MockServiceFactory(service))
-    val client = spy(Client(factory))
+    val client = spy(Client(factory, NullStatsReceiver, supportUnsigned = false))
 
     client.query(sqlQuery)
     client.query(sqlQuery)

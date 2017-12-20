@@ -337,3 +337,5 @@ case class FetchResult(rowPackets: Seq[Packet], containsLastRow: Boolean) extend
   override def toString: String =
     s"FetchResult(rows=${rowPackets.size}, containsLastRow=$containsLastRow)"
 }
+
+private[finagle] object PoisonedConnectionResult extends Result
