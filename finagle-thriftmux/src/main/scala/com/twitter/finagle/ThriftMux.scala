@@ -237,7 +237,7 @@ object ThriftMux
 
       private val extractResponseBytesFn = (response: mux.Response) => {
         val responseCtx = Contexts.local.getOrElse(Headers.Response.Key, EmptyResponseHeadersFn)
-        responseCtx.put(response.contexts)
+        responseCtx.set(response.contexts)
         Buf.ByteArray.Owned.extract(response.body)
       }
 

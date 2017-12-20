@@ -73,7 +73,7 @@ object ThriftReqRepServicePerEndpoint {
       // we rely on the Headers.Response.Values to be mutable such that we
       // can update the same reference in scope that will be read downstream.
       Contexts.local.get(Headers.Response.Key).foreach { responseCtx =>
-        responseCtx.put(response.headers.toBufSeq)
+        responseCtx.set(response.headers.toBufSeq)
       }
       Future.value(response.value)
     case Throw(e) =>

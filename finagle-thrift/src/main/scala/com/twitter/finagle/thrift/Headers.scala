@@ -1,7 +1,6 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.context.Contexts.local.Key
 import com.twitter.io.Buf
 
 object Headers {
@@ -10,24 +9,24 @@ object Headers {
     def apply(headers: Seq[(Buf, Buf)]): Values = new Values(headers)
   }
 
-  /**
+    /**
    * A mutable container for "header" like value information.
    *
-   * This container is mutable because the information is carried across different code layers
-   * via [[com.twitter.finagle.context.LocalContext]]. Thus, we create a local with a default empty
-   * value at the top of the local scope which is then mutated and read by code within the closure.
+   * @note  This container is mutable because the information is carried across
+   *        different code layers via [[com.twitter.finagle.context.LocalContext]].
+   *        Thus, we create a local with a default empty value at the top of the local
+   *        scope which is then mutated and read by code within the closure.
+   *
+   * @note Any subsequent call to `set` replaces the underlying values.
    */
-  private[finagle] class Values private(headers: Seq[(Buf, Buf)]) {
-    private[this] val _values = scala.collection.mutable.ArrayBuffer[(Buf, Buf)]()
-    put(headers)
+  private[finagle] class Values(initialValues: Seq[(Buf, Buf)]) {
+    @volatile private[this] var valuesRef = initialValues
 
-    def put(headers: Seq[(Buf, Buf)]): Unit = synchronized {
-      headers.foreach { value => _values += value }
+    def set(values: Seq[(Buf, Buf)]): Unit = {
+      valuesRef = values
     }
 
-    def values: Seq[(Buf, Buf)] =  synchronized {
-      _values
-    }
+    def values: Seq[(Buf, Buf)] = valuesRef
   }
 
   /**
@@ -36,8 +35,8 @@ object Headers {
    * well as an empty header values constant.
    */
   object Request {
-    def newValues: Values = Values(Seq.empty[(Buf, Buf)])
-    val Key: Key[Headers.Values] = new Contexts.local.Key[Headers.Values]
+    def newValues: Values = Values(Nil)
+    val Key: Contexts.local.Key[Headers.Values] = new Contexts.local.Key[Headers.Values]
   }
 
   /**
@@ -46,7 +45,7 @@ object Headers {
    * well as an empty header values constant.
    */
   object Response {
-    def newValues: Values = Values(Seq.empty[(Buf, Buf)])
-    val Key: Key[Headers.Values] = new Contexts.local.Key[Headers.Values]
+    def newValues: Values = Values(Nil)
+    val Key: Contexts.local.Key[Headers.Values] = new Contexts.local.Key[Headers.Values]
   }
 }
