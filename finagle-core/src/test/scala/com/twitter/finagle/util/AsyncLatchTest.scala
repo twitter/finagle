@@ -12,6 +12,7 @@ class AsyncLatchTest extends FunSuite {
     latch await {
       didCall = true
     }
+    assert(didCall)
   }
 
   test("when count>0, AsyncLatch should execute waiters when count has reached 0") {
