@@ -82,9 +82,8 @@ object BackupRequestFilter {
       case BackupRequestFilter.Param.Configured(maxExtraLoad, sendInterrupts) =>
         val brf = mkFilterFromParams[Req, Rep](maxExtraLoad, sendInterrupts, params)
         new ServiceProxy[Req, Rep](brf.andThen(service)) {
-          override def close(deadline: Time): Future[Unit] = {
-            Future.join(Seq(brf.close(deadline), service.close(deadline)))
-          }
+          override def close(deadline: Time): Future[Unit] =
+            service.close(deadline).before(brf.close(deadline))
         }
       case BackupRequestFilter.Param.Disabled =>
         service
@@ -129,7 +128,7 @@ private[client] class BackupRequestFactory[Req, Rep](
     underlying(conn).map(applyBrf)
 
   override def close(deadline: Time): Future[Unit] =
-    Future.join(Seq(underlying.close(deadline), filter.close(deadline)))
+    underlying.close(deadline).before(filter.close(deadline))
 }
 
 /**
