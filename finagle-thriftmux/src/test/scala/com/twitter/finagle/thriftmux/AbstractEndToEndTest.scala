@@ -1554,7 +1554,7 @@ abstract class AbstractEndToEndTest
     val shortTimeoutReqRepSvcPerEndpoint: Service[scrooge.Request[TestService.Query.Args], scrooge.Response[TestService.Query.SuccessType]] =
       builder
         .withTimeoutPerRequest(5.millis)
-        .reqRepServicePerEndpoint[TestService.ReqRepServicePerEndpoint]("fast")
+        .servicePerEndpoint[TestService.ReqRepServicePerEndpoint]("fast")
         .query
 
     intercept[IndividualRequestTimeoutException] {
@@ -1590,7 +1590,7 @@ abstract class AbstractEndToEndTest
     val longTimeoutReqRepSvcPerEndpoint =
       builder
         .withTimeoutPerRequest(5.seconds)
-        .reqRepServicePerEndpoint[TestService.ReqRepServicePerEndpoint]("slow")
+        .servicePerEndpoint[TestService.ReqRepServicePerEndpoint]("slow")
         .query
 
     val response = await(longTimeoutReqRepSvcPerEndpoint(scrooge.Request(TestService.Query.Args("looong"))))
@@ -1689,7 +1689,7 @@ abstract class AbstractEndToEndTest
     }
     // ReqRepServicePerEndpoint
     val asIsReqRepSvcPerEndpoint: Service[scrooge.Request[TestService.Query.Args], scrooge.Response[TestService.Query.SuccessType]] =
-      mb.reqRepServicePerEndpoint[TestService.ReqRepServicePerEndpoint]("as_is").query
+      mb.servicePerEndpoint[TestService.ReqRepServicePerEndpoint]("as_is").query
     intercept[RequestTimeoutException] {
       await(asIsReqRepSvcPerEndpoint(scrooge.Request(TestService.Query.Args("nope"))))
     }
@@ -1722,7 +1722,7 @@ abstract class AbstractEndToEndTest
     val longTimeoutReqRepSvcPerEndpoint: Service[scrooge.Request[TestService.Query.Args], scrooge.Response[TestService.Query.SuccessType]] =
       mb.withTimeoutPerRequest(5.seconds)
         .withTimeoutTotal(5.seconds)
-        .reqRepServicePerEndpoint[TestService.ReqRepServicePerEndpoint]("good")
+        .servicePerEndpoint[TestService.ReqRepServicePerEndpoint]("good")
         .query
 
     val response = await(longTimeoutReqRepSvcPerEndpoint(scrooge.Request(TestService.Query.Args("yep"))))
@@ -1891,7 +1891,7 @@ abstract class AbstractEndToEndTest
           case ReqRep(_, Throw(InvalidQueryException(_))) =>
             ResponseClass.RetryableFailure
         }
-        .reqRepServicePerEndpoint[TestService.ReqRepServicePerEndpoint]("all_invalid")
+        .servicePerEndpoint[TestService.ReqRepServicePerEndpoint]("all_invalid")
         .query
 
     intercept[InvalidQueryException] {
@@ -1958,7 +1958,7 @@ abstract class AbstractEndToEndTest
           case ReqRep(_, Throw(InvalidQueryException(errorCode))) if errorCode == 1 =>
             ResponseClass.Success
         }
-        .reqRepServicePerEndpoint[TestService.ReqRepServicePerEndpoint]("err_1")
+        .servicePerEndpoint[TestService.ReqRepServicePerEndpoint]("err_1")
         .query
 
     intercept[InvalidQueryException] {

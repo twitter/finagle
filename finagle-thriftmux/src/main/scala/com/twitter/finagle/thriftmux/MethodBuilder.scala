@@ -4,7 +4,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
 import com.twitter.finagle.client.RefcountedClosable
 import com.twitter.finagle.service.ResponseClassifier
-import com.twitter.finagle.thrift.service.{Filterable, ReqRepServicePerEndpointBuilder, ServicePerEndpointBuilder}
+import com.twitter.finagle.thrift.service.{Filterable, ServicePerEndpointBuilder}
 import com.twitter.finagle.thrift.{ServiceIfaceBuilder, ThriftClientRequest, ThriftRichClient}
 import com.twitter.util.Duration
 import com.twitter.util.tunable.Tunable
@@ -299,23 +299,5 @@ class MethodBuilder(
       mb.params[param.Label].label
     )(builder)
     servicePerEndpoint.filtered(filters)
-  }
-
-  /**
-   * Construct a `ReqRepServicePerEndpoint` to be used for the `methodName` function.
-   *
-   * @param methodName used for scoping metrics (e.g. "clnt/your_client_label/method_name").
-   */
-  def reqRepServicePerEndpoint[ReqRepServicePerEndpoint <: Filterable[ReqRepServicePerEndpoint]](
-    methodName: String
-  )(
-    implicit builder: ReqRepServicePerEndpointBuilder[ReqRepServicePerEndpoint]
-  ): ReqRepServicePerEndpoint = {
-    val filters: Filter.TypeAgnostic = mb.filters(methodName)
-    val reqRepServicePerEndpoint: ReqRepServicePerEndpoint = rich.reqRepServicePerEndpoint(
-      mb.wrappedService(methodName),
-      mb.params[param.Label].label
-    )(builder)
-    reqRepServicePerEndpoint.filtered(filters)
   }
 }
