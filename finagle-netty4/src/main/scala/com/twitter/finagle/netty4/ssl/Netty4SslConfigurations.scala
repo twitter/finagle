@@ -1,6 +1,7 @@
 package com.twitter.finagle.netty4.ssl
 
-import com.twitter.finagle.ssl.{ApplicationProtocols, TrustCredentials}
+import com.twitter.finagle.ssl.{ApplicationProtocols, SslConfigurationException, TrustCredentials}
+import com.twitter.util.{Return, Throw, Try}
 import io.netty.handler.ssl.{ApplicationProtocolConfig, SslContextBuilder, SslProvider}
 import io.netty.handler.ssl.ApplicationProtocolConfig.{
   Protocol,
@@ -9,12 +10,13 @@ import io.netty.handler.ssl.ApplicationProtocolConfig.{
 }
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory
 import scala.collection.JavaConverters._
+import scala.util.control.NonFatal
 
 /**
  * Convenience functions for setting values on a Netty `SslContextBuilder`
  * which are applicable to both client and server engines.
  */
-private[ssl] object Netty4SslConfigurations {
+private[finagle] object Netty4SslConfigurations {
 
   /**
    * Configures the trust credentials of the `SslContextBuilder`. This
@@ -42,48 +44,11 @@ private[ssl] object Netty4SslConfigurations {
    * Configures the application protocols of the `SslContextBuilder`. This
    * method mutates the `SslContextBuilder`, and returns it as the result.
    *
-   * @note This sets which application level protocol negotiation to
-   * use ALPN.
-   *
    * @note This also sets the `SelectorFailureBehavior` to NO_ADVERTISE,
    * and the `SelectedListenerFailureBehavior` to ACCEPT as those are the
    * only modes supported by both JDK and Native engines.
    */
-  def configureClientApplicationProtocols(
-    builder: SslContextBuilder,
-    applicationProtocols: ApplicationProtocols
-  ): SslContextBuilder = {
-    // don't use NPN because https://github.com/netty/netty/issues/7346 breaks
-    // web crawlers
-    configureApplicationProtocols(builder, applicationProtocols, Protocol.ALPN)
-  }
-
-  /**
-   * Configures the application protocols of the `SslContextBuilder`. This
-   * method mutates the `SslContextBuilder`, and returns it as the result.
-   *
-   * @note This sets which application level protocol negotiation to
-   * use NPN and ALPN.
-   *
-   * @note This also sets the `SelectorFailureBehavior` to NO_ADVERTISE,
-   * and the `SelectedListenerFailureBehavior` to ACCEPT as those are the
-   * only modes supported by both JDK and Native engines.
-   */
-  def configureServerApplicationProtocols(
-    builder: SslContextBuilder,
-    applicationProtocols: ApplicationProtocols
-  ): SslContextBuilder =
-    configureApplicationProtocols(builder, applicationProtocols, Protocol.NPN_AND_ALPN)
-
-  /**
-   * Configures the application protocols of the `SslContextBuilder`. This
-   * method mutates the `SslContextBuilder`, and returns it as the result.
-   *
-   * @note This also sets the `SelectorFailureBehavior` to NO_ADVERTISE,
-   * and the `SelectedListenerFailureBehavior` to ACCEPT as those are the
-   * only modes supported by both JDK and Native engines.
-   */
-  private[this] def configureApplicationProtocols(
+  def configureApplicationProtocols(
     builder: SslContextBuilder,
     applicationProtocols: ApplicationProtocols,
     negotiationProtocol: Protocol
@@ -108,11 +73,22 @@ private[ssl] object Netty4SslConfigurations {
    *
    * @note This is necessary in environments where the native engine could fail to load.
    */
-  def configureProvider(
-    builder: SslContextBuilder,
-    forceJdk: Boolean
-  ): SslContextBuilder =
+  def configureProvider(builder: SslContextBuilder, forceJdk: Boolean): SslContextBuilder =
     if (forceJdk) builder.sslProvider(SslProvider.JDK)
     else builder
+
+  /**
+   * Unwraps the `Try[SslContextBuilder]` and throws an `SslConfigurationException` for
+   * `NonFatal` errors.
+   */
+  def unwrapTryContextBuilder(builder: Try[SslContextBuilder]): SslContextBuilder =
+    builder match {
+      case Return(sslContextBuilder) =>
+        sslContextBuilder
+      case Throw(NonFatal(nonFatal)) =>
+        throw new SslConfigurationException(nonFatal.getMessage, nonFatal)
+      case Throw(throwable) =>
+        throw throwable
+    }
 
 }
