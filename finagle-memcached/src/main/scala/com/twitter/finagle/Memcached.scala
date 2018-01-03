@@ -232,10 +232,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
      */
     private val defaultPendingRequestLimit = Some(100)
 
-    private val UseTwoConnections: Boolean =
-      Toggles("com.twitter.finagle.memcached.UseTwoConnections")(ServerInfo().id.hashCode)
-
-    private val defaultNumConnections: Int = if (UseTwoConnections) 2 else 4
+    private val defaultNumConnections: Int = 2
 
     /**
      * Default stack parameters used for memcached client. We change the
@@ -490,7 +487,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
      * The connections are load balanced over which allows the pipelined client to
      * avoid head-of-line blocking and reduce its latency.
      *
-     * We've empirically found that four is a good default for this, but it can be
+     * We've empirically found that two is a good default for this, but it can be
      * increased at the cost of additional connection overhead.
      */
     def connectionsPerEndpoint(connections: Int): Client =
