@@ -2,7 +2,7 @@ package com.twitter.finagle.memcached.protocol.text.transport
 
 import com.twitter.finagle.memcached.protocol.{Command, Response}
 import com.twitter.finagle.memcached.protocol.text._
-import com.twitter.finagle.memcached.protocol.text.client.MemcachedClientDecoder
+import com.twitter.finagle.memcached.protocol.text.client.{CommandToBuf, MemcachedClientDecoder}
 import com.twitter.finagle.netty4.encoder.BufEncoder
 import io.netty.channel._
 

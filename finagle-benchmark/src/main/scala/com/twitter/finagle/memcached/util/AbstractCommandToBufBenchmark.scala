@@ -3,9 +3,9 @@ package com.twitter.finagle.memcached.util
 import com.twitter.finagle.benchmark.StdBenchAnnotations
 import com.twitter.finagle.memcached.protocol.Command
 import com.twitter.finagle.memcached.protocol.Set
-import com.twitter.finagle.memcached.protocol.text.AbstractCommandToBuf
-import com.twitter.finagle.memcached.protocol.text.CommandToBuf
 import com.twitter.finagle.memcached.protocol.text.MessageEncoder
+import com.twitter.finagle.memcached.protocol.text.client.AbstractCommandToBuf
+import com.twitter.finagle.memcached.protocol.text.client.CommandToBuf
 import com.twitter.io.Buf
 import com.twitter.io.BufByteWriter
 import com.twitter.util.Time
