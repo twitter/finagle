@@ -22,7 +22,7 @@ class Http2UpgradingTransportTest extends FunSuite {
       }
     }
     val ref = new RefTransport(transport)
-    val p = Promise[Option[MultiplexedTransporter]]()
+    val p = Promise[Option[StreamTransportFactory]]()
 
     val upgradingTransport = new Http2UpgradingTransport(
       transport,

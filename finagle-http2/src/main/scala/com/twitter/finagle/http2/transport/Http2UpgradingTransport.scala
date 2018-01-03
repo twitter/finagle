@@ -21,7 +21,7 @@ import scala.util.control.NonFatal
 private[http2] class Http2UpgradingTransport(
   t: Transport[Any, Any],
   ref: RefTransport[Any, Any],
-  p: Promise[Option[MultiplexedTransporter]],
+  p: Promise[Option[StreamTransportFactory]],
   params: Stack.Params
 ) extends TransportProxy[Any, Any](t) {
 
@@ -54,10 +54,11 @@ private[http2] class Http2UpgradingTransport(
         type Context = TransportContext with HasExecutor
       }
     ]
-    val multiplexed = new MultiplexedTransporter(contextCasted, t.remoteAddress, params)
-    p.updateIfEmpty(Return(Some(multiplexed)))
+    val fac = new StreamTransportFactory(contextCasted, t.remoteAddress, params)
+    p.updateIfEmpty(Return(Some(fac)))
+
     ref.update { _ =>
-      unsafeCast(multiplexed.first())
+      unsafeCast(fac.first())
     }
   }
 

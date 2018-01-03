@@ -5,16 +5,16 @@ import com.twitter.finagle.http2.transport.Http2ClientDowngrader._
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.netty4.transport.HasExecutor
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.transport.{Transport, TransportContext, LegacyContext}
+import com.twitter.finagle.transport.{LegacyContext, Transport, TransportContext}
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.{Status, StreamClosedException, FailureFlags, Stack, Failure}
-import com.twitter.logging.{Logger, HasLogLevel, Level}
-import com.twitter.util.{Future, Time, Promise, Return, Throw, Try, Closable}
+import com.twitter.finagle.{Failure, FailureFlags, Stack, Status, StreamClosedException}
+import com.twitter.logging.{HasLogLevel, Level, Logger}
+import com.twitter.util.{Closable, Future, Promise, Return, Throw, Time, Try}
 import io.netty.handler.codec.http.{HttpObject, HttpRequest, LastHttpContent}
 import io.netty.handler.codec.http2.Http2Error
 import java.net.SocketAddress
 import java.security.cert.Certificate
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
 import java.util.concurrent.ConcurrentHashMap
 import scala.collection.JavaConverters._
 
@@ -24,13 +24,13 @@ import scala.collection.JavaConverters._
  * After a stream finishes, the transport represents the next stream id.
  *
  * Since each transport only represents a single stream at a time, one of these
- * transports cannot be multiplexed-instead, the ChildTransport is the
+ * transports cannot be multiplexed-instead, the [[StreamTransport]] is the
  * unit of multiplexing, so if you want to increase concurrency, you should
  * create a new Transport.
  *
  * ==Threading==
  *
- * MultiplexedTransporter requires the underlying transport to provide a serial
+ * [[StreamTransportFactory]] requires the underlying transport to provide a serial
  * [[java.util.concurrent.Executor]]. That is, an `Executor` that guarantees
  * ordered execution of `Runnables` one at a time. This allows thread safety and
  * race condition avoidance without using synchronized blocks. This is desirable
@@ -42,35 +42,33 @@ import scala.collection.JavaConverters._
  * not forwarded to the Runnables submitted to the executor, including the
  * Context.
  */
-private[http2] class MultiplexedTransporter(
+private[http2] class StreamTransportFactory(
   underlying: Transport[StreamMessage, StreamMessage] {
     type Context = TransportContext with HasExecutor
   },
   addr: SocketAddress,
   params: Stack.Params
-) extends (() => Try[Transport[HttpObject, HttpObject]])
+) extends (() => Future[Transport[HttpObject, HttpObject]])
     with Closable { parent =>
-  import MultiplexedTransporter._
+  import StreamTransportFactory._
 
   private[this] val exec = underlying.context.executor
   private[this] val log = Logger.get(getClass.getName)
 
-  // A map of streamIds -> ChildTransport
-  private[this] val children = new ConcurrentHashMap[Int, ChildTransport]()
+  // A map of streamIds -> StreamTransport
+  private[this] val streams = new ConcurrentHashMap[Int, StreamTransport]()
   private[this] val id = new AtomicInteger(1)
 
-  // This state as well as operations that start or stop streams and goaways are synchronized on
-  // this (parent).
+  // This state as well as operations that start or stop streams and goaways are serialized via `exec`
   @volatile private[this] var dead = false
+  @volatile private[this] var pingPromise: Promise[Unit] = null
 
   // exposed for testing
-  private[http2] def numChildren: Int = children.size
+  private[http2] def numStreams: Int = streams.size
   private[http2] def setStreamId(num: Int): Unit = id.set(num)
 
   private[this] val FailureDetector.Param(detectorConfig) = params[FailureDetector.Param]
   private[this] val Stats(statsReceiver) = params[Stats]
-
-  private[this] var pingPromise: Promise[Unit] = null
 
   // exposed for testing
   private[http2] def ping(): Future[Unit] = {
@@ -93,10 +91,13 @@ private[http2] class MultiplexedTransporter(
 
   private[this] def handleGoaway(obj: HttpObject, lastStreamId: Int): Unit = {
     dead = true
-    children.values.asScala.foreach { child =>
-      if (child.curId > lastStreamId) {
-        child.handleCloseStream(s"the stream id (${child.curId}) was higher than the last stream" +
-          s" id ($lastStreamId) on a GOAWAY")
+    streams.values.asScala.foreach { stream =>
+      if (stream.curId > lastStreamId) {
+        stream
+          .handleCloseStream(
+            s"the stream id (${stream.curId}) was higher than the last stream" +
+              s" id ($lastStreamId) on a GOAWAY"
+          )
       }
     }
   }
@@ -115,7 +116,7 @@ private[http2] class MultiplexedTransporter(
   // a different order, or on a different thread. it's unlikely, but racy.
   private[this] def handleSuccessfulRead(sm: StreamMessage): Unit = sm match {
     case Message(msg, streamId) =>
-      val c = children.get(streamId)
+      val c = streams.get(streamId)
       if (c != null) c.handleOffer(msg)
       else {
         val lastId = id.get()
@@ -129,7 +130,7 @@ private[http2] class MultiplexedTransporter(
           underlying.write(Rst(streamId, Http2Error.STREAM_CLOSED.code))
         } else {
           dead = true
-          children.values.asScala.foreach(_.handleCloseStream(s"stream $streamId not found"))
+          streams.values.asScala.foreach(_.handleCloseStream(s"stream $streamId not found"))
           underlying.write(
             // TODO: Properly utilize the DEBUG_DATA section of GOAWAY
             GoAway(
@@ -148,10 +149,10 @@ private[http2] class MultiplexedTransporter(
     case Rst(streamId, errorCode) =>
       val error =
         if (errorCode == Http2Error.REFUSED_STREAM.code) Failure.RetryableNackFailure
-       else if (errorCode == Http2Error.ENHANCE_YOUR_CALM.code) Failure.NonRetryableNackFailure
+        else if (errorCode == Http2Error.ENHANCE_YOUR_CALM.code) Failure.NonRetryableNackFailure
         else new StreamClosedException(addr, streamId.toString)
 
-      val c = children.get(streamId)
+      val c = streams.get(streamId)
       if (c != null) c.handleCloseWith(error)
       else {
         if (log.isLoggable(Level.DEBUG))
@@ -180,18 +181,16 @@ private[http2] class MultiplexedTransporter(
 
   private[this] val readLoop: Try[StreamMessage] => Unit = { result =>
     exec.execute(new Runnable {
-      def run(): Unit = {
-        result match {
-          case Return(msg) =>
-            handleSuccessfulRead(msg)
-            loop()
+      def run(): Unit = result match {
+        case Return(msg) =>
+          handleSuccessfulRead(msg)
+          loop()
 
-          case Throw(e) =>
-            children.values.asScala.foreach { c =>
-              c.handleCloseWith(e)
-            }
-            parent.close()
-        }
+        case Throw(e) =>
+          streams.values.asScala.foreach { c =>
+            c.handleCloseWith(e)
+          }
+          parent.close()
       }
     })
   }
@@ -203,24 +202,41 @@ private[http2] class MultiplexedTransporter(
 
   loop()
 
+  // ensure that `first` is only called once.
+  private[this] val firstOnce = new AtomicBoolean(false)
+
   /**
    * Provides a transport that knows we've already sent the first request, so we
    * just need a response to advance to the next stream.
-   * These methods (first and apply) are not threadsafe and must be used
-   * accordingly.
+   *
+   * @note this method is not thread-safe as the [[StreamTransport]] instance can modify
+   *       [[StreamTransportFactory]] state concurrently to any instances produced via
+   *       `apply`.
    */
   def first(): Transport[HttpObject, HttpObject] = {
-    val ct = new ChildTransport()
-    ct.handleNewStream()
-    ct.handleState(Active(finishedWriting = true, finishedReading = false))
-    ct
+    if (firstOnce.compareAndSet(false, true)) {
+      val ct = new StreamTransport()
+      ct.handleNewStream()
+      ct.handleState(Active(finishedWriting = true, finishedReading = false))
+      ct
+    } else {
+      throw new IllegalStateException(s"$this.first() was called multiple times")
+    }
   }
 
-  def apply(): Try[Transport[HttpObject, HttpObject]] = {
-    if (dead) Throw(new DeadConnectionException(addr, FailureFlags.Retryable))
-    else {
-      Return(new ChildTransport())
-    }
+  def apply(): Future[Transport[HttpObject, HttpObject]] = {
+    val p = new Promise[Transport[HttpObject, HttpObject]]
+
+    exec.execute(new Runnable {
+      def run(): Unit = {
+        if (dead) p.setException(new DeadConnectionException(addr, FailureFlags.Retryable))
+        else {
+          p.setValue(new StreamTransport())
+        }
+      }
+    })
+
+    p
   }
 
   def onClose: Future[Throwable] = underlying.onClose
@@ -229,9 +245,8 @@ private[http2] class MultiplexedTransporter(
 
   def status: Status = detector.status
 
-
   /**
-   * ChildTransport represents a single http/2 stream at a time.  Once the stream
+   * StreamTransport represents a single http/2 stream at a time.  Once the stream
    * has finished, the transport can be used again for a different stream.
    */
   // One note is that closing one of the transports closes the underlying
@@ -240,10 +255,10 @@ private[http2] class MultiplexedTransporter(
   // connections.  This can be improved by adding an extra layer between pooling
   // and dispatching, or making the distinction between streams and sessions
   // explicit.
-  private[http2] class ChildTransport extends Transport[HttpObject, HttpObject] { child =>
+  private[http2] class StreamTransport extends Transport[HttpObject, HttpObject] { stream =>
     type Context = TransportContext
 
-    private[this] val _onClose: Promise[Throwable] = Promise[Throwable]()
+    private[this] val _onClose: Promise[Throwable] = new Promise[Throwable]
 
     // Current stream ID
     @volatile private[this] var _curId = 0
@@ -251,75 +266,69 @@ private[http2] class MultiplexedTransporter(
     // Exposed for testing
     private[http2] def curId: Int = _curId
 
-    private[this] val queue: AsyncQueue[HttpObject] = new AsyncQueue[HttpObject] {
+    private[this] val queue: AsyncQueue[HttpObject] = new AsyncQueue[HttpObject]
 
-    }
+    @volatile private[StreamTransportFactory] var _state: StreamState = Idle
 
-    @volatile private[MultiplexedTransporter] var _state: ChildState = Idle
-
-    private[MultiplexedTransporter] def handleState(newState: ChildState): Unit = {
+    private[StreamTransportFactory] def handleState(newState: StreamState): Unit = {
       if (log.isLoggable(Level.DEBUG)) {
         log.debug(s"Stream $curId: ${_state} => ${newState}")
       }
       _state = newState
     }
 
-    def state: ChildState = _state
+    def state: StreamState = _state
 
-    private[MultiplexedTransporter] def handleNewStream(): Unit = {
-      state match {
-        case Idle =>
-          val newId = id.getAndAdd(2)
-          if (newId < 0) {
-            handleCloseWith(new StreamIdOverflowException(addr))
-          } else if (newId % 2 != 1) {
-            handleCloseWith(new IllegalStreamIdException(addr, newId))
-          } else {
-            // If the queue is not empty, this means a new stream is attempting to be created before
-            // all of the messages from the previous stream have been consumed.
-            val queueSize = queue.size
-            if (queueSize != 0) {
-              val head = queue.poll().poll match {
-                case Some(thing) => thing.toString
-                case None => "(no head?)"
-              }
-              handleBadState(
-                s"Queue was not empty (size=$queueSize) when creating new stream. Head: $head"
-              )
-            } else {
-              handleState(Active(finishedReading = false, finishedWriting = false))
-              children.put(newId, child)
-              children.remove(_curId)
-              _curId = newId
+    private[StreamTransportFactory] def handleNewStream(): Unit = state match {
+      case Idle =>
+        val newId = id.getAndAdd(2)
+        if (newId < 0) {
+          handleCloseWith(new StreamIdOverflowException(addr))
+        } else if (newId % 2 != 1) {
+          handleCloseWith(new IllegalStreamIdException(addr, newId))
+        } else {
+          // If the queue is not empty, this means a new stream is attempting to be created before
+          // all of the messages from the previous stream have been consumed.
+          val queueSize = queue.size
+          if (queueSize != 0) {
+            val head = queue.poll().poll match {
+              case Some(thing) => thing.toString
+              case None => "(no head?)"
             }
-
-            // TODO: It is also a problem if someone is already polling on the queue in an idle
-            //       state. This represents a premature read on a child that is not yet associated
-            //       with a stream ID.
+            handleBadState(
+              s"Queue was not empty (size=$queueSize) when creating new stream. Head: $head"
+            )
+          } else {
+            handleState(Active(finishedReading = false, finishedWriting = false))
+            streams.put(newId, stream)
+            streams.remove(_curId)
+            _curId = newId
           }
 
-        case _ =>
-          handleBadState(
-            s"newStream in state: ${state.getClass.getName}, parent dead? ${parent.dead}"
-          )
-      }
+          // TODO: It is also a problem if someone is already polling on the queue in an idle
+          //       state. This represents a premature read on a stream that is not yet associated
+          //       with a stream ID.
+        }
+
+      case _ =>
+        handleBadState(
+          s"newStream in state: ${state.getClass.getName}, parent dead? ${parent.dead}"
+        )
     }
 
     private[this] def handleBadState(msg: String): Future[Nothing] = {
-      log.error(s"Child ${_curId} bad state: $msg")
-      val exn = new BadChildStateException(msg, curId)
+      log.error(s"Stream ${_curId} bad state: $msg")
+      val exn = new BadStreamStateException(msg, curId)
       handleCloseWith(exn)
       Future.exception(exn)
     }
 
-    private[this] def handleCheckFinished() = {
-      state match {
-        case a: Active if a.finished && queue.size == 0 =>
-          if (parent.dead) handleCloseStream(s"parent MultiplexedTransporter already dead")
-          else handleState(Idle)
+    private[this] def handleCheckFinished() = state match {
+      case a: Active if a.finished && queue.size == 0 =>
+        if (parent.dead) handleCloseStream(s"parent MultiplexedTransporter already dead")
+        else handleState(Idle)
 
-        case _ => // nop
-      }
+      case _ => // nop
     }
 
     private[this] val postRead: Try[HttpObject] => Unit = {
@@ -330,23 +339,21 @@ private[http2] class MultiplexedTransporter(
         exec.execute(new Runnable { def run(): Unit = handleCloseWith(e) })
     }
 
-    private[this] def handleWriteAndCheck(obj: HttpObject): Future[Unit] = {
-      state match {
-        case a: Active =>
-          if (obj.isInstanceOf[LastHttpContent]) {
-            handleState(a.copy(finishedWriting = true))
-            handleCheckFinished()
+    private[this] def handleWriteAndCheck(obj: HttpObject): Future[Unit] = state match {
+      case a: Active =>
+        if (obj.isInstanceOf[LastHttpContent]) {
+          handleState(a.copy(finishedWriting = true))
+          handleCheckFinished()
+        }
+
+        underlying
+          .write(Message(obj, curId))
+          .onFailure { e: Throwable =>
+            exec.execute(new Runnable { def run(): Unit = handleCloseWith(e) })
           }
 
-          underlying
-            .write(Message(obj, curId))
-            .onFailure { e: Throwable =>
-              exec.execute(new Runnable { def run(): Unit = handleCloseWith(e) })
-            }
-
-        case _ =>
-          _onClose.unit
-      }
+      case _ =>
+        _onClose.unit
     }
 
     def write(obj: HttpObject): Future[Unit] = {
@@ -360,8 +367,8 @@ private[http2] class MultiplexedTransporter(
                 handleNewStream()
                 handleWriteAndCheck(obj)
               } else {
-                log.warning("Write to child with dead parent")
-                handleCloseStream("tried to write to a child with a dead parent")
+                log.warning("Write to stream with dead parent")
+                handleCloseStream("tried to write to a stream with a dead parent")
                 _onClose.unit
               }
 
@@ -371,11 +378,11 @@ private[http2] class MultiplexedTransporter(
             case a: Active if a.finishedWriting =>
               handleBadState(s"Write after finished writing: $obj")
 
-            case a: Active =>
+            case _: Active =>
               handleWriteAndCheck(obj)
 
             case Dead =>
-              handleBadState(s"Write to dead child: $obj")
+              handleBadState(s"Write to dead stream: $obj")
           }
           result.proxyTo(writep)
         }
@@ -391,37 +398,35 @@ private[http2] class MultiplexedTransporter(
     def read(): Future[HttpObject] = {
       val readp = new Promise[HttpObject]
       exec.execute(new Runnable {
-        def run(): Unit = {
-          state match {
-            case _: Active =>
-              val result = queue.poll()
+        def run(): Unit = state match {
+          case _: Active =>
+            val result = queue.poll()
 
-              result.poll match {
-                case Some(res) =>
-                  readp.updateIfEmpty(res)
-                  postRead(res)
+            result.poll match {
+              case Some(res) =>
+                readp.updateIfEmpty(res)
+                postRead(res)
 
-                case None =>
-                  result.respond(postRead)
-                  result.proxyTo(readp)
-                  readp.setInterruptHandler(closeOnInterrupt)
-              }
+              case None =>
+                result.respond(postRead)
+                result.proxyTo(readp)
+                readp.setInterruptHandler(closeOnInterrupt)
+            }
 
-            case Dead =>
-              queue.poll().proxyTo(readp)
+          case Dead =>
+            queue.poll().proxyTo(readp)
 
-            case Idle =>
-              val drained = queue.drain()
-              handleBadState(s"Read from idle child. Drained $drained")
-                .asInstanceOf[Future[HttpObject]]
-                .proxyTo(readp)
-          }
+          case Idle =>
+            val drained = queue.drain()
+            handleBadState(s"Read from idle stream. Drained $drained")
+              .asInstanceOf[Future[HttpObject]]
+              .proxyTo(readp)
         }
       })
       readp
     }
 
-    private[MultiplexedTransporter] def handleOffer(obj: HttpObject): Unit = {
+    private[StreamTransportFactory] def handleOffer(obj: HttpObject): Unit = {
       state match {
         case a: Active if !a.finishedReading =>
           if (obj.isInstanceOf[LastHttpContent]) {
@@ -441,19 +446,17 @@ private[http2] class MultiplexedTransporter(
           log.warning(s"Received message on inbound-closed stream: ($obj)")
 
         case Idle =>
-          handleBadState(s"Offered message to idle child: $obj")
+          handleBadState(s"Offered message to idle stream: $obj")
 
         case Dead =>
-          handleBadState(s"Offered message to dead child: $obj")
+          handleBadState(s"Offered message to dead stream: $obj")
       }
     }
 
-    def status: Status = {
-      state match {
-        case _: Active => Status.Open
-        case Dead => Status.Closed
-        case Idle => parent.status
-      }
+    def status: Status = state match {
+      case _: Active => Status.Open
+      case Dead => Status.Closed
+      case Idle => parent.status
     }
 
     def onClose: Future[Throwable] = _onClose.or(underlying.onClose)
@@ -465,7 +468,9 @@ private[http2] class MultiplexedTransporter(
     def peerCertificate: Option[Certificate] = underlying.peerCertificate
 
     def close(deadline: Time): Future[Unit] = {
-      exec.execute(new Runnable { def run(): Unit = handleCloseStream("close called on child transport", deadline) })
+      exec.execute(new Runnable {
+        def run(): Unit = handleCloseStream("close called on stream transport", deadline)
+      })
       _onClose.unit
     }
 
@@ -483,35 +488,35 @@ private[http2] class MultiplexedTransporter(
       }
 
       handleState(Dead)
-      children.remove(curId)
+      streams.remove(curId)
 
       queue.fail(exn, discard = false)
       _onClose.updateIfEmpty(Return(exn))
     }
 
-    val context: TransportContext = new LegacyContext(child)
+    val context: TransportContext = new LegacyContext(stream)
   }
 }
 
-private[http2] object MultiplexedTransporter {
+private[http2] object StreamTransportFactory {
   val PingOutstandingFailure: Failure =
     Failure("A ping is already outstanding on this session.")
 
-  val ChildMaxPendingOffers = 1000
+  val StreamMaxPendingOffers = 1000
 
-  sealed trait ChildState
+  sealed trait StreamState
 
   /**
-   * Child is between requests and requires a new stream ID to continue
+   * Stream is between requests and requires a new stream ID to continue
    */
-  object Idle extends ChildState {
+  object Idle extends StreamState {
     override def toString: String = "Idle"
   }
 
   /**
-   * Child represents a stream with active reading/writing
+   * Stream represents a stream with active reading/writing
    */
-  case class Active(finishedReading: Boolean, finishedWriting: Boolean) extends ChildState {
+  case class Active(finishedReading: Boolean, finishedWriting: Boolean) extends StreamState {
     def finished = finishedWriting && finishedReading
     override def toString: String = {
       if (finished)
@@ -526,21 +531,21 @@ private[http2] object MultiplexedTransporter {
   }
 
   /**
-   * Child is closed/dead and cannot be used again
+   * Stream is closed/dead and cannot be used again
    */
-  object Dead extends ChildState {
+  object Dead extends StreamState {
     override def toString: String = "Dead"
   }
 
-  class BadChildStateException(
+  class BadStreamStateException(
     msg: String,
     id: Int,
     private[finagle] val flags: Long = FailureFlags.NonRetryable
-  ) extends Exception(s"Child $id in bad state: $msg")
-      with FailureFlags[BadChildStateException] {
+  ) extends Exception(s"Stream $id in bad state: $msg")
+      with FailureFlags[BadStreamStateException] {
 
-    protected def copyWithFlags(newFlags: Long): BadChildStateException =
-      new BadChildStateException(msg, id, newFlags)
+    protected def copyWithFlags(newFlags: Long): BadStreamStateException =
+      new BadStreamStateException(msg, id, newFlags)
   }
 
   class DeadConnectionException(addr: SocketAddress, private[finagle] val flags: Long)

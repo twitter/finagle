@@ -8,7 +8,7 @@ import com.twitter.finagle.param.Stats
 import com.twitter.finagle.{Stack, Status}
 import com.twitter.finagle.transport.{Transport, TransportContext, LegacyContext}
 import com.twitter.logging.Logger
-import com.twitter.util.{Future, ConstFuture, Promise, Time}
+import com.twitter.util.{Future, Promise, Time}
 import java.net.SocketAddress
 import java.security.cert.Certificate
 import java.util.concurrent.atomic.AtomicReference
@@ -33,9 +33,9 @@ private[http2] class PriorKnowledgeTransporter(
 
   def remoteAddress: SocketAddress = underlying.remoteAddress
 
-  private[this] val ref = new AtomicReference[Future[MultiplexedTransporter]](null)
+  private[this] val ref = new AtomicReference[Future[StreamTransportFactory]](null)
 
-  private[this] def createMultiplexedTransporter(): Future[MultiplexedTransporter] = {
+  private[this] def createStreamTransportFactory(): Future[StreamTransportFactory] = {
     underlying().map { transport =>
       val inOutCasted = Transport.cast[StreamMessage, StreamMessage](transport)
       val contextCasted = inOutCasted.asInstanceOf[
@@ -43,7 +43,7 @@ private[http2] class PriorKnowledgeTransporter(
           type Context = TransportContext with HasExecutor
         }
       ]
-      val multi = new MultiplexedTransporter(
+      val streamFac = new StreamTransportFactory(
         contextCasted,
         remoteAddress,
         params
@@ -54,18 +54,18 @@ private[http2] class PriorKnowledgeTransporter(
 
       // Consider the creation of a new prior knowledge transport as an upgrade
       upgradeCounter.incr()
-      multi
+      streamFac
     }
   }
 
-  private[this] def getMulti(): Future[MultiplexedTransporter] = {
+  private[this] def getStreamTransportFactory(): Future[StreamTransportFactory] = {
     Option(ref.get) match {
       case None =>
-        val p = Promise[MultiplexedTransporter]()
+        val p = Promise[StreamTransportFactory]()
         if (ref.compareAndSet(null, p)) {
-          p.become(createMultiplexedTransporter())
+          p.become(createStreamTransportFactory())
           p
-        } else getMulti()
+        } else getStreamTransportFactory()
       case Some(f) => f
     }
   }
@@ -83,8 +83,8 @@ private[http2] class PriorKnowledgeTransporter(
     val context: TransportContext = new LegacyContext(this)
   }
 
-  def apply(): Future[Transport[Any, Any]] = getMulti().flatMap { multi =>
-    new ConstFuture(multi().map(Http2Transporter.unsafeCast).handle {
+  def apply(): Future[Transport[Any, Any]] = getStreamTransportFactory().flatMap { fac =>
+    fac().map(Http2Transporter.unsafeCast).handle {
       case exn: Throwable =>
         log.warning(
           exn,
@@ -93,6 +93,6 @@ private[http2] class PriorKnowledgeTransporter(
 
         ref.set(null)
         deadTransport(exn)
-    })
+    }
   }
 }

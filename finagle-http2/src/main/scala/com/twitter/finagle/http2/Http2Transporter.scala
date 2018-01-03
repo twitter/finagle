@@ -166,19 +166,19 @@ private[finagle] class Http2Transporter(
   import Http2Transporter._
 
   protected[this] val cachedConnection =
-    new AtomicReference[Future[Option[MultiplexedTransporter]]]()
+    new AtomicReference[Future[Option[StreamTransportFactory]]]()
 
-  private[this] def tryEvict(f: Future[Option[MultiplexedTransporter]]): Unit = {
+  private[this] def tryEvict(f: Future[Option[StreamTransportFactory]]): Unit = {
     // kick us out of the cache so we can try to reestablish the connection
     cachedConnection.compareAndSet(f, null)
   }
 
   private[this] def useExistingConnection(
-    f: Future[Option[MultiplexedTransporter]]
+    f: Future[Option[StreamTransportFactory]]
   ): Future[Transport[Any, Any]] = f.transform {
     case Return(Some(fn)) =>
-      Future.value(fn() match {
-        case Return(transport) => unsafeCast(transport)
+      fn().transform {
+        case Return(transport) => Future.value(unsafeCast(transport))
         case Throw(exn) =>
           log.warning(
             exn,
@@ -187,8 +187,8 @@ private[finagle] class Http2Transporter(
           tryEvict(f)
 
           // we expect finagle to treat this specially and retry if possible
-          deadTransport(exn)
-      })
+          Future.value(deadTransport(exn))
+      }
     case Return(None) =>
       // we didn't upgrade
       underlyingHttp11()
@@ -225,7 +225,7 @@ private[finagle] class Http2Transporter(
 
   private[this] def upgrade(): Future[Transport[Any, Any]] = {
     val conn: Future[Transport[Any, Any]] = underlying()
-    val p = Promise[Option[MultiplexedTransporter]]()
+    val p = Promise[Option[StreamTransportFactory]]()
     if (cachedConnection.compareAndSet(null, p)) {
       p.onFailure {
         case NonFatal(exn) =>
@@ -268,7 +268,7 @@ private[finagle] class Http2Transporter(
                     }
                   ]
                 p.setValue(Some(
-                  new MultiplexedTransporter(contextCasted, trans.remoteAddress, params)))
+                  new StreamTransportFactory(contextCasted, trans.remoteAddress, params)))
                 useExistingConnection(p)
               case Return(msg) =>
                 log.error(s"Non-upgrade event detected $msg")
@@ -328,7 +328,7 @@ private[finagle] class Http2Transporter(
     if (f == null) Status.Open
     else {
       f.poll match {
-        case Some(Return(Some(multi))) => multi.status
+        case Some(Return(Some(fac))) => fac.status
         case _ => Status.Open
       }
     }

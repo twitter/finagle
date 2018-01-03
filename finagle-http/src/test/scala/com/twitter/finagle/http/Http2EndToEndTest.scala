@@ -8,10 +8,11 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.toggle.flag.overrides
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
-import com.twitter.util.{Closable, Future}
+import com.twitter.util._
 import io.netty.handler.codec.http2.Http2CodecUtil
 import java.net.InetSocketAddress
-import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
+import scala.collection.mutable.ArrayBuffer
 
 class Http2EndToEndTest extends AbstractEndToEndTest {
   def implName: String = "netty4 http/2"
@@ -191,5 +192,63 @@ class Http2EndToEndTest extends AbstractEndToEndTest {
 
     await(client(Request("/")))
     assert(!headers.contains(Http2CodecUtil.HTTP_UPGRADE_SETTINGS_HEADER.toString))
+  }
+
+  private final class Srv extends Closable {
+
+    val responses = new ArrayBuffer[Promise[Response]]
+
+    private[this] val service = Service.mk[Request, Response] { _ =>
+      _pending.incrementAndGet()
+      val p = new Promise[Response]
+      responses.append(p)
+      p.ensure(_pending.decrementAndGet())
+    }
+
+    private[this] val _pending = new AtomicInteger
+
+    private[this] val _ls = finagle.Http.server
+      .configuredParams(finagle.Http.Http2)
+      .withLabel("server")
+      .serve("localhost:*", service)
+
+    def pending(): Int = _pending.get()
+    def startProcessing(idx: Int) = responses(idx).setValue(Response())
+    def boundAddr = _ls.boundAddress.asInstanceOf[InetSocketAddress]
+    def close(deadline: Time): Future[Unit] = _ls.close(deadline)
+  }
+
+
+  test("draining servers process pending requests") {
+    val srv = new Srv
+
+    val dest = s"${ srv.boundAddr.getHostName }:${ srv.boundAddr.getPort }"
+
+    val client =
+      finagle.Http.client
+        .configuredParams(finagle.Http.Http2)
+        .newService(dest, "client")
+
+    // dispatch a request that will be pending when the
+    // server shutsdown.
+    val pendingReply = client(Request("/"))
+    while (srv.pending() != 1) { Thread.sleep(100) }
+
+    // shutdown server w/ grace period
+    srv.close(10.minutes)
+
+    // new connection attempt fails
+    val rep2 = client(Request("/"))
+    Await.ready(rep2, 30.seconds)
+    assert(rep2.poll.get.isThrow)
+
+    srv.startProcessing(0)
+
+    // pending request is finally successfully processed
+    Await.ready(pendingReply, 30.seconds)
+    pendingReply.poll.get match {
+      case Return(resp) => assert(resp.status == Status.Ok)
+      case Throw(t) => fail("didn't expect pendingReply to fail", t)
+    }
   }
 }
