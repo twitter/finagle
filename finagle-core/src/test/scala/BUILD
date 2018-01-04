@@ -23,6 +23,7 @@ scala_library(name='pushsession-utils',
   sources=[
     './com/twitter/finagle/exp/pushsession/DeferredExecutor.scala',
     './com/twitter/finagle/exp/pushsession/MockChannelHandle.scala',
+    './com/twitter/finagle/exp/pushsession/MockPushSession.scala',
   ],
   fatal_warnings=True,
 )

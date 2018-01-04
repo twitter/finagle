@@ -1,17 +1,14 @@
 package com.twitter.finagle.mux.exp.pushsession
 
 import com.twitter.finagle.Mux.param.{MaxFrameSize, OppTls}
-import com.twitter.finagle.Stack.Params
-import com.twitter.finagle.exp.pushsession.{PushChannelHandle, PushListener, PushSession, PushStackClient, PushStackServer, PushTransporter}
-import com.twitter.finagle.liveness.FailureDetector
+import com.twitter.finagle.exp.pushsession._
 import com.twitter.finagle.mux.Handshake.Headers
-import com.twitter.finagle.mux.transport.{IncompatibleNegotiationException, MuxFramer, OpportunisticTls}
-import com.twitter.finagle.mux.{Handshake, OpportunisticTlsParams, Request, Response}
+import com.twitter.finagle.mux.{OpportunisticTlsParams, Request, Response}
 import com.twitter.finagle.netty4.exp.pushsession.{Netty4PushListener, Netty4PushTransporter}
 import com.twitter.finagle.server.StackServer
-import com.twitter.finagle.{Client, ListeningServer, Mux, Name, Server, Service, ServiceFactory, Stack, mux, param}
+import com.twitter.finagle._
 import com.twitter.io.{Buf, ByteReader}
-import com.twitter.logging.{Level, Logger}
+import com.twitter.logging.Logger
 import com.twitter.util.Future
 import io.netty.channel.{Channel, ChannelPipeline}
 import java.net.{InetSocketAddress, SocketAddress}
@@ -36,76 +33,6 @@ private[finagle] object MuxPush
     service: ServiceFactory[mux.Request, mux.Response]
   ): ListeningServer = server.serve(addr, service)
 
-  private[pushsession] def negotiateClientSession(
-    handle: PushChannelHandle[ByteReader, Buf],
-    params: Params,
-    peerHeaders: Option[Headers]
-  ): MuxClientSession = {
-
-    def turnOnTls(): Unit = handle match {
-      case h: MuxChannelHandle => h.turnOnTls()
-      case other =>
-        // Should never happen when building a true client
-        throw new IllegalStateException(
-          s"Expected to find a MuxChannelHandle, instead found $other. Couldn't turn on TLS")
-    }
-
-    val statsReceiver = params[param.Stats].statsReceiver
-    val localEncryptLevel = params[OppTls].level.getOrElse(OpportunisticTls.Off)
-
-    val remoteEncryptLevel = peerHeaders.flatMap(Handshake.valueOf(OpportunisticTls.Header.KeyBuf, _)) match {
-      case Some(buf) => OpportunisticTls.Header.decodeLevel(buf)
-      case None =>
-        log.debug("Peer either didn't negotiate or didn't send an Opportunistic Tls preference: " +
-          "defaulting to remote encryption level of Off")
-        OpportunisticTls.Off
-    }
-
-    try {
-      val useTls = OpportunisticTls.negotiate(localEncryptLevel, remoteEncryptLevel)
-      if (log.isLoggable(Level.DEBUG)) {
-        log.debug(s"Successfully negotiated TLS with remote peer. Using TLS: $useTls " +
-          s"local level: $localEncryptLevel, remote level: $remoteEncryptLevel")
-      }
-      if (useTls) {
-        statsReceiver.counter("tls", "upgrade", "success").incr()
-        turnOnTls()
-      }
-    } catch {
-      case exn: IncompatibleNegotiationException =>
-        log.fatal(
-          exn,
-          s"The local peer wanted $localEncryptLevel and the remote peer wanted" +
-            s" $remoteEncryptLevel which are incompatible."
-        )
-        throw exn
-    }
-
-    val framingStats = statsReceiver.scope("framer")
-
-    val writeManager = {
-      val fragmentSize = peerHeaders
-        .flatMap(Handshake.valueOf(MuxFramer.Header.KeyBuf, _))
-        .map(MuxFramer.Header.decodeFrameSize(_))
-        .getOrElse(Int.MaxValue)
-      new FragmentingMessageWriter(handle, fragmentSize, framingStats)
-    }
-
-    val FailureDetector.Param(detectorConfig) = params[FailureDetector.Param]
-    val name = params[param.Label].label
-    val timer = params[param.Timer].timer
-
-    new MuxClientSession(
-      handle,
-      new FragmentDecoder(framingStats),
-      writeManager,
-      detectorConfig,
-      name,
-      statsReceiver,
-      timer
-    )
-  }
-
   def client: Client = Client()
 
   final case class Client(
@@ -126,16 +53,15 @@ private[finagle] object MuxPush
     protected def newSession(
       handle: PushChannelHandle[ByteReader, Buf]
     ): Future[MuxClientNegotiatingSession] = {
-      val negotiator = negotiateClientSession(handle, buildParams, _: Option[Headers])
+      val negotiator: Option[Headers] => MuxClientSession = Negotiation.Client(buildParams).negotiate(handle, _: Option[Headers])
       val headers = Mux.Client.headers(params[MaxFrameSize].size, params[OppTls].level)
-      val name = params[param.Label].label
       Future.value(
         new MuxClientNegotiatingSession(
           handle = handle,
           version = Mux.LatestVersion,
           negotiator = negotiator,
           headers = headers,
-          name = name))
+          name = params[param.Label].label))
     }
 
     override def newClient(
@@ -196,19 +122,17 @@ private[finagle] object MuxPush
       Service[Request, Response]
     ) => PushSession[ByteReader, Buf]
 
-    // TODO: implement negotiation
-    def defaultSessionFactory(
+    val defaultSessionFactory: SessionF = (
       params: Stack.Params,
       handle: PushChannelHandle[ByteReader, Buf],
       service: Service[Request, Response]
-    ): MuxServerSession = {
-      val statsReceiver = params[param.Stats].statsReceiver
-      new MuxServerSession(
-        params,
-        new FragmentDecoder(statsReceiver),
-        new FragmentingMessageWriter(handle, Int.MaxValue, statsReceiver),
-        handle,
-        service
+    ) => {
+      MuxServerNegotiator(
+        handle = handle,
+        service = service,
+        makeLocalHeaders = Mux.Server.headers(_: Headers, params[MaxFrameSize].size, params[OppTls].level),
+        negotiate = (service, headers) => Negotiation.Server(params, service).negotiate(handle, headers),
+        timer = params[param.Timer].timer
       )
     }
   }

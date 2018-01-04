@@ -75,7 +75,7 @@ private[finagle] final class MuxServerSession(
     }
   }
 
-  def processMessage(message: Message): Unit = message match {
+  private[this] def processMessage(message: Message): Unit = message match {
     case m: Message.Tdispatch =>
       tracker.dispatch(m)
 

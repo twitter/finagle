@@ -41,7 +41,7 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
       if (observedHeaders != null) sys.error("Unexpected state")
       else {
         observedHeaders = hs
-        MuxPush.negotiateClientSession(handle, params, hs)
+        Negotiation.Client(params).negotiate(handle, hs)
       }
     }
   }
@@ -161,7 +161,7 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
 
   test("Handle onClose failure cancels the handshake") {
     def negotiate(handle: PushChannelHandle[ByteReader, Buf], hs: Option[Headers]): MuxClientSession =
-      MuxPush.negotiateClientSession(handle, fragmentingParams, hs)
+      Negotiation.Client(fragmentingParams).negotiate(handle, hs)
 
     val (handle, negotiatingSession) = withMockHandle(negotiate, fragmentingParams)
     val sessionF = negotiatingSession.negotiate()
@@ -178,7 +178,7 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
 
   test("Handle normal onClose cancels the handshake") {
     def negotiate(handle: PushChannelHandle[ByteReader, Buf], hs: Option[Headers]): MuxClientSession =
-      MuxPush.negotiateClientSession(handle, fragmentingParams, hs)
+      Negotiation.Client(fragmentingParams).negotiate(handle, hs)
 
     val (handle, negotiatingSession) = withMockHandle(negotiate, fragmentingParams)
     val sessionF = negotiatingSession.negotiate()
