@@ -171,6 +171,7 @@ Runtime Behavior Changes
   * finagle-netty4: `Netty4ClientEngineFactory` and `Netty4ServerEngineFactory` now
     validate loaded certificates in all cases to ensure that the current date
     range is within the validity range specified in the certificate. ``PHAB_ID=D88664``
+  * finagle-redis: Support Geo index operation with GEOADD, GEODIST and other commands.
 
   * finagle-netty4: `TrustCredentials.Insecure` now works with native SSL/TLS engines.
     ``PHAB_ID=D103766``

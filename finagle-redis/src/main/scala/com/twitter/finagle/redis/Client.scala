@@ -38,6 +38,7 @@ trait NormalCommands
     with SortedSetCommands
     with ListCommands
     with SetCommands
+    with GeoCommands
     with BtreeSortedSetCommands
     with TopologyCommands
     with HyperLogLogCommands
