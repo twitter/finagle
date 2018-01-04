@@ -1,22 +1,22 @@
 package com.twitter.finagle
 
-import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
-import org.mockito.Mockito.{never, spy, times, verify}
-import org.mockito.Matchers._
+import com.twitter.conversions.time._
 import com.twitter.finagle.service.{ConstantService, NilService}
 import com.twitter.util.{Await, Future, Time}
+import org.mockito.Matchers._
+import org.mockito.Mockito.{never, spy, times, verify}
+import org.scalatest.FunSuite
 
-@RunWith(classOf[JUnitRunner])
 class FilterTest extends FunSuite {
+  private def await[T](f: Future[T]): T = Await.result(f, 5.seconds)
+
   class PassThruFilter extends Filter[Int, Int, Int, Int] {
-    def apply(req: Int, svc: Service[Int, Int]) = svc(req)
+    def apply(req: Int, svc: Service[Int, Int]): Future[Int] = svc(req)
   }
 
   class PassThruServiceFactory extends ServiceFactory[Int, Int] {
-    def apply(conn: ClientConnection) = Future.value(constSvc)
-    def close(deadline: Time) = Future.Done
+    def apply(conn: ClientConnection): Future[Service[Int, Int]] = Future.value(constSvc)
+    def close(deadline: Time): Future[Unit] = Future.Done
   }
 
   val constSvc = new ConstantService[Int, Int](Future.value(2))
@@ -24,7 +24,7 @@ class FilterTest extends FunSuite {
   test("Filter.andThen(Filter): applies next filter") {
     val spied = spy(new PassThruFilter)
     val svc = (new PassThruFilter).andThen(spied).andThen(constSvc)
-    Await.result(svc(4))
+    await(svc(4))
     verify(spied).apply(any[Int], any[Service[Int, Int]])
   }
 
@@ -33,41 +33,57 @@ class FilterTest extends FunSuite {
       throw new Exception
     }
     val svc = (new PassThruFilter).andThen(fail).andThen(constSvc)
-    val result = Await.result(svc(4).liftToTry)
+    val result = await(svc(4).liftToTry)
     assert(result.isThrow)
+  }
+
+  test("Filter.andThen(Service): can rescue synchronous exceptions from Service") {
+    val throwSvc = Service.mk[Int, Int] { _ =>
+      throw new IllegalArgumentException("bummer")
+    }
+    val filter = new SimpleFilter[Int, Int] {
+      def apply(request: Int, service: Service[Int, Int]): Future[Int] = {
+        service(request).rescue {
+          case _: IllegalArgumentException => Future.value(44)
+        }
+      }
+    }
+
+    val svc = filter.andThen(throwSvc)
+    assert(44 == await(svc(4)))
   }
 
   test("Filter.andThen(Service): applies next filter") {
     val spied = spy(new ConstantService[Int, Int](Future.value(2)))
     val svc = (new PassThruFilter).andThen(spied)
-    Await.result(svc(4))
+    await(svc(4))
     verify(spied).apply(any[Int])
   }
 
   test("Filter.andThen(Service): lifts synchronous exceptions into Future.exception") {
     val svc = (new PassThruFilter).andThen(NilService)
-    val result = Await.result(svc(4).liftToTry)
+    val result = await(svc(4).liftToTry)
     assert(result.isThrow)
   }
 
   test("Filter.andThen(ServiceFactory): applies next filter") {
     val spied = spy(new PassThruServiceFactory)
     val sf = (new PassThruFilter).andThen(spied)
-    Await.result(sf(ClientConnection.nil))
+    await(sf(ClientConnection.nil))
     verify(spied).apply(any[ClientConnection])
   }
 
   test("Filter.andThenIf: applies next filter when true") {
     val spied = spy(new PassThruFilter)
     val svc = (new PassThruFilter).andThenIf((true, spied)).andThen(constSvc)
-    Await.result(svc(4))
+    await(svc(4))
     verify(spied).apply(any[Int], any[Service[Int, Int]])
   }
 
   test("Filter.andThenIf: doesn't apply next filter when false") {
     val spied = spy(new PassThruFilter)
     val svc = (new PassThruFilter).andThenIf((false, spied)).andThen(constSvc)
-    Await.result(svc(4))
+    await(svc(4))
     verify(spied, never).apply(any[Int], any[Service[Int, Int]])
   }
 
@@ -79,17 +95,17 @@ class FilterTest extends FunSuite {
       }
       .andThen(constSvc)
 
-    assert(Await.result(svc(100)) == 2)
+    assert(await(svc(100)) == 2)
     verify(spied, times(1)).apply(any[Int], any[Service[Int, Int]])
 
-    assert(Await.result(svc(-99)) == 2)
+    assert(await(svc(-99)) == 2)
     verify(spied, times(1)).apply(any[Int], any[Service[Int, Int]])
   }
 
   test("Filter.TypeAgnostic.toFilter distributes over Filter.TypeAgnostic.andThen") {
     val calls = List.newBuilder[(Any, Any)]
     class TestFilter extends Filter.TypeAgnostic {
-      def toFilter[Req, Rep] =
+      def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] =
         Filter.mk[Req, Rep, Req, Rep] { (req, svc) =>
           calls += (this -> req)
           svc(req)
@@ -142,18 +158,18 @@ class FilterTest extends FunSuite {
       // for being returned from T.toFilter, and use that as a proxy for
       // identity.
       final class F[Req, Rep] extends Filter[Req, Rep, Req, Rep] {
-        override def apply(req: Req, svc: Service[Req, Rep]) = svc(req)
+        def apply(req: Req, svc: Service[Req, Rep]): Future[Rep] = svc(req)
       }
 
       object T extends Filter.TypeAgnostic {
-        override def toFilter[Req, Rep] = new F[Req, Rep]
+        def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = new F[Req, Rep]
       }
 
       assert(f(T).toFilter.isInstanceOf[F[_, _]])
     }
 
     // Left identity
-    isIdentity(Filter.TypeAgnostic.Identity.andThen(_))
+    isIdentity(Filter.TypeAgnostic.Identity.andThen)
 
     // Right identity
     isIdentity(_.andThen(Filter.TypeAgnostic.Identity))
