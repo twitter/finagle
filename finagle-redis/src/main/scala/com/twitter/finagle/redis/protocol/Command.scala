@@ -111,6 +111,7 @@ object Command {
   val SLAVEOF = Buf.Utf8("SLAVEOF")
   val CONFIG = Buf.Utf8("CONFIG")
   val SENTINEL = Buf.Utf8("SENTINEL")
+  val CLUSTER = Buf.Utf8("CLUSTER")
   val DBSIZE = Buf.Utf8("DBSIZE")
 
   // Scripts
@@ -148,6 +149,7 @@ object Command {
   val EXPIRE = Buf.Utf8("EXPIRE")
   val EXPIREAT = Buf.Utf8("EXPIREAT")
   val KEYS = Buf.Utf8("KEYS")
+  val MIGRATE = Buf.Utf8("MIGRATE")
   val MOVE = Buf.Utf8("MOVE")
   val PERSIST = Buf.Utf8("PERSIST")
   val PEXPIRE = Buf.Utf8("PEXPIRE")
@@ -182,6 +184,9 @@ object Command {
   val HSETNX = Buf.Utf8("HSETNX")
   val HVALS = Buf.Utf8("HVALS")
   val HSTRLEN = Buf.Utf8("HSTRLEN")
+
+  // Cluster commands
+  val ASKING = Buf.Utf8("ASKING")
 
   // Command Arguments
   val WITHSCORES = Buf.Utf8("WITHSCORES")

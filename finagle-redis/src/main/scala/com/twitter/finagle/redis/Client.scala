@@ -26,7 +26,7 @@ object Client {
 class Client(
   override val factory: ServiceFactory[Command, Reply],
   private[redis] val timer: Timer = DefaultTimer
-) extends BaseClient(factory)
+) extends BaseSingleClient(factory)
     with NormalCommands
     with SubscribeCommands
     with Transactions
@@ -79,11 +79,32 @@ trait Transactions { self: Client =>
   }
 }
 
+trait BaseClient { self: Closable =>
+  /**
+   * Helper function for passing a command to the service
+   */ 
+  private[redis] def doRequest[T](
+    cmd: Command
+  )(handler: PartialFunction[Reply, Future[T]]): Future[T]
+
+  /**
+   * Helper function to convert a Redis multi-bulk reply into a map of pairs
+   */
+  private[redis] def returnPairs[A](messages: Seq[A]) = {
+    assert(messages.length % 2 == 0, "Odd number of items in response")
+    messages.grouped(2).toSeq.flatMap {
+      case Seq(a, b) => Some((a, b))
+      case _ => None
+    }
+  }
+}
+
 /**
  * Connects to a single Redis host
  * @param factory: Finagle service factory object built with the Redis codec
  */
-abstract class BaseClient(protected val factory: ServiceFactory[Command, Reply]) extends Closable {
+abstract class BaseSingleClient(protected val factory: ServiceFactory[Command, Reply])
+extends BaseClient with Closable {
 
   /**
    * Releases underlying service factory object
@@ -103,17 +124,6 @@ abstract class BaseClient(protected val factory: ServiceFactory[Command, Reply])
         case StatusReply("QUEUED") => Future.Done.asInstanceOf[Future[Nothing]]
         case _ => Future.exception(new IllegalStateException)
       })
-  }
-
-  /**
-   * Helper function to convert a Redis multi-bulk reply into a map of pairs
-   */
-  private[redis] def returnPairs[A](messages: Seq[A]) = {
-    assert(messages.length % 2 == 0, "Odd number of items in response")
-    messages.grouped(2).toSeq.flatMap {
-      case Seq(a, b) => Some((a, b))
-      case _ => None
-    }
   }
 }
 
@@ -139,7 +149,7 @@ object TransactionalClient {
  * single redis instance, supporting transactions
  */
 class TransactionalClient(factory: ServiceFactory[Command, Reply])
-    extends BaseClient(factory)
+    extends BaseSingleClient(factory)
     with NormalCommands {
 
   private[this] var _multi = false
