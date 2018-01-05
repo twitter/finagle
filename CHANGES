@@ -6,6 +6,7 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 
 Unreleased
 ----------
+  * finagle-redis: Add support for redis Geo Commands. ``PHAB_ID=D123167``
 
 New Features
 ~~~~~~~~~~~~

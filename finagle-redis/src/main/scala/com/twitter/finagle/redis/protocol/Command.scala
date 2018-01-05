@@ -183,6 +183,17 @@ object Command {
   val HVALS = Buf.Utf8("HVALS")
   val HSTRLEN = Buf.Utf8("HSTRLEN")
 
+  // Geo commands (only available in Redis >= 3.2)
+  val GEOADD = Buf.Utf8("GEOADD")
+  val GEOHASH = Buf.Utf8("GEOHASH")
+  val GEORADIUS = Buf.Utf8("GEORADIUS")
+  val GEORADIUSBYMEMBER = Buf.Utf8("GEORADIUSBYMEMBER")
+  val GEOPOS = Buf.Utf8("GEOPOS")
+  val GEODIST = Buf.Utf8("GEODIST")
+  // Geo command arguments
+  val WITHCOORD = Buf.Utf8("WITHCOORD")
+  val WITHDIST = Buf.Utf8("WITHDIST")
+  val WITHHASH = Buf.Utf8("WITHHASH")
   // Command Arguments
   val WITHSCORES = Buf.Utf8("WITHSCORES")
   val LIMIT = Buf.Utf8("LIMIT")
