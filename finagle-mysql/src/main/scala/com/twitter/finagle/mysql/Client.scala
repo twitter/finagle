@@ -227,9 +227,6 @@ private class StdClient(
     def closeWith(e: Throwable): Future[T] = {
       singleton.close()
       Future.exception(e)
-//        .before {
-//        Future.exception(e)
-//      }
     }
 
     transaction.transform {
@@ -250,15 +247,8 @@ private class StdClient(
             // pooling underneath. then, close the service.
             singleton().flatMap { svc =>
               svc(PoisonConnectionRequest)
-            }.transform {
-              case Return(_) =>
-                closeWith(e)
-              case Throw(e2) =>
-                log.critical(e2, "Failure closing connection after rollback failure")
-                // this might be a bit drastic, but we do not want to leave the
-                // connection in an indeterminate state.
-                factory.close()
-                Future.exception(e)
+            }.transform { _ =>
+              closeWith(e)
             }
         }
     }
