@@ -31,7 +31,7 @@ import io.netty.util.AsciiString
 /**
  * This handler sets us up for a cleartext upgrade
  */
-private[http2] class Http2CleartextServerInitializer(
+private[finagle] class Http2CleartextServerInitializer(
   init: ChannelInitializer[Channel],
   params: Stack.Params
 ) extends ChannelInitializer[SocketChannel] {
@@ -54,6 +54,9 @@ private[http2] class Http2CleartextServerInitializer(
     }
   }
 
+  // An optional hook for modifying the channel when an upgrade has completed
+  protected def onUpgrade(ctx: ChannelHandlerContext): Unit = {}
+
   def upgradeCodecFactory(channel: Channel): UpgradeCodecFactory = new UpgradeCodecFactory {
     override def newUpgradeCodec(protocol: CharSequence): UpgradeCodec = {
       if (AsciiString.contentEquals(Http2CodecUtil.HTTP_UPGRADE_PROTOCOL_NAME, protocol)) {
@@ -70,6 +73,7 @@ private[http2] class Http2CleartextServerInitializer(
             // we turn off backpressure because Http2 only works with autoread on for now
             ctx.channel.config.setAutoRead(true)
             super.upgradeTo(ctx, upgradeRequest)
+            onUpgrade(ctx)
           }
         }
       } else null
