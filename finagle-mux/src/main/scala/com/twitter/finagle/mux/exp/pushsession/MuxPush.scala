@@ -5,7 +5,6 @@ import com.twitter.finagle.exp.pushsession._
 import com.twitter.finagle.mux.Handshake.Headers
 import com.twitter.finagle.mux.{OpportunisticTlsParams, Request, Response}
 import com.twitter.finagle.netty4.exp.pushsession.{Netty4PushListener, Netty4PushTransporter}
-import com.twitter.finagle.server.StackServer
 import com.twitter.finagle._
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.logging.Logger
@@ -42,9 +41,8 @@ private[finagle] object MuxPush
       with param.WithDefaultLoadBalancer[Client]
       with OpportunisticTlsParams[Client] {
 
-    private[this] def statsReceiver = params[param.Stats].statsReceiver.scope("mux")
-
-    private[this] val buildParams = params + param.Stats(statsReceiver)
+    private[this] val scopedStatsParams = params + param.Stats(
+      params[param.Stats].statsReceiver.scope("mux"))
 
     protected type SessionT = MuxClientNegotiatingSession
     protected type In = ByteReader
@@ -53,7 +51,8 @@ private[finagle] object MuxPush
     protected def newSession(
       handle: PushChannelHandle[ByteReader, Buf]
     ): Future[MuxClientNegotiatingSession] = {
-      val negotiator: Option[Headers] => MuxClientSession = Negotiation.Client(buildParams).negotiate(handle, _: Option[Headers])
+      val negotiator: Option[Headers] => MuxClientSession =
+        Negotiation.Client(scopedStatsParams).negotiate(handle, _: Option[Headers])
       val headers = Mux.Client.headers(params[MaxFrameSize].size, params[OppTls].level)
       Future.value(
         new MuxClientNegotiatingSession(
@@ -84,7 +83,8 @@ private[finagle] object MuxPush
         _ => (),
         MuxServerPipelineInit,
         inetSocketAddress,
-        Mux.param.removeTlsIfOpportunisticClient(params) // we don't want to scope these metrics to mux
+        // we don't want to scope these metrics to mux, so we use `params`
+        Mux.param.removeTlsIfOpportunisticClient(params)
       ) {
         override protected def initSession[T <: PushSession[ByteReader, Buf]](
           channel: Channel,
@@ -95,7 +95,7 @@ private[finagle] object MuxPush
           // required in the `negotiateClientSession` method above. Adding
           // more proxy types will break this pathway.
           def wrappedBuilder(pushChannelHandle: PushChannelHandle[ByteReader, Buf]): Future[T] =
-            sessionBuilder(new MuxChannelHandle(pushChannelHandle, channel, buildParams))
+            sessionBuilder(new MuxChannelHandle(pushChannelHandle, channel, scopedStatsParams))
 
           super.initSession(channel, protocolInit, wrappedBuilder)
         }
@@ -126,23 +126,30 @@ private[finagle] object MuxPush
       params: Stack.Params,
       handle: PushChannelHandle[ByteReader, Buf],
       service: Service[Request, Response]
-    ) => {
-      MuxServerNegotiator(
-        handle = handle,
-        service = service,
-        makeLocalHeaders = Mux.Server.headers(_: Headers, params[MaxFrameSize].size, params[OppTls].level),
-        negotiate = (service, headers) => Negotiation.Server(params, service).negotiate(handle, headers),
-        timer = params[param.Timer].timer
-      )
+    ) => handle match {
+      case h: MuxChannelHandle =>
+        MuxServerNegotiator(
+          handle = h,
+          service = service,
+          makeLocalHeaders = Mux.Server
+            .headers(_: Headers, params[MaxFrameSize].size, params[OppTls].level),
+          negotiate = (service, headers) => Negotiation.Server(params, service)
+            .negotiate(handle, headers),
+          timer = params[param.Timer].timer
+        )
+
+      case other =>
+        throw new IllegalStateException(
+          s"Expected to find a `MuxChannelHandle` but found ${ other.getClass.getSimpleName }")
     }
   }
 
-  // TODO: support opp-TLS
   final case class Server(
-    stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Mux.Server().stack,
-    params: Stack.Params = StackServer.defaultParams + param.ProtocolLibrary("mux"),
+    stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Mux.server.stack,
+    params: Stack.Params = Mux.server.params,
     sessionFactory: Server.SessionF = Server.defaultSessionFactory
-  ) extends PushStackServer[mux.Request, mux.Response, Server] {
+  ) extends PushStackServer[mux.Request, mux.Response, Server]
+    with OpportunisticTlsParams[Server] {
 
     protected type PipelineReq = ByteReader
     protected type PipelineRep = Buf
@@ -150,12 +157,27 @@ private[finagle] object MuxPush
     private[this] val scopedStatsParams = params + param.Stats(
       params[param.Stats].statsReceiver.scope("mux"))
 
-    protected def newListener(): PushListener[ByteReader, Buf] =
+    protected def newListener(): PushListener[ByteReader, Buf] = {
+      Mux.Server.validateTlsParamConsistency(params)
       new Netty4PushListener[ByteReader, Buf](
         MuxServerPipelineInit,
-        params, // we don't want to use the scoped stats receiver
+        Mux.param.removeTlsIfOpportunisticServer(params), // we don't want to scope these metrics to mux
         identity
-      )
+      ) {
+        override protected def initializePushChannelHandle(
+          ch: Channel,
+          sessionFactory: SessionFactory
+        ): Unit = {
+          val proxyFactory: SessionFactory = { handle =>
+            // We need to proxy via the MuxChannelHandle to get a vector
+            // into the netty pipeline for handling installing the TLS
+            // components of the pipeline after the negotiation.
+            sessionFactory(new MuxChannelHandle(handle, ch, params))
+          }
+          super.initializePushChannelHandle(ch, proxyFactory)
+        }
+      }
+    }
 
     protected def newSession(
       handle: PushChannelHandle[ByteReader, Buf],

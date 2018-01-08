@@ -4,7 +4,7 @@ import com.twitter.finagle.mux.{Handshake, Request, Response}
 import com.twitter.finagle.mux.Handshake.{CanTinitMsg, Headers, TinitTag}
 import com.twitter.finagle.{Mux, Service, Status}
 import com.twitter.finagle.mux.transport.Message
-import com.twitter.finagle.exp.pushsession.{PushChannelHandle, PushSession, RefPushSession}
+import com.twitter.finagle.exp.pushsession.{PushSession, RefPushSession}
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.logging.{Level, Logger}
 import com.twitter.util._
@@ -24,7 +24,7 @@ import scala.util.control.NonFatal
  * - `close` and `status` are safe to call from any thread.
  */
 private[finagle] class MuxServerNegotiator private(
-  handle: PushChannelHandle[ByteReader, Buf],
+  handle: MuxChannelHandle,
   service: Service[Request, Response],
   makeLocalHeaders: Headers => Headers,
   negotiate: (Service[Request, Response], Option[Headers]) => PushSession[ByteReader, Buf],
@@ -97,8 +97,14 @@ private[finagle] class MuxServerNegotiator private(
     case Message.Tinit(tag, Mux.LatestVersion, headers) =>
       try {
         val localHeaders = makeLocalHeaders(headers)
+        // We need to enqueue the message *now* so that it makes it down the pipeline before
+        // we potentially install the Netty TLS ChannelHandler. If we use the standard
+        // `sendAndForget` we bounce the send through the serial executor. If we try to execute
+        // the pipeline changes via the continuation provided to `send`, we are not guaranteed
+        // that it will happen before handling inbound bytes.
+        handle.sendNowAndForget(Message.encode(Message.Rinit(tag, Mux.LatestVersion, localHeaders)))
+
         // pipeline changes for Opp-TLS
-        handle.sendAndForget(Message.encode(Message.Rinit(tag, Mux.LatestVersion, localHeaders)))
         val session = negotiate(service, Some(headers))
         negotiationSuccess(session)
       } catch {
@@ -173,7 +179,7 @@ private object MuxServerNegotiator {
   private val log = Logger.get
 
   def apply(
-    handle: PushChannelHandle[ByteReader, Buf],
+    handle: MuxChannelHandle,
     service: Service[Request, Response],
     makeLocalHeaders: Headers => Headers,
     negotiate: (Service[Request, Response], Option[Headers]) => PushSession[ByteReader, Buf],

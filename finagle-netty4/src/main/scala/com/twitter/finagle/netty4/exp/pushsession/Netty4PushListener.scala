@@ -10,27 +10,31 @@ import java.net.SocketAddress
 /**
  * Netty4 based PushListener implementation
  */
-private[finagle] final class Netty4PushListener[In, Out](
+private[finagle] class Netty4PushListener[In, Out](
   pipelineInit: ChannelPipeline => Unit,
   params: Stack.Params,
   setupMarshalling: ChannelInitializer[Channel] => ChannelHandler
 ) extends PushListener[In, Out] {
 
-  private type SessionFactory = (PushChannelHandle[In, Out]) => Future[PushSession[In, Out]]
+  final protected type SessionFactory = (PushChannelHandle[In, Out]) => Future[PushSession[In, Out]]
 
   private[this] val listeningServerBuilder =
     new ListeningServerBuilder(_ => (), params, setupMarshalling)
 
-  def listen(addr: SocketAddress)(sessionFactory: SessionFactory): ListeningServer = {
+  final def listen(addr: SocketAddress)(sessionFactory: SessionFactory): ListeningServer = {
     val initializer = new ChannelHandleInitializer(sessionFactory)
     listeningServerBuilder.bindWithBridge(initializer, addr)
   }
 
+  /**
+   * Vector for hooking into the underlying Netty4 Channel.
+   */
+  protected def initializePushChannelHandle(ch: Channel, sessionFactory: SessionFactory): Unit = {
+    Netty4PushChannelHandle.install[In, Out, PushSession[In, Out]](ch, pipelineInit, sessionFactory)
+  }
+
   private[this] class ChannelHandleInitializer(sessionFactory: SessionFactory)
       extends ChannelInitializer[Channel] {
-
-    def initChannel(ch: Channel): Unit =
-      Netty4PushChannelHandle.install[In, Out, PushSession[In, Out]](
-        ch, pipelineInit, sessionFactory)
+    def initChannel(ch: Channel): Unit = initializePushChannelHandle(ch, sessionFactory)
   }
 }

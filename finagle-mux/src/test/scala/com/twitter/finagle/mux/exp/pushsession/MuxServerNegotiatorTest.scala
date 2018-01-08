@@ -16,7 +16,10 @@ class MuxServerNegotiatorTest extends FunSuite with Eventually with IntegrationP
 
   private val data: Buf = Buf.ByteArray.Owned((0 until 1024).map(_.toByte).toArray)
 
-  private class MockSession(handle: PushChannelHandle[ByteReader, Buf], val headers: Option[Headers]) extends PushSession[ByteReader, Buf](handle) {
+  private class MockSession(
+      handle: PushChannelHandle[ByteReader, Buf],
+      val headers: Option[Headers])
+    extends PushSession[ByteReader, Buf](handle) {
 
     val receivedMessages = new mutable.Queue[Message]()
 
@@ -32,6 +35,14 @@ class MuxServerNegotiatorTest extends FunSuite with Eventually with IntegrationP
   }
 
   private abstract class Ctx {
+    private class MockMuxChannelHandle(underlying: PushChannelHandle[ByteReader, Buf])
+      extends MuxChannelHandle(
+        underlying = underlying,
+        ch = null, // only used in overridden method `sendAndForgetNow`
+        params = params) {
+      override def sendNowAndForget(buf: Buf): Unit = sendAndForget(buf)
+    }
+
     def params = MuxPush.server.params
 
     var resolvedSession: MockSession = null
@@ -56,7 +67,8 @@ class MuxServerNegotiatorTest extends FunSuite with Eventually with IntegrationP
       resolvedSession
     }
 
-    val negotiator = MuxServerNegotiator(handle, service, localHeaders, negotiate, Timer.Nil)
+    val negotiator = MuxServerNegotiator(
+      new MockMuxChannelHandle(handle), service, localHeaders, negotiate, Timer.Nil)
 
     def receiveMessage(msg: Message): Unit = {
       val br = ByteReader(Message.encode(msg))
@@ -92,8 +104,9 @@ class MuxServerNegotiatorTest extends FunSuite with Eventually with IntegrationP
       val headers = Seq(Buf.Utf8("hello") -> Buf.Utf8("world"))
       receiveMessage(Tinit(1, 1, headers))
 
-      assert(resolvedSession.headers == Some(headers))
       assert(popSentMessage() == Rinit(1, 1, localHeaders(headers)))
+      handle.serialExecutor.executeAll()
+      assert(resolvedSession.headers == Some(headers))
     }
   }
 
@@ -114,6 +127,7 @@ class MuxServerNegotiatorTest extends FunSuite with Eventually with IntegrationP
       receiveMessage(Tinit(1, 1, Seq.empty))
       // Should have been sent before negotiation happened
       assert(popSentMessage() == Rinit(1, 1, localHeaders(Seq.empty)))
+      handle.serialExecutor.executeAll()
 
       // Shouldn't be closed until the Rerr is flushed
       assert(!handle.closedCalled)

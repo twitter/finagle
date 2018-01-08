@@ -121,7 +121,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     }
 
     // tells the Netty4Listener not to turn on TLS so we can turn it on later
-    private[this] def removeTlsIfOpportunisticServer(params: Stack.Params): Stack.Params = {
+    private[finagle] def removeTlsIfOpportunisticServer(params: Stack.Params): Stack.Params = {
       params[param.OppTls].level match {
         case None => params
         case _ => params + Transport.ServerSsl(None)

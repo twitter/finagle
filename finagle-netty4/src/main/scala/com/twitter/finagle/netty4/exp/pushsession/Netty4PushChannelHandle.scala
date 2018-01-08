@@ -121,9 +121,7 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel)
   // See note above about the scheduling of send messages
   def send(message: Out)(continuation: (Try[Unit]) => Unit): Unit = {
     serialExecutor.execute(new Runnable {
-      def run(): Unit = {
-        handleWriteAndFlush(message, continuation)
-      }
+      def run(): Unit = handleWriteAndFlush(message, continuation)
     })
   }
 
