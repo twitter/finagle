@@ -8,6 +8,8 @@ import com.twitter.logging.Logger
 import scala.collection.mutable
 
 private object ClientDecoder {
+  private val log = Logger.get()
+
   private val End: Buf = Buf.Utf8("END")
   private val Item: Buf = Buf.Utf8("ITEM")
   private val Stat: Buf = Buf.Utf8("STAT")
@@ -56,8 +58,6 @@ private[finagle] abstract class ClientDecoder[R] extends FrameDecoder[R] {
       extends State
   private case class Failed(error: Throwable) extends State
 
-  private[this] val log = Logger.get
-  private[this] val byteArrayForBuf2Int = ParserUtils.newByteArrayForBuf2Int()
   private[this] var state: State = AwaitingResponse
 
   /** Parse a sequence of tokens into a response */
@@ -133,7 +133,7 @@ private[finagle] abstract class ClientDecoder[R] extends FrameDecoder[R] {
             }
 
           val ex = new ServerError(
-            s"Server returned invalid response when values or END was expected: ${bufString}"
+            s"Server returned invalid response when values or END was expected: $bufString"
           )
           state = Failed(ex)
           throw ex
@@ -156,8 +156,7 @@ private[finagle] abstract class ClientDecoder[R] extends FrameDecoder[R] {
       if (responseName == Value) {
         validateValueResponse(tokens)
         val dataLengthAsBuf = tokens(3)
-        dataLengthAsBuf.write(byteArrayForBuf2Int, 0)
-        ParserUtils.byteArrayStringToInt(byteArrayForBuf2Int, dataLengthAsBuf.length)
+        ParserUtils.bufToInt(dataLengthAsBuf)
       } else -1
     }
   }

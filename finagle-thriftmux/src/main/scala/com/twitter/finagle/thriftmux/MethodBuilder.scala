@@ -66,7 +66,7 @@ object MethodBuilder {
       params,
       Config.create(thriftMuxClient.stack, params)
     )
-    new MethodBuilder(thriftMuxClient, mb)
+    new MethodBuilder(thriftMuxClient.asInstanceOf[ThriftRichClient], mb)
   }
 
   /**

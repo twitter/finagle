@@ -47,26 +47,24 @@ object ParserUtils {
     split
   }
 
-  private[memcached] def newByteArrayForBuf2Int() = new Array[Byte](MaxLengthOfIntString)
-
   /**
-   * Converts `length` characters of a Byte Array, representing a non-negative integer in chars,
+   * Converts the `Buf`, representing a non-negative integer in chars,
    * to a base 10 Int.
-   * Returns -1 if any of the characters are not digits, or the length is invalid
+   * Returns -1 if any of the bytes are not digits, or the length is invalid
    */
-  private[memcached] def byteArrayStringToInt(bytes: Array[Byte], length: Int): Int = {
-    if (length < 0 || length > MaxLengthOfIntString || length > bytes.length) -1
+  private[memcached] def bufToInt(buf: Buf): Int = {
+    val length = buf.length
+    if (length > MaxLengthOfIntString) -1
     else {
       var num = 0
-      var multiple = 1
-      var i = length - 1 // Start at the least significant digit and move left
-      while (i >= 0) {
-        if (bytes(i) >= '0' && bytes(i) <= '9')
-          num += (bytes(i) - '0') * multiple
+      var i = 0
+      while (i < length) {
+        val b = buf.get(i)
+        if (b >= '0' && b <= '9')
+          num = (num * 10) + (b - '0')
         else
           return -1
-        i -= 1
-        multiple *= 10
+        i += 1
       }
       num
     }

@@ -10,7 +10,7 @@ private[memcached] object ServerDecoder {
 
   private val NeedMoreData: Null = null
 
-  private def validateStorageCommand(tokens: Seq[Buf]) = {
+  private def validateStorageCommand(tokens: Seq[Buf]): Unit = {
     if (tokens.size < 5) throw new ClientError("Too few arguments")
     if (tokens.size > 6) throw new ClientError("Too many arguments")
     if (!ParserUtils.isDigits(tokens(4))) throw new ClientError("Bad frame length")
@@ -34,7 +34,6 @@ private[finagle] abstract class ServerDecoder[R >: Null](storageCommands: immuta
   private case class AwaitingData(valuesSoFar: Seq[Value], tokens: Seq[Buf], bytesNeeded: Int)
       extends State
 
-  private[this] val byteArrayForBuf2Int = ParserUtils.newByteArrayForBuf2Int()
   private[this] var state: State = AwaitingCommand
 
   private[this] def needsData(tokens: Seq[Buf]): Int = {
@@ -42,8 +41,7 @@ private[finagle] abstract class ServerDecoder[R >: Null](storageCommands: immuta
     if (storageCommands.contains(commandName)) {
       validateStorageCommand(tokens)
       val dataLengthAsBuf = tokens(4)
-      dataLengthAsBuf.write(byteArrayForBuf2Int, 0)
-      ParserUtils.byteArrayStringToInt(byteArrayForBuf2Int, dataLengthAsBuf.length)
+      ParserUtils.bufToInt(dataLengthAsBuf)
     } else -1
   }
 
@@ -64,7 +62,7 @@ private[finagle] abstract class ServerDecoder[R >: Null](storageCommands: immuta
           state = AwaitingData(Nil, tokens, dataBytes)
           NeedMoreData
         }
-      case AwaitingData(valuesSoFar, tokens, bytesNeeded) =>
+      case AwaitingData(_, tokens, bytesNeeded) =>
         // The framer should have given us the right sized Buf
         assert(buffer.length == bytesNeeded)
         state = AwaitingCommand

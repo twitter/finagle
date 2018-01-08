@@ -12,8 +12,7 @@ private[finagle] class ServerFramer(storageCommands: Set[Buf]) extends Framer {
       val commandName = tokens.head
       if (storageCommands.contains(commandName) && tokens.length >= 5) {
         val dataLengthAsBuf = tokens(4)
-        dataLengthAsBuf.write(byteArrayForBuf2Int, 0)
-        ParserUtils.byteArrayStringToInt(byteArrayForBuf2Int, dataLengthAsBuf.length)
+        ParserUtils.bufToInt(dataLengthAsBuf)
       } else -1
     } else -1
 }

@@ -72,8 +72,6 @@ private[memcached] trait Framer extends FinagleFramer {
 
   private[this] var state: State = AwaitingTextFrame
 
-  protected val byteArrayForBuf2Int: Array[Byte] = ParserUtils.newByteArrayForBuf2Int()
-
   /**
    * Using the current accumulation of Bufs, read the next frame. If no frame can be read,
    * return null.
