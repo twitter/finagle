@@ -15,13 +15,13 @@ object StackServer {
 
   private[this] class JvmTracing[Req, Rep]
       extends Stack.Module1[param.Tracer, ServiceFactory[Req, Rep]] {
-    override def role: Role = Role.jvmTracing
-    override def description: String = "Server-side JVM tracing"
-    override def make(
+    def role: Role = Role.jvmTracing
+    def description: String = "Server-side JVM tracing"
+    def make(
       _tracer: param.Tracer,
       next: ServiceFactory[Req, Rep]
     ): ServiceFactory[Req, Rep] = {
-      val param.Tracer(tracer) = _tracer
+      val tracer = _tracer.tracer
       if (tracer.isNull) next
       else newJvmFilter[Req, Rep].andThen(next)
     }
@@ -31,10 +31,10 @@ object StackServer {
    * Canonical Roles for each Server-related Stack modules.
    */
   object Role extends Stack.Role("StackServer") {
-    val serverDestTracing = Stack.Role("ServerDestTracing")
-    val jvmTracing = Stack.Role("JvmTracing")
-    val preparer = Stack.Role("preparer")
-    val protoTracing = Stack.Role("protoTracing")
+    val serverDestTracing: Stack.Role = Stack.Role("ServerDestTracing")
+    val jvmTracing: Stack.Role = Stack.Role("JvmTracing")
+    val preparer: Stack.Role = Stack.Role("preparer")
+    val protoTracing: Stack.Role = Stack.Role("protoTracing")
   }
 
   /**
@@ -109,7 +109,11 @@ object StackServer {
  */
 trait StackServer[Req, Rep]
     extends StackBasedServer[Req, Rep]
-    with Stack.Parameterized[StackServer[Req, Rep]] {
+    with Stack.Parameterized[StackServer[Req, Rep]]
+    with Stack.Transformable[StackServer[Req, Rep]] {
+
+  def transformed(t: Stack.Transformer): StackServer[Req, Rep] =
+    withStack(t(stack))
 
   /** The current stack used in this StackServer. */
   def stack: Stack[ServiceFactory[Req, Rep]]

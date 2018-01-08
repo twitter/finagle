@@ -1,6 +1,7 @@
 package com.twitter.finagle.server
 
 import com.twitter.finagle.Stack.Param
+import com.twitter.finagle.filter.RequestLogger
 import com.twitter.finagle.param._
 import com.twitter.finagle.{ClientConnection, ListeningServer, ServiceFactory, Stack}
 import com.twitter.finagle.stack.Endpoint
@@ -16,6 +17,7 @@ import java.net.SocketAddress
 trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This]]
   extends StackServer[Req, Rep]
     with Stack.Parameterized[This]
+    with Stack.Transformable[This]
     with CommonParams[This]
     with WithServerTransport[This]
     with WithServerSession[This]
@@ -53,14 +55,18 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
       private[this] val serverParams = params +
         Label(serverLabel) +
         Stats(statsReceiver) +
-        Monitor(reporter(label, None) andThen monitor)
-
-      private[this] val serviceFactory = (stack ++ Stack.Leaf(Endpoint, factory))
-        .make(serverParams)
+        Monitor(reporter(label, None).andThen(monitor))
 
       // We re-parameterize in case `newListeningServer` needs to access the
       // finalized parameters.
-      private[this] val server = withParams(serverParams)
+      private[this] val server: This = {
+        val withEndpoint = withStack(stack ++ Stack.Leaf(Endpoint, factory))
+        withEndpoint
+          .transformed(RequestLogger.newStackTransformer(serverLabel))
+          .withParams(serverParams)
+      }
+
+      private[this] val serviceFactory = server.stack.make(serverParams)
 
       // Session bookkeeping used to explicitly manage
       // session resources per ListeningServer. Note, draining
@@ -148,4 +154,7 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
   override def configuredParams(newParams: Stack.Params): This = {
     withParams(params ++ newParams)
   }
+
+  override def transformed(t: Stack.Transformer): This =
+    withStack(t(stack))
 }

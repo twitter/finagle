@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import scala.annotation.tailrec
+import scala.annotation.{implicitNotFound, tailrec}
 import scala.collection.mutable
 
 /**
@@ -43,7 +43,7 @@ sealed trait Stack[T] {
    * the map traverses on the element produced by `fn`, not the
    * original stack.
    */
-  protected def transform(fn: Stack[T] => Stack[T]): Stack[T] =
+  def transform(fn: Stack[T] => Stack[T]): Stack[T] =
     fn(this) match {
       case Node(hd, mk, next) => Node(hd, mk, next.transform(fn))
       case leaf @ Leaf(_, _) => leaf
@@ -285,7 +285,7 @@ object Stack {
       val head = new Stack.Head {
         val role: Stack.Role = _role
         val description: String = _role.toString
-        val parameters = Nil
+        val parameters: Seq[Stack.Param[_]] = Nil
       }
       Leaf(head, t)
     }
@@ -620,7 +620,7 @@ trait Stackable[T] extends Stack.Head {
  * [[StackBuilder]] to provide a convenient interface for constructing
  * Stacks.
  */
-@scala.annotation.implicitNotFound("${From} is not Stackable to ${To}")
+@implicitNotFound("${From} is not Stackable to ${To}")
 trait CanStackFrom[-From, To] {
   def toStackable(role: Stack.Role, el: From): Stackable[To]
 }

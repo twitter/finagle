@@ -1,6 +1,7 @@
 package com.twitter.finagle.client
 
 import com.twitter.finagle._
+import com.twitter.finagle.filter.RequestLogger
 import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.param._
 import com.twitter.finagle.stack.nilStack
@@ -102,8 +103,8 @@ trait EndpointerStackClient[Req, Rep, This <: EndpointerStackClient[Req, Rep, Th
    *               If that is also an empty String, then `dest` is used.
    */
   def newClient(dest: Name, label0: String): ServiceFactory[Req, Rep] = {
-    val Stats(stats) = params[Stats]
-    val Label(label1) = params[Label]
+    val stats = params[Stats].statsReceiver
+    val label1 = params[Label].label
 
     // For historical reasons, we have two sources for identifying
     // a client. The most recently set `label0` takes precedence.
@@ -113,7 +114,9 @@ trait EndpointerStackClient[Req, Rep, This <: EndpointerStackClient[Req, Rep, Th
       case _ => label0
     }
 
-    val clientStack = stack ++ (endpointer +: nilStack)
+    val tranformer = RequestLogger.newStackTransformer(clientLabel)
+    val clientStack = tranformer(stack ++ (endpointer +: nilStack))
+
     val clientParams = params +
       Label(clientLabel) +
       Stats(stats.scope(clientLabel)) +
