@@ -231,9 +231,9 @@ class ApertureTest extends FunSuite with ApertureSuite {
     bal.update(counts.range(10))
     bal.rebuildx()
     assert(bal.isDeterministicAperture)
-    assert(bal.minUnitsx == 4)
-    bal.applyn(1000)
-    assert(counts.nonzero == Set(1, 2, 3, 4))
+    assert(bal.minUnitsx == 8)
+    bal.applyn(2000)
+    assert(counts.nonzero == (1 to 8).toSet)
   }
 
   test("useDeterministicOrdering, clients unevenly divide servers") {
@@ -243,18 +243,21 @@ class ApertureTest extends FunSuite with ApertureSuite {
     }
 
     ProcessCoordinate.setCoordinate(peerOffset = 0, instanceId = 1, totalInstances = 4)
-    bal.update(counts.range(10))
+    bal.update(counts.range(18))
     bal.rebuildx()
     assert(bal.isDeterministicAperture)
-    assert(bal.minUnitsx == 4)
-    bal.applyn(1000)
-    // The range is 2.5, so we need a physical aperture of at least 2 to satisfy
-    // the `minUnits` of 4. In this case, a physical aperture of 2 maps to 6 servers
-    // on the ring, where 2 and 7 get ~1/2 the traffic relative to the rest of
-    // the nodes.
-    assert(counts.nonzero == Set(2, 3, 4, 5, 6, 7))
-    assert(counts(2).total.toDouble / counts(3).total - 0.5 <= 0.1)
-    assert(counts(7).total.toDouble / counts(6).total - 0.5 <= 0.1)
+    assert(bal.minUnitsx == 8)
+    bal.applyn(2000)
+
+    // Need at least 32 connections to satisfy min of 8, so we have to circle the ring 2 times (N=2)
+    // to get 36 virtual servers. Instance 1 offset: 0.25, width: 2*0.25 = 0.5 resulting in
+    // covering half the servers, or 9 server units.
+    // Our instance 1 offset is 0.25, which maps to server instance 18*0.25=4.5 as the start of its
+    // aperture and ends at 13.5, meaning that server instances 4 through 13 are in its physical
+    // aperture and 4 and 13 should get ~1/2 the load of the rest in this clients aperture.
+    assert(counts.nonzero == (4 to 13).toSet)
+    assert(math.abs(counts(4).total.toDouble / counts(5).total - 0.5) <= 0.1)
+    assert(math.abs(counts(13).total.toDouble / counts(12).total - 0.5) <= 0.1)
   }
 
   test("no-arg rebuilds are idempotent") {
@@ -321,7 +324,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
       assert(bal.isDeterministicAperture)
       // ignore 150, since we are using d-aperture and instead
       // default to 4.
-      assert(bal.minUnitsx == 4)
+      assert(bal.minUnitsx == 8)
     }
 
     toggle.flag.overrides.let(Aperture.dapertureToggleKey, 0.0) {

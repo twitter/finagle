@@ -16,6 +16,38 @@ import scala.util.hashing.MurmurHash3
 private object Aperture {
   val dapertureToggleKey = "com.twitter.finagle.core.UseDeterministicAperture"
   private val dapertureToggle = CoreToggles(dapertureToggleKey)
+
+  // When picking a min aperture, we want to ensure that p2c can actually converge
+  // when there are weights present. Based on empirical measurements, weights are well
+  // respected when we have 4 or more servers.
+  // The root of the problem is that you can't send a fractional request to the (potentially)
+  // fractionally weighted edges of the aperture. The following thought experiment illustrates
+  // this.
+  // First, we consider the limiting case of only one weighted node. If we only have one node
+  // to choose from, it's impossible to respect the weight since we will always return the
+  // single node – we need at least 2 nodes in this case.
+  // Next, we extend the thought experiment to the case of pick2. How does the probability of
+  // picking the second node change? Consider the case of 3 nodes of weights [1, 1, 0.5]. The
+  // probability of node 2 being picked on the first try is 0.5/2.5, but it changes for the
+  // second pick to 0.5/1.5. This shifting of probability causes a drift in the probability
+  // of a node being either of the two picked and in the case of the three nodes above, the
+  // probability of being picked either first or second is ~0.61 relative to nodes 0 or 1,
+  // meaningfully different than the desired value of 0.50.
+  // Next, we extrapolate this to the case of a large number of nodes. As the number of nodes
+  // in the aperture increases the numerator (a node's weight) of the probability stays the same
+  // but denominator (the sum of weights) increases. As N reaches infinity, the difference in
+  // probability between being picked first or second converges to 0, restoring the probabilities
+  // to what we expect. Running the same simulation with N nodes where the last node has 0.5
+  // weight results in the following simulated probabilities (P) relative to nodes with weight 1
+  // of picking the last node (weight 0.5) for either the first or second pick:
+  //      N     2       3       4       6      10     10000
+  //      P    1.0    0.61    0.56    0.53    0.52     0.50
+  // While 4 healthy nodes has been determined to be sufficient for the p2c picking algorithm,
+  // it is susceptible to finding it's aperture without any healthy nodes. While this is rare
+  // in isolation it becomes more likely when there are many such sized apertures present.
+  // Therefore, we've assigned the min to 8 to further decrease the probability of having a
+  // aperture without any healthy nodes.
+  private val MinDeterminsticAperture: Int = 8
 }
 
 /**
@@ -88,7 +120,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
 
   /**
    * The current aperture. This is never less than 1, or more
-   * than `units`.
+   * than `maxUnits`.
    */
   protected def aperture: Int = dist.aperture
 
@@ -189,7 +221,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     /**
      * Returns the maximum size of the aperture window.
      */
-    def max: Int = vector.size
+    final def max: Int = vector.size
 
     /**
      * Returns the minimum size of the aperture window.
@@ -208,7 +240,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     /**
      * Returns the current aperture.
      */
-    def aperture: Int = _aperture
+    final def aperture: Int = _aperture
 
     /**
      * Represents how many servers `pick` will select over – which may
@@ -220,17 +252,17 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
      * Adjusts the aperture by `n` while ensuring that it stays within
      * the bounds [min, max].
      */
-    def adjust(n: Int): Unit = {
+    final def adjust(n: Int): Unit = {
       _aperture = math.max(min, math.min(max, _aperture + n))
     }
 
-    def rebuild(): This = rebuild(vector)
-    def rebuild(vec: Vector[Node]): This = {
+    final def rebuild(): This = rebuild(vector)
+    final def rebuild(vec: Vector[Node]): This = {
       updateVectorHash(vec)
       if (vec.isEmpty) new EmptyVector(initAperture)
       else ProcessCoordinate() match {
         case Some(coord) if dapertureActive =>
-          new DeterministicApeture(vec, initAperture, coord)
+          new DeterministicAperture(vec, initAperture, coord)
 
         case None if dapertureActive =>
           noCoordinate.incr()
@@ -347,7 +379,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    * @param coord The [[ProcessCoordinate]] for this process which is used to narrow
    * the range of `pick2`.
    */
-  protected final class DeterministicApeture(
+  protected final class DeterministicAperture(
     vector: Vector[Node],
     initAperture: Int,
     coord: Coord
@@ -380,17 +412,10 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       }
     }
 
-    // We want to additionally ensure that p2c can actually converge when there
-    // are weights present. In order to do so, we need to pick over 4 or more servers.
-    // To see why, we can think about this in terms of picking one weighted node.
-    // If we only have one node to choose from, it's impossible to respect the weight
-    // since we will always return the single node – we need at least 2 nodes in
-    // this case. The same holds true for pick2, except we need 4 so that the
-    // weight(s) hold. Additionally, a min value of 4 nodes is more practical
-    // for resiliency. Note that this definition ignores the user defined `minAperture`,
+    // Note that this definition ignores the user defined `minAperture`,
     // but that isn't likely to hold much value given our definition of `min`
     // and how we calculate the `apertureWidth`.
-    override def min: Int = math.min(4, vector.size)
+    override def min: Int = math.min(Aperture.MinDeterminsticAperture, vector.size)
 
     // Translates the logical `aperture` into a physical one that
     // maps to the ring. Note, we do this in terms of the peer
@@ -399,11 +424,18 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     // cover more servers than the `aperture` requested in service
     // of global uniform load.
     private[this] def apertureWidth: Double = {
+      // A recasting of the formula
+      // clients*aperture <= N*servers
+      // - N is the smallest integer satisfying the inequality and represents
+      //   the number of times we have to circle the ring.
+      // -> ceil(clients*aperture/servers) = N
+      // - unitWidth = 1/clients; ring.unitWidth = 1/servers
+      // -> ceil(aperture*ring.unitWidth/unitWidth) = N
       val unitWidth: Double = coord.unitWidth // (0, 1.0]
-      val unitAperture: Double  = aperture * ring.unitWidth // (0, 1.0]
-      val units: Int = math.ceil(unitAperture / unitWidth).toInt
-      val width: Double = units * unitWidth
-      // We know that `width` is bounded between (0, 1.0] since `units`
+      val unitAperture: Double = aperture * ring.unitWidth // (0, 1.0]
+      val N: Int = math.ceil(unitAperture / unitWidth).toInt
+      val width: Double = N * unitWidth
+      // We know that `width` is bounded between (0, 1.0] since `N`
       // at most will be the inverse of `unitWidth` (i.e. if `unitAperture`
       // is 1, then units = 1/(1/x) = x, width = x*(1/x) = 1). However,
       // practically, we take the min of 1.0 to account for any floating

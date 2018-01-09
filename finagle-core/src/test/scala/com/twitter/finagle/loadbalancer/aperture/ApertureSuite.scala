@@ -35,7 +35,7 @@ private[loadbalancer] trait ApertureSuite {
     def maxUnitsx: Int = maxUnits
     def distx: Distributor = dist
     def rebuildx(): Unit = rebuild()
-    def isDeterministicAperture: Boolean = dist.isInstanceOf[DeterministicApeture]
+    def isDeterministicAperture: Boolean = dist.isInstanceOf[DeterministicAperture]
     def isRandomAperture: Boolean = dist.isInstanceOf[RandomAperture]
   }
 
