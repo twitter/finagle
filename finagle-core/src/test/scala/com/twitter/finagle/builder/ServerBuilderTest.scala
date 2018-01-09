@@ -61,7 +61,7 @@ class ServerBuilderTest
     def apply(config: SslServerConfiguration): Engine = engine
   }
   private val sessionVerifier = new SslServerSessionVerifier {
-    def apply(config: SslServerConfiguration, session: SSLSession): Boolean = true
+    def apply(address: Address, config: SslServerConfiguration, session: SSLSession): Boolean = true
   }
 
   test("ServerBuilder sets SSL/TLS configuration") {

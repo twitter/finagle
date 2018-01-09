@@ -46,6 +46,9 @@ Breaking API Changes
   * finagle-base-http: `c.t.f.http.Message.headerMap` is now an abstract method.
     ``PHAB_ID=D120931``
 
+  * finagle-core: `c.t.f.ssl.server.SslServerSessionVerifier` no longer uses the unauthenticated
+    host information from `SSLSession`. ``PHAB_ID=D124815``
+
   * finagle-memcached: `ConcurrentLoadBalancerFactory` was removed and its behavior
     was replaced by a Stack.Param inside finagle-core's `LoadBalancerFactory`.
     ``PHAB_ID=D119394``

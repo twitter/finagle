@@ -1,5 +1,6 @@
 package com.twitter.finagle.netty4.ssl.server
 
+import com.twitter.finagle.Address
 import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerSessionVerifier}
 import io.netty.channel.Channel
 import io.netty.channel.embedded.EmbeddedChannel
@@ -14,6 +15,7 @@ class SslServerVerificationHandlerTest extends FunSuite with MockitoSugar with O
 
   class TestVerifier(result: => Boolean) extends SslServerSessionVerifier {
     def apply(
+      address: Address,
       config: SslServerConfiguration,
       session: SSLSession
     ): Boolean = result
@@ -31,7 +33,7 @@ class SslServerVerificationHandlerTest extends FunSuite with MockitoSugar with O
   test("handler removes itself on successful verification") {
     val pipeline = channel.pipeline
     pipeline.addFirst(
-      new SslServerVerificationHandler(sslHandler, sslConfig, new TestVerifier(true))
+      new SslServerVerificationHandler(sslHandler, Address.failing, sslConfig, new TestVerifier(true))
     )
 
     val before = pipeline.get(classOf[SslServerVerificationHandler])
@@ -51,7 +53,7 @@ class SslServerVerificationHandlerTest extends FunSuite with MockitoSugar with O
   test("closes channel when verification fails") {
     val pipeline = channel.pipeline
     pipeline.addFirst(
-      new SslServerVerificationHandler(sslHandler, sslConfig, new TestVerifier(false))
+      new SslServerVerificationHandler(sslHandler, Address.failing, sslConfig, new TestVerifier(false))
     )
 
     pipeline.fireChannelActive()
@@ -67,6 +69,7 @@ class SslServerVerificationHandlerTest extends FunSuite with MockitoSugar with O
     pipeline.addFirst(
       new SslServerVerificationHandler(
         sslHandler,
+        Address.failing,
         sslConfig,
         new TestVerifier(throw new Exception("failed verification"))
       )
@@ -83,7 +86,7 @@ class SslServerVerificationHandlerTest extends FunSuite with MockitoSugar with O
   test("closes channel when verification fails without channel active") {
     val pipeline = channel.pipeline
     pipeline.addFirst(
-      new SslServerVerificationHandler(sslHandler, sslConfig, new TestVerifier(false))
+      new SslServerVerificationHandler(sslHandler, Address.failing, sslConfig, new TestVerifier(false))
     )
 
     handshakePromise.setSuccess(channel)

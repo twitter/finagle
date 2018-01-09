@@ -1,6 +1,6 @@
 package com.twitter.finagle.ssl.server
 
-import com.twitter.finagle.Stack
+import com.twitter.finagle.{Address, Stack}
 import javax.net.ssl.SSLSession
 
 /**
@@ -19,6 +19,7 @@ abstract class SslServerSessionVerifier {
    * similarly to a response of false.
    */
   def apply(
+    address: Address,
     config: SslServerConfiguration,
     session: SSLSession
   ): Boolean
@@ -49,6 +50,7 @@ object SslServerSessionVerifier {
    */
   val AlwaysValid: SslServerSessionVerifier = new SslServerSessionVerifier {
     def apply(
+      address: Address,
       config: SslServerConfiguration,
       session: SSLSession
     ): Boolean = true

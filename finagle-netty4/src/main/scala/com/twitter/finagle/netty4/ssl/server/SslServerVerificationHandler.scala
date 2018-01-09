@@ -1,6 +1,6 @@
 package com.twitter.finagle.netty4.ssl.server
 
-import com.twitter.finagle.{SslVerificationFailedException, FailureFlags}
+import com.twitter.finagle.{Address, FailureFlags, SslVerificationFailedException}
 import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerSessionVerifier}
 import com.twitter.logging.{HasLogLevel, Level}
 import com.twitter.util.{Promise, Return, Throw}
@@ -16,6 +16,7 @@ import scala.util.control.NonFatal
  */
 private[netty4] class SslServerVerificationHandler(
   sslHandler: SslHandler,
+  remoteAddress: Address,
   config: SslServerConfiguration,
   sessionVerifier: SslServerSessionVerifier
 ) extends ChannelInboundHandlerAdapter { self =>
@@ -24,7 +25,7 @@ private[netty4] class SslServerVerificationHandler(
 
   private[this] def verifySession(session: SSLSession, ctx: ChannelHandlerContext): Unit = {
     try {
-      if (sessionVerifier(config, session)) {
+      if (sessionVerifier(remoteAddress, config, session)) {
         ctx.pipeline.remove(self)
         onHandshakeComplete.setDone()
       } else {

@@ -1,5 +1,6 @@
 package com.twitter.finagle.param
 
+import com.twitter.finagle.Address
 import com.twitter.finagle.server.StringServer
 import com.twitter.finagle.ssl.Engine
 import com.twitter.finagle.ssl.server.{
@@ -20,7 +21,7 @@ class ServerTransportParamsTest extends FunSuite with MockitoSugar {
     def apply(config: SslServerConfiguration): Engine = engine
   }
   private val sessionVerifier = new SslServerSessionVerifier {
-    def apply(config: SslServerConfiguration, session: SSLSession): Boolean = true
+    def apply(address: Address, config: SslServerConfiguration, session: SSLSession): Boolean = true
   }
 
   test("withTransport.tls sets SSL/TLS configuration") {

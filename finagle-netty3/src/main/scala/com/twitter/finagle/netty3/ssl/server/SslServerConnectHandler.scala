@@ -1,6 +1,8 @@
 package com.twitter.finagle.netty3.ssl.server
 
+import com.twitter.finagle.Address
 import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerSessionVerifier}
+import java.net.InetSocketAddress
 import javax.net.ssl.SSLException
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.ssl.SslHandler
@@ -26,10 +28,16 @@ private[netty3] class SslServerConnectHandler(
     sslHandler
       .handshake()
       .addListener(new ChannelFutureListener {
-        override def operationComplete(f: ChannelFuture): Unit =
+        override def operationComplete(f: ChannelFuture): Unit = {
+          val remoteAddress: Address =
+            // guard against disconnected sessions and test environments with mock channels
+            if (ctx.getChannel.getRemoteAddress == null || !ctx.getChannel.getRemoteAddress.isInstanceOf[InetSocketAddress])
+              Address.failing
+            else Address(ctx.getChannel.getRemoteAddress.asInstanceOf[InetSocketAddress])
+
           if (f.isSuccess) {
             try {
-              if (sessionVerifier(config, sslHandler.getEngine.getSession)) {
+              if (sessionVerifier(remoteAddress, config, sslHandler.getEngine.getSession)) {
                 SslServerConnectHandler.super.channelConnected(ctx, e)
               } else {
                 Channels.close(ctx.getChannel)
@@ -40,6 +48,7 @@ private[netty3] class SslServerConnectHandler(
           } else {
             Channels.close(ctx.getChannel)
           }
+        }
       })
   }
 
