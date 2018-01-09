@@ -2,7 +2,7 @@ package com.twitter.finagle.netty4
 
 import com.twitter.conversions.storage._
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.{ChannelException, Stack}
+import com.twitter.finagle.Stack
 import com.twitter.finagle.netty4.http.handler.{
   BadRequestHandler,
   ClientExceptionMapper,
@@ -10,12 +10,10 @@ import com.twitter.finagle.netty4.http.handler.{
   PayloadSizeHandler,
   UnpoolHttpHandler
 }
-import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.param.Logger
 import com.twitter.finagle.http.param._
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.transport.TransportContext
-import com.twitter.util.{Future, Promise}
 import io.netty.channel._
 import io.netty.handler.codec.http._
 import java.net.SocketAddress
@@ -76,38 +74,6 @@ package object http {
       // about resource management, we have to turn pooled resources into unpooled ones as
       // the very last step of the pipeline.
       fn("unpoolHttp", UnpoolHttpHandler)
-    }
-  }
-
-  // In HTTP/2, messages may be split up into multiple frames. Due to a netty
-  // bug, https://github.com/netty/netty/issues/4941, the promise that
-  // ch.writeAndFlush provides for us is satisfied after the first frame is
-  // written instead of after all frames are written. To work around this, we
-  // schedule, rather than directly run the completion of our Promise.
-  //
-  // This provides a workaround because the completion of `p` is scheduled after
-  // all of the writes of the frame are scheduled. However, the ChannelFuture
-  // that is being listened to is the one satisfied by the first write. This
-  // will hide a failure caused by the second write.
-  private[finagle] val Http2ChannelTransportFactory: Channel => ChannelTransport = { ch: Channel =>
-    new ChannelTransport(ch) {
-      final override def write(msg: Any): Future[Unit] = {
-        val op = ch.writeAndFlush(msg)
-        val p = new Promise[Unit]
-
-        op.addListener(new ChannelFutureListener {
-          def operationComplete(f: ChannelFuture): Unit = {
-            ch.eventLoop.execute(new Runnable {
-              def run(): Unit = {
-                if (f.isSuccess) p.setDone
-                else p.setException(ChannelException(f.cause, remoteAddress))
-              }
-            })
-          }
-        })
-
-        p
-      }
     }
   }
 
