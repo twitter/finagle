@@ -240,7 +240,8 @@ private class StdClient(
           case Throw(_: ChannelClosedException) =>
             closeWith(e)
           case Throw(rollbackEx) =>
-            log.info(rollbackEx, "Failure during rollback, closing connection")
+            log.info(rollbackEx, s"Rolled back due to $e. Failed during rollback, closing " +
+              "connection")
             // the rollback failed and we don't want any uncommitted state to leak
             // to the next usage of the connection. issue a "poisoned" request to close
             // the underlying connection. this is necessary due to the connection
