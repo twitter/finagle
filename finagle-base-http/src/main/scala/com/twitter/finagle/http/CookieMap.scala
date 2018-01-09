@@ -1,14 +1,14 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.http.netty3.Bijections
-import com.twitter.finagle.http.netty3.Bijections._
-import org.jboss.netty.handler.codec.http.{
-  HttpHeaders,
-  CookieDecoder => NettyCookieDecoder,
-  CookieEncoder => NettyCookieEncoder
-}
+import com.twitter.finagle.http.netty3.Netty3CookieCodec
+import org.jboss.netty.handler.codec.http.HttpHeaders
 import scala.collection.mutable
-import scala.collection.JavaConverters._
+
+private[http] object CookieMap {
+
+  private val cookieCodec: CookieCodec = Netty3CookieCodec
+
+}
 
 /**
  * Adapt cookies of a Message to a mutable Map where cookies are indexed by
@@ -22,6 +22,7 @@ import scala.collection.JavaConverters._
 class CookieMap(message: Message)
     extends mutable.Map[String, Cookie]
     with mutable.MapLike[String, Cookie, CookieMap] {
+  import CookieMap._
 
   override def empty: CookieMap = new CookieMap(Request())
 
@@ -41,11 +42,13 @@ class CookieMap(message: Message)
       HttpHeaders.Names.SET_COOKIE
 
   private[this] def decodeCookies(header: String): Iterable[Cookie] = {
-    val decoder = new NettyCookieDecoder
-    try {
-      decoder.decode(header).asScala.map { Bijections.from(_) }
-    } catch {
-      case e: IllegalArgumentException =>
+    val decoding  =
+      if (message.isRequest) cookieCodec.decodeServer(header)
+      else cookieCodec.decodeClient(header)
+    decoding match {
+      case Some(decoding) =>
+        decoding
+      case None =>
         _isValid = false
         Nil
     }
@@ -57,18 +60,11 @@ class CookieMap(message: Message)
 
     // Add cookies back again
     if (message.isRequest) {
-      val encoder = new NettyCookieEncoder(false)
-      foreach {
-        case (_, cookie) =>
-          encoder.addCookie(Bijections.from(cookie))
-      }
-      message.headerMap.set(cookieHeaderName, encoder.encode())
+      message.headerMap.set(cookieHeaderName, cookieCodec.encodeClient(values))
     } else {
-      val encoder = new NettyCookieEncoder(true)
       foreach {
         case (_, cookie) =>
-          encoder.addCookie(Bijections.from(cookie))
-          message.headerMap.add(cookieHeaderName, encoder.encode())
+          message.headerMap.add(cookieHeaderName, cookieCodec.encodeServer(cookie))
       }
     }
   }
