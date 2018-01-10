@@ -4,6 +4,7 @@ import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.{ChannelClosedException, ClientConnection, Service, ServiceFactory, ServiceProxy}
 import com.twitter.logging.Logger
 import com.twitter.util._
+import scala.annotation.tailrec
 
 object Client {
 
@@ -26,6 +27,19 @@ object Client {
     statsReceiver: StatsReceiver,
     supportUnsigned: Boolean
   ): Client with Transactions = new StdClient(factory, supportUnsigned, statsReceiver)
+
+  // Extractor for nested [[ChannelClosedException]]s. Returns true if exception contains a
+  // [[ChannelClosedException]], and false otherwise.
+  //
+  // Exposed for testing.
+  private[mysql] object WrappedChannelClosedException {
+    @tailrec
+    def unapply(t: Throwable): Boolean = t match {
+      case _: ChannelClosedException => true
+      case _: Throwable => unapply(t.getCause)
+      case _ => false
+    }
+  }
 }
 
 trait Client extends Closable {
@@ -136,6 +150,7 @@ private class StdClient(
     with Transactions {
 
   import StdClient._
+  import Client._
 
   def this(
     factory: ServiceFactory[Request, Result],
@@ -233,11 +248,15 @@ private class StdClient(
       case Return(r) =>
         singleton.close()
         Future.value(r)
+      case Throw(e @ WrappedChannelClosedException()) =>
+        // We don't attempt a rollback in the event of a [[ChannelClosedException]]; the rollback
+        // would simply fail with the same exception.
+        closeWith(e)
       case Throw(e) =>
         client.query(rollbackQuery).transform {
           case Return(_) =>
             closeWith(e)
-          case Throw(_: ChannelClosedException) =>
+          case Throw(e @ WrappedChannelClosedException()) =>
             closeWith(e)
           case Throw(rollbackEx) =>
             log.info(rollbackEx, s"Rolled back due to $e. Failed during rollback, closing " +

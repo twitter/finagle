@@ -1,6 +1,6 @@
 package com.twitter.finagle.mysql
 
-import com.twitter.finagle.Mysql
+import com.twitter.finagle.{ChannelClosedException, Mysql}
 import com.twitter.finagle.filter.NackAdmissionFilter
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.util.Time
@@ -39,5 +39,50 @@ class ClientTest extends FunSuite with MockitoSugar with MustMatchers {
     verify(client, times(2)).query(sqlQuery)
     verify(factory, times(2)).apply()
     verify(factory, times(0)).close(any[Time])
+  }
+
+  test("WrappedChannelClosedException.unapply returns None for non-CCE nested exceptions") {
+    val exceptionInner = new Exception("inner")
+    val exceptionMiddle = new Exception("middle", exceptionInner)
+    val exceptionOuter = new Exception("outer", exceptionMiddle)
+
+    exceptionOuter match {
+      case e @ Client.WrappedChannelClosedException() =>
+        fail("exception did not contain CCE but was unwrapped as WrappedChannelClosedException")
+      case _ =>
+    }
+  }
+
+  test("WrappedChannelClosedException.unapply returns Some(exc) for CCEs") {
+    val exception = new ChannelClosedException()
+
+    exception match {
+      case e @ Client.WrappedChannelClosedException() =>
+      case _ => fail("exception DID contain CCE but was not unwrapped")
+    }
+  }
+
+  test("WrappedChannelClosedException.unapply returns Some(outer exception) for CCEs nested one " +
+    "level down") {
+    val exceptionInner = new Exception("inner")
+    val exceptionMiddle = new ChannelClosedException(exceptionInner, null)
+    val exceptionOuter = new Exception("outer", exceptionMiddle)
+
+    exceptionOuter match {
+      case e @ Client.WrappedChannelClosedException() =>
+      case _ => fail("exception DID contain CCE but was not unwrapped")
+    }
+  }
+
+  test("WrappedChannelClosedException.unapply returns Some(outer exception) for CCEs nested two " +
+    "levels down") {
+    val exceptionInner = new ChannelClosedException()
+    val exceptionMiddle = new Exception("middle", exceptionInner)
+    val exceptionOuter = new Exception("outer", exceptionMiddle)
+
+    exceptionOuter match {
+      case e @ Client.WrappedChannelClosedException() =>
+      case _ => fail("exception DID contain CCE but was not unwrapped")
+    }
   }
 }
