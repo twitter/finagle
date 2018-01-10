@@ -6,7 +6,6 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 
 Unreleased
 ----------
-  * finagle-redis: Add support for redis Geo Commands. ``PHAB_ID=D123167``
 
 New Features
 ~~~~~~~~~~~~
@@ -14,8 +13,7 @@ New Features
   * finagle-memcached: By default, the Memcached client now creates two connections
     to each endpoint, instead of 4. ``PHAB_ID=D119619``
 
-New Features
-~~~~~~~~~~~~
+  * finagle-redis: Add support for redis Geo Commands. ``PHAB_ID=D123167``
 
   * Introduce trace logging of requests as they flow through a Finagle
     client or server. These logs can be turned on at runtime by setting the
@@ -105,9 +103,9 @@ Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
   * finagle-core: Remove `NackAdmissionControl` from the default client stack.
-    Add it to the finagle-{http,mux} client stacks; note that it is added to 
+    Add it to the finagle-{http,mux} client stacks; note that it is added to
     finagle-http2 via finagle-http and finagle-thriftmux via finalge-mux. It is
-    no longer part of the finagle-{memcached,mysql,redis} client stacks. 
+    no longer part of the finagle-{memcached,mysql,redis} client stacks.
     ``PHAB_ID=D116722``
 
   * finagle-core: The "pipelining/pending" stat has been removed from protocols
