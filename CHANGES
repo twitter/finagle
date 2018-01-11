@@ -10,6 +10,10 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
+  * finagle-core: `FailureDetector` has a new method, `onClose`, which provides
+    a Future that is satisfied when the `FailureDetector` marks a peer as Closed.
+    ``PHAB_ID=D126840``
+
   * finagle-memcached: By default, the Memcached client now creates two connections
     to each endpoint, instead of 4. ``PHAB_ID=D119619``
 

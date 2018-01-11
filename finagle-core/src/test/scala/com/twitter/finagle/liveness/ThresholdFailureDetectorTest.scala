@@ -160,10 +160,12 @@ class ThresholdFailureDetectorTest
       tc.advance(10.milliseconds)
       timer.tick()
       assert(d.status == Status.Busy)
+      assert(!d.onClose.isDefined)
     }
     tc.advance(10.milliseconds)
     timer.tick()
     assert(d.status == Status.Closed)
+    assert(d.onClose.isDefined)
     assert(sr.counters(Seq("close")) == 1)
   }
 
@@ -193,11 +195,13 @@ class ThresholdFailureDetectorTest
     for (i <- 1 until failAfter) {
       assert(n.get == i)
       assert(d.status == Status.Open)
+      assert(!d.onClose.isDefined)
       tc.advance(10.milliseconds)
       timer.tick()
     }
 
     assert(n.get == failAfter)
+    assert(d.onClose.isDefined)
     assert(sr.counters(Seq("failures")) == 1)
     assert(sr.counters(Seq("close")) == 1)
     assert(sr.counters.get(Seq("marked_busy")).isEmpty)

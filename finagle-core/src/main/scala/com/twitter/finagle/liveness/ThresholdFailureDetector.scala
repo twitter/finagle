@@ -73,6 +73,10 @@ private class ThresholdFailureDetector(
 
   def status: Status = state.get
 
+  private[this] val _onClose = new Promise[Unit]
+
+  def onClose: Future[Unit] = _onClose
+
   private[this] def markBusy(): Unit = {
     if (state.compareAndSet(Status.Open, Status.Busy)) {
       busyCounter.incr()
@@ -88,6 +92,7 @@ private class ThresholdFailureDetector(
   private[this] def markClosed(): Unit = {
     closeCounter.incr()
     state.set(Status.Closed)
+    _onClose.setDone()
   }
 
   private[this] def loop(): Future[Unit] = {

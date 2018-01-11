@@ -89,6 +89,13 @@ private[http2] class StreamTransportFactory(
   private[this] val detector =
     FailureDetector(detectorConfig, ping, statsReceiver.scope("failuredetector"))
 
+  // H2 uses the default WatermarkPool, which believes each StreamTransport
+  // represents a connection. When the WatermarkPool sees a peer marked "Closed",
+  // it believes the connection has already been torn down and doesn't make an
+  // attempt to close it. Therefore, we ensure that if the FailureDetector marks
+  // this connection as closed, it gets torn down.
+  detector.onClose.ensure(close())
+
   private[this] def handleGoaway(obj: HttpObject, lastStreamId: Int): Unit = {
     dead = true
     streams.values.asScala.foreach { stream =>
@@ -127,10 +134,10 @@ private[http2] class StreamTransportFactory(
           )
 
         if (streamId < id.get()) {
+          // This stream may have existed and was closed. This is an error, but is recoverable.
           underlying.write(Rst(streamId, Http2Error.STREAM_CLOSED.code))
         } else {
-          dead = true
-          streams.values.asScala.foreach(_.handleCloseStream(s"stream $streamId not found"))
+          // This stream definitely has not yet existed. This error is not recoverable.
           underlying.write(
             // TODO: Properly utilize the DEBUG_DATA section of GOAWAY
             GoAway(
@@ -139,7 +146,10 @@ private[http2] class StreamTransportFactory(
               Http2Error.PROTOCOL_ERROR.code
             )
           )
-          close()
+          handleClose(
+            Time.Bottom,
+            Some(new Http2ProtocolException(s"Message for streamId $streamId which doesn't exist yet"))
+          )
         }
       }
 
@@ -187,18 +197,12 @@ private[http2] class StreamTransportFactory(
           loop()
 
         case Throw(e) =>
-          streams.values.asScala.foreach { c =>
-            c.handleCloseWith(e)
-          }
-          parent.close()
+          handleClose(Time.Bottom, Some(e))
       }
     })
   }
 
-  // we should stop when we fail
-  private[this] def loop(): Unit = {
-    underlying.read().respond(readLoop)
-  }
+  private[this] def loop(): Unit = underlying.read().respond(readLoop)
 
   loop()
 
@@ -226,7 +230,6 @@ private[http2] class StreamTransportFactory(
 
   def apply(): Future[Transport[HttpObject, HttpObject]] = {
     val p = new Promise[Transport[HttpObject, HttpObject]]
-
     exec.execute(new Runnable {
       def run(): Unit = {
         if (dead) p.setException(new DeadConnectionException(addr, FailureFlags.Retryable))
@@ -235,13 +238,33 @@ private[http2] class StreamTransportFactory(
         }
       }
     })
-
     p
   }
 
-  def onClose: Future[Throwable] = underlying.onClose
+  def onClose: Future[Throwable] = underlying.context.onClose
 
-  def close(deadline: Time): Future[Unit] = underlying.close(deadline)
+  private[this] def handleClose(
+      deadline: Time,
+      streamExn: Option[Throwable] = None
+    ): Unit = {
+    dead = true
+    streams.values.asScala.foreach { stream =>
+      streamExn match {
+        case Some(e) =>
+          stream.handleCloseWith(e, deadline)
+        case None =>
+          stream.handleCloseStream("StreamTransportFactory closed", deadline)
+      }
+    }
+    underlying.close(deadline)
+  }
+
+  def close(deadline: Time): Future[Unit] = {
+    exec.execute(new Runnable {
+      def run(): Unit = handleClose(deadline)
+    })
+    underlying.context.onClose.unit
+  }
 
   def status: Status = detector.status
 
@@ -491,6 +514,7 @@ private[http2] class StreamTransportFactory(
       streams.remove(curId)
 
       queue.fail(exn, discard = false)
+
       _onClose.updateIfEmpty(Return(exn))
     }
 
@@ -536,6 +560,8 @@ private[http2] object StreamTransportFactory {
   object Dead extends StreamState {
     override def toString: String = "Dead"
   }
+
+  class Http2ProtocolException(msg: String) extends Exception(s"HTTP/2 Protocol error: $msg")
 
   class BadStreamStateException(
     msg: String,

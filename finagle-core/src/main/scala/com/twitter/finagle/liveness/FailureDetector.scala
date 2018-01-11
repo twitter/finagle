@@ -5,16 +5,22 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.{Status, Stack}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.parsers.{double, duration, int, list}
-import com.twitter.util.{Duration, Future}
+import com.twitter.util.{Duration, Future, Promise}
 import java.util.logging.Logger
 
 /**
  * Failure detectors attempt to gauge the liveness of a peer,
  * usually by sending ping messages and evaluating response
  * times.
+ *
+ * A peer marked `Busy` may be revived. A peer marked `Closed` may not.
+ *
+ * `onClose` is satisfied when `FailureDetector` marks a peer as closed.
  */
 private[finagle] trait FailureDetector {
   def status: Status
+
+  def onClose: Future[Unit]
 }
 
 /**
@@ -24,6 +30,7 @@ private[finagle] trait FailureDetector {
  */
 private object NullFailureDetector extends FailureDetector {
   def status: Status = Status.Open
+  val onClose: Future[Unit] = Future.never
 }
 
 /**
@@ -31,7 +38,13 @@ private object NullFailureDetector extends FailureDetector {
  * `fn` to decide what `status` to return.
  */
 private class MockFailureDetector(fn: () => Status) extends FailureDetector {
-  def status: Status = fn()
+  private[this] val _onClose = new Promise[Unit]
+  def onClose: Future[Unit] = _onClose
+  def status: Status = {
+    val mockStatus = fn()
+    if (mockStatus == Status.Closed) _onClose.setDone()
+    mockStatus
+  }
 }
 
 /**
