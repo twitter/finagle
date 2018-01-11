@@ -4,7 +4,7 @@ import com.twitter.finagle.dispatch.GenSerialClientDispatcher.wrapWriteException
 import com.twitter.finagle.http._
 import com.twitter.finagle.http.exp.{Multi, StreamTransportProxy}
 import com.twitter.finagle.http.netty3.Bijections._
-import com.twitter.finagle.http.netty3.{Bijections, Injection, Netty3MultipartDecoder}
+import com.twitter.finagle.http.netty3.{Bijections, Injection}
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.netty3.http.ReaderUtils.{readChunk, streamChunks}
 import com.twitter.finagle.transport.Transport
@@ -69,8 +69,7 @@ private[finagle] class Netty3ServerStreamTransport(transport: Transport[Any, Any
           val finagleReq = new Request.Impl(
             readerIn,
             Writer.FailingWriter,
-            remoteSocketAddress,
-            Netty3MultipartDecoder
+            remoteSocketAddress
           )
 
           finagleReq.version = Bijections.versionFromNetty(req.getProtocolVersion)

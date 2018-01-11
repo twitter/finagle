@@ -12,6 +12,7 @@ scala_library(
     'finagle/finagle-base-http',
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-netty4',
+    'finagle/finagle-netty4-http/src/main/resources',
     'util/util-core/src/main/scala:scala',
     'util/util-logging/src/main/scala:scala',
   ],

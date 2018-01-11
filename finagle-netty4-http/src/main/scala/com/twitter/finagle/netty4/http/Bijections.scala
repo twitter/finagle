@@ -31,8 +31,7 @@ private[finagle] object Bijections {
       val result = new Request.Impl(
         reader = r,
         writer = Writer.FailingWriter,
-        remoteSocketAddress = remoteAddr,
-        multipartDecoder = Netty4MultipartDecoder
+        remoteSocketAddress = remoteAddr
       )
 
       result.setChunked(chunked)

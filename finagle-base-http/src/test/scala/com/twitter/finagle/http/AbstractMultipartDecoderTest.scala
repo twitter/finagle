@@ -24,12 +24,12 @@ abstract class AbstractMultipartDecoderTest(decoder: MultipartDecoder) extends F
       .buildFormPost(multipart = true)
 
   test("Attribute") {
-    assert(decoder(newRequest(Buf.Empty)).get.attributes("type").head == "text")
+    assert(decoder.decode(newRequest(Buf.Empty)).get.attributes("type").head == "text")
   }
 
   test("FileUpload (in-memory)") {
     val foo = Buf.Utf8("foo")
-    val multipart = decoder(newRequest(foo)).get
+    val multipart = decoder.decode(newRequest(foo)).get
 
     val Multipart.InMemoryFileUpload(buf, contentType, fileName, contentTransferEncoding) =
       multipart.files("groups").head
@@ -43,8 +43,8 @@ abstract class AbstractMultipartDecoderTest(decoder: MultipartDecoder) extends F
   }
 
   test("FileUpload (on-disk)") {
-    val foo = Buf.Utf8("." * (Multipart.MaxInMemoryFileSize.inBytes.toInt + 10))
-    val multipart = decoder(newRequest(foo)).get
+    val foo = Buf.Utf8("." * (Multipart.DefaultMaxInMemoryFileSize.inBytes.toInt + 10))
+    val multipart = decoder.decode(newRequest(foo)).get
 
     val Multipart.OnDiskFileUpload(file, contentType, fileName, contentTransferEncoding) =
       multipart.files("groups").head
@@ -58,13 +58,17 @@ abstract class AbstractMultipartDecoderTest(decoder: MultipartDecoder) extends F
   }
 
   test("Not a multipart request") {
-    assert(decoder(Request()).isEmpty)
-    assert(decoder(Request(Method.Post, "/")).isEmpty)
+    assert(decoder.decode(Request()).isEmpty)
+    assert(decoder.decode(Request(Method.Post, "/")).isEmpty)
     assert(
-      decoder({val r = Request(Method.Post, "/"); r.contentType = "application/json"; r}).isEmpty
+      decoder.decode(
+        {val r = Request(Method.Post, "/"); r.contentType = "application/json"; r}
+      ).isEmpty
     )
     assert(
-      decoder({val r = Request(Method.Put, "/"); r.contentType = "multipart/form-data"; r}).isEmpty
+      decoder.decode(
+        {val r = Request(Method.Put, "/"); r.contentType = "multipart/form-data"; r}
+      ).isEmpty
     )
   }
 }

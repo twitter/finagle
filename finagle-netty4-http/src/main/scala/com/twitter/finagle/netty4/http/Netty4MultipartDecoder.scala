@@ -1,16 +1,17 @@
 package com.twitter.finagle.netty4.http
 
-import com.twitter.finagle.http.Request
 import com.twitter.finagle.http.exp.{Multipart, MultipartDecoder}
+import com.twitter.finagle.http.Request
 import com.twitter.io.Buf
+import com.twitter.util.StorageUnit
 import io.netty.handler.codec.http.multipart._
 import scala.collection.mutable
 import scala.collection.JavaConverters._
 
-object Netty4MultipartDecoder extends MultipartDecoder {
-  protected def decode(req: Request): Option[Multipart] = {
+private class Netty4MultipartDecoder extends MultipartDecoder {
+  protected def decodeFull(req: Request, maxInMemoryFileSize: StorageUnit): Option[Multipart] = {
     val decoder = new HttpPostMultipartRequestDecoder(
-      new DefaultHttpDataFactory(Multipart.MaxInMemoryFileSize.inBytes),
+      new DefaultHttpDataFactory(maxInMemoryFileSize.inBytes),
       Bijections.finagle.requestToNetty(req)
     )
 

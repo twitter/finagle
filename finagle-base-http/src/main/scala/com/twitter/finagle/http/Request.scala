@@ -2,7 +2,6 @@ package com.twitter.finagle.http
 
 import com.twitter.collection.RecordSchema
 import com.twitter.finagle.http.exp.{Multipart, MultipartDecoder}
-import com.twitter.finagle.http.netty3.Netty3MultipartDecoder
 import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util.Closable
 import java.net.{InetAddress, InetSocketAddress}
@@ -259,7 +258,8 @@ object Request {
     // can keep a handle to the writer half and the client implementation can use
     // the reader half.
     val rw = Reader.writable()
-    val req = new Request.Impl(rw, rw, new InetSocketAddress(0), Netty3MultipartDecoder)
+    val req = new Request.Impl(rw, rw, new InetSocketAddress(0))
+
     req.version = version
     req.method = method
     req.uri = uri
@@ -290,12 +290,7 @@ object Request {
     uri: String,
     reader: Reader
   ): Request = {
-    val req = new Request.Impl(
-      reader,
-      Writer.FailingWriter,
-      new InetSocketAddress(0),
-      Netty3MultipartDecoder
-    )
+    val req = new Request.Impl(reader, Writer.FailingWriter, new InetSocketAddress(0))
 
     req.setChunked(true)
     req.version = version
@@ -364,13 +359,12 @@ object Request {
   private[finagle] final class Impl(
     val reader: Reader,
     val writer: Writer with Closable,
-    val remoteSocketAddress: InetSocketAddress,
-    val multipartDecoder: MultipartDecoder
-  ) extends Request {
+    val remoteSocketAddress: InetSocketAddress) extends Request {
 
     private var _method: Method = Method.Get
     private var _uri: String = ""
-    private lazy val _multipart: Option[Multipart] = multipartDecoder(this)
+
+    lazy val multipart: Option[Multipart] = MultipartDecoder.decode(this)
     val headerMap: HeaderMap = HeaderMap()
     val ctx: Request.Schema.Record = Request.Schema.newRecord()
 
@@ -383,7 +377,5 @@ object Request {
     def uri_=(uri: String): Unit = {
       _uri = uri
     }
-
-    def multipart: Option[Multipart] = _multipart
   }
 }

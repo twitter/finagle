@@ -19,7 +19,7 @@ case class Multipart(
 )
 
 /**
- * An _experimental_ set ot utility classes and methods for decoding HTTP POST requests with
+ * A set of utility classes and methods for decoding HTTP POST requests with
  * `multipart/form-data` content type.
  */
 object Multipart {
@@ -27,7 +27,7 @@ object Multipart {
   /**
    * The maximum size of the file upload to be stored as in-memory file.
    */
-  private[finagle] val MaxInMemoryFileSize: StorageUnit = 32.kilobytes
+  val DefaultMaxInMemoryFileSize: StorageUnit = 32.kilobytes
 
   /**
    * A type representing a multipart _file upload_.
