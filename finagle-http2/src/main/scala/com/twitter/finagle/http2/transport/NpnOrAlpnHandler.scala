@@ -2,7 +2,7 @@ package com.twitter.finagle.http2.transport
 
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.Stack
-import com.twitter.finagle.http2.param.FrameLoggerNamePrefix
+import com.twitter.finagle.http2.param.{EncoderIgnoreMaxHeaderListSize, FrameLoggerNamePrefix}
 import com.twitter.finagle.http2.{LoggerPerFrameTypeLogger, Settings}
 import com.twitter.finagle.netty4.http._
 import com.twitter.finagle.netty4.param.Allocator
@@ -51,6 +51,7 @@ private[http2] class NpnOrAlpnHandler(init: ChannelInitializer[Channel], params:
             Http2MultiplexCodecBuilder.forServer(initializer)
               .frameLogger(logger)
               .initialSettings(initialSettings)
+              .encoderIgnoreMaxHeaderListSize(params[EncoderIgnoreMaxHeaderListSize].ignoreMaxHeaderListSize)
               .build()
           )
 

@@ -2,28 +2,15 @@ package com.twitter.finagle.http2
 
 import com.twitter.finagle.Stack
 import com.twitter.finagle.http
-import com.twitter.finagle.http2.param.FrameLoggerNamePrefix
-import com.twitter.finagle.http2.transport.{
-  Http2NackHandler,
-  PriorKnowledgeHandler,
-  RstHandler,
-  StripHeadersHandler
-}
+import com.twitter.finagle.http2.param.{EncoderIgnoreMaxHeaderListSize, FrameLoggerNamePrefix}
+import com.twitter.finagle.http2.transport.{Http2NackHandler, PriorKnowledgeHandler, RstHandler, StripHeadersHandler}
 import com.twitter.finagle.netty4.http.{HttpCodecName, initServer}
 import com.twitter.finagle.netty4.param.Allocator
 import com.twitter.finagle.param.Stats
 import com.twitter.logging.Logger
 import io.netty.channel.socket.SocketChannel
-import io.netty.channel.{
-  Channel,
-  ChannelHandlerContext,
-  ChannelInitializer
-}
-import io.netty.handler.codec.http.HttpServerUpgradeHandler.{
-  SourceCodec,
-  UpgradeCodec,
-  UpgradeCodecFactory
-}
+import io.netty.channel.{Channel, ChannelHandlerContext, ChannelInitializer}
+import io.netty.handler.codec.http.HttpServerUpgradeHandler.{SourceCodec, UpgradeCodec, UpgradeCodecFactory}
 import io.netty.handler.codec.http.{FullHttpRequest, HttpServerUpgradeHandler}
 import io.netty.handler.codec.http2._
 import io.netty.util.AsciiString
@@ -65,6 +52,7 @@ private[finagle] class Http2CleartextServerInitializer(
         val codec = UpgradeMultiplexCodecBuilder.forServer(initializer)
           .frameLogger(logger)
           .initialSettings(Settings.fromParams(params))
+          .encoderIgnoreMaxHeaderListSize(params[EncoderIgnoreMaxHeaderListSize].ignoreMaxHeaderListSize)
           .build()
 
         new Http2ServerUpgradeCodec(codec) {
