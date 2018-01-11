@@ -57,14 +57,16 @@ All Balancers
 Aperture Based Load Balancers
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-**aperture**
-  A gauge of the width of the window over which endpoints are
-  load-balanced.
+**logical_aperture**
+  A gauge of the width of the window over which endpoints are load-balanced.
+  This is primarily an accounting mechanism and for a true representation of
+  the number of endpoints the client is talking to see `physical_aperture`.
 
 **physical_aperture**
   When using deterministic aperture (i.e. `useDeterministicOrdering` is set),
   the width of the window over which endpoints are load-balanced may be
-  wider than the `aperture` gauge. The `physical_aperture` represents this value.
+  wider than the `logical_aperture` gauge. The `physical_aperture` represents
+  this value.
 
 **use_deterministic_ordering**
   1 if the Aperture implementation uses deterministic ordering

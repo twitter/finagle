@@ -5,7 +5,6 @@ import com.twitter.finagle.loadbalancer.{BalancerNode, NodeT}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.Ema
 import com.twitter.util.{Duration, Future, Return, Time, Throw}
-import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * LoadBand is an aperture controller targeting a load band. `lowLoad` and `highLoad` are
@@ -57,7 +56,9 @@ private[loadbalancer] trait LoadBand[Req, Rep] extends BalancerNode[Req, Rep] {
    */
   protected def highLoad: Double
 
-  private[this] val total = new AtomicInteger(0)
+  // Must only be used from within the intrinsic lock, which is the monoTime object
+  private[this] var total: Int = 0
+  private[this] var offeredLoadEma: Double = 0L
   private[this] val monoTime = new Ema.Monotime
   private[this] val ema = new Ema(smoothWin.inNanoseconds)
 
@@ -65,8 +66,7 @@ private[loadbalancer] trait LoadBand[Req, Rep] extends BalancerNode[Req, Rep] {
   private[this] val widenCounter = sr.counter("widen")
   private[this] val narrowCounter = sr.counter("narrow")
 
-  @volatile private[this] var offeredLoadEma: Double = 0L
-  private[this] val emaGauge = sr.addGauge("offered_load_ema") { offeredLoadEma.toFloat }
+  private[this] val emaGauge = sr.addGauge("offered_load_ema") { monoTime.synchronized(offeredLoadEma).toFloat }
 
   /**
    * Adjust `total` by `delta` in order to keep track of total load across all
@@ -83,8 +83,11 @@ private[loadbalancer] trait LoadBand[Req, Rep] extends BalancerNode[Req, Rep] {
     // update (ts = 2)
     // t1:
     // update (ts = 1) // breaks monotonicity
-    offeredLoadEma = synchronized {
-      ema.update(monoTime.nanos(), total.addAndGet(delta))
+    val nextOfferedLoadEma = monoTime.synchronized {
+      total += delta
+      val next = ema.update(monoTime.nanos(), total)
+      offeredLoadEma = next
+      next
     }
 
     // Compute the capacity-adjusted average load and adjust the
@@ -94,12 +97,12 @@ private[loadbalancer] trait LoadBand[Req, Rep] extends BalancerNode[Req, Rep] {
     // Adjustments are somewhat racy: aperture and units may change
     // from underneath us. But this is not a big deal. If we
     // overshoot, the controller will self-correct quickly.
-    val avgLoad = offeredLoadEma / aperture
+    val avgLoad = nextOfferedLoadEma / logicalAperture
 
-    if (avgLoad >= highLoad && aperture < maxUnits) {
+    if (avgLoad >= highLoad && logicalAperture < maxUnits) {
       widen()
       widenCounter.incr()
-    } else if (avgLoad <= lowLoad && aperture > minUnits) {
+    } else if (avgLoad <= lowLoad && logicalAperture > minUnits) {
       narrow()
       narrowCounter.incr()
     }

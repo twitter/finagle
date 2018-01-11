@@ -30,7 +30,7 @@ private[loadbalancer] trait ApertureSuite {
 
     // Expose some protected methods for testing
     def adjustx(n: Int): Unit = adjust(n)
-    def aperturex: Int = aperture
+    def aperturex: Int = logicalAperture
     def minUnitsx: Int = minUnits
     def maxUnitsx: Int = maxUnits
     def distx: Distributor = dist

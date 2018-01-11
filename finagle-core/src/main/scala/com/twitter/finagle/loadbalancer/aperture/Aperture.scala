@@ -119,10 +119,10 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   protected def narrow(): Unit = adjust(-1)
 
   /**
-   * The current aperture. This is never less than 1, or more
+   * The current logical aperture. This is never less than 1, or more
    * than `maxUnits`.
    */
-  protected def aperture: Int = dist.aperture
+  protected def logicalAperture: Int = dist.logicalAperture
 
   /**
    * The maximum aperture serving units.
@@ -174,7 +174,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   }
 
   private[this] val gauges = Seq(
-    statsReceiver.addGauge("aperture") { aperture },
+    statsReceiver.addGauge("logical_aperture") { logicalAperture },
     statsReceiver.addGauge("physical_aperture") { dist.physicalAperture },
     statsReceiver.addGauge("use_deterministic_ordering") {
       if (dapertureActive) 1F else 0F
@@ -233,27 +233,27 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     // defer to the balancers `updater` which is serial. Therefore, we only
     // need to guarantee visibility across threads and don't need to
     // provide other synchronization between threads.
-    @volatile private[this] var _aperture: Int = initAperture
+    @volatile private[this] var _logicalAperture: Int = initAperture
     // Make sure the aperture is within bounds [min, max].
     adjust(0)
 
     /**
-     * Returns the current aperture.
+     * Returns the current logical aperture.
      */
-    final def aperture: Int = _aperture
+    final def logicalAperture: Int = _logicalAperture
 
     /**
      * Represents how many servers `pick` will select over – which may
-     * differ from `aperture` when using [[DeterministicAperture]].
+     * differ from `logicalAperture` when using [[DeterministicAperture]].
      */
-    def physicalAperture: Int = aperture
+    def physicalAperture: Int = logicalAperture
 
     /**
-     * Adjusts the aperture by `n` while ensuring that it stays within
-     * the bounds [min, max].
+     * Adjusts the logical aperture by `n` while ensuring that it stays
+     * within the bounds [min, max].
      */
     final def adjust(n: Int): Unit = {
-      _aperture = math.max(min, math.min(max, _aperture + n))
+      _logicalAperture = math.max(min, math.min(max, _logicalAperture + n))
     }
 
     final def rebuild(): This = rebuild(vector)
@@ -345,16 +345,16 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     // globally, since `token` is assigned randomly per process
     // when the node is created.
     protected val vec = statusOrder(vector.sortBy(nodeToken))
-    protected def bound: Int = aperture
+    protected def bound: Int = logicalAperture
     protected def emptyNode: Node = failingNode(emptyException)
     protected def rng: Rng = self.rng
 
     if (rebuildLog.isLoggable(Level.DEBUG)) {
-      val vecString = vec.take(aperture).map(_.factory.address).mkString("[", ", ", "]")
+      val vecString = vec.take(logicalAperture).map(_.factory.address).mkString("[", ", ", "]")
       rebuildLog.debug(s"[RandomAperture.rebuild $lbl] nodes=$vecString")
     }
 
-    def indices: Set[Int] = (0 until aperture).toSet
+    def indices: Set[Int] = (0 until logicalAperture).toSet
 
     // To reduce the amount of rebuilds needed, we rely on the probabilistic
     // nature of p2c pick. That is, we know that only when a significant
@@ -432,7 +432,8 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       // - unitWidth = 1/clients; ring.unitWidth = 1/servers
       // -> ceil(aperture*ring.unitWidth/unitWidth) = N
       val unitWidth: Double = coord.unitWidth // (0, 1.0]
-      val unitAperture: Double = aperture * ring.unitWidth // (0, 1.0]
+
+      val unitAperture: Double = logicalAperture * ring.unitWidth // (0, 1.0]
       val N: Int = math.ceil(unitAperture / unitWidth).toInt
       val width: Double = N * unitWidth
       // We know that `width` is bounded between (0, 1.0] since `N`
