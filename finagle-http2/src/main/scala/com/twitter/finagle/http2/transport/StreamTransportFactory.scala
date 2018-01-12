@@ -70,6 +70,8 @@ private[http2] class StreamTransportFactory(
   private[this] val FailureDetector.Param(detectorConfig) = params[FailureDetector.Param]
   private[this] val Stats(statsReceiver) = params[Stats]
 
+  private val streamsGauge = statsReceiver.addGauge("streams") { streams.size }
+
   // exposed for testing
   private[http2] def ping(): Future[Unit] = {
     val done = new Promise[Unit]

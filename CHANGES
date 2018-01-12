@@ -14,6 +14,9 @@ New Features
     a Future that is satisfied when the `FailureDetector` marks a peer as Closed.
     ``PHAB_ID=D126840``
 
+  * finagle-http2: HTTP/2 clients now expose the number of currently opened streams under
+    the `$client/streams` gauge. ``PHAB_ID=D127238``
+
   * finagle-memcached: By default, the Memcached client now creates two connections
     to each endpoint, instead of 4. ``PHAB_ID=D119619``
 
