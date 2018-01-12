@@ -17,7 +17,8 @@ New Features
   * finagle-memcached: By default, the Memcached client now creates two connections
     to each endpoint, instead of 4. ``PHAB_ID=D119619``
 
-  * finagle-redis: Add support for redis Geo Commands. ``PHAB_ID=D123167``
+  * finagle-redis: Add support for redis Geo Commands. ``PHAB_ID=D123167`` based on the PR
+    https://github.com/twitter/finagle/pull/628 written by Mura-Mi [https://github.com/Mura-Mi]
 
   * Introduce trace logging of requests as they flow through a Finagle
     client or server. These logs can be turned on at runtime by setting the
