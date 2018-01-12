@@ -26,7 +26,7 @@ class ConstClientEngineFactory(newEngine: SocketAddress => Engine) extends SslCl
         // An SslClientConfiguration may specify a hostname, and if so, we need to
         // use that instead. It is why we create a new `InetSocketAddress` instead
         // of just returning the one from Address.Inet.
-        new InetSocketAddress(SslClientEngineFactory.getHostname(isa, config), isa.getPort)
+        new InetSocketAddress(SslClientEngineFactory.getHostString(isa, config), isa.getPort)
       case _ => UnknownSocketAddress
     }
 

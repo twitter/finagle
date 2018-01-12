@@ -37,6 +37,11 @@ Bug Fixes
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-core, finagle-netty4: When creating engines, SslClientEngineFactories now use
+    `SslClientEngineFactory.getHostString` instead of `SslClientEngineFactory.getHostname`.
+    This no longer performs an unnecessary reverse lookup when a hostname is not supplied
+    as part of the `SslClientConfiguration`.  ``PHAB_ID=D124369``
+  
   * finagle-http2: Supplies a dependency on io.netty.netty-tcnative-boringssl-static,
     which adds support for ALPN, which is necessary for encrypted http/2.  To use a
     different static ssl dependency, exclude the tcnative-boringssl dependency and

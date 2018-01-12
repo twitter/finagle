@@ -90,7 +90,7 @@ private[finagle] object Netty4ClientSslConfigurations {
   ): Engine = {
     val sslEngine = address match {
       case Address.Inet(isa, _) =>
-        context.newEngine(allocator, SslClientEngineFactory.getHostname(isa, config), isa.getPort)
+        context.newEngine(allocator, SslClientEngineFactory.getHostString(isa, config), isa.getPort)
       case _ =>
         context.newEngine(allocator)
     }
