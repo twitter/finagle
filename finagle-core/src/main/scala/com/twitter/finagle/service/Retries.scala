@@ -60,6 +60,28 @@ object Retries {
 
     def mk(): (Budget, Stack.Param[Budget]) =
       (this, Budget)
+
+    def canEqual(other: Any): Boolean = other.isInstanceOf[Budget]
+
+    /**
+      * The equals method only compares the retryBudget field of this instance,
+      * since the requeueBackoffs Stream[Duration] is possibly infinite,
+      * resulting in an infinite computation to compare for equality.
+      */
+    override def equals(other: Any): Boolean = other match {
+      case that: Budget =>
+        (that canEqual this) &&
+          retryBudget == that.retryBudget
+      case _ => false
+    }
+
+    /**
+      * For the hashCode of this class we only take into account the hashCode of the RetryBudget field.
+      * The requeueBackoffs Stream[Duration] is possibly infinite,
+      * resulting in an infinite computation to get to the hashCode.
+      */
+    override def hashCode(): Int =
+      retryBudget.##
   }
 
   object Budget extends Stack.Param[Budget] {
