@@ -14,6 +14,11 @@ New Features
     a Future that is satisfied when the `FailureDetector` marks a peer as Closed.
     ``PHAB_ID=D126840``
 
+  * finagle-core: Introduce trace logging of requests as they flow through a
+    Finagle client or server. These logs can be turned on at runtime by setting
+    the "com.twitter.finagle.request.Logger" logger to trace level.
+    ``PHAB_ID=D124352``
+
   * finagle-http2: HTTP/2 clients now expose the number of currently opened streams under
     the `$client/streams` gauge. ``PHAB_ID=D127238``
 
@@ -23,10 +28,9 @@ New Features
   * finagle-redis: Add support for redis Geo Commands. ``PHAB_ID=D123167`` based on the PR
     https://github.com/twitter/finagle/pull/628 written by Mura-Mi [https://github.com/Mura-Mi]
 
-  * Introduce trace logging of requests as they flow through a Finagle
-    client or server. These logs can be turned on at runtime by setting the
-    "com.twitter.finagle.request.Logger" logger to trace level.
-    ``PHAB_ID=D124352``
+  * finagle-thrift: Add `c.t.f.thrift.service.ThriftServiceBuilder` and
+    `c.t.f.thrift.service.ReqRepThriftServiceBuilder` for backwards compatibility
+    of creating higher-kinded method-per-endpoint clients. ``PHAB_ID=D127538``
 
 Bug Fixes
 ~~~~~~~~~
@@ -41,7 +45,7 @@ Runtime Behavior Changes
     `SslClientEngineFactory.getHostString` instead of `SslClientEngineFactory.getHostname`.
     This no longer performs an unnecessary reverse lookup when a hostname is not supplied
     as part of the `SslClientConfiguration`.  ``PHAB_ID=D124369``
-  
+
   * finagle-http2: Supplies a dependency on io.netty.netty-tcnative-boringssl-static,
     which adds support for ALPN, which is necessary for encrypted http/2.  To use a
     different static ssl dependency, exclude the tcnative-boringssl dependency and
