@@ -5,6 +5,7 @@ import com.twitter.finagle.Stack.Module0
 import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.SerialClientDispatcher
+import com.twitter.finagle.filter.ClearContextValueFilter
 import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.naming.{DefaultInterpreter, NameInterpreter}
@@ -654,5 +655,41 @@ abstract class AbstractStackClientTest
 
     Await.result(listeningServer.close(), 5.seconds)
     Await.result(svc.close(), 5.seconds)
+  }
+
+  test("Sources exceptions") {
+    val listeningServer = StringServer.server
+      .serve(":*", Service.mk[String, String](Future.value(_)))
+    val boundAddress = listeningServer.boundAddress.asInstanceOf[InetSocketAddress]
+    val label = "stringClient"
+
+    val throwsModule = new Stack.Module0[ServiceFactory[String, String]] {
+      val role = Stack.Role("Throws")
+      val description = "Throws Exception"
+
+      def make(
+        next: ServiceFactory[String, String]
+      ): ServiceFactory[String, String] =
+        (new SimpleFilter[String, String] {
+          def apply(
+            request: String,
+            service: Service[String, String]
+          ): Future[String] = Future.exception(new Failure("boom!"))
+        }).andThen(next)
+    }
+
+    // Insert a module that throws near before [[ExceptionSourceFilter]].
+    // We could insert using [[ExceptionSourceFilter]] as the relative insertion point, but we use
+    // another module instead so that if the [[ExceptionSourceFilter]] were moved earlier in the
+    // stack, this test would fail.
+    val svc = baseClient.withStack(baseClient.stack.insertBefore(
+      ClearContextValueFilter.role, throwsModule))
+      .newService(Name.bound(Address(boundAddress)), label)
+
+    val failure = intercept[Failure] {
+      Await.result(svc("hello"), 5.seconds)
+    }
+
+   assert(failure.toString == "Failure(boom!, flags=0x00) with Service -> stringClient")
   }
 }

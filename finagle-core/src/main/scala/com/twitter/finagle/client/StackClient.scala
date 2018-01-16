@@ -168,14 +168,6 @@ object StackClient {
     stk.push(MonitorFilter.clientModule)
 
     /**
-     * `ExceptionSourceFilter` is the exception handler of last resort. It recovers
-     * application errors into failed [[Future Futures]] and attributes the failures to
-     * clients by client label. This needs to be at the top of the endpoint stack so that
-     * failures anywhere lower in the stack have endpoints attributed to them.
-     */
-    stk.push(ExceptionSourceFilter.module)
-
-    /**
      * `LatencyCompensation` configures latency compensation based on destination.
      *
      * It must appear above consumers of the the c.t.f.client.Compensation param, so
@@ -271,6 +263,11 @@ object StackClient {
      *    in the `RequeueFilter` with its own value; however, if the client
      *    has removed `Retries` in its configuration, we want `Retries`
      *    to be cleared so the server doesn't see a value set by another client.
+     *
+     *  * `ExceptionSourceFilter` is the exception handler of last resort. It recovers
+     *     application errors into failed [[Future Futures]] and attributes the failures to
+     *     clients by client label. This needs to be near the top of the stack so that
+     *     request failures anywhere lower in the stack have endpoints attributed to them.
      */
     stk.push(LoadBalancerFactory.module)
     stk.push(StatsFactoryWrapper.module)
@@ -280,6 +277,7 @@ object StackClient {
     stk.push(FactoryToService.module)
     stk.push(Retries.moduleRequeueable)
     stk.push(ClearContextValueFilter.module(context.Retries))
+    stk.push(ExceptionSourceFilter.module)
 
     /*
      * These modules deal with name resolution and request
