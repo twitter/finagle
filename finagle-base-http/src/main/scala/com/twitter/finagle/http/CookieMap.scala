@@ -4,10 +4,18 @@ import com.twitter.finagle.http.netty3.Netty3CookieCodec
 import org.jboss.netty.handler.codec.http.HttpHeaders
 import scala.collection.mutable
 
-private[http] object CookieMap {
+private[finagle] object CookieMap {
 
-  private val cookieCodec: CookieCodec = Netty3CookieCodec
+  @volatile private[this] var cookieCodec: CookieCodec = Netty3CookieCodec
 
+  // Sets the codec to use for cookies
+  def setCookieCodec(cookieCodec: CookieCodec): Unit = {
+    this.cookieCodec = cookieCodec
+  }
+
+  // exposed for testing
+  private[http] def getCookieCodec: CookieCodec =
+    cookieCodec
 }
 
 /**
@@ -19,10 +27,12 @@ private[http] object CookieMap {
  * cookie is removed from the CookieMap, a header is automatically removed from
  * the ''message''
  */
-class CookieMap(message: Message)
+class CookieMap private[http](message: Message, cookieCodec: CookieCodec)
     extends mutable.Map[String, Cookie]
     with mutable.MapLike[String, Cookie, CookieMap] {
-  import CookieMap._
+
+  def this(message: Message) =
+    this(message, CookieMap.getCookieCodec)
 
   override def empty: CookieMap = new CookieMap(Request())
 
