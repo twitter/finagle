@@ -272,7 +272,7 @@ class ToggleMapTest extends FunSuite with GeneratorDrivenPropertyChecks with Mat
       assert(someToggle.isDefinedAt(Int.MinValue))
       assert(!someToggle(Int.MinValue))
       assert(someToggle.isDefinedAt(Int.MaxValue))
-      assert(!someToggle(Int.MaxValue))
+      assert(someToggle(Int.MaxValue))
     }
   }
 
@@ -447,6 +447,19 @@ class ToggleMapTest extends FunSuite with GeneratorDrivenPropertyChecks with Mat
       assert(!toggle(i))
     }
     assert(Iterator.empty.sameElements(ToggleMap.Off.iterator))
+  }
+
+  test("Toggles are independent") {
+    val map = ToggleMap.newMutable()
+    map.put("com.toggle.t0", 0.001)
+    map.put("com.toggle.t1", 0.001)
+
+    val t0 = map("com.toggle.t0")
+    val t1 = map("com.toggle.t1")
+    
+    // These inputs were found from observation
+    assert(t0(602) && !t1(602))
+    assert(!t0(1129) && t1(1129))
   }
 
 }

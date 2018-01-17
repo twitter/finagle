@@ -92,9 +92,6 @@ abstract class ToggleMap { self =>
 
 object ToggleMap {
 
-  // more or less picked out of thin air as the initial hashing value
-  private[this] val HashSeed = 1300476044
-
   /**
    * Used to create a `Toggle[Int]` that hashes its inputs to
    * `apply` and `isDefinedAt` in order to promote a relatively even
@@ -109,8 +106,10 @@ object ToggleMap {
     fraction: Double
   ): Toggle.Fractional[Int] = new Toggle.Fractional[Int](id) {
     override def toString: String = s"Toggle($id)"
+    // Each Toggle has a different hash seed so that Toggles are independent
+    private[this] val hashSeed = MurmurHash3.stringHash(id)
     private[this] def hash(i: Int): Int = {
-      val h = MurmurHash3.mix(HashSeed, i)
+      val h = MurmurHash3.mix(hashSeed, i)
       MurmurHash3.finalizeHash(h, 1)
     }
     def isDefinedAt(x: Int): Boolean = pf.isDefinedAt(hash(x))

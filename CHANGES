@@ -38,6 +38,10 @@ Bug Fixes
   * finagle-mysql: Fix a bug with transactions where an exception during a rollback
     could leave the connection with a partially committed transaction. ``PHAB_ID=D122771``
 
+  * finagle-toggle: `c.t.f.toggle.Toggle`s are independent; that is, applying the same value to
+    two different toggles with the same fraction will produce independent true/false
+    values. ``PHAB_ID=D128172``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
