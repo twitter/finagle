@@ -8,12 +8,13 @@ import com.twitter.finagle.netty4.http.{HttpCodecName, initServer}
 import com.twitter.finagle.netty4.param.Allocator
 import com.twitter.finagle.param.Stats
 import com.twitter.logging.Logger
+import com.twitter.finagle.stats.Gauge
 import io.netty.channel.socket.SocketChannel
-import io.netty.channel.{Channel, ChannelHandlerContext, ChannelInitializer}
+import io.netty.channel.{Channel, ChannelFuture, ChannelFutureListener, ChannelHandlerContext, ChannelInitializer}
 import io.netty.handler.codec.http.HttpServerUpgradeHandler.{SourceCodec, UpgradeCodec, UpgradeCodecFactory}
 import io.netty.handler.codec.http.{FullHttpRequest, HttpServerUpgradeHandler}
 import io.netty.handler.codec.http2._
-import io.netty.util.AsciiString
+import io.netty.util.{AsciiString, AttributeKey}
 
 /**
  * This handler sets us up for a cleartext upgrade
@@ -54,6 +55,17 @@ private[finagle] class Http2CleartextServerInitializer(
           .initialSettings(Settings.fromParams(params))
           .encoderIgnoreMaxHeaderListSize(params[EncoderIgnoreMaxHeaderListSize].ignoreMaxHeaderListSize)
           .build()
+
+        val streams = statsReceiver.addGauge("streams") { codec.connection.numActiveStreams }
+
+        // We're attaching a gauge to the channel's attributes to make sure it stays referenced
+        // as long as channel is alive.
+        channel.attr(AttributeKey.valueOf[Gauge]("streams_gauge")).set(streams)
+
+        // We're removing the gauge on channel closure.
+        channel.closeFuture.addListener(new ChannelFutureListener() {
+          def operationComplete(f: ChannelFuture): Unit = streams.remove()
+        })
 
         new Http2ServerUpgradeCodec(codec) {
           override def upgradeTo(ctx: ChannelHandlerContext, upgradeRequest: FullHttpRequest) {

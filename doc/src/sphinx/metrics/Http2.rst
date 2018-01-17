@@ -4,5 +4,8 @@
 **<client_label>/upgrade/success**
   A counter of http2 upgrades and new prior knowledge connections client side.
 
+**<server_label>/streams**
+  A gauge exposing the number of opened streams on the server.
+
 **<client_label>/streams**
   A gauge exposing the number of opened streams on the client.
