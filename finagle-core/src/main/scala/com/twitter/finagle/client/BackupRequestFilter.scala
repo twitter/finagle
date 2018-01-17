@@ -29,18 +29,7 @@ object BackupRequestFilter {
 
   object Param {
 
-    /**
-     * Class for configuring [[BackupRequestFilter]]
-     *
-     * @param maxExtraLoad How much extra load, as a fraction, we are willing to send to the server.
-     *                  Must be between 0.0 and 1.0.
-     *
-     * @param sendInterrupts Whether or not to interrupt the original or backup request when a response
-     *                       is returned and the result of the outstanding request is superseded. For
-     *                       protocols without a control plane, where the connection is cut on
-     *                       interrupts, this should be "false" to avoid connection churn.
-     */
-    case class Configured(maxExtraLoad: Double, sendInterrupts: Boolean) extends Param {
+    private[client] case class Configured(maxExtraLoad: Double, sendInterrupts: Boolean) extends Param {
       require(
         maxExtraLoad > 0 && maxExtraLoad < 1.0,
         s"maxExtraLoad must be between 0.0 and 1.0, was $maxExtraLoad"
@@ -50,8 +39,22 @@ object BackupRequestFilter {
     implicit val param: Stack.Param[BackupRequestFilter.Param] = Stack.Param(Disabled)
   }
 
+  /**
+   * Configuration to disable [[BackupRequestFilter]]
+   */
   val Disabled: Param = Param.Disabled
 
+  /**
+   * Configure [[BackupRequestFilter]].
+   *
+   * @param maxExtraLoad How much extra load, as a fraction, we are willing to send to the server.
+   *                  Must be between 0.0 and 1.0.
+   *
+   * @param sendInterrupts Whether or not to interrupt the original or backup request when a response
+   *                       is returned and the result of the outstanding request is superseded. For
+   *                       protocols without a control plane, where the connection is cut on
+   *                       interrupts, this should be "false" to avoid connection churn.
+   */
   def Configured(maxExtraLoad: Double, sendInterrupts: Boolean): Param =
     Param.Configured(maxExtraLoad, sendInterrupts)
 
