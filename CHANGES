@@ -35,6 +35,10 @@ New Features
     `c.t.f.thrift.service.ReqRepThriftServiceBuilder` for backwards compatibility
     of creating higher-kinded method-per-endpoint clients. ``PHAB_ID=D127538``
 
+  * finagle-core: `c.t.f.http.MethodBuilder` and `c.t.f.thriftmux.MethodBuilder` now
+    expose `idempotent` and `nonIdempotent` methods, which can be used to configure
+    retries and the sending of backup requests. ``PHAB_ID=D122087``
+
 Bug Fixes
 ~~~~~~~~~
 

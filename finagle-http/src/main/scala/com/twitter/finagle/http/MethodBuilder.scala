@@ -2,6 +2,7 @@ package com.twitter.finagle.http
 
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
 import com.twitter.finagle.client.StackClient
+import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.{Name, Resolver, Service, client}
 import com.twitter.util.Duration
@@ -219,6 +220,20 @@ class MethodBuilder private (mb: client.MethodBuilder[Request, Response])
 
   def withRetryDisabled: MethodBuilder =
     new MethodBuilder(mb.withRetry.disabled)
+
+  /**
+   * @inheritdoc
+   *
+   * This additionally causes any server error HTTP status codes (500s) to be retried.
+   */
+  def idempotent(maxExtraLoad: Double): MethodBuilder =
+    new MethodBuilder(mb.idempotent(
+      maxExtraLoad,
+      sendInterrupts = false,
+      HttpResponseClassifier.ServerErrorsAsFailures))
+
+  def nonIdempotent: MethodBuilder =
+    new MethodBuilder(mb.nonIdempotent)
 
   /**
    * Construct a [[Service]] to be used for the `methodName` method.

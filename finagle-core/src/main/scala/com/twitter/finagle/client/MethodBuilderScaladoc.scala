@@ -1,6 +1,6 @@
 package com.twitter.finagle.client
 
-import com.twitter.finagle.service.ResponseClassifier
+import com.twitter.finagle.service
 import com.twitter.util.Duration
 import com.twitter.util.tunable.Tunable
 
@@ -191,7 +191,7 @@ private[finagle] trait MethodBuilderScaladoc[T] {
    * @see [[https://twitter.github.io/finagle/guide/Clients.html#response-classification
    *     response classification user guide]]
    */
-  def withRetryForClassifier(classifier: ResponseClassifier): T
+  def withRetryForClassifier(classifier: service.ResponseClassifier): T
 
   /**
    * Disables "application" level retries.
@@ -215,5 +215,26 @@ private[finagle] trait MethodBuilderScaladoc[T] {
    * @see [[withRetryForClassifier]]
    */
   def withRetryDisabled: T
+
+
+  /**
+   * Configure that requests are to be treated as idempotent. Because requests can be safely
+   * retried, [[BackupRequestFilter]] is configured with the params `maxExtraLoad` and
+   * `sendInterrupts` to decrease tail latency by sending an additional fraction of requests.
+   *
+   * @param maxExtraLoad How much extra load, as a fraction, we are willing to send to the server.
+   *                     Must be between 0.0 and 1.0.
+   */
+  def idempotent(
+    maxExtraLoad: Double
+  ): T
+
+  /**
+   * Configure that requests are to be treated as non-idempotent. [[BackupRequestFilter]] is
+   * disabled, and only those failures that are known to be safe to retry (i.e., write failures,
+   * where the request was never sent) are retried via requeue filter; any previously configured
+   * retries are removed.
+   */
+  def nonIdempotent: T
 
 }

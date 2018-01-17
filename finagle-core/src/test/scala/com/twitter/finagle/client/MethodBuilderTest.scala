@@ -8,10 +8,9 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util._
 import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
 import java.util.concurrent.atomic.AtomicInteger
-import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.mockito.MockitoSugar
 
 private object MethodBuilderTest {
   private val neverSvc: Service[Int, Int] =
@@ -55,8 +54,12 @@ private object MethodBuilderTest {
   }
 }
 
-@RunWith(classOf[JUnitRunner])
-class MethodBuilderTest extends FunSuite with Matchers with Eventually with IntegrationPatience {
+class MethodBuilderTest
+  extends FunSuite
+  with Matchers
+  with Eventually
+  with MockitoSugar
+  with IntegrationPatience {
 
   import MethodBuilderTest._
 
@@ -402,4 +405,239 @@ class MethodBuilderTest extends FunSuite with Matchers with Eventually with Inte
     assert(f.getSource(Failure.Source.Method).contains(methodName))
   }
 
+  test("nonIdempotent disables BackupRequestFilter") {
+    val underlying = mock[Service[Int, Int]]
+    val svc = ServiceFactory.const(underlying)
+
+    val configuredBrfParam = BackupRequestFilter.Configured(
+      maxExtraLoad = 0.01,
+      sendInterrupts = true)
+
+    // Configure BackupRequestFilter
+    val params = Stack.Params.empty + configuredBrfParam
+
+    val stack = Stack.Leaf(Stack.Role("test"), svc)
+
+    val stackClient = TestStackClient(stack, params)
+    val methodBuilder = MethodBuilder.from("with backups", stackClient)
+
+    // Ensure BRF is configured before calling `nonIdempotent`
+    assert(methodBuilder.params[BackupRequestFilter.Param] == configuredBrfParam)
+
+    val nonIdempotentClient = methodBuilder.nonIdempotent
+
+    // Ensure BRF is disabled after calling `nonIdempotent`
+    assert(nonIdempotentClient.params[BackupRequestFilter.Param] == BackupRequestFilter.Disabled)
+  }
+
+  test("nonIdempotent client keeps existing ResponseClassifier in params ") {
+    val underlying = mock[Service[Int, Int]]
+    val svc = ServiceFactory.const(underlying)
+
+    val configuredResponseClassifierParam =
+      param.ResponseClassifier(ResponseClassifier.RetryOnTimeout)
+
+    // Configure BackupRequestFilter
+    val params = Stack.Params.empty + configuredResponseClassifierParam
+
+    val stack = Stack.Leaf(Stack.Role("test"), svc)
+
+    val stackClient = TestStackClient(stack, params)
+    val methodBuilder = MethodBuilder.from("with classifier", stackClient)
+
+    // Ensure classifier is configured before calling `nonIdempotent`
+    assert(methodBuilder.params[param.ResponseClassifier] == configuredResponseClassifierParam)
+
+    val nonIdempotentClient = methodBuilder.nonIdempotent
+
+    // Ensure classifier is still in params after calling `nonIdempotent`
+    assert(nonIdempotentClient.params[param.ResponseClassifier] ==
+      configuredResponseClassifierParam)
+  }
+
+  test("nonIdempotent sets ResponseClassifier.default for Retries") {
+    val stats = new InMemoryStatsReceiver()
+    val timer = new MockTimer()
+    val classifier: ResponseClassifier = {
+      case ReqRep(_, Throw(_)) => ResponseClass.RetryableFailure
+    }
+    val params =
+      Stack.Params.empty +
+        param.Timer(timer) +
+        param.Stats(stats) +
+        Retries.Budget(RetryBudget.Infinite) +
+        param.ResponseClassifier(classifier)
+
+    val svc: Service[Int, Int] = Service.mk { i =>
+      if (i == 0) throw new Exception("boom!")
+      else throw ChannelWriteException(new Exception("boom"))
+    }
+
+    val stack = Retries.moduleRequeueable[Int, Int]
+      .toStack(Stack.Leaf(Stack.Role("test"), ServiceFactory.const(svc)))
+    val stackClient = TestStackClient(stack, params)
+    val mb = MethodBuilder.from("mb", stackClient)
+
+    // ensure we *do* get retries with unchanged
+    val client = mb.newService("a_client")
+
+    val rep1 = client(0)
+    intercept[Exception] {
+      Await.result(rep1, 1.second)
+    }
+    eventually {
+      assert(stats.counters(Seq("mb", "a_client", "logical", "requests")) == 1)
+      assert(stats.stat("mb", "a_client", "retries")() == Seq(2))
+    }
+
+    // ensure we *don't* get retries for non-WriteExceptions with idempotent client
+    val nonIdempotentClient = mb.nonIdempotent.newService("a_client_nonidempotent")
+
+    val rep2 = nonIdempotentClient(0)
+    intercept[Exception] {
+      Await.result(rep2, 1.second)
+    }
+    eventually {
+      assert(stats.counters(Seq("mb", "a_client_nonidempotent", "logical", "requests")) == 1)
+      assert(stats.stat("mb", "a_client_nonidempotent", "retries")() == Seq(0))
+    }
+
+    // This request should trigger a WriteException and thus is retried/requeued in RequeueFilter,
+    // per ResponseClassifier.default, but not retried in MethodBuilder's retries.
+    val writeExceptionReq = nonIdempotentClient(1)
+    intercept[Exception] {
+      Await.result(writeExceptionReq, 1.second)
+    }
+    eventually {
+      assert(stats.counters(Seq("mb", "a_client_nonidempotent", "logical", "requests")) == 2)
+      assert(stats.stat("mb", "a_client_nonidempotent", "retries")() == Seq(0, 0))
+      // Requeued 20 times
+      // (Infinite budget has balance of 100 * 0.2 max requeues per request = 20)
+      assert(stats.stat("retries", "requeues_per_request")() == Seq(0, 0, 0, 0, 20))
+    }
+  }
+
+  test("idempotent uses passed params to configure BackupRequestFilter/ResponseClassifier") {
+    val stats = new InMemoryStatsReceiver()
+    val timer = new MockTimer()
+    val params =
+      Stack.Params.empty +
+        param.Timer(timer) +
+        param.Stats(stats) +
+        Retries.Budget(RetryBudget.Infinite)
+
+    val perReqTimeout = 50.milliseconds
+    val totalTimeout = perReqTimeout * 2 + 20.milliseconds
+    val classifier: ResponseClassifier = {
+      case ReqRep(_, Throw(_: IndividualRequestTimeoutException)) =>
+        ResponseClass.RetryableFailure
+    }
+    val svc: Service[Int, Int] = Service.mk { i =>
+      Future.sleep(perReqTimeout + 1.millis)(timer).map(_ => i)
+    }
+
+    val stack = TimeoutFilter
+      .clientModule[Int, Int]
+      .toStack(Stack.Leaf(Stack.Role("test"), ServiceFactory.const(svc)))
+    val stackClient = TestStackClient(stack, params)
+    val mb = MethodBuilder.from("mb", stackClient)
+      .withTimeout.perRequest(perReqTimeout)
+      .withTimeout.total(totalTimeout)
+      .idempotent(0.01, true, classifier)
+
+    assert(mb.params[BackupRequestFilter.Param] == BackupRequestFilter.Configured(0.01, true))
+    assert(mb.params[param.ResponseClassifier].responseClassifier == classifier)
+
+    // ensure that the response classifier was also used to configure retries
+
+    val client = mb.newService("a_client")
+
+    Time.withCurrentTimeFrozen { tc =>
+      // issue the request
+      val rep = client(1)
+      assert(!rep.isDefined)
+
+      // hit the 1st per-req timeout.
+      tc.advance(perReqTimeout)
+      timer.tick()
+      assert(!rep.isDefined)
+
+      // hit the 2nd per-req timeout.
+      tc.advance(perReqTimeout)
+      timer.tick()
+      assert(!rep.isDefined)
+
+      // hit the total timeout
+      tc.advance(20.milliseconds)
+      timer.tick()
+      assert(rep.isDefined)
+
+      intercept[GlobalRequestTimeoutException] {
+        Await.result(rep, 5.seconds)
+      }
+
+      eventually {
+        // confirm there were 2 retries issued
+        assert(stats.stat("mb", "a_client", "retries")() == Seq(2))
+      }
+    }
+  }
+
+  test("idempotent combines existing clasifier with new one") {
+    val stats = new InMemoryStatsReceiver()
+    val timer = new MockTimer()
+
+    val myException1 = new Exception("boom1!")
+    val myException2 = new Exception("boomz2")
+
+    val existingClassifier: ResponseClassifier = {
+      case ReqRep(_, Throw(myException1)) => ResponseClass.RetryableFailure
+    }
+
+    val newClassifier: ResponseClassifier = {
+      case ReqRep(_, Throw(myException2)) => ResponseClass.RetryableFailure
+    }
+
+    val params =
+      Stack.Params.empty +
+        param.Timer(timer) +
+        param.Stats(stats) +
+        Retries.Budget(RetryBudget.Infinite) +
+        param.ResponseClassifier(existingClassifier)
+
+    val svc: Service[Int, Int] = Service.mk { i =>
+      if (i == 0) throw myException1
+      else throw myException2
+    }
+
+    val stack = Retries.moduleRequeueable[Int, Int]
+      .toStack(Stack.Leaf(Stack.Role("test"), ServiceFactory.const(svc)))
+    val stackClient = TestStackClient(stack, params)
+    val client = MethodBuilder.from("mb", stackClient).idempotent(0.01, true, newClassifier)
+      .newService("a_client")
+
+    val rep1 = client(0)
+    val exc1 = intercept[Exception] {
+      Await.result(rep1, 1.second)
+    }
+    assert(exc1 == myException1)
+
+    // ensure exceptions that fall under exisitng classifier, and those that fall under the
+    // new classifier, are retried
+    eventually {
+      assert(stats.counters(Seq("mb", "a_client", "logical", "requests")) == 1)
+      assert(stats.stat("mb", "a_client", "retries")() == Seq(2))
+    }
+
+    val rep2 = client(1)
+    val exc2 = intercept[Exception] {
+      Await.result(rep2, 1.second)
+    }
+    assert(exc2 == myException2)
+
+    eventually {
+      assert(stats.counters(Seq("mb", "a_client", "logical", "requests")) == 2)
+      assert(stats.stat("mb", "a_client", "retries")() == Seq(2, 2))
+    }
+  }
 }

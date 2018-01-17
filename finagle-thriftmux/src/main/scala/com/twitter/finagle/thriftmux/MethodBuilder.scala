@@ -265,6 +265,20 @@ class MethodBuilder(
     new MethodBuilder(rich, mb.withRetry.disabled)
 
   /**
+   * @inheritdoc
+   *
+   * This additionally causes Thrift Exceptions to be retried.
+   */
+  def idempotent(maxExtraLoad: Double): MethodBuilder =
+    new MethodBuilder(rich, mb.idempotent(
+      maxExtraLoad,
+      sendInterrupts = true,
+      ResponseClassifier.RetryOnThrows))
+
+  def nonIdempotent: MethodBuilder =
+    new MethodBuilder(rich, mb.nonIdempotent)
+
+  /**
    * Construct a `ServiceIface` to be used for the `methodName` function.
    *
    * @param methodName used for scoping metrics (e.g. "clnt/your_client_label/method_name").

@@ -1,6 +1,7 @@
 package com.twitter.finagle.client
 
 import com.twitter.finagle.client.MethodBuilderTimeout.TunableDuration
+import com.twitter.finagle.param.ResponseClassifier
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.{Showable, StackRegistry}
@@ -184,6 +185,62 @@ private[finagle] final class MethodBuilder[Req, Rep](
   def withTimeout: MethodBuilderTimeout[Req, Rep] =
     new MethodBuilderTimeout[Req, Rep](self)
 
+
+  /**
+   * Configure that requests are to be treated as idempotent. Because requests can be safely
+   * retried, [[BackupRequestFilter]] is configured with the params `maxExtraLoad` and
+   * `sendInterrupts` to decrease tail latency by sending an additional fraction of requests.
+   *
+   * @param maxExtraLoad How much extra load, as a fraction, we are willing to send to the server.
+   *                     Must be between 0.0 and 1.0.
+   * @param sendInterrupts Whether or not to interrupt the original or backup request when a response
+   *                       is returned and the result of the outstanding request is superseded. For
+   *                       protocols without a control plane, where the connection is cut on
+   *                       interrupts, this should be "false" to avoid connection churn.
+   * @param classifier [[ResponseClassifier]] (combined (via [[ResponseClassifier.orElse]])
+   *                   with any existing classifier in the stack params), used for determining
+   *                   whether or not requests have succeeded and should be retries.
+   *                   These determinations are also reflected in stats, and used by
+   *                   [[FailureAccrualFactory]].
+   */
+  def idempotent(
+    maxExtraLoad: Double,
+    sendInterrupts: Boolean,
+    classifier: service.ResponseClassifier
+  ): MethodBuilder[Req, Rep] = {
+    val combinedClassifier =
+      if (!params.contains[ResponseClassifier]) classifier
+      else (params[ResponseClassifier].responseClassifier).orElse(classifier)
+
+    val brfParam =
+      if (maxExtraLoad == 0) BackupRequestFilter.Disabled
+      else BackupRequestFilter.Configured(maxExtraLoad, sendInterrupts)
+
+    (new MethodBuilder[Req, Rep](
+      refCounted,
+      dest,
+      stack,
+      stackParams + brfParam + ResponseClassifier(combinedClassifier),
+      config))
+    .withRetry.forClassifier(combinedClassifier)
+  }
+
+  /**
+   * Configure that requests are to be treated as non-idempotent. [[BackupRequestFilter]] is
+   * disabled, and only those failures that are known to be safe to retry (i.e., write failures,
+   * where the request was never sent) are retried via requeue filter; any previously configured
+   * retries are removed.
+   */
+  def nonIdempotent: MethodBuilder[Req, Rep] = {
+    new MethodBuilder[Req, Rep](
+      refCounted,
+      dest,
+      stack,
+      stackParams + BackupRequestFilter.Disabled,
+      config)
+    .withRetry.forClassifier(service.ResponseClassifier.Default)
+  }
+
   //
   // Build
   //
@@ -226,11 +283,16 @@ private[finagle] final class MethodBuilder[Req, Rep](
     // Requests start at the top and traverse down.
     // Responses flow back from the bottom up.
     //
+    // Backups are positioned after retries to avoid request amplification of retries, after
+    // total timeouts and before per-request timeouts so that each backup uses the per-request
+    // timeout.
+    //
     // - Logical Stats
     // - Failure logging
     // - Annotate method name for a `Failure`
     // - Total Timeout
     // - Retries
+    // - Backup Requests
     // - Service (Finagle client's stack, including Per Request Timeout)
 
     val stats = statsReceiver(methodName)
@@ -292,7 +354,10 @@ private[finagle] final class MethodBuilder[Req, Rep](
   def wrappedService(name: String): Service[Req, Rep] = {
     addToRegistry(name)
     refCounted.open()
-    new ServiceProxy[Req, Rep](refCounted.get) {
+
+    val underlying = BackupRequestFilter.filterService(stackParams, refCounted.get)
+
+    new ServiceProxy[Req, Rep](underlying) {
       private[this] val isClosed = new AtomicBoolean(false)
       private[this] val closedP = new Promise[Unit]()
 
@@ -302,14 +367,15 @@ private[finagle] final class MethodBuilder[Req, Rep](
 
       override def status: Status =
         if (isClosed.get) Status.Closed
-        else refCounted.get.status
+        else underlying.status
 
       override def close(deadline: Time): Future[Unit] = {
         if (isClosed.compareAndSet(false, true)) {
           // remove our method builder's entries from the registry
           ClientRegistry.unregisterPrefixes(registryEntry(), registryKeyPrefix(name))
-          // and decrease the ref count
-          closedP.become(refCounted.close())
+          // call refCounted.close to decrease the ref count. `underlying.close` is only
+          // called when the closable underlying `refCounted` is closed.
+          closedP.become(refCounted.close(deadline).transform(_ => underlying.close(deadline)))
         }
         closedP
       }
