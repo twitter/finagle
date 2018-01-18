@@ -55,21 +55,21 @@ Turning the example into code, first in Scala:
       case ReqRep(_, Return(rep)) if rep.statusCode >= 400 && rep.statusCode <= 599 =>
         ResponseClass.RetryableFailure
     }
+    // can reduce tail latency by sending 1% extra load to the backend
+    .idempotent(maxExtraLoad = 0.01)
     // build the service
     .newService(methodName = "get_statuses")
 
-  // a `Service` for "POST statuses/update" with relatively loose timeouts
-  // and a retry policy tailored to this endpoint.
+  // a `Service` for "POST statuses/update", which is non-idempotent and has
+  // relatively loose timeouts
   val statusesUpdate: Service[http.Request, http.Response] = builder
     // 200 millisecond timeouts per attempt. this applies to the initial
     // attempt and each retry, if any.
     .withTimeoutPerRequest(200.milliseconds)
     // 500 milliseconds timeouts in total, including retries
     .withTimeoutTotal(500.milliseconds)
-    // retry only a specific HTTP response code
-    .withRetryForClassifier {
-      case ReqRep(_, Return(rep)) if rep.statusCode == 418 => ResponseClass.RetryableFailure
-    }
+    // no retries (except on write exceptions), and no backup requests
+    .nonIdempotent
     // build the service
     .newService(methodName = "update_status")
 
@@ -87,6 +87,7 @@ A similar example, for Java:
     Http.client().methodBuilder("localhost:8080")
       .withTimeoutTotal(Duration.fromMilliseconds(50))
       .withTimeoutPerRequest(Duration.fromMilliseconds(25))
+      .idempotent(0.01)
       .newService("java_example");
 
 Retries
@@ -112,6 +113,32 @@ The :ref:`classifier <response_classification>` set by ``withRetryForClassifier`
 used to determine which requests are successful. This is the basis for measuring
 the :ref:`logical <mb_logical_req>` success metrics of the method and for logging_
 unsuccessful requests.
+
+Idempotency
+-----------
+
+``MethodBuilder`` provides ``idempotent`` and ``nonIdemptotent`` methods for a client to signal
+whether it's safe to resend requests that have already been sent. 
+
+If a client is configured with ``idempotent``, a protcol-dependent
+:src:`ResponseClassifier <com/twitter/finagle/service/ResponseClassifier.scala>` is combined with
+any exisiting classifier to also reissue requests on failure (Thrift exceptions for ThriftMux
+clients, and 500s for HTTP clients). The parameter to ``idempotent``, ``maxExtraLoad``, is used to
+configure :src:`BackupRequestFilter <com/twitter/finagle/client/BackupRequestFilter.scala>`
+(a value of 0.0 disables the filter).
+:src:`BackupRequestFilter <com/twitter/finagle/client/BackupRequestFilter.scala>` can reduce tail
+latency by sending a second, backup request if the original request has not been satisfied within
+a certain time limit (calculated dynamically based on latency). The filter will never send more than
+``maxExtraLoad`` more requests (i.e., for a value of 0.01, the filter will not send more than 1%
+additional requests).
+
+If a client is configured with ``nonIdempotent``, any existing configured
+:src:`ResponseClassifier <com/twitter/finagle/service/ResponseClassifier.scala>` is removed
+and replaced with the default
+:src:`ResponseClassifier <com/twitter/finagle/service/ResponseClassifier.scala>`, which only retries
+on write exceptions (wherein the request was never sent to the server). Any configured
+:src:`BackupRequestFilter <com/twitter/finagle/client/BackupRequestFilter.scala>` is also disabled,
+since it's not safe to reissue requests.
 
 Timeouts
 --------
