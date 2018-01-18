@@ -147,10 +147,10 @@ returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.h
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.memcached" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="memcached"></a><a id="memcached:memcached"></a>
+    </li><li name="com.twitter.finagle.http" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="http"></a><a id="http:http"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#memcached" title="Permalink">
+      <a href="../../../com/twitter/finagle/index.html#http" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -159,14 +159,14 @@ resources for using Finagle.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="../index.html"><span class="name">memcached</span></a>
+        <a title="" href="../index.html"><span class="name">http</span></a>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.memcached.loadbalancer" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="loadbalancer"></a><a id="loadbalancer:loadbalancer"></a>
+    </li><li name="com.twitter.finagle.http.exp" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="exp"></a><a id="exp:exp"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/memcached/index.html#loadbalancer" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#exp" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -175,74 +175,53 @@ resources for using Finagle.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="index.html"><span class="name">loadbalancer</span></a>
+        <a title="" href="index.html"><span class="name">exp</span></a>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.memcached">memcached</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory" visbl="pub" class="indented6 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ConcurrentLoadBalancerFactory"></a><a id="ConcurrentLoadBalancerFactory:ConcurrentLoadBalancerFactory"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/index.html#ConcurrentLoadBalancerFactory" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="Exposes a StackModule which composes over the LoadBalancerFactory to change the way the way endpoints are created for a load balancer." href="ConcurrentLoadBalancerFactory$.html"><span class="name">ConcurrentLoadBalancerFactory</span></a>
-      </span>
-      
-      <p class="shortcomment cmt">Exposes a <span class="extype" name="StackModule">StackModule</span> which composes over the <span class="extype" name="LoadBalancerFactory">LoadBalancerFactory</span> to
-change the way the way endpoints are created for a load balancer.</p><div class="fullcomment"><div class="comment cmt"><p>Exposes a <span class="extype" name="StackModule">StackModule</span> which composes over the <span class="extype" name="LoadBalancerFactory">LoadBalancerFactory</span> to
-change the way the way endpoints are created for a load balancer. In particular,
-each endpoint that is resolved is replicated by the given <a href="" class="extype" name="com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory.Param">Param</a>. This, increases
-concurrency for each identical endpoint and allows them to be load balanced over. This
-is useful for pipelining protocols that may incur head-of-line blocking without
-this replication.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.memcached.loadbalancer">loadbalancer</a></dd></dl></div>
-    </li><li class="current-entities indented6">
-                        <a class="object" href="ConcurrentLoadBalancerFactory$$Param$.html" title=""></a>
-                        <a class="class" href="" title="A class eligible for configuring the number of connections a single endpoint has."></a>
-                        <a href="" title="A class eligible for configuring the number of connections a single endpoint has.">Param</a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.http">http</a></dd></dl></div>
+    </li><li class="current-entities indented5">
+                        <a class="object" href="Multipart$.html" title="A set of utility classes and methods for decoding HTTP POST requests with multipart/form-data content type."></a>
+                        <a class="class" href="Multipart.html" title="Provides a convenient interface for querying the content of the multipart/form-data body."></a>
+                        <a href="Multipart.html" title="Provides a convenient interface for querying the content of the multipart/form-data body.">Multipart</a>
+                      </li><li class="current-entities indented5">
+                        <a class="object" href="" title=""></a>
+                        <a class="class" href="MultipartDecoder.html" title="A utility that represents a decoder for a Multipart data."></a>
+                        <a href="MultipartDecoder.html" title="A utility that represents a decoder for a Multipart data.">MultipartDecoder</a>
                       </li>
               </ul>
             </div>
           </div>
           <div id="content">
-            <body class="class type">
+            <body class="object value">
       <div id="definition">
-        <a href="ConcurrentLoadBalancerFactory$$Param$.html" title="See companion object"><div class="big-circle class-companion-object">c</div></a>
-        <p id="owner"><a href="../../../../index.html" class="extype" name="com">com</a>.<a href="../../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../index.html" class="extype" name="com.twitter.finagle.memcached">memcached</a>.<a href="index.html" class="extype" name="com.twitter.finagle.memcached.loadbalancer">loadbalancer</a>.<a href="ConcurrentLoadBalancerFactory$.html" class="extype" name="com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory">ConcurrentLoadBalancerFactory</a></p>
-        <h1><a href="ConcurrentLoadBalancerFactory$$Param$.html" title="See companion object">Param</a><span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param.html" title="Permalink">
+        <a href="MultipartDecoder.html" title="See companion class"><div class="big-circle object-companion-class">o</div></a>
+        <p id="owner"><a href="../../../../index.html" class="extype" name="com">com</a>.<a href="../../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../index.html" class="extype" name="com.twitter.finagle.http">http</a>.<a href="index.html" class="extype" name="com.twitter.finagle.http.exp">exp</a></p>
+        <h1><a href="MultipartDecoder.html" title="See companion class">MultipartDecoder</a><span class="permalink">
+      <a href="../../../../../com/twitter/finagle/http/exp/MultipartDecoder$.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
         <h3><span class="morelinks"><div>
-            Companion <a href="ConcurrentLoadBalancerFactory$$Param$.html" title="See companion object">object Param</a>
+            Companion <a href="MultipartDecoder.html" title="See companion class">class MultipartDecoder</a>
           </div></span></h3>
       </div>
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">case class</span>
+        <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">Param</span><span class="params">(<span name="numConnections">numConnections: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <span class="name">MultipartDecoder</span><span class="result"> extends <a href="MultipartDecoder.html" class="extype" name="com.twitter.finagle.http.exp.MultipartDecoder">MultipartDecoder</a></span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A class eligible for configuring the number of connections
-a single endpoint has.
-</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/Equals.html#scala.Equals" class="extype" name="scala.Equals">Equals</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="MultipartDecoder.html" class="extype" name="com.twitter.finagle.http.exp.MultipartDecoder">MultipartDecoder</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
         </div></div>
         
 
@@ -268,7 +247,7 @@ a single endpoint has.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory.Param"><span>Param</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.http.exp.MultipartDecoder"><span>MultipartDecoder</span></li><li class="in" name="com.twitter.finagle.http.exp.MultipartDecoder"><span>MultipartDecoder</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -286,26 +265,7 @@ a single endpoint has.
 
       <div id="template">
         <div id="allMembers">
-        <div id="constructors" class="members">
-              <h3>Instance Constructors</h3>
-              <ol><li name="com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory.Param#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(numConnections:Int):com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory.Param"></a><a id="&lt;init&gt;:Param"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param.html#&lt;init&gt;(numConnections:Int):com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory.Param" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">new</span>
-      </span>
-      <span class="symbol">
-        <span class="name">Param</span><span class="params">(<span name="numConnections">numConnections: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span>
-      </span>
-      
-      
-    </li></ol>
-            </div>
+        
 
         
 
@@ -317,7 +277,7 @@ a single endpoint has.
                 <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param.html#!=(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/http/exp/MultipartDecoder$.html#!=(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -333,7 +293,7 @@ a single endpoint has.
     </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param.html###():Int" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/http/exp/MultipartDecoder$.html###():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -349,7 +309,7 @@ a single endpoint has.
     </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param.html#==(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/http/exp/MultipartDecoder$.html#==(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -362,10 +322,26 @@ a single endpoint has.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.http.exp.MultipartDecoder#Empty" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Empty:com.twitter.finagle.http.exp.MultipartDecoder"></a><a id="Empty:MultipartDecoder"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/http/exp/MultipartDecoder$.html#Empty:com.twitter.finagle.http.exp.MultipartDecoder" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Empty</span><span class="result">: <a href="MultipartDecoder.html" class="extype" name="com.twitter.finagle.http.exp.MultipartDecoder">MultipartDecoder</a></span>
+      </span>
+      
+      
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param.html#asInstanceOf[T0]:T0" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/http/exp/MultipartDecoder$.html#asInstanceOf[T0]:T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -381,7 +357,7 @@ a single endpoint has.
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param.html#clone():Object" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/http/exp/MultipartDecoder$.html#clone():Object" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -402,10 +378,58 @@ a single endpoint has.
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.http.exp.MultipartDecoder#decode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="decode(request:com.twitter.finagle.http.Request,maxInMemoryFileSize:com.twitter.util.StorageUnit):Option[com.twitter.finagle.http.exp.Multipart]"></a><a id="decode(Request,StorageUnit):Option[Multipart]"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/http/exp/MultipartDecoder$.html#decode(request:com.twitter.finagle.http.Request,maxInMemoryFileSize:com.twitter.util.StorageUnit):Option[com.twitter.finagle.http.exp.Multipart]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">decode</span><span class="params">(<span name="request">request: <a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>, <span name="maxInMemoryFileSize">maxInMemoryFileSize: <a href="https://twitter.github.io/util/docs/com/twitter/util/StorageUnit.html#com.twitter.util.StorageUnit" class="extype" name="com.twitter.util.StorageUnit">StorageUnit</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="Multipart.html" class="extype" name="com.twitter.finagle.http.exp.Multipart">Multipart</a>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="MultipartDecoder.html" class="extype" name="com.twitter.finagle.http.exp.MultipartDecoder">MultipartDecoder</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.exp.MultipartDecoder#decode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="decode(request:com.twitter.finagle.http.Request):Option[com.twitter.finagle.http.exp.Multipart]"></a><a id="decode(Request):Option[Multipart]"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/http/exp/MultipartDecoder$.html#decode(request:com.twitter.finagle.http.Request):Option[com.twitter.finagle.http.exp.Multipart]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">decode</span><span class="params">(<span name="request">request: <a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="Multipart.html" class="extype" name="com.twitter.finagle.http.exp.Multipart">Multipart</a>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="MultipartDecoder.html" class="extype" name="com.twitter.finagle.http.exp.MultipartDecoder">MultipartDecoder</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.exp.MultipartDecoder#decodeFull" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="decodeFull(request:com.twitter.finagle.http.Request,maxInMemoryFileSize:com.twitter.util.StorageUnit):Option[com.twitter.finagle.http.exp.Multipart]"></a><a id="decodeFull(Request,StorageUnit):Option[Multipart]"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/http/exp/MultipartDecoder$.html#decodeFull(request:com.twitter.finagle.http.Request,maxInMemoryFileSize:com.twitter.util.StorageUnit):Option[com.twitter.finagle.http.exp.Multipart]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">decodeFull</span><span class="params">(<span name="request">request: <a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>, <span name="maxInMemoryFileSize">maxInMemoryFileSize: <a href="https://twitter.github.io/util/docs/com/twitter/util/StorageUnit.html#com.twitter.util.StorageUnit" class="extype" name="com.twitter.util.StorageUnit">StorageUnit</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="Multipart.html" class="extype" name="com.twitter.finagle.http.exp.Multipart">Multipart</a>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.exp.MultipartDecoder">MultipartDecoder</a> → <a href="MultipartDecoder.html" class="extype" name="com.twitter.finagle.http.exp.MultipartDecoder">MultipartDecoder</a></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/http/exp/MultipartDecoder$.html#eq(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -418,10 +442,26 @@ a single endpoint has.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/http/exp/MultipartDecoder$.html#equals(x$1:Any):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param.html#finalize():Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/http/exp/MultipartDecoder$.html#finalize():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -443,7 +483,7 @@ a single endpoint has.
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param.html#getClass():Class[_]" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/http/exp/MultipartDecoder$.html#getClass():Class[_]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -459,10 +499,29 @@ a single endpoint has.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/http/exp/MultipartDecoder$.html#hashCode():Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd><dt>Annotations</dt><dd>
+                <span class="name">@native</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param.html#isInstanceOf[T0]:Boolean" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/http/exp/MultipartDecoder$.html#isInstanceOf[T0]:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -475,26 +534,10 @@ a single endpoint has.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory.Param#mk" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="mk():(com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory.Param,com.twitter.finagle.Stack.Param[com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory.Param])"></a><a id="mk():(Param,Stack.Param[Param])"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param.html#mk():(com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory.Param,com.twitter.finagle.Stack.Param[com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory.Param])" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">mk</span><span class="params">()</span><span class="result">: (<a href="" class="extype" name="com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory.Param">Param</a>, <a href="../../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Stack.Param</a>[<a href="" class="extype" name="com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory.Param">Param</a>])</span>
-      </span>
-      
-      
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/http/exp/MultipartDecoder$.html#ne(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -510,7 +553,7 @@ a single endpoint has.
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param.html#notify():Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/http/exp/MultipartDecoder$.html#notify():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -529,7 +572,7 @@ a single endpoint has.
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param.html#notifyAll():Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/http/exp/MultipartDecoder$.html#notifyAll():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -545,26 +588,10 @@ a single endpoint has.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory.Param#numConnections" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="numConnections:Int"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param.html#numConnections:Int" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">numConnections</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
-      </span>
-      
-      
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/http/exp/MultipartDecoder$.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -577,10 +604,26 @@ a single endpoint has.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/http/exp/MultipartDecoder$.html#toString():String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param.html#wait():Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/http/exp/MultipartDecoder$.html#wait():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -602,7 +645,7 @@ a single endpoint has.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/http/exp/MultipartDecoder$.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -624,7 +667,7 @@ a single endpoint has.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param.html#wait(x$1:Long):Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/http/exp/MultipartDecoder$.html#wait(x$1:Long):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -655,14 +698,8 @@ a single endpoint has.
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.Serializable">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></h3>
-            </div><div class="parent" name="java.io.Serializable">
-              <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
-            </div><div class="parent" name="scala.Product">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a></h3>
-            </div><div class="parent" name="scala.Equals">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/Equals.html#scala.Equals" class="extype" name="scala.Equals">Equals</a></h3>
+        <div class="parent" name="com.twitter.finagle.http.exp.MultipartDecoder">
+              <h3>Inherited from <a href="MultipartDecoder.html" class="extype" name="com.twitter.finagle.http.exp.MultipartDecoder">MultipartDecoder</a></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

@@ -217,6 +217,10 @@ generator.
                         <a href="ReqRepServicePerEndpointBuilder.html" title="Typeclass ReqRepServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients.">ReqRepServicePerEndpointBuilder</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
+                        <a class="trait" href="ReqRepThriftServiceBuilder.html" title="A typeclass to construct a ThriftService by wrapping a ReqRepServicePerEndpoint."></a>
+                        <a href="ReqRepThriftServiceBuilder.html" title="A typeclass to construct a ThriftService by wrapping a ReqRepServicePerEndpoint.">ReqRepThriftServiceBuilder</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
                         <a class="trait" href="ServicePerEndpointBuilder.html" title="Typeclass ServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients."></a>
                         <a href="ServicePerEndpointBuilder.html" title="Typeclass ServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients.">ServicePerEndpointBuilder</a>
                       </li><li class="current-entities indented5">
@@ -227,6 +231,10 @@ generator.
                         <span class="separator"></span>
                         <a class="object" href="ThriftResponseClassifier$.html" title="ResponseClassifiers for use with finagle-thrift request/responses."></a>
                         <a href="ThriftResponseClassifier$.html" title="ResponseClassifiers for use with finagle-thrift request/responses.">ThriftResponseClassifier</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="trait" href="ThriftServiceBuilder.html" title="A typeclass to construct a ThriftService by wrapping a ServicePerEndpoint."></a>
+                        <a href="ThriftServiceBuilder.html" title="A typeclass to construct a ThriftService by wrapping a ServicePerEndpoint.">ThriftServiceBuilder</a>
                       </li><li name="com.twitter.finagle.thrift.thrift" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="thrift"></a><a id="thrift:thrift"></a>
       <span class="permalink">
@@ -359,9 +367,9 @@ This is a compatibility constructor to replace an existing Future interface
 with one built from a ServicePerEndpoint.</p><p>Scrooge generates implementations of this builder.
 </p></div></div>
     </li><li name="com.twitter.finagle.thrift.service.ReqRepMethodPerEndpointBuilder" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="ReqRepMethodPerEndpointBuilder[ReqRepServicePerEndpoint,MethodPerEndpoint]extendsAnyRef"></a><a id="ReqRepMethodPerEndpointBuilder[ReqRepServicePerEndpoint,MethodPerEndpoint]:ReqRepMethodPerEndpointBuilder[ReqRepServicePerEndpoint,MethodPerEndpoint]"></a>
+      <a id="ReqRepMethodPerEndpointBuilder[ReqRepServicePerEndpoint,MethodPerEndpoint]extendsMethodPerEndpointBuilder[ReqRepServicePerEndpoint,MethodPerEndpoint]"></a><a id="ReqRepMethodPerEndpointBuilder[ReqRepServicePerEndpoint,MethodPerEndpoint]:ReqRepMethodPerEndpointBuilder[ReqRepServicePerEndpoint,MethodPerEndpoint]"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/thrift/service/index.html#ReqRepMethodPerEndpointBuilder[ReqRepServicePerEndpoint,MethodPerEndpoint]extendsAnyRef" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/thrift/service/index.html#ReqRepMethodPerEndpointBuilder[ReqRepServicePerEndpoint,MethodPerEndpoint]extendsMethodPerEndpointBuilder[ReqRepServicePerEndpoint,MethodPerEndpoint]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -370,16 +378,16 @@ with one built from a ServicePerEndpoint.</p><p>Scrooge generates implementation
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="A typeclass to construct a MethodPerEndpoint by wrapping a ReqRepServicePerEndpoint." href="ReqRepMethodPerEndpointBuilder.html"><span class="name">ReqRepMethodPerEndpointBuilder</span></a><span class="tparams">[<span name="ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</span>, <span name="MethodPerEndpoint">MethodPerEndpoint</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+        <a title="A typeclass to construct a MethodPerEndpoint by wrapping a ReqRepServicePerEndpoint." href="ReqRepMethodPerEndpointBuilder.html"><span class="name">ReqRepMethodPerEndpointBuilder</span></a><span class="tparams">[<span name="ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</span>, <span name="MethodPerEndpoint">MethodPerEndpoint</span>]</span><span class="result"> extends <a href="MethodPerEndpointBuilder.html" class="extype" name="com.twitter.finagle.thrift.service.MethodPerEndpointBuilder">MethodPerEndpointBuilder</a>[<span class="extype" name="com.twitter.finagle.thrift.service.ReqRepMethodPerEndpointBuilder.ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</span>, <span class="extype" name="com.twitter.finagle.thrift.service.ReqRepMethodPerEndpointBuilder.MethodPerEndpoint">MethodPerEndpoint</span>]</span>
       </span>
       
       <p class="shortcomment cmt">A typeclass to construct a MethodPerEndpoint by wrapping a ReqRepServicePerEndpoint.</p><div class="fullcomment"><div class="comment cmt"><p>A typeclass to construct a MethodPerEndpoint by wrapping a ReqRepServicePerEndpoint.</p><p>This is a compatibility constructor to replace an existing Future interface with one built from
 a ReqRepServicePerEndpoint.</p><p>Scrooge generates implementations of this builder.
 </p></div></div>
     </li><li name="com.twitter.finagle.thrift.service.ReqRepServicePerEndpointBuilder" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="ReqRepServicePerEndpointBuilder[ReqRepServicePerEndpoint&lt;:com.twitter.finagle.thrift.service.Filterable[ReqRepServicePerEndpoint]]extendsAnyRef"></a><a id="ReqRepServicePerEndpointBuilder[ReqRepServicePerEndpoint&lt;:Filterable[ReqRepServicePerEndpoint]]:ReqRepServicePerEndpointBuilder[ReqRepServicePerEndpoint]"></a>
+      <a id="ReqRepServicePerEndpointBuilder[ReqRepServicePerEndpoint&lt;:com.twitter.finagle.thrift.service.Filterable[ReqRepServicePerEndpoint]]extendsServicePerEndpointBuilder[ReqRepServicePerEndpoint]"></a><a id="ReqRepServicePerEndpointBuilder[ReqRepServicePerEndpoint&lt;:Filterable[ReqRepServicePerEndpoint]]:ReqRepServicePerEndpointBuilder[ReqRepServicePerEndpoint]"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/thrift/service/index.html#ReqRepServicePerEndpointBuilder[ReqRepServicePerEndpoint&lt;:com.twitter.finagle.thrift.service.Filterable[ReqRepServicePerEndpoint]]extendsAnyRef" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/thrift/service/index.html#ReqRepServicePerEndpointBuilder[ReqRepServicePerEndpoint&lt;:com.twitter.finagle.thrift.service.Filterable[ReqRepServicePerEndpoint]]extendsServicePerEndpointBuilder[ReqRepServicePerEndpoint]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -388,7 +396,7 @@ a ReqRepServicePerEndpoint.</p><p>Scrooge generates implementations of this buil
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="Typeclass ReqRepServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients." href="ReqRepServicePerEndpointBuilder.html"><span class="name">ReqRepServicePerEndpointBuilder</span></a><span class="tparams">[<span name="ReqRepServicePerEndpoint">ReqRepServicePerEndpoint &lt;: <a href="Filterable.html" class="extype" name="com.twitter.finagle.thrift.service.Filterable">Filterable</a>[<span class="extype" name="com.twitter.finagle.thrift.service.ReqRepServicePerEndpointBuilder.ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</span>]</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+        <a title="Typeclass ReqRepServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients." href="ReqRepServicePerEndpointBuilder.html"><span class="name">ReqRepServicePerEndpointBuilder</span></a><span class="tparams">[<span name="ReqRepServicePerEndpoint">ReqRepServicePerEndpoint &lt;: <a href="Filterable.html" class="extype" name="com.twitter.finagle.thrift.service.Filterable">Filterable</a>[<span class="extype" name="com.twitter.finagle.thrift.service.ReqRepServicePerEndpointBuilder.ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</span>]</span>]</span><span class="result"> extends <a href="ServicePerEndpointBuilder.html" class="extype" name="com.twitter.finagle.thrift.service.ServicePerEndpointBuilder">ServicePerEndpointBuilder</a>[<span class="extype" name="com.twitter.finagle.thrift.service.ReqRepServicePerEndpointBuilder.ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Typeclass ReqRepServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients.</p><div class="fullcomment"><div class="comment cmt"><p>Typeclass ReqRepServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients.</p><p>Scrooge generates implementations of this builder.
@@ -411,6 +419,49 @@ a ReqRepServicePerEndpoint.</p><p>Scrooge generates implementations of this buil
       <p class="shortcomment cmt">Typeclass ServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients.</p><div class="fullcomment"><div class="comment cmt"><p>Typeclass ServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients.
 Scrooge generates implementations of this builder.
 </p></div></div>
+    </li><li name="com.twitter.finagle.thrift.service.ReqRepThriftServiceBuilder" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ReqRepThriftServiceBuilder[ReqRepServicePerEndpoint,ThriftService]extendsThriftServiceBuilder[ReqRepServicePerEndpoint,ThriftService]"></a><a id="ReqRepThriftServiceBuilder[ReqRepServicePerEndpoint,ThriftService]:ReqRepThriftServiceBuilder[ReqRepServicePerEndpoint,ThriftService]"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/thrift/service/index.html#ReqRepThriftServiceBuilder[ReqRepServicePerEndpoint,ThriftService]extendsThriftServiceBuilder[ReqRepServicePerEndpoint,ThriftService]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="A typeclass to construct a ThriftService by wrapping a ReqRepServicePerEndpoint." href="ReqRepThriftServiceBuilder.html"><span class="name deprecated" title="Deprecated: (Since version 2018-01-12) Use MethodPerEndpointBuilder">ReqRepThriftServiceBuilder</span></a><span class="tparams">[<span name="ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</span>, <span name="ThriftService">ThriftService</span>]</span><span class="result"> extends <a href="ThriftServiceBuilder.html" class="extype" name="com.twitter.finagle.thrift.service.ThriftServiceBuilder">ThriftServiceBuilder</a>[<span class="extype" name="com.twitter.finagle.thrift.service.ReqRepThriftServiceBuilder.ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</span>, <span class="extype" name="com.twitter.finagle.thrift.service.ReqRepThriftServiceBuilder.ThriftService">ThriftService</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A typeclass to construct a ThriftService by wrapping a ReqRepServicePerEndpoint.</p><div class="fullcomment"><div class="comment cmt"><p>A typeclass to construct a ThriftService by wrapping a ReqRepServicePerEndpoint.</p><p>This is a compatibility constructor to replace an existing Future interface with one built from
+a ReqRepServicePerEndpoint.</p><p>Scrooge generates implementations of this builder.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-01-12)</i> Use MethodPerEndpointBuilder</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.thrift.service.ThriftServiceBuilder" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ThriftServiceBuilder[ServicePerEndpoint,ThriftService]extendsAnyRef"></a><a id="ThriftServiceBuilder[ServicePerEndpoint,ThriftService]:ThriftServiceBuilder[ServicePerEndpoint,ThriftService]"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/thrift/service/index.html#ThriftServiceBuilder[ServicePerEndpoint,ThriftService]extendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="A typeclass to construct a ThriftService by wrapping a ServicePerEndpoint." href="ThriftServiceBuilder.html"><span class="name deprecated" title="Deprecated: (Since version 2018-01-12) Use MethodPerEndpointBuilder">ThriftServiceBuilder</span></a><span class="tparams">[<span name="ServicePerEndpoint">ServicePerEndpoint</span>, <span name="ThriftService">ThriftService</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A typeclass to construct a ThriftService by wrapping a ServicePerEndpoint.</p><div class="fullcomment"><div class="comment cmt"><p>A typeclass to construct a ThriftService by wrapping a ServicePerEndpoint.
+This is a compatibility constructor to replace an existing Future interface
+with one built from a ServicePerEndpoint.</p><p>Scrooge generates implementations of this builder.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-01-12)</i> Use MethodPerEndpointBuilder</p></dd></dl></div>
     </li></ol>
             </div>
 

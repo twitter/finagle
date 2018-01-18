@@ -249,6 +249,10 @@ resources for using Finagle.
                         <a href="" title="">ReqRepServicePerEndpointBuilder</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
+                        <a class="object" href="Scribe$$ReqRepThriftServiceBuilder$.html" title=""></a>
+                        <a href="Scribe$$ReqRepThriftServiceBuilder$.html" title="">ReqRepThriftServiceBuilder</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="class" href="Scribe$$ServiceIface.html" title=""></a>
                         <a href="Scribe$$ServiceIface.html" title="">ServiceIface</a>
                       </li><li class="current-entities indented6">
@@ -263,6 +267,10 @@ resources for using Finagle.
                         <span class="separator"></span>
                         <a class="object" href="Scribe$$ServicePerEndpointBuilder$.html" title=""></a>
                         <a href="Scribe$$ServicePerEndpointBuilder$.html" title="">ServicePerEndpointBuilder</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="object" href="Scribe$$ThriftServiceBuilder$.html" title=""></a>
+                        <a href="Scribe$$ThriftServiceBuilder$.html" title="">ThriftServiceBuilder</a>
                       </li>
               </ul>
             </div>
@@ -295,7 +303,7 @@ resources for using Finagle.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="../../thrift/service/ReqRepServicePerEndpointBuilder.html" class="extype" name="com.twitter.finagle.thrift.service.ReqRepServicePerEndpointBuilder">ReqRepServicePerEndpointBuilder</a>[<a href="Scribe$$ReqRepServicePerEndpoint.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</a>], <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="../../thrift/service/ReqRepServicePerEndpointBuilder.html" class="extype" name="com.twitter.finagle.thrift.service.ReqRepServicePerEndpointBuilder">ReqRepServicePerEndpointBuilder</a>[<a href="Scribe$$ReqRepServicePerEndpoint.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</a>], <a href="../../thrift/service/ServicePerEndpointBuilder.html" class="extype" name="com.twitter.finagle.thrift.service.ServicePerEndpointBuilder">ServicePerEndpointBuilder</a>[<a href="Scribe$$ReqRepServicePerEndpoint.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</a>], <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
         </div></div>
         
 
@@ -321,7 +329,7 @@ resources for using Finagle.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.exception.thriftscala.Scribe.ReqRepServicePerEndpointBuilder"><span>ReqRepServicePerEndpointBuilder</span></li><li class="in" name="com.twitter.finagle.thrift.service.ReqRepServicePerEndpointBuilder"><span>ReqRepServicePerEndpointBuilder</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.exception.thriftscala.Scribe.ReqRepServicePerEndpointBuilder"><span>ReqRepServicePerEndpointBuilder</span></li><li class="in" name="com.twitter.finagle.thrift.service.ReqRepServicePerEndpointBuilder"><span>ReqRepServicePerEndpointBuilder</span></li><li class="in" name="com.twitter.finagle.thrift.service.ServicePerEndpointBuilder"><span>ServicePerEndpointBuilder</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -613,8 +621,8 @@ resources for using Finagle.
         <span class="name">servicePerEndpoint</span><span class="params">(<span name="thriftService">thriftService: <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../../thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>, <span name="clientParam">clientParam: <a href="../../thrift/RichClientParam.html" class="extype" name="com.twitter.finagle.thrift.RichClientParam">RichClientParam</a></span>)</span><span class="result">: <a href="Scribe$$ReqRepServicePerEndpoint.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</a></span>
       </span>
       
-      <p class="shortcomment cmt">Build a client ReqRepServicePerEndpoint wrapping a binary thrift service.</p><div class="fullcomment"><div class="comment cmt"><p>Build a client ReqRepServicePerEndpoint wrapping a binary thrift service.
-</p></div><dl class="paramcmts block"><dt class="param">thriftService</dt><dd class="cmt"><p>An underlying thrift service that works on byte arrays.</p></dd><dt class="param">clientParam</dt><dd class="cmt"><p>RichClientParam wraps client params <a href="../../thrift/RichClientParam.html" class="extype" name="com.twitter.finagle.thrift.RichClientParam">com.twitter.finagle.thrift.RichClientParam</a>.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.ReqRepServicePerEndpointBuilder">ReqRepServicePerEndpointBuilder</a> → <a href="../../thrift/service/ReqRepServicePerEndpointBuilder.html" class="extype" name="com.twitter.finagle.thrift.service.ReqRepServicePerEndpointBuilder">ReqRepServicePerEndpointBuilder</a></dd></dl></div>
+      <p class="shortcomment cmt">Build a client ServicePerEndpoint wrapping a binary thrift service.</p><div class="fullcomment"><div class="comment cmt"><p>Build a client ServicePerEndpoint wrapping a binary thrift service.
+</p></div><dl class="paramcmts block"><dt class="param">thriftService</dt><dd class="cmt"><p>An underlying thrift service that works on byte arrays.</p></dd><dt class="param">clientParam</dt><dd class="cmt"><p>RichClientParam wraps client params <a href="../../thrift/RichClientParam.html" class="extype" name="com.twitter.finagle.thrift.RichClientParam">com.twitter.finagle.thrift.RichClientParam</a>.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.ReqRepServicePerEndpointBuilder">ReqRepServicePerEndpointBuilder</a> → <a href="../../thrift/service/ServicePerEndpointBuilder.html" class="extype" name="com.twitter.finagle.thrift.service.ServicePerEndpointBuilder">ServicePerEndpointBuilder</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
@@ -727,6 +735,8 @@ resources for using Finagle.
         <div id="inheritedMembers">
         <div class="parent" name="com.twitter.finagle.thrift.service.ReqRepServicePerEndpointBuilder">
               <h3>Inherited from <a href="../../thrift/service/ReqRepServicePerEndpointBuilder.html" class="extype" name="com.twitter.finagle.thrift.service.ReqRepServicePerEndpointBuilder">ReqRepServicePerEndpointBuilder</a>[<a href="Scribe$$ReqRepServicePerEndpoint.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</a>]</h3>
+            </div><div class="parent" name="com.twitter.finagle.thrift.service.ServicePerEndpointBuilder">
+              <h3>Inherited from <a href="../../thrift/service/ServicePerEndpointBuilder.html" class="extype" name="com.twitter.finagle.thrift.service.ServicePerEndpointBuilder">ServicePerEndpointBuilder</a>[<a href="Scribe$$ReqRepServicePerEndpoint.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</a>]</h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

@@ -378,8 +378,7 @@ recommended path for using native SSL/TLS engines within Finagle.
       <p class="shortcomment cmt">Creates a new <code>Engine</code> based on an <code>SslServerConfiguration</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new <code>Engine</code> based on an <code>SslServerConfiguration</code>.
 </p></div><dl class="paramcmts block"><dt class="param">config</dt><dd class="cmt"><p>A collection of parameters which the engine factory
 should consider when creating the TLS server <code>Engine</code>.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.netty4.ssl.server.Netty4ServerEngineFactory">Netty4ServerEngineFactory</a> → <a href="../../../ssl/server/SslServerEngineFactory.html" class="extype" name="com.twitter.finagle.ssl.server.SslServerEngineFactory">SslServerEngineFactory</a></dd><dt>Note</dt><dd><span class="cmt"><p><code>ApplicationProtocols</code> other than Unspecified are only supported
-by using a native engine via netty-tcnative.</p></span>, <span class="cmt"><p>Using <code>TrustCredentials.Insecure</code> forces the underlying engine to be
-a JDK engine and not a native engine, based on what Netty supports.</p></span>, <span class="cmt"><p><code>KeyCredentials</code> must be specified, as it is not possible
+by using a native engine via netty-tcnative.</p></span>, <span class="cmt"><p><code>KeyCredentials</code> must be specified, as it is not possible
 with this engine to use one of the &quot;installed security providers&quot;.</p></span></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>

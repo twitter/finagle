@@ -529,7 +529,46 @@ resources for using Finagle.
 
         <div class="values members">
               <h3>Abstract Value Members</h3>
-              <ol><li name="com.twitter.finagle.http.Message#reader" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.http.Response#ctx" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ctx:com.twitter.finagle.http.Response.Schema.Record"></a><a id="ctx:Record"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/Response.html#ctx:com.twitter.finagle.http.Response.Schema.Record" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ctx</span><span class="result">: <span class="extype" name="com.twitter.collection.RecordSchema.Record">Record</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Arbitrary user-defined context associated with this response object.</p><div class="fullcomment"><div class="comment cmt"><p>Arbitrary user-defined context associated with this response object.
+<a href="https://twitter.github.io/util/docs/com/twitter/collection/RecordSchema$Record.html" class="extype" name="com.twitter.collection.RecordSchema.Record">RecordSchema.Record</a> is
+used here, rather than <a href="../context/Context.html" class="extype" name="com.twitter.finagle.context.Context">com.twitter.finagle.context.Context</a> or similar
+out-of-band mechanisms, to make the connection between the response and its
+associated context explicit.
+</p></div></div>
+    </li><li name="com.twitter.finagle.http.Message#headerMap" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="headerMap:com.twitter.finagle.http.HeaderMap"></a><a id="headerMap:HeaderMap"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/Response.html#headerMap:com.twitter.finagle.http.HeaderMap" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">headerMap</span><span class="result">: <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a> (i.e., HTTP headers) associated with this message.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a> (i.e., HTTP headers) associated with this message.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd><dt>Note</dt><dd><span class="cmt"><p>This structure isn't thread-safe. Any concurrent access should be synchronized
+      externally.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Message#reader" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="reader:com.twitter.io.Reader"></a><a id="reader:Reader"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/Response.html#reader:com.twitter.io.Reader" title="Permalink">
@@ -1184,27 +1223,6 @@ an <code>IllegalStateException</code> is thrown.
       <p class="shortcomment cmt">Cookies.</p><div class="fullcomment"><div class="comment cmt"><p>Cookies. In a request, this uses the Cookie headers.
 In a response, it uses the Set-Cookie headers.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Response#ctx" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ctx:com.twitter.finagle.http.Response.Schema.Record"></a><a id="ctx:Record"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/Response.html#ctx:com.twitter.finagle.http.Response.Schema.Record" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">ctx</span><span class="result">: <span class="extype" name="com.twitter.collection.RecordSchema.Record">Record</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">Arbitrary user-defined context associated with this response object.</p><div class="fullcomment"><div class="comment cmt"><p>Arbitrary user-defined context associated with this response object.
-<a href="https://twitter.github.io/util/docs/com/twitter/collection/RecordSchema$Record.html" class="extype" name="com.twitter.collection.RecordSchema.Record">RecordSchema.Record</a> is
-used here, rather than <a href="../context/Context.html" class="extype" name="com.twitter.finagle.context.Context">com.twitter.finagle.context.Context</a> or similar
-out-of-band mechanisms, to make the connection between the response and its
-associated context explicit.
-</p></div></div>
     </li><li name="com.twitter.finagle.http.Message#date" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="date:Option[String]"></a>
       <span class="permalink">
@@ -1475,24 +1493,6 @@ users should use withInputStream.)
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Message#headerMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="headerMap:com.twitter.finagle.http.HeaderMap"></a><a id="headerMap:HeaderMap"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/Response.html#headerMap:com.twitter.finagle.http.HeaderMap" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">headerMap</span><span class="result">: <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">A <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a> (i.e., HTTP headers) associated with this message.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a> (i.e., HTTP headers) associated with this message.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd><dt>Note</dt><dd><span class="cmt"><p>This structure isn't thread-safe. Any concurrent access should be synchronized
-      externally.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#host" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="host(value:String):Message.this.type"></a><a id="host(String):Response.this.type"></a>
       <span class="permalink">

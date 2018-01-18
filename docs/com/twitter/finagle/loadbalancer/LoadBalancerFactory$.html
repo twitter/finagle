@@ -451,6 +451,29 @@ memory pressure.
       
       <p class="shortcomment cmt">A class eligible for configuring a <a href="../Stackable.html" class="extype" name="com.twitter.finagle.Stackable">com.twitter.finagle.Stackable</a>
 <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">com.twitter.finagle.loadbalancer.LoadBalancerFactory</a>.</p>
+    </li><li name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.ReplicateAddresses" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ReplicateAddressesextendsProductwithSerializable"></a><a id="ReplicateAddresses:ReplicateAddresses"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/loadbalancer/LoadBalancerFactory$.html#ReplicateAddressesextendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="A class eligible for configuring the way endpoints are created for a load balancer." href="LoadBalancerFactory$$ReplicateAddresses.html"><span class="name">ReplicateAddresses</span></a><span class="params">(<span name="count">count: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A class eligible for configuring the way endpoints are created for
+a load balancer.</p><div class="fullcomment"><div class="comment cmt"><p>A class eligible for configuring the way endpoints are created for
+a load balancer. In particular, each endpoint that is resolved is replicated
+by the given parameter. This increases concurrency for each identical endpoint
+and allows them to be load balanced over. This is useful for pipelining or
+multiplexing protocols that may incur head-of-line blocking (e.g. from the
+server's processing threads or the network) without this replication.
+</p></div></div>
     </li><li name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.WhenNoNodesOpenParam" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="WhenNoNodesOpenParamextendsProductwithSerializable"></a><a id="WhenNoNodesOpenParam:WhenNoNodesOpenParam"></a>
       <span class="permalink">
@@ -937,6 +960,22 @@ when the balancer does not find a node with <code>Status.Open</code>.</p><p>The 
       </span>
       <span class="symbol">
         <a title="" href="LoadBalancerFactory$$Param$.html"><span class="name">Param</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.ReplicateAddresses" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ReplicateAddresses"></a><a id="ReplicateAddresses:ReplicateAddresses"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/loadbalancer/LoadBalancerFactory$.html#ReplicateAddresses" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="LoadBalancerFactory$$ReplicateAddresses$.html"><span class="name">ReplicateAddresses</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       

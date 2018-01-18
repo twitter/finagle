@@ -217,6 +217,10 @@ generator.
                         <a href="ReqRepServicePerEndpointBuilder.html" title="Typeclass ReqRepServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients.">ReqRepServicePerEndpointBuilder</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
+                        <a class="trait" href="ReqRepThriftServiceBuilder.html" title="A typeclass to construct a ThriftService by wrapping a ReqRepServicePerEndpoint."></a>
+                        <a href="ReqRepThriftServiceBuilder.html" title="A typeclass to construct a ThriftService by wrapping a ReqRepServicePerEndpoint.">ReqRepThriftServiceBuilder</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
                         <a class="trait" href="ServicePerEndpointBuilder.html" title="Typeclass ServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients."></a>
                         <a href="ServicePerEndpointBuilder.html" title="Typeclass ServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients.">ServicePerEndpointBuilder</a>
                       </li><li class="current-entities indented5">
@@ -227,6 +231,10 @@ generator.
                         <span class="separator"></span>
                         <a class="object" href="ThriftResponseClassifier$.html" title="ResponseClassifiers for use with finagle-thrift request/responses."></a>
                         <a href="ThriftResponseClassifier$.html" title="ResponseClassifiers for use with finagle-thrift request/responses.">ThriftResponseClassifier</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="trait" href="ThriftServiceBuilder.html" title="A typeclass to construct a ThriftService by wrapping a ServicePerEndpoint."></a>
+                        <a href="ThriftServiceBuilder.html" title="A typeclass to construct a ThriftService by wrapping a ServicePerEndpoint.">ThriftServiceBuilder</a>
                       </li>
               </ul>
             </div>
@@ -250,7 +258,7 @@ generator.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <span class="name">ReqRepMethodPerEndpointBuilder</span><span class="tparams">[<span name="ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</span>, <span name="MethodPerEndpoint">MethodPerEndpoint</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+        <span class="name">ReqRepMethodPerEndpointBuilder</span><span class="tparams">[<span name="ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</span>, <span name="MethodPerEndpoint">MethodPerEndpoint</span>]</span><span class="result"> extends <a href="MethodPerEndpointBuilder.html" class="extype" name="com.twitter.finagle.thrift.service.MethodPerEndpointBuilder">MethodPerEndpointBuilder</a>[<span class="extype" name="com.twitter.finagle.thrift.service.ReqRepMethodPerEndpointBuilder.ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</span>, <span class="extype" name="com.twitter.finagle.thrift.service.ReqRepMethodPerEndpointBuilder.MethodPerEndpoint">MethodPerEndpoint</span>]</span>
       </span>
       </h4>
 
@@ -261,7 +269,7 @@ a ReqRepServicePerEndpoint.</p><p>Scrooge generates implementations of this buil
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="MethodPerEndpointBuilder.html" class="extype" name="com.twitter.finagle.thrift.service.MethodPerEndpointBuilder">MethodPerEndpointBuilder</a>[<span class="extype" name="com.twitter.finagle.thrift.service.ReqRepMethodPerEndpointBuilder.ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</span>, <span class="extype" name="com.twitter.finagle.thrift.service.ReqRepMethodPerEndpointBuilder.MethodPerEndpoint">MethodPerEndpoint</span>], <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
         </div><div class="toggleContainer block">
             <span class="toggle">
               Known Subclasses
@@ -292,7 +300,7 @@ a ReqRepServicePerEndpoint.</p><p>Scrooge generates implementations of this buil
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.thrift.service.ReqRepMethodPerEndpointBuilder"><span>ReqRepMethodPerEndpointBuilder</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.thrift.service.ReqRepMethodPerEndpointBuilder"><span>ReqRepMethodPerEndpointBuilder</span></li><li class="in" name="com.twitter.finagle.thrift.service.MethodPerEndpointBuilder"><span>MethodPerEndpointBuilder</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -316,10 +324,10 @@ a ReqRepServicePerEndpoint.</p><p>Scrooge generates implementations of this buil
 
         <div class="values members">
               <h3>Abstract Value Members</h3>
-              <ol><li name="com.twitter.finagle.thrift.service.ReqRepMethodPerEndpointBuilder#methodPerEndpoint" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="methodPerEndpoint(reqRepServicePerEndpoint:ReqRepServicePerEndpoint):MethodPerEndpoint"></a><a id="methodPerEndpoint(ReqRepServicePerEndpoint):MethodPerEndpoint"></a>
+              <ol><li name="com.twitter.finagle.thrift.service.MethodPerEndpointBuilder#methodPerEndpoint" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="methodPerEndpoint(servicePerEndpoint:ServicePerEndpoint):MethodPerEndpoint"></a><a id="methodPerEndpoint(ReqRepServicePerEndpoint):MethodPerEndpoint"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/thrift/service/ReqRepMethodPerEndpointBuilder.html#methodPerEndpoint(reqRepServicePerEndpoint:ReqRepServicePerEndpoint):MethodPerEndpoint" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/thrift/service/ReqRepMethodPerEndpointBuilder.html#methodPerEndpoint(servicePerEndpoint:ServicePerEndpoint):MethodPerEndpoint" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -328,10 +336,11 @@ a ReqRepServicePerEndpoint.</p><p>Scrooge generates implementations of this buil
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">methodPerEndpoint</span><span class="params">(<span name="reqRepServicePerEndpoint">reqRepServicePerEndpoint: <span class="extype" name="com.twitter.finagle.thrift.service.ReqRepMethodPerEndpointBuilder.ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.thrift.service.ReqRepMethodPerEndpointBuilder.MethodPerEndpoint">MethodPerEndpoint</span></span>
+        <span class="name">methodPerEndpoint</span><span class="params">(<span name="servicePerEndpoint">servicePerEndpoint: <span class="extype" name="com.twitter.finagle.thrift.service.ReqRepMethodPerEndpointBuilder.ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.thrift.service.ReqRepMethodPerEndpointBuilder.MethodPerEndpoint">MethodPerEndpoint</span></span>
       </span>
       
-      <p class="shortcomment cmt">Build a MethodPerEndpoint wrapping a ReqRepServicePerEndpoint.</p>
+      <p class="shortcomment cmt">Build a MethodPerEndpoint wrapping a ServicePerEndpoint.</p><div class="fullcomment"><div class="comment cmt"><p>Build a MethodPerEndpoint wrapping a ServicePerEndpoint.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="MethodPerEndpointBuilder.html" class="extype" name="com.twitter.finagle.thrift.service.MethodPerEndpointBuilder">MethodPerEndpointBuilder</a></dd></dl></div>
     </li></ol>
             </div>
 
@@ -698,7 +707,9 @@ a ReqRepServicePerEndpoint.</p><p>Scrooge generates implementations of this buil
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.AnyRef">
+        <div class="parent" name="com.twitter.finagle.thrift.service.MethodPerEndpointBuilder">
+              <h3>Inherited from <a href="MethodPerEndpointBuilder.html" class="extype" name="com.twitter.finagle.thrift.service.MethodPerEndpointBuilder">MethodPerEndpointBuilder</a>[<span class="extype" name="com.twitter.finagle.thrift.service.ReqRepMethodPerEndpointBuilder.ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</span>, <span class="extype" name="com.twitter.finagle.thrift.service.ReqRepMethodPerEndpointBuilder.MethodPerEndpoint">MethodPerEndpoint</span>]</h3>
+            </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></h3>

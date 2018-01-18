@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &#8212; Finagle 17.12.0 documentation</title>
+    <title>Metrics &#8212; Finagle 18.1.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '17.12.0',
+        VERSION:     '18.1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 17.12.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 18.1.0 documentation" href="index.html" />
     <link rel="next" title="Unsuccessful Responses" href="UnsuccessfulResponses.html" />
     <link rel="prev" title="Protocols" href="Protocols.html" />
    
@@ -394,13 +394,15 @@ request.</dd>
 <div class="section" id="aperture-based-load-balancers">
 <h3>Aperture Based Load Balancers<a class="headerlink" href="#aperture-based-load-balancers" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
-<dt><strong>aperture</strong></dt>
-<dd>A gauge of the width of the window over which endpoints are
-load-balanced.</dd>
+<dt><strong>logical_aperture</strong></dt>
+<dd>A gauge of the width of the window over which endpoints are load-balanced.
+This is primarily an accounting mechanism and for a true representation of
+the number of endpoints the client is talking to see <cite>physical_aperture</cite>.</dd>
 <dt><strong>physical_aperture</strong></dt>
 <dd>When using deterministic aperture (i.e. <cite>useDeterministicOrdering</cite> is set),
 the width of the window over which endpoints are load-balanced may be
-wider than the <cite>aperture</cite> gauge. The <cite>physical_aperture</cite> represents this value.</dd>
+wider than the <cite>logical_aperture</cite> gauge. The <cite>physical_aperture</cite> represents
+this value.</dd>
 <dt><strong>use_deterministic_ordering</strong></dt>
 <dd>1 if the Aperture implementation uses deterministic ordering
 0, otherwise.</dd>
@@ -1066,6 +1068,10 @@ count as 5XX for this counter.</dd>
 <dd>A counter of http2 upgrades and new prior knowledge connections server side.</dd>
 <dt><strong>&lt;client_label&gt;/upgrade/success</strong></dt>
 <dd>A counter of http2 upgrades and new prior knowledge connections client side.</dd>
+<dt><strong>&lt;server_label&gt;/streams</strong></dt>
+<dd>A gauge exposing the number of opened streams on the server.</dd>
+<dt><strong>&lt;client_label&gt;/streams</strong></dt>
+<dd>A gauge exposing the number of opened streams on the client.</dd>
 </dl>
 </div>
 <div class="section" id="memcached">
@@ -1293,7 +1299,7 @@ upgraded a connection to TLS.</dd>
       </div>
       <div class="clearer"></div>
     </div>
-  <div class="footer">&copy; Copyright 2017 Twitter, Inc.</div>
+  <div class="footer">&copy; Copyright 2018 Twitter, Inc.</div>
   
   </body>
 </html>

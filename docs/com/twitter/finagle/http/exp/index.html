@@ -196,9 +196,13 @@ resources for using Finagle.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.http">http</a></dd></dl></div>
     </li><li class="current-entities indented5">
-                        <a class="object" href="Multipart$.html" title="An _experimental_ set ot utility classes and methods for decoding HTTP POST requests with multipart/form-data content type."></a>
+                        <a class="object" href="Multipart$.html" title="A set of utility classes and methods for decoding HTTP POST requests with multipart/form-data content type."></a>
                         <a class="class" href="Multipart.html" title="Provides a convenient interface for querying the content of the multipart/form-data body."></a>
                         <a href="Multipart.html" title="Provides a convenient interface for querying the content of the multipart/form-data body.">Multipart</a>
+                      </li><li class="current-entities indented5">
+                        <a class="object" href="MultipartDecoder$.html" title=""></a>
+                        <a class="class" href="MultipartDecoder.html" title="A utility that represents a decoder for a Multipart data."></a>
+                        <a href="MultipartDecoder.html" title="A utility that represents a decoder for a Multipart data.">MultipartDecoder</a>
                       </li><li name="com.twitter.finagle.http.filter" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="filter"></a><a id="filter:filter"></a>
       <span class="permalink">
@@ -376,6 +380,24 @@ resources for using Finagle.
       <p class="shortcomment cmt">Provides a convenient interface for querying the content of the <code>multipart/form-data</code> body.</p><div class="fullcomment"><div class="comment cmt"><p>Provides a convenient interface for querying the content of the <code>multipart/form-data</code> body.</p><p>To decode the non-chunked, POST request into an instance of <a href="Multipart.html" class="extype" name="com.twitter.finagle.http.exp.Multipart">Multipart</a>, use <code>Request.multipart</code>.</p><p>Note: This is an _experimental API_, which will likely be changed in future to support
 streaming HTTP requests.
 </p></div></div>
+    </li><li name="com.twitter.finagle.http.exp.MultipartDecoder" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="MultipartDecoderextendsAnyRef"></a><a id="MultipartDecoder:MultipartDecoder"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/http/exp/index.html#MultipartDecoderextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A utility that represents a decoder for a Multipart data." href="MultipartDecoder.html"><span class="name">MultipartDecoder</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A utility that represents a decoder for a <a href="Multipart.html" class="extype" name="com.twitter.finagle.http.exp.Multipart">Multipart</a> data.</p><div class="fullcomment"><div class="comment cmt"><p>A utility that represents a decoder for a <a href="Multipart.html" class="extype" name="com.twitter.finagle.http.exp.Multipart">Multipart</a> data.</p><p>This decoder is used from within <code>Request.multipart</code> hence the constraint on HTTP method
+being POST.
+</p></div></div>
     </li></ol>
             </div>
 
@@ -396,11 +418,27 @@ streaming HTTP requests.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="An _experimental_ set ot utility classes and methods for decoding HTTP POST requests with multipart/form-data content type." href="Multipart$.html"><span class="name">Multipart</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A set of utility classes and methods for decoding HTTP POST requests with multipart/form-data content type." href="Multipart$.html"><span class="name">Multipart</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
-      <p class="shortcomment cmt">An _experimental_ set ot utility classes and methods for decoding HTTP POST requests with
+      <p class="shortcomment cmt">A set of utility classes and methods for decoding HTTP POST requests with
 <code>multipart/form-data</code> content type.</p>
+    </li><li name="com.twitter.finagle.http.exp.MultipartDecoder" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MultipartDecoder"></a><a id="MultipartDecoder:MultipartDecoder"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/http/exp/index.html#MultipartDecoder" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="MultipartDecoder$.html"><span class="name">MultipartDecoder</span></a><span class="result"> extends <a href="MultipartDecoder.html" class="extype" name="com.twitter.finagle.http.exp.MultipartDecoder">MultipartDecoder</a></span>
+      </span>
+      
+      
     </li>
               </ol>
             </div>

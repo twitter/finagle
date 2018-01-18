@@ -1056,37 +1056,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       
-    </li><li name="com.twitter.finagle.exp.BackupRequestFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="BackupRequestFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a><a id="BackupRequestFilter[Req,Rep]:BackupRequestFilter[Req,Rep]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/exp/index.html#BackupRequestFilter[Req,Rep]extendsSimpleFilter[Req,Rep]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="Issue a backup request after a threshold time has elapsed, useful for curtailing tail latencies in distributed systems." href="BackupRequestFilter.html"><span class="name">BackupRequestFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">Issue a backup request after a threshold time has elapsed, useful
-for curtailing tail latencies in distributed systems.</p><div class="fullcomment"><div class="comment cmt"><p>Issue a backup request after a threshold time has elapsed, useful
-for curtailing tail latencies in distributed systems. See [1] for details.</p><p>Several stats are exported through the given stats receiver exposing
-the filter's operating behavior:</p><ul><li>counter <code>timeouts</code> indicates the number of original requests
-   that timed out and subsequently caused a backup request to
-   be issued;</li><li>counter <code>won</code> indicates the number of original requests that won,
-   including those that didn't actually race with a backup;</li><li>counter <code>lost</code> indicates the number of original requests that lost
-   a race with their corresponding backup request, and finally</li><li>gauge <code>cutoff_ms</code> indicates the current backup request cutoff value
-   in milliseconds.</li></ul><p>[1]: Dean, J. and Barroso, L.A. (2013), The Tail at Scale,
-Communications of the ACM, Vol. 56 No. 2, Pages 74-80,
-http://cacm.acm.org/magazines/2013/2/160173-the-tail-at-scale/fulltext
-</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>A filter alone cannot guarantee that a request is dispatched
-onto a different endpoint from the original. Eventually, this
-should be implemented as a sort of queueing policy.</p></span>, <span class="cmt"><p>Care must be taken to ensure that application of this filter
-preserves semantics since a request may be issued twice (ie. they
-are idempotent).</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.exp.DarkTrafficFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DarkTrafficFilter[Req,Rep]extendsSimpleFilter[Req,Rep]withAbstractDarkTrafficFilter"></a><a id="DarkTrafficFilter[Req,Rep]:DarkTrafficFilter[Req,Rep]"></a>
       <span class="permalink">
@@ -1139,6 +1108,40 @@ forwarded.
       </span>
       
       
+    </li><li name="com.twitter.finagle.exp.BackupRequestFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="BackupRequestFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a><a id="BackupRequestFilter[Req,Rep]:BackupRequestFilter[Req,Rep]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/exp/index.html#BackupRequestFilter[Req,Rep]extendsSimpleFilter[Req,Rep]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Issue a backup request after a threshold time has elapsed, useful for curtailing tail latencies in distributed systems." href="BackupRequestFilter.html"><span class="name deprecated" title="Deprecated: (Since version 2017-12-18) Use com.twitter.finagle.client.BackupRequestFilter">BackupRequestFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Issue a backup request after a threshold time has elapsed, useful
+for curtailing tail latencies in distributed systems.</p><div class="fullcomment"><div class="comment cmt"><p>Issue a backup request after a threshold time has elapsed, useful
+for curtailing tail latencies in distributed systems. See [1] for details.</p><p>Several stats are exported through the given stats receiver exposing
+the filter's operating behavior:</p><ul><li>counter <code>timeouts</code> indicates the number of original requests
+   that timed out and subsequently caused a backup request to
+   be issued;</li><li>counter <code>won</code> indicates the number of original requests that won,
+   including those that didn't actually race with a backup;</li><li>counter <code>lost</code> indicates the number of original requests that lost
+   a race with their corresponding backup request, and finally</li><li>gauge <code>cutoff_ms</code> indicates the current backup request cutoff value
+   in milliseconds.</li></ul><p>[1]: Dean, J. and Barroso, L.A. (2013), The Tail at Scale,
+Communications of the ACM, Vol. 56 No. 2, Pages 74-80,
+http://cacm.acm.org/magazines/2013/2/160173-the-tail-at-scale/fulltext
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-12-18)</i> Use com.twitter.finagle.client.BackupRequestFilter</p></dd><dt>Note</dt><dd><span class="cmt"><p>A filter alone cannot guarantee that a request is dispatched
+onto a different endpoint from the original. Eventually, this
+should be implemented as a sort of queueing policy.</p></span>, <span class="cmt"><p>Care must be taken to ensure that application of this filter
+preserves semantics since a request may be issued twice (ie. they
+are idempotent).</p></span></dd></dl></div>
     </li></ol>
             </div>
 

@@ -761,6 +761,25 @@ Further details, including the request and response, are available at
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.http.MethodBuilder#idempotent" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="idempotent(maxExtraLoad:Double):com.twitter.finagle.http.MethodBuilder"></a><a id="idempotent(Double):MethodBuilder"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/MethodBuilder.html#idempotent(maxExtraLoad:Double):com.twitter.finagle.http.MethodBuilder" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">idempotent</span><span class="params">(<span name="maxExtraLoad">maxExtraLoad: <a href="http://www.scala-lang.org/api/2.12.4/scala/Double.html#scala.Double" class="extype" name="scala.Double">Double</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Configure that requests are to be treated as idempotent.</p><div class="fullcomment"><div class="comment cmt"><p>Configure that requests are to be treated as idempotent. Because requests can be safely
+retried, <span class="extype" name="BackupRequestFilter">BackupRequestFilter</span> is configured with the params <code>maxExtraLoad</code> and
+<code>sendInterrupts</code> to decrease tail latency by sending an additional fraction of requests.</p><p>This additionally causes any server error HTTP status codes (500s) to be retried.</p></div><dl class="paramcmts block"><dt class="param">maxExtraLoad</dt><dd class="cmt"><p>How much extra load, as a fraction, we are willing to send to the server.
+                    Must be between 0.0 and 1.0.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a> → MethodBuilderScaladoc</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -810,6 +829,26 @@ Further details, including the request and response, are available at
       
       <p class="shortcomment cmt">Construct a <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a> to be used for the <code>methodName</code> method.</p><div class="fullcomment"><div class="comment cmt"><p>Construct a <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a> to be used for the <code>methodName</code> method.
 </p></div><dl class="paramcmts block"><dt class="param">methodName</dt><dd class="cmt"><p>used for scoping metrics (e.g. &quot;clnt/your_client_label/method_name&quot;).</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.MethodBuilder#nonIdempotent" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="nonIdempotent:com.twitter.finagle.http.MethodBuilder"></a><a id="nonIdempotent:MethodBuilder"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/MethodBuilder.html#nonIdempotent:com.twitter.finagle.http.MethodBuilder" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">nonIdempotent</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Configure that requests are to be treated as non-idempotent.</p><div class="fullcomment"><div class="comment cmt"><p>Configure that requests are to be treated as non-idempotent. <span class="extype" name="BackupRequestFilter">BackupRequestFilter</span> is
+disabled, and only those failures that are known to be safe to retry (i.e., write failures,
+where the request was never sent) are retried via requeue filter; any previously configured
+retries are removed.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a> → MethodBuilderScaladoc</dd></dl></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">

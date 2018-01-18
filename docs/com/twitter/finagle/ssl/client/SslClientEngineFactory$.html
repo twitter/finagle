@@ -513,7 +513,27 @@ protocols and cipher suites.</p>
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.ssl.client.SslClientEngineFactory#getHostname" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.ssl.client.SslClientEngineFactory#getHostString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getHostString(isa:java.net.InetSocketAddress,config:com.twitter.finagle.ssl.client.SslClientConfiguration):String"></a><a id="getHostString(InetSocketAddress,SslClientConfiguration):String"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/ssl/client/SslClientEngineFactory$.html#getHostString(isa:java.net.InetSocketAddress,config:com.twitter.finagle.ssl.client.SslClientConfiguration):String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getHostString</span><span class="params">(<span name="isa">isa: <span class="extype" name="java.net.InetSocketAddress">InetSocketAddress</span></span>, <span name="config">config: <a href="SslClientConfiguration.html" class="extype" name="com.twitter.finagle.ssl.client.SslClientConfiguration">SslClientConfiguration</a></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Return the hostname from the <a href="SslClientConfiguration.html" class="extype" name="com.twitter.finagle.ssl.client.SslClientConfiguration">configuration</a> if set,
+or fall back to the host string of the <code>java.net.InetSocketAddress</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Return the hostname from the <a href="SslClientConfiguration.html" class="extype" name="com.twitter.finagle.ssl.client.SslClientConfiguration">configuration</a> if set,
+or fall back to the host string of the <code>java.net.InetSocketAddress</code>.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>If the config does not contain a hostname, this method will not perform
+a reverse DNS lookup if the address was created with a literal IP address.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.ssl.client.SslClientEngineFactory#getHostname" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getHostname(isa:java.net.InetSocketAddress,config:com.twitter.finagle.ssl.client.SslClientConfiguration):String"></a><a id="getHostname(InetSocketAddress,SslClientConfiguration):String"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/ssl/client/SslClientEngineFactory$.html#getHostname(isa:java.net.InetSocketAddress,config:com.twitter.finagle.ssl.client.SslClientConfiguration):String" title="Permalink">
@@ -529,7 +549,10 @@ protocols and cipher suites.</p>
       </span>
       
       <p class="shortcomment cmt">Return the hostname from the <a href="SslClientConfiguration.html" class="extype" name="com.twitter.finagle.ssl.client.SslClientConfiguration">configuration</a> if set,
-or fall back to the hostname of the <code>java.net.InetSocketAddress</code>.</p>
+or fall back to the hostname of the <code>java.net.InetSocketAddress</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Return the hostname from the <a href="SslClientConfiguration.html" class="extype" name="com.twitter.finagle.ssl.client.SslClientConfiguration">configuration</a> if set,
+or fall back to the hostname of the <code>java.net.InetSocketAddress</code>.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>If the config does not contain a hostname, and the address was created
+with a literal IP address, this method will perform a reverse DNS lookup.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">

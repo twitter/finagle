@@ -236,6 +236,10 @@ resources for using Finagle.
                         <a class="trait" href="StackRegistry.html" title="A registry that allows the registration of a string identifier with a a com.twitter.finagle.Stack and its params."></a>
                         <a href="StackRegistry.html" title="A registry that allows the registration of a string identifier with a a com.twitter.finagle.Stack and its params.">StackRegistry</a>
                       </li><li class="current-entities indented4">
+                        <a class="object" href="WindowedPercentileHistogram$.html" title=""></a>
+                        <a class="class" href="WindowedPercentileHistogram.html" title="Sliding window of numBuckets histograms."></a>
+                        <a href="WindowedPercentileHistogram.html" title="Sliding window of numBuckets histograms.">WindowedPercentileHistogram</a>
+                      </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="defaultTimerProbeSlowTasks$.html" title="Configures whether to probe for slow tasks executing in the default Timer."></a>
                         <a href="defaultTimerProbeSlowTasks$.html" title="Configures whether to probe for slow tasks executing in the default Timer.">defaultTimerProbeSlowTasks</a>
@@ -283,7 +287,8 @@ latch guarantees serial, non-concurrent execution, functions passed to
 2. The latch's count is zero</p><p>Thus, calling <a href="#incr():Int" class="extmbr" name="com.twitter.finagle.util.AsyncLatch#incr">com.twitter.finagle.util.AsyncLatch#incr</a> will cause
 subsequent functions passed to <a href="#await(f:=&gt;Unit):Unit" class="extmbr" name="com.twitter.finagle.util.AsyncLatch#await">com.twitter.finagle.util.AsyncLatch#await</a>
 to be delayed until the count is decremented to zero. Once the count is zero,
-functions are executed in the order that they are provided to <code>await</code>.
+functions are executed in LIFO order, i.e., the reverse of the order in
+which they are given to <code>await</code>.
 </p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes

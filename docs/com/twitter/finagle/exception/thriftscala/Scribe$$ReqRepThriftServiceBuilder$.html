@@ -147,10 +147,10 @@ returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.h
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.memcached" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="memcached"></a><a id="memcached:memcached"></a>
+    </li><li name="com.twitter.finagle.exception" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="exception"></a><a id="exception:exception"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#memcached" title="Permalink">
+      <a href="../../../com/twitter/finagle/index.html#exception" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -159,14 +159,14 @@ resources for using Finagle.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="../index.html"><span class="name">memcached</span></a>
+        <a title="" href="../index.html"><span class="name">exception</span></a>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.memcached.loadbalancer" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="loadbalancer"></a><a id="loadbalancer:loadbalancer"></a>
+    </li><li name="com.twitter.finagle.exception.thriftscala" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="thriftscala"></a><a id="thriftscala:thriftscala"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/memcached/index.html#loadbalancer" title="Permalink">
+      <a href="../../../../com/twitter/finagle/exception/index.html#thriftscala" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -175,14 +175,14 @@ resources for using Finagle.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="index.html"><span class="name">loadbalancer</span></a>
+        <a title="" href="index.html"><span class="name">thriftscala</span></a>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.memcached">memcached</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory" visbl="pub" class="indented6 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ConcurrentLoadBalancerFactory"></a><a id="ConcurrentLoadBalancerFactory:ConcurrentLoadBalancerFactory"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.exception">exception</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.exception.thriftscala.Scribe" visbl="pub" class="indented6 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Scribe"></a><a id="Scribe:Scribe"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/index.html#ConcurrentLoadBalancerFactory" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/exception/thriftscala/index.html#Scribe" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -191,21 +191,86 @@ resources for using Finagle.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="Exposes a StackModule which composes over the LoadBalancerFactory to change the way the way endpoints are created for a load balancer." href="ConcurrentLoadBalancerFactory$.html"><span class="name">ConcurrentLoadBalancerFactory</span></a>
+        <a title="" href="Scribe$.html"><span class="name">Scribe</span></a>
       </span>
       
-      <p class="shortcomment cmt">Exposes a <span class="extype" name="StackModule">StackModule</span> which composes over the <span class="extype" name="LoadBalancerFactory">LoadBalancerFactory</span> to
-change the way the way endpoints are created for a load balancer.</p><div class="fullcomment"><div class="comment cmt"><p>Exposes a <span class="extype" name="StackModule">StackModule</span> which composes over the <span class="extype" name="LoadBalancerFactory">LoadBalancerFactory</span> to
-change the way the way endpoints are created for a load balancer. In particular,
-each endpoint that is resolved is replicated by the given <a href="ConcurrentLoadBalancerFactory$$Param.html" class="extype" name="com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory.Param">Param</a>. This, increases
-concurrency for each identical endpoint and allows them to be load balanced over. This
-is useful for pipelining protocols that may incur head-of-line blocking without
-this replication.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.memcached.loadbalancer">loadbalancer</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.exception.thriftscala">thriftscala</a></dd></dl></div>
     </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="trait" href="Scribe$$BaseServiceIface.html" title=""></a>
+                        <a href="Scribe$$BaseServiceIface.html" title="">BaseServiceIface</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="class" href="Scribe$$FinagledClient.html" title=""></a>
+                        <a href="Scribe$$FinagledClient.html" title="">FinagledClient</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="class" href="Scribe$$FinagledService.html" title=""></a>
+                        <a href="Scribe$$FinagledService.html" title="">FinagledService</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="trait" href="Scribe$$FutureIface.html" title=""></a>
+                        <a href="Scribe$$FutureIface.html" title="">FutureIface</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="object" href="Scribe$$Log$.html" title=""></a>
+                        <a href="Scribe$$Log$.html" title="">Log</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="class" href="Scribe$$MethodIface.html" title=""></a>
+                        <a href="Scribe$$MethodIface.html" title="">MethodIface</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="object" href="Scribe$$MethodIfaceBuilder$.html" title=""></a>
+                        <a href="Scribe$$MethodIfaceBuilder$.html" title="">MethodIfaceBuilder</a>
+                      </li><li class="current-entities indented6">
+                        <a class="object" href="Scribe$$MethodPerEndpoint$.html" title=""></a>
+                        <a class="trait" href="Scribe$$MethodPerEndpoint.html" title=""></a>
+                        <a href="Scribe$$MethodPerEndpoint.html" title="">MethodPerEndpoint</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="object" href="Scribe$$MethodPerEndpointBuilder$.html" title=""></a>
+                        <a href="Scribe$$MethodPerEndpointBuilder$.html" title="">MethodPerEndpointBuilder</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="object" href="Scribe$$ReqRepMethodPerEndpoint$.html" title=""></a>
+                        <a href="Scribe$$ReqRepMethodPerEndpoint$.html" title="">ReqRepMethodPerEndpoint</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="object" href="Scribe$$ReqRepMethodPerEndpointBuilder$.html" title=""></a>
+                        <a href="Scribe$$ReqRepMethodPerEndpointBuilder$.html" title="">ReqRepMethodPerEndpointBuilder</a>
+                      </li><li class="current-entities indented6">
+                        <a class="object" href="Scribe$$ReqRepServicePerEndpoint$.html" title=""></a>
+                        <a class="trait" href="Scribe$$ReqRepServicePerEndpoint.html" title=""></a>
+                        <a href="Scribe$$ReqRepServicePerEndpoint.html" title="">ReqRepServicePerEndpoint</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="object" href="Scribe$$ReqRepServicePerEndpointBuilder$.html" title=""></a>
+                        <a href="Scribe$$ReqRepServicePerEndpointBuilder$.html" title="">ReqRepServicePerEndpointBuilder</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="object" href="" title=""></a>
-                        <a class="class" href="ConcurrentLoadBalancerFactory$$Param.html" title="A class eligible for configuring the number of connections a single endpoint has."></a>
-                        <a href="ConcurrentLoadBalancerFactory$$Param.html" title="A class eligible for configuring the number of connections a single endpoint has.">Param</a>
+                        <a href="" title="">ReqRepThriftServiceBuilder</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="class" href="Scribe$$ServiceIface.html" title=""></a>
+                        <a href="Scribe$$ServiceIface.html" title="">ServiceIface</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="object" href="Scribe$$ServiceIfaceBuilder$.html" title=""></a>
+                        <a href="Scribe$$ServiceIfaceBuilder$.html" title="">ServiceIfaceBuilder</a>
+                      </li><li class="current-entities indented6">
+                        <a class="object" href="Scribe$$ServicePerEndpoint$.html" title=""></a>
+                        <a class="trait" href="Scribe$$ServicePerEndpoint.html" title=""></a>
+                        <a href="Scribe$$ServicePerEndpoint.html" title="">ServicePerEndpoint</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="object" href="Scribe$$ServicePerEndpointBuilder$.html" title=""></a>
+                        <a href="Scribe$$ServicePerEndpointBuilder$.html" title="">ServicePerEndpointBuilder</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="object" href="Scribe$$ThriftServiceBuilder$.html" title=""></a>
+                        <a href="Scribe$$ThriftServiceBuilder$.html" title="">ThriftServiceBuilder</a>
                       </li>
               </ul>
             </div>
@@ -213,34 +278,35 @@ this replication.
           <div id="content">
             <body class="object value">
       <div id="definition">
-        <a href="ConcurrentLoadBalancerFactory$$Param.html" title="See companion class"><div class="big-circle object-companion-class">o</div></a>
-        <p id="owner"><a href="../../../../index.html" class="extype" name="com">com</a>.<a href="../../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../index.html" class="extype" name="com.twitter.finagle.memcached">memcached</a>.<a href="index.html" class="extype" name="com.twitter.finagle.memcached.loadbalancer">loadbalancer</a>.<a href="ConcurrentLoadBalancerFactory$.html" class="extype" name="com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory">ConcurrentLoadBalancerFactory</a></p>
-        <h1><a href="ConcurrentLoadBalancerFactory$$Param.html" title="See companion class">Param</a><span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param$.html" title="Permalink">
+        <div class="big-circle object">o</div>
+        <p id="owner"><a href="../../../../index.html" class="extype" name="com">com</a>.<a href="../../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../index.html" class="extype" name="com.twitter.finagle.exception">exception</a>.<a href="index.html" class="extype" name="com.twitter.finagle.exception.thriftscala">thriftscala</a>.<a href="Scribe$.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe">Scribe</a></p>
+        <h1>ReqRepThriftServiceBuilder<span class="permalink">
+      <a href="../../../../../com/twitter/finagle/exception/thriftscala/Scribe$$ReqRepThriftServiceBuilder$.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
-        <h3><span class="morelinks"><div>
-            Companion <a href="ConcurrentLoadBalancerFactory$$Param.html" title="See companion class">class Param</a>
-          </div></span></h3>
+        <h3><span class="morelinks"></span></h3>
       </div>
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">implicit </span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">Param</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <span class="name deprecated" title="Deprecated: (Since version 2018-01-12) Use ReqRepMethodPerEndpointBuilder">ReqRepThriftServiceBuilder</span><span class="result"> extends <a href="../../thrift/service/ReqRepThriftServiceBuilder.html" class="extype" name="com.twitter.finagle.thrift.service.ReqRepThriftServiceBuilder">ReqRepThriftServiceBuilder</a>[<a href="Scribe$$ReqRepServicePerEndpoint.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</a>, <a href="Scribe.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe">Scribe</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>]]</span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-01-12)</i> Use ReqRepMethodPerEndpointBuilder</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="../../thrift/service/ReqRepThriftServiceBuilder.html" class="extype" name="com.twitter.finagle.thrift.service.ReqRepThriftServiceBuilder">ReqRepThriftServiceBuilder</a>[<a href="Scribe$$ReqRepServicePerEndpoint.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</a>, <a href="Scribe.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe">Scribe</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>]], <a href="../../thrift/service/ThriftServiceBuilder.html" class="extype" name="com.twitter.finagle.thrift.service.ThriftServiceBuilder">ThriftServiceBuilder</a>[<a href="Scribe$$ReqRepServicePerEndpoint.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</a>, <a href="Scribe.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe">Scribe</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>]], <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
         </div></div>
         
 
@@ -266,7 +332,7 @@ this replication.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory.Param"><span>Param</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.exception.thriftscala.Scribe.ReqRepThriftServiceBuilder"><span>ReqRepThriftServiceBuilder</span></li><li class="in" name="com.twitter.finagle.thrift.service.ReqRepThriftServiceBuilder"><span>ReqRepThriftServiceBuilder</span></li><li class="in" name="com.twitter.finagle.thrift.service.ThriftServiceBuilder"><span>ThriftServiceBuilder</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -296,7 +362,7 @@ this replication.
                 <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param$.html#!=(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/exception/thriftscala/Scribe$$ReqRepThriftServiceBuilder$.html#!=(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -312,7 +378,7 @@ this replication.
     </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param$.html###():Int" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/exception/thriftscala/Scribe$$ReqRepThriftServiceBuilder$.html###():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -328,7 +394,7 @@ this replication.
     </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param$.html#==(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/exception/thriftscala/Scribe$$ReqRepThriftServiceBuilder$.html#==(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -344,7 +410,7 @@ this replication.
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param$.html#asInstanceOf[T0]:T0" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/exception/thriftscala/Scribe$$ReqRepThriftServiceBuilder$.html#asInstanceOf[T0]:T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -357,10 +423,27 @@ this replication.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.exception.thriftscala.Scribe.ReqRepThriftServiceBuilder#build" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="build(servicePerEndpoint:com.twitter.finagle.exception.thriftscala.Scribe.ReqRepServicePerEndpoint):com.twitter.finagle.exception.thriftscala.Scribe.MethodPerEndpoint"></a><a id="build(ReqRepServicePerEndpoint):MethodPerEndpoint"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/exception/thriftscala/Scribe$$ReqRepThriftServiceBuilder$.html#build(servicePerEndpoint:com.twitter.finagle.exception.thriftscala.Scribe.ReqRepServicePerEndpoint):com.twitter.finagle.exception.thriftscala.Scribe.MethodPerEndpoint" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">build</span><span class="params">(<span name="servicePerEndpoint">servicePerEndpoint: <a href="Scribe$$ReqRepServicePerEndpoint.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</a></span>)</span><span class="result">: <a href="Scribe$$MethodPerEndpoint.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.MethodPerEndpoint">MethodPerEndpoint</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Build a MethodPerEndpoint wrapping a ServicePerEndpoint.</p><div class="fullcomment"><div class="comment cmt"><p>Build a MethodPerEndpoint wrapping a ServicePerEndpoint.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.ReqRepThriftServiceBuilder">ReqRepThriftServiceBuilder</a> → <a href="../../thrift/service/ThriftServiceBuilder.html" class="extype" name="com.twitter.finagle.thrift.service.ThriftServiceBuilder">ThriftServiceBuilder</a></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param$.html#clone():Object" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/exception/thriftscala/Scribe$$ReqRepThriftServiceBuilder$.html#clone():Object" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -384,7 +467,7 @@ this replication.
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param$.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/exception/thriftscala/Scribe$$ReqRepThriftServiceBuilder$.html#eq(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -400,7 +483,7 @@ this replication.
     </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param$.html#equals(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/exception/thriftscala/Scribe$$ReqRepThriftServiceBuilder$.html#equals(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -416,7 +499,7 @@ this replication.
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param$.html#finalize():Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/exception/thriftscala/Scribe$$ReqRepThriftServiceBuilder$.html#finalize():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -438,7 +521,7 @@ this replication.
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param$.html#getClass():Class[_]" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/exception/thriftscala/Scribe$$ReqRepThriftServiceBuilder$.html#getClass():Class[_]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -457,7 +540,7 @@ this replication.
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param$.html#hashCode():Int" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/exception/thriftscala/Scribe$$ReqRepThriftServiceBuilder$.html#hashCode():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -476,7 +559,7 @@ this replication.
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param$.html#isInstanceOf[T0]:Boolean" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/exception/thriftscala/Scribe$$ReqRepThriftServiceBuilder$.html#isInstanceOf[T0]:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -492,7 +575,7 @@ this replication.
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param$.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/exception/thriftscala/Scribe$$ReqRepThriftServiceBuilder$.html#ne(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -508,7 +591,7 @@ this replication.
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param$.html#notify():Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/exception/thriftscala/Scribe$$ReqRepThriftServiceBuilder$.html#notify():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -527,7 +610,7 @@ this replication.
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param$.html#notifyAll():Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/exception/thriftscala/Scribe$$ReqRepThriftServiceBuilder$.html#notifyAll():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -543,26 +626,10 @@ this replication.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory.Param#param" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="param:com.twitter.finagle.Stack.Param[com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory.Param]"></a><a id="param:Stack.Param[Param]"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param$.html#param:com.twitter.finagle.Stack.Param[com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory.Param]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">implicit </span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">param</span><span class="result">: <a href="../../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Stack.Param</a>[<a href="ConcurrentLoadBalancerFactory$$Param.html" class="extype" name="com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory.Param">Param</a>]</span>
-      </span>
-      
-      
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param$.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/exception/thriftscala/Scribe$$ReqRepThriftServiceBuilder$.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -578,7 +645,7 @@ this replication.
     </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param$.html#toString():String" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/exception/thriftscala/Scribe$$ReqRepThriftServiceBuilder$.html#toString():String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -594,7 +661,7 @@ this replication.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param$.html#wait():Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/exception/thriftscala/Scribe$$ReqRepThriftServiceBuilder$.html#wait():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -616,7 +683,7 @@ this replication.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param$.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/exception/thriftscala/Scribe$$ReqRepThriftServiceBuilder$.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -638,7 +705,7 @@ this replication.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/loadbalancer/ConcurrentLoadBalancerFactory$$Param$.html#wait(x$1:Long):Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/exception/thriftscala/Scribe$$ReqRepThriftServiceBuilder$.html#wait(x$1:Long):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -669,10 +736,10 @@ this replication.
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.Serializable">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></h3>
-            </div><div class="parent" name="java.io.Serializable">
-              <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
+        <div class="parent" name="com.twitter.finagle.thrift.service.ReqRepThriftServiceBuilder">
+              <h3>Inherited from <a href="../../thrift/service/ReqRepThriftServiceBuilder.html" class="extype" name="com.twitter.finagle.thrift.service.ReqRepThriftServiceBuilder">ReqRepThriftServiceBuilder</a>[<a href="Scribe$$ReqRepServicePerEndpoint.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</a>, <a href="Scribe.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe">Scribe</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>]]</h3>
+            </div><div class="parent" name="com.twitter.finagle.thrift.service.ThriftServiceBuilder">
+              <h3>Inherited from <a href="../../thrift/service/ThriftServiceBuilder.html" class="extype" name="com.twitter.finagle.thrift.service.ThriftServiceBuilder">ThriftServiceBuilder</a>[<a href="Scribe$$ReqRepServicePerEndpoint.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.ReqRepServicePerEndpoint">ReqRepServicePerEndpoint</a>, <a href="Scribe.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe">Scribe</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>]]</h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

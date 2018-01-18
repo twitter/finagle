@@ -205,6 +205,10 @@ stabilized (moved elsewhere) at any time.
                         <span class="separator"></span>
                         <a class="trait" href="PushTransporter.html" title="PushSessionTransporters attempt to construct a PushChannelHandle and provide it to the factory function, returning any errors as failed Futures."></a>
                         <a href="PushTransporter.html" title="PushSessionTransporters attempt to construct a PushChannelHandle and provide it to the factory function, returning any errors as failed Futures.">PushTransporter</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="RefPushSession.html" title="Proxy PushSession which can update the underlying session."></a>
+                        <a href="RefPushSession.html" title="Proxy PushSession which can update the underlying session.">RefPushSession</a>
                       </li>
               </ul>
             </div>
@@ -376,6 +380,30 @@ failed <code>Future</code>s.</p><div class="fullcomment"><div class="comment cmt
 and provide it to the factory function, returning any errors as
 failed <code>Future</code>s.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>There is one <a href="PushTransporter.html" class="extype" name="com.twitter.finagle.exp.pushsession.PushTransporter">PushTransporter</a> assigned per remote peer.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.exp.pushsession.RefPushSession" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="RefPushSession[In,Out]extendsPushSession[In,Out]"></a><a id="RefPushSession[In,Out]:RefPushSession[In,Out]"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/exp/pushsession/index.html#RefPushSession[In,Out]extendsPushSession[In,Out]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Proxy PushSession which can update the underlying session." href="RefPushSession.html"><span class="name">RefPushSession</span></a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="PushSession.html" class="extype" name="com.twitter.finagle.exp.pushsession.PushSession">PushSession</a>[<span class="extype" name="com.twitter.finagle.exp.pushsession.RefPushSession.In">In</span>, <span class="extype" name="com.twitter.finagle.exp.pushsession.RefPushSession.Out">Out</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Proxy <a href="PushSession.html" class="extype" name="com.twitter.finagle.exp.pushsession.PushSession">PushSession</a> which can update the underlying session.</p><div class="fullcomment"><div class="comment cmt"><p>Proxy <a href="PushSession.html" class="extype" name="com.twitter.finagle.exp.pushsession.PushSession">PushSession</a> which can update the underlying session.</p><p>Thread safety considerations</p><p>- <code>receive</code> is only intended to be called from within the serial executor, which is
+  a general rule in all <code>PushSession</code> implementations.
+- <code>updateRef</code> should be called only from within the handle's serial executor. This
+  is to avoid race conditions between closing the underlying session (which happens
+  in the serial executor) and replacing it with a new session: if replacing happens
+  in the same thread, there is no need to worry about broadcasting close events
+  from the old session to the new one.
+- <code>close</code> and <code>status</code> are safe to call from any thread.
+</p></div></div>
     </li></ol>
             </div>
 

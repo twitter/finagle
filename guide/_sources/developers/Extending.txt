@@ -241,12 +241,12 @@ much the same in Netty 3 and Netty 4.
 
 Using a Netty 3 `ChannelPipeline <http://netty.io/3.6/api/org/jboss/netty/channel/ChannelPipeline.html>`_:
 
-.. includecode:: code/client-server-anatomy/netty3/Pipeline.scala#serverpipeline
+.. includecode:: ../code/client-server-anatomy/netty3/Pipeline.scala#serverpipeline
    :language: scala
 
 Using a Netty 4 `ChannelPipeline <http://netty.io/4.1/api/io/netty/channel/ChannelPipeline.html>`_:
 
-.. includecode:: code/client-server-anatomy/netty4/Pipeline.scala#serverpipeline
+.. includecode:: ../code/client-server-anatomy/netty4/Pipeline.scala#serverpipeline
    :language: scala
 
 
@@ -262,7 +262,7 @@ and :finagle-netty4-src:`Netty4Listener <com/twitter/finagle/netty4/Netty4Listen
 Here we define a :finagle-netty4-src:`Netty4Listener <com/twitter/finagle/netty4/Netty4Listener.scala>`
 in our server implementation:
 
-.. includecode:: code/client-server-anatomy/netty4/Echo.scala#serverlistener
+.. includecode:: ../code/client-server-anatomy/netty4/Echo.scala#serverlistener
    :language: scala
 
 This implements the :src:`Listener <com/twitter/finagle/server/Listener.scala>`
@@ -312,7 +312,7 @@ We could translate our ``serveTransport`` function to use this facility.
 
 Using Netty 4:
 
-.. includecode:: code/client-server-anatomy/netty4/Echo.scala#simplelisten
+.. includecode:: ../code/client-server-anatomy/netty4/Echo.scala#simplelisten
    :language: scala
 
 A nice consequence of using a :ref:`Service <services>` to process
@@ -340,12 +340,12 @@ processing is done in the ``Dispatcher``.
 
 We'll create a server that uses Netty 4:
 
-.. includecode:: code/client-server-anatomy/netty4/Echo.scala#server
+.. includecode:: ../code/client-server-anatomy/netty4/Echo.scala#server
    :language: scala
 
 Finally, we make use of our service:
 
-.. includecode:: code/client-server-anatomy/netty4/Echo.scala#serveruse
+.. includecode:: ../code/client-server-anatomy/netty4/Echo.scala#serveruse
    :language: scala
 
 To create a server that uses Netty 3, use a
@@ -362,12 +362,12 @@ pipeline, the types have different namespaces but look much the same in Netty 3 
 
 Netty 3 `ChannelPipeline <http://netty.io/3.6/api/org/jboss/netty/channel/ChannelPipeline.html>`_:
 
-.. includecode:: code/client-server-anatomy/netty3/Pipeline.scala#clientpipeline
+.. includecode:: ../code/client-server-anatomy/netty3/Pipeline.scala#clientpipeline
    :language: scala
 
 Netty 4 `ChannelPipeline <http://netty.io/4.1/api/io/netty/channel/ChannelPipeline.html>`_:
 
-.. includecode:: code/client-server-anatomy/netty4/Pipeline.scala#clientpipeline
+.. includecode:: ../code/client-server-anatomy/netty4/Pipeline.scala#clientpipeline
    :language: scala
 
 
@@ -382,7 +382,7 @@ however the use of other Transporters is fully supported.
 
 Using a :finagle-netty4-src:`Netty4Transporter <com/twitter/finagle/netty4/Netty4Transporter.scala>`:
 
-.. includecode:: code/client-server-anatomy/netty4/Echo.scala#transporter
+.. includecode:: ../code/client-server-anatomy/netty4/Echo.scala#transporter
    :language: scala
 
 
@@ -410,12 +410,12 @@ A Basic Client
 Given a defined transporter and request dispatching strategy, we can compose the
 two and create a client. We'll create a client that uses Netty 4:
 
-.. includecode:: code/client-server-anatomy/netty4/Echo.scala#explicitbridge
+.. includecode:: ../code/client-server-anatomy/netty4/Echo.scala#explicitbridge
    :language: scala
 
 Finally, we can dispatch requests over our client.
 
-.. includecode:: code/client-server-anatomy/netty4/Echo.scala#basicclientexample
+.. includecode:: ../code/client-server-anatomy/netty4/Echo.scala#basicclientexample
    :language: scala
 
 Assuming we have a server willing to listen, we can expect a response:
@@ -435,13 +435,13 @@ Our client is a ``Service``, so we can supply additional
 behavior to make our client more robust using
 filters:
 
-.. includecode:: code/client-server-anatomy/netty4/Echo.scala#filters
+.. includecode:: ../code/client-server-anatomy/netty4/Echo.scala#filters
    :language: scala
 
 Composing these filters [#]_ with our basic client demonstrates
 the composable components used throughout finagle.
 
-.. includecode:: code/client-server-anatomy/netty4/Echo.scala#robustclient
+.. includecode:: ../code/client-server-anatomy/netty4/Echo.scala#robustclient
    :language: scala
 
 This client is a good start, but we cannot dispatch concurrent requests
@@ -469,7 +469,7 @@ on :ref:`client modules <client_modules>` for more details.
 
 Putting together a ``StdStackClient`` is simple:
 
-.. includecode:: code/client-server-anatomy/netty4/Echo.scala#client
+.. includecode:: ../code/client-server-anatomy/netty4/Echo.scala#client
    :language: scala
 
 Armed with this new client, we can connect to a destination :src:`Name
