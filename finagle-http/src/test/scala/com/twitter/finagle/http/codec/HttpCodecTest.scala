@@ -50,7 +50,7 @@ class HttpCodecTest extends FunSuite {
     assert(response.headerMap(Fields.Server) == "macaw")
   }
 
-  test("decodeBytes") {
+  test("decodeBytesToResponse") {
     val response = HttpCodec.decodeBytesToResponse(
       "HTTP/1.1 200 OK\r\nServer: macaw\r\nContent-Length: 0\r\n\r\n".getBytes(UTF_8)
     )

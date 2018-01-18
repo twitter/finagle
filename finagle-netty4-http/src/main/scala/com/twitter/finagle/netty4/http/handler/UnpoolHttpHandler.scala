@@ -17,7 +17,7 @@ import io.netty.util.ReferenceCounted
  *       and replaced with EmptyByteBuf.
  */
 @Sharable
-private[http] object UnpoolHttpHandler extends ChannelInboundHandlerAdapter {
+private[finagle] object UnpoolHttpHandler extends ChannelInboundHandlerAdapter {
   override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit = msg match {
     // This case is special since it helps to avoid unnecessary `replace`
     // when the underlying content is already `EmptyByteBuffer`.

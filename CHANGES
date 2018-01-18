@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-base-http: `c.t.f.h.codec.HttpCodec` has been moved to the `finagle-http`
+    project. ``PHAB_ID=D116364``
+
 18.1.0
 -------
 
