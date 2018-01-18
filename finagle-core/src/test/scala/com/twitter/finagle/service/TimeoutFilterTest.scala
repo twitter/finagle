@@ -361,6 +361,51 @@ class TimeoutFilterTest extends FunSuite with Matchers with MockitoSugar {
     }
   }
 
+  test("Tunable timeouts: Timeout if tunable is updated") {
+    val timer = new MockTimer()
+    val timeoutTunable = Tunable.emptyMutable[Duration]("id")
+    val filter = new TimeoutFilter[String, String](
+      timeoutTunable,
+      timeout => new IndividualRequestTimeoutException(timeout),
+      timer
+    )
+
+    val h = new TimeoutFilterHelper()
+    val svc = filter.andThen(h.service)
+
+    Time.withCurrentTimeFrozen { tc =>
+      timeoutTunable.set(5.seconds)
+      val res = svc("hello")
+      assert(!res.isDefined)
+
+      // not yet at the timeout
+      tc.advance(4.seconds)
+      timer.tick()
+      assert(!res.isDefined)
+
+      // go past the timeout
+      tc.advance(2.seconds)
+      timer.tick()
+      val ex = intercept[IndividualRequestTimeoutException] {
+        Await.result(res, 1.second)
+      }
+      ex.getMessage should include(timeoutTunable().get.toString)
+
+      // change the timeout
+      timeoutTunable.set(3.seconds)
+      val res2 = svc("hello")
+      assert(!res2.isDefined)
+
+      // this time, 4 seconds pushes us past
+      tc.advance(4.seconds)
+      timer.tick()
+      val ex2 = intercept[IndividualRequestTimeoutException] {
+        Await.result(res2, 1.second)
+      }
+      ex2.getMessage should include(timeoutTunable().get.toString)
+    }
+  }
+
   test("Tunable timeouts: No timeout if Tunable cleared") {
     val h = new TunableTimeoutHelper
     import h._

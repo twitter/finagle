@@ -232,6 +232,13 @@ class TimeoutFilter[Req, Rep](
   timer: Timer
 ) extends SimpleFilter[Req, Rep] {
 
+  def this(
+    timeout: Tunable[Duration],
+    exceptionFn: Duration => RequestTimeoutException,
+    timer: Timer
+  ) =
+    this(() => timeout().getOrElse(TimeoutFilter.Param.Default), exceptionFn, timer)
+
   def this(timeout: Duration, exception: RequestTimeoutException, timer: Timer) =
     this(() => timeout, _ => exception, timer)
 
