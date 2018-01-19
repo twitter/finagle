@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+  * finagle-thriftmux: Expose the underlying configured client `label` in the
+    `c.t.finagle.thriftmux.MethodBuilder`. ``PHAB_ID=D129109``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

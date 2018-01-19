@@ -246,6 +246,15 @@ class MethodBuilder(
   mb: client.MethodBuilder[ThriftClientRequest, Array[Byte]]
 ) extends client.MethodBuilderScaladoc[MethodBuilder] {
 
+  /**
+   * Configured client label. The `label` is used to assign a label to the underlying Thrift client.
+   * The label is used to display stats, etc.
+   *
+   * @see [[com.twitter.finagle.Client]]
+   * @see [[https://twitter.github.io/finagle/guide/Clients.html#clients]]
+   */
+  def label: String = mb.params[param.Label].label
+
   def withTimeoutTotal(howLong: Duration): MethodBuilder =
     new MethodBuilder(rich, mb.withTimeout.total(howLong))
 
@@ -292,7 +301,7 @@ class MethodBuilder(
     val filters: Filter.TypeAgnostic = mb.filters(methodName)
     val serviceIface: ServiceIface = rich.newServiceIface(
       mb.wrappedService(methodName),
-      mb.params[param.Label].label
+      label
     )(builder)
     serviceIface.filtered(filters)
   }
@@ -310,7 +319,7 @@ class MethodBuilder(
     val filters: Filter.TypeAgnostic = mb.filters(methodName)
     val servicePerEndpoint: ServicePerEndpoint = rich.servicePerEndpoint(
       mb.wrappedService(methodName),
-      mb.params[param.Label].label
+      label
     )(builder)
     servicePerEndpoint.filtered(filters)
   }
