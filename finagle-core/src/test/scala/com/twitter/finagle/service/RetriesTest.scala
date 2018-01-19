@@ -423,4 +423,18 @@ class RetriesTest extends FunSuite {
 
     factory()
   }
+
+  test("hashCode and equals for Retries.Budget only checks RetryBudget, not Backoff stream") {
+    val budget = Retries.Budget(RetryBudget.Empty, Backoff.const(1.second))
+    val budgetWithDifferentBackoffStream = Retries.Budget(RetryBudget.Empty, Backoff.const(2.second))
+    val differentBudget = Retries.Budget(RetryBudget.Infinite, Backoff.const(3.second))
+
+    assert(budget.equals(budget))
+    assert(budget.equals(budgetWithDifferentBackoffStream))
+    assert(! budget.equals(differentBudget))
+
+    assert(budget.## == budget.##)
+    assert(budget.## == budgetWithDifferentBackoffStream.##)
+    assert(budget.## != differentBudget.##)
+  }
 }

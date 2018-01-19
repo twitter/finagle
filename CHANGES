@@ -19,6 +19,12 @@ Breaking API Changes
   * finagle-base-http: `c.t.f.h.codec.HttpCodec` has been moved to the `finagle-http`
     project. ``PHAB_ID=D116364``
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: Finagle clients with retry budgets or backoffs should no
+    longer have infinite hash codes. ``PHAB_ID=D128594``
+
 18.1.0
 -------
 
