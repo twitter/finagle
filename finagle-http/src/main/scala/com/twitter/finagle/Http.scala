@@ -304,6 +304,22 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       withStack(stack.replace(http.filter.StatsFilter.role, http.filter.StatsFilter.module))
 
     /**
+     * Enable HTTP/2
+     *
+     * @note this will override whatever has been set in the toggle.
+     */
+    def withHttp2: Client =
+      configuredParams(Http2)
+
+    /**
+     * Disable HTTP/2
+     *
+     * @note this will override whatever has been set in the toggle.
+     */
+    def withNoHttp2: Client =
+      configured(Netty4Impl)
+
+    /**
      * Create a [[http.MethodBuilder]] for a given destination.
      *
      * @see [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]]
@@ -363,7 +379,9 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       val shouldHttp2 =
         if (params[Transport.ClientSsl].sslClientConfiguration == None) useH2C()
         else useH2()
-      val client = if (shouldHttp2) this.configuredParams(Http2) else this
+      val explicitlyConfigured = params.contains[HttpImpl]
+      val client = if (!explicitlyConfigured && shouldHttp2) this.configuredParams(Http2)
+      else this
       client.superNewClient(dest, label0)
     }
   }
@@ -487,6 +505,22 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       withStack(stack.replace(http.filter.StatsFilter.role, http.filter.StatsFilter.module))
 
     /**
+     * Enable HTTP/2
+     *
+     * @note this will override whatever has been set in the toggle.
+     */
+    def withHttp2: Server =
+      configuredParams(Http2)
+
+    /**
+     * Disable HTTP/2
+     *
+     * @note this will override whatever has been set in the toggle.
+     */
+    def withNoHttp2: Server =
+      configured(Netty4Impl)
+
+    /**
      * By default finagle-http automatically sends 100-CONTINUE responses to inbound
      * requests which set the 'Expect: 100-Continue' header. Streaming servers will
      * always return 100-CONTINUE. Non-streaming servers will compare the
@@ -541,8 +575,10 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       val shouldHttp2 =
         if (params[Transport.ServerSsl].sslServerConfiguration == None) useH2C()
         else useH2()
-      val client = if (shouldHttp2) this.configuredParams(Http2) else this
-      client.superServe(addr, factory)
+      val explicitlyConfigured = params.contains[HttpImpl]
+      val server = if (!explicitlyConfigured && shouldHttp2) this.configuredParams(Http2)
+      else this
+      server.superServe(addr, factory)
     }
   }
 

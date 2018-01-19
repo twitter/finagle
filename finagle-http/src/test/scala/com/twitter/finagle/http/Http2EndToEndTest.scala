@@ -16,9 +16,9 @@ import scala.collection.mutable.ArrayBuffer
 
 class Http2EndToEndTest extends AbstractEndToEndTest {
   def implName: String = "netty4 http/2"
-  def clientImpl(): finagle.Http.Client = finagle.Http.client.configuredParams(finagle.Http.Http2)
+  def clientImpl(): finagle.Http.Client = finagle.Http.client.withHttp2
 
-  def serverImpl(): finagle.Http.Server = finagle.Http.server.configuredParams(finagle.Http.Http2)
+  def serverImpl(): finagle.Http.Server = finagle.Http.server.withHttp2
 
   // Stats test requires examining the upgrade itself.
   val shouldUpgrade = new AtomicBoolean(true)
@@ -181,6 +181,72 @@ class Http2EndToEndTest extends AbstractEndToEndTest {
     }
   }
 
+  test("Configuration params take precedence over the toggle for the client") {
+    for {
+      clientUseHttp2 <- Seq(1D, 0D)
+    } {
+      val sr = new InMemoryStatsReceiver()
+      val server = serverImpl
+        .withStatsReceiver(sr)
+        .withLabel("server")
+        .serve("localhost:*", initService)
+      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+      val client = overrides.let(Map("com.twitter.finagle.http.UseH2C" -> clientUseHttp2)) {
+        val c = finagle.Http.client
+          .withStatsReceiver(sr)
+
+        (if (clientUseHttp2 == 1.0) c.withNoHttp2
+        else c.withHttp2)
+          .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+      }
+      val rep = client(Request("/"))
+      await(rep)
+      if (clientUseHttp2 == 0.0) {
+        assert(sr.counters.get(Seq("client", "upgrade", "success")) == Some(1),
+          "Failed to upgrade when both parties were on")
+        assert(sr.counters.get(Seq("server", "upgrade", "success")) == Some(1),
+          "Failed to upgrade when both parties were on")
+      } else {
+        assert(!sr.counters.contains(Seq("client", "upgrade", "success")))
+        assert(!sr.counters.contains(Seq("server", "upgrade", "success")))
+      }
+      await(Closable.all(client, server).close())
+    }
+  }
+
+  test("Configuration params take precedence over the toggle for the server") {
+    for {
+      serverUseHttp2 <- Seq(1D, 0D)
+    } {
+      val sr = new InMemoryStatsReceiver()
+      val server = overrides.let(Map("com.twitter.finagle.http.UseH2C" -> serverUseHttp2)) {
+        val s = finagle.Http.server
+          .withStatsReceiver(sr)
+          .withLabel("server")
+
+        (if (serverUseHttp2 == 1.0) s.withNoHttp2
+        else s.withHttp2)
+          .serve("localhost:*", initService)
+      }
+      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+      val client = clientImpl()
+        .withStatsReceiver(sr)
+        .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+      val rep = client(Request("/"))
+      await(rep)
+      if (serverUseHttp2 == 0.0) {
+        assert(sr.counters.get(Seq("client", "upgrade", "success")) == Some(1),
+          "Failed to upgrade when both parties were on")
+        assert(sr.counters.get(Seq("server", "upgrade", "success")) == Some(1),
+          "Failed to upgrade when both parties were on")
+      } else {
+        assert(!sr.counters.contains(Seq("client", "upgrade", "success")))
+        assert(!sr.counters.contains(Seq("server", "upgrade", "success")))
+      }
+      await(Closable.all(client, server).close())
+    }
+  }
+
   test("We delete the HTTP2-SETTINGS header properly") {
     @volatile var headers: HeaderMap = null
     val server = serverImpl().serve("localhost:*", Service.mk { req: Request =>
@@ -208,7 +274,7 @@ class Http2EndToEndTest extends AbstractEndToEndTest {
     private[this] val _pending = new AtomicInteger
 
     private[this] val _ls = finagle.Http.server
-      .configuredParams(finagle.Http.Http2)
+      .withHttp2
       .withLabel("server")
       .serve("localhost:*", service)
 
@@ -226,7 +292,7 @@ class Http2EndToEndTest extends AbstractEndToEndTest {
 
     val client =
       finagle.Http.client
-        .configuredParams(finagle.Http.Http2)
+        .withHttp2
         .newService(dest, "client")
 
     // dispatch a request that will be pending when the

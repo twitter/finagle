@@ -37,12 +37,12 @@ class Http2AlpnTest extends AbstractEndToEndTest {
   def implName: String = "alpn http/2"
   def clientImpl(): finagle.Http.Client =
     finagle.Http.client
-      .configuredParams(finagle.Http.Http2)
+      .withHttp2
       .configured(Transport.ClientSsl(Some(clientConfiguration())))
 
   def serverImpl(): finagle.Http.Server =
     finagle.Http.server
-      .configuredParams(finagle.Http.Http2)
+      .withHttp2
       .configured(Transport.ServerSsl(Some(serverConfiguration())))
 
   def unimplementedFeatures: Set[Feature] = Set(

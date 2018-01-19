@@ -51,26 +51,26 @@ class DirectPayloadsLifecycleTest extends FunSuite {
 
   doTest(
     "HTTP/1.1",
-    FinagleHttp.client.configured(FinagleHttp.Netty4Impl),
-    FinagleHttp.server.configured(FinagleHttp.Netty4Impl)
+    FinagleHttp.client.withNoHttp2,
+    FinagleHttp.server.withNoHttp2
   )
 
   doTest(
     "HTTP/2",
-    FinagleHttp.client.configuredParams(FinagleHttp.Http2),
-    FinagleHttp.server.configuredParams(FinagleHttp.Http2)
+    FinagleHttp.client.withHttp2,
+    FinagleHttp.server.withHttp2
   )
 
   doTest(
     "HTTP/2 client <-> HTTP/1.1 server",
-    FinagleHttp.client.configuredParams(FinagleHttp.Http2),
+    FinagleHttp.client.withHttp2,
     FinagleHttp.server
   )
 
   doTest(
     "Prior Knowledge HTTP/2",
-    FinagleHttp.client.configuredParams(FinagleHttp.Http2).configured(PriorKnowledge(true)),
-    FinagleHttp.server.configuredParams(FinagleHttp.Http2)
+    FinagleHttp.client.withHttp2.configured(PriorKnowledge(true)),
+    FinagleHttp.server.withHttp2
   )
 
   // TODO: Test ALPN

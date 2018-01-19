@@ -7,7 +7,6 @@ import com.twitter.finagle.Http;
 import com.twitter.finagle.Server;
 import com.twitter.finagle.Service;
 import com.twitter.finagle.builder.ServerBuilder;
-import com.twitter.finagle.client.StackClient$;
 import com.twitter.finagle.http.Request;
 import com.twitter.finagle.http.Response;
 import com.twitter.finagle.param.Label;
@@ -52,6 +51,6 @@ public final class HttpServerTest {
             .withCompressionLevel(2)
             .configured(new Label("test").mk())
             .withDecompression(true)
-            .configuredParams(StackClient$.MODULE$.defaultParams());
+            .withHttp2();
   }
 }

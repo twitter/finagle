@@ -9,12 +9,12 @@ class Http2PriorKnowledgeTest extends AbstractEndToEndTest {
   def implName: String = "prior knowledge http/2"
   def clientImpl(): finagle.Http.Client =
     finagle.Http.client
-      .configuredParams(finagle.Http.Http2)
+      .withHttp2
       .configured(PriorKnowledge(true))
 
   def serverImpl(): finagle.Http.Server =
     finagle.Http.server
-      .configuredParams(finagle.Http.Http2)
+      .withHttp2
 
   def featureImplemented(feature: Feature): Boolean = feature != MaxHeaderSize
 

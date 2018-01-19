@@ -7,7 +7,6 @@ import com.twitter.finagle.Client;
 import com.twitter.finagle.Http;
 import com.twitter.finagle.Service;
 import com.twitter.finagle.builder.ClientBuilder;
-import com.twitter.finagle.client.StackClient$;
 import com.twitter.finagle.http.Request;
 import com.twitter.finagle.http.Response;
 import com.twitter.finagle.param.Label;
@@ -75,6 +74,6 @@ public final class HttpClientTest {
           .withTls("foo.com")
           .configured(new Label("test").mk())
           .withDecompression(true)
-          .configuredParams(StackClient$.MODULE$.defaultParams());
+          .withHttp2();
   }
 }
