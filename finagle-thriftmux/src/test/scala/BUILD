@@ -19,4 +19,5 @@ junit_tests(
   ],
   sources=rglobs('*.scala'),
   fatal_warnings=True,
+  known_to_fail='CSL-5851'
 )
