@@ -6,7 +6,9 @@ import com.twitter.finagle._
 import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier, Retries, RetryBudget}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.WindowedPercentileHistogram
+import com.twitter.logging.Logger
 import com.twitter.util._
+import com.twitter.util.tunable.Tunable
 
 object BackupRequestFilter {
   val role = Stack.Role("BackupRequestFilter")
@@ -20,8 +22,28 @@ object BackupRequestFilter {
   private val SupersededRequestFailure = Failure.ignorable(
     "Request was superseded by another in BackupRequestFilter")
 
+  private val log = Logger.get(this.getClass.getName)
+
   // Refresh rate for refreshing the configured percentile from the [[WindowedPercentile]].
   private val RefreshPercentileInterval = 3.seconds
+
+  private def getAndValidateMaxExtraLoad(maxExtraLoad: Tunable[Double]): Double =
+    maxExtraLoad() match {
+      case Some(maxExtraLoad) if (maxExtraLoad >= 0.0 && maxExtraLoad < 1.0) => maxExtraLoad
+      case Some(invalidMaxExtraLoad) => log.error(
+        s"maxExtraLoad must be between 0.0 and 1.0, was $invalidMaxExtraLoad. Using 0.0")
+        0.0
+      case None => 0.0
+    }
+
+  private[client] def newRetryBudget(maxExtraLoad: Double, nowMillis: () => Long): RetryBudget =
+    if (maxExtraLoad == 0.0) RetryBudget.Empty
+    else
+      RetryBudget(
+        ttl = RetryBudget.DefaultTtl,
+        minRetriesPerSec = RetryBudget.DefaultMinRetriesPerSec,
+        percentCanRetry = maxExtraLoad,
+        nowMillis)
 
   sealed trait Param {
     def mk(): (Param, Stack.Param[Param]) = (this, Param.param)
@@ -29,12 +51,10 @@ object BackupRequestFilter {
 
   object Param {
 
-    private[client] case class Configured(maxExtraLoad: Double, sendInterrupts: Boolean) extends Param {
-      require(
-        maxExtraLoad > 0 && maxExtraLoad < 1.0,
-        s"maxExtraLoad must be between 0.0 and 1.0, was $maxExtraLoad"
-      )
-    }
+    private[client] case class Configured(
+        maxExtraLoad: Tunable[Double],
+        sendInterrupts: Boolean)
+      extends Param
     case object Disabled extends Param
     implicit val param: Stack.Param[BackupRequestFilter.Param] = Stack.Param(Disabled)
   }
@@ -55,11 +75,18 @@ object BackupRequestFilter {
    *                       protocols without a control plane, where the connection is cut on
    *                       interrupts, this should be "false" to avoid connection churn.
    */
-  def Configured(maxExtraLoad: Double, sendInterrupts: Boolean): Param =
+  def Configured(maxExtraLoad: Double, sendInterrupts: Boolean): Param = {
+    require(
+      maxExtraLoad >= 0 && maxExtraLoad < 1.0,
+      s"maxExtraLoad must be between 0.0 and 1.0, was $maxExtraLoad")
+    Param.Configured(Tunable.const(role.name, maxExtraLoad), sendInterrupts)
+  }
+
+  def Configured(maxExtraLoad: Tunable[Double], sendInterrupts: Boolean): Param =
     Param.Configured(maxExtraLoad, sendInterrupts)
 
   private[this] def mkFilterFromParams[Req, Rep](
-    maxExtraLoad: Double,
+    maxExtraLoad: Tunable[Double],
     sendInterrupts: Boolean,
     params: Stack.Params
   ): BackupRequestFilter[Req, Rep] =
@@ -147,8 +174,12 @@ private[client] class BackupRequestFactory[Req, Rep](
  * not receive more extra load than that permitted by the [[Retries.Budget]], whether through
  * retries due to failures or backup requests.
  *
- * @param maxExtraLoad How much extra load, as a fraction, we are willing to send to the server.
- *                  Must be between 0.0 and 1.0.
+ * @param maxExtraLoadTunable How much extra load, as a [[Tunable]] fraction, we are willing to send
+ *                            to the server. Must be between 0.0 and 1.0. When this [[Tunable]] is
+ *                            changed, it can take a few seconds for the new value to take effect.
+ *                            Note that the max extra load is enforced by a [[RetryBudget]], which
+ *                            is re-created on updates to the [[Tunable]] value; the existing
+ *                            balance is *not* transferred to the new budget.
  *
  * @param sendInterrupts Whether or not to interrupt the original or backup request when a response
  *                       is returned and the result of the outstanding request is superseded. For
@@ -161,11 +192,11 @@ private[client] class BackupRequestFactory[Req, Rep](
  *       request latency stats.
  */
 private[client] class BackupRequestFilter[Req, Rep](
-    maxExtraLoad: Double,
+    maxExtraLoadTunable: Tunable[Double],
     sendInterrupts: Boolean,
     responseClassifier: ResponseClassifier,
+    newRetryBudget: (Double, () => Long) => RetryBudget,
     clientRetryBudget: RetryBudget,
-    backupRequestRetryBudget: RetryBudget,
     nowMs: () => Long,
     statsReceiver: StatsReceiver,
     timer: Timer,
@@ -174,22 +205,18 @@ private[client] class BackupRequestFilter[Req, Rep](
   import BackupRequestFilter._
 
   def this(
-    maxExtraLoad: Double,
+    maxExtraLoadTunable: Tunable[Double],
     sendInterrupts: Boolean,
     responseClassifier: ResponseClassifier,
     clientRetryBudget: RetryBudget,
     statsReceiver: StatsReceiver,
     timer: Timer
   ) = this(
-    maxExtraLoad,
+    maxExtraLoadTunable,
     sendInterrupts,
     responseClassifier,
+    newRetryBudget = BackupRequestFilter.newRetryBudget,
     clientRetryBudget = clientRetryBudget,
-    backupRequestRetryBudget = RetryBudget(
-      ttl = 10.seconds,
-      minRetriesPerSec = 10,
-      percentCanRetry = maxExtraLoad,
-      nowMillis = Stopwatch.systemMillis),
     Stopwatch.systemMillis,
     statsReceiver,
     timer,
@@ -201,12 +228,12 @@ private[client] class BackupRequestFilter[Req, Rep](
       bucketSize = 10.seconds,
       timer))
 
-  require(
-    maxExtraLoad > 0 && maxExtraLoad < 1.0,
-    s"maxExtraLoad must be between 0.0 and 1.0, was $maxExtraLoad"
-  )
 
-  private[this] val percentile: Double = (1.0 - maxExtraLoad) * 100
+  @volatile private[this] var backupRequestRetryBudget: RetryBudget =
+    newRetryBudget(getAndValidateMaxExtraLoad(maxExtraLoadTunable), nowMs)
+
+  private[this] def percentileFromMaxExtraLoad(maxExtraLoad: Double): Double =
+    (1.0 - maxExtraLoad) * 100
 
   private[this] val windowedPercentile: WindowedPercentileHistogram =
     windowedPercentileHistogramFac()
@@ -217,11 +244,22 @@ private[client] class BackupRequestFilter[Req, Rep](
   private[client] def sendBackupAfterDuration: Duration =
     Duration.fromMilliseconds(sendBackupAfter)
 
-  private[this] val refreshSendBackupAfterTimerTask =
+  // schedule timer to refresh `sendBackupAfter`, and refresh `backupRequestRetryBuget` in response
+  // to changes to the value of `maxExtraLoadTunable`,
+  private[this] val refreshTimerTask: TimerTask = {
+    @volatile var curMaxExtraLoad = getAndValidateMaxExtraLoad(maxExtraLoadTunable)
+    @volatile var percentile = percentileFromMaxExtraLoad(curMaxExtraLoad)
     timer.schedule(RefreshPercentileInterval) {
+      val newMaxExtraLoad = getAndValidateMaxExtraLoad(maxExtraLoadTunable)
+      if (curMaxExtraLoad != newMaxExtraLoad) {
+        curMaxExtraLoad = newMaxExtraLoad
+        percentile = percentileFromMaxExtraLoad(curMaxExtraLoad)
+        backupRequestRetryBudget = newRetryBudget(curMaxExtraLoad, nowMs)
+      }
       sendBackupAfter = windowedPercentile.percentile(percentile)
       sendAfterStat.add(sendBackupAfter)
     }
+  }
 
   private[this] val sendAfterStat = statsReceiver.stat("send_backup_after_ms")
   private[this] val backupsSent = statsReceiver.counter("backups_sent")
@@ -262,7 +300,7 @@ private[client] class BackupRequestFilter[Req, Rep](
   // issuing a retry. However, since `backupRequestRetryBudget` is likely to be the limiting factor,
   // this should rarely happen and we tolerate it.
   private[this] def canIssueBackup(): Boolean =
-  backupRequestRetryBudget.tryWithdraw() && clientRetryBudget.tryWithdraw()
+    backupRequestRetryBudget.tryWithdraw() && clientRetryBudget.tryWithdraw()
 
   def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
     backupRequestRetryBudget.deposit()
@@ -309,7 +347,7 @@ private[client] class BackupRequestFilter[Req, Rep](
   }
 
   def close(deadline: Time): Future[Unit] = {
-    refreshSendBackupAfterTimerTask.cancel()
+    refreshTimerTask.cancel()
     windowedPercentile.close(deadline)
   }
 }

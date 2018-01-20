@@ -545,7 +545,11 @@ class MethodBuilderTest
       .withTimeout.total(totalTimeout)
       .idempotent(0.01, true, classifier)
 
-    assert(mb.params[BackupRequestFilter.Param] == BackupRequestFilter.Configured(0.01, true))
+    mb.params[BackupRequestFilter.Param] match {
+      case BackupRequestFilter.Param.Configured(maxExtraLoadTunable, sendInterrupts) =>
+        assert(maxExtraLoadTunable().get == 0.01 && sendInterrupts)
+      case _ => fail("BackupRequestFilter not configured")
+    }
     assert(mb.params[param.ResponseClassifier].responseClassifier == classifier)
 
     // ensure that the response classifier was also used to configure retries

@@ -94,7 +94,9 @@ object RetryBudget {
       s"TokenRetryBudget(deposit=$depositAmount, withdraw=$withdrawalAmount, balance=$balance)"
   }
 
-  private[this] val DefaultTtl = 10.seconds
+  private[finagle] val DefaultTtl = 10.seconds
+
+  private[finagle] val DefaultMinRetriesPerSec = 10
 
   /**
    * Creates a default [[RetryBudget]] that allows for about 20% of the
@@ -109,7 +111,7 @@ object RetryBudget {
    * requests as well as clients that do not issue many requests per window.
    */
   def apply(): RetryBudget =
-    apply(DefaultTtl, 10, 0.2, Stopwatch.systemMillis)
+    apply(DefaultTtl, DefaultMinRetriesPerSec, 0.2, Stopwatch.systemMillis)
 
   /**
    * Creates a [[RetryBudget]] that allows for about `percentCanRetry` percent

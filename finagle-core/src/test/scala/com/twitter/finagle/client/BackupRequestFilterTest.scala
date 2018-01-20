@@ -6,6 +6,7 @@ import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier, R
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.util.WindowedPercentileHistogram
 import com.twitter.util._
+import com.twitter.util.tunable.Tunable
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.scalatest.{FunSuite, Matchers, OneInstancePerTest}
@@ -60,17 +61,22 @@ class BackupRequestFilterTest extends FunSuite
   }
 
   private[this] val clientRetryBudget = RetryBudget(5.seconds, 10, 0.2, Stopwatch.timeMillis)
-  private[this] val backupRequestRetryBudget = RetryBudget(5.seconds, 10, 0.01, Stopwatch.timeMillis)
+  private[this] val backupRequestRetryBudget =
+    RetryBudget(30.seconds, 10, 0.01, Stopwatch.timeMillis)
 
-  val maxDuration = 10.seconds
+  private[this] val newBackupRequestRetryBudget: (Double, () => Long) => RetryBudget =
+    (_, _) => backupRequestRetryBudget
+
+  private[this] val maxExtraLoadTunable: Tunable.Mutable[Double] = Tunable.mutable[Double](
+    "brfTunable", 0.01)
 
   private[this] def newBrf: BackupRequestFilter[String, String] =
     new BackupRequestFilter[String, String](
-      0.5,
+      maxExtraLoadTunable,
       true,
       classifier,
+      newBackupRequestRetryBudget,
       clientRetryBudget,
-      backupRequestRetryBudget,
       Stopwatch.timeMillis,
       statsReceiver,
       timer,
@@ -103,32 +109,64 @@ class BackupRequestFilterTest extends FunSuite
     tc.advance(3.seconds)
     timer.tick()
     assert(numBackupTimerTasks == 0)
+    assert(!statsReceiver.counters.contains(Seq("backups_sent")))
     assert(brf.sendBackupAfterDuration > Duration.Zero)
   }
 
-  test("extra load must be non-negative") {
-    intercept[IllegalArgumentException] {
-      BackupRequestFilter.Configured(-5.0, false)
+  def testRetryBudgetEmpty(maxExtraLoad: Tunable[Double]) {
+    var currentRetryBudget: RetryBudget = null
+    var currentMaxExtraLoad: Double = -1.0 // sentinel to make sure it gets set to 0.0 below
+
+    def newRetryBudget(maxExtraLoad: Double, nowMillis: () => Long): RetryBudget = {
+      currentMaxExtraLoad = maxExtraLoad
+      currentRetryBudget = BackupRequestFilter.newRetryBudget(maxExtraLoad, nowMillis)
+      currentRetryBudget
     }
-    val mkBadFilter = () => new BackupRequestFilter[String, String](
-      -5.0,
+
+    val filter = new BackupRequestFilter[String, String](
+      maxExtraLoad,
       false,
       ResponseClassifier.Default,
-      RetryBudget.Infinite,
+      newRetryBudget,
       RetryBudget.Infinite,
       Stopwatch.timeMillis,
       NullStatsReceiver,
       timer,
       () => wp
     )
-    intercept[IllegalArgumentException] {
-      new BackupRequestFactory[String, String](
-        fac,
-        mkBadFilter()
+    assert(currentRetryBudget eq RetryBudget.Empty)
+    assert(currentMaxExtraLoad == 0.0)
+
+    // Now make sure it's ok if we change the maxExtraLoad from a valid value to this one after
+    // the filter is created
+
+    val tunable = Tunable.mutable("brfTunable", 0.5)
+
+    Time.withCurrentTimeFrozen { tc =>
+      val filter = new BackupRequestFilter[String, String](
+        tunable,
+        false,
+        ResponseClassifier.Default,
+        newRetryBudget,
+        RetryBudget.Infinite,
+        Stopwatch.timeMillis,
+        NullStatsReceiver,
+        timer,
+        () => wp
       )
+      assert(currentRetryBudget ne RetryBudget.Empty)
+      assert(currentMaxExtraLoad == 0.5)
+      if (maxExtraLoad eq Tunable.none) tunable.clear() else tunable.set(maxExtraLoad().get)
+      tc.advance(3.seconds)
+      timer.tick()
+      assert(currentRetryBudget eq RetryBudget.Empty)
+      assert(currentMaxExtraLoad == 0.0)
     }
+  }
+
+  test("extra load must be non-negative") {
     intercept[IllegalArgumentException] {
-      mkBadFilter()
+      BackupRequestFilter.Configured(-5.0, false)
     }
   }
 
@@ -136,26 +174,18 @@ class BackupRequestFilterTest extends FunSuite
     intercept[IllegalArgumentException] {
       BackupRequestFilter.Configured(2.0, false)
     }
-    val mkBadFilter = () => new BackupRequestFilter[String, String](
-      2.0,
-      false,
-      ResponseClassifier.Default,
-      RetryBudget.Infinite,
-      RetryBudget.Infinite,
-      Stopwatch.timeMillis,
-      NullStatsReceiver,
-      timer,
-      () => wp
-    )
-    intercept[IllegalArgumentException] {
-      new BackupRequestFactory[String, String](
-        fac,
-        mkBadFilter()
-      )
-    }
-    intercept[IllegalArgumentException] {
-      mkBadFilter()
-    }
+  }
+
+  test("Uses 0.0 for maxExtraLoad if Tunable is negative") {
+    testRetryBudgetEmpty(Tunable.const("brfTunable", -5.0))
+  }
+
+  test("Uses 0.0 for maxExtraLoad if Tunable is > 1.0") {
+    testRetryBudgetEmpty(Tunable.const("brfTunable", 5.0))
+  }
+
+  test("Uses 0.0 for maxExtraLoad if Tunable.apply is None") {
+    testRetryBudgetEmpty(Tunable.none)
   }
 
   test("adds latency to windowedPercentile") {
@@ -289,11 +319,11 @@ class BackupRequestFilterTest extends FunSuite
   ): Future[String] = {
 
     val brf = (new BackupRequestFilter[String, String](
-      0.5,
+      Tunable.const("brfTunable", 0.5),
       sendInterrupts,
       classifier,
+      newBackupRequestRetryBudget,
       clientRetryBudget,
-      backupRequestRetryBudget,
       Stopwatch.timeMillis,
       statsReceiver,
       timer,
@@ -519,7 +549,7 @@ class BackupRequestFilterTest extends FunSuite
   test("Deposits into local RetryBudget only") {
     Time.withCurrentTimeFrozen { tc =>
       val service = newService()
-      assert(backupRequestRetryBudget.balance == 50)
+      assert(backupRequestRetryBudget.balance == 300)
       assert(clientRetryBudget.balance == 50)
       0.until(100).foreach { _ =>
         val p = new Promise[String]
@@ -527,7 +557,7 @@ class BackupRequestFilterTest extends FunSuite
         val f = service("ok")
         p.setValue("ok")
       }
-      assert(backupRequestRetryBudget.balance == 51)
+      assert(backupRequestRetryBudget.balance == 301)
       assert(clientRetryBudget.balance == 50)
     }
   }
@@ -567,7 +597,7 @@ class BackupRequestFilterTest extends FunSuite
         assert(!f.isDefined)
         assert(numBackupTimerTasks == 1)
 
-        (0.until(50)).foreach(_ => retryBudget.tryWithdraw())
+        (0.until(300)).foreach(_ => retryBudget.tryWithdraw())
         assert(!retryBudget.tryWithdraw())
         tc.advance(brf.sendBackupAfterDuration)
         timer.tick()
@@ -593,6 +623,143 @@ class BackupRequestFilterTest extends FunSuite
       timer.tick()
       origPromise.setException(new IndividualRequestTimeoutException(2.seconds))
       assert(wp.percentile(50.0) == (WarmupRequestLatency + 1.second).inMillis)
+    }
+  }
+
+  test("RetryBudget is empty if `maxExtraLoad` Tunable is changed to 0.0 dynamically") {
+
+    var currentRetryBudget: RetryBudget = null
+
+    def newRetryBudget(maxExtraLoad: Double, nowMillis: () => Long): RetryBudget = {
+      currentRetryBudget = BackupRequestFilter.newRetryBudget(maxExtraLoad, nowMillis)
+      currentRetryBudget
+    }
+
+    Time.withCurrentTimeFrozen { tc =>
+      val brf = new BackupRequestFilter[String, String](
+        maxExtraLoadTunable,
+        true,
+        classifier,
+        newRetryBudget,
+        clientRetryBudget,
+        Stopwatch.timeMillis,
+        statsReceiver,
+        timer,
+        () => wp)
+      val service = newService(brf)
+      warmFilterForBackup(tc, service, brf)
+      assert(currentRetryBudget.balance == 100)
+
+      // Set filter to send no backups; advance 3 seconds so we see the change
+      maxExtraLoadTunable.set(0.0)
+      tc.advance(3.seconds)
+      timer.tick()
+
+      // ensure the budget is now empty
+      assert(currentRetryBudget eq RetryBudget.Empty)
+
+      // ensure we really can't sent a backup
+      val p = new Promise[String]
+      when(underlying("a")).thenReturn(p)
+
+      val f = service("a")
+      verify(underlying).apply("a")
+      assert(!f.isDefined)
+
+      tc.advance(brf.sendBackupAfterDuration)
+      timer.tick()
+      verify(underlying, times(1)).apply("a")
+
+      p.setValue("orig")
+      assert(f.poll == Some(Return("orig")))
+      assert(statsReceiver.counters(Seq("budget_exhausted")) == 1)
+      assert(!statsReceiver.counters.contains(Seq("backups_sent")))
+    }
+  }
+
+  test("if maxExtraLoad remains at the same value, no new RetryBudget is created") {
+    var newRetryBudgetCalls = 0
+    def newRetryBudget(maxExtraLoad: Double, nowMillis: () => Long): RetryBudget = {
+      newRetryBudgetCalls += 1
+      BackupRequestFilter.newRetryBudget(maxExtraLoad, nowMillis)
+    }
+
+    Time.withCurrentTimeFrozen { tc =>
+      val brf = new BackupRequestFilter[String, String](
+        maxExtraLoadTunable,
+        true,
+        classifier,
+        newRetryBudget,
+        clientRetryBudget,
+        Stopwatch.timeMillis,
+        statsReceiver,
+        timer,
+        () => wp)
+      val service = newService(brf)
+      warmFilterForBackup(tc, service, brf)
+      assert(newRetryBudgetCalls == 1)
+      maxExtraLoadTunable.set(0.01)
+      // we refresh the budget every 3 seconds if the Tunable value has changed
+      tc.advance(3.seconds)
+      timer.tick()
+      // `newRetryBudget` is called asynchronously, but we'd expect this test to fail often if
+      // `newRetryBudget` was called more than once
+      assert(newRetryBudgetCalls == 1)
+    }
+  }
+
+  test("sendBackupAfter percentile and RetryBudget changed when maxExtraLoad Tunable is changed") {
+    var currentRetryBudget: RetryBudget = null
+
+    def newRetryBudget(maxExtraLoad: Double, nowMillis: () => Long): RetryBudget = {
+      currentRetryBudget = BackupRequestFilter.newRetryBudget(maxExtraLoad, nowMillis)
+      currentRetryBudget
+    }
+
+    Time.withCurrentTimeFrozen { tc =>
+      val brf = new BackupRequestFilter[String, String](
+        maxExtraLoadTunable,
+        true,
+        classifier,
+        newRetryBudget,
+        clientRetryBudget,
+        Stopwatch.timeMillis,
+        statsReceiver,
+        timer,
+        () => new WindowedPercentileHistogram(5, 3.seconds, timer))
+      val service = newService(brf)
+      assert(currentRetryBudget.balance == 100)
+      (0 until 90).foreach { _ =>
+        val p = new Promise[String]
+        when(underlying("ok")).thenReturn(p)
+        val f = service("ok")
+        tc.advance(50.millis)
+        p.setValue("ok")
+      }
+      (0 until 10).foreach { _ =>
+        val p = new Promise[String]
+        when(underlying("ok")).thenReturn(p)
+        val f = service("ok")
+        tc.advance(100.millis)
+        p.setValue("ok")
+      }
+      tc.advance(3.seconds)
+      timer.tick()
+      assert(brf.sendBackupAfterDuration == 100.millis)
+      assert(currentRetryBudget.toString ==
+        "TokenRetryBudget(deposit=1000, withdraw=100000, balance=101)")
+
+      // Set filter to send 10% backups; advance the time to see the change
+      maxExtraLoadTunable.set(0.1)
+      tc.advance(3.seconds)
+      timer.tick()
+      assert(brf.sendBackupAfterDuration == 50.millis)
+
+      // note that new budget does not get balance from old budget.
+      eventually {
+        assert(currentRetryBudget.toString ==
+          "TokenRetryBudget(deposit=1000, withdraw=10000, balance=100)")
+      }
     }
   }
 
