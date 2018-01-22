@@ -1,7 +1,6 @@
 package com.twitter.finagle.http
 
 import com.twitter.collection.RecordSchema
-import com.twitter.finagle.http.exp.{Multipart, MultipartDecoder}
 import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util.Closable
 import java.net.{InetAddress, InetSocketAddress}
@@ -34,18 +33,6 @@ abstract class Request private extends Message {
    */
   def params: ParamMap = _params
   private[this] lazy val _params: ParamMap = new RequestParamMap(this)
-
-  /**
-   * Returns an _optional_ [[Multipart]] instance, which maintains the
-   * `multipart/form-data` content of this non-chunked, POST request. If
-   * this requests is either streaming or non-POST, this method returns
-   * `None`.
-   *
-   * Note: This method is a part of an experimental API for handling
-   * multipart HTTP data and it will likely be changed in future in order
-   * to support streaming requests.
-   */
-  def multipart: Option[Multipart]
 
   /**
    * Returns the HTTP method of this request.
@@ -344,7 +331,6 @@ object Request {
     def uri: String = request.uri
 
     // These should never need to be overridden
-    final def multipart: Option[Multipart] = request.multipart
     final def method: Method = request.method
     final def method_=(method: Method): Unit = request.method_=(method)
     final def uri_=(uri: String): Unit = request.uri_=(uri)
@@ -364,7 +350,6 @@ object Request {
     private var _method: Method = Method.Get
     private var _uri: String = ""
 
-    lazy val multipart: Option[Multipart] = MultipartDecoder.decode(this)
     val headerMap: HeaderMap = HeaderMap()
     val ctx: Request.Schema.Record = Request.Schema.newRecord()
 
