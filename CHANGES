@@ -7,6 +7,15 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Deprecations
+~~~~~~~~~~~~
+
+  * finagle-core: `c.t.finagle.ssl.Ssl` and related classes have been
+    deprecated. They were replaced as the primary way of using SSL/TLS
+    within Finagle in release 6.44.0 (April 2017). Please migrate to using
+    `c.t.f.ssl.client.SslClientEngineFactory` or
+    `c.t.f.ssl.server.SslServerEngineFactory` instead. ``PHAB_ID=D129692``
+
 New Features
 ~~~~~~~~~~~~
 

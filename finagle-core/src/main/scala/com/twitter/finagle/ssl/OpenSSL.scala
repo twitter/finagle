@@ -11,6 +11,7 @@ import collection.mutable.{Map => MutableMap}
  *
  * You need to have the appropriate shared libraries on your java.library.path
  */
+@deprecated("Use the Netty 4 engine factories instead", "2018-01-19")
 object OpenSSL {
   type MapOfStrings = java.util.Map[java.lang.String, java.lang.String]
 

@@ -17,6 +17,7 @@ import javax.net.ssl._
  *   The cert chain should contain the certificate.
  * @return Array[KeyManager]
  */
+@deprecated("Use a PKCS#8 formatted private key instead", "2018-01-19")
 object PEMEncodedKeyManager {
   class ExternalExecutableFailed(message: String) extends Exception(message)
 

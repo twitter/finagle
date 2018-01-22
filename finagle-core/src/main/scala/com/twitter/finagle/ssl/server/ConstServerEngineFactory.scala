@@ -7,6 +7,7 @@ import com.twitter.finagle.ssl.{Engine, SslConfigurations}
  * which use a () => Engine interface. It should only be used for legacy
  * purposes.
  */
+@deprecated("Use the Netty 4 engine factories instead", "2018-01-19")
 class ConstServerEngineFactory(newEngine: () => Engine) extends SslServerEngineFactory {
 
   /**

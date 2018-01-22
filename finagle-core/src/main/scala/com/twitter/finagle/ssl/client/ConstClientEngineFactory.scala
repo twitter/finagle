@@ -15,6 +15,7 @@ case object UnknownSocketAddress extends SocketAddress
  * which use a SocketAddress => Engine interface. It should only be used
  * for legacy purposes.
  */
+@deprecated("Use the Netty 4 engine factories instead", "2018-01-19")
 class ConstClientEngineFactory(newEngine: SocketAddress => Engine) extends SslClientEngineFactory {
 
   private[this] def addressToSocketAddress(

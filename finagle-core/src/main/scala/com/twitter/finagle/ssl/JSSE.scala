@@ -7,6 +7,7 @@ import scala.collection.mutable.{Map => MutableMap}
 /*
  * Creates JSSE SSLEngines on behalf of the Ssl singleton
  */
+@deprecated("Use the Netty 4 engine factories instead", "2018-01-19")
 object JSSE {
   private[this] val log = Logger.getLogger(getClass.getName)
   private[this] val contextCache: MutableMap[String, SSLContext] = MutableMap.empty

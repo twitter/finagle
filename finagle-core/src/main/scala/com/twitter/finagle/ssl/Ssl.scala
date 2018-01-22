@@ -7,6 +7,7 @@ import javax.net.ssl._
  * SSL helper object, capable of creating cached SSLEngine instances
  * backed by both the native APR/OpenSSL bindings, or pure Java JSSE.
  */
+@deprecated("Use the Netty 4 engine factories instead", "2018-01-19")
 object Ssl {
   private[this] val log = Logger.getLogger(getClass.getName)
   private[this] val cacheContexts = true
