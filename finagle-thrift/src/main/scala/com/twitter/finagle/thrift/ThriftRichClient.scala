@@ -21,6 +21,18 @@ import scala.reflect.ClassTag
  * For Java generated code, the `Class` passed in should be
  * `ServiceName$ServiceIface`.
  *
+ *
+ * @define build
+ *
+ * Create a new client of type `ThriftService`, which must be generated
+ * by [[https://github.com/twitter/scrooge Scrooge]].
+ *
+ * For Scala generated code, the `Class` passed in should be
+ * either `ServiceName$MethodPerEndpoint` or `ServiceName[Future]`.
+ *
+ * For Java generated code, the `Class` passed in should be
+ * `ServiceName$ServiceIface`.
+ *
  * @define serviceIface
  *
  * Construct a Finagle `Service` interface for a Scrooge-generated Thrift object.
@@ -191,7 +203,7 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
   }
 
   /**
-   * $clientUse
+   * $build
    */
   def build[ThriftService](dest: String, cls: Class[_]): ThriftService = {
     val (n, l) = Resolver.evalLabeled(dest)
@@ -199,13 +211,13 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
   }
 
   /**
-   * $clientUse
+   * $build
    */
   def build[ThriftService](dest: String, label: String, cls: Class[_]): ThriftService =
     build(Resolver.eval(dest), label, cls)
 
   /**
-   * $clientUse
+   * $build
    */
   def build[ThriftService: ClassTag](dest: String): ThriftService = {
     val (n, l) = Resolver.evalLabeled(dest)
@@ -213,7 +225,7 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
   }
 
   /**
-   * $clientUse
+   * $build
    */
   def build[ThriftService: ClassTag](dest: String, label: String): ThriftService = {
     val cls = implicitly[ClassTag[ThriftService]].runtimeClass
@@ -221,7 +233,7 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
   }
 
   /**
-   * $clientUse
+   * $build
    */
   def build[ThriftService: ClassTag](dest: Name, label: String): ThriftService = {
     val cls = implicitly[ClassTag[ThriftService]].runtimeClass
@@ -229,14 +241,14 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
   }
 
   /**
-   * $clientUse
+   * $build
    */
   def build[ThriftService](name: Name, label: String, cls: Class[_]): ThriftService = {
     build(name, label, cls, clientParam, newService(name, label))
   }
 
   /**
-   * $clientUse
+   * $build
    */
   def build[ThriftService](
     name: Name,
