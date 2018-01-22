@@ -284,6 +284,17 @@ class MethodBuilder(
       sendInterrupts = true,
       ResponseClassifier.RetryOnThrows))
 
+  /**
+   * @inheritdoc
+   *
+   * This additionally causes Thrift Exceptions to be retried.
+   */
+  def idempotent(maxExtraLoad: Tunable[Double]): MethodBuilder =
+    new MethodBuilder(rich, mb.idempotent(
+      maxExtraLoad,
+      sendInterrupts = true,
+      ResponseClassifier.RetryOnThrows))
+
   def nonIdempotent: MethodBuilder =
     new MethodBuilder(rich, mb.nonIdempotent)
 

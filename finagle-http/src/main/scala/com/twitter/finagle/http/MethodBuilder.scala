@@ -232,6 +232,17 @@ class MethodBuilder private (mb: client.MethodBuilder[Request, Response])
       sendInterrupts = false,
       HttpResponseClassifier.ServerErrorsAsFailures))
 
+  /**
+   * @inheritdoc
+   *
+   * This additionally causes any server error HTTP status codes (500s) to be retried.
+   */
+  def idempotent(maxExtraLoad: Tunable[Double]): MethodBuilder =
+    new MethodBuilder(mb.idempotent(
+      maxExtraLoad,
+      sendInterrupts = false,
+      HttpResponseClassifier.ServerErrorsAsFailures))
+
   def nonIdempotent: MethodBuilder =
     new MethodBuilder(mb.nonIdempotent)
 

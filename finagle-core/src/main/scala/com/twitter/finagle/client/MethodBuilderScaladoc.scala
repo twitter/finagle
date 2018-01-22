@@ -230,6 +230,18 @@ private[finagle] trait MethodBuilderScaladoc[T] {
   ): T
 
   /**
+   * Configure that requests are to be treated as idempotent. Because requests can be safely
+   * retried, [[BackupRequestFilter]] is configured with the params `maxExtraLoad` and
+   * `sendInterrupts` to decrease tail latency by sending an additional fraction of requests.
+   *
+   * @param maxExtraLoad How much extra load, as a Tunable[Double], we are willing to send to the
+   *                     server. Must be between 0.0 and 1.0.
+   */
+  def idempotent(
+    maxExtraLoad: Tunable[Double]
+  ): T
+
+  /**
    * Configure that requests are to be treated as non-idempotent. [[BackupRequestFilter]] is
    * disabled, and only those failures that are known to be safe to retry (i.e., write failures,
    * where the request was never sent) are retried via requeue filter; any previously configured

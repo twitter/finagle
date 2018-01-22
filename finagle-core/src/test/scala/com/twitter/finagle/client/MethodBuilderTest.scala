@@ -1,5 +1,6 @@
 package com.twitter.finagle.client
 
+import com.twitter.conversions.percent._
 import com.twitter.conversions.time._
 import com.twitter.finagle.Stack.{NoOpModule, Params}
 import com.twitter.finagle._
@@ -7,6 +8,7 @@ import com.twitter.finagle.service._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util._
 import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
+import com.twitter.util.tunable.Tunable
 import java.util.concurrent.atomic.AtomicInteger
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{FunSuite, Matchers}
@@ -410,7 +412,7 @@ class MethodBuilderTest
     val svc = ServiceFactory.const(underlying)
 
     val configuredBrfParam = BackupRequestFilter.Configured(
-      maxExtraLoad = 0.01,
+      maxExtraLoad = 1.percent,
       sendInterrupts = true)
 
     // Configure BackupRequestFilter
@@ -543,11 +545,11 @@ class MethodBuilderTest
     val mb = MethodBuilder.from("mb", stackClient)
       .withTimeout.perRequest(perReqTimeout)
       .withTimeout.total(totalTimeout)
-      .idempotent(0.01, true, classifier)
+      .idempotent(1.percent, true, classifier)
 
     mb.params[BackupRequestFilter.Param] match {
       case BackupRequestFilter.Param.Configured(maxExtraLoadTunable, sendInterrupts) =>
-        assert(maxExtraLoadTunable().get == 0.01 && sendInterrupts)
+        assert(maxExtraLoadTunable().get == 1.percent && sendInterrupts)
       case _ => fail("BackupRequestFilter not configured")
     }
     assert(mb.params[param.ResponseClassifier].responseClassifier == classifier)
@@ -587,6 +589,20 @@ class MethodBuilderTest
     }
   }
 
+  test("idempotent that takes a Tunable uses it to configure BackupRequestFilter") {
+    val underlying = mock[Service[Int, Int]]
+    val svc = ServiceFactory.const(underlying)
+
+    val tunable = Tunable.const("brfTunable", 50.percent)
+    val stack = Stack.Leaf(Stack.Role("test"), svc)
+
+    val stackClient = TestStackClient(stack, Stack.Params.empty)
+    val mb = MethodBuilder.from("with Tunable", stackClient)
+      .idempotent(tunable, true, ResponseClassifier.Default)
+
+    assert(mb.params[BackupRequestFilter.Param] == BackupRequestFilter.Configured(tunable, true))
+  }
+
   test("idempotent combines existing clasifier with new one") {
     val stats = new InMemoryStatsReceiver()
     val timer = new MockTimer()
@@ -617,7 +633,7 @@ class MethodBuilderTest
     val stack = Retries.moduleRequeueable[Int, Int]
       .toStack(Stack.Leaf(Stack.Role("test"), ServiceFactory.const(svc)))
     val stackClient = TestStackClient(stack, params)
-    val client = MethodBuilder.from("mb", stackClient).idempotent(0.01, true, newClassifier)
+    val client = MethodBuilder.from("mb", stackClient).idempotent(1.percent, true, newClassifier)
       .newService("a_client")
 
     val rep1 = client(0)
