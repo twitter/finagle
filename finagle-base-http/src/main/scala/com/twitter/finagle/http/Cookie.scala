@@ -8,7 +8,7 @@ import scala.collection.JavaConverters._
 
 object Cookie {
 
-  private val DefaultMaxAge = Int.MinValue.seconds // Netty's DefaultCookie default.
+  private[finagle] val DefaultMaxAge = Int.MinValue.seconds // Netty's DefaultCookie default.
 
   private[this] val IllegalNameChars = Set('\t', '\n', '\u000b', '\f', '\r', ' ', ',', ';', '=')
   private[this] val IllegalValueChars = Set('\n', '\u000b', '\f', '\r', ';')
@@ -288,13 +288,13 @@ class Cookie private (
     httpOnly: Boolean = _httpOnly
   ): Cookie =
     new Cookie(
-      name = name,
-      value = value,
-      domain = domain,
-      path = path,
-      maxAge = maxAge,
-      secure = secure,
-      httpOnly = httpOnly
+      name,
+      value,
+      domain,
+      path,
+      maxAge,
+      secure,
+      httpOnly
     )
 
   /**

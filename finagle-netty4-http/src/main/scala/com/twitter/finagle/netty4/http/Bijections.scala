@@ -1,10 +1,15 @@
 package com.twitter.finagle.netty4.http
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.http.{Fields, HeaderMap, Request}
 import com.twitter.finagle.netty4.{BufAsByteBuf, ByteBufAsBuf}
 import com.twitter.finagle.{http => FinagleHttp}
 import com.twitter.io.{BufReader, Reader, Writer}
 import io.netty.handler.codec.{http => NettyHttp}
+import io.netty.handler.codec.http.cookie.{
+  Cookie => NettyCookie,
+  DefaultCookie => NettyDefaultCookie
+}
 import java.net.InetSocketAddress
 
 private[finagle] object Bijections {
@@ -99,6 +104,19 @@ private[finagle] object Bijections {
 
       resp
     }
+
+    def cookieToFinagle(nc: NettyCookie): FinagleHttp.Cookie = {
+      val cookie = new FinagleHttp.Cookie(
+        name = nc.name,
+        value = nc.value,
+        domain = Option(nc.domain()),
+        path = Option(nc.path()),
+        secure = nc.isSecure(),
+        httpOnly = nc.isHttpOnly())
+
+      if (nc.maxAge() != Long.MinValue) cookie.maxAge(Some(nc.maxAge().seconds))
+      else cookie
+    }
   }
 
   object finagle {
@@ -169,6 +187,18 @@ private[finagle] object Bijections {
         )
 
       }
+    }
+
+    def cookieToNetty(c: FinagleHttp.Cookie): NettyCookie = {
+      val nc = new NettyDefaultCookie(c.name, c.value)
+      nc.setDomain(c.domain)
+      nc.setPath(c.path)
+      if (c.maxAge != FinagleHttp.Cookie.DefaultMaxAge) {
+        nc.setMaxAge(c.maxAge.inSeconds)
+      }
+      nc.setSecure(c.secure)
+      nc.setHttpOnly(c.httpOnly)
+      nc
     }
   }
 }

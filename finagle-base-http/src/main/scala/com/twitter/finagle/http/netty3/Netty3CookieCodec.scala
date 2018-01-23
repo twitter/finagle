@@ -33,13 +33,13 @@ private[http] object Netty3CookieCodec extends CookieCodec {
   }
 
   def decodeClient(header: String): Option[Iterable[Cookie]] =
-  try {
-    Some(decoder.decode(header).asScala.map { cookie: Netty3Cookie =>
-      Bijections.from[Netty3Cookie, Cookie](cookie)
-    })
-  } catch {
-    case e: IllegalArgumentException => None
-  }
+    try {
+      Some(decoder.decode(header).asScala.map { cookie: Netty3Cookie =>
+        Bijections.from[Netty3Cookie, Cookie](cookie)
+      })
+    } catch {
+      case e: IllegalArgumentException => None
+    }
 
   def decodeServer(header: String): Option[Iterable[Cookie]] =
     try {
