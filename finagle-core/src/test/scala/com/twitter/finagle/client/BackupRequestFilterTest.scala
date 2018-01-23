@@ -1,5 +1,6 @@
 package com.twitter.finagle.client
 
+import com.twitter.conversions.percent._
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier, RetryBudget}
@@ -60,15 +61,15 @@ class BackupRequestFilterTest extends FunSuite
     case ReqRep(_ , Return(rep)) if rep == "ok" => ResponseClass.Success
   }
 
-  private[this] val clientRetryBudget = RetryBudget(5.seconds, 10, 0.2, Stopwatch.timeMillis)
+  private[this] val clientRetryBudget = RetryBudget(5.seconds, 10, 20.percent, Stopwatch.timeMillis)
   private[this] val backupRequestRetryBudget =
-    RetryBudget(30.seconds, 10, 0.01, Stopwatch.timeMillis)
+    RetryBudget(30.seconds, 10, 1.percent, Stopwatch.timeMillis)
 
   private[this] val newBackupRequestRetryBudget: (Double, () => Long) => RetryBudget =
     (_, _) => backupRequestRetryBudget
 
   private[this] val maxExtraLoadTunable: Tunable.Mutable[Double] = Tunable.mutable[Double](
-    "brfTunable", 0.01)
+    "brfTunable", 1.percent)
 
   private[this] def newBrf: BackupRequestFilter[String, String] =
     new BackupRequestFilter[String, String](
@@ -135,12 +136,12 @@ class BackupRequestFilterTest extends FunSuite
       () => wp
     )
     assert(currentRetryBudget eq RetryBudget.Empty)
-    assert(currentMaxExtraLoad == 0.0)
+    assert(currentMaxExtraLoad == 0.percent)
 
     // Now make sure it's ok if we change the maxExtraLoad from a valid value to this one after
     // the filter is created
 
-    val tunable = Tunable.mutable("brfTunable", 0.5)
+    val tunable = Tunable.mutable("brfTunable", 50.percent)
 
     Time.withCurrentTimeFrozen { tc =>
       val filter = new BackupRequestFilter[String, String](
@@ -155,33 +156,33 @@ class BackupRequestFilterTest extends FunSuite
         () => wp
       )
       assert(currentRetryBudget ne RetryBudget.Empty)
-      assert(currentMaxExtraLoad == 0.5)
+      assert(currentMaxExtraLoad == 50.percent)
       if (maxExtraLoad eq Tunable.none) tunable.clear() else tunable.set(maxExtraLoad().get)
       tc.advance(3.seconds)
       timer.tick()
       assert(currentRetryBudget eq RetryBudget.Empty)
-      assert(currentMaxExtraLoad == 0.0)
+      assert(currentMaxExtraLoad == 0.percent)
     }
   }
 
   test("extra load must be non-negative") {
     intercept[IllegalArgumentException] {
-      BackupRequestFilter.Configured(-5.0, false)
+      BackupRequestFilter.Configured(-500.percent, false)
     }
   }
 
   test("extra load must be <= 1.0") {
     intercept[IllegalArgumentException] {
-      BackupRequestFilter.Configured(2.0, false)
+      BackupRequestFilter.Configured(200.percent, false)
     }
   }
 
   test("Uses 0.0 for maxExtraLoad if Tunable is negative") {
-    testRetryBudgetEmpty(Tunable.const("brfTunable", -5.0))
+    testRetryBudgetEmpty(Tunable.const("brfTunable", -500.percent))
   }
 
   test("Uses 0.0 for maxExtraLoad if Tunable is > 1.0") {
-    testRetryBudgetEmpty(Tunable.const("brfTunable", 5.0))
+    testRetryBudgetEmpty(Tunable.const("brfTunable", 500.percent))
   }
 
   test("Uses 0.0 for maxExtraLoad if Tunable.apply is None") {
@@ -235,7 +236,7 @@ class BackupRequestFilterTest extends FunSuite
 
     // Configured
     Time.withCurrentTimeFrozen { tc =>
-      s.make(ps + BackupRequestFilter.Configured(0.5, false)).toService
+      s.make(ps + BackupRequestFilter.Configured(50.percent, false)).toService
       tc.advance(4.seconds)
       timer.tick()
       assert(statsReceiver.stats.contains(Seq("backups", "send_backup_after_ms")))
@@ -319,7 +320,7 @@ class BackupRequestFilterTest extends FunSuite
   ): Future[String] = {
 
     val brf = (new BackupRequestFilter[String, String](
-      Tunable.const("brfTunable", 0.5),
+      Tunable.const("brfTunable", 50.percent),
       sendInterrupts,
       classifier,
       newBackupRequestRetryBudget,
@@ -651,7 +652,7 @@ class BackupRequestFilterTest extends FunSuite
       assert(currentRetryBudget.balance == 100)
 
       // Set filter to send no backups; advance 3 seconds so we see the change
-      maxExtraLoadTunable.set(0.0)
+      maxExtraLoadTunable.set(0.percent)
       tc.advance(3.seconds)
       timer.tick()
 
@@ -698,7 +699,7 @@ class BackupRequestFilterTest extends FunSuite
       val service = newService(brf)
       warmFilterForBackup(tc, service, brf)
       assert(newRetryBudgetCalls == 1)
-      maxExtraLoadTunable.set(0.01)
+      maxExtraLoadTunable.set(1.percent)
       // we refresh the budget every 3 seconds if the Tunable value has changed
       tc.advance(3.seconds)
       timer.tick()
@@ -750,7 +751,7 @@ class BackupRequestFilterTest extends FunSuite
         "TokenRetryBudget(deposit=1000, withdraw=100000, balance=101)")
 
       // Set filter to send 10% backups; advance the time to see the change
-      maxExtraLoadTunable.set(0.1)
+      maxExtraLoadTunable.set(10.percent)
       tc.advance(3.seconds)
       timer.tick()
       assert(brf.sendBackupAfterDuration == 50.millis)
@@ -769,7 +770,7 @@ class BackupRequestFilterTest extends FunSuite
   }
 
   test("Service returned by filterService closes the underlying service when closed") {
-    val params = Stack.Params.empty + BackupRequestFilter.Configured(0.5, false)
+    val params = Stack.Params.empty + BackupRequestFilter.Configured(50.percent, false)
     val svc = BackupRequestFilter.filterService(params, underlying)
     assert(svc ne underlying)
 

@@ -31,6 +31,7 @@ Turning the example into code, first in Scala:
 
 .. code-block:: scala
 
+  import com.twitter.conversions.percent._
   import com.twitter.conversions.time._
   import com.twitter.finagle.{http, Http, Service}
   import com.twitter.finagle.service.{ReqRep, ResponseClass}
@@ -56,7 +57,7 @@ Turning the example into code, first in Scala:
         ResponseClass.RetryableFailure
     }
     // can reduce tail latency by sending 1% extra load to the backend
-    .idempotent(maxExtraLoad = 0.01)
+    .idempotent(maxExtraLoad = 1.percent)
     // build the service
     .newService(methodName = "get_statuses")
 
