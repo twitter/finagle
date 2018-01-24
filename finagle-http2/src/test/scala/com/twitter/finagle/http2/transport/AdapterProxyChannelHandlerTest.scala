@@ -1,6 +1,7 @@
 package com.twitter.finagle.http2.transport
 
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader.Message
+import com.twitter.finagle.stats.InMemoryStatsReceiver
 import io.netty.buffer.{Unpooled, ByteBuf}
 import io.netty.channel._
 import io.netty.channel.embedded.EmbeddedChannel
@@ -135,9 +136,10 @@ class AdapterProxyChannelHandlerTest extends FunSuite {
   }
 
   test("streams aren't torn down until we actually get a last item") {
+    val stats = new InMemoryStatsReceiver
     val handler = new AdapterProxyChannelHandler({ pipeline =>
       ()
-    })
+    }, stats)
     val channel = new EmbeddedChannel()
     channel.pipeline.addLast(handler)
 
@@ -153,6 +155,38 @@ class AdapterProxyChannelHandlerTest extends FunSuite {
     assert(handler.numConnections == 1)
     channel.writeOutbound(Message(last, 3))
     assert(handler.numConnections == 0)
+  }
+
+  test("channel gauge is accurate") {
+    val stats = new InMemoryStatsReceiver()
+    val handler = new AdapterProxyChannelHandler({ pipeline =>
+      ()
+    }, stats)
+    val channel = new EmbeddedChannel()
+    channel.pipeline.addLast(handler)
+
+    val channelsGauge = stats.gauges(Seq("channels"))
+    assert(channelsGauge() == 0.0)
+
+    val req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "twitter.com")
+    val rep = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+    val last = new DefaultLastHttpContent()
+
+    channel.writeOutbound(Message(req, 3))
+    channel.writeOutbound(Message(last, 3))
+    assert(channelsGauge() == 1.0)
+
+    channel.writeOutbound(Message(req, 5))
+    assert(channelsGauge() == 2.0)
+
+    channel.writeOutbound(Message(last, 5))
+    channel.writeInbound(Message(rep, 3))
+    channel.writeInbound(Message(last, 3))
+    assert(channelsGauge() == 1.0)
+
+    channel.writeInbound(Message(rep, 5))
+    channel.writeInbound(Message(last, 5))
+    assert(channelsGauge() == 0.0)
   }
 
   test("close closes the underlying connection") {

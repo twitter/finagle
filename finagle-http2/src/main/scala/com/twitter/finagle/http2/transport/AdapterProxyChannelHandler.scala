@@ -1,6 +1,7 @@
 package com.twitter.finagle.http2.transport
 
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader._
+import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.logging.Logger
 import io.netty.channel._
 import io.netty.channel.embedded.EmbeddedChannel
@@ -23,8 +24,10 @@ import scala.collection.mutable.HashMap
  * @param setupFn is run on each of the channels for each of the streams, and
  *                should be for a pipeline for HttpObject.
  */
-private[http2] class AdapterProxyChannelHandler(setupFn: ChannelPipeline => Unit)
-    extends ChannelDuplexHandler {
+private[http2] final class AdapterProxyChannelHandler(
+  setupFn: ChannelPipeline => Unit,
+  statsReceiver: StatsReceiver = NullStatsReceiver
+) extends ChannelDuplexHandler {
 
   import AdapterProxyChannelHandler._
 
@@ -32,6 +35,10 @@ private[http2] class AdapterProxyChannelHandler(setupFn: ChannelPipeline => Unit
   // having to synchronize
   private[this] val map = HashMap[Int, CompletingChannel]()
   private[this] val log = Logger.get()
+
+  private[this] val channelSizeGauge = statsReceiver.addGauge("channels") {
+    synchronized { map.size }
+  }
 
   private[this] def setupEmbeddedChannel(
     ctx: ChannelHandlerContext,
@@ -92,14 +99,10 @@ private[http2] class AdapterProxyChannelHandler(setupFn: ChannelPipeline => Unit
     })
   }
 
-  private[this] val flushTuple: ((Int, CompletingChannel)) => Unit = {
-    case (_, value) =>
-      value.embedded.flush()
-  }
-
-  override def flush(ctx: ChannelHandlerContext): Unit = {
-    map.foreach(flushTuple)
-  }
+  // NB: Iterating through all EmbeddedChannels takes a while. Since we always
+  // call flush() after write(...) anyway, we manually flush the EmbeddedChannels
+  // after they're written to. For non-embedded write (RST/GOAWAY/PING), the default
+  // flush() behavior is sufficient
 
   private[this] def updateCompletionStatus(obj: HttpObject, streamId: Int, reading: Boolean): Unit =
     obj match {
@@ -138,7 +141,9 @@ private[http2] class AdapterProxyChannelHandler(setupFn: ChannelPipeline => Unit
         strm match {
           case Message(obj, streamId) =>
             val embedded = getEmbeddedChannel(ctx, streamId)
-            embedded.write(obj, proxyForChannel(embedded, promise))
+            // NB: We flush the channel here to avoid iterating through all EmbeddedChannels on each
+            // call to flush()
+            embedded.writeAndFlush(obj, proxyForChannel(embedded, promise))
             updateCompletionStatus(obj, streamId, false)
           case rst: Rst => ctx.write(rst, promise)
           case goaway: GoAway => ctx.write(goaway, promise)

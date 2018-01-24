@@ -64,7 +64,7 @@ private[http2] class UpgradeRequestHandler(params: Stack.Params) extends Channel
                 pipeline.addLast(SchemifyingHandler.HandlerName, new SchemifyingHandler("http"))
                 pipeline.addLast(StripHeadersHandler.HandlerName, StripHeadersHandler)
                 initClient(params)(pipeline)
-             })
+             }, statsReceiver.scope("adapter_proxy"))
             )
             upgradeCounter.incr()
             ctx.fireChannelRead(successful)
