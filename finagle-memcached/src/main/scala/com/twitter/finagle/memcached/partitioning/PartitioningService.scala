@@ -26,14 +26,14 @@ private[finagle] abstract class PartitioningService[Req, Rep] extends Service[Re
 
   /**
    * Extracts the necessary information (e.g. keys) that is needed for the partitioning logic and
-   * group them by partition. The keys present in the request could belong to multiple partitions.
+   * groups them by partition. The keys present in the request could belong to multiple partitions.
    * The implementations will examine the keys, group them by partition, clone the request into
-   * per-partition requests and return the sequence of partitioned requests
+   * per-partition requests and return the sequence of partitioned requests.
    *
    * @param request: Incoming batched request
    * @return Sequence of partitioned requests
    */
-  protected def partitionRequest(request: Req): Seq[Req]
+  protected def partitionRequest(request: Req): Seq[(Req, Future[Service[Req, Rep]])]
 
   /**
    * This method is used for the batched request case. When the keys belong to multiple partitions,
@@ -52,6 +52,10 @@ private[finagle] abstract class PartitioningService[Req, Rep] extends Service[Re
       case Return(svc) => svc(request)
       case t @ Throw(_) => Future.const(t.cast[Rep])
     }
+  }
+
+  protected[this] val partitionRequestFn = (t: (Req, Future[Service[Req, Rep]])) => {
+    applyService(t._1, t._2)
   }
 
   /**
@@ -74,9 +78,7 @@ private[finagle] abstract class PartitioningService[Req, Rep] extends Service[Re
       // multiple partitions
       Future
         .collect(
-          partitionRequest(request).map { partitionedRequest =>
-            applyService(partitionedRequest, getPartitionFor(partitionedRequest))
-          }
+          partitionRequest(request).map(partitionRequestFn)
         )
         .map(mergeResponses)
     }

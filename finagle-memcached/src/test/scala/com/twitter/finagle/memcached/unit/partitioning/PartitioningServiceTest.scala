@@ -210,10 +210,15 @@ private[this] class SimplePartitioningService(
     }
   }
 
-  override protected def partitionRequest(batchedRequest: String): Seq[String] = {
+  private val stringToTuple = (s: String) => {
+    val trimmed = s.trim
+    (trimmed, getPartitionFor(trimmed))
+  }
+
+  override protected def partitionRequest(batchedRequest: String): Seq[(String, Future[Service[String, String]])] = {
     // assuming all sub-requests are unique (one request per partition). If not the following code
     // will need to group requests by partition by using getPartitionFor method
-    batchedRequest.split(RequestDelimiter).map(_.trim).toSeq
+    batchedRequest.split(RequestDelimiter).map(stringToTuple).toSeq
   }
 
   override protected def mergeResponses(responses: Seq[String]): String = {

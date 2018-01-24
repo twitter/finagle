@@ -5,6 +5,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.hashing._
 import com.twitter.util._
+import scala.collection.breakOut
 
 /**
  * KetamaPartitioningService implements consistent hashing based partitioning across the
@@ -83,21 +84,23 @@ private[finagle] abstract class KetamaPartitioningService[Req, Rep, Key](
     }
   }
 
-  final override protected def partitionRequest(request: Req): Seq[Req] = {
+  final override protected def partitionRequest(request: Req): Seq[(Req, Future[Service[Req, Rep]])] = {
     getPartitionKeys(request) match {
-      case Seq(_) =>
-        Seq(request)
-      case keys =>
+      case Seq(key) =>
+        Seq((request, partitionForKey(key)))
+      case keys: Seq[Key] if keys.nonEmpty =>
         groupByPartition(keys) match {
           case keyMap if keyMap.size == 1 =>
             // all keys belong to the same partition
-            Seq(request)
+            Seq((request, partitionForKey(keys.head)))
           case keyMap =>
             keyMap.map {
-              case (_, pKeys) =>
-                createPartitionRequestForKeys(request, pKeys.toSeq)
-            }.toSeq
+              case (ps, pKeys) =>
+                (createPartitionRequestForKeys(request, pKeys.toSeq), ps)
+            }(breakOut)
         }
+      case _ =>
+        throw new IllegalStateException("No partition keys found in request")
     }
   }
 
