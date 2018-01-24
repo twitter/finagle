@@ -1,6 +1,6 @@
 package com.twitter.finagle.http2.transport
 
-import com.twitter.finagle.http2.transport.Http2ClientDowngrader.Message
+import com.twitter.finagle.http2.transport.Http2ClientDowngrader.{Message, Rst}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import io.netty.buffer.{Unpooled, ByteBuf}
 import io.netty.channel._
@@ -155,6 +155,49 @@ class AdapterProxyChannelHandlerTest extends FunSuite {
     assert(handler.numConnections == 1)
     channel.writeOutbound(Message(last, 3))
     assert(handler.numConnections == 0)
+  }
+
+  test("streams are torn down when we receive rst") {
+    val handler = new AdapterProxyChannelHandler({ pipeline =>
+      ()
+    })
+    val channel = new EmbeddedChannel()
+    channel.pipeline.addLast(handler)
+
+    val req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "twitter.com")
+    val rep = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+    val last = new DefaultLastHttpContent()
+
+    channel.writeOutbound(Message(req, 3))
+    assert(handler.numConnections == 1)
+    channel.writeInbound(Message(rep, 3))
+    assert(handler.numConnections == 1)
+    channel.writeOutbound(Rst(3, 0x8))
+    assert(handler.numConnections == 0)
+    channel.writeInbound(Message(last, 3))
+    assert(handler.numConnections == 0)
+  }
+
+  test("streams are torn down when we send rst") {
+    val handler = new AdapterProxyChannelHandler({ pipeline =>
+      ()
+    })
+    val channel = new EmbeddedChannel()
+    channel.pipeline.addLast(handler)
+
+    val req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "twitter.com")
+    val rep = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+    val last = new DefaultLastHttpContent()
+
+    channel.writeOutbound(Message(req, 3))
+    assert(handler.numConnections == 1)
+    channel.writeInbound(Message(rep, 3))
+    assert(handler.numConnections == 1)
+    channel.writeInbound(Rst(3, 0x8))
+    assert(handler.numConnections == 0)
+    intercept[AdapterProxyChannelHandler.WriteToNackedStreamException] {
+      channel.writeOutbound(Message(last, 3))
+    }
   }
 
   test("channel gauge is accurate") {

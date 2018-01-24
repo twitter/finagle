@@ -1,8 +1,9 @@
 package com.twitter.finagle.http2.transport
 
+import com.twitter.finagle.FailureFlags
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader._
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
-import com.twitter.logging.Logger
+import com.twitter.logging.{Logger, Level, HasLogLevel}
 import io.netty.channel._
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
@@ -35,6 +36,7 @@ private[http2] final class AdapterProxyChannelHandler(
   // having to synchronize
   private[this] val map = HashMap[Int, CompletingChannel]()
   private[this] val log = Logger.get()
+  private[this] var cur = -1
 
   private[this] val channelSizeGauge = statsReceiver.addGauge("channels") {
     synchronized { map.size }
@@ -52,16 +54,22 @@ private[http2] final class AdapterProxyChannelHandler(
     embedded
   }
 
+  // this may return a null.
   private[this] def getEmbeddedChannel(
     ctx: ChannelHandlerContext,
     streamId: Int
   ): EmbeddedChannel =
-    map
-      .getOrElseUpdate(
-        streamId,
-        new CompletingChannel(setupEmbeddedChannel(ctx, streamId))
-      )
-      .embedded
+    map.get(streamId) match {
+      case Some(completingChannel) =>
+        completingChannel.embedded
+      case None if (streamId > cur) =>
+        cur = streamId
+        val completingChannel = new CompletingChannel(setupEmbeddedChannel(ctx, streamId))
+        map.put(streamId, completingChannel)
+        completingChannel.embedded
+      case None =>
+        null
+    }
 
   private[this] def closeAll(): Unit = {
     map.foreach {
@@ -120,9 +128,16 @@ private[http2] final class AdapterProxyChannelHandler(
 
   override def channelRead(ctx: ChannelHandlerContext, msg: Object): Unit = msg match {
     case Message(obj, streamId) =>
-      getEmbeddedChannel(ctx, streamId).writeInbound(obj)
-      updateCompletionStatus(obj, streamId, true)
-    case rst: Rst => ctx.fireChannelRead(rst)
+      getEmbeddedChannel(ctx, streamId) match {
+        case null =>
+          // nop, we've sent an RST, and won't be doing anything more to this stream id
+        case embedded =>
+          embedded.writeInbound(obj)
+          updateCompletionStatus(obj, streamId, true)
+      }
+    case rst @ Rst(streamId, _) =>
+      map.remove(streamId)
+      ctx.fireChannelRead(rst)
     case goaway: GoAway => ctx.fireChannelRead(goaway)
     case Ping => ctx.fireChannelRead(Ping)
     case upgrade: UpgradeEvent => ctx.fireChannelRead(upgrade)
@@ -140,12 +155,21 @@ private[http2] final class AdapterProxyChannelHandler(
       case strm: StreamMessage =>
         strm match {
           case Message(obj, streamId) =>
-            val embedded = getEmbeddedChannel(ctx, streamId)
-            // NB: We flush the channel here to avoid iterating through all EmbeddedChannels on each
-            // call to flush()
-            embedded.writeAndFlush(obj, proxyForChannel(embedded, promise))
-            updateCompletionStatus(obj, streamId, false)
-          case rst: Rst => ctx.write(rst, promise)
+            getEmbeddedChannel(ctx, streamId) match {
+              case null =>
+                promise.setFailure(new WriteToNackedStreamException(streamId))
+                // nop, we've received an rst, and won't be doing anything more to this stream id
+              case embedded =>
+                // NB: We flush the channel here to avoid iterating through all EmbeddedChannels on each
+                // call to flush()
+                embedded.writeAndFlush(obj, proxyForChannel(embedded, promise))
+                updateCompletionStatus(obj, streamId, false)
+            }
+          case rst @ Rst(streamId, _) =>
+            map.remove(streamId)
+            // receiving an rst for a stream that never existed is a protocol error, but
+            // we handle that in StreamTransportFactory, so for now we just propagate it.
+            ctx.write(rst, promise)
           case goaway: GoAway => ctx.write(goaway, promise)
           case Ping => ctx.write(Ping, promise)
         }
@@ -232,5 +256,18 @@ private[http2] object AdapterProxyChannelHandler {
     val source = channel.newPromise()
     source.addListener(new ChannelPromiseNotifier(sink))
     source
+  }
+
+  // this is non-retryable because we know this message is mid-stream, so we've
+  // already written stuff to the wire.
+  class WriteToNackedStreamException(
+    id: Int,
+    private[finagle] val flags: Long = FailureFlags.NonRetryable
+  ) extends Exception(s"Tried to write to already nacked stream id $id.")
+      with FailureFlags[WriteToNackedStreamException]
+      with HasLogLevel {
+    def logLevel: Level = Level.DEBUG
+    protected def copyWithFlags(flags: Long): WriteToNackedStreamException =
+      new WriteToNackedStreamException(id, flags)
   }
 }
