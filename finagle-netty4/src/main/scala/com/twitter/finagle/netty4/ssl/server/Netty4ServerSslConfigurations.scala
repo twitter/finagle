@@ -35,7 +35,10 @@ private[finagle] object Netty4ServerSslConfigurations {
     applicationProtocols: ApplicationProtocols
   ): SslContextBuilder =
     Netty4SslConfigurations.configureApplicationProtocols(
-      builder, applicationProtocols, Protocol.NPN_AND_ALPN)
+      builder,
+      applicationProtocols,
+      Protocol.NPN_AND_ALPN
+    )
 
   /**
    * Creates an `SslContextBuilder` for a server with the supplied `KeyCredentials`.
@@ -77,7 +80,8 @@ private[finagle] object Netty4ServerSslConfigurations {
     val withTrust = Netty4SslConfigurations.configureTrust(withProvider, config.trustCredentials)
     val withAppProtocols = Netty4ServerSslConfigurations.configureServerApplicationProtocols(
       withTrust,
-      config.applicationProtocols)
+      config.applicationProtocols
+    )
 
     withAppProtocols.build()
   }

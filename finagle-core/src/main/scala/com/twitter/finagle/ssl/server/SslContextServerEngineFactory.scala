@@ -7,7 +7,7 @@ import javax.net.ssl.SSLContext
  * This class provides an ability to use an initialized supplied
  * `javax.net.ssl.SSLContext` as the basis for creating [[Engine Engines]].
  */
-class SslContextServerEngineFactory(sslContext: SSLContext) extends SslServerEngineFactory {
+final class SslContextServerEngineFactory(sslContext: SSLContext) extends SslServerEngineFactory {
 
   /**
    * Creates a new [[Engine]] based on an [[SslServerConfiguration]]
@@ -38,5 +38,4 @@ class SslContextServerEngineFactory(sslContext: SSLContext) extends SslServerEng
     SslServerEngineFactory.configureEngine(engine, config)
     engine
   }
-
 }

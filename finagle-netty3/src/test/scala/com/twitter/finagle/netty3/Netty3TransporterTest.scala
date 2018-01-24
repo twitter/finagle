@@ -25,17 +25,14 @@ import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.ssl.SslHandler
 import org.jboss.netty.handler.timeout.IdleStateHandler
-import org.junit.runner.RunWith
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.Eventually
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import scala.collection.JavaConverters._
 import scala.reflect.ClassTag
 
-@RunWith(classOf[JUnitRunner])
 class Netty3TransporterTest extends FunSuite with MockitoSugar with Eventually {
 
   case class FakeClientEngineFactory(engine: Engine) extends SslClientEngineFactory {

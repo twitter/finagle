@@ -13,7 +13,7 @@ import java.net.InetSocketAddress
  * A channel initializer that takes [[Stack.Params]] and upgrades the pipeline with missing
  * SSL/TLS pieces required for server-side transport encryption.
  */
-private[finagle] class Netty4ServerSslChannelInitializer(params: Stack.Params)
+final private[finagle] class Netty4ServerSslChannelInitializer(params: Stack.Params)
     extends ChannelInitializer[Channel] {
 
   /**
@@ -23,10 +23,8 @@ private[finagle] class Netty4ServerSslChannelInitializer(params: Stack.Params)
    * instead.
    */
   private[this] def selectEngineFactory(ch: Channel): SslServerEngineFactory = {
-    val SslServerEngineFactory.Param(defaultEngineFactory) =
-      SslServerEngineFactory.Param.param.default
-    val SslServerEngineFactory.Param(engineFactory) =
-      params[SslServerEngineFactory.Param]
+    val defaultEngineFactory = SslServerEngineFactory.Param.param.default.factory
+    val engineFactory = params[SslServerEngineFactory.Param].factory
 
     if (engineFactory == defaultEngineFactory) Netty4ServerEngineFactory(ch.alloc())
     else engineFactory
@@ -39,7 +37,7 @@ private[finagle] class Netty4ServerSslChannelInitializer(params: Stack.Params)
   private[this] def combineApplicationProtocols(
     config: SslServerConfiguration
   ): SslServerConfiguration = {
-    val Alpn(protocols) = params[Alpn]
+    val protocols = params[Alpn].protocols
 
     config.copy(
       applicationProtocols = ApplicationProtocols.combine(protocols, config.applicationProtocols)
@@ -56,7 +54,7 @@ private[finagle] class Netty4ServerSslChannelInitializer(params: Stack.Params)
     remoteAddress: Address,
     config: SslServerConfiguration
   ): SslServerVerificationHandler = {
-    val SslServerSessionVerifier.Param(sessionVerifier) = params[SslServerSessionVerifier.Param]
+    val sessionVerifier = params[SslServerSessionVerifier.Param].verifier
     new SslServerVerificationHandler(sslHandler, remoteAddress, config, sessionVerifier)
   }
 

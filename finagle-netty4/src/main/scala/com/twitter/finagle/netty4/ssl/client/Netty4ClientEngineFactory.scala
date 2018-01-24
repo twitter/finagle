@@ -11,7 +11,7 @@ import io.netty.handler.ssl.OpenSsl
  * This engine factory uses Netty 4's `SslContextBuilder`. It is the
  * recommended path for using native SSL/TLS engines with Finagle.
  */
-class Netty4ClientEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
+final class Netty4ClientEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
     extends SslClientEngineFactory {
 
   /**
@@ -27,11 +27,10 @@ class Netty4ClientEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
    */
   def apply(address: Address, config: SslClientConfiguration): Engine = {
     val context = Netty4ClientSslConfigurations.createClientContext(config, forceJdk)
-    val engine = Netty4ClientSslConfigurations.createClientEngine(
-      address, config, context, allocator)
+    val engine =
+      Netty4ClientSslConfigurations.createClientEngine(address, config, context, allocator)
     engine
   }
-
 }
 
 object Netty4ClientEngineFactory {

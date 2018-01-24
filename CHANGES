@@ -112,6 +112,9 @@ Breaking API Changes
     was replaced by a Stack.Param inside finagle-core's `LoadBalancerFactory`.
     ``PHAB_ID=D119394``
 
+  * finagle-netty4: `Netty4ClientEngineFactory` and `Netty4ServerEngineFactory` were finalized.
+    ``PHAB_ID=D128708``
+
   * finagle-thrift, finagle-thriftmux: Remove `ReqRep` specific methods. Since the "ReqRep"
     builders are now subclasses of their non-"ReqRep" counterparts their is no longer a
     need to expose "ReqRep" specific methods. ``PHAB_ID=D123341``

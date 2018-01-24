@@ -10,7 +10,7 @@ import io.netty.handler.ssl.{OpenSsl, SslContext}
  * This engine factory uses Netty 4's `SslContextBuilder`. It is the
  * recommended path for using native SSL/TLS engines within Finagle.
  */
-class Netty4ServerEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
+final class Netty4ServerEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
     extends SslServerEngineFactory {
 
   /**
@@ -27,7 +27,6 @@ class Netty4ServerEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
     val context: SslContext = Netty4ServerSslConfigurations.createServerContext(config, forceJdk)
     Netty4ServerSslConfigurations.createServerEngine(config, context, allocator)
   }
-
 }
 
 object Netty4ServerEngineFactory {

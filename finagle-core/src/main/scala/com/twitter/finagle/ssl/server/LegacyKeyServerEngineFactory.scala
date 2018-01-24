@@ -88,5 +88,4 @@ object LegacyKeyServerEngineFactory extends SslServerEngineFactory {
     SslServerEngineFactory.configureEngine(engine, config)
     engine
   }
-
 }

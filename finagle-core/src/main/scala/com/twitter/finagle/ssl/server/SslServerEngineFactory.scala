@@ -44,13 +44,11 @@ object SslServerEngineFactory {
   def configureClientAuth(
     sslEngine: SSLEngine,
     clientAuth: ClientAuth
-  ): Unit = {
-    clientAuth match {
-      case ClientAuth.Unspecified => // Do Nothing
-      case ClientAuth.Off => sslEngine.setWantClientAuth(false)
-      case ClientAuth.Wanted => sslEngine.setWantClientAuth(true)
-      case ClientAuth.Needed => sslEngine.setNeedClientAuth(true)
-    }
+  ): Unit = clientAuth match {
+    case ClientAuth.Unspecified => // Do Nothing
+    case ClientAuth.Off => sslEngine.setWantClientAuth(false)
+    case ClientAuth.Wanted => sslEngine.setWantClientAuth(true)
+    case ClientAuth.Needed => sslEngine.setNeedClientAuth(true)
   }
 
   /**

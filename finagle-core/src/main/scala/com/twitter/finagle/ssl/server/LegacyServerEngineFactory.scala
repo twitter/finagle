@@ -87,5 +87,4 @@ object LegacyServerEngineFactory extends SslServerEngineFactory {
     engine.self.setUseClientMode(false)
     engine
   }
-
 }
