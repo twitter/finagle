@@ -9,7 +9,7 @@ import io.netty.handler.codec.http.cookie.{
 }
 import scala.collection.JavaConverters._
 
-private[http] object Netty4CookieCodec extends CookieCodec {
+private[finagle] object Netty4CookieCodec extends CookieCodec {
   // not stateful, so safe to re-use
   private[this] val clientEncoder = NettyClientCookieEncoder.STRICT
   private[this] val serverEncoder = NettyServerCookieEncoder.STRICT

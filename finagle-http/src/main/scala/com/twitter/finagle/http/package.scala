@@ -1,6 +1,8 @@
 package com.twitter.finagle
 
 import com.twitter.app.GlobalFlag
+import com.twitter.finagle.netty4.http.Netty4CookieCodec
+import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.stats.DefaultStatsReceiver
 import com.twitter.finagle.toggle.{StandardToggleMap, ToggleMap}
 
@@ -17,6 +19,14 @@ package object http {
    */
   private[finagle] val Toggles: ToggleMap =
     StandardToggleMap(LibraryName, DefaultStatsReceiver)
+
+
+  private[http] val UseNetty4CookieCodec =
+    Toggles("com.twitter.finagle.http.UseNetty4CookieCodec")
+
+  if (UseNetty4CookieCodec(ServerInfo().id.hashCode())) {
+    CookieMap.setCookieCodec(Netty4CookieCodec)
+  }
 
   object serverErrorsAsFailures
       extends GlobalFlag(
