@@ -5,6 +5,7 @@ import com.twitter.finagle.http2.transport.Http2ClientDowngrader._
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.netty4.transport.HasExecutor
 import com.twitter.finagle.param.Stats
+import com.twitter.finagle.stats.{Verbosity, VerbosityAdjustingStatsReceiver}
 import com.twitter.finagle.transport.{LegacyContext, Transport, TransportContext}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Failure, FailureFlags, Stack, Status, StreamClosedException}
@@ -15,8 +16,7 @@ import io.netty.handler.codec.http2.Http2Error
 import java.net.SocketAddress
 import java.security.cert.Certificate
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
-import java.util.concurrent.ConcurrentHashMap
-import scala.collection.JavaConverters._
+import scala.collection.mutable.{HashMap => MutableHashMap}
 
 /**
  * A factory for making a transport which represents an http2 stream.
@@ -55,22 +55,35 @@ private[http2] class StreamTransportFactory(
   private[this] val exec = underlying.context.executor
   private[this] val log = Logger.get(getClass.getName)
 
-  // A map of streamIds -> StreamTransport
-  private[this] val streams = new ConcurrentHashMap[Int, StreamTransport]()
+  // A map of active streamIds -> StreamTransport. Concurrency issues are handled by the serial
+  // executor.
+  private[this] val activeStreams = new MutableHashMap[Int, StreamTransport]()
   private[this] val id = new AtomicInteger(1)
 
   // This state as well as operations that start or stop streams and goaways are serialized via `exec`
   @volatile private[this] var dead = false
   @volatile private[this] var pingPromise: Promise[Unit] = null
 
-  // exposed for testing
-  private[http2] def numStreams: Int = streams.size
+  // exposed for testing & streams gauge synchronized because this is called outside of the executor
+  private[http2] def numActiveStreams: Int = synchronized { activeStreams.size }
   private[http2] def setStreamId(num: Int): Unit = id.set(num)
 
   private[this] val FailureDetector.Param(detectorConfig) = params[FailureDetector.Param]
   private[this] val Stats(statsReceiver) = params[Stats]
 
-  private val streamsGauge = statsReceiver.addGauge("streams") { streams.size }
+  private[this] val activeStreamsGauge = statsReceiver.addGauge("streams") { numActiveStreams }
+
+  private[this] val debugStats = new VerbosityAdjustingStatsReceiver(statsReceiver, Verbosity.Debug)
+    .scope("debug")
+
+  private val removeIdleCounter = debugStats.counter("remove_idle")
+  private val removeRstCounter = debugStats.counter("remove_rst")
+  private val removeExnCounter = debugStats.counter("remove_exn")
+  private val removeCloseCounter = debugStats.counter("remove_close")
+
+  private def handleRemoveStream(streamId: Int): Boolean = {
+    activeStreams.remove(streamId) != null
+  }
 
   // exposed for testing
   private[http2] def ping(): Future[Unit] = {
@@ -100,7 +113,7 @@ private[http2] class StreamTransportFactory(
 
   private[this] def handleGoaway(obj: HttpObject, lastStreamId: Int): Unit = {
     dead = true
-    streams.values.asScala.foreach { stream =>
+    activeStreams.values.foreach { stream =>
       if (stream.curId > lastStreamId) {
         stream
           .handleCloseStream(
@@ -125,34 +138,36 @@ private[http2] class StreamTransportFactory(
   // a different order, or on a different thread. it's unlikely, but racy.
   private[this] def handleSuccessfulRead(sm: StreamMessage): Unit = sm match {
     case Message(msg, streamId) =>
-      val c = streams.get(streamId)
-      if (c != null) c.handleOffer(msg)
-      else {
-        val lastId = id.get()
-        if (log.isLoggable(Level.DEBUG))
-          log.debug(
-            s"Got message for nonexistent stream $streamId. Next client " +
-              s"stream id=${lastId}. msg=$msg"
-          )
+      activeStreams.get(streamId) match {
+        case Some(stream) =>
+          stream.handleOffer(msg)
 
-        if (streamId < id.get()) {
-          // This stream may have existed and was closed. This is an error, but is recoverable.
-          underlying.write(Rst(streamId, Http2Error.STREAM_CLOSED.code))
-        } else {
-          // This stream definitely has not yet existed. This error is not recoverable.
-          underlying.write(
-            // TODO: Properly utilize the DEBUG_DATA section of GOAWAY
-            GoAway(
-              LastHttpContent.EMPTY_LAST_CONTENT,
-              lastId,
-              Http2Error.PROTOCOL_ERROR.code
+        case None =>
+          val lastId = id.get()
+          if (log.isLoggable(Level.DEBUG))
+            log.debug(
+              s"Got message for nonexistent stream $streamId. Next client " +
+                s"stream id=${lastId}. msg=$msg"
             )
-          )
-          handleClose(
-            Time.Bottom,
-            Some(new Http2ProtocolException(s"Message for streamId $streamId which doesn't exist yet"))
-          )
-        }
+
+          if (streamId < id.get()) {
+            // This stream may have existed and was closed. This is an error, but is recoverable.
+            underlying.write(Rst(streamId, Http2Error.STREAM_CLOSED.code))
+          } else {
+            // This stream definitely has not yet existed. This error is not recoverable.
+            underlying.write(
+              // TODO: Properly utilize the DEBUG_DATA section of GOAWAY
+              GoAway(
+                LastHttpContent.EMPTY_LAST_CONTENT,
+                lastId,
+                Http2Error.PROTOCOL_ERROR.code
+              )
+            )
+            handleClose(
+              Time.Bottom,
+              Some(new Http2ProtocolException(s"Message for streamId $streamId which doesn't exist yet"))
+            )
+          }
       }
 
     case GoAway(msg, lastStreamId, _) =>
@@ -164,14 +179,18 @@ private[http2] class StreamTransportFactory(
         else if (errorCode == Http2Error.ENHANCE_YOUR_CALM.code) Failure.NonRetryableNackFailure
         else new StreamClosedException(addr, streamId.toString)
 
-      val c = streams.get(streamId)
-      if (c != null) c.handleCloseWith(error)
-      else {
-        if (log.isLoggable(Level.DEBUG))
-          log.debug(s"Got RST for nonexistent stream: $streamId, code: $errorCode")
+      activeStreams.get(streamId) match {
+        case Some(stream) =>
+          handleRemoveStream(streamId)
+          removeRstCounter.incr()
+          stream.handleCloseWith(error)
+
+        case None =>
+          // According to spec, an endpoint should not send another RST upon receipt
+          // of an RST for an absent stream ID as this could cause a loop.
+          if (log.isLoggable(Level.DEBUG))
+            log.debug(s"Got RST for nonexistent stream: $streamId, code: $errorCode")
       }
-    // According to spec, an endpoint should not send another RST upon receipt
-    // of an RST for an absent stream ID as this could cause a loop.
 
     case Ping =>
       if (pingPromise != null) {
@@ -221,10 +240,10 @@ private[http2] class StreamTransportFactory(
    */
   def first(): Transport[HttpObject, HttpObject] = {
     if (firstOnce.compareAndSet(false, true)) {
-      val ct = new StreamTransport()
-      ct.handleNewStream()
-      ct.handleState(Active(finishedWriting = true, finishedReading = false))
-      ct
+      val st = new StreamTransport()
+      st.handleNewStream()
+      st.handleState(Active(finishedWriting = true, finishedReading = false))
+      st
     } else {
       throw new IllegalStateException(s"$this.first() was called multiple times")
     }
@@ -236,7 +255,8 @@ private[http2] class StreamTransportFactory(
       def run(): Unit = {
         if (dead) p.setException(new DeadConnectionException(addr, FailureFlags.Retryable))
         else {
-          p.setValue(new StreamTransport())
+          val st = new StreamTransport()
+          p.setValue(st)
         }
       }
     })
@@ -250,7 +270,7 @@ private[http2] class StreamTransportFactory(
       streamExn: Option[Throwable] = None
     ): Unit = {
     dead = true
-    streams.values.asScala.foreach { stream =>
+    activeStreams.values.foreach { stream =>
       streamExn match {
         case Some(e) =>
           stream.handleCloseWith(e, deadline)
@@ -268,7 +288,8 @@ private[http2] class StreamTransportFactory(
     underlying.context.onClose.unit
   }
 
-  def status: Status = detector.status
+  // Ensure we report closed if closed has been called but the detector has not yet been triggered
+  def status: Status = if (dead) Status.Closed else detector.status
 
   /**
    * StreamTransport represents a single http/2 stream at a time.  Once the stream
@@ -325,8 +346,7 @@ private[http2] class StreamTransportFactory(
             )
           } else {
             handleState(Active(finishedReading = false, finishedWriting = false))
-            streams.put(newId, stream)
-            streams.remove(_curId)
+            activeStreams.put(newId, stream)
             _curId = newId
           }
 
@@ -344,6 +364,9 @@ private[http2] class StreamTransportFactory(
     private[this] def handleBadState(msg: String): Future[Nothing] = {
       log.error(s"Stream ${_curId} bad state: $msg")
       val exn = new BadStreamStateException(msg, curId)
+
+      // If this is not in activeStreams, it was removed for another reason
+      if (handleRemoveStream(curId)) removeExnCounter.incr()
       handleCloseWith(exn)
       Future.exception(exn)
     }
@@ -351,7 +374,14 @@ private[http2] class StreamTransportFactory(
     private[this] def handleCheckFinished() = state match {
       case a: Active if a.finished && queue.size == 0 =>
         if (parent.dead) handleCloseStream(s"parent MultiplexedTransporter already dead")
-        else handleState(Idle)
+        else {
+          if (handleRemoveStream(curId)) {
+            removeIdleCounter.incr()
+            handleState(Idle)
+          } else {
+            handleBadState("Stream ID not found in map when going idle")
+          }
+        }
 
       case _ => // nop
     }
@@ -513,7 +543,8 @@ private[http2] class StreamTransportFactory(
       }
 
       handleState(Dead)
-      streams.remove(curId)
+      // If this is not in activeStreams, it was removed for another reason
+      if (handleRemoveStream(curId)) removeCloseCounter.incr()
 
       queue.fail(exn, discard = false)
 

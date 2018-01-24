@@ -53,7 +53,7 @@ class StreamTransportFactoryTest extends FunSuite {
       throw await(second.onClose)
     }
     assert(exn.flags == FailureFlags.Retryable)
-    assert(streamFac.numStreams == 1)
+    assert(streamFac.numActiveStreams == 1)
   }
 
   test("StreamTransportFactory streams should kill themselves when they grow to a bad stream id") {
@@ -79,7 +79,7 @@ class StreamTransportFactoryTest extends FunSuite {
       throw await(stream.onClose)
     }
     assert(exn.flags == FailureFlags.Retryable)
-    assert(streamFac.numStreams == 0)
+    assert(streamFac.numActiveStreams == 0)
   }
 
   test("StreamTransportFactory streams should disappear when they die") {
@@ -93,12 +93,12 @@ class StreamTransportFactoryTest extends FunSuite {
     val conn = await(streamFac())
 
     conn.write(H1Req)
-    assert(streamFac.numStreams == 1)
+    assert(streamFac.numActiveStreams == 1)
 
     assert(!conn.onClose.isDefined)
     await(conn.close())
 
-    assert(streamFac.numStreams == 0)
+    assert(streamFac.numActiveStreams == 0)
   }
 
   test("StreamTransportFactory streams can't even") {
@@ -119,7 +119,7 @@ class StreamTransportFactoryTest extends FunSuite {
       throw await(stream.onClose)
     }
     assert(exn.flags == FailureFlags.Retryable)
-    assert(streamFac.numStreams == 0)
+    assert(streamFac.numActiveStreams == 0)
   }
 
   test("StreamTransportFactory forbids new streams on GOAWAY") {
@@ -136,7 +136,7 @@ class StreamTransportFactoryTest extends FunSuite {
     intercept[DeadConnectionException] {
       await(streamFac())
     }
-    assert(streamFac.numStreams == 0)
+    assert(streamFac.numActiveStreams == 0)
   }
 
   test("StreamTransportFactoryer respects last stream ID on GOAWAY & closes streams") {
@@ -176,7 +176,7 @@ class StreamTransportFactoryTest extends FunSuite {
     intercept[StreamClosedException] {
       await(c3.read())
     }
-    assert(streamFac.numStreams == 0)
+    assert(streamFac.numActiveStreams == 0)
   }
 
   test("StreamTransportFactoryer reflects detector status") {
@@ -194,7 +194,7 @@ class StreamTransportFactoryTest extends FunSuite {
     assert(streamFac.status == Status.Open)
     cur = Status.Busy
     assert(streamFac.status == Status.Busy)
-    assert(streamFac.numStreams == 0)
+    assert(streamFac.numActiveStreams == 0)
   }
 
   test("StreamTransportFactoryer call to first() provides stream with streamId == 1") {
@@ -222,7 +222,7 @@ class StreamTransportFactoryTest extends FunSuite {
 
     // An attempt to hide implementation details.
     assert(cA.curId - cB.curId == 2)
-    assert(streamFac.numStreams == 2)
+    assert(streamFac.numActiveStreams == 2)
   }
 
   test("Idle streams kill themselves when read") {
@@ -241,7 +241,7 @@ class StreamTransportFactoryTest extends FunSuite {
 
     assert(thrown.isFlagged(FailureFlags.NonRetryable))
     assert(stream.status == Status.Closed)
-    assert(streamFac.numStreams == 0)
+    assert(streamFac.numActiveStreams == 0)
   }
 
   test("Children can be closed streamFacple times, but keep the first reason") {
@@ -265,7 +265,7 @@ class StreamTransportFactoryTest extends FunSuite {
     }
 
     assert(thrown.getMessage.equals("derp"))
-    assert(streamFac.numStreams == 0)
+    assert(streamFac.numActiveStreams == 0)
   }
 
   test("RST is sent when a message is received for a closed stream") {
@@ -286,7 +286,7 @@ class StreamTransportFactoryTest extends FunSuite {
 
     val result = await(writeq.poll())
     assert(result == Rst(3, Http2Error.STREAM_CLOSED.code))
-    assert(streamFac.numStreams == 0)
+    assert(streamFac.numActiveStreams == 0)
   }
 
   test("GOAWAY w/ PROTOCOL_ERROR is sent when a message is received for an idle stream") {
@@ -309,7 +309,7 @@ class StreamTransportFactoryTest extends FunSuite {
     val GoAway(_, lastId, errorCode) = result
     assert(lastId == 5)
     assert(errorCode == Http2Error.PROTOCOL_ERROR.code)
-    assert(streamFac.numStreams == 0)
+    assert(streamFac.numActiveStreams == 0)
   }
 
   test("RST is not sent when RST is received for a nonexistent stream") {
@@ -329,7 +329,7 @@ class StreamTransportFactoryTest extends FunSuite {
     intercept[TimeoutException] {
       await(writeq.poll())
     }
-    assert(streamFac.numStreams == 0)
+    assert(streamFac.numActiveStreams == 0)
   }
 
   test("PINGs receive replies every time") {
