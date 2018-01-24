@@ -3,12 +3,11 @@ package com.twitter.finagle.http2
 import com.twitter.finagle.Stack
 import com.twitter.finagle.http
 import com.twitter.finagle.http2.param.{EncoderIgnoreMaxHeaderListSize, FrameLoggerNamePrefix}
-import com.twitter.finagle.http2.transport.{Http2NackHandler, PriorKnowledgeHandler, RstHandler, StripHeadersHandler}
-import com.twitter.finagle.netty4.http.{HttpCodecName, initServer}
-import com.twitter.finagle.netty4.param.Allocator
+import com.twitter.finagle.http2.transport.{H2Init, PingListenerDecorator, PriorKnowledgeHandler}
+import com.twitter.finagle.netty4.http.HttpCodecName
 import com.twitter.finagle.param.Stats
-import com.twitter.logging.Logger
 import com.twitter.finagle.stats.Gauge
+import com.twitter.logging.Logger
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.{Channel, ChannelFuture, ChannelFutureListener, ChannelHandlerContext, ChannelInitializer}
 import io.netty.handler.codec.http.HttpServerUpgradeHandler.{SourceCodec, UpgradeCodec, UpgradeCodecFactory}
@@ -19,7 +18,7 @@ import io.netty.util.{AsciiString, AttributeKey}
 /**
  * This handler sets us up for a cleartext upgrade
  */
-private[finagle] class Http2CleartextServerInitializer(
+final private[finagle] class Http2CleartextServerInitializer(
   init: ChannelInitializer[Channel],
   params: Stack.Params
 ) extends ChannelInitializer[SocketChannel] {
@@ -27,20 +26,7 @@ private[finagle] class Http2CleartextServerInitializer(
   private[this] val Stats(statsReceiver) = params[Stats]
   private[this] val upgradeCounter = statsReceiver.scope("upgrade").counter("success")
 
-  val initializer = new ChannelInitializer[Channel] {
-    def initChannel(ch: Channel): Unit = {
-      ch.config().setAllocator(params[Allocator].allocator)
-      ch.pipeline.addLast(new Http2NackHandler)
-      ch.pipeline.addLast(new Http2StreamFrameToHttpObjectCodec(
-        true /* isServer */,
-        false /* validateHeaders */
-      ))
-      ch.pipeline.addLast(StripHeadersHandler.HandlerName, StripHeadersHandler)
-      ch.pipeline.addLast(new RstHandler())
-      initServer(params)(ch.pipeline)
-      ch.pipeline.addLast(init)
-    }
-  }
+  val initializer = H2Init(init, params)
 
   // An optional hook for modifying the channel when an upgrade has completed
   protected def onUpgrade(ctx: ChannelHandlerContext): Unit = {}
@@ -50,11 +36,14 @@ private[finagle] class Http2CleartextServerInitializer(
       if (AsciiString.contentEquals(Http2CodecUtil.HTTP_UPGRADE_PROTOCOL_NAME, protocol)) {
         val logger = new LoggerPerFrameTypeLogger(params[FrameLoggerNamePrefix].loggerNamePrefix)
 
-        val codec = UpgradeMultiplexCodecBuilder.forServer(initializer)
+        val codec: Http2MultiplexCodec = UpgradeMultiplexCodecBuilder.forServer(initializer)
           .frameLogger(logger)
           .initialSettings(Settings.fromParams(params))
           .encoderIgnoreMaxHeaderListSize(params[EncoderIgnoreMaxHeaderListSize].ignoreMaxHeaderListSize)
           .build()
+
+        val listener = codec.decoder.frameListener
+        codec.decoder.frameListener(new PingListenerDecorator(listener))
 
         val streams = statsReceiver.addGauge("streams") { codec.connection.numActiveStreams }
 

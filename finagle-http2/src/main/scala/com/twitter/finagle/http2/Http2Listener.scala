@@ -23,7 +23,7 @@ private[finagle] object Http2Listener {
   def apply[In, Out](
     params: Stack.Params
   )(implicit mIn: Manifest[In], mOut: Manifest[Out]): Listener[In, Out, TransportContext] = {
-    val Transport.ServerSsl(configuration) = params[Transport.ServerSsl]
+    val configuration = params[Transport.ServerSsl].sslServerConfiguration
 
     val initializer =
       if (configuration.isDefined)
