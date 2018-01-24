@@ -9,6 +9,7 @@ junit_tests(
     'finagle/finagle-thriftmux/src/test/thrift:thrift-scala',
     'finagle/finagle-mux/src/main/scala:scala',
     'scrooge/scrooge-core/src/main/scala:scala',
+    'util/util-core/src/main/java:java',
     'util/util-core/src/main/scala:scala',
   ],
   sources=rglobs('*.java'),

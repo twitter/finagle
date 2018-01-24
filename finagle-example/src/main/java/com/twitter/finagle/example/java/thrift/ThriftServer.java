@@ -4,6 +4,8 @@ import com.twitter.finagle.ListeningServer;
 import com.twitter.finagle.Thrift;
 import com.twitter.finagle.example.thriftscala.Hello;
 import com.twitter.util.Await;
+import com.twitter.util.Closable;
+import com.twitter.util.Closables;
 import com.twitter.util.Future;
 import com.twitter.util.TimeoutException;
 
@@ -14,6 +16,11 @@ public final class ThriftServer {
   public static class HelloImpl implements Hello.FutureIface {
     public Future<String> hi() {
       return Future.value("hi");
+    }
+
+    @Override
+    public Closable asClosable() {
+      return Closables.NOP;
     }
   }
 
