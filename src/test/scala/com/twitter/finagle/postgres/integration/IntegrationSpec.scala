@@ -4,9 +4,9 @@ import java.sql.Timestamp
 import java.time.{Instant, ZoneId, ZonedDateTime}
 
 import com.twitter.finagle.postgres.codec.ServerError
-import com.twitter.finagle.postgres.{OK, PostgresClient, Row, Spec}
+import com.twitter.finagle.postgres._
 import com.twitter.finagle.{Postgres, Status}
-import com.twitter.util.{Await, Duration}
+import com.twitter.util.{Await, Duration, Future, Promise}
 
 object IntegrationSpec {
   val pgTestTable = "finagle_test"
@@ -37,13 +37,18 @@ class IntegrationSpec extends Spec {
 
     val queryTimeout = Duration.fromSeconds(2)
 
-    def getClient = {
-      Postgres.Client()
+    def getClient: PostgresClientImpl = {
+      val client = Postgres.Client()
         .withCredentials(user, password)
         .database(dbname)
         .withSessionPool.maxSize(1)
         .conditionally(useSsl, _.withTransport.tlsWithoutValidation)
         .newRichClient(hostPort)
+
+      Await.result(Future[PostgresClientImpl] {
+        while (!client.isAvailable) {}
+        client
+      })
     }
 
     def getBadClient = {
