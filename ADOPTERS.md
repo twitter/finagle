@@ -71,6 +71,7 @@ URLs if possible) and [submit a pull request][1]!
 * [Tendril](http://www.tendrilinc.com/)
 * [Threat Stack](https://www.threatstack.com/)
 * [Tinder] (https://www.tinder.com/)
+* [Tradeshift](https://tradeshift.com/)
 * [Tumblr](https://www.tumblr.com/)
 * [Twitter](https://twitter.com/)
   * ["Finagle: A Protocol-Agnostic RPC System"][11]
