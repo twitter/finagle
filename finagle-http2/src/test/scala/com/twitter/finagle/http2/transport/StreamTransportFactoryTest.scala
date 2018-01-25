@@ -332,6 +332,33 @@ class StreamTransportFactoryTest extends FunSuite {
     assert(streamFac.numActiveStreams == 0)
   }
 
+  test("RST is not sent when RST is received for an existent stream") {
+    val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
+    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+      type Context = TransportContext with HasExecutor
+    }]
+    val addr = new SocketAddress {}
+    var cur: Status = Status.Open
+    val params = Stack.Params.empty + FailureDetector.Param(
+      new FailureDetector.MockConfig(() => cur)
+    )
+    val streamFac = new StreamTransportFactory(transport, addr, params)
+    val conn = await(streamFac())
+
+    streamFac.setStreamId(11)
+    conn.write(H1Req)
+
+    val req = await(writeq.poll())
+    assert(req == Message(H1Req, 11))
+
+    readq.offer(Rst(11, Http2Error.INTERNAL_ERROR.code))
+
+    intercept[TimeoutException] {
+      await(writeq.poll())
+    }
+    assert(streamFac.numActiveStreams == 0)
+  }
+
   test("PINGs receive replies every time") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
     val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {

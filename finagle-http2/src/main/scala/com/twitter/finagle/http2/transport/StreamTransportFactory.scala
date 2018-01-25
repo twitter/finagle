@@ -183,8 +183,9 @@ private[http2] class StreamTransportFactory(
         case Some(stream) =>
           handleRemoveStream(streamId)
           removeRstCounter.incr()
+          // mark the stream as dead to ensure we don't send an RST in response
+          stream.handleState(Dead)
           stream.handleCloseWith(error)
-
         case None =>
           // According to spec, an endpoint should not send another RST upon receipt
           // of an RST for an absent stream ID as this could cause a loop.
