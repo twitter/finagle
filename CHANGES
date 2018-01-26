@@ -36,6 +36,10 @@ Breaking API Changes
   * finagle base-http: `c.t.f.h.Request.multipart` has been removed.
     Use `c.t.f.h.exp.MultipartDecoder` instead. ``PHAB_ID=D129158``
 
+  * finagle-http: Split the toggle 'c.t.f.h.UseH2C' into a client-side toggle and a
+    server-side toggle, named 'c.t.f.h.UseH2CClients', and 'c.t.f.h.UseH2CServers',
+    respectively.  ``PHAB_ID=D130988``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

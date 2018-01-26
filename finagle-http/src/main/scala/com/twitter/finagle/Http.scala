@@ -52,8 +52,12 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     private[this] val underlying: Toggle[Int] = Toggles("com.twitter.finagle.http.UseH2")
     def apply(): Boolean = underlying(ServerInfo().id.hashCode)
   }
-  private[this] object useH2C {
-    private[this] val underlying: Toggle[Int] = Toggles("com.twitter.finagle.http.UseH2C")
+  private[this] object useH2CClients {
+    private[this] val underlying: Toggle[Int] = Toggles("com.twitter.finagle.http.UseH2CClients")
+    def apply(): Boolean = underlying(ServerInfo().id.hashCode)
+  }
+  private[this] object useH2CServers {
+    private[this] val underlying: Toggle[Int] = Toggles("com.twitter.finagle.http.UseH2CServers")
     def apply(): Boolean = underlying(ServerInfo().id.hashCode)
   }
 
@@ -377,7 +381,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     }
     override def newClient(dest: Name, label0: String): ServiceFactory[Request, Response] = {
       val shouldHttp2 =
-        if (params[Transport.ClientSsl].sslClientConfiguration == None) useH2C()
+        if (params[Transport.ClientSsl].sslClientConfiguration == None) useH2CClients()
         else useH2()
       val explicitlyConfigured = params.contains[HttpImpl]
       val client = if (!explicitlyConfigured && shouldHttp2) this.configuredParams(Http2)
@@ -573,7 +577,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       addr: SocketAddress,
       factory: ServiceFactory[Request, Response]): ListeningServer = {
       val shouldHttp2 =
-        if (params[Transport.ServerSsl].sslServerConfiguration == None) useH2C()
+        if (params[Transport.ServerSsl].sslServerConfiguration == None) useH2CServers()
         else useH2()
       val explicitlyConfigured = params.contains[HttpImpl]
       val server = if (!explicitlyConfigured && shouldHttp2) this.configuredParams(Http2)
