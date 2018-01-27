@@ -254,4 +254,10 @@ class MethodBuilder private (mb: client.MethodBuilder[Request, Response])
   def newService(methodName: String): Service[Request, Response] =
     mb.newService(methodName)
 
+ /**
+  * Construct a [[Service]] to be used for the client.
+  */
+  def newService: Service[Request, Response] =
+    mb.newService
+
 }

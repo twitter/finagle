@@ -309,12 +309,25 @@ class MethodBuilder(
   )(
     implicit builder: ServiceIfaceBuilder[ServiceIface]
   ): ServiceIface = {
-    val filters: Filter.TypeAgnostic = mb.filters(methodName)
+    val filters: Filter.TypeAgnostic = mb.filters(Some(methodName))
     val serviceIface: ServiceIface = rich.newServiceIface(
-      mb.wrappedService(methodName),
+      mb.wrappedService(Some(methodName)),
       label
     )(builder)
     serviceIface.filtered(filters)
+  }
+
+  private[this] def servicePerEndpoint[ServicePerEndpoint <: Filterable[ServicePerEndpoint]](
+    methodName: Option[String]
+  )(
+    implicit builder: ServicePerEndpointBuilder[ServicePerEndpoint]
+  ): ServicePerEndpoint = {
+    val filters: Filter.TypeAgnostic = mb.filters(methodName)
+    val servicePerEndpoint: ServicePerEndpoint = rich.servicePerEndpoint(
+      mb.wrappedService(methodName),
+      label
+    )(builder)
+    servicePerEndpoint.filtered(filters)
   }
 
   /**
@@ -326,12 +339,14 @@ class MethodBuilder(
     methodName: String
   )(
     implicit builder: ServicePerEndpointBuilder[ServicePerEndpoint]
-  ): ServicePerEndpoint = {
-    val filters: Filter.TypeAgnostic = mb.filters(methodName)
-    val servicePerEndpoint: ServicePerEndpoint = rich.servicePerEndpoint(
-      mb.wrappedService(methodName),
-      label
-    )(builder)
-    servicePerEndpoint.filtered(filters)
-  }
+  ): ServicePerEndpoint =
+    servicePerEndpoint(Some(methodName))
+
+  /**
+   * Construct a `ServicePerEndpoint` to be used for the client.
+   */
+  def servicePerEndpoint[ServicePerEndpoint <: Filterable[ServicePerEndpoint]](
+    implicit builder: ServicePerEndpointBuilder[ServicePerEndpoint]
+  ): ServicePerEndpoint =
+    servicePerEndpoint(None)
 }

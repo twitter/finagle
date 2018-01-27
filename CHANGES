@@ -7,6 +7,16 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+  * finagle-core: `c.t.f.http.MethodBuilder` now exposes a method `newService` without a
+    `methodName` to create a client. `c.t.f.thriftmux.MethodBuilder` now exposes a
+    method `servicePerEndpoint` without a `methodName` to create a client. ``PHAB_ID=D131809``
+
+  * finagle-thriftmux: Expose the underlying configured client `label` in the
+    `c.t.finagle.thriftmux.MethodBuilder`. ``PHAB_ID=D129109``
+
 Bug Fixes
 ~~~~~~~~~
 
@@ -20,12 +30,6 @@ Deprecations
     within Finagle in release 6.44.0 (April 2017). Please migrate to using
     `c.t.f.ssl.client.SslClientEngineFactory` or
     `c.t.f.ssl.server.SslServerEngineFactory` instead. ``PHAB_ID=D129692``
-
-New Features
-~~~~~~~~~~~~
-
-  * finagle-thriftmux: Expose the underlying configured client `label` in the
-    `c.t.finagle.thriftmux.MethodBuilder`. ``PHAB_ID=D129109``
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~

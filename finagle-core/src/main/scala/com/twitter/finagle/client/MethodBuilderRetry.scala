@@ -60,16 +60,23 @@ private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (mb: MethodB
 
   private[client] def logFailuresFilter(
     clientName: String,
-    methodName: String
+    methodName: Option[String]
   ): Filter.TypeAgnostic = new Filter.TypeAgnostic {
-    def toFilter[Req1, Rep1]: Filter[Req1, Rep1, Req1, Rep1] =
+    def toFilter[Req1, Rep1]: Filter[Req1, Rep1, Req1, Rep1] = {
+      val loggerPrefix = "com.twitter.finagle.client.MethodBuilder"
+      val (label, loggerName) = methodName match {
+        case Some(methodName) =>
+          (s"$clientName/$methodName", s"$loggerPrefix.$clientName.$methodName")
+        case None =>
+          (clientName, s"$loggerPrefix.$clientName")
+      }
       new LogFailuresFilter[Req1, Rep1](
-        Logger.get(s"com.twitter.finagle.client.MethodBuilder.$clientName.$methodName"),
-        clientName,
-        methodName,
+        Logger.get(loggerName),
+        label,
         mb.config.retry.responseClassifier,
         Stopwatch.systemMillis
       )
+    }
   }
 
   private[client] def registryEntries: Iterable[(Seq[String], String)] = {
@@ -125,8 +132,7 @@ private[client] object MethodBuilderRetry {
 
   private[client] class LogFailuresFilter[Req, Rep](
       logger: Logger,
-      clientLabel: String,
-      methodName: String,
+      label: String,
       responseClassifier: ResponseClassifier,
       nowMs: () => Long)
     extends Filter[Req, Rep, Req, Rep] {
@@ -149,7 +155,7 @@ private[client] object MethodBuilderRetry {
           case Throw(e) => e
           case _ => null // note: nulls are allowed/ignored in this logging API
         }
-        val msg = s"Request failed for $clientLabel/$methodName, elapsed=$elapsedMs ms"
+        val msg = s"Request failed for $label, elapsed=$elapsedMs ms"
         if (logger.isLoggable(Level.TRACE)) {
           logger.trace(exception, s"$msg (request=$request, response=$response)")
         } else {

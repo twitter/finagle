@@ -23,8 +23,7 @@ class LogFailuresFilterTest extends FunSuite with BeforeAndAfter {
     classifier: ResponseClassifier
   ) = new MethodBuilderRetry.LogFailuresFilter[String, String](
     logger,
-    "CoolClient",
-    "MopeyMethod",
+    "CoolClient/MopeyMethod",
     classifier,
     Stopwatch.timeMillis
   )

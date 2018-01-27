@@ -25,6 +25,9 @@ Finagle clients for each grouping. While long-lived clients in Finagle are not
 expensive, they are not free. They create duplicate metrics and waste heap,
 file descriptors, and CPU.
 
+``MethodBuilder`` can also be used without scoping to a ``methodName``, allowing users to wrap
+an entire client with ``MethodBuilder``, as with ``totalService`` in the example below.
+
 .. _mb_example_http:
 
 Turning the example into code, first in Scala:
@@ -73,6 +76,10 @@ Turning the example into code, first in Scala:
     .nonIdempotent
     // build the service
     .newService(methodName = "update_status")
+
+  // A `Service` that is not scoped to a method
+  val totalService: Service[http.Request, http.Response] = builder
+    .newService
 
 A similar example, for Java:
 

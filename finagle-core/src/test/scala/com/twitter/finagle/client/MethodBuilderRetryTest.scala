@@ -102,6 +102,25 @@ class MethodBuilderRetryTest extends FunSuite {
     assert(stats.stat(clientName, "client", "retries")() == Seq(1))
   }
 
+  test("scoped to clientName if methodName is None") {
+    val stats = new InMemoryStatsReceiver()
+    val retrySvc = new RetrySvc()
+    val methodBuilder = retryMethodBuilder(retrySvc.svc, stats)
+    val classifier: ResponseClassifier = {
+      case ReqRep(_, Throw(_: IllegalArgumentException)) =>
+        ResponseClass.RetryableFailure
+    }
+    val client = methodBuilder.withRetry
+      .forClassifier(classifier)
+      .newService
+
+    // the client will retry once
+    intercept[NullPointerException] {
+      Await.result(client(1), 5.seconds)
+    }
+    assert(stats.stat(clientName, "retries")() == Seq(1))
+  }
+
   test("retries do not apply to failures handled by the RequeueFilter") {
     val stats = new InMemoryStatsReceiver()
     val svc = Service.mk[Int, Int] { _ =>

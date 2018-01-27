@@ -240,6 +240,41 @@ class MethodBuilderTest
     }
   }
 
+  test("newServices with no MethodName are added to the Registry") {
+    val registry = new SimpleRegistry()
+    GlobalRegistry.withRegistry(registry) {
+      val protocolLib = "test_lib"
+      val clientName = "some_svc"
+      val addr = "test_addr"
+      val stats = new InMemoryStatsReceiver()
+      val params =
+        Stack.Params.empty +
+          param.Stats(stats) +
+          param.Label(clientName) +
+          param.ProtocolLibrary(protocolLib)
+      val stackClient = TestStackClient(stack, params)
+      val methodBuilder = MethodBuilder.from(addr, stackClient)
+
+      def key(name: String, suffix: String*): Seq[String] =
+        Seq("client", protocolLib, clientName, addr, "methods", name) ++ suffix
+
+      def filteredRegistry: Set[Entry] =
+        registry.filter { entry =>
+          entry.key.head == "client"
+        }.toSet
+
+      val totalSvc = methodBuilder.newService
+      val totalSvcEntries = Set(
+        Entry(key("statsReceiver"), s"InMemoryStatsReceiver/$clientName"),
+        Entry(key("retry"), "Config(DefaultResponseClassifier)")
+      )
+      assert(filteredRegistry == totalSvcEntries)
+
+      Await.result(totalSvc.close(), 5.seconds)
+      assert(registry.isEmpty)
+    }
+  }
+
   test("newService's are added to the Registry") {
     val registry = new SimpleRegistry()
     GlobalRegistry.withRegistry(registry) {
@@ -297,7 +332,7 @@ class MethodBuilderTest
     }
   }
 
-  test("stats are filtered") {
+  test("stats are filtered with methodName if it exists") {
     val stats = new InMemoryStatsReceiver()
     val clientLabel = "the_client"
     val params =
@@ -331,6 +366,43 @@ class MethodBuilderTest
       case (names, _) =>
         names.containsSlice(Seq(clientLabel, methodName, "logical", "failures")) ||
           names.containsSlice(Seq(clientLabel, methodName, "logical", "sourcedfailures"))
+    }
+    assert(!failureCounters)
+  }
+
+  test("stats are not filtered with methodName if it does not exist") {
+    val stats = new InMemoryStatsReceiver()
+    val clientLabel = "the_client"
+    val params =
+      Stack.Params.empty +
+        param.Label(clientLabel) +
+        param.Stats(stats)
+
+    val failure = Failure("some reason", new RuntimeException("welp"))
+      .withSource(Failure.Source.Service, "test_service")
+    val svc: Service[Int, Int] = new FailedService(failure)
+
+    val stack = Stack.Leaf(Stack.Role("test"), ServiceFactory.const(svc))
+    val stackClient = TestStackClient(stack, params)
+
+    val methodBuilder = MethodBuilder.from("destination", stackClient)
+
+    // the first attempts will hit the per-request timeout and will be
+    // retried. then the retry should succeed.
+    val client = methodBuilder.newService
+
+    // issue a failing request
+    intercept[Failure] {
+      Await.result(client(1), 5.seconds)
+    }
+
+    // verify the metrics are getting filtered down
+    assert(!stats.gauges.contains(Seq(clientLabel, "logical", "pending")))
+
+    val failureCounters = stats.counters.exists {
+      case (names, _) =>
+        names.containsSlice(Seq(clientLabel, "logical", "failures")) ||
+          names.containsSlice(Seq(clientLabel, "logical", "sourcedfailures"))
     }
     assert(!failureCounters)
   }
@@ -385,7 +457,7 @@ class MethodBuilderTest
     assert(!svc.isAvailable)
   }
 
-  test("failures are annotated with the method name") {
+  test("failures are annotated with the method name if it exists") {
     val params = Stack.Params.empty
 
     val failure = Failure("some reason", new RuntimeException("welp"))
@@ -405,6 +477,28 @@ class MethodBuilderTest
     }
 
     assert(f.getSource(Failure.Source.Method).contains(methodName))
+  }
+
+  test("failures are not annotated with the method name if it does not exist") {
+    val params = Stack.Params.empty
+
+    val failure = Failure("some reason", new RuntimeException("welp"))
+    val svc: Service[Int, Int] = new FailedService(failure)
+
+    val stack = Stack.Leaf(Stack.Role("test"), ServiceFactory.const(svc))
+    val stackClient = TestStackClient(stack, params)
+
+    val methodBuilder = MethodBuilder.from("destination", stackClient)
+
+    val methodName = "a_method"
+    val client = methodBuilder.newService
+
+    // issue a failing request
+    val f = intercept[Failure] {
+      Await.result(client(1), 5.seconds)
+    }
+
+    assert(f.getSource(Failure.Source.Method).isEmpty)
   }
 
   test("nonIdempotent disables BackupRequestFilter") {

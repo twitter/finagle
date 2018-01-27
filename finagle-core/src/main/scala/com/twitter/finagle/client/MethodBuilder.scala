@@ -1,5 +1,6 @@
 package com.twitter.finagle.client
 
+import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle.client.MethodBuilderTimeout.TunableDuration
 import com.twitter.finagle.param.ResponseClassifier
 import com.twitter.finagle.service.TimeoutFilter
@@ -279,13 +280,20 @@ private[finagle] final class MethodBuilder[Req, Rep](
   // Build
   //
 
+  private[this] def newService(methodName: Option[String]): Service[Req, Rep] =
+    filters(methodName).andThen(wrappedService(methodName))
+
   /**
    * Create a [[Service]] from the current configuration.
-   *
-   * @param methodName used for scoping metrics
    */
   def newService(methodName: String): Service[Req, Rep] =
-    filters(methodName).andThen(wrappedService(methodName))
+    newService(Some(methodName))
+
+  /**
+   * Create a [[Service]] from the current configuration.
+   */
+  def newService: Service[Req, Rep] =
+    newService(None)
 
   //
   // Internals
@@ -309,10 +317,16 @@ private[finagle] final class MethodBuilder[Req, Rep](
       case label => label
     }
 
-  private[this] def statsReceiver(methodName: String): StatsReceiver =
-    stackParams[param.Stats].statsReceiver.scope(clientName, methodName)
+  private[this] def statsReceiver(methodName: Option[String]): StatsReceiver = {
+    val clientScoped = stackParams[param.Stats].statsReceiver.scope(clientName)
+    methodName match {
+      case Some(methodName) => clientScoped.scope(methodName)
+      case None => clientScoped
+    }
+  }
 
-  def filters(methodName: String): Filter.TypeAgnostic = {
+
+  def filters(methodName: Option[String]): Filter.TypeAgnostic = {
     // Ordering of filters:
     // Requests start at the top and traverse down.
     // Responses flow back from the bottom up.
@@ -333,10 +347,15 @@ private[finagle] final class MethodBuilder[Req, Rep](
     val retries = withRetry
     val timeouts = withTimeout
 
+    val failureSource = methodName match {
+      case Some(methodName) => addFailureSource(methodName)
+      case None => TypeAgnostic.Identity
+    }
+
     retries
       .logicalStatsFilter(stats)
       .andThen(retries.logFailuresFilter(clientName, methodName))
-      .andThen(addFailureSource(methodName))
+      .andThen(failureSource)
       .andThen(timeouts.totalFilter)
       .andThen(retries.filter(stats))
       .andThen(timeouts.perRequestFilter)
@@ -357,8 +376,11 @@ private[finagle] final class MethodBuilder[Req, Rep](
   private[this] def registryEntry(): StackRegistry.Entry =
     StackRegistry.Entry(Showable.show(dest), stack, params)
 
-  private[this] def registryKeyPrefix(name: String): Seq[String] =
-    Seq(RegistryKey, name)
+  private[this] def registryKeyPrefix(methodName: Option[String]): Seq[String] =
+    methodName match {
+      case Some(name) => Seq(RegistryKey, name)
+      case None => Seq(RegistryKey)
+    }
 
   // clients get registered at:
   // client/$protocol_lib/$client_name/$dest_addr
@@ -371,7 +393,7 @@ private[finagle] final class MethodBuilder[Req, Rep](
   //   retry: DefaultResponseClassifier
   //   timeout/total: 100.milliseconds
   //   timeout/per_request: 30.milliseconds
-  private[this] def addToRegistry(name: String): Unit = {
+  private[this] def addToRegistry(name: Option[String]): Unit = {
     val entry = registryEntry()
     val keyPrefix = registryKeyPrefix(name)
     ClientRegistry.register(entry, keyPrefix :+ "statsReceiver", statsReceiver(name).toString)
@@ -385,7 +407,7 @@ private[finagle] final class MethodBuilder[Req, Rep](
     }
   }
 
-  def wrappedService(name: String): Service[Req, Rep] = {
+  def wrappedService(name: Option[String]): Service[Req, Rep] = {
     addToRegistry(name)
     refCounted.open()
 
