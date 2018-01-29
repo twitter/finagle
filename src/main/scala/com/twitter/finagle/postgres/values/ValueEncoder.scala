@@ -222,5 +222,3 @@ object ValueEncoder extends LowPriorityEncoder {
 trait LowPriorityEncoder {
   implicit def fromExport[T](implicit export: ValueEncoder.Exported[T]): ValueEncoder[T] = export.encoder
 }
-
-case class JSONB(bytes: Array[Byte]) extends AnyVal
