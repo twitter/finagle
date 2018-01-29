@@ -1,18 +1,21 @@
 package com.twitter.finagle.postgres.values
 
+import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import java.time._
-import java.time.temporal.{ChronoField, JulianFields}
+import java.time.temporal.ChronoField
 
-import com.twitter.finagle.postgres.{Generators, PostgresClient, ResultSet, Spec}
-import Generators._
 import com.twitter.finagle.Postgres
+import com.twitter.finagle.postgres.Generators._
+import com.twitter.finagle.postgres.PostgresClient
 import com.twitter.finagle.postgres.PostgresClient.TypeSpecifier
-import com.twitter.finagle.postgres.messages.{DataRow, Field}
+import com.twitter.finagle.postgres.ResultSet
+import com.twitter.finagle.postgres.Spec
+import com.twitter.finagle.postgres.messages.DataRow
+import com.twitter.finagle.postgres.messages.Field
 import com.twitter.util.Await
 import org.jboss.netty.buffer.ChannelBuffers
 import org.scalacheck.Arbitrary
-import Arbitrary.arbitrary
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 class ValuesSpec extends Spec with GeneratorDrivenPropertyChecks {
@@ -138,6 +141,21 @@ class ValuesSpec extends Spec with GeneratorDrivenPropertyChecks {
       )
       "parse uuids" in test(ValueDecoder.uuid, ValueEncoder.uuid)("uuid_send", "uuid")
       "parse dates" in test(ValueDecoder.localDate, ValueEncoder.date)("date_send", "date")
+
+      "parse jsonb" in {
+        val json = "{\"a\":\"b\"}"
+        val createBuffer = () => {
+          ValueEncoder.jsonb.encodeBinary(json.getBytes, Charset.defaultCharset()).get
+        }
+        val buffer = createBuffer()
+        val version = buffer.readByte()
+        val encoded = Array.fill(buffer.readableBytes())(buffer.readByte())
+        version must equal(1)
+        encoded must equal(json.getBytes)
+
+        val decoded = ValueDecoder.jsonb.decodeBinary("", createBuffer(), Charset.defaultCharset()).get()
+        decoded must equal(json)
+      }
     }
   }
 }
