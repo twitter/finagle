@@ -189,13 +189,13 @@ object ValueEncoder extends LowPriorityEncoder {
     m: Map[String, String] => m.mapValues(Option(_))
   }
 
-  implicit val jsonb: ValueEncoder[Array[Byte]] = instance[Array[Byte]](
+  implicit val jsonb: ValueEncoder[JSONB] = instance[JSONB](
     "jsonb",
     j => String.valueOf(j),
     (j, c) => {
-      val cb = ChannelBuffers.buffer(1 + j.length)
+      val cb = ChannelBuffers.buffer(1 + j.bytes.length)
       cb.writeByte(1)
-      cb.writeBytes(j)
+      cb.writeBytes(j.bytes)
       Some(cb)
     }
   )
@@ -222,3 +222,5 @@ object ValueEncoder extends LowPriorityEncoder {
 trait LowPriorityEncoder {
   implicit def fromExport[T](implicit export: ValueEncoder.Exported[T]): ValueEncoder[T] = export.encoder
 }
+
+case class JSONB(bytes: Array[Byte]) extends AnyVal

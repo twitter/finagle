@@ -145,7 +145,7 @@ class ValuesSpec extends Spec with GeneratorDrivenPropertyChecks {
       "parse jsonb" in {
         val json = "{\"a\":\"b\"}"
         val createBuffer = () => {
-          ValueEncoder.jsonb.encodeBinary(json.getBytes, Charset.defaultCharset()).get
+          ValueEncoder.jsonb.encodeBinary(JSONB(json.getBytes), Charset.defaultCharset()).get
         }
         val buffer = createBuffer()
         val version = buffer.readByte()
