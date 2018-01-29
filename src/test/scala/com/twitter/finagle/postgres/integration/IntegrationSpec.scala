@@ -1,12 +1,16 @@
 package com.twitter.finagle.postgres.integration
 
 import java.sql.Timestamp
-import java.time.{Instant, ZoneId, ZonedDateTime}
+import java.time.Instant
 
-import com.twitter.finagle.postgres.codec.ServerError
 import com.twitter.finagle.postgres._
-import com.twitter.finagle.{Postgres, Status}
-import com.twitter.util.{Await, Duration, Future, Promise}
+import com.twitter.finagle.postgres.codec.ServerError
+import com.twitter.finagle.Postgres
+import com.twitter.finagle.Status
+import com.twitter.util.Try
+import com.twitter.util.Await
+import com.twitter.util.Duration
+import com.twitter.util.Future
 
 object IntegrationSpec {
   val pgTestTable = "finagle_test"
@@ -78,6 +82,8 @@ class IntegrationSpec extends Spec {
       """.stripMargin.format(IntegrationSpec.pgTestTable))
       val response2 = Await.result(createTableQuery, queryTimeout)
       response2 must equal(OK(1))
+
+      Try(Await.result(client.execute("create extension hstore"))) // enable hstore type
     }
 
     def insertSampleData(client: PostgresClient): Unit = {
