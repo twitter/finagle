@@ -15,7 +15,7 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
   val expBackoff = Backoff.equalJittered(5.seconds, 60.seconds)
   val expBackoffList = expBackoff take 6
 
-  test("Consective failures policy: fail on nth attempt") {
+  test("Consecutive failures policy: fail on nth attempt") {
     val policy = FailureAccrualPolicy.consecutiveFailures(3, constantBackoff)
 
     // Failing three times should return true from 'onFailure' on third time
@@ -202,5 +202,88 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
       timeControl.advance(1.second)
       assert(policy.markDeadOnFailure() == Some(5.seconds))
     }
+  }
+
+  def hybridPolicy = FailureAccrualPolicy
+    .consecutiveFailures(3, expBackoff)
+    .orElse(
+      FailureAccrualPolicy.successRateWithinDuration(
+        requiredSuccessRate = 0.8,
+        window = 30.seconds,
+        markDeadFor = expBackoff
+      )
+    )
+
+  test("Hybrid policy: fail on nth attempt") {
+    val policy = hybridPolicy
+    assert(policy.markDeadOnFailure() == None)
+    assert(policy.markDeadOnFailure() == None)
+    assert(policy.markDeadOnFailure() == Some(5.seconds))
+  }
+
+  test("Hybrid policy: failures reset to zero on revived()") {
+    val policy = hybridPolicy
+    assert(policy.markDeadOnFailure() == None)
+
+    policy.revived()
+
+    assert(policy.markDeadOnFailure() == None)
+    assert(policy.markDeadOnFailure() == None)
+    assert(policy.markDeadOnFailure() == Some(5.seconds))
+  }
+
+  test("Hybrid policy: failures reset to zero on success") {
+    val policy = hybridPolicy
+    assert(policy.markDeadOnFailure() == None)
+
+    policy.recordSuccess()
+
+    assert(policy.markDeadOnFailure() == None)
+    assert(policy.markDeadOnFailure() == None)
+    assert(policy.markDeadOnFailure() == Some(5.seconds))
+  }
+
+  test("Hybrid policy: uses windowed success rate as well as consecutive failure") {
+    Time.withCurrentTimeFrozen { timeControl =>
+      val policy = hybridPolicy
+
+      for (i <- 0 until 15) {
+        policy.recordSuccess()
+        timeControl.advance(1.second)
+
+        policy.markDeadOnFailure()
+        timeControl.advance(1.second)
+      }
+
+      assert(policy.markDeadOnFailure() == Some(5.seconds))
+
+      policy.revived()
+
+      assert(policy.markDeadOnFailure() == None)
+      assert(policy.markDeadOnFailure() == None)
+      assert(policy.markDeadOnFailure() == Some(5.seconds))
+    }
+  }
+
+  test("Hybrid policy: uses longest duration when markDeadOnFailure()") {
+    val policy1 = FailureAccrualPolicy
+      .consecutiveFailures(3, Backoff.const(5.seconds))
+      .orElse(
+        FailureAccrualPolicy.consecutiveFailures(3, Backoff.const(10.seconds))
+      )
+
+    assert(policy1.markDeadOnFailure() == None)
+    assert(policy1.markDeadOnFailure() == None)
+    assert(policy1.markDeadOnFailure() == Some(10.seconds))
+
+    val policy2 = FailureAccrualPolicy
+      .consecutiveFailures(3, Backoff.const(10.seconds))
+      .orElse(
+        FailureAccrualPolicy.consecutiveFailures(3, Backoff.const(5.seconds))
+      )
+
+    assert(policy2.markDeadOnFailure() == None)
+    assert(policy2.markDeadOnFailure() == None)
+    assert(policy2.markDeadOnFailure() == Some(10.seconds))
   }
 }

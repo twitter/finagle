@@ -10,6 +10,9 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
+  * finagle-core: Add orElse to allow composition of `FailureAccrualPolicy`s.
+    ``PHAB_ID=D131156``
+
   * finagle-core: `c.t.f.http.MethodBuilder` now exposes a method `newService` without a
     `methodName` to create a client. `c.t.f.thriftmux.MethodBuilder` now exposes a
     method `servicePerEndpoint` without a `methodName` to create a client. ``PHAB_ID=D131809``

@@ -15,7 +15,7 @@ import com.twitter.util.{Duration, Stopwatch}
  * @see The [[https://twitter.github.io/finagle/guide/Clients.html#failure-accrual user guide]]
  *      for more details.
  */
-abstract class FailureAccrualPolicy {
+abstract class FailureAccrualPolicy { self =>
 
   /** Invoked by FailureAccrualFactory when a request is successful. */
   def recordSuccess(): Unit
@@ -32,6 +32,40 @@ abstract class FailureAccrualPolicy {
    * probing. Used to reset any history.
    */
   def revived(): Unit
+
+  /**
+   * Creates a [[FailureAccrualPolicy]] which uses both `this` and `that`.
+   *
+   * [[markDeadOnFailure]] will return the longer duration if both `this` and `that` return
+   * Some(duration).
+   */
+  final def orElse(that: FailureAccrualPolicy): FailureAccrualPolicy =
+    new FailureAccrualPolicy {
+      def recordSuccess(): Unit = {
+        self.recordSuccess()
+        that.recordSuccess()
+      }
+
+      def markDeadOnFailure(): Option[Duration] = {
+        val resSelf = self.markDeadOnFailure()
+        val resThat = that.markDeadOnFailure()
+
+        (resSelf, resThat) match {
+          case (Some(_), None) => resSelf
+          case (None, Some(_)) => resThat
+          case (Some(durationSelf), Some(durationThat)) =>
+            // max duration is chosen because generally FailureAccrual policies with longer backoffs
+            // will be less sensitive, so it makes sense to respect that longer backoff
+            Some(durationSelf.max(durationThat))
+          case _ => None
+        }
+      }
+
+      def revived(): Unit = {
+        self.revived()
+        that.revived()
+      }
+    }
 }
 
 object FailureAccrualPolicy {
