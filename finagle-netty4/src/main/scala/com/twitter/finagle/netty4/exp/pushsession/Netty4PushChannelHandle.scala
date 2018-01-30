@@ -323,6 +323,8 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel)
       }
     }
   }
+
+  override def toString: String = s"Netty4PushChannelHandle($ch)"
 }
 
 private object Netty4PushChannelHandle {
