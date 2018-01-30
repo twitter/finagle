@@ -130,7 +130,8 @@ private[http2] final class AdapterProxyChannelHandler(
     case Message(obj, streamId) =>
       getEmbeddedChannel(ctx, streamId) match {
         case null =>
-          // nop, we've sent an RST, and won't be doing anything more to this stream id
+          // We've sent an RST, and won't be doing anything more to this stream id, so just free the message
+          ReferenceCountUtil.release(obj)
         case embedded =>
           embedded.writeInbound(obj)
           updateCompletionStatus(obj, streamId, true)

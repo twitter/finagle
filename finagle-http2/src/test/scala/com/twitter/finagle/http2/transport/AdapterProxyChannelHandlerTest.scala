@@ -174,8 +174,10 @@ class AdapterProxyChannelHandlerTest extends FunSuite {
     assert(handler.numConnections == 1)
     channel.writeOutbound(Rst(3, 0x8))
     assert(handler.numConnections == 0)
+    assert(last.refCnt() == 1)
     channel.writeInbound(Message(last, 3))
     assert(handler.numConnections == 0)
+    assert(last.refCnt() == 0)
   }
 
   test("streams are torn down when we send rst") {
