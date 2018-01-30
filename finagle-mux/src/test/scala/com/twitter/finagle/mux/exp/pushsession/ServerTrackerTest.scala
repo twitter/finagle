@@ -124,6 +124,13 @@ class ServerTrackerTest extends FunSuite {
       assert(tracker.npending == 0)
 
       val Rdiscarded(2) = messageWriter.messages.dequeue()
+
+      // If the promise still completes, its result is just discarded
+      p.setValue(Response(data))
+      executor.executeAll()
+
+      assert(tracker.npending == 0)
+      assert(messageWriter.messages.isEmpty)
     }
   }
 

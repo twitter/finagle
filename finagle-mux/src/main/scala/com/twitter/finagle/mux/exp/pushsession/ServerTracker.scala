@@ -159,10 +159,10 @@ private class ServerTracker(
   }
 
   private[this] def renderResponse(dispatch: Dispatch, response: Try[Message]): Unit = {
-    val storedDispatch = dispatches.remove(dispatch.tag)
+    dispatches.remove(dispatch.tag) match {
+      case null => // nop: the dispatch was discarded and the tag is unused
 
-    if (dispatch != null) {
-      if (storedDispatch eq dispatch) {
+      case storedDispatch if storedDispatch eq dispatch =>
         val result = response match {
           case Return(rep) =>
             lessor.observe(dispatch.timer())
@@ -174,13 +174,13 @@ private class ServerTracker(
 
         messageWriter.write(result)
         checkDrained()
-      } else {
+
+      case storedDispatch =>
         // This was the result of a race between a request that was canceled
         // and its tag being reused, and the dispatch of the initial request.
-        // We discard this result and place the dispatch back in the map so it can
-        // be handled.
+        // We discard this result and place the dispatch back in the map so it
+        //  can be handled.
         dispatches.put(storedDispatch.tag, storedDispatch)
-      }
     }
   }
 
