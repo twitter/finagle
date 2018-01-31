@@ -127,6 +127,30 @@ Retries
 
 .. include:: metrics/Retries.rst
 
+Backup Requests
+---------------
+
+.. _backup_requests:
+
+These stats provide information on the state and behavior of 
+`com.twitter.finagle.client.BackupRequestFilter`.
+
+**backups/send_backup_after_ms**
+  A histogram of the time, in  milliseconds, after which a request will be re-issued if it has
+  not yet completed.
+
+**backups/backups_sent**
+  A counter of the number of backup requests sent.
+
+**backups/backups_won**
+  A counter of the number of backup requests that completed before the original, regardless of
+  whether they succeeded.
+
+**backups/budget_exhausted**
+  A counter of the number of times the backup request budget (computed using the current value
+  of the `maxExtraLoad` param) or client retry budget was exhausted, preventing a backup from being
+  sent.
+
 Dispatching
 -----------
 
