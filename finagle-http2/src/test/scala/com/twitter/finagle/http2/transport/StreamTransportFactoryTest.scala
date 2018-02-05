@@ -21,6 +21,7 @@ import org.scalatest.FunSuite
 class StreamTransportFactoryTest extends FunSuite {
 
   def await[T](a: Awaitable[T]) = Await.result(a, 5.seconds)
+  def ready[T](a: Awaitable[T]) = Await.ready(a, 5.seconds)
 
   class SlowClosingQueue(left: AsyncQueue[StreamMessage], right: AsyncQueue[StreamMessage])
       extends QueueTransport[StreamMessage, StreamMessage](left, right) {
@@ -376,5 +377,24 @@ class StreamTransportFactoryTest extends FunSuite {
       assert(await(writeq.poll()) == Ping)
       readq.offer(Ping)
     }
+  }
+
+  test("stream transports enter Dead state if the StreamTransportFactory loses track of them") {
+    val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
+    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+      type Context = TransportContext with HasExecutor
+    }]
+    val addr = new SocketAddress {}
+    var cur: Status = Status.Open
+
+    val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
+
+    val stream = streamFac.first().asInstanceOf[streamFac.StreamTransport]
+    readq.offer(Message(LastHttpContent.EMPTY_LAST_CONTENT, 1))
+
+    // fake a lost stream
+    streamFac.removeStream(1)
+    ready(stream.read())
+    assert(stream.state == Dead)
   }
 }

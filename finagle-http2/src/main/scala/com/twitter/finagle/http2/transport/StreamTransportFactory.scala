@@ -42,7 +42,7 @@ import scala.collection.mutable.{HashMap => MutableHashMap}
  * not forwarded to the Runnables submitted to the executor, including the
  * Context.
  */
-private[http2] class StreamTransportFactory(
+final private[http2] class StreamTransportFactory(
   underlying: Transport[StreamMessage, StreamMessage] {
     type Context = TransportContext with HasExecutor
   },
@@ -67,6 +67,7 @@ private[http2] class StreamTransportFactory(
   // exposed for testing & streams gauge synchronized because this is called outside of the executor
   private[http2] def numActiveStreams: Int = synchronized { activeStreams.size }
   private[http2] def setStreamId(num: Int): Unit = id.set(num)
+  private[http2] def removeStream(num: Int): Unit = activeStreams.remove(num)
 
   private[this] val FailureDetector.Param(detectorConfig) = params[FailureDetector.Param]
   private[this] val Stats(statsReceiver) = params[Stats]
@@ -82,7 +83,7 @@ private[http2] class StreamTransportFactory(
   private val removeCloseCounter = debugStats.counter("remove_close")
 
   private def handleRemoveStream(streamId: Int): Boolean = {
-    activeStreams.remove(streamId) != null
+    activeStreams.remove(streamId).isDefined
   }
 
   // exposed for testing
