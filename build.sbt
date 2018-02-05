@@ -465,8 +465,9 @@ lazy val finagleBaseHttp = Project(
   libraryDependencies ++= Seq(
     util("collection"),
     util("logging"),
-  )
-).dependsOn(finagleCore, finagleNetty3)
+    netty4Http
+  ) ++ netty4Libs
+).dependsOn(finagleCore, finagleNetty3, finagleToggle)
 
 lazy val finagleNetty3Http = Project(
   id = "finagle-netty3-http",
