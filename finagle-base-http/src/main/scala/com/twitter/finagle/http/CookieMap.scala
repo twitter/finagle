@@ -1,21 +1,19 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.http.netty3.Netty3CookieCodec
+import com.twitter.finagle.http.netty4.Netty4CookieCodec
+import com.twitter.finagle.server.ServerInfo
 import org.jboss.netty.handler.codec.http.HttpHeaders
 import scala.collection.mutable
 
 private[finagle] object CookieMap {
 
-  @volatile private[this] var cookieCodec: CookieCodec = Netty3CookieCodec
+  val UseNetty4CookieCodec =
+    Toggles("com.twitter.finagle.http.UseNetty4CookieCodec")
 
-  // Sets the codec to use for cookies
-  def setCookieCodec(cookieCodec: CookieCodec): Unit = {
-    this.cookieCodec = cookieCodec
-  }
-
-  // exposed for testing
-  private[http] def getCookieCodec: CookieCodec =
-    cookieCodec
+  private val cookieCodec =
+    if (UseNetty4CookieCodec(ServerInfo().id.hashCode())) Netty4CookieCodec
+    else Netty3CookieCodec
 }
 
 /**
@@ -32,7 +30,7 @@ class CookieMap private[finagle](message: Message, cookieCodec: CookieCodec)
     with mutable.MapLike[String, Cookie, CookieMap] {
 
   def this(message: Message) =
-    this(message, CookieMap.getCookieCodec)
+    this(message, CookieMap.cookieCodec)
 
   override def empty: CookieMap = new CookieMap(Request())
 

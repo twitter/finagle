@@ -9,7 +9,6 @@ scala_library(
     '3rdparty/jvm/io/netty',
     'finagle/finagle-base-http',
     'finagle/finagle-core',
-    'finagle/finagle-http/src/main/resources',
     'finagle/finagle-http2',
     'finagle/finagle-netty3',
     'finagle/finagle-netty3-http',

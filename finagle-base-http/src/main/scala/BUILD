@@ -7,8 +7,12 @@ scala_library(
   dependencies=[
     '3rdparty/jvm/com/google/code/findbugs:jsr305',
     '3rdparty/jvm/io/netty',
+    '3rdparty/jvm/io/netty:netty4',
+    '3rdparty/jvm/io/netty:netty4-http',
     'finagle/finagle-core',
+    'finagle/finagle-base-http/src/main/resources',
     'finagle/finagle-netty3',
+    'finagle/finagle-toggle/src/main/scala:scala',
     'util/util-app',
     'util/util-codec',
     'util/util-collection',
