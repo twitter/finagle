@@ -1,8 +1,10 @@
 package com.twitter.finagle.http2.transport
 
+import com.twitter.finagle.Stack.Params
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader.{Message, Rst}
+import com.twitter.finagle.netty4.http
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import io.netty.buffer.{Unpooled, ByteBuf}
+import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel._
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http._
@@ -11,20 +13,21 @@ import java.nio.charset.StandardCharsets
 import org.scalatest.FunSuite
 
 class AdapterProxyChannelHandlerTest extends FunSuite {
-  val moon = Unpooled.copiedBuffer("goodnight moon", StandardCharsets.UTF_8)
-  val stars = Unpooled.copiedBuffer("goodnight stars", StandardCharsets.UTF_8)
-  val fullRequest = new DefaultFullHttpRequest(
+  def moon = Unpooled.copiedBuffer("goodnight moon", StandardCharsets.UTF_8)
+  def stars = Unpooled.copiedBuffer("goodnight stars", StandardCharsets.UTF_8)
+  def chunk() = Unpooled.wrappedBuffer("ref-counting on the jvm is a great idea".getBytes(StandardCharsets.UTF_8))
+  def fullRequest = new DefaultFullHttpRequest(
     HttpVersion.HTTP_1_1,
     HttpMethod.GET,
     "twitter.com",
     moon
   )
-  val fullResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, moon)
-  val request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "twitter.com")
-  val dataReq = new DefaultHttpContent(moon)
-  val starsReq = new DefaultHttpContent(stars)
-  val messageReq = Message(fullRequest, 3)
-  val messageRep = Message(fullResponse, 3)
+  def fullResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, moon)
+  def request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "twitter.com")
+  def dataReq = new DefaultHttpContent(moon)
+  def starsReq = new DefaultHttpContent(stars)
+  def messageReq = Message(fullRequest, 3)
+  def messageRep = Message(fullResponse, 3)
 
   def validateObject(
     msg: Message,
@@ -47,9 +50,7 @@ class AdapterProxyChannelHandlerTest extends FunSuite {
   }
 
   test("writes things through") {
-    val handler = new AdapterProxyChannelHandler({ pipeline =>
-      ()
-    })
+    val handler = new AdapterProxyChannelHandler(http.initClient(Params.empty))
     val channel = new EmbeddedChannel()
     channel.pipeline.addLast(handler)
     channel.writeOutbound(messageReq)
@@ -57,13 +58,12 @@ class AdapterProxyChannelHandlerTest extends FunSuite {
   }
 
   test("reads things through") {
-    val handler = new AdapterProxyChannelHandler({ pipeline =>
-      ()
-    })
+    val handler = new AdapterProxyChannelHandler(http.initClient(Params.empty))
     val channel = new EmbeddedChannel()
     channel.pipeline.addLast(handler)
     channel.writeInbound(messageReq)
-    assert(channel.readInbound[Message]() == messageReq)
+    val read = channel.readInbound[Message]()
+    assert(read.equals(messageReq))
   }
 
   test("disaggregates reads") {
@@ -102,6 +102,43 @@ class AdapterProxyChannelHandlerTest extends FunSuite {
     assert(validateObject(channel.readOutbound[Message](), 3, true, Some(moon)))
   }
 
+  test("cleans up pipelines for different streams") {
+    val handler = new AdapterProxyChannelHandler({ pipeline =>
+      http.initClient(Params.empty)(pipeline)
+    })
+    val channel = new EmbeddedChannel()
+    channel.pipeline.addLast(handler)
+    val content3 = chunk() // destined for stream #3
+    assert(content3.refCnt() == 1)
+    val content5 = chunk() // destined for stream #5
+    assert(content5.refCnt() == 1)
+
+    channel.writeOutbound(Message(request, 3))
+    channel.writeOutbound(Message(request, 5))
+
+    channel.writeOutbound(Message(dataReq, 3))
+    assert(validateObject(channel.readOutbound[Message](), 3, true, Some(moon)))
+
+    // both streams see inbound responses + data
+    channel.writeInbound(Message(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK), 3))
+    channel.writeInbound(Message(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK), 5))
+    channel.writeInbound(Message(new DefaultHttpContent(content3), 3))
+    channel.writeInbound(Message(new DefaultHttpContent(content5), 5))
+
+    assert(content3.refCnt() == 1)
+    assert(content5.refCnt() == 1)
+    channel.writeInbound(Rst(3, 0x8)) // stream #3 sees a RST
+    assert(content3.refCnt() == 0) // buffered data on #3 is cleaned up
+    assert(content5.refCnt() == 1) // buffered data on stream #5 is unaffected
+
+    channel.writeOutbound(Message(starsReq, 5))
+    assert(validateObject(channel.readOutbound[Message](), 5, true, Some(stars)))
+
+    // stream #5 sees the last message and its buffered data is released
+    channel.writeInbound(Message(new DefaultLastHttpContent(), 5))
+    assert(content5.refCnt() == 0)
+  }
+
   test("different handlers for different streams") {
     val handler = new AdapterProxyChannelHandler({ pipeline =>
       pipeline.addLast(new Aggregator())
@@ -123,9 +160,7 @@ class AdapterProxyChannelHandlerTest extends FunSuite {
   }
 
   test("streams are torn down eventually") {
-    val handler = new AdapterProxyChannelHandler({ pipeline =>
-      ()
-    })
+    val handler = new AdapterProxyChannelHandler(http.initClient(Params.empty))
     val channel = new EmbeddedChannel()
     channel.pipeline.addLast(handler)
 
@@ -137,42 +172,45 @@ class AdapterProxyChannelHandlerTest extends FunSuite {
 
   test("streams aren't torn down until we actually get a last item") {
     val stats = new InMemoryStatsReceiver
-    val handler = new AdapterProxyChannelHandler({ pipeline =>
-      ()
-    }, stats)
+    val handler = new AdapterProxyChannelHandler(http.initClient(Params.empty), stats)
     val channel = new EmbeddedChannel()
     channel.pipeline.addLast(handler)
 
     val req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "twitter.com")
     val rep = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
     val last = new DefaultLastHttpContent()
+    val content = chunk()
+    assert(content.refCnt() == 1)
 
     channel.writeOutbound(Message(req, 3))
     assert(handler.numConnections == 1)
     channel.writeInbound(Message(rep, 3))
     assert(handler.numConnections == 1)
     channel.writeInbound(Message(last, 3))
+    channel.writeInbound(Message(new DefaultHttpContent(content), 3))
     assert(handler.numConnections == 1)
     channel.writeOutbound(Message(last, 3))
     assert(handler.numConnections == 0)
+    assert(content.refCnt() == 0)
   }
 
   test("streams are torn down when we receive rst") {
-    val handler = new AdapterProxyChannelHandler({ pipeline =>
-      ()
-    })
+    val handler = new AdapterProxyChannelHandler(http.initClient(Params.empty))
     val channel = new EmbeddedChannel()
     channel.pipeline.addLast(handler)
 
     val req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "twitter.com")
     val rep = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
     val last = new DefaultLastHttpContent()
-
     channel.writeOutbound(Message(req, 3))
     assert(handler.numConnections == 1)
     channel.writeInbound(Message(rep, 3))
+    val content = chunk()
+    assert(content.refCnt() == 1)
+    channel.writeInbound(Message(new DefaultHttpContent(content), 3))
     assert(handler.numConnections == 1)
-    channel.writeOutbound(Rst(3, 0x8))
+    channel.writeInbound(Rst(3, 0x8))
+    assert(content.refCnt() == 0)
     assert(handler.numConnections == 0)
     assert(last.refCnt() == 1)
     channel.writeInbound(Message(last, 3))
@@ -180,70 +218,82 @@ class AdapterProxyChannelHandlerTest extends FunSuite {
     assert(last.refCnt() == 0)
   }
 
+  test("embedded handlers can cleanup on channel close") {
+    // use actual client init fn
+    val apch = new AdapterProxyChannelHandler(http.initClient(Params.empty))
+    val channel = new EmbeddedChannel()
+    channel.pipeline.addLast(apch)
+    val content = chunk()
+    assert(content.refCnt() == 1)
+    // reading registers a new stream with a partially aggregated payload
+    channel.pipeline().fireChannelRead(Message(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK), 3))
+    channel.pipeline().fireChannelRead(Message(new DefaultHttpContent(content), 3))
+
+    // session dies
+    channel.close()
+
+    assert(content.refCnt() == 0)
+  }
+
   test("streams are torn down when we send rst") {
-    val handler = new AdapterProxyChannelHandler({ pipeline =>
-      ()
-    })
+    val handler = new AdapterProxyChannelHandler(http.initClient(Params.empty))
     val channel = new EmbeddedChannel()
     channel.pipeline.addLast(handler)
 
     val req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "twitter.com")
+    val repChunk = Unpooled.wrappedBuffer("ref-counting on the jvm is a great idea".getBytes(StandardCharsets.UTF_8))
+    assert(repChunk.refCnt() == 1)
     val rep = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
     val last = new DefaultLastHttpContent()
 
     channel.writeOutbound(Message(req, 3))
     assert(handler.numConnections == 1)
     channel.writeInbound(Message(rep, 3))
+    channel.writeInbound(Message(new DefaultHttpContent(repChunk), 3))
     assert(handler.numConnections == 1)
     channel.writeInbound(Rst(3, 0x8))
     assert(handler.numConnections == 0)
     intercept[AdapterProxyChannelHandler.WriteToNackedStreamException] {
       channel.writeOutbound(Message(last, 3))
     }
+    assert(repChunk.refCnt() == 0)
   }
 
   test("channel gauge is accurate") {
     val stats = new InMemoryStatsReceiver()
-    val handler = new AdapterProxyChannelHandler({ pipeline =>
-      ()
-    }, stats)
+    val handler = new AdapterProxyChannelHandler(http.initClient(Params.empty), stats)
     val channel = new EmbeddedChannel()
     channel.pipeline.addLast(handler)
 
     val channelsGauge = stats.gauges(Seq("channels"))
     assert(channelsGauge() == 0.0)
 
-    val req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "twitter.com")
-    val rep = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
-    val last = new DefaultLastHttpContent()
-
-    channel.writeOutbound(Message(req, 3))
-    channel.writeOutbound(Message(last, 3))
+    channel.writeOutbound(Message(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "twitter.com"), 3))
+    channel.writeOutbound(Message(new DefaultLastHttpContent(), 3))
     assert(channelsGauge() == 1.0)
 
-    channel.writeOutbound(Message(req, 5))
+    channel.writeOutbound(Message(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "twitter.com"), 5))
     assert(channelsGauge() == 2.0)
 
-    channel.writeOutbound(Message(last, 5))
-    channel.writeInbound(Message(rep, 3))
-    channel.writeInbound(Message(last, 3))
+    channel.writeOutbound(Message(new DefaultLastHttpContent(), 5))
+    channel.writeInbound(Message(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK), 3))
+    channel.writeInbound(Message(new DefaultLastHttpContent(), 3))
     assert(channelsGauge() == 1.0)
 
-    channel.writeInbound(Message(rep, 5))
-    channel.writeInbound(Message(last, 5))
+    channel.writeInbound(Message(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK), 5))
+    channel.writeInbound(Message(new DefaultLastHttpContent(), 5))
     assert(channelsGauge() == 0.0)
   }
 
   test("close closes the underlying connection") {
-    val handler = new AdapterProxyChannelHandler({ pipeline =>
-      ()
-    })
+    val handler = new AdapterProxyChannelHandler(http.initClient(Params.empty))
     val channel = new EmbeddedChannel()
     channel.pipeline.addLast(handler)
 
     channel.close()
     assert(!channel.isOpen)
   }
+
 }
 
 class Aggregator extends ChannelDuplexHandler {

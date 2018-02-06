@@ -74,7 +74,8 @@ private[http2] final class AdapterProxyChannelHandler(
   private[this] def closeAll(): Unit = {
     map.foreach {
       case (_, value) =>
-        value.embedded.close()
+        value.embedded.pipeline().fireChannelInactive() // clean up inbound handlers
+        value.embedded.close() // clean up outbound handlers
     }
     map.clear()
   }
@@ -112,19 +113,26 @@ private[http2] final class AdapterProxyChannelHandler(
   // after they're written to. For non-embedded write (RST/GOAWAY/PING), the default
   // flush() behavior is sufficient
 
-  private[this] def updateCompletionStatus(obj: HttpObject, streamId: Int, reading: Boolean): Unit =
-    obj match {
-      case _: LastHttpContent =>
-        val completed = map(streamId)
-        if (reading) {
-          completed.finishedReading = true
-        } else {
-          completed.finishedWriting = true
-        }
-        if (completed.finishedWriting && completed.finishedReading)
-          map.remove(streamId)
-      case _ => // nop
-    }
+  private[this] def updateCompletionStatus(obj: HttpObject, streamId: Int, reading: Boolean): Unit = obj match {
+    case _: LastHttpContent =>
+      val completed = map(streamId)
+      if (reading) {
+        completed.finishedReading = true
+      } else {
+        completed.finishedWriting = true
+      }
+      if (completed.finishedWriting && completed.finishedReading)
+        rmStream(streamId)
+    case _ => // nop
+  }
+
+  // stop tracking a stream and allow the associated embedded handlers to cleanup.
+  private def rmStream(streamId: Int): Unit = map.remove(streamId) match {
+    case Some(channel) =>
+      channel.embedded.pipeline().fireChannelInactive()
+    case None =>
+      if (log.isLoggable(Level.DEBUG)) log.debug(s"tried to remove non-existent stream #$streamId")
+  }
 
   override def channelRead(ctx: ChannelHandlerContext, msg: Object): Unit = msg match {
     case Message(obj, streamId) =>
@@ -137,7 +145,7 @@ private[http2] final class AdapterProxyChannelHandler(
           updateCompletionStatus(obj, streamId, true)
       }
     case rst @ Rst(streamId, _) =>
-      map.remove(streamId)
+      rmStream(streamId)
       ctx.fireChannelRead(rst)
     case goaway: GoAway => ctx.fireChannelRead(goaway)
     case Ping => ctx.fireChannelRead(Ping)
@@ -167,7 +175,7 @@ private[http2] final class AdapterProxyChannelHandler(
                 updateCompletionStatus(obj, streamId, false)
             }
           case rst @ Rst(streamId, _) =>
-            map.remove(streamId)
+            rmStream(streamId)
             // receiving an rst for a stream that never existed is a protocol error, but
             // we handle that in StreamTransportFactory, so for now we just propagate it.
             ctx.write(rst, promise)

@@ -385,7 +385,6 @@ class StreamTransportFactoryTest extends FunSuite {
       type Context = TransportContext with HasExecutor
     }]
     val addr = new SocketAddress {}
-    var cur: Status = Status.Open
 
     val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
 
