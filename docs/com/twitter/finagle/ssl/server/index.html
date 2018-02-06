@@ -290,27 +290,7 @@ resources for using Finagle.
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.ssl.server.ConstServerEngineFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ConstServerEngineFactoryextendsSslServerEngineFactory"></a><a id="ConstServerEngineFactory:ConstServerEngineFactory"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/ssl/server/index.html#ConstServerEngineFactoryextendsSslServerEngineFactory" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="This engine factory is a bridge for TLSServerEngine param configurations which use a () =&gt; Engine interface." href="ConstServerEngineFactory.html"><span class="name">ConstServerEngineFactory</span></a><span class="result"> extends <a href="SslServerEngineFactory.html" class="extype" name="com.twitter.finagle.ssl.server.SslServerEngineFactory">SslServerEngineFactory</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">This engine factory is a bridge for TLSServerEngine param configurations
-which use a () =&gt; Engine interface.</p><div class="fullcomment"><div class="comment cmt"><p>This engine factory is a bridge for TLSServerEngine param configurations
-which use a () =&gt; Engine interface. It should only be used for legacy
-purposes.
-</p></div></div>
-    </li><li name="com.twitter.finagle.ssl.server.SslContextServerEngineFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.ssl.server.SslContextServerEngineFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SslContextServerEngineFactoryextendsSslServerEngineFactory"></a><a id="SslContextServerEngineFactory:SslContextServerEngineFactory"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/ssl/server/index.html#SslContextServerEngineFactoryextendsSslServerEngineFactory" title="Permalink">
@@ -318,7 +298,7 @@ purposes.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
@@ -388,6 +368,29 @@ to perform additional server-side verification checks against a
 configuration or session. The <code>apply</code> method of the verifier is called
 when an <code>SSLSession</code> has been established.
 </p></div></div>
+    </li><li name="com.twitter.finagle.ssl.server.ConstServerEngineFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ConstServerEngineFactoryextendsSslServerEngineFactory"></a><a id="ConstServerEngineFactory:ConstServerEngineFactory"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/ssl/server/index.html#ConstServerEngineFactoryextendsSslServerEngineFactory" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="This engine factory is a bridge for TLSServerEngine param configurations which use a () =&gt; Engine interface." href="ConstServerEngineFactory.html"><span class="name deprecated" title="Deprecated: (Since version 2018-01-19) Use the Netty 4 engine factories instead">ConstServerEngineFactory</span></a><span class="result"> extends <a href="SslServerEngineFactory.html" class="extype" name="com.twitter.finagle.ssl.server.SslServerEngineFactory">SslServerEngineFactory</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">This engine factory is a bridge for TLSServerEngine param configurations
+which use a () =&gt; Engine interface.</p><div class="fullcomment"><div class="comment cmt"><p>This engine factory is a bridge for TLSServerEngine param configurations
+which use a () =&gt; Engine interface. It should only be used for legacy
+purposes.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-01-19)</i> Use the Netty 4 engine factories instead</p></dd></dl></div>
     </li></ol>
             </div>
 

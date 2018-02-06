@@ -2038,29 +2038,6 @@ preserved, though may not be appropriate for the new media type.
       
       <p class="shortcomment cmt">Sets the HTTP method of this request to the given <code>method</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the HTTP method of this request to the given <code>method</code>.</p><p>* @see <span class="extype" name="method(Method)">method(Method)</span> for Java users.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a> → <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Request.Proxy#multipart" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="multipart:Option[com.twitter.finagle.http.exp.Multipart]"></a><a id="multipart:Option[Multipart]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/RequestProxy.html#multipart:Option[com.twitter.finagle.http.exp.Multipart]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">multipart</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="exp/Multipart.html" class="extype" name="com.twitter.finagle.http.exp.Multipart">Multipart</a>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">Returns an _optional_ <span class="extype" name="Multipart">Multipart</span> instance, which maintains the
-<code>multipart/form-data</code> content of this non-chunked, POST request.</p><div class="fullcomment"><div class="comment cmt"><p>Returns an _optional_ <span class="extype" name="Multipart">Multipart</span> instance, which maintains the
-<code>multipart/form-data</code> content of this non-chunked, POST request. If
-this requests is either streaming or non-POST, this method returns
-<code>None</code>.</p><p>Note: This method is a part of an experimental API for handling
-multipart HTTP data and it will likely be changed in future in order
-to support streaming requests.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a> → <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">

@@ -544,6 +544,25 @@ Further details, including the request and response, are available at
               
         </dd></dl></div>
     </li><li name="com.twitter.finagle.thriftmux.MethodBuilder#idempotent" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="idempotent(maxExtraLoad:com.twitter.util.tunable.Tunable[Double]):com.twitter.finagle.thriftmux.MethodBuilder"></a><a id="idempotent(Tunable[Double]):MethodBuilder"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thriftmux/MethodBuilder.html#idempotent(maxExtraLoad:com.twitter.util.tunable.Tunable[Double]):com.twitter.finagle.thriftmux.MethodBuilder" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">idempotent</span><span class="params">(<span name="maxExtraLoad">maxExtraLoad: <a href="https://twitter.github.io/util/docs/com/twitter/util/tunable/Tunable.html#com.twitter.util.tunable.Tunable" class="extype" name="com.twitter.util.tunable.Tunable">Tunable</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Double.html#scala.Double" class="extype" name="scala.Double">Double</a>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.thriftmux.MethodBuilder">MethodBuilder</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Configure that requests are to be treated as idempotent.</p><div class="fullcomment"><div class="comment cmt"><p>Configure that requests are to be treated as idempotent. Because requests can be safely
+retried, <span class="extype" name="BackupRequestFilter">BackupRequestFilter</span> is configured with the params <code>maxExtraLoad</code> and
+<code>sendInterrupts</code> to decrease tail latency by sending an additional fraction of requests.</p><p>This additionally causes Thrift Exceptions to be retried.</p></div><dl class="paramcmts block"><dt class="param">maxExtraLoad</dt><dd class="cmt"><p>How much extra load, as a Tunable[Double], we are willing to send to the
+                    server. Must be between 0.0 and 1.0.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thriftmux.MethodBuilder">MethodBuilder</a> → MethodBuilderScaladoc</dd></dl></div>
+    </li><li name="com.twitter.finagle.thriftmux.MethodBuilder#idempotent" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="idempotent(maxExtraLoad:Double):com.twitter.finagle.thriftmux.MethodBuilder"></a><a id="idempotent(Double):MethodBuilder"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/thriftmux/MethodBuilder.html#idempotent(maxExtraLoad:Double):com.twitter.finagle.thriftmux.MethodBuilder" title="Permalink">
@@ -578,6 +597,24 @@ retried, <span class="extype" name="BackupRequestFilter">BackupRequestFilter</sp
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.thriftmux.MethodBuilder#label" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="label:String"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thriftmux/MethodBuilder.html#label:String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">label</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Configured client label.</p><div class="fullcomment"><div class="comment cmt"><p>Configured client label. The <code>label</code> is used to assign a label to the underlying Thrift client.
+The label is used to display stats, etc.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#clients" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#clients</a></p></span><span class="cmt"><p><a href="../Client.html" class="extype" name="com.twitter.finagle.Client">com.twitter.finagle.Client</a></p></span></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -652,6 +689,22 @@ retries are removed.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.thriftmux.MethodBuilder#servicePerEndpoint" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="servicePerEndpoint[ServicePerEndpoint&lt;:com.twitter.finagle.thrift.service.Filterable[ServicePerEndpoint]](implicitbuilder:com.twitter.finagle.thrift.service.ServicePerEndpointBuilder[ServicePerEndpoint]):ServicePerEndpoint"></a><a id="servicePerEndpoint[ServicePerEndpoint&lt;:Filterable[ServicePerEndpoint]](ServicePerEndpointBuilder[ServicePerEndpoint]):ServicePerEndpoint"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thriftmux/MethodBuilder.html#servicePerEndpoint[ServicePerEndpoint&lt;:com.twitter.finagle.thrift.service.Filterable[ServicePerEndpoint]](implicitbuilder:com.twitter.finagle.thrift.service.ServicePerEndpointBuilder[ServicePerEndpoint]):ServicePerEndpoint" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">servicePerEndpoint</span><span class="tparams">[<span name="ServicePerEndpoint">ServicePerEndpoint &lt;: <a href="../thrift/service/Filterable.html" class="extype" name="com.twitter.finagle.thrift.service.Filterable">Filterable</a>[<span class="extype" name="com.twitter.finagle.thriftmux.MethodBuilder.servicePerEndpoint.ServicePerEndpoint">ServicePerEndpoint</span>]</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="builder">builder: <a href="../thrift/service/ServicePerEndpointBuilder.html" class="extype" name="com.twitter.finagle.thrift.service.ServicePerEndpointBuilder">ServicePerEndpointBuilder</a>[<span class="extype" name="com.twitter.finagle.thriftmux.MethodBuilder.servicePerEndpoint.ServicePerEndpoint">ServicePerEndpoint</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.thriftmux.MethodBuilder.servicePerEndpoint.ServicePerEndpoint">ServicePerEndpoint</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Construct a <code>ServicePerEndpoint</code> to be used for the client.</p>
     </li><li name="com.twitter.finagle.thriftmux.MethodBuilder#servicePerEndpoint" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="servicePerEndpoint[ServicePerEndpoint&lt;:com.twitter.finagle.thrift.service.Filterable[ServicePerEndpoint]](methodName:String)(implicitbuilder:com.twitter.finagle.thrift.service.ServicePerEndpointBuilder[ServicePerEndpoint]):ServicePerEndpoint"></a><a id="servicePerEndpoint[ServicePerEndpoint&lt;:Filterable[ServicePerEndpoint]](String)(ServicePerEndpointBuilder[ServicePerEndpoint]):ServicePerEndpoint"></a>
       <span class="permalink">

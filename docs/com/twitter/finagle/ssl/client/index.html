@@ -286,27 +286,7 @@ resources for using Finagle.
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.ssl.client.ConstClientEngineFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ConstClientEngineFactoryextendsSslClientEngineFactory"></a><a id="ConstClientEngineFactory:ConstClientEngineFactory"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/ssl/client/index.html#ConstClientEngineFactoryextendsSslClientEngineFactory" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="This engine factory is a bridge for TLSClientEngine param configurations which use a SocketAddress =&gt; Engine interface." href="ConstClientEngineFactory.html"><span class="name">ConstClientEngineFactory</span></a><span class="result"> extends <a href="SslClientEngineFactory.html" class="extype" name="com.twitter.finagle.ssl.client.SslClientEngineFactory">SslClientEngineFactory</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">This engine factory is a bridge for TLSClientEngine param configurations
-which use a SocketAddress =&gt; Engine interface.</p><div class="fullcomment"><div class="comment cmt"><p>This engine factory is a bridge for TLSClientEngine param configurations
-which use a SocketAddress =&gt; Engine interface. It should only be used
-for legacy purposes.
-</p></div></div>
-    </li><li name="com.twitter.finagle.ssl.client.SslClientConfiguration" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.ssl.client.SslClientConfiguration" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="SslClientConfigurationextendsProductwithSerializable"></a><a id="SslClientConfiguration:SslClientConfiguration"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/ssl/client/index.html#SslClientConfigurationextendsProductwithSerializable" title="Permalink">
@@ -376,7 +356,7 @@ when an <code>SSLSession</code> has been established.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
@@ -385,6 +365,29 @@ when an <code>SSLSession</code> has been established.
       
       <p class="shortcomment cmt">This class provides an ability to use an initialized supplied
 <code>javax.net.ssl.SSLContext</code> as the basis for creating <a href="../Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engines</a>.</p>
+    </li><li name="com.twitter.finagle.ssl.client.ConstClientEngineFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ConstClientEngineFactoryextendsSslClientEngineFactory"></a><a id="ConstClientEngineFactory:ConstClientEngineFactory"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/ssl/client/index.html#ConstClientEngineFactoryextendsSslClientEngineFactory" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="This engine factory is a bridge for TLSClientEngine param configurations which use a SocketAddress =&gt; Engine interface." href="ConstClientEngineFactory.html"><span class="name deprecated" title="Deprecated: (Since version 2018-01-19) Use the Netty 4 engine factories instead">ConstClientEngineFactory</span></a><span class="result"> extends <a href="SslClientEngineFactory.html" class="extype" name="com.twitter.finagle.ssl.client.SslClientEngineFactory">SslClientEngineFactory</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">This engine factory is a bridge for TLSClientEngine param configurations
+which use a SocketAddress =&gt; Engine interface.</p><div class="fullcomment"><div class="comment cmt"><p>This engine factory is a bridge for TLSClientEngine param configurations
+which use a SocketAddress =&gt; Engine interface. It should only be used
+for legacy purposes.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-01-19)</i> Use the Netty 4 engine factories instead</p></dd></dl></div>
     </li></ol>
             </div>
 

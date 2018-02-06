@@ -226,11 +226,11 @@ resources for using Finagle.
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">ConstClientEngineFactory</span><span class="result"> extends <a href="SslClientEngineFactory.html" class="extype" name="com.twitter.finagle.ssl.client.SslClientEngineFactory">SslClientEngineFactory</a></span>
+        <span class="name deprecated" title="Deprecated: (Since version 2018-01-19) Use the Netty 4 engine factories instead">ConstClientEngineFactory</span><span class="result"> extends <a href="SslClientEngineFactory.html" class="extype" name="com.twitter.finagle.ssl.client.SslClientEngineFactory">SslClientEngineFactory</a></span>
       </span>
       </h4>
 
@@ -238,7 +238,10 @@ resources for using Finagle.
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>This engine factory is a bridge for TLSClientEngine param configurations
 which use a SocketAddress =&gt; Engine interface. It should only be used
 for legacy purposes.
-</p></div><div class="toggleContainer block">
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-01-19)</i> Use the Netty 4 engine factories instead</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &#8212; Finagle 18.1.0 documentation</title>
+    <title>Metrics &#8212; Finagle 18.2.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '18.1.0',
+        VERSION:     '18.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 18.1.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 18.2.0 documentation" href="index.html" />
     <link rel="next" title="Unsuccessful Responses" href="UnsuccessfulResponses.html" />
     <link rel="prev" title="Protocols" href="Protocols.html" />
    
@@ -588,9 +588,28 @@ was not requeued due to the underlying <code class="docutils literal"><span clas
 status of <code class="docutils literal"><span class="pre">Open</span></code>.</dd>
 </dl>
 </div>
+<div class="section" id="backup-requests">
+<h2>Backup Requests<a class="headerlink" href="#backup-requests" title="Permalink to this headline">¶</a></h2>
+<p id="id2">These stats provide information on the state and behavior of
+<cite>com.twitter.finagle.client.BackupRequestFilter</cite>.</p>
+<dl class="docutils">
+<dt><strong>backups/send_backup_after_ms</strong></dt>
+<dd>A histogram of the time, in  milliseconds, after which a request will be re-issued if it has
+not yet completed.</dd>
+<dt><strong>backups/backups_sent</strong></dt>
+<dd>A counter of the number of backup requests sent.</dd>
+<dt><strong>backups/backups_won</strong></dt>
+<dd>A counter of the number of backup requests that completed before the original, regardless of
+whether they succeeded.</dd>
+<dt><strong>backups/budget_exhausted</strong></dt>
+<dd>A counter of the number of times the backup request budget (computed using the current value
+of the <cite>maxExtraLoad</cite> param) or client retry budget was exhausted, preventing a backup from being
+sent.</dd>
+</dl>
+</div>
 <div class="section" id="dispatching">
 <h2>Dispatching<a class="headerlink" href="#dispatching" title="Permalink to this headline">¶</a></h2>
-<p id="id2">The client metrics scoped under <cite>dispatcher</cite> represent information about a
+<p id="id3">The client metrics scoped under <cite>dispatcher</cite> represent information about a
 client&#8217;s dispatching layer.</p>
 <p>Depending on the underlying protocol, dispatchers may have different request
 queueing rules.</p>
@@ -647,7 +666,7 @@ milliseconds.</dd>
 </div>
 <div class="section" id="nack-admission-control">
 <h3>Nack Admission Control<a class="headerlink" href="#nack-admission-control" title="Permalink to this headline">¶</a></h3>
-<p id="id3">These metrics reflect the behavior of the
+<p id="id4">These metrics reflect the behavior of the
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/filter/NackAdmissionFilter.scala">NackAdmissionFilter</a>.</p>
 <dl class="docutils">
 <dt><strong>dropped_requests</strong></dt>
@@ -771,9 +790,9 @@ your server.</dd>
 </div>
 <div class="section" id="service-discovery">
 <h2>Service Discovery<a class="headerlink" href="#service-discovery" title="Permalink to this headline">¶</a></h2>
-<p id="id4">These metrics track the state of name resolution and service discovery.</p>
-<div class="section" id="id5">
-<h3>Name Resolution<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<p id="id5">These metrics track the state of name resolution and service discovery.</p>
+<div class="section" id="id6">
+<h3>Name Resolution<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
 <p>Finagle clients resolve <a class="reference internal" href="Names.html"><span class="doc">names</span></a> into sets of network
 addresses to which sockets can be opened. A number of the moving parts
 involved in this process are cached (i.e.
@@ -1234,6 +1253,7 @@ upgraded a connection to TLS.</dd>
 </li>
 <li><a class="reference internal" href="#pendingrequestfilter">PendingRequestFilter</a></li>
 <li><a class="reference internal" href="#retries">Retries</a></li>
+<li><a class="reference internal" href="#backup-requests">Backup Requests</a></li>
 <li><a class="reference internal" href="#dispatching">Dispatching</a></li>
 <li><a class="reference internal" href="#server-thread-usage">Server Thread Usage</a></li>
 <li><a class="reference internal" href="#admission-control">Admission Control</a><ul>
@@ -1255,7 +1275,7 @@ upgraded a connection to TLS.</dd>
 </ul>
 </li>
 <li><a class="reference internal" href="#service-discovery">Service Discovery</a><ul>
-<li><a class="reference internal" href="#id5">Name Resolution</a></li>
+<li><a class="reference internal" href="#id6">Name Resolution</a></li>
 <li><a class="reference internal" href="#initial-resolution">Initial Resolution</a></li>
 <li><a class="reference internal" href="#address-stabilization">Address Stabilization</a></li>
 <li><a class="reference internal" href="#zookeeper-diagnostics">ZooKeeper Diagnostics</a><ul>

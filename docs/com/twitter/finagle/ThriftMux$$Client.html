@@ -404,10 +404,10 @@ prefix and servers with &quot;srv/thrift&quot;. If you'd like more configuration
         <span class="name">build</span><span class="tparams">[<span name="ThriftService">ThriftService</span>]</span><span class="params">(<span name="name">name: <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a></span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="cls">cls: <span class="extype" name="scala.Predef.Class">Class</span>[_]</span>, <span name="clientParam">clientParam: <a href="thrift/RichClientParam.html" class="extype" name="com.twitter.finagle.thrift.RichClientParam">RichClientParam</a></span>, <span name="service">service: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.thrift.ThriftRichClient.build.ThriftService">ThriftService</span></span>
       </span>
       
-      <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
-by <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>Iface</code>, which must be generated
+      <p class="shortcomment cmt">Create a new client of type <code>ThriftService</code>, which must be generated
+by <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>ThriftService</code>, which must be generated
 by <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><p>For Scala generated code, the <code>Class</code> passed in should be
-either <code>ServiceName$FutureIface</code> or <code>ServiceName[Future]</code>.</p><p>For Java generated code, the <code>Class</code> passed in should be
+either <code>ServiceName$MethodPerEndpoint</code> or <code>ServiceName[Future]</code>.</p><p>For Java generated code, the <code>Class</code> passed in should be
 <code>ServiceName$ServiceIface</code>.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="thrift/ThriftRichClient.html" class="extype" name="com.twitter.finagle.thrift.ThriftRichClient">ThriftRichClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.ThriftRichClient#build" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="build[ThriftService](name:com.twitter.finagle.Name,label:String,cls:Class[_]):ThriftService"></a><a id="build[ThriftService](Name,String,Class[_]):ThriftService"></a>
@@ -424,10 +424,10 @@ either <code>ServiceName$FutureIface</code> or <code>ServiceName[Future]</code>.
         <span class="name">build</span><span class="tparams">[<span name="ThriftService">ThriftService</span>]</span><span class="params">(<span name="name">name: <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a></span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="cls">cls: <span class="extype" name="scala.Predef.Class">Class</span>[_]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.thrift.ThriftRichClient.build.ThriftService">ThriftService</span></span>
       </span>
       
-      <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
-by <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>Iface</code>, which must be generated
+      <p class="shortcomment cmt">Create a new client of type <code>ThriftService</code>, which must be generated
+by <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>ThriftService</code>, which must be generated
 by <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><p>For Scala generated code, the <code>Class</code> passed in should be
-either <code>ServiceName$FutureIface</code> or <code>ServiceName[Future]</code>.</p><p>For Java generated code, the <code>Class</code> passed in should be
+either <code>ServiceName$MethodPerEndpoint</code> or <code>ServiceName[Future]</code>.</p><p>For Java generated code, the <code>Class</code> passed in should be
 <code>ServiceName$ServiceIface</code>.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="thrift/ThriftRichClient.html" class="extype" name="com.twitter.finagle.thrift.ThriftRichClient">ThriftRichClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.ThriftRichClient#build" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="build[ThriftService](dest:com.twitter.finagle.Name,label:String)(implicitevidence$6:scala.reflect.ClassTag[ThriftService]):ThriftService"></a><a id="build[ThriftService](Name,String)(ClassTag[ThriftService]):ThriftService"></a>
@@ -444,10 +444,10 @@ either <code>ServiceName$FutureIface</code> or <code>ServiceName[Future]</code>.
         <span class="name">build</span><span class="tparams">[<span name="ThriftService">ThriftService</span>]</span><span class="params">(<span name="dest">dest: <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a></span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.4/scala/reflect/ClassTag.html#scala.reflect.ClassTag" class="extype" name="scala.reflect.ClassTag">ClassTag</a>[<span class="extype" name="com.twitter.finagle.thrift.ThriftRichClient.build.ThriftService">ThriftService</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.thrift.ThriftRichClient.build.ThriftService">ThriftService</span></span>
       </span>
       
-      <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
-by <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>Iface</code>, which must be generated
+      <p class="shortcomment cmt">Create a new client of type <code>ThriftService</code>, which must be generated
+by <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>ThriftService</code>, which must be generated
 by <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><p>For Scala generated code, the <code>Class</code> passed in should be
-either <code>ServiceName$FutureIface</code> or <code>ServiceName[Future]</code>.</p><p>For Java generated code, the <code>Class</code> passed in should be
+either <code>ServiceName$MethodPerEndpoint</code> or <code>ServiceName[Future]</code>.</p><p>For Java generated code, the <code>Class</code> passed in should be
 <code>ServiceName$ServiceIface</code>.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="thrift/ThriftRichClient.html" class="extype" name="com.twitter.finagle.thrift.ThriftRichClient">ThriftRichClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.ThriftRichClient#build" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="build[ThriftService](dest:String,label:String)(implicitevidence$5:scala.reflect.ClassTag[ThriftService]):ThriftService"></a><a id="build[ThriftService](String,String)(ClassTag[ThriftService]):ThriftService"></a>
@@ -464,10 +464,10 @@ either <code>ServiceName$FutureIface</code> or <code>ServiceName[Future]</code>.
         <span class="name">build</span><span class="tparams">[<span name="ThriftService">ThriftService</span>]</span><span class="params">(<span name="dest">dest: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.4/scala/reflect/ClassTag.html#scala.reflect.ClassTag" class="extype" name="scala.reflect.ClassTag">ClassTag</a>[<span class="extype" name="com.twitter.finagle.thrift.ThriftRichClient.build.ThriftService">ThriftService</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.thrift.ThriftRichClient.build.ThriftService">ThriftService</span></span>
       </span>
       
-      <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
-by <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>Iface</code>, which must be generated
+      <p class="shortcomment cmt">Create a new client of type <code>ThriftService</code>, which must be generated
+by <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>ThriftService</code>, which must be generated
 by <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><p>For Scala generated code, the <code>Class</code> passed in should be
-either <code>ServiceName$FutureIface</code> or <code>ServiceName[Future]</code>.</p><p>For Java generated code, the <code>Class</code> passed in should be
+either <code>ServiceName$MethodPerEndpoint</code> or <code>ServiceName[Future]</code>.</p><p>For Java generated code, the <code>Class</code> passed in should be
 <code>ServiceName$ServiceIface</code>.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="thrift/ThriftRichClient.html" class="extype" name="com.twitter.finagle.thrift.ThriftRichClient">ThriftRichClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.ThriftRichClient#build" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="build[ThriftService](dest:String)(implicitevidence$4:scala.reflect.ClassTag[ThriftService]):ThriftService"></a><a id="build[ThriftService](String)(ClassTag[ThriftService]):ThriftService"></a>
@@ -484,10 +484,10 @@ either <code>ServiceName$FutureIface</code> or <code>ServiceName[Future]</code>.
         <span class="name">build</span><span class="tparams">[<span name="ThriftService">ThriftService</span>]</span><span class="params">(<span name="dest">dest: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.4/scala/reflect/ClassTag.html#scala.reflect.ClassTag" class="extype" name="scala.reflect.ClassTag">ClassTag</a>[<span class="extype" name="com.twitter.finagle.thrift.ThriftRichClient.build.ThriftService">ThriftService</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.thrift.ThriftRichClient.build.ThriftService">ThriftService</span></span>
       </span>
       
-      <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
-by <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>Iface</code>, which must be generated
+      <p class="shortcomment cmt">Create a new client of type <code>ThriftService</code>, which must be generated
+by <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>ThriftService</code>, which must be generated
 by <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><p>For Scala generated code, the <code>Class</code> passed in should be
-either <code>ServiceName$FutureIface</code> or <code>ServiceName[Future]</code>.</p><p>For Java generated code, the <code>Class</code> passed in should be
+either <code>ServiceName$MethodPerEndpoint</code> or <code>ServiceName[Future]</code>.</p><p>For Java generated code, the <code>Class</code> passed in should be
 <code>ServiceName$ServiceIface</code>.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="thrift/ThriftRichClient.html" class="extype" name="com.twitter.finagle.thrift.ThriftRichClient">ThriftRichClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.ThriftRichClient#build" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="build[ThriftService](dest:String,label:String,cls:Class[_]):ThriftService"></a><a id="build[ThriftService](String,String,Class[_]):ThriftService"></a>
@@ -504,10 +504,10 @@ either <code>ServiceName$FutureIface</code> or <code>ServiceName[Future]</code>.
         <span class="name">build</span><span class="tparams">[<span name="ThriftService">ThriftService</span>]</span><span class="params">(<span name="dest">dest: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="cls">cls: <span class="extype" name="scala.Predef.Class">Class</span>[_]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.thrift.ThriftRichClient.build.ThriftService">ThriftService</span></span>
       </span>
       
-      <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
-by <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>Iface</code>, which must be generated
+      <p class="shortcomment cmt">Create a new client of type <code>ThriftService</code>, which must be generated
+by <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>ThriftService</code>, which must be generated
 by <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><p>For Scala generated code, the <code>Class</code> passed in should be
-either <code>ServiceName$FutureIface</code> or <code>ServiceName[Future]</code>.</p><p>For Java generated code, the <code>Class</code> passed in should be
+either <code>ServiceName$MethodPerEndpoint</code> or <code>ServiceName[Future]</code>.</p><p>For Java generated code, the <code>Class</code> passed in should be
 <code>ServiceName$ServiceIface</code>.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="thrift/ThriftRichClient.html" class="extype" name="com.twitter.finagle.thrift.ThriftRichClient">ThriftRichClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.ThriftRichClient#build" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="build[ThriftService](dest:String,cls:Class[_]):ThriftService"></a><a id="build[ThriftService](String,Class[_]):ThriftService"></a>
@@ -524,10 +524,10 @@ either <code>ServiceName$FutureIface</code> or <code>ServiceName[Future]</code>.
         <span class="name">build</span><span class="tparams">[<span name="ThriftService">ThriftService</span>]</span><span class="params">(<span name="dest">dest: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="cls">cls: <span class="extype" name="scala.Predef.Class">Class</span>[_]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.thrift.ThriftRichClient.build.ThriftService">ThriftService</span></span>
       </span>
       
-      <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
-by <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>Iface</code>, which must be generated
+      <p class="shortcomment cmt">Create a new client of type <code>ThriftService</code>, which must be generated
+by <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>ThriftService</code>, which must be generated
 by <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><p>For Scala generated code, the <code>Class</code> passed in should be
-either <code>ServiceName$FutureIface</code> or <code>ServiceName[Future]</code>.</p><p>For Java generated code, the <code>Class</code> passed in should be
+either <code>ServiceName$MethodPerEndpoint</code> or <code>ServiceName[Future]</code>.</p><p>For Java generated code, the <code>Class</code> passed in should be
 <code>ServiceName$ServiceIface</code>.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="thrift/ThriftRichClient.html" class="extype" name="com.twitter.finagle.thrift.ThriftRichClient">ThriftRichClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftMux.Client#clientParam" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clientParam:com.twitter.finagle.thrift.RichClientParam"></a><a id="clientParam:RichClientParam"></a>

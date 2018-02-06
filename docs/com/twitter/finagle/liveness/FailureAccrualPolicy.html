@@ -218,7 +218,7 @@ whether to mark an endpoint dead upon a request failure. On each successful
 response, <code>FailureAccrualFactory</code> calls <code>recordSuccess()</code>. On each failure,
 <code>FailureAccrualFactory</code> calls <code>markDeadOnFailure()</code> to obtain the duration
 to mark the endpoint dead for; (Some(Duration)), or None.
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#failure-accrual" target="_blank">user guide</a>
+</p></div><dl class="attributes block"> <dt>Self Type</dt><dd><a href="" class="extype" name="com.twitter.finagle.liveness.FailureAccrualPolicy">FailureAccrualPolicy</a></dd><dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#failure-accrual" target="_blank">user guide</a>
      for more details.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
@@ -602,6 +602,24 @@ probing. Used to reset any history.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.liveness.FailureAccrualPolicy#orElse" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="orElse(that:com.twitter.finagle.liveness.FailureAccrualPolicy):com.twitter.finagle.liveness.FailureAccrualPolicy"></a><a id="orElse(FailureAccrualPolicy):FailureAccrualPolicy"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/liveness/FailureAccrualPolicy.html#orElse(that:com.twitter.finagle.liveness.FailureAccrualPolicy):com.twitter.finagle.liveness.FailureAccrualPolicy" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">orElse</span><span class="params">(<span name="that">that: <a href="" class="extype" name="com.twitter.finagle.liveness.FailureAccrualPolicy">FailureAccrualPolicy</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.liveness.FailureAccrualPolicy">FailureAccrualPolicy</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Creates a <a href="" class="extype" name="com.twitter.finagle.liveness.FailureAccrualPolicy">FailureAccrualPolicy</a> which uses both <code>this</code> and <code>that</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a <a href="" class="extype" name="com.twitter.finagle.liveness.FailureAccrualPolicy">FailureAccrualPolicy</a> which uses both <code>this</code> and <code>that</code>.</p><p><a href="#markDeadOnFailure():Option[com.twitter.util.Duration]" class="extmbr" name="com.twitter.finagle.liveness.FailureAccrualPolicy#markDeadOnFailure">markDeadOnFailure</a> will return the longer duration if both <code>this</code> and <code>that</code> return
+Some(duration).
+</p></div></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
