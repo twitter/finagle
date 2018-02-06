@@ -74,8 +74,13 @@ private[http2] final class AdapterProxyChannelHandler(
   private[this] def closeAll(): Unit = {
     map.foreach {
       case (_, value) =>
-        value.embedded.pipeline().fireChannelInactive() // clean up inbound handlers
-        value.embedded.close() // clean up outbound handlers
+        // Clean up inbound handlers. Normally the close
+        // below would be sufficient but it is suppressed
+        // by the OutboundPropagator so we have to take
+        // matters into our own hands and fire the channel
+        // inactive explicitly.
+        value.embedded.pipeline().fireChannelInactive()
+        value.embedded.close()
     }
     map.clear()
   }
