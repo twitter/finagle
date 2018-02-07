@@ -56,6 +56,13 @@ Runtime Behavior Changes
   * finagle-core: Finagle clients with retry budgets or backoffs should no
     longer have infinite hash codes. ``PHAB_ID=D128594``
 
+  * finagle-core: `c.t.f.l.Balancer` no longer uses a `c.t.f.u.Updater` as its underlying
+    concurrency primitive as it was found that in practice coalescing updates almost never
+    happens and in the absence of that `Updater` imposes more overhead than simple
+    synchronization while complicating the result of calling `rebuild()` since we don't know
+    if the rebuild actually occurred by the time we attempt to use the distributor again.
+    ``PHAB_ID=D126486``
+
 18.1.0
 -------
 
@@ -112,7 +119,7 @@ Runtime Behavior Changes
   * finagle-http2: Supplies a dependency on io.netty.netty-tcnative-boringssl-static,
     which adds support for ALPN, which is necessary for encrypted http/2.  To use a
     different static ssl dependency, exclude the tcnative-boringssl dependency and
-    manually depend on the one you want to use.  ``PHAB_ID=D119555``
+    manually depend on the one you want to use. ``PHAB_ID=D119555``
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~

@@ -105,8 +105,12 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
 
   /**
    * Adjust the aperture by `n` serving units.
+   *
+   * Calls to this method are intrinsically racy with respect to updates and rebuilds
+   * and no special consideration is taken to avoid these races as feedback mechanisms
+   * should simply fire again should an adjustment be made to an old [[Balancer]].
    */
-  protected def adjust(n: Int): Unit = invoke(_.adjust(n))
+  protected def adjust(n: Int): Unit = dist.adjust(n)
 
   /**
    * Widen the aperture by one serving unit.

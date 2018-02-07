@@ -3,7 +3,6 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.finagle._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Future, Time}
-import java.util.concurrent.atomic.AtomicInteger
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.Conductors
@@ -187,48 +186,4 @@ class BalancerTest extends FunSuite with Conductors with GeneratorDrivenProperty
       update1(i) eq bal._dist().vector(i).factory
     })
   }
-
-  if (!sys.props.contains("SKIP_FLAKY")) // CSL-1685
-    test("Coalesces updates") {
-      val conductor = new Conductor
-      import conductor._
-
-      val bal = new TestBalancer {
-        val beat = new AtomicInteger(1)
-        @volatile var updateThreads: Set[Long] = Set.empty
-
-        override def rebuildDistributor() {
-          synchronized { updateThreads += Thread.currentThread.getId() }
-          waitForBeat(beat.getAndIncrement())
-          waitForBeat(beat.getAndIncrement())
-        }
-      }
-      val f1, f2, f3 = newFac()
-
-      @volatile var thread1Id: Long = -1
-
-      thread("updater1") {
-        thread1Id = Thread.currentThread.getId()
-        bal.update(Vector.empty) // waits for 1, 2
-        // (then waits for 3, 4, in this thread)
-      }
-
-      thread("updater2") {
-        waitForBeat(1)
-        bal._rebuild()
-        bal.update(Vector(f1))
-        bal.update(Vector(f2))
-        bal._rebuild()
-        bal.update(Vector(f3))
-        bal._rebuild()
-        assert(beat == 1)
-        waitForBeat(2)
-      }
-
-      whenFinished {
-        assert(bal.factories == Set(f3))
-        assert(bal._dist().gen == 3)
-        assert(bal.updateThreads == Set(thread1Id))
-      }
-    }
 }
