@@ -191,7 +191,7 @@ object ValueEncoder extends LowPriorityEncoder {
 
   implicit val jsonb: ValueEncoder[JSONB] = instance[JSONB](
     "jsonb",
-    j => String.valueOf(j),
+    j => JSONB.stringify(j),
     (j, c) => {
       val cb = ChannelBuffers.buffer(1 + j.bytes.length)
       cb.writeByte(1)
