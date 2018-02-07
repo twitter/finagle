@@ -25,7 +25,7 @@ object Cookie {
     bs
   }
 
-  private[this] def stringContains(string: String, chars: JBitSet): Boolean = {
+  private[http] def stringContains(string: String, chars: JBitSet): Boolean = {
     var i = 0
     val until = string.length
     while (i < until && !chars.get(string.charAt(i))) {

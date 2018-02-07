@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Bug Fixes
+~~~~~~~~~
+
+  * finagle-base-http: `c.t.f.http.Netty4CookieCodec.encode` now wraps Cookie values that would
+    be wrapped in `c.t.f.http.Netty3CookieCodec.encode`. ``PHAB_ID=D134566``
+
 18.2.0
 -------
 

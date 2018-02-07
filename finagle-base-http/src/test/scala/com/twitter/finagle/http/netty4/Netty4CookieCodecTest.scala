@@ -1,15 +1,39 @@
 package com.twitter.finagle.http.netty4
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.http.netty3.Netty3CookieCodec
 import com.twitter.finagle.http.Cookie
 import com.twitter.finagle.http.netty4.Netty4CookieCodec._
-import io.netty.handler.codec.http.cookie.{
-  Cookie => NettyCookie,
-  DefaultCookie => NettyDefaultCookie
-}
+import com.twitter.util.Try
+import io.netty.handler.codec.http.cookie.{Cookie => NettyCookie, DefaultCookie => NettyDefaultCookie}
 import org.scalatest.FunSuite
 
 class Netty4CookieCodecTest extends FunSuite {
+
+  // N4 STRICT mode does not permit control characters (0 - 32, 127), whitespace, double-quote, comma,
+  // semicolon, backslash, or non-ascii characters (here we know that we test up to 150.toChar)
+  val prohibitedInN4 =
+    (0 to 32).map(_.toChar) ++
+    Seq(127.toChar) ++
+    Seq(' ', '"', ',', ';', '\\') ++
+    (128 to 150).map(_.toChar)
+
+  test("Value encoding (incl. wrapping) is the same as n3, minus the new prohibited characters") {
+    (0 to 150).map(_.toChar).foreach { char =>
+      val cookie = new Cookie("name", s"value${char}value")
+      val n4EncodedClient = Try(Netty4CookieCodec.encodeClient(Seq(cookie)))
+      val n4EncodedServer = Try(Netty4CookieCodec.encodeServer(cookie))
+      val n3EncodedClient = Try(Netty3CookieCodec.encodeClient(Seq(cookie)))
+
+      if (prohibitedInN4.contains(char)) {
+        assert(n4EncodedClient.isThrow && n4EncodedServer.isThrow)
+      } else {
+        assert(n4EncodedClient == n3EncodedClient)
+        assert(n4EncodedClient == n4EncodedServer)
+      }
+    }
+  }
+
   test("finagle cookie with name, value -> netty") {
     val in = new Cookie(
       name = "name",
