@@ -336,6 +336,18 @@ class FailureAccrualFactory[Req, Rep](
     policy.recordSuccess()
   }
 
+  private[this] def didReceiveIgnorable(): Unit = self.synchronized {
+    state match {
+      // If we receive a `Failure.Ignorable` in the `ProbeClosed` state, we must transition back
+      // to `ProbeOpen`, since no other state transition will be triggered via `didSucceed` or
+      // `didFail`, and we don't want to be stuck in `ProbeClosed`; the status is `Busy` in that
+      // state and we do not receive further requests.
+      case ProbeClosed =>
+        state = ProbeOpen
+      case _ =>
+    }
+  }
+
   private[this] def markDeadFor(duration: Duration) = self.synchronized {
     // In order to have symmetry with the revival counter, don't count removals
     // when probing fails.
@@ -394,9 +406,13 @@ class FailureAccrualFactory[Req, Rep](
         // (unsuccessful).
         stopProbing()
 
-        service(request).respond { rep =>
-          if (isSuccess(ReqRep(request, rep))) didSucceed()
-          else didFail()
+        service(request).respond {
+          // Don't count `Failure.Ignorable` responses as either successful or failed
+          case Throw(f: Failure) if f.isFlagged(Failure.Ignorable) =>
+            didReceiveIgnorable()
+          case rep =>
+            if (isSuccess(ReqRep(request, rep))) didSucceed()
+            else didFail()
         }
       }
 

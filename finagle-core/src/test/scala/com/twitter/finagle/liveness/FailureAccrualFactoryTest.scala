@@ -1,10 +1,9 @@
 package com.twitter.finagle.liveness
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.service._
-import com.twitter.finagle.{Status, ServiceFactory, Service, ServiceFactoryWrapper, Stack}
-import com.twitter.finagle.param
+import com.twitter.finagle._
 import com.twitter.finagle.toggle.flag
 import com.twitter.util._
 import java.util.concurrent.TimeUnit
@@ -118,6 +117,107 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     // trip it.
     svc(5)
     assert(stats.counter("removals")() == 1)
+  }
+
+  test("does not count ignorable failure as failure") {
+    val svcFactory = ServiceFactory.const {
+      Service.mk { i: Int =>
+        Future.exception[Int](Failure.ignorable("ignore me!"))
+      }
+    }
+    val stats = new InMemoryStatsReceiver()
+    val faf = new FailureAccrualFactory[Int, Int](
+      underlying = svcFactory,
+      policy = FailureAccrualPolicy.consecutiveFailures(1, Backoff.const(2.seconds)),
+      timer = Timer.Nil,
+      statsReceiver = stats,
+      responseClassifier = ResponseClassifier.Default
+    )
+
+    val svc = Await.result(faf(), 5.seconds)
+    svc(-1)
+    assert(stats.counter("removals")() == 0)
+    assert(faf.isAvailable)
+  }
+
+  test("does not count ignorable failure as success") {
+    var ret = Future.exception[Int](new Exception("boom!"))
+    val svcFactory = ServiceFactory.const {
+      Service.mk { i: Int =>
+        ret
+      }
+    }
+    val stats = new InMemoryStatsReceiver()
+    val faf = new FailureAccrualFactory[Int, Int](
+      underlying = svcFactory,
+      policy = FailureAccrualPolicy.consecutiveFailures(3, Backoff.const(2.seconds)),
+      timer = new MockTimer,
+      statsReceiver = stats,
+      responseClassifier = ResponseClassifier.Default
+    )
+
+    val svc = Await.result(faf(), 5.seconds)
+    svc(-1)
+    svc(-1)
+
+    assert(stats.counter("removals")() == 0)
+    assert(faf.isAvailable)
+
+    ret = Future.exception[Int](Failure.ignorable("ignore me!"))
+
+    svc(-1) // this should not be counted as a success
+    assert(stats.counter("removals")() == 0)
+    assert(faf.isAvailable)
+
+    ret = Future.exception[Int](new Exception("boom!"))
+
+    svc(-1) // Third "real" exception in a row; should trip FA
+
+    assert(stats.counter("removals")() == 1)
+    assert(!faf.isAvailable)
+  }
+
+  test("keeps probe open on ignorable failure") {
+    var ret = Future.exception[Int](new Exception("boom!"))
+    Time.withCurrentTimeFrozen { timeControl =>
+      val svcFactory = ServiceFactory.const {
+        Service.mk { i: Int =>
+          ret
+        }
+      }
+      val stats = new InMemoryStatsReceiver()
+      val timer = new MockTimer
+      val faf = new FailureAccrualFactory[Int, Int](
+        underlying = svcFactory,
+        policy = FailureAccrualPolicy.consecutiveFailures(1, Backoff.const(2.seconds)),
+        timer = timer,
+        statsReceiver = stats,
+        responseClassifier = ResponseClassifier.Default
+      )
+
+      val svc = Await.result(faf(), 5.seconds)
+      svc(-1)
+
+      // Trip FA
+      assert(stats.counter("removals")() == 1)
+      assert(!faf.isAvailable)
+
+      timeControl.advance(10.seconds)
+      timer.tick()
+
+      assert(faf.isAvailable)
+
+      ret = Future.exception[Int](Failure.ignorable("ignore me!"))
+
+      svc(-1)
+
+      // ensure that the ignorable not counted as a success, but that we can still send requests
+      // (ProbeOpen state)
+      assert(stats.counters.get(List("revivals")) == None)
+      assert(stats.counter("probes")() == 1)
+      assert(stats.counter("removals")() == 1)
+      assert(faf.isAvailable)
+    }
   }
 
   test("a failing service should enter the probing state after the markDeadFor duration") {

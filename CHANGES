@@ -10,6 +10,9 @@ Unreleased
 Bug Fixes
 ~~~~~~~~~
 
+  * finagle-core: `c.t.f.liveness.FailureAccrualFactory` takes no action on `c.t.f.Failure.Ignorable`
+    responses. ``PHAB_ID=D135435``
+
   * finagle-base-http: `c.t.f.http.Netty4CookieCodec.encode` now wraps Cookie values that would
     be wrapped in `c.t.f.http.Netty3CookieCodec.encode`. ``PHAB_ID=D134566``
 
