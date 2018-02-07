@@ -139,11 +139,11 @@ object ValueDecoder {
 
   implicit val javaBigDecimal: ValueDecoder[java.math.BigDecimal] = bigDecimal.map(_.bigDecimal)
 
-  val jsonb = instance(
-    s => Return(s),
+  implicit val jsonb: ValueDecoder[JSONB] = instance(
+    s => Return(JSONB(s)),
     (b, c) => Try {
       b.readByte()  //discard version number
-      new String(Array.fill(b.readableBytes())(b.readByte()), c)
+      JSONB(new String(Array.fill(b.readableBytes())(b.readByte()), c))
     }
   )
 
