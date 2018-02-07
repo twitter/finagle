@@ -17,12 +17,12 @@ private[loadbalancer] trait Expiration[Req, Rep] extends BalancerNode[Req, Rep] 
   protected def endpointIdleTime: Duration
 
   /**
-   * Creates a new periodic task which which will try to expire nodes
-   * that are outside of the aperture window. The interval that the task
-   * is run at is <= the `endpointIdleTime`. This means that idle nodes can
-   * live for at most `endpointIdleTime` * 2. We take the loss in precision
-   * for the perfomance gain of not needing to schedule granular timer tasks
-   * for each individual endpoint.
+   * Creates a new periodic task which will try to expire nodes that are
+   * outside of the aperture window. The interval that the task is run at
+   * is <= the `endpointIdleTime`. This means that idle nodes can live for
+   * at most `endpointIdleTime` * 2. We take the loss in precision for the
+   * performance gain of not needing to schedule granular timer tasks for
+   * each individual endpoint.
    */
   protected def newExpiryTask(timer: Timer): TimerTask =
     timer.schedule(endpointIdleTime / 2) {
@@ -47,7 +47,7 @@ private[loadbalancer] trait Expiration[Req, Rep] extends BalancerNode[Req, Rep] 
    *
    * 1. No service has been acquired for at least `endpointIdleTime` duration.
    *
-   * 2. There are no outstanding service acquistion requests.
+   * 2. There are no outstanding service acquisition requests.
    */
   protected trait ExpiringNode extends NodeT[Req, Rep] {
 

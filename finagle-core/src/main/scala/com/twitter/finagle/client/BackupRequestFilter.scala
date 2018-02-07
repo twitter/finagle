@@ -244,7 +244,7 @@ private[client] class BackupRequestFilter[Req, Rep](
   private[client] def sendBackupAfterDuration: Duration =
     Duration.fromMilliseconds(sendBackupAfter)
 
-  // schedule timer to refresh `sendBackupAfter`, and refresh `backupRequestRetryBuget` in response
+  // schedule timer to refresh `sendBackupAfter`, and refresh `backupRequestRetryBudget` in response
   // to changes to the value of `maxExtraLoadTunable`,
   private[this] val refreshTimerTask: TimerTask = {
     @volatile var curMaxExtraLoad = getAndValidateMaxExtraLoad(maxExtraLoadTunable)

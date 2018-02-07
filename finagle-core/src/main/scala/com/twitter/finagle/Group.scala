@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicReference
 trait Group[T] { outer =>
   // Group is needlessly complex due to it transitioning to
   // deprecation. In order to provide reasonable compatibility with
-  // forthcoming structrures, we base the group implementation on Var
+  // forthcoming structures, we base the group implementation on Var
   // while retaining its two key semantics:
   //
   //   (1) unchanged objects retain identity;

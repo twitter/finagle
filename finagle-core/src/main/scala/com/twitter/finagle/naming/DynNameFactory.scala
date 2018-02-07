@@ -8,7 +8,7 @@ import com.twitter.util.{Activity, Future, Promise, Stopwatch, Time}
 import scala.collection.immutable
 
 /**
- * Proxies requests to the current definiton of 'name', queueing
+ * Proxies requests to the current definition of 'name', queueing
  * requests while it is pending.
  */
 private class DynNameFactory[Req, Rep](

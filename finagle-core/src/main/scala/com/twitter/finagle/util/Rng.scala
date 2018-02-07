@@ -10,12 +10,12 @@ import java.util.concurrent.ThreadLocalRandom
 trait Rng {
 
   /**
-   * Generate a random Double between `0.0` and `1.0`, inclusive.
+   * Generate a random Double between 0.0 and 1.0, inclusive.
    */
   def nextDouble(): Double
 
   /**
-   * Generate a random Int betwen 0 (inclusive) and `n` (exclusive).
+   * Generate a random Int between 0 (inclusive) and `n` (exclusive).
    *
    * @param n the upper bound (exclusive). Must be a positive value.
    */

@@ -119,7 +119,7 @@ private final class LazyEndpointFactory[Req, Rep](
     case Making => remake()
     case s @ Made(underlying) =>
       // Note, underlying is responsible for draining any outstanding
-      // service acquistion requests gracefully.
+      // service acquisition requests gracefully.
       if (!state.compareAndSet(s, Init)) remake()
       else underlying.close()
   }

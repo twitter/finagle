@@ -29,9 +29,6 @@ private class NameTreeParsers private (str: String) {
     throw new IllegalArgumentException(s"$expected expected but $found found at '$displayStr'")
   }
 
-  private[this] def illegal(expected: Char, found: String): Nothing =
-    illegal(stringOfChar(expected), found)
-
   private[this] def illegal(expected: String, found: Char): Nothing =
     illegal(expected, stringOfChar(found))
 

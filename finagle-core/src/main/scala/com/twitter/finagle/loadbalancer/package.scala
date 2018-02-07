@@ -60,7 +60,7 @@ package object loadbalancer {
    * `defaultAddressOrdering`. If no value is set, [[Address.OctetOrdering]]
    * is used with the assumption that hosts resolved via Finagle provide the
    * load balancer with resolved InetAddresses. If a separate resolution process
-   * is used, outside of Finagle, the default ordering should be overriden.
+   * is used, outside of Finagle, the default ordering should be overridden.
    */
   def defaultAddressOrdering: Ordering[Address] = addressOrdering
 

@@ -13,7 +13,7 @@ import scala.collection.mutable.Builder
  * delegation rules. Together, these describe how to bind a
  * [[com.twitter.finagle.Path]] to a set of
  * [[com.twitter.finagle.Addr]]. [[com.twitter.finagle.naming.DefaultInterpreter]]
- * implements the default binding stategy.
+ * implements the default binding strategy.
  *
  * @see The [[https://twitter.github.io/finagle/guide/Names.html#interpreting-paths-with-delegation-tables user guide]]
  *      for further details.

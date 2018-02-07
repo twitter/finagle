@@ -38,7 +38,7 @@ import com.twitter.util._
  * resulting from different bindings of the [[Path]]).
  *
  * @bug This is far too complicated, though it seems necessary for
- * efficiency when namers are occasionally overriden.
+ * efficiency when namers are occasionally overridden.
  *
  * @bug 'status' has a funny definition.
  */
