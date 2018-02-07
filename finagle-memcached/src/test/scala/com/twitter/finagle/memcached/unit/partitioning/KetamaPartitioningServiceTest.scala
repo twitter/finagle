@@ -4,7 +4,8 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle._
 import com.twitter.finagle.memcached.partitioning.KetamaPartitioningService
-import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.memcached.partitioning.KetamaPartitioningService.NoPartitioningKeys
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.hashing.KeyHasher
 import com.twitter.util._
 import java.nio.charset.StandardCharsets.UTF_8
@@ -264,6 +265,13 @@ class KetamaPartitioningServiceTest extends PartitioningServiceTestBase {
       assert(awaitResult(client(request)) == request + EchoDelimiter + serverName)
     }
   }
+
+  test("no partitioning keys") {
+    client = createClient(NullStatsReceiver, ejectFailedHosts = true)
+    intercept[NoPartitioningKeys] {
+      awaitResult(client(""))
+    }
+  }
 }
 
 object TestKetamaPartitioningService {
@@ -309,7 +317,10 @@ private[this] class TestKetamaPartitioningService(
   }
 
   protected override def getPartitionKeys(request: String): Seq[String] = {
-    request.split(RequestDelimiter).map(_.trim).toSeq
+    if (request.isEmpty)
+      Seq.empty
+    else
+      request.split(RequestDelimiter).map(_.trim).toSeq
   }
 
   protected override def createPartitionRequestForKeys(

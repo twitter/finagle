@@ -6,7 +6,7 @@ import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.server.StringServer
-import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Address, _}
 import com.twitter.util._
@@ -76,7 +76,7 @@ trait PartitioningServiceTestBase extends FunSuite with BeforeAndAfterEach with 
   }
 
   protected[this] def createClient(
-    sr: InMemoryStatsReceiver,
+    sr: StatsReceiver,
     dest: Name = Name.bound(servers.map(s => Address(s._2)): _*),
     ejectFailedHosts: Boolean = false
   ): Service[String, String] = {

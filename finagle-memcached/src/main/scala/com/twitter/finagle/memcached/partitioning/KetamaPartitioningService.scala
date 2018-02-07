@@ -3,7 +3,9 @@ package com.twitter.finagle.memcached.partitioning
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle._
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
+import com.twitter.finagle.param.Logger
 import com.twitter.hashing._
+import com.twitter.logging.Level
 import com.twitter.util._
 import scala.collection.breakOut
 
@@ -14,6 +16,11 @@ import scala.collection.breakOut
  * 'Memcached.param.EjectFailedHost' param is true.
  */
 private[finagle] object KetamaPartitioningService {
+
+  /**
+   * Request is missing partitioning keys needed to determine target partition(s).
+   */
+  private[finagle] class NoPartitioningKeys extends Exception
 
   private[finagle] val DefaultNumReps = 160
 
@@ -46,6 +53,10 @@ private[finagle] abstract class KetamaPartitioningService[Req, Rep, Key](
   numReps: Int = KetamaPartitioningService.DefaultNumReps
 ) extends PartitioningService[Req, Rep] {
 
+  import KetamaPartitioningService._
+
+  private[this] val logger = params[Logger].log
+
   private[this] val nodeManager = new KetamaNodeManager(underlying, params, numReps)
 
   /**
@@ -76,7 +87,9 @@ private[finagle] abstract class KetamaPartitioningService[Req, Rep, Key](
   ): Future[Service[Req, Rep]] = {
     val keys = getPartitionKeys(partitionedRequest)
     if (keys.isEmpty) {
-      Future.exception(new IllegalStateException("No partition keys found in request"))
+      if (logger.isLoggable(Level.DEBUG))
+        logger.log(Level.DEBUG, s"NoPartitioningKeys in getPartitionFor: $partitionedRequest")
+      Future.exception(new NoPartitioningKeys())
     } else {
       // All keys in the request are assumed to belong to the same partition, so use the
       // first key to find the associated partition.
@@ -84,7 +97,9 @@ private[finagle] abstract class KetamaPartitioningService[Req, Rep, Key](
     }
   }
 
-  final override protected def partitionRequest(request: Req): Seq[(Req, Future[Service[Req, Rep]])] = {
+  final override protected def partitionRequest(
+    request: Req
+  ): Seq[(Req, Future[Service[Req, Rep]])] = {
     getPartitionKeys(request) match {
       case Seq(key) =>
         Seq((request, partitionForKey(key)))
@@ -100,7 +115,9 @@ private[finagle] abstract class KetamaPartitioningService[Req, Rep, Key](
             }(breakOut)
         }
       case _ =>
-        throw new IllegalStateException("No partition keys found in request")
+        if (logger.isLoggable(Level.DEBUG))
+          logger.log(Level.DEBUG, s"NoPartitioningKeys in partitionRequest: $request")
+        throw new NoPartitioningKeys
     }
   }
 
@@ -115,4 +132,5 @@ private[finagle] abstract class KetamaPartitioningService[Req, Rep, Key](
     val hash = keyHasher.hashKey(bytes)
     nodeManager.getServiceForHash(hash)
   }
+
 }

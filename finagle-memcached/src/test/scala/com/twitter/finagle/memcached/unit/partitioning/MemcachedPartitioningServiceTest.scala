@@ -5,6 +5,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.memcached.TwemcacheClient
 import com.twitter.finagle.memcached.partitioning.MemcachedPartitioningService
+import com.twitter.finagle.memcached.partitioning.MemcachedPartitioningService.UnsupportedCommand
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.serverset2.addr.ZkMetadata
@@ -166,6 +167,12 @@ class MemcachedPartitioningServiceTest
     when(mockService.apply(any[Command])).thenReturn(Future.value(Deleted))
     awaitResult(client.delete("foo")) must be(java.lang.Boolean.TRUE)
     verify(mockService, times(1)).apply(any[Delete])
+  }
+
+  test("unsupported command") {
+    intercept[UnsupportedCommand] {
+      awaitResult(client.stats())
+    }
   }
 
   test("adds and removes") {

@@ -2,15 +2,21 @@ package com.twitter.finagle.memcached.partitioning
 
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle.memcached.protocol._
+import com.twitter.finagle.param.Logger
 import com.twitter.finagle.{Memcached, _}
 import com.twitter.hashing.KeyHasher
 import com.twitter.io.Buf
+import com.twitter.logging.Level
 
 /**
  * MemcachedPartitioningService provides Ketama consistent hashing based partitioning for the
  * Memcached protocol.
  */
 private[finagle] object MemcachedPartitioningService {
+
+  private[finagle] class UnsupportedCommand(msg: String) extends Exception
+  private[finagle] class UnsupportedBatchCommand(msg: String) extends Exception
+  private[finagle] class UnsupportedResponse(msg: String) extends Exception
 
   private[finagle] val role = Stack.Role("MemcachedKetamaPartitioning")
   private[finagle] val description =
@@ -46,6 +52,9 @@ private[finagle] class MemcachedPartitioningService(
       keyHasher,
       numReps
     ) {
+  import MemcachedPartitioningService._
+
+  private[this] val logger = params[Logger].log
 
   final override protected def getKeyBytes(key: Buf): Array[Byte] = {
     Buf.ByteArray.Owned.extract(key)
@@ -62,7 +71,9 @@ private[finagle] class MemcachedPartitioningService(
       case delete: Delete =>
         Seq(delete.key)
       case _ =>
-        throw new IllegalStateException(s"Unexpected command: $command")
+        if (logger.isLoggable(Level.DEBUG))
+          logger.log(Level.DEBUG, s"UnsupportedCommand: $command")
+        throw new UnsupportedCommand(s"Unsupported command: $command")
     }
   }
 
@@ -82,7 +93,9 @@ private[finagle] class MemcachedPartitioningService(
       case getv: Getv =>
         getv.copy(keys = pKeys)
       case _ =>
-        throw new IllegalStateException(s"Unexpected invocation: $command")
+        if (logger.isLoggable(Level.DEBUG))
+          logger.log(Level.DEBUG, s"UnsupportedBatchCommand: $command")
+        throw new UnsupportedBatchCommand(s"Unsupported batch command: $command")
     }
   }
 
@@ -94,7 +107,9 @@ private[finagle] class MemcachedPartitioningService(
     Values(responses.flatMap {
       case Values(values) => values
       case nonvalue =>
-        throw new IllegalStateException(s"Expected Values, instead found $nonvalue")
+        if (logger.isLoggable(Level.DEBUG))
+          logger.log(Level.DEBUG, s"UnsupportedResponse: Expected Values, instead found $nonvalue")
+        throw new UnsupportedResponse(s"Expected Values, instead found $nonvalue")
     })
   }
 
