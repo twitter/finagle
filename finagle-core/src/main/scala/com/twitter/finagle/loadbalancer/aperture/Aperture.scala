@@ -14,6 +14,8 @@ import scala.collection.mutable.ListBuffer
 import scala.util.hashing.MurmurHash3
 
 private object Aperture {
+  private[this] val log = Logger.get()
+
   val dapertureToggleKey = "com.twitter.finagle.core.UseDeterministicAperture"
   private val dapertureToggle = CoreToggles(dapertureToggleKey)
 
@@ -45,9 +47,18 @@ private object Aperture {
   // While 4 healthy nodes has been determined to be sufficient for the p2c picking algorithm,
   // it is susceptible to finding it's aperture without any healthy nodes. While this is rare
   // in isolation it becomes more likely when there are many such sized apertures present.
-  // Therefore, we've assigned the min to 8 to further decrease the probability of having a
+  // Therefore, we've assigned the min to 12 to further decrease the probability of having a
   // aperture without any healthy nodes.
-  private val MinDeterminsticAperture: Int = 8
+  // Note: the flag will be removed and replaced with a constant after tuning.
+  private val MinDeterminsticAperture: Int = {
+    val min = minDeterminsticAperture()
+    if (1 < min) min
+    else {
+      log.warning(s"Unexpectedly low minimum d-aperture encountered: $min. " +
+        s"Check your configuration. Defaulting to 12.")
+      12
+    }
+  }
 }
 
 /**

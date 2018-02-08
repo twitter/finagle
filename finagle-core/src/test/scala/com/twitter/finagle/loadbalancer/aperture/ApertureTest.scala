@@ -8,7 +8,8 @@ import com.twitter.finagle.toggle
 import com.twitter.finagle.util.Rng
 import com.twitter.util.{Activity, Await, Duration, NullTimer}
 import java.net.InetSocketAddress
-import org.scalatest.FunSuite
+import org.scalactic.source.Position
+import org.scalatest.{FunSuite, Tag}
 
 class ApertureTest extends FunSuite with ApertureSuite {
 
@@ -43,6 +44,14 @@ class ApertureTest extends FunSuite with ApertureSuite {
     protected def failingNode(cause: Throwable): Node =
       new Node(new FailingEndpointFactory[Unit, Unit](cause))
   }
+
+  // Ensure the flag value is 12 since many of the tests depend on it.
+  override protected def test(testName: String,testTags: Tag*)(testFun: => Any)(implicit pos: Position): Unit =
+    super.test(testName, testTags:_*) {
+      minDeterminsticAperture.let(12) {
+        testFun
+      }
+    }
 
   test("requires minAperture > 0") {
     intercept[IllegalArgumentException] {
@@ -227,13 +236,14 @@ class ApertureTest extends FunSuite with ApertureSuite {
       override protected val useDeterministicOrdering = Some(true)
     }
 
-    ProcessCoordinate.setCoordinate(peerOffset = 0, instanceId = 1, totalInstances = 10)
-    bal.update(counts.range(10))
+    ProcessCoordinate.setCoordinate(peerOffset = 0, instanceId = 0, totalInstances = 12)
+    bal.update(counts.range(24))
     bal.rebuildx()
     assert(bal.isDeterministicAperture)
-    assert(bal.minUnitsx == 8)
+    assert(bal.minUnitsx == 12)
     bal.applyn(2000)
-    assert(counts.nonzero == (1 to 8).toSet)
+
+    assert(counts.nonzero == (0 to 11).toSet)
   }
 
   test("useDeterministicOrdering, clients unevenly divide servers") {
@@ -246,18 +256,18 @@ class ApertureTest extends FunSuite with ApertureSuite {
     bal.update(counts.range(18))
     bal.rebuildx()
     assert(bal.isDeterministicAperture)
-    assert(bal.minUnitsx == 8)
+    assert(bal.minUnitsx == 12)
     bal.applyn(2000)
 
-    // Need at least 32 connections to satisfy min of 8, so we have to circle the ring 2 times (N=2)
-    // to get 36 virtual servers. Instance 1 offset: 0.25, width: 2*0.25 = 0.5 resulting in
-    // covering half the servers, or 9 server units.
+    // Need at least 48 connections to satisfy min of 12, so we have to circle the ring 3 times (N=3)
+    // to get 48 virtual servers. Instance 1 offset: 0.25, width: 3*0.25 = 0.75 resulting in
+    // covering three quarters the servers, or 14 server units.
     // Our instance 1 offset is 0.25, which maps to server instance 18*0.25=4.5 as the start of its
-    // aperture and ends at 13.5, meaning that server instances 4 through 13 are in its physical
-    // aperture and 4 and 13 should get ~1/2 the load of the rest in this clients aperture.
-    assert(counts.nonzero == (4 to 13).toSet)
+    // aperture and ends at 18.0, meaning that server instances 4 through 17 are in its physical
+    // aperture and 4 should get ~1/2 the load of the rest in this clients aperture.
+    assert(counts.nonzero == (4 to 17).toSet)
     assert(math.abs(counts(4).total.toDouble / counts(5).total - 0.5) <= 0.1)
-    assert(math.abs(counts(13).total.toDouble / counts(12).total - 0.5) <= 0.1)
+    assert(math.abs(counts(17).total.toDouble / counts(12).total - 1.0) <= 0.1)
   }
 
   test("no-arg rebuilds are idempotent") {
@@ -323,8 +333,8 @@ class ApertureTest extends FunSuite with ApertureSuite {
       bal.rebuildx()
       assert(bal.isDeterministicAperture)
       // ignore 150, since we are using d-aperture and instead
-      // default to 4.
-      assert(bal.minUnitsx == 8)
+      // default to 12.
+      assert(bal.minUnitsx == 12)
     }
 
     toggle.flag.overrides.let(Aperture.dapertureToggleKey, 0.0) {
