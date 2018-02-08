@@ -25,7 +25,7 @@ final private[http2] class NpnOrAlpnHandler(init: ChannelInitializer[Channel], p
       upgradeCounter.incr()
 
       ctx.channel.config.setAutoRead(true)
-      val initialSettings = Settings.fromParams(params)
+      val initialSettings = Settings.fromParams(params, isServer = true)
       val logger = new LoggerPerFrameTypeLogger(params[FrameLoggerNamePrefix].loggerNamePrefix)
 
       val codec: Http2MultiplexCodec = Http2MultiplexCodecBuilder.forServer(initializer)

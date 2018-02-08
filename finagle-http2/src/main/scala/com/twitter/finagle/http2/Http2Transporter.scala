@@ -57,7 +57,7 @@ private[finagle] object Http2Transporter {
         .frameListener(Http2ClientDowngrader)
         .frameLogger(new LoggerPerFrameTypeLogger(params[FrameLoggerNamePrefix].loggerNamePrefix))
         .connection(new DefaultHttp2Connection(false /*server*/ ))
-        .initialSettings(Settings.fromParams(params))
+        .initialSettings(Settings.fromParams(params, isServer = false))
         .encoderIgnoreMaxHeaderListSize(ignoreMaxHeaderListSize)
 
       val PriorKnowledge(priorKnowledge) = params[PriorKnowledge]

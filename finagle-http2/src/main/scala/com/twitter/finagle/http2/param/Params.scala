@@ -33,15 +33,18 @@ object HeaderTableSize {
 }
 
 /**
- *  A class for configuring overrides to the default pushEnabled setting.
+ * A class for configuring overrides to the default pushEnabled setting.
+ *
+ * Marked as private because finagle doesn't support it yet.  Right now
+ * the default of, "Do not use push promises" is the only supported mode.
  */
-case class PushEnabled(pushEnabled: Option[Boolean]) {
+private[http2] case class PushEnabled(pushEnabled: Option[Boolean]) {
   def mk(): (PushEnabled, Stack.Param[PushEnabled]) =
     (this, PushEnabled.param)
 }
 
-object PushEnabled {
-  implicit val param = Stack.Param(PushEnabled(None))
+private[http2] object PushEnabled {
+  implicit val param = Stack.Param(PushEnabled(Some(false)))
 }
 
 /**

@@ -38,7 +38,7 @@ final private[finagle] class Http2CleartextServerInitializer(
 
         val codec: Http2MultiplexCodec = UpgradeMultiplexCodecBuilder.forServer(initializer)
           .frameLogger(logger)
-          .initialSettings(Settings.fromParams(params))
+          .initialSettings(Settings.fromParams(params, isServer = true))
           .encoderIgnoreMaxHeaderListSize(params[EncoderIgnoreMaxHeaderListSize].ignoreMaxHeaderListSize)
           .build()
 

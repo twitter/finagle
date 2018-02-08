@@ -75,7 +75,7 @@ private[http2] class PriorKnowledgeHandler(
           upgradeCounter.incr()
 
           // we have read a complete preface. Setup HTTP/2 pipeline.
-          val initialSettings = Settings.fromParams(params)
+          val initialSettings = Settings.fromParams(params, isServer = true)
           val logger = new LoggerPerFrameTypeLogger(params[FrameLoggerNamePrefix].loggerNamePrefix)
           val codec = Http2MultiplexCodecBuilder.forServer(initializer)
             .frameLogger(logger)
