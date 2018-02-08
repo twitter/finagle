@@ -103,8 +103,11 @@ object BackupRequestFilter {
    * Returns `service` with a [[BackupRequestFilter]] prepended, according to the configuration
    * params in `params`. If the [[BackupRequestFilter]] has not been configured, returns the
    * same `service`.
+   *
+   * Users should only use this method for filtering generic services; otherwise,
+   * usage through the `idempotent` method on [[MethodBuilder]] implementations is preferred.
    */
-  private[client] def filterService[Req, Rep](
+  def filterService[Req, Rep](
     params: Stack.Params,
     service: Service[Req, Rep]
   ): Service[Req, Rep] =

@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+  * `c.t.f.client.BackupRequestFilter.filterService` for wrapping raw services in a
+    `c.t.f.client.BackupRequestFilter` is now public. ``PHAB_ID=D135484``
+
 Bug Fixes
 ~~~~~~~~~
 
