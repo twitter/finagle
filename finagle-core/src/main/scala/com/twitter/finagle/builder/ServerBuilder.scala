@@ -6,9 +6,8 @@ import com.twitter.finagle.{Server => FinagleServer, _}
 import com.twitter.finagle.filter.{MaskCancelFilter, RequestSemaphoreFilter, ServerAdmissionControl}
 import com.twitter.finagle.server.{Listener, StackBasedServer}
 import com.twitter.finagle.service.{ExpiringService, TimeoutFilter}
-import com.twitter.finagle.ssl.{ApplicationProtocols, CipherSuites, Engine, KeyCredentials}
+import com.twitter.finagle.ssl.{ApplicationProtocols, CipherSuites, KeyCredentials}
 import com.twitter.finagle.ssl.server.{
-  ConstServerEngineFactory,
   SslServerConfiguration,
   SslServerEngineFactory,
   SslServerSessionVerifier
@@ -19,7 +18,6 @@ import com.twitter.finagle.util._
 import com.twitter.util.{CloseAwaitably, Duration, Future, NullMonitor, Time}
 import java.io.File
 import java.net.SocketAddress
-import javax.net.ssl.SSLEngine
 import scala.annotation.implicitNotFound
 
 /**
@@ -466,16 +464,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
       )
     )
   }
-
-  /**
-   * Provide a raw SSL engine that is used to establish SSL sessions.
-   */
-  def newSslEngine(newSsl: () => SSLEngine): This =
-    newFinagleSslEngine(() => new Engine(newSsl()))
-
-  def newFinagleSslEngine(v: () => Engine): This =
-    _configured(SslServerEngineFactory.Param(new ConstServerEngineFactory(v)))
-      .configured(Transport.ServerSsl(Some(SslServerConfiguration())))
 
   /**
    * Configures the maximum concurrent requests that are admitted

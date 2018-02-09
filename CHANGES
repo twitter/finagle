@@ -22,6 +22,22 @@ Bug Fixes
   * finagle-base-http: `c.t.f.http.Netty4CookieCodec.encode` now wraps Cookie values that would
     be wrapped in `c.t.f.http.Netty3CookieCodec.encode`. ``PHAB_ID=D134566``
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: `c.t.finagle.ssl.Ssl` and related classes have been
+    removed. They were replaced as the primary way of using SSL/TLS
+    within Finagle in release 6.44.0 (April 2017). Please migrate to using
+    `c.t.f.ssl.client.SslClientEngineFactory` or
+    `c.t.f.ssl.server.SslServerEngineFactory` instead. ``PHAB_ID=D135908``
+
+  * finagle-core: Removed `newSslEngine` and `newFinagleSslEngine` from
+    `ServerBuilder`. Please implement a class which extends
+    `c.t.f.ssl.server.SslServerEngineFactory` with the previously passed in
+    function used as the implementation of the `apply` method. Then use the
+    created engine factory with one of the `tls` methods instead.
+    ``PHAB_ID=D135908``
+
 18.2.0
 -------
 
