@@ -6,11 +6,12 @@ import com.twitter.util.{Return, Throw, Try}
 /**
  * Retries contains the number of times a request has been retried.
  *
- * @param retries the number of retries
+ * @param attempt which retry attempt this is. Will be 0
+ *                if the request is not a retry.
  */
-private[finagle] case class Retries(val retries: Int)
+case class Retries(attempt: Int)
 
-private[finagle] object Retries
+object Retries
     extends Contexts.broadcast.Key[Retries]("com.twitter.finagle.Retries") {
 
   def current: Option[Retries] =
@@ -18,7 +19,7 @@ private[finagle] object Retries
 
   override def marshal(retries: Retries): Buf = {
     val bw = BufByteWriter.fixed(4)
-    bw.writeIntBE(retries.retries)
+    bw.writeIntBE(retries.attempt)
     bw.owned()
   }
 
@@ -30,8 +31,8 @@ private[finagle] object Retries
         )
       )
     } else {
-      val retries: Int = ByteReader(buf).readIntBE()
-      Return(Retries(retries))
+      val attempt: Int = ByteReader(buf).readIntBE()
+      Return(Retries(attempt))
     }
   }
 }

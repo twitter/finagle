@@ -72,6 +72,13 @@ Current request deadline
 ``com.twitter.finagle.context.Deadline.current`` —
 A broadcast ``Context`` that represents when the request should be completed by.
 
+Current retry attempt
+~~~~~~~~~~~~~~~~~~~~~
+
+``com.twitter.finagle.context.Retries.current`` —
+A broadcast ``Context`` that represents which retry attempt this request is.
+Will have ``attempt`` set to 0 if the request is not a retry.
+
 Current TLS peer certificate
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

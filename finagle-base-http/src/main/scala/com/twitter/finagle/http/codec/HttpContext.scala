@@ -26,7 +26,7 @@ object HttpContext {
     deadline.timestamp.inNanoseconds + " " + deadline.deadline.inNanoseconds
 
   private[this] def marshalRetries(retries: Retries): String =
-    retries.retries.toString
+    retries.attempt.toString
 
   private[this] val unmarshalDeadline: String => Option[Deadline] = header => {
     try {
