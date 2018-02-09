@@ -551,7 +551,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *
    * Http.client
    *   .methodBuilder("inet!localhost:8080")
-   *   .withTotalTimeout(duration)
+   *   .withTimeoutTotal(duration)
    * }}}
    *
    * @note if the request is not complete after `duration` the work that is
