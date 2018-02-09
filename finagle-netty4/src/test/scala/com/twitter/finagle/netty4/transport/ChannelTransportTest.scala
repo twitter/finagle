@@ -289,4 +289,12 @@ class ChannelTransportTest
 
     assert(ct.status == Status.Closed)
   }
+
+  test("firing inactive doesn't trigger a close") {
+    val em = new EmbeddedChannel
+    val ct = new ChannelTransport(em, new AsyncQueue[Any](maxPendingOffers = 1))
+    em.pipeline.fireChannelInactive()
+
+    assert(em.isOpen)
+  }
 }

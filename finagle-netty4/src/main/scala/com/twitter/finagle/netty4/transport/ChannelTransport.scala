@@ -9,7 +9,7 @@ import io.netty.handler.ssl.SslHandler
 import java.net.SocketAddress
 import java.security.cert.Certificate
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
-import scala.util.control.NonFatal
+import scala.util.control.{NonFatal, NoStackTrace}
 
 /**
  * A [[Transport]] implementation based on Netty's [[nettyChan.Channel]].
@@ -24,7 +24,8 @@ import scala.util.control.NonFatal
  */
 private[finagle] class ChannelTransport(
   ch: nettyChan.Channel,
-  readQueue: AsyncQueue[Any] = new AsyncQueue[Any]
+  readQueue: AsyncQueue[Any] = new AsyncQueue[Any],
+  omitStackTraceOnInactive: Boolean = false
 ) extends Transport[Any, Any] {
 
   type Context = Netty4Context
@@ -33,6 +34,7 @@ private[finagle] class ChannelTransport(
 
   private[this] val failed = new AtomicBoolean(false)
   private[this] val closed = new Promise[Throwable]
+  private[this] val alreadyClosed = new AtomicBoolean(false)
 
   private[this] val readInterruptHandler: PartialFunction[Throwable, Unit] = {
     case e =>
@@ -139,7 +141,10 @@ private[finagle] class ChannelTransport(
     else Status.Open
 
   def close(deadline: Time): Future[Unit] = {
-    if (ch.isOpen) ch.close()
+    // we check if this has already been closed because of a netty bug
+    // https://github.com/netty/netty/issues/7638.  Remove this work-around once
+    // it's fixed.
+    if (alreadyClosed.compareAndSet(false, true) && ch.isOpen) ch.close()
     closed.unit
   }
 
@@ -185,7 +190,10 @@ private[finagle] class ChannelTransport(
       }
 
       override def channelInactive(ctx: nettyChan.ChannelHandlerContext): Unit = {
-        fail(new ChannelClosedException(remoteAddress))
+        alreadyClosed.set(true)
+        if (omitStackTraceOnInactive) {
+          fail(new ChannelClosedException(remoteAddress) with NoStackTrace)
+        } else fail(new ChannelClosedException(remoteAddress))
       }
 
       override def exceptionCaught(ctx: nettyChan.ChannelHandlerContext, e: Throwable): Unit = {

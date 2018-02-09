@@ -1,8 +1,10 @@
 package com.twitter.finagle.http2
 
+import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.{http, Stack, ListeningServer, Announcement}
 import com.twitter.finagle.netty4.Netty4Listener
 import com.twitter.finagle.netty4.http.{HttpCodecName, initServer}
+import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.Awaitable.CanAwait
@@ -58,14 +60,17 @@ private[http2] class Http2Listener[In, Out](
     )
   }
 
-  private[this] val underlyingListener = Netty4Listener[In, Out](
+  private[this] val underlyingListener = Netty4Listener[In, Out, TransportContext](
     pipelineInit = { pipeline: ChannelPipeline =>
       channels.add(pipeline.channel)
       pipeline.addLast(HttpCodecName, sourceCodec(params))
       initServer(params)(pipeline)
     },
     params = params,
-    setupMarshalling = setupMarshalling
+    setupMarshalling = setupMarshalling,
+    transportFactory = { ch: Channel =>
+      new ChannelTransport(ch, new AsyncQueue[Any], omitStackTraceOnInactive = true)
+    }
   )
 
   // we need to find the underlying handler and tell it how long to wait to drain
