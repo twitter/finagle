@@ -35,36 +35,37 @@ private[finagle] class CachingPool[Req, Rep](
 
   private[this] class WrappedService(underlying: Service[Req, Rep])
       extends ServiceProxy[Req, Rep](underlying) {
-    override def close(deadline: Time) =
+    override def close(deadline: Time) = CachingPool.this.synchronized {
       if (this.status != Status.Closed && CachingPool.this.isOpen) {
         cache.put(underlying)
         Future.Done
       } else
         underlying.close(deadline)
-  }
-
-  @tailrec
-  private[this] def get(): Option[Service[Req, Rep]] = {
-    cache.get() match {
-      case s @ Some(service) if service.status != Status.Closed => s
-      case Some(service) /* unavailable */ => service.close(); get()
-      case None => None
     }
   }
 
-  def apply(conn: ClientConnection): Future[Service[Req, Rep]] = synchronized {
+  @tailrec
+  private[this] def get(): Option[Service[Req, Rep]] = cache.get() match {
+    case s @ Some(service) if service.status != Status.Closed => s
+    case Some(service) /* unavailable */ => service.close(); get()
+    case None => None
+  }
+
+  private[this] val wrap: Service[Req, Rep] => Service[Req, Rep] = svc => new WrappedService(svc)
+
+  def apply(conn: ClientConnection): Future[Service[Req, Rep]] = CachingPool.this.synchronized {
     if (!isOpen) Future.exception(new ServiceClosedException)
     else {
       get() match {
         case Some(service) =>
           Future.value(new WrappedService(service))
         case None =>
-          factory(conn) map { new WrappedService(_) }
+          factory(conn).map(wrap)
       }
     }
   }
 
-  def close(deadline: Time) = synchronized {
+  def close(deadline: Time) = CachingPool.this.synchronized {
     isOpen = false
 
     cache.evictAll()
