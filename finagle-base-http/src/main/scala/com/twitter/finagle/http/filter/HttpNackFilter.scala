@@ -59,6 +59,10 @@ object HttpNackFilter {
   private[finagle] def isNonRetryableNack(rep: Response): Boolean =
     rep.status == ResponseStatus && rep.headerMap.contains(NonRetryableNackHeader)
 
+  private[finagle] def isNack(rep: Response): Boolean =
+    rep.status == ResponseStatus &&
+      (rep.headerMap.contains(RetryableNackHeader) || rep.headerMap.contains(NonRetryableNackHeader))
+
   private[finagle] def module: Stackable[ServiceFactory[Request, Response]] =
     new Stack.Module1[param.Stats, ServiceFactory[Request, Response]] {
       val role: Stack.Role = HttpNackFilter.role

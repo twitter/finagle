@@ -19,7 +19,10 @@ private[http] final class ClientNackFilter extends SimpleFilter[Request, Respons
     request: Request,
     service: Service[Request, Response]
   ): Future[Response] = {
-    service(request).flatMap(convertNackFn)
+    // If the request was chunked, we likely consume some of the body during an initial
+    // dispatch so it's not generally safe to retry even if the server says it is.
+    val continuation = if (request.isChunked) convertChunkedReqNackFn else convertNackFn
+    service(request).flatMap(continuation)
   }
 }
 
@@ -42,6 +45,16 @@ object ClientNackFilter {
       swallowNackResponse(res).transform(respondRetryableFailure)
 
     case res if HttpNackFilter.isNonRetryableNack(res) =>
+      swallowNackResponse(res).transform(respondNonRetryableFailure)
+
+    // Clean responses pass through
+    case res => Future.value(res)
+  }
+
+  // It's likely unsafe to retry this request based on request body being chunked so
+  // we don't mark it retryable even if the server thinks it's safe.
+  private val convertChunkedReqNackFn: Response => Future[Response] = {
+    case res if HttpNackFilter.isNack(res) =>
       swallowNackResponse(res).transform(respondNonRetryableFailure)
 
     // Clean responses pass through

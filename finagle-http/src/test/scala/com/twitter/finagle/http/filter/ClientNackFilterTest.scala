@@ -1,8 +1,8 @@
 package com.twitter.finagle.http.filter
 
-import com.twitter.finagle.http.{Request, Response}
+import com.twitter.finagle.http.{Method, Request, Response}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.{Address, Http, Name, Service, http}
+import com.twitter.finagle._
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Awaitable, Closable, Duration, Future}
 import java.net.InetSocketAddress
@@ -26,7 +26,7 @@ class ClientNackFilterTest extends FunSuite {
       assert(clientSr.counters(Seq("http", "connects")) == 1)
       assert(serverSr.counters.get(Seq("myservice", "nacks")).isEmpty)
 
-      Closable.all(client, server).close()
+      closeCtx()
     }
   }
 
@@ -43,7 +43,7 @@ class ClientNackFilterTest extends FunSuite {
       assert(clientSr.counters(Seq("http", "connects")) == 1)
       assert(serverSr.counters(Seq("myservice", "nacks")) == 1)
 
-      Closable.all(client, server).close()
+      closeCtx()
     }
   }
 
@@ -60,7 +60,7 @@ class ClientNackFilterTest extends FunSuite {
       assert(clientSr.counters(Seq("http", "connects")) == 1)
       assert(serverSr.counters(Seq("myservice", "nacks")) == 1)
 
-      Closable.all(client, server).close()
+      closeCtx()
     }
   }
 
@@ -74,7 +74,28 @@ class ClientNackFilterTest extends FunSuite {
       assert(clientSr.counters(Seq("http", "connects")) == 2)
       assert(serverSr.counters(Seq("myservice", "nacks")) == 1)
 
-      Closable.all(client, server).close()
+      closeCtx()
+    }
+  }
+
+  test("always marks streaming requests as non-retryable") {
+    new NackCtx(withStreaming = false) {
+      def nackBody: Buf = Buf.Utf8("whatever")
+      val f = intercept[Failure] {
+        request.method(Method.Post)
+        request.setChunked(true)
+        request.writer.close() // don't really write anything, but the dispatcher cant know that...
+
+        await(client(request))
+      }
+
+      assert(f.isFlagged(FailureFlags.Rejected))
+      assert(!f.isFlagged(FailureFlags.Retryable))
+
+      assert(clientSr.counters(Seq("http", "requests")) == 1)
+      assert(serverSr.counters(Seq("myservice", "nacks")) == 1)
+
+      closeCtx()
     }
   }
 
@@ -140,5 +161,8 @@ class ClientNackFilterTest extends FunSuite {
         )
 
     val request = Request(if (withStreaming) ChunkedNack else StdNack)
+
+    // Close both the client and the server
+    def closeCtx(): Unit = await(Closable.all(client, server).close())
   }
 }

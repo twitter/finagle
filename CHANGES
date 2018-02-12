@@ -22,6 +22,10 @@ Bug Fixes
   * finagle-base-http: `c.t.f.http.Netty4CookieCodec.encode` now wraps Cookie values that would
     be wrapped in `c.t.f.http.Netty3CookieCodec.encode`. ``PHAB_ID=D134566``
 
+  * finagle-http: The HTTP client will not attempt to retry nacked requests with streaming
+    bodies since it is likely that at least part of the body was already consumed and therefore
+    it isn't safe to retry. ``PHAB_ID=D136053``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
