@@ -18,6 +18,7 @@ import com.twitter.finagle.stats.{
 }
 import com.twitter.finagle.thrift._
 import com.twitter.finagle.thriftmux.Toggles
+import com.twitter.finagle.thriftmux.pushsession.MuxDowngradingNegotiator
 import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
 import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.transport.{StatsTransport, Transport}
@@ -99,13 +100,13 @@ object ThriftMux
   /**
    * Base [[com.twitter.finagle.Stack]] for ThriftMux clients.
    */
-  private[twitter] val BaseClientStack: Stack[ServiceFactory[mux.Request, mux.Response]] =
+  val BaseClientStack: Stack[ServiceFactory[mux.Request, mux.Response]] =
     (ThriftMuxUtil.protocolRecorder +: Mux.client.stack)
 
   /**
    * Base [[com.twitter.finagle.Stack]] for ThriftMux servers.
    */
-  private[twitter] val BaseServerStack: Stack[ServiceFactory[mux.Request, mux.Response]] =
+  val BaseServerStack: Stack[ServiceFactory[mux.Request, mux.Response]] =
   // NOTE: ideally this would not use the `prepConn` role, but it's conveniently
   // located in the right location of the stack and is defaulted to a no-op.
   // We would like this located anywhere before the StatsFilter so that success
@@ -113,6 +114,11 @@ object ThriftMux
   // byte arrays. see CSL-1351
     ThriftMuxUtil.protocolRecorder +:
       Mux.server.stack.replace(StackServer.Role.preparer, Server.ExnHandler)
+
+  /**
+   * Base [[com.twitter.finagle.Stack.Params]] for ThriftMux servers.
+   */
+  val BaseServerParams: Stack.Params = Mux.Server.params + ProtocolLibrary("thriftmux")
 
   object Client {
 
@@ -375,7 +381,7 @@ object ThriftMux
    */
   case class ServerMuxer(
     stack: Stack[ServiceFactory[mux.Request, mux.Response]] = BaseServerStack,
-    params: Stack.Params = Mux.server.params + ProtocolLibrary("thriftmux")
+    params: Stack.Params = BaseServerParams
   ) extends StdStackServer[mux.Request, mux.Response, ServerMuxer] {
 
     protected type In = Buf
@@ -441,9 +447,24 @@ object ThriftMux
     }
   }
 
-  val serverMuxer = ServerMuxer()
+  @deprecated("Use Server.defaultMuxer instead", "2018-02-01")
+  def serverMuxer: StackServer[mux.Request, mux.Response] = Server.defaultMuxer
 
   object Server {
+
+    /** The default underlying muxer for ThriftMux servers */
+    def defaultMuxer: StackServer[mux.Request, mux.Response] = standardMuxer
+
+    private[finagle] def pushMuxer: StackServer[mux.Request, mux.Response] = {
+      MuxPush.server
+        .copy(
+          stack = BaseServerStack,
+          params = BaseServerParams,
+          sessionFactory = MuxDowngradingNegotiator.build(_, _, _, _))
+    }
+
+    private[finagle] def standardMuxer: StackServer[mux.Request, mux.Response] = ServerMuxer()
+
     private val MuxToArrayFilter =
       new Filter[mux.Request, mux.Response, Array[Byte], Array[Byte]] {
         private[this] val responseBytesToMuxResponseFn = (responseBytes: Array[Byte]) => {
@@ -505,7 +526,7 @@ object ThriftMux
    * @see [[https://twitter.github.io/finagle/guide/Protocols.html#thrift Thrift]] documentation
    * @see [[https://twitter.github.io/finagle/guide/Protocols.html#mux Mux]] documentation
    */
-  case class Server(muxer: StackServer[mux.Request, mux.Response] = serverMuxer)
+  final case class Server(muxer: StackServer[mux.Request, mux.Response] = Server.defaultMuxer)
     extends StackBasedServer[Array[Byte], Array[Byte]]
       with ThriftRichServer
       with Stack.Parameterized[Server]

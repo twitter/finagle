@@ -189,6 +189,32 @@ private[finagle] object ThriftEmulator {
       Buf.ByteArray.Shared(buffer.toArray)
     }
 
+    // We proxy reads via a queue so that we can synthesize incoming messages.
+    private[this] val readq = new AsyncQueue[Buf]
+    private[this] def readLoop(): Future[Unit] =
+      underlying.read().flatMap(processRead)
+    private[this] val processRead: Buf => Future[Unit] =
+      buf => {
+        readq.offer(Message.encode(thriftToMux(ttwitter, protocolFactory, buf)))
+        readLoop()
+      }
+
+    if (ttwitter) {
+      // write the TTwitter ack
+      underlying.write(ttwitterAck)
+    } else {
+      // we are speaking vanilla thrift, encode `init` as a mux dispatch.
+      readq.offer(Message.encode(thriftToMux(ttwitter, protocolFactory, init)))
+    }
+
+    // kick off readLoop and propagate failure.
+    readLoop().onFailure { exc =>
+      readq.fail(exc)
+    }
+
+    def write(buf: Buf): Future[Unit] = writeMuxToThrift(buf)
+    def read(): Future[Buf] = readq.poll()
+
     /**
      * Lowers a mux message into a Thrift message where possible and writes
      * the result to `underlying`.
@@ -224,77 +250,51 @@ private[finagle] object ThriftEmulator {
           // return a failure to the level above us.
           Future.exception(Failure(msg).withLogLevel(Level.DEBUG))
       }
+  }
 
-    /**
-     * Returns a Mux.Tdispatch from a thrift dispatch message.
-     */
-    private[this] def thriftToMux(buf: Buf): Message = {
-      // It's okay to use a static tag since we serialize messages into
-      // the dispatcher so we are ensured no tag conflicts.
-      val tag = Message.Tags.MinTag
-      if (!ttwitter) {
-        Message.Tdispatch(tag, Nil, Path.empty, Dtab.empty, buf)
-      } else {
-        val header = new RequestHeader
-        val request = InputBuffer.peelMessage(
-          Buf.ByteArray.Owned.extract(buf),
-          header,
-          protocolFactory
-        )
-        val richHeader = new RichRequestHeader(header)
-        val contextBuf =
-          new mutable.ArrayBuffer[(Buf, Buf)](
-            2 + (if (header.contexts == null) 0 else header.contexts.size)
-          )
-
-        contextBuf += (Trace.idCtx.marshalId -> Trace.idCtx.marshal(richHeader.traceId))
-
-        richHeader.clientId match {
-          case Some(clientId) =>
-            val clientIdBuf = ClientId.clientIdCtx.marshal(Some(clientId))
-            contextBuf += ClientId.clientIdCtx.marshalId -> clientIdBuf
-          case None =>
-        }
-
-        if (header.contexts != null) {
-          val iter = header.contexts.iterator()
-          while (iter.hasNext) {
-            val c = iter.next()
-            contextBuf += (
-              Buf.ByteArray.Owned(c.getKey) -> Buf.ByteArray.Owned(c.getValue)
-            )
-          }
-        }
-
-        val requestBuf = Buf.ByteArray.Owned(request)
-        Message.Tdispatch(tag, contextBuf.toSeq, richHeader.dest, richHeader.dtab, requestBuf)
-      }
-    }
-
-    // We proxy reads via a queue so that we can synthesize incoming messages.
-    private[this] val readq = new AsyncQueue[Buf]
-    private[this] def readLoop(): Future[Unit] =
-      underlying.read().flatMap(processRead)
-    private[this] val processRead: Buf => Future[Unit] =
-      buf => {
-        readq.offer(Message.encode(thriftToMux(buf)))
-        readLoop()
-      }
-
-    if (ttwitter) {
-      // write the TTwitter ack
-      underlying.write(ttwitterAck)
+  /**
+   * Returns a Mux.Tdispatch from a thrift dispatch message.
+   */
+  def thriftToMux(ttwitter: Boolean, protocolFactory: TProtocolFactory, buf: Buf): Message.Tdispatch = {
+    // It's okay to use a static tag since we serialize messages into
+    // the dispatcher so we are ensured no tag conflicts.
+    val tag = Message.Tags.MinTag
+    if (!ttwitter) {
+      Message.Tdispatch(tag, Nil, Path.empty, Dtab.empty, buf)
     } else {
-      // we are speaking vanilla thrift, encode `init` as a mux dispatch.
-      readq.offer(Message.encode(thriftToMux(init)))
-    }
+      val header = new RequestHeader
+      val request = InputBuffer.peelMessage(
+        Buf.ByteArray.Owned.extract(buf),
+        header,
+        protocolFactory
+      )
+      val richHeader = new RichRequestHeader(header)
+      val contextBuf =
+        new mutable.ArrayBuffer[(Buf, Buf)](
+          2 + (if (header.contexts == null) 0 else header.contexts.size)
+        )
 
-    // kick off readLoop and propagate failure.
-    readLoop().onFailure { exc =>
-      readq.fail(exc)
-    }
+      contextBuf += (Trace.idCtx.marshalId -> Trace.idCtx.marshal(richHeader.traceId))
 
-    def write(buf: Buf): Future[Unit] = writeMuxToThrift(buf)
-    def read(): Future[Buf] = readq.poll()
+      richHeader.clientId match {
+        case Some(clientId) =>
+          val clientIdBuf = ClientId.clientIdCtx.marshal(Some(clientId))
+          contextBuf += ClientId.clientIdCtx.marshalId -> clientIdBuf
+        case None =>
+      }
+
+      if (header.contexts != null) {
+        val iter = header.contexts.iterator()
+        while (iter.hasNext) {
+          val c = iter.next()
+          contextBuf += (
+            Buf.ByteArray.Owned(c.getKey) -> Buf.ByteArray.Owned(c.getValue)
+          )
+        }
+      }
+
+      val requestBuf = Buf.ByteArray.Owned(request)
+      Message.Tdispatch(tag, contextBuf.toSeq, richHeader.dest, richHeader.dtab, requestBuf)
+    }
   }
 }

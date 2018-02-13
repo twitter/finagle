@@ -24,6 +24,7 @@ import scala.util.control.NonFatal
  * - `close` and `status` are safe to call from any thread.
  */
 private[finagle] class MuxServerNegotiator private(
+  refSession: RefPushSession[ByteReader, Buf],
   handle: MuxChannelHandle,
   service: Service[Request, Response],
   makeLocalHeaders: Headers => Headers,
@@ -36,23 +37,13 @@ private[finagle] class MuxServerNegotiator private(
 
   private[this] val sessionP = Promise[PushSession[ByteReader, Buf]]
   private[this] var handshakePhase: Phase = checkRerrPhase
-  
-  @volatile
-  private[this] var refSession: RefPushSession[ByteReader, Buf] = null
-
-  // We need to be able to set the `refSession` after construction since
-  // the `RefPushSession` needs a reference to `this` during its construction,
-  // but `this` needs to be able to replace itself in the `RefPushSession`.
-  private def setRefSession(ref: RefPushSession[ByteReader, Buf]): Unit = {
-    refSession = ref
-  }
-
-  def onClose: Future[Unit] = handle.onClose
 
   handle.onClose.ensure {
     // If we have already completed negotiation, no need to close ourselves
     if (!sessionP.isDefined) close()
   }
+
+  def onClose: Future[Unit] = handle.onClose
 
   def close(deadline: Time): Future[Unit] = {
     // We want to proxy close calls to the underlying session, provided it resolves in time.
@@ -175,19 +166,19 @@ private[finagle] class MuxServerNegotiator private(
   }
 }
 
-private object MuxServerNegotiator {
+private[finagle] object MuxServerNegotiator {
   private val log = Logger.get
 
-  def apply(
+  /** Make a new `MuxServerNegotiator` and install it into the passed `RefPushSession` */
+  def build(
+    ref: RefPushSession[ByteReader, Buf],
     handle: MuxChannelHandle,
     service: Service[Request, Response],
     makeLocalHeaders: Headers => Headers,
     negotiate: (Service[Request, Response], Option[Headers]) => PushSession[ByteReader, Buf],
     timer: Timer
-  ): PushSession[ByteReader, Buf] = {
-    val negotiatingSession = new MuxServerNegotiator(handle, service, makeLocalHeaders, negotiate, timer)
-    val ref = new RefPushSession[ByteReader, Buf](handle, negotiatingSession)
-    negotiatingSession.setRefSession(ref)
-    ref
+  ): Unit = {
+    val negotiator = new MuxServerNegotiator(ref, handle, service, makeLocalHeaders, negotiate, timer)
+    ref.updateRef(negotiator)
   }
 }

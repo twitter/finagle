@@ -4,6 +4,7 @@ junit_tests(
     '3rdparty/jvm/org/apache/thrift:libthrift-0.5.0',
     '3rdparty/jvm/org/scalatest',
     'finagle/finagle-core/src/main/scala:scala',
+    'finagle/finagle-core/src/test/scala:pushsession-utils',
     'finagle/finagle-mux/src/main/scala:scala',
     'finagle/finagle-netty4/src/main/scala:scala',
     'finagle/finagle-thrift',

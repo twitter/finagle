@@ -135,8 +135,8 @@ private[finagle] final class MuxClientNegotiatingSession(
   }
 }
 
-private object MuxClientNegotiatingSession {
+private[finagle] object MuxClientNegotiatingSession {
   private val log = Logger.get
 
-  private val MarkerRerr: Message.Rerr = Message.Rerr(TinitTag, CanTinitMsg)
+  val MarkerRerr: Message.Rerr = Message.Rerr(TinitTag, CanTinitMsg)
 }

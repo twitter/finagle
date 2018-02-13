@@ -1,7 +1,7 @@
 package com.twitter.finagle.mux.exp.pushsession
 
 import com.twitter.finagle.{Dtab, Path, Service, Status}
-import com.twitter.finagle.exp.pushsession.{MockChannelHandle, PushChannelHandle, PushSession}
+import com.twitter.finagle.exp.pushsession.{MockChannelHandle, PushChannelHandle, PushSession, RefPushSession, SentinelSession}
 import com.twitter.finagle.mux.Handshake.Headers
 import com.twitter.finagle.mux.{Handshake, Request, Response}
 import com.twitter.finagle.mux.transport.Message
@@ -67,12 +67,22 @@ class MuxServerNegotiatorTest extends FunSuite with Eventually with IntegrationP
       resolvedSession
     }
 
-    val negotiator = MuxServerNegotiator(
-      new MockMuxChannelHandle(handle), service, localHeaders, negotiate, Timer.Nil)
+    private val muxHandle = new MockMuxChannelHandle(handle)
+    private val ref = new RefPushSession[ByteReader, Buf](muxHandle, SentinelSession[ByteReader, Buf](muxHandle))
+    MuxServerNegotiator.build(
+      ref = ref,
+      handle = muxHandle,
+      service = service,
+      makeLocalHeaders = localHeaders,
+      negotiate = negotiate,
+      timer = Timer.Nil)
+
+    // Alias with less refined type
+    def session: PushSession[ByteReader, Buf] = ref
 
     def receiveMessage(msg: Message): Unit = {
       val br = ByteReader(Message.encode(msg))
-      negotiator.receive(br)
+      session.receive(br)
     }
 
     def popSentMessage(): Message = {
@@ -145,7 +155,7 @@ class MuxServerNegotiatorTest extends FunSuite with Eventually with IntegrationP
 
   test("handle closing should close the service") {
     new Ctx {
-      assert(negotiator.status == Status.Open)
+      assert(session.status == Status.Open)
       handle.onClosePromise.setDone()
 
       eventually {

@@ -52,7 +52,7 @@ private[finagle] object MuxPush
       handle: PushChannelHandle[ByteReader, Buf]
     ): Future[MuxClientNegotiatingSession] = {
       val negotiator: Option[Headers] => MuxClientSession =
-        Negotiation.Client(scopedStatsParams).negotiate(handle, _: Option[Headers])
+        new Negotiation.Client(scopedStatsParams).negotiate(handle, _: Option[Headers])
       val headers = Mux.Client.headers(params[MaxFrameSize].size, params[OppTls].level)
       Future.value(
         new MuxClientNegotiatingSession(
@@ -117,30 +117,31 @@ private[finagle] object MuxPush
 
   object Server {
     type SessionF = (
+      RefPushSession[ByteReader, Buf],
       Stack.Params,
-      PushChannelHandle[ByteReader, Buf],
+      MuxChannelHandle,
       Service[Request, Response]
     ) => PushSession[ByteReader, Buf]
 
     val defaultSessionFactory: SessionF = (
+      ref: RefPushSession[ByteReader, Buf],
       params: Stack.Params,
-      handle: PushChannelHandle[ByteReader, Buf],
+      handle: MuxChannelHandle,
       service: Service[Request, Response]
-    ) => handle match {
-      case h: MuxChannelHandle =>
-        MuxServerNegotiator(
-          handle = h,
-          service = service,
-          makeLocalHeaders = Mux.Server
-            .headers(_: Headers, params[MaxFrameSize].size, params[OppTls].level),
-          negotiate = (service, headers) => Negotiation.Server(params, service)
-            .negotiate(handle, headers),
-          timer = params[param.Timer].timer
-        )
-
-      case other =>
-        throw new IllegalStateException(
-          s"Expected to find a `MuxChannelHandle` but found ${ other.getClass.getSimpleName }")
+    ) => {
+      val scopedStatsParams = params + param.Stats(
+        params[param.Stats].statsReceiver.scope("mux"))
+      MuxServerNegotiator.build(
+        ref = ref,
+        handle = handle,
+        service = service,
+        makeLocalHeaders = Mux.Server
+          .headers(_: Headers, params[MaxFrameSize].size, params[OppTls].level),
+        negotiate = (service, headers) =>
+          new Negotiation.Server(scopedStatsParams, service).negotiate(handle, headers),
+        timer = params[param.Timer].timer
+      )
+      ref
     }
   }
 
@@ -153,9 +154,6 @@ private[finagle] object MuxPush
 
     protected type PipelineReq = ByteReader
     protected type PipelineRep = Buf
-
-    private[this] val scopedStatsParams = params + param.Stats(
-      params[param.Stats].statsReceiver.scope("mux"))
 
     protected def newListener(): PushListener[ByteReader, Buf] = {
       Mux.Server.validateTlsParamConsistency(params)
@@ -182,8 +180,17 @@ private[finagle] object MuxPush
     protected def newSession(
       handle: PushChannelHandle[ByteReader, Buf],
       service: Service[Request, Response]
-    ): PushSession[ByteReader, Buf] =
-      sessionFactory(scopedStatsParams, handle, service)
+    ): RefPushSession[ByteReader, Buf] = handle match {
+      case h: MuxChannelHandle =>
+        val ref = new RefPushSession[ByteReader, Buf](h, SentinelSession[ByteReader, Buf](h))
+        sessionFactory(ref, params, h, service)
+        ref
+
+      case other =>
+        throw new IllegalStateException(
+          s"Expected to find a `MuxChannelHandle` but found ${other.getClass.getSimpleName}")
+    }
+
 
     protected def copy1(
       stack: Stack[ServiceFactory[Request, Response]],

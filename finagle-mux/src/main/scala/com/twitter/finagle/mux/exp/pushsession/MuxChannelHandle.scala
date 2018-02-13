@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * add the OpportunisticTls support. This is currently specialized to Netty4 since
  * we use the Netty4 TLS implementation.
  */
-private class MuxChannelHandle(
+private[finagle] class MuxChannelHandle(
     underlying: PushChannelHandle[ByteReader, Buf],
     ch: Channel,
     params: Stack.Params)

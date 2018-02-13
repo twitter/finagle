@@ -13,7 +13,7 @@ import com.twitter.logging.{Level, Logger}
 /**
  * Abstraction of negotiation logic for push-based mux clients and servers
  */
-private abstract class Negotiation(params: Stack.Params) {
+private[finagle] abstract class Negotiation(params: Stack.Params) {
 
   type SessionT <: PushSession[ByteReader, Buf]
 
@@ -66,6 +66,7 @@ private abstract class Negotiation(params: Stack.Params) {
       }
     } catch {
       case exn: IncompatibleNegotiationException =>
+        statsReceiver.counter("tls", "upgrade", "incompatible").incr()
         log.fatal(
           exn,
           s"The local peer wanted $localEncryptLevel and the remote peer wanted" +
@@ -80,7 +81,7 @@ private abstract class Negotiation(params: Stack.Params) {
    *
    * @note If negotiation fails an appropriate exception may be thrown.
    */
-  def negotiate(
+  final def negotiate(
     handle: PushChannelHandle[ByteReader, Buf],
     peerHeaders: Option[Headers]
   ): SessionT = {
@@ -93,13 +94,14 @@ private abstract class Negotiation(params: Stack.Params) {
         .getOrElse(Int.MaxValue)
       new FragmentingMessageWriter(handle, fragmentSize, framingStats)
     }
+    val messageDecoder = new FragmentDecoder(framingStats)
 
-    builder(handle, writeManager, new FragmentDecoder(framingStats))
+    builder(handle, writeManager, messageDecoder)
   }
 }
 
-private object Negotiation {
-  final case class Client(params: Stack.Params) extends Negotiation(params) {
+private[finagle] object Negotiation {
+  final class Client(params: Stack.Params) extends Negotiation(params) {
     override type SessionT = MuxClientSession
 
     protected def builder(
@@ -119,7 +121,7 @@ private object Negotiation {
     }
   }
 
-  final case class Server(params: Stack.Params, service: Service[Request, Response])
+  final class Server(params: Stack.Params, service: Service[Request, Response])
     extends Negotiation(params) {
     override type SessionT = MuxServerSession
 
