@@ -10,7 +10,7 @@ import com.twitter.finagle.{
   ServiceProxy,
   Status
 }
-import com.twitter.util.{Future, Time, Duration, Timer}
+import com.twitter.util.{Duration, Future, Time, Timer}
 import scala.annotation.tailrec
 
 /**
@@ -33,15 +33,27 @@ private[finagle] class CachingPool[Req, Rep](
   private[this] val sizeGauge =
     statsReceiver.addGauge("pool_cached") { cache.size }
 
-  private[this] class WrappedService(underlying: Service[Req, Rep])
-      extends ServiceProxy[Req, Rep](underlying) {
-    override def close(deadline: Time) = CachingPool.this.synchronized {
-      if (this.status != Status.Closed && CachingPool.this.isOpen) {
-        cache.put(underlying)
-        Future.Done
-      } else
-        underlying.close(deadline)
-    }
+
+  final private[this] class WrappedService(underlying: Service[Req, Rep])
+    extends ServiceProxy[Req, Rep](underlying) {
+
+    // access mediated by synchronizing on CachingPool.this
+    private[this] var close: Future[Unit] = null
+
+    // We ensure that a service wrapper instance is only ever closed once to defend against
+    // inserting the same underlying service into the cache multiple times.
+    override def close(deadline: Time): Future[Unit] =
+      CachingPool.this.synchronized {
+        if (close eq null) {
+          if (this.status != Status.Closed && CachingPool.this.isOpen) {
+            cache.put(underlying)
+            close = Future.Done
+          } else {
+            close = underlying.close(deadline)
+          }
+        }
+        close
+      }
   }
 
   @tailrec
