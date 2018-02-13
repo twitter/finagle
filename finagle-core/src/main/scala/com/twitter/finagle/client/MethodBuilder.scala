@@ -411,7 +411,8 @@ private[finagle] final class MethodBuilder[Req, Rep](
     addToRegistry(name)
     refCounted.open()
 
-    val underlying = BackupRequestFilter.filterService(stackParams, refCounted.get)
+    val underlying = BackupRequestFilter.filterService(
+      stackParams + param.Stats(statsReceiver(name)), refCounted.get)
 
     new ServiceProxy[Req, Rep](underlying) {
       private[this] val isClosed = new AtomicBoolean(false)

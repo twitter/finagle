@@ -697,6 +697,31 @@ class MethodBuilderTest
     assert(mb.params[BackupRequestFilter.Param] == BackupRequestFilter.Configured(tunable, true))
   }
 
+  test("backup stats are scoped correctly") {
+    val stats = new InMemoryStatsReceiver()
+    val timer = new MockTimer
+
+    val svc: Service[Int, Int] = Service.const(Future.value(1))
+    val stack = Stack.Leaf(Stack.Role("test"), ServiceFactory.const(svc))
+
+    val stackClient = TestStackClient(
+      stack,
+      Stack.Params.empty + param.Timer(timer) + param.Stats(stats) + param.Label("clientLabel"))
+
+    val mb = MethodBuilder.from("mb", stackClient)
+      .idempotent(maxExtraLoad = 1.percent, true, ResponseClassifier.Default)
+
+    val client = mb.newService("a_method")
+    Time.withCurrentTimeFrozen { tc =>
+      Await.result(client(1), 1.second)
+      tc.advance(5.seconds)
+      timer.tick()
+      assert(stats.stat("clientLabel", "a_method", "backups", "send_backup_after_ms")()
+        == List(0.0))
+    }
+
+  }
+
   test("idempotent combines existing clasifier with new one") {
     val stats = new InMemoryStatsReceiver()
     val timer = new MockTimer()
