@@ -2,17 +2,15 @@ package com.twitter.finagle.http.codec
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.Status
-import com.twitter.finagle.http.netty3.Bijections
 import com.twitter.finagle.http.{Request, Response, Version, Status => HttpStatus}
-import com.twitter.finagle.netty3.http.Netty3ClientStreamTransport
+import com.twitter.finagle.netty4.http.{Bijections, Netty4ClientStreamTransport}
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.finagle.transport.{QueueTransport, Transport, LegacyContext, TransportContext}
+import com.twitter.finagle.transport.{LegacyContext, QueueTransport, Transport, TransportContext}
 import com.twitter.io.{Buf, Reader}
-import com.twitter.util.{Await, Duration, Future, Promise, Return, Throw, Time}
-import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.handler.codec.http._
-import org.jboss.netty.handler.codec.http.HttpResponseStatus.OK
-import org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1
+import com.twitter.util.{Await, Awaitable, Duration, Future, Promise, Return, Throw, Time}
+import io.netty.buffer.Unpooled
+import io.netty.handler.codec.http.{DefaultHttpContent, HttpContent, HttpRequest, HttpUtil, LastHttpContent}
+import java.nio.charset.StandardCharsets
 import org.mockito.Mockito.{spy, times, verify}
 import org.scalatest.FunSuite
 
@@ -73,23 +71,27 @@ class OpTransport[In, Out](var ops: List[OpTransport.Op[In, Out]]) extends Trans
   val context = new LegacyContext(this)
 }
 
-// Note: This is shared between Netty3 and Netty4 implementations, but we need a concrete impl
-// to test it so the finagle-http package is most appropriate even though the implementation
-// is in finagle-base-http.
+// Note: We need a concrete impl to test it so the finagle-http package is most
+// appropriate even though the implementation is in finagle-base-http.
 class HttpClientDispatcherTest extends FunSuite {
-  def mkPair() = {
+
+  private[this] def await[T](t: Awaitable[T]): T = Await.result(t, Duration.fromSeconds(15))
+
+  private[this] def mkPair() = {
     val inQ = new AsyncQueue[Any]
     val outQ = new AsyncQueue[Any]
     (
-      new Netty3ClientStreamTransport(new QueueTransport[Any, Any](inQ, outQ)),
+      new Netty4ClientStreamTransport(new QueueTransport[Any, Any](inQ, outQ)),
       new QueueTransport[Any, Any](outQ, inQ)
     )
   }
 
-  def chunk(content: String) =
-    new DefaultHttpChunk(ChannelBuffers.wrappedBuffer(content.getBytes("UTF-8")))
-
-  private val timeout = Duration.fromSeconds(15)
+  private[this] def chunk(content: String): HttpContent = {
+    val bytes = content.getBytes(StandardCharsets.UTF_8)
+    val buf = Unpooled.buffer(bytes.length)
+    buf.writeBytes(bytes)
+    new DefaultHttpContent(buf)
+  }
 
   test("streaming request body") {
     val (in, out) = mkPair()
@@ -102,10 +104,10 @@ class HttpClientDispatcherTest extends FunSuite {
     // discard the request immediately
     out.read()
 
-    val r = Bijections.responseToNetty(Response())
-    r.setChunked(true)
+    val r = Bijections.finagle.responseHeadersToNetty(Response())
+    HttpUtil.setTransferEncodingChunked(r, true)
     out.write(r)
-    val res = Await.result(f, timeout)
+    val res = await(f)
 
     val c = res.reader.read(Int.MaxValue)
     assert(!c.isDefined)
@@ -113,7 +115,7 @@ class HttpClientDispatcherTest extends FunSuite {
     out.read() flatMap { c =>
       out.write(c)
     }
-    assert(Await.result(c, timeout) === Some(Buf.Utf8("a")))
+    assert(await(c) === Some(Buf.Utf8("a")))
 
     val cc = res.reader.read(Int.MaxValue)
     assert(!cc.isDefined)
@@ -121,7 +123,7 @@ class HttpClientDispatcherTest extends FunSuite {
     out.read() flatMap { c =>
       out.write(c)
     }
-    assert(Await.result(cc, timeout) === Some(Buf.Utf8("some other thing")))
+    assert(await(cc) === Some(Buf.Utf8("some other thing")))
 
     val last = res.reader.read(Int.MaxValue)
     assert(!last.isDefined)
@@ -129,25 +131,25 @@ class HttpClientDispatcherTest extends FunSuite {
     out.read() flatMap { c =>
       out.write(c)
     }
-    assert(Await.result(last, timeout).isEmpty)
+    assert(await(last).isEmpty)
   }
 
   test("invalid message") {
     val (in, out) = mkPair()
     val disp = new HttpClientDispatcher(in, NullStatsReceiver)
     out.write("invalid message")
-    intercept[ClassCastException] { Await.result(disp(Request())) }
+    intercept[IllegalArgumentException] { Await.result(disp(Request())) }
   }
 
   test("not chunked") {
     val (in, out) = mkPair()
     val disp = new HttpClientDispatcher(in, NullStatsReceiver)
-    val httpRes = new DefaultHttpResponse(HTTP_1_1, OK)
+    val httpRes = Bijections.finagle.fullResponseToNetty(Response())
     val req = Request()
     val f = disp(req)
-    Await.result(out.read(), timeout)
+    await(out.read())
     out.write(httpRes)
-    val res = Await.result(f, timeout)
+    val res = await(f)
     assert(res.status == HttpStatus.Ok)
     assert(res.version == Version.Http11)
     assert(!res.isChunked)
@@ -156,43 +158,43 @@ class HttpClientDispatcherTest extends FunSuite {
   test("chunked") {
     val (in, out) = mkPair()
     val disp = new HttpClientDispatcher(in, NullStatsReceiver)
-    val httpRes = new DefaultHttpResponse(HTTP_1_1, OK)
-    httpRes.setChunked(true)
+    val httpRes = Bijections.finagle.responseHeadersToNetty(Response())
+    HttpUtil.setTransferEncodingChunked(httpRes, true)
 
     val f = disp(Request())
     out.write(httpRes)
-    val reader = Await.result(f, timeout).reader
+    val reader = await(f).reader
 
     val c = reader.read(Int.MaxValue)
     out.write(chunk("hello"))
-    assert(Await.result(c, timeout) == Some(Buf.Utf8("hello")))
+    assert(await(c) == Some(Buf.Utf8("hello")))
 
     val cc = reader.read(Int.MaxValue)
     out.write(chunk("world"))
-    assert(Await.result(cc, timeout) == Some(Buf.Utf8("world")))
+    assert(await(cc) == Some(Buf.Utf8("world")))
 
-    out.write(HttpChunk.LAST_CHUNK)
-    assert(Await.result(reader.read(Int.MaxValue), timeout).isEmpty)
+    out.write(LastHttpContent.EMPTY_LAST_CONTENT)
+    assert(await(reader.read(Int.MaxValue)).isEmpty)
   }
 
   test("error mid-chunk") {
     val (in, out) = mkPair()
     val inSpy = spy(in)
     val disp = new HttpClientDispatcher(inSpy, NullStatsReceiver)
-    val httpRes = new DefaultHttpResponse(HTTP_1_1, OK)
-    httpRes.setChunked(true)
+    val httpRes = Bijections.finagle.responseHeadersToNetty(Response())
+    HttpUtil.setTransferEncodingChunked(httpRes, true)
 
     val f = disp(Request())
     out.write(httpRes)
-    val reader = Await.result(f, timeout).reader
+    val reader = await(f).reader
 
     val c = reader.read(Int.MaxValue)
     out.write(chunk("hello"))
-    assert(Await.result(c, timeout) == Some(Buf.Utf8("hello")))
+    assert(await(c) == Some(Buf.Utf8("hello")))
 
     val cc = reader.read(Int.MaxValue)
     out.write("something else")
-    intercept[IllegalArgumentException] { Await.result(cc, timeout) }
+    intercept[IllegalArgumentException] { await(cc) }
     verify(inSpy, times(1)).close()
   }
 
@@ -205,7 +207,7 @@ class HttpClientDispatcherTest extends FunSuite {
       OpTransport[Any, Any](Write(Function.const(true), writep), Read(readp), Close(Future.Done))
 
     val disp =
-      new HttpClientDispatcher(new Netty3ClientStreamTransport(transport), NullStatsReceiver)
+      new HttpClientDispatcher(new Netty4ClientStreamTransport(transport), NullStatsReceiver)
     val req = Request()
     req.setChunked(true)
 
@@ -222,7 +224,7 @@ class HttpClientDispatcherTest extends FunSuite {
     writep.setException(new Exception)
 
     assert(g.isDefined)
-    intercept[Reader.ReaderDiscarded] { Await.result(g, timeout) }
+    intercept[Reader.ReaderDiscarded] { await(g) }
   }
 
   test("upstream interrupt: during req stream (read)") {
@@ -238,7 +240,7 @@ class HttpClientDispatcherTest extends FunSuite {
     )
 
     val disp =
-      new HttpClientDispatcher(new Netty3ClientStreamTransport(transport), NullStatsReceiver)
+      new HttpClientDispatcher(new Netty4ClientStreamTransport(transport), NullStatsReceiver)
     val req = Request()
     req.setChunked(true)
 
@@ -254,7 +256,7 @@ class HttpClientDispatcherTest extends FunSuite {
 
     // The reader is now discarded
     intercept[Reader.ReaderDiscarded] {
-      Await.result(req.writer.write(Buf.Utf8(".")), timeout)
+      await(req.writer.write(Buf.Utf8(".")))
     }
   }
 
@@ -268,19 +270,19 @@ class HttpClientDispatcherTest extends FunSuite {
       // Read the response
       Read(Future.never),
       // Then we try to write the chunk
-      Write(_.isInstanceOf[HttpChunk], chunkp),
+      Write(_.isInstanceOf[HttpContent], chunkp),
       Close(Future.Done)
     )
 
     val disp =
-      new HttpClientDispatcher(new Netty3ClientStreamTransport(transport), NullStatsReceiver)
+      new HttpClientDispatcher(new Netty4ClientStreamTransport(transport), NullStatsReceiver)
     val req = Request()
     req.setChunked(true)
 
     val f = disp(req)
 
     // Buffer up for write.
-    Await.result(req.writer.write(Buf.Utf8("..")), timeout)
+    await(req.writer.write(Buf.Utf8("..")))
 
     assert(transport.status == Status.Open)
     f.raise(new Exception)
@@ -292,7 +294,7 @@ class HttpClientDispatcherTest extends FunSuite {
 
     // The reader is now discarded
     intercept[Reader.ReaderDiscarded] {
-      Await.result(req.writer.write(Buf.Utf8(".")), timeout)
+      await(req.writer.write(Buf.Utf8(".")))
     }
   }
 }

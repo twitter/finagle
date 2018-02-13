@@ -11,7 +11,6 @@ scala_library(
     'finagle/finagle-core',
     'finagle/finagle-http2',
     'finagle/finagle-netty3',
-    'finagle/finagle-netty3-http',
     'finagle/finagle-netty4',
     'finagle/finagle-netty4-http',
     'finagle/finagle-toggle',

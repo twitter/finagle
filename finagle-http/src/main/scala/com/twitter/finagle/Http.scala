@@ -10,7 +10,6 @@ import com.twitter.finagle.http.exp.StreamTransport
 import com.twitter.finagle.http.filter._
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.http2.{Http2Listener, Http2Transporter}
-import com.twitter.finagle.netty3.http.{Netty3ClientStreamTransport, Netty3Http, Netty3ServerStreamTransport}
 import com.twitter.finagle.netty4.http.{Netty4HttpListener, Netty4HttpTransporter}
 import com.twitter.finagle.netty4.http.{Netty4ClientStreamTransport, Netty4ServerStreamTransport}
 import com.twitter.finagle.server._
@@ -83,15 +82,6 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
   object HttpImpl {
     implicit val httpImplParam: Stack.Param[HttpImpl] = Stack.Param(Netty4Impl)
   }
-
-  @deprecated("Netty3 based implementations will be removed. Prefer Netty4Impl.", "2017-08-23")
-  val Netty3Impl: HttpImpl = HttpImpl(
-    new Netty3ClientStreamTransport(_),
-    new Netty3ServerStreamTransport(_),
-    Netty3Http.Transporter,
-    Netty3Http.Listener,
-    "Netty3"
-  )
 
   val Netty4Impl: Http.HttpImpl = Http.HttpImpl(
     new Netty4ClientStreamTransport(_),

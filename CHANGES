@@ -45,6 +45,9 @@ Breaking API Changes
     created engine factory with one of the `tls` methods instead.
     ``PHAB_ID=D135908``
 
+  * finagle-http: Removed the `c.t.f.Http.Netty3Impl`. Netty4 is now the only
+    underlying HTTP implementation available. ``PHAB_ID=D136705``
+
 18.2.0
 -------
 
