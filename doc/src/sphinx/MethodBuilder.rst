@@ -185,16 +185,30 @@ Metrics are scoped to your client's label and method name.
   the latency of the :ref:`logical <mb_logical_req>` requests, in milliseconds.
 - `clnt/your_client_label/method_name/retries` — A stat of the number of times
   requests are retried.
+- `clnt/your_client_label/method_name/backups/send_backup_after_ms` - A stat of the time,
+  in  milliseconds, after which a request will be re-issued (backup sent) if it has not yet
+  completed. Present only if `idempotent` is configured.
+- `clnt/your_client_label/method_name/backups/backups_sent` - A counter of the number of backup
+  requests sent. Present only if `idempotent` is configured.
+- `clnt/your_client_label/method_name/backups/backups_won` - A counter of the number of backup
+  requests that completed before the original, regardless of whether they succeeded. Present only
+  if `idempotent` is configured.
+- `clnt/your_client_label/method_name/backups/budget_exhausted` - A counter of the number of times
+  the backup request budget (computed using the current value of the `maxExtraLoad` param) or client
+  retry budget was exhausted, preventing a backup from being sent. Present only if `idempotent` is
+  configured.
 
 For example:
 
 .. code-block:: scala
 
+  import com.twitter.conversions.percent._
   import com.twitter.finagle.Http
 
   val builder = Http.client
     .withLabel("example_client")
     .methodBuilder("inet!localhost:8080")
+    .idempotent(maxExtraLoad = 1.percent)
   val statusesShow = builder.newService(methodName = "get_statuses")
 
 Will produce the following metrics:
@@ -203,6 +217,10 @@ Will produce the following metrics:
 - `clnt/example_client/get_statuses/logical/success`
 - `clnt/example_client/get_statuses/logical/request_latency_ms`
 - `clnt/example_client/get_statuses/retries`
+- `clnt/example_client/get_statuses/backups/send_backup_after_ms`
+- `clnt/example_client/get_statuses/backups/backups_sent`
+- `clnt/example_client/get_statuses/backups/backups_won`
+- `clnt/example_client/get_statuses/backups/budget_exhausted`
 
 ``MethodBuilder`` adds itself into the process registry which allows
 for introspection of runtime configuration via TwitterServer's `/admin/registry.json`
