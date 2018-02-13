@@ -583,7 +583,10 @@ lazy val finagleThriftMux = Project(
     util("core"),
     util("logging"),
     util("stats")) ++ scroogeLibs
-).dependsOn(finagleCore, finagleMux, finagleThrift)
+).dependsOn(
+  finagleCore % "compile->compile;test->test",
+  finagleMux,
+  finagleThrift)
 
 lazy val finagleMySQL = Project(
   id = "finagle-mysql",
