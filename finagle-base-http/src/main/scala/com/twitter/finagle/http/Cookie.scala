@@ -92,8 +92,6 @@ class Cookie private (
   private[this] var _value: String,
   private[this] var _domain: String,
   private[this] var _path: String,
-  private[this] var _comment: String,
-  private[this] var _commentUrl: String,
   private[this] var _discard: Boolean,
   private[this] var _ports: Set[Int],
   private[this] var _maxAge: Duration,
@@ -119,15 +117,13 @@ class Cookie private (
     _value = value,
     _domain = Cookie.validateField(domain.orNull),
     _path = Cookie.validateField(path.orNull),
-    null,
-    null,
-    false,
-    Set.empty,
-    maxAge.orNull,
-    0,
-    secure,
-    httpOnly,
-    true
+    _discard = false,
+    _ports = Set.empty,
+    _maxAge = maxAge.orNull,
+    _version = 0,
+    _secure = secure,
+    _httpOnly = httpOnly,
+    _forDeprecation = true
   )
 
   def this(
@@ -150,8 +146,6 @@ class Cookie private (
       underlying.getValue,
       underlying.getDomain,
       underlying.getPath,
-      underlying.getComment,
-      underlying.getCommentUrl,
       underlying.isDiscard,
       underlying.getPorts.asScala.toSet.map { i: Integer =>
         i.intValue
@@ -163,18 +157,6 @@ class Cookie private (
       true
     )
   }
-
-  /**
-   * Get the comment.
-   * @note May be null.
-   */
-  def comment: String = _comment
-
-  /**
-   * Get the commentUrl.
-   * @note May be null.
-   */
-  def commentUrl: String = _commentUrl
 
   /**
    * Get the domain.
@@ -201,22 +183,6 @@ class Cookie private (
 
   @deprecated("Use secure instead", "2017-08-16")
   def isSecure: Boolean = _secure
-
-  /**
-   * Set the comment.
-   * @note `comment` may be null.
-   */
-  @deprecated("Removed per RFC-6265", "2017-08-16")
-  def comment_=(comment: String): Unit =
-    _comment = Cookie.validateField(comment)
-
-  /**
-   * Set the commentUrl.
-   * @note `commentUrl` may be null.
-   */
-  @deprecated("Removed per RFC-6265", "2017-08-16")
-  def commentUrl_=(commentUrl: String): Unit =
-    _commentUrl = Cookie.validateField(commentUrl)
 
   /**
    * Set the domain.

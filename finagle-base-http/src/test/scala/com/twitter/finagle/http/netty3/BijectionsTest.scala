@@ -20,8 +20,6 @@ class BijectionsTest extends FunSuite {
       httpOnly = false
     )
 
-    in.comment = "comment"
-    in.commentUrl = "commentUrl"
     in.isDiscard = true
     in.ports = Seq(1, 2, 3)
     in.version = 100
@@ -31,8 +29,6 @@ class BijectionsTest extends FunSuite {
     assert(out.getValue == "value")
     assert(out.getDomain == "domain")
     assert(out.getPath == "path")
-    assert(out.getComment == "comment")
-    assert(out.getCommentUrl == "commentUrl")
     assert(out.isDiscard)
     assert(out.getPorts.asScala == Set(new Integer(1), new Integer(2), new Integer(3)))
     assert(out.getMaxAge == 99)
@@ -48,8 +44,6 @@ class BijectionsTest extends FunSuite {
     val in: NettyCookie = new DefaultCookie("name", "value")
     in.setDomain("domain")
     in.setPath("path")
-    in.setComment("comment")
-    in.setCommentUrl("commentUrl")
     in.setDiscard(true)
     in.setPorts(new Integer(1), new Integer(2), new Integer(3))
     in.setMaxAge(99)
@@ -63,8 +57,6 @@ class BijectionsTest extends FunSuite {
     assert(out.value == "value")
     assert(out.domain == "domain")
     assert(out.path == "path")
-    assert(out.comment == "comment")
-    assert(out.commentUrl == "commentUrl")
     assert(out.discard)
     assert(out.ports == Set(1, 2, 3))
     assert(out.maxAge == 99.seconds)

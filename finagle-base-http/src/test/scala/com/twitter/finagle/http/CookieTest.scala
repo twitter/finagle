@@ -2,18 +2,13 @@ package com.twitter.finagle.http
 
 import com.twitter.conversions.time._
 import org.jboss.netty.handler.codec.http.DefaultCookie
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import scala.collection.JavaConverters._
 
-@RunWith(classOf[JUnitRunner])
 class CookieTest extends FunSuite {
 
   test("mutate underlying") {
     val cookie = new Cookie("name", "value")
-    cookie.comment = "hello"
-    cookie.commentUrl = "hello.com"
     cookie.domain = ".twitter.com"
     cookie.maxAge = 100.seconds
     cookie.path = "/1/statuses/show"
@@ -25,8 +20,6 @@ class CookieTest extends FunSuite {
     cookie.isSecure = true
 
     assert(cookie.name == "name")
-    assert(cookie.comment == "hello")
-    assert(cookie.commentUrl == "hello.com")
     assert(cookie.domain == ".twitter.com")
     assert(cookie.maxAge == 100.seconds)
     assert(cookie.path == "/1/statuses/show")
@@ -129,8 +122,6 @@ class CookieTest extends FunSuite {
     assert(cookie.value == nettyCookie.getValue)
     assert(cookie.domain == nettyCookie.getDomain)
     assert(cookie.path == nettyCookie.getPath)
-    assert(cookie.comment == nettyCookie.getComment)
-    assert(cookie.commentUrl == nettyCookie.getCommentUrl)
     assert(cookie.discard == nettyCookie.isDiscard)
     assert(cookie.ports == nettyCookie.getPorts.asScala.toSet)
     assert(cookie.maxAge == nettyCookie.getMaxAge.seconds)
@@ -202,38 +193,6 @@ class CookieTest extends FunSuite {
       }
       intercept[IllegalArgumentException] {
         new Cookie("name", "value", domain = Some(s"hello${c}goodbye"))
-      }
-    }
-  }
-
-  test("comment trimmed and validated") {
-    val cookie = new Cookie("name", "value")
-    cookie.comment = "   comment   "
-    assert(cookie.comment == "comment")
-
-    IllegalFieldChars.foreach { c =>
-      intercept[IllegalArgumentException] {
-        cookie.path = s"hello${c}goodbye"
-      }
-      intercept[IllegalArgumentException] {
-        val cookie = new Cookie("name", "value")
-        cookie.comment = s"hello${c}goodbye"
-      }
-    }
-  }
-
-  test("commentUrl trimmed and validated") {
-    val cookie = new Cookie("name", "value")
-    cookie.commentUrl = "   commentUrl   "
-    assert(cookie.commentUrl == "commentUrl")
-
-    IllegalFieldChars.foreach { c =>
-      intercept[IllegalArgumentException] {
-        cookie.path = s"hello${c}goodbye"
-      }
-      intercept[IllegalArgumentException] {
-        val cookie = new Cookie("name", "value")
-        cookie.commentUrl = s"hello${c}goodbye"
       }
     }
   }

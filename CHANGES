@@ -32,6 +32,10 @@ Bug Fixes
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-base-http: Removed `c.t.f.http.Cookie.comment_`, `c.t.f.http.Cookie.comment_=`,
+    `c.t.f.http.Cookie.commentUrl_`, and `c.t.f.http.Cookie.commentUrl_=`. `comment` and `commentUrl`
+    per RFC-6265. ``PHAB_ID=D137538``
+
   * finagle-core: `c.t.finagle.ssl.Ssl` and related classes have been
     removed. They were replaced as the primary way of using SSL/TLS
     within Finagle in release 6.44.0 (April 2017). Please migrate to using
