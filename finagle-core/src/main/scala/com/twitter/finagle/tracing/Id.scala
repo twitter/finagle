@@ -1,7 +1,6 @@
 package com.twitter.finagle.tracing
 
 import com.twitter.finagle.util.ByteArrays
-import com.twitter.util.RichU64String
 import com.twitter.util.{Try, Return, Throw}
 import java.lang.{Boolean => JBool}
 import scala.util.control.NonFatal
@@ -12,8 +11,7 @@ import scala.util.control.NonFatal
  * and traceId).
  */
 final class SpanId(val self: Long) extends Proxy {
-  def toLong = self
-
+  def toLong: Long = self
   override def toString: String = SpanId.toString(self)
 }
 
@@ -51,9 +49,9 @@ object SpanId {
       // Tolerates 128 bit X-B3-TraceId by reading the right-most 16 hex
       // characters (as opposed to overflowing a U64 and starting a new trace).
       // For TraceId, prefer TraceId128#apply.
-      val length = spanId.length()
+      val length = spanId.length
       val lower64Bits = if (length <= 16) spanId else spanId.substring(length - 16)
-      Some(SpanId(new RichU64String(lower64Bits).toU64Long))
+      Some(SpanId(java.lang.Long.parseUnsignedLong(lower64Bits, 16)))
     } catch {
       case NonFatal(_) => None
     }
@@ -70,12 +68,17 @@ object TraceId128 {
    */
   def apply(spanId: String): TraceId128 = {
     try {
-      val length = spanId.length()
+      val length = spanId.length
       val lower64Bits = if (length <= 16) spanId else spanId.substring(length - 16)
-      val low = Some(SpanId(new RichU64String(lower64Bits).toU64Long))
 
-      if (length == 32) TraceId128(low, Some(SpanId(new RichU64String(spanId.substring(0, 16)).toU64Long)))
-      else TraceId128(low, None)
+      val low =
+        Some(SpanId(java.lang.Long.parseUnsignedLong(lower64Bits, 16)))
+
+      val high =
+        if (length == 32) Some(SpanId(java.lang.Long.parseUnsignedLong(spanId.substring(0, 16), 16)))
+        else None
+
+      TraceId128(low, high)
     } catch {
       case NonFatal(_) => empty
     }
@@ -250,7 +253,7 @@ final case class TraceId(
 
   private[TraceId] def ids = (traceId, parentId, spanId, traceIdHigh)
 
-  override def equals(other: Any) = other match {
+  override def equals(other: Any): Boolean = other match {
     case other: TraceId => this.ids equals other.ids
     case _ => false
   }

@@ -1,41 +1,37 @@
 package com.twitter.finagle.tracing
 
-import com.twitter.util.RichU64Long
-import java.util.concurrent.TimeUnit
+import com.twitter.finagle.benchmark.StdBenchAnnotations
 import org.openjdk.jmh.annotations._
 import scala.util.Random
 
-@OutputTimeUnit(TimeUnit.MICROSECONDS)
-@BenchmarkMode(Array(Mode.AverageTime))
-class SpanIdBenchmark {
+class SpanIdBenchmark extends StdBenchAnnotations {
   import SpanIdBenchmark._
 
   @Benchmark
-  def timeOldToString(state: SpanIdState) {
-    import state._
-    var i = 0
-    while (i < n) {
-      new RichU64Long(ids(i).self).toU64HexString
-      i += 1
-    }
-  }
+  def toString(state: SpanIdState): String = state.nextId().toString
 
   @Benchmark
-  def timeToString(state: SpanIdState) {
-    import state._
-    var i = 0
-    while (i < n) {
-      ids(i).toString
-      i += 1
-    }
-  }
+  def fromString(state: SpanIdState): Option[SpanId] = SpanId.fromString(state.nextString())
 }
 
 object SpanIdBenchmark {
-  @State(Scope.Benchmark)
+  @State(Scope.Thread)
   class SpanIdState {
-    val rng = new Random(31415926535897932L)
-    val n = 1024
-    val ids = Array.fill(n)(SpanId(rng.nextLong()))
+    private val rng = new Random(31415926535897932L)
+    private var i = 0
+    private val ids = Array.fill(1024)(SpanId(rng.nextLong()))
+    private val strings = Array.fill(1024)(SpanId(rng.nextLong()).toString)
+
+    def nextId(): SpanId = {
+      val j = i % 1024
+      i += 1
+      ids(j)
+    }
+
+    def nextString(): String = {
+      val j = i % 1024
+      i += 1
+      strings(j)
+    }
   }
 }

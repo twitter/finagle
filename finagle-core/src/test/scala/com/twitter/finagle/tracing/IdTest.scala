@@ -1,6 +1,5 @@
 package com.twitter.finagle.tracing
 
-import com.twitter.util.RichU64Long
 import scala.util.Random
 import org.scalatest.FunSuite
 import org.junit.runner.RunWith
@@ -58,7 +57,7 @@ class IdTest extends FunSuite {
     assert(TraceId(None, None, SpanId(0L), None, Flags().setDebug).sampled == Some(true))
   }
 
-  def hex(l: Long) = new RichU64Long(l).toU64HexString
+  def hex(l: Long): String = "%016X".format(l)
 
   test("extract 64bit only ids") {
     val low = 5208512171318403364L
@@ -88,14 +87,14 @@ class IdTest extends FunSuite {
 
   test("SpanId.toString: each bit must be correct") {
     for (b <- 0 until 64)
-      assert(hex(1 << b) == SpanId(1 << b).toString)
+      assert(hex(1 << b).equalsIgnoreCase(SpanId(1 << b).toString))
   }
 
   test("SpanId.toString: random") {
     val rng = new Random(31415926535897932L)
     for (_ <- 0 until 1024) {
       val l = rng.nextLong()
-      assert(hex(l) == SpanId(l).toString)
+      assert(hex(l).equalsIgnoreCase(SpanId(l).toString))
     }
   }
 
