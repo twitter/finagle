@@ -40,6 +40,10 @@ Breaking API Changes
     `c.t.f.http.Cookie.commentUrl_`, and `c.t.f.http.Cookie.commentUrl_=`. `comment` and `commentUrl`
     per RFC-6265. ``PHAB_ID=D137538``
 
+  * finagle-base-http: `c.t.f.http.RequestBuilder` has been moved to the finagle-http target
+    and the implicit evidence, `RequestConfig.Yes` has been renamed to `RequestBuilder.Valid`.
+    ``PHAB_ID=D122227``
+
   * finagle-core: `c.t.finagle.ssl.Ssl` and related classes have been
     removed. They were replaced as the primary way of using SSL/TLS
     within Finagle in release 6.44.0 (April 2017). Please migrate to using
@@ -173,7 +177,7 @@ Runtime Behavior Changes
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
-  * finagle-base-http, finagle-http: Removed Apache Commons Lang dependency,
+    * finagle-base-http, finagle-http: Removed Apache Commons Lang dependency,
     `org.apache.commons.lang3.time.FastDateFormat` now is `java.time.format.DateTimeFormatter`.
     ``PHAB_ID=D121479``
 

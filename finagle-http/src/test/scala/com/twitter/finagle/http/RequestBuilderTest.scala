@@ -2,11 +2,8 @@ package com.twitter.finagle.http
 
 import com.twitter.io.Buf
 import java.net.URL
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class RequestBuilderTest extends FunSuite {
   val URL0 = new URL("http://joe:blow@www.google.com:77/xxx?foo=bar#xxx")
   val URL1 = new URL("https://www.google.com/")
@@ -15,31 +12,34 @@ class RequestBuilderTest extends FunSuite {
 
   val BODY0 = Buf.Utf8("blah")
   val FORM0 = Seq(
-    "k1" -> "v1",
+    "k1" -> "v",
     "k2" -> "v2",
-    "k3" -> "v3"
+    "k3" -> "v33"
   )
 
   val MULTIPART0 =
     """--Boundary
-Content-Disposition: form-data; name="k1"
-Content-Type: text/plain; charset=UTF-8
+content-disposition: form-data; name="k1"
+content-length: 1
+content-type: text/plain; charset=UTF-8
 
-v1
+v
 --Boundary
-Content-Disposition: form-data; name="k2"
-Content-Type: text/plain; charset=UTF-8
+content-disposition: form-data; name="k2"
+content-length: 2
+content-type: text/plain; charset=UTF-8
 
 v2
 --Boundary
-Content-Disposition: form-data; name="k3"
-Content-Type: text/plain; charset=UTF-8
+content-disposition: form-data; name="k3"
+content-length: 3
+content-type: text/plain; charset=UTF-8
 
-v3
+v33
 --Boundary--
 """.replace("\r\n", "\n")
 
-  val FORMPOST0 = "k1=v1&k2=v2&k3=v3"
+  val FORMPOST0 = "k1=v&k2=v2&k3=v33"
 
   test("reject non-http urls") {
     intercept[IllegalArgumentException] {
@@ -300,6 +300,7 @@ v3
     val content = "--[^-\r\n]+".r
       .replaceAllIn(req0.contentString, "--Boundary")
       .replace("\r\n", "\n")
+
     assert(content == MULTIPART0)
   }
 }

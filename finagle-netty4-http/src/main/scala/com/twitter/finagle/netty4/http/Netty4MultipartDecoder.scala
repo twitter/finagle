@@ -8,7 +8,7 @@ import io.netty.handler.codec.http.multipart._
 import scala.collection.mutable
 import scala.collection.JavaConverters._
 
-private class Netty4MultipartDecoder extends MultipartDecoder {
+private[finagle] class Netty4MultipartDecoder extends MultipartDecoder {
   protected def decodeFull(req: Request, maxInMemoryFileSize: StorageUnit): Option[Multipart] = {
     val decoder = new HttpPostMultipartRequestDecoder(
       new DefaultHttpDataFactory(maxInMemoryFileSize.inBytes),
