@@ -122,9 +122,9 @@ object ThriftMux
 
   object Client {
 
-    private[finagle] val UsePushMuxToggleName =
+    private[finagle] val UsePushMuxClientToggleName =
       "com.twitter.finagle.thriftmux.UsePushMuxClient"
-    private[this] val usePushMuxToggle = Toggles(UsePushMuxToggleName)
+    private[this] val usePushMuxToggle = Toggles(UsePushMuxClientToggleName)
     private[this] def UsePushMuxClient: Boolean = usePushMuxToggle(ServerInfo().id.hashCode)
 
     def apply(): Client =
@@ -452,8 +452,14 @@ object ThriftMux
 
   object Server {
 
+    private[finagle] val UsePushMuxServerToggleName =
+      "com.twitter.finagle.thriftmux.UsePushMuxServer"
+    private[this] val usePushMuxToggle = Toggles(UsePushMuxServerToggleName)
+    private[this] def UsePushMuxServer: Boolean = usePushMuxToggle(ServerInfo().id.hashCode)
+
     /** The default underlying muxer for ThriftMux servers */
-    def defaultMuxer: StackServer[mux.Request, mux.Response] = standardMuxer
+    def defaultMuxer: StackServer[mux.Request, mux.Response] =
+      if(UsePushMuxServer) pushMuxer else standardMuxer
 
     private[finagle] def pushMuxer: StackServer[mux.Request, mux.Response] = {
       MuxPush.server

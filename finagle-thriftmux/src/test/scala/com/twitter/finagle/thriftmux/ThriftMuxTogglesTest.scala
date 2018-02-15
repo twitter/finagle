@@ -7,15 +7,29 @@ import org.scalatest.FunSuite
 
 class ThriftMuxTogglesTest extends FunSuite {
 
+  // client tests
   test("When toggle disabled use the transport-based Mux client as the default muxer") {
-    flag.overrides.let(ThriftMux.Client.UsePushMuxToggleName, 0.0) {
-      ThriftMux.client.muxer.isInstanceOf[Mux.Client]
+    flag.overrides.let(ThriftMux.Client.UsePushMuxClientToggleName, 0.0) {
+      assert(ThriftMux.client.muxer.isInstanceOf[Mux.Client])
     }
   }
 
   test("When toggle enabled use the push-based Mux client as the default muxer") {
-    flag.overrides.let(ThriftMux.Client.UsePushMuxToggleName, 1.0) {
-      ThriftMux.client.muxer.isInstanceOf[MuxPush.Client]
+    flag.overrides.let(ThriftMux.Client.UsePushMuxClientToggleName, 1.0) {
+      assert(ThriftMux.client.muxer.isInstanceOf[MuxPush.Client])
+    }
+  }
+
+  // server tests
+  test("When toggle disabled use the transport-based Mux server as the default muxer") {
+    flag.overrides.let(ThriftMux.Server.UsePushMuxServerToggleName, 0.0) {
+      assert(ThriftMux.server.muxer.isInstanceOf[ThriftMux.ServerMuxer])
+    }
+  }
+
+  test("When toggle enabled use the push-based Mux server as the default muxer") {
+    flag.overrides.let(ThriftMux.Server.UsePushMuxServerToggleName, 1.0) {
+      assert(ThriftMux.server.muxer.isInstanceOf[MuxPush.Server])
     }
   }
 }
