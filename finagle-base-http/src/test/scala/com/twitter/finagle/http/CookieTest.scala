@@ -213,4 +213,9 @@ class CookieTest extends FunSuite {
     assert(cookie.httpOnly == true)
     assert(cookie.secure == true)
   }
+
+  test("maxAge is default if set to None") {
+    val cookie = new Cookie("name", "value").maxAge(None)
+    assert(cookie.maxAge == Cookie.DefaultMaxAge)
+  }
 }

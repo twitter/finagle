@@ -94,7 +94,7 @@ class Cookie private (
   private[this] var _path: String,
   private[this] var _discard: Boolean,
   private[this] var _ports: Set[Int],
-  private[this] var _maxAge: Duration,
+  private[this] var _maxAge: Option[Duration],
   private[this] var _version: Int,
   private[this] var _secure: Boolean,
   private[this] var _httpOnly: Boolean,
@@ -119,7 +119,7 @@ class Cookie private (
     _path = Cookie.validateField(path.orNull),
     _discard = false,
     _ports = Set.empty,
-    _maxAge = maxAge.orNull,
+    _maxAge = maxAge,
     _version = 0,
     _secure = secure,
     _httpOnly = httpOnly,
@@ -150,7 +150,7 @@ class Cookie private (
       underlying.getPorts.asScala.toSet.map { i: Integer =>
         i.intValue
       },
-      underlying.getMaxAge.seconds,
+      Option(underlying.getMaxAge.seconds),
       underlying.getVersion,
       underlying.isSecure,
       underlying.isHttpOnly,
@@ -171,7 +171,10 @@ class Cookie private (
   def path: String = _path
   def name: String = _name
   def value: String = _value
-  def maxAge: Duration = _maxAge
+  def maxAge: Duration = _maxAge match {
+    case Some(maxAge) => maxAge
+    case None => Cookie.DefaultMaxAge
+  }
   def ports: Set[Int] = _ports
   def version: Int = _version
   def httpOnly: Boolean = _httpOnly
@@ -194,7 +197,7 @@ class Cookie private (
 
   @deprecated("Set maxAge in the Cookie constructor or use `Cookie.maxAge`", "2017-08-16")
   def maxAge_=(maxAge: Duration): Unit =
-    _maxAge = maxAge
+    _maxAge = Option(maxAge)
 
   /**
    * Set the path.
@@ -247,9 +250,9 @@ class Cookie private (
   private[this] def copy(
     name: String = _name,
     value: String = _value,
-    domain: Option[String] = Some(_domain),
-    path: Option[String] = Some(_path),
-    maxAge: Option[Duration] = Some(_maxAge),
+    domain: Option[String] = Option(_domain),
+    path: Option[String] = Option(_path),
+    maxAge: Option[Duration] = _maxAge,
     secure: Boolean = _secure,
     httpOnly: Boolean = _httpOnly
   ): Cookie =
