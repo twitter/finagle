@@ -48,7 +48,12 @@ trait PushStackServer[Req, Rep, This <: PushStackServer[Req, Rep, This]]
     trackSession: ClientConnection => Unit
   ): ListeningServer = {
 
-    newListener().listen(addr) { handle: PushChannelHandle[PipelineReq, PipelineRep] =>
+    val listener = newListener()
+
+    // This assumes that the `toString` of the implementation is sufficiently descriptive.
+    addServerToRegistry(listener.toString)
+
+    listener.listen(addr) { handle: PushChannelHandle[PipelineReq, PipelineRep] =>
       val conn = new ClientConnectionProxy(handle)
 
       def mkSession(svc: Service[Req, Rep]): PushSession[PipelineReq, PipelineRep] = {

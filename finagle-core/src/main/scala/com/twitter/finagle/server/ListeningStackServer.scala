@@ -5,6 +5,7 @@ import com.twitter.finagle.filter.RequestLogger
 import com.twitter.finagle.param._
 import com.twitter.finagle.{ClientConnection, ListeningServer, ServiceFactory, Stack}
 import com.twitter.finagle.stack.Endpoint
+import com.twitter.util.registry.GlobalRegistry
 import com.twitter.util.{CloseAwaitably, Future, Time}
 import java.net.SocketAddress
 
@@ -157,4 +158,19 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
 
   override def transformed(t: Stack.Transformer): This =
     withStack(t(stack))
+
+  /**
+   * Export info about the listener type to the global registry.
+   *
+   * The information about its implementation can then be queried at runtime.
+   */
+  final protected def addServerToRegistry(listenerName: String): Unit = {
+    val listenerImplKey = Seq(
+      ServerRegistry.registryName,
+      params[ProtocolLibrary].name,
+      params[Label].label,
+      "Listener"
+    )
+    GlobalRegistry.get.put(listenerImplKey, listenerName)
+  }
 }

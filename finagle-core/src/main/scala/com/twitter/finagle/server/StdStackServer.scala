@@ -4,10 +4,8 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.{
   ClientConnection, ClientConnectionProxy, Failure, ListeningServer, Service, ServiceFactory}
 import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.param.{Label, ProtocolLibrary}
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.{Closable, Future, Return, Throw, Time}
-import com.twitter.util.registry.GlobalRegistry
 import java.net.SocketAddress
 
 /**
@@ -68,16 +66,8 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
     // `serviceFactory` via `newDispatcher`.
     val listener = newListener()
 
-    // Export info about the listener type so that we can query info
-    // about its implementation at runtime. This assumes that the `toString`
-    // of the implementation is sufficiently descriptive.
-    val listenerImplKey = Seq(
-      ServerRegistry.registryName,
-      params[ProtocolLibrary].name,
-      params[Label].label,
-      "Listener"
-    )
-    GlobalRegistry.get.put(listenerImplKey, listener.toString)
+    // This assumes that the `toString` of the implementation is sufficiently descriptive.
+    addServerToRegistry(listener.toString)
 
     listener.listen(addr) { transport =>
       val clientConnection = new ClientConnectionProxy(

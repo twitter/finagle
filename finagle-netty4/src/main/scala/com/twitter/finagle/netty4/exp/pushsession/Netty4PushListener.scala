@@ -37,4 +37,6 @@ private[finagle] class Netty4PushListener[In, Out](
       extends ChannelInitializer[Channel] {
     def initChannel(ch: Channel): Unit = initializePushChannelHandle(ch, sessionFactory)
   }
+
+  override def toString: String = "Netty4PushListener"
 }

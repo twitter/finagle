@@ -5,6 +5,7 @@ import com.twitter.finagle.server.StackServer
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{
   ClientConnection, ListeningServer, Service, ServiceFactory, Stack, Status}
+import com.twitter.util.registry.{Entry, GlobalRegistry}
 import com.twitter.util.{Await, Awaitable, Duration, Future, Promise, Time}
 import java.net.{InetSocketAddress, SocketAddress}
 import java.security.cert.Certificate
@@ -37,6 +38,8 @@ class PushStackServerTest extends FunSuite with MockitoSugar {
   // Note: only intended to handle one connection at a time due to storing
   //       per-listen call data in the parent instance.
   class MockPushListener extends PushListener[Unit, Unit] {
+
+    override def toString: String = "MockPushListener"
 
     type SessionBuilder = PushChannelHandle[Unit, Unit] => Future[PushSession[Unit, Unit]]
 
@@ -173,5 +176,21 @@ class PushStackServerTest extends FunSuite with MockitoSugar {
     await(server.mockListener.builder(handle))
 
     assert(TestServiceFactory.cert == Some(mockCert))
+  }
+
+  test("inserts an entry into the registry") {
+    val server = new TestStackServer()
+
+    // Should have registered itself
+    server.serve(new InetSocketAddress(0),
+      ServiceFactory(() => Future.exception(new Exception("Sad face"))))
+
+    val entries = GlobalRegistry.get.iterator.toList
+    val foundEntry = entries.exists {
+      case Entry(key, "MockPushListener") => key.lastOption == Some("Listener")
+      case _ => false
+    }
+
+    assert(foundEntry)
   }
 }
