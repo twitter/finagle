@@ -84,11 +84,39 @@ trait TwemcacheConnectedClient extends TwemcacheClient { self: ConnectedClient =
 
 object TwemcacheClient {
 
+  private[this] val EmptyGetResult = Future.value(GetResult.Empty)
+  private[this] val EmptyGetsResult = Future.value(GetsResult(GetResult.Empty))
+
   /**
    * Construct a twemcache client from a single Service, which supports both memcache and twemcache command
    */
   def apply(raw: Service[Command, Response]): TwemcacheClient = {
-    new ConnectedClient(raw) with TwemcacheConnectedClient
+
+    new ConnectedClient(raw) with TwemcacheConnectedClient {
+      override def getResult(keys: Iterable[String]): Future[GetResult] = {
+        if (keys.nonEmpty) {
+          super.getResult(keys)
+        } else {
+          EmptyGetResult
+        }
+      }
+
+      override def getsResult(keys: Iterable[String]): Future[GetsResult] = {
+        if (keys.nonEmpty) {
+          super.getsResult(keys)
+        } else {
+          EmptyGetsResult
+        }
+      }
+
+      override def getvResult(keys: Iterable[String]): Future[GetsResult] = {
+        if (keys.nonEmpty) {
+          super.getvResult(keys)
+        } else {
+          EmptyGetsResult
+        }
+      }
+    }
   }
 }
 

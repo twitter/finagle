@@ -4,7 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.memcached.integration.external.TestMemcachedServer
 import com.twitter.finagle.memcached.protocol.ClientError
-import com.twitter.finagle.memcached.{Client, PartitionedClient}
+import com.twitter.finagle.memcached.{Client, GetResult, GetsResult, PartitionedClient}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.io.Buf
 import com.twitter.util._
@@ -77,6 +77,15 @@ abstract class MemcachedTest
       awaitResult(client.get("bob")).get == Buf.Utf8("hello there \r\n nice to meet \r\n you"),
       3.seconds
     )
+  }
+
+  test("empty key sequence") {
+    assert(awaitResult(client.get(Seq.empty)).isEmpty)
+    assert(awaitResult(client.gets(Seq.empty)).isEmpty)
+    assert(awaitResult(client.getWithFlag(Seq.empty)).isEmpty)
+    assert(awaitResult(client.getsWithFlag(Seq.empty)).isEmpty)
+    assert(awaitResult(client.getResult(Seq.empty)) == GetResult.Empty)
+    assert(awaitResult(client.getsResult(Seq.empty)) == GetsResult(GetResult.Empty))
   }
 
   test("get") {
@@ -242,11 +251,7 @@ abstract class MemcachedTest
 
     // test other keyed command validation
     val nullSeq: Seq[String] = null
-    if (isOldClient) {
-      intercept[NullPointerException] { awaitResult(client.get(nullSeq)) }
-    } else {
-      intercept[ClientError] { awaitResult(client.get(nullSeq)) }
-    }
+    intercept[NullPointerException] { awaitResult(client.get(nullSeq)) }
 
     intercept[ClientError] { awaitResult(client.append("bad key", Buf.Utf8("rab"))) }
     intercept[ClientError] { awaitResult(client.prepend("bad key", Buf.Utf8("rab"))) }
