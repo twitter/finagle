@@ -1,6 +1,8 @@
 package com.twitter.finagle.serverset2
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.google.common.collect.ImmutableMap
+
 import scala.collection.JavaConverters._
 import scala.util.control.NonFatal
 
@@ -50,7 +52,20 @@ private[serverset2] object JsonDict {
       case NonFatal(_) => return Function.const(None)
     }
 
-    key =>
-      Option(o.get(key))
+    // If the object is a Curator service discovery record then translate it to a serversets entry.
+    // TODO: Is this enough to definitively say the object is a Curator service discovery record?
+    if (o.containsKey("name") && o.containsKey("id") && o.containsKey("address") && o.containsKey("port")) {
+      key => {
+        val host = o.get("address")
+        val port = o.get("port")
+        key match {
+          case "serviceEndpoint" => Some(ImmutableMap.of("host", host, "port", port))
+          case "status" => Some("ALIVE")
+          case _ => None
+        }
+      }
+    } else {
+      key => Option(o.get(key))
+    }
   }
 }
