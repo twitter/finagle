@@ -40,6 +40,9 @@ Breaking API Changes
     `c.t.f.http.Cookie.commentUrl_`, and `c.t.f.http.Cookie.commentUrl_=`. `comment` and `commentUrl`
     per RFC-6265. ``PHAB_ID=D137538``
 
+  * finagle-base-http: Removed deprecated `c.t.f.http.Cookie.isDiscard` and
+    `c.t.f.http.Cookie.isDiscard_=`, per RFC-6265. ``PHAB_ID=D138109``
+
   * finagle-base-http: `c.t.f.http.RequestBuilder` has been moved to the finagle-http target
     and the implicit evidence, `RequestConfig.Yes` has been renamed to `RequestBuilder.Valid`.
     ``PHAB_ID=D122227``

@@ -20,7 +20,6 @@ class BijectionsTest extends FunSuite {
       httpOnly = false
     )
 
-    in.isDiscard = true
     in.ports = Seq(1, 2, 3)
     in.version = 100
 
@@ -29,7 +28,6 @@ class BijectionsTest extends FunSuite {
     assert(out.getValue == "value")
     assert(out.getDomain == "domain")
     assert(out.getPath == "path")
-    assert(out.isDiscard)
     assert(out.getPorts.asScala == Set(new Integer(1), new Integer(2), new Integer(3)))
     assert(out.getMaxAge == 99)
     assert(out.getVersion == 100)
@@ -57,7 +55,6 @@ class BijectionsTest extends FunSuite {
     assert(out.value == "value")
     assert(out.domain == "domain")
     assert(out.path == "path")
-    assert(out.discard)
     assert(out.ports == Set(1, 2, 3))
     assert(out.maxAge == 99.seconds)
     assert(out.version == 100)

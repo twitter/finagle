@@ -92,7 +92,6 @@ class Cookie private (
   private[this] var _value: String,
   private[this] var _domain: String,
   private[this] var _path: String,
-  private[this] var _discard: Boolean,
   private[this] var _ports: Set[Int],
   private[this] var _maxAge: Option[Duration],
   private[this] var _version: Int,
@@ -117,7 +116,6 @@ class Cookie private (
     _value = value,
     _domain = Cookie.validateField(domain.orNull),
     _path = Cookie.validateField(path.orNull),
-    _discard = false,
     _ports = Set.empty,
     _maxAge = maxAge,
     _version = 0,
@@ -146,7 +144,6 @@ class Cookie private (
       underlying.getValue,
       underlying.getDomain,
       underlying.getPath,
-      underlying.isDiscard,
       underlying.getPorts.asScala.toSet.map { i: Integer =>
         i.intValue
       },
@@ -178,11 +175,7 @@ class Cookie private (
   def ports: Set[Int] = _ports
   def version: Int = _version
   def httpOnly: Boolean = _httpOnly
-  def discard: Boolean = _discard
   def secure: Boolean = _secure
-
-  @deprecated("Removed per RFC-6265", "2017-08-16")
-  def isDiscard: Boolean = _discard
 
   @deprecated("Use secure instead", "2017-08-16")
   def isSecure: Boolean = _secure
@@ -226,10 +219,6 @@ class Cookie private (
   @deprecated("Set httpOnly in the Cookie constructor or use `Cookie.httpOnly`", "2017-08-16")
   def httpOnly_=(httpOnly: Boolean): Unit =
     _httpOnly = httpOnly
-
-  @deprecated("Removed per RFC-6265", "2017-08-16")
-  def isDiscard_=(discard: Boolean): Unit =
-    _discard = discard
 
   @deprecated("Set secure in the Cookie constructor or use `Cookie.secure`", "2017-08-16")
   def isSecure_=(secure: Boolean): Unit =

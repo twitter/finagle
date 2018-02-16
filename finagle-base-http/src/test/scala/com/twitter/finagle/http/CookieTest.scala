@@ -16,7 +16,6 @@ class CookieTest extends FunSuite {
     cookie.value = "value2"
     cookie.version = 1
     cookie.httpOnly = true
-    cookie.isDiscard = false
     cookie.isSecure = true
 
     assert(cookie.name == "name")
@@ -27,7 +26,6 @@ class CookieTest extends FunSuite {
     assert(cookie.value == "value2")
     assert(cookie.version == 1)
     assert(cookie.httpOnly == true)
-    assert(cookie.isDiscard == false)
     assert(cookie.isSecure == true)
   }
 
@@ -122,7 +120,6 @@ class CookieTest extends FunSuite {
     assert(cookie.value == nettyCookie.getValue)
     assert(cookie.domain == nettyCookie.getDomain)
     assert(cookie.path == nettyCookie.getPath)
-    assert(cookie.discard == nettyCookie.isDiscard)
     assert(cookie.ports == nettyCookie.getPorts.asScala.toSet)
     assert(cookie.maxAge == nettyCookie.getMaxAge.seconds)
     assert(cookie.version == nettyCookie.getVersion)
