@@ -1,9 +1,9 @@
 junit_tests(
-  dependencies=[
-    '3rdparty/jvm/junit',
-    'finagle/finagle-mysql',
-    'finagle/finagle-core/src/main/scala:scala',
-  ],
-  fatal_warnings=False,
-  sources=rglobs('*.java')
+    sources = rglobs("*.java"),
+    fatal_warnings = False,
+    dependencies = [
+        "3rdparty/jvm/junit",
+        "finagle/finagle-core/src/main/scala",
+        "finagle/finagle-mysql",
+    ],
 )

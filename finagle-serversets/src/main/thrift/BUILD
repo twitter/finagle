@@ -15,13 +15,13 @@
 # ==================================================================================================
 
 java_thrift_library(
-  name='thrift-java',
-  sources=globs('com/twitter/thrift/endpoint.thrift'),
-  compiler='scrooge',
-  language='java',
-  provides=artifact(
-    org='com.twitter.thrift',
-    name='finagle-serversets-thrift',
-    repo=artifactory,
-  ),
+    name = "thrift-java",
+    sources = globs("com/twitter/thrift/endpoint.thrift"),
+    compiler = "scrooge",
+    language = "java",
+    provides = artifact(
+        org = "com.twitter.thrift",
+        name = "finagle-serversets-thrift",
+        repo = artifactory,
+    ),
 )

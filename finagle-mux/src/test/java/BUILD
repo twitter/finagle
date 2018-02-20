@@ -1,9 +1,9 @@
 junit_tests(
-  dependencies=[
-    'finagle/finagle-mux',
-    'util/util-core',
-    'finagle/finagle-core',
-  ],
-  fatal_warnings=True,
-  sources=rglobs('*.java')
+    sources = rglobs("*.java"),
+    fatal_warnings = True,
+    dependencies = [
+        "finagle/finagle-core",
+        "finagle/finagle-mux",
+        "util/util-core",
+    ],
 )

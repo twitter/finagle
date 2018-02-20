@@ -1,3 +1,6 @@
 resources(
-  sources=rglobs('*', exclude=[rglobs('BUILD*', '*.pyc')])
+    sources = rglobs(
+        "*",
+        exclude = [rglobs("BUILD*", "*.pyc")],
+    ),
 )

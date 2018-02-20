@@ -1,3 +1,3 @@
 resources(
-  sources=globs('*.sql')
+    sources = globs("*.sql"),
 )

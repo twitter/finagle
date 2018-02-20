@@ -1,5 +1,5 @@
 target(
-  dependencies=[
-    'finagle/finagle-tunable/src/main/scala'
-  ]
+    dependencies = [
+        "finagle/finagle-tunable/src/main/scala",
+    ],
 )

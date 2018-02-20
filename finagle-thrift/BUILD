@@ -1,12 +1,13 @@
 target(
-  dependencies=[
-    'finagle/finagle-thrift/src/main/scala'
-  ]
+    dependencies = [
+        "finagle/finagle-thrift/src/main/scala",
+    ],
 )
 
-target(name='tests',
-  dependencies=[
-    'finagle/finagle-thrift/src/test/java',
-    'finagle/finagle-thrift/src/test/scala'
-  ]
+target(
+    name = "tests",
+    dependencies = [
+        "finagle/finagle-thrift/src/test/java",
+        "finagle/finagle-thrift/src/test/scala",
+    ],
 )

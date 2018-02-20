@@ -1,11 +1,12 @@
 target(
-  dependencies=[
-    'finagle/finagle-zipkin/src/main/scala'
-  ]
+    dependencies = [
+        "finagle/finagle-zipkin/src/main/scala",
+    ],
 )
 
-target(name='tests',
-  dependencies=[
-    'finagle/finagle-zipkin/src/test/scala'
-  ]
+target(
+    name = "tests",
+    dependencies = [
+        "finagle/finagle-zipkin/src/test/scala",
+    ],
 )

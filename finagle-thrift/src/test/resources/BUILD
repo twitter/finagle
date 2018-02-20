@@ -1,3 +1,6 @@
 resources(
-  sources=rglobs('*', exclude=[rglobs('BUILD')])
+    sources = rglobs(
+        "*",
+        exclude = [rglobs("BUILD")],
+    ),
 )

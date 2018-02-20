@@ -1,5 +1,6 @@
-target(name='tests',
-  dependencies=[
-    'finagle/finagle-integration/src/test/scala'
-  ]
+target(
+    name = "tests",
+    dependencies = [
+        "finagle/finagle-integration/src/test/scala",
+    ],
 )
