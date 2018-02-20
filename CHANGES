@@ -19,7 +19,10 @@ Bug Fixes
   * finagle-core: `c.t.f.liveness.FailureAccrualFactory` takes no action on `c.t.f.Failure.Ignorable`
     responses. ``PHAB_ID=D135435``
 
-  * finagle-core: CachingPool service wrapper instances are resilient to multiple closes.
+  * finagle-core: `c.t.f.pool.WatermarkPool` is resilient to multiple closes on a service instance.
+    ``PHAB_ID=D137198``
+
+  * finagle-core: `c.t.f.pool.CachingPool` service wrapper instances are resilient to multiple closes.
     ``PHAB_ID=D136781``
 
   * finagle-base-http: `c.t.f.http.Netty4CookieCodec.encode` now wraps Cookie values that would
@@ -46,6 +49,8 @@ Breaking API Changes
   * finagle-base-http: `c.t.f.http.RequestBuilder` has been moved to the finagle-http target
     and the implicit evidence, `RequestConfig.Yes` has been renamed to `RequestBuilder.Valid`.
     ``PHAB_ID=D122227``
+
+  * finagle-core: `c.t.f.pool.WatermarkPool` was finalized. ``PHAB_ID=D137198``
 
   * finagle-core: `c.t.finagle.ssl.Ssl` and related classes have been
     removed. They were replaced as the primary way of using SSL/TLS
