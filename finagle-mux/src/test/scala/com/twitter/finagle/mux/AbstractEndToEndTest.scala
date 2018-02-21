@@ -134,17 +134,19 @@ abstract class AbstractEndToEndTest
 
     Await.result(client(Request.empty), 30.seconds)
 
-    assertAnnotationsInOrder(
-      tracer.toSeq,
-      Seq(
-        Annotation.ServiceName("theClient"),
-        Annotation.ClientSend(),
-        Annotation.ServiceName("theServer"),
-        Annotation.ServerRecv(),
-        Annotation.ServerSend(),
-        Annotation.ClientRecv()
+    eventually {
+      assertAnnotationsInOrder(
+        tracer.toSeq,
+        Seq(
+          Annotation.ServiceName("theClient"),
+          Annotation.ClientSend(),
+          Annotation.ServiceName("theServer"),
+          Annotation.ServerRecv(),
+          Annotation.ServerSend(),
+          Annotation.ClientRecv()
+        )
       )
-    )
+    }
 
     Await.result(server.close(), 30.seconds)
     Await.result(client.close(), 30.seconds)

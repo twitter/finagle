@@ -14,11 +14,6 @@
       "id": "com.twitter.finagle.core.UseDeterministicAperture",
       "description": "Use deterministic aperture instead of a random aperture for client load balancing",
       "fraction": 0.0
-    },
-    {
-      "id": "com.twitter.util.UseLifoPromiseContinuations",
-      "description": "Use LIFO callback execution order for Promises",
-      "fraction": 0.0
     }
   ]
 }
