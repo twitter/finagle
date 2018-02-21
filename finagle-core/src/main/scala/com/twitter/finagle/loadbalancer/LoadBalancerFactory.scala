@@ -390,14 +390,3 @@ object FlagBalancerFactory extends LoadBalancerFactory {
     underlying.newBalancer(endpoints, emptyException, params)
   }
 }
-
-@deprecated("Use com.twitter.finagle.loadbalancer.FlagBalancerFactory instead.", "2017-11-28")
-object DefaultBalancerFactory extends LoadBalancerFactory {
-  def newBalancer[Req, Rep](
-    endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
-    emptyException: NoBrokersAvailableException,
-    params: Stack.Params
-  ): ServiceFactory[Req, Rep] = {
-    FlagBalancerFactory.newBalancer(endpoints, emptyException, params)
-  }
-}
