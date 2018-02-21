@@ -21,3 +21,6 @@ These metrics reflect the behavior of the
 
 **dropped_requests**
   A counter of the number of requests probabilistically dropped.
+
+**ema_value**
+  A gauge of the EMA value. Between 0 and 100, inclusive.

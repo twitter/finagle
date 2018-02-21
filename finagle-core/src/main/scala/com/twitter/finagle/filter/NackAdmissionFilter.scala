@@ -3,7 +3,7 @@ package com.twitter.finagle.filter
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.server.ServerInfo
-import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
 import com.twitter.finagle.util.{Ema, Rng}
 import com.twitter.util._
 
@@ -139,7 +139,6 @@ private[finagle] class NackAdmissionFilter[Req, Rep](
   require(nackRateThreshold < 1, s"nackRateThreshold must lie in (0, 1): $nackRateThreshold")
   require(nackRateThreshold > 0, s"nackRateThreshold must lie in (0, 1): $nackRateThreshold")
 
-  private[this] val droppedRequestCounter = statsReceiver.counter("dropped_requests")
   private[this] val acceptRateThreshold = 1.0 - nackRateThreshold
   private[this] val multiplier = 1D / acceptRateThreshold
   private[this] val windowInNs = window.inNanoseconds
@@ -155,6 +154,11 @@ private[finagle] class NackAdmissionFilter[Req, Rep](
 
   // visible for testing. Synchronized as Ema is not threadsafe
   private[filter] def emaValue: Double = synchronized { ema.last }
+
+  private[this] val droppedRequestCounter = statsReceiver.counter("dropped_requests")
+  private[this] val emaPercent = statsReceiver.addGauge(Verbosity.Debug, "ema_value") {
+    (emaValue * 100).toFloat
+  }
 
   // Decrease the EMA if the response is a Nack, increase otherwise. Update the
   // acceptFraction & last update time
