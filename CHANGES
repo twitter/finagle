@@ -10,8 +10,12 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
-  * `c.t.f.client.BackupRequestFilter.filterService` for wrapping raw services in a
+  * finagle-core: `c.t.f.client.BackupRequestFilter.filterService` for wrapping raw services in a
     `c.t.f.client.BackupRequestFilter` is now public. ``PHAB_ID=D135484``
+
+  * finagle-core: Introduce `c.t.f.Stacks.EMPTY_PARAMS` for getting an empty Param map from
+    Java, and `c.t.f.Stack.Params.plus` for easily adding Params to a Param map from Java.
+    ``PHAB_ID=D139660``
 
 Bug Fixes
 ~~~~~~~~~

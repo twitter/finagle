@@ -360,8 +360,19 @@ object Stack {
     /**
      * Produce a new parameter map, overriding any previous
      * `P`-typed value.
+     *
+     * Java users may find it easier to use `plus` below.
      */
     def +[P: Param](p: P): Params
+
+    /**
+     * Java-friendly API for `+`.
+     *
+     * The `Tuple2` can be created by calls to a `mk(): (P, Param[P])` method on parameters
+     * (see [[com.twitter.finagle.service.TimeoutFilter.Param.mk()]] as an example).
+     */
+    def plus[P](typeAndParam: (P, Param[P])): Params =
+      this.+(typeAndParam._1)(typeAndParam._2)
 
     /**
      * Alias for [[addAll(Params)]].
@@ -400,6 +411,8 @@ object Stack {
 
     /**
      * The empty parameter map.
+     *
+     * Java users may find it easier to use `Stacks.EMPTY_PARAMS`.
      */
     val empty: Params = Prms(Map.empty)
   }

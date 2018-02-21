@@ -120,6 +120,11 @@ public class StackParamCompilationTest {
   }
 
   @Test
+  public void testConstructStack() {
+    Stacks.EMPTY_PARAMS.plus(new TimeoutFilter.Param(Duration.Top()).mk());
+  }
+
+  @Test
   public void testDefaults() {
       Stack.Param<ExceptionStatsHandler> param = ExceptionStatsHandler.param();
   }
