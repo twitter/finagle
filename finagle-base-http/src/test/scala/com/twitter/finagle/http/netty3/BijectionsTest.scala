@@ -5,7 +5,6 @@ import com.twitter.finagle.http.Cookie
 import com.twitter.finagle.http.netty3.Bijections._
 import org.jboss.netty.handler.codec.http.{DefaultCookie, Cookie => NettyCookie}
 import org.scalatest.FunSuite
-import scala.collection.JavaConverters._
 
 class BijectionsTest extends FunSuite {
 
@@ -20,7 +19,6 @@ class BijectionsTest extends FunSuite {
       httpOnly = false
     )
 
-    in.ports = Seq(1, 2, 3)
     in.version = 100
 
     val out: NettyCookie = Bijections.from(in)
@@ -28,7 +26,6 @@ class BijectionsTest extends FunSuite {
     assert(out.getValue == "value")
     assert(out.getDomain == "domain")
     assert(out.getPath == "path")
-    assert(out.getPorts.asScala == Set(new Integer(1), new Integer(2), new Integer(3)))
     assert(out.getMaxAge == 99)
     assert(out.getVersion == 100)
     assert(out.isSecure)
@@ -43,7 +40,6 @@ class BijectionsTest extends FunSuite {
     in.setDomain("domain")
     in.setPath("path")
     in.setDiscard(true)
-    in.setPorts(new Integer(1), new Integer(2), new Integer(3))
     in.setMaxAge(99)
     in.setVersion(100)
     in.setSecure(true)
@@ -55,7 +51,6 @@ class BijectionsTest extends FunSuite {
     assert(out.value == "value")
     assert(out.domain == "domain")
     assert(out.path == "path")
-    assert(out.ports == Set(1, 2, 3))
     assert(out.maxAge == 99.seconds)
     assert(out.version == 100)
     assert(out.secure)

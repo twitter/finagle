@@ -3,7 +3,6 @@ package com.twitter.finagle.http
 import com.twitter.conversions.time._
 import org.jboss.netty.handler.codec.http.DefaultCookie
 import org.scalatest.FunSuite
-import scala.collection.JavaConverters._
 
 class CookieTest extends FunSuite {
 
@@ -12,7 +11,6 @@ class CookieTest extends FunSuite {
     cookie.domain = ".twitter.com"
     cookie.maxAge = 100.seconds
     cookie.path = "/1/statuses/show"
-    cookie.ports = Seq(1, 2, 3)
     cookie.value = "value2"
     cookie.version = 1
     cookie.httpOnly = true
@@ -22,7 +20,6 @@ class CookieTest extends FunSuite {
     assert(cookie.domain == ".twitter.com")
     assert(cookie.maxAge == 100.seconds)
     assert(cookie.path == "/1/statuses/show")
-    assert(cookie.ports == Set(1, 2, 3))
     assert(cookie.value == "value2")
     assert(cookie.version == 1)
     assert(cookie.httpOnly == true)
@@ -120,7 +117,6 @@ class CookieTest extends FunSuite {
     assert(cookie.value == nettyCookie.getValue)
     assert(cookie.domain == nettyCookie.getDomain)
     assert(cookie.path == nettyCookie.getPath)
-    assert(cookie.ports == nettyCookie.getPorts.asScala.toSet)
     assert(cookie.maxAge == nettyCookie.getMaxAge.seconds)
     assert(cookie.version == nettyCookie.getVersion)
     assert(cookie.secure == nettyCookie.isSecure)
@@ -150,18 +146,6 @@ class CookieTest extends FunSuite {
   test("name is trimmed") {
     val cookie = new Cookie("    name     ", "value")
     assert(cookie.name == "name")
-  }
-
-  test("ports are validated") {
-    intercept[IllegalArgumentException] {
-      val cookie = new Cookie("name", "value")
-      cookie.ports = Seq(-1, 0, 5) // cannot be negative
-    }
-
-    val cookie = new Cookie("name", "value")
-    intercept[IllegalArgumentException] {
-      cookie.ports = Seq(-1, 0, 5) // cannot be negative
-    }
   }
 
   private[this] val IllegalFieldChars = Set('\n', '\u000b', '\f', '\r', ';')

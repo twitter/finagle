@@ -81,7 +81,6 @@ object Bijections {
     nc.setVersion(c.version)
     nc.setSecure(c.secure)
     nc.setHttpOnly(c.httpOnly)
-    nc.setPorts(c.ports.toSeq: _*)
     nc
   }
 

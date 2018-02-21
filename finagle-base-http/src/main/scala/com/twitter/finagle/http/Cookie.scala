@@ -4,7 +4,6 @@ import com.twitter.conversions.time._
 import com.twitter.util.Duration
 import java.util.{BitSet => JBitSet}
 import org.jboss.netty.handler.codec.http.{Cookie => NettyCookie}
-import scala.collection.JavaConverters._
 
 object Cookie {
 
@@ -68,16 +67,6 @@ object Cookie {
       else trimmed
     }
   }
-
-  private[this] val invalidPort: Int => Boolean = p => p <= 0 || p > '\uffff'
-
-  // These are the same checks made by Netty's DefaultCookie
-  private def validatePorts(ports: Set[Int]): Set[Int] = {
-    val p = ports.find(invalidPort)
-    if (p.isDefined)
-      throw new IllegalArgumentException("Cookie port out of range: " + p.get);
-    ports
-  }
 }
 
 // A small amount of naming hopscotch is needed while we deprecate the `set` methods in preparation
@@ -92,7 +81,6 @@ class Cookie private (
   private[this] var _value: String,
   private[this] var _domain: String,
   private[this] var _path: String,
-  private[this] var _ports: Set[Int],
   private[this] var _maxAge: Option[Duration],
   private[this] var _version: Int,
   private[this] var _secure: Boolean,
@@ -116,7 +104,6 @@ class Cookie private (
     _value = value,
     _domain = Cookie.validateField(domain.orNull),
     _path = Cookie.validateField(path.orNull),
-    _ports = Set.empty,
     _maxAge = maxAge,
     _version = 0,
     _secure = secure,
@@ -144,9 +131,6 @@ class Cookie private (
       underlying.getValue,
       underlying.getDomain,
       underlying.getPath,
-      underlying.getPorts.asScala.toSet.map { i: Integer =>
-        i.intValue
-      },
       Option(underlying.getMaxAge.seconds),
       underlying.getVersion,
       underlying.isSecure,
@@ -172,7 +156,6 @@ class Cookie private (
     case Some(maxAge) => maxAge
     case None => Cookie.DefaultMaxAge
   }
-  def ports: Set[Int] = _ports
   def version: Int = _version
   def httpOnly: Boolean = _httpOnly
   def secure: Boolean = _secure
@@ -199,10 +182,6 @@ class Cookie private (
   @deprecated("Set path in the Cookie constructor or use `Cookie.path`", "2017-08-16")
   def path_=(path: String): Unit =
     _path = Cookie.validateField(path)
-
-  @deprecated("Removed per RFC-6265", "2017-08-16")
-  def ports_=(ports: Seq[Int]): Unit =
-    _ports = Cookie.validatePorts(ports.toSet)
 
   /**
    * Set the value.
