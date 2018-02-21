@@ -1,18 +1,18 @@
 package com.twitter.finagle.netty3.channel
 
 import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.logging.{Level, Logger}
 import com.twitter.util.{Duration, Monitor, Stopwatch, Time}
 import java.io.IOException
-import java.util.concurrent.atomic.AtomicLong
-import java.util.logging.{Level, Logger}
+import java.util.concurrent.atomic.{AtomicLong, AtomicReference}
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel.{
   ChannelHandlerContext,
   ChannelStateEvent,
   ExceptionEvent,
   MessageEvent,
-  WriteCompletionEvent,
-  SimpleChannelHandler
+  SimpleChannelHandler,
+  WriteCompletionEvent
 }
 
 /**
@@ -22,10 +22,9 @@ import org.jboss.netty.channel.{
  * server in order to consolidate statistics across a number of channels.
  */
 class ChannelStatsHandler(statsReceiver: StatsReceiver) extends SimpleChannelHandler {
-  private[this] val log = Logger.getLogger(getClass.getName)
+  private[this] val log = Logger.get(getClass)
   private[this] val connectionCount: AtomicLong = new AtomicLong()
-  private[this] var elapsed: () => Duration = null
-
+  private[this] val elapsed = new AtomicReference[Stopwatch.Elapsed](null)
   private[this] val connects = statsReceiver.counter("connects")
   private[this] val connectionDuration = statsReceiver.stat("connection_duration")
   private[this] val connectionReceivedBytes = statsReceiver.stat("connection_received_bytes")
@@ -41,7 +40,10 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver) extends SimpleChannelHan
   }
 
   override def channelOpen(ctx: ChannelHandlerContext, e: ChannelStateEvent): Unit = {
-    elapsed = Stopwatch.start()
+    if (elapsed.getAndSet(Stopwatch.start()) != null) {
+      log.warning(
+        "channelOpen() called when channel was already open, clobbering an existing timer")
+    }
     ctx.setAttachment((new AtomicLong(0), new AtomicLong(0)))
     connects.incr()
     connectionCount.incrementAndGet()
@@ -79,16 +81,16 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver) extends SimpleChannelHan
 
   override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
     // guarded in case Netty calls channelClosed without calling channelOpen.
-    if (elapsed != null) {
+    val currentElapsed = elapsed.getAndSet(null)
+    if (currentElapsed != null) {
       val (channelReadCount, channelWriteCount) =
         ctx.getAttachment().asInstanceOf[(AtomicLong, AtomicLong)]
 
       connectionReceivedBytes.add(channelReadCount.get)
       connectionSentBytes.add(channelWriteCount.get)
 
-      connectionDuration.add(elapsed().inMilliseconds)
+      connectionDuration.add(currentElapsed().inMilliseconds)
       connectionCount.decrementAndGet()
-      elapsed = null
     }
 
     super.channelClosed(ctx, e)
@@ -100,7 +102,7 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver) extends SimpleChannelHan
     // If no Monitor is active, then log the exception so we don't fail silently.
     if (!Monitor.isActive) {
       val level = evt.getCause match {
-        case t: IOException => Level.FINE
+        case t: IOException => Level.DEBUG
         case _ => Level.WARNING
       }
       log.log(level, "ChannelStatsHandler caught an exception", evt.getCause)
