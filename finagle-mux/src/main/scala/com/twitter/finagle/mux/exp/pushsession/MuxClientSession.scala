@@ -27,12 +27,12 @@ import java.util.concurrent.Executor
  * concerns, such as managing the data plane, to be implemented without propagating
  * concurrency concerns into their implementations.
  *
- * The `ClientSessionDataPlane` takes responsibility for tracking state related to
- * dispatches and leaves other session layer concerns such as pings, leases, and ensuring
- * that the session layer is ready to dispatch to its parent `MuxClientSession`. If the mux
- * protocol is expanded to support streaming the extra complexity of managing the stream
- * individual stream states would likely live in the `ClientSessionDataPlane` and flow
- * control would similarly be abstracted to a data structure that belongs to the session.
+ * The `ClientTracker` takes responsibility for tracking state related to dispatches
+ * and leaves other session layer concerns such as pings, leases, and ensuring that
+ * the session layer is ready to dispatch to its parent `MuxClientSession`. If the mux
+ * protocol is expanded to support streaming the extra complexity of managing the
+ * individual stream states would likely live in the `ClientTracker` and flow control
+ * would similarly be abstracted to a data structure that belongs to the session.
  */
 private[finagle] final class MuxClientSession(
   handle: PushChannelHandle[ByteReader, Buf],
@@ -59,7 +59,7 @@ private[finagle] final class MuxClientSession(
 
   private[this] val log: Logger = Logger.get(getClass.getName)
   private[this] val exec: Executor = handle.serialExecutor
-  private[this] val dataPlane = new ClientSessionDataPlane(messageWriter)
+  private[this] val tracker = new ClientTracker(messageWriter)
 
   private[this] val failureDetector =
     FailureDetector(detectorConfig, ping, statsReceiver.scope("failuredetector"))
@@ -163,12 +163,12 @@ private[finagle] final class MuxClientSession(
     if (isDraining) dispatchP.setException(Failure.RetryableNackFailure)
     else {
       val asDispatch = canDispatch != CanDispatch.No
-      val tag = dataPlane.dispatchRequest(req, asDispatch, locals, dispatchP)
+      val tag = tracker.dispatchRequest(req, asDispatch, locals, dispatchP)
       dispatchP.setInterruptHandler {
         case cause: Throwable =>
           exec.execute(new Runnable {
             def run(): Unit = {
-              dataPlane.requestInterrupted(dispatchP, tag, cause)
+              tracker.requestInterrupted(dispatchP, tag, cause)
             }
           })
       }
@@ -228,7 +228,7 @@ private[finagle] final class MuxClientSession(
         ClientSession.FuturePingNack.proxyTo(pp)
       }
 
-      dataPlane.shutdown(oexc, Some(handle.remoteAddress))
+      tracker.shutdown(oexc, Some(handle.remoteAddress))
 
       oexc match {
         case Some(t) => log.info(t, s"Closing mux client session to $name due to error")
@@ -256,10 +256,10 @@ private[finagle] final class MuxClientSession(
 
       case Message.Rerr(_, err) =>
         log.info(s"($name) Server error: $err")
-        dataPlane.receivedResponse(msg.tag, Throw(ServerError(err)))
+        tracker.receivedResponse(msg.tag, Throw(ServerError(err)))
 
       case Message.Rmessage(_) =>
-        dataPlane.receivedResponse(msg.tag, ReqRepFilter.reply(msg))
+        tracker.receivedResponse(msg.tag, ReqRepFilter.reply(msg))
 
       case Message.Tdrain(tag) =>
         // Ack the Tdrain and begin shutting down.
@@ -285,7 +285,7 @@ private[finagle] final class MuxClientSession(
     }
 
     // Check if we're in a finished-draining state and transition accordingly
-    if (dispatchState == Draining && dataPlane.pendingDispatches == 0) {
+    if (dispatchState == Draining && tracker.pendingDispatches == 0) {
       if (log.isLoggable(Level.TRACE)) {
         log.trace(s"Finished draining a connection to $name")
       }

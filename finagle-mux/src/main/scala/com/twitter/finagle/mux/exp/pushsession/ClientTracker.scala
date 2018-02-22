@@ -18,7 +18,7 @@ import java.net.SocketAddress
  *
  * @param messageWriter message writer belonging to parent `MuxClientSession`
  */
-private class ClientSessionDataPlane(messageWriter: MessageWriter) {
+private class ClientTracker(messageWriter: MessageWriter) {
 
   // outstanding messages, each tagged with a unique int between `MinTag` and `MaxTag`.
   private[this] val messages =
