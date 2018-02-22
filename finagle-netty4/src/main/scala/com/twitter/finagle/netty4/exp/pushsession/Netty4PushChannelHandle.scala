@@ -39,32 +39,39 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel)
 
   import Netty4PushChannelHandle._
 
-  private[this] class SafeExecutor(eventLoop: EventLoop) extends Executor {
+  // A runnable that catches unhandled exceptions and closes the handle
+  // instead of letting netty swallow them.
+  private[this] abstract class SafeRunnable extends Runnable {
+    // task to execute. Uncaught exceptions result in a log message and closure of the handle.
+    def tryRun(): Unit
 
-    // A proxy runnable that catches unhandled exceptions thrown by the underlying
-    // `Runnable` and closes the handle instead of letting netty swallow them.
-    private class SafeRunnable(underlying: Runnable) extends Runnable {
-      def run(): Unit = {
-
-        try underlying.run()
-        catch {
-          case NonFatal(t) =>
-            log.error(t, "Unhandled exception detected in push-session serial executor. Shutting down.")
-            FinagleStatsReceiver.counter("push", "unhandled_exceptions", t.getClass.getName).incr()
-            // This is happening in the channels event loop so we're thread safe.
-            handleFail()
-        }
+    final def run(): Unit = {
+      try tryRun()
+      catch {
+        case NonFatal(t) =>
+          log.error(t, "Unhandled exception detected in push-session serial executor. Shutting down.")
+          FinagleStatsReceiver.counter("push", "unhandled_exceptions", t.getClass.getName).incr()
+          // This is happening in the channels event loop so we're thread safe.
+          handleFail()
       }
     }
+  }
 
-    def execute(command: Runnable): Unit = eventLoop.execute(new SafeRunnable(command))
+  private[this] final class SafeExecutor(eventLoop: EventLoop) extends Executor {
+    private[this] final class SafeProxy(underlying: Runnable) extends SafeRunnable {
+      def tryRun(): Unit = underlying.run()
+    }
+
+    def safeExecute(command: SafeRunnable): Unit = eventLoop.execute(command)
+    def execute(command: Runnable): Unit = safeExecute(new SafeProxy(command))
   }
 
   @volatile
   private[this] var failed: Boolean = false
   private[this] val closePromise = Promise[Unit]()
+  private[this] val safeExecutor = new SafeExecutor(ch.eventLoop)
 
-  val serialExecutor: Executor = new SafeExecutor(ch.eventLoop)
+  def serialExecutor: Executor = safeExecutor
 
   def onClose: Future[Unit] = closePromise
 
@@ -93,12 +100,12 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel)
     if (messages.isEmpty) {
       // We schedule it with the executor so as to satisfy the guarantee that the
       // continuation will be run later.
-      serialExecutor.execute(new Runnable {
-        def run(): Unit = continuation(Return.Unit)
+      safeExecutor.safeExecute(new SafeRunnable {
+        def tryRun(): Unit = continuation(Return.Unit)
       })
     } else
-      serialExecutor.execute(new Runnable {
-        def run(): Unit = {
+      safeExecutor.safeExecute(new SafeRunnable {
+        def tryRun(): Unit = {
           // When doing a batch write we only have a single handle to all writes, so if
           // one fails there is no way to say which one and there is no reason to continue.
           // Therefore, we let all but the last use the voidPromise which will fail the
@@ -120,21 +127,21 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel)
 
   // See note above about the scheduling of send messages
   def send(message: Out)(continuation: (Try[Unit]) => Unit): Unit = {
-    serialExecutor.execute(new Runnable {
-      def run(): Unit = handleWriteAndFlush(message, continuation)
+    safeExecutor.safeExecute(new SafeRunnable {
+      def tryRun(): Unit = handleWriteAndFlush(message, continuation)
     })
   }
 
   // See note above about the scheduling of send messages
   def sendAndForget(message: Out): Unit =
-    serialExecutor.execute(new Runnable {
-      def run(): Unit = ch.writeAndFlush(message, ch.voidPromise())
+    safeExecutor.safeExecute(new SafeRunnable {
+      def tryRun(): Unit = ch.writeAndFlush(message, ch.voidPromise())
     })
 
   // See note above about the scheduling of send messages
   def sendAndForget(messages: Iterable[Out]): Unit =
-    if (messages.nonEmpty) serialExecutor.execute(new Runnable {
-      def run(): Unit = {
+    if (messages.nonEmpty) safeExecutor.safeExecute(new SafeRunnable {
+      def tryRun(): Unit = {
         val it = messages.iterator
         // Cache one element in `next` so we can flush the last one
         var next = it.next()
@@ -192,8 +199,8 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel)
 
   // Bounce the call to `handleFail` through the executor to ensure that it happens 'later'
   private[this] def scheduleFailure(): Unit = {
-    serialExecutor.execute(new Runnable {
-      def run(): Unit = handleFail()
+    safeExecutor.safeExecute(new SafeRunnable {
+      def tryRun(): Unit = handleFail()
     })
   }
 
@@ -205,7 +212,7 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel)
       // We trampoline the satisfaction of the close promise to make sure
       // users don't get inadvertent re-entrance due to the continuations
       // attached to the promise potentially being run right away.
-      serialExecutor.execute(new Runnable { def run(): Unit = closePromise.setDone() })
+      safeExecutor.safeExecute(new SafeRunnable { def tryRun(): Unit = closePromise.setDone() })
 
       close()
     }
@@ -237,8 +244,8 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel)
 
     override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit = {
       val m = msg.asInstanceOf[In]
-      serialExecutor.execute(new Runnable {
-        def run(): Unit = session.receive(m)
+      safeExecutor.safeExecute(new SafeRunnable {
+        def tryRun(): Unit = session.receive(m)
       })
     }
 
