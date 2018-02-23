@@ -1,11 +1,12 @@
 package com.twitter.finagle.mux.transport
 
-import com.twitter.finagle.{Stack, FailureFlags, Mux}
+import com.twitter.finagle.{FailureFlags, Mux, SourcedException, Stack}
 import com.twitter.finagle.transport.{Transport, ContextBasedTransport}
 import com.twitter.io.Buf
 import com.twitter.logging.{Logger, HasLogLevel, Level}
 import com.twitter.util.Future
 import io.netty.channel.Channel
+import scala.util.control.NoStackTrace
 
 private[twitter] object OpportunisticTls {
   private[this] val log = Logger.get()
@@ -99,11 +100,20 @@ private[twitter] object OpportunisticTls {
   case object Required extends Level("required")
 }
 
+/**
+ * Unable to negotiate whether to use TLS or not with the remote peer.
+ *
+ * This means that one party indicated that it required encryption, and the
+ * other party either indicated that it did not support encryption, or it
+ * didn't support negotiating encryption at all.
+ */
 class IncompatibleNegotiationException(
   private[finagle] val flags: Long = FailureFlags.Empty
 ) extends Exception("Could not negotiate whether to use TLS or not.")
     with FailureFlags[IncompatibleNegotiationException]
-    with HasLogLevel {
+    with HasLogLevel
+    with SourcedException
+    with NoStackTrace {
   def logLevel: Level = Level.ERROR
   protected def copyWithFlags(flags: Long): IncompatibleNegotiationException =
     new IncompatibleNegotiationException(flags)
