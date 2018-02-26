@@ -5,6 +5,7 @@ import com.twitter.logging.{HasLogLevel, Level}
 import io.netty.channel.{ChannelDuplexHandler, ChannelHandlerContext, ChannelPromise}
 import io.netty.handler.codec.http2.Http2ResetFrame
 import io.netty.util.ReferenceCountUtil
+import scala.util.control.NoStackTrace
 
 /**
  * A handler to drop incoming reset frames, and ensure servers don't try to
@@ -38,7 +39,8 @@ class ClientDiscardedRequestException private[transport] (
       s"Attempted to write to a stream after receiving an RST with error code $errorCode"
     )
     with FailureFlags[ClientDiscardedRequestException]
-    with HasLogLevel {
+    with HasLogLevel
+    with NoStackTrace {
   def logLevel: Level = Level.DEBUG
   protected def copyWithFlags(flags: Long): ClientDiscardedRequestException =
     new ClientDiscardedRequestException(errorCode, flags)

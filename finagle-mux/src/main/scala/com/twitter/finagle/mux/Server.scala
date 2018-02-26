@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.logging.{Level, Logger}
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
+import scala.util.control.NoStackTrace
 
 /**
  * Indicates that a client requested that a given request be discarded.
@@ -23,7 +24,10 @@ import scala.collection.JavaConverters._
  * This implies that the client issued a Tdiscarded message for a given tagged
  * request, as per [[com.twitter.finagle.mux]].
  */
-case class ClientDiscardedRequestException(why: String) extends Exception(why) with HasLogLevel {
+case class ClientDiscardedRequestException(why: String)
+  extends Exception(why)
+  with HasLogLevel
+  with NoStackTrace {
   def logLevel: com.twitter.logging.Level = com.twitter.logging.Level.DEBUG
 }
 
