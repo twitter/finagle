@@ -388,9 +388,12 @@ final private[http2] class StreamTransportFactory(
       case _ => // nop
     }
 
+    private[this] val postReadReturnRunnable: Runnable =
+      new Runnable { def run(): Unit = handleCheckFinished() }
+
     private[this] val postRead: Try[HttpObject] => Unit = {
       case Return(_) =>
-        exec.execute(new Runnable { def run(): Unit = handleCheckFinished() })
+        exec.execute(postReadReturnRunnable)
 
       case Throw(e) =>
         exec.execute(new Runnable { def run(): Unit = handleCloseWith(e) })
@@ -516,13 +519,13 @@ final private[http2] class StreamTransportFactory(
       case Idle => parent.status
     }
 
-    def onClose: Future[Throwable] = _onClose.or(underlying.onClose)
+    def onClose: Future[Throwable] = _onClose.or(underlying.context.onClose)
 
-    def localAddress: SocketAddress = underlying.localAddress
+    def localAddress: SocketAddress = underlying.context.localAddress
 
-    def remoteAddress: SocketAddress = underlying.remoteAddress
+    def remoteAddress: SocketAddress = underlying.context.remoteAddress
 
-    def peerCertificate: Option[Certificate] = underlying.peerCertificate
+    def peerCertificate: Option[Certificate] = underlying.context.peerCertificate
 
     def close(deadline: Time): Future[Unit] = {
       exec.execute(new Runnable {
@@ -575,8 +578,8 @@ private[http2] object StreamTransportFactory {
   /**
    * Stream represents a stream with active reading/writing
    */
-  case class Active(finishedReading: Boolean, finishedWriting: Boolean) extends StreamState {
-    def finished = finishedWriting && finishedReading
+  private case class Active(finishedReading: Boolean, finishedWriting: Boolean) extends StreamState {
+    def finished: Boolean = finishedWriting && finishedReading
     override def toString: String = {
       if (finished)
         "Active(finished)"

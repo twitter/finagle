@@ -39,8 +39,11 @@ private class ClientTracker(messageWriter: MessageWriter) {
 
   /** Complete a dispatch response */
   def receivedResponse(tag: Int, msg: Try[Response]): Unit = {
-    for (u <- messages.unmap(tag))
-      u() = msg
+    messages.unmap(tag) match {
+      case Some(u) => u() = msg
+      case None => ()
+    }
+
   }
 
   /**
