@@ -779,4 +779,42 @@ class MethodBuilderTest
       assert(stats.stat("mb", "a_client", "retries")() == Seq(2, 2))
     }
   }
+
+  test("idempotent does not remove any existing RetryBudget from params") {
+    val retryBudget = RetryBudget(5.seconds, 10, 0.1)
+    val params =
+      Stack.Params.empty +
+        Retries.Budget(retryBudget)
+
+    val svc: Service[Int, Int] = Service.const(Future.value(1))
+
+    val stack = Retries.moduleRequeueable[Int, Int]
+      .toStack(Stack.Leaf(Stack.Role("test"), ServiceFactory.const(svc)))
+    val stackClient = TestStackClient(stack, params)
+    val client = MethodBuilder.from("mb", stackClient)
+      .idempotent(1.percent, true, ResponseClassifier.Default)
+
+    assert(client.params[Retries.Budget].retryBudget eq retryBudget)
+  }
+
+  test("idempotent adds retry budget to params") {
+    val params = Stack.Params.empty
+
+    val svc: Service[Int, Int] = Service.const(Future.value(1))
+
+    val stack = Retries.moduleRequeueable[Int, Int]
+      .toStack(Stack.Leaf(Stack.Role("test"), ServiceFactory.const(svc)))
+    val stackClient = TestStackClient(stack, params)
+    val client = MethodBuilder.from("mb", stackClient)
+
+    // there's no budget to start with; if we get the budget it's a new default one each time
+    assert(client.params[Retries.Budget].retryBudget ne client.params[Retries.Budget].retryBudget)
+
+    val idempotentClient = client.idempotent(1.percent, true, ResponseClassifier.Default)
+
+    // now that the budget has been added (a new default one), we get the same one each time
+    assert(
+      idempotentClient.params[Retries.Budget].retryBudget eq
+      idempotentClient.params[Retries.Budget].retryBudget)
+  }
 }

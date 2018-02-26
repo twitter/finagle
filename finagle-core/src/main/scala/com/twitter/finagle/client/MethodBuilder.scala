@@ -3,7 +3,7 @@ package com.twitter.finagle.client
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle.client.MethodBuilderTimeout.TunableDuration
 import com.twitter.finagle.param.ResponseClassifier
-import com.twitter.finagle.service.TimeoutFilter
+import com.twitter.finagle.service.{Retries, TimeoutFilter}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.{Showable, StackRegistry}
 import com.twitter.finagle.{Filter, Name, Service, ServiceFactory, Stack, param, _}
@@ -255,7 +255,10 @@ private[finagle] final class MethodBuilder[Req, Rep](
       refCounted,
       dest,
       stack,
-      stackParams + brfParam + ResponseClassifier(combinedClassifier),
+      // If the RetryBudget is not configured, BackupRequestFilter and RetryFilter will each
+      // get a new instance of the default budget. Since we want them to share the same
+      // client retry budget, insert the budget into the params.
+      stackParams + brfParam + ResponseClassifier(combinedClassifier) + stackParams[Retries.Budget],
       config))
       .withRetry.forClassifier(combinedClassifier)
   }
