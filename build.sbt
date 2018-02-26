@@ -312,7 +312,10 @@ lazy val finagleNetty4 = Project(
     util("lint"),
     util("stats")
   ) ++ netty4Libs
-).dependsOn(finagleCore, finagleToggle)
+).dependsOn(
+  finagleCore % "compile->compile;test->test",
+  finagleToggle
+)
 
 lazy val finagleNetty3 = Project(
   id = "finagle-netty3",
