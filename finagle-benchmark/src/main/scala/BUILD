@@ -21,7 +21,7 @@ scala_library(
         "finagle/finagle-thrift/src/main/java",
         "finagle/finagle-thrift/src/main/scala",
         "finagle/finagle-thriftmux/src/main/scala",
-        "finagle/finagle-zipkin/src/main/scala",
+        "finagle/finagle-zipkin-scribe/src/main/scala",
         "scrooge/scrooge-core/src/main/scala",
         "util/util-app/src/main/scala",
         "util/util-core/src/main/scala",

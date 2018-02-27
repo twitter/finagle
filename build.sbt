@@ -178,7 +178,7 @@ lazy val projectList = Seq[sbt.ProjectReference](
   finagleNetty3,
   finagleStats,
   finagleZipkinCore,
-  finagleZipkin,
+  finagleZipkinScribe,
   finagleServersets,
   finagleTunable,
   finagleException,
@@ -373,13 +373,13 @@ lazy val finagleZipkinCore = Project(
     util("stats")) ++ scroogeLibs ++ jacksonLibs
 ).dependsOn(finagleCore, finagleThrift)
 
-lazy val finagleZipkin = Project(
-  id = "finagle-zipkin",
-  base = file("finagle-zipkin")
+lazy val finagleZipkinScribe = Project(
+  id = "finagle-zipkin-scribe",
+  base = file("finagle-zipkin-scribe")
 ).settings(
   sharedSettings
 ).settings(
-  name := "finagle-zipkin",
+  name := "finagle-zipkin-scribe",
   libraryDependencies ++= scroogeLibs
 ).dependsOn(finagleCore, finagleThrift, finagleZipkinCore)
 
@@ -666,7 +666,7 @@ lazy val finagleBenchmark = Project(
   finagleNetty4,
   finagleStats,
   finagleThriftMux,
-  finagleZipkin
+  finagleZipkinScribe
 ).aggregate(finagleBenchmarkThrift)
 
 lazy val finagleDoc = Project(

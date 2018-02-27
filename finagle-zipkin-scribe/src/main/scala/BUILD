@@ -2,7 +2,7 @@ scala_library(
     sources = rglobs("*.scala"),
     provides = scala_artifact(
         org = "com.twitter",
-        name = "finagle-zipkin",
+        name = "finagle-zipkin-scribe",
         repo = artifactory,
     ),
     # Exposes a service-loaded class.
@@ -13,8 +13,8 @@ scala_library(
         "finagle/finagle-thrift",
         "finagle/finagle-thrift/src/main/java",
         "finagle/finagle-zipkin-core",
-        "finagle/finagle-zipkin/src/main/resources",
-        "finagle/finagle-zipkin/src/main/thrift:thrift-scala",
+        "finagle/finagle-zipkin-scribe/src/main/resources",
+        "finagle/finagle-zipkin-scribe/src/main/thrift:thrift-scala",
         "scrooge/scrooge-core/src/main/scala",
         "util/util-app",
         "util/util-core/src/main/scala",

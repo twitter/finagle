@@ -78,6 +78,10 @@ Breaking API Changes
   * finagle-http: Removed the `c.t.f.Http.Netty3Impl`. Netty4 is now the only
     underlying HTTP implementation available. ``PHAB_ID=D136705``
 
+  * finagle-zipkin-scribe: Renamed the finagle-zipkin module to finagle-zipkin-scribe, to
+    better advertise that this is just the scribe implementation, instead of the default.
+    ``PHAB_ID=D141940``
+
 18.2.0
 -------
 
