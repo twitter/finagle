@@ -14,7 +14,6 @@ class CookieTest extends FunSuite {
     cookie.value = "value2"
     cookie.version = 1
     cookie.httpOnly = true
-    cookie.isSecure = true
 
     assert(cookie.name == "name")
     assert(cookie.domain == ".twitter.com")
@@ -23,7 +22,6 @@ class CookieTest extends FunSuite {
     assert(cookie.value == "value2")
     assert(cookie.version == 1)
     assert(cookie.httpOnly == true)
-    assert(cookie.isSecure == true)
   }
 
   test("constructor sets correct params") {

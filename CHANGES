@@ -60,6 +60,9 @@ Breaking API Changes
     and the implicit evidence, `RequestConfig.Yes` has been renamed to `RequestBuilder.Valid`.
     ``PHAB_ID=D122227``
 
+  * finagle-base-http: Removed deprecated `c.t.f.Cookie.isSecure`; use `c.t.f.Cookie.secure`
+    instead. Removed deprecated `c.t.f.Cookie.isSecure_=`. ``PHAB_ID=D140435``
+
   * finagle-core: `c.t.f.pool.WatermarkPool` was finalized. ``PHAB_ID=D137198``
 
   * finagle-core: `c.t.finagle.ssl.Ssl` and related classes have been

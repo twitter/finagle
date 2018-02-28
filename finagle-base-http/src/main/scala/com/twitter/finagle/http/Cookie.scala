@@ -160,9 +160,6 @@ class Cookie private (
   def httpOnly: Boolean = _httpOnly
   def secure: Boolean = _secure
 
-  @deprecated("Use secure instead", "2017-08-16")
-  def isSecure: Boolean = _secure
-
   /**
    * Set the domain.
    * @note `domain` may be null.
@@ -198,10 +195,6 @@ class Cookie private (
   @deprecated("Set httpOnly in the Cookie constructor or use `Cookie.httpOnly`", "2017-08-16")
   def httpOnly_=(httpOnly: Boolean): Unit =
     _httpOnly = httpOnly
-
-  @deprecated("Set secure in the Cookie constructor or use `Cookie.secure`", "2017-08-16")
-  def isSecure_=(secure: Boolean): Unit =
-    _secure = secure
 
   // Helper method for `equals` that returns true if two strings are both null, or have the
   // same value (ignoring case)
