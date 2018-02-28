@@ -29,6 +29,9 @@ Bug Fixes
   * finagle-core: `c.t.f.pool.CachingPool` service wrapper instances are resilient to multiple closes.
     ``PHAB_ID=D136781``
 
+  * finagle-core: Requeue module now closes sessions it prevented from propagating up the stack.
+    ``PHAB_ID=D142457``
+
   * finagle-base-http: `c.t.f.http.Netty4CookieCodec.encode` now wraps Cookie values that would
     be wrapped in `c.t.f.http.Netty3CookieCodec.encode`. ``PHAB_ID=D134566``
 

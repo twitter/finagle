@@ -290,6 +290,11 @@ object Retries {
           // to point out when a connection is dead for a reason that shouldn't
           // trigger circuit breaking
           case Return(deadSvc) if deadSvc.status == Status.Closed && n > 0 =>
+            // Since we're stopping `deadSvc` from propagating up the stack to either an application
+            // or FactoryToService wrapper and since it's not part of the Service contract that Status
+            // can only be Closed when the close method was called, we must manually close the session
+            // to forestall resource leaks.
+            deadSvc.close()
             requeuesCounter.incr()
             applySelf(conn, n - 1)
           case t => Future.const(t)
