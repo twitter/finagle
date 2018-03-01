@@ -61,9 +61,8 @@ private[finagle] object MemcachedTracingFilter {
           case command: RetrievalCommand =>
             response.respond {
               case Return(Values(vals)) =>
-                val cmd = command.asInstanceOf[RetrievalCommand]
                 val misses = mutable.Set.empty[String]
-                cmd.keys.foreach {
+                command.keys.foreach {
                   case Buf.Utf8(key) =>
                     misses += key
                 }
