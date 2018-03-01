@@ -84,6 +84,9 @@ Breaking API Changes
   * finagle-core: The deprecated `c.t.f.loadbalancer.DefaultBalancerFactory` has been removed.
     ``PHAB_ID=D139814``
 
+  * finagle-exp: The deprecated `c.t.f.exp.BackupRequestFilter` has been removed. Please use
+    `c.t.f.client.BackupRequestFilter` instead. ``PHAB_ID=D143333``
+
   * finagle-http: Removed the `c.t.f.Http.Netty3Impl`. Netty4 is now the only
     underlying HTTP implementation available. ``PHAB_ID=D136705``
 
