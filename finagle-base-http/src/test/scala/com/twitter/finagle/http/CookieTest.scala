@@ -12,7 +12,6 @@ class CookieTest extends FunSuite {
     cookie.maxAge = 100.seconds
     cookie.path = "/1/statuses/show"
     cookie.value = "value2"
-    cookie.version = 1
     cookie.httpOnly = true
 
     assert(cookie.name == "name")
@@ -20,7 +19,6 @@ class CookieTest extends FunSuite {
     assert(cookie.maxAge == 100.seconds)
     assert(cookie.path == "/1/statuses/show")
     assert(cookie.value == "value2")
-    assert(cookie.version == 1)
     assert(cookie.httpOnly == true)
   }
 
@@ -116,7 +114,6 @@ class CookieTest extends FunSuite {
     assert(cookie.domain == nettyCookie.getDomain)
     assert(cookie.path == nettyCookie.getPath)
     assert(cookie.maxAge == nettyCookie.getMaxAge.seconds)
-    assert(cookie.version == nettyCookie.getVersion)
     assert(cookie.secure == nettyCookie.isSecure)
     assert(cookie.httpOnly == nettyCookie.isHttpOnly)
   }

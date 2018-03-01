@@ -82,7 +82,6 @@ class Cookie private (
   private[this] var _domain: String,
   private[this] var _path: String,
   private[this] var _maxAge: Option[Duration],
-  private[this] var _version: Int,
   private[this] var _secure: Boolean,
   private[this] var _httpOnly: Boolean,
   private[this] var _forDeprecation: Boolean
@@ -105,7 +104,6 @@ class Cookie private (
     _domain = Cookie.validateField(domain.orNull),
     _path = Cookie.validateField(path.orNull),
     _maxAge = maxAge,
-    _version = 0,
     _secure = secure,
     _httpOnly = httpOnly,
     _forDeprecation = true
@@ -132,7 +130,6 @@ class Cookie private (
       underlying.getDomain,
       underlying.getPath,
       Option(underlying.getMaxAge.seconds),
-      underlying.getVersion,
       underlying.isSecure,
       underlying.isHttpOnly,
       true
@@ -156,7 +153,6 @@ class Cookie private (
     case Some(maxAge) => maxAge
     case None => Cookie.DefaultMaxAge
   }
-  def version: Int = _version
   def httpOnly: Boolean = _httpOnly
   def secure: Boolean = _secure
 
@@ -187,10 +183,6 @@ class Cookie private (
   @deprecated("Set value in the Cookie constructor", "2017-08-16")
   def value_=(value: String): Unit =
     _value = value
-
-  @deprecated("Removed per RFC-6265", "2017-08-16")
-  def version_=(version: Int): Unit =
-    _version = version
 
   @deprecated("Set httpOnly in the Cookie constructor or use `Cookie.httpOnly`", "2017-08-16")
   def httpOnly_=(httpOnly: Boolean): Unit =

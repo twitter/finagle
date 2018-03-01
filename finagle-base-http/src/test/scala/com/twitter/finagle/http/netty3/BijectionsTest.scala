@@ -19,15 +19,12 @@ class BijectionsTest extends FunSuite {
       httpOnly = false
     )
 
-    in.version = 100
-
     val out: NettyCookie = Bijections.from(in)
     assert(out.getName == "name")
     assert(out.getValue == "value")
     assert(out.getDomain == "domain")
     assert(out.getPath == "path")
     assert(out.getMaxAge == 99)
-    assert(out.getVersion == 100)
     assert(out.isSecure)
     assert(!out.isHttpOnly)
 
@@ -39,9 +36,7 @@ class BijectionsTest extends FunSuite {
     val in: NettyCookie = new DefaultCookie("name", "value")
     in.setDomain("domain")
     in.setPath("path")
-    in.setDiscard(true)
     in.setMaxAge(99)
-    in.setVersion(100)
     in.setSecure(true)
     in.setHttpOnly(false)
 
@@ -52,7 +47,6 @@ class BijectionsTest extends FunSuite {
     assert(out.domain == "domain")
     assert(out.path == "path")
     assert(out.maxAge == 99.seconds)
-    assert(out.version == 100)
     assert(out.secure)
     assert(!out.httpOnly)
 

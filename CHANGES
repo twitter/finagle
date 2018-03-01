@@ -63,6 +63,9 @@ Breaking API Changes
   * finagle-base-http: Removed deprecated `c.t.f.Cookie.isSecure`; use `c.t.f.Cookie.secure`
     instead. Removed deprecated `c.t.f.Cookie.isSecure_=`. ``PHAB_ID=D140435``
 
+  * finagle-base-http: Removed deprecated `c.t.f.http.Cookie.version` and
+    `c.t.f.http.Cookie.version_=`, per RFC-6265. ``PHAB_ID=D142672``
+
   * finagle-core: `c.t.f.pool.WatermarkPool` was finalized. ``PHAB_ID=D137198``
 
   * finagle-core: `c.t.finagle.ssl.Ssl` and related classes have been

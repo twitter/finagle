@@ -78,7 +78,6 @@ object Bijections {
     nc.setDomain(c.domain)
     nc.setPath(c.path)
     nc.setMaxAge(c.maxAge.inSeconds)
-    nc.setVersion(c.version)
     nc.setSecure(c.secure)
     nc.setHttpOnly(c.httpOnly)
     nc
