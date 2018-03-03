@@ -222,6 +222,13 @@ private[finagle] trait MethodBuilderScaladoc[T] {
    * retried, [[BackupRequestFilter]] is configured with the params `maxExtraLoad` and
    * `sendInterrupts` to decrease tail latency by sending an additional fraction of requests.
    *
+   *  If you are using TwitterServer, a good starting point for determining a value for
+   * `maxExtraLoad` is looking at the details of the PDF histogram for request latency,
+   * at /admin/histograms. If you choose a `maxExtraLoad` of 1.percent, for example, you can expect
+   * your p999/p9999 latencies to (roughly) now be that of your p99 latency. For 5.percent, those
+   * latencies would shift to your p95 latency. You should also ensure that your backend can
+   * tolerate the increased load.
+   *
    * @param maxExtraLoad How much extra load, as a fraction, we are willing to send to the server.
    *                     Must be between 0.0 and 1.0.
    */
