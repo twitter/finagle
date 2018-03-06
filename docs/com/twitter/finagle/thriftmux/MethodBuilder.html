@@ -579,7 +579,12 @@ retried, <span class="extype" name="BackupRequestFilter">BackupRequestFilter</sp
       
       <p class="shortcomment cmt">Configure that requests are to be treated as idempotent.</p><div class="fullcomment"><div class="comment cmt"><p>Configure that requests are to be treated as idempotent. Because requests can be safely
 retried, <span class="extype" name="BackupRequestFilter">BackupRequestFilter</span> is configured with the params <code>maxExtraLoad</code> and
-<code>sendInterrupts</code> to decrease tail latency by sending an additional fraction of requests.</p><p>This additionally causes Thrift Exceptions to be retried.</p></div><dl class="paramcmts block"><dt class="param">maxExtraLoad</dt><dd class="cmt"><p>How much extra load, as a fraction, we are willing to send to the server.
+<code>sendInterrupts</code> to decrease tail latency by sending an additional fraction of requests.</p><p> If you are using TwitterServer, a good starting point for determining a value for
+<code>maxExtraLoad</code> is looking at the details of the PDF histogram for request latency,
+at /admin/histograms. If you choose a <code>maxExtraLoad</code> of 1.percent, for example, you can expect
+your p999/p9999 latencies to (roughly) now be that of your p99 latency. For 5.percent, those
+latencies would shift to your p95 latency. You should also ensure that your backend can
+tolerate the increased load.</p><p>This additionally causes Thrift Exceptions to be retried.</p></div><dl class="paramcmts block"><dt class="param">maxExtraLoad</dt><dd class="cmt"><p>How much extra load, as a fraction, we are willing to send to the server.
                     Must be between 0.0 and 1.0.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thriftmux.MethodBuilder">MethodBuilder</a> → MethodBuilderScaladoc</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>

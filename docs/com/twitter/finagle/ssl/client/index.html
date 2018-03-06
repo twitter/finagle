@@ -181,10 +181,6 @@ resources for using Finagle.
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.ssl">ssl</a></dd></dl></div>
     </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="ConstClientEngineFactory.html" title="This engine factory is a bridge for TLSClientEngine param configurations which use a SocketAddress =&gt; Engine interface."></a>
-                        <a href="ConstClientEngineFactory.html" title="This engine factory is a bridge for TLSClientEngine param configurations which use a SocketAddress =&gt; Engine interface.">ConstClientEngineFactory</a>
-                      </li><li class="current-entities indented5">
-                        <span class="separator"></span>
                         <a class="object" href="JdkClientEngineFactory$.html" title="This engine factory is a default JVM-based implementation, intended to provide coverage for a wide array of configurations."></a>
                         <a href="JdkClientEngineFactory$.html" title="This engine factory is a default JVM-based implementation, intended to provide coverage for a wide array of configurations.">JdkClientEngineFactory</a>
                       </li><li class="current-entities indented5">
@@ -203,10 +199,6 @@ resources for using Finagle.
                         <span class="separator"></span>
                         <a class="class" href="SslContextClientEngineFactory.html" title="This class provides an ability to use an initialized supplied javax.net.ssl.SSLContext as the basis for creating Engines."></a>
                         <a href="SslContextClientEngineFactory.html" title="This class provides an ability to use an initialized supplied javax.net.ssl.SSLContext as the basis for creating Engines.">SslContextClientEngineFactory</a>
-                      </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="object" href="UnknownSocketAddress$.html" title="This class represents a Finagle Address that doesn't have or contain a corresponding java.net.SocketAddress"></a>
-                        <a href="UnknownSocketAddress$.html" title="This class represents a Finagle Address that doesn't have or contain a corresponding java.net.SocketAddress">UnknownSocketAddress</a>
                       </li><li name="com.twitter.finagle.ssl.server" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="server"></a><a id="server:server"></a>
       <span class="permalink">
@@ -365,29 +357,6 @@ when an <code>SSLSession</code> has been established.
       
       <p class="shortcomment cmt">This class provides an ability to use an initialized supplied
 <code>javax.net.ssl.SSLContext</code> as the basis for creating <a href="../Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engines</a>.</p>
-    </li><li name="com.twitter.finagle.ssl.client.ConstClientEngineFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ConstClientEngineFactoryextendsSslClientEngineFactory"></a><a id="ConstClientEngineFactory:ConstClientEngineFactory"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/ssl/client/index.html#ConstClientEngineFactoryextendsSslClientEngineFactory" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="This engine factory is a bridge for TLSClientEngine param configurations which use a SocketAddress =&gt; Engine interface." href="ConstClientEngineFactory.html"><span class="name deprecated" title="Deprecated: (Since version 2018-01-19) Use the Netty 4 engine factories instead">ConstClientEngineFactory</span></a><span class="result"> extends <a href="SslClientEngineFactory.html" class="extype" name="com.twitter.finagle.ssl.client.SslClientEngineFactory">SslClientEngineFactory</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">This engine factory is a bridge for TLSClientEngine param configurations
-which use a SocketAddress =&gt; Engine interface.</p><div class="fullcomment"><div class="comment cmt"><p>This engine factory is a bridge for TLSClientEngine param configurations
-which use a SocketAddress =&gt; Engine interface. It should only be used
-for legacy purposes.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-01-19)</i> Use the Netty 4 engine factories instead</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -445,24 +414,6 @@ coverage for a wide array of configurations.</p>
       </span>
       
       
-    </li><li name="com.twitter.finagle.ssl.client.UnknownSocketAddress" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="UnknownSocketAddress"></a><a id="UnknownSocketAddress:UnknownSocketAddress"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/ssl/client/index.html#UnknownSocketAddress" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="This class represents a Finagle Address that doesn't have or contain a corresponding java.net.SocketAddress" href="UnknownSocketAddress$.html"><span class="name">UnknownSocketAddress</span></a><span class="result"> extends <span class="extype" name="java.net.SocketAddress">SocketAddress</span> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">This class represents a Finagle <a href="../../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a> that doesn't have
-or contain a corresponding <code>java.net.SocketAddress</code>
-</p>
     </li>
               </ol>
             </div>

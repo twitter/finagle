@@ -301,8 +301,8 @@ use.</p><p> Flag          Value     Meaning
                         <a href="BadMessageException.html" title="Indicates that encoding or decoding of a Mux message failed.">BadMessageException</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="IncompatibleNegotiationException.html" title=""></a>
-                        <a href="IncompatibleNegotiationException.html" title="">IncompatibleNegotiationException</a>
+                        <a class="class" href="IncompatibleNegotiationException.html" title="Unable to negotiate whether to use TLS or not with the remote peer."></a>
+                        <a href="IncompatibleNegotiationException.html" title="Unable to negotiate whether to use TLS or not with the remote peer.">IncompatibleNegotiationException</a>
                       </li>
               </ul>
             </div>
@@ -360,10 +360,10 @@ use.</p><p> Flag          Value     Meaning
       <p class="shortcomment cmt">Indicates that encoding or decoding of a Mux message failed.</p><div class="fullcomment"><div class="comment cmt"><p>Indicates that encoding or decoding of a Mux message failed.
 Reason for failure should be provided by the <code>why</code> string.
 </p></div></div>
-    </li><li name="com.twitter.finagle.mux.transport.IncompatibleNegotiationException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="IncompatibleNegotiationExceptionextendsExceptionwithFailureFlags[com.twitter.finagle.mux.transport.IncompatibleNegotiationException]withHasLogLevel"></a><a id="IncompatibleNegotiationException:IncompatibleNegotiationException"></a>
+    </li><li name="com.twitter.finagle.mux.transport.IncompatibleNegotiationException" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="IncompatibleNegotiationExceptionextendsExceptionwithFailureFlags[com.twitter.finagle.mux.transport.IncompatibleNegotiationException]withHasLogLevelwithSourcedExceptionwithNoStackTrace"></a><a id="IncompatibleNegotiationException:IncompatibleNegotiationException"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/mux/transport/index.html#IncompatibleNegotiationExceptionextendsExceptionwithFailureFlags[com.twitter.finagle.mux.transport.IncompatibleNegotiationException]withHasLogLevel" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/mux/transport/index.html#IncompatibleNegotiationExceptionextendsExceptionwithFailureFlags[com.twitter.finagle.mux.transport.IncompatibleNegotiationException]withHasLogLevelwithSourcedExceptionwithNoStackTrace" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -372,10 +372,13 @@ Reason for failure should be provided by the <code>why</code> string.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="" href="IncompatibleNegotiationException.html"><span class="name">IncompatibleNegotiationException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="IncompatibleNegotiationException.html" class="extype" name="com.twitter.finagle.mux.transport.IncompatibleNegotiationException">IncompatibleNegotiationException</a>] with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a></span>
+        <a title="Unable to negotiate whether to use TLS or not with the remote peer." href="IncompatibleNegotiationException.html"><span class="name">IncompatibleNegotiationException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="IncompatibleNegotiationException.html" class="extype" name="com.twitter.finagle.mux.transport.IncompatibleNegotiationException">IncompatibleNegotiationException</a>] with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a> with <a href="../../SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Unable to negotiate whether to use TLS or not with the remote peer.</p><div class="fullcomment"><div class="comment cmt"><p>Unable to negotiate whether to use TLS or not with the remote peer.</p><p>This means that one party indicated that it required encryption, and the
+other party either indicated that it did not support encryption, or it
+didn't support negotiating encryption at all.
+</p></div></div>
     </li></ol>
             </div>
 

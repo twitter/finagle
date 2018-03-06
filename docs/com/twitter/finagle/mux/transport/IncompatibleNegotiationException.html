@@ -269,8 +269,8 @@ use.</p><p> Flag          Value     Meaning
                         <a href="BadMessageException.html" title="Indicates that encoding or decoding of a Mux message failed.">BadMessageException</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="" title=""></a>
-                        <a href="" title="">IncompatibleNegotiationException</a>
+                        <a class="class" href="" title="Unable to negotiate whether to use TLS or not with the remote peer."></a>
+                        <a href="" title="Unable to negotiate whether to use TLS or not with the remote peer.">IncompatibleNegotiationException</a>
                       </li>
               </ul>
             </div>
@@ -294,16 +294,19 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">IncompatibleNegotiationException</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="" class="extype" name="com.twitter.finagle.mux.transport.IncompatibleNegotiationException">IncompatibleNegotiationException</a>] with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a></span>
+        <span class="name">IncompatibleNegotiationException</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="" class="extype" name="com.twitter.finagle.mux.transport.IncompatibleNegotiationException">IncompatibleNegotiationException</a>] with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a> with <a href="../../SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a></span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Unable to negotiate whether to use TLS or not with the remote peer.</p><p>This means that one party indicated that it required encryption, and the
+other party either indicated that it did not support encryption, or it
+didn't support negotiating encryption at all.
+</p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a>, <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="" class="extype" name="com.twitter.finagle.mux.transport.IncompatibleNegotiationException">IncompatibleNegotiationException</a>], <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a>, <a href="../../SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a>, <a href="../../HasRemoteInfo.html" class="extype" name="com.twitter.finagle.HasRemoteInfo">HasRemoteInfo</a>, <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a>, <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="" class="extype" name="com.twitter.finagle.mux.transport.IncompatibleNegotiationException">IncompatibleNegotiationException</a>], <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
         </div></div>
         
 
@@ -329,7 +332,7 @@ use.</p><p> Flag          Value     Meaning
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.mux.transport.IncompatibleNegotiationException"><span>IncompatibleNegotiationException</span></li><li class="in" name="com.twitter.logging.HasLogLevel"><span>HasLogLevel</span></li><li class="in" name="com.twitter.finagle.FailureFlags"><span>FailureFlags</span></li><li class="in" name="java.lang.Exception"><span>Exception</span></li><li class="in" name="java.lang.Throwable"><span>Throwable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.mux.transport.IncompatibleNegotiationException"><span>IncompatibleNegotiationException</span></li><li class="in" name="scala.util.control.NoStackTrace"><span>NoStackTrace</span></li><li class="in" name="com.twitter.finagle.SourcedException"><span>SourcedException</span></li><li class="in" name="com.twitter.finagle.HasRemoteInfo"><span>HasRemoteInfo</span></li><li class="in" name="com.twitter.logging.HasLogLevel"><span>HasLogLevel</span></li><li class="in" name="com.twitter.finagle.FailureFlags"><span>FailureFlags</span></li><li class="in" name="java.lang.Exception"><span>Exception</span></li><li class="in" name="java.lang.Throwable"><span>Throwable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -564,7 +567,23 @@ calling.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="java.lang.Throwable#fillInStackTrace" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.HasRemoteInfo#exceptionMessage" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="exceptionMessage():String"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/mux/transport/IncompatibleNegotiationException.html#exceptionMessage():String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">exceptionMessage</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../HasRemoteInfo.html" class="extype" name="com.twitter.finagle.HasRemoteInfo">HasRemoteInfo</a></dd></dl></div>
+    </li><li name="scala.util.control.NoStackTrace#fillInStackTrace" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="fillInStackTrace():Throwable"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mux/transport/IncompatibleNegotiationException.html#fillInStackTrace():Throwable" title="Permalink">
@@ -576,10 +595,10 @@ calling.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">fillInStackTrace</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Throwable">Throwable</span></span>
+        <span class="name">fillInStackTrace</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Throwable">Throwable</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NoStackTrace → Throwable</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
@@ -653,7 +672,7 @@ calling.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
-    </li><li name="java.lang.Throwable#getMessage" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.HasRemoteInfo#getMessage" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getMessage():String"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mux/transport/IncompatibleNegotiationException.html#getMessage():String" title="Permalink">
@@ -665,10 +684,10 @@ calling.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getMessage</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+        <span class="name">getMessage</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../HasRemoteInfo.html" class="extype" name="com.twitter.finagle.HasRemoteInfo">HasRemoteInfo</a> → Throwable</dd></dl></div>
     </li><li name="java.lang.Throwable#getStackTrace" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getStackTrace():Array[StackTraceElement]"></a>
       <span class="permalink">
@@ -888,6 +907,38 @@ calling.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
+    </li><li name="com.twitter.finagle.HasRemoteInfo#remoteInfo" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="remoteInfo():com.twitter.finagle.context.RemoteInfo"></a><a id="remoteInfo():RemoteInfo"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/mux/transport/IncompatibleNegotiationException.html#remoteInfo():com.twitter.finagle.context.RemoteInfo" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">remoteInfo</span><span class="params">()</span><span class="result">: <a href="../../context/RemoteInfo.html" class="extype" name="com.twitter.finagle.context.RemoteInfo">RemoteInfo</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../HasRemoteInfo.html" class="extype" name="com.twitter.finagle.HasRemoteInfo">HasRemoteInfo</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.SourcedException#serviceName" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="serviceName:String"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/mux/transport/IncompatibleNegotiationException.html#serviceName:String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">serviceName</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a></dd></dl></div>
     </li><li name="java.lang.Throwable#setStackTrace" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setStackTrace(x$1:Array[StackTraceElement]):Unit"></a><a id="setStackTrace(Array[StackTraceElement]):Unit"></a>
       <span class="permalink">
@@ -1014,7 +1065,13 @@ calling.
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="com.twitter.logging.HasLogLevel">
+        <div class="parent" name="scala.util.control.NoStackTrace">
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a></h3>
+            </div><div class="parent" name="com.twitter.finagle.SourcedException">
+              <h3>Inherited from <a href="../../SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a></h3>
+            </div><div class="parent" name="com.twitter.finagle.HasRemoteInfo">
+              <h3>Inherited from <a href="../../HasRemoteInfo.html" class="extype" name="com.twitter.finagle.HasRemoteInfo">HasRemoteInfo</a></h3>
+            </div><div class="parent" name="com.twitter.logging.HasLogLevel">
               <h3>Inherited from <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a></h3>
             </div><div class="parent" name="com.twitter.finagle.FailureFlags">
               <h3>Inherited from <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="" class="extype" name="com.twitter.finagle.mux.transport.IncompatibleNegotiationException">IncompatibleNegotiationException</a>]</h3>

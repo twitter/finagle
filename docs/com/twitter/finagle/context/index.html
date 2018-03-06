@@ -235,6 +235,10 @@ resources for using Finagle.
                         <a class="object" href="RemoteInfo$.html" title=""></a>
                         <a class="trait" href="RemoteInfo.html" title="Contains the remote information for a request, if available."></a>
                         <a href="RemoteInfo.html" title="Contains the remote information for a request, if available.">RemoteInfo</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="Retries$.html" title=""></a>
+                        <a class="class" href="Retries.html" title="Retries contains the number of times a request has been retried."></a>
+                        <a href="Retries.html" title="Retries contains the number of times a request has been retried.">Retries</a>
                       </li><li name="com.twitter.finagle.core" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="core"></a><a id="core:core"></a>
       <span class="permalink">
@@ -1100,6 +1104,24 @@ tree.
       </span>
       
       <p class="shortcomment cmt">Contains the remote information for a request, if available.</p>
+    </li><li name="com.twitter.finagle.context.Retries" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="RetriesextendsProductwithSerializable"></a><a id="Retries:Retries"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/context/index.html#RetriesextendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Retries contains the number of times a request has been retried." href="Retries.html"><span class="name">Retries</span></a><span class="params">(<span name="attempt">attempt: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Retries contains the number of times a request has been retried.</p><div class="fullcomment"><div class="comment cmt"><p>Retries contains the number of times a request has been retried.
+</p></div><dl class="paramcmts block"><dt class="param">attempt</dt><dd class="cmt"><p>which retry attempt this is. Will be 0
+               if the request is not a retry.</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -1153,6 +1175,22 @@ tree.
       </span>
       <span class="symbol">
         <a title="" href="RemoteInfo$.html"><span class="name">RemoteInfo</span></a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.context.Retries" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Retries"></a><a id="Retries:Retries"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/context/index.html#Retries" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Retries$.html"><span class="name">Retries</span></a><span class="result"> extends <a href="MarshalledContext$Key.html" class="extype" name="com.twitter.finagle.context.MarshalledContext.Key">Key</a>[<a href="Retries.html" class="extype" name="com.twitter.finagle.context.Retries">Retries</a>] with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       

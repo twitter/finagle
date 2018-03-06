@@ -1574,7 +1574,7 @@ For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
 
 Http.client
   .methodBuilder(<span class="lit">"inet!localhost:8080"</span>)
-  .withTotalTimeout(duration)</pre></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>if the request is not complete after <code>duration</code> the work that is
+  .withTimeoutTotal(duration)</pre></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>if the request is not complete after <code>duration</code> the work that is
       in progress will be interrupted via <span class="extype" name="Future.raise">Future.raise</span>.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="requestTimeout(Duration)">requestTimeout(Duration)</span></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#tls" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tls(sslContext:javax.net.ssl.SSLContext,hostname:Option[String]):ClientBuilder.this.This"></a><a id="tls(SSLContext,Option[String]):This"></a>

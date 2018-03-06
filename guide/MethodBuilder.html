@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>MethodBuilder &#8212; Finagle 18.2.0 documentation</title>
+    <title>MethodBuilder &#8212; Finagle 18.3.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '18.2.0',
+        VERSION:     '18.3.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 18.2.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 18.3.0 documentation" href="index.html" />
    
   
   <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
@@ -227,13 +227,27 @@ number of <a class="reference internal" href="#mb-logical-req"><span class="std 
 the latency of the <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> requests, in milliseconds.</li>
 <li><cite>clnt/your_client_label/method_name/retries</cite> — A stat of the number of times
 requests are retried.</li>
+<li><cite>clnt/your_client_label/method_name/backups/send_backup_after_ms</cite> - A stat of the time,
+in  milliseconds, after which a request will be re-issued (backup sent) if it has not yet
+completed. Present only if <cite>idempotent</cite> is configured.</li>
+<li><cite>clnt/your_client_label/method_name/backups/backups_sent</cite> - A counter of the number of backup
+requests sent. Present only if <cite>idempotent</cite> is configured.</li>
+<li><cite>clnt/your_client_label/method_name/backups/backups_won</cite> - A counter of the number of backup
+requests that completed before the original, regardless of whether they succeeded. Present only
+if <cite>idempotent</cite> is configured.</li>
+<li><cite>clnt/your_client_label/method_name/backups/budget_exhausted</cite> - A counter of the number of times
+the backup request budget (computed using the current value of the <cite>maxExtraLoad</cite> param) or client
+retry budget was exhausted, preventing a backup from being sent. Present only if <cite>idempotent</cite> is
+configured.</li>
 </ul>
 <p>For example:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.percent._</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 
 <span class="k">val</span> <span class="n">builder</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
   <span class="o">.</span><span class="n">withLabel</span><span class="o">(</span><span class="s">&quot;example_client&quot;</span><span class="o">)</span>
   <span class="o">.</span><span class="n">methodBuilder</span><span class="o">(</span><span class="s">&quot;inet!localhost:8080&quot;</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">idempotent</span><span class="o">(</span><span class="n">maxExtraLoad</span> <span class="k">=</span> <span class="mf">1.</span><span class="n">percent</span><span class="o">)</span>
 <span class="k">val</span> <span class="n">statusesShow</span> <span class="k">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;get_statuses&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
@@ -243,6 +257,10 @@ requests are retried.</li>
 <li><cite>clnt/example_client/get_statuses/logical/success</cite></li>
 <li><cite>clnt/example_client/get_statuses/logical/request_latency_ms</cite></li>
 <li><cite>clnt/example_client/get_statuses/retries</cite></li>
+<li><cite>clnt/example_client/get_statuses/backups/send_backup_after_ms</cite></li>
+<li><cite>clnt/example_client/get_statuses/backups/backups_sent</cite></li>
+<li><cite>clnt/example_client/get_statuses/backups/backups_won</cite></li>
+<li><cite>clnt/example_client/get_statuses/backups/budget_exhausted</cite></li>
 </ul>
 <p><code class="docutils literal"><span class="pre">MethodBuilder</span></code> adds itself into the process registry which allows
 for introspection of runtime configuration via TwitterServer&#8217;s <cite>/admin/registry.json</cite>

@@ -360,7 +360,7 @@ empty stack for <a href="ServiceFactory.html" class="extype" name="com.twitter.f
 
         <div class="values members">
               <h3>Abstract Value Members</h3>
-              <ol><li name="com.twitter.finagle.Stack.Params#+" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.Stack.Params#+" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="+[P](p:P)(implicitevidence$3:com.twitter.finagle.Stack.Param[P]):com.twitter.finagle.Stack.Params"></a><a id="+[P](P)(Param[P]):Params"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Stack$$Params.html#+[P](p:P)(implicitevidence$3:com.twitter.finagle.Stack.Param[P]):com.twitter.finagle.Stack.Params" title="Permalink">
@@ -376,7 +376,9 @@ empty stack for <a href="ServiceFactory.html" class="extype" name="com.twitter.f
       </span>
       
       <p class="shortcomment cmt">Produce a new parameter map, overriding any previous
-<code>P</code>-typed value.</p>
+<code>P</code>-typed value.</p><div class="fullcomment"><div class="comment cmt"><p>Produce a new parameter map, overriding any previous
+<code>P</code>-typed value.</p><p>Java users may find it easier to use <code>plus</code> below.
+</p></div></div>
     </li><li name="com.twitter.finagle.Stack.Params#addAll" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="addAll(ps:com.twitter.finagle.Stack.Params):com.twitter.finagle.Stack.Params"></a><a id="addAll(Params):Params"></a>
       <span class="permalink">
@@ -1628,6 +1630,24 @@ the P-typed parameter.</p>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
+    </li><li name="com.twitter.finagle.Stack.Params#plus" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="plus[P](typeAndParam:(P,com.twitter.finagle.Stack.Param[P])):com.twitter.finagle.Stack.Params"></a><a id="plus[P]((P,Param[P])):Params"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Stack$$Params.html#plus[P](typeAndParam:(P,com.twitter.finagle.Stack.Param[P])):com.twitter.finagle.Stack.Params" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">plus</span><span class="tparams">[<span name="P">P</span>]</span><span class="params">(<span name="typeAndParam">typeAndParam: (<span class="extype" name="com.twitter.finagle.Stack.Params.plus.P">P</span>, <a href="Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a>[<span class="extype" name="com.twitter.finagle.Stack.Params.plus.P">P</span>])</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Java-friendly API for <code>+</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Java-friendly API for <code>+</code>.</p><p>The <code>Tuple2</code> can be created by calls to a <code>mk(): (P, Param[P])</code> method on parameters
+(see <span class="extype" name="com.twitter.finagle.service.TimeoutFilter.Param.mk()">com.twitter.finagle.service.TimeoutFilter.Param.mk()</span> as an example).
+</p></div></div>
     </li><li name="scala.collection.TraversableOnce#product" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="product[B&gt;:A](implicitnum:Numeric[B]):B"></a><a id="product[B&gt;:(Param[_],Any)](Numeric[B]):B"></a>
       <span class="permalink">

@@ -1323,6 +1323,10 @@ generator.
                         <a class="trait" href="Stackable.html" title="Produce a stack from a T-typed element."></a>
                         <a href="Stackable.html" title="Produce a stack from a T-typed element.">Stackable</a>
                       </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="Stacks.html" title="A Java adaptation of the com.twitter.finagle.Stack companion object."></a>
+                        <a href="Stacks.html" title="A Java adaptation of the com.twitter.finagle.Stack companion object.">Stacks</a>
+                      </li><li class="current-entities indented3">
                         <a class="object" href="Status$.html" title="Define valid Status! values."></a>
                         <a class="trait" href="Status.html" title="Status tells the condition of a networked endpoint."></a>
                         <a href="Status.html" title="Status tells the condition of a networked endpoint.">Status</a>
@@ -1497,11 +1501,11 @@ prefix and servers with &quot;srv/thrift&quot;. If you'd like more configuration
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A ThriftMux com.twitter.finagle.Server." href="ThriftMux$$Server.html"><span class="name">Server</span></a><span class="params">(<span name="muxer">muxer: <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>] = <span class="symbol"><span class="name"><a href="#serverMuxer:com.twitter.finagle.ThriftMux.ServerMuxer">serverMuxer</a></span></span></span>)</span><span class="result"> extends <a href="server/StackBasedServer.html" class="extype" name="com.twitter.finagle.server.StackBasedServer">StackBasedServer</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>], <a href="http://www.scala-lang.org/api/2.12.4/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]] with <a href="thrift/ThriftRichServer.html" class="extype" name="com.twitter.finagle.thrift.ThriftRichServer">ThriftRichServer</a> with <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="ThriftMux$$Server.html" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a>] with <a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a>[<a href="ThriftMux$$Server.html" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a>] with <a href="param/WithServerTransport.html" class="extype" name="com.twitter.finagle.param.WithServerTransport">WithServerTransport</a>[<a href="ThriftMux$$Server.html" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a>] with <a href="param/WithServerSession.html" class="extype" name="com.twitter.finagle.param.WithServerSession">WithServerSession</a>[<a href="ThriftMux$$Server.html" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a>] with <a href="param/WithServerAdmissionControl.html" class="extype" name="com.twitter.finagle.param.WithServerAdmissionControl">WithServerAdmissionControl</a>[<a href="ThriftMux$$Server.html" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a>] with <a href="mux/OpportunisticTlsParams.html" class="extype" name="com.twitter.finagle.mux.OpportunisticTlsParams">OpportunisticTlsParams</a>[<a href="ThriftMux$$Server.html" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a>] with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A ThriftMux com.twitter.finagle.Server." href="ThriftMux$$Server.html"><span class="name">Server</span></a><span class="params">(<span name="muxer">muxer: <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>] = <span class="symbol"><span class="name"><a href="ThriftMux$$Server$.html">Server.defaultMuxer</a></span></span></span>)</span><span class="result"> extends <a href="server/StackBasedServer.html" class="extype" name="com.twitter.finagle.server.StackBasedServer">StackBasedServer</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>], <a href="http://www.scala-lang.org/api/2.12.4/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]] with <a href="thrift/ThriftRichServer.html" class="extype" name="com.twitter.finagle.thrift.ThriftRichServer">ThriftRichServer</a> with <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="ThriftMux$$Server.html" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a>] with <a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a>[<a href="ThriftMux$$Server.html" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a>] with <a href="param/WithServerTransport.html" class="extype" name="com.twitter.finagle.param.WithServerTransport">WithServerTransport</a>[<a href="ThriftMux$$Server.html" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a>] with <a href="param/WithServerSession.html" class="extype" name="com.twitter.finagle.param.WithServerSession">WithServerSession</a>[<a href="ThriftMux$$Server.html" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a>] with <a href="param/WithServerAdmissionControl.html" class="extype" name="com.twitter.finagle.param.WithServerAdmissionControl">WithServerAdmissionControl</a>[<a href="ThriftMux$$Server.html" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a>] with <a href="mux/OpportunisticTlsParams.html" class="extype" name="com.twitter.finagle.mux.OpportunisticTlsParams">OpportunisticTlsParams</a>[<a href="ThriftMux$$Server.html" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a>] with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A ThriftMux <code>com.twitter.finagle.Server</code>.</p><div class="fullcomment"><div class="comment cmt"><p>A ThriftMux <code>com.twitter.finagle.Server</code>.
@@ -1518,7 +1522,7 @@ prefix and servers with &quot;srv/thrift&quot;. If you'd like more configuration
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A server for the Thrift protocol served over com.twitter.finagle.mux." href="ThriftMux$$ServerMuxer.html"><span class="name">ServerMuxer</span></a><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]] = <span class="symbol">BaseServerStack</span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="defval" name='<span class="name"><a href="param/ProtocolLibrary$.html">Mux.server.params + ProtocolLibrary(&quot;thriftmux&quot;)</a></span>'>...</span></span>)</span><span class="result"> extends <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>, <a href="ThriftMux$$ServerMuxer.html" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a>] with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A server for the Thrift protocol served over com.twitter.finagle.mux." href="ThriftMux$$ServerMuxer.html"><span class="name">ServerMuxer</span></a><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]] = <span class="symbol"><span class="name"><a href="#BaseServerStack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]]">BaseServerStack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol"><span class="name"><a href="#BaseServerParams:com.twitter.finagle.Stack.Params">BaseServerParams</a></span></span></span>)</span><span class="result"> extends <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>, <a href="ThriftMux$$ServerMuxer.html" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a>] with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A server for the Thrift protocol served over <a href="mux/index.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A server for the Thrift protocol served over <a href="mux/index.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.
@@ -1590,6 +1594,54 @@ tracing support).
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.ThriftMux#BaseClientStack" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BaseClientStack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]]"></a><a id="BaseClientStack:Stack[ServiceFactory[Request,Response]]"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/ThriftMux$.html#BaseClientStack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">BaseClientStack</span><span class="result">: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Base <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">com.twitter.finagle.Stack</a> for ThriftMux clients.</p>
+    </li><li name="com.twitter.finagle.ThriftMux#BaseServerParams" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BaseServerParams:com.twitter.finagle.Stack.Params"></a><a id="BaseServerParams:Params"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/ThriftMux$.html#BaseServerParams:com.twitter.finagle.Stack.Params" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">BaseServerParams</span><span class="result">: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Base <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">com.twitter.finagle.Stack.Params</a> for ThriftMux servers.</p>
+    </li><li name="com.twitter.finagle.ThriftMux#BaseServerStack" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BaseServerStack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]]"></a><a id="BaseServerStack:Stack[ServiceFactory[Request,Response]]"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/ThriftMux$.html#BaseServerStack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">BaseServerStack</span><span class="result">: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Base <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">com.twitter.finagle.Stack</a> for ThriftMux servers.</p>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -2128,22 +2180,6 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
       </span>
       
       
-    </li><li name="com.twitter.finagle.ThriftMux#serverMuxer" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="serverMuxer:com.twitter.finagle.ThriftMux.ServerMuxer"></a><a id="serverMuxer:ServerMuxer"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/ThriftMux$.html#serverMuxer:com.twitter.finagle.ThriftMux.ServerMuxer" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">serverMuxer</span><span class="result">: <a href="ThriftMux$$ServerMuxer.html" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a></span>
-      </span>
-      
-      
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
@@ -2282,7 +2318,29 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
 
         
 
-        
+        <div class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="com.twitter.finagle.ThriftMux#serverMuxer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="serverMuxer:com.twitter.finagle.server.StackServer[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]"></a><a id="serverMuxer:StackServer[Request,Response]"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/ThriftMux$.html#serverMuxer:com.twitter.finagle.server.StackServer[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2018-02-01) Use Server.defaultMuxer instead">serverMuxer</span><span class="result">: <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-02-01)</i> Use Server.defaultMuxer instead</p></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">

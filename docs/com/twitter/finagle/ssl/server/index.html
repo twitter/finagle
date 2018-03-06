@@ -197,20 +197,8 @@ resources for using Finagle.
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.ssl">ssl</a></dd></dl></div>
     </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="ConstServerEngineFactory.html" title="This engine factory is a bridge for TLSServerEngine param configurations which use a () =&gt; Engine interface."></a>
-                        <a href="ConstServerEngineFactory.html" title="This engine factory is a bridge for TLSServerEngine param configurations which use a () =&gt; Engine interface.">ConstServerEngineFactory</a>
-                      </li><li class="current-entities indented5">
-                        <span class="separator"></span>
                         <a class="object" href="JdkServerEngineFactory$.html" title="This engine factory is a default JVM-based implementation, intended to provide coverage for a wide array of configurations."></a>
                         <a href="JdkServerEngineFactory$.html" title="This engine factory is a default JVM-based implementation, intended to provide coverage for a wide array of configurations.">JdkServerEngineFactory</a>
-                      </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="object" href="LegacyKeyServerEngineFactory$.html" title="This engine factory is intended to act as a temporary bridge for those currently using non-PKCS#8 PEM-encoded keys, such as PKCS#1 keys."></a>
-                        <a href="LegacyKeyServerEngineFactory$.html" title="This engine factory is intended to act as a temporary bridge for those currently using non-PKCS#8 PEM-encoded keys, such as PKCS#1 keys.">LegacyKeyServerEngineFactory</a>
-                      </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="object" href="LegacyServerEngineFactory$.html" title="This engine factory is intended to act as a temporary bridge for those currently using JSSE or OpenSSL (Finagle-Native) through the Ssl class."></a>
-                        <a href="LegacyServerEngineFactory$.html" title="This engine factory is intended to act as a temporary bridge for those currently using JSSE or OpenSSL (Finagle-Native) through the Ssl class.">LegacyServerEngineFactory</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
                         <a class="class" href="SslContextServerEngineFactory.html" title=""></a>
@@ -368,29 +356,6 @@ to perform additional server-side verification checks against a
 configuration or session. The <code>apply</code> method of the verifier is called
 when an <code>SSLSession</code> has been established.
 </p></div></div>
-    </li><li name="com.twitter.finagle.ssl.server.ConstServerEngineFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ConstServerEngineFactoryextendsSslServerEngineFactory"></a><a id="ConstServerEngineFactory:ConstServerEngineFactory"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/ssl/server/index.html#ConstServerEngineFactoryextendsSslServerEngineFactory" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="This engine factory is a bridge for TLSServerEngine param configurations which use a () =&gt; Engine interface." href="ConstServerEngineFactory.html"><span class="name deprecated" title="Deprecated: (Since version 2018-01-19) Use the Netty 4 engine factories instead">ConstServerEngineFactory</span></a><span class="result"> extends <a href="SslServerEngineFactory.html" class="extype" name="com.twitter.finagle.ssl.server.SslServerEngineFactory">SslServerEngineFactory</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">This engine factory is a bridge for TLSServerEngine param configurations
-which use a () =&gt; Engine interface.</p><div class="fullcomment"><div class="comment cmt"><p>This engine factory is a bridge for TLSServerEngine param configurations
-which use a () =&gt; Engine interface. It should only be used for legacy
-purposes.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-01-19)</i> Use the Netty 4 engine factories instead</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -454,60 +419,7 @@ coverage for a wide array of configurations.</p>
 
         
 
-        <div class="values members">
-              <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.ssl.server.LegacyKeyServerEngineFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="LegacyKeyServerEngineFactory"></a><a id="LegacyKeyServerEngineFactory:LegacyKeyServerEngineFactory"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/ssl/server/index.html#LegacyKeyServerEngineFactory" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="This engine factory is intended to act as a temporary bridge for those currently using non-PKCS#8 PEM-encoded keys, such as PKCS#1 keys." href="LegacyKeyServerEngineFactory$.html"><span class="name deprecated" title="Deprecated: (Since version 2017-02-10) Use Netty4ServerEngineFactory instead">LegacyKeyServerEngineFactory</span></a><span class="result"> extends <a href="SslServerEngineFactory.html" class="extype" name="com.twitter.finagle.ssl.server.SslServerEngineFactory">SslServerEngineFactory</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">This engine factory is intended to act as a temporary bridge for those currently using
-non-PKCS#8 PEM-encoded keys, such as PKCS#1 keys.</p><div class="fullcomment"><div class="comment cmt"><p>This engine factory is intended to act as a temporary bridge for those currently using
-non-PKCS#8 PEM-encoded keys, such as PKCS#1 keys. Once the private key file has been
-converted into PKCS#8 PEM-encoded format, <a href="JdkServerEngineFactory$.html" class="extype" name="com.twitter.finagle.ssl.server.JdkServerEngineFactory">JdkServerEngineFactory</a> or
-<code>Netty4ServerEngineFactory</code> should be used instead.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-02-10)</i> Use Netty4ServerEngineFactory instead</p></dd><dt>Note</dt><dd><span class="cmt"><p>This engine factory uses <a href="../PEMEncodedKeyManager$.html" class="extype" name="com.twitter.finagle.ssl.PEMEncodedKeyManager">PEMEncodedKeyManager</a> which shells out to OpenSSL
-in order to convert the key into a usable format.</p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.ssl.server.LegacyServerEngineFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="LegacyServerEngineFactory"></a><a id="LegacyServerEngineFactory:LegacyServerEngineFactory"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/ssl/server/index.html#LegacyServerEngineFactory" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="This engine factory is intended to act as a temporary bridge for those currently using JSSE or OpenSSL (Finagle-Native) through the Ssl class." href="LegacyServerEngineFactory$.html"><span class="name deprecated" title="Deprecated: (Since version 2017-02-07) Use Netty4ServerEngineFactory instead">LegacyServerEngineFactory</span></a><span class="result"> extends <a href="SslServerEngineFactory.html" class="extype" name="com.twitter.finagle.ssl.server.SslServerEngineFactory">SslServerEngineFactory</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">This engine factory is intended to act as a temporary bridge for those currently using
-<a href="../JSSE$.html" class="extype" name="com.twitter.finagle.ssl.JSSE">JSSE</a> or <a href="../OpenSSL$.html" class="extype" name="com.twitter.finagle.ssl.OpenSSL">OpenSSL</a> (Finagle-Native) through the <a href="../Ssl$.html" class="extype" name="com.twitter.finagle.ssl.Ssl">Ssl</a> class.</p><div class="fullcomment"><div class="comment cmt"><p>This engine factory is intended to act as a temporary bridge for those currently using
-<a href="../JSSE$.html" class="extype" name="com.twitter.finagle.ssl.JSSE">JSSE</a> or <a href="../OpenSSL$.html" class="extype" name="com.twitter.finagle.ssl.OpenSSL">OpenSSL</a> (Finagle-Native) through the <a href="../Ssl$.html" class="extype" name="com.twitter.finagle.ssl.Ssl">Ssl</a> class. From there, if using
-<a href="../JSSE$.html" class="extype" name="com.twitter.finagle.ssl.JSSE">JSSE</a>, then <a href="JdkServerEngineFactory$.html" class="extype" name="com.twitter.finagle.ssl.server.JdkServerEngineFactory">JdkServerEngineFactory</a> or <code>Netty4ServerEngineFactory</code> should be the next
-step. If using <a href="../OpenSSL$.html" class="extype" name="com.twitter.finagle.ssl.OpenSSL">OpenSSL</a>, then <code>Netty4ServerEngineFactory</code> should be the next
-step, as it will be the supported path forward for using native engines with Finagle.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-02-07)</i> Use Netty4ServerEngineFactory instead</p></dd></dl></div>
-    </li></ol>
-            </div>
+        
         </div>
 
         <div id="inheritedMembers">

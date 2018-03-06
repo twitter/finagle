@@ -1163,9 +1163,9 @@ use.</p><p> Flag          Value     Meaning
         <div id="types" class="types members">
               <h3>Type Members</h3>
               <ol><li name="com.twitter.finagle.mux.ClientDiscardedRequestException" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ClientDiscardedRequestExceptionextendsExceptionwithHasLogLevelwithProductwithSerializable"></a><a id="ClientDiscardedRequestException:ClientDiscardedRequestException"></a>
+      <a id="ClientDiscardedRequestExceptionextendsExceptionwithHasLogLevelwithNoStackTracewithProductwithSerializable"></a><a id="ClientDiscardedRequestException:ClientDiscardedRequestException"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/index.html#ClientDiscardedRequestExceptionextendsExceptionwithHasLogLevelwithProductwithSerializable" title="Permalink">
+      <a href="../../../../com/twitter/finagle/mux/index.html#ClientDiscardedRequestExceptionextendsExceptionwithHasLogLevelwithNoStackTracewithProductwithSerializable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1174,7 +1174,7 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="Indicates that a client requested that a given request be discarded." href="ClientDiscardedRequestException.html"><span class="name">ClientDiscardedRequestException</span></a><span class="params">(<span name="why">why: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="Indicates that a client requested that a given request be discarded." href="ClientDiscardedRequestException.html"><span class="name">ClientDiscardedRequestException</span></a><span class="params">(<span name="why">why: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">Indicates that a client requested that a given request be discarded.</p><div class="fullcomment"><div class="comment cmt"><p>Indicates that a client requested that a given request be discarded.</p><p>This implies that the client issued a Tdiscarded message for a given tagged

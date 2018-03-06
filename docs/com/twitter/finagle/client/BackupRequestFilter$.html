@@ -505,6 +505,27 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.client.BackupRequestFilter#filterService" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="filterService[Req,Rep](params:com.twitter.finagle.Stack.Params,service:com.twitter.finagle.Service[Req,Rep]):com.twitter.finagle.Service[Req,Rep]"></a><a id="filterService[Req,Rep](Params,Service[Req,Rep]):Service[Req,Rep]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/client/BackupRequestFilter$.html#filterService[Req,Rep](params:com.twitter.finagle.Stack.Params,service:com.twitter.finagle.Service[Req,Rep]):com.twitter.finagle.Service[Req,Rep]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">filterService</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="params">params: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>, <span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.client.BackupRequestFilter.filterService.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.BackupRequestFilter.filterService.Rep">Rep</span>]</span>)</span><span class="result">: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.client.BackupRequestFilter.filterService.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.BackupRequestFilter.filterService.Rep">Rep</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns <code>service</code> with a <span class="extype" name="BackupRequestFilter">BackupRequestFilter</span> prepended, according to the configuration
+params in <code>params</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Returns <code>service</code> with a <span class="extype" name="BackupRequestFilter">BackupRequestFilter</span> prepended, according to the configuration
+params in <code>params</code>. If the <span class="extype" name="BackupRequestFilter">BackupRequestFilter</span> has not been configured, returns the
+same <code>service</code>.</p><p>Users should only use this method for filtering generic services; otherwise,
+usage through the <code>idempotent</code> method on <span class="extype" name="MethodBuilder">MethodBuilder</span> implementations is preferred.
+</p></div></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
