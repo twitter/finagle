@@ -13,6 +13,7 @@ class LeakSafeCompositeByteBufTest extends FunSuite {
 
   IllegalInstances.foreach {
     case (k, v) =>
+      if (!sys.props.contains("SKIP_FLAKY"))
       test(s"$k: throws exceptions on direct buffers") {
         val comp = new LeakSafeCompositeByteBuf(UnpooledByteBufAllocator.DEFAULT, true, 10)
         intercept[IllegalArgumentException] { comp.addComponents(v) }

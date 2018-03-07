@@ -108,6 +108,7 @@ class StringServerTest extends FunSuite with Eventually with IntegrationPatience
     }
   }
 
+  if (!sys.props.contains("SKIP_FLAKY"))
   test("ConnectionRegistry correctly removes entries upon client close") {
     new Ctx {
       val initialState = registry.iterator.toArray
