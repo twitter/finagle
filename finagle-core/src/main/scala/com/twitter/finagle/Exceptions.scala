@@ -333,12 +333,23 @@ class ConnectionFailedException(underlying: Option[Throwable], remoteAddress: Op
  * Indicates that a given channel was closed, for instance if the connection
  * was reset by a peer or a proxy.
  */
-class ChannelClosedException(underlying: Option[Throwable], remoteAddress: Option[SocketAddress])
-    extends ChannelException(underlying, remoteAddress) {
+class ChannelClosedException private[finagle](
+  underlying: Option[Throwable],
+  remoteAddress: Option[SocketAddress],
+  private[finagle] val flags: Long)
+    extends ChannelException(underlying, remoteAddress)
+    with FailureFlags[ChannelClosedException] {
+
+  def this(underlying: Option[Throwable], remoteAddress: Option[SocketAddress]) =
+    this(underlying, remoteAddress, FailureFlags.Empty)
+
   def this(underlying: Throwable, remoteAddress: SocketAddress) =
     this(Option(underlying), Option(remoteAddress))
   def this(remoteAddress: SocketAddress) = this(None, Option(remoteAddress))
   def this() = this(None, None)
+
+  protected def copyWithFlags(flags: Long): ChannelClosedException =
+    new ChannelClosedException(underlying, remoteAddress, flags)
 }
 
 /**

@@ -1,6 +1,6 @@
 package com.twitter.finagle.mux.exp.pushsession
 
-import com.twitter.finagle.{ChannelClosedException, Failure, Status}
+import com.twitter.finagle.{ChannelClosedException, Failure, Status, FailureFlags}
 import com.twitter.finagle.mux.Handshake.{CanTinitMsg, Headers, TinitTag}
 import com.twitter.finagle.mux.exp.pushsession.MuxClientNegotiatingSession._
 import com.twitter.finagle.mux.transport.Message
@@ -57,7 +57,8 @@ private[finagle] final class MuxClientNegotiatingSession(
   // If the session fails to negotiate before the handle closes, we need to satisfy the promise
   handle.onClose.respond { reason =>
     val exc = reason match {
-      case Return(_) => new ChannelClosedException(handle.remoteAddress)
+      case Return(_) =>
+        new ChannelClosedException(handle.remoteAddress).flagged(FailureFlags.Retryable)
       case Throw(t) => t
     }
     failHandshake(exc)

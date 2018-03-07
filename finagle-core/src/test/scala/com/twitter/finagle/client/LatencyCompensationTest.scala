@@ -224,7 +224,6 @@ class LatencyCompensationTest
       }
     }
 
-  if (!sys.props.contains("SKIP_FLAKY")) // TRFC-325
     test("Latency compensator doesn't always add compensation") {
       new Ctx {
         Time.withCurrentTimeFrozen { clock =>
@@ -243,7 +242,9 @@ class LatencyCompensationTest
             eventually {
               assert(nm.isDefined)
             }
-            assert(respond.interrupted.isDefined)
+            eventually {
+              assert(respond.interrupted.isDefined)
+            }
             intercept[IndividualRequestTimeoutException] {
               Await.result(nm, 10.seconds)
             }
