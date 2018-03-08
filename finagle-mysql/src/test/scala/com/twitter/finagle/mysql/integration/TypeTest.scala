@@ -63,15 +63,15 @@ class NumericTypeTest extends FunSuite with IntegrationClient {
   }
 
   def runTest(c: Client, sql: String)(testFunc: Row => Unit): Unit = {
-    val textEncoded = Await.result(c.query(sql) map {
-      case rs: ResultSet if rs.rows.size > 0 => rs.rows(0)
+    val textEncoded = Await.result(c.query(sql).map {
+      case rs: ResultSet if rs.rows.nonEmpty => rs.rows.head
       case v => fail("expected a ResultSet with 1 row but received: %s".format(v))
     })
 
     val ps = c.prepare(sql)
     val binaryrows = Await.result(ps.select()(identity))
     assert(binaryrows.size == 1)
-    val binaryEncoded = binaryrows(0)
+    val binaryEncoded = binaryrows.head
 
     testFunc(textEncoded)
     testFunc(binaryEncoded)
@@ -117,7 +117,7 @@ class NumericTypeTest extends FunSuite with IntegrationClient {
     test("extract %s from %s".format("float", rowType)) {
       row("float") match {
         case Some(FloatValue(f)) =>
-          assert(math.abs((f - 1.61F)) <= .000001)
+          assert(math.abs(f - 1.61F) <= .000001)
         case v => fail("expected FloatValue but got %s".format(v))
       }
     }
@@ -125,7 +125,7 @@ class NumericTypeTest extends FunSuite with IntegrationClient {
     test("extract %s from %s".format("double", rowType)) {
       row("double") match {
         case Some(DoubleValue(d)) =>
-          assert(math.abs((d - 1.618)) <= .000001)
+          assert(math.abs(d - 1.618) <= .000001)
         case v => fail("expected DoubleValue but got %s".format(v))
       }
     }
@@ -139,7 +139,7 @@ class NumericTypeTest extends FunSuite with IntegrationClient {
 
     test("extract %s from %s".format("bit", rowType)) {
       row("bit") match {
-        case Some(v: RawValue) => // pass
+        case Some(_: RawValue) => // pass
         case v => fail("expected a RawValue but got %s".format(v))
       }
     }
@@ -213,14 +213,14 @@ class BlobTypeTest extends FunSuite with IntegrationClient {
         X'67', X'68', X'6970', X'6A', 'small', '1');"""))
 
     val textEncoded = Await.result(c.query("SELECT * FROM `blobs`") map {
-      case rs: ResultSet if rs.rows.size > 0 => rs.rows(0)
+      case rs: ResultSet if rs.rows.nonEmpty => rs.rows.head
       case v => fail("expected a ResultSet with 1 row but received: %s".format(v))
     })
 
     val ps = c.prepare("SELECT * FROM `blobs`")
     val binaryrows: Seq[Row] = Await.result(ps.select()(identity))
     assert(binaryrows.size == 1)
-    val binaryEncoded = binaryrows(0)
+    val binaryEncoded = binaryrows.head
 
     testRow(textEncoded)
     testRow(binaryEncoded)
@@ -334,14 +334,14 @@ class DateTimeTypeTest extends FunSuite with IntegrationClient {
         '2013-11-02 19:56:36', '19:56:32', '2013');"""))
 
     val textEncoded = Await.result(c.query("SELECT * FROM `datetime`") map {
-      case rs: ResultSet if rs.rows.size > 0 => rs.rows(0)
+      case rs: ResultSet if rs.rows.nonEmpty => rs.rows.head
       case v => fail("expected a ResultSet with 1 row but received: %s".format(v))
     })
 
     val ps = c.prepare("SELECT * FROM `datetime`")
     val binaryrows = Await.result(ps.select()(identity))
     assert(binaryrows.size == 1)
-    val binaryEncoded = binaryrows(0)
+    val binaryEncoded = binaryrows.head
 
     testRow(textEncoded)
     testRow(binaryEncoded)
@@ -395,7 +395,7 @@ class DateTimeTypeTest extends FunSuite with IntegrationClient {
 
     test("extract %s from %s".format("time", rowType)) {
       row("time") match {
-        case Some(r: RawValue) => // pass
+        case Some(_: RawValue) => // pass
         case a => fail("Expected RawValue but got %s".format(a))
       }
     }

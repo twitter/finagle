@@ -21,7 +21,7 @@ trait Decoder[T <: Result] extends (Packet => Try[T]) {
  * [[http://dev.mysql.com/doc/internals/en/connection-phase-packets.html]]
  */
 object HandshakeInit extends Decoder[HandshakeInit] {
-  def decode(packet: Packet) = {
+  def decode(packet: Packet): HandshakeInit = {
     val br = MysqlBuf.reader(packet.body)
     try {
       val protocol = br.readByte()
@@ -38,8 +38,8 @@ object HandshakeInit extends Decoder[HandshakeInit] {
         "unsupported protocol version"
       )
 
-      val charset = br.readUnsignedByte().toShort
-      val status = br.readShortLE().toShort
+      val charset = br.readUnsignedByte()
+      val status = br.readShortLE()
       val capHigh = br.readUnsignedShortLE() << 16
       val serverCap = Capability(capHigh, capLow)
 
@@ -83,7 +83,7 @@ case class HandshakeInit(
  * [[http://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-OK_Packet]]
  */
 object OK extends Decoder[OK] {
-  def decode(packet: Packet) = {
+  def decode(packet: Packet): OK = {
     val br = MysqlBuf.reader(packet.body)
     try {
       br.skip(1)
@@ -111,7 +111,7 @@ case class OK(
  * [[http://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-ERR_Packet]]
  */
 object Error extends Decoder[Error] {
-  def decode(packet: Packet) = {
+  def decode(packet: Packet): Error = {
     // start reading after flag byte
     val br = MysqlBuf.reader(packet.body)
     try {
@@ -132,7 +132,7 @@ case class Error(code: Short, sqlState: String, message: String) extends Result
  * [[http://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-EOF_Packet]]
  */
 object EOF extends Decoder[EOF] {
-  def decode(packet: Packet) = {
+  def decode(packet: Packet): EOF = {
     val br = MysqlBuf.reader(packet.body)
     try {
       br.skip(1)
@@ -219,7 +219,7 @@ case class Field(
   decimals: Byte
 ) extends Result {
   def id: String = if (name.isEmpty) origName else name
-  override val toString = "Field(%s)".format(id)
+  override val toString: String = "Field(%s)".format(id)
 
   def isUnsigned: Boolean = (flags & FieldAttributes.UnsignedBitMask) > 0
   def isSigned: Boolean = !isUnsigned
@@ -232,7 +232,7 @@ case class Field(
  * [[http://dev.mysql.com/doc/internals/en/com-stmt-prepare-response.html#packet-COM_STMT_PREPARE_OK]]
  */
 object PrepareOK extends Decoder[PrepareOK] {
-  def decode(header: Packet) = {
+  def decode(header: Packet): PrepareOK = {
     val br = MysqlBuf.reader(header.body)
     try {
       br.skip(1)

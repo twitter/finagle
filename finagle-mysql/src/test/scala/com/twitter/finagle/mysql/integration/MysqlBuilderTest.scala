@@ -4,17 +4,14 @@ import com.twitter.finagle.Mysql
 import com.twitter.finagle.param
 import com.twitter.finagle.tracing._
 import com.twitter.util.Await
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class MysqlBuilderTest extends FunSuite with IntegrationClient {
   test("clients have granular tracing") {
     Trace.enable()
     var annotations: List[Annotation] = Nil
     val mockTracer = new Tracer {
-      def record(record: Record) = {
+      def record(record: Record): Unit = {
         annotations ::= record.annotation
       }
       def sampleTrace(traceId: TraceId): Option[Boolean] = Some(true)

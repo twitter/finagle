@@ -1,16 +1,13 @@
-package com.twitter.finagle.mysql
+package com.twitter.finagle.mysql.unit
 
+import com.twitter.finagle.mysql._
 import com.twitter.finagle.mysql.transport.MysqlBuf
 import com.twitter.io.Buf
+import java.nio.charset.StandardCharsets.{US_ASCII, UTF_8}
 import java.sql.Timestamp
 import java.util.TimeZone
-import java.nio.charset.StandardCharsets.{US_ASCII, UTF_8}
-
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class TimestampValueTest extends FunSuite {
   val timestampValueLocal = new TimestampValue(TimeZone.getDefault, TimeZone.getDefault)
 

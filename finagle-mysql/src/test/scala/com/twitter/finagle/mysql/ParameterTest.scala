@@ -1,11 +1,8 @@
 package com.twitter.finagle.mysql
 
 import com.twitter.finagle.mysql.Parameter.NullParameter
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class ParameterTest extends FunSuite {
   test("Parameter coercion") {
     locally {

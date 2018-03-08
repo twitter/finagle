@@ -1,12 +1,11 @@
 package com.twitter.finagle.mysql.integration
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.Mysql
 import com.twitter.finagle.mysql._
-import com.twitter.util.Await
+import com.twitter.util.{Await, Future}
 import java.sql.Date
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
 case class SwimmingRecord(
   event: String,
@@ -15,7 +14,7 @@ case class SwimmingRecord(
   nationality: String,
   date: Date
 ) {
-  override def toString = {
+  override def toString: String = {
     def q(s: String) = "'" + s + "'"
     "(" + q(event) + "," + time + "," + q(name) + "," + q(nationality) + "," + q(date.toString) + ")"
   }
@@ -32,7 +31,7 @@ object SwimmingRecord {
     PRIMARY KEY (`id`)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;"""
 
-  val allRecords = List[SwimmingRecord](
+  val allRecords: List[SwimmingRecord] = List[SwimmingRecord](
     SwimmingRecord("50 m freestyle", 20.91F, "Cesar Cielo", "Brazil", Date.valueOf("2009-12-18")),
     SwimmingRecord("100 m freestyle", 46.91F, "Cesar Cielo", "Brazil", Date.valueOf("2009-08-02")),
     SwimmingRecord(
@@ -60,13 +59,16 @@ object SwimmingRecord {
   )
 }
 
-@RunWith(classOf[JUnitRunner])
 class ClientTest extends FunSuite with IntegrationClient {
   import SwimmingRecord._
+
+  private[this] def await[T](f: Future[T]): T =
+    Await.result(f, 5.seconds)
+
   for (c <- client) {
     test("failed auth") {
       try {
-        Await.result(Mysql.newRichClient("localhost:3306").ping)
+        await(Mysql.newRichClient("localhost:3306").ping())
         fail("Expected an error when using an unauthenticated client")
       } catch {
         // Expected Access Denied Error Code
@@ -75,12 +77,12 @@ class ClientTest extends FunSuite with IntegrationClient {
     }
 
     test("ping") {
-      val pingResult = Await.result(c.ping)
+      val pingResult = await(c.ping())
       assert(pingResult.isInstanceOf[OK])
     }
 
     test("query: create a table") {
-      val createResult = Await.result(c.query(schema))
+      val createResult = await(c.query(schema))
       assert(createResult.isInstanceOf[OK])
     }
 
@@ -88,14 +90,14 @@ class ClientTest extends FunSuite with IntegrationClient {
       val sql = """INSERT INTO `finagle-mysql-test` (`event`, `time`, `name`, `nationality`, `date`)
          VALUES %s;""".format(allRecords.mkString(", "))
 
-      val insertResult = Await.result(c.query(sql))
+      val insertResult = await(c.query(sql))
       val OK(_, insertid, _, _, _) = insertResult.asInstanceOf[OK]
       assert(insertResult.isInstanceOf[OK])
       assert(insertid == 1)
     }
 
     test("query: select values") {
-      val selectResult = Await.result(c.select("SELECT * FROM `finagle-mysql-test`") { row =>
+      val selectResult = await(c.select("SELECT * FROM `finagle-mysql-test`") { row =>
         val StringValue(event) = row("event").get
         val FloatValue(time) = row("time").get
         val StringValue(name) = row("name").get
@@ -121,7 +123,7 @@ class ClientTest extends FunSuite with IntegrationClient {
         val recordName = allRecords(randomIdx).name
         val expectedRes = LongValue(allRecords.filter(_.name == recordName).size)
         val res = ps.select(recordName)(identity)
-        val row = Await.result(res)(0)
+        val row = await(res)(0)
         assert(row("numRecords").get == expectedRes)
       }
     }
@@ -129,8 +131,8 @@ class ClientTest extends FunSuite with IntegrationClient {
     test("cursored statement") {
       val query = "select * from `finagle-mysql-test` where `event` = ?"
       val cursoredStatement = c.cursor(query)
-      val cursorResult = Await.result(cursoredStatement(1, "50 m freestyle")(r => r))
-      val rows = Await.result(cursorResult.stream.toSeq())
+      val cursorResult = await(cursoredStatement(1, "50 m freestyle")(r => r))
+      val rows = await(cursorResult.stream.toSeq())
 
       assert(rows.size == 1)
       assert(rows(0)("event").get == StringValue("50 m freestyle"))
@@ -139,7 +141,7 @@ class ClientTest extends FunSuite with IntegrationClient {
     test("CursorResult does not store head of stream") {
       val query = "select * from `finagle-mysql-test`"
       val cursoredStatement = c.cursor(query)
-      val cursorResult = Await.result(cursoredStatement(1)(r => r))
+      val cursorResult = await(cursoredStatement(1)(r => r))
       val first = cursorResult.stream.take(1)
       val second = cursorResult.stream.take(1)
       assert(first != second)

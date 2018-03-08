@@ -18,11 +18,14 @@ trait CanBeParameter[-A] { outer =>
 }
 
 object CanBeParameter {
+  private[this] def arrayLength(bytes: Array[Byte]): Int =
+    MysqlBuf.sizeOfLen(bytes.length) + bytes.length
+
   implicit val stringCanBeParameter: CanBeParameter[String] = {
     new CanBeParameter[String] {
       def sizeOf(param: String): Int = {
         val bytes = param.getBytes(Charset.defaultCharset)
-        MysqlBuf.sizeOfLen(bytes.size) + bytes.size
+        arrayLength(bytes)
       }
 
       def typeCode(param: String): Short = Type.VarChar
@@ -67,7 +70,7 @@ object CanBeParameter {
     }
   }
 
-  implicit val longCanBeParameter = {
+  implicit val longCanBeParameter: CanBeParameter[Long] = {
     new CanBeParameter[Long] {
       def sizeOf(param: Long): Int = 8
       def typeCode(param: Long): Short = Type.LongLong
@@ -117,9 +120,30 @@ object CanBeParameter {
     }
   }
 
+  // the format: varlen followed by the value as a string
+  // https://dev.mysql.com/doc/internals/en/binary-protocol-value.html#packet-ProtocolBinary::MYSQL_TYPE_NEWDECIMAL
+  implicit val bigDecimalCanBeParameter: CanBeParameter[BigDecimal] =
+    new CanBeParameter[BigDecimal] {
+      private[this] val binaryCharset = Charset(Charset.Binary)
+
+      private[this] def asBytes(bd: BigDecimal): Array[Byte] =
+        bd.toString.getBytes(binaryCharset)
+
+      def sizeOf(param: BigDecimal): Int =
+        arrayLength(asBytes(param))
+
+      def typeCode(param: BigDecimal): Short =
+        Type.NewDecimal
+
+      def write(writer: MysqlBufWriter, param: BigDecimal): Unit =
+        writer.writeLengthCodedBytes(asBytes(param))
+    }
+
   implicit val byteArrayCanBeParameter: CanBeParameter[Array[Byte]] = {
     new CanBeParameter[Array[Byte]] {
-      def sizeOf(param: Array[Byte]): Int = MysqlBuf.sizeOfLen(param.length) + param.length
+      def sizeOf(param: Array[Byte]): Int =
+        arrayLength(param)
+
       def typeCode(param: Array[Byte]): Short = {
         if (param.length <= 255) Type.TinyBlob
         else if (param.length <= 65535) Type.Blob
@@ -134,10 +158,10 @@ object CanBeParameter {
   implicit val valueCanBeParameter: CanBeParameter[Value] = {
     new CanBeParameter[Value] {
       def sizeOf(param: Value): Int = param match {
-        case RawValue(_, _, true, b) => MysqlBuf.sizeOfLen(b.length) + b.length
+        case RawValue(_, _, true, b) => arrayLength(b)
         case StringValue(s) =>
-          val bytes = s.getBytes(Charset.defaultCharset);
-          MysqlBuf.sizeOfLen(bytes.length) + bytes.length
+          val bytes = s.getBytes(Charset.defaultCharset)
+          arrayLength(bytes)
         case ByteValue(_) => 1
         case ShortValue(_) => 2
         case IntValue(_) => 4

@@ -6,9 +6,9 @@ import java.nio.charset.StandardCharsets.{UTF_8, ISO_8859_1, US_ASCII}
 object Charset {
 
   /**
-   * Default Charset used by this client.
+   * Default Java Charset used by this client, UTF-8.
    */
-  val defaultCharset = UTF_8
+  val defaultCharset: JCharset = UTF_8
 
   /**
    * Converts from mysql charset to java charset.
@@ -36,11 +36,19 @@ object Charset {
   private[this] val Utf8Set = Set(192 to 254: _*) + 33 + 45 + 46 + 83
 
   /**
-   * Some useful charset constants
+   * @see https://dev.mysql.com/doc/refman/5.7/en/charset-unicode-sets.html
    */
-  val Utf8_bin = 83.toShort
-  val Utf8_general_ci = 33.toShort
-  val Binary = 63.toShort
+  val Utf8_bin: Short = 83.toShort
+
+  /**
+   * @see https://dev.mysql.com/doc/refman/5.7/en/charset-unicode-sets.html
+   */
+  val Utf8_general_ci: Short = 33.toShort
+
+  /**
+   * @see https://dev.mysql.com/doc/refman/5.7/en/charset-binary-set.html
+   */
+  val Binary: Short = 63.toShort
 
   private[this] val CompatibleSet = Latin1Set ++ Utf8Set + Binary
   def isCompatible(code: Short): Boolean = CompatibleSet(code)
