@@ -42,7 +42,7 @@ class NackAdmissionFilterTest extends FunSuite {
     val timer: MockTimer = new MockTimer
     val statsReceiver: InMemoryStatsReceiver = new InMemoryStatsReceiver()
 
-    val DefaultAcceptRateThreshold = 1.0 - DefaultNackRateThreshold
+    val DefaultAcceptRateThreshold: Double = 1.0 - DefaultNackRateThreshold
 
     val svc: Service[Int, Int] = Service.mk[Int, Int](v => Future.value(v))
 
@@ -53,6 +53,8 @@ class NackAdmissionFilterTest extends FunSuite {
     val nackingSvc: Service[Int, Int] = new FailedService(nackFailure)
     val failingInterruptedSvc: Service[Int, Int] = new FailedService(interruptedFailure)
     val failingNamingSvc: Service[Int, Int] = new FailedService(namingFailure)
+
+    val rpsThreshold: Int = 5
 
     // Used to ensure that the accept rate is safely above or below the
     // accept rate threshold.
@@ -139,14 +141,18 @@ class NackAdmissionFilterTest extends FunSuite {
     import ctx._
 
     ctl.advance(10.milliseconds)
-    // Decrease Ema to just below 1
-    testGetNack()
+    // Decrease Ema to be below 1
+    for (_ <- 1 to 2*rpsThreshold) {
+      testGetNack()
+      // Need to update timestamp as well
+      ctl.advance(10.milliseconds)
+    }
     val firstEmaValue = filter.emaValue
 
     ctl.advance(10.milliseconds)
 
     // Increment Ema
-    testGetSuccessfulResponse()
+      testGetSuccessfulResponse()
     assert(filter.emaValue > firstEmaValue)
   }
 
@@ -154,7 +160,10 @@ class NackAdmissionFilterTest extends FunSuite {
     val ctx = new Ctx
     import ctx._
     ctl.advance(10.milliseconds)
-    testGetNack()
+    for (_ <- 1 to 2*rpsThreshold) {
+      testGetNack()
+      ctl.advance(10.milliseconds)
+    }
     assert(filter.emaValue < 1)
   }
 
@@ -318,6 +327,12 @@ class NackAdmissionFilterTest extends FunSuite {
     val ctx = new Ctx(lowRng, 100.milliseconds)
     import ctx._
 
+    ctl.advance(10.milliseconds)
+    for (_ <- 1 to rpsThreshold) {
+      testGetNack()
+      ctl.advance(10.milliseconds)
+    }
+
     // Pass time so NACKs can significantly reduce the Ema value
     ctl.advance(200.milliseconds)
     // Explicitly, we successfully _send_ the first request, but return a
@@ -375,7 +390,10 @@ class NackAdmissionFilterTest extends FunSuite {
     assert(filter.emaValue == originalEma)
 
     ctl.advance(10.milliseconds)
-    testGetNack()
+    for (_ <- 0 to rpsThreshold) {
+      testGetNack()
+      ctl.advance(10.milliseconds)
+    }
     assert(filter.emaValue < originalEma)
   }
 

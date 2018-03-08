@@ -7,6 +7,13 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: `c.t.f.filter.NackAdmissionFilter` no longer takes effect when
+    the client's request rate is too low to accurately update the EMA value or
+    drop requests. ``PHAB_ID=D143996``
+
 18.3.0
 -------
 

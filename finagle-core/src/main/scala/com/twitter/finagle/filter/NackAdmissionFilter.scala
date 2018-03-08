@@ -3,7 +3,7 @@ package com.twitter.finagle.filter
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.server.ServerInfo
-import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
+import com.twitter.finagle.stats.{Counter, Gauge, StatsReceiver, Verbosity}
 import com.twitter.finagle.util.{Ema, Rng}
 import com.twitter.util._
 
@@ -12,7 +12,7 @@ private[finagle] object NackAdmissionFilter {
     Failure("Request not issued to the backend due to observed overload.",
       Failure.Rejected | Failure.NonRetryable)
   )
-  val role = new Stack.Role("NackAdmissionFilter")
+  val role: Stack.Role = new Stack.Role("NackAdmissionFilter")
 
   /**
    * For feature roll out only.
@@ -28,7 +28,7 @@ private[finagle] object NackAdmissionFilter {
    * approaches zero. If no requests are allowed through, no new information is
    * gathered about the service, preventing recovery.
    */
-  private[finagle] val MaxDropProbability = 0.75
+  private[finagle] val MaxDropProbability: Double = 0.75
 
   /**
    * By default, the EMA window is 2 minutes: any response that the filter
@@ -40,7 +40,7 @@ private[finagle] object NackAdmissionFilter {
    * the server receives a small number of non-nacks ("accepts"), the EMA will
    * end up being very close to 1.
    */
-  private val DefaultWindow = 2.minutes
+  private val DefaultWindow: Duration = 2.minutes
 
   /**
    * By default, the client will send all requests when the accept rate EMA is
@@ -51,7 +51,16 @@ private[finagle] object NackAdmissionFilter {
    * 100 - (2 * 20) = 60% probability. If the EMA is 10%, the filter will drop
    * any given request with 100 - (2 * 10) = 80% probability.
    */
-  private val DefaultNackRateThreshold = 0.5
+  private val DefaultNackRateThreshold: Double = 0.5
+
+  /**
+   * If the request rate is below `rpsThreshold`, the filter will not lower
+   * the ema value or drop requests. If the request rate is equal or greater,
+   * the filter will take effect.
+   * 
+   * Note: the value of this threshold was empirically found to be effective.
+   */
+  private val rpsThreshold: Long = 5
 
   /**
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
@@ -69,8 +78,8 @@ private[finagle] object NackAdmissionFilter {
 
   private[finagle] def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module2[NackAdmissionFilter.Param, param.Stats, ServiceFactory[Req, Rep]] {
-      val description = "Probabilistically drops requests to the underlying service."
-      val role = NackAdmissionFilter.role
+      val description: String = "Probabilistically drops requests to the underlying service."
+      val role: Stack.Role = NackAdmissionFilter.role
 
       def make(
         _param: Param,
@@ -139,43 +148,60 @@ private[finagle] class NackAdmissionFilter[Req, Rep](
   require(nackRateThreshold < 1, s"nackRateThreshold must lie in (0, 1): $nackRateThreshold")
   require(nackRateThreshold > 0, s"nackRateThreshold must lie in (0, 1): $nackRateThreshold")
 
-  private[this] val acceptRateThreshold = 1.0 - nackRateThreshold
-  private[this] val multiplier = 1D / acceptRateThreshold
-  private[this] val windowInNs = window.inNanoseconds
+  private[this] val acceptRateThreshold: Double = 1.0 - nackRateThreshold
+  private[this] val multiplier: Double = 1D / acceptRateThreshold
+  private[this] val windowInNs: Long = window.inNanoseconds
+
+  // Tracks the number of requests attempted during the previous 1000 ms. In
+  // other words, tracks the client's rps. We arbitrarily give the Adder 10
+  // slices.
+  private[this] val rpsCounter: WindowedAdder = WindowedAdder(1000, 10, Stopwatch.systemMillis)
 
   // EMA representing the rate of responses that are not nacks. We update it
   // whenever we get a response from the cluster with 0 when the service responds
   // with a nack and 1 otherwise.
   // NB: Usage of the ema must be synchronized with the generation of the timestamp.
   //     and neither the Ema nor Monotime class is threadsafe.
-  private[this] val ema = new Ema(windowInNs)
+  private[this] val ema: Ema = new Ema(windowInNs)
   // Start the ema at 1.0. No need for synchronization during construction.
   ema.update(monoTime.nanos(), 1)
 
   // visible for testing. Synchronized as Ema is not threadsafe
   private[filter] def emaValue: Double = synchronized { ema.last }
 
-  private[this] val droppedRequestCounter = statsReceiver.counter("dropped_requests")
-  private[this] val emaPercent = statsReceiver.addGauge(Verbosity.Debug, "ema_value") {
+  private[this] val droppedRequestCounter: Counter = statsReceiver.counter("dropped_requests")
+  private[this] val emaPercent: Gauge = statsReceiver.addGauge(Verbosity.Debug, "ema_value") {
     (emaValue * 100).toFloat
   }
 
   // Decrease the EMA if the response is a Nack, increase otherwise. Update the
-  // acceptFraction & last update time
+  // acceptFraction & last update time.
   private[this] val afterSend: Try[Rep] => Unit = (rep: Try[Rep]) => {
-    val value = rep match {
-      case Throw(f: Failure) if f.isFlagged(Failure.Rejected) => 0
-      case _ => 1
-    }
+    val value =
+      if (sufficientRps) rep match {
+        case Throw(f: Failure) if f.isFlagged(Failure.Rejected) => 0
+        case _ => 1
+      } else {
+        // Bump up the ema value if the rps is too low to drop the request.
+        // The ema value will start off high when the rps rises, protecting
+        // against prematurely dropping requests (e.g., during warmup).
+        1
+      }
 
     // Avoid a race condition where another update occurs between the call to
     // nanos and the update.
     synchronized { ema.update(monoTime.nanos(), value) }
   }
 
+  // Determines whether the client's rps is high enough to lower the ema
+  // value and drop requests.
+  private[this] def sufficientRps: Boolean = {
+    rpsCounter.sum() >= rpsThreshold
+  }
+
   // Drop the current request if:
-  // 1. The accept fraction is under the threshold
-  // 2. A random value is < the calculated drop probability
+  // 1. the accept fraction is under the threshold, and
+  // 2. a random value is < the calculated drop probability.
   private[this] def shouldDropRequest(): Boolean = {
     val acceptFraction = emaValue
     acceptFraction < acceptRateThreshold &&
@@ -183,6 +209,7 @@ private[finagle] class NackAdmissionFilter[Req, Rep](
   }
 
   def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
+    rpsCounter.incr()
     if (enableNackAc() && shouldDropRequest()) {
       droppedRequestCounter.incr()
       OverloadFailure
