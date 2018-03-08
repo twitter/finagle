@@ -247,6 +247,8 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
 
     /**
      * The credentials to use when authenticating a new session.
+     *
+     * @param p if `null`, no password is used.
      */
     def withCredentials(u: String, p: String): Client =
       configured(Handshake.Credentials(Option(u), Option(p)))
