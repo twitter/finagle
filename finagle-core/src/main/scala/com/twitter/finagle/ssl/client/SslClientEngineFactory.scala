@@ -57,6 +57,7 @@ object SslClientEngineFactory {
 
     SslConfigurations.configureProtocols(sslEngine, config.protocols)
     SslConfigurations.configureCipherSuites(sslEngine, config.cipherSuites)
+    SslConfigurations.configureHostnameVerification(sslEngine, config.hostname)
   }
 
   /**

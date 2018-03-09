@@ -33,7 +33,7 @@ object SslClientSessionVerifier {
    * whether the SSL/TLS connection should be used. It is an additional level
    * of verification beyond the standard certificate chain verification checking.
    *
-   * @note By default a `HostnameVerifier` will be used if this
+   * @note By default sessions will be seen as `AlwaysValid` if this
    * param is not configured.
    */
   case class Param(verifier: SslClientSessionVerifier) {
@@ -41,7 +41,7 @@ object SslClientSessionVerifier {
       (this, Param.param)
   }
   object Param {
-    implicit val param = Stack.Param(Param(HostnameVerifier))
+    implicit val param = Stack.Param(Param(AlwaysValid))
   }
 
   /**

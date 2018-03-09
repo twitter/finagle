@@ -116,6 +116,25 @@ private[ssl] object SslConfigurations {
     }
 
   /**
+   * If a non-empty hostname is supplied, the engine is set to use
+   * "HTTPS"-style hostname verification.
+   *
+   * See: `javax.net.ssl.SSLParameters#setEndpointIdentificationAlgorithm` and
+   * https://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html
+   * for more details.
+   */
+  def configureHostnameVerification(
+    sslEngine: SSLEngine,
+    hostname: Option[String]
+  ): Unit = hostname match {
+    case Some(_) =>
+      val sslParameters = sslEngine.getSSLParameters()
+      sslParameters.setEndpointIdentificationAlgorithm("HTTPS")
+      sslEngine.setSSLParameters(sslParameters)
+    case None => // do nothing
+  }
+
+  /**
    * Guard method for failing fast inside of a factory's apply method when
    * [[KeyCredentials]] are not supported.
    */

@@ -1,11 +1,8 @@
 package com.twitter.finagle.ssl
 
 import javax.net.ssl.{SSLContext, SSLEngine}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class SslConfigurationsTest extends FunSuite {
 
   private[this] def createTestEngine(): SSLEngine = {
@@ -59,6 +56,26 @@ class SslConfigurationsTest extends FunSuite {
     intercept[IllegalArgumentException] {
       SslConfigurations.configureProtocols(sslEngine, protocols)
     }
+  }
+
+  test("configureHostnameVerifier turns on endpoint identification when hostname is set") {
+    val sslEngine = createTestEngine()
+    val sslParametersBefore = sslEngine.getSSLParameters
+    assert(sslParametersBefore.getEndpointIdentificationAlgorithm == null)
+
+    SslConfigurations.configureHostnameVerification(sslEngine, Some("twitter.com"))
+    val sslParametersAfter = sslEngine.getSSLParameters
+    assert(sslParametersAfter.getEndpointIdentificationAlgorithm == "HTTPS")
+  }
+
+  test("configureHostnameVerifier leaves endpoint identification off when hostname is empty") {
+    val sslEngine = createTestEngine()
+    val sslParametersBefore = sslEngine.getSSLParameters
+    assert(sslParametersBefore.getEndpointIdentificationAlgorithm == null)
+
+    SslConfigurations.configureHostnameVerification(sslEngine, None)
+    val sslParametersAfter = sslEngine.getSSLParameters
+    assert(sslParametersAfter.getEndpointIdentificationAlgorithm == null)
   }
 
   test("checkKeyCredentialsNotSupported does nothing for Unspecified") {

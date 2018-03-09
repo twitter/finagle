@@ -7,12 +7,26 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: `c.t.f.ssl.client.HostnameVerifier` has been removed since it was using
+    `sun.security.util.HostnameChecker` which is no longer accessible in JDK 9.
+    ``PHAB_ID=D144149``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
   * finagle-core: `c.t.f.filter.NackAdmissionFilter` no longer takes effect when
     the client's request rate is too low to accurately update the EMA value or
     drop requests. ``PHAB_ID=D143996``
+
+  * finagle-core: SSL/TLS client hostname verification is no longer performed by
+    `c.t.f.ssl.client.HostnameVerifier`. The same underlying library
+    `sun.security.util.HostnameChecker` is used to perform the hostname verification.
+    However it now occurs before the SSL/TLS handshake has been completed, and the
+    exception on failure has changes from a `c.t.f.SslHostVerificationException` to a
+    `javax.net.ssl.CertificateException`. ``PHAB_ID=D144149``
 
 18.3.0
 -------
