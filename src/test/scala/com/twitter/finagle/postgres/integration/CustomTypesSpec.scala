@@ -72,7 +72,7 @@ class CustomTypesSpec extends Spec with GeneratorDrivenPropertyChecks {
 
     s"A $mode postgres client with $paramsMode params" should {
       "retrieve the available types from the remote DB" in {
-        val types = Await.result(client.typeMap)
+        val types = Await.result(client.typeMap())
         assert(types.nonEmpty)
         assert(types != PostgresClient.defaultTypes)
       }

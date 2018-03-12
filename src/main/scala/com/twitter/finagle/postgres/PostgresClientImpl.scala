@@ -3,20 +3,17 @@ package com.twitter.finagle.postgres
 import java.nio.charset.{Charset, StandardCharsets}
 import java.util.concurrent.atomic.AtomicInteger
 
-import scala.collection.immutable.Queue
-import scala.language.implicitConversions
-import scala.util.Random
-
-import com.twitter.finagle.Status
-import com.twitter.finagle.postgres.codec.Errors
+import com.twitter.cache.Refresh
+import com.twitter.conversions.time._
 import com.twitter.finagle.postgres.messages._
 import com.twitter.finagle.postgres.values._
-import com.twitter.finagle.{Service, ServiceFactory}
+import com.twitter.finagle.{Service, ServiceFactory, Status}
 import com.twitter.logging.Logger
 import com.twitter.util._
 import org.jboss.netty.buffer.ChannelBuffer
 
-import scala.language.existentials
+import scala.language.{existentials, implicitConversions}
+import scala.util.Random
 
 /*
  * A Finagle client for communicating with Postgres.
@@ -80,20 +77,25 @@ class PostgresClientImpl(
     customTypesResult
   }
 
-  private[postgres] val typeMap = types.map(Future(_)).getOrElse(retrieveTypeMap())
+
+  private[postgres] val typeMap = Refresh.every(1.hour) {
+    types.map(Future(_)).getOrElse(retrieveTypeMap())
+  }
 
   // The OIDs to be used when sending parameters
-  private[postgres] val encodeOids = typeMap.map {
-    tm => tm.toIndexedSeq.map {
-      case (oid, PostgresClient.TypeSpecifier(receiveFn, typeName, elemOid)) => typeName -> oid
-    }.groupBy(_._1).mapValues(_.map(_._2).min)
-  }
+  private[postgres] val encodeOids =
+    typeMap().map {
+      tm =>
+        tm.toIndexedSeq.map {
+          case (oid, PostgresClient.TypeSpecifier(receiveFn, typeName, elemOid)) => typeName -> oid
+        }.groupBy(_._1).mapValues(_.map(_._2).min)
+    }
 
   /*
    * Execute some actions inside of a transaction using a single connection
    */
   override def inTransaction[T](fn: PostgresClient => Future[T]): Future[T] = for {
-    types               <- typeMap
+    types               <- typeMap()
     service             <- factory()
     constFactory        =  ServiceFactory.const(service)
     id                  =  Random.alphanumeric.take(28).mkString
@@ -116,7 +118,7 @@ class PostgresClientImpl(
    * Issue an arbitrary SQL query and get the response.
    */
   override def query(sql: String): Future[QueryResponse] = sendQuery(sql) {
-    case SelectResult(fields, rows) => typeMap.map {
+    case SelectResult(fields, rows) => typeMap().map {
       types => ResultSet(fields, charset, rows, types, receiveFunctions)
     }
     case CommandCompleteResponse(affected) => Future(OK(affected))
@@ -142,7 +144,7 @@ class PostgresClientImpl(
    * Run a single SELECT query and wrap the results with the provided function.
    */
   override def select[T](sql: String)(f: Row => T): Future[Seq[T]] = for {
-    types  <- typeMap
+    types  <- typeMap()
     result <- fetch(sql)
   } yield result match {
     case SelectResult(fields, rows) => ResultSet(fields, charset, rows, types, receiveFunctions).rows.map(f)
@@ -152,25 +154,32 @@ class PostgresClientImpl(
    * Issue a single, prepared SELECT query and wrap the response rows with the provided function.
    */
   override def prepareAndQuery[T](sql: String, params: Param[_]*)(f: Row => T): Future[Seq[T]] = {
-    for {
-      service <- factory()
-      statement = new PreparedStatementImpl("", sql, service)
-      result  <- statement.select(params: _*)(f)
-    } yield result
+    typeMap().flatMap { _ =>
+      for {
+        service   <- factory()
+        statement = new PreparedStatementImpl("", sql, service)
+        result    <- statement.select(params: _*)(f)
+      } yield result
+    }
   }
 
   /*
    * Issue a single, prepared arbitrary query without an expected result set, and provide the affected row count
    */
-  override def prepareAndExecute(sql: String, params: Param[_]*):Future[Int] = for {
-    service   <- factory()
-    statement = new PreparedStatementImpl("", sql, service)
-    OK(count) <- statement.exec(params: _*)
-  } yield count
+  override def prepareAndExecute(sql: String, params: Param[_]*): Future[Int] = {
+    typeMap().flatMap { _ =>
+      for {
+        service   <- factory()
+        statement = new PreparedStatementImpl("", sql, service)
+        OK(count) <- statement.exec(params: _*)
+      } yield count
+    }
+  }
 
 
   /**
     * Close the underlying connection pool and make this Client eternally down
+    *
     * @return
     */
   override def close(): Future[Unit] = {
@@ -279,7 +288,7 @@ class PostgresClientImpl(
       }
 
       val f = for {
-        types  <- typeMap
+        types  <- typeMap()
         pname  <- parse(params: _*)
         _      <- bind(paramBuffers)
         fields <- describe()
