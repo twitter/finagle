@@ -41,6 +41,10 @@ trait MysqlRichClient { self: com.twitter.finagle.Client[Request, Result] =>
   /**
    * Creates a new `RichClient` connected to the logical
    * destination described by `dest`.
+   *
+   * @param dest the location to connect to, e.g. "host:port". See the
+   *             [[https://twitter.github.io/finagle/guide/Names.html user guide]]
+   *             for details on destination names.
    */
   def newRichClient(dest: String): mysql.Client with mysql.Transactions =
     mysql.Client(newClient(dest), richClientStatsReceiver, supportUnsigned)
