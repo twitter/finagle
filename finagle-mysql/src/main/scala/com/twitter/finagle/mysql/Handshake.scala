@@ -37,7 +37,12 @@ object Handshake {
    */
   case class Credentials(username: Option[String], password: Option[String])
   implicit object Credentials extends Stack.Param[Credentials] {
-    val default = Credentials(None, None)
+    val default: Credentials = Credentials(None, None)
+
+    override def show(p: Credentials): Seq[(String, () => String)] = {
+      // do not show the password for security reasons
+      Seq(("username", () => p.username.getOrElse("")))
+    }
   }
 
   /**
@@ -46,7 +51,7 @@ object Handshake {
    */
   case class Database(db: Option[String])
   implicit object Database extends Stack.Param[Database] {
-    val default = Database(None)
+    val default: Database = Database(None)
   }
 
   /**
@@ -55,7 +60,7 @@ object Handshake {
    */
   case class Charset(charset: Short)
   implicit object Charset extends Stack.Param[Charset] {
-    val default = Charset(Utf8_general_ci)
+    val default: Charset = Charset(Utf8_general_ci)
   }
 
   /**
@@ -64,23 +69,20 @@ object Handshake {
     */
   case class FoundRows(enabled: Boolean)
   implicit object FoundRows extends Stack.Param[FoundRows] {
-    val default = FoundRows(true)
+    val default: FoundRows = FoundRows(true)
   }
 
   /**
    * Creates a Handshake from a collection of [[com.twitter.finagle.Stack.Params]].
    */
   def apply(prms: Stack.Params): Handshake = {
-    val Credentials(u, p) = prms[Credentials]
-    val Database(db) = prms[Database]
-    val Charset(cs) = prms[Charset]
-    val FoundRows(fr) = prms[FoundRows]
+    val credentials = prms[Credentials]
     Handshake(
-      username = u,
-      password = p,
-      database = db,
-      charset = cs,
-      enableFoundRows = fr
+      username = credentials.username,
+      password = credentials.password,
+      database = prms[Database].db,
+      charset = prms[Charset].charset,
+      enableFoundRows = prms[FoundRows].enabled
     )
   }
 }
@@ -137,14 +139,14 @@ case class Handshake(
   }
 
   private[this] def isCompatibleVersion(init: HandshakeInit) =
-    if (init.serverCap.has(Capability.Protocol41)) Return(true)
+    if (init.serverCap.has(Capability.Protocol41)) Return.True
     else Throw(IncompatibleVersion)
 
   private[this] def isCompatibleCharset(init: HandshakeInit) =
-    if (Charset.isCompatible(init.charset)) Return(true)
+    if (Charset.isCompatible(init.charset)) Return.True
     else Throw(IncompatibleCharset)
 
-  def apply(init: HandshakeInit) = {
+  def apply(init: HandshakeInit): Try[HandshakeResponse] = {
     for {
       _ <- isCompatibleVersion(init)
       _ <- isCompatibleCharset(init)

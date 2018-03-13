@@ -69,9 +69,9 @@ object Transporter {
    */
   case class SocksProxy(sa: Option[SocketAddress], credentials: Option[(String, String)]) {
     def mk(): (SocksProxy, Stack.Param[SocksProxy]) =
-      (this, SocksProxy.param)
+      (this, SocksProxy)
   }
-  object SocksProxy {
+  implicit object SocksProxy extends Stack.Param[SocksProxy] {
 
     private[this] def socksProxy: Option[SocketAddress] =
       (socksProxyHost.get, socksProxyPort.get) match {
@@ -85,7 +85,18 @@ object Transporter {
         case _ => None
       }
 
-    implicit val param = Stack.Param(SocksProxy(socksProxy, socksUsernameAndPassword))
+    val default: SocksProxy = SocksProxy(socksProxy, socksUsernameAndPassword)
+
+    override def show(p: SocksProxy): Seq[(String, () => String)] = {
+      // do not show the password for security reasons
+      Seq(
+        ("socketAddress", () => p.sa.toString),
+        ("credentials",
+          () => p.credentials
+            .map(c => s"username=${c._1}")
+            .toString)
+      )
+    }
   }
 
   /**
@@ -94,23 +105,46 @@ object Transporter {
    */
   case class HttpProxy(sa: Option[SocketAddress], credentials: Option[Credentials]) {
     def mk(): (HttpProxy, Stack.Param[HttpProxy]) =
-      (this, HttpProxy.param)
+      (this, HttpProxy)
 
     def this(sa: Option[SocketAddress]) = this(sa, None)
   }
-  object HttpProxy {
-    implicit val param = Stack.Param(HttpProxy(None, None))
+  implicit object HttpProxy extends Stack.Param[HttpProxy] {
+    val default: HttpProxy = HttpProxy(None, None)
+
+    override def show(p: HttpProxy): Seq[(String, () => String)] = {
+      // do not show the password for security reasons
+      Seq(
+        ("socketAddress", () => p.sa.toString),
+        ("credentials", () => p.credentials.map(_.toStringNoPassword).toString)
+      )
+    }
   }
 
   case class HttpProxyTo(hostAndCredentials: Option[(String, Option[Credentials])])
-  object HttpProxyTo {
-    implicit val param = Stack.Param(HttpProxyTo(None))
+  implicit object HttpProxyTo extends Stack.Param[HttpProxyTo] {
+    val default: HttpProxyTo = HttpProxyTo(None)
+
+    override def show(p: HttpProxyTo): Seq[(String, () => String)] = {
+      // do not show the password for security reasons
+      Seq(
+        ("host", () => p.hostAndCredentials.map(_._1).toString),
+        ("credentials",
+          () => p.hostAndCredentials
+            .flatMap(_._2)
+            .map(_.toStringNoPassword)
+            .toString)
+      )
+    }
   }
 
   /**
    * This class wraps the username, password that we use for http proxy auth
    */
-  case class Credentials(username: String, password: String)
+  case class Credentials(username: String, password: String) {
+    private[Transporter] def toStringNoPassword: String =
+      s"Credentials(username=$username)"
+  }
 
   /**
    * Configures the traffic class to be used by clients.
