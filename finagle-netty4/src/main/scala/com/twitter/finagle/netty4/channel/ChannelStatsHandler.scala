@@ -61,9 +61,10 @@ private class ChannelStatsHandler(sharedChannelStats: SharedChannelStats)
   // are used only in their `channelStatsHandler` instance.
   private[this] var channelBytesRead: Long = _
   private[this] var channelBytesWritten: Long = _
-  private[this] var connectionDuration: Stopwatch.Elapsed = _
   private[this] var channelWasWritable: Boolean = _
   private[this] var channelWritableDuration: Stopwatch.Elapsed = _
+  // `connectionDuration` and `channelActive` must be updated together
+  private[this] var connectionDuration: Stopwatch.Elapsed = _
   private[this] var channelActive: Boolean = false
 
   override def handlerAdded(ctx: ChannelHandlerContext): Unit = {
@@ -78,8 +79,8 @@ private class ChannelStatsHandler(sharedChannelStats: SharedChannelStats)
     sharedChannelStats.connects.incr()
     sharedChannelStats.connectionCountIncrement()
 
-    connectionDuration = Stopwatch.start()
     channelActive = true
+    connectionDuration = Stopwatch.start()
     super.channelActive(ctx)
   }
 
@@ -92,7 +93,6 @@ private class ChannelStatsHandler(sharedChannelStats: SharedChannelStats)
       case _ =>
         log.warning("ChannelStatsHandler received non-ByteBuf write: " + msg)
     }
-
     super.write(ctx, msg, p)
   }
 
@@ -113,29 +113,25 @@ private class ChannelStatsHandler(sharedChannelStats: SharedChannelStats)
     super.close(ctx, p)
   }
 
+  // Note that a channel can go inactive without ever seeing `channelActive`
+  // but all the stats in here are predicated on the channel having been active
   override def channelInactive(ctx: ChannelHandlerContext): Unit = {
     // protect against Netty calling this multiple times
     if (channelActive) {
+      channelActive = false
+      val elapsed = connectionDuration
+      connectionDuration = null
+      sharedChannelStats.connectionDuration.add(elapsed().inMilliseconds)
+      sharedChannelStats.connectionCountDecrement()
+
       val oldChannelBytesRead = channelBytesRead
       val oldChannelBytesWritten = channelBytesWritten
       channelBytesRead = 0
       channelBytesWritten = 0
       sharedChannelStats.connectionReceivedBytes.add(oldChannelBytesRead)
       sharedChannelStats.connectionSentBytes.add(oldChannelBytesWritten)
-
-      // a channel can go inactive without ever seeing `channelActive`
-      val oldConnectionDuration = connectionDuration
-      connectionDuration = null
-      oldConnectionDuration match {
-        case null =>
-        case elapsed =>
-          sharedChannelStats.connectionDuration.add(elapsed().inMilliseconds)
-          sharedChannelStats.connectionCountDecrement()
-      }
-
-      super.channelInactive(ctx)
     }
-    channelActive = false
+    super.channelInactive(ctx)
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable): Unit = {
