@@ -100,6 +100,12 @@ Breaking API Changes
   * finagle-base-http: Removed deprecated `c.t.f.http.Cookie.version` and
     `c.t.f.http.Cookie.version_=`, per RFC-6265. ``PHAB_ID=D142672``
 
+  * finagle-base-http: Removed deprecated `c.t.f.Cookie.httpOnly_=`; use `c.t.f.Cookie.httpOnly`
+    instead. ``PHAB_ID=D143177``
+
+  * finagle-base-http: Removed deprecated `c.t.f.Cookie.maxAge_=`; use `c.t.f.Cookie.maxAge`
+    instead. ``PHAB_ID=D143177``
+
   * finagle-core: `c.t.f.pool.WatermarkPool` was finalized. ``PHAB_ID=D137198``
 
   * finagle-core: `c.t.finagle.ssl.Ssl` and related classes have been

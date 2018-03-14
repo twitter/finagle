@@ -164,10 +164,6 @@ class Cookie private (
   def domain_=(domain: String): Unit =
     _domain = Cookie.validateField(domain)
 
-  @deprecated("Set maxAge in the Cookie constructor or use `Cookie.maxAge`", "2017-08-16")
-  def maxAge_=(maxAge: Duration): Unit =
-    _maxAge = Option(maxAge)
-
   /**
    * Set the path.
    * @note `path` may be null.
@@ -183,10 +179,6 @@ class Cookie private (
   @deprecated("Set value in the Cookie constructor", "2017-08-16")
   def value_=(value: String): Unit =
     _value = value
-
-  @deprecated("Set httpOnly in the Cookie constructor or use `Cookie.httpOnly`", "2017-08-16")
-  def httpOnly_=(httpOnly: Boolean): Unit =
-    _httpOnly = httpOnly
 
   // Helper method for `equals` that returns true if two strings are both null, or have the
   // same value (ignoring case)

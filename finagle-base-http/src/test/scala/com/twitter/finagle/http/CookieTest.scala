@@ -9,17 +9,13 @@ class CookieTest extends FunSuite {
   test("mutate underlying") {
     val cookie = new Cookie("name", "value")
     cookie.domain = ".twitter.com"
-    cookie.maxAge = 100.seconds
     cookie.path = "/1/statuses/show"
     cookie.value = "value2"
-    cookie.httpOnly = true
 
     assert(cookie.name == "name")
     assert(cookie.domain == ".twitter.com")
-    assert(cookie.maxAge == 100.seconds)
     assert(cookie.path == "/1/statuses/show")
     assert(cookie.value == "value2")
-    assert(cookie.httpOnly == true)
   }
 
   test("constructor sets correct params") {
