@@ -43,7 +43,10 @@ object Postgres {
   object User { implicit object param extends RequiredParam[User]("User") }
 
   case class Password(password: Option[String]) extends AnyVal
-  object Password { implicit val param = Param(Password(None)) }
+  implicit object Password extends Stack.Param[Password] {
+    override def default: Password = Password(None)
+    override def show(p: Password): Seq[(String, () => String)] = Nil
+  }
 
   case class Database(database: String) extends AnyVal
   object Database { implicit object param extends RequiredParam[Database]("Database") }
