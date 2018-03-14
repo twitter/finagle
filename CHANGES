@@ -7,6 +7,11 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+  * finagle-core: `c.t.f.filter.NackAdmissionFilter` can now be disabled via a `with`-method.
+    `$Protocol.client.withAdmissionControl.noNackAdmissionControl` ``PHAB_ID=D146873``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

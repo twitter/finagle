@@ -1,18 +1,16 @@
 package com.twitter.finagle.filter
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.param
 import com.twitter.finagle.service.FailedService
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.toggle.flag
 import com.twitter.finagle.util.{DefaultLogger, Ema, Rng}
-import com.twitter.finagle.{Failure, Service}
+import com.twitter.finagle.{Failure, Service, Stack, ServiceFactory}
 import com.twitter.util._
 import java.util.logging.Logger
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class NackAdmissionFilterTest extends FunSuite {
   // NB: [[DefaultWindow]] and [[DefaultNackRateThreshold]] values are
   //     arbitrary.
@@ -134,6 +132,24 @@ class NackAdmissionFilterTest extends FunSuite {
         }
       }
     }
+  }
+
+  testEnabled("Can be disabled by configuration param") { ctl =>
+
+    val nackSvc = ServiceFactory.const[Int, Int](new FailedService(Failure.rejected("goaway")))
+    val stats = new InMemoryStatsReceiver
+
+    val s: Stack[ServiceFactory[Int, Int]] =
+      NackAdmissionFilter
+        .module[Int, Int]
+        .toStack(Stack.Leaf(Stack.Role("svc"), nackSvc))
+
+    val ps: Stack.Params = Stack.Params.empty + param.Stats(stats)
+
+    val sf = s.make(ps + NackAdmissionFilter.Disabled)
+
+    // Make sure the NAF module is skipped
+    assert(sf.equals(nackSvc))
   }
 
   testEnabled("increases acceptProbability when request is not NACKed") { ctl =>

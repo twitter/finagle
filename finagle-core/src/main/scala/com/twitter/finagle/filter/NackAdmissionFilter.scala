@@ -57,24 +57,33 @@ private[finagle] object NackAdmissionFilter {
    * If the request rate is below `rpsThreshold`, the filter will not lower
    * the ema value or drop requests. If the request rate is equal or greater,
    * the filter will take effect.
-   * 
+   *
    * Note: the value of this threshold was empirically found to be effective.
    */
   private val rpsThreshold: Long = 5
 
-  /**
-   * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
-   * [[com.twitter.finagle.filter.NackAdmissionFilter]] module.
-   */
-  case class Param(window: Duration, nackRateThreshold: Double) {
-    def mk(): (Param, Stack.Param[Param]) =
-      (this, Param.param)
+
+  sealed trait Param {
+    def mk(): (Param, Stack.Param[Param]) = (this, Param.param)
   }
 
-  object Param {
+  private[finagle] object Param {
+    /**
+     * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
+     * [[com.twitter.finagle.filter.NackAdmissionFilter]] module.
+     */
+    case class Configured(window: Duration, nackRateThreshold: Double) extends Param
+
+    /**
+     * Disables this role
+     */
+    case object Disabled extends Param
+
     implicit val param: Stack.Param[NackAdmissionFilter.Param] =
-      Stack.Param(Param(DefaultWindow, DefaultNackRateThreshold))
+      Stack.Param(Configured(DefaultWindow, DefaultNackRateThreshold))
   }
+
+  private[finagle] val Disabled: Param = Param.Disabled
 
   private[finagle] def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module2[NackAdmissionFilter.Param, param.Stats, ServiceFactory[Req, Rep]] {
@@ -85,20 +94,24 @@ private[finagle] object NackAdmissionFilter {
         _param: Param,
         _stats: param.Stats,
         next: ServiceFactory[Req, Rep]
-      ): ServiceFactory[Req, Rep] = {
-        val param.Stats(stats) = _stats
+      ): ServiceFactory[Req, Rep] =  _param match {
+        case Param.Configured(window, threshold) =>
+          val param.Stats(stats) = _stats
 
-        // Create the filter with the given window and nack rate threshold.
-        val filter = new NackAdmissionFilter[Req, Rep](
-          _param.window,
-          _param.nackRateThreshold,
-          Rng.threadLocal,
-          stats.scope("nack_admission_control")
-        )
+          // Create the filter with the given window and nack rate threshold.
+          val filter = new NackAdmissionFilter[Req, Rep](
+            window,
+            threshold,
+            Rng.threadLocal,
+            stats.scope("nack_admission_control")
+          )
 
-        // This creates a filter that is shared across all endpoints, which is
-        // required for proper operation.
-        filter.andThen(next)
+          // This creates a filter that is shared across all endpoints, which is
+          // required for proper operation.
+          filter.andThen(next)
+
+        case Param.Disabled =>
+          next
       }
     }
 }
