@@ -1,17 +1,22 @@
-package com.twitter.finagle.netty4.ssl
+package com.twitter.finagle.thriftmux.ssl
 
-import com.twitter.finagle.{Address, ListeningServer, Service}
-import com.twitter.finagle.client.StringClient
-import com.twitter.finagle.server.StringServer
+import com.twitter.finagle.{Address, ListeningServer, ThriftMux}
+import com.twitter.finagle.mux.transport.OpportunisticTls
 import com.twitter.finagle.ssl.{ClientAuth, KeyCredentials, TrustCredentials}
 import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientSessionVerifier}
 import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerSessionVerifier}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.thriftmux.thriftscala._
 import com.twitter.io.TempFile
+import com.twitter.util.Future
 import java.net.InetSocketAddress
 import javax.net.ssl.SSLSession
 
-object Netty4SslTestComponents {
+object ThriftSmuxSslTestComponents {
+
+  private val concatService = new TestService.MethodPerEndpoint {
+    def query(x: String): Future[String] = Future.value(x.concat(x))
+  }
 
   private val chainCert = TempFile.fromResourcePath("/ssl/certs/svc-test-chain.cert.pem")
   // deleteOnExit is handled by TempFile
@@ -52,19 +57,20 @@ object Netty4SslTestComponents {
     label: String = "client",
     statsReceiver: StatsReceiver = NullStatsReceiver,
     sessionVerifier: SslClientSessionVerifier = SslClientSessionVerifier.AlwaysValid
-  ): Service[String, String] = {
+  ): TestService.MethodPerEndpoint = {
     val clientConfig = SslClientConfiguration(
       keyCredentials = KeyCredentials.CertAndKey(clientCert, clientKey),
       trustCredentials = TrustCredentials.CertCollection(chainCert))
 
-    StringClient.client
+    ThriftMux.client
       .withTransport.tls(clientConfig, sessionVerifier)
+      .withOpportunisticTls(OpportunisticTls.Required)
       .withStatsReceiver(statsReceiver)
-      .newService("localhost:" + port, label)
+      .withLabel(label)
+      .build[TestService.MethodPerEndpoint]("localhost:" + port)
   }
 
   def mkTlsServer(
-    service: Service[String, String],
     label: String = "server",
     statsReceiver: StatsReceiver = NullStatsReceiver,
     sessionVerifier: SslServerSessionVerifier = SslServerSessionVerifier.AlwaysValid
@@ -74,10 +80,11 @@ object Netty4SslTestComponents {
       trustCredentials = TrustCredentials.CertCollection(chainCert),
       clientAuth = ClientAuth.Needed)
 
-    StringServer.server
+    ThriftMux.server
       .withTransport.tls(serverConfig, sessionVerifier)
-      .withLabel(label)
+      .withOpportunisticTls(OpportunisticTls.Required)
       .withStatsReceiver(statsReceiver)
-      .serve(":*", service)
+      .withLabel(label)
+      .serveIface("localhost:*", concatService)
   }
 }

@@ -6,6 +6,7 @@ import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
 import com.twitter.util.{Duration, Monitor, Stopwatch}
 import io.netty.buffer.ByteBuf
 import io.netty.channel.{ChannelDuplexHandler, ChannelHandlerContext, ChannelPromise}
+import io.netty.handler.ssl.SslHandshakeCompletionEvent
 import io.netty.handler.timeout.TimeoutException
 import java.io.IOException
 import java.util.concurrent.atomic.LongAdder
@@ -22,6 +23,10 @@ private object ChannelStatsHandler {
     private val connectionCount = new LongAdder()
     def connectionCountIncrement(): Unit = connectionCount.increment()
     def connectionCountDecrement(): Unit = connectionCount.decrement()
+
+    private val tlsConnectionCount = new LongAdder()
+    def tlsConnectionCountIncrement(): Unit = tlsConnectionCount.increment()
+    def tlsConnectionCountDecrement(): Unit = tlsConnectionCount.decrement()
 
     val connects = statsReceiver.counter("connects")
 
@@ -42,6 +47,9 @@ private object ChannelStatsHandler {
     val closesCount = statsReceiver.counter("closes")
     private val connections = statsReceiver.addGauge("connections") {
       connectionCount.sum()
+    }
+    private val tlsConnections = statsReceiver.addGauge("tls", "connections") {
+      tlsConnectionCount.sum()
     }
   }
 }
@@ -66,6 +74,7 @@ private class ChannelStatsHandler(sharedChannelStats: SharedChannelStats)
   // `connectionDuration` and `channelActive` must be updated together
   private[this] var connectionDuration: Stopwatch.Elapsed = _
   private[this] var channelActive: Boolean = false
+  private[this] var tlsChannelActive: Boolean = false
 
   override def handlerAdded(ctx: ChannelHandlerContext): Unit = {
     channelBytesRead = 0L
@@ -130,6 +139,11 @@ private class ChannelStatsHandler(sharedChannelStats: SharedChannelStats)
       channelBytesWritten = 0
       sharedChannelStats.connectionReceivedBytes.add(oldChannelBytesRead)
       sharedChannelStats.connectionSentBytes.add(oldChannelBytesWritten)
+
+      if (tlsChannelActive) {
+        tlsChannelActive = false
+        sharedChannelStats.tlsConnectionCountDecrement()
+      }
     }
     super.channelInactive(ctx)
   }
@@ -161,4 +175,21 @@ private class ChannelStatsHandler(sharedChannelStats: SharedChannelStats)
     }
     super.channelWritabilityChanged(ctx)
   }
+
+  // Along with the `SslHandshakeCompletionEvent`, Netty also has an `SslCloseCompletionEvent`.
+  // Instead we track SSL/TLS connection closes via the normal connection close primitives in
+  // order to keep our metrics in line and minimize accounting discrepancies between connections
+  // and tls connections.
+  override def userEventTriggered(ctx: ChannelHandlerContext, evt: AnyRef): Unit = {
+    evt match {
+      case _: SslHandshakeCompletionEvent =>
+        if (channelActive) {
+          tlsChannelActive = true
+          sharedChannelStats.tlsConnectionCountIncrement()
+        }
+      case _ => // do nothing
+    }
+    super.userEventTriggered(ctx, evt)
+  }
+
 }

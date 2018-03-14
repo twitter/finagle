@@ -9,8 +9,13 @@ Unreleased
 
 New Features
 ~~~~~~~~~~~~
+
   * finagle-core: `c.t.f.filter.NackAdmissionFilter` can now be disabled via a `with`-method.
     `$Protocol.client.withAdmissionControl.noNackAdmissionControl` ``PHAB_ID=D146873``
+
+  * finagle-netty4: Add 'tls/connections' gauge for Finagle on Netty 4 which tracks the number
+    of open SSL/TLS connections per Finagle client or server.
+    ``PHAB_ID=D144184``
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~

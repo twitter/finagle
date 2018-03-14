@@ -72,6 +72,10 @@ ChannelStatsHandler
   A counter of the number of times a specific exception has been thrown within
   a Netty pipeline.
 
+**tls/connections**
+  A gauge of the total number of SSL/TLS connections that are currently open in
+  the channel.
+
 IdleChannelHandler
 <<<<<<<<<<<<<<<<<<
 
