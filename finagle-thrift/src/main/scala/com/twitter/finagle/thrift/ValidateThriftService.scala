@@ -57,7 +57,7 @@ class ValidateThriftService(
       val iprot = protocolFactory.getProtocol(memoryTransport)
       val reply = iprot.readMessageBegin()
       reply.`type` != TMessageType.EXCEPTION || {
-        val exc = TApplicationException.read(iprot)
+        val exc = TApplicationException.readFrom(iprot)
         iprot.readMessageEnd()
         exc.getType == TApplicationException.INTERNAL_ERROR ||
         exc.getType == TApplicationException.UNKNOWN_METHOD

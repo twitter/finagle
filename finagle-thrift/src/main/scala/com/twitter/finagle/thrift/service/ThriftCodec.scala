@@ -84,7 +84,7 @@ private[thrift] object ThriftCodec {
     val iprot = pf.getProtocol(new TMemoryInputTransport(resBytes))
     val msg = iprot.readMessageBegin()
     if (msg.`type` == TMessageType.EXCEPTION) {
-      val exception = TApplicationException.read(iprot)
+      val exception = TApplicationException.readFrom(iprot)
       iprot.readMessageEnd()
       throw exception
     } else {

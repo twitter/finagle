@@ -4,7 +4,7 @@ import scoverage.ScoverageKeys
 // All Twitter library releases are date versioned as YY.MM.patch
 val releaseVersion = "18.4.0-SNAPSHOT"
 
-val libthriftVersion = "0.5.0-7"
+val libthriftVersion = "0.10.0"
 
 val netty4Version = "4.1.16.Final"
 
@@ -41,7 +41,7 @@ val jacksonLibs = Seq(
   "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion exclude("com.google.guava", "guava")
 )
 val thriftLibs = Seq(
-  "com.twitter" % "libthrift" % libthriftVersion intransitive()
+  "org.apache.thrift" % "libthrift" % libthriftVersion intransitive()
 )
 val scroogeLibs = thriftLibs ++ Seq(
   "com.twitter" %% "scrooge-core" % releaseVersion)
@@ -137,7 +137,7 @@ val sharedSettings = Seq(
   // Prevent eviction warnings
   dependencyOverrides ++= (scalaVersion { vsn =>
     Seq(
-      "com.twitter" % "libthrift" % libthriftVersion
+      "org.apache.thrift" % "libthrift" % libthriftVersion
     )
   }).value,
 
@@ -525,7 +525,7 @@ lazy val finagleMemcached = Project(
     util("hashing"),
     util("zk-test") % "test",
     "com.twitter" %% "bijection-core" % "0.9.4",
-    "com.twitter" % "libthrift" % libthriftVersion
+    "org.apache.thrift" % "libthrift" % libthriftVersion
   ),
   libraryDependencies ++= jacksonLibs
 ).dependsOn(

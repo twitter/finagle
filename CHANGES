@@ -23,6 +23,10 @@ Breaking API Changes
   * finagle-core: `c.t.f.ssl.client.HostnameVerifier` has been removed since it was using
     `sun.security.util.HostnameChecker` which is no longer accessible in JDK 9.
     ``PHAB_ID=D144149``
+    
+  * finagle-thrift: Upgraded libthrift to 0.10.0, `c.t.f.thrift.Protocols.TFinagleBinaryProtocol`
+    constructor now takes `stringLengthLimit` and `containerLengthLimit`, `NO_LENGTH_LIMIT` value
+    changed from 0 to -1. ``PHAB_ID=D124620``
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -37,6 +41,13 @@ Runtime Behavior Changes
     However it now occurs before the SSL/TLS handshake has been completed, and the
     exception on failure has changes from a `c.t.f.SslHostVerificationException` to a
     `javax.net.ssl.CertificateException`. ``PHAB_ID=D144149``
+
+Deprecations
+~~~~~~~~~~~~
+
+  * finagle-thrift: System property "-Dorg.apache.thrift.readLength" is deprecated. Use
+    constructors to set read length limit for TBinaryProtocol.Factory and TCompactProtocol.Factory.
+    ``PHAB_ID=D124620``
 
 18.3.0
 -------
@@ -251,7 +262,7 @@ Runtime Behavior Changes
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
-    * finagle-base-http, finagle-http: Removed Apache Commons Lang dependency,
+  * finagle-base-http, finagle-http: Removed Apache Commons Lang dependency,
     `org.apache.commons.lang3.time.FastDateFormat` now is `java.time.format.DateTimeFormatter`.
     ``PHAB_ID=D121479``
 

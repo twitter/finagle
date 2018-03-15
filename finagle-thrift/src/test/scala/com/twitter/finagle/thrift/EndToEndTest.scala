@@ -8,12 +8,7 @@ import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
 import com.twitter.finagle.ssl.{ClientAuth, KeyCredentials, TrustCredentials}
 import com.twitter.finagle.ssl.client.SslClientConfiguration
 import com.twitter.finagle.ssl.server.SslServerConfiguration
-import com.twitter.finagle.stats.{
-  InMemoryStatsReceiver,
-  LoadedStatsReceiver,
-  NullStatsReceiver,
-  StatsReceiver
-}
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, LoadedStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.service.ThriftResponseClassifier
 import com.twitter.finagle.thrift.thriftscala._
 import com.twitter.finagle.tracing.{Annotation, Record, Trace}
@@ -24,7 +19,7 @@ import com.twitter.util._
 import java.io.{PrintWriter, StringWriter}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import org.apache.thrift.TApplicationException
-import org.apache.thrift.protocol.{TCompactProtocol, TProtocolFactory}
+import org.apache.thrift.protocol.{TBinaryProtocol, TCompactProtocol, TProtocolFactory}
 import org.scalatest.{BeforeAndAfter, FunSuite}
 import scala.reflect.ClassTag
 
@@ -213,36 +208,6 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
   testThrift("(don't) propagate Dtab") { (client, tracer) =>
     val dtabSize = Await.result(client.show_me_your_dtab_size(), 10.seconds)
     assert(dtabSize == 0)
-  }
-
-  test("JSON is broken (before we upgrade)") {
-    // We test for the presence of a JSON encoding
-    // bug in thrift 0.5.0[1]. See THRIFT-1375.
-    //  When we upgrade, this test will fail and helpfully
-    // remind us to add JSON back.
-    import java.nio.ByteBuffer
-    import org.apache.thrift.protocol._
-    import org.apache.thrift.transport._
-
-    val bytes = Array[Byte](102, 100, 125, -96, 57, -55, -72, 18, -21, 15, -91, -36, 104, 111, 111,
-      -127, -21, 15, -91, -36, 104, 111, 111, -127, 0, 0, 0, 0, 0, 0, 0, 0)
-    val pf = new TJSONProtocol.Factory()
-
-    val json = {
-      val buf = new TMemoryBuffer(512)
-      pf.getProtocol(buf).writeBinary(ByteBuffer.wrap(bytes))
-      java.util.Arrays.copyOfRange(buf.getArray(), 0, buf.length())
-    }
-
-    val decoded = {
-      val trans = new TMemoryInputTransport(json)
-      val bin = pf.getProtocol(trans).readBinary()
-      val bytes = new Array[Byte](bin.remaining())
-      bin.get(bytes, 0, bin.remaining())
-      bytes
-    }
-
-    assert(bytes.toSeq != decoded.toSeq, "Add JSON support back")
   }
 
   testThrift("end-to-end tracing potpourri") { (client, tracer) =>
@@ -855,6 +820,45 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
 
     assert(Await.result(client.someway(), timeout = 100.millis) == null)
     assert(sr.stats.get(Seq("codec_connection_preparation_latency_ms")) == None)
+  }
+
+  test("default protocolFactory should return TFinagleProtocol") {
+
+    val clientParamDefault = RichClientParam()
+    clientParamDefault.protocolFactory.getClass.getName.contains("finagle.thrift.Protocols") == true
+  }
+
+  test ("TBinaryProtocol.Factory has all correct field") {
+    val clientParamTBF = RichClientParam(new TBinaryProtocol.Factory(false, false))
+    val strictReadField = clientParamTBF.protocolFactory.getClass.getDeclaredField("strictRead_")
+    val strictWriteField = clientParamTBF.protocolFactory.getClass.getDeclaredField("strictWrite_")
+    val readLimitField = clientParamTBF.protocolFactory.getClass.getDeclaredField("stringLengthLimit_")
+
+    strictReadField.setAccessible(true)
+    strictWriteField.setAccessible(true)
+    readLimitField.setAccessible(true)
+
+    strictReadField.get(clientParamTBF.protocolFactory) == false
+    strictWriteField.get(clientParamTBF.protocolFactory) == false
+    readLimitField.get(clientParamTBF.protocolFactory) == Protocols.NoReadLimit
+  }
+
+  test ("TBinaryProtocol.Factory has right info after we set system property") {
+
+    System.setProperty("org.apache.thrift.readLength", "1000")
+    val clientParamSysProp = RichClientParam(new TBinaryProtocol.Factory(false, false))
+    val strictReadField = clientParamSysProp.protocolFactory.getClass.getDeclaredField("strictRead_")
+    val strictWriteField = clientParamSysProp.protocolFactory.getClass.getDeclaredField("strictWrite_")
+    val readLimitField = clientParamSysProp.protocolFactory.getClass.getDeclaredField("stringLengthLimit_")
+
+    strictReadField.setAccessible(true)
+    strictWriteField.setAccessible(true)
+    readLimitField.setAccessible(true)
+
+    strictReadField.get(clientParamSysProp.protocolFactory) == false
+    strictWriteField.get(clientParamSysProp.protocolFactory) == false
+    readLimitField.get(clientParamSysProp.protocolFactory) == 1000
+    System.clearProperty("org.apache.thrift.readLength")
   }
 }
 

@@ -54,7 +54,36 @@ object Protocols {
     case _: Throwable => false
   }
 
+  /**
+   * The JVM property of size limit on the incoming Thrift message
+   */
+  private[thrift] val SysPropReadLength: Long =
+    System.getProperty("org.apache.thrift.readLength", "-1").toLong
+
+  /**
+   * No size limit on the incoming Thrift message, value is -1
+   */
+  private[thrift] val NoReadLimit: Int = -1
+
   private[this] def optimizedBinarySupported: Boolean = unsafe.isDefined && StringsBackedByCharArray
+
+  /**
+   * Returns a shorter read size limit when it is set both by system property and a method parameter
+   *
+   * @param readLength method parameter
+   */
+  private[thrift] def getReadLimit(readLength: Long): Long = {
+    val readLengthOption = if (readLength <= NoReadLimit) None else Some(readLength)
+    val sysPropReadLengthOption =
+      if (SysPropReadLength <= NoReadLimit) None else Some(SysPropReadLength)
+
+    (readLengthOption, sysPropReadLengthOption) match {
+      case (Some(validatedReadLength), Some(validatedSystemLength)) =>
+        validatedReadLength.min(validatedSystemLength)
+      case (validatedReadLength, validatedSystemLength) =>
+        validatedReadLength.orElse(validatedSystemLength).getOrElse(NoReadLimit)
+    }
+  }
 
   /**
    * Returns a `TProtocolFactory` that creates `TProtocol`s that
@@ -63,23 +92,26 @@ object Protocols {
   def binaryFactory(
     strictRead: Boolean = false,
     strictWrite: Boolean = true,
-    readLength: Int = 0,
+    readLength: Long = -1,
     statsReceiver: StatsReceiver = DefaultStatsReceiver
   ): TProtocolFactory = {
+    val readLengthLimit: Long = getReadLimit(readLength)
     if (!optimizedBinarySupported) {
-      new TBinaryProtocol.Factory(strictRead, strictWrite, readLength)
+      new TBinaryProtocol.Factory(strictRead, strictWrite, readLengthLimit, NoReadLimit)
     } else {
       // Factories are created rarely while the creation of their TProtocol's
       // is a common event. Minimize counter creation to just once per Factory.
       val largerThanTlOutBuffer = statsReceiver.counter("larger_than_threadlocal_out_buffer")
       new TProtocolFactory {
         override def getProtocol(trans: TTransport): TProtocol = {
-          val proto =
-            new TFinagleBinaryProtocol(trans, largerThanTlOutBuffer, strictRead, strictWrite)
-          if (readLength != 0) {
-            proto.setReadLength(readLength)
-          }
-          proto
+          new TFinagleBinaryProtocol(
+            trans,
+            largerThanTlOutBuffer,
+            readLengthLimit,
+            NoReadLimit,
+            strictRead,
+            strictWrite
+          )
         }
       }
     }
@@ -169,9 +201,17 @@ object Protocols {
   private[thrift] class TFinagleBinaryProtocol(
     trans: TTransport,
     largerThanTlOutBuffer: Counter,
+    stringLengthLimit: Long = -1,
+    containerLengthLimit: Long = -1,
     strictRead: Boolean = false,
     strictWrite: Boolean = true
-  ) extends TBinaryProtocol(trans, strictRead, strictWrite) {
+  ) extends TBinaryProtocol(
+        trans,
+        stringLengthLimit,
+        containerLengthLimit,
+        strictRead,
+        strictWrite
+      ) {
     import TFinagleBinaryProtocol._
 
     override def writeString(str: String) {
@@ -235,7 +275,6 @@ object Protocols {
         trans.write(array, 0, array.length)
       }
     }
-
   }
 
 }
