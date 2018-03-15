@@ -1,6 +1,6 @@
 package com.twitter.finagle.zipkin.core
 
-import com.twitter.finagle.tracing.{TraceId, Record, Tracer, Annotation, Trace}
+import com.twitter.finagle.tracing.{TraceId, Record, Tracer}
 
 /**
  * Tracer that supports sampling. Will pass through a subset of the records.

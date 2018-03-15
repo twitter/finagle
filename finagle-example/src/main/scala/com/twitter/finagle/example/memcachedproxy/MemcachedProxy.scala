@@ -4,8 +4,7 @@ import com.twitter.finagle.ListeningServer
 import com.twitter.finagle.Memcached
 import com.twitter.finagle.memcached.protocol.{Command, Response}
 import com.twitter.finagle.Service
-import com.twitter.finagle.builder.{Server, ClientBuilder, ServerBuilder}
-import java.net.{ConnectException, Socket, InetSocketAddress}
+import java.net.{ConnectException, Socket}
 
 /**
  * Run a server on port 8080 that delegates all Memcached requests to a server

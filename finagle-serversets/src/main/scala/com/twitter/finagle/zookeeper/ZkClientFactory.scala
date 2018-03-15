@@ -5,7 +5,6 @@ import com.twitter.concurrent.{Offer, Broker, AsyncMutex}
 import com.twitter.finagle.addr.StabilizingAddr.State._
 import com.twitter.finagle.util.InetSocketAddressUtil
 import com.twitter.util.Duration
-import java.lang.{Long => JLong}
 import java.net.InetSocketAddress
 import org.apache.zookeeper.Watcher.Event.KeeperState
 import org.apache.zookeeper.{Watcher, WatchedEvent}
