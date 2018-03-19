@@ -28,6 +28,12 @@ Breaking API Changes
     constructor now takes `stringLengthLimit` and `containerLengthLimit`, `NO_LENGTH_LIMIT` value
     changed from 0 to -1. ``PHAB_ID=D124620``
 
+  * finagle-thrift: Move "stateless" methods in `c.t.finagle.thrift.ThriftRichClient`
+    to `c.t.finagle.thrift.ThriftClient`. Then mix the `ThriftClient` trait into the
+    ThriftMux and Thrift Client companions to make it clearer that these stateless methods
+    are not affected by the changing state of the configured client instance but are instead
+    simply utility methods which convert or wrap the incoming argument. ``PHAB_ID=D143185``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

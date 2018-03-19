@@ -182,7 +182,7 @@ object Thrift
     }
   }
 
-  object Client {
+  object Client extends ThriftClient {
     private val preparer: Stackable[ServiceFactory[ThriftClientRequest, Array[Byte]]] =
       new Stack.ModuleParams[ServiceFactory[ThriftClientRequest, Array[Byte]]] {
         override def parameters: Seq[Stack.Param[_]] = Nil

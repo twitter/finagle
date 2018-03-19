@@ -94,7 +94,7 @@ object ThriftServiceIfaceExample {
 
     //#thriftclientapi-method-adapter
     val filteredMethodIface: LoggerService[Future] =
-      Thrift.client.newMethodIface(clientServiceIface.copy(log = filteredLog))
+      Thrift.Client.newMethodIface(clientServiceIface.copy(log = filteredLog))
     Await.result(filteredMethodIface.log("ping", 3).map(println))
     //#thriftclientapi-method-adapter
   }

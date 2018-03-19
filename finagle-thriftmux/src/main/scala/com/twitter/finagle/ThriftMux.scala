@@ -120,7 +120,7 @@ object ThriftMux
    */
   val BaseServerParams: Stack.Params = Mux.Server.params + ProtocolLibrary("thriftmux")
 
-  object Client {
+  object Client extends ThriftClient {
 
     private[finagle] val UsePushMuxClientToggleName =
       "com.twitter.finagle.thriftmux.UsePushMuxClient"
