@@ -60,7 +60,8 @@ private[finagle] object MuxPush
           version = Mux.LatestVersion,
           negotiator = negotiator,
           headers = headers,
-          name = params[param.Label].label))
+          name = params[param.Label].label,
+          stats = scopedStatsParams[param.Stats].statsReceiver))
     }
 
     override def newClient(

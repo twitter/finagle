@@ -1,11 +1,12 @@
 package com.twitter.finagle.mux.exp.pushsession
 
-import com.twitter.finagle.{ChannelClosedException, Failure, Status, FailureFlags}
+import com.twitter.finagle.{ChannelClosedException, Failure, FailureFlags, Status}
 import com.twitter.finagle.mux.Handshake.{CanTinitMsg, Headers, TinitTag}
 import com.twitter.finagle.mux.exp.pushsession.MuxClientNegotiatingSession._
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.exp.pushsession.{PushChannelHandle, PushSession}
 import com.twitter.finagle.mux.Handshake
+import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.logging.Logger
 import com.twitter.util._
@@ -20,11 +21,19 @@ private[finagle] final class MuxClientNegotiatingSession(
   version: Short,
   negotiator: Option[Headers] => MuxClientSession,
   headers: Handshake.Headers,
-  name: String
+  name: String,
+  stats: StatsReceiver
 ) extends PushSession[ByteReader, Buf](handle) {
 
   private[this] val negotiatedSession = Promise[MuxClientSession]()
   private[this] val startNegotiation = new AtomicBoolean(false)
+
+  // A debug gauge used to track the number of sessions currently negotiating.
+  // The utility of this gauge may be short and will likely be removed fast.
+  private[this] val negotiatingGauge = stats.addGauge(Verbosity.Debug, "negotiating") {
+    if (startNegotiation.get) 1.0f else 0.0f
+  }
+  negotiatedSession.ensure(negotiatingGauge.remove())
 
   private type Phase = Message => Unit
 
