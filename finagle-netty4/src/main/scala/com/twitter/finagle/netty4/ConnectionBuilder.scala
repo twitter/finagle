@@ -105,6 +105,7 @@ private final class ConnectionBuilder(
       def operationComplete(channelF: ChannelFuture): Unit = {
         val latency = elapsed().inMilliseconds
         if (channelF.isCancelled()) {
+          failedConnectLatencyStat.add(latency)
           cancelledConnects.incr()
           transportP.setException(
             Failure(
