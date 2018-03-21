@@ -3,21 +3,25 @@ package com.twitter.finagle.mysql
 import com.github.benmanes.caffeine.cache.{Caffeine, RemovalCause, RemovalListener}
 import com.twitter.cache.caffeine.CaffeineCache
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
-import com.twitter.finagle.mysql.transport.{MysqlBufReader, MysqlBuf, Packet}
+import com.twitter.finagle.mysql.transport.{MysqlBuf, MysqlBufReader, Packet}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.{CancelledRequestException, Service, ServiceProxy, WriteException}
-import com.twitter.util.{Closable, Future, Promise, Return, Throw, Time, Try}
+import com.twitter.finagle.{Service, ServiceProxy, WriteException}
+import com.twitter.util._
 
 /**
  * A catch-all exception class for errors returned from the upstream
  * MySQL server.
  */
-case class ServerError(code: Short, sqlState: String, message: String) extends Exception(message)
+case class ServerError(
+  code: Short,
+  sqlState: String,
+  message: String
+) extends Exception(message)
 
 case class LostSyncException(underlying: Throwable) extends RuntimeException(underlying) {
-  override def getMessage = underlying.toString
-  override def getStackTrace = underlying.getStackTrace
+  override def getMessage: String = underlying.toString
+  override def getStackTrace: Array[StackTraceElement] = underlying.getStackTrace
 }
 
 /**
@@ -31,7 +35,7 @@ private[mysql] class PrepareCache(
   cache: Caffeine[Object, Object]
 ) extends ServiceProxy[Request, Result](svc) {
 
-  def closable(num: Int): Closable = Closable.make { deadline: Time =>
+  def closable(num: Int): Closable = Closable.make { _ =>
     svc(CloseRequest(num)).unit
   }
 
@@ -67,8 +71,7 @@ private[mysql] class PrepareCache(
 }
 
 private[finagle] object ClientDispatcher {
-  private val cancelledRequestExc = new CancelledRequestException
-  private val lostSyncExc = new LostSyncException(new Throwable)
+  private val lostSyncExc = LostSyncException(new Throwable)
   private val emptyTx = (Nil, EOF(0: Short, ServerStatus(0)))
   private val wrapWriteException: PartialFunction[Throwable, Future[Nothing]] = {
     case exc: Throwable => Future.exception(WriteException(exc))
@@ -101,7 +104,7 @@ private[finagle] object ClientDispatcher {
    * error (or corrupt data) between the client and server.
    */
   private def const[T](result: Try[T]): Future[T] =
-    Future.const(result rescue { case exc => Throw(LostSyncException(exc)) })
+    Future.const(result.rescue { case exc => Throw(LostSyncException(exc)) })
 }
 
 /**
@@ -120,9 +123,9 @@ private[finagle] class ClientDispatcher(
   import ClientDispatcher._
 
   override def apply(req: Request): Future[Result] =
-    connPhase flatMap { _ =>
+    connPhase.flatMap { _ =>
       super.apply(req)
-    } onFailure {
+    }.onFailure {
       // a LostSyncException represents a fatal state between
       // the client / server. The error is unrecoverable
       // so we close the service.
@@ -143,15 +146,15 @@ private[finagle] class ClientDispatcher(
    * [[http://dev.mysql.com/doc/internals/en/connection-phase.html]]
    */
   private[this] val connPhase: Future[Result] =
-    trans.read() flatMap { packet =>
-      const(HandshakeInit(packet)) flatMap { init =>
-        const(handshake(init)) flatMap { req =>
+    trans.read().flatMap { packet =>
+      const(HandshakeInit(packet)).flatMap { init =>
+        const(handshake(init)).flatMap { req =>
           val rep = new Promise[Result]
           dispatch(req, rep)
           rep
         }
       }
-    } onFailure { _ =>
+    }.onFailure { _ =>
       close()
     }
 
@@ -163,9 +166,9 @@ private[finagle] class ClientDispatcher(
    * This leaves room for implementing streaming results.
    */
   protected def dispatch(req: Request, rep: Promise[Result]): Future[Unit] =
-    trans.write(req.toPacket) rescue {
+    trans.write(req.toPacket).rescue {
       wrapWriteException
-    } before {
+    }.before {
       val signal = new Promise[Unit]
       if (req.cmd == Command.COM_STMT_CLOSE) {
         // synthesize COM_STMT_CLOSE response
@@ -173,8 +176,8 @@ private[finagle] class ClientDispatcher(
         rep.updateIfEmpty(Return(CloseStatementOK))
         signal
       } else
-        trans.read() flatMap { packet =>
-          rep.become(decodePacket(packet, req.cmd, signal))
+        trans.read().flatMap { packet =>
+          rep.become(decodePacket(req, packet, req.cmd, signal))
           signal
         }
     }
@@ -191,6 +194,7 @@ private[finagle] class ClientDispatcher(
    * future is satisfied, subsequent requests can be dispatched.
    */
   private[this] def decodePacket(
+    req: Request,
     packet: Packet,
     cmd: Byte,
     signal: Promise[Unit]
@@ -198,16 +202,20 @@ private[finagle] class ClientDispatcher(
     MysqlBuf.peek(packet.body) match {
       case Some(Packet.OkByte) if cmd == Command.COM_STMT_FETCH =>
         // Not really an OK packet; 00 is the header for a row as well
-        readTx().flatMap {
+        readTx(req).flatMap {
           case (rowPackets, eof) =>
             const(FetchResult(packet +: rowPackets, eof))
-        } ensure signal.setDone()
+        }.ensure {
+          signal.setDone()
+        }
 
       case Some(Packet.EofByte) if cmd == Command.COM_STMT_FETCH =>
         // synthesize an empty FetchResult
         signal.setDone()
 
-        const(EOF(packet) flatMap (FetchResult(Seq(), _)))
+        const(EOF(packet).flatMap { eof =>
+          FetchResult(Nil, eof)
+        })
 
       case Some(Packet.OkByte) if cmd == Command.COM_STMT_PREPARE =>
         // decode PrepareOk Result: A header packet potentially followed
@@ -215,17 +223,17 @@ private[finagle] class ClientDispatcher(
         // information, respectively.
         val result = for {
           ok <- const(PrepareOK(packet))
-          (seq1, _) <- readTx(ok.numOfParams)
-          (seq2, _) <- readTx(ok.numOfCols)
-          ps <- Future.collect(seq1 map { p =>
+          (seq1, _) <- readTx(req, ok.numOfParams)
+          (seq2, _) <- readTx(req, ok.numOfCols)
+          ps <- Future.collect(seq1.map { p =>
             const(Field(p))
           })
-          cs <- Future.collect(seq2 map { p =>
+          cs <- Future.collect(seq2.map { p =>
             const(Field(p))
           })
         } yield ok.copy(params = ps, columns = cs)
 
-        result ensure signal.setDone()
+        result.ensure { signal.setDone() }
 
       // decode OK Result
       case Some(Packet.OkByte) =>
@@ -235,9 +243,8 @@ private[finagle] class ClientDispatcher(
       // decode Error result
       case Some(Packet.ErrorByte) =>
         signal.setDone()
-        const(Error(packet)) flatMap { err =>
-          val Error(code, state, msg) = err
-          Future.exception(ServerError(code, state, msg))
+        const(Error(packet)).flatMap { err =>
+          Future.exception(errorToServerError(req, err))
         }
 
       case Some(byte) =>
@@ -248,12 +255,12 @@ private[finagle] class ClientDispatcher(
         }
 
         val result = const(numCols).flatMap { cnt =>
-          readTx(cnt).flatMap {
+          readTx(req, cnt).flatMap {
             case (fields, eof) =>
               if (eof.serverStatus.has(ServerStatus.CursorExists)) {
                 const(ResultSetBuilder(isBinaryEncoded, supportUnsigned)(packet, fields, Seq()))
               } else {
-                readTx().flatMap {
+                readTx(req).flatMap {
                   case (rows, _) =>
                     const(ResultSetBuilder(isBinaryEncoded, supportUnsigned)(packet, fields, rows))
                 }
@@ -264,12 +271,22 @@ private[finagle] class ClientDispatcher(
         // TODO: When streaming is implemented the
         // done signal should dependent on the
         // completion of the stream.
-        result ensure signal.setDone()
+        result.ensure {
+          signal.setDone()
+        }
 
       case _ =>
         signal.setDone()
         Future.exception(lostSyncExc)
     }
+  }
+
+  private[this] def errorToServerError(req: Request, err: Error): ServerError = {
+    val msg = req match {
+      case ws: WithSql => s"${err.message}, Executed SQL='${ws.sql}'"
+      case _ => err.message
+    }
+    ServerError(err.code, err.sqlState, msg)
   }
 
   /**
@@ -283,20 +300,22 @@ private[finagle] class ClientDispatcher(
    * number of reads exceeds the limit before an EOF packet is reached
    * a Future encoded LostSyncException is returned.
    */
-  private[this] def readTx(limit: Int = Int.MaxValue): Future[(Seq[Packet], EOF)] = {
+  private[this] def readTx(
+    req: Request,
+    limit: Int = Int.MaxValue
+  ): Future[(Seq[Packet], EOF)] = {
     def aux(numRead: Int, xs: List[Packet]): Future[(List[Packet], EOF)] = {
       if (numRead > limit) Future.exception(lostSyncExc)
       else
-        trans.read() flatMap { packet =>
+        trans.read().flatMap { packet =>
           MysqlBuf.peek(packet.body) match {
             case Some(Packet.EofByte) =>
-              const(EOF(packet)) map { eof =>
+              const(EOF(packet)).map { eof =>
                 (xs.reverse, eof)
               }
             case Some(Packet.ErrorByte) =>
-              const(Error(packet)) flatMap { err =>
-                val Error(code, state, msg) = err
-                Future.exception(ServerError(code, state, msg))
+              const(Error(packet)).flatMap { err =>
+                Future.exception(errorToServerError(req, err))
               }
             case Some(_) => aux(numRead + 1, packet :: xs)
             case None => Future.exception(lostSyncExc)

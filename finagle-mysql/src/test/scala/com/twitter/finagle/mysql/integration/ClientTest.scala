@@ -5,7 +5,7 @@ import com.twitter.finagle.Mysql
 import com.twitter.finagle.mysql._
 import com.twitter.util.{Await, Future}
 import java.sql.Date
-import org.scalatest.FunSuite
+import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 case class SwimmingRecord(
   event: String,
@@ -59,92 +59,169 @@ object SwimmingRecord {
   )
 }
 
-class ClientTest extends FunSuite with IntegrationClient {
+class ClientTest extends FunSuite
+  with IntegrationClient
+  with BeforeAndAfterAll {
   import SwimmingRecord._
 
   private[this] def await[T](f: Future[T]): T =
     Await.result(f, 5.seconds)
 
-  for (c <- client) {
-    test("failed auth") {
-      try {
-        await(Mysql.newRichClient("localhost:3306").ping())
-        fail("Expected an error when using an unauthenticated client")
-      } catch {
-        // Expected Access Denied Error Code
-        case ServerError(code, _, _) => assert(code == 1045)
+  private val c: Client with Transactions = client.orNull
+
+  override def beforeAll(): Unit = {
+    if (c != null) {
+      await(c.query(schema)) match {
+        case _: OK => // ok, table created. good.
+        case x => fail("Create table was not ok: " + x)
       }
-    }
-
-    test("ping") {
-      val pingResult = await(c.ping())
-      assert(pingResult.isInstanceOf[OK])
-    }
-
-    test("query: create a table") {
-      val createResult = await(c.query(schema))
-      assert(createResult.isInstanceOf[OK])
-    }
-
-    test("query: insert values") {
-      val sql = """INSERT INTO `finagle-mysql-test` (`event`, `time`, `name`, `nationality`, `date`)
-         VALUES %s;""".format(allRecords.mkString(", "))
-
-      val insertResult = await(c.query(sql))
-      val OK(_, insertid, _, _, _) = insertResult.asInstanceOf[OK]
-      assert(insertResult.isInstanceOf[OK])
-      assert(insertid == 1)
-    }
-
-    test("query: select values") {
-      val selectResult = await(c.select("SELECT * FROM `finagle-mysql-test`") { row =>
-        val StringValue(event) = row("event").get
-        val FloatValue(time) = row("time").get
-        val StringValue(name) = row("name").get
-        val StringValue(nation) = row("nationality").get
-        val DateValue(date) = row("date").get
-        SwimmingRecord(event, time, name, nation, date)
-      })
-
-      var i = 0
-      for (res <- selectResult) {
-        assert(allRecords(i) == res)
-        i += 1
-      }
-    }
-
-    test("prepared statement") {
-      val prepareQuery =
-        "SELECT COUNT(*) AS 'numRecords' FROM `finagle-mysql-test` WHERE `name` LIKE ?"
-      def extractRow(r: Result) = r.asInstanceOf[ResultSet].rows(0)
-      val ps = c.prepare(prepareQuery)
-      for (i <- 0 to 10) {
-        val randomIdx = math.floor(math.random * (allRecords.size - 1)).toInt
-        val recordName = allRecords(randomIdx).name
-        val expectedRes = LongValue(allRecords.filter(_.name == recordName).size)
-        val res = ps.select(recordName)(identity)
-        val row = await(res)(0)
-        assert(row("numRecords").get == expectedRes)
-      }
-    }
-
-    test("cursored statement") {
-      val query = "select * from `finagle-mysql-test` where `event` = ?"
-      val cursoredStatement = c.cursor(query)
-      val cursorResult = await(cursoredStatement(1, "50 m freestyle")(r => r))
-      val rows = await(cursorResult.stream.toSeq())
-
-      assert(rows.size == 1)
-      assert(rows(0)("event").get == StringValue("50 m freestyle"))
-    }
-
-    test("CursorResult does not store head of stream") {
-      val query = "select * from `finagle-mysql-test`"
-      val cursoredStatement = c.cursor(query)
-      val cursorResult = await(cursoredStatement(1)(r => r))
-      val first = cursorResult.stream.take(1)
-      val second = cursorResult.stream.take(1)
-      assert(first != second)
     }
   }
+
+  override def afterAll(): Unit = {
+    if (c != null) {
+      c.close()
+    }
+  }
+
+  test("failed auth") {
+    try {
+      await(Mysql.newRichClient("localhost:3306").ping())
+      fail("Expected an error when using an unauthenticated client")
+    } catch {
+      // Expected Access Denied Error Code
+      case se: ServerError => assert(se.code == 1045)
+    }
+  }
+
+  test("ping") {
+    val pingResult = await(c.ping())
+    assert(pingResult.isInstanceOf[OK])
+  }
+
+  test("query: create a table") {
+    val createResult = await(c.query(
+      """
+        |CREATE TEMPORARY TABLE IF NOT EXISTS table_create_test (id int(5))
+      """.stripMargin))
+    assert(createResult.isInstanceOf[OK])
+  }
+
+  test("query: insert values") {
+    val sql = """INSERT INTO `finagle-mysql-test` (`event`, `time`, `name`, `nationality`, `date`)
+       VALUES %s;""".format(allRecords.mkString(", "))
+
+    val insertResult = await(c.query(sql))
+    val OK(_, insertId, _, _, _) = insertResult.asInstanceOf[OK]
+    assert(insertResult.isInstanceOf[OK])
+    assert(insertId == 1)
+  }
+
+  test("query: select values") {
+    val selectResult = await(c.select("SELECT * FROM `finagle-mysql-test`") { row =>
+      val StringValue(event) = row("event").get
+      val FloatValue(time) = row("time").get
+      val StringValue(name) = row("name").get
+      val StringValue(nation) = row("nationality").get
+      val DateValue(date) = row("date").get
+      SwimmingRecord(event, time, name, nation, date)
+    })
+
+    var i = 0
+    for (res <- selectResult) {
+      assert(allRecords(i) == res)
+      i += 1
+    }
+  }
+
+  test("prepared statement") {
+    val prepareQuery =
+      "SELECT COUNT(*) AS 'numRecords' FROM `finagle-mysql-test` WHERE `name` LIKE ?"
+    val ps = c.prepare(prepareQuery)
+    for (i <- 0 to 10) {
+      val randomIdx = math.floor(math.random * (allRecords.size - 1)).toInt
+      val recordName = allRecords(randomIdx).name
+      val expectedRes = LongValue(allRecords.filter(_.name == recordName).size)
+      val res = ps.select(recordName)(identity)
+      val row = await(res)(0)
+      assert(row("numRecords").get == expectedRes)
+    }
+  }
+
+  test("cursored statement") {
+    val query = "select * from `finagle-mysql-test` where `event` = ?"
+    val cursoredStatement = c.cursor(query)
+    val cursorResult = await(cursoredStatement(1, "50 m freestyle")(r => r))
+    val rows = await(cursorResult.stream.toSeq())
+
+    assert(rows.size == 1)
+    assert(rows(0)("event").get == StringValue("50 m freestyle"))
+  }
+
+  test("query with invalid sql includes sql in exception message") {
+    // this has a mismatched number of columns.
+    val invalidSql =
+      """INSERT INTO `finagle-mysql-test` (
+        |  `event`, `time`, `name`, `nationality`, `date`
+        |) VALUES (1)""".stripMargin
+
+    val err = intercept[ServerError] {
+      await(c.query(invalidSql))
+    }
+    assert(err.getMessage.contains(invalidSql))
+  }
+
+  test("select with invalid sql includes sql in exception message") {
+    // this has a mismatched number of columns.
+    val invalidSql =
+      """
+        |SELECT 1
+        |FROM `finagle-mysql-test`
+        |WHERE `event` IN (SELECT ?, ?)
+      """.stripMargin
+
+    val err = intercept[ServerError] {
+      await(c.select(invalidSql)(identity))
+    }
+    assert(err.getMessage.contains(invalidSql))
+  }
+
+  test("prepare with invalid sql includes sql in exception message") {
+    val invalidSql =
+      """INSERT INTO `finagle-mysql-test` (
+        |  `event`, `time`, `name`, `nationality`, `date`
+        |) VALUES (?)""".stripMargin
+    val prepared = c.prepare(invalidSql)
+    val err = intercept[ServerError] {
+      await(prepared(1))
+    }
+    assert(err.getMessage.contains(invalidSql))
+  }
+
+  test("cursor with invalid sql includes sql in exception message") {
+    val invalidSql =
+      """
+        |SELECT 1
+        |FROM `finagle-mysql-test`
+        |WHERE `event` IN (SELECT ?, ?)
+      """.stripMargin
+    val statement = c.cursor(invalidSql)
+    val cursor = await(statement(1, "X", "Y")(identity))
+    val err = intercept[ServerError] {
+      await(cursor.stream.toSeq())
+    }
+    assert(err.getMessage.contains(invalidSql))
+  }
+
+  // NOTE: this test case seems to do something bad to the client
+  // and we leave it as the last test case and investigate separately.
+  test("CursorResult does not store head of stream") {
+    val query = "select * from `finagle-mysql-test`"
+    val cursoredStatement = c.cursor(query)
+    val cursorResult = await(cursoredStatement(1)(r => r))
+    val first = cursorResult.stream.take(1)
+    val second = cursorResult.stream.take(1)
+    assert(first != second)
+  }
+
 }

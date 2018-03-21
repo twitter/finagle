@@ -45,6 +45,13 @@ sealed trait Request {
   def toPacket: Packet
 }
 
+/**
+ * Contains the SQL for a [[Request]].
+ */
+sealed trait WithSql {
+  def sql: String
+}
+
 private[finagle] object PoisonConnectionRequest extends Request {
   val seq: Short = 0
   override val cmd: Byte = Command.COM_POISON_CONN
@@ -64,8 +71,8 @@ abstract class CommandRequest(override val cmd: Byte) extends Request {
  * associated data into a packet.
  */
 class SimpleCommandRequest(command: Byte, data: Array[Byte]) extends CommandRequest(command) {
-  val buf = Buf.ByteArray.Owned(Array(command)).concat(Buf.ByteArray.Owned(data))
-  val toPacket = Packet(seq, buf)
+  val buf: Buf = Buf.ByteArray.Owned(Array(command)).concat(Buf.ByteArray.Owned(data))
+  val toPacket: Packet = Packet(seq, buf)
 }
 
 /**
@@ -94,6 +101,9 @@ case class UseRequest(dbName: String)
  */
 case class QueryRequest(sqlStatement: String)
     extends SimpleCommandRequest(Command.COM_QUERY, sqlStatement.getBytes)
+    with WithSql {
+  def sql: String = sqlStatement
+}
 
 /**
  * Allocates a prepared statement on the server from the
@@ -102,6 +112,9 @@ case class QueryRequest(sqlStatement: String)
  */
 case class PrepareRequest(sqlStatement: String)
     extends SimpleCommandRequest(Command.COM_STMT_PREPARE, sqlStatement.getBytes)
+    with WithSql {
+  def sql: String = sqlStatement
+}
 
 /**
  * Client response sent during connection phase.
@@ -122,12 +135,12 @@ case class HandshakeResponse(
   import Capability._
   override val seq: Short = 1
 
-  lazy val hashPassword = password match {
+  lazy val hashPassword: Array[Byte] = password match {
     case Some(p) => encryptPassword(p, salt)
-    case None => Array[Byte]()
+    case None => Array.emptyByteArray
   }
 
-  def toPacket = {
+  def toPacket: Packet = {
     val fixedBodySize = 34
     val dbStrSize = database.map { _.length + 1 }.getOrElse(0)
     val packetBodySize =
@@ -164,9 +177,9 @@ case class HandshakeResponse(
 
 class FetchRequest(val prepareOK: PrepareOK, val numRows: Int)
     extends CommandRequest(Command.COM_STMT_FETCH) {
-  val stmtId = prepareOK.id
+  val stmtId: Int = prepareOK.id
 
-  override def toPacket: Packet = {
+  def toPacket: Packet = {
     val bw = MysqlBuf.writer(new Array[Byte](9))
     bw.writeByte(cmd)
     bw.writeIntLE(stmtId)
@@ -233,7 +246,7 @@ class ExecuteRequest(
     writer
   }
 
-  def toPacket = {
+  def toPacket: Packet = {
     val bw = MysqlBuf.writer(new Array[Byte](10))
     bw.writeByte(cmd)
     bw.writeIntLE(stmtId)
@@ -265,14 +278,14 @@ class ExecuteRequest(
 }
 
 object ExecuteRequest {
-  val FLAG_CURSOR_READ_ONLY = 0x01.toByte // CURSOR_TYPE_READ_ONLY
+  val FLAG_CURSOR_READ_ONLY: Byte = 0x01.toByte // CURSOR_TYPE_READ_ONLY
 
   def apply(
     stmtId: Int,
     params: IndexedSeq[Parameter] = IndexedSeq.empty,
     hasNewParams: Boolean = true,
     flags: Byte = 0
-  ) = {
+  ): ExecuteRequest = {
     val sanitizedParams = params.map {
       case null => Parameter.NullParameter
       case other => other
@@ -298,7 +311,7 @@ object ExecuteRequest {
  * [[http://dev.mysql.com/doc/internals/en/com-stmt-close.html]]
  */
 case class CloseRequest(stmtId: Int) extends CommandRequest(Command.COM_STMT_CLOSE) {
-  override val toPacket = {
+  val toPacket: Packet = {
     val bw = MysqlBuf.writer(new Array[Byte](5))
     bw.writeByte(cmd).writeIntLE(stmtId)
     Packet(seq, bw.owned())

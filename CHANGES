@@ -13,6 +13,9 @@ New Features
   * finagle-core: `c.t.f.filter.NackAdmissionFilter` can now be disabled via a `with`-method.
     `$Protocol.client.withAdmissionControl.noNackAdmissionControl` ``PHAB_ID=D146873``
 
+  * finagle-mysql: Exceptions now include the SQL that was being executed when possible.
+    ``PHAB_ID=D150503``
+
   * finagle-netty4: Add 'tls/connections' gauge for Finagle on Netty 4 which tracks the number
     of open SSL/TLS connections per Finagle client or server.
     ``PHAB_ID=D144184``
@@ -23,7 +26,7 @@ Breaking API Changes
   * finagle-core: `c.t.f.ssl.client.HostnameVerifier` has been removed since it was using
     `sun.security.util.HostnameChecker` which is no longer accessible in JDK 9.
     ``PHAB_ID=D144149``
-    
+
   * finagle-thrift: Upgraded libthrift to 0.10.0, `c.t.f.thrift.Protocols.TFinagleBinaryProtocol`
     constructor now takes `stringLengthLimit` and `containerLengthLimit`, `NO_LENGTH_LIMIT` value
     changed from 0 to -1. ``PHAB_ID=D124620``
