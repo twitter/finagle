@@ -8,7 +8,7 @@ scala_library(
     # Exposes a service-loaded class.
     scope = "forced",
     dependencies = [
-        "3rdparty/jvm/org/apache/thrift:libthrift-0.5.0",
+        "3rdparty/jvm/org/apache/thrift:libthrift",
         "finagle/finagle-core/src/main/scala",
         "finagle/finagle-thrift",
         "finagle/finagle-thrift/src/main/java",

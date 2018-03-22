@@ -13,7 +13,7 @@ import org.apache.thrift.protocol.TProtocolFactory
  *
  * Serve the interface implementation `iface`, which must be generated
  * by either [[https://github.com/twitter/scrooge Scrooge]] or
- * [[https://github.com/mariusaeriksen/thrift-0.5.0-finagle thrift-finagle]].
+ * [[https://github.com/mariusaeriksen/thrift-finagle thrift-finagle]].
  *
  * Given the IDL:
  *

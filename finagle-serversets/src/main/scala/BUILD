@@ -11,7 +11,7 @@ scala_library(
         "3rdparty/jvm/com/fasterxml/jackson/core:jackson-databind",
         "3rdparty/jvm/com/github/ben-manes/caffeine",
         "3rdparty/jvm/com/google/inject:guice",
-        "3rdparty/jvm/org/apache/thrift:libthrift-0.5.0",
+        "3rdparty/jvm/org/apache/thrift:libthrift",
         "3rdparty/jvm/org/apache/zookeeper:zookeeper-client",
         "finagle/finagle-core/src/main/scala",
         "finagle/finagle-serversets/src/main/java",

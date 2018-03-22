@@ -34,7 +34,7 @@ import org.apache.thrift.TException
  * [[com.twitter.finagle.mux]]. Rich interfaces are provided to adhere to those
  * generated from a [[https://thrift.apache.org/docs/idl Thrift IDL]] by
  * [[https://twitter.github.io/scrooge/ Scrooge]] or
- * [[https://github.com/mariusaeriksen/thrift-0.5.0-finagle thrift-finagle]].
+ * [[https://github.com/mariusaeriksen/thrift-finagle thrift-finagle]].
  *
  * == Clients ==
  *

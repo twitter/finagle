@@ -20,7 +20,7 @@ scala_library(
         "3rdparty/jvm/io/netty:netty4",
         "3rdparty/jvm/io/netty:netty4-handler-proxy",
         "3rdparty/jvm/io/netty:netty4-http",
-        "3rdparty/jvm/org/apache/thrift:libthrift-0.5.0",
+        "3rdparty/jvm/org/apache/thrift:libthrift",
         "3rdparty/jvm/org/apache/zookeeper:zookeeper-client",
         "finagle/finagle-core/src/main/scala",
         "finagle/finagle-memcached/src/main/resources",

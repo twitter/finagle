@@ -25,7 +25,7 @@ import com.twitter.finagle.toggle.{StandardToggleMap, ToggleMap}
  * thrift `ProtocolFactory`.
  *
  * These transports are used by the services produced by the
- * [[https://github.com/mariusaeriksen/thrift-0.5.0-finagle finagle thrift codegenerator]].
+ * [[https://github.com/mariusaeriksen/thrift-finagle finagle thrift codegenerator]].
  *
  * {{{
  * val service: Service[ThriftClientRequest, Array[Byte]] = ClientBuilder()

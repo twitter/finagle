@@ -7,7 +7,7 @@ scala_library(
     ),
     dependencies = [
         "3rdparty/jvm/com/google/inject:guice",
-        "3rdparty/jvm/org/apache/thrift:libthrift-0.5.0",
+        "3rdparty/jvm/org/apache/thrift:libthrift",
         "finagle/finagle-base-http/src/main/scala",
         "finagle/finagle-core/src/main/scala",
         "finagle/finagle-example/src/main/thrift:thrift-scala",

@@ -30,7 +30,7 @@ import org.apache.thrift.protocol.TProtocolFactory
  * `Client[ThriftClientRequest, Array[Byte]]` provides direct access
  * to the thrift transport, but we recommend using code generation
  * through either [[https://github.com/twitter/scrooge Scrooge]] or
- * [[https://github.com/mariusaeriksen/thrift-0.5.0-finagle a fork]]
+ * [[https://github.com/mariusaeriksen/thrift-finagle a fork]]
  * of the Apache generator. A rich API is provided to support
  * interfaces generated with either of these code generators.
  *
