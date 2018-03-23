@@ -6,16 +6,13 @@ import com.twitter.finagle.tracing._
 import com.twitter.io.Buf
 import com.twitter.util.Future
 import org.apache.thrift.protocol.{TMessageType, TMessage, TBinaryProtocol}
-import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import scala.collection.JavaConverters._
 
-@RunWith(classOf[JUnitRunner])
 class TTwitterClientFilterTest extends FunSuite with MockitoSugar {
   val protocolFactory = new TBinaryProtocol.Factory()
 

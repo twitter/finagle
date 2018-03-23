@@ -165,7 +165,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
         new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
         ifaceToService(impl, RichServerParam())
       )
-    val client = Thrift.client.newIface[B.ServiceIface](
+    val client = Thrift.client.build[B.ServiceIface](
       Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
       "client"
     )
@@ -309,7 +309,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
             trustCredentials = TrustCredentials.CertCollection(interFile)
           )
         )
-        .newIface[B.ServiceIface](
+        .build[B.ServiceIface](
           Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
           "client"
         )
@@ -327,9 +327,9 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     server.close()
   }
 
-  test("serveIface works with X.FutureIface, X[Future] with extended services") {
-    // 1. Server extends X.FutureIface.
-    class ExtendedEchoService1 extends ExtendedEcho.FutureIface {
+  test("serveIface works with X.MethodPerEndpoint, X[Future] with extended services") {
+    // 1. Server extends X.MethodPerEndpoint.
+    class ExtendedEchoService1 extends ExtendedEcho.MethodPerEndpoint {
       override def echo(msg: String): Future[String] = Future.value(msg)
       override def getStatus(): Future[String] = Future.value("OK")
     }
@@ -338,7 +338,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new ExtendedEchoService1()
     )
-    val client1 = Thrift.client.newIface[ExtendedEcho.FutureIface](
+    val client1 = Thrift.client.build[ExtendedEcho.MethodPerEndpoint](
       Name.bound(Address(server1.boundAddress.asInstanceOf[InetSocketAddress])),
       "client"
     )
@@ -355,7 +355,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new ExtendedEchoService2()
     )
-    val client2 = Thrift.client.newIface[ExtendedEcho.FutureIface](
+    val client2 = Thrift.client.build[ExtendedEcho.MethodPerEndpoint](
       Name.bound(Address(server2.boundAddress.asInstanceOf[InetSocketAddress])),
       "client"
     )
@@ -384,7 +384,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
   }
 
   private def serverForClassifier(): ListeningServer = {
-    val iface = new Echo.FutureIface {
+    val iface = new Echo.MethodPerEndpoint {
       def echo(x: String) =
         if (x == "safe")
           Future.value("safe")
@@ -400,7 +400,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
   }
 
   private def serverWithClassifier(sr: InMemoryStatsReceiver): ListeningServer = {
-    val iface = new Echo.FutureIface {
+    val iface = new Echo.MethodPerEndpoint {
       def echo(x: String) =
         if (x == "safe")
           Future.value("safe")
@@ -419,7 +419,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
 
   private def testScalaClientResponseClassification(
     sr: InMemoryStatsReceiver,
-    client: Echo.FutureIface
+    client: Echo.MethodPerEndpoint
   ): Unit = {
     val ex = intercept[InvalidQueryException] {
       Await.result(client.echo("hi"), 5.seconds)
@@ -451,7 +451,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
 
   private def testScalaServerResponseClassification(
     sr: InMemoryStatsReceiver,
-    client: Echo.FutureIface
+    client: Echo.MethodPerEndpoint
   ): Unit = {
     val ex = intercept[InvalidQueryException] {
       Await.result(client.echo("hi"), 5.seconds)
@@ -512,7 +512,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       .withStatsReceiver(sr)
       .withResponseClassifier(scalaClassifier)
       .withRequestTimeout(100.milliseconds) // used in conjuection with a "slow" query
-      .newIface[Echo.FutureIface](
+      .build[Echo.MethodPerEndpoint](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
@@ -524,7 +524,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
   test("scala thrift stack server using response classification") {
     val sr = new InMemoryStatsReceiver()
     val server = serverWithClassifier(sr)
-    val client = Thrift.client.newIface[Echo.FutureIface](
+    val client = Thrift.client.build[Echo.MethodPerEndpoint](
       Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
       "client"
     )
@@ -539,7 +539,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     val client = Thrift.client
       .configured(Stats(sr))
       .withResponseClassifier(javaClassifier)
-      .newIface[thriftjava.Echo.ServiceIface](
+      .build[thriftjava.Echo.ServiceIface](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
@@ -588,7 +588,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     val client = Thrift.client
       .configured(Stats(sr))
       .withResponseClassifier(ThriftResponseClassifier.ThriftExceptionsAsFailures)
-      .newIface[Echo.FutureIface](
+      .build[Echo.MethodPerEndpoint](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
@@ -613,7 +613,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     val client = Thrift.client
       .configured(Stats(sr))
       .withResponseClassifier(ThriftResponseClassifier.ThriftExceptionsAsFailures)
-      .newIface[thriftjava.Echo.ServiceIface](
+      .build[thriftjava.Echo.ServiceIface](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
@@ -633,7 +633,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
   }
 
   test("Thrift server stats are properly scoped") {
-    val iface: Echo.FutureIface = new Echo.FutureIface {
+    val iface: Echo.MethodPerEndpoint = new Echo.MethodPerEndpoint {
       def echo(x: String) =
         Future.value(x)
     }
@@ -647,7 +647,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     val server = Thrift.server
       .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), iface)
 
-    val client = Thrift.client.newIface[Echo.FutureIface](
+    val client = Thrift.client.build[Echo.MethodPerEndpoint](
       Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
       "client"
     )
@@ -667,7 +667,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
 
     val serverStats = new InMemoryStatsReceiver
 
-    val iface = new Echo.FutureIface {
+    val iface = new Echo.MethodPerEndpoint {
       def echo(x: String) =
         if (x == "safe")
           Future.value("safe")
@@ -687,7 +687,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       .withMaxReusableBufferSize(15)
       .withResponseClassifier(ThriftResponseClassifier.ThriftExceptionsAsFailures)
       .withStatsReceiver(clientStats)
-      .newIface[Echo.FutureIface](
+      .build[Echo.MethodPerEndpoint](
       Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
       "client"
     )
@@ -711,7 +711,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
 
   }
 
-  private[this] val servers: Seq[(String, (StatsReceiver, Echo.FutureIface) => ListeningServer)] =
+  private[this] val servers: Seq[(String, (StatsReceiver, Echo.MethodPerEndpoint) => ListeningServer)] =
     Seq(
       "Thrift.server" ->
         (
@@ -739,7 +739,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
         )
     )
 
-  private[this] val clients: Seq[(String, (StatsReceiver, Address) => Echo.FutureIface)] = Seq(
+  private[this] val clients: Seq[(String, (StatsReceiver, Address) => Echo.MethodPerEndpoint)] = Seq(
     "Thrift.client" ->
       (
         (
@@ -748,7 +748,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
         ) =>
           Thrift.client
             .withStatsReceiver(sr)
-            .newIface[Echo.FutureIface](Name.bound(addr), "client")
+            .build[Echo.MethodPerEndpoint](Name.bound(addr), "client")
       ),
     "ClientBuilder(stack)" ->
       (
@@ -775,7 +775,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     test(s"measures payload sizes: $s :: $c") {
       val sr = new InMemoryStatsReceiver
 
-      val fi = new Echo.FutureIface {
+      val fi = new Echo.MethodPerEndpoint {
         def echo(x: String) = Future.value(x + x)
       }
 
@@ -813,7 +813,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       .withProtocolFactory(pf)
       .withClientId(ClientId("aClient"))
       .withNoAttemptTTwitterUpgrade
-      .newIface[B.ServiceIface](
+      .build[B.ServiceIface](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )

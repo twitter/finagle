@@ -9,11 +9,8 @@ import com.twitter.finagle.thriftmux.thriftscala.{InvalidQueryException, TestSer
 import com.twitter.io.Buf
 import com.twitter.util.{Throw, Return}
 import java.nio.charset.StandardCharsets.UTF_8
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class ThriftMuxResponseClassifierTest extends FunSuite {
 
   private val classifier = ThriftMuxResponseClassifier.usingDeserializeCtx {

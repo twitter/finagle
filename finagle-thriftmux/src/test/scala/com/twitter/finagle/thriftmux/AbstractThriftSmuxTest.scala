@@ -40,7 +40,7 @@ abstract class AbstractThriftSmuxTest extends FunSuite {
     record: ThriftMux.Client => ThriftMux.Client,
     stats: StatsReceiver,
     addr: InetSocketAddress
-  ): TestService.FutureIface = record(
+  ): TestService.MethodPerEndpoint = record(
     clientLevel match {
       case None =>
         clientImpl()
@@ -51,7 +51,7 @@ abstract class AbstractThriftSmuxTest extends FunSuite {
           .withTransport.tlsWithoutValidation
           .withOpportunisticTls(level)
     }
-  ).newIface[TestService.FutureIface](
+  ).build[TestService.MethodPerEndpoint](
     Name.bound(Address(addr)),
     "client"
   )
@@ -110,7 +110,7 @@ abstract class AbstractThriftSmuxTest extends FunSuite {
         intercept[IllegalStateException] {
           val addr = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
           client.withOpportunisticTls(level)
-            .newIface[TestService.FutureIface](
+            .build[TestService.MethodPerEndpoint](
             Name.bound(Address(addr)),
             "client"
           )
@@ -161,7 +161,7 @@ abstract class AbstractThriftSmuxTest extends FunSuite {
 object AbstractThriftSmuxTest {
   type TlsPair = (Option[OpportunisticTls.Level], Option[OpportunisticTls.Level])
 
-  val concatIface = new TestService.FutureIface {
+  val concatIface = new TestService.MethodPerEndpoint {
     def query(x: String): Future[String] = Future.value(x.concat(x))
   }
 

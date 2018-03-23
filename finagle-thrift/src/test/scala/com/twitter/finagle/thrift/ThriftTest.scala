@@ -122,7 +122,7 @@ trait ThriftTest { self: FunSuite =>
           }
 
           thrift
-            .newIface[Iface](
+            .build[Iface](
               Name.bound(Address(addr.asInstanceOf[InetSocketAddress])),
               "thriftclient"
             )

@@ -2,11 +2,9 @@ package com.twitter.finagle.thriftmux
 
 import com.twitter.finagle.ThriftMux
 import com.twitter.util.Future
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
+import org.scalatest.junit.AssertionsForJUnit
 
-@RunWith(classOf[JUnitRunner])
 class ThriftIfaceTest extends FunSuite with AssertionsForJUnit {
   test("invalid thrift ifaces") {
     trait FakeThriftIface {

@@ -3,11 +3,8 @@ package com.twitter.finagle.thrift
 import com.twitter.finagle.{Path, Dtab}
 import com.twitter.finagle.tracing.{Flags, SpanId, TraceId}
 import java.util.ArrayList
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class RichRequestHeaderTest extends FunSuite {
   test("None if clientId is not set") {
     val header = new thrift.RequestHeader

@@ -4,14 +4,11 @@ import com.twitter.finagle.Service
 import com.twitter.util.{Return, Throw, Promise, Time}
 import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
 import org.apache.thrift.transport.TMemoryBuffer
-import org.junit.runner.RunWith
 import org.mockito.{Matchers, ArgumentCaptor}
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.{OneInstancePerTest, FunSuite}
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class SeqIdFilterTest extends FunSuite with MockitoSugar with OneInstancePerTest {
   val protocolFactory = new TBinaryProtocol.Factory()
 

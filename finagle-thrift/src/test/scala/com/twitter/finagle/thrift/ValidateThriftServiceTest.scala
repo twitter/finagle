@@ -5,14 +5,11 @@ import com.twitter.finagle.{Status, Service, WriteException}
 import com.twitter.util.{Await, Future, Promise, Return, Throw}
 import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
-import org.junit.runner.RunWith
 import org.mockito.Matchers
 import org.mockito.Mockito.{verify, when, times}
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class ValidateThriftServiceTest extends FunSuite with MockitoSugar {
 
   case class ValidateThriftServiceContext(p: Promise[Array[Byte]] = new Promise[Array[Byte]]) {

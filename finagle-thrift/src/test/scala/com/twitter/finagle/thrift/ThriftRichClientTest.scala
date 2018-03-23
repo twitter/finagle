@@ -3,8 +3,7 @@ package com.twitter.finagle.thrift
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.thrift.ThriftServiceIface.Filterable
-import com.twitter.finagle.thrift.service.ServicePerEndpointBuilder
+import com.twitter.finagle.thrift.service.{Filterable, ServicePerEndpointBuilder}
 import org.apache.thrift.protocol.TProtocolFactory
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito._
@@ -43,30 +42,6 @@ class ThriftRichClientTest extends FunSuite with MockitoSugar with OneInstancePe
     def filtered(filter: TypeAgnostic): SvcIface = this
   }
   private val svcIface = new SvcIface
-
-  test("ThriftRichClientTest newServiceIface takes dest String and stats scoping label arguments") {
-    val captor = ArgumentCaptor.forClass(classOf[RichClientParam])
-    val mockBuilder = mock[ServiceIfaceBuilder[SvcIface]]
-    doReturn(svcIface).when(mockBuilder).newServiceIface(any(), captor.capture())
-    val client = spy(ThriftRichClientMock)
-    client.newServiceIface("/s/tweetypie/tweetypie", "tweetypie_client")(builder = mockBuilder)
-
-    assert(captor.getValue.clientStats.toString == "NullStatsReceiver/clnt/tweetypie_client")
-    verify(client).newService("/s/tweetypie/tweetypie", "tweetypie_client")
-  }
-
-  test("ThriftRichClientTest newServiceIface takes dest Name and stats scoping label arguments") {
-    val captor = ArgumentCaptor.forClass(classOf[RichClientParam])
-    val mockBuilder = mock[ServiceIfaceBuilder[SvcIface]]
-    doReturn(svcIface).when(mockBuilder).newServiceIface(any(), captor.capture())
-
-    val name = Name.empty
-    val client = spy(ThriftRichClientMock)
-    client.newServiceIface(name, "tweetypie_client")(builder = mockBuilder)
-
-    assert(captor.getValue.clientStats.toString == "NullStatsReceiver/clnt/tweetypie_client")
-    verify(client).newService(name, "tweetypie_client")
-  }
 
   test("ThriftRichClientTest servicePerEndpoint takes dest String and stats scoping label arguments") {
     val captor = ArgumentCaptor.forClass(classOf[RichClientParam])

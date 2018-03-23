@@ -3,12 +3,9 @@ package com.twitter.finagle.thrift
 import com.twitter.scrooge.ThriftStruct
 import com.twitter.util.Return
 import java.util.concurrent.atomic.AtomicInteger
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class DeserializeCtxTest extends FunSuite with MockitoSugar {
 
   test("only deserializes once") {

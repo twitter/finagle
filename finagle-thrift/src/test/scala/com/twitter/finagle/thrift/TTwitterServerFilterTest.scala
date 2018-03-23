@@ -6,11 +6,8 @@ import com.twitter.finagle.util.ByteArrays
 import com.twitter.util.{Await, Future}
 import java.nio.charset.StandardCharsets.UTF_8
 import org.apache.thrift.protocol.{TMessage, TMessageType}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class TTwitterServerFilterTest extends FunSuite {
   val protocolFactory = Protocols.binaryFactory()
 

@@ -64,7 +64,7 @@ abstract class AbstractEndToEndTest
   trait ThriftMuxTestServer {
     val server = serverImpl.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-      new TestService.FutureIface {
+      new TestService.MethodPerEndpoint {
         def query(x: String): Future[String] =
           (Contexts.broadcast.get(testContext), Dtab.local) match {
             case (None, Dtab.empty) =>
@@ -83,7 +83,7 @@ abstract class AbstractEndToEndTest
 
   test("end-to-end thriftmux") {
     new ThriftMuxTestServer {
-      val client = clientImpl.newIface[TestService.FutureIface](
+      val client = clientImpl.build[TestService.MethodPerEndpoint](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
@@ -96,7 +96,7 @@ abstract class AbstractEndToEndTest
   test("end-to-end thriftmux: propagate Dtab.local") {
     new ThriftMuxTestServer {
       val client =
-        clientImpl.newIface[TestService.FutureIface](
+        clientImpl.build[TestService.MethodPerEndpoint](
           Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
           "client"
         )
@@ -115,7 +115,7 @@ abstract class AbstractEndToEndTest
   test("thriftmux server + Finagle thrift client") {
     new ThriftMuxTestServer {
       val client =
-        Thrift.client.newIface[TestService.FutureIface](
+        Thrift.client.build[TestService.MethodPerEndpoint](
           Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
           "client"
         )
@@ -132,7 +132,7 @@ abstract class AbstractEndToEndTest
     val clientId = ClientId("test.service")
 
     def servers(pf: TProtocolFactory): Seq[(String, Closable, Int)] = {
-      val iface = new TestService.FutureIface {
+      val iface = new TestService.MethodPerEndpoint {
         def query(x: String): Future[String] =
           if (x.isEmpty) Future.value(ClientId.current.map(_.name).getOrElse(""))
           else Future.value(x + x)
@@ -214,11 +214,11 @@ abstract class AbstractEndToEndTest
   ) {
     val server = serverImpl.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-      new TestService.FutureIface {
+      new TestService.MethodPerEndpoint {
         def query(x: String): Future[String] = throw new Exception("sad panda")
       }
     )
-    val client = Thrift.client.newIface[TestService.FutureIface](
+    val client = Thrift.client.build[TestService.MethodPerEndpoint](
       Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
       "aclient"
     )
@@ -246,14 +246,14 @@ abstract class AbstractEndToEndTest
       .configured(PTracer(tracer))
       .serveIface(
         new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-        new TestService.FutureIface {
+        new TestService.MethodPerEndpoint {
           def query(x: String): Future[String] = Future.value(x + x)
         }
       )
 
     val client = Thrift.client
       .configured(PTracer(tracer))
-      .newIface[TestService.FutureIface](
+      .build[TestService.MethodPerEndpoint](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
@@ -292,14 +292,14 @@ abstract class AbstractEndToEndTest
           .configured(PTracer(tracer))
           .serveIface(
             new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-            new TestService.FutureIface {
+            new TestService.MethodPerEndpoint {
               def query(x: String): Future[String] = Future.value(x + x)
             }
           )
 
         val client = Thrift.client
           .configured(PTracer(tracer))
-          .newIface[TestService.FutureIface](
+          .build[TestService.MethodPerEndpoint](
           Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
           "client"
         )
@@ -328,7 +328,7 @@ abstract class AbstractEndToEndTest
   test("thriftmux server + Finagle thrift client: clientId should be passed from client to server") {
     val server = serverImpl.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-      new TestService.FutureIface {
+      new TestService.MethodPerEndpoint {
         def query(x: String): Future[String] =
           Future.value(ClientId.current.map(_.name).getOrElse("No ClientId"))
       }
@@ -337,7 +337,7 @@ abstract class AbstractEndToEndTest
     val clientId = "test.service"
     val client = Thrift.client
       .withClientId(ClientId(clientId))
-      .newIface[TestService.FutureIface](
+      .build[TestService.MethodPerEndpoint](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
@@ -352,7 +352,7 @@ abstract class AbstractEndToEndTest
   test("thriftmux server + Finagle thrift client: ClientId should not be overridable externally") {
     val server = serverImpl.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-      new TestService.FutureIface {
+      new TestService.MethodPerEndpoint {
         def query(x: String): Future[String] =
           Future.value(ClientId.current.map(_.name).getOrElse("No ClientId"))
       }
@@ -362,7 +362,7 @@ abstract class AbstractEndToEndTest
     val otherClientId = ClientId("other.bar")
     val client = Thrift.client
       .withClientId(clientId)
-      .newIface[TestService.FutureIface](
+      .build[TestService.MethodPerEndpoint](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
@@ -381,7 +381,7 @@ abstract class AbstractEndToEndTest
       .withLabel("slowServer")
       .serveIface(
         new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-        new TestService.FutureIface {
+        new TestService.MethodPerEndpoint {
           def query(x: String): Future[String] = {
             val clientId = ClientId("second_hop_clientId")
             assert(ClientId.current.contains(clientId))
@@ -394,7 +394,7 @@ abstract class AbstractEndToEndTest
       .withLabel("middle_service_label")
       .withClientId(ClientId("second_hop_clientId"))
       .withRequestTimeout(10.millis) // smaller than the delay used in slowServer
-      .newServiceIface[TestService.ServiceIface](
+      .servicePerEndpoint[TestService.ServicePerEndpoint](
         s"localhost:${slowServer.boundAddress.asInstanceOf[InetSocketAddress].getPort}",
         "middle_service_label"
       )
@@ -403,7 +403,7 @@ abstract class AbstractEndToEndTest
       .withLabel("middleServer")
       .serveIface(
         new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-        new TestService.FutureIface {
+        new TestService.MethodPerEndpoint {
           def query(x: String): Future[String] = {
             val clientId = ClientId("theClient_clientId")
             assert(ClientId.current.contains(clientId))
@@ -415,7 +415,7 @@ abstract class AbstractEndToEndTest
     val theClient = clientImpl
       .withLabel("the_service_label")
       .withClientId(ClientId("theClient_clientId"))
-      .newServiceIface[TestService.ServiceIface](
+      .servicePerEndpoint[TestService.ServicePerEndpoint](
         s"localhost:${theServer.boundAddress.asInstanceOf[InetSocketAddress].getPort}",
         "the_service_label"
       )
@@ -433,7 +433,7 @@ abstract class AbstractEndToEndTest
 
   test("thriftmux server + Finagle thrift client: server.close()") {
     new ThriftMuxTestServer {
-      val client = Thrift.client.newIface[TestService.FutureIface](
+      val client = Thrift.client.build[TestService.MethodPerEndpoint](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
@@ -460,7 +460,7 @@ abstract class AbstractEndToEndTest
   test("thriftmux server + thriftmux client: ClientId should not be overridable externally") {
     val server = serverImpl.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-      new TestService.FutureIface {
+      new TestService.MethodPerEndpoint {
         def query(x: String): Future[String] =
           Future.value(ClientId.current.map(_.name).getOrElse(""))
       }
@@ -470,7 +470,7 @@ abstract class AbstractEndToEndTest
     val otherClientId = ClientId("other.bar")
     val client = clientImpl
       .withClientId(clientId)
-      .newIface[TestService.FutureIface](
+      .build[TestService.MethodPerEndpoint](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
@@ -487,7 +487,7 @@ abstract class AbstractEndToEndTest
 
   test("thriftmux server + Finagle thrift client w/o protocol upgrade") {
     new ThriftMuxTestServer {
-      val client = OldPlainThriftClient.newIface[TestService.FutureIface](
+      val client = OldPlainThriftClient.build[TestService.MethodPerEndpoint](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
@@ -499,7 +499,7 @@ abstract class AbstractEndToEndTest
 
   test("thriftmux server + Finagle thrift client w/o protocol upgrade: server.close()") {
     new ThriftMuxTestServer {
-      val client = OldPlainThriftClient.newIface[TestService.FutureIface](
+      val client = OldPlainThriftClient.build[TestService.MethodPerEndpoint](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
@@ -529,11 +529,11 @@ abstract class AbstractEndToEndTest
   ) {
     val server = serverImpl.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-      new TestService.FutureIface {
+      new TestService.MethodPerEndpoint {
         def query(x: String): Future[String] = throw new Exception("sad panda")
       }
     )
-    val client = OldPlainThriftClient.newIface[TestService.FutureIface](
+    val client = OldPlainThriftClient.build[TestService.MethodPerEndpoint](
       Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
       "aclient"
     )
@@ -542,7 +542,7 @@ abstract class AbstractEndToEndTest
   }
 
   test("thriftmux server should count exceptions as failures") {
-    val iface = new TestService.FutureIface {
+    val iface = new TestService.MethodPerEndpoint {
       def query(x: String): Future[String] = Future.exception(new RuntimeException("lolol"))
     }
     val svc = new TestService.FinagledService(iface, Protocols.binaryFactory())
@@ -552,7 +552,7 @@ abstract class AbstractEndToEndTest
       .withStatsReceiver(sr)
       .serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), svc)
     val client =
-      clientImpl.newIface[TestService.FutureIface](
+      clientImpl.build[TestService.MethodPerEndpoint](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
@@ -569,7 +569,7 @@ abstract class AbstractEndToEndTest
   }
 
   test("thriftmux client default failure classification") {
-    val iface = new TestService.FutureIface {
+    val iface = new TestService.MethodPerEndpoint {
       def query(x: String): Future[String] = Future.exception(new InvalidQueryException(x.length))
     }
     val svc = new TestService.FinagledService(iface, Protocols.binaryFactory())
@@ -582,7 +582,7 @@ abstract class AbstractEndToEndTest
     val client =
       clientImpl
         .withStatsReceiver(sr)
-        .newIface[TestService.FutureIface](
+        .build[TestService.MethodPerEndpoint](
           Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
           "client"
         )
@@ -623,7 +623,7 @@ abstract class AbstractEndToEndTest
   }
 
   def serverForClassifier(): ListeningServer = {
-    val iface = new TestService.FutureIface {
+    val iface = new TestService.MethodPerEndpoint {
       def query(x: String): Future[String] =
         if (x == "safe")
           Future.value("safe")
@@ -640,7 +640,7 @@ abstract class AbstractEndToEndTest
 
   private def testScalaFailureClassification(
     sr: InMemoryStatsReceiver,
-    client: TestService.FutureIface
+    client: TestService.MethodPerEndpoint
   ): Unit = {
     val ex = intercept[InvalidQueryException] {
       await(client.query("hi"))
@@ -715,14 +715,14 @@ abstract class AbstractEndToEndTest
     assert(sr.counters(Seq("client", "failures")) == 2)
   }
 
-  test("scala thriftmux stack client deserialized response classification with `newIface`") {
+  test("scala thriftmux stack client deserialized response classification with `build`") {
     val server = serverForClassifier()
     val sr = new InMemoryStatsReceiver()
     val client = clientImpl
       .withStatsReceiver(sr)
       .withResponseClassifier(scalaClassifier)
       .withRequestTimeout(100.milliseconds) // used in conjuection with a "slow" query
-      .newIface[TestService.FutureIface](
+      .build[TestService.MethodPerEndpoint](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
@@ -731,14 +731,14 @@ abstract class AbstractEndToEndTest
     server.close()
   }
 
-  test("scala thriftmux stack client deserialized response classification with `newServiceIface`") {
+  test("scala thriftmux stack client deserialized response classification with `servicePerEndpoint`") {
     val server = serverForClassifier()
     val sr = new InMemoryStatsReceiver()
     val client = clientImpl
       .withStatsReceiver(sr)
       .withResponseClassifier(scalaClassifier)
       .withRequestTimeout(100.milliseconds) // used in conjuection with a "slow" query
-      .newServiceIface[TestService.ServiceIface](
+      .servicePerEndpoint[TestService.ServicePerEndpoint](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
@@ -798,7 +798,7 @@ abstract class AbstractEndToEndTest
     val client = clientImpl
       .withStatsReceiver(sr)
       .withResponseClassifier(javaClassifier)
-      .newIface[thriftjava.TestService.ServiceIface](
+      .build[thriftjava.TestService.ServiceIface](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
@@ -855,7 +855,7 @@ abstract class AbstractEndToEndTest
     val client = clientImpl
       .withStatsReceiver(sr)
       .withResponseClassifier(ThriftMuxResponseClassifier.ThriftExceptionsAsFailures)
-      .newIface[TestService.FutureIface](
+      .build[TestService.MethodPerEndpoint](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
@@ -880,7 +880,7 @@ abstract class AbstractEndToEndTest
     val client = clientImpl
       .withStatsReceiver(sr)
       .withResponseClassifier(ThriftMuxResponseClassifier.ThriftExceptionsAsFailures)
-      .newIface[thriftjava.TestService.ServiceIface](
+      .build[thriftjava.TestService.ServiceIface](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
@@ -904,7 +904,7 @@ abstract class AbstractEndToEndTest
     val nreqs = 5
     val servicePromises = Array.fill(nreqs)(new Promise[String])
     val requestReceived = Array.fill(nreqs)(new Promise[String])
-    val testService = new TestService.FutureIface {
+    val testService = new TestService.MethodPerEndpoint {
       @volatile var nReqReceived = 0
       def query(x: String): Future[String] = synchronized {
         nReqReceived += 1
@@ -949,7 +949,7 @@ abstract class AbstractEndToEndTest
   test("thriftmux client: should emit ClientId") {
     val server = serverImpl.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-      new TestService.FutureIface {
+      new TestService.MethodPerEndpoint {
         def query(x: String): Future[String] = {
           Future.value(ClientId.current.map(_.name).getOrElse("No ClientId"))
         }
@@ -958,7 +958,7 @@ abstract class AbstractEndToEndTest
 
     val client = clientImpl
       .withClientId(ClientId("foo.bar"))
-      .newIface[TestService.FutureIface](
+      .build[TestService.MethodPerEndpoint](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
@@ -982,7 +982,7 @@ abstract class AbstractEndToEndTest
    */
 
   test("ThriftMux servers and clients should export protocol stats") {
-    val iface = new TestService.FutureIface {
+    val iface = new TestService.MethodPerEndpoint {
       def query(x: String): Future[String] = Future.value(x + x)
     }
     val mem = new InMemoryStatsReceiver
@@ -994,7 +994,7 @@ abstract class AbstractEndToEndTest
     val client = clientImpl
       .withStatsReceiver(mem)
       .withLabel("client")
-      .newIface[TestService.FutureIface](
+      .build[TestService.MethodPerEndpoint](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
@@ -1015,7 +1015,7 @@ abstract class AbstractEndToEndTest
       private def assertStats(
         prefix: String,
         sr: InMemoryStatsReceiver,
-        iface: TestService.FutureIface
+        iface: TestService.MethodPerEndpoint
       ) = {
         assert(await(iface.query("ok")) == "okok")
         // These stats are exported by scrooge generated code.
@@ -1025,14 +1025,14 @@ abstract class AbstractEndToEndTest
       // non-labeled client inherits destination as label
       val name = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
       val sr1 = new InMemoryStatsReceiver
-      assertStats(name.toString, sr1, base(sr1).newIface[TestService.FutureIface](name, ""))
+      assertStats(name.toString, sr1, base(sr1).build[TestService.MethodPerEndpoint](name, ""))
 
       // labeled via configured
       val sr2 = new InMemoryStatsReceiver
       assertStats(
         "client",
         sr2,
-        base(sr2).newIface[TestService.FutureIface](
+        base(sr2).build[TestService.MethodPerEndpoint](
           Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
           "client"
         )
@@ -1056,14 +1056,14 @@ abstract class AbstractEndToEndTest
 
     val echo = serverImpl.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-      new TestService.FutureIface {
+      new TestService.MethodPerEndpoint {
         def query(x: String): Future[String] = Future.value(x)
       }
     )
 
     val client = clientImpl
       .filtered(filter)
-      .newIface[TestService.FutureIface](
+      .build[TestService.MethodPerEndpoint](
         Name.bound(Address(echo.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
@@ -1101,13 +1101,13 @@ abstract class AbstractEndToEndTest
       .filtered(filter1)
       .serveIface(
         new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-        new TestService.FutureIface {
+        new TestService.MethodPerEndpoint {
           def query(x: String): Future[String] = Future.exception(Failure.rejected("unhappy"))
         }
       )
 
     val client1 = clientImpl
-      .newIface[TestService.FutureIface](
+      .build[TestService.MethodPerEndpoint](
         Name.bound(Address(server1.boundAddress.asInstanceOf[InetSocketAddress])),
         "client1"
       )
@@ -1124,13 +1124,13 @@ abstract class AbstractEndToEndTest
       .filtered(filter2)
       .serveIface(
         new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-        new TestService.FutureIface {
+        new TestService.MethodPerEndpoint {
           def query(x: String): Future[String] = Future.exception(Failure.rejected("unhappy"))
         }
       )
 
     val client2 = clientImpl
-      .newIface[TestService.FutureIface](
+      .build[TestService.MethodPerEndpoint](
         Name.bound(Address(server2.boundAddress.asInstanceOf[InetSocketAddress])),
         "client2"
       )
@@ -1152,13 +1152,13 @@ abstract class AbstractEndToEndTest
       .configured(Label("myserver"))
       .serveIface(
         new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-        new TestService.FutureIface {
+        new TestService.MethodPerEndpoint {
           def query(x: String): Future[String] = Future.value(x + x)
         }
       )
 
     val thriftClient =
-      Thrift.client.newIface[TestService.FutureIface](
+      Thrift.client.build[TestService.MethodPerEndpoint](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
@@ -1175,7 +1175,7 @@ abstract class AbstractEndToEndTest
       .withProtocolFactory(pf)
       .serveIface(
         new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-        new TestService.FutureIface {
+        new TestService.MethodPerEndpoint {
           def query(x: String): Future[String] = Future.value(x + x)
         }
       )
@@ -1183,7 +1183,7 @@ abstract class AbstractEndToEndTest
     val dst = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
     val tcompactClient = clientImpl
       .withProtocolFactory(pf)
-      .newIface[TestService.FutureIface](dst, "client")
+      .build[TestService.MethodPerEndpoint](dst, "client")
     assert(await(tcompactClient.query("ok")) == "okok")
 
     await(server.close())
@@ -1194,13 +1194,13 @@ abstract class AbstractEndToEndTest
       .withProtocolFactory(new TCompactProtocol.Factory)
       .serveIface(
         new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-        new TestService.FutureIface {
+        new TestService.MethodPerEndpoint {
           def query(x: String): Future[String] = Future.value(x + x)
         }
       )
 
     val dst = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
-    val tbinaryClient = clientImpl.newIface[TestService.FutureIface](dst, "client")
+    val tbinaryClient = clientImpl.build[TestService.MethodPerEndpoint](dst, "client")
     intercept[com.twitter.finagle.mux.ServerApplicationError] {
       await(tbinaryClient.query("ok"))
     }
@@ -1211,7 +1211,7 @@ abstract class AbstractEndToEndTest
   // This test uses excessive memory so skip on SBT builds
   if (!sys.props.contains("SKIP_SBT"))
     test("ThriftMux client to Thrift server ") {
-      val iface = new TestService.FutureIface {
+      val iface = new TestService.MethodPerEndpoint {
         def query(x: String): Future[String] = Future.value(x + x)
       }
       val mem = new InMemoryStatsReceiver
@@ -1237,14 +1237,14 @@ abstract class AbstractEndToEndTest
 
   test("drain downgraded connections") {
     val response = new Promise[String]()
-    val iface = new TestService.FutureIface {
+    val iface = new TestService.MethodPerEndpoint {
       def query(x: String): Future[String] = response
     }
 
     val inet = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val server = serverImpl.serveIface(inet, iface)
     val client =
-      Thrift.client.newIface[TestService.FutureIface](
+      Thrift.client.build[TestService.MethodPerEndpoint](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
@@ -1289,7 +1289,7 @@ abstract class AbstractEndToEndTest
 
     val client =
         clientImpl
-        .newIface[TestService.FutureIface](
+        .build[TestService.MethodPerEndpoint](
         Name.bound(
           Address(server1.boundAddress.asInstanceOf[InetSocketAddress]),
           Address(server2.boundAddress.asInstanceOf[InetSocketAddress])),
@@ -1317,7 +1317,7 @@ abstract class AbstractEndToEndTest
         .configured(Stats(serverSr))
         .serveIface(
           new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-          new TestService.FutureIface {
+          new TestService.MethodPerEndpoint {
             def query(x: String): Future[String] = Future.exception(Failure.rejected("unhappy"))
           }
         )
@@ -1334,7 +1334,7 @@ abstract class AbstractEndToEndTest
         clientImpl
           .withStatsReceiver(sr)
           .configured(Retries.Budget(budget))
-          .newIface[TestService.FutureIface](
+          .build[TestService.MethodPerEndpoint](
             Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
             "client"
           )
@@ -1366,7 +1366,7 @@ abstract class AbstractEndToEndTest
 
     val server = serverImpl.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-      new TestService.FutureIface {
+      new TestService.MethodPerEndpoint {
         def query(s: String): Future[String] = Future.exception(failure)
       }
     )
@@ -1379,7 +1379,7 @@ abstract class AbstractEndToEndTest
 
     val client = clientImpl
       .transformed(removeFailure)
-      .newIface[TestService.FutureIface](
+      .build[TestService.MethodPerEndpoint](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
       )
@@ -1415,7 +1415,7 @@ abstract class AbstractEndToEndTest
       val client =
         Thrift.client
           .configured(Stats(sr))
-          .newIface[TestService.FutureIface](
+          .build[TestService.MethodPerEndpoint](
             Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
             "client"
           )
@@ -1481,7 +1481,7 @@ abstract class AbstractEndToEndTest
         clientImpl
           .withStatsReceiver(sr)
           .configured(Retries.Budget(budget))
-          .newIface[TestService.FutureIface](
+          .build[TestService.MethodPerEndpoint](
             boundNames,
             "client"
           )
@@ -1505,7 +1505,7 @@ abstract class AbstractEndToEndTest
       val client =
         Thrift.client
           .configured(Stats(sr))
-          .newIface[TestService.FutureIface](
+          .build[TestService.MethodPerEndpoint](
             boundNames,
             "client"
           )
@@ -1525,11 +1525,11 @@ abstract class AbstractEndToEndTest
     builder: MethodBuilder
   ): Unit = {
     // these should never complete within the timeout
-    // ServiceIface
+    // ServicePerEndpoint
     val shortTimeout: Service[TestService.Query.Args, TestService.Query.SuccessType] =
       builder
         .withTimeoutPerRequest(5.millis)
-        .newServiceIface[TestService.ServiceIface]("fast")
+        .servicePerEndpoint[TestService.ServicePerEndpoint]("fast")
         .query
 
     intercept[IndividualRequestTimeoutException] {
@@ -1562,11 +1562,11 @@ abstract class AbstractEndToEndTest
     }
 
     // these should always complete within the timeout
-    // ServiceIface
+    // ServicePerEndpoint
     val longTimeout =
       builder
         .withTimeoutPerRequest(5.seconds)
-        .newServiceIface[TestService.ServiceIface]("slow")
+        .servicePerEndpoint[TestService.ServicePerEndpoint]("slow")
         .query
 
   var result = await(longTimeout(TestService.Query.Args("looong")))
@@ -1601,7 +1601,7 @@ abstract class AbstractEndToEndTest
 
   test("methodBuilder timeouts from Stack") {
     implicit val timer: Timer = DefaultTimer
-    val service = new TestService.FutureIface {
+    val service = new TestService.MethodPerEndpoint {
       def query(x: String): Future[String] = {
         Future.sleep(50.millis).before { Future.value(x) }
       }
@@ -1622,7 +1622,7 @@ abstract class AbstractEndToEndTest
 
   test("methodBuilder timeouts from ClientBuilder") {
     implicit val timer: Timer = DefaultTimer
-    val service = new TestService.FutureIface {
+    val service = new TestService.MethodPerEndpoint {
       def query(x: String): Future[String] = {
         Future.sleep(50.millis).before { Future.value(x) }
       }
@@ -1646,7 +1646,7 @@ abstract class AbstractEndToEndTest
 
   test("methodBuilder timeouts from configured ClientBuilder") {
     implicit val timer: Timer = DefaultTimer
-    val service = new TestService.FutureIface {
+    val service = new TestService.MethodPerEndpoint {
       def query(x: String): Future[String] = {
         Future.sleep(50.millis).before { Future.value(x) }
       }
@@ -1670,9 +1670,9 @@ abstract class AbstractEndToEndTest
     val mb = MethodBuilder.from(clientBuilder)
 
     // these should never complete within the timeout
-    // ServiceIface
+    // ServicePerEndpoint
     val asIs: Service[TestService.Query.Args, TestService.Query.SuccessType] =
-      mb.newServiceIface[TestService.ServiceIface]("as_is").query
+      mb.servicePerEndpoint[TestService.ServicePerEndpoint]("as_is").query
     intercept[RequestTimeoutException] {
       await(asIs(TestService.Query.Args("nope")))
     }
@@ -1695,11 +1695,11 @@ abstract class AbstractEndToEndTest
     }
 
     // increase the timeouts via MB and now the request should succeed
-    // ServiceIface
+    // ServicePerEndpoint
     val longTimeout: Service[TestService.Query.Args, TestService.Query.SuccessType] =
       mb.withTimeoutPerRequest(5.seconds)
         .withTimeoutTotal(5.seconds)
-        .newServiceIface[TestService.ServiceIface]("good")
+        .servicePerEndpoint[TestService.ServicePerEndpoint]("good")
         .query
 
     var result = await(longTimeout(TestService.Query.Args("yep")))
@@ -1733,7 +1733,7 @@ abstract class AbstractEndToEndTest
 
   test("methodBuilder tunable timeouts from configured ClientBuilder") {
     val timer: MockTimer = new MockTimer()
-    val service = new TestService.FutureIface {
+    val service = new TestService.MethodPerEndpoint {
       private val methodCalled = new AtomicBoolean(false)
 
       def query(x: String): Future[String] = {
@@ -1767,7 +1767,7 @@ abstract class AbstractEndToEndTest
     val tunableTimeoutSvc: Service[TestService.Query.Args, TestService.Query.SuccessType] =
       mb.withTimeoutPerRequest(perRequestTimeoutTunable)
         .withTimeoutTotal(totalTimeoutTunable)
-        .newServiceIface[TestService.ServiceIface]("good")
+        .servicePerEndpoint[TestService.ServicePerEndpoint]("good")
         .query
 
     // send a good response to ensure the stack has a chance to initialized
@@ -1853,14 +1853,14 @@ abstract class AbstractEndToEndTest
     server: ListeningServer,
     builder: MethodBuilder
   ): Unit = {
-    // ServiceIface
+    // ServicePerEndpoint
     val retryInvalid: Service[TestService.Query.Args, TestService.Query.SuccessType] =
       builder
         .withRetryForClassifier {
           case ReqRep(_, Throw(InvalidQueryException(_))) =>
             ResponseClass.RetryableFailure
         }
-        .newServiceIface[TestService.ServiceIface]("all_invalid")
+        .servicePerEndpoint[TestService.ServicePerEndpoint]("all_invalid")
         .query
 
     intercept[InvalidQueryException] {
@@ -1898,7 +1898,7 @@ abstract class AbstractEndToEndTest
       await(retryInvalidReqRepSvcPerEndpoint(scrooge.Request(TestService.Query.Args("fail0"))))
     }
 
-    // ServiceIface
+    // ServicePerEndpoint
     val errCode1Succeeds: Service[TestService.Query.Args, TestService.Query.SuccessType] =
       builder
         .withRetryForClassifier {
@@ -1907,7 +1907,7 @@ abstract class AbstractEndToEndTest
           case ReqRep(_, Throw(InvalidQueryException(errorCode))) if errorCode == 1 =>
             ResponseClass.Success
         }
-        .newServiceIface[TestService.ServiceIface]("err_1")
+        .servicePerEndpoint[TestService.ServicePerEndpoint]("err_1")
         .query
 
     intercept[InvalidQueryException] {
@@ -1974,7 +1974,7 @@ abstract class AbstractEndToEndTest
   }
 
   test("methodBuilder retries from Stack") {
-    val service = new TestService.FutureIface {
+    val service = new TestService.MethodPerEndpoint {
       def query(x: String): Future[String] = x match {
         case "fail0" => Future.exception(InvalidQueryException(0))
         case "fail1" => Future.exception(InvalidQueryException(1))
@@ -2014,7 +2014,7 @@ abstract class AbstractEndToEndTest
   }
 
   test("methodBuilder retries from ClientBuilder") {
-    val service = new TestService.FutureIface {
+    val service = new TestService.MethodPerEndpoint {
       def query(x: String): Future[String] = x match {
         case "fail0" => Future.exception(InvalidQueryException(0))
         case "fail1" => Future.exception(InvalidQueryException(1))

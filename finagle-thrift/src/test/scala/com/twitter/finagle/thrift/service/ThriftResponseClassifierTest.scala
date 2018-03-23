@@ -7,11 +7,8 @@ import com.twitter.finagle.thrift.DeserializeCtx
 import com.twitter.finagle.thrift.thriftscala.{InvalidQueryException, Echo}
 import com.twitter.util.{Return, Throw}
 import java.nio.charset.StandardCharsets.UTF_8
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class ThriftResponseClassifierTest extends FunSuite {
 
   private val classifier = ThriftResponseClassifier.usingDeserializeCtx {
