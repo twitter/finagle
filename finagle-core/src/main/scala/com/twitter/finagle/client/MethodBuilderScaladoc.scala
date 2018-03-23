@@ -38,6 +38,10 @@ private[finagle] trait MethodBuilderScaladoc[T] {
    *
    * @see [[withTimeoutPerRequest(Duration)]]
    *
+   * @see The MethodBuilder section in the
+   *      [[https://twitter.github.io/finagle/guide/MethodBuilder.html#timeouts user guide]]
+   *      for further details.
+   *
    * @return a new instance with all other settings copied
    */
   def withTimeoutTotal(howLong: Duration): T
@@ -71,6 +75,10 @@ private[finagle] trait MethodBuilderScaladoc[T] {
    *                no method specific timeout will be applied.
    *
    * @see [[withTimeoutPerRequest(Tunable[Duration])]]
+   *
+   * @see The MethodBuilder section in the
+   *      [[https://twitter.github.io/finagle/guide/MethodBuilder.html#timeouts user guide]]
+   *      for further details.
    *
    * @return a new instance with all other settings copied
    */
@@ -108,6 +116,10 @@ private[finagle] trait MethodBuilderScaladoc[T] {
    *                no method specific timeout will be applied.
    *
    * @see [[withTimeoutTotal(Duration)]]
+   *
+   * @see The MethodBuilder section in the
+   *      [[https://twitter.github.io/finagle/guide/MethodBuilder.html#timeouts user guide]]
+   *      for further details.
    *
    * @return a new instance with all other settings copied
    */
@@ -147,6 +159,10 @@ private[finagle] trait MethodBuilderScaladoc[T] {
    *                no method specific timeout will be applied.
    *
    * @see [[withTimeoutTotal(Tunable[Duration])]]
+   *
+   * @see The MethodBuilder section in the
+   *      [[https://twitter.github.io/finagle/guide/MethodBuilder.html#timeouts user guide]]
+   *      for further details.
    *
    * @return a new instance with all other settings copied
    */
@@ -190,6 +206,9 @@ private[finagle] trait MethodBuilderScaladoc[T] {
    *
    * @see [[https://twitter.github.io/finagle/guide/Clients.html#response-classification
    *     response classification user guide]]
+   * @see The MethodBuilder section in the
+   *      [[https://twitter.github.io/finagle/guide/MethodBuilder.html#retries user guide]]
+   *      for further details.
    */
   def withRetryForClassifier(classifier: service.ResponseClassifier): T
 
@@ -213,14 +232,16 @@ private[finagle] trait MethodBuilderScaladoc[T] {
    * }}}
    *
    * @see [[withRetryForClassifier]]
+   * @see The MethodBuilder section in the
+   *      [[https://twitter.github.io/finagle/guide/MethodBuilder.html#retries user guide]]
+   *      for further details.
    */
   def withRetryDisabled: T
 
-
   /**
    * Configure that requests are to be treated as idempotent. Because requests can be safely
-   * retried, [[BackupRequestFilter]] is configured with the params `maxExtraLoad` and
-   * `sendInterrupts` to decrease tail latency by sending an additional fraction of requests.
+   * retried, [[BackupRequestFilter]] is configured with the params `maxExtraLoad`
+   * to decrease tail latency by sending an additional fraction of requests.
    *
    *  If you are using TwitterServer, a good starting point for determining a value for
    * `maxExtraLoad` is looking at the details of the PDF histogram for request latency,
@@ -231,6 +252,11 @@ private[finagle] trait MethodBuilderScaladoc[T] {
    *
    * @param maxExtraLoad How much extra load, as a fraction, we are willing to send to the server.
    *                     Must be between 0.0 and 1.0.
+   *                     Backup requests can be disabled by setting this to 0.0.
+   *
+   * @see The MethodBuilder section in the
+   *      [[https://twitter.github.io/finagle/guide/MethodBuilder.html#idempotency user guide]]
+   *      for further details.
    */
   def idempotent(
     maxExtraLoad: Double
@@ -238,11 +264,16 @@ private[finagle] trait MethodBuilderScaladoc[T] {
 
   /**
    * Configure that requests are to be treated as idempotent. Because requests can be safely
-   * retried, [[BackupRequestFilter]] is configured with the params `maxExtraLoad` and
-   * `sendInterrupts` to decrease tail latency by sending an additional fraction of requests.
+   * retried, [[BackupRequestFilter]] is configured with the params `maxExtraLoad`
+   * to decrease tail latency by sending an additional fraction of requests.
    *
    * @param maxExtraLoad How much extra load, as a Tunable[Double], we are willing to send to the
    *                     server. Must be between 0.0 and 1.0.
+   *                     Backup requests can be disabled by setting this to 0.0.
+   *
+   * @see The MethodBuilder section in the
+   *      [[https://twitter.github.io/finagle/guide/MethodBuilder.html#idempotency user guide]]
+   *      for further details.
    */
   def idempotent(
     maxExtraLoad: Tunable[Double]
@@ -253,6 +284,10 @@ private[finagle] trait MethodBuilderScaladoc[T] {
    * disabled, and only those failures that are known to be safe to retry (i.e., write failures,
    * where the request was never sent) are retried via requeue filter; any previously configured
    * retries are removed.
+   *
+   * @see The MethodBuilder section in the
+   *      [[https://twitter.github.io/finagle/guide/MethodBuilder.html#idempotency user guide]]
+   *      for further details.
    */
   def nonIdempotent: T
 
