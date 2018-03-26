@@ -28,9 +28,6 @@ final private[finagle] class Http2CleartextServerInitializer(
 
   val initializer = H2Init(init, params)
 
-  // An optional hook for modifying the channel when an upgrade has completed
-  protected def onUpgrade(ctx: ChannelHandlerContext): Unit = {}
-
   def upgradeCodecFactory(channel: Channel): UpgradeCodecFactory = new UpgradeCodecFactory {
     override def newUpgradeCodec(protocol: CharSequence): UpgradeCodec = {
       if (AsciiString.contentEquals(Http2CodecUtil.HTTP_UPGRADE_PROTOCOL_NAME, protocol)) {
@@ -62,7 +59,6 @@ final private[finagle] class Http2CleartextServerInitializer(
             // we turn off backpressure because Http2 only works with autoread on for now
             ctx.channel.config.setAutoRead(true)
             super.upgradeTo(ctx, upgradeRequest)
-            onUpgrade(ctx)
           }
         }
       } else null
