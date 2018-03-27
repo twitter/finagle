@@ -69,23 +69,18 @@ object Cookie {
   }
 }
 
-// A small amount of naming hopscotch is needed while we deprecate the `set` methods in preparation
-// for removal; the param names can't conflict with the `get` method names, hence the underscored
-// param names.
-//
-// `_forDeprecation` is an unused param; it's needed so we can offer a unique constructor (below)
-// that takes all fields with the proper names while we deprecate the `set` methods. Once we remove
-// the `set` methods, we can clean this up.
-class Cookie private (
-  private[this] var _name: String,
-  private[this] var _value: String,
-  private[this] var _domain: String,
-  private[this] var _path: String,
-  private[this] var _maxAge: Option[Duration],
-  private[this] var _secure: Boolean,
-  private[this] var _httpOnly: Boolean,
-  private[this] var _forDeprecation: Boolean
-) {
+/**
+ * @note `domain` and `path` may be null.
+ */
+final class Cookie private (
+  val name: String,
+  val value: String,
+  val domain: String,
+  val path: String,
+  private[this] val _maxAge: Option[Duration],
+  val secure: Boolean,
+  val httpOnly: Boolean
+) { self =>
 
   /**
    * Create a cookie.
@@ -99,14 +94,13 @@ class Cookie private (
     secure: Boolean = false,
     httpOnly: Boolean = false
   ) = this(
-    _name = Cookie.validateName(name),
-    _value = value,
-    _domain = Cookie.validateField(domain.orNull),
-    _path = Cookie.validateField(path.orNull),
+    name = Cookie.validateName(name),
+    value = value,
+    domain = Cookie.validateField(domain.orNull),
+    path = Cookie.validateField(path.orNull),
     _maxAge = maxAge,
-    _secure = secure,
-    _httpOnly = httpOnly,
-    _forDeprecation = true
+    secure = secure,
+    httpOnly = httpOnly
   )
 
   def this(
@@ -131,30 +125,14 @@ class Cookie private (
       underlying.getPath,
       Option(underlying.getMaxAge.seconds),
       underlying.isSecure,
-      underlying.isHttpOnly,
-      true
+      underlying.isHttpOnly
     )
   }
 
-  /**
-   * Get the domain.
-   * @note May be null.
-   */
-  def domain: String = _domain
-
-  /**
-   * Get the path.
-   * @note May be null.
-   */
-  def path: String = _path
-  def name: String = _name
-  def value: String = _value
   def maxAge: Duration = _maxAge match {
     case Some(maxAge) => maxAge
     case None => Cookie.DefaultMaxAge
   }
-  def httpOnly: Boolean = _httpOnly
-  def secure: Boolean = _secure
 
   // Helper method for `equals` that returns true if two strings are both null, or have the
   // same value (ignoring case)
@@ -169,13 +147,13 @@ class Cookie private (
   }
 
   private[this] def copy(
-    name: String = _name,
-    value: String = _value,
-    domain: Option[String] = Option(_domain),
-    path: Option[String] = Option(_path),
-    maxAge: Option[Duration] = _maxAge,
-    secure: Boolean = _secure,
-    httpOnly: Boolean = _httpOnly
+    name: String = self.name,
+    value: String = self.value,
+    domain: Option[String] = Option(self.domain),
+    path: Option[String] = Option(self.path),
+    maxAge: Option[Duration] = self._maxAge,
+    secure: Boolean = self.secure,
+    httpOnly: Boolean = self.httpOnly
   ): Cookie =
     new Cookie(
       name,
