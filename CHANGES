@@ -20,6 +20,9 @@ New Features
     of open SSL/TLS connections per Finagle client or server.
     ``PHAB_ID=D144184``
 
+  * finagle-redis: Support has been added for a number of new cluster commands
+    introduced in Redis 3.0.0. ``PHAB_ID=D152186``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
