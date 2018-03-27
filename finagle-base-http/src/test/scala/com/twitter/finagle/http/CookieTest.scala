@@ -6,18 +6,6 @@ import org.scalatest.FunSuite
 
 class CookieTest extends FunSuite {
 
-  test("mutate underlying") {
-    val cookie = new Cookie("name", "value")
-    cookie.domain = ".twitter.com"
-    cookie.path = "/1/statuses/show"
-    cookie.value = "value2"
-
-    assert(cookie.name == "name")
-    assert(cookie.domain == ".twitter.com")
-    assert(cookie.path == "/1/statuses/show")
-    assert(cookie.value == "value2")
-  }
-
   test("constructor sets correct params") {
     val cookie = new Cookie(
       name = "name",
@@ -147,9 +135,6 @@ class CookieTest extends FunSuite {
 
     IllegalFieldChars.foreach { c =>
       intercept[IllegalArgumentException] {
-        cookie.path = s"hello${c}goodbye"
-      }
-      intercept[IllegalArgumentException] {
         new Cookie("name", "value", path = Some(s"hello${c}goodbye"))
       }
     }
@@ -161,9 +146,6 @@ class CookieTest extends FunSuite {
 
     IllegalFieldChars.foreach { c =>
       intercept[IllegalArgumentException] {
-        cookie.domain = s"hello${c}goodbye"
-      }
-      intercept[IllegalArgumentException] {
         new Cookie("name", "value", domain = Some(s"hello${c}goodbye"))
       }
     }
@@ -174,12 +156,13 @@ class CookieTest extends FunSuite {
   ) {
     val cookie = new Cookie("name", "value")
       .domain(Some("domain"))
+      .value("value2")
       .maxAge(Some(99.seconds))
       .httpOnly(true)
       .secure(true)
 
     assert(cookie.name == "name")
-    assert(cookie.value == "value")
+    assert(cookie.value == "value2")
     assert(cookie.domain == "domain")
     assert(cookie.maxAge == 99.seconds)
     assert(cookie.httpOnly == true)

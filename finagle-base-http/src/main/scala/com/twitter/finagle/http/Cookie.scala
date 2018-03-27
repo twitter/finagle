@@ -156,30 +156,6 @@ class Cookie private (
   def httpOnly: Boolean = _httpOnly
   def secure: Boolean = _secure
 
-  /**
-   * Set the domain.
-   * @note `domain` may be null.
-   */
-  @deprecated("Set domain in the Cookie constructor or use `Cookie.domain`", "2017-08-16")
-  def domain_=(domain: String): Unit =
-    _domain = Cookie.validateField(domain)
-
-  /**
-   * Set the path.
-   * @note `path` may be null.
-   */
-  @deprecated("Set path in the Cookie constructor or use `Cookie.path`", "2017-08-16")
-  def path_=(path: String): Unit =
-    _path = Cookie.validateField(path)
-
-  /**
-   * Set the value.
-   * @note `value` must not be null.
-   */
-  @deprecated("Set value in the Cookie constructor", "2017-08-16")
-  def value_=(value: String): Unit =
-    _value = value
-
   // Helper method for `equals` that returns true if two strings are both null, or have the
   // same value (ignoring case)
   private[this] def stringsEqual(s0: String, s1: String): Boolean = {
@@ -216,6 +192,12 @@ class Cookie private (
    */
   def domain(domain: Option[String]): Cookie =
     copy(domain = domain)
+
+  /**
+   * Create a new [[Cookie]] with the same set fields, and value `value`.
+   */
+  def value(value: String): Cookie =
+    copy(value = value)
 
   /**
    * Create a new [[Cookie]] with the same set fields, and maxAge `maxAge`

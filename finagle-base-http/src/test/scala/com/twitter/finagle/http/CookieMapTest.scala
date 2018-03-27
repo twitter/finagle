@@ -72,10 +72,8 @@ abstract class CookieMapTest(codec: CookieCodec, codecName: String)
     test(s"$codec Adding two cookies with the same name but different domain to a $messageType " +
       "adds both cookies") {
       val message = newMessage()
-      val cookie = new Cookie("name", "value")
-      cookie.domain = "foo"
-      val cookie2 = new Cookie("name", "value2")
-      cookie2.domain = "bar"
+      val cookie = new Cookie("name", "value").domain(Some("foo"))
+      val cookie2 = new Cookie("name", "value2").domain(Some("bar"))
       lazy val cookieMap = new CookieMap(message, codec)
 
       cookieMap.add(cookie)

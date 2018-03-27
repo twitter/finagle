@@ -37,6 +37,15 @@ Breaking API Changes
     are not affected by the changing state of the configured client instance but are instead
     simply utility methods which convert or wrap the incoming argument. ``PHAB_ID=D143185``
 
+  * finagle-base-http: Removed deprecated `c.t.f.Cookie.value_=`; use `c.t.f.Cookie.value`
+    instead. ``PHAB_ID=D148266``
+
+  * finagle-base-http: Removed deprecated `c.t.f.Cookie.domain_=`; use `c.t.f.Cookie.domain`
+    instead. ``PHAB_ID=D148266``
+
+  * finagle-base-http: Removed deprecated `c.t.f.Cookie.path_=`; use `c.t.f.Cookie.path`
+    instead. ``PHAB_ID=D148266``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
