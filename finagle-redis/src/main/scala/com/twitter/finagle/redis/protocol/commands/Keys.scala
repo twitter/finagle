@@ -1,8 +1,9 @@
 package com.twitter.finagle.redis.protocol
 
 import com.twitter.io.Buf
-import com.twitter.util.Time
+import com.twitter.util.{Duration, Time}
 import java.lang.{Long => JLong}
+import java.net.InetSocketAddress
 
 case class Del(keys: Seq[Buf]) extends StrictKeysCommand {
   def name: Buf = Command.DEL
@@ -31,6 +32,16 @@ case class Keys(pattern: Buf) extends Command {
 
   def name: Buf = Command.KEYS
   override def body: Seq[Buf] = Seq(pattern)
+}
+
+case class Migrate(addr: InetSocketAddress, keys: Seq[Buf], timeout: Duration) extends Command {
+  def name: Buf = Command.MIGRATE
+  override def body: Seq[Buf] = {
+    val ip = Buf.Utf8(addr.getAddress.getHostAddress)
+    val port = Buf.Utf8(addr.getPort.toString)
+    Seq(ip, port, Buf.Utf8(""), Buf.Utf8("0"),
+      Buf.Utf8(timeout.inMilliseconds.toString), Command.KEYS) ++ keys
+  }
 }
 
 case class Move(key: Buf, db: Buf) extends StrictKeyCommand {
