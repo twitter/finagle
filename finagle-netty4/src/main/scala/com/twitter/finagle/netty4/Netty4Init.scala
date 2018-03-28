@@ -15,7 +15,7 @@ import io.netty.util.{ResourceLeakDetector, ResourceLeakDetectorFactory}
  */
 private object trackReferenceLeaks
     extends GlobalFlag[Boolean](
-      false,
+      true,
       "Enable reference leak tracking in Netty and export a counter at finagle/netty4/reference_leaks"
     )
 
@@ -23,14 +23,18 @@ private object trackReferenceLeaks
  * Runs prior initialization of any client/server in order to set Netty 4 system properties
  * as early as possible.
  */
-private class Netty4Init extends FinagleInit {
+private final class Netty4Init extends FinagleInit {
 
   def label: String = "Initializing Netty 4 system properties"
+
+  // Make the counter lazy so that we don't pay for it unless we actually have a leak
+  private[this] lazy val referenceLeaks =
+    FinagleStatsReceiver.counter("netty4", "reference_leaks")
 
   def apply(): Unit = {
 
     // We set a sane default and reject client initiated TLS/SSL session
-    // renegotiations (for security reasons).
+    // renegotiation's (for security reasons).
     //
     // NOTE: This property affects both JDK SSL (Java 8+) and Netty 4 OpenSSL
     // implementations.
@@ -76,19 +80,22 @@ private class Netty4Init extends FinagleInit {
 
     // Enable tracking of reference leaks.
     if (trackReferenceLeaks()) {
-      val referenceLeaks =
-        FinagleStatsReceiver.counter("netty4", "reference_leaks")
-
       if (ResourceLeakDetector.getLevel == ResourceLeakDetector.Level.DISABLED) {
         ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.SIMPLE)
       }
 
       ResourceLeakDetectorFactory.setResourceLeakDetectorFactory(
-        new StatsLeakDetectorFactory({ () =>
+        new StatsLeakDetectorFactory(
+          ResourceLeakDetectorFactory.instance(),
+          { () =>
           referenceLeaks.incr()
           referenceLeakLintRule.leakDetected()
         })
       )
+    } else {
+      // If our leak detection is disabled, disable Netty's leak detection as well
+      // so that users don't need to disable in two places.
+      ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED)
     }
   }
 }

@@ -1,13 +1,19 @@
 package com.twitter.finagle.netty4
 
 import io.netty.buffer.ByteBuf
+import io.netty.util.{ResourceLeakDetector, ResourceLeakDetectorFactory}
 import org.scalatest.FunSuite
+import org.scalatest.mockito.MockitoSugar
+import org.mockito.Mockito._
+import org.mockito.Matchers._
 
-class StatsLeakDetectorFactoryTest extends FunSuite {
+class StatsLeakDetectorFactoryTest extends FunSuite with MockitoSugar {
   test("counts netty resource leaks") {
     var leaks = 0
 
-    val fac = new StatsLeakDetectorFactory({ () =>
+    val fac = new StatsLeakDetectorFactory(
+      mock[ResourceLeakDetectorFactory], // not actually used
+      { () =>
       leaks += 1
     })
     val detector = fac.newResourceLeakDetector(classOf[ByteBuf])
@@ -27,7 +33,14 @@ class StatsLeakDetectorFactoryTest extends FunSuite {
   }
 
   test("can load non-bytebuf resource trackers") {
-    val detectorFac = new StatsLeakDetectorFactory(() => ())
+    val parent = mock[ResourceLeakDetectorFactory]
+    val expected = mock[ResourceLeakDetector[String]]
+
+    when(parent.newResourceLeakDetector(same(classOf[String]), any[Int], any[Long]))
+      .thenReturn(expected)
+
+    val detectorFac = new StatsLeakDetectorFactory(parent, () => ())
     val detector = detectorFac.newResourceLeakDetector(classOf[String])
+    assert(detector eq expected)
   }
 }

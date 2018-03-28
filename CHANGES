@@ -63,6 +63,8 @@ Runtime Behavior Changes
     exception on failure has changes from a `c.t.f.SslHostVerificationException` to a
     `javax.net.ssl.CertificateException`. ``PHAB_ID=D144149``
 
+  * finagle-netty4: Netty ByteBuf leak tracking is enabled by default. ``PHAB_ID=D152828``
+
 Deprecations
 ~~~~~~~~~~~~
 

@@ -6,10 +6,10 @@ import io.netty.util.{ResourceLeakDetector, ResourceLeakDetectorFactory}
 /**
  * `ResourceLeakDetectorFactory` which calls `leakFn` on each resource leak.
  */
-private[netty4] class StatsLeakDetectorFactory(leakFn: () => Unit)
-    extends ResourceLeakDetectorFactory {
-
-  private[this] val stashedInstance = ResourceLeakDetectorFactory.instance()
+private[netty4] final class StatsLeakDetectorFactory(
+    underlying: ResourceLeakDetectorFactory,
+    leakFn: () => Unit
+  ) extends ResourceLeakDetectorFactory {
 
   def newResourceLeakDetector[T](
     resource: Class[T],
@@ -20,7 +20,7 @@ private[netty4] class StatsLeakDetectorFactory(leakFn: () => Unit)
       new LeakDetectorStatsImpl(leakFn, samplingInterval, maxActive)
 
     case _ =>
-      stashedInstance.newResourceLeakDetector(resource, samplingInterval, maxActive)
+      underlying.newResourceLeakDetector(resource, samplingInterval, maxActive)
   }
 
   private[this] class LeakDetectorStatsImpl[T](
