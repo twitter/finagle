@@ -78,6 +78,6 @@ public final class ServerSets {
    * @param address the target address to create the endpoint for
    */
   public static Endpoint toEndpoint(InetSocketAddress address) {
-    return new Endpoint(address.getHostName(), address.getPort());
+    return new Endpoint(address.getHostString(), address.getPort());
   }
 }
