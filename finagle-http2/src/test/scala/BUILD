@@ -2,13 +2,13 @@ junit_tests(
     sources = rglobs("*.scala"),
     fatal_warnings = True,
     dependencies = [
-        "3rdparty/jvm/io/netty:netty4-http",
         scoped(
             "3rdparty/jvm/io/netty",
             scope = "forced",
         ),
+        "3rdparty/jvm/io/netty:netty4-codec-http",
+        "3rdparty/jvm/io/netty:netty4-codec-http2",
         "3rdparty/jvm/io/netty:netty4-handler-proxy",
-        "3rdparty/jvm/io/netty:netty4-http2",
         "3rdparty/jvm/junit",
         "3rdparty/jvm/org/mockito:mockito-all",
         "3rdparty/jvm/org/scalatest",

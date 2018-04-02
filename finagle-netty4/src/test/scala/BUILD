@@ -3,8 +3,8 @@ junit_tests(
     fatal_warnings = True,
     dependencies = [
         "3rdparty/jvm/io/netty:netty4",
+        "3rdparty/jvm/io/netty:netty4-codec-http",
         "3rdparty/jvm/io/netty:netty4-handler-proxy",
-        "3rdparty/jvm/io/netty:netty4-http",
         "3rdparty/jvm/junit",
         "3rdparty/jvm/org/mockito:mockito-all",
         "3rdparty/jvm/org/scalacheck",

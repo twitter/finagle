@@ -35,7 +35,7 @@ junit_tests(
     dependencies = [
         "3rdparty/jvm/com/github/ben-manes/caffeine",
         "3rdparty/jvm/io/netty",
-        "3rdparty/jvm/io/netty:netty4-http",
+        "3rdparty/jvm/io/netty:netty4-codec-http",
         "3rdparty/jvm/junit",
         "3rdparty/jvm/org/hdrhistogram",
         "3rdparty/jvm/org/mockito:mockito-all",

@@ -10,7 +10,7 @@ scala_library(
         "3rdparty/jvm/com/google/code/findbugs:jsr305",
         "3rdparty/jvm/io/netty",
         "3rdparty/jvm/io/netty:netty4",
-        "3rdparty/jvm/io/netty:netty4-http",
+        "3rdparty/jvm/io/netty:netty4-codec-http",
         "finagle/finagle-base-http/src/main/resources",
         "finagle/finagle-core",
         "finagle/finagle-netty3",
