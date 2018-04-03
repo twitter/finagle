@@ -2,10 +2,8 @@ package com.twitter.finagle.netty4.ssl.client
 
 import com.twitter.finagle.{Address, SslVerificationFailedException}
 import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientSessionVerifier}
-import com.twitter.finagle.netty4.channel.{
-  BufferingChannelOutboundHandler,
-  ConnectPromiseDelayListeners
-}
+import com.twitter.finagle.netty4.channel.BufferingChannelOutboundHandler
+import com.twitter.finagle.netty4.channel.ConnectPromiseDelayListeners._
 import com.twitter.util.{Promise, Return, Throw}
 import io.netty.channel._
 import io.netty.handler.ssl.SslHandler
@@ -27,8 +25,7 @@ private[netty4] class SslClientVerificationHandler(
   config: SslClientConfiguration,
   sessionVerifier: SslClientSessionVerifier
 ) extends ChannelOutboundHandlerAdapter
-    with BufferingChannelOutboundHandler
-    with ConnectPromiseDelayListeners { self =>
+    with BufferingChannelOutboundHandler { self =>
 
   private[this] val onHandshakeComplete = Promise[Unit]()
   private[this] val inet: Option[SocketAddress] = address match {

@@ -2,17 +2,15 @@ package com.twitter.finagle.netty4.channel
 
 import io.netty.channel.ChannelOutboundHandlerAdapter
 import io.netty.channel.embedded.EmbeddedChannel
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
 
-@RunWith(classOf[JUnitRunner])
 class ConnectPromiseDelayListenersTest extends FunSuite {
+
+  import ConnectPromiseDelayListeners._
 
   class Ctx
       extends ChannelOutboundHandlerAdapter
-      with BufferingChannelOutboundHandler
-      with ConnectPromiseDelayListeners {
+      with BufferingChannelOutboundHandler {
 
     val channel = new EmbeddedChannel(this)
 

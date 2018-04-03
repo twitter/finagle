@@ -4,7 +4,7 @@ import io.netty.channel._
 import io.netty.util.concurrent.{GenericFutureListener, Future => NettyFuture}
 
 /**
- * This trait provides [[GenericFutureListener]]s that are useful for implementing handlers
+ * This object provides [[GenericFutureListener]]s that are useful for implementing handlers
  * that delay a connect-promise until some additional step is done (i.e., HTTP proxy connect,
  * SSL handshake, etc).
  *
@@ -14,7 +14,7 @@ import io.netty.util.concurrent.{GenericFutureListener, Future => NettyFuture}
  * - [[com.twitter.finagle.netty4.proxy.HttpProxyConnectHandler]]
  * - [[com.twitter.finagle.netty4.proxy.Netty4ProxyConnectHandler]]
  */
-private[netty4] trait ConnectPromiseDelayListeners {
+private[netty4] object ConnectPromiseDelayListeners {
 
   /**
    * Creates a new [[GenericFutureListener]] that cancels a given `promise` when the

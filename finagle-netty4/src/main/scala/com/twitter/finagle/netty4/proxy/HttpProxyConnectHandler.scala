@@ -3,10 +3,8 @@ package com.twitter.finagle.netty4.proxy
 import com.twitter.finagle.{ChannelClosedException, ProxyConnectException}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.client.Transporter.Credentials
-import com.twitter.finagle.netty4.channel.{
-  BufferingChannelOutboundHandler,
-  ConnectPromiseDelayListeners
-}
+import com.twitter.finagle.netty4.channel.BufferingChannelOutboundHandler
+import com.twitter.finagle.netty4.channel.ConnectPromiseDelayListeners._
 import com.twitter.util.Base64StringEncoder
 import io.netty.channel._
 import io.netty.handler.codec.http._
@@ -46,8 +44,7 @@ private[netty4] class HttpProxyConnectHandler(
   httpClientCodec: ChannelHandler = new HttpClientCodec()
 ) // exposed for testing
     extends ChannelDuplexHandler
-    with BufferingChannelOutboundHandler
-    with ConnectPromiseDelayListeners { self =>
+    with BufferingChannelOutboundHandler { self =>
 
   private[this] final def httpCodecKey = "httpProxyClientCodec"
 

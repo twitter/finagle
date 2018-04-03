@@ -1,7 +1,7 @@
 package com.twitter.finagle.netty4.proxy
 
 import com.twitter.finagle.ProxyConnectException
-import com.twitter.finagle.netty4.channel.ConnectPromiseDelayListeners
+import com.twitter.finagle.netty4.channel.ConnectPromiseDelayListeners._
 import io.netty.channel.{
   Channel,
   ChannelHandlerContext,
@@ -30,8 +30,7 @@ import java.net.{InetSocketAddress, SocketAddress}
 private[netty4] class Netty4ProxyConnectHandler(
   proxyHandler: ProxyHandler,
   bypassLocalhostConnections: Boolean = false
-) extends ChannelOutboundHandlerAdapter
-    with ConnectPromiseDelayListeners { self =>
+) extends ChannelOutboundHandlerAdapter { self =>
 
   private[this] final val proxyCodecKey: String = "netty4ProxyCodec"
 
