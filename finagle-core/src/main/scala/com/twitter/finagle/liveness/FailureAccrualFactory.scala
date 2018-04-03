@@ -23,10 +23,10 @@ object FailureAccrualFactory {
   private[this] val DefaultSuccessRateThreshold = 0.8
   private[this] val DefaultSuccessRateWindow = 30.seconds
 
-  private[this] val UseSuccessRateDefaultPolicyId =
-    "com.twitter.finagle.core.UseSuccessRateFailureAccrual"
-  private[this] def useSuccessRateDefaultPolicy: Boolean =
-    CoreToggles(UseSuccessRateDefaultPolicyId)(ServerInfo().id.hashCode)
+  private[this] val UseHybridDefaultPolicyId =
+    "com.twitter.finagle.core.UseHybridFailureAccrual"
+  private[this] def useHybridDefaultPolicy: Boolean =
+    CoreToggles(UseHybridDefaultPolicyId)(ServerInfo().id.hashCode)
 
   // Use equalJittered backoff in order to wait more time in between
   // each revival attempt on successive failures; if an endpoint has failed
@@ -37,20 +37,24 @@ object FailureAccrualFactory {
     Backoff.equalJittered(5.seconds, 300.seconds)
 
   private[finagle] def defaultPolicy: Function0[FailureAccrualPolicy] = {
-    if (useSuccessRateDefaultPolicy) {
+    if (useHybridDefaultPolicy) {
       new Function0[FailureAccrualPolicy] {
         def apply(): FailureAccrualPolicy =
           FailureAccrualPolicy
             .successRateWithinDuration(
               DefaultSuccessRateThreshold,
               DefaultSuccessRateWindow,
-              jitteredBackoff
-            )
+              jitteredBackoff)
+            .orElse(FailureAccrualPolicy
+              .consecutiveFailures(DefaultConsecutiveFailures, jitteredBackoff))
 
         override def toString: String =
-          "FailureAccrualPolicy.successRateWithinDuration(" +
+          "FailureAccrualPolicy" +
+            ".successRateWithinDuration(" +
             s"successRate = $DefaultSuccessRateThreshold, window = $DefaultSuccessRateWindow, " +
-            s"markDeadFor = $jitteredBackoff)"
+            s"markDeadFor = $jitteredBackoff)" +
+            ".orElse(FailureAccrualPolicy" +
+            s".consecutiveFailures(numFailures: $DefaultConsecutiveFailures, markDeadFor: $jitteredBackoff)"
       }
     } else {
       new Function0[FailureAccrualPolicy] {
