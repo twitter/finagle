@@ -3,7 +3,7 @@ package com.twitter.finagle.liveness
 import com.twitter.conversions.time._
 import com.twitter.finagle.service.Backoff
 import com.twitter.finagle.util.Ema
-import com.twitter.util.{Duration, Stopwatch}
+import com.twitter.util.{Duration, Stopwatch, WindowedAdder}
 
 /**
  * A `FailureAccrualPolicy` is used by `FailureAccrualFactory` to determine
@@ -70,6 +70,17 @@ abstract class FailureAccrualPolicy { self =>
 
 object FailureAccrualPolicy {
 
+  val DefaultConsecutiveFailures = 5
+  val DefaultMinimumRequestThreshold = 5
+
+  // These values approximate 5 consecutive failures at around 5k QPS during the
+  // given window for randomly distributed failures. For lower (more typical)
+  // workloads, this approach will better deal with randomly distributed failures.
+  // Note that if an endpoint begins to fail all requests, FailureAccrual will
+  // trigger in (window) * (1 - threshold) seconds - 6 seconds for these values.
+  val DefaultSuccessRateThreshold = 0.8
+  val DefaultSuccessRateWindow = 30.seconds
+
   private[this] val Success = 1
   private[this] val Failure = 0
 
@@ -125,7 +136,7 @@ object FailureAccrualPolicy {
     override def markDeadOnFailure(): Option[Duration] = synchronized {
       val emaStampForRequest = emaStamp
       val sr = successRate.update(emaStampForRequest, Failure)
-      if (emaStampForRequest >= window && sr < requiredSuccessRate) {
+      if (canRemove(emaStampForRequest, sr)) {
         val duration = nextMarkDeadFor.head
         nextMarkDeadFor = nextMarkDeadFor.tail
         Some(duration)
@@ -153,6 +164,18 @@ object FailureAccrualPolicy {
      * Calls to this method must be synchronized by the caller.
      */
     protected def resetEmaCounter(): Unit
+
+    /**
+     * Used to ensure that enough requests have been received within a window before triggering
+     * failure accrual.
+     */
+    protected def sufficientRequests: Boolean
+
+    // We can trigger FailureAccrual if the `window` has passed, success rate is below
+    // `requiredSuccessRate`, and we have `sufficientRequests`
+    private[this] def canRemove(emaStampForRequest: Long, sr: Double): Boolean =
+      emaStampForRequest >= window && sr < requiredSuccessRate && sufficientRequests
+
   }
 
   /**
@@ -192,6 +215,75 @@ object FailureAccrualPolicy {
       override protected def resetEmaCounter(): Unit = {
         totalRequests = 0
       }
+
+      // Since this FailureAccrualPolicy is based on number of requests, there are always sufficient
+      // requests
+      override protected def sufficientRequests: Boolean = true
+    }
+  }
+
+  /**
+   * Returns a policy based on an exponentially-weighted moving average success
+   * rate over a time window. A moving average is used so the success rate
+   * calculation is biased towards more recent requests.
+   *
+   * If the computed weighted success rate is less
+   * than the required success rate, `markDeadOnFailure()` will return
+   * Some(Duration).
+   *
+   * @see com.twitter.finagle.util.Ema for how the success rate is computed
+   *
+   * @param requiredSuccessRate successRate that must be met
+   *
+   * @param window window over which the success rate is tracked.
+   * `markDeadOnFailure()` will return None, until we get requests for a duration
+   * of at least `window`.
+   *
+   * @param markDeadFor stream of durations to use for the next duration
+   * returned from `markDeadOnFailure()`
+   *
+   * @param minRequestThreshold minimum number of requests in the past `window`
+   * for `markDeadOnFailure()` to return a duration
+   */
+  def successRateWithinDuration(
+    requiredSuccessRate: Double,
+    window: Duration,
+    markDeadFor: Stream[Duration],
+    minRequestThreshold: Int
+  ): FailureAccrualPolicy = {
+    assert(window.isFinite, s"window must be finite: $window")
+
+    new SuccessRateFailureAccrualPolicy(requiredSuccessRate, window.inMilliseconds, markDeadFor) {
+
+      // Tracks the number of requests in the past `window`. The window was chosen to have 5 slices
+      // arbitrarily.
+      private[this] val requestCounter: WindowedAdder =
+        WindowedAdder(window.inMilliseconds, 5, Stopwatch.systemMillis)
+
+      override protected def sufficientRequests: Boolean = requestCounter.sum >= minRequestThreshold
+
+      // Time elapsed since this instance was built, or since the endpoint was revived.
+      private[this] var timeElapsed: Stopwatch.Elapsed = Stopwatch.start()
+
+      override protected def emaStamp: Long = {
+        timeElapsed.apply().inMilliseconds
+      }
+
+      override protected def resetEmaCounter(): Unit = {
+        timeElapsed = Stopwatch.start()
+        requestCounter.reset()
+      }
+
+      override def recordSuccess(): Unit = {
+        requestCounter.incr()
+        super.recordSuccess()
+      }
+
+      override def markDeadOnFailure(): Option[Duration] = {
+        requestCounter.incr()
+        super.markDeadOnFailure()
+      }
+
     }
   }
 
@@ -219,22 +311,12 @@ object FailureAccrualPolicy {
     requiredSuccessRate: Double,
     window: Duration,
     markDeadFor: Stream[Duration]
-  ): FailureAccrualPolicy = {
-    assert(window.isFinite, s"window must be finite: $window")
-
-    new SuccessRateFailureAccrualPolicy(requiredSuccessRate, window.inMilliseconds, markDeadFor) {
-      // Time elapsed since this instance was built, or since the endpoint was revived.
-      private[this] var timeElapsed: Stopwatch.Elapsed = Stopwatch.start()
-
-      override protected def emaStamp: Long = {
-        timeElapsed.apply().inMilliseconds
-      }
-
-      override protected def resetEmaCounter(): Unit = {
-        timeElapsed = Stopwatch.start()
-      }
-    }
-  }
+  ): FailureAccrualPolicy =
+    successRateWithinDuration(
+      requiredSuccessRate,
+      window,
+      markDeadFor,
+      DefaultMinimumRequestThreshold)
 
   /**
    * A policy based on a maximum number of consecutive failures. If `numFailures`

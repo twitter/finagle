@@ -13,15 +13,12 @@ import scala.util.Random
 
 object FailureAccrualFactory {
   private[this] val rng = new Random
-  private[this] val DefaultConsecutiveFailures = 5
 
-  // These values approximate 5 consecutive failures at around 5k QPS during the
-  // given window for randomly distributed failures. For lower (more typical)
-  // workloads, this approach will better deal with randomly distributed failures.
-  // Note that if an endpoint begins to fail all requests, FailureAccrual will
-  // trigger in (window) * (1 - threshold) seconds - 6 seconds for these values.
-  private[this] val DefaultSuccessRateThreshold = 0.8
-  private[this] val DefaultSuccessRateWindow = 30.seconds
+  private[this] val DefaultConsecutiveFailures = FailureAccrualPolicy.DefaultConsecutiveFailures
+  private[this] val DefaultSuccessRateThreshold = FailureAccrualPolicy.DefaultSuccessRateThreshold
+  private[this] val DefaultSuccessRateWindow = FailureAccrualPolicy.DefaultSuccessRateWindow
+  private[this] val DefaultMinimumRequestThreshold =
+    FailureAccrualPolicy.DefaultMinimumRequestThreshold
 
   private[this] val UseHybridDefaultPolicyId =
     "com.twitter.finagle.core.UseHybridFailureAccrual"
@@ -44,7 +41,8 @@ object FailureAccrualFactory {
             .successRateWithinDuration(
               DefaultSuccessRateThreshold,
               DefaultSuccessRateWindow,
-              jitteredBackoff)
+              jitteredBackoff,
+              DefaultMinimumRequestThreshold)
             .orElse(FailureAccrualPolicy
               .consecutiveFailures(DefaultConsecutiveFailures, jitteredBackoff))
 

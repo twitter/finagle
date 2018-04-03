@@ -141,7 +141,7 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
     val successRateDuration = 30.seconds
     Time.withCurrentTimeFrozen { timeControl =>
       val policy =
-        FailureAccrualPolicy.successRateWithinDuration(1, successRateDuration, expBackoffList)
+        FailureAccrualPolicy.successRateWithinDuration(1, successRateDuration, expBackoffList, 0)
 
       assert(policy.markDeadOnFailure() == None)
 
@@ -162,7 +162,7 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
     val successRateDuration = 30.seconds
     Time.withCurrentTimeFrozen { timeControl =>
       val policy =
-        FailureAccrualPolicy.successRateWithinDuration(1, successRateDuration, expBackoffList)
+        FailureAccrualPolicy.successRateWithinDuration(1, successRateDuration, expBackoffList, 0)
 
       timeControl.advance(successRateDuration)
       for (i <- 0 until expBackoffList.length)
@@ -184,7 +184,7 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
     val successRateDuration = 100.seconds
     Time.withCurrentTimeFrozen { timeControl =>
       val policy =
-        FailureAccrualPolicy.successRateWithinDuration(0.5, successRateDuration, constantBackoff)
+        FailureAccrualPolicy.successRateWithinDuration(0.5, successRateDuration, constantBackoff, 0)
 
       for (i <- 0 until 100) {
         timeControl.advance(1.second)
@@ -204,13 +204,30 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
     }
   }
 
+  test("Success rate within duration policy: respects rps threshold") {
+    val successRateDuration = 30.seconds
+    Time.withCurrentTimeFrozen { timeControl =>
+      val policy =
+        FailureAccrualPolicy.successRateWithinDuration(1, successRateDuration, expBackoffList, 5)
+
+      timeControl.advance(30.seconds)
+
+      assert(policy.markDeadOnFailure() == None)
+      assert(policy.markDeadOnFailure() == None)
+      assert(policy.markDeadOnFailure() == None)
+      assert(policy.markDeadOnFailure() == None)
+      assert(policy.markDeadOnFailure() == Some(5.seconds))
+    }
+  }
+
   def hybridPolicy = FailureAccrualPolicy
     .consecutiveFailures(3, expBackoff)
     .orElse(
       FailureAccrualPolicy.successRateWithinDuration(
         requiredSuccessRate = 0.8,
         window = 30.seconds,
-        markDeadFor = expBackoff
+        markDeadFor = expBackoff,
+        minRequestThreshold = 0
       )
     )
 

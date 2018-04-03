@@ -52,6 +52,9 @@ Breaking API Changes
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-core: Add minimum request threshold for `successRateWithinDuration` failure accrual.
+    ``PHAB_ID=D154129``
+
   * finagle-core: `c.t.f.filter.NackAdmissionFilter` no longer takes effect when
     the client's request rate is too low to accurately update the EMA value or
     drop requests. ``PHAB_ID=D143996``
