@@ -23,6 +23,11 @@ New Features
   * finagle-redis: Support has been added for a number of new cluster commands
     introduced in Redis 3.0.0. ``PHAB_ID=D152186``
 
+Bug Fixes
+~~~~~~~~~
+
+  * finagle-mysql: Fix handling of interrupts during transactions. ``PHAB_ID=D154441``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

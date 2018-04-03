@@ -1,3 +1,15 @@
+scala_library(
+    name = "integration-client",
+    sources = [
+        "com/twitter/finagle/mysql/integration/IntegrationClient.scala",
+    ],
+    fatal_warnings = True,
+    dependencies = [
+        "3rdparty/jvm/org/scalatest",
+        "finagle/finagle-mysql/src/main/scala",
+    ],
+)
+
 junit_tests(
     sources = rglobs("*.scala"),
     fatal_warnings = True,

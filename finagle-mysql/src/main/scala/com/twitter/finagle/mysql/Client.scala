@@ -253,7 +253,9 @@ private class StdClient(
         // would simply fail with the same exception.
         closeWith(e)
       case Throw(e) =>
-        client.query(rollbackQuery).transform {
+        // the rollback is `masked` in order to protect it from prior interrupts/raises.
+        // this statement should run regardless.
+        client.query(rollbackQuery).masked.transform {
           case Return(_) =>
             closeWith(e)
           case Throw(e @ WrappedChannelClosedException()) =>

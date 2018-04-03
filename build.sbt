@@ -236,7 +236,7 @@ lazy val finagleIntegration = Project(
   finagleCore % "compile->compile;test->test",
   finagleHttp,
   finagleHttp2,
-  finagleMySQL,
+  finagleMySQL % "test->compile;test->test",
   finagleMemcached,
   finagleMux,
   finagleNetty4Http,
