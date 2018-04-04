@@ -16,7 +16,7 @@ class Http2PriorKnowledgeTest extends AbstractEndToEndTest {
     finagle.Http.server
       .withHttp2
 
-  def featureImplemented(feature: Feature): Boolean = feature != MaxHeaderSize
+  def featureImplemented(feature: Feature): Boolean = true
 
   test("A prior knowledge connection counts as one upgrade for stats") {
     val client = nonStreamingConnect(Service.mk { req: Request =>

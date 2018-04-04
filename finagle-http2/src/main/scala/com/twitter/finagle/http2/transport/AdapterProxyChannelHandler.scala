@@ -154,6 +154,7 @@ private[http2] final class AdapterProxyChannelHandler(
       ctx.fireChannelRead(rst)
     case goaway: GoAway => ctx.fireChannelRead(goaway)
     case Ping => ctx.fireChannelRead(Ping)
+    case exn: StreamException => ctx.fireChannelRead(exn)
     case upgrade: UpgradeEvent => ctx.fireChannelRead(upgrade)
     case _ =>
       val wrongType = new IllegalArgumentException(
@@ -186,6 +187,14 @@ private[http2] final class AdapterProxyChannelHandler(
             ctx.write(rst, promise)
           case goaway: GoAway => ctx.write(goaway, promise)
           case Ping => ctx.write(Ping, promise)
+          case StreamException(exn, _) =>
+            // this doesn't make sense.  fail hard here.
+            val wrongType = new IllegalArgumentException(
+              "StreamExceptions can not be written to the netty pipeline.",
+              exn
+            )
+            log.error(wrongType, "Tried to write a stream exception to the http2 client pipeline")
+            promise.setFailure(wrongType)
         }
       case _ =>
         val wrongType = new IllegalArgumentException(

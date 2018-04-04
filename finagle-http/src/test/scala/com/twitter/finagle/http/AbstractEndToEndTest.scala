@@ -7,6 +7,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.context.{Contexts, Deadline, Retries}
 import com.twitter.finagle.http.service.HttpResponseClassifier
+import com.twitter.finagle.http2.param.EncoderIgnoreMaxHeaderListSize
 import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
@@ -31,7 +32,6 @@ abstract class AbstractEndToEndTest
 
   sealed trait Feature
   object TooLongStream extends Feature
-  object MaxHeaderSize extends Feature
   object ClientAbort extends Feature
   object HeaderFields extends Feature
   object ReaderClose extends Feature
@@ -1055,18 +1055,14 @@ abstract class AbstractEndToEndTest
     assert(rep.status == Status.InternalServerError)
   }
 
-  testIfImplemented(MaxHeaderSize)("client respects MaxHeaderSize in response") {
-    val svc = new Service[Request, Response] {
-      def apply(request: Request) = {
-        val response = Response()
-        response.headerMap.set("foo", "*" * 1.kilobytes.bytes.toInt)
-        Future.value(response)
-      }
-    }
+  test("client respects MaxHeaderSize in response") {
+    val ref = new ServiceFactoryRef(ServiceFactory.const(initService))
 
     val server = serverImpl()
       .withStatsReceiver(NullStatsReceiver)
-      .serve("localhost:*", svc)
+      // we need to ignore header list size so we can examine behavior on the client-side
+      .configured(EncoderIgnoreMaxHeaderListSize(true))
+      .serve("localhost:*", ref)
 
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
     val client = clientImpl()
@@ -1075,6 +1071,14 @@ abstract class AbstractEndToEndTest
       .newService(s"${addr.getHostName}:${addr.getPort}", "client")
 
     initClient(client)
+    val svc = new Service[Request, Response] {
+      def apply(request: Request) = {
+        val response = Response()
+        response.headerMap.set("foo", "*" * 1.kilobytes.bytes.toInt)
+        Future.value(response)
+      }
+    }
+    ref() = ServiceFactory.const(svc)
 
     val req = Request("/")
     intercept[TooLongMessageException] {

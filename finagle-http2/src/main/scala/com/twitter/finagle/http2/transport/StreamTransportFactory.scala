@@ -1,6 +1,7 @@
 package com.twitter.finagle.http2.transport
 
 import com.twitter.concurrent.AsyncQueue
+import com.twitter.finagle.http.TooLongMessageException
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader._
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.netty4.transport.HasExecutor
@@ -184,9 +185,7 @@ final private[http2] class StreamTransportFactory(
         case Some(stream) =>
           handleRemoveStream(streamId)
           removeRstCounter.incr()
-          // mark the stream as dead to ensure we don't send an RST in response
-          stream.handleState(Dead)
-          stream.handleCloseWith(error)
+          stream.handleCloseWith(error, canRst = false)
         case None =>
           // According to spec, an endpoint should not send another RST upon receipt
           // of an RST for an absent stream ID as this could cause a loop.
@@ -194,6 +193,16 @@ final private[http2] class StreamTransportFactory(
             log.debug(s"Got RST for nonexistent stream: $streamId, code: $errorCode")
       }
 
+    case StreamException(exn, streamId) =>
+      val error = TooLongMessageException(exn, addr)
+      activeStreams.get(streamId) match {
+        case Some(stream) =>
+          handleRemoveStream(streamId)
+          stream.handleCloseWith(error, canRst = false)
+        case None =>
+          if (log.isLoggable(Level.DEBUG))
+            log.debug(exn, s"Got exception for nonexistent stream: $streamId")
+      }
     case Ping =>
       if (pingPromise != null) {
         pingPromise.setDone()
@@ -218,7 +227,6 @@ final private[http2] class StreamTransportFactory(
         case Return(msg) =>
           handleSuccessfulRead(msg)
           loop()
-
         case Throw(e) =>
           handleClose(Time.Bottom, Some(e))
       }
@@ -538,9 +546,9 @@ final private[http2] class StreamTransportFactory(
       handleCloseWith(new StreamClosedException(Some(addr), _curId.toString, whyFailed), deadline)
     }
 
-    private[http2] def handleCloseWith(exn: Throwable, deadline: Time = Time.Bottom): Unit = {
+    private[http2] def handleCloseWith(exn: Throwable, deadline: Time = Time.Bottom, canRst: Boolean = true): Unit = {
       state match {
-        case a: Active if !a.finished =>
+        case a: Active if (!a.finished) && canRst =>
           underlying
             .write(Rst(_curId, Http2Error.CANCEL.code))
             .by(deadline)(DefaultTimer) // TODO: Get Timer from stack params

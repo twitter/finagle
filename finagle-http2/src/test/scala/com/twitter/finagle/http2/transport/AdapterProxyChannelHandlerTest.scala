@@ -1,13 +1,15 @@
 package com.twitter.finagle.http2.transport
 
 import com.twitter.finagle.Stack.Params
-import com.twitter.finagle.http2.transport.Http2ClientDowngrader.{Message, Rst}
+import com.twitter.finagle.http2.transport.Http2ClientDowngrader.{Message, Rst, StreamException}
 import com.twitter.finagle.netty4.http
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel._
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http._
+import io.netty.handler.codec.http2.Http2Exception.{HeaderListSizeException, headerListSizeError}
+import io.netty.handler.codec.http2.Http2Error
 import io.netty.util.concurrent.PromiseCombiner
 import java.nio.charset.StandardCharsets
 import org.scalatest.FunSuite
@@ -292,6 +294,45 @@ class AdapterProxyChannelHandlerTest extends FunSuite {
 
     channel.close()
     assert(!channel.isOpen)
+  }
+
+  test("fails hard when you try to write a StreamException") {
+    val handler = new AdapterProxyChannelHandler({ pipeline =>
+      pipeline.addLast(new Disaggregator())
+    })
+    val channel = new EmbeddedChannel()
+    channel.pipeline.addLast(handler)
+    val error = Http2Error.PROTOCOL_ERROR
+    val hlsExn = headerListSizeError(3, error, true /* onDecode */, "too big") match {
+      case e: HeaderListSizeException => e
+      case _ => fail
+    }
+
+    val exn = StreamException(hlsExn, 3)
+    val e = intercept[IllegalArgumentException] {
+      channel.writeOutbound(exn)
+    }
+    intercept[HeaderListSizeException] {
+      throw e.getCause()
+    }
+  }
+
+  test("propagates StreamExceptions when reading") {
+    val handler = new AdapterProxyChannelHandler({ pipeline =>
+      pipeline.addLast(new Disaggregator())
+    })
+    val channel = new EmbeddedChannel()
+    channel.pipeline.addLast(handler)
+    val error = Http2Error.PROTOCOL_ERROR
+    val hlsExn = headerListSizeError(3, error, true /* onDecode */, "too big") match {
+      case e: HeaderListSizeException => e
+      case _ => fail
+    }
+
+    val exn = StreamException(hlsExn, 3)
+    channel.writeInbound(exn)
+    val read = channel.readInbound[StreamException]()
+    assert(read.equals(exn))
   }
 
 }

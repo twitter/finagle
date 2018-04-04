@@ -2,6 +2,7 @@ package com.twitter.finagle.http2.transport
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
+import com.twitter.finagle.http.TooLongMessageException
 import com.twitter.finagle.http2.SerialExecutor
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader._
 import com.twitter.finagle.http2.transport.StreamTransportFactory._
@@ -12,6 +13,7 @@ import com.twitter.finagle.{FailureFlags, Stack, Status, StreamClosedException}
 import com.twitter.util.{Await, Awaitable, Future, TimeoutException}
 import io.netty.buffer._
 import io.netty.handler.codec.http._
+import io.netty.handler.codec.http2.Http2Exception.{HeaderListSizeException, headerListSizeError}
 import io.netty.handler.codec.http2.Http2Error
 import java.net.SocketAddress
 import java.nio.charset.StandardCharsets
@@ -376,6 +378,33 @@ class StreamTransportFactoryTest extends FunSuite {
       streamFac.ping()
       assert(await(writeq.poll()) == Ping)
       readq.offer(Ping)
+    }
+  }
+
+  test("reading a StreamException fails that stream") {
+    val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
+    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+      type Context = TransportContext with HasExecutor
+    }]
+
+    val error = Http2Error.PROTOCOL_ERROR
+    val hlsExn = headerListSizeError(3, error, true /* onDecode */, "too big") match {
+      case e: HeaderListSizeException => e
+      case _ => fail
+    }
+
+    val exn = StreamException(hlsExn, 3)
+
+    val addr = new SocketAddress {}
+    val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
+    streamFac.setStreamId(3)
+
+    val stream = await(streamFac())
+    stream.write(H1Req)
+    readq.offer(exn)
+    val f = stream.read()
+    intercept[TooLongMessageException] {
+      await(f)
     }
   }
 
