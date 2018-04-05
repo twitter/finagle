@@ -71,8 +71,8 @@ object Parameter {
 
   object NullParameter extends Parameter {
     type A = Null
-    def value = null
-    def evidence = CanBeParameter.nullCanBeParameter
+    def value: Null = null
+    def evidence: CanBeParameter[Null] = CanBeParameter.nullCanBeParameter
   }
 }
 
