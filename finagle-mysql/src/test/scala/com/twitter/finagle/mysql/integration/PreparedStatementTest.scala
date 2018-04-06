@@ -46,7 +46,7 @@ class PreparedStatementTest extends FunSuite
   }
 
   /** Returns the primary key for the inserted row */
-  private[this] def insertBigDecimal(bd: BigDecimal): Long = {
+  private[this] def insertBigDecimal(bd: Option[BigDecimal]): Long = {
     val preparedInsert = c.prepare(insertBigDecimalSql)
     val inserted: Future[Result] = preparedInsert(bd)
     val result = inserted.flatMap {
@@ -74,7 +74,7 @@ class PreparedStatementTest extends FunSuite
   }
 
   private[this] def testBigDecimal(bd: BigDecimal): Unit = {
-    val id = insertBigDecimal(bd)
+    val id = insertBigDecimal(Option(bd))
     assert(bd == selectBigDecimal(id))
   }
 
@@ -86,17 +86,28 @@ class PreparedStatementTest extends FunSuite
     testBigDecimal(null)
   }
 
+  test("insert with Some") {
+    val bd = BigDecimal(100.1)
+    val id = insertBigDecimal(Some(bd))
+    assert(bd == selectBigDecimal(id))
+  }
+
+  test("insert with None") {
+    val id = insertBigDecimal(None)
+    assert(null == selectBigDecimal(id))
+  }
+
   test("insert BigDecimal with too much precision") {
     intercept[ServerError] {
       // this number has more total digits than allowed, 5
-      insertBigDecimal(BigDecimal("100000"))
+      insertBigDecimal(Some(BigDecimal("100000")))
     }
   }
 
   test("insert BigDecimal with too much scale") {
     // this number has more digits after the decimal point (3) than allowed (2)
     val bd = BigDecimal("100.888")
-    val id = insertBigDecimal(bd)
+    val id = insertBigDecimal(Some(bd))
     assert(BigDecimal(100.89) == selectBigDecimal(id))
   }
 

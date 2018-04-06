@@ -1,8 +1,9 @@
 package com.twitter.finagle.mysql
 
 import com.twitter.finagle.mysql.transport.{MysqlBuf, MysqlBufWriter}
+import java.{lang => jl}
 
-trait CanBeParameter[-A] { outer =>
+trait CanBeParameter[-A] {
 
   /**
    * Returns the size of the given parameter in its MySQL binary representation.
@@ -17,6 +18,10 @@ trait CanBeParameter[-A] { outer =>
   def write(writer: MysqlBufWriter, param: A): Unit
 }
 
+/**
+ * When a new implicit [[CanBeParameter]] is added here, it should also be
+ * explicitly added to [[Parameter.unsafeWrap]].
+ */
 object CanBeParameter {
   private[this] def arrayLength(bytes: Array[Byte]): Int =
     MysqlBuf.sizeOfLen(bytes.length) + bytes.length
@@ -43,12 +48,30 @@ object CanBeParameter {
     }
   }
 
+  implicit val javaLangBooleanCanBeParameter: CanBeParameter[jl.Boolean] = {
+    new CanBeParameter[jl.Boolean] {
+      def sizeOf(param: jl.Boolean): Int = booleanCanBeParameter.sizeOf(param.booleanValue())
+      def typeCode(param: jl.Boolean): Short = booleanCanBeParameter.typeCode(param.booleanValue())
+      def write(writer: MysqlBufWriter, param: jl.Boolean): Unit =
+        booleanCanBeParameter.write(writer, param.booleanValue())
+    }
+  }
+
   implicit val byteCanBeParameter: CanBeParameter[Byte] = {
     new CanBeParameter[Byte] {
       def sizeOf(param: Byte): Int = 1
       def typeCode(param: Byte): Short = Type.Tiny
       def write(writer: MysqlBufWriter, param: Byte): Unit =
         writer.writeByte(param)
+    }
+  }
+
+  implicit val javaLangByteCanBeParameter: CanBeParameter[jl.Byte] = {
+    new CanBeParameter[jl.Byte] {
+      def sizeOf(param: jl.Byte): Int = byteCanBeParameter.sizeOf(param.byteValue())
+      def typeCode(param: jl.Byte): Short = byteCanBeParameter.typeCode(param.byteValue())
+      def write(writer: MysqlBufWriter, param: jl.Byte): Unit =
+        byteCanBeParameter.write(writer, param.byteValue())
     }
   }
 
@@ -61,6 +84,15 @@ object CanBeParameter {
     }
   }
 
+  implicit val javaLangShortCanBeParameter: CanBeParameter[jl.Short] = {
+    new CanBeParameter[jl.Short] {
+      def sizeOf(param: jl.Short): Int = shortCanBeParameter.sizeOf(param.shortValue())
+      def typeCode(param: jl.Short): Short = shortCanBeParameter.typeCode(param.shortValue())
+      def write(writer: MysqlBufWriter, param: jl.Short): Unit =
+        shortCanBeParameter.write(writer, param.shortValue())
+    }
+  }
+
   implicit val intCanBeParameter: CanBeParameter[Int] = {
     new CanBeParameter[Int] {
       def sizeOf(param: Int): Int = 4
@@ -70,12 +102,30 @@ object CanBeParameter {
     }
   }
 
+  implicit val javaLangIntCanBeParameter: CanBeParameter[jl.Integer] = {
+    new CanBeParameter[jl.Integer] {
+      def sizeOf(param: jl.Integer): Int = intCanBeParameter.sizeOf(param.intValue())
+      def typeCode(param: jl.Integer): Short = intCanBeParameter.typeCode(param.intValue())
+      def write(writer: MysqlBufWriter, param: jl.Integer): Unit =
+        intCanBeParameter.write(writer, param.intValue())
+    }
+  }
+
   implicit val longCanBeParameter: CanBeParameter[Long] = {
     new CanBeParameter[Long] {
       def sizeOf(param: Long): Int = 8
       def typeCode(param: Long): Short = Type.LongLong
       def write(writer: MysqlBufWriter, param: Long): Unit =
         writer.writeLongLE(param)
+    }
+  }
+
+  implicit val javaLangLongCanBeParameter: CanBeParameter[jl.Long] = {
+    new CanBeParameter[jl.Long] {
+      def sizeOf(param: jl.Long): Int = longCanBeParameter.sizeOf(param.longValue())
+      def typeCode(param: jl.Long): Short = longCanBeParameter.typeCode(param.longValue())
+      def write(writer: MysqlBufWriter, param: jl.Long): Unit =
+        longCanBeParameter.write(writer, param.longValue())
     }
   }
 
@@ -111,12 +161,30 @@ object CanBeParameter {
     }
   }
 
+  implicit val javaLangFloatCanBeParameter: CanBeParameter[jl.Float] = {
+    new CanBeParameter[jl.Float] {
+      def sizeOf(param: jl.Float): Int = floatCanBeParameter.sizeOf(param.floatValue())
+      def typeCode(param: jl.Float): Short = floatCanBeParameter.typeCode(param.floatValue())
+      def write(writer: MysqlBufWriter, param: jl.Float): Unit =
+        floatCanBeParameter.write(writer, param.floatValue())
+    }
+  }
+
   implicit val doubleCanBeParameter: CanBeParameter[Double] = {
     new CanBeParameter[Double] {
       def sizeOf(param: Double): Int = 8
       def typeCode(param: Double): Short = Type.Double
       def write(writer: MysqlBufWriter, param: Double): Unit =
         writer.writeDoubleLE(param)
+    }
+  }
+
+  implicit val javaLangDoubleCanBeParameter: CanBeParameter[jl.Double] = {
+    new CanBeParameter[jl.Double] {
+      def sizeOf(param: jl.Double): Int = doubleCanBeParameter.sizeOf(param.doubleValue())
+      def typeCode(param: jl.Double): Short = doubleCanBeParameter.typeCode(param.doubleValue())
+      def write(writer: MysqlBufWriter, param: jl.Double): Unit =
+        doubleCanBeParameter.write(writer, param.doubleValue())
     }
   }
 

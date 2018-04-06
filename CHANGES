@@ -16,6 +16,10 @@ New Features
   * finagle-mysql: Exceptions now include the SQL that was being executed when possible.
     ``PHAB_ID=D150503``
 
+  * finagle-mysql: Added support for `Option`\s to `Parameter` implicits. This
+    allows for the natural represention of nullable columns with an `Option`
+    where a `None` is treated as a `null`. ``PHAB_ID=D156186``
+
   * finagle-netty4: Add 'tls/connections' gauge for Finagle on Netty 4 which tracks the number
     of open SSL/TLS connections per Finagle client or server.
     ``PHAB_ID=D144184``

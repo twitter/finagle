@@ -5,8 +5,24 @@ import java.util.logging.Logger
 import language.implicitConversions
 
 /**
- * A value of type `A` can implicitly convert to a `Parameter` if an evidence `CanBeParameter[A]` is
- * available in scope. This type is not to be instantiated in any other manner.
+ * A value of type `A` can implicitly convert to a `Parameter` if an evidence
+ * `CanBeParameter[A]` is available in scope via the [[Parameter.wrap]] or
+ * [[Parameter.wrapOption]] implicits.
+ *
+ * A Scala example:
+ * {{{
+ * import com.twitter.finagle.mysql.Parameter._
+ *
+ * val p: Parameter = "this will get implicitly converted to a Parameter"
+ * }}}
+ *
+ * A Java example:
+ * {{{
+ * import com.twitter.finagle.mysql.Parameter;
+ * import com.twitter.finagle.mysql.Parameters;
+ *
+ * Parameter p = Parameters.of("explicitly converted to a Parameter");
+ * }}}
  */
 sealed trait Parameter {
   type A
@@ -22,10 +38,43 @@ sealed trait Parameter {
 }
 
 /**
- * Note: There is a Java-friendly API for this object: [[com.twitter.finagle.mysql.Parameters]].
+ * For Scala users, the typical usage is by importing the implicit conversions
+ * and then letting the compiler do the conversions for you.
+ *
+ * Java users should generally be using [[Parameters.of]] to do explicit
+ * conversions.
+ *
+ * A Scala example:
+ * {{{
+ * import com.twitter.finagle.mysql.Parameter._
+ *
+ * val p: Parameter = "this will get implicitly converted to a Parameter"
+ * }}}
+ *
+ * A Java example:
+ * {{{
+ * import com.twitter.finagle.mysql.Parameter;
+ * import com.twitter.finagle.mysql.Parameters;
+ *
+ * Parameter p = Parameters.of("explicitly converted to a Parameter");
+ * }}}
+ *
+ * @see [[Parameters]] for a Java-friendly API.
  */
 object Parameter {
 
+  /**
+   * Java users can use [[Parameters.of]].
+   */
+  implicit def wrapOption[_A](option: Option[_A])(implicit ev: CanBeParameter[_A]): Parameter =
+    option match {
+      case None => NullParameter
+      case Some(value) => wrap(value)
+    }
+
+  /**
+   * Java users can use [[Parameters.of]].
+   */
   implicit def wrap[_A](_value: _A)(implicit _evidence: CanBeParameter[_A]): Parameter = {
     if (_value == null) {
       NullParameter
@@ -43,12 +92,16 @@ object Parameter {
 
   /**
    * This converts the compile time error we would get with `wrap` into
-   * a run time error. This method should only be used to ease migration
-   * from Any to Parameter. It maintains the previous behavior where
-   * we log a failure to encode and transparently write a SQL NULL to
-   * the wire.
+   * a runtime error.
+   *
+   * Java users can use [[Parameters.of]].
+   *
+   * @note Any unknown types are treated as a SQL NULL.
    */
   def unsafeWrap(value: Any): Parameter = value match {
+    case null => NullParameter
+    case Some(v) => unsafeWrap(v)
+    case None => NullParameter
     case v: String => wrap(v)
     case v: Boolean => wrap(v)
     case v: Byte => wrap(v)
@@ -61,14 +114,19 @@ object Parameter {
     case v: Value => wrap(v)
     case v: java.sql.Timestamp => wrap(v)
     case v: java.sql.Date => wrap(v)
-    case null => Parameter.NullParameter
+    case v: java.util.Date => wrap(v)
+    case o: java.util.Optional[_] if o.isPresent => unsafeWrap(o.get())
+    case o: java.util.Optional[_] => NullParameter
     case v =>
       // Unsupported type. Write the error to log, and write the type as null.
       // This allows us to safely skip writing the parameter without corrupting the buffer.
       log.warning(s"Unknown parameter ${v.getClass.getName} will be treated as SQL NULL.")
-      Parameter.NullParameter
+      NullParameter
   }
 
+  /**
+   * Java users can use [[Parameters.nullParameter]].
+   */
   object NullParameter extends Parameter {
     type A = Null
     def value: Null = null
@@ -81,9 +139,22 @@ object Parameter {
  */
 object Parameters {
 
+  /**
+   * See [[Parameter.NullParameter]].
+   */
   def nullParameter: Parameter = Parameter.NullParameter
 
-  def unsafeWrap(value: Any): Parameter = Parameter.unsafeWrap(value)
+  /**
+   * Java friendly factory method for a [[Parameter]].
+   *
+   * Synonym for [[of]].
+   */
+  def unsafeWrap(value: Any): Parameter = of(value)
+
+  /**
+   * Java friendly factory method for a [[Parameter]].
+   */
+  def of(value: Any): Parameter = Parameter.unsafeWrap(value)
 
   //TODO: create an accessor to Parameter.wrap, so type errors are caught at compile time.
 }

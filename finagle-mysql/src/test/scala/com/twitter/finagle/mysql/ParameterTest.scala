@@ -20,8 +20,20 @@ class ParameterTest extends FunSuite {
     assert(param.value == value)
   }
 
+  test("java.lang.Boolean") {
+    val value = Boolean.box(true)
+    val param: Parameter = value
+    assert(param.value == value)
+  }
+
   test("Byte") {
     val value = 3.toByte
+    val param: Parameter = value
+    assert(param.value == value)
+  }
+
+  test("java.lang.Byte") {
+    val value = Byte.box(3)
     val param: Parameter = value
     assert(param.value == value)
   }
@@ -32,14 +44,32 @@ class ParameterTest extends FunSuite {
     assert(param.value == value)
   }
 
+  test("java.lang.Short") {
+    val value = Short.box(3)
+    val param: Parameter = value
+    assert(param.value == value)
+  }
+
   test("Int") {
     val value = 3
     val param: Parameter = value
     assert(param.value == value)
   }
 
+  test("java.lang.Int") {
+    val value = Int.box(3)
+    val param: Parameter = value
+    assert(param.value == value)
+  }
+
   test("Long") {
     val value = 3L
+    val param: Parameter = value
+    assert(param.value == value)
+  }
+
+  test("java.lang.Long") {
+    val value = Long.box(3L)
     val param: Parameter = value
     assert(param.value == value)
   }
@@ -56,8 +86,21 @@ class ParameterTest extends FunSuite {
     assert(param.value == value)
   }
 
+  test("java.lang.Float") {
+    val value = Float.box(3.0F)
+    val param: Parameter = value
+    assert(param.value == value)
+  }
+
+
   test("Double") {
     val value = 3.0
+    val param: Parameter = value
+    assert(param.value == value)
+  }
+
+  test("java.lang.Double") {
+    val value = Double.box(3.0)
     val param: Parameter = value
     assert(param.value == value)
   }
@@ -103,4 +146,15 @@ class ParameterTest extends FunSuite {
     assert(param == null)
   }
 
+  test("Option as Some") {
+    val value: Option[String] = Some("yep")
+    val param: Parameter = value
+    assert(param.value == value.get)
+  }
+
+  test("Option as None") {
+    val value: Option[String] = None
+    val param: Parameter = value
+    assert(param.value == null)
+  }
 }
