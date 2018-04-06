@@ -18,12 +18,3 @@ scala_library(
         "util/util-core/src/main/scala",
     ],
 )
-
-benchmark(
-    name = "benchmark",
-    sources = rglobs("com/twitter/finagle/benchmark/*.scala"),
-    dependencies = [
-        ":scala",
-        "util/util-core",
-    ],
-)
