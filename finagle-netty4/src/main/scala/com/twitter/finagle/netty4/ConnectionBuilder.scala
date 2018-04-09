@@ -135,7 +135,7 @@ private final class ConnectionBuilder(
             // there is no need to retry if proxy connect failed
             case e: ProxyConnectException => e
             // the rest of failures could benefit from retries
-            case NonFatal(e) => Failure.rejected(new ConnectionFailedException(e, addr))
+            case e => Failure.rejected(new ConnectionFailedException(e, addr))
           })
         } else if (!channelF.channel.isOpen) {
           // Somehow the channel ended up closed before we got here, likely as
