@@ -64,8 +64,17 @@ trait ListeningServer extends Closable with Awaitable[Unit] {
  * def exit() { server.close() }
  * }}}
  */
-object NullServer extends ListeningServer with CloseAwaitably {
-  def closeServer(deadline: Time) = closeAwaitably { Future.Done }
+object NullServer extends ListeningServer {
+  def closeServer(deadline: Time): Future[Unit] = Future.Done
+
+  def ready(timeout: Duration)(implicit permit: Awaitable.CanAwait): NullServer.this.type =
+    throw new com.twitter.util.TimeoutException(timeout.toString)
+
+  def result(timeout: Duration)(implicit permit: Awaitable.CanAwait): Unit =
+    throw new com.twitter.util.TimeoutException(timeout.toString)
+
+  def isReady(implicit permit: Awaitable.CanAwait): Boolean = false
+
   val boundAddress = new InetSocketAddress(0)
 }
 
