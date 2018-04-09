@@ -110,7 +110,8 @@ private final class ConnectionBuilder(
     transportP.setInterruptHandler {
       case _ =>
         cancelAttempts.incr()
-        nettyConnectF.cancel(true /* mayInterruptIfRunning */ )
+        // We just want best effort: we don't want to potentially interrupt a thread.
+        nettyConnectF.cancel(false /* mayInterruptIfRunning */ )
     }
 
     nettyConnectF.addListener(new ChannelFutureListener {
