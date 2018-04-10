@@ -169,7 +169,7 @@ resources for using Finagle.
 <a href="mux/index.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>. Rich interfaces are provided to adhere to those
 generated from a <a href="https://thrift.apache.org/docs/idl" target="_blank">Thrift IDL</a> by
 <a href="https://twitter.github.io/scrooge/" target="_blank">Scrooge</a> or
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">thrift-finagle</a>.</p><h4> Clients </h4><p>Clients can be created directly from an interface generated from
+<a href="https://github.com/mariusaeriksen/thrift-finagle" target="_blank">thrift-finagle</a>.</p><h4> Clients </h4><p>Clients can be created directly from an interface generated from
 a Thrift IDL:</p><p>For example, this IDL:</p><pre>service TestService {
   string query(<span class="num">1</span>: string x)
 }</pre><p>compiled with Scrooge, generates the interface
@@ -224,7 +224,7 @@ prefix and servers with &quot;srv/thrift&quot;. If you'd like more configuration
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">Client</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <span class="name">Client</span><span class="result"> extends <a href="thrift/ThriftClient.html" class="extype" name="com.twitter.finagle.thrift.ThriftClient">ThriftClient</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       </h4>
 
@@ -233,7 +233,7 @@ prefix and servers with &quot;srv/thrift&quot;. If you'd like more configuration
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="thrift/ThriftClient.html" class="extype" name="com.twitter.finagle.thrift.ThriftClient">ThriftClient</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
         </div></div>
         
 
@@ -259,7 +259,7 @@ prefix and servers with &quot;srv/thrift&quot;. If you'd like more configuration
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.ThriftMux.Client"><span>Client</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.ThriftMux.Client"><span>Client</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="com.twitter.finagle.thrift.ThriftClient"><span>ThriftClient</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -498,6 +498,25 @@ prefix and servers with &quot;srv/thrift&quot;. If you'd like more configuration
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.thrift.ThriftClient#methodPerEndpoint" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="methodPerEndpoint[ServicePerEndpoint,MethodPerEndpoint](servicePerEndpoint:ServicePerEndpoint)(implicitbuilder:com.twitter.finagle.thrift.service.MethodPerEndpointBuilder[ServicePerEndpoint,MethodPerEndpoint]):MethodPerEndpoint"></a><a id="methodPerEndpoint[ServicePerEndpoint,MethodPerEndpoint](ServicePerEndpoint)(MethodPerEndpointBuilder[ServicePerEndpoint,MethodPerEndpoint]):MethodPerEndpoint"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/ThriftMux$$Client$.html#methodPerEndpoint[ServicePerEndpoint,MethodPerEndpoint](servicePerEndpoint:ServicePerEndpoint)(implicitbuilder:com.twitter.finagle.thrift.service.MethodPerEndpointBuilder[ServicePerEndpoint,MethodPerEndpoint]):MethodPerEndpoint" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">methodPerEndpoint</span><span class="tparams">[<span name="ServicePerEndpoint">ServicePerEndpoint</span>, <span name="MethodPerEndpoint">MethodPerEndpoint</span>]</span><span class="params">(<span name="servicePerEndpoint">servicePerEndpoint: <span class="extype" name="com.twitter.finagle.thrift.ThriftClient.methodPerEndpoint.ServicePerEndpoint">ServicePerEndpoint</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="builder">builder: <a href="thrift/service/MethodPerEndpointBuilder.html" class="extype" name="com.twitter.finagle.thrift.service.MethodPerEndpointBuilder">MethodPerEndpointBuilder</a>[<span class="extype" name="com.twitter.finagle.thrift.ThriftClient.methodPerEndpoint.ServicePerEndpoint">ServicePerEndpoint</span>, <span class="extype" name="com.twitter.finagle.thrift.ThriftClient.methodPerEndpoint.MethodPerEndpoint">MethodPerEndpoint</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.thrift.ThriftClient.methodPerEndpoint.MethodPerEndpoint">MethodPerEndpoint</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Converts from a Service interface (<code>ServicePerEndpoint</code>) to the
+method interface (<code>MethodPerEndpoint</code>).</p><div class="fullcomment"><div class="comment cmt"><p>Converts from a Service interface (<code>ServicePerEndpoint</code>) to the
+method interface (<code>MethodPerEndpoint</code>).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="thrift/ThriftClient.html" class="extype" name="com.twitter.finagle.thrift.ThriftClient">ThriftClient</a></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -658,7 +677,54 @@ prefix and servers with &quot;srv/thrift&quot;. If you'd like more configuration
 
         
 
-        
+        <div class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="com.twitter.finagle.thrift.ThriftClient#newMethodIface" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="newMethodIface[ServiceIface,FutureIface](serviceIface:ServiceIface)(implicitbuilder:com.twitter.finagle.thrift.MethodIfaceBuilder[ServiceIface,FutureIface]):FutureIface"></a><a id="newMethodIface[ServiceIface,FutureIface](ServiceIface)(MethodIfaceBuilder[ServiceIface,FutureIface]):FutureIface"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/ThriftMux$$Client$.html#newMethodIface[ServiceIface,FutureIface](serviceIface:ServiceIface)(implicitbuilder:com.twitter.finagle.thrift.MethodIfaceBuilder[ServiceIface,FutureIface]):FutureIface" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2017-11-13) Use com.twitter.finagle.ThriftClient#methodPerEndpoint[ServicePerEndpoint, MethodPerEndpoint]">newMethodIface</span><span class="tparams">[<span name="ServiceIface">ServiceIface</span>, <span name="FutureIface">FutureIface</span>]</span><span class="params">(<span name="serviceIface">serviceIface: <span class="extype" name="com.twitter.finagle.thrift.ThriftClient.newMethodIface.ServiceIface">ServiceIface</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="builder">builder: <a href="thrift/MethodIfaceBuilder.html" class="extype" name="com.twitter.finagle.thrift.MethodIfaceBuilder">MethodIfaceBuilder</a>[<span class="extype" name="com.twitter.finagle.thrift.ThriftClient.newMethodIface.ServiceIface">ServiceIface</span>, <span class="extype" name="com.twitter.finagle.thrift.ThriftClient.newMethodIface.FutureIface">FutureIface</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.thrift.ThriftClient.newMethodIface.FutureIface">FutureIface</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Converts from a Service interface (<code>ServiceIface</code>) to the
+method interface (<code>newIface</code>).</p><div class="fullcomment"><div class="comment cmt"><p>Converts from a Service interface (<code>ServiceIface</code>) to the
+method interface (<code>newIface</code>).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="thrift/ThriftClient.html" class="extype" name="com.twitter.finagle.thrift.ThriftClient">ThriftClient</a></dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-11-13)</i> Use com.twitter.finagle.ThriftClient#methodPerEndpoint[ServicePerEndpoint, MethodPerEndpoint]</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.thrift.ThriftClient#thriftService" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="thriftService[ServicePerEndpoint,ThriftService](servicePerEndpoint:ServicePerEndpoint)(implicitbuilder:com.twitter.finagle.thrift.service.ThriftServiceBuilder[ServicePerEndpoint,ThriftService]):ThriftService"></a><a id="thriftService[ServicePerEndpoint,ThriftService](ServicePerEndpoint)(ThriftServiceBuilder[ServicePerEndpoint,ThriftService]):ThriftService"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/ThriftMux$$Client$.html#thriftService[ServicePerEndpoint,ThriftService](servicePerEndpoint:ServicePerEndpoint)(implicitbuilder:com.twitter.finagle.thrift.service.ThriftServiceBuilder[ServicePerEndpoint,ThriftService]):ThriftService" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2018-01-12) Use methodPerEndpoint">thriftService</span><span class="tparams">[<span name="ServicePerEndpoint">ServicePerEndpoint</span>, <span name="ThriftService">ThriftService</span>]</span><span class="params">(<span name="servicePerEndpoint">servicePerEndpoint: <span class="extype" name="com.twitter.finagle.thrift.ThriftClient.thriftService.ServicePerEndpoint">ServicePerEndpoint</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="builder">builder: <a href="thrift/service/ThriftServiceBuilder.html" class="extype" name="com.twitter.finagle.thrift.service.ThriftServiceBuilder">ThriftServiceBuilder</a>[<span class="extype" name="com.twitter.finagle.thrift.ThriftClient.thriftService.ServicePerEndpoint">ServicePerEndpoint</span>, <span class="extype" name="com.twitter.finagle.thrift.ThriftClient.thriftService.ThriftService">ThriftService</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.thrift.ThriftClient.thriftService.ThriftService">ThriftService</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Converts from a Service interface (<code>ServicePerEndpoint</code>) to the higher-kinded
+method interface (<code>MethodPerEndpoint</code>).</p><div class="fullcomment"><div class="comment cmt"><p>Converts from a Service interface (<code>ServicePerEndpoint</code>) to the higher-kinded
+method interface (<code>MethodPerEndpoint</code>).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="thrift/ThriftClient.html" class="extype" name="com.twitter.finagle.thrift.ThriftClient">ThriftClient</a></dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-01-12)</i> Use methodPerEndpoint</p></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">
@@ -666,6 +732,8 @@ prefix and servers with &quot;srv/thrift&quot;. If you'd like more configuration
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></h3>
             </div><div class="parent" name="java.io.Serializable">
               <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="com.twitter.finagle.thrift.ThriftClient">
+              <h3>Inherited from <a href="thrift/ThriftClient.html" class="extype" name="com.twitter.finagle.thrift.ThriftClient">ThriftClient</a></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

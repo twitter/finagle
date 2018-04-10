@@ -280,7 +280,7 @@ resources for using Finagle.
                         <a class="class" href="KetamaClientKey.html" title=""></a>
                         <a href="KetamaClientKey.html" title="">KetamaClientKey</a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
+                        <a class="object" href="MockClient$.html" title=""></a>
                         <a class="class" href="" title="Map-based mock client for testing"></a>
                         <a href="" title="Map-based mock client for testing">MockClient</a>
                       </li><li class="current-entities indented4">
@@ -346,14 +346,16 @@ resources for using Finagle.
           <div id="content">
             <body class="class type">
       <div id="definition">
-        <div class="big-circle class">c</div>
+        <a href="MockClient$.html" title="See companion object"><div class="big-circle class-companion-object">c</div></a>
         <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="index.html" class="extype" name="com.twitter.finagle.memcached">memcached</a></p>
-        <h1>MockClient<span class="permalink">
+        <h1><a href="MockClient$.html" title="See companion object">MockClient</a><span class="permalink">
       <a href="../../../../com/twitter/finagle/memcached/MockClient.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
-        <h3><span class="morelinks"></span></h3>
+        <h3><span class="morelinks"><div>
+            Companion <a href="MockClient$.html" title="See companion object">object MockClient</a>
+          </div></span></h3>
       </div>
 
       <h4 id="signature" class="signature">
@@ -367,8 +369,9 @@ resources for using Finagle.
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Map-based mock client for testing</p><p>Note: expiry and flags are ignored on update operations.
-</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Map-based mock client for testing
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>this class now respects expiry times. If you want the old expiry-ignoring behavior,
+      use MockClient.ignoresTtl()</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -419,38 +422,6 @@ resources for using Finagle.
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.memcached.MockClient#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(contents:Map[String,String])(implicitm:Manifest[String]):com.twitter.finagle.memcached.MockClient"></a><a id="&lt;init&gt;:MockClient"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/memcached/MockClient.html#&lt;init&gt;(contents:Map[String,String])(implicitm:Manifest[String]):com.twitter.finagle.memcached.MockClient" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">new</span>
-      </span>
-      <span class="symbol">
-        <span class="name">MockClient</span><span class="params">(<span name="contents">contents: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="m">m: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.memcached.MockClient#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(contents:Map[String,Array[Byte]]):com.twitter.finagle.memcached.MockClient"></a><a id="&lt;init&gt;:MockClient"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/memcached/MockClient.html#&lt;init&gt;(contents:Map[String,Array[Byte]]):com.twitter.finagle.memcached.MockClient" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">new</span>
-      </span>
-      <span class="symbol">
-        <span class="name">MockClient</span><span class="params">(<span name="contents">contents: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.12.4/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>)</span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.memcached.MockClient#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="&lt;init&gt;():com.twitter.finagle.memcached.MockClient"></a><a id="&lt;init&gt;:MockClient"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/memcached/MockClient.html#&lt;init&gt;():com.twitter.finagle.memcached.MockClient" title="Permalink">
@@ -463,22 +434,6 @@ resources for using Finagle.
       </span>
       <span class="symbol">
         <span class="name">MockClient</span><span class="params">()</span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.memcached.MockClient#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(map:scala.collection.mutable.Map[String,com.twitter.io.Buf]):com.twitter.finagle.memcached.MockClient"></a><a id="&lt;init&gt;:MockClient"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/memcached/MockClient.html#&lt;init&gt;(map:scala.collection.mutable.Map[String,com.twitter.io.Buf]):com.twitter.finagle.memcached.MockClient" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">new</span>
-      </span>
-      <span class="symbol">
-        <span class="name">MockClient</span><span class="params">(<span name="map">map: <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>]</span>)</span>
       </span>
       
       
@@ -524,6 +479,38 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.memcached.MockClient#++=" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="++=(kvs:TraversableOnce[(String,com.twitter.finagle.memcached.MockClient.Cached)]):com.twitter.finagle.memcached.MockClient"></a><a id="++=(TraversableOnce[(String,Cached)]):MockClient"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/memcached/MockClient.html#++=(kvs:TraversableOnce[(String,com.twitter.finagle.memcached.MockClient.Cached)]):com.twitter.finagle.memcached.MockClient" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $plus$plus$eq" class="name">++=</span><span class="params">(<span name="kvs">kvs: <span class="extype" name="scala.TraversableOnce">TraversableOnce</span>[(<span class="extype" name="scala.Predef.String">String</span>, <a href="MockClient$$Cached.html" class="extype" name="com.twitter.finagle.memcached.MockClient.Cached">Cached</a>)]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.memcached.MockClient">MockClient</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">convenience method for adding several values directly to the underlying map</p>
+    </li><li name="com.twitter.finagle.memcached.MockClient#+=" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="+=(kv:(String,com.twitter.finagle.memcached.MockClient.Cached)):com.twitter.finagle.memcached.MockClient"></a><a id="+=((String,Cached)):MockClient"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/memcached/MockClient.html#+=(kv:(String,com.twitter.finagle.memcached.MockClient.Cached)):com.twitter.finagle.memcached.MockClient" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $plus$eq" class="name">+=</span><span class="params">(<span name="kv">kv: (<span class="extype" name="scala.Predef.String">String</span>, <a href="MockClient$$Cached.html" class="extype" name="com.twitter.finagle.memcached.MockClient.Cached">Cached</a>)</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.memcached.MockClient">MockClient</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">convenience method for adding a value directly to the underlying map</p>
     </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
       <span class="permalink">
@@ -556,6 +543,22 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+    </li><li name="com.twitter.finagle.memcached.MockClient#active" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="active:Map[String,com.twitter.finagle.memcached.MockClient.Cached]"></a><a id="active:Map[String,Cached]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/memcached/MockClient.html#active:Map[String,com.twitter.finagle.memcached.MockClient.Cached]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">active</span><span class="result">: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="MockClient$$Cached.html" class="extype" name="com.twitter.finagle.memcached.MockClient.Cached">Cached</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns an immutable copy of the current cache with expired elements filtered out</p>
     </li><li name="com.twitter.finagle.memcached.Client#adapt" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="adapt[T](bijection:com.twitter.bijection.Bijection[com.twitter.io.Buf,T]):com.twitter.finagle.memcached.BaseClient[T]"></a><a id="adapt[T](Bijection[Buf,T]):BaseClient[T]"></a>
       <span class="permalink">
@@ -587,7 +590,17 @@ resources for using Finagle.
         <span class="name">add</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">Note: expiry and flags are ignored.</p><div class="fullcomment"><div class="comment cmt"><p>Note: expiry and flags are ignored.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.memcached.MockClient">MockClient</a> → <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Store a key but only if it doesn't already exist on the server.</p><div class="fullcomment"><div class="comment cmt"><p>Store a key but only if it doesn't already exist on the server.</p><p><code>flags</code> is an arbitrary integer that the server stores along with
+              the data and sends back when the item is retrieved.
+              Clients may use this as a bit field to store data-specific
+              information; this field is opaque to the server.</p><p><code>expiry</code> is the expiration time for entries. If it is Time.epoch<code>,
+               </code>Time.Top<code>, </code>Time.Bottom<code> or </code>Time.Undefined<code> then the item
+               never expires, although it may be deleted from the cache to
+               make room for other items. This is also the case for values
+               where the number of seconds is larger than </code>Long.MaxValue<code>.
+               Otherwise, clients will not be able to retrieve this item after
+               the expiration time arrives (measured on the cache server).
+</code></p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.memcached.MockClient">MockClient</a> → <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#add" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="add(key:String,value:T):com.twitter.util.Future[Boolean]"></a><a id="add(String,Buf):Future[Boolean]"></a>
       <span class="permalink">
@@ -620,7 +633,18 @@ resources for using Finagle.
         <span class="name">append</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">Note: expiry and flags are ignored.</p><div class="fullcomment"><div class="comment cmt"><p>Note: expiry and flags are ignored.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.memcached.MockClient">MockClient</a> → <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Append bytes to the end of an existing key.</p><div class="fullcomment"><div class="comment cmt"><p>Append bytes to the end of an existing key. If the key doesn't exist, the
+operation has no effect.</p><p><code>flags</code> is an arbitrary integer that the server stores along with
+              the data and sends back when the item is retrieved.
+              Clients may use this as a bit field to store data-specific
+              information; this field is opaque to the server.</p><p><code>expiry</code> is the expiration time for entries. If it is Time.epoch<code>,
+               </code>Time.Top<code>, </code>Time.Bottom<code> or </code>Time.Undefined<code> then the item
+               never expires, although it may be deleted from the cache to
+               make room for other items. This is also the case for values
+               where the number of seconds is larger than </code>Long.MaxValue<code>.
+               Otherwise, clients will not be able to retrieve this item after
+               the expiration time arrives (measured on the cache server).
+</code></p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.memcached.MockClient">MockClient</a> → <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#append" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="append(key:String,value:T):com.twitter.util.Future[Boolean]"></a><a id="append(String,Buf):Future[Boolean]"></a>
       <span class="permalink">
@@ -687,9 +711,24 @@ exist, the operation has no effect.
         <span class="name">checkAndSet</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>, <span name="casUnique">casUnique: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="CasResult.html" class="extype" name="com.twitter.finagle.memcached.CasResult">CasResult</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">Checks if value is same as previous value, if not, do a swap and return true.</p><div class="fullcomment"><div class="comment cmt"><p>Checks if value is same as previous value, if not, do a swap and return true.</p><p>Note: expiry and flags are ignored.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p><span class="extype" name="Stored">Stored</span> if the operation was successful, <span class="extype" name="Exists">Exists</span> if the
+      <p class="shortcomment cmt">Perform a CAS operation on the key, only if the value has not
+changed since the value was last retrieved, and <code>casUnique</code>
+extracted from a <code>gets</code> command.</p><div class="fullcomment"><div class="comment cmt"><p>Perform a CAS operation on the key, only if the value has not
+changed since the value was last retrieved, and <code>casUnique</code>
+extracted from a <code>gets</code> command.  We treat the &quot;cas unique&quot; token
+opaquely, but in reality it is a string-encoded u64.</p><p><code>flags</code> is an arbitrary integer that the server stores along with
+              the data and sends back when the item is retrieved.
+              Clients may use this as a bit field to store data-specific
+              information; this field is opaque to the server.</p><p><code>expiry</code> is the expiration time for entries. If it is Time.epoch<code>,
+               </code>Time.Top<code>, </code>Time.Bottom<code> or </code>Time.Undefined<code> then the item
+               never expires, although it may be deleted from the cache to
+               make room for other items. This is also the case for values
+               where the number of seconds is larger than </code>Long.MaxValue<code>.
+               Otherwise, clients will not be able to retrieve this item after
+               the expiration time arrives (measured on the cache server).
+</code></p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p><span class="extype" name="Stored">Stored</span> if the operation was successful, <span class="extype" name="Exists">Exists</span> if the
        operation failed because someone else had changed the value,
-       or <span class="extype" name="NotFound">NotFound</span> if the key was not found in the cache.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.memcached.MockClient">MockClient</a> → <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+       or <span class="extype" name="NotFound">NotFound</span> if the key was not found in the cache.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.memcached.MockClient">MockClient</a> → <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#gets(keys:Iterable[String]):com.twitter.util.Future[Map[String,(T,com.twitter.io.Buf)]]" class="extmbr" name="com.twitter.finagle.memcached.MockClient#gets">gets</a> and <a href="#getsResult(keys:Iterable[String]):com.twitter.util.Future[com.twitter.finagle.memcached.GetsResult]" class="extmbr" name="com.twitter.finagle.memcached.MockClient#getsResult">getsResult</a> for retreiving the cas token.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#checkAndSet" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="checkAndSet(key:String,value:T,casUnique:com.twitter.io.Buf):com.twitter.util.Future[com.twitter.finagle.memcached.CasResult]"></a><a id="checkAndSet(String,Buf,Buf):Future[CasResult]"></a>
       <span class="permalink">
@@ -714,6 +753,22 @@ token matches the one on the server, the value is replaced.  We treat the
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p><span class="extype" name="Stored">Stored</span> if the operation was successful, <span class="extype" name="Exists">Exists</span> if the
        operation failed because someone else had changed the value,
        or <span class="extype" name="NotFound">NotFound</span> if the key was not found in the cache.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="BaseClient.html#gets(keys:Iterable[String]):com.twitter.util.Future[Map[String,(T,com.twitter.io.Buf)]]" class="extmbr" name="com.twitter.finagle.memcached.BaseClient#gets">gets</a> and <a href="BaseClient.html#getsResult(keys:Iterable[String]):com.twitter.util.Future[com.twitter.finagle.memcached.GetsResult]" class="extmbr" name="com.twitter.finagle.memcached.BaseClient#getsResult">getsResult</a> for retreiving the cas token.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.memcached.MockClient#clear" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="clear():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/memcached/MockClient.html#clear():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clear</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">clear underlying cache: the underlying Map will be empty</p>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
@@ -787,7 +842,7 @@ token matches the one on the server, the value is replaced.  We treat the
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
-    </li><li name="com.twitter.finagle.memcached.MockClient#contents" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.memcached.MockClient#contents" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="contents:Map[String,com.twitter.io.Buf]"></a><a id="contents:Map[String,Buf]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/memcached/MockClient.html#contents:Map[String,com.twitter.io.Buf]" title="Permalink">
@@ -802,7 +857,9 @@ token matches the one on the server, the value is replaced.  We treat the
         <span class="name">contents</span><span class="result">: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">Returns an immutable copy of the current cache.</p>
+      <p class="shortcomment cmt">Returns an immutable copy of the current cache.</p><div class="fullcomment"><div class="comment cmt"><p>Returns an immutable copy of the current cache. API compatible with MockClient
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>The returned Map will contain expired items for backwards compatibility
+      with the old API. To get a Map with them filtered out, use MockClient.active</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.MockClient#decr" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="decr(key:String,delta:Long):com.twitter.util.Future[Option[Long]]"></a><a id="decr(String,Long):Future[Option[Long]]"></a>
       <span class="permalink">
@@ -1170,6 +1227,38 @@ as a decimal representation of a 64-bit unsigned integer.</p><p>This operation h
       <p class="shortcomment cmt">Increment the <code>key</code> by <code>1</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Increment the <code>key</code> by <code>1</code>.</p><p>Interprets the stored value for <code>key</code> as a Long if it is parseable
 as a decimal representation of a 64-bit unsigned integer.</p><p>This operation has no effect if there is no value there already.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.memcached.MockClient#isEmpty" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="isEmpty:Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/memcached/MockClient.html#isEmpty:Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isEmpty</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.memcached.MockClient#isExpired" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isExpired(t:com.twitter.util.Time):Boolean"></a><a id="isExpired(Time):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/memcached/MockClient.html#isExpired(t:com.twitter.util.Time):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isExpired</span><span class="params">(<span name="t">t: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -1186,22 +1275,6 @@ as a decimal representation of a 64-bit unsigned integer.</p><p>This operation h
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.memcached.MockClient#map" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="map:scala.collection.mutable.Map[String,com.twitter.io.Buf]"></a><a id="map:Map[String,Buf]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/memcached/MockClient.html#map:scala.collection.mutable.Map[String,com.twitter.io.Buf]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">map</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/mutable/Map.html#scala.collection.mutable.Map" class="extype" name="scala.collection.mutable.Map">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>]</span>
-      </span>
-      
-      
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -1271,7 +1344,18 @@ as a decimal representation of a 64-bit unsigned integer.</p><p>This operation h
         <span class="name">prepend</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">Note: expiry and flags are ignored.</p><div class="fullcomment"><div class="comment cmt"><p>Note: expiry and flags are ignored.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.memcached.MockClient">MockClient</a> → <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Prepend bytes to the beginning of an existing key.</p><div class="fullcomment"><div class="comment cmt"><p>Prepend bytes to the beginning of an existing key. If the key doesn't
+exist, the operation has no effect.</p><p><code>flags</code> is an arbitrary integer that the server stores along with
+              the data and sends back when the item is retrieved.
+              Clients may use this as a bit field to store data-specific
+              information; this field is opaque to the server.</p><p><code>expiry</code> is the expiration time for entries. If it is Time.epoch<code>,
+               </code>Time.Top<code>, </code>Time.Bottom<code> or </code>Time.Undefined<code> then the item
+               never expires, although it may be deleted from the cache to
+               make room for other items. This is also the case for values
+               where the number of seconds is larger than </code>Long.MaxValue<code>.
+               Otherwise, clients will not be able to retrieve this item after
+               the expiration time arrives (measured on the cache server).
+</code></p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.memcached.MockClient">MockClient</a> → <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#prepend" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="prepend(key:String,value:T):com.twitter.util.Future[Boolean]"></a><a id="prepend(String,Buf):Future[Boolean]"></a>
       <span class="permalink">
@@ -1323,7 +1407,18 @@ protocol compatibility.
         <span class="name">replace</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">Note: expiry and flags are ignored.</p><div class="fullcomment"><div class="comment cmt"><p>Note: expiry and flags are ignored.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.memcached.MockClient">MockClient</a> → <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Replace bytes on an existing key.</p><div class="fullcomment"><div class="comment cmt"><p>Replace bytes on an existing key. If the key doesn't exist, the
+operation has no effect.</p><p><code>flags</code> is an arbitrary integer that the server stores along with
+              the data and sends back when the item is retrieved.
+              Clients may use this as a bit field to store data-specific
+              information; this field is opaque to the server.</p><p><code>expiry</code> is the expiration time for entries. If it is Time.epoch<code>,
+               </code>Time.Top<code>, </code>Time.Bottom<code> or </code>Time.Undefined<code> then the item
+               never expires, although it may be deleted from the cache to
+               make room for other items. This is also the case for values
+               where the number of seconds is larger than </code>Long.MaxValue<code>.
+               Otherwise, clients will not be able to retrieve this item after
+               the expiration time arrives (measured on the cache server).
+</code></p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.memcached.MockClient">MockClient</a> → <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#replace" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="replace(key:String,value:T):com.twitter.util.Future[Boolean]"></a><a id="replace(String,Buf):Future[Boolean]"></a>
       <span class="permalink">
@@ -1357,8 +1452,17 @@ effect.</p><p>Neither flags nor expiry are supplied.
         <span class="name">set</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">Note: expiry and flags are ignored.</p><div class="fullcomment"><div class="comment cmt"><p>Note: expiry and flags are ignored.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.memcached.MockClient">MockClient</a> → <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Store a key.</p><div class="fullcomment"><div class="comment cmt"><p>Store a key. Override an existing value.</p><p><code>flags</code> is an arbitrary integer that the server stores along with
+              the data and sends back when the item is retrieved.
+              Clients may use this as a bit field to store data-specific
+              information; this field is opaque to the server.</p><p><code>expiry</code> is the expiration time for entries. If it is Time.epoch<code>,
+               </code>Time.Top<code>, </code>Time.Bottom<code> or </code>Time.Undefined<code> then the item
+               never expires, although it may be deleted from the cache to
+               make room for other items. This is also the case for values
+               where the number of seconds is larger than </code>Long.MaxValue<code>.
+               Otherwise, clients will not be able to retrieve this item after
+               the expiration time arrives (measured on the cache server).
+</code></p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.memcached.MockClient">MockClient</a> → <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#set" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="set(key:String,value:T):com.twitter.util.Future[Unit]"></a><a id="set(String,Buf):Future[Unit]"></a>
       <span class="permalink">
@@ -1376,6 +1480,22 @@ effect.</p><p>Neither flags nor expiry are supplied.
       
       <p class="shortcomment cmt">Store a key.</p><div class="fullcomment"><div class="comment cmt"><p>Store a key. Override an existing values.</p><p>Neither flags nor expiry are supplied.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.memcached.MockClient#size" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="size:Int"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/memcached/MockClient.html#size:Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">size</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.memcached.MockClient#stats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="stats(args:Option[String]):com.twitter.util.Future[Seq[String]]"></a><a id="stats(Option[String]):Future[Seq[String]]"></a>
       <span class="permalink">
@@ -1443,6 +1563,26 @@ effect.</p><p>Neither flags nor expiry are supplied.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.memcached.MockClient#toMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toMap:Map[String,com.twitter.finagle.memcached.MockClient.Cached]"></a><a id="toMap:Map[String,Cached]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/memcached/MockClient.html#toMap:Map[String,com.twitter.finagle.memcached.MockClient.Cached]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toMap</span><span class="result">: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="MockClient$$Cached.html" class="extype" name="com.twitter.finagle.memcached.MockClient.Cached">Cached</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns an immutable copy of the current cache.</p><div class="fullcomment"><div class="comment cmt"><p>Returns an immutable copy of the current cache. Values are wrapped in a Cached
+class, which carries the expiry time and flags given, along with the Buf containing
+the value.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>The returned Map *will* contain expired items. To get a Map with them filtered out,
+      use MockClient.active</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.MockClient#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">
@@ -1459,6 +1599,54 @@ effect.</p><p>Neither flags nor expiry are supplied.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.memcached.MockClient">MockClient</a> → AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.memcached.MockClient#update" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="update(k:String,v:com.twitter.io.Buf):Unit"></a><a id="update(String,Buf):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/memcached/MockClient.html#update(k:String,v:com.twitter.io.Buf):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">update</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="v">v: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.memcached.MockClient#update" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="update(k:String,v:String):Unit"></a><a id="update(String,String):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/memcached/MockClient.html#update(k:String,v:String):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">update</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="v">v: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.memcached.MockClient#update" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="update(k:String,v:com.twitter.finagle.memcached.MockClient.Cached):Unit"></a><a id="update(String,Cached):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/memcached/MockClient.html#update(k:String,v:com.twitter.finagle.memcached.MockClient.Cached):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">update</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="v">v: <a href="MockClient$$Cached.html" class="extype" name="com.twitter.finagle.memcached.MockClient.Cached">Cached</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">

@@ -10,6 +10,9 @@ MethodBuilder
 level than the  :ref:`Finagle 6 APIs <finagle6apis>` while improving upon the deprecated
 ``ClientBuilder``. ``MethodBuilder`` provides:
 
+- :ref:`Idempotent <mb_idempotency>` classification providing a good default retry
+  policy. It also offers a single knob, max extra load, that can help reduce tail latency
+  through :ref:`backup requests <mb_backup_requests>`.
 - :ref:`Logical <mb_logical_req>` success rate metrics.
 - Retries based on application-level requests and responses (e.g. an HTTP
   503 response code or a Thrift exception).
@@ -122,31 +125,117 @@ used to determine which requests are successful. This is the basis for measuring
 the :ref:`logical <mb_logical_req>` success metrics of the method and for logging_
 unsuccessful requests.
 
+.. _mb_idempotency:
+
 Idempotency
 -----------
 
 ``MethodBuilder`` provides ``idempotent`` and ``nonIdemptotent`` methods for a client to signal
 whether it's safe to resend requests that have already been sent. 
 
-If a client is configured with ``idempotent``, a protcol-dependent
+If a client is configured with ``idempotent``, a protocol-dependent
 :src:`ResponseClassifier <com/twitter/finagle/service/ResponseClassifier.scala>` is combined with
-any exisiting classifier to also reissue requests on failure (Thrift exceptions for ThriftMux
+any existing classifier to also reissue requests on failure (Thrift exceptions for ThriftMux
 clients, and 500s for HTTP clients). The parameter to ``idempotent``, ``maxExtraLoad``, is used to
-configure :src:`BackupRequestFilter <com/twitter/finagle/client/BackupRequestFilter.scala>`
-(a value of 0.0 disables the filter).
-:src:`BackupRequestFilter <com/twitter/finagle/client/BackupRequestFilter.scala>` can reduce tail
-latency by sending a second, backup request if the original request has not been satisfied within
-a certain time limit (calculated dynamically based on latency). The filter will never send more than
-``maxExtraLoad`` more requests (i.e., for a value of 0.01, the filter will not send more than 1%
-additional requests).
+configure :ref:`backup requests <mb_backup_requests>` and may be useful in reducing tail latency.
+Backup requests can be disabled by setting ``maxExtraLoad`` to `0.0`.
 
 If a client is configured with ``nonIdempotent``, any existing configured
 :src:`ResponseClassifier <com/twitter/finagle/service/ResponseClassifier.scala>` is removed
 and replaced with the default
 :src:`ResponseClassifier <com/twitter/finagle/service/ResponseClassifier.scala>`, which only retries
 on write exceptions (wherein the request was never sent to the server). Any configured
-:src:`BackupRequestFilter <com/twitter/finagle/client/BackupRequestFilter.scala>` is also disabled,
+:ref:`backup requests <mb_backup_requests>` are also disabled,
 since it's not safe to reissue requests.
+
+.. _mb_backup_requests:
+
+Backup Requests
+~~~~~~~~~~~~~~~
+
+Backup requests, or hedged requests, are a means of reducing the tail latency of
+requests that are known to be safe to issue multiple times. This is done by sending an extra
+copy of a request, or a backup, to the backend after some threshold of time has elapsed
+before receiving a response for the initial request. This helps tail latency when the
+backend service has high variability in its response times and the additional backend load
+is deemed worth the cost of improving tail latency.
+
+``MethodBuilder`` makes backup requests easy through the ``idempotent`` method's ``maxExtraLoad``
+parameter. This parameter represents the maximum extra load, expressed as a fraction from
+`[0.0 to 1.0)`, you are willing to send to the backend. If a response for the original request
+has not been received within some duration, a second, backup, request will be issued so long as
+the extra load constraints have not been violated. That duration is derived from ``maxExtraLoad``;
+it is the n-th percentile latency of requests, where n is `100 * (1  - maxExtraLoad)`. For example,
+if ``maxExtraLoad`` is `0.01`, no more than 1% additional requests will be sent and
+it will be sent at the p99 latency.
+
+To disable backup requests, set ``maxExtraLoad`` to `0.0`.
+
+Latency is calculated using a windowed history of responses. In order to protect the backend from
+excessive backup requests should the latency shift suddenly, a `RetryBudget` based on
+``maxExtraLoad`` is used. When determining whether or not to send a backup, this local budget
+is combined with the underlying client's retry budget; this means that the backend will
+not receive more extra load than that permitted by the budget, whether through
+retries due to failures or backup requests.
+
+If you are using TwitterServer along with finagle-stats, a good starting point for
+determining a value for ``maxExtraLoad`` is looking at the details of the
+`PDF histogram for request latency <https://twitter.github.io/twitter-server/Admin.html#admin-histograms>`_.
+If you choose a ``maxExtraLoad`` of `0.01`, for example, you can expect your p999 and p9999
+latencies to come in towards the p99 latency. For `0.05`, those latencies would shift
+towards your p95 latency. You should also ensure that your backend can tolerate the increased load.
+
+Here's an example of how to send backup requests for one endpoint
+and disable them for another, first in Scala:
+
+.. code-block:: scala
+
+  import com.twitter.conversions.percent._
+  import com.twitter.finagle.{http, Http, Service}
+
+  val builder = Http.client.methodBuilder("inet!localhost:8080")
+
+  val withBackups: Service[http.Request, http.Response] = builder
+    .idempotent(maxExtraLoad = 1.percent)
+    .newService(methodName = "with_backups")
+
+  val noBackups: Service[http.Request, http.Response] = builder
+    .idempotent(maxExtraLoad = 0.percent)
+    .newService(methodName = "no_backups")
+
+A similar example, for Java:
+
+.. code-block:: java
+
+  import com.twitter.finagle.Http;
+  import com.twitter.finagle.Service;
+  import com.twitter.finagle.http.Request;
+  import com.twitter.finagle.http.Response;
+
+  Service<Request, Response> withBackups =
+    Http.client().methodBuilder("localhost:8080")
+      .idempotent(0.01)
+      .newService("with_backups");
+
+  Service<Request, Response> noBackups =
+    Http.client().methodBuilder("localhost:8080")
+      .idempotent(0.0)
+      .newService("no_backups");
+
+.. _mb_backups_requests_no_mb:
+
+While backup requests are integrated nicely with ``MethodBuilder``, this is not a requirement.
+The functionality is encapsulated in a :ref:`Filter <filters>` that can be composed with
+your other `Filters` and `Services`. Take a look at
+:src:`BackupRequestFilter <com/twitter/finagle/client/BackupRequestFilter.scala>`,
+but note there are subtleties regarding where it is placed and the retry budgets.
+
+.. note::
+
+   Backup requests were popularized by Google in Dean, J. and Barroso, L.A. (2013),
+   `The Tail at Scale <http://cacm.acm.org/magazines/2013/2/160173-the-tail-at-scale/fulltext>`_,
+   Communications of the ACM, Vol. 56 No. 2, Pages 74-80.
+   Non-paywalled slides `here <https://static.googleusercontent.com/media/research.google.com/en//people/jeff/Berkeley-Latency-Mar2012.pdf>`_.
 
 Timeouts
 --------

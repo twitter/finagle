@@ -171,7 +171,7 @@ Array[Byte]]</code>. The service provided is that of a &quot;transport&quot; of
 thrift messages (requests and replies) according to the protocol
 chosen. This is why the client codecs need to have access to a
 thrift <code>ProtocolFactory</code>.</p><p>These transports are used by the services produced by the
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">finagle thrift codegenerator</a>.</p><pre><span class="kw">val</span> service: Service[ThriftClientRequest, <span class="std">Array</span>[<span class="std">Byte</span>]] = ClientBuilder()
+<a href="https://github.com/mariusaeriksen/thrift-finagle" target="_blank">finagle thrift codegenerator</a>.</p><pre><span class="kw">val</span> service: Service[ThriftClientRequest, <span class="std">Array</span>[<span class="std">Byte</span>]] = ClientBuilder()
   .hosts(<span class="lit">"foobar.com:123"</span>)
   .stack(Thrift.client)
   .build()
@@ -211,7 +211,7 @@ generator.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="Serializes an individual delegation." href="Delegation$.html"><span class="name">Delegation</span></a><span class="result"> extends <span class="extype" name="com.twitter.scrooge.ThriftStructCodec3">ThriftStructCodec3</span>[<a href="Delegation.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.Delegation">Delegation</a>] with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="Serializes an individual delegation." href="Delegation$.html"><span class="name">Delegation</span></a><span class="result"> extends <span class="extype" name="com.twitter.scrooge.ValidatingThriftStructCodec3">ValidatingThriftStructCodec3</span>[<a href="Delegation.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.Delegation">Delegation</a>] with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">Serializes an individual delegation.</p><div class="fullcomment"><div class="comment cmt"><p>Serializes an individual delegation.

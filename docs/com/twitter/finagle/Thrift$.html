@@ -774,7 +774,7 @@ Array[Byte]]</code>. The service provided is that of a &quot;transport&quot; of
 thrift messages (requests and replies) according to the protocol
 chosen. This is why the client codecs need to have access to a
 thrift <code>ProtocolFactory</code>.</p><p>These transports are used by the services produced by the
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">finagle thrift codegenerator</a>.</p><pre><span class="kw">val</span> service: Service[ThriftClientRequest, <span class="std">Array</span>[<span class="std">Byte</span>]] = ClientBuilder()
+<a href="https://github.com/mariusaeriksen/thrift-finagle" target="_blank">finagle thrift codegenerator</a>.</p><pre><span class="kw">val</span> service: Service[ThriftClientRequest, <span class="std">Array</span>[<span class="std">Byte</span>]] = ClientBuilder()
   .hosts(<span class="lit">"foobar.com:123"</span>)
   .stack(Thrift.client)
   .build()
@@ -1409,7 +1409,7 @@ be injected with <code>withProtocolFactory</code>. The client,
 <code>Client[ThriftClientRequest, Array[Byte]]</code> provides direct access
 to the thrift transport, but we recommend using code generation
 through either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a> or
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">a fork</a>
+<a href="https://github.com/mariusaeriksen/thrift-finagle" target="_blank">a fork</a>
 of the Apache generator. A rich API is provided to support
 interfaces generated with either of these code generators.</p><p>The client and server uses the standard thrift protocols, with
 support for both framed and buffered transports. Finagle attempts
@@ -2224,7 +2224,7 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="Thrift$$Client$.html"><span class="name">Client</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="Thrift$$Client$.html"><span class="name">Client</span></a><span class="result"> extends <a href="thrift/ThriftClient.html" class="extype" name="com.twitter.finagle.thrift.ThriftClient">ThriftClient</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       

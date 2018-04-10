@@ -171,7 +171,7 @@ Array[Byte]]</code>. The service provided is that of a &quot;transport&quot; of
 thrift messages (requests and replies) according to the protocol
 chosen. This is why the client codecs need to have access to a
 thrift <code>ProtocolFactory</code>.</p><p>These transports are used by the services produced by the
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">finagle thrift codegenerator</a>.</p><pre><span class="kw">val</span> service: Service[ThriftClientRequest, <span class="std">Array</span>[<span class="std">Byte</span>]] = ClientBuilder()
+<a href="https://github.com/mariusaeriksen/thrift-finagle" target="_blank">finagle thrift codegenerator</a>.</p><pre><span class="kw">val</span> service: Service[ThriftClientRequest, <span class="std">Array</span>[<span class="std">Byte</span>]] = ClientBuilder()
   .hosts(<span class="lit">"foobar.com:123"</span>)
   .stack(Thrift.client)
   .build()
@@ -287,6 +287,10 @@ generator.
                         <span class="separator"></span>
                         <a class="trait" href="ServiceIfaceBuilder.html" title="Typeclass ServiceIfaceBuilder[T] creates T-typed interfaces from thrift clients."></a>
                         <a href="ServiceIfaceBuilder.html" title="Typeclass ServiceIfaceBuilder[T] creates T-typed interfaces from thrift clients.">ServiceIfaceBuilder</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="ThriftClient.html" title="Stateless helper methods which wrap a given ServiceIface (deprecated) or a given ServicePerEndpoint with another type via the given method's implicit Builder."></a>
+                        <a href="ThriftClient.html" title="Stateless helper methods which wrap a given ServiceIface (deprecated) or a given ServicePerEndpoint with another type via the given method's implicit Builder.">ThriftClient</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="ThriftClientRequest.html" title="Defines a (framed) thrift request, simply composed of the raw message and a boolean indicating whether it is a one-shot message or not."></a>
@@ -763,6 +767,23 @@ generator.
       </span>
       
       
+    </li><li name="com.twitter.finagle.thrift.RichClientParam#restrictedProtocolFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="restrictedProtocolFactory:org.apache.thrift.protocol.TProtocolFactory"></a><a id="restrictedProtocolFactory:TProtocolFactory"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/RichClientParam.html#restrictedProtocolFactory:org.apache.thrift.protocol.TProtocolFactory" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">restrictedProtocolFactory</span><span class="result">: <span class="extype" name="org.apache.thrift.protocol.TProtocolFactory">TProtocolFactory</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Apply system-wide read limit on TBinaryProtocol and TCompactProtocol if
+the System.Property(&quot;-Dorg.apache.thrift.readLength&quot;) is set.</p>
     </li><li name="com.twitter.finagle.thrift.RichClientParam#serviceName" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="serviceName:String"></a>
       <span class="permalink">

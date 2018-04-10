@@ -456,7 +456,7 @@ resources for using Finagle.
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
@@ -465,7 +465,7 @@ resources for using Finagle.
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"></div><dl class="attributes block"> <dt>Self Type</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.Cookie">Cookie</a></dd><dt>Note</dt><dd><span class="cmt"><p><code>domain</code> and <code>path</code> may be null.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -680,7 +680,7 @@ resources for using Finagle.
       </span>
       
       <p class="shortcomment cmt">Create a new <a href="" class="extype" name="com.twitter.finagle.http.Cookie">Cookie</a> with the same set fields, and domain <code>domain</code>.</p>
-    </li><li name="com.twitter.finagle.http.Cookie#domain" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Cookie#domain" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="domain:String"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/Cookie.html#domain:String" title="Permalink">
@@ -689,13 +689,13 @@ resources for using Finagle.
     </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
         <span class="name">domain</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
-      <p class="shortcomment cmt">Get the domain.</p><div class="fullcomment"><div class="comment cmt"><p>Get the domain.</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>May be null.</p></span></dd></dl></div>
+      
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -816,7 +816,7 @@ DefaultCookie.
     </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
         <span class="name">httpOnly</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
@@ -881,7 +881,7 @@ DefaultCookie.
     </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
         <span class="name">name</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
@@ -958,7 +958,7 @@ DefaultCookie.
       </span>
       
       <p class="shortcomment cmt">Create a new <a href="" class="extype" name="com.twitter.finagle.http.Cookie">Cookie</a> with the same set fields, and path <code>path</code>.</p>
-    </li><li name="com.twitter.finagle.http.Cookie#path" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Cookie#path" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="path:String"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/Cookie.html#path:String" title="Permalink">
@@ -967,13 +967,13 @@ DefaultCookie.
     </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
         <span class="name">path</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
-      <p class="shortcomment cmt">Get the path.</p><div class="fullcomment"><div class="comment cmt"><p>Get the path.</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>May be null.</p></span></dd></dl></div>
+      
     </li><li name="com.twitter.finagle.http.Cookie#secure" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="secure(secure:Boolean):com.twitter.finagle.http.Cookie"></a><a id="secure(Boolean):Cookie"></a>
       <span class="permalink">
@@ -1000,7 +1000,7 @@ DefaultCookie.
     </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
         <span class="name">secure</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
@@ -1040,6 +1040,22 @@ DefaultCookie.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.http.Cookie#value" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="value(value:String):com.twitter.finagle.http.Cookie"></a><a id="value(String):Cookie"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/Cookie.html#value(value:String):com.twitter.finagle.http.Cookie" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">value</span><span class="params">(<span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.Cookie">Cookie</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Create a new <a href="" class="extype" name="com.twitter.finagle.http.Cookie">Cookie</a> with the same set fields, and value <code>value</code>.</p>
+    </li><li name="com.twitter.finagle.http.Cookie#value" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="value:String"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/Cookie.html#value:String" title="Permalink">
@@ -1048,7 +1064,7 @@ DefaultCookie.
     </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
         <span class="name">value</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
@@ -1129,105 +1145,7 @@ DefaultCookie.
 
         
 
-        <div class="values members">
-              <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.http.Cookie#domain_=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="domain_=(domain:String):Unit"></a><a id="domain_=(String):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/Cookie.html#domain_=(domain:String):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: domain_$eq. Deprecated: (Since version 2017-08-16) Set domain in the Cookie constructor or use Cookie.domain" class="name deprecated">domain_=</span><span class="params">(<span name="domain">domain: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Set the domain.</p><div class="fullcomment"><div class="comment cmt"><p>Set the domain.</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-08-16)</i> Set domain in the Cookie constructor or use <code>Cookie.domain</code></p></dd><dt>Note</dt><dd><span class="cmt"><p><code>domain</code> may be null.</p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Cookie#httpOnly_=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="httpOnly_=(httpOnly:Boolean):Unit"></a><a id="httpOnly_=(Boolean):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/Cookie.html#httpOnly_=(httpOnly:Boolean):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: httpOnly_$eq. Deprecated: (Since version 2017-08-16) Set httpOnly in the Cookie constructor or use Cookie.httpOnly" class="name deprecated">httpOnly_=</span><span class="params">(<span name="httpOnly">httpOnly: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-08-16)</i> Set httpOnly in the Cookie constructor or use <code>Cookie.httpOnly</code></p></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Cookie#maxAge_=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="maxAge_=(maxAge:com.twitter.util.Duration):Unit"></a><a id="maxAge_=(Duration):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/Cookie.html#maxAge_=(maxAge:com.twitter.util.Duration):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: maxAge_$eq. Deprecated: (Since version 2017-08-16) Set maxAge in the Cookie constructor or use Cookie.maxAge" class="name deprecated">maxAge_=</span><span class="params">(<span name="maxAge">maxAge: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-08-16)</i> Set maxAge in the Cookie constructor or use <code>Cookie.maxAge</code></p></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Cookie#path_=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="path_=(path:String):Unit"></a><a id="path_=(String):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/Cookie.html#path_=(path:String):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: path_$eq. Deprecated: (Since version 2017-08-16) Set path in the Cookie constructor or use Cookie.path" class="name deprecated">path_=</span><span class="params">(<span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Set the path.</p><div class="fullcomment"><div class="comment cmt"><p>Set the path.</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-08-16)</i> Set path in the Cookie constructor or use <code>Cookie.path</code></p></dd><dt>Note</dt><dd><span class="cmt"><p><code>path</code> may be null.</p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Cookie#value_=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="value_=(value:String):Unit"></a><a id="value_=(String):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/Cookie.html#value_=(value:String):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: value_$eq. Deprecated: (Since version 2017-08-16) Set value in the Cookie constructor" class="name deprecated">value_=</span><span class="params">(<span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Set the value.</p><div class="fullcomment"><div class="comment cmt"><p>Set the value.</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-08-16)</i> Set value in the Cookie constructor</p></dd><dt>Note</dt><dd><span class="cmt"><p><code>value</code> must not be null.</p></span></dd></dl></div>
-    </li></ol>
-            </div>
+        
         </div>
 
         <div id="inheritedMembers">

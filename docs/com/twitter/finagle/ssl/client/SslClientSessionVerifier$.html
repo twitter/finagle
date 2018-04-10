@@ -299,7 +299,7 @@ resources for using Finagle.
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">verifier</dt><dd class="cmt"><p>The <a href="SslClientSessionVerifier.html" class="extype" name="com.twitter.finagle.ssl.client.SslClientSessionVerifier">SslClientSessionVerifier</a> whose <code>apply</code> method
 is called when an <code>SSLSession</code> is established. This method determines
 whether the SSL/TLS connection should be used. It is an additional level
-of verification beyond the standard certificate chain verification checking.</p></dd></dl><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>By default a <code>HostnameVerifier</code> will be used if this
+of verification beyond the standard certificate chain verification checking.</p></dd></dl><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>By default sessions will be seen as <code>AlwaysValid</code> if this
 param is not configured.</p></span></dd></dl></div>
     </li></ol>
             </div>

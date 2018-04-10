@@ -196,7 +196,7 @@ resources for using Finagle.
                         <a class="class" href="ByteValue.html" title=""></a>
                         <a href="ByteValue.html" title="">ByteValue</a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="CanBeParameter$.html" title=""></a>
+                        <a class="object" href="CanBeParameter$.html" title="When a new implicit CanBeParameter is added here, it should also be explicitly added to Parameter.unsafeWrap."></a>
                         <a class="trait" href="CanBeParameter.html" title=""></a>
                         <a href="CanBeParameter.html" title="">CanBeParameter</a>
                       </li><li class="current-entities indented4">
@@ -332,9 +332,9 @@ resources for using Finagle.
                         <a class="class" href="OK.html" title=""></a>
                         <a href="OK.html" title="">OK</a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="Parameter$.html" title="Note: There is a Java-friendly API for this object: com.twitter.finagle.mysql.Parameters."></a>
-                        <a class="trait" href="Parameter.html" title="A value of type A can implicitly convert to a Parameter if an evidence CanBeParameter[A] is available in scope."></a>
-                        <a href="Parameter.html" title="A value of type A can implicitly convert to a Parameter if an evidence CanBeParameter[A] is available in scope.">Parameter</a>
+                        <a class="object" href="Parameter$.html" title="For Scala users, the typical usage is by importing the implicit conversions and then letting the compiler do the conversions for you."></a>
+                        <a class="trait" href="Parameter.html" title="A value of type A can implicitly convert to a Parameter if an evidence CanBeParameter[A] is available in scope via the Parameter.wrap or Parameter.wrapOption implicits."></a>
+                        <a href="Parameter.html" title="A value of type A can implicitly convert to a Parameter if an evidence CanBeParameter[A] is available in scope via the Parameter.wrap or Parameter.wrapOption implicits.">Parameter</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Parameters$.html" title="A Java adaptation of the com.twitter.finagle.mysql.Parameter companion object."></a>
@@ -352,9 +352,9 @@ resources for using Finagle.
                         <a class="class" href="PrepareRequest.html" title="Allocates a prepared statement on the server from the passed in query string."></a>
                         <a href="PrepareRequest.html" title="Allocates a prepared statement on the server from the passed in query string.">PrepareRequest</a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="trait" href="PreparedStatement.html" title="A PreparedStatement represents a parameterized sql statement which may be applied concurrently with varying parameters."></a>
-                        <a href="PreparedStatement.html" title="A PreparedStatement represents a parameterized sql statement which may be applied concurrently with varying parameters.">PreparedStatement</a>
+                        <a class="object" href="PreparedStatement$.html" title=""></a>
+                        <a class="trait" href="PreparedStatement.html" title="A PreparedStatement represents a parameterized SQL statement which may be applied concurrently with varying parameters."></a>
+                        <a href="PreparedStatement.html" title="A PreparedStatement represents a parameterized SQL statement which may be applied concurrently with varying parameters.">PreparedStatement</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="QueryRequest.html" title="A QueryRequest is used to send the server a text-based query that is executed immediately."></a>
@@ -423,6 +423,10 @@ resources for using Finagle.
                         <span class="separator"></span>
                         <a class="trait" href="Value.html" title="Defines a Value ADT that represents the domain of values received from a mysql server."></a>
                         <a href="Value.html" title="Defines a Value ADT that represents the domain of values received from a mysql server.">Value</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="WithSql.html" title="Contains the SQL for a Request."></a>
+                        <a href="WithSql.html" title="Contains the SQL for a Request.">WithSql</a>
                       </li>
               </ul>
             </div>
@@ -748,7 +752,7 @@ resources for using Finagle.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getMessage</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+        <span class="name">getMessage</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.mysql.LostSyncException">LostSyncException</a> → Throwable</dd></dl></div>

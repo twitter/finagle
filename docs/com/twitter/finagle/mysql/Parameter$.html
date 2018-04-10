@@ -196,7 +196,7 @@ resources for using Finagle.
                         <a class="class" href="ByteValue.html" title=""></a>
                         <a href="ByteValue.html" title="">ByteValue</a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="CanBeParameter$.html" title=""></a>
+                        <a class="object" href="CanBeParameter$.html" title="When a new implicit CanBeParameter is added here, it should also be explicitly added to Parameter.unsafeWrap."></a>
                         <a class="trait" href="CanBeParameter.html" title=""></a>
                         <a href="CanBeParameter.html" title="">CanBeParameter</a>
                       </li><li class="current-entities indented4">
@@ -332,9 +332,9 @@ resources for using Finagle.
                         <a class="class" href="OK.html" title=""></a>
                         <a href="OK.html" title="">OK</a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="" title="Note: There is a Java-friendly API for this object: com.twitter.finagle.mysql.Parameters."></a>
-                        <a class="trait" href="Parameter.html" title="A value of type A can implicitly convert to a Parameter if an evidence CanBeParameter[A] is available in scope."></a>
-                        <a href="Parameter.html" title="A value of type A can implicitly convert to a Parameter if an evidence CanBeParameter[A] is available in scope.">Parameter</a>
+                        <a class="object" href="" title="For Scala users, the typical usage is by importing the implicit conversions and then letting the compiler do the conversions for you."></a>
+                        <a class="trait" href="Parameter.html" title="A value of type A can implicitly convert to a Parameter if an evidence CanBeParameter[A] is available in scope via the Parameter.wrap or Parameter.wrapOption implicits."></a>
+                        <a href="Parameter.html" title="A value of type A can implicitly convert to a Parameter if an evidence CanBeParameter[A] is available in scope via the Parameter.wrap or Parameter.wrapOption implicits.">Parameter</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Parameters$.html" title="A Java adaptation of the com.twitter.finagle.mysql.Parameter companion object."></a>
@@ -352,9 +352,9 @@ resources for using Finagle.
                         <a class="class" href="PrepareRequest.html" title="Allocates a prepared statement on the server from the passed in query string."></a>
                         <a href="PrepareRequest.html" title="Allocates a prepared statement on the server from the passed in query string.">PrepareRequest</a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="trait" href="PreparedStatement.html" title="A PreparedStatement represents a parameterized sql statement which may be applied concurrently with varying parameters."></a>
-                        <a href="PreparedStatement.html" title="A PreparedStatement represents a parameterized sql statement which may be applied concurrently with varying parameters.">PreparedStatement</a>
+                        <a class="object" href="PreparedStatement$.html" title=""></a>
+                        <a class="trait" href="PreparedStatement.html" title="A PreparedStatement represents a parameterized SQL statement which may be applied concurrently with varying parameters."></a>
+                        <a href="PreparedStatement.html" title="A PreparedStatement represents a parameterized SQL statement which may be applied concurrently with varying parameters.">PreparedStatement</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="QueryRequest.html" title="A QueryRequest is used to send the server a text-based query that is executed immediately."></a>
@@ -423,6 +423,10 @@ resources for using Finagle.
                         <span class="separator"></span>
                         <a class="trait" href="Value.html" title="Defines a Value ADT that represents the domain of values received from a mysql server."></a>
                         <a href="Value.html" title="Defines a Value ADT that represents the domain of values received from a mysql server.">Value</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="WithSql.html" title="Contains the SQL for a Request."></a>
+                        <a href="WithSql.html" title="Contains the SQL for a Request.">WithSql</a>
                       </li>
               </ul>
             </div>
@@ -453,8 +457,14 @@ resources for using Finagle.
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Note: There is a Java-friendly API for this object: <a href="Parameters$.html" class="extype" name="com.twitter.finagle.mysql.Parameters">com.twitter.finagle.mysql.Parameters</a>.
-</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>For Scala users, the typical usage is by importing the implicit conversions
+and then letting the compiler do the conversions for you.</p><p>Java users should generally be using <a href="Parameters$.html#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameters#of">Parameters.of</a> to do explicit
+conversions.</p><p>A Scala example:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter._
+
+<span class="kw">val</span> p: Parameter = <span class="lit">"this will get implicitly converted to a Parameter"</span></pre><p>A Java example:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter;
+<span class="kw">import</span> com.twitter.finagle.mysql.Parameters;
+
+Parameter p = Parameters.of(<span class="lit">"explicitly converted to a Parameter"</span>);</pre></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="Parameters$.html" class="extype" name="com.twitter.finagle.mysql.Parameters">Parameters</a> for a Java-friendly API.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -809,12 +819,9 @@ resources for using Finagle.
       </span>
       
       <p class="shortcomment cmt">This converts the compile time error we would get with <code>wrap</code> into
-a run time error.</p><div class="fullcomment"><div class="comment cmt"><p>This converts the compile time error we would get with <code>wrap</code> into
-a run time error. This method should only be used to ease migration
-from Any to Parameter. It maintains the previous behavior where
-we log a failure to encode and transparently write a SQL NULL to
-the wire.
-</p></div></div>
+a runtime error.</p><div class="fullcomment"><div class="comment cmt"><p>This converts the compile time error we would get with <code>wrap</code> into
+a runtime error.</p><p>Java users can use <a href="Parameters$.html#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameters#of">Parameters.of</a>.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Any unknown types are treated as a SQL NULL.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
@@ -898,7 +905,23 @@ the wire.
         <span class="name">wrap</span><span class="tparams">[<span name="_A">_A</span>]</span><span class="params">(<span name="_value">_value: <span class="extype" name="com.twitter.finagle.mysql.Parameter.wrap._A">_A</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="_evidence">_evidence: <a href="CanBeParameter.html" class="extype" name="com.twitter.finagle.mysql.CanBeParameter">CanBeParameter</a>[<span class="extype" name="com.twitter.finagle.mysql.Parameter.wrap._A">_A</span>]</span>)</span><span class="result">: <a href="Parameter.html" class="extype" name="com.twitter.finagle.mysql.Parameter">Parameter</a></span>
       </span>
       
+      <p class="shortcomment cmt">Java users can use <a href="Parameters$.html#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameters#of">Parameters.of</a>.</p>
+    </li><li name="com.twitter.finagle.mysql.Parameter#wrapOption" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="wrapOption[_A](option:Option[_A])(implicitev:com.twitter.finagle.mysql.CanBeParameter[_A]):com.twitter.finagle.mysql.Parameter"></a><a id="wrapOption[_A](Option[_A])(CanBeParameter[_A]):Parameter"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Parameter$.html#wrapOption[_A](option:Option[_A])(implicitev:com.twitter.finagle.mysql.CanBeParameter[_A]):com.twitter.finagle.mysql.Parameter" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wrapOption</span><span class="tparams">[<span name="_A">_A</span>]</span><span class="params">(<span name="option">option: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="com.twitter.finagle.mysql.Parameter.wrapOption._A">_A</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <a href="CanBeParameter.html" class="extype" name="com.twitter.finagle.mysql.CanBeParameter">CanBeParameter</a>[<span class="extype" name="com.twitter.finagle.mysql.Parameter.wrapOption._A">_A</span>]</span>)</span><span class="result">: <a href="Parameter.html" class="extype" name="com.twitter.finagle.mysql.Parameter">Parameter</a></span>
+      </span>
       
+      <p class="shortcomment cmt">Java users can use <a href="Parameters$.html#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameters#of">Parameters.of</a>.</p>
     </li><li name="com.twitter.finagle.mysql.Parameter.NullParameter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="NullParameter"></a><a id="NullParameter:NullParameter"></a>
       <span class="permalink">
@@ -911,10 +934,10 @@ the wire.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="Parameter$$NullParameter$.html"><span class="name">NullParameter</span></a><span class="result"> extends <a href="Parameter.html" class="extype" name="com.twitter.finagle.mysql.Parameter">Parameter</a></span>
+        <a title="Java users can use Parameters.nullParameter." href="Parameter$$NullParameter$.html"><span class="name">NullParameter</span></a><span class="result"> extends <a href="Parameter.html" class="extype" name="com.twitter.finagle.mysql.Parameter">Parameter</a></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Java users can use <a href="Parameters$.html#nullParameter:com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameters#nullParameter">Parameters.nullParameter</a>.</p>
     </li>
               </ol>
             </div>

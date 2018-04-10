@@ -559,9 +559,10 @@ Further details, including the request and response, are available at
       </span>
       
       <p class="shortcomment cmt">Configure that requests are to be treated as idempotent.</p><div class="fullcomment"><div class="comment cmt"><p>Configure that requests are to be treated as idempotent. Because requests can be safely
-retried, <span class="extype" name="BackupRequestFilter">BackupRequestFilter</span> is configured with the params <code>maxExtraLoad</code> and
-<code>sendInterrupts</code> to decrease tail latency by sending an additional fraction of requests.</p><p>This additionally causes Thrift Exceptions to be retried.</p></div><dl class="paramcmts block"><dt class="param">maxExtraLoad</dt><dd class="cmt"><p>How much extra load, as a Tunable[Double], we are willing to send to the
-                    server. Must be between 0.0 and 1.0.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thriftmux.MethodBuilder">MethodBuilder</a> → MethodBuilderScaladoc</dd></dl></div>
+retried, <span class="extype" name="BackupRequestFilter">BackupRequestFilter</span> is configured with the params <code>maxExtraLoad</code>
+to decrease tail latency by sending an additional fraction of requests.</p><p>This additionally causes Thrift Exceptions to be retried.</p></div><dl class="paramcmts block"><dt class="param">maxExtraLoad</dt><dd class="cmt"><p>How much extra load, as a Tunable[Double], we are willing to send to the
+                    server. Must be between 0.0 and 1.0.
+                    Backup requests can be disabled by setting this to 0.0.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thriftmux.MethodBuilder">MethodBuilder</a> → MethodBuilderScaladoc</dd></dl></div>
     </li><li name="com.twitter.finagle.thriftmux.MethodBuilder#idempotent" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="idempotent(maxExtraLoad:Double):com.twitter.finagle.thriftmux.MethodBuilder"></a><a id="idempotent(Double):MethodBuilder"></a>
       <span class="permalink">
@@ -578,14 +579,15 @@ retried, <span class="extype" name="BackupRequestFilter">BackupRequestFilter</sp
       </span>
       
       <p class="shortcomment cmt">Configure that requests are to be treated as idempotent.</p><div class="fullcomment"><div class="comment cmt"><p>Configure that requests are to be treated as idempotent. Because requests can be safely
-retried, <span class="extype" name="BackupRequestFilter">BackupRequestFilter</span> is configured with the params <code>maxExtraLoad</code> and
-<code>sendInterrupts</code> to decrease tail latency by sending an additional fraction of requests.</p><p> If you are using TwitterServer, a good starting point for determining a value for
+retried, <span class="extype" name="BackupRequestFilter">BackupRequestFilter</span> is configured with the params <code>maxExtraLoad</code>
+to decrease tail latency by sending an additional fraction of requests.</p><p> If you are using TwitterServer, a good starting point for determining a value for
 <code>maxExtraLoad</code> is looking at the details of the PDF histogram for request latency,
 at /admin/histograms. If you choose a <code>maxExtraLoad</code> of 1.percent, for example, you can expect
 your p999/p9999 latencies to (roughly) now be that of your p99 latency. For 5.percent, those
 latencies would shift to your p95 latency. You should also ensure that your backend can
 tolerate the increased load.</p><p>This additionally causes Thrift Exceptions to be retried.</p></div><dl class="paramcmts block"><dt class="param">maxExtraLoad</dt><dd class="cmt"><p>How much extra load, as a fraction, we are willing to send to the server.
-                    Must be between 0.0 and 1.0.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thriftmux.MethodBuilder">MethodBuilder</a> → MethodBuilderScaladoc</dd></dl></div>
+                    Must be between 0.0 and 1.0.
+                    Backup requests can be disabled by setting this to 0.0.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thriftmux.MethodBuilder">MethodBuilder</a> → MethodBuilderScaladoc</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -655,7 +657,9 @@ The label is used to display stats, etc.
 disabled, and only those failures that are known to be safe to retry (i.e., write failures,
 where the request was never sent) are retried via requeue filter; any previously configured
 retries are removed.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thriftmux.MethodBuilder">MethodBuilder</a> → MethodBuilderScaladoc</dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thriftmux.MethodBuilder">MethodBuilder</a> → MethodBuilderScaladoc</dd><dt>See also</dt><dd><span class="cmt"><p>The MethodBuilder section in the
+     <a href="https://twitter.github.io/finagle/guide/MethodBuilder.html#idempotency" target="_blank">user guide</a>
+     for further details.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
@@ -852,7 +856,9 @@ of a <code>Return</code> response is a success, while everything else is not.
 <span class="kw">val</span> client: Http.Client = ???
 <span class="kw">val</span> builder = client.methodBuilder(<span class="lit">"inet!example.com:80"</span>)
 builder.withRetryDisabled</pre></li></ol>
-            </div><dt>See also</dt><dd><span class="cmt"><p><a href="#withRetryForClassifier(classifier:com.twitter.finagle.service.ResponseClassifier):com.twitter.finagle.thriftmux.MethodBuilder" class="extmbr" name="com.twitter.finagle.thriftmux.MethodBuilder#withRetryForClassifier">withRetryForClassifier</a></p></span></dd></dl></div>
+            </div><dt>See also</dt><dd><span class="cmt"><p>The MethodBuilder section in the
+     <a href="https://twitter.github.io/finagle/guide/MethodBuilder.html#retries" target="_blank">user guide</a>
+     for further details.</p></span><span class="cmt"><p><a href="#withRetryForClassifier(classifier:com.twitter.finagle.service.ResponseClassifier):com.twitter.finagle.thriftmux.MethodBuilder" class="extmbr" name="com.twitter.finagle.thriftmux.MethodBuilder#withRetryForClassifier">withRetryForClassifier</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.thriftmux.MethodBuilder#withRetryForClassifier" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withRetryForClassifier(classifier:com.twitter.finagle.service.ResponseClassifier):com.twitter.finagle.thriftmux.MethodBuilder"></a><a id="withRetryForClassifier(ResponseClassifier):MethodBuilder"></a>
       <span class="permalink">
@@ -889,7 +895,9 @@ builder.withRetryForClassifier {
   <span class="kw">case</span> ReqRep(_, Return(rep)) <span class="kw">if</span> rep.statusCode == <span class="num">418</span> <span class="kw">=&gt;</span> ResponseClass.RetryableFailure
 }</pre><p>The classifier is also used to determine the logical success metrics of
 the client.</p></li></ol>
-            </div><dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#response-classification" target="_blank">response classification user guide</a></p></span><span class="cmt"><p><a href="#withRetryDisabled:com.twitter.finagle.thriftmux.MethodBuilder" class="extmbr" name="com.twitter.finagle.thriftmux.MethodBuilder#withRetryDisabled">withRetryDisabled</a></p></span></dd></dl></div>
+            </div><dt>See also</dt><dd><span class="cmt"><p>The MethodBuilder section in the
+     <a href="https://twitter.github.io/finagle/guide/MethodBuilder.html#retries" target="_blank">user guide</a>
+     for further details.</p></span><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#response-classification" target="_blank">response classification user guide</a></p></span><span class="cmt"><p><a href="#withRetryDisabled:com.twitter.finagle.thriftmux.MethodBuilder" class="extmbr" name="com.twitter.finagle.thriftmux.MethodBuilder#withRetryDisabled">withRetryDisabled</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.thriftmux.MethodBuilder#withTimeoutPerRequest" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withTimeoutPerRequest(howLong:com.twitter.util.tunable.Tunable[com.twitter.util.Duration]):com.twitter.finagle.thriftmux.MethodBuilder"></a><a id="withTimeoutPerRequest(Tunable[Duration]):MethodBuilder"></a>
       <span class="permalink">
@@ -925,7 +933,9 @@ For example, a per-request timeout of 50 milliseconds:</p><pre><span class="kw">
 <span class="kw">val</span> tunableTimeout: Tunable[Duration] = Tunable.const(<span class="lit">"id"</span>, <span class="num">50.</span>milliseconds)
 <span class="kw">val</span> builder = client.methodBuilder(<span class="lit">"inet!example.com:80"</span>)
 builder.withTimeoutPerRequest(tunableTimeout))</pre></li></ol>
-            </div><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="withTimeoutTotal(Tunable[Duration])">withTimeoutTotal(Tunable[Duration])</span></p></span></dd></dl></div>
+            </div><dt>See also</dt><dd><span class="cmt"><p>The MethodBuilder section in the
+     <a href="https://twitter.github.io/finagle/guide/MethodBuilder.html#timeouts" target="_blank">user guide</a>
+     for further details.</p></span><span class="cmt"><p><span class="extype" name="withTimeoutTotal(Tunable[Duration])">withTimeoutTotal(Tunable[Duration])</span></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.thriftmux.MethodBuilder#withTimeoutPerRequest" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withTimeoutPerRequest(howLong:com.twitter.util.Duration):com.twitter.finagle.thriftmux.MethodBuilder"></a><a id="withTimeoutPerRequest(Duration):MethodBuilder"></a>
       <span class="permalink">
@@ -959,7 +969,9 @@ For example, a per-request timeout of 50 milliseconds:</p><pre><span class="kw">
 <span class="kw">val</span> client: Http.Client = ???
 <span class="kw">val</span> builder = client.methodBuilder(<span class="lit">"inet!example.com:80"</span>)
 builder.withTimeoutPerRequest(<span class="num">50.</span>milliseconds))</pre></li></ol>
-            </div><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="withTimeoutTotal(Duration)">withTimeoutTotal(Duration)</span></p></span></dd></dl></div>
+            </div><dt>See also</dt><dd><span class="cmt"><p>The MethodBuilder section in the
+     <a href="https://twitter.github.io/finagle/guide/MethodBuilder.html#timeouts" target="_blank">user guide</a>
+     for further details.</p></span><span class="cmt"><p><span class="extype" name="withTimeoutTotal(Duration)">withTimeoutTotal(Duration)</span></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.thriftmux.MethodBuilder#withTimeoutTotal" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withTimeoutTotal(howLong:com.twitter.util.tunable.Tunable[com.twitter.util.Duration]):com.twitter.finagle.thriftmux.MethodBuilder"></a><a id="withTimeoutTotal(Tunable[Duration]):MethodBuilder"></a>
       <span class="permalink">
@@ -992,7 +1004,9 @@ For example, a total timeout of 200 milliseconds:</p><pre><span class="kw">impor
 <span class="kw">val</span> tunableTimeout: Tunable[Duration] = Tunable.const(<span class="lit">"id"</span>, <span class="num">200.</span>milliseconds)
 <span class="kw">val</span> builder = client.methodBuilder(<span class="lit">"inet!example.com:80"</span>)
 builder.withTimeoutTotal(tunableTimeout))</pre></li></ol>
-            </div><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="withTimeoutPerRequest(Tunable[Duration])">withTimeoutPerRequest(Tunable[Duration])</span></p></span></dd></dl></div>
+            </div><dt>See also</dt><dd><span class="cmt"><p>The MethodBuilder section in the
+     <a href="https://twitter.github.io/finagle/guide/MethodBuilder.html#timeouts" target="_blank">user guide</a>
+     for further details.</p></span><span class="cmt"><p><span class="extype" name="withTimeoutPerRequest(Tunable[Duration])">withTimeoutPerRequest(Tunable[Duration])</span></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.thriftmux.MethodBuilder#withTimeoutTotal" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withTimeoutTotal(howLong:com.twitter.util.Duration):com.twitter.finagle.thriftmux.MethodBuilder"></a><a id="withTimeoutTotal(Duration):MethodBuilder"></a>
       <span class="permalink">
@@ -1023,7 +1037,9 @@ For example, a total timeout of 200 milliseconds:</p><pre><span class="kw">impor
 <span class="kw">val</span> client: Http.Client = ???
 <span class="kw">val</span> builder = client.methodBuilder(<span class="lit">"inet!example.com:80"</span>)
 builder.withTimeoutTotal(<span class="num">200.</span>milliseconds))</pre></li></ol>
-            </div><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="withTimeoutPerRequest(Duration)">withTimeoutPerRequest(Duration)</span></p></span></dd></dl></div>
+            </div><dt>See also</dt><dd><span class="cmt"><p>The MethodBuilder section in the
+     <a href="https://twitter.github.io/finagle/guide/MethodBuilder.html#timeouts" target="_blank">user guide</a>
+     for further details.</p></span><span class="cmt"><p><span class="extype" name="withTimeoutPerRequest(Duration)">withTimeoutPerRequest(Duration)</span></p></span></dd></dl></div>
     </li>
               </ol>
             </div>

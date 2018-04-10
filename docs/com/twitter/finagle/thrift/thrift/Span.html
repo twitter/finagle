@@ -171,7 +171,7 @@ Array[Byte]]</code>. The service provided is that of a &quot;transport&quot; of
 thrift messages (requests and replies) according to the protocol
 chosen. This is why the client codecs need to have access to a
 thrift <code>ProtocolFactory</code>.</p><p>These transports are used by the services produced by the
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">finagle thrift codegenerator</a>.</p><pre><span class="kw">val</span> service: Service[ThriftClientRequest, <span class="std">Array</span>[<span class="std">Byte</span>]] = ClientBuilder()
+<a href="https://github.com/mariusaeriksen/thrift-finagle" target="_blank">finagle thrift codegenerator</a>.</p><pre><span class="kw">val</span> service: Service[ThriftClientRequest, <span class="std">Array</span>[<span class="std">Byte</span>]] = ClientBuilder()
   .hosts(<span class="lit">"foobar.com:123"</span>)
   .stack(Thrift.client)
   .build()
@@ -286,7 +286,7 @@ annotation and ending with a SERVER_SEND.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><span class="extype" name="java.lang.Cloneable">Cloneable</span>, <span class="extype" name="org.apache.thrift.TBase">TBase</span>[<a href="" class="extype" name="com.twitter.finagle.thrift.thrift.Span">Span</a>, <span class="extype" name="com.twitter.finagle.thrift.thrift.Span._Fields">_Fields</span>], <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="java.lang.Comparable">Comparable</span>[<a href="" class="extype" name="com.twitter.finagle.thrift.thrift.Span">Span</a>], <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="java.lang.Cloneable">Cloneable</span>, <span class="extype" name="org.apache.thrift.TBase">TBase</span>[<a href="" class="extype" name="com.twitter.finagle.thrift.thrift.Span">Span</a>, <span class="extype" name="com.twitter.finagle.thrift.thrift.Span._Fields">_Fields</span>], <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="org.apache.thrift.TSerializable">TSerializable</span>, <span class="extype" name="java.lang.Comparable">Comparable</span>[<a href="" class="extype" name="com.twitter.finagle.thrift.thrift.Span">Span</a>], <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
         </div></div>
         
 
@@ -312,7 +312,7 @@ annotation and ending with a SERVER_SEND.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.thrift.thrift.Span"><span>Span</span></li><li class="in" name="java.lang.Cloneable"><span>Cloneable</span></li><li class="in" name="org.apache.thrift.TBase"><span>TBase</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="java.lang.Comparable"><span>Comparable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.thrift.thrift.Span"><span>Span</span></li><li class="in" name="java.lang.Cloneable"><span>Cloneable</span></li><li class="in" name="org.apache.thrift.TBase"><span>TBase</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="org.apache.thrift.TSerializable"><span>TSerializable</span></li><li class="in" name="java.lang.Comparable"><span>Comparable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -1084,7 +1084,7 @@ annotation and ending with a SERVER_SEND.
         <span class="name">read</span><span class="params">(<span name="iprot">iprot: <span class="extype" name="org.apache.thrift.protocol.TProtocol">TProtocol</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thrift.thrift.Span">Span</a> → TBase</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thrift.thrift.Span">Span</a> → TSerializable</dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.thrift.Span#setAnnotations" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="setAnnotations(annotations:java.util.List[com.twitter.finagle.thrift.thrift.Annotation]):com.twitter.finagle.thrift.thrift.Span"></a><a id="setAnnotations(List[Annotation]):Span"></a>
       <span class="permalink">
@@ -1568,7 +1568,7 @@ annotation and ending with a SERVER_SEND.
         <span class="name">write</span><span class="params">(<span name="oprot">oprot: <span class="extype" name="org.apache.thrift.protocol.TProtocol">TProtocol</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thrift.thrift.Span">Span</a> → TBase</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thrift.thrift.Span">Span</a> → TSerializable</dd></dl></div>
     </li>
               </ol>
             </div>
@@ -1585,6 +1585,8 @@ annotation and ending with a SERVER_SEND.
               <h3>Inherited from <span class="extype" name="org.apache.thrift.TBase">TBase</span>[<a href="" class="extype" name="com.twitter.finagle.thrift.thrift.Span">Span</a>, <span class="extype" name="com.twitter.finagle.thrift.thrift.Span._Fields">_Fields</span>]</h3>
             </div><div class="parent" name="java.io.Serializable">
               <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="org.apache.thrift.TSerializable">
+              <h3>Inherited from <span class="extype" name="org.apache.thrift.TSerializable">TSerializable</span></h3>
             </div><div class="parent" name="java.lang.Comparable">
               <h3>Inherited from <span class="extype" name="java.lang.Comparable">Comparable</span>[<a href="" class="extype" name="com.twitter.finagle.thrift.thrift.Span">Span</a>]</h3>
             </div><div class="parent" name="scala.AnyRef">

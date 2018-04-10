@@ -727,7 +727,9 @@ finagle client. Concrete implementations are expected to specify this.
       <p class="shortcomment cmt">Creates a new <code>RichClient</code> connected to the logical
 destination described by <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new <code>RichClient</code> connected to the logical
 destination described by <code>dest</code>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="MysqlRichClient.html" class="extype" name="com.twitter.finagle.MysqlRichClient">MysqlRichClient</a></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">dest</dt><dd class="cmt"><p>the location to connect to, e.g. &quot;host:port&quot;. See the
+            <a href="https://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+            for details on destination names.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="MysqlRichClient.html" class="extype" name="com.twitter.finagle.MysqlRichClient">MysqlRichClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.MysqlRichClient#newRichClient" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newRichClient(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactions"></a><a id="newRichClient(Name,String):mysql.ClientwithTransactions"></a>
       <span class="permalink">
@@ -1115,7 +1117,7 @@ statements return the &quot;correct&quot; update count.</p><p>See https://dev.my
       </span>
       
       <p class="shortcomment cmt">The default character set used when establishing a new session.</p>
-    </li><li name="com.twitter.finagle.Mysql.Client#withCredentials" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.Mysql.Client#withCredentials" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withCredentials(u:String,p:String):com.twitter.finagle.Mysql.Client"></a><a id="withCredentials(String,String):Client"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Mysql$$Client.html#withCredentials(u:String,p:String):com.twitter.finagle.Mysql.Client" title="Permalink">
@@ -1130,7 +1132,8 @@ statements return the &quot;correct&quot; update count.</p><p>See https://dev.my
         <span class="name">withCredentials</span><span class="params">(<span name="u">u: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="p">p: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a></span>
       </span>
       
-      <p class="shortcomment cmt">The credentials to use when authenticating a new session.</p>
+      <p class="shortcomment cmt">The credentials to use when authenticating a new session.</p><div class="fullcomment"><div class="comment cmt"><p>The credentials to use when authenticating a new session.
+</p></div><dl class="paramcmts block"><dt class="param">p</dt><dd class="cmt"><p>if <code>null</code>, no password is used.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.Mysql.Client#withDatabase" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="withDatabase(db:String):com.twitter.finagle.Mysql.Client"></a><a id="withDatabase(String):Client"></a>
       <span class="permalink">

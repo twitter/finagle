@@ -196,7 +196,7 @@ resources for using Finagle.
                         <a class="class" href="ByteValue.html" title=""></a>
                         <a href="ByteValue.html" title="">ByteValue</a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="CanBeParameter$.html" title=""></a>
+                        <a class="object" href="CanBeParameter$.html" title="When a new implicit CanBeParameter is added here, it should also be explicitly added to Parameter.unsafeWrap."></a>
                         <a class="trait" href="CanBeParameter.html" title=""></a>
                         <a href="CanBeParameter.html" title="">CanBeParameter</a>
                       </li><li class="current-entities indented4">
@@ -332,9 +332,9 @@ resources for using Finagle.
                         <a class="class" href="OK.html" title=""></a>
                         <a href="OK.html" title="">OK</a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="Parameter$.html" title="Note: There is a Java-friendly API for this object: com.twitter.finagle.mysql.Parameters."></a>
-                        <a class="trait" href="Parameter.html" title="A value of type A can implicitly convert to a Parameter if an evidence CanBeParameter[A] is available in scope."></a>
-                        <a href="Parameter.html" title="A value of type A can implicitly convert to a Parameter if an evidence CanBeParameter[A] is available in scope.">Parameter</a>
+                        <a class="object" href="Parameter$.html" title="For Scala users, the typical usage is by importing the implicit conversions and then letting the compiler do the conversions for you."></a>
+                        <a class="trait" href="Parameter.html" title="A value of type A can implicitly convert to a Parameter if an evidence CanBeParameter[A] is available in scope via the Parameter.wrap or Parameter.wrapOption implicits."></a>
+                        <a href="Parameter.html" title="A value of type A can implicitly convert to a Parameter if an evidence CanBeParameter[A] is available in scope via the Parameter.wrap or Parameter.wrapOption implicits.">Parameter</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Parameters$.html" title="A Java adaptation of the com.twitter.finagle.mysql.Parameter companion object."></a>
@@ -352,9 +352,9 @@ resources for using Finagle.
                         <a class="class" href="PrepareRequest.html" title="Allocates a prepared statement on the server from the passed in query string."></a>
                         <a href="PrepareRequest.html" title="Allocates a prepared statement on the server from the passed in query string.">PrepareRequest</a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="trait" href="" title="A PreparedStatement represents a parameterized sql statement which may be applied concurrently with varying parameters."></a>
-                        <a href="" title="A PreparedStatement represents a parameterized sql statement which may be applied concurrently with varying parameters.">PreparedStatement</a>
+                        <a class="object" href="PreparedStatement$.html" title=""></a>
+                        <a class="trait" href="" title="A PreparedStatement represents a parameterized SQL statement which may be applied concurrently with varying parameters."></a>
+                        <a href="" title="A PreparedStatement represents a parameterized SQL statement which may be applied concurrently with varying parameters.">PreparedStatement</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="QueryRequest.html" title="A QueryRequest is used to send the server a text-based query that is executed immediately."></a>
@@ -423,6 +423,10 @@ resources for using Finagle.
                         <span class="separator"></span>
                         <a class="trait" href="Value.html" title="Defines a Value ADT that represents the domain of values received from a mysql server."></a>
                         <a href="Value.html" title="Defines a Value ADT that represents the domain of values received from a mysql server.">Value</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="WithSql.html" title="Contains the SQL for a Request."></a>
+                        <a href="WithSql.html" title="Contains the SQL for a Request.">WithSql</a>
                       </li>
               </ul>
             </div>
@@ -430,14 +434,16 @@ resources for using Finagle.
           <div id="content">
             <body class="trait type">
       <div id="definition">
-        <div class="big-circle trait">t</div>
+        <a href="PreparedStatement$.html" title="See companion object"><div class="big-circle trait-companion-object">t</div></a>
         <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="index.html" class="extype" name="com.twitter.finagle.mysql">mysql</a></p>
-        <h1>PreparedStatement<span class="permalink">
+        <h1><a href="PreparedStatement$.html" title="See companion object">PreparedStatement</a><span class="permalink">
       <a href="../../../../com/twitter/finagle/mysql/PreparedStatement.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
-        <h3><span class="morelinks"></span></h3>
+        <h3><span class="morelinks"><div>
+            Companion <a href="PreparedStatement$.html" title="See companion object">object PreparedStatement</a>
+          </div></span></h3>
       </div>
 
       <h4 id="signature" class="signature">
@@ -451,10 +457,10 @@ resources for using Finagle.
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A PreparedStatement represents a parameterized
-sql statement which may be applied concurrently
-with varying parameters.
-</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A <code>PreparedStatement</code> represents a parameterized SQL statement which may be
+applied concurrently with varying parameters.</p><p>These are SQL statements with <code>?</code>'s used for the parameters which are
+&quot;filled in&quot; per usage by <code>apply</code> and <code>select</code>.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="Client.prepare(String)">Client.prepare(String)</span></p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -508,7 +514,7 @@ with varying parameters.
 
         <div class="values members">
               <h3>Abstract Value Members</h3>
-              <ol><li name="com.twitter.finagle.mysql.PreparedStatement#apply" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.mysql.PreparedStatement#apply" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="apply(params:com.twitter.finagle.mysql.Parameter*):com.twitter.util.Future[com.twitter.finagle.mysql.Result]"></a><a id="apply(Parameter*):Future[Result]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/mysql/PreparedStatement.html#apply(params:com.twitter.finagle.mysql.Parameter*):com.twitter.util.Future[com.twitter.finagle.mysql.Result]" title="Permalink">
@@ -523,8 +529,18 @@ with varying parameters.
         <span class="name">apply</span><span class="params">(<span name="params">params: <a href="Parameter.html" class="extype" name="com.twitter.finagle.mysql.Parameter">Parameter</a>*</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="Result.html" class="extype" name="com.twitter.finagle.mysql.Result">Result</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">Executes the prepared statement with the
-given <code>params</code>.</p>
+      <p class="shortcomment cmt">Executes the prepared statement with the given <code>params</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Executes the prepared statement with the given <code>params</code>.</p><p>For Scala users, you can use the implicit conversions to <a href="Parameter.html" class="extype" name="com.twitter.finagle.mysql.Parameter">Parameter</a>
+by importing <code>Parameter._</code>. For example:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.{Client, PreparedStatement, Result}
+<span class="kw">import</span> com.twitter.finagle.mysql.Parameter._
+<span class="kw">import</span> com.twitter.util.Future
+
+<span class="kw">val</span> client: Client = ???
+<span class="kw">val</span> preparedStatement: PreparedStatement =
+  client.prepare(<span class="lit">"INSERT INTO a_table (column1, column2) VALUES (?, ?)"</span>)
+
+<span class="cmt">// note the implicit conversions of the String and Int to Parameters</span>
+<span class="kw">val</span> result: Future[Result] = preparedStatement(<span class="lit">"value1"</span>, <span class="num">1234</span>)</pre><p>Java users, see <a href="#asJava:com.twitter.finagle.mysql.PreparedStatement.AsJava" class="extmbr" name="com.twitter.finagle.mysql.PreparedStatement#asJava">asJava</a> and use <a href="PreparedStatement$$AsJava.html#execute(params:com.twitter.finagle.mysql.Parameter*):com.twitter.util.Future[com.twitter.finagle.mysql.Result]" class="extmbr" name="com.twitter.finagle.mysql.PreparedStatement.AsJava#execute">PreparedStatement.AsJava.execute</a>.
+</p></div></div>
     </li></ol>
             </div>
 
@@ -595,6 +611,22 @@ given <code>params</code>.</p>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.PreparedStatement#asJava" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="asJava:com.twitter.finagle.mysql.PreparedStatement.AsJava"></a><a id="asJava:AsJava"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/PreparedStatement.html#asJava:com.twitter.finagle.mysql.PreparedStatement.AsJava" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asJava</span><span class="result">: <a href="PreparedStatement$$AsJava.html" class="extype" name="com.twitter.finagle.mysql.PreparedStatement.AsJava">AsJava</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Provides a Java-friendly API for this <a href="" class="extype" name="com.twitter.finagle.mysql.PreparedStatement">PreparedStatement</a>.</p>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
@@ -796,12 +828,24 @@ given <code>params</code>.</p>
         <span class="name">select</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="params">params: <a href="Parameter.html" class="extype" name="com.twitter.finagle.mysql.Parameter">Parameter</a>*</span>)</span><span class="params">(<span name="f">f: (<a href="Row.html" class="extype" name="com.twitter.finagle.mysql.Row">Row</a>) ⇒ <span class="extype" name="com.twitter.finagle.mysql.PreparedStatement.select.T">T</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="com.twitter.finagle.mysql.PreparedStatement.select.T">T</span>]]</span>
       </span>
       
-      <p class="shortcomment cmt">Executes the prepared statement with the
-given <code>params</code> and maps <code>f</code> to the rows
-of the returned ResultSet.</p><div class="fullcomment"><div class="comment cmt"><p>Executes the prepared statement with the
-given <code>params</code> and maps <code>f</code> to the rows
-of the returned ResultSet. If no ResultSet
-is returned, the function returns an empty Seq.
+      <p class="shortcomment cmt">Executes the prepared statement with the given <code>params</code> and maps <code>f</code> to the
+rows of the returned <a href="ResultSet.html" class="extype" name="com.twitter.finagle.mysql.ResultSet">ResultSet</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Executes the prepared statement with the given <code>params</code> and maps <code>f</code> to the
+rows of the returned <a href="ResultSet.html" class="extype" name="com.twitter.finagle.mysql.ResultSet">ResultSet</a>. If no <a href="ResultSet.html" class="extype" name="com.twitter.finagle.mysql.ResultSet">ResultSet</a> is returned, the function
+returns an empty <code>Seq</code>.</p><p>For Scala users, you can use the implicit conversions to <a href="Parameter.html" class="extype" name="com.twitter.finagle.mysql.Parameter">Parameter</a>
+by importing <code>Parameter._</code>. For example:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.{Client, PreparedStatement, StringValue}
+<span class="kw">import</span> com.twitter.finagle.mysql.Parameter._
+<span class="kw">import</span> com.twitter.util.Future
+
+<span class="kw">val</span> client: Client = ???
+<span class="kw">val</span> preparedStatement: PreparedStatement =
+  client.prepare(<span class="lit">"SELECT column1 FROM a_table WHERE column2 = ?"</span>)
+
+<span class="cmt">// note the implicit conversion of the Int, 1234, into a Parameter</span>
+<span class="kw">val</span> result: Future[<span class="std">Seq</span>[<span class="std">String</span>] = preparedStatement.select(<span class="num">1234</span>) { row <span class="kw">=&gt;</span>
+  row(<span class="lit">"column1"</span>).get <span class="kw">match</span> {
+    <span class="kw">case</span> StringValue(s) <span class="kw">=&gt;</span> s
+  }
+}</pre><p>Java users, see <a href="#asJava:com.twitter.finagle.mysql.PreparedStatement.AsJava" class="extmbr" name="com.twitter.finagle.mysql.PreparedStatement#asJava">asJava</a> and use <a href="PreparedStatement$$AsJava.html#select[T](f:com.twitter.function.JavaFunction[com.twitter.finagle.mysql.Row,T],params:com.twitter.finagle.mysql.Parameter*):com.twitter.util.Future[java.util.List[T]]" class="extmbr" name="com.twitter.finagle.mysql.PreparedStatement.AsJava#select">PreparedStatement.AsJava.select</a>.
 </p></div></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>

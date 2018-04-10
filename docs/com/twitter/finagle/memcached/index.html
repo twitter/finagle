@@ -527,7 +527,7 @@ and Updating).
                         <a class="class" href="KetamaClientKey.html" title=""></a>
                         <a href="KetamaClientKey.html" title="">KetamaClientKey</a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
+                        <a class="object" href="MockClient$.html" title=""></a>
                         <a class="class" href="MockClient.html" title="Map-based mock client for testing"></a>
                         <a href="MockClient.html" title="Map-based mock client for testing">MockClient</a>
                       </li><li class="current-entities indented4">
@@ -950,7 +950,7 @@ Array[Byte]]</code>. The service provided is that of a &quot;transport&quot; of
 thrift messages (requests and replies) according to the protocol
 chosen. This is why the client codecs need to have access to a
 thrift <code>ProtocolFactory</code>.</p><p>These transports are used by the services produced by the
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">finagle thrift codegenerator</a>.</p><pre><span class="kw">val</span> service: Service[ThriftClientRequest, <span class="std">Array</span>[<span class="std">Byte</span>]] = ClientBuilder()
+<a href="https://github.com/mariusaeriksen/thrift-finagle" target="_blank">finagle thrift codegenerator</a>.</p><pre><span class="kw">val</span> service: Service[ThriftClientRequest, <span class="std">Array</span>[<span class="std">Byte</span>]] = ClientBuilder()
   .hosts(<span class="lit">"foobar.com:123"</span>)
   .stack(Thrift.client)
   .build()
@@ -1430,8 +1430,10 @@ generator.
         <a title="Map-based mock client for testing" href="MockClient.html"><span class="name">MockClient</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.memcached.Client">Client</a></span>
       </span>
       
-      <p class="shortcomment cmt">Map-based mock client for testing</p><div class="fullcomment"><div class="comment cmt"><p>Map-based mock client for testing</p><p>Note: expiry and flags are ignored on update operations.
-</p></div></div>
+      <p class="shortcomment cmt">Map-based mock client for testing
+</p><div class="fullcomment"><div class="comment cmt"><p>Map-based mock client for testing
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>this class now respects expiry times. If you want the old expiry-ignoring behavior,
+      use MockClient.ignoresTtl()</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.PHPMemCacheClient" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="PHPMemCacheClientextendsPartitionedClient"></a><a id="PHPMemCacheClient:PHPMemCacheClient"></a>
       <span class="permalink">
@@ -1793,6 +1795,22 @@ you can also invoke loadZKData() in your class anytime to force reading zk data 
       </span>
       <span class="symbol">
         <a title="" href="KetamaClientKey$.html"><span class="name">KetamaClientKey</span></a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.memcached.MockClient" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MockClient"></a><a id="MockClient:MockClient"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/memcached/index.html#MockClient" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="MockClient$.html"><span class="name">MockClient</span></a>
       </span>
       
       

@@ -774,7 +774,7 @@ Array[Byte]]</code>. The service provided is that of a &quot;transport&quot; of
 thrift messages (requests and replies) according to the protocol
 chosen. This is why the client codecs need to have access to a
 thrift <code>ProtocolFactory</code>.</p><p>These transports are used by the services produced by the
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">finagle thrift codegenerator</a>.</p><pre><span class="kw">val</span> service: Service[ThriftClientRequest, <span class="std">Array</span>[<span class="std">Byte</span>]] = ClientBuilder()
+<a href="https://github.com/mariusaeriksen/thrift-finagle" target="_blank">finagle thrift codegenerator</a>.</p><pre><span class="kw">val</span> service: Service[ThriftClientRequest, <span class="std">Array</span>[<span class="std">Byte</span>]] = ClientBuilder()
   .hosts(<span class="lit">"foobar.com:123"</span>)
   .stack(Thrift.client)
   .build()
@@ -890,6 +890,10 @@ generator.
                         <span class="separator"></span>
                         <a class="trait" href="ServiceIfaceBuilder.html" title="Typeclass ServiceIfaceBuilder[T] creates T-typed interfaces from thrift clients."></a>
                         <a href="ServiceIfaceBuilder.html" title="Typeclass ServiceIfaceBuilder[T] creates T-typed interfaces from thrift clients.">ServiceIfaceBuilder</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="ThriftClient.html" title="Stateless helper methods which wrap a given ServiceIface (deprecated) or a given ServicePerEndpoint with another type via the given method's implicit Builder."></a>
+                        <a href="ThriftClient.html" title="Stateless helper methods which wrap a given ServiceIface (deprecated) or a given ServicePerEndpoint with another type via the given method's implicit Builder.">ThriftClient</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="ThriftClientRequest.html" title="Defines a (framed) thrift request, simply composed of the raw message and a boolean indicating whether it is a one-shot message or not."></a>
@@ -1082,7 +1086,7 @@ Array[Byte]]</code>. The service provided is that of a &quot;transport&quot; of
 thrift messages (requests and replies) according to the protocol
 chosen. This is why the client codecs need to have access to a
 thrift <code>ProtocolFactory</code>.</p><p>These transports are used by the services produced by the
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">finagle thrift codegenerator</a>.</p><pre><span class="kw">val</span> service: Service[ThriftClientRequest, <span class="std">Array</span>[<span class="std">Byte</span>]] = ClientBuilder()
+<a href="https://github.com/mariusaeriksen/thrift-finagle" target="_blank">finagle thrift codegenerator</a>.</p><pre><span class="kw">val</span> service: Service[ThriftClientRequest, <span class="std">Array</span>[<span class="std">Byte</span>]] = ClientBuilder()
   .hosts(<span class="lit">"foobar.com:123"</span>)
   .stack(Thrift.client)
   .build()
@@ -1315,6 +1319,23 @@ failing any requests that do not.
       <p class="shortcomment cmt">Indicates that a Thrift response did not have the correct sequence
 ID according to that assigned by <a href="SeqIdFilter.html" class="extype" name="com.twitter.finagle.thrift.SeqIdFilter">com.twitter.finagle.thrift.SeqIdFilter</a>
 on the corresponding request.</p>
+    </li><li name="com.twitter.finagle.thrift.ThriftClient" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ThriftClientextendsAnyRef"></a><a id="ThriftClient:ThriftClient"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/index.html#ThriftClientextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Stateless helper methods which wrap a given ServiceIface (deprecated) or a given ServicePerEndpoint with another type via the given method's implicit Builder." href="ThriftClient.html"><span class="name">ThriftClient</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Stateless helper methods which wrap a given <code>ServiceIface</code> (deprecated) or a
+given <code>ServicePerEndpoint</code> with another type via the given method's implicit Builder.</p>
     </li><li name="com.twitter.finagle.thrift.ThriftClientRequest" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ThriftClientRequestextendsObject"></a><a id="ThriftClientRequest:ThriftClientRequest"></a>
       <span class="permalink">

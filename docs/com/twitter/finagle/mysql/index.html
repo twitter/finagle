@@ -559,7 +559,7 @@ use.</p><p> Flag          Value     Meaning
                         <a class="class" href="ByteValue.html" title=""></a>
                         <a href="ByteValue.html" title="">ByteValue</a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="CanBeParameter$.html" title=""></a>
+                        <a class="object" href="CanBeParameter$.html" title="When a new implicit CanBeParameter is added here, it should also be explicitly added to Parameter.unsafeWrap."></a>
                         <a class="trait" href="CanBeParameter.html" title=""></a>
                         <a href="CanBeParameter.html" title="">CanBeParameter</a>
                       </li><li class="current-entities indented4">
@@ -695,9 +695,9 @@ use.</p><p> Flag          Value     Meaning
                         <a class="class" href="OK.html" title=""></a>
                         <a href="OK.html" title="">OK</a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="Parameter$.html" title="Note: There is a Java-friendly API for this object: com.twitter.finagle.mysql.Parameters."></a>
-                        <a class="trait" href="Parameter.html" title="A value of type A can implicitly convert to a Parameter if an evidence CanBeParameter[A] is available in scope."></a>
-                        <a href="Parameter.html" title="A value of type A can implicitly convert to a Parameter if an evidence CanBeParameter[A] is available in scope.">Parameter</a>
+                        <a class="object" href="Parameter$.html" title="For Scala users, the typical usage is by importing the implicit conversions and then letting the compiler do the conversions for you."></a>
+                        <a class="trait" href="Parameter.html" title="A value of type A can implicitly convert to a Parameter if an evidence CanBeParameter[A] is available in scope via the Parameter.wrap or Parameter.wrapOption implicits."></a>
+                        <a href="Parameter.html" title="A value of type A can implicitly convert to a Parameter if an evidence CanBeParameter[A] is available in scope via the Parameter.wrap or Parameter.wrapOption implicits.">Parameter</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Parameters$.html" title="A Java adaptation of the com.twitter.finagle.mysql.Parameter companion object."></a>
@@ -715,9 +715,9 @@ use.</p><p> Flag          Value     Meaning
                         <a class="class" href="PrepareRequest.html" title="Allocates a prepared statement on the server from the passed in query string."></a>
                         <a href="PrepareRequest.html" title="Allocates a prepared statement on the server from the passed in query string.">PrepareRequest</a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="trait" href="PreparedStatement.html" title="A PreparedStatement represents a parameterized sql statement which may be applied concurrently with varying parameters."></a>
-                        <a href="PreparedStatement.html" title="A PreparedStatement represents a parameterized sql statement which may be applied concurrently with varying parameters.">PreparedStatement</a>
+                        <a class="object" href="PreparedStatement$.html" title=""></a>
+                        <a class="trait" href="PreparedStatement.html" title="A PreparedStatement represents a parameterized SQL statement which may be applied concurrently with varying parameters."></a>
+                        <a href="PreparedStatement.html" title="A PreparedStatement represents a parameterized SQL statement which may be applied concurrently with varying parameters.">PreparedStatement</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="QueryRequest.html" title="A QueryRequest is used to send the server a text-based query that is executed immediately."></a>
@@ -786,6 +786,10 @@ use.</p><p> Flag          Value     Meaning
                         <span class="separator"></span>
                         <a class="trait" href="Value.html" title="Defines a Value ADT that represents the domain of values received from a mysql server."></a>
                         <a href="Value.html" title="Defines a Value ADT that represents the domain of values received from a mysql server.">Value</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="WithSql.html" title="Contains the SQL for a Request."></a>
+                        <a href="WithSql.html" title="Contains the SQL for a Request.">WithSql</a>
                       </li><li name="com.twitter.finagle.namer" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="namer"></a><a id="namer:namer"></a>
       <span class="permalink">
@@ -1034,7 +1038,7 @@ Array[Byte]]</code>. The service provided is that of a &quot;transport&quot; of
 thrift messages (requests and replies) according to the protocol
 chosen. This is why the client codecs need to have access to a
 thrift <code>ProtocolFactory</code>.</p><p>These transports are used by the services produced by the
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">finagle thrift codegenerator</a>.</p><pre><span class="kw">val</span> service: Service[ThriftClientRequest, <span class="std">Array</span>[<span class="std">Byte</span>]] = ClientBuilder()
+<a href="https://github.com/mariusaeriksen/thrift-finagle" target="_blank">finagle thrift codegenerator</a>.</p><pre><span class="kw">val</span> service: Service[ThriftClientRequest, <span class="std">Array</span>[<span class="std">Byte</span>]] = ClientBuilder()
   .hosts(<span class="lit">"foobar.com:123"</span>)
   .stack(Thrift.client)
   .build()
@@ -1744,13 +1748,19 @@ upstream MySQL server.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="A value of type A can implicitly convert to a Parameter if an evidence CanBeParameter[A] is available in scope." href="Parameter.html"><span class="name">Parameter</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+        <a title="A value of type A can implicitly convert to a Parameter if an evidence CanBeParameter[A] is available in scope via the Parameter.wrap or Parameter.wrapOption implicits." href="Parameter.html"><span class="name">Parameter</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
       </span>
       
-      <p class="shortcomment cmt">A value of type <code>A</code> can implicitly convert to a <code>Parameter</code> if an evidence <code>CanBeParameter[A]</code> is
-available in scope.</p><div class="fullcomment"><div class="comment cmt"><p>A value of type <code>A</code> can implicitly convert to a <code>Parameter</code> if an evidence <code>CanBeParameter[A]</code> is
-available in scope. This type is not to be instantiated in any other manner.
-</p></div></div>
+      <p class="shortcomment cmt">A value of type <code>A</code> can implicitly convert to a <code>Parameter</code> if an evidence
+<code>CanBeParameter[A]</code> is available in scope via the <a href="Parameter$.html#wrap[_A](_value:_A)(implicit_evidence:com.twitter.finagle.mysql.CanBeParameter[_A]):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameter#wrap">Parameter.wrap</a> or
+<a href="Parameter$.html#wrapOption[_A](option:Option[_A])(implicitev:com.twitter.finagle.mysql.CanBeParameter[_A]):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameter#wrapOption">Parameter.wrapOption</a> implicits.</p><div class="fullcomment"><div class="comment cmt"><p>A value of type <code>A</code> can implicitly convert to a <code>Parameter</code> if an evidence
+<code>CanBeParameter[A]</code> is available in scope via the <a href="Parameter$.html#wrap[_A](_value:_A)(implicit_evidence:com.twitter.finagle.mysql.CanBeParameter[_A]):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameter#wrap">Parameter.wrap</a> or
+<a href="Parameter$.html#wrapOption[_A](option:Option[_A])(implicitev:com.twitter.finagle.mysql.CanBeParameter[_A]):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameter#wrapOption">Parameter.wrapOption</a> implicits.</p><p>A Scala example:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter._
+
+<span class="kw">val</span> p: Parameter = <span class="lit">"this will get implicitly converted to a Parameter"</span></pre><p>A Java example:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter;
+<span class="kw">import</span> com.twitter.finagle.mysql.Parameters;
+
+Parameter p = Parameters.of(<span class="lit">"explicitly converted to a Parameter"</span>);</pre></div></div>
     </li><li name="com.twitter.finagle.mysql.PrepareOK" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="PrepareOKextendsResultwithProductwithSerializable"></a><a id="PrepareOK:PrepareOK"></a>
       <span class="permalink">
@@ -1768,9 +1778,9 @@ available in scope. This type is not to be instantiated in any other manner.
       
       
     </li><li name="com.twitter.finagle.mysql.PrepareRequest" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="PrepareRequestextendsSimpleCommandRequestwithProductwithSerializable"></a><a id="PrepareRequest:PrepareRequest"></a>
+      <a id="PrepareRequestextendsSimpleCommandRequestwithWithSqlwithProductwithSerializable"></a><a id="PrepareRequest:PrepareRequest"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mysql/index.html#PrepareRequestextendsSimpleCommandRequestwithProductwithSerializable" title="Permalink">
+      <a href="../../../../com/twitter/finagle/mysql/index.html#PrepareRequestextendsSimpleCommandRequestwithWithSqlwithProductwithSerializable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1779,7 +1789,7 @@ available in scope. This type is not to be instantiated in any other manner.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="Allocates a prepared statement on the server from the passed in query string." href="PrepareRequest.html"><span class="name">PrepareRequest</span></a><span class="params">(<span name="sqlStatement">sqlStatement: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="SimpleCommandRequest.html" class="extype" name="com.twitter.finagle.mysql.SimpleCommandRequest">SimpleCommandRequest</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="Allocates a prepared statement on the server from the passed in query string." href="PrepareRequest.html"><span class="name">PrepareRequest</span></a><span class="params">(<span name="sqlStatement">sqlStatement: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="SimpleCommandRequest.html" class="extype" name="com.twitter.finagle.mysql.SimpleCommandRequest">SimpleCommandRequest</a> with <a href="WithSql.html" class="extype" name="com.twitter.finagle.mysql.WithSql">WithSql</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">Allocates a prepared statement on the server from the
@@ -1787,7 +1797,7 @@ passed in query string.</p><div class="fullcomment"><div class="comment cmt"><p>
 passed in query string.
 <a href="http://dev.mysql.com/doc/internals/en/com-stmt-prepare.html" target="_blank">http://dev.mysql.com/doc/internals/en/com-stmt-prepare.html</a>
 </p></div></div>
-    </li><li name="com.twitter.finagle.mysql.PreparedStatement" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.mysql.PreparedStatement" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="PreparedStatementextendsAnyRef"></a><a id="PreparedStatement:PreparedStatement"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/mysql/index.html#PreparedStatementextendsAnyRef" title="Permalink">
@@ -1799,16 +1809,18 @@ passed in query string.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="A PreparedStatement represents a parameterized sql statement which may be applied concurrently with varying parameters." href="PreparedStatement.html"><span class="name">PreparedStatement</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+        <a title="A PreparedStatement represents a parameterized SQL statement which may be applied concurrently with varying parameters." href="PreparedStatement.html"><span class="name">PreparedStatement</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
       </span>
       
-      <p class="shortcomment cmt">A PreparedStatement represents a parameterized
-sql statement which may be applied concurrently
-with varying parameters.</p>
+      <p class="shortcomment cmt">A <code>PreparedStatement</code> represents a parameterized SQL statement which may be
+applied concurrently with varying parameters.</p><div class="fullcomment"><div class="comment cmt"><p>A <code>PreparedStatement</code> represents a parameterized SQL statement which may be
+applied concurrently with varying parameters.</p><p>These are SQL statements with <code>?</code>'s used for the parameters which are
+&quot;filled in&quot; per usage by <code>apply</code> and <code>select</code>.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="Client.prepare(String)">Client.prepare(String)</span></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.mysql.QueryRequest" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="QueryRequestextendsSimpleCommandRequestwithProductwithSerializable"></a><a id="QueryRequest:QueryRequest"></a>
+      <a id="QueryRequestextendsSimpleCommandRequestwithWithSqlwithProductwithSerializable"></a><a id="QueryRequest:QueryRequest"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mysql/index.html#QueryRequestextendsSimpleCommandRequestwithProductwithSerializable" title="Permalink">
+      <a href="../../../../com/twitter/finagle/mysql/index.html#QueryRequestextendsSimpleCommandRequestwithWithSqlwithProductwithSerializable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1817,7 +1829,7 @@ with varying parameters.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A QueryRequest is used to send the server a text-based query that is executed immediately." href="QueryRequest.html"><span class="name">QueryRequest</span></a><span class="params">(<span name="sqlStatement">sqlStatement: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="SimpleCommandRequest.html" class="extype" name="com.twitter.finagle.mysql.SimpleCommandRequest">SimpleCommandRequest</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A QueryRequest is used to send the server a text-based query that is executed immediately." href="QueryRequest.html"><span class="name">QueryRequest</span></a><span class="params">(<span name="sqlStatement">sqlStatement: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="SimpleCommandRequest.html" class="extype" name="com.twitter.finagle.mysql.SimpleCommandRequest">SimpleCommandRequest</a> with <a href="WithSql.html" class="extype" name="com.twitter.finagle.mysql.WithSql">WithSql</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A QueryRequest is used to send the server a text-based query that
@@ -2064,6 +2076,22 @@ associated data into a packet.</p>
       
       <p class="shortcomment cmt">Defines a Value ADT that represents the domain of values
 received from a mysql server.</p>
+    </li><li name="com.twitter.finagle.mysql.WithSql" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="WithSqlextendsAnyRef"></a><a id="WithSql:WithSql"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/index.html#WithSqlextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Contains the SQL for a Request." href="WithSql.html"><span class="name">WithSql</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Contains the SQL for a <a href="Request.html" class="extype" name="com.twitter.finagle.mysql.Request">Request</a>.</p>
     </li></ol>
             </div>
 
@@ -2100,10 +2128,11 @@ received from a mysql server.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="CanBeParameter$.html"><span class="name">CanBeParameter</span></a>
+        <a title="When a new implicit CanBeParameter is added here, it should also be explicitly added to Parameter.unsafeWrap." href="CanBeParameter$.html"><span class="name">CanBeParameter</span></a>
       </span>
       
-      
+      <p class="shortcomment cmt">When a new implicit <a href="CanBeParameter.html" class="extype" name="com.twitter.finagle.mysql.CanBeParameter">CanBeParameter</a> is added here, it should also be
+explicitly added to <a href="Parameter$.html#unsafeWrap(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameter#unsafeWrap">Parameter.unsafeWrap</a>.</p>
     </li><li name="com.twitter.finagle.mysql.Capability" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Capability"></a><a id="Capability:Capability"></a>
       <span class="permalink">
@@ -2450,7 +2479,7 @@ executing transactions.
 to indicate that a command has completed succesfully.
 <a href="http://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-OK_Packet" target="_blank">http://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-OK_Packet</a>
 </p></div></div>
-    </li><li name="com.twitter.finagle.mysql.Parameter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.mysql.Parameter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Parameter"></a><a id="Parameter:Parameter"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/mysql/index.html#Parameter" title="Permalink">
@@ -2462,10 +2491,18 @@ to indicate that a command has completed succesfully.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="Note: There is a Java-friendly API for this object: com.twitter.finagle.mysql.Parameters." href="Parameter$.html"><span class="name">Parameter</span></a>
+        <a title="For Scala users, the typical usage is by importing the implicit conversions and then letting the compiler do the conversions for you." href="Parameter$.html"><span class="name">Parameter</span></a>
       </span>
       
-      <p class="shortcomment cmt">Note: There is a Java-friendly API for this object: <a href="Parameters$.html" class="extype" name="com.twitter.finagle.mysql.Parameters">com.twitter.finagle.mysql.Parameters</a>.</p>
+      <p class="shortcomment cmt">For Scala users, the typical usage is by importing the implicit conversions
+and then letting the compiler do the conversions for you.</p><div class="fullcomment"><div class="comment cmt"><p>For Scala users, the typical usage is by importing the implicit conversions
+and then letting the compiler do the conversions for you.</p><p>Java users should generally be using <a href="Parameters$.html#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameters#of">Parameters.of</a> to do explicit
+conversions.</p><p>A Scala example:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter._
+
+<span class="kw">val</span> p: Parameter = <span class="lit">"this will get implicitly converted to a Parameter"</span></pre><p>A Java example:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter;
+<span class="kw">import</span> com.twitter.finagle.mysql.Parameters;
+
+Parameter p = Parameters.of(<span class="lit">"explicitly converted to a Parameter"</span>);</pre></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="Parameters$.html" class="extype" name="com.twitter.finagle.mysql.Parameters">Parameters</a> for a Java-friendly API.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.mysql.Parameters" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Parameters"></a><a id="Parameters:Parameters"></a>
       <span class="permalink">
@@ -2522,6 +2559,22 @@ a prepared statement initialization request
 COM_STMT_PREPARE.
 <a href="http://dev.mysql.com/doc/internals/en/com-stmt-prepare-response.html#packet-COM_STMT_PREPARE_OK" target="_blank">http://dev.mysql.com/doc/internals/en/com-stmt-prepare-response.html#packet-COM_STMT_PREPARE_OK</a>
 </p></div></div>
+    </li><li name="com.twitter.finagle.mysql.PreparedStatement" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PreparedStatement"></a><a id="PreparedStatement:PreparedStatement"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/index.html#PreparedStatement" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="PreparedStatement$.html"><span class="name">PreparedStatement</span></a>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.mysql.QuitRequest" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="QuitRequest"></a><a id="QuitRequest:QuitRequest"></a>
       <span class="permalink">

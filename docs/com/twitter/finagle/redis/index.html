@@ -716,6 +716,10 @@ finagle clients and servers.
                         <a href="ClientError.html" title="">ClientError</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="class" href="ClusterDecodeError.html" title="Thrown when the response from a cluster management command could not be decoded correctly."></a>
+                        <a href="ClusterDecodeError.html" title="Thrown when the response from a cluster management command could not be decoded correctly.">ClusterDecodeError</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="trait" href="ConnectionCommands.html" title=""></a>
                         <a href="ConnectionCommands.html" title="">ConnectionCommands</a>
                       </li><li class="current-entities indented4">
@@ -870,7 +874,7 @@ Array[Byte]]</code>. The service provided is that of a &quot;transport&quot; of
 thrift messages (requests and replies) according to the protocol
 chosen. This is why the client codecs need to have access to a
 thrift <code>ProtocolFactory</code>.</p><p>These transports are used by the services produced by the
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">finagle thrift codegenerator</a>.</p><pre><span class="kw">val</span> service: Service[ThriftClientRequest, <span class="std">Array</span>[<span class="std">Byte</span>]] = ClientBuilder()
+<a href="https://github.com/mariusaeriksen/thrift-finagle" target="_blank">finagle thrift codegenerator</a>.</p><pre><span class="kw">val</span> service: Service[ThriftClientRequest, <span class="std">Array</span>[<span class="std">Byte</span>]] = ClientBuilder()
   .hosts(<span class="lit">"foobar.com:123"</span>)
   .stack(Thrift.client)
   .build()
@@ -1121,6 +1125,22 @@ generator.
       </span>
       
       
+    </li><li name="com.twitter.finagle.redis.ClusterDecodeError" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ClusterDecodeErrorextendsExceptionwithProductwithSerializable"></a><a id="ClusterDecodeError:ClusterDecodeError"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/redis/index.html#ClusterDecodeErrorextendsExceptionwithProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Thrown when the response from a cluster management command could not be decoded correctly." href="ClusterDecodeError.html"><span class="name">ClusterDecodeError</span></a><span class="params">(<span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Thrown when the response from a cluster management command could not be decoded correctly.</p>
     </li><li name="com.twitter.finagle.redis.ConnectionCommands" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ConnectionCommandsextendsBasicConnectionCommands"></a><a id="ConnectionCommands:ConnectionCommands"></a>
       <span class="permalink">

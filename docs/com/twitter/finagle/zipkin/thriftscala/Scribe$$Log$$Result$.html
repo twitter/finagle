@@ -244,7 +244,7 @@ resources for using Finagle.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">Result</span><span class="result"> extends <span class="extype" name="com.twitter.scrooge.ThriftStructCodec3">ThriftStructCodec3</span>[<a href="Scribe$$Log$$Result.html" class="extype" name="com.twitter.finagle.zipkin.thriftscala.Scribe.Log.Result">Result</a>] with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <span class="name">Result</span><span class="result"> extends <span class="extype" name="com.twitter.scrooge.ValidatingThriftStructCodec3">ValidatingThriftStructCodec3</span>[<a href="Scribe$$Log$$Result.html" class="extype" name="com.twitter.finagle.zipkin.thriftscala.Scribe.Log.Result">Result</a>] with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       </h4>
 
@@ -253,7 +253,7 @@ resources for using Finagle.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="com.twitter.scrooge.ThriftStructCodec3">ThriftStructCodec3</span>[<a href="Scribe$$Log$$Result.html" class="extype" name="com.twitter.finagle.zipkin.thriftscala.Scribe.Log.Result">Result</a>], <span class="extype" name="com.twitter.scrooge.ThriftStructCodec">ThriftStructCodec</span>[<a href="Scribe$$Log$$Result.html" class="extype" name="com.twitter.finagle.zipkin.thriftscala.Scribe.Log.Result">Result</a>], <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="com.twitter.scrooge.ValidatingThriftStructCodec3">ValidatingThriftStructCodec3</span>[<a href="Scribe$$Log$$Result.html" class="extype" name="com.twitter.finagle.zipkin.thriftscala.Scribe.Log.Result">Result</a>], <span class="extype" name="com.twitter.scrooge.ThriftStructCodec3">ThriftStructCodec3</span>[<a href="Scribe$$Log$$Result.html" class="extype" name="com.twitter.finagle.zipkin.thriftscala.Scribe.Log.Result">Result</a>], <span class="extype" name="com.twitter.scrooge.ThriftStructCodec">ThriftStructCodec</span>[<a href="Scribe$$Log$$Result.html" class="extype" name="com.twitter.finagle.zipkin.thriftscala.Scribe.Log.Result">Result</a>], <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
         </div></div>
         
 
@@ -279,7 +279,7 @@ resources for using Finagle.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.zipkin.thriftscala.Scribe.Log.Result"><span>Result</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="com.twitter.scrooge.ThriftStructCodec3"><span>ThriftStructCodec3</span></li><li class="in" name="com.twitter.scrooge.ThriftStructCodec"><span>ThriftStructCodec</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.zipkin.thriftscala.Scribe.Log.Result"><span>Result</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="com.twitter.scrooge.ValidatingThriftStructCodec3"><span>ValidatingThriftStructCodec3</span></li><li class="in" name="com.twitter.scrooge.ThriftStructCodec3"><span>ThriftStructCodec3</span></li><li class="in" name="com.twitter.scrooge.ThriftStructCodec"><span>ThriftStructCodec</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -812,6 +812,40 @@ resources for using Finagle.
       </span>
       
       <p class="shortcomment cmt">Checks that all required fields are non-null.</p>
+    </li><li name="com.twitter.scrooge.ValidatingThriftStructCodec3#validateField" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="validateField[U&lt;:com.twitter.scrooge.ValidatingThriftStruct[U]](any:Any):Seq[com.twitter.scrooge.validation.Issue]"></a><a id="validateField[U&lt;:ValidatingThriftStruct[U]](Any):Seq[Issue]"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/thriftscala/Scribe$$Log$$Result$.html#validateField[U&lt;:com.twitter.scrooge.ValidatingThriftStruct[U]](any:Any):Seq[com.twitter.scrooge.validation.Issue]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">validateField</span><span class="tparams">[<span name="U">U &lt;: <span class="extype" name="com.twitter.scrooge.ValidatingThriftStruct">ValidatingThriftStruct</span>[<span class="extype" name="com.twitter.scrooge.ValidatingThriftStructCodec3.validateField.U">U</span>]</span>]</span><span class="params">(<span name="any">any: <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></span>)</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="com.twitter.scrooge.validation.Issue">Issue</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>ValidatingThriftStructCodec3</dd></dl></div>
+    </li><li name="com.twitter.finagle.zipkin.thriftscala.Scribe.Log.Result#validateNewInstance" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="validateNewInstance(item:com.twitter.finagle.zipkin.thriftscala.Scribe.Log.Result):Seq[com.twitter.scrooge.validation.Issue]"></a><a id="validateNewInstance(Result):Seq[Issue]"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/zipkin/thriftscala/Scribe$$Log$$Result$.html#validateNewInstance(item:com.twitter.finagle.zipkin.thriftscala.Scribe.Log.Result):Seq[com.twitter.scrooge.validation.Issue]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">validateNewInstance</span><span class="params">(<span name="item">item: <a href="Scribe$$Log$$Result.html" class="extype" name="com.twitter.finagle.zipkin.thriftscala.Scribe.Log.Result">Result</a></span>)</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="com.twitter.scrooge.validation.Issue">Issue</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Checks that the struct is a valid as a new instance.</p><div class="fullcomment"><div class="comment cmt"><p>Checks that the struct is a valid as a new instance. If there are any missing required or
+construction required fields, return a non-empty list.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.zipkin.thriftscala.Scribe.Log.Result">Result</a> → ValidatingThriftStructCodec3</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
@@ -910,6 +944,8 @@ resources for using Finagle.
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></h3>
             </div><div class="parent" name="java.io.Serializable">
               <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="com.twitter.scrooge.ValidatingThriftStructCodec3">
+              <h3>Inherited from <span class="extype" name="com.twitter.scrooge.ValidatingThriftStructCodec3">ValidatingThriftStructCodec3</span>[<a href="Scribe$$Log$$Result.html" class="extype" name="com.twitter.finagle.zipkin.thriftscala.Scribe.Log.Result">Result</a>]</h3>
             </div><div class="parent" name="com.twitter.scrooge.ThriftStructCodec3">
               <h3>Inherited from <span class="extype" name="com.twitter.scrooge.ThriftStructCodec3">ThriftStructCodec3</span>[<a href="Scribe$$Log$$Result.html" class="extype" name="com.twitter.finagle.zipkin.thriftscala.Scribe.Log.Result">Result</a>]</h3>
             </div><div class="parent" name="com.twitter.scrooge.ThriftStructCodec">

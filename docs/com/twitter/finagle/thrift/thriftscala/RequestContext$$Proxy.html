@@ -171,7 +171,7 @@ Array[Byte]]</code>. The service provided is that of a &quot;transport&quot; of
 thrift messages (requests and replies) according to the protocol
 chosen. This is why the client codecs need to have access to a
 thrift <code>ProtocolFactory</code>.</p><p>These transports are used by the services produced by the
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">finagle thrift codegenerator</a>.</p><pre><span class="kw">val</span> service: Service[ThriftClientRequest, <span class="std">Array</span>[<span class="std">Byte</span>]] = ClientBuilder()
+<a href="https://github.com/mariusaeriksen/thrift-finagle" target="_blank">finagle thrift codegenerator</a>.</p><pre><span class="kw">val</span> service: Service[ThriftClientRequest, <span class="std">Array</span>[<span class="std">Byte</span>]] = ClientBuilder()
   .hosts(<span class="lit">"foobar.com:123"</span>)
   .stack(Thrift.client)
   .build()
@@ -211,7 +211,7 @@ generator.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="This struct serializes com.twitter.finagle.Context" href="RequestContext$.html"><span class="name">RequestContext</span></a><span class="result"> extends <span class="extype" name="com.twitter.scrooge.ThriftStructCodec3">ThriftStructCodec3</span>[<a href="RequestContext.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.RequestContext">RequestContext</a>] with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="This struct serializes com.twitter.finagle.Context" href="RequestContext$.html"><span class="name">RequestContext</span></a><span class="result"> extends <span class="extype" name="com.twitter.scrooge.ValidatingThriftStructCodec3">ValidatingThriftStructCodec3</span>[<a href="RequestContext.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.RequestContext">RequestContext</a>] with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">This struct serializes com.twitter.finagle.Context
@@ -260,7 +260,7 @@ instance.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="RequestContext.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.RequestContext">RequestContext</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="com.twitter.scrooge.HasThriftStructCodec3">HasThriftStructCodec3</span>[<a href="RequestContext.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.RequestContext">RequestContext</a>], <a href="http://www.scala-lang.org/api/2.12.4/scala/Product2.html#scala.Product2" class="extype" name="scala.Product2">Product2</a>[<span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span>, <span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span>], <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/Equals.html#scala.Equals" class="extype" name="scala.Equals">Equals</a>, <span class="extype" name="com.twitter.scrooge.ThriftStruct">ThriftStruct</span>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="RequestContext.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.RequestContext">RequestContext</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="com.twitter.scrooge.ValidatingThriftStruct">ValidatingThriftStruct</span>[<a href="RequestContext.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.RequestContext">RequestContext</a>], <span class="extype" name="com.twitter.scrooge.HasThriftStructCodec3">HasThriftStructCodec3</span>[<a href="RequestContext.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.RequestContext">RequestContext</a>], <a href="http://www.scala-lang.org/api/2.12.4/scala/Product2.html#scala.Product2" class="extype" name="scala.Product2">Product2</a>[<span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span>, <span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span>], <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/Equals.html#scala.Equals" class="extype" name="scala.Equals">Equals</a>, <span class="extype" name="com.twitter.scrooge.ThriftStruct">ThriftStruct</span>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
         </div></div>
         
 
@@ -286,7 +286,7 @@ instance.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.thrift.thriftscala.RequestContext.Proxy"><span>Proxy</span></li><li class="in" name="com.twitter.finagle.thrift.thriftscala.RequestContext"><span>RequestContext</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="com.twitter.scrooge.HasThriftStructCodec3"><span>HasThriftStructCodec3</span></li><li class="in" name="scala.Product2"><span>Product2</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="com.twitter.scrooge.ThriftStruct"><span>ThriftStruct</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.thrift.thriftscala.RequestContext.Proxy"><span>Proxy</span></li><li class="in" name="com.twitter.finagle.thrift.thriftscala.RequestContext"><span>RequestContext</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="com.twitter.scrooge.ValidatingThriftStruct"><span>ValidatingThriftStruct</span></li><li class="in" name="com.twitter.scrooge.HasThriftStructCodec3"><span>HasThriftStructCodec3</span></li><li class="in" name="scala.Product2"><span>Product2</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="com.twitter.scrooge.ThriftStruct"><span>ThriftStruct</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -413,9 +413,9 @@ instance.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="RequestContext.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.RequestContext">RequestContext</a> → Product2</dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.thriftscala.RequestContext#_codec" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="_codec:com.twitter.scrooge.ThriftStructCodec3[com.twitter.finagle.thrift.thriftscala.RequestContext]"></a><a id="_codec:ThriftStructCodec3[RequestContext]"></a>
+      <a id="_codec:com.twitter.scrooge.ValidatingThriftStructCodec3[com.twitter.finagle.thrift.thriftscala.RequestContext]"></a><a id="_codec:ValidatingThriftStructCodec3[RequestContext]"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/thrift/thriftscala/RequestContext$$Proxy.html#_codec:com.twitter.scrooge.ThriftStructCodec3[com.twitter.finagle.thrift.thriftscala.RequestContext]" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/thrift/thriftscala/RequestContext$$Proxy.html#_codec:com.twitter.scrooge.ValidatingThriftStructCodec3[com.twitter.finagle.thrift.thriftscala.RequestContext]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -424,10 +424,10 @@ instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">_codec</span><span class="result">: <span class="extype" name="com.twitter.scrooge.ThriftStructCodec3">ThriftStructCodec3</span>[<a href="RequestContext.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.RequestContext">RequestContext</a>]</span>
+        <span class="name">_codec</span><span class="result">: <span class="extype" name="com.twitter.scrooge.ValidatingThriftStructCodec3">ValidatingThriftStructCodec3</span>[<a href="RequestContext.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.RequestContext">RequestContext</a>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="RequestContext.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.RequestContext">RequestContext</a> → HasThriftStructCodec3</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="RequestContext.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.RequestContext">RequestContext</a> → ValidatingThriftStruct → HasThriftStructCodec3</dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.thriftscala.RequestContext.Proxy#_passthroughFields" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="_passthroughFields:scala.collection.immutable.Map[Short,com.twitter.scrooge.TFieldBlob]"></a><a id="_passthroughFields:Map[Short,TFieldBlob]"></a>
       <span class="permalink">
@@ -1027,6 +1027,8 @@ from the passthroughFields map, if present.
               <h3>Inherited from <a href="RequestContext.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.RequestContext">RequestContext</a></h3>
             </div><div class="parent" name="java.io.Serializable">
               <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="com.twitter.scrooge.ValidatingThriftStruct">
+              <h3>Inherited from <span class="extype" name="com.twitter.scrooge.ValidatingThriftStruct">ValidatingThriftStruct</span>[<a href="RequestContext.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.RequestContext">RequestContext</a>]</h3>
             </div><div class="parent" name="com.twitter.scrooge.HasThriftStructCodec3">
               <h3>Inherited from <span class="extype" name="com.twitter.scrooge.HasThriftStructCodec3">HasThriftStructCodec3</span>[<a href="RequestContext.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.RequestContext">RequestContext</a>]</h3>
             </div><div class="parent" name="scala.Product2">

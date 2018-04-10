@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Protocols &#8212; Finagle 18.3.0 documentation</title>
+    <title>Protocols &#8212; Finagle 18.4.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '18.3.0',
+        VERSION:     '18.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 18.3.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 18.4.0 documentation" href="index.html" />
     <link rel="next" title="Metrics" href="Metrics.html" />
     <link rel="prev" title="Names and Naming in Finagle" href="Names.html" />
    
@@ -198,7 +198,7 @@ following rich APIs:</p>
 </div>
 <p>To convert the Service interface to the method interface use <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Thrift$">Thrift.newMethodIface</a>:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">filteredMethodIface</span><span class="k">:</span> <span class="kt">LoggerService</span><span class="o">[</span><span class="kt">Future</span><span class="o">]</span> <span class="k">=</span>
-  <span class="nc">Thrift</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">newMethodIface</span><span class="o">(</span><span class="n">clientServiceIface</span><span class="o">.</span><span class="n">copy</span><span class="o">(</span><span class="n">log</span> <span class="k">=</span> <span class="n">filteredLog</span><span class="o">))</span>
+  <span class="nc">Thrift</span><span class="o">.</span><span class="nc">Client</span><span class="o">.</span><span class="n">newMethodIface</span><span class="o">(</span><span class="n">clientServiceIface</span><span class="o">.</span><span class="n">copy</span><span class="o">(</span><span class="n">log</span> <span class="k">=</span> <span class="n">filteredLog</span><span class="o">))</span>
 <span class="nc">Await</span><span class="o">.</span><span class="n">result</span><span class="o">(</span><span class="n">filteredMethodIface</span><span class="o">.</span><span class="n">log</span><span class="o">(</span><span class="s">&quot;ping&quot;</span><span class="o">,</span> <span class="mi">3</span><span class="o">).</span><span class="n">map</span><span class="o">(</span><span class="n">println</span><span class="o">))</span>
 </pre></div>
 </div>

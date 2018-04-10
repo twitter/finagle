@@ -171,7 +171,7 @@ Array[Byte]]</code>. The service provided is that of a &quot;transport&quot; of
 thrift messages (requests and replies) according to the protocol
 chosen. This is why the client codecs need to have access to a
 thrift <code>ProtocolFactory</code>.</p><p>These transports are used by the services produced by the
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">finagle thrift codegenerator</a>.</p><pre><span class="kw">val</span> service: Service[ThriftClientRequest, <span class="std">Array</span>[<span class="std">Byte</span>]] = ClientBuilder()
+<a href="https://github.com/mariusaeriksen/thrift-finagle" target="_blank">finagle thrift codegenerator</a>.</p><pre><span class="kw">val</span> service: Service[ThriftClientRequest, <span class="std">Array</span>[<span class="std">Byte</span>]] = ClientBuilder()
   .hosts(<span class="lit">"foobar.com:123"</span>)
   .stack(Thrift.client)
   .build()
@@ -287,6 +287,10 @@ generator.
                         <span class="separator"></span>
                         <a class="trait" href="ServiceIfaceBuilder.html" title="Typeclass ServiceIfaceBuilder[T] creates T-typed interfaces from thrift clients."></a>
                         <a href="ServiceIfaceBuilder.html" title="Typeclass ServiceIfaceBuilder[T] creates T-typed interfaces from thrift clients.">ServiceIfaceBuilder</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="ThriftClient.html" title="Stateless helper methods which wrap a given ServiceIface (deprecated) or a given ServicePerEndpoint with another type via the given method's implicit Builder."></a>
+                        <a href="ThriftClient.html" title="Stateless helper methods which wrap a given ServiceIface (deprecated) or a given ServicePerEndpoint with another type via the given method's implicit Builder.">ThriftClient</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="ThriftClientRequest.html" title="Defines a (framed) thrift request, simply composed of the raw message and a boolean indicating whether it is a one-shot message or not."></a>
@@ -465,9 +469,9 @@ generator.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.Protocols#binaryFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="binaryFactory(strictRead:Boolean,strictWrite:Boolean,readLength:Int,statsReceiver:com.twitter.finagle.stats.StatsReceiver):org.apache.thrift.protocol.TProtocolFactory"></a><a id="binaryFactory(Boolean,Boolean,Int,StatsReceiver):TProtocolFactory"></a>
+      <a id="binaryFactory(strictRead:Boolean,strictWrite:Boolean,readLength:Long,statsReceiver:com.twitter.finagle.stats.StatsReceiver):org.apache.thrift.protocol.TProtocolFactory"></a><a id="binaryFactory(Boolean,Boolean,Long,StatsReceiver):TProtocolFactory"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/thrift/Protocols$.html#binaryFactory(strictRead:Boolean,strictWrite:Boolean,readLength:Int,statsReceiver:com.twitter.finagle.stats.StatsReceiver):org.apache.thrift.protocol.TProtocolFactory" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/Protocols$.html#binaryFactory(strictRead:Boolean,strictWrite:Boolean,readLength:Long,statsReceiver:com.twitter.finagle.stats.StatsReceiver):org.apache.thrift.protocol.TProtocolFactory" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -476,7 +480,7 @@ generator.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">binaryFactory</span><span class="params">(<span name="strictRead">strictRead: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">false</span></span>, <span name="strictWrite">strictWrite: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">true</span></span>, <span name="readLength">readLength: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a> = <span class="symbol">0</span></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../index.html">DefaultStatsReceiver</a></span></span></span>)</span><span class="result">: <span class="extype" name="org.apache.thrift.protocol.TProtocolFactory">TProtocolFactory</span></span>
+        <span class="name">binaryFactory</span><span class="params">(<span name="strictRead">strictRead: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">false</span></span>, <span name="strictWrite">strictWrite: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">true</span></span>, <span name="readLength">readLength: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a> = <span class="symbol">-1</span></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../index.html">DefaultStatsReceiver</a></span></span></span>)</span><span class="result">: <span class="extype" name="org.apache.thrift.protocol.TProtocolFactory">TProtocolFactory</span></span>
       </span>
       
       <p class="shortcomment cmt">Returns a <code>TProtocolFactory</code> that creates <code>TProtocol</code>s that

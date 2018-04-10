@@ -491,7 +491,7 @@ client to maintain higher success rates.
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.param.SessionQualificationParams#consecutiveFailuresFailureAccrual" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.param.SessionQualificationParams#consecutiveFailuresFailureAccrual" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="consecutiveFailuresFailureAccrual(nFailures:Int):A"></a><a id="consecutiveFailuresFailureAccrual(Int):A"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/param/SessionQualificationParams.html#consecutiveFailuresFailureAccrual(nFailures:Int):A" title="Permalink">
@@ -506,7 +506,10 @@ client to maintain higher success rates.
         <span class="name">consecutiveFailuresFailureAccrual</span><span class="params">(<span name="nFailures">nFailures: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.SessionQualificationParams.A">A</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Sets a FailureAccrualPolicy that triggers after <code>nFailures</code> consecutive failures.</p><div class="fullcomment"><div class="comment cmt"><p>Sets a FailureAccrualPolicy that triggers after <code>nFailures</code> consecutive failures.
+</p></div><dl class="paramcmts block"><dt class="param">nFailures</dt><dd class="cmt"><p>The number of failures to trigger on</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#failure-accrual" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#failure-accrual</a>
+     <a href="https://twitter.github.io/finagle/guide/Clients.html#circuit-breaking" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#circuit-breaking</a>
+     <span class="extype" name="FailureAccrualFactory">FailureAccrualFactory</span></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.param.SessionQualificationParams#consecutiveFailuresFailureAccrual" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="consecutiveFailuresFailureAccrual(nFailures:Int,backoff:Stream[com.twitter.util.Duration]):A"></a><a id="consecutiveFailuresFailureAccrual(Int,Stream[Duration]):A"></a>
       <span class="permalink">
@@ -732,22 +735,6 @@ producing durations for which a host is marked unavailable.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.param.SessionQualificationParams#successRateFailureAccrual" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="successRateFailureAccrual(successRate:Double,window:com.twitter.util.Duration):A"></a><a id="successRateFailureAccrual(Double,Duration):A"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/param/SessionQualificationParams.html#successRateFailureAccrual(successRate:Double,window:com.twitter.util.Duration):A" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">successRateFailureAccrual</span><span class="params">(<span name="successRate">successRate: <a href="http://www.scala-lang.org/api/2.12.4/scala/Double.html#scala.Double" class="extype" name="scala.Double">Double</a></span>, <span name="window">window: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.SessionQualificationParams.A">A</span></span>
-      </span>
-      
-      
     </li><li name="com.twitter.finagle.param.SessionQualificationParams#successRateFailureAccrual" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="successRateFailureAccrual(successRate:Double,window:com.twitter.util.Duration,backoff:Stream[com.twitter.util.Duration]):A"></a><a id="successRateFailureAccrual(Double,Duration,Stream[Duration]):A"></a>
       <span class="permalink">
@@ -767,7 +754,48 @@ producing durations for which a host is marked unavailable.
 by looking at a moving average over a time window.</p><div class="fullcomment"><div class="comment cmt"><p>Sets a failure accrual policy that triggers when success rate drops under a given value
 by looking at a moving average over a time window.</p><p>The current default policy is success rate based with a cutoff of 80% and
 a window of 30 seconds.
-</p></div><dl class="paramcmts block"><dt class="param">window</dt><dd class="cmt"><p>The time window of the moving average</p></dd><dt class="param">backoff</dt><dd class="cmt"><p>The backoff that should be applied to revival attempts</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#failure-accrual" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#failure-accrual</a></p></span></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">successRate</dt><dd class="cmt"><p>The success rate to trigger on</p></dd><dt class="param">window</dt><dd class="cmt"><p>The time window of the moving average</p></dd><dt class="param">backoff</dt><dd class="cmt"><p>The backoff that should be applied to revival attempts</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#failure-accrual" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#failure-accrual</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.param.SessionQualificationParams#successRateFailureAccrual" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="successRateFailureAccrual(successRate:Double,window:com.twitter.util.Duration):A"></a><a id="successRateFailureAccrual(Double,Duration):A"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/param/SessionQualificationParams.html#successRateFailureAccrual(successRate:Double,window:com.twitter.util.Duration):A" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">successRateFailureAccrual</span><span class="params">(<span name="successRate">successRate: <a href="http://www.scala-lang.org/api/2.12.4/scala/Double.html#scala.Double" class="extype" name="scala.Double">Double</a></span>, <span name="window">window: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.SessionQualificationParams.A">A</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Sets a failure accrual policy that triggers when success rate drops under a given value
+by looking at a moving average over a time window.</p><div class="fullcomment"><div class="comment cmt"><p>Sets a failure accrual policy that triggers when success rate drops under a given value
+by looking at a moving average over a time window.</p><p>The current default policy is success rate based with a cutoff of 80% and
+a window of 30 seconds.
+</p></div><dl class="paramcmts block"><dt class="param">successRate</dt><dd class="cmt"><p>The success rate to trigger on</p></dd><dt class="param">window</dt><dd class="cmt"><p>The time window of the moving average</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#failure-accrual" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#failure-accrual</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.param.SessionQualificationParams#successRateFailureAccrual" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="successRateFailureAccrual(successRate:Double,window:com.twitter.util.Duration,backoff:Stream[com.twitter.util.Duration],minRequestThreshold:Int):A"></a><a id="successRateFailureAccrual(Double,Duration,Stream[Duration],Int):A"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/param/SessionQualificationParams.html#successRateFailureAccrual(successRate:Double,window:com.twitter.util.Duration,backoff:Stream[com.twitter.util.Duration],minRequestThreshold:Int):A" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">successRateFailureAccrual</span><span class="params">(<span name="successRate">successRate: <a href="http://www.scala-lang.org/api/2.12.4/scala/Double.html#scala.Double" class="extype" name="scala.Double">Double</a></span>, <span name="window">window: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>, <span name="backoff">backoff: <span class="extype" name="scala.Stream">Stream</span>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>]</span>, <span name="minRequestThreshold">minRequestThreshold: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.SessionQualificationParams.A">A</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Sets a failure accrual policy that triggers when success rate drops under a given value
+by looking at a moving average over a time window.</p><div class="fullcomment"><div class="comment cmt"><p>Sets a failure accrual policy that triggers when success rate drops under a given value
+by looking at a moving average over a time window.</p><p>The current default policy is success rate based with a cutoff of 80% and
+a window of 30 seconds.
+</p></div><dl class="paramcmts block"><dt class="param">successRate</dt><dd class="cmt"><p>The success rate to trigger on</p></dd><dt class="param">window</dt><dd class="cmt"><p>The time window of the moving average</p></dd><dt class="param">backoff</dt><dd class="cmt"><p>The backoff that should be applied to revival attempts</p></dd><dt class="param">minRequestThreshold</dt><dd class="cmt"><p>The minimum number of requests in a window
+required for failure accrual to trigger</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#failure-accrual" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#failure-accrual</a></p></span></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

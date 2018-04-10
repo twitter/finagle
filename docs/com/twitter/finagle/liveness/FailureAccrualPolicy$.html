@@ -318,6 +318,70 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.liveness.FailureAccrualPolicy#DefaultConsecutiveFailures" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DefaultConsecutiveFailures:Int"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/liveness/FailureAccrualPolicy$.html#DefaultConsecutiveFailures:Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">DefaultConsecutiveFailures</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.liveness.FailureAccrualPolicy#DefaultMinimumRequestThreshold" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DefaultMinimumRequestThreshold:Int"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/liveness/FailureAccrualPolicy$.html#DefaultMinimumRequestThreshold:Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">DefaultMinimumRequestThreshold</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.liveness.FailureAccrualPolicy#DefaultSuccessRateThreshold" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DefaultSuccessRateThreshold:Double"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/liveness/FailureAccrualPolicy$.html#DefaultSuccessRateThreshold:Double" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">DefaultSuccessRateThreshold</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Double.html#scala.Double" class="extype" name="scala.Double">Double</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.liveness.FailureAccrualPolicy#DefaultSuccessRateWindow" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DefaultSuccessRateWindow:com.twitter.util.Duration"></a><a id="DefaultSuccessRateWindow:Duration"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/liveness/FailureAccrualPolicy$.html#DefaultSuccessRateWindow:com.twitter.util.Duration" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">DefaultSuccessRateWindow</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>
+      </span>
+      
+      
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -607,6 +671,32 @@ Some(Duration).
 <code>markDeadOnFailure()</code> will return None, until we get requests for a duration
 of at least <code>window</code>.</p></dd><dt class="param">markDeadFor</dt><dd class="cmt"><p>stream of durations to use for the next duration
 returned from <code>markDeadOnFailure()</code></p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>com.twitter.finagle.util.Ema for how the success rate is computed</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.liveness.FailureAccrualPolicy#successRateWithinDuration" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="successRateWithinDuration(requiredSuccessRate:Double,window:com.twitter.util.Duration,markDeadFor:Stream[com.twitter.util.Duration],minRequestThreshold:Int):com.twitter.finagle.liveness.FailureAccrualPolicy"></a><a id="successRateWithinDuration(Double,Duration,Stream[Duration],Int):FailureAccrualPolicy"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/liveness/FailureAccrualPolicy$.html#successRateWithinDuration(requiredSuccessRate:Double,window:com.twitter.util.Duration,markDeadFor:Stream[com.twitter.util.Duration],minRequestThreshold:Int):com.twitter.finagle.liveness.FailureAccrualPolicy" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">successRateWithinDuration</span><span class="params">(<span name="requiredSuccessRate">requiredSuccessRate: <a href="http://www.scala-lang.org/api/2.12.4/scala/Double.html#scala.Double" class="extype" name="scala.Double">Double</a></span>, <span name="window">window: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>, <span name="markDeadFor">markDeadFor: <span class="extype" name="scala.Stream">Stream</span>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>]</span>, <span name="minRequestThreshold">minRequestThreshold: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="FailureAccrualPolicy.html" class="extype" name="com.twitter.finagle.liveness.FailureAccrualPolicy">FailureAccrualPolicy</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns a policy based on an exponentially-weighted moving average success
+rate over a time window.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a policy based on an exponentially-weighted moving average success
+rate over a time window. A moving average is used so the success rate
+calculation is biased towards more recent requests.</p><p>If the computed weighted success rate is less
+than the required success rate, <code>markDeadOnFailure()</code> will return
+Some(Duration).
+</p></div><dl class="paramcmts block"><dt class="param">requiredSuccessRate</dt><dd class="cmt"><p>successRate that must be met</p></dd><dt class="param">window</dt><dd class="cmt"><p>window over which the success rate is tracked.
+<code>markDeadOnFailure()</code> will return None, until we get requests for a duration
+of at least <code>window</code>.</p></dd><dt class="param">markDeadFor</dt><dd class="cmt"><p>stream of durations to use for the next duration
+returned from <code>markDeadOnFailure()</code></p></dd><dt class="param">minRequestThreshold</dt><dd class="cmt"><p>minimum number of requests in the past <code>window</code>
+for <code>markDeadOnFailure()</code> to return a duration</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>com.twitter.finagle.util.Ema for how the success rate is computed</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

@@ -225,6 +225,10 @@ resources for using Finagle.
                         <a href="ClientError.html" title="">ClientError</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="class" href="ClusterDecodeError.html" title="Thrown when the response from a cluster management command could not be decoded correctly."></a>
+                        <a href="ClusterDecodeError.html" title="Thrown when the response from a cluster management command could not be decoded correctly.">ClusterDecodeError</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="trait" href="ConnectionCommands.html" title=""></a>
                         <a href="ConnectionCommands.html" title="">ConnectionCommands</a>
                       </li><li class="current-entities indented4">
@@ -1878,6 +1882,22 @@ values with new values, just as regular SET.
       <p class="shortcomment cmt">Sets the given keys to their respective values.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the given keys to their respective values. MSETNX will not perform
 any operation at all even if just a single key already exists.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>1 if all keys were set, 0 if no keys were set.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd>StringCommands</dd><dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/msetnx</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.KeyCommands#migrate" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="migrate(destAddr:java.net.InetSocketAddress,keys:Seq[com.twitter.io.Buf],timeout:com.twitter.util.Duration):com.twitter.util.Future[Unit]"></a><a id="migrate(InetSocketAddress,Seq[Buf],Duration):Future[Unit]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/redis/Client.html#migrate(destAddr:java.net.InetSocketAddress,keys:Seq[com.twitter.io.Buf],timeout:com.twitter.util.Duration):com.twitter.util.Future[Unit]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">migrate</span><span class="params">(<span name="destAddr">destAddr: <span class="extype" name="java.net.InetSocketAddress">InetSocketAddress</span></span>, <span name="keys">keys: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>]</span>, <span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a> = <span class="symbol"><span class="name"><a href="../../../index.html">5.seconds</a></span></span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Migrates all keys to the destination server</p><div class="fullcomment"><div class="comment cmt"><p>Migrates all keys to the destination server</p></div><dl class="paramcmts block"><dt class="param">destAddr</dt><dd class="cmt"><p>target redis server</p></dd><dt class="param">keys</dt><dd class="cmt"><p>list of keys to be migrated</p></dd><dt class="param">timeout</dt><dd class="cmt"><p>timeout before failing, defaults to 5 seconds</p></dd><dt>returns</dt><dd class="cmt"><p>unit</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd>KeyCommands</dd></dl></div>
     </li><li name="com.twitter.finagle.redis.KeyCommands#move" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="move(key:com.twitter.io.Buf,db:com.twitter.io.Buf):com.twitter.util.Future[Boolean]"></a><a id="move(Buf,Buf):Future[Boolean]"></a>
       <span class="permalink">
