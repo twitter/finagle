@@ -2,13 +2,9 @@ package com.twitter.finagle.mysql.integration
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.client.DefaultPool
-import com.twitter.finagle.mysql._
 import com.twitter.util.Await
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class AbortedClientTest extends FunSuite with IntegrationClient {
 
   private def idleTime = 1.seconds
@@ -34,8 +30,7 @@ class AbortedClientTest extends FunSuite with IntegrationClient {
       val abortedClientQuery = "SHOW GLOBAL STATUS LIKE '%Aborted_clients%'"
       val initialAbortedValue: String = Await
         .result(c.select(abortedClientQuery) { row =>
-          val StringValue(abortedValue) = row("Value").get
-          abortedValue
+          row.stringOrNull("Value")
         }, 5.seconds)
         .head
 
@@ -50,7 +45,7 @@ class AbortedClientTest extends FunSuite with IntegrationClient {
       Thread.sleep((idleTime + 5.seconds).inMilliseconds)
 
       Await.result(c.select(abortedClientQuery) { row =>
-        val StringValue(abortedValue) = row("Value").get
+        val abortedValue = row.stringOrNull("Value")
         assert(initialAbortedValue.toInt == abortedValue.toInt)
       }, 5.seconds)
     }

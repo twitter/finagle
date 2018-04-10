@@ -55,6 +55,14 @@ object SwimmingRecord {
       "Michael Phelps",
       "United States",
       Date.valueOf("2009-07-29")
+    ),
+    // this record is used to check how empty strings are handled.
+    SwimmingRecord(
+      "",
+      100.0F,
+      "",
+      "",
+      Date.valueOf("2009-08-02")
     )
   )
 }
@@ -119,11 +127,11 @@ class ClientTest extends FunSuite
 
   test("query: select values") {
     val selectResult = await(c.select("SELECT * FROM `finagle-mysql-test`") { row =>
-      val StringValue(event) = row("event").get
-      val FloatValue(time) = row("time").get
-      val StringValue(name) = row("name").get
-      val StringValue(nation) = row("nationality").get
-      val DateValue(date) = row("date").get
+      val event = row.stringOrNull("event")
+      val time = row.floatOrZero("time")
+      val name = row.stringOrNull("name")
+      val nation = row.stringOrNull("nationality")
+      val date = row.javaSqlDateOrNull("date")
       SwimmingRecord(event, time, name, nation, date)
     })
 
@@ -211,6 +219,13 @@ class ClientTest extends FunSuite
       await(cursor.stream.toSeq())
     }
     assert(err.getMessage.contains(invalidSql))
+  }
+
+  test("PreparedStatement reading empty strings") {
+    val sql =
+      """
+        |INSERT INTO
+      """.stripMargin
   }
 
   // NOTE: this test case seems to do something bad to the client

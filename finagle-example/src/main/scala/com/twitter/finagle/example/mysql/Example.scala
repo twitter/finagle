@@ -101,13 +101,9 @@ object Example extends App {
     val query =
       "SELECT * FROM `finagle-mysql-example` WHERE `date` BETWEEN '2009-06-01' AND '2009-08-31'"
     client.select(query) { row =>
-      val StringValue(event) = row("event").get
-      val DateValue(date) = row("date").get
-      val StringValue(name) = row("name").get
-      val time = row("time").map {
-        case FloatValue(f) => f
-        case _ => 0.0F
-      }.get
+      val date = row.javaSqlDateOrNull("date")
+      val name = row.stringOrNull("name")
+      val time = row.floatOrZero("time")
 
       (name, time, date)
     }

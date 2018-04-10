@@ -33,7 +33,7 @@ private class BinaryEncodedRow(
    * Check if the bit is set. Note, the
    * first 2 bits are reserved.
    */
-  def isNull(index: Int) = nullBitmap.testBit(index + 2)
+  def isNull(index: Int): Boolean = nullBitmap.testBit(index + 2)
 
   /**
    * Convert the binary representation of each value

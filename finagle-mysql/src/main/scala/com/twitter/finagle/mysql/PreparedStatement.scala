@@ -57,9 +57,7 @@ trait PreparedStatement {
    *
    * // note the implicit conversion of the Int, 1234, into a Parameter
    * val result: Future[Seq[String] = preparedStatement.select(1234) { row =>
-   *   row("column1").get match {
-   *     case StringValue(s) => s
-   *   }
+   *   row.stringOrNull("column1")
    * }
    * }}}
    *
@@ -141,8 +139,7 @@ object PreparedStatement {
      *   .prepare("SELECT column1 FROM a_table WHERE column2 = ?")
      *   .asJava();
      * Future<List<String>> result = preparedStatement.select((Row row) -> {
-     *     StringValue sv = (StringValue) row.apply("column1").get();
-     *     return sv.s();
+     *     return row.stringOrNull();
      *   },
      *   of(1234)
      * );

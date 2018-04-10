@@ -1,7 +1,7 @@
 package com.twitter.finagle.mysql.integration
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.mysql.{BigDecimalValue, Client, NullValue, OK, Result, ServerError}
+import com.twitter.finagle.mysql.{Client, OK, Result, ServerError}
 import com.twitter.util.{Await, Future}
 import java.sql.SQLException
 import org.scalatest.{BeforeAndAfter, FunSuite}
@@ -64,10 +64,7 @@ class PreparedStatementTest extends FunSuite
   private[this] def selectBigDecimal(id: Long): BigDecimal = {
     val selectSql = s"SELECT big_decimal FROM prepared_stmt WHERE id = $id"
     val bds = await(c.select(selectSql) { row =>
-      row("big_decimal").get match {
-        case BigDecimalValue(bd) => bd
-        case NullValue => null
-      }
+      row.bigDecimalOrNull("big_decimal")
     })
     assert(bds.size == 1)
     bds.head

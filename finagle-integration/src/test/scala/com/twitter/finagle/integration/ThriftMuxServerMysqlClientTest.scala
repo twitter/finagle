@@ -1,7 +1,7 @@
 package com.twitter.finagle.integration
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.mysql.{IntValue, OK}
+import com.twitter.finagle.mysql.OK
 import com.twitter.finagle.mysql.integration.IntegrationClient
 import com.twitter.finagle.thriftmux.thriftscala.TestService
 import com.twitter.finagle.util.HashedWheelTimer
@@ -102,8 +102,7 @@ class ThriftMuxServerMysqlClientTest extends FunSuite
       // insert should get rolled back.
       val ids: Seq[Int] = await(
         mysqlClient.select("SELECT id FROM txn_test") { row =>
-          val IntValue(id) = row("id").get
-          id
+          row.intOrZero("id")
         }
       )
       assert(Seq.empty == ids)

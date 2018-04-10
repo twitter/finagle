@@ -27,7 +27,7 @@ private class StringEncodedRow(
       val bytes = reader.readLengthCodedBytes()
       if (bytes == null)
         NullValue
-      else if (bytes.isEmpty)
+      else if (bytes.length == 0)
         EmptyValue
       else if (!Charset.isCompatible(charset))
         RawValue(field.fieldType, field.charset, false, bytes)
@@ -61,7 +61,7 @@ private class StringEncodedRow(
       }
     }
 
-  def indexOf(name: String) = indexMap.get(name)
+  def indexOf(name: String): Option[Int] = indexMap.get(name)
 
   @inline
   private[this] def isSigned(field: Field): Boolean =
