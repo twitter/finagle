@@ -75,7 +75,7 @@ trait Client extends Closable {
    *
    * @note The cursored statements are built on a prepare -> execute -> fetch flow
    * that requires state tracking. It is important to either fully consume the resulting
-   * stream, or explicitly call `close()`
+   * stream, or explicitly call [[CursorResult.close()]].
    */
   def cursor(sql: String): CursoredStatement
 

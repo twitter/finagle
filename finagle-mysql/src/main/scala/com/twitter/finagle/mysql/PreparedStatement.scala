@@ -14,6 +14,7 @@ import scala.collection.JavaConverters._
  * "filled in" per usage by `apply` and `select`.
  *
  * @see [[Client.prepare(String)]]
+ * @see [[CursoredStatement]] for a lazy stream of [[Row]]s.
  */
 trait PreparedStatement {
 
@@ -72,7 +73,7 @@ trait PreparedStatement {
   /**
    * Provides a Java-friendly API for this [[PreparedStatement]].
    */
-  def asJava: PreparedStatement.AsJava =
+  final def asJava: PreparedStatement.AsJava =
     new PreparedStatement.AsJava(this)
 
 }
