@@ -1,10 +1,8 @@
 package com.twitter.finagle.http
 
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
+import scala.collection.JavaConverters._
 
-@RunWith(classOf[JUnitRunner])
 class RequestTest extends FunSuite {
   test("constructors") {
     Seq(
@@ -80,4 +78,99 @@ class RequestTest extends FunSuite {
 
     assert(Request.queryString("q!" -> "twitter!") == "?q%21=twitter%21")
   }
+
+  test("getParam") {
+    val request = Request(Method.Post, "/search")
+    request.mediaType = MediaType.WwwForm
+    request.contentString = "q=twitter"
+    assert(request.getParam("q") == "twitter")
+    assert(request.getParam("r") == null)
+
+    assert(request.getParam("q", "myDefault") == "twitter")
+    assert(request.getParam("r", "myDefault") == "myDefault")
+  }
+
+  test("getShortParam") {
+    val request = Request(Method.Post, "/search")
+    request.mediaType = MediaType.WwwForm
+    request.contentString = "q=10&r=x"
+    assert(request.getShortParam("q") == 10)
+    assert(request.getShortParam("r") == 0)
+    assert(request.getShortParam("s") == 0)
+
+    assert(request.getShortParam("q", 11) == 10)
+    assert(request.getShortParam("r", 11) == 0)
+    assert(request.getShortParam("s", 11) == 11)
+  }
+
+  test("getIntParam") {
+    val request = Request(Method.Post, "/search")
+    request.mediaType = MediaType.WwwForm
+    request.contentString = "q=10&r=x"
+    assert(request.getIntParam("q") == 10)
+    assert(request.getIntParam("r") == 0)
+    assert(request.getIntParam("s") == 0)
+
+    assert(request.getIntParam("q", 11) == 10)
+    assert(request.getIntParam("r", 11) == 0)
+    assert(request.getIntParam("s", 11) == 11)
+  }
+
+  test("getLongParam") {
+    val request = Request(Method.Post, "/search")
+    request.mediaType = MediaType.WwwForm
+    request.contentString = "q=10&r=x"
+    assert(request.getLongParam("q") == 10)
+    assert(request.getLongParam("r") == 0)
+    assert(request.getLongParam("s") == 0)
+
+    assert(request.getLongParam("q", 11) == 10)
+    assert(request.getLongParam("r", 11) == 0)
+    assert(request.getLongParam("s", 11) == 11)
+  }
+
+  test("getBooleanParam") {
+    val request = Request(Method.Post, "/search")
+    request.mediaType = MediaType.WwwForm
+    request.contentString = "q=1&r=x"
+    assert(request.getBooleanParam("q"))
+    assert(!request.getBooleanParam("r"))
+    assert(!request.getBooleanParam("s"))
+
+    assert(request.getBooleanParam("q", true))
+    assert(!request.getBooleanParam("r", true))
+    assert(request.getBooleanParam("s", true))
+  }
+
+  test("getParams") {
+    val request = Request(Method.Post, "/search?r=yes")
+    request.mediaType = MediaType.WwwForm
+    request.contentString = "q=1&r=x"
+
+    val result = request.getParams("r")
+    assert(result == List("x", "yes").asJava)
+
+    val all = request.getParams()
+    assert(all.size == 3)
+  }
+
+  test("containsParam") {
+    val request = Request(Method.Post, "/search?r=yes")
+    request.mediaType = MediaType.WwwForm
+    request.contentString = "q=1&s=x"
+
+    assert(request.containsParam("r"))
+    assert(request.containsParam("s"))
+    assert(!request.containsParam("t"))
+  }
+
+  test("getParamNames") {
+    val request = Request(Method.Post, "/search?r=yes")
+    request.mediaType = MediaType.WwwForm
+    request.contentString = "q=1&s=x"
+
+    val names = request.getParamNames()
+    assert(names.size == 3)
+  }
+
 }

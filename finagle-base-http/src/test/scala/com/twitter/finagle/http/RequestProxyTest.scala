@@ -28,4 +28,25 @@ class RequestProxyTest extends FunSuite {
 
     assert(proxy.cookies.get("foo") == Some(cookie))
   }
+
+  test("request uri params") {
+    val req = Request("/search?q=hello")
+    val proxy = new http.Request.Proxy {
+      def request: Request = req
+    }
+
+    assert(proxy.params.get("q") == Some("hello"))
+  }
+
+  test("request body params") {
+    val req = Request(Method.Post, "/search")
+    req.contentType = "application/x-www-form-urlencoded"
+    req.contentString = "q=twitter"
+    val proxy = new http.Request.Proxy {
+      def request: Request = req
+    }
+
+    assert(proxy.params.get("q") == Some("twitter"))
+  }
+
 }

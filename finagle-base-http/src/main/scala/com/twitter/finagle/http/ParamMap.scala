@@ -166,10 +166,14 @@ object EmptyParamMap extends ParamMap {
 }
 
 /**
- * HttpRequest-backed param map.  Handle parameters in the URL and form encoded
- * body.  Multipart forms are not supported (not needed, could be abusive).
+ * Http [[Request]]-backed [[ParamMap]]. This [[ParamMap]] contains both
+ * parameters provided as part of the request URI and parameters provided
+ * as part of the request body.
  *
- * This map is a multi-map.  Use getAll() to get all values for a key.
+ * @note Request body parameters are considered if the following criteria are true:
+ *   1. The request is not a TRACE request.
+ *   2. The request media type is 'application/x-www-form-urlencoded'
+ *   3. The content length is greater than 0.
  */
 class RequestParamMap(val request: Request) extends ParamMap {
   override def isValid: Boolean = _isValid

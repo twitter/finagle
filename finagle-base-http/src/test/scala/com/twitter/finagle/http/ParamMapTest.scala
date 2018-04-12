@@ -1,10 +1,7 @@
 package com.twitter.finagle.http
 
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class ParamMapTest extends FunSuite {
   test("no params") {
     val request = Request("/search.json")

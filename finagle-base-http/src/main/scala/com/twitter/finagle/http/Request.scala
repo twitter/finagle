@@ -28,8 +28,26 @@ abstract class Request private extends Message {
   final def isRequest: Boolean = true
 
   /**
-   * Returns a [[ParamMap]] instance, which maintains query string and url-encoded
-   * params associated with this request.
+   * Returns a [[ParamMap]] instance, which contains both parameters provided
+   * as part of the request URI and parameters provided as part of the request
+   * body.
+   *
+   * @note Request body parameters are considered if the following criteria are true:
+   *   1. The request is not a TRACE request.
+   *   2. The request media type is 'application/x-www-form-urlencoded'
+   *   3. The content length is greater than 0.
+   *
+   * {{{
+   * import com.twitter.finagle.http.{MediaType, Method, Request}
+   *
+   * val request = Request(Method.Post, "/search?a=yes")
+   * request.mediaType = MediaType.WwwForm
+   * request.contentString = "a=no&b=yes&c=no"
+   * request.params
+   *
+   * // Result
+   * // com.twitter.finagle.http.ParamMap = ?c=no&a=no&b=yes&a=yes
+   * }}}
    */
   def params: ParamMap = _params
   private[this] lazy val _params: ParamMap = new RequestParamMap(this)
@@ -127,51 +145,99 @@ abstract class Request private extends Message {
   // The get*Param methods below are for Java compatibility.  Note Scala default
   // arguments aren't compatible with Java, so we need two versions of each.
 
-  /** Get parameter value.  Returns value or null. */
+  /**
+   * Get parameter value. Returns value or null.
+   *
+   * @see [[params]] for details of which parameters are considered.
+   */
   def getParam(name: String): String =
     getParam(name, null)
 
-  /** Get parameter value.  Returns value or default. */
+  /**
+   * Get parameter value. Returns value or default.
+   *
+   * @see [[params]] for details of which parameters are considered.
+   */
   def getParam(name: String, default: String): String =
     params.getOrElse(name, default)
 
-  /** Get Short param.  Returns value or 0. */
+  /**
+   * Get Short param. Returns value or 0.
+   *
+   * @see [[params]] for details of which parameters are considered.
+   */
   def getShortParam(name: String): Short =
     params.getShortOrElse(name, 0)
 
-  /** Get Short param.  Returns value or default. */
+  /**
+   * Get Short param. Returns value or default.
+   *
+   * @see [[params]] for details of which parameters are considered.
+   */
   def getShortParam(name: String, default: Short): Short =
     params.getShortOrElse(name, default)
 
-  /** Get Int param.  Returns value or 0. */
+  /**
+   * Get Int param. Returns value or 0.
+   *
+   * @see [[params]] for details of which parameters are considered.
+   */
   def getIntParam(name: String): Int =
     params.getIntOrElse(name, 0)
 
-  /** Get Int param.  Returns value or default. */
+  /**
+   * Get Int param. Returns value or default.
+   *
+   * @see [[params]] for details of which parameters are considered.
+   */
   def getIntParam(name: String, default: Int): Int =
     params.getIntOrElse(name, default)
 
-  /** Get Long param.  Returns value or 0. */
+  /**
+   * Get Long param. Returns value or 0.
+   *
+   * @see [[params]] for details of which parameters are considered.
+   */
   def getLongParam(name: String): Long =
     params.getLongOrElse(name, 0L)
 
-  /** Get Long param.  Returns value or default. */
+  /**
+   * Get Long param. Returns value or default.
+   *
+   * @see [[params]] for details of which parameters are considered.
+   */
   def getLongParam(name: String, default: Long): Long =
     params.getLongOrElse(name, default)
 
-  /** Get Boolean param.  Returns value or false. */
+  /**
+   * Get Boolean param. Returns value or false.
+   *
+   * @see [[params]] for details of which parameters are considered.
+   */
   def getBooleanParam(name: String): Boolean =
     params.getBooleanOrElse(name, false)
 
-  /** Get Boolean param.  Returns value or default. */
+  /**
+   * Get Boolean param. Returns value or default.
+   *
+   * @see [[params]] for details of which parameters are considered.
+   */
   def getBooleanParam(name: String, default: Boolean): Boolean =
     params.getBooleanOrElse(name, default)
 
-  /** Get all values of parameter.  Returns list of values. */
+  /**
+   * Get all values of parameter. Returns list of values.
+   *
+   * @see [[params]] for details of which parameters are considered.
+   */
   def getParams(name: String): JList[String] =
     params.getAll(name).toList.asJava
 
-  /** Get all parameters. */
+  /**
+   * Get all parameters.
+   *
+   * @see [[params]] for details of which parameters are considered.
+   */
   def getParams(): JList[JMap.Entry[String, String]] =
     params.toList.map {
       case (k, v) =>
@@ -179,11 +245,19 @@ abstract class Request private extends Message {
         new AbstractMap.SimpleImmutableEntry(k, v).asInstanceOf[JMap.Entry[String, String]]
     }.asJava
 
-  /** Check if parameter exists. */
+  /**
+   * Check if parameter exists.
+   *
+   * @see [[params]] for details of which parameters are considered.
+   */
   def containsParam(name: String): Boolean =
     params.contains(name)
 
-  /** Get parameters names. */
+  /**
+   * Get parameters names.
+   *
+   * @see [[params]] for details of which parameters are considered.
+   */
   def getParamNames(): JSet[String] =
     params.keySet.asJava
 
