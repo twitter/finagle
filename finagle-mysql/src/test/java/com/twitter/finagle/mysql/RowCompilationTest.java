@@ -1,9 +1,13 @@
 package com.twitter.finagle.mysql;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.List;
+import java.util.TimeZone;
 
+import scala.Array;
 import scala.Option;
 import scala.collection.IndexedSeq;
 import scala.collection.JavaConversions;
@@ -45,14 +49,17 @@ public final class RowCompilationTest {
     }
   }
 
-  private Field newField(String name) {
+  /** The column name used throughout */
+  private final String cn = "i";
+
+  private Field newField() {
     return new Field(
       "catalog",
       "db",
       "table",
       "originalTable",
-      name,
-      name,
+      cn,
+      cn,
       (short) 5,
       10,
       (short) 10,
@@ -61,111 +68,164 @@ public final class RowCompilationTest {
     );
   }
 
+  private final List<Field> fields = Collections.singletonList(newField());
 
   private final Row intRow = new RowImpl(
-      Collections.singletonList(newField("i")),
+      fields,
       Collections.singletonList(new ByteValue((byte) 1))
   );
 
   private final Row nullRow = new RowImpl(
-      Collections.singletonList(newField("i")),
+      fields,
       Collections.singletonList(NullValue$.MODULE$)
   );
 
   private final Row floatRow = new RowImpl(
-      Collections.singletonList(newField("i")),
+      fields,
       Collections.singletonList(new FloatValue(1.0f))
   );
 
   private final Row stringRow = new RowImpl(
-      Collections.singletonList(newField("i")),
+      fields,
       Collections.singletonList(new StringValue("hi"))
+  );
+
+  private final Row bytesRow = new RowImpl(
+      fields,
+      Collections.singletonList(new RawValue(
+          Type.TinyBlob(), Charset.Binary(), true, new byte[] {0, 1, 2 }))
+  );
+
+  private final Row timestampRow = new RowImpl(
+      fields,
+      Collections.singletonList(new RawValue(
+          Type.Timestamp(), Charset.Utf8_bin(), false,
+          "2018-05-05 10:20:30".getBytes(StandardCharsets.UTF_8))
+      )
+  );
+
+  private final Row emptyRow = new RowImpl(
+      fields,
+      Collections.singletonList(EmptyValue$.MODULE$)
   );
 
   @Test
   public void testPrimitives() {
-    byte b = intRow.byteOrZero("i");
+    boolean bool = intRow.booleanOrFalse(cn);
+    Assert.assertEquals(true, bool);
+    Assert.assertFalse(nullRow.booleanOrFalse(cn));
+
+    byte b = intRow.byteOrZero(cn);
     Assert.assertEquals((byte) 1, b);
-    Assert.assertEquals((byte) 0, nullRow.byteOrZero("i"));
+    Assert.assertEquals((byte) 0, nullRow.byteOrZero(cn));
 
-    short s = intRow.shortOrZero("i");
+    short s = intRow.shortOrZero(cn);
     Assert.assertEquals((short) 1, s);
-    Assert.assertEquals((short) 0, nullRow.shortOrZero("i"));
+    Assert.assertEquals((short) 0, nullRow.shortOrZero(cn));
 
-    int i = intRow.intOrZero("i");
+    int i = intRow.intOrZero(cn);
     Assert.assertEquals(1, i);
-    Assert.assertEquals(0, nullRow.intOrZero("i"));
+    Assert.assertEquals(0, nullRow.intOrZero(cn));
 
-    float f = floatRow.floatOrZero("i");
+    float f = floatRow.floatOrZero(cn);
     Assert.assertEquals(1.0f, f, 0.0);
-    Assert.assertEquals(0.0f, nullRow.floatOrZero("i"), 0.0);
+    Assert.assertEquals(0.0f, nullRow.floatOrZero(cn), 0.0);
 
-    double d = floatRow.doubleOrZero("i");
+    double d = floatRow.doubleOrZero(cn);
     Assert.assertEquals(1.0, d, 0.0);
-    Assert.assertEquals(0.0, nullRow.doubleOrZero("i"), 0.0);
+    Assert.assertEquals(0.0, nullRow.doubleOrZero(cn), 0.0);
   }
 
   @Test
   public void testGetBoxedPrimitives() {
-    Option<Byte> b = intRow.getByte("i");
+    Option<Boolean> bool = intRow.getBoolean(cn);
+    Assert.assertEquals(Boolean.TRUE, bool.get());
+    Assert.assertTrue(nullRow.getBoolean(cn).isEmpty());
+
+    Option<Byte> b = intRow.getByte(cn);
     Assert.assertEquals(Byte.valueOf((byte) 1), b.get());
-    Assert.assertTrue(nullRow.getByte("i").isEmpty());
+    Assert.assertTrue(nullRow.getByte(cn).isEmpty());
 
-    Option<Short> s = intRow.getShort("i");
+    Option<Short> s = intRow.getShort(cn);
     Assert.assertEquals(Short.valueOf((short) 1), s.get());
-    Assert.assertTrue(nullRow.getShort("i").isEmpty());
+    Assert.assertTrue(nullRow.getShort(cn).isEmpty());
 
-    Option<Integer> i = intRow.getInteger("i");
+    Option<Integer> i = intRow.getInteger(cn);
     Assert.assertEquals(Integer.valueOf(1), i.get());
-    Assert.assertTrue(nullRow.getInteger("i").isEmpty());
+    Assert.assertTrue(nullRow.getInteger(cn).isEmpty());
 
-    Option<Long> l = intRow.getLong("i");
+    Option<Long> l = intRow.getLong(cn);
     Assert.assertEquals(Long.valueOf(1), l.get());
-    Assert.assertTrue(nullRow.getLong("i").isEmpty());
+    Assert.assertTrue(nullRow.getLong(cn).isEmpty());
 
-    Option<Float> f = floatRow.getFloat("i");
+    Option<Float> f = floatRow.getFloat(cn);
     Assert.assertEquals(Float.valueOf(1.0f), f.get());
-    Assert.assertTrue(nullRow.getFloat("i").isEmpty());
+    Assert.assertTrue(nullRow.getFloat(cn).isEmpty());
 
-    Option<Double> d = floatRow.getDouble("i");
+    Option<Double> d = floatRow.getDouble(cn);
     Assert.assertEquals(Double.valueOf(1.0), d.get());
-    Assert.assertTrue(nullRow.getDouble("i").isEmpty());
+    Assert.assertTrue(nullRow.getDouble(cn).isEmpty());
   }
 
   @Test
   public void testOrNulls() {
-    String string = stringRow.stringOrNull("i");
+    String string = stringRow.stringOrNull(cn);
     Assert.assertEquals("hi", string);
-    Assert.assertNull(nullRow.stringOrNull("i"));
+    Assert.assertNull(nullRow.stringOrNull(cn));
 
-    BigInt bigInt = intRow.bigIntOrNull("i");
+    BigInt bigInt = intRow.bigIntOrNull(cn);
     Assert.assertEquals(BigInt.apply(1), bigInt);
-    Assert.assertNull(nullRow.bigIntOrNull("i"));
+    Assert.assertNull(nullRow.bigIntOrNull(cn));
 
-    BigDecimal bigDecimal = floatRow.bigDecimalOrNull("i");
+    BigDecimal bigDecimal = floatRow.bigDecimalOrNull(cn);
     Assert.assertEquals(BigDecimal$.MODULE$.apply(1.0), bigDecimal);
-    Assert.assertNull(nullRow.bigDecimalOrNull("i"));
+    Assert.assertNull(nullRow.bigDecimalOrNull(cn));
 
-    Date javaSqlDate = nullRow.javaSqlDateOrNull("i");
+    Date javaSqlDate = nullRow.javaSqlDateOrNull(cn);
     Assert.assertNull(javaSqlDate);
+
+    byte[] bytes = bytesRow.bytesOrNull(cn);
+    Assert.assertArrayEquals(new byte[] {0, 1, 2 }, bytes);
+    Assert.assertNull(nullRow.bytesOrNull(cn));
+
+    Timestamp timestamp = timestampRow.timestampOrNull(cn, TimeZone.getTimeZone("UTC"));
+    Assert.assertEquals(1525515630000L, timestamp.getTime());
+    Assert.assertNull(nullRow.timestampOrNull(cn, TimeZone.getTimeZone("UTC")));
   }
 
   @Test
   public void testGetOthers() {
-    Option<String> string = stringRow.getString("i");
+    Option<String> string = stringRow.getString(cn);
     Assert.assertEquals("hi", string.get());
-    Assert.assertTrue(nullRow.getString("i").isEmpty());
+    Assert.assertTrue(nullRow.getString(cn).isEmpty());
 
-    Option<BigInt> bigInt = intRow.getBigInt("i");
+    Option<BigInt> bigInt = intRow.getBigInt(cn);
     Assert.assertEquals(BigInt.apply(1), bigInt.get());
-    Assert.assertTrue(nullRow.getBigInt("i").isEmpty());
+    Assert.assertTrue(nullRow.getBigInt(cn).isEmpty());
 
-    Option<BigDecimal> bigDecimal = floatRow.getBigDecimal("i");
+    Option<BigDecimal> bigDecimal = floatRow.getBigDecimal(cn);
     Assert.assertEquals(BigDecimal$.MODULE$.apply(1.0), bigDecimal.get());
-    Assert.assertTrue(nullRow.getBigDecimal("i").isEmpty());
+    Assert.assertTrue(nullRow.getBigDecimal(cn).isEmpty());
 
-    Option<Date> javaSqlDate = nullRow.getJavaSqlDate("i");
+    Option<Date> javaSqlDate = nullRow.getJavaSqlDate(cn);
     Assert.assertTrue(javaSqlDate.isEmpty());
+
+    Option<byte[]> bytes = bytesRow.getBytes(cn);
+    Assert.assertArrayEquals(new byte[] {0, 1, 2 }, bytes.get());
+    Assert.assertTrue(nullRow.getBytes(cn).isEmpty());
+
+    Option<Timestamp> timestamp = timestampRow.getTimestamp(cn, TimeZone.getTimeZone("UTC"));
+    Assert.assertEquals(1525515630000L, timestamp.get().getTime());
+    Assert.assertTrue(nullRow.getTimestamp(cn, TimeZone.getTimeZone("UTC")).isEmpty());
+  }
+
+  @Test
+  public void testEmpty() {
+    Assert.assertEquals("", emptyRow.stringOrNull(cn));
+    Assert.assertEquals("", emptyRow.getString(cn).get());
+
+    Assert.assertEquals(Array.emptyByteArray(), emptyRow.bytesOrNull(cn));
+    Assert.assertEquals(Array.emptyByteArray(), emptyRow.getBytes(cn).get());
   }
 
 }

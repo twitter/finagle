@@ -1,5 +1,8 @@
 package com.twitter.finagle.mysql
 
+import java.sql.Timestamp
+import java.util.TimeZone
+
 /**
  * A `Row` allows you to extract [[Value]]'s from a MySQL row.
  *
@@ -91,6 +94,50 @@ trait Row {
 
   private[this] def columnNotFound(columnName: String): Nothing =
     throw new ColumnNotFoundException(columnName)
+
+  /**
+   * Returns a Java primitive `boolean` for the given column name,
+   * or `false` if the SQL value is NULL.
+   *
+   * This is used for MySQL columns that are `tiny` as `boolean`
+   * is a synonym for that type.
+   *
+   * @param columnName the case sensitive name of the column.
+   * @see [[getBoolean]]
+   * @see [[https://dev.mysql.com/doc/refman/5.5/en/numeric-type-overview.html]]
+   * @throws ColumnNotFoundException if the column is not found in the row.
+   * @throws UnsupportedTypeException if the MySQL column is not that type.
+   */
+  def booleanOrFalse(columnName: String): Boolean =
+    apply(columnName) match {
+      case Some(ByteValue(v)) => v != 0
+      case Some(NullValue) => false
+      case Some(v) => unsupportedValue(columnName, v)
+      case None => columnNotFound(columnName)
+    }
+
+  /**
+   * Returns `Some` of a boxed Java `Boolean` for the given column name,
+   * or `None` if the SQL value is NULL.
+   *
+   * This is used for MySQL columns that are `tiny` as `boolean`
+   * is a synonym for that type.
+   *
+   * @param columnName the case sensitive name of the column.
+   * @see [[booleanOrFalse]]
+   * @see [[https://dev.mysql.com/doc/refman/5.5/en/numeric-type-overview.html]]
+   * @throws ColumnNotFoundException if the column is not found in the row.
+   * @throws UnsupportedTypeException if the MySQL column is not that type.
+   */
+  def getBoolean(columnName: String): Option[java.lang.Boolean] =
+    apply(columnName) match {
+      case Some(ByteValue(v)) =>
+        if (v != 0) Row.SomeTrue
+        else Row.SomeFalse
+      case Some(NullValue) => None
+      case Some(v) => unsupportedValue(columnName, v)
+      case None => columnNotFound(columnName)
+    }
 
   /**
    * Returns a Java primitive `byte` for the given column name,
@@ -457,6 +504,81 @@ trait Row {
     Option(bigDecimalOrNull(columnName))
 
   /**
+   * Returns a `Array[Byte]` for the given column name,
+   * or `null` if the SQL value is NULL.
+   *
+   * This can be used for MySQL columns that are `tinyblob`,
+   * `mediumblob`, `blob`, `binary`, or `varbinary`.
+   *
+   * @param columnName the case sensitive name of the column.
+   * @see [[getBytes]]
+   * @throws ColumnNotFoundException if the column is not found in the row.
+   * @throws UnsupportedTypeException if the MySQL column is not that type.
+   */
+  def bytesOrNull(columnName: String): Array[Byte] =
+    apply(columnName) match {
+      case Some(RawValue(typ, _, _, bytes)) if Row.isBinary(typ) => bytes
+      case Some(EmptyValue) => Array.emptyByteArray
+      case Some(NullValue) => null
+      case Some(v) => unsupportedValue(columnName, v)
+      case None => columnNotFound(columnName)
+    }
+
+  /**
+   * Returns `Some` of an `Array[Byte]` for the given column name,
+   * or `None` if the SQL value is NULL.
+   *
+   * This can be used for MySQL columns that are `tinyblob`,
+   * `mediumblob`, `blob`, `binary`, or `varbinary`.
+   *
+   * @param columnName the case sensitive name of the column.
+   * @see [[bytesOrNull]]
+   * @throws ColumnNotFoundException if the column is not found in the row.
+   * @throws UnsupportedTypeException if the MySQL column is not that type.
+   */
+  def getBytes(columnName: String): Option[Array[Byte]] =
+    Option(bytesOrNull(columnName))
+
+  /**
+   * Returns a `java.sql.Timestamp` for the given column name,
+   * or `null` if the SQL value is NULL.
+   *
+   * This can be used for MySQL columns that are `timestamp` or `datetime`.
+   *
+   * @param columnName the case sensitive name of the column.
+   * @param timeZone the `TimeZone` used to parse the data.
+   * @see [[getTimestamp]]
+   * @throws ColumnNotFoundException if the column is not found in the row.
+   * @throws UnsupportedTypeException if the MySQL column is not that type.
+   */
+  def timestampOrNull(columnName: String, timeZone: TimeZone): Timestamp =
+    apply(columnName) match {
+      case Some(value) if TimestampValue.isTimestamp(value) =>
+        TimestampValue.fromValue(value, timeZone) match {
+          case Some(timestamp) => timestamp
+          case None => unsupportedValue(columnName, value)
+        }
+      case Some(NullValue) => null
+      case Some(v) => unsupportedValue(columnName, v)
+      case None => columnNotFound(columnName)
+    }
+
+  /**
+   * Returns `Some` of an `java.sql.Timestamp` for the given column name,
+   * or `None` if the SQL value is NULL.
+   *
+   * This can be used for MySQL columns that are `timestamp` or `datetime`.
+   *
+   * @param columnName the case sensitive name of the column.
+   * @param timeZone the `TimeZone` used to parse the data.
+   * @see [[timestampOrNull]]
+   * @throws ColumnNotFoundException if the column is not found in the row.
+   * @throws UnsupportedTypeException if the MySQL column is not that type.
+   */
+  def getTimestamp(columnName: String, timeZone: TimeZone): Option[Timestamp] =
+    Option(timestampOrNull(columnName, timeZone))
+
+  /**
    * Returns a `java.sql.Date` for the given column name,
    * or `null` if the SQL value is NULL.
    *
@@ -493,6 +615,20 @@ trait Row {
 
 private object Row {
   private val EmptyString: String = ""
+  private val SomeTrue: Option[java.lang.Boolean] = Some(java.lang.Boolean.TRUE)
+  private val SomeFalse: Option[java.lang.Boolean] = Some(java.lang.Boolean.FALSE)
+
+  private def isBinary(typ: Short): Boolean =
+    typ match {
+      case Type.TinyBlob => true
+      case Type.MediumBlob => true
+      case Type.Blob => true
+      // used for `binary` columns
+      case Type.String => true
+      // used for `varbinary` columns
+      case Type.VarString => true
+      case _ => false
+    }
 
 }
 

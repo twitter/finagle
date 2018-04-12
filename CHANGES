@@ -7,6 +7,14 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+  * finagle-mysql: Added APIs to `Row` which simplify the common access pattern.
+    For example, `Row.stringOrNull(columnName: String): String` and
+    `Row.getString(columnName: String): Option[String]`.
+    ``PHAB_ID=D156926``, ``PHAB_ID=D157360``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -32,10 +40,6 @@ New Features
   * finagle-mysql: Added support for `Option`\s to `Parameter` implicits. This
     allows for the natural representation of nullable columns with an `Option`
     where a `None` is treated as a `null`. ``PHAB_ID=D156186``
-
-  * finagle-mysql: Added APIs to `Row` which simplify the common access pattern.
-    For example, `Row.stringOrNull(columnName: String): String` and
-    `Row.getString(columnName: String): Option[String]`. ``PHAB_ID=D156926``
 
   * finagle-netty4: Add 'tls/connections' gauge for Finagle on Netty 4 which tracks the number
     of open SSL/TLS connections per Finagle client or server.
