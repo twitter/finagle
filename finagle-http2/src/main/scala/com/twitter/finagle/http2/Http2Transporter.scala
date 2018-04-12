@@ -9,7 +9,7 @@ import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.netty4.http.{HttpCodecName, Netty4HttpTransporter, initClient}
 import com.twitter.finagle.netty4.transport.HasExecutor
 import com.twitter.finagle.param.{Timer => TimerParam}
-import com.twitter.finagle.transport.{Transport, TransportProxy, TransportContext, LegacyContext}
+import com.twitter.finagle.transport.{LegacyContext, Transport, TransportContext, TransportProxy}
 import com.twitter.finagle.{Stack, Status}
 import com.twitter.logging.{HasLogLevel, Level, Logger}
 import com.twitter.util._
@@ -22,6 +22,9 @@ import java.security.cert.Certificate
 import java.util.concurrent.atomic.AtomicReference
 
 private[finagle] object Http2Transporter {
+
+  // Sentinel that we check early to avoid polling a promise forever
+  private val UpgradeRejected: Future[Option[StreamTransportFactory]] = Future.None
 
   def apply(params: Stack.Params)(addr: SocketAddress): Transporter[Any, Any, TransportContext] = {
     // current http2 client implementation doesn't support
@@ -74,7 +77,6 @@ private[finagle] object Http2Transporter {
         maxChunkSize.inBytes.toInt
       )
 
-
       if (tlsEnabled) {
         val p = Promise[Unit]()
         val buffer = BufferingHandler.alpn()
@@ -104,12 +106,8 @@ private[finagle] object Http2Transporter {
           })
         )
       } else {
-        val connectionHandler = connectionHandlerBuilder.build()
-        val upgradeCodec = new Http2ClientUpgradeCodec(connectionHandler)
-        val upgradeHandler = new HttpClientUpgradeHandler(sourceCodec, upgradeCodec, Int.MaxValue)
         pipeline.addLast(HttpCodecName, sourceCodec)
-        pipeline.addLast("httpUpgradeHandler", upgradeHandler)
-        pipeline.addLast(UpgradeRequestHandler.HandlerName, new UpgradeRequestHandler(params))
+        pipeline.addLast(UpgradeRequestHandler.HandlerName, new UpgradeRequestHandler(params, sourceCodec, connectionHandlerBuilder))
         initClient(params)(pipeline)
       }
   }
@@ -168,6 +166,21 @@ private[finagle] class Http2Transporter(
   protected[this] val cachedConnection =
     new AtomicReference[Future[Option[StreamTransportFactory]]]()
 
+  // We want HTTP/1.x connections to get culled once we have a live HTTP/2 session so
+  // we transition their status to `Closed` once we have an H2 session that can be used.
+  private[this] val http1Status: () => Status = () => {
+    val f = cachedConnection.get
+    if (f == null || (f eq UpgradeRejected)) Status.Open
+    else f.poll match {
+      case Some(Return(Some(fac))) =>
+        fac.status match {
+          case Status.Open => Status.Closed
+          case status => status
+        }
+      case _ => Status.Open
+    }
+  }
+
   private[this] def tryEvict(f: Future[Option[StreamTransportFactory]]): Unit = {
     // kick us out of the cache so we can try to reestablish the connection
     cachedConnection.compareAndSet(f, null)
@@ -203,23 +216,13 @@ private[finagle] class Http2Transporter(
   private[this] def fallbackToHttp11(f: Future[Option[_]]): Future[Transport[Any, Any]] = {
     val conn = underlyingHttp11()
     conn.map { http11Trans =>
-      val ref = new RefTransport(http11Trans)
-      f.respond {
-        case Return(None) => // the upgrade was rejected, so we can keep the connection
-        case _ =>
-          // we allow the pool to close us if we pass the upgrade or fail entirely
-          // this will trigger a new connection attempt, which will use the upgraded
-          // connection if we passed, or try to upgrade again if there was a non-rejection
-          // failure in the upgrade
-          ref.update { trans =>
-            new TransportProxy[Any, Any](trans) {
-              def write(any: Any): Future[Unit] = trans.write(any)
-              def read(): Future[Any] = trans.read()
-              override def status: Status = Status.Closed
-            }
-          }
+      new TransportProxy[Any, Any](http11Trans) {
+        def write(req: Any): Future[Unit] = http11Trans.write(req)
+        def read(): Future[Any] = http11Trans.read()
+
+        override def status: Status =
+          Status.worst(http11Trans.status, http1Status())
       }
-      ref
     }
   }
 
@@ -227,8 +230,14 @@ private[finagle] class Http2Transporter(
     val conn: Future[Transport[Any, Any]] = underlying()
     val p = Promise[Option[StreamTransportFactory]]()
     if (cachedConnection.compareAndSet(null, p)) {
-      p.onFailure {
-        case NonFatal(exn) =>
+      p.respond {
+        case Return(None) =>
+          // we attempt to set the sentinel value to make polling status cheaper in the future.
+          cachedConnection.compareAndSet(p, UpgradeRejected)
+
+        case Return(_) => // nop: successful upgrade. Good news.
+
+        case Throw(exn) =>
           val level = exn match {
             case HasLogLevel(level) => level
             case _ => Level.WARNING
@@ -285,7 +294,7 @@ private[finagle] class Http2Transporter(
           } else {
             val ref = new RefTransport(trans)
             ref.update { t =>
-              new Http2UpgradingTransport(t, ref, p, params)
+              new Http2UpgradingTransport(t, ref, p, params, http1Status)
             }
             Future.value(ref)
           }

@@ -1,15 +1,13 @@
 package com.twitter.finagle.http2.transport
 
-import com.twitter.finagle.{FailureFlags, Stack}
-import com.twitter.finagle.http2.{RefTransport, Http2Transporter}
-
+import com.twitter.finagle.{FailureFlags, Stack, Status}
+import com.twitter.finagle.http2.{Http2Transporter, RefTransport}
+import com.twitter.finagle.http2.transport.Http2UpgradingTransport.UpgradeIgnoredException
 import com.twitter.finagle.netty4.transport.HasExecutor
-import com.twitter.finagle.transport.{Transport, TransportProxy, TransportContext}
+import com.twitter.finagle.transport.{Transport, TransportContext, TransportProxy}
 import com.twitter.logging.{HasLogLevel, Level}
-import com.twitter.util.{Promise, Future, Time, Return, Throw}
-import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
-import io.netty.handler.codec.http.LastHttpContent
-import scala.util.control.NonFatal
+import com.twitter.util.{Future, Promise, Return, Throw, Time}
+import scala.util.control.NoStackTrace
 
 /**
  * This transport waits for a message that the upgrade has either succeeded or
@@ -18,33 +16,38 @@ import scala.util.control.NonFatal
  * `Http2UpgradingTransport`, once it updates `ref`, it knows it will no longer
  * take calls to write or read.
  */
-private[http2] class Http2UpgradingTransport(
+private[http2] final class Http2UpgradingTransport(
   t: Transport[Any, Any],
   ref: RefTransport[Any, Any],
   p: Promise[Option[StreamTransportFactory]],
-  params: Stack.Params
+  params: Stack.Params,
+  http1Status: () => Status
 ) extends TransportProxy[Any, Any](t) {
 
   import Http2Transporter._
   import Http2ClientDowngrader.StreamMessage
 
-  private[this] val finishedWriting = Promise[Unit]
-  finishedWriting.setInterruptHandler {
-    case NonFatal(exn) =>
-      finishedWriting.updateIfEmpty(Throw(exn))
-  }
+  @volatile private[this] var upgradeFailed = false
 
-  def write(any: Any): Future[Unit] = {
-    val result = t.write(any)
-    if (any.isInstanceOf[LastHttpContent])
-      result.respond(finishedWriting.updateIfEmpty _)
-    result
+  def write(any: Any): Future[Unit] = t.write(any)
+
+  // If we failed the upgrade, we want to mark ourselves closed once the parent transporter
+  // has generated an H2 session so that we can converge to H2 sessions, if possible.
+  override def status: Status = {
+    if (upgradeFailed) Status.worst(super.status, http1Status())
+    else super.status
   }
 
   private[this] def upgradeRejected(): Unit = synchronized {
+    upgradeFailed = true
     p.updateIfEmpty(Return.None)
     // we need ref to update before we can read again
     ref.update(identity)
+  }
+
+  private[this] def upgradeIgnored(): Unit = synchronized {
+    upgradeFailed = true
+    p.updateIfEmpty(Throw(UpgradeIgnoredException))
   }
 
   private[this] def upgradeSuccessful(): Unit = synchronized {
@@ -55,22 +58,26 @@ private[http2] class Http2UpgradingTransport(
       }
     ]
     val fac = new StreamTransportFactory(contextCasted, t.remoteAddress, params)
-    p.updateIfEmpty(Return(Some(fac)))
-
+    // This removes us from the transport pathway
     ref.update { _ =>
       unsafeCast(fac.first())
     }
+
+    // Let the `Http2Transporter` know about the shiny new h2 session.
+    // We need to do this *after* taking the first stream.
+    p.updateIfEmpty(Return(Some(fac)))
   }
 
   def read(): Future[Any] = t.read().flatMap {
-    case _ @UpgradeEvent.UPGRADE_REJECTED =>
+    case UpgradeRequestHandler.UpgradeRejected =>
       upgradeRejected()
       ref.read()
-    case _ @UpgradeEvent.UPGRADE_SUCCESSFUL =>
-      finishedWriting.before {
-        upgradeSuccessful()
-        ref.read()
-      }
+    case UpgradeRequestHandler.UpgradeSuccessful =>
+      upgradeSuccessful()
+      ref.read()
+    case UpgradeRequestHandler.UpgradeAborted =>
+      upgradeIgnored()
+      ref.read()
     case result =>
       Future.value(result)
   }
@@ -90,5 +97,9 @@ private object Http2UpgradingTransport {
     def logLevel: Level = Level.DEBUG // this happens often on interrupts, so let's be quiet
     protected def copyWithFlags(newFlags: Long): ClosedWhileUpgradingException =
       new ClosedWhileUpgradingException(newFlags)
+  }
+
+  object UpgradeIgnoredException extends Exception("Upgrade not attempted") with HasLogLevel with NoStackTrace {
+    override def logLevel: Level = Level.DEBUG
   }
 }

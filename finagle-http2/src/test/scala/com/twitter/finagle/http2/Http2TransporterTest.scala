@@ -1,29 +1,26 @@
 package com.twitter.finagle.http2
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Status, Stack}
+import com.twitter.finagle.{Stack, Status}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader
+import com.twitter.finagle.http2.transport.UpgradeRequestHandler._
 import com.twitter.finagle.netty4.transport.HasExecutor
-import com.twitter.finagle.transport.{Transport, TransportProxy, TransportContext, LegacyContext}
-import com.twitter.util.{Await, Duration, Future, Time, Promise, MockTimer}
+import com.twitter.finagle.transport.{LegacyContext, Transport, TransportContext, TransportProxy}
+import com.twitter.util.{Await, Duration, Future, MockTimer, Promise, Time}
 import io.netty.handler.codec.http.{
   DefaultFullHttpResponse,
-  HttpVersion,
-  HttpResponseStatus,
   HttpResponse,
+  HttpResponseStatus,
+  HttpVersion,
   LastHttpContent
 }
-import java.net.{SocketAddress, InetSocketAddress}
+import java.net.{InetSocketAddress, SocketAddress}
 import java.security.cert.Certificate
 import java.util.concurrent.Executor
-import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import scala.language.reflectiveCalls
 
-@RunWith(classOf[JUnitRunner])
 class Http2TransporterTest extends FunSuite {
   def await[T](f: Future[T], wait: Duration = 1.second) =
     Await.result(f, wait)
@@ -102,7 +99,7 @@ class Http2TransporterTest extends FunSuite {
     assert(t2.count == 1)
   }
 
-  class UpgradeTransport(upgradeRep: UpgradeEvent, addr: SocketAddress)
+  class UpgradeTransport(upgradeRep: UpgradeResult, addr: SocketAddress)
       extends TransportProxy[Any, Any](new TestTransport(addr)) {
 
     @volatile var count = 0
@@ -112,11 +109,11 @@ class Http2TransporterTest extends FunSuite {
         count += 1
         Future.value(upgradeRep)
       } else {
-        if (upgradeRep == UpgradeEvent.UPGRADE_SUCCESSFUL && count == 1) {
+        if (upgradeRep == UpgradeSuccessful && count == 1) {
           count += 1
           val rep = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
           Future.value(Http2ClientDowngrader.Message(rep, 1))
-        } else if (upgradeRep == UpgradeEvent.UPGRADE_SUCCESSFUL) {
+        } else if (upgradeRep == UpgradeSuccessful) {
           count += 1
           Future.never
         } else {
@@ -127,11 +124,11 @@ class Http2TransporterTest extends FunSuite {
       }
   }
 
-  class UpgradingTransporter(upgradeRep: UpgradeEvent)
+  class UpgradingTransporter(upgradeRep: UpgradeResult)
       extends BackingTransporter(new UpgradeTransport(upgradeRep, _))
 
   test("Http2Transporter reuses the http2 transporter postupgrade") {
-    val t1 = new UpgradingTransporter(UpgradeEvent.UPGRADE_SUCCESSFUL)
+    val t1 = new UpgradingTransporter(UpgradeSuccessful)
     val t2 = new TestTransporter()
     val transporter = new Http2Transporter(t1, t2, false, Stack.Params.empty, new MockTimer())
     val addr = new InetSocketAddress("127.1", 14400)
@@ -149,7 +146,7 @@ class Http2TransporterTest extends FunSuite {
   }
 
   test("Http2Transporter uses the http11 transporter post rejection") {
-    val t1 = new UpgradingTransporter(UpgradeEvent.UPGRADE_REJECTED)
+    val t1 = new UpgradingTransporter(UpgradeRejected)
     val t2 = new TestTransporter()
     val transporter = new Http2Transporter(t1, t2, false, Stack.Params.empty, new MockTimer())
     val addr = new InetSocketAddress("127.1", 14400)
@@ -167,7 +164,7 @@ class Http2TransporterTest extends FunSuite {
   }
 
   test("Http2Transporter marks outstanding transports dead after a successful upgrade") {
-    val t1 = new UpgradingTransporter(UpgradeEvent.UPGRADE_SUCCESSFUL)
+    val t1 = new UpgradingTransporter(UpgradeSuccessful)
     val t2 = new TestTransporter()
     val transporter = new Http2Transporter(t1, t2, false, Stack.Params.empty, new MockTimer())
     val addr = new InetSocketAddress("127.1", 14400)
@@ -188,7 +185,7 @@ class Http2TransporterTest extends FunSuite {
   }
 
   test("Http2Transporter keeps outstanding transports alive after a failed upgrade") {
-    val t1 = new UpgradingTransporter(UpgradeEvent.UPGRADE_REJECTED)
+    val t1 = new UpgradingTransporter(UpgradeRejected)
     val t2 = new TestTransporter()
     val transporter = new Http2Transporter(t1, t2, false, Stack.Params.empty, new MockTimer())
     val addr = new InetSocketAddress("127.1", 14400)
@@ -222,12 +219,11 @@ class Http2TransporterTest extends FunSuite {
     }
   }
 
-  test("Http2Transporter marks outstanding transports dead after a failed connect attempt") {
+  test("Http2Transporter doesn't mark outstanding transports dead after a failed connect attempt") {
     val p = Promise[Transport[Any, Any]]()
     val t1 = new FirstFail(p)
     val t2 = new TestTransporter()
     val transporter = new Http2Transporter(t1, t2, false, Stack.Params.empty, new MockTimer())
-    val addr = new InetSocketAddress("127.1", 14400)
 
     val fTrans = transporter()
     assert(!fTrans.isDefined)
@@ -246,7 +242,7 @@ class Http2TransporterTest extends FunSuite {
       await(fTrans)
     }
     assert(actual == e)
-    assert(trans.status == Status.Closed)
+    assert(trans.status == Status.Open)
   }
 
   test("Http2Transporter can try to establish a connection again if a connection failed") {
@@ -270,7 +266,7 @@ class Http2TransporterTest extends FunSuite {
 
   test("Http2Transporter evicts the connection if it dies") {
     Time.withCurrentTimeFrozen { ctl =>
-      val t1 = new UpgradingTransporter(UpgradeEvent.UPGRADE_SUCCESSFUL)
+      val t1 = new UpgradingTransporter(UpgradeSuccessful)
       val t2 = new TestTransporter()
       val transporter = new Http2Transporter(t1, t2, false, Stack.Params.empty, new MockTimer())
       val addr = new InetSocketAddress("127.1", 14400)

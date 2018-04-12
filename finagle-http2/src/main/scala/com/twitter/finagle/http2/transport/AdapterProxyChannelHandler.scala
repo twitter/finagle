@@ -6,7 +6,6 @@ import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.logging.{Logger, Level, HasLogLevel}
 import io.netty.channel._
 import io.netty.channel.embedded.EmbeddedChannel
-import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
 import io.netty.handler.codec.http.{HttpObject, LastHttpContent}
 import io.netty.util.ReferenceCountUtil
 import io.netty.util.concurrent.PromiseCombiner
@@ -155,7 +154,7 @@ private[http2] final class AdapterProxyChannelHandler(
     case goaway: GoAway => ctx.fireChannelRead(goaway)
     case Ping => ctx.fireChannelRead(Ping)
     case exn: StreamException => ctx.fireChannelRead(exn)
-    case upgrade: UpgradeEvent => ctx.fireChannelRead(upgrade)
+    case upgrade: UpgradeRequestHandler.UpgradeResult => ctx.fireChannelRead(upgrade)
     case _ =>
       val wrongType = new IllegalArgumentException(
         s"Expected a StreamMessage or UpgradeEvent, got ${msg.getClass.getName} instead."

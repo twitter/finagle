@@ -4,6 +4,7 @@ import com.twitter.conversions.storage._
 import com.twitter.conversions.time._
 import com.twitter.finagle
 import com.twitter.finagle.Service
+import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.toggle.flag.overrides
 import com.twitter.finagle.util.DefaultTimer
@@ -11,7 +12,7 @@ import com.twitter.io.Buf
 import com.twitter.util._
 import io.netty.handler.codec.http2.Http2CodecUtil
 import java.net.InetSocketAddress
-import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
+import java.util.concurrent.atomic.AtomicInteger
 import scala.collection.mutable.ArrayBuffer
 
 class Http2EndToEndTest extends AbstractEndToEndTest {
@@ -21,7 +22,7 @@ class Http2EndToEndTest extends AbstractEndToEndTest {
   def serverImpl(): finagle.Http.Server = finagle.Http.server.withHttp2
 
   // Stats test requires examining the upgrade itself.
-  val shouldUpgrade = new AtomicBoolean(true)
+  private[this] val ShouldUpgrade = Contexts.local.newKey[Boolean]()
 
   /**
    * The client and server start with the plain-text upgrade so the first request
@@ -29,7 +30,7 @@ class Http2EndToEndTest extends AbstractEndToEndTest {
    * fire a throw-away request first so we are testing a real HTTP/2 connection.
    */
   override def initClient(client: HttpService): Unit = {
-    if (shouldUpgrade.get()) {
+    if (Contexts.local.get(ShouldUpgrade).getOrElse(true)) {
       val request = Request("/")
       await(client(request))
       statsRecv.clear()
@@ -43,19 +44,51 @@ class Http2EndToEndTest extends AbstractEndToEndTest {
   def featureImplemented(feature: Feature): Boolean = true
 
   test("Upgrade stats are properly recorded") {
-    shouldUpgrade.set(false)
+    Contexts.local.let(ShouldUpgrade, false) {
+      val client = nonStreamingConnect(Service.mk { _: Request =>
+        Future.value(Response())
+      })
 
-    val client = nonStreamingConnect(Service.mk { req: Request =>
-      Future.value(Response())
-    })
+      await(client(Request("/"))) // Should be an upgrade request
 
-    await(client(Request("/"))) // Should be an upgrade request
+      assert(statsRecv.counters(Seq("client", "upgrade", "success")) == 1)
+      assert(statsRecv.counters(Seq("server", "upgrade", "success")) == 1)
+      await(client.close())
+    }
+  }
 
-    assert(statsRecv.counters(Seq("client", "upgrade", "success")) == 1)
-    assert(statsRecv.counters(Seq("server", "upgrade", "success")) == 1)
-    await(client.close())
+  test("Upgrade ignored") {
+    val req = Request(Method.Post, "/")
+    req.contentString = "body"
 
-    shouldUpgrade.set(true)
+    Contexts.local.let(ShouldUpgrade, false) {
+      val client = nonStreamingConnect(Service.mk { _: Request =>
+        Future.value(Response())
+      })
+
+      await(client(req))
+      // Should have been ignored by upgrade mechanisms since the request has a body
+      assert(statsRecv.counters(Seq("client", "upgrade", "ignored")) == 1)
+
+      // Should still be zero since the client didn't attempt the upgrade at all
+      assert(!statsRecv.counters.contains(Seq("server", "upgrade", "ignored")))
+      await(client.close())
+    }
+
+    Contexts.local.let(ShouldUpgrade, false) {
+      val client = nonStreamingConnect(Service.mk { _: Request =>
+        Future.value(Response())
+      })
+
+      // Spoof the upgrade: the client won't attempt it but the Upgrade header should
+      // still cause the server to consider it an upgrade request and tick the counter.
+      req.headerMap.set(Fields.Upgrade, "h2c")
+
+      await(client(req))
+      assert(statsRecv.counters(Seq("client", "upgrade", "ignored")) == 2)
+      assert(statsRecv.counters(Seq("server", "upgrade", "ignored")) == 1)
+      await(client.close())
+    }
   }
 
   // TODO: Consolidate behavior between h1 and h2

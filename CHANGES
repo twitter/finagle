@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-http2: Clients and servers no longer attempt a cleartext upgrade if the
+    first request of the HTTP/1.1 session has a body. ``PHAB_ID=D153986``
+
 18.4.0
 -------
 
