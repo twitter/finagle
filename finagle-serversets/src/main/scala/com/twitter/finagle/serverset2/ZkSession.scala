@@ -1,5 +1,6 @@
 package com.twitter.finagle.serverset2
 
+import com.twitter.app.GlobalFlag
 import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.conversions.time._
 import com.twitter.finagle.serverset2.client._
@@ -8,6 +9,11 @@ import com.twitter.io.Buf
 import com.twitter.logging.Logger
 import com.twitter.util._
 import scala.collection.concurrent
+
+object zkConcurrentOperations extends GlobalFlag[Int](100,
+  "Number of concurrent operations allowed per ZkClient (default 100, max 1000). " +
+    "Ops exceeding this limit will be queued until existing operations complete."
+)
 
 /**
  * A representation of a ZooKeeper session based on asynchronous primitives such
@@ -40,7 +46,12 @@ private[serverset2] class ZkSession(
   // N.B. this semaphore has no max-waiters limit. This could lead to an OOME if the zk operations
   // never complete. This is preferable to handling and re-queuing (via future.sleep etc)
   // the error if an arbitrary max-limit is set.
-  private val limiter = new AsyncSemaphore(100)
+  private[this] val numPermits = {
+    val flagVal = zkConcurrentOperations()
+    if (flagVal > 0 && flagVal <= ZkSession.MaxPermits) flagVal else ZkSession.DefaultPermits
+  }
+
+  private val limiter = new AsyncSemaphore(numPermits)
   private val waitersGauge = statsReceiver.addGauge("numWaiters") { limiter.numWaiters }
 
   private def limit[T](f: => Future[T]): Future[T] =
@@ -261,6 +272,8 @@ private[serverset2] class ZkSession(
 }
 
 private[serverset2] object ZkSession {
+  private val MaxPermits = 1000
+  private val DefaultPermits = 100
 
   /** A noop ZkSession. */
   val nil: ZkSession = {
