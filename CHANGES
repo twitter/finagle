@@ -10,6 +10,15 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
+  * finagle-base-http: Added ability to add SameSite attribute to Cookies to
+    comply with https://tools.ietf.org/html/draft-west-first-party-cookies-07.
+    The attribute may be set in the constructor via the `c.t.f.http.Cookie`
+    `sameSite` param or via the `c.t.f.http.Cookie.sameSite` method.
+
+    - Pass `SameSite.Lax` to the `Cookie` to add the "Lax" attribute.
+    - Pass `SameSite.Strict` to the `Cookie` to add the "Strict" attribute.
+    ``PHAB_ID=D157942``
+
   * finagle-mysql: Added APIs to `Row` which simplify the common access pattern.
     For example, `Row.stringOrNull(columnName: String): String` and
     `Row.getString(columnName: String): Option[String]`.

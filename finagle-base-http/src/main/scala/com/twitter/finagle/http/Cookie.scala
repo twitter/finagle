@@ -1,6 +1,7 @@
 package com.twitter.finagle.http
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.http.cookie.SameSite
 import com.twitter.util.Duration
 import java.util.{BitSet => JBitSet}
 import org.jboss.netty.handler.codec.http.{Cookie => NettyCookie}
@@ -79,7 +80,8 @@ final class Cookie private (
   val path: String,
   private[this] val _maxAge: Option[Duration],
   val secure: Boolean,
-  val httpOnly: Boolean
+  val httpOnly: Boolean,
+  val sameSite: SameSite
 ) { self =>
 
   /**
@@ -92,7 +94,8 @@ final class Cookie private (
     path: Option[String] = None,
     maxAge: Option[Duration] = Some(Cookie.DefaultMaxAge),
     secure: Boolean = false,
-    httpOnly: Boolean = false
+    httpOnly: Boolean = false,
+    sameSite: SameSite = SameSite.Unset
   ) = this(
     name = Cookie.validateName(name),
     value = value,
@@ -100,7 +103,8 @@ final class Cookie private (
     path = Cookie.validateField(path.orNull),
     _maxAge = maxAge,
     secure = secure,
-    httpOnly = httpOnly
+    httpOnly = httpOnly,
+    sameSite = sameSite
   )
 
   def this(
@@ -113,7 +117,27 @@ final class Cookie private (
     None,
     Some(Cookie.DefaultMaxAge),
     false,
-    false
+    false,
+    SameSite.Unset
+  )
+
+  def this(
+    name: String,
+    value: String,
+    domain: Option[String],
+    path: Option[String],
+    maxAge: Option[Duration],
+    secure: Boolean,
+    httpOnly: Boolean
+  ) = this(
+    name,
+    value,
+    domain,
+    path,
+    maxAge,
+    secure,
+    httpOnly,
+    SameSite.Unset
   )
 
   @deprecated("Use Bijections.from to create a Cookie from a Netty Cookie")
@@ -125,7 +149,8 @@ final class Cookie private (
       underlying.getPath,
       Option(underlying.getMaxAge.seconds),
       underlying.isSecure,
-      underlying.isHttpOnly
+      underlying.isHttpOnly,
+      SameSite.Unset /* Netty cookies do not support the SameSite attribute */
     )
   }
 
@@ -153,7 +178,8 @@ final class Cookie private (
     path: Option[String] = Option(self.path),
     maxAge: Option[Duration] = self._maxAge,
     secure: Boolean = self.secure,
-    httpOnly: Boolean = self.httpOnly
+    httpOnly: Boolean = self.httpOnly,
+    sameSite: SameSite = self.sameSite
   ): Cookie =
     new Cookie(
       name,
@@ -162,7 +188,8 @@ final class Cookie private (
       path,
       maxAge,
       secure,
-      httpOnly
+      httpOnly,
+      sameSite
     )
 
   /**
@@ -200,6 +227,12 @@ final class Cookie private (
    */
   def secure(secure: Boolean): Cookie =
     copy(secure = secure)
+
+  /**
+   * Create a new [[Cookie]] with the same set fields, and sameSite `sameSite`
+   */
+  def sameSite(sameSite: SameSite): Cookie =
+    copy(sameSite = sameSite)
 
   /**
    * Returns true if `obj` equals `this`. Two cookies are considered equal if their names,

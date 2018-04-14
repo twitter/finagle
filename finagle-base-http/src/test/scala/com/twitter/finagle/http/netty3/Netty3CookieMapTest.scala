@@ -1,14 +1,28 @@
 package com.twitter.finagle.http.netty3
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.http.cookie.SameSite
+import com.twitter.finagle.http.cookie.exp.supportSameSiteCodec
 import com.twitter.finagle.http.{Cookie, CookieMap, CookieMapTest, Message, Request, Response}
 
 // These tests exercise common N3/N4 cookie behavior via CookieMapTest, and then further
 // test Netty 3-specific behavior below.
 class Netty3CookieMapTest extends CookieMapTest(Netty3CookieCodec, "netty 3") {
 
+  def toggledTest(what: String)(f: => Unit) = {
+    for {
+      sameSiteCodec <- Seq(false, true)
+    } {
+      test(s"$what with flag supportSameSiteCodec = $sameSiteCodec") {
+        supportSameSiteCodec.let(sameSiteCodec) {
+            f
+          }
+      }
+    }
+  }
+
   def testCookies(newMessage: () => Message, headerName: String, messageType: String): Unit = {
-    test(s"Adding a $messageType cookie header with attributes adds the cookie with the " +
+    toggledTest(s"Adding a $messageType cookie header with attributes adds the cookie with the " +
       "attributes") {
       val message = newMessage()
       lazy val cookieMap = new CookieMap(message, Netty3CookieCodec)
@@ -19,13 +33,14 @@ class Netty3CookieMapTest extends CookieMapTest(Netty3CookieCodec, "netty 3") {
       assert(cookie.maxAge == 23.seconds)
       assert(cookie.domain == ".example.com")
       assert(cookie.path == "/")
+      assert(cookie.sameSite == SameSite.Unset)
     }
   }
 
   // Request cookie tests
   testCookies(() => Request(), "Cookie", "Request")
 
-  test(s"Only Domain and Path attributes on a Request cookie are added to the header") {
+  toggledTest(s"Only Domain and Path attributes on a Request cookie are added to the header") {
     val request = Request()
     val cookie = new Cookie(
       name = "name",
@@ -46,12 +61,13 @@ class Netty3CookieMapTest extends CookieMapTest(Netty3CookieCodec, "netty 3") {
     assert(!headers.contains("Expires"))
     assert(!headers.contains("Secure"))
     assert(!headers.contains("HTTPOnly"))
+    assert(!headers.contains("SameSite"))
   }
 
   // Response cookie tests
   testCookies(() => Response(), "Set-Cookie", "Response")
 
-  test(s"Setting multiple cookies in a single header on a Response adds all the cookies") {
+  toggledTest(s"Setting multiple cookies in a single header on a Response adds all the cookies") {
     val response = Response()
     lazy val cookieMap = new CookieMap(response, Netty3CookieCodec)
     response.headerMap.set("Set-Cookie", "name=value; name2=value2")
@@ -63,5 +79,6 @@ class Netty3CookieMapTest extends CookieMapTest(Netty3CookieCodec, "netty 3") {
     assert(cookieHeaders.size == 2)
     assert(cookieHeaders.toSeq.contains("name=value"))
     assert(cookieHeaders.toSeq.contains("name2=value2"))
+    assert(!cookieHeaders.toSeq.contains("SameSite="))
   }
 }
