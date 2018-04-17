@@ -9,42 +9,52 @@ import scala.collection.mutable
  */
 private final class DefaultHeaderMap extends HeaderMap {
 
-  import DefaultHeaderMap._
-
-  private[this] val underlying = new Headers
+  // In general, HashSet/HashTables that are not thread safe are not
+  // durable to concurrent modification and can result in infinite loops.
+  // As such, we synchronize on the underlying `Headers` when performing
+  // accesses to avoid this. In the common case of no concurrent access,
+  // this should be cheap.
+  private[this] val underlying = new DefaultHeaderMap.Headers
 
   // ---- HeaderMap -----
 
-  def getAll(key: String): Seq[String] = underlying.getAll(key)
+  def getAll(key: String): Seq[String] = underlying.synchronized {
+    underlying.getAll(key)
+  }
 
-  def add(k: String, v: String): HeaderMap = {
+  def add(k: String, v: String): HeaderMap = underlying.synchronized {
     underlying.add(k, v)
     this
   }
 
-  def set(key: String, value: String): HeaderMap = {
+  def set(key: String, value: String): HeaderMap = underlying.synchronized {
     underlying.set(key, value)
     this
   }
 
   // ---- Map/MapLike -----
 
-  def get(key: String): Option[String] = underlying.getFirst(key)
+  def get(key: String): Option[String] = underlying.synchronized {
+    underlying.getFirst(key)
+  }
 
-  def iterator: Iterator[(String, String)] = underlying.flattenIterator
+  def iterator: Iterator[(String, String)] = underlying.synchronized {
+    underlying.flattenIterator
+  }
 
   def +=(kv: (String, String)): this.type = {
     set(kv._1, kv._2)
     this
   }
 
-  def -=(key: String): this.type = {
+  def -=(key: String): this.type = underlying.synchronized {
     underlying.removeAll(key)
     this
   }
 
-  override def keySet: Set[String] =
+  override def keySet: Set[String] = underlying.synchronized {
     underlying.values.flatMap(_.names).toSet
+  }
 
   override def keysIterator: Iterator[String] =
     keySet.iterator
@@ -167,7 +177,7 @@ private object DefaultHeaderMap {
   //
   // - iteration by gaining access to `entriesIterator` (protected method).
   // - get/add functions by providing custom hashCode and equals methods for a key
-  private final class Headers extends mutable.HashMap[String, Header] {
+  private final class Headers extends mutable.HashMap[String, Header] { self =>
 
     private def hashChar(c: Char): Int =
       if (c >= 'A' && c <= 'Z') c + 32
@@ -207,7 +217,26 @@ private object DefaultHeaderMap {
       }
 
     def flattenIterator: Iterator[(String, String)] = new Iterator[(String, String)] {
-      private[this] val it = entriesIterator
+      // To get the following behavior, this method must be called in a thread safe
+      // manner and as such, it is only called from within the `DefaultHeaderMap.iterator`
+      // method, which synchronizes on this instance.
+      //
+      // The resulting iterator is not invariant of mutations of the HeaderMap, but
+      // shouldn't result in corruption of the HashMap. To do that, we make a copy
+      // of the underlying values, so by key, it is immutable. However, adding more
+      // values to an existing key is still not thread safe in terms of observability
+      // since it modifies the `Header` linked list structure, but that shouldn't
+      // result in corruption of this HashMap.
+      private[this] val it = {
+        val array = new Array[Header](self.size)
+        val it = self.entriesIterator
+        var i = 0
+        while (it.hasNext) {
+          array(i) = it.next().value
+          i += 1
+        }
+        array.iterator
+      }
       private[this] var current: Header = _
 
       def hasNext: Boolean =
@@ -215,7 +244,7 @@ private object DefaultHeaderMap {
 
       def next(): (String, String) = {
         if (current == null) {
-          current = it.next().value
+          current = it.next()
         }
 
         val result = (current.name, current.value)

@@ -38,6 +38,13 @@ Runtime Behavior Changes
   * finagle-http2: Clients and servers no longer attempt a cleartext upgrade if the
     first request of the HTTP/1.1 session has a body. ``PHAB_ID=D153986``
 
+Bug Fixes
+~~~~~~~~~
+
+  * finagle-base-http: Concurrent modification of the `c.t.f.http.DefaultHeaderMap` could
+    result in an infinite loop due to HashMap corruption. Access is now synchronized to avoid
+    the infinite loop. ``PHAB_ID=D159250``
+
 18.4.0
 -------
 
