@@ -86,7 +86,7 @@ private[finagle] object Netty4SslConfigurations {
       case Return(sslContextBuilder) =>
         sslContextBuilder
       case Throw(NonFatal(nonFatal)) =>
-        throw new SslConfigurationException(nonFatal.getMessage, nonFatal)
+        throw new SslConfigurationException(nonFatal)
       case Throw(throwable) =>
         throw throwable
     }

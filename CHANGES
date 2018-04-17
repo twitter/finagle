@@ -35,6 +35,10 @@ New Features
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-core: Add `c.t.f.SslException` to better model exceptions related to SSL/TLS.
+    The `c.t.f.ChannelException.apply` method will now wrap `javax.net.ssl.SSLException`s in
+    `c.t.f.SslException`. ``PHAB_ID=D158344``
+
   * finagle-http2: Clients and servers no longer attempt a cleartext upgrade if the
     first request of the HTTP/1.1 session has a body. ``PHAB_ID=D153986``
 

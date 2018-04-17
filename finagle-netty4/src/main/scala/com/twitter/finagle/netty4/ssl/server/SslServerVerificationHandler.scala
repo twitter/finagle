@@ -1,6 +1,6 @@
 package com.twitter.finagle.netty4.ssl.server
 
-import com.twitter.finagle.{Address, FailureFlags, SslVerificationFailedException}
+import com.twitter.finagle.{Address, FailureFlags, SslException, SslVerificationFailedException}
 import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerSessionVerifier}
 import com.twitter.logging.{HasLogLevel, Level}
 import com.twitter.util.{Promise, Return, Throw}
@@ -76,14 +76,19 @@ private[netty4] class SslServerVerificationHandler(
   }
 }
 
+/**
+ * Indicates that the SslHandler was interrupted while it was trying to complete the TLS handshake.
+ */
 private[netty4] class InterruptedSslException(
   private[finagle] val flags: Long = FailureFlags.Empty
-) extends Exception(
-  "The SslHandler was interrupted while it was trying to complete the TLS handshake."
-)
+) extends SslException(None, None)
     with FailureFlags[InterruptedSslException]
     with HasLogLevel {
-  def logLevel: Level = Level.WARNING
+
+  override def exceptionMessage(): String =
+    "The SslHandler was interrupted while it was trying to complete the TLS handshake."
+
+  override def logLevel: Level = Level.WARNING
   protected def copyWithFlags(flags: Long): InterruptedSslException =
     new InterruptedSslException(flags)
 }

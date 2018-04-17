@@ -5,6 +5,7 @@ import com.twitter.finagle.context.RemoteInfo
 import com.twitter.logging.{HasLogLevel, Level}
 import com.twitter.util.Duration
 import java.net.SocketAddress
+import javax.net.ssl.{SSLException => JSSLException}
 import scala.util.control.NoStackTrace
 
 /**
@@ -254,6 +255,7 @@ object ChannelException {
         new ConnectionFailedException(cause, remoteAddress)
       case _: java.nio.channels.ClosedChannelException =>
         new ChannelClosedException(cause, remoteAddress)
+      case e: JSSLException => new SslException(e, remoteAddress)
       case e: java.io.IOException if ChannelClosedStrings.contains(e.getMessage) =>
         new ChannelClosedException(cause, remoteAddress)
       case e: java.io.IOException if ConnectionFailedStrings.contains(e.getMessage) =>
@@ -465,13 +467,21 @@ object ChannelWriteException {
 }
 
 /**
+ * Indicates that an SSL/TLS exception occurred.
+ */
+class SslException(cause: Option[Throwable], remoteAddr: Option[SocketAddress])
+  extends ChannelException(cause, remoteAddr) {
+  def this(cause: JSSLException, remoteAddr: SocketAddress) = this(Option(cause), Option(remoteAddr))
+}
+
+/**
  * Indicates that an error occurred while `SslClientSessionVerification` was
  * being performed, or the server disconnected from the client in a way that
  * indicates that there was high probability that the server failed to verify
  * the client's certificate.
  */
 case class SslVerificationFailedException(ex: Option[Throwable], remoteAddr: Option[SocketAddress])
-    extends ChannelException(ex, remoteAddr) {
+    extends SslException(ex, remoteAddr) {
   def this(underlying: Throwable, remoteAddress: SocketAddress) =
     this(Option(underlying), Option(remoteAddress))
   def this() = this(None, None)
@@ -487,7 +497,7 @@ case class SslVerificationFailedException(ex: Option[Throwable], remoteAddr: Opt
  * with a server at a given `remoteAddress`.
  */
 case class SslHandshakeException(ex: Option[Throwable], remoteAddr: Option[SocketAddress])
-    extends ChannelException(ex, remoteAddr) {
+    extends SslException(ex, remoteAddr) {
   def this(underlying: Throwable, remoteAddress: SocketAddress) =
     this(Option(underlying), Option(remoteAddress))
   def this() = this(None, None)
@@ -501,7 +511,7 @@ case class SslHandshakeException(ex: Option[Throwable], remoteAddr: Option[Socke
 /**
  * Indicates that the certificate for a given session was invalidated.
  */
-case class SslHostVerificationException(principal: String) extends ChannelException {
+case class SslHostVerificationException(principal: String) extends SslException(None, None) {
   def this() = this(null)
 }
 

@@ -90,7 +90,7 @@ class SslConfigurationsTest extends FunSuite {
     }
     assert(
       "KeyCredentials.CertAndKey is not supported at this time for TestFactory" ==
-        ex.getMessage
+        ex.cause.getMessage
     )
   }
 
@@ -101,7 +101,7 @@ class SslConfigurationsTest extends FunSuite {
     }
     assert(
       "KeyCredentials.CertKeyAndChain is not supported at this time for TestFactory" ==
-        ex.getMessage
+        ex.cause.getMessage
     )
   }
 
@@ -117,7 +117,7 @@ class SslConfigurationsTest extends FunSuite {
     }
     assert(
       "TrustCredentials.Insecure is not supported at this time for TestFactory" ==
-        ex.getMessage
+        ex.cause.getMessage
     )
   }
 
@@ -128,7 +128,7 @@ class SslConfigurationsTest extends FunSuite {
     }
     assert(
       "TrustCredentials.CertCollection is not supported at this time for TestFactory" ==
-        ex.getMessage
+        ex.cause.getMessage
     )
   }
 
@@ -144,7 +144,7 @@ class SslConfigurationsTest extends FunSuite {
     }
     assert(
       "ApplicationProtocols.Supported is not supported at this time for TestFactory" ==
-        ex.getMessage
+        ex.cause.getMessage
     )
   }
 
@@ -153,7 +153,8 @@ class SslConfigurationsTest extends FunSuite {
     val ex = intercept[SslConfigurationException] {
       SslConfigurations.checkProtocolsNotSupported("TestFactory", protocols)
     }
-    assert("Protocols.Enabled is not supported at this time for TestFactory" == ex.getMessage)
+    assert("Protocols.Enabled is not supported at this time for TestFactory" ==
+      ex.cause.getMessage)
   }
 
   test("checkClientAuthNotSupported throws for Off") {
@@ -161,7 +162,8 @@ class SslConfigurationsTest extends FunSuite {
     val ex = intercept[SslConfigurationException] {
       SslConfigurations.checkClientAuthNotSupported("TestFactory", clientAuth)
     }
-    assert("ClientAuth.Off is not supported at this time for TestFactory" == ex.getMessage)
+    assert("ClientAuth.Off is not supported at this time for TestFactory" ==
+      ex.cause.getMessage)
   }
 
   test("checkClientAuthNotSupported throws for Wanted") {
@@ -169,7 +171,8 @@ class SslConfigurationsTest extends FunSuite {
     val ex = intercept[SslConfigurationException] {
       SslConfigurations.checkClientAuthNotSupported("TestFactory", clientAuth)
     }
-    assert("ClientAuth.Wanted is not supported at this time for TestFactory" == ex.getMessage)
+    assert("ClientAuth.Wanted is not supported at this time for TestFactory" ==
+      ex.cause.getMessage)
   }
 
   test("checkClientAuthNotSupported throws for Needed") {
@@ -177,7 +180,8 @@ class SslConfigurationsTest extends FunSuite {
     val ex = intercept[SslConfigurationException] {
       SslConfigurations.checkClientAuthNotSupported("TestFactory", clientAuth)
     }
-    assert("ClientAuth.Needed is not supported at this time for TestFactory" == ex.getMessage)
+    assert("ClientAuth.Needed is not supported at this time for TestFactory" ==
+      ex.cause.getMessage)
   }
 
 }

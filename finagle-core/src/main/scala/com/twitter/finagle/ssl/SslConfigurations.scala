@@ -26,7 +26,7 @@ private[ssl] object SslConfigurations {
         val tryKms = factory.getKeyManagers()
         tryKms match {
           case Return(kms) => Some(kms)
-          case Throw(ex) => throw SslConfigurationException(ex.getMessage, ex)
+          case Throw(ex) => throw SslConfigurationException(ex)
         }
       case _: KeyCredentials.CertKeyAndChain =>
         throw SslConfigurationException.notSupported(
@@ -56,7 +56,7 @@ private[ssl] object SslConfigurations {
         val tryTms = factory.getTrustManagers()
         tryTms match {
           case Return(tms) => Some(tms)
-          case Throw(ex) => throw SslConfigurationException(ex.getMessage, ex)
+          case Throw(ex) => throw SslConfigurationException(ex)
         }
     }
 
