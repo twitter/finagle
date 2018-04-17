@@ -882,7 +882,6 @@ abstract class AbstractEndToEndTest
   }
 
   test(implName + ": Status.busy propagates along the Stack") {
-    val st = new InMemoryStatsReceiver
     val failService = new HttpService {
       def apply(req: Request): Future[Response] =
         Future.exception(Failure.rejected("unhappy"))
@@ -891,8 +890,8 @@ abstract class AbstractEndToEndTest
     val clientName = "http"
     val server = serverImpl().serve(new InetSocketAddress(0), failService)
     val client = clientImpl()
-      .withStatsReceiver(st)
       .configured(FailureAccrualFactory.Param(failureAccrualFailures, () => 1.minute))
+      .withStatsReceiver(statsRecv)
       .newService(
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         clientName
@@ -903,14 +902,13 @@ abstract class AbstractEndToEndTest
     }
     assert(e.isFlagged(FailureFlags.Rejected))
 
-    assert(st.counters(Seq(clientName, "failure_accrual", "removals")) == 1)
-    assert(st.counters(Seq(clientName, "retries", "requeues")) == failureAccrualFailures - 1)
-    assert(st.counters(Seq(clientName, "failures", "restartable")) == failureAccrualFailures)
+    assert(statsRecv.counters(Seq(clientName, "failure_accrual", "removals")) == 1)
+    assert(statsRecv.counters(Seq(clientName, "retries", "requeues")) == failureAccrualFailures - 1)
+    assert(statsRecv.counters(Seq(clientName, "failures", "restartable")) == failureAccrualFailures)
     await(Closable.all(client, server).close())
   }
 
   test(implName + ": nonretryable isn't retried") {
-    val st = new InMemoryStatsReceiver
     val failService = new HttpService {
       def apply(req: Request): Future[Response] =
         Future.exception(Failure("unhappy", FailureFlags.NonRetryable | FailureFlags.Rejected))
@@ -919,8 +917,8 @@ abstract class AbstractEndToEndTest
     val clientName = "http"
     val server = serverImpl().serve(new InetSocketAddress(0), failService)
     val client = clientImpl()
-      .withStatsReceiver(st)
       .configured(FailureAccrualFactory.Param(failureAccrualFailures, () => 1.minute))
+      .withStatsReceiver(statsRecv)
       .newService(
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         clientName
@@ -932,11 +930,11 @@ abstract class AbstractEndToEndTest
     }
     assert(e.isFlagged(FailureFlags.Rejected))
 
-    assert(!st.counters.contains(Seq(clientName, "failure_accrual", "removals")))
-    assert(!st.counters.contains(Seq(clientName, "retries", "requeues")))
-    assert(!st.counters.contains(Seq(clientName, "failures", "restartable")))
-    assert(st.counters(Seq(clientName, "failures")) == 1)
-    assert(st.counters(Seq(clientName, "requests")) == 1)
+    assert(!statsRecv.counters.contains(Seq(clientName, "failure_accrual", "removals")))
+    assert(!statsRecv.counters.contains(Seq(clientName, "retries", "requeues")))
+    assert(!statsRecv.counters.contains(Seq(clientName, "failures", "restartable")))
+    assert(statsRecv.counters(Seq(clientName, "failures")) == 1)
+    assert(statsRecv.counters(Seq(clientName, "requests")) == 1)
     await(Closable.all(client, server).close())
   }
 
@@ -1067,7 +1065,6 @@ abstract class AbstractEndToEndTest
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
     val client = clientImpl()
       .withMaxHeaderSize(1.kilobyte)
-      .withStatsReceiver(NullStatsReceiver)
       .newService(s"${addr.getHostName}:${addr.getPort}", "client")
 
     initClient(client)

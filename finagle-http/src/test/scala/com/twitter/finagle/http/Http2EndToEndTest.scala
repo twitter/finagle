@@ -17,7 +17,7 @@ import scala.collection.mutable.ArrayBuffer
 
 class Http2EndToEndTest extends AbstractEndToEndTest {
   def implName: String = "netty4 http/2"
-  def clientImpl(): finagle.Http.Client = finagle.Http.client.withHttp2
+  def clientImpl(): finagle.Http.Client = finagle.Http.client.withHttp2.withStatsReceiver(statsRecv)
 
   def serverImpl(): finagle.Http.Server = finagle.Http.server.withHttp2
 
@@ -33,6 +33,9 @@ class Http2EndToEndTest extends AbstractEndToEndTest {
     if (Contexts.local.get(ShouldUpgrade).getOrElse(true)) {
       val request = Request("/")
       await(client(request))
+      eventually {
+        assert(statsRecv.counters(Seq("client", "requests")) == 1L)
+      }
       statsRecv.clear()
     }
   }
