@@ -3,9 +3,10 @@ package com.twitter.finagle.http
 import com.twitter.conversions.storage._
 import com.twitter.conversions.time._
 import com.twitter.finagle
-import com.twitter.finagle.Service
+import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.service.ServiceFactoryRef
 import com.twitter.finagle.toggle.flag.overrides
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
@@ -303,6 +304,7 @@ class Http2EndToEndTest extends AbstractEndToEndTest {
 
     val responses = new ArrayBuffer[Promise[Response]]
 
+    private[this] val ref = new ServiceFactoryRef(ServiceFactory.const(initService))
     private[this] val service = Service.mk[Request, Response] { _ =>
       _pending.incrementAndGet()
       val p = new Promise[Response]
@@ -315,12 +317,16 @@ class Http2EndToEndTest extends AbstractEndToEndTest {
     private[this] val _ls = finagle.Http.server
       .withHttp2
       .withLabel("server")
-      .serve("localhost:*", service)
+      .serve("localhost:*", ref)
 
     def pending(): Int = _pending.get()
     def startProcessing(idx: Int) = responses(idx).setValue(Response())
     def boundAddr = _ls.boundAddress.asInstanceOf[InetSocketAddress]
     def close(deadline: Time): Future[Unit] = _ls.close(deadline)
+    def upgrade(svc: Service[Request, Response]): Unit = {
+      initClient(svc)
+      ref() = ServiceFactory.const(service)
+    }
   }
 
 
@@ -332,7 +338,10 @@ class Http2EndToEndTest extends AbstractEndToEndTest {
     val client =
       finagle.Http.client
         .withHttp2
+        .withStatsReceiver(statsRecv)
         .newService(dest, "client")
+
+    srv.upgrade(client)
 
     // dispatch a request that will be pending when the
     // server shutsdown.
