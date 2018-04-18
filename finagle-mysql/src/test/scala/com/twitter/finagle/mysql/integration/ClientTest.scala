@@ -103,29 +103,49 @@ class ClientTest extends FunSuite
   }
 
   test("ping") {
-    val pingResult = await(c.ping())
-    assert(pingResult.isInstanceOf[OK])
+    await(c.ping())
   }
 
+  private val createTableSql =
+    """CREATE TEMPORARY TABLE IF NOT EXISTS table_create_test (id int(5))"""
+
   test("query: create a table") {
-    val createResult = await(c.query(
-      """
-        |CREATE TEMPORARY TABLE IF NOT EXISTS table_create_test (id int(5))
-      """.stripMargin))
+    val createResult = await(c.query(createTableSql))
     assert(createResult.isInstanceOf[OK])
   }
 
-  test("query: insert values") {
-    val sql = """INSERT INTO `finagle-mysql-test` (`event`, `time`, `name`, `nationality`, `date`)
-       VALUES %s;""".format(allRecords.mkString(", "))
-
-    val insertResult = await(c.query(sql))
-    val OK(_, insertId, _, _, _) = insertResult.asInstanceOf[OK]
-    assert(insertResult.isInstanceOf[OK])
-    assert(insertId == 1)
+  test("modify: create a table") {
+    await(c.modify(createTableSql))
   }
 
-  test("query: select values") {
+  test("query: insert values") {
+    val insertSql =
+       """INSERT INTO `finagle-mysql-test` (`event`, `time`, `name`, `nationality`, `date`)
+       VALUES %s;""".format(allRecords.mkString(", "))
+    val insertResult = await(c.query(insertSql))
+    val ok = insertResult.asInstanceOf[OK]
+    assert(ok.insertId == 1)
+  }
+
+  test("modify: insert values") {
+    // other tests are dependent on the data setup, so we are mindful
+    // to not modify any rows.
+    val insertSql =
+      """
+        |INSERT INTO `finagle-mysql-test` (event, time, name, nationality, date)
+        |SELECT 'event', 1.0, 'name', 'nationality', 'date'
+        |WHERE 1 = 0
+      """.stripMargin
+    val insertResult = await(c.modify(insertSql))
+    assert(insertResult.affectedRows == 0)
+  }
+
+  test("read: select values") {
+    val resultSet = await(c.read("SELECT * FROM `finagle-mysql-test`"))
+    assert(resultSet.rows.size == allRecords.size)
+  }
+
+  test("select: select values") {
     val selectResult = await(c.select("SELECT * FROM `finagle-mysql-test`") { row =>
       val event = row.stringOrNull("event")
       val time = row.floatOrZero("time")

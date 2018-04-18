@@ -28,6 +28,11 @@ New Features
     `Row.getString(columnName: String): Option[String]`.
     ``PHAB_ID=D156926``, ``PHAB_ID=D157360``
 
+  * finagle-mysql: Added `read` and `modify` APIs to `c.t.f.mysql.Client` and
+    `c.t.f.mysql.PreparedStatement` for that return the specific type of
+    `Result` for those operations, `ResultSet` and `OK` respectively.
+    ``PHAB_ID=D160215``
+
   * finagle-serversets: Zk2Session's AsyncSemaphore which controls the maximum
     concurrent Zk operations is configurable (GlobalFlag c.t.f.serverset2.zkConcurrentOperations).
     ```PHAB_ID=D157709```
@@ -35,6 +40,12 @@ New Features
   * finagle-mysql: Address `CursoredStatement` usability from Java via
     `CursoredStatement.asJava()`. Through this, you can use the API with
     varargs and Java 8 lambdas. ``PHAB_ID=D158399``
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-mysql: `c.t.f.mysql.Client.ping` now returns a `Future[Unit]`
+    instead of the broad `Future[Result]` ADT. ``PHAB_ID=D160215``
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~

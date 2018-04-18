@@ -40,19 +40,55 @@ object Client {
       case _ => false
     }
   }
+
+  private val ResultToResultSet: Result => Future[ResultSet] = {
+    case rs: ResultSet => Future.value(rs)
+    case r => Future.exception(
+      new IllegalStateException(s"Unsupported response to a read='$r'"))
+  }
+
+  private val ResultToOK: Result => Future[OK] = {
+    case ok: OK => Future.value(ok)
+    case r => Future.exception(
+      new IllegalStateException(s"Unsupported response to a modify='$r'"))
+  }
 }
 
 trait Client extends Closable {
 
   /**
    * Returns the result of executing the `sql` query on the server.
+   *
+   * '''Note:''' this is a lower-level API. For SELECT queries, prefer using
+   * [[select]] or [[read]], and use [[modify]] for DML (INSERT/UPDATE/DELETE)
+   * and DDL.
    */
   def query(sql: String): Future[Result]
+
+  /**
+   * Executes the given SELECT query given by `sql`.
+   *
+   * @see [[PreparedStatement.read]]
+   */
+  def read(sql: String): Future[ResultSet] =
+    query(sql).flatMap(Client.ResultToResultSet)
+
+  /**
+   * Executes the given DML (e.g. INSERT/UPDATE/DELETE) or DDL
+   * (e.g. CREATE TABLE, DROP TABLE, COMMIT, START TRANSACTION, etc)
+   * given by `sql`.
+   *
+   * @see [[PreparedStatement.modify]]
+   */
+  def modify(sql: String): Future[OK] =
+    query(sql).flatMap(Client.ResultToOK)
 
   /**
    * Sends the given `sql` to the server and maps each resulting row to
    * `f`, a function from Row => T. If no ResultSet is returned, the function
    * returns an empty Seq.
+   *
+   * @see [[PreparedStatement.select]]
    */
   def select[T](sql: String)(f: Row => T): Future[Seq[T]]
 
@@ -82,7 +118,7 @@ trait Client extends Closable {
   /**
    * Returns the result of pinging the server.
    */
-  def ping(): Future[Result]
+  def ping(): Future[Unit]
 }
 
 trait Transactions {
@@ -163,7 +199,9 @@ private class StdClient(
   private[this] val cursorStats = new CursorStats(statsReceiver)
 
   def query(sql: String): Future[Result] = service(QueryRequest(sql))
-  def ping(): Future[Result] = service(PingRequest)
+
+  def ping(): Future[Unit] =
+    service(PingRequest).unit
 
   def select[T](sql: String)(f: Row => T): Future[Seq[T]] =
     query(sql).map {
@@ -175,7 +213,7 @@ private class StdClient(
     def apply(ps: Parameter*): Future[Result] = factory().flatMap { svc =>
       svc(PrepareRequest(sql)).flatMap {
         case ok: PrepareOK => svc(ExecuteRequest(ok.id, ps.toIndexedSeq))
-        case r => Future.exception(new Exception(s"Unexpected result $r when preparing $sql"))
+        case r => Future.exception(new IllegalStateException(s"Unexpected result $r when preparing $sql"))
       }.ensure {
         svc.close()
       }
