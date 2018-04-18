@@ -17,7 +17,7 @@ private object QueryParamDecoder {
     else decodeParams(uri.substring(qPos + 1, uri.length))
   }
 
-  private[this] def decodeParams(s: String): JMap[String, JList[String]] = {
+  def decodeParams(s: String): JMap[String, JList[String]] = {
     val params = new LinkedHashMap[String, JList[String]]
 
     // Limit the maximum number of params to 1024 to limit vulnerability to hash collision exploits

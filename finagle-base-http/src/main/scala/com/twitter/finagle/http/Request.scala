@@ -48,6 +48,8 @@ abstract class Request private extends Message {
    * // Result
    * // com.twitter.finagle.http.ParamMap = ?c=no&a=no&b=yes&a=yes
    * }}}
+   *
+   * To get just query parameters from the URI, use [[Uri]].
    */
   def params: ParamMap = _params
   private[this] lazy val _params: ParamMap = new RequestParamMap(this)

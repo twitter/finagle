@@ -3,7 +3,7 @@ package com.twitter.finagle.http
 import com.twitter.finagle.netty4.http.Netty4FormPostEncoder
 import com.twitter.util.Base64StringEncoder
 import com.twitter.io.Buf
-import java.net.{URI, URL}
+import java.net.{URI => JURI, URL}
 import java.nio.charset.StandardCharsets
 import scala.annotation.implicitNotFound
 import scala.collection.JavaConverters._
@@ -355,7 +355,7 @@ class RequestBuilder[HasUrl, HasForm] private[http] (
    *
    * @return lowercase string representation of the host for the request.
    */
-  private[this] def hostString(uri: URI, url: URL): String = {
+  private[this] def hostString(uri: JURI, url: URL): String = {
     (if (uri.getHost == null) {
       // fallback to URL
       url.getHost

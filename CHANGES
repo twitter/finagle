@@ -19,6 +19,10 @@ New Features
     - Pass `SameSite.Strict` to the `Cookie` to add the "Strict" attribute.
     ``PHAB_ID=D157942``
 
+  * finagle-base-http: Introduced an API to extract query string params from a
+    `c.t.f.http.Request`, `c.t.f.http.Uri.fromRequest` and `c.t.f.http.Uri#params`.
+    ``PHAB_ID=D160298``
+
   * finagle-mysql: Added APIs to `Row` which simplify the common access pattern.
     For example, `Row.stringOrNull(columnName: String): String` and
     `Row.getString(columnName: String): Option[String]`.
