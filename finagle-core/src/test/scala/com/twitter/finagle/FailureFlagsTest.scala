@@ -1,16 +1,13 @@
 package com.twitter.finagle
 
-import org.junit.runner.RunWith
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
-@RunWith(classOf[JUnitRunner])
 class FailureFlagsTest extends FunSuite with GeneratorDrivenPropertyChecks {
   import FailureFlags._
 
-  case class FlagCheck(val flags: Long) extends FailureFlags[FlagCheck] {
+  case class FlagCheck(flags: Long) extends FailureFlags[FlagCheck] {
     protected def copyWithFlags(f: Long): FlagCheck = FlagCheck(f)
   }
 
@@ -55,9 +52,21 @@ class FailureFlagsTest extends FunSuite with GeneratorDrivenPropertyChecks {
   }
 
   test("FailureFlags trait throws IllegalStateException when flagged with invalid combinations") {
-
     intercept[IllegalArgumentException] {
       FlagCheck(Retryable | NonRetryable)
     }
+  }
+
+  test("withFlags copies over stack trace, cause, suppressed") {
+    val initial = FlagCheck(FailureFlags.Empty)
+    initial.initCause(new RuntimeException("cause"))
+    initial.addSuppressed(new IllegalArgumentException("suppressed1"))
+    initial.addSuppressed(new UnsupportedOperationException("suppressed2"))
+
+    val copied = initial.flagged(FailureFlags.ShowMask)
+
+    assert(copied.getStackTrace.toSeq == initial.getStackTrace.toSeq)
+    assert(copied.getCause == initial.getCause)
+    assert(copied.getSuppressed.toSeq == initial.getSuppressed.toSeq)
   }
 }

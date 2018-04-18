@@ -49,6 +49,10 @@ Bug Fixes
     result in an infinite loop due to HashMap corruption. Access is now synchronized to avoid
     the infinite loop. ``PHAB_ID=D159250``
 
+  * finagle-core: `FailureFlags` that have their flags set modified will now
+    retain the original stack trace, suppressed Throwables, and cause when possible.
+    ``PHAB_ID=D160402``
+
 18.4.0
 -------
 

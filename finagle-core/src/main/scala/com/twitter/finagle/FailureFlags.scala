@@ -143,6 +143,9 @@ private[finagle] trait FailureFlags[T <: FailureFlags[T]] extends Throwable { th
    * A copy of this object with the given flags replacing the current flags. The
    * caller of this method should check to see if a copy is necessary before
    * calling.
+   *
+   * As this is an internal API, the other `Throwable` fields such as the cause
+   * and stack trace should be handled by callers.
    */
   protected def copyWithFlags(flags: Long): T
 
@@ -150,7 +153,19 @@ private[finagle] trait FailureFlags[T <: FailureFlags[T]] extends Throwable { th
    * This with the current flags replaced by newFlags. This does not mutate.
    */
   private[finagle] def withFlags(newFlags: Long): T =
-    if (flags == newFlags) this else copyWithFlags(newFlags)
+    if (newFlags == flags) {
+      this
+    } else {
+      val copied = copyWithFlags(newFlags)
+      copied.setStackTrace(getStackTrace)
+      if (getCause != null && copied.getCause == null) {
+        copied.initCause(getCause)
+      }
+      getSuppressed.toSeq.foreach { t =>
+        copied.addSuppressed(t)
+      }
+      copied
+    }
 
   /**
    * This with the given flags added. This does not mutate.
