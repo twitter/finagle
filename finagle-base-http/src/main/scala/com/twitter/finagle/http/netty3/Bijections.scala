@@ -1,6 +1,7 @@
 package com.twitter.finagle.http.netty3
 
 import com.twitter.finagle.http._
+import com.twitter.finagle.http.cookie.SameSite
 import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
 import org.jboss.netty.handler.codec.http.{Cookie => NettyCookie, _}
 
@@ -88,8 +89,13 @@ object Bijections {
       def apply(nc: NettyCookie): Cookie = cookieFromNetty(nc)
     }
 
-  private[http] def cookieFromNetty(nc: NettyCookie): Cookie =
-    new Cookie(nc)
+  private[http] def cookieFromNetty(nc: NettyCookie): Cookie = nc match {
+    case sc: SameSiteSupportingCookie =>
+      new Cookie(sc).sameSite(SameSite.fromString(sc.getSameSite))
+    case _ =>
+      new Cookie(nc)
+  }
+
 
   // Request
 

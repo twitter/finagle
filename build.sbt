@@ -196,7 +196,8 @@ lazy val projectList = Seq[sbt.ProjectReference](
   finagleThriftMux,
   finagleMySQL,
   finagleRedis,
-  finagleNetty4Http
+  finagleNetty4Http,
+  finagleHttpCookie
 )
 
 lazy val finagle = Project(
@@ -469,7 +470,7 @@ lazy val finagleBaseHttp = Project(
     util("logging"),
     netty4Http
   ) ++ netty4Libs
-).dependsOn(finagleCore, finagleNetty3, finagleToggle)
+).dependsOn(finagleCore, finagleNetty3, finagleToggle, finagleHttpCookie)
 
 lazy val finagleNetty4Http = Project(
   id = "finagle-netty4-http",
@@ -669,6 +670,18 @@ lazy val finagleBenchmark = Project(
   finagleThriftMux,
   finagleZipkinScribe
 ).aggregate(finagleBenchmarkThrift)
+
+lazy val finagleHttpCookie = Project(
+  id = "finagle-http-cookie",
+  base = file("finagle-http-cookie")
+).settings(
+  sharedSettings
+).settings(
+  name := "finagle-http-cookie",
+  libraryDependencies ++= Seq(
+    netty3Lib
+  )
+)
 
 lazy val finagleDoc = Project(
   id = "finagle-doc",

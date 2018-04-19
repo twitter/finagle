@@ -13,6 +13,7 @@ scala_library(
         "3rdparty/jvm/io/netty:netty4-codec-http",
         "finagle/finagle-base-http/src/main/resources",
         "finagle/finagle-core",
+        "finagle/finagle-http-cookie/src/main/java/com/twitter/finagle/http/netty3",
         "finagle/finagle-netty3",
         "finagle/finagle-toggle/src/main/scala",
         "util/util-app",

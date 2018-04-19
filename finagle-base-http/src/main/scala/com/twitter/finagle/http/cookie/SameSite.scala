@@ -26,4 +26,15 @@ object SameSite {
    */
   case object Unset extends SameSite
 
+  /**
+   * Converts the given SameSite value (string) to the corresponding
+   * SameSite object. Anything not Lax or Strict is considered Unset.
+   * Note that this is case-sensitive.
+   */
+  def fromString(s: String): SameSite = s match {
+    case "Lax" => Lax
+    case "Strict" => Strict
+    case _ => Unset
+  }
+
 }

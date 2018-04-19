@@ -79,19 +79,21 @@ class SameSiteEndToEndTest extends FunSuite {
     useNetty4CookieCodec <- Seq(0.0, 1.0)
   } {
     test(s"response should contain Lax if set in laxService, with useNetty4CookieCodec=$useNetty4CookieCodec") {
-      new Ctx(useNetty4CookieCodec) {
-        val server =
-          Http.server
-            .withLabel("myservice")
-            .serve(new InetSocketAddress(0), setCookieservice(SameSite.Lax))
+      supportSameSiteCodec.let(true) {
+        new Ctx(useNetty4CookieCodec) {
+          val server =
+            Http.server
+              .withLabel("myservice")
+              .serve(new InetSocketAddress(0), setCookieservice(SameSite.Lax))
 
-        val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-        val client = Http.client.newService(s":${addr.getPort}", "http")
+          val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+          val client = Http.client.newService(s":${ addr.getPort }", "http")
 
-        val response: Response = await(client(request))
-        assert(response.status == Status.Ok)
-        assert(response.headerMap.get("Set-Cookie").get == "foo=bar; SameSite=Lax")
-        assert(response.cookies.get("foo").get.sameSite == SameSite.Lax)
+          val response: Response = await(client(request))
+          assert(response.status == Status.Ok)
+          assert(response.headerMap.get("Set-Cookie").get == "foo=bar; SameSite=Lax")
+          assert(response.cookies.get("foo").get.sameSite == SameSite.Lax)
+        }
       }
     }
   }
@@ -100,19 +102,21 @@ class SameSiteEndToEndTest extends FunSuite {
     useNetty4CookieCodec <- Seq(0.0, 1.0)
   } {
     test(s"response should contain Strict if set in strictService, with useNetty4CookieCodec=$useNetty4CookieCodec") {
-      new Ctx(useNetty4CookieCodec) {
-        val server =
-          Http.server
-            .withLabel("myservice")
-            .serve(new InetSocketAddress(0), setCookieservice(SameSite.Strict))
+      supportSameSiteCodec.let(true) {
+        new Ctx(useNetty4CookieCodec) {
+          val server =
+            Http.server
+              .withLabel("myservice")
+              .serve(new InetSocketAddress(0), setCookieservice(SameSite.Strict))
 
-        val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-        val client = Http.client.newService(s":${addr.getPort}", "http")
+          val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+          val client = Http.client.newService(s":${ addr.getPort }", "http")
 
-        val response: Response = await(client(request))
-        assert(response.status == Status.Ok)
-        assert(response.headerMap.get("Set-Cookie").get == "foo=bar; SameSite=Strict")
-        assert(response.cookies.get("foo").get.sameSite == SameSite.Strict)
+          val response: Response = await(client(request))
+          assert(response.status == Status.Ok)
+          assert(response.headerMap.get("Set-Cookie").get == "foo=bar; SameSite=Strict")
+          assert(response.cookies.get("foo").get.sameSite == SameSite.Strict)
+        }
       }
     }
   }

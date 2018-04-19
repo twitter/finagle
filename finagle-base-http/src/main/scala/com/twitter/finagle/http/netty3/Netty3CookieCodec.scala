@@ -17,7 +17,8 @@ import scala.collection.JavaConverters._
 private[http] object Netty3CookieCodec extends CookieCodec {
 
   // not stateful, so safe to re-use
-  private[this] val decoder = new NettyCookieDecoder
+  private[this] val sameSiteDecoder = new SameSiteSupportingCookieDecoder
+  private[this] val netty3Decoder = new NettyCookieDecoder
 
   def encodeClient(cookies: Iterable[Cookie]): String = {
     val encoder = new NettyCookieEncoder(false /* encode client-style cookies */)
@@ -37,10 +38,12 @@ private[http] object Netty3CookieCodec extends CookieCodec {
 
   def decodeClient(header: String): Option[Iterable[Cookie]] = {
     try {
-      Some(decoder.decode(header).asScala.map { cookie: Netty3Cookie =>
-        val decoded = Bijections.from[Netty3Cookie, Cookie](cookie)
-        if (CookieMap.includeSameSite) SameSiteCodec.decodeSameSite(header, decoded)
-        else decoded
+      val cookies =
+        if (CookieMap.includeSameSite) sameSiteDecoder.decode(header).asScala
+        else netty3Decoder.decode(header).asScala
+
+      Some(cookies.map { cookie: Netty3Cookie =>
+        Bijections.from[Netty3Cookie, Cookie](cookie)
       })
     } catch {
       case e: IllegalArgumentException => None
@@ -49,7 +52,11 @@ private[http] object Netty3CookieCodec extends CookieCodec {
 
   def decodeServer(header: String): Option[Iterable[Cookie]] =
     try {
-      Some(decoder.decode(header).asScala.map { cookie: Netty3Cookie =>
+      val cookies =
+        if (CookieMap.includeSameSite) sameSiteDecoder.decode(header).asScala
+        else netty3Decoder.decode(header).asScala
+
+      Some(cookies.map { cookie: Netty3Cookie =>
         Bijections.from[Netty3Cookie, Cookie](cookie)
       })
     } catch {

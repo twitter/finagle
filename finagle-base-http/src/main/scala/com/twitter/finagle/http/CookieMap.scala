@@ -18,7 +18,8 @@ private[finagle] object CookieMap {
     if (UseNetty4CookieCodec(ServerInfo().id.hashCode())) Netty4CookieCodec
     else Netty3CookieCodec
 
-  private[finagle] val includeSameSite: Boolean = supportSameSiteCodec()
+  // Note that this is a def to allow it to be toggled for unit tests.
+  private[finagle] def includeSameSite: Boolean = supportSameSiteCodec()
 
   private[finagle] val flaglessSameSitesCounter =
     LoadedStatsReceiver.scope("http").scope("cookie").counter("flagless_samesites")
@@ -60,7 +61,7 @@ class CookieMap private[twitter](message: Message, cookieCodec: CookieCodec)
       HttpHeaders.Names.SET_COOKIE
 
   private[this] def decodeCookies(header: String): Iterable[Cookie] = {
-    val decoding  =
+    val decoding =
       if (message.isRequest) cookieCodec.decodeServer(header)
       else cookieCodec.decodeClient(header)
     decoding match {
@@ -84,7 +85,7 @@ class CookieMap private[twitter](message: Message, cookieCodec: CookieCodec)
         case (_, cookie) => {
           message.headerMap.add(cookieHeaderName,
             cookieCodec.encodeServer(cookie))
-          if (message.headerMap.toString.contains("SameSite")
+          if (!message.headerMap.toString.contains("SameSite")
               && cookie.sameSite != SameSite.Unset) {
             CookieMap.silentlyDroppedSameSitesCounter.incr()
           }
