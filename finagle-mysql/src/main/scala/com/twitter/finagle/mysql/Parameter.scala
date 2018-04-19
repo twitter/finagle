@@ -2,18 +2,27 @@ package com.twitter.finagle.mysql
 
 import com.twitter.finagle.mysql.transport.MysqlBufWriter
 import java.util.logging.Logger
-import language.implicitConversions
+import scala.language.implicitConversions
 
 /**
  * A value of type `A` can implicitly convert to a `Parameter` if an evidence
  * `CanBeParameter[A]` is available in scope via the [[Parameter.wrap]] or
- * [[Parameter.wrapOption]] implicits.
+ * [[Parameter.wrapOption]] implicits. Explicit conversions are available
+ * via [[Parameter.of]] and [[Parameters.of]].
  *
- * A Scala example:
+ * A Scala example with implicits:
  * {{{
+ * import com.twitter.finagle.mysql.Parameter
  * import com.twitter.finagle.mysql.Parameter._
  *
  * val p: Parameter = "this will get implicitly converted to a Parameter"
+ * }}}
+ *
+ * A Scala example without implicits:
+ * {{{
+ * import com.twitter.finagle.mysql.Parameter
+ *
+ * val p: Parameter = Parameter.of("explicitly converted to a Parameter")
  * }}}
  *
  * A Java example:
@@ -39,16 +48,25 @@ sealed trait Parameter {
 
 /**
  * For Scala users, the typical usage is by importing the implicit conversions
- * and then letting the compiler do the conversions for you.
+ * and then letting the compiler do the conversions for you. Explicit
+ * runtime conversions are also available via [[Parameter.of]].
  *
  * Java users should generally be using [[Parameters.of]] to do explicit
  * conversions.
  *
- * A Scala example:
+ * A Scala example with implicits:
  * {{{
+ * import com.twitter.finagle.mysql.Parameter
  * import com.twitter.finagle.mysql.Parameter._
  *
  * val p: Parameter = "this will get implicitly converted to a Parameter"
+ * }}}
+ *
+ * A Scala example without implicits:
+ * {{{
+ * import com.twitter.finagle.mysql.Parameter
+ *
+ * val p: Parameter = Parameter.of("explicitly converted to a Parameter")
  * }}}
  *
  * A Java example:
@@ -64,6 +82,16 @@ sealed trait Parameter {
 object Parameter {
 
   /**
+   * Generally used via implicits.
+   * Input of `None` is treated as a `NULL`.
+   *
+   * {{{
+   * import com.twitter.finagle.mysql.Parameter
+   * import com.twitter.finagle.mysql.Parameter._
+   *
+   * val p: Parameter = Some("this will get implicitly converted to a Parameter")
+   * }}}
+   *
    * Java users can use [[Parameters.of]].
    */
   implicit def wrapOption[_A](option: Option[_A])(implicit ev: CanBeParameter[_A]): Parameter =
@@ -73,6 +101,15 @@ object Parameter {
     }
 
   /**
+   * Generally used via implicits.
+   *
+   * {{{
+   * import com.twitter.finagle.mysql.Parameter
+   * import com.twitter.finagle.mysql.Parameter._
+   *
+   * val p: Parameter = "this will get implicitly converted to a Parameter"
+   * }}}
+   *
    * Java users can use [[Parameters.of]].
    */
   implicit def wrap[_A](_value: _A)(implicit _evidence: CanBeParameter[_A]): Parameter = {
@@ -91,16 +128,22 @@ object Parameter {
   private val log = Logger.getLogger("finagle-mysql")
 
   /**
-   * This converts the compile time error we would get with `wrap` into
-   * a runtime error.
+   * Converts the given `value` into a [[Parameter]] at runtime.
    *
-   * Java users can use [[Parameters.of]].
+   * Scala users may use the implicit conversions if they prefer.
+   *
+   * {{{
+   * import com.twitter.finagle.mysql.Parameter
+   *
+   * val p: Parameter = Parameter.of("a string")
+   * }}}
    *
    * @note Any unknown types are treated as a SQL NULL.
+   * @see [[Parameters.of]] for Java users.
    */
-  def unsafeWrap(value: Any): Parameter = value match {
+  def of(value: Any): Parameter = value match {
     case null => NullParameter
-    case Some(v) => unsafeWrap(v)
+    case Some(v) => of(v)
     case None => NullParameter
     case v: String => wrap(v)
     case v: Boolean => wrap(v)
@@ -115,7 +158,7 @@ object Parameter {
     case v: java.sql.Timestamp => wrap(v)
     case v: java.sql.Date => wrap(v)
     case v: java.util.Date => wrap(v)
-    case o: java.util.Optional[_] if o.isPresent => unsafeWrap(o.get())
+    case o: java.util.Optional[_] if o.isPresent => of(o.get())
     case o: java.util.Optional[_] => NullParameter
     case v =>
       // Unsupported type. Write the error to log, and write the type as null.
@@ -123,6 +166,11 @@ object Parameter {
       log.warning(s"Unknown parameter ${v.getClass.getName} will be treated as SQL NULL.")
       NullParameter
   }
+
+  /**
+   * Synonym for [[of]].
+   */
+  def unsafeWrap(value: Any): Parameter = of(value)
 
   /**
    * Java users can use [[Parameters.nullParameter]].
