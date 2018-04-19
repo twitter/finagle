@@ -171,24 +171,6 @@ object TimestampValue
   }
 
   /**
-   * Extracts the fractional part of a timestamp, up to the
-   * nanoseconds. It takes care of padding properly so that .1
-   * is interpreted as 100 millis and not 1 nanoseconds (like
-   * SimpleDateFormat wrongly does.)
-   */
-  private[this] object Nanos {
-    def unapply(str: String): Option[Int] = {
-      str match {
-        case "" => Some(0)
-        case s: String if !s.startsWith(".") => None
-        case s: String if s.length() > 10 => None
-        case s: String => Some(s.stripPrefix(".").padTo(9, '0').toInt)
-        case _ => None
-      }
-    }
-  }
-
-  /**
    * Convert a string-encoded timestamp into a [[java.sql.Timestamp]] in a given
    * timezone.
    *
@@ -208,13 +190,37 @@ object TimestampValue
     format.setTimeZone(timeZone)
     val timeInMillis = format.parse(str, parsePosition).getTime
 
-    // Parse fractional part
-    str.substring(parsePosition.getIndex) match {
-      case Nanos(nanos) =>
-        val ts = new Timestamp(timeInMillis)
-        ts.setNanos(nanos)
-        ts
-      case _ => Zero
+    /**
+     * Extracts the fractional part of a timestamp, up to the
+     * nanoseconds. It takes care of padding properly so that .1
+     * is interpreted as 100 millis and not 1 nanoseconds (like
+     * SimpleDateFormat wrongly does.)
+     */
+    val index = parsePosition.getIndex
+    if (index >= str.length) {
+      // nothing left to parse, therefore no nanos
+      new Timestamp(timeInMillis)
+    } else if (str.charAt(index) != '.') {
+      // if the next char isn't a . it isn't valid
+      Zero
+    } else {
+      // see what comes after the '.'
+      val rest = str.substring(index + 1)
+      if (rest.length > 9) {
+        // too many characters
+        Zero
+      } else {
+        // convert to an integer then convert to nanos by adding trailing 0s
+        val multiple = math.pow(10, 9 - rest.length).toInt
+        try {
+          val nanos = Integer.parseInt(rest) * multiple
+          val ts = new Timestamp(timeInMillis)
+          ts.setNanos(nanos)
+          ts
+        } catch {
+          case _: NumberFormatException => Zero
+        }
+      }
     }
   }
 
@@ -229,7 +235,7 @@ object TimestampValue
    * MySQL binary protocol.
    */
   private[this] def fromBytes(bytes: Array[Byte], timeZone: TimeZone): Timestamp = {
-    if (bytes.isEmpty) {
+    if (bytes.length == 0) {
       return Zero
     }
 
@@ -319,7 +325,7 @@ object DateValue extends Injectable[Date] with Extractable[Date] {
    * MySQL binary protocol.
    */
   private[this] def fromBytes(bytes: Array[Byte]): Date = {
-    if (bytes.isEmpty) {
+    if (bytes.length == 0) {
       return Zero
     }
 
