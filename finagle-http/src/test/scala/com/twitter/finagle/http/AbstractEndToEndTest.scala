@@ -6,6 +6,7 @@ import com.twitter.finagle
 import com.twitter.finagle._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.context.{Contexts, Deadline, Retries}
+import com.twitter.finagle.filter.ServerAdmissionControl
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.http2.param.EncoderIgnoreMaxHeaderListSize
 import com.twitter.finagle.liveness.FailureAccrualFactory
@@ -18,6 +19,7 @@ import com.twitter.util._
 import io.netty.buffer.PooledByteBufAllocator
 import java.io.{PrintWriter, StringWriter}
 import java.net.{InetAddress, InetSocketAddress}
+import java.util.concurrent.atomic.AtomicBoolean
 import org.scalactic.source.Position
 import org.scalatest.{BeforeAndAfter, FunSuite, OneInstancePerTest, Tag}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
@@ -1608,6 +1610,91 @@ abstract class AbstractEndToEndTest
     assert(!res.isChunked)
     assert(res.length == 0)
     assert(res.contentLength.contains(body.length.toLong))
+    await(client.close())
+    await(server.close())
+  }
+
+  test("ServerAdmissionControl doesn't filter requests with a chunked body") {
+    val responseString = "a response"
+    val svc = Service.mk[Request, Response] { _ =>
+      val response = Response()
+      response.contentString = responseString
+      Future.value(response)
+    }
+
+    val nacked = new AtomicBoolean(false)
+    val filter = new Filter.TypeAgnostic {
+      override def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = new SimpleFilter[Req, Rep] {
+        // nacks them all
+        def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
+          if (nacked.compareAndSet(false, true)) Future.exception(Failure.rejected)
+          else service(request)
+        }
+      }
+    }
+
+    val server = serverImpl()
+      .configured(ServerAdmissionControl.Filters(Some(Seq(_ => filter))))
+      .serve("localhost:*", svc)
+
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+    // first, a request with a body
+    val reqWithBody = Request(Method.Post, "/")
+    reqWithBody.setChunked(true)
+    val writer = reqWithBody.writer
+    writer.write(Buf.Utf8("data")).before(writer.close())
+
+    // Shouldn't be nacked
+    assert(await(client(reqWithBody)).contentString == responseString)
+    assert(!nacked.get)
+
+    // Should be nacked the first time
+    val reqWithoutBody = Request(Method.Get, "/")
+    assert(await(client(reqWithoutBody)).contentString == responseString)
+    assert(nacked.get)
+
+    await(client.close())
+    await(server.close())
+  }
+
+  test("ServerAdmissionControl can filter requests with the magic header") {
+    val responseString = "a response"
+    val svc = Service.mk[Request, Response] { _ =>
+      val response = Response()
+      response.contentString = responseString
+      Future.value(response)
+    }
+
+    val nacked = new AtomicBoolean(false)
+    val filter = new Filter.TypeAgnostic {
+      override def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = new SimpleFilter[Req, Rep] {
+        // nacks them all
+        def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
+          if (nacked.compareAndSet(false, true)) Future.exception(Failure.rejected)
+          else service(request)
+        }
+      }
+    }
+
+    val server = serverImpl()
+      .configured(ServerAdmissionControl.Filters(Some(Seq(_ => filter))))
+      .serve("localhost:*", svc)
+
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+    // first, a request with a body
+    val reqWithBody = Request(Method.Post, "/")
+    reqWithBody.contentString = "not-empty"
+
+    // Header should be there so we can nack it
+    assert(await(client(reqWithBody)).contentString == responseString)
+    assert(nacked.get)
+
     await(client.close())
     await(server.close())
   }

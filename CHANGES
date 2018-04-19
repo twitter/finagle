@@ -54,6 +54,11 @@ Runtime Behavior Changes
     The `c.t.f.ChannelException.apply` method will now wrap `javax.net.ssl.SSLException`s in
     `c.t.f.SslException`. ``PHAB_ID=D158344``
 
+  * finagle-http: ServerAdmissionControl is circumvented for HTTP requests that have
+    a body unless the request contains the header 'finagle-http-retryable-request' since
+    it cannot be known whether the client can actually retry them, potentially resulting
+    in depressed success rates during periods of throttling. ``PHAB_ID=D134209``
+
   * finagle-http2: Clients and servers no longer attempt a cleartext upgrade if the
     first request of the HTTP/1.1 session has a body. ``PHAB_ID=D153986``
 

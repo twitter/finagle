@@ -21,8 +21,20 @@ private[http] final class ClientNackFilter extends SimpleFilter[Request, Respons
   ): Future[Response] = {
     // If the request was chunked, we likely consume some of the body during an initial
     // dispatch so it's not generally safe to retry even if the server says it is.
-    val continuation = if (request.isChunked) convertChunkedReqNackFn else convertNackFn
-    service(request).flatMap(continuation)
+    if (request.isChunked) {
+      // Make sure we don't accidentally signal that we can retry this request. This
+      // could happen if, for example, the same request gets reused but with a different
+      // body representation.
+      request.headerMap.remove(HttpNackFilter.RetryableRequestHeader)
+      service(request).flatMap(convertChunkedReqNackFn)
+    } else {
+      if (!request.content.isEmpty) {
+        // We add the `CanRetryWithBodyHeader` to signal to the server that we're able
+        // to retry this request with a body.
+        request.headerMap.add(HttpNackFilter.RetryableRequestHeader, "")
+      }
+      service(request).flatMap(convertNackFn)
+    }
   }
 }
 

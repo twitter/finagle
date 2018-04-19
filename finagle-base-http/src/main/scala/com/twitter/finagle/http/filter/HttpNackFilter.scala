@@ -1,6 +1,8 @@
 package com.twitter.finagle.http.filter
 
 import com.twitter.finagle._
+import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.filter.ServerAdmissionControl
 import com.twitter.finagle.http.{Method, Request, Response, Status}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.service.RetryPolicy
@@ -28,6 +30,9 @@ object HttpNackFilter {
   /** Header name for non-retryable nack responses */
   val NonRetryableNackHeader: String = "finagle-http-nonretryable-nack"
 
+  /** Header name for requests that have a body and the client can retry */
+  val RetryableRequestHeader: String = "finagle-http-retryable-request"
+
   /** Response status for a nacked request */
   val ResponseStatus: Status = Status.ServiceUnavailable
 
@@ -40,16 +45,16 @@ object HttpNackFilter {
   private val RetryableNackFlags = FailureFlags.Rejected | FailureFlags.Retryable
 
   private[twitter] object RetryableNack {
-    def unapply(t: Throwable): Option[Throwable] = t match {
-      case f: FailureFlags[_] if f.isFlagged(RetryableNackFlags) => Some(f)
-      case _ => None
+    def unapply(t: Throwable): Boolean = t match {
+      case f: FailureFlags[_] => f.isFlagged(RetryableNackFlags)
+      case _ => false
     }
   }
 
   private[twitter] object NonRetryableNack {
-    def unapply(t: Throwable): Option[Throwable] = t match {
-      case f: FailureFlags[_] if f.isFlagged(NonRetryableNackFlags) => Some(f)
-      case _ => None
+    def unapply(t: Throwable): Boolean = t match {
+      case f: FailureFlags[_] => f.isFlagged(NonRetryableNackFlags)
+      case _ => false
     }
   }
 
@@ -80,16 +85,27 @@ object HttpNackFilter {
   /** Construct a new HttpNackFilter */
   private[finagle] def newFilter(statsReceiver: StatsReceiver): SimpleFilter[Request, Response] =
     new HttpNackFilter(statsReceiver)
+
+  private def retryableRequest(req: Request): Boolean = {
+    // If the request came in chunked, the finagle HTTP/1.x server implementation will
+    // bork the session state if it doesn't consume the body, so we don't nack these if
+    // at all possible.
+    //
+    // If it didn't come in chunked, we don't know if the client has retained a copy of
+    // the body and can retry it if we nack it, so we only allow nacking of requests with
+    // a body if the client has signaled that it is able to retry them.
+    !req.isChunked && (req.content.isEmpty || req.headerMap.contains(RetryableRequestHeader))
+  }
 }
 
-private class HttpNackFilter(statsReceiver: StatsReceiver) extends SimpleFilter[Request, Response] {
+private final class HttpNackFilter(statsReceiver: StatsReceiver) extends SimpleFilter[Request, Response] {
   import HttpNackFilter._
 
   private[this] val nackCounts = statsReceiver.counter("nacks")
-  private[this] val nonretryableNackCounts = statsReceiver.counter("nonretryable_nacks")
+  private[this] val nonRetryableNackCounts = statsReceiver.counter("nonretryable_nacks")
 
-  private[this] val standardHandler = makeHandler(true)
-  private[this] val bodylessHandler = makeHandler(false)
+  private[this] val standardHandler = makeHandler(includeBody = true)
+  private[this] val bodylessHandler = makeHandler(includeBody = false)
 
   private[this] def makeHandler(includeBody: Boolean): PartialFunction[Throwable, Response] = {
     // For legacy reasons, this captures all RetryableWriteExceptions
@@ -102,8 +118,8 @@ private class HttpNackFilter(statsReceiver: StatsReceiver) extends SimpleFilter[
       }
       rep
 
-    case NonRetryableNack(_) =>
-      nonretryableNackCounts.incr()
+    case NonRetryableNack() =>
+      nonRetryableNackCounts.incr()
       val rep = Response(ResponseStatus)
       rep.headerMap.set(NonRetryableNackHeader, "true")
       if (includeBody) {
@@ -117,6 +133,17 @@ private class HttpNackFilter(statsReceiver: StatsReceiver) extends SimpleFilter[
       if (request.method == Method.Head) bodylessHandler
       else standardHandler
 
-    service(request).handle(handler)
+    val isRetryable = retryableRequest(request)
+    // We need to strip the header in case this request gets forwarded to another
+    // endpoint as the marker header is only valid on a hop-by-hop basis.
+    request.headerMap.remove(RetryableRequestHeader)
+
+    if (isRetryable) {
+      service(request).handle(handler)
+    } else {
+      Contexts.local.let(ServerAdmissionControl.NonRetryable, ()) {
+        service(request).handle(handler)
+      }
+    }
   }
 }

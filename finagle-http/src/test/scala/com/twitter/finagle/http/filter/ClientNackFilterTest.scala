@@ -99,6 +99,28 @@ class ClientNackFilterTest extends FunSuite {
     }
   }
 
+  test("adds the magic header to requests that aren't chunked") {
+    val markerHeader = "finagle-had-retryable-request-header"
+    val service = new ClientNackFilter().andThen(Service.mk { req: Request =>
+      val resp = Response()
+
+      if (req.headerMap.contains(HttpNackFilter.RetryableRequestHeader)) {
+        resp.headerMap.add(markerHeader, "")
+      }
+      Future.value(resp)
+    })
+
+    val nonChunkedRequest = Request(method = Method.Post, uri = "/")
+    nonChunkedRequest.contentString = "static"
+    val nonChunkedResponse = await(service(nonChunkedRequest))
+    assert(nonChunkedResponse.headerMap.contains(markerHeader))
+
+    val chunkedRequest = Request(method = Method.Post, uri = "/")
+    chunkedRequest.setChunked(true)
+    val chunkedResponse = await(service(chunkedRequest))
+    assert(!chunkedResponse.headerMap.contains(markerHeader))
+  }
+
   // Scaffold for checking nack behavior
   private abstract class NackCtx(withStreaming: Boolean) {
 

@@ -3,16 +3,14 @@ package com.twitter.finagle.filter
 import com.twitter.conversions.time._
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
+import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.server.StackServer
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.util.{Await, Future}
 import java.util.concurrent.atomic.AtomicInteger
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class ServerAdmissionControlTest extends FunSuite with MockitoSugar {
   class Ctx {
     val a = new AtomicInteger(1)
@@ -121,5 +119,19 @@ class ServerAdmissionControlTest extends FunSuite with MockitoSugar {
     val svc = Await.result(factory(), 5.seconds)
     assert(Await.result(svc(1), 5.seconds) == 1)
     assert(a.get == 3)
+  }
+
+  test("Respects the NonRetryable context entry") {
+    val ctx = new Ctx
+    import ctx._
+
+    val factory = stack.make(StackServer.defaultParams)
+    val svc = Await.result(factory(), 5.seconds)
+
+    Contexts.local.let(ServerAdmissionControl.NonRetryable, ()) {
+      val aInitial = a.get
+      assert(Await.result(svc(1), 5.seconds) == 1)
+      assert(a.get == aInitial)
+    }
   }
 }

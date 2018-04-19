@@ -2,7 +2,9 @@ package com.twitter.finagle.filter
 
 import com.twitter.finagle._
 import com.twitter.finagle.Filter.TypeAgnostic
+import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.param.ProtocolLibrary
+import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
 import com.twitter.util.{Future, Promise, Time}
 import java.util.concurrent.{ConcurrentHashMap, ConcurrentMap}
 import scala.collection.JavaConverters._
@@ -25,6 +27,12 @@ import scala.collection.JavaConverters._
  * can also be registered, allowing for more fine-grained behavior.
  */
 private[twitter] object ServerAdmissionControl {
+
+  /**
+   * Signal that the request cannot be retried by the client and thus the server
+   * should attempt to handle it, if at all possible.
+   */
+  private[finagle] val NonRetryable: Contexts.local.Key[Unit] = Contexts.local.newKey[Unit]()
 
   /**
    * Passed to filter factories to allow behavioral adjustment on a per-service
@@ -51,6 +59,16 @@ private[twitter] object ServerAdmissionControl {
     implicit val param = new Stack.Param[Param] {
       lazy val default = Param(true)
     }
+  }
+
+  /**
+   * A collection of filters that overrides those in the global registry
+   *
+   * This is primarily useful for testing.
+   */
+  private[finagle] case class Filters(overrides: Option[Seq[ServerParams => TypeAgnostic]])
+  object Filters {
+    implicit val param: Stack.Param[Filters] = Stack.Param(Filters(None))
   }
 
   /**
@@ -93,12 +111,44 @@ private[twitter] object ServerAdmissionControl {
   def unregisterAll(): Unit = acs.clear()
 
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] = {
-    new Stack.Module2[Param, ProtocolLibrary, ServiceFactory[Req, Rep]] {
+    new Stack.Module4[Param, ProtocolLibrary, param.Stats, Filters, ServiceFactory[Req, Rep]] {
       val role = ServerAdmissionControl.role
       val description = "Proactively reject requests when the server operates beyond its capacity"
+
+      // The `serverACFilter` parameter represents the server-side AC filters which may
+      // potentially nack any request. They have no knowledge of whether a request can
+      // be retried or not, so if we have knowledge that a request cannot be retried, by
+      // the client we don't pass it through the `serverACFilter`.
+      private[this] final class NonretryableFilter(
+        serverACFilter: Filter[Req, Rep, Req, Rep],
+        protocolName: String,
+        statsReceiver: StatsReceiver
+      ) extends SimpleFilter[Req, Rep] {
+
+        private[this] val unRetryableCount = statsReceiver.counter(
+          Verbosity.Debug, "admission_control", protocolName, "nonretryable")
+
+        def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
+          // If the marker context element exists we presume the client can't retry the request
+          if (Contexts.local.contains(NonRetryable)) {
+            unRetryableCount.incr()
+            // We clear the value since at this time there is little value for the service to know
+            // whether the request is non-retryable. This could change in the future, especially if
+            // people want this information for their own application level nacking logic.
+            Contexts.local.letClear(NonRetryable) {
+              service(request)
+            }
+          } else {
+            serverACFilter(request, service)
+          }
+        }
+      }
+
       def make(
         _enabled: Param,
         protoLib: ProtocolLibrary,
+        stats: param.Stats,
+        overrides: Filters,
         next: ServiceFactory[Req, Rep]
       ): ServiceFactory[Req, Rep] = {
         val Param(enabled) = _enabled
@@ -106,17 +156,25 @@ private[twitter] object ServerAdmissionControl {
         val onServerClose = new Promise[Unit]
         val conf = ServerParams(protoString, onServerClose)
 
-        if (!enabled || acs.isEmpty) {
+        val filters = overrides.overrides match {
+          case Some(filters) => filters
+          case None => acs.values.asScala
+        }
+
+        if (!enabled || filters.isEmpty) {
           next
         } else {
           // assume the order of filters doesn't matter
           val typeAgnosticFilters =
-            acs.values.asScala.foldLeft(Filter.TypeAgnostic.Identity) {
+            filters.foldLeft(Filter.TypeAgnostic.Identity) {
               case (sum, mkFilter) =>
                 mkFilter(conf).andThen(sum)
             }
 
-          new ServiceFactoryProxy[Req, Rep](typeAgnosticFilters.toFilter.andThen(next)) {
+          // Add our predicate filter so we don't reject requests that can't be retried
+          val filter = new NonretryableFilter(typeAgnosticFilters.toFilter, protoLib.name, stats.statsReceiver)
+
+          new ServiceFactoryProxy[Req, Rep](filter.andThen(next)) {
             override def close(deadline: Time): Future[Unit] = {
               onServerClose.setDone()
               self.close(deadline)
@@ -127,3 +185,4 @@ private[twitter] object ServerAdmissionControl {
     }
   }
 }
+

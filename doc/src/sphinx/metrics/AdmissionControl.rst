@@ -22,5 +22,9 @@ These metrics reflect the behavior of the
 **dropped_requests**
   A counter of the number of requests probabilistically dropped.
 
+**nonretryable**
+  A counter of the number of requests that were deemed non-retryable and thus
+  were not passed through the set of nack admission filters.
+
 **ema_value**
   A gauge of the EMA value. Between 0 and 100, inclusive.
