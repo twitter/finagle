@@ -10,7 +10,6 @@ import com.twitter.finagle.{
 import com.twitter.finagle.client.{LatencyCompensation, Transporter}
 import com.twitter.finagle.netty4.Netty4Transporter.Backpressure
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.stats.Verbosity
 import com.twitter.finagle.transport.Transport
 import com.twitter.logging.Level
 import com.twitter.util.{Future, Promise, Stopwatch}
@@ -27,7 +26,6 @@ import io.netty.channel.socket.nio.NioSocketChannel
 import java.lang.{Boolean => JBool, Integer => JInt}
 import java.net.SocketAddress
 import java.nio.channels.UnresolvedAddressException
-import java.util.concurrent.atomic.AtomicInteger
 import scala.util.control.NonFatal
 
 /**
@@ -48,13 +46,6 @@ private final class ConnectionBuilder(
   private[this] val connectLatencyStat = statsReceiver.stat("connect_latency_ms")
   private[this] val failedConnectLatencyStat = statsReceiver.stat("failed_connect_latency_ms")
   private[this] val cancelledConnects = statsReceiver.counter("cancelled_connects")
-
-  // Some temporary debug level metrics to help troubleshoot why we see extremely latent connects.
-  private[this] val cancelAttempts = statsReceiver.counter(Verbosity.Debug, "attempted_cancel_connects")
-  private[this] val pendingConnects = new AtomicInteger(0)
-  private[this] val pendingConnectsGuage = statsReceiver.addGauge(Verbosity.Debug, "pending_connects") {
-    pendingConnects.get
-  }
 
   /**
    * Creates a new connection then, from within the channels event loop, passes it to the
@@ -101,7 +92,6 @@ private final class ConnectionBuilder(
     val elapsed = Stopwatch.start()
     val nettyConnectF = bootstrap.connect(addr)
 
-    pendingConnects.incrementAndGet()
     val transportP = new Promise[T]
     // Try to cancel the connect attempt if the transporter's promise is interrupted.
     // If the future is already complete, the channel will be closed by the interrupt
@@ -109,7 +99,6 @@ private final class ConnectionBuilder(
     // installed below.
     transportP.setInterruptHandler {
       case _ =>
-        cancelAttempts.incr()
         // We just want best effort: we don't want to potentially interrupt a thread.
         nettyConnectF.cancel(false /* mayInterruptIfRunning */ )
     }
@@ -162,7 +151,6 @@ private final class ConnectionBuilder(
           // connections.
           transportP.setInterruptHandler {
             case t =>
-              cancelAttempts.incr()
               ch.close()
               result.raise(t)
           }
@@ -170,6 +158,6 @@ private final class ConnectionBuilder(
       }
     })
 
-    transportP.ensure { pendingConnects.decrementAndGet() }
+    transportP
   }
 }
