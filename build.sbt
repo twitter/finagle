@@ -571,7 +571,6 @@ lazy val finagleMux = Project(
     util("stats"))
 ).dependsOn(
   finagleCore % "compile->compile;test->test",
-  finagleExp,
   finagleNetty4,
   finagleToggle)
 

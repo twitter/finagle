@@ -2,8 +2,14 @@ package com.twitter.finagle.mux.lease.exp
 
 import com.twitter.conversions.storage._
 import com.twitter.conversions.time._
-import com.twitter.finagle.exp.LatencyHistogram
-import com.twitter.util.{Duration, Time, StorageUnit, Stopwatch}
+import com.twitter.finagle.util.{DefaultTimer, WindowedPercentileHistogram}
+import com.twitter.util.{Duration, Stopwatch, StorageUnit, Time, Timer}
+
+private object RequestSnooper {
+
+  private val NumBuckets = 5
+
+}
 
 /**
  * RequestSnooper maintains a histogram of handle time unaffected by garbage
@@ -17,15 +23,15 @@ private[lease] class RequestSnooper(
   counter: ByteCounter,
   percentile: Int,
   lr: LogsReceiver = NullLogsReceiver,
-  now: () => Long = Stopwatch.systemMillis
+  now: () => Long = Stopwatch.systemMillis,
+  timer: Timer = DefaultTimer
 ) {
+  import RequestSnooper._
 
-  private[this] val histo = new LatencyHistogram(
-    clipDuration = 10.seconds.inMilliseconds,
-    error = 0,
-    history = 1.minute.inMilliseconds,
-    slices = LatencyHistogram.DefaultSlices,
-    now
+  private[this] val histogram = new WindowedPercentileHistogram(
+    NumBuckets,
+    1.minute / NumBuckets,
+    timer
   )
 
   /**
@@ -38,7 +44,7 @@ private[lease] class RequestSnooper(
     // this has gross memory implications . . . on the other hand, this doesn't really work
     // without that.
     if (counter.lastGc < (Time.now - d))
-      histo.add(d.inMilliseconds)
+      histogram.add(d.inMilliseconds.toInt)
   }
 
   /**
@@ -47,9 +53,10 @@ private[lease] class RequestSnooper(
    * bytes that will pass in the time it takes to handle a request.
    */
   def handleBytes(): StorageUnit = {
-    lr.record("discountHistoMs", histo.quantile(percentile).toString)
+    val p = histogram.percentile(percentile)
+    lr.record("discountHistoMs", p.toString)
     lr.record("discountRate", counter.rate().toString)
 
-    (histo.quantile(percentile) * counter.rate()).toLong.bytes
+    (p * counter.rate()).toLong.bytes
   }
 }
