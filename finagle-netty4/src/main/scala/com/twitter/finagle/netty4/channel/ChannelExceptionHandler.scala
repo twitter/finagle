@@ -12,6 +12,17 @@ import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
 import io.netty.handler.timeout.{WriteTimeoutException, ReadTimeoutException}
 import java.util.logging.Level
 
+private[netty4] object ChannelExceptionHandler {
+  // When an Http/2 stream receives an RST with messages in the write queue, an exception
+  // is generated. Since this is likely when a partially filled response is in flight, we avoid
+  // logging.
+  // The type is not matched here to avoid a dependency on netty-http2
+  object Http2StreamClosedBeforeWriteException {
+    def unapply(t: Throwable): Boolean =
+      "Stream closed before write could take place".equals(t.getMessage)
+  }
+}
+
 /**
  * 1. Wraps Netty exceptions with Finagle ones.
  * 2. Reports known exceptions into a given `statsReceiver`.
@@ -20,6 +31,7 @@ import java.util.logging.Level
 @Sharable
 private[netty4] class ChannelExceptionHandler(stats: StatsReceiver, log: java.util.logging.Logger)
     extends ChannelInboundHandlerAdapter {
+  import ChannelExceptionHandler._
 
   private[this] val readTimeoutCounter = stats.counter("read_timeout")
   private[this] val writeTimeoutCounter = stats.counter("write_timeout")
@@ -31,6 +43,8 @@ private[netty4] class ChannelExceptionHandler(stats: StatsReceiver, log: java.ut
       Level.FINEST
     case e: java.io.IOException
         if IOExceptionStrings.FinestIOExceptionMessages.contains(e.getMessage) =>
+      Level.FINEST
+    case Http2StreamClosedBeforeWriteException() =>
       Level.FINEST
     case _ => Level.WARNING
   }
