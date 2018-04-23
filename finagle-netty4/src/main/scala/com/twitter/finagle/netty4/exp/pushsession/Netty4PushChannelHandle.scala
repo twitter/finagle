@@ -1,8 +1,8 @@
 package com.twitter.finagle.netty4.exp.pushsession
 
-import com.twitter.finagle.{ChannelException, Status}
+import com.twitter.finagle.{ChannelClosedException, ChannelException, Status, UnknownChannelException}
 import com.twitter.finagle.exp.pushsession.{PushChannelHandle, PushSession}
-import com.twitter.finagle.stats.FinagleStatsReceiver
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Logger
 import com.twitter.util.{NonFatal => _, _}
 import io.netty.buffer.ByteBuf
@@ -34,7 +34,7 @@ import scala.util.control.NonFatal
  * @see [[com.twitter.finagle.netty4.ssl.client.Netty4ClientSslChannelInitializer]] for the tools
  *     used to initialize TLS and delay the connect promise until negotiation is complete.
  */
-private final class Netty4PushChannelHandle[In, Out] private (ch: Channel)
+private final class Netty4PushChannelHandle[In, Out] private (ch: Channel, statsReceiver: StatsReceiver)
     extends PushChannelHandle[In, Out] {
 
   import Netty4PushChannelHandle._
@@ -50,9 +50,9 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel)
       catch {
         case NonFatal(t) =>
           log.error(t, "Unhandled exception detected in push-session serial executor. Shutting down.")
-          FinagleStatsReceiver.counter("push", "unhandled_exceptions", t.getClass.getName).incr()
+          statsReceiver.counter("push", "unhandled_exceptions", t.getClass.getName).incr()
           // This is happening in the channels event loop so we're thread safe.
-          handleFail()
+          handleFail(Throw(t))
       }
     }
   }
@@ -187,9 +187,9 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel)
           val result =
             if (future.isSuccess) Return.Unit
             else {
-              val exc = ChannelException(future.cause, remoteAddress)
-              handleFail()
-              Throw(exc)
+              val exc = toCause(future.cause)
+              handleFail(exc)
+              exc
             }
 
           continuation(result)
@@ -198,40 +198,49 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel)
   }
 
   // Bounce the call to `handleFail` through the executor to ensure that it happens 'later'
-  private[this] def scheduleFailure(): Unit = {
+  private[this] def scheduleFailure(cause: Try[Unit]): Unit = {
     safeExecutor.safeExecute(new SafeRunnable {
-      def tryRun(): Unit = handleFail()
+      def tryRun(): Unit = handleFail(cause)
     })
   }
 
 
   // Must be called from within the serialExecutor
-  private def handleFail(): Unit = {
+  private def handleFail(cause: Try[Unit]): Unit = {
     if (!failed) {
       failed = true
       // We trampoline the satisfaction of the close promise to make sure
       // users don't get inadvertent re-entrance due to the continuations
       // attached to the promise potentially being run right away.
-      safeExecutor.safeExecute(new SafeRunnable { def tryRun(): Unit = closePromise.setDone() })
+      safeExecutor.safeExecute(new SafeRunnable { def tryRun(): Unit = closePromise.updateIfEmpty(cause) })
 
       close()
     }
   }
 
   private[this] def handleChannelExceptionCaught(exc: Throwable): Unit = {
-    // Exceptions should have been logged by the `ChannelExceptionHandler` and
-    // there is little to no value in propagating them forward from here, so
-    // we just drop them.
-
     // We make sure these events are trampolined through the serial executor
     // to guard against re-entrance.
-    scheduleFailure()
+    scheduleFailure(toCause(exc))
   }
+
+  private[this] def toCause(ex: Throwable): Try[Unit] =
+    ChannelException(ex, remoteAddress) match {
+      case _: ChannelClosedException =>
+        Return.Unit // These are considered 'normal'
+      case unknown: UnknownChannelException =>
+        // We got an exception we're not prepared for, so lets log and count it.
+        log.info(ex, "Unknown exception closed channel.")
+        statsReceiver.counter("push", "unknown_exceptions", ex.getClass.getName).incr()
+        Throw(unknown)
+      case other =>
+        Throw(other)
+    }
 
   private[this] def handleChannelInactive(): Unit = {
     // We make sure these events are trampolined through the serial executor
     // to guard against re-entrance.
-    scheduleFailure()
+    scheduleFailure(Return.Unit)
   }
 
   private[this] final class SessionDriver(@volatile private var session: PushSession[In, Out])
@@ -297,7 +306,7 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel)
         log.error(exc, channelStateMsg)
 
         drainQueue()
-        handleFail()
+        handleFail(Throw(exc))
       }
     }
 
@@ -359,7 +368,8 @@ private object Netty4PushChannelHandle {
   def install[In, Out, T <: PushSession[In, Out]](
     ch: Channel,
     protocolInit: ChannelPipeline => Unit,
-    sessionFactory: PushChannelHandle[In, Out] => Future[T]
+    sessionFactory: PushChannelHandle[In, Out] => Future[T],
+    statsReceiver: StatsReceiver
   ): (Netty4PushChannelHandle[In, Out], Future[T]) = {
     if (!ch.eventLoop.inEventLoop) {
       throw new IllegalStateException(
@@ -371,7 +381,7 @@ private object Netty4PushChannelHandle {
     val p = Promise[T]
     p.setInterruptHandler { case _ => ch.close() }
 
-    val channelHandle = new Netty4PushChannelHandle[In, Out](ch)
+    val channelHandle = new Netty4PushChannelHandle[In, Out](ch, statsReceiver)
     val delayStage = new channelHandle.DelayedByteBufHandler
     ch.pipeline.addLast(DelayedByteBufHandler, delayStage)
 
@@ -392,9 +402,9 @@ private object Netty4PushChannelHandle {
             case Return(session) =>
               delayStage.installSessionDriver(session)
 
-            case Throw(_) =>
+            case t @ Throw(_) =>
               // make sure we clean up associated resources
-              channelHandle.handleFail()
+              channelHandle.handleFail(t.cast[Unit])
           }
 
           p.updateIfEmpty(result)

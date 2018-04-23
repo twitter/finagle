@@ -10,15 +10,9 @@ import com.twitter.finagle.netty4.codec.BufCodec
 import com.twitter.finagle.netty4.decoder.{DecoderHandler, TestFramer}
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
-import com.twitter.util.{Await, Duration, Future, Promise, Return, Time}
+import com.twitter.util._
 import io.netty.buffer.{ByteBuf, Unpooled}
-import io.netty.channel.{
-  ChannelHandlerContext,
-  ChannelInboundHandlerAdapter,
-  ChannelOutboundHandlerAdapter,
-  ChannelPipeline,
-  ChannelPromise
-}
+import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter, ChannelOutboundHandlerAdapter, ChannelPipeline, ChannelPromise}
 import io.netty.handler.codec.MessageToMessageCodec
 import java.net.{InetAddress, InetSocketAddress, ServerSocket, Socket, SocketAddress}
 import java.nio.channels.UnresolvedAddressException
@@ -28,9 +22,10 @@ import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 
 class Netty4PushTransporterTest extends FunSuite with Eventually with IntegrationPatience {
-  private val timeout = 15.seconds
   private val frameSize = 4
   private val data = "hello world"
+
+  private def await[T](result: Awaitable[T]): T = Await.result(result, 15.seconds)
 
   // converts to string frames of 4 bytes/chars each (we're using ASCII chars for tests which are 1 byte each)
   private def withStringFramer(pipeline: ChannelPipeline): Unit = {
@@ -100,7 +95,7 @@ class Netty4PushTransporterTest extends FunSuite with Eventually with Integratio
 
       acceptedSocket = server.accept()
 
-      clientsideTransport = Await.result(f, timeout)
+      clientsideTransport = await(f)
     }
 
     def closeCtx(): Unit = {
@@ -117,7 +112,7 @@ class Netty4PushTransporterTest extends FunSuite with Eventually with Integratio
 
     // connection failure is propagated to the Transporter promise
     val exc = intercept[Failure] {
-      Await.result(p, Duration.fromSeconds(15))
+      await(p)
     }
 
     exc match {
@@ -140,10 +135,10 @@ class Netty4PushTransporterTest extends FunSuite with Eventually with Integratio
 
       // one server message produces two client transport messages
       assert(
-        Await.result(clientsideTransport.readFuture(), timeout) == data.take(frameSize).mkString
+        await(clientsideTransport.readFuture()) == data.take(frameSize).mkString
       )
       assert(
-        Await.result(clientsideTransport.readFuture(), timeout) == data
+        await(clientsideTransport.readFuture()) == data
           .drop(frameSize)
           .take(frameSize)
           .mkString
@@ -157,7 +152,7 @@ class Netty4PushTransporterTest extends FunSuite with Eventually with Integratio
     new Ctx(Netty4PushTransporter.raw[String, String](withStringFramer, _, _)) {
       connect()
 
-      Await.ready(clientsideTransport.write(data), timeout)
+      await(clientsideTransport.write(data))
 
       val bytes = new Array[Byte](data.length)
       val is = acceptedSocket.getInputStream
@@ -179,7 +174,7 @@ class Netty4PushTransporterTest extends FunSuite with Eventually with Integratio
       )
     val transFuture = transporter(h => Future.value(new TestSession[ByteBuf, ByteBuf](h)))
     val acceptedSocket = server.accept()
-    val clientsideTransport = Await.result(transFuture, timeout)
+    val clientsideTransport = await(transFuture)
 
     val requestBytes = "hello world request".getBytes("UTF-8")
     val in = Unpooled.wrappedBuffer(requestBytes)
@@ -189,7 +184,7 @@ class Netty4PushTransporterTest extends FunSuite with Eventually with Integratio
     acceptedSocket.getOutputStream.write(responseBytes)
     acceptedSocket.getOutputStream.flush()
 
-    val responseBB = Await.result(clientsideTransport.readFuture(), timeout)
+    val responseBB = await(clientsideTransport.readFuture())
     assert(responseBB.refCnt == 1)
   }
 
@@ -205,13 +200,16 @@ class Netty4PushTransporterTest extends FunSuite with Eventually with Integratio
     ) {
       connect()
 
-      Await.result(clientsideTransport.onClose, timeout)
+      intercept[ReadTimedOutException] {
+        await(clientsideTransport.onClose)
+      }
 
       closeCtx()
     }
   }
 
   test("Failure before session resolution") {
+    val ex = new Exception("sadface")
     object FailingHandler extends ChannelInboundHandlerAdapter {
       @volatile
       private[this] var ctx: ChannelHandlerContext = null
@@ -219,7 +217,7 @@ class Netty4PushTransporterTest extends FunSuite with Eventually with Integratio
       val latch = Promise[Unit]
 
       latch.onSuccess { _ =>
-        if (ctx != null) ctx.fireExceptionCaught(new Exception("sadface"))
+        if (ctx != null) ctx.fireExceptionCaught(ex)
       }
 
       override def handlerAdded(ctx: ChannelHandlerContext): Unit = {
@@ -252,7 +250,10 @@ class Netty4PushTransporterTest extends FunSuite with Eventually with Integratio
 
       connect()
 
-      Await.result(clientsideTransport.onClose, timeout)
+      val observed = intercept[UnknownChannelException] {
+        await(clientsideTransport.onClose)
+      }
+      assert(observed.getCause == ex)
 
       closeCtx()
     }
@@ -285,7 +286,9 @@ class Netty4PushTransporterTest extends FunSuite with Eventually with Integratio
       // We don't await on this since we discarded it's associated ChannelPromise in writeSwallower
       clientsideTransport.write("msg")
 
-      Await.result(clientsideTransport.onClose, timeout)
+      intercept[WriteTimedOutException] {
+        await(clientsideTransport.onClose)
+      }
 
       closeCtx()
     }
@@ -308,7 +311,7 @@ class Netty4PushTransporterTest extends FunSuite with Eventually with Integratio
 
       val transporter =
         new Netty4PushTransporter[Unit, Unit](init, _ => (), fakeAddress, Stack.Params.empty)
-      assert(Await.result(transporter(_ => ???).liftToTry, timeout).throwable == e)
+      assert(await(transporter(_ => ???).liftToTry).throwable == e)
     }
 
     shouldNotBeWrapped(new UnresolvedAddressException())

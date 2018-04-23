@@ -1,6 +1,6 @@
 package com.twitter.finagle.netty4.exp.pushsession
 
-import com.twitter.finagle.Stack
+import com.twitter.finagle.{Stack, param}
 import com.twitter.finagle.netty4.channel.RawNetty4ClientChannelInitializer
 import com.twitter.finagle.netty4.ConnectionBuilder
 import com.twitter.finagle.exp.pushsession.{PushChannelHandle, PushSession, PushTransporter}
@@ -56,8 +56,10 @@ private[finagle] class Netty4PushTransporter[In, Out](
     channel: Channel,
     protocolInit: ChannelPipeline => Unit,
     sessionBuilder: PushChannelHandle[In, Out] => Future[T]): Future[T] = {
+    val statsReceiver = params[param.Stats].statsReceiver
     val (_, sessionF) =
-      Netty4PushChannelHandle.install[In, Out, T](channel, protocolInit, sessionBuilder)
+      Netty4PushChannelHandle.install[In, Out, T](
+        channel, protocolInit, sessionBuilder, statsReceiver)
     sessionF
   }
 

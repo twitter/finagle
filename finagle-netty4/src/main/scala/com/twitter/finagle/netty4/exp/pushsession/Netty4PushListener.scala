@@ -1,7 +1,7 @@
 package com.twitter.finagle.netty4.exp.pushsession
 
 import com.twitter.finagle.netty4.ListeningServerBuilder
-import com.twitter.finagle.{ListeningServer, Stack}
+import com.twitter.finagle.{ListeningServer, Stack, param}
 import com.twitter.finagle.exp.pushsession.{PushChannelHandle, PushListener, PushSession}
 import com.twitter.util.Future
 import io.netty.channel.{Channel, ChannelHandler, ChannelInitializer, ChannelPipeline}
@@ -30,7 +30,9 @@ private[finagle] class Netty4PushListener[In, Out](
    * Vector for hooking into the underlying Netty4 Channel.
    */
   protected def initializePushChannelHandle(ch: Channel, sessionFactory: SessionFactory): Unit = {
-    Netty4PushChannelHandle.install[In, Out, PushSession[In, Out]](ch, pipelineInit, sessionFactory)
+    val statsReceiver = params[param.Stats].statsReceiver
+    Netty4PushChannelHandle.install[In, Out, PushSession[In, Out]](
+      ch, pipelineInit, sessionFactory, statsReceiver)
   }
 
   private[this] class ChannelHandleInitializer(sessionFactory: SessionFactory)

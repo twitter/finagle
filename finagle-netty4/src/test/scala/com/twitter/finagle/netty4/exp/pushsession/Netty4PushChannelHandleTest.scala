@@ -1,8 +1,9 @@
 package com.twitter.finagle.netty4.exp.pushsession
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{ChannelException, Status}
+import com.twitter.finagle.{ChannelException, Status, UnknownChannelException}
 import com.twitter.finagle.exp.pushsession.{PushChannelHandle, PushSession}
+import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.util.{Await, Awaitable, Future, Promise, Return, Throw, Time, Try}
 import io.netty.buffer.ByteBufAllocator
 import io.netty.channel.{
@@ -20,12 +21,16 @@ import scala.collection.JavaConverters._
 
 class Netty4PushChannelHandleTest extends FunSuite {
 
-  class NoopSession(handle: PushChannelHandle[Any, Any]) extends PushSession[Any, Any](handle) {
+  private class NoopSession(handle: PushChannelHandle[Any, Any]) extends PushSession[Any, Any](handle) {
     val received: mutable.Queue[Any] = new mutable.Queue[Any]()
     def receive(message: Any): Unit = received += message
     def status: Status = handle.status
     def close(deadline: Time): Future[Unit] = handle.close(deadline)
   }
+
+  private case class TestException() extends Exception("boom")
+
+  private def ex: Exception = new TestException()
 
   def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
 
@@ -42,7 +47,8 @@ class Netty4PushChannelHandleTest extends FunSuite {
   ): (EmbeddedChannel, Netty4PushChannelHandle[In, Out]) = {
     val ch = new EmbeddedChannel()
     transportHandlers.foreach { case (name, handler) => ch.pipeline.addLast(name, handler) }
-    val (handle, _) = Netty4PushChannelHandle.install[In, Out, PushSession[In, Out]](ch, _ => (), f)
+    val (handle, _) = Netty4PushChannelHandle.install[In, Out, PushSession[In, Out]](
+      ch, _ => (), f, NullStatsReceiver)
     ch -> handle
   }
 
@@ -86,7 +92,7 @@ class Netty4PushChannelHandleTest extends FunSuite {
     await(handle.onClose)
   }
 
-  test("Satisfies onClose when the channel throws an ExceptionT") {
+  test("Satisfies onClose when the channel throws an Exception") {
     def testException(installDriver: Boolean): Unit = {
       val (ch, handle) = noopChannel()
 
@@ -99,10 +105,14 @@ class Netty4PushChannelHandleTest extends FunSuite {
         assert(ch.pipeline.get(Netty4PushChannelHandle.DelayedByteBufHandler) != null)
       }
 
-      ch.pipeline().fireExceptionCaught(new Exception("boom!!!"))
+      ch.pipeline().fireExceptionCaught(ex)
       ch.runPendingTasks()
 
-      await(handle.onClose)
+      val observed = intercept[UnknownChannelException] {
+        await(handle.onClose)
+      }
+
+      assert(ex == observed.getCause)
       assert(handle.status == Status.Closed)
       assert(!ch.isOpen)
     }
@@ -201,8 +211,6 @@ class Netty4PushChannelHandleTest extends FunSuite {
     assert(sendResult == Return.Unit)
   }
 
-  private val ex = new Exception("boom")
-
   private def failWritePipeline(
     allowToPass: Int
   ): (EmbeddedChannel, Netty4PushChannelHandle[Any, Any]) = {
@@ -268,7 +276,11 @@ class Netty4PushChannelHandleTest extends FunSuite {
       ch.runPendingTasks()
       assert(!ch.isOpen)
       assert(handle.status == Status.Closed)
-      await(handle.onClose)
+      val observed = intercept[UnknownChannelException] {
+        await(handle.onClose)
+      }
+
+      assert(observed.getCause == ex)
     }
   }
 
@@ -292,7 +304,7 @@ class Netty4PushChannelHandleTest extends FunSuite {
 
     val protocolInit: ChannelPipeline => Unit = _.addLast(ObserverName, OutboundObserver)
     val (handle, _) =
-      Netty4PushChannelHandle.install[Any, Any, NoopSession](ch, protocolInit, _ => p)
+      Netty4PushChannelHandle.install[Any, Any, NoopSession](ch, protocolInit, _ => p, NullStatsReceiver)
 
     assert(ch.pipeline.get(Netty4PushChannelHandle.SessionDriver) == null)
     assert(ch.pipeline.get(Netty4PushChannelHandle.DelayedByteBufHandler) != null)
