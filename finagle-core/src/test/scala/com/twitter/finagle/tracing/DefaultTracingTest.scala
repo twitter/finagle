@@ -28,15 +28,8 @@ class DefaultTracingTest extends FunSuite {
    *          and interfere with [[com.twitter.finagle.util.ExitGuardTest]]
    */
   def testCoreTraces(f: (Tracer, Tracer) => (Service[String, String], Closable)) {
-    val combinedTracer = new BufferingTracer
-    class MultiTracer extends BufferingTracer {
-      override def record(rec: Record) {
-        super.record(rec)
-        combinedTracer.record(rec)
-      }
-    }
-    val serverTracer = new MultiTracer
-    val clientTracer = new MultiTracer
+    val serverTracer = new BufferingTracer
+    val clientTracer = new BufferingTracer
 
     val (svc, finalizer) = f(serverTracer, clientTracer)
     Await.result(svc("foo"), 1.second)
@@ -45,14 +38,20 @@ class DefaultTracingTest extends FunSuite {
     assert(clientTracer.map(_.traceId).toSet.size == 1)
 
     assertAnnotationsInOrder(
-      combinedTracer.toSeq,
+      clientTracer.toSeq,
       Seq(
         Annotation.ServiceName("theClient"),
         Annotation.ClientSend(),
+        Annotation.ClientRecv()
+      )
+    )
+
+    assertAnnotationsInOrder(
+      serverTracer.toSeq,
+      Seq(
         Annotation.ServiceName("theServer"),
         Annotation.ServerRecv(),
-        Annotation.ServerSend(),
-        Annotation.ClientRecv()
+        Annotation.ServerSend()
       )
     )
 
