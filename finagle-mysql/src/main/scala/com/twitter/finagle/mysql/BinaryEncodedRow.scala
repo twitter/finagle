@@ -24,7 +24,7 @@ private class BinaryEncodedRow(
    * is set, the value is null.
    */
   val nullBitmap: BigInt = {
-    val len = ((fields.size + 7 + 2) / 8).toInt
+    val len = (fields.size + 7 + 2) / 8
     val bytesAsBigEndian = reader.take(len).reverse
     BigInt(bytesAsBigEndian)
   }
@@ -42,10 +42,12 @@ private class BinaryEncodedRow(
    * @see [[https://mariadb.com/kb/en/mariadb/resultset-row/]] for details
    *     about the binary row format.
    */
-  lazy val values: IndexedSeq[Value] =
-    for ((field, idx) <- fields.zipWithIndex) yield {
-      if (isNull(idx)) NullValue
-      else
+  lazy val values: IndexedSeq[Value] = {
+    val vs = new Array[Value](fields.length)
+    var idx = 0
+    while (idx < fields.length) {
+      vs(idx) = if (isNull(idx)) NullValue else {
+        val field = fields(idx)
         field.fieldType match {
           case Type.Tiny if isSigned(field) => ByteValue(reader.readByte())
           case Type.Tiny => ShortValue(reader.readUnsignedByte())
@@ -73,7 +75,11 @@ private class BinaryEncodedRow(
             throw new UnsupportedOperationException("LongBlob is not supported!")
           case typ => RawValue(typ, field.charset, isBinary = true, reader.readLengthCodedBytes())
         }
+      }
+      idx += 1
     }
+    vs
+  }
 
   def indexOf(name: String): Option[Int] = indexMap.get(name)
 
