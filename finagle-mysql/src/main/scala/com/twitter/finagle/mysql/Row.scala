@@ -74,6 +74,17 @@ trait Row {
   def indexOf(columnName: String): Option[Int]
 
   /**
+   * Retrieves the 0-indexed index of the column with the given name.
+   * @param columnName the case sensitive name of the column.
+   * @return -1 if the column does not exist, otherwise the index of the column.
+   */
+  protected def indexOfOrSentinel(columnName: String): Int =
+    indexOf(columnName) match {
+      case Some(index) => index
+      case None => -1
+    }
+
+  /**
    * Retrieves the [[Value]] in the column with the given name.
    * @param columnName the case sensitive name of the column.
    * @return Some(Value) if the column exists with the given name. Otherwise, None.
@@ -109,11 +120,13 @@ trait Row {
    * @throws UnsupportedTypeException if the MySQL column is not that type.
    */
   def booleanOrFalse(columnName: String): Boolean =
-    apply(columnName) match {
-      case Some(ByteValue(v)) => v != 0
-      case Some(NullValue) => false
-      case Some(v) => unsupportedValue(columnName, v)
-      case None => columnNotFound(columnName)
+    indexOfOrSentinel(columnName) match {
+      case -1 => columnNotFound(columnName)
+      case n => values(n) match {
+        case ByteValue(v) => v != 0
+        case NullValue => false
+        case v => unsupportedValue(columnName, v)
+      }
     }
 
   /**
@@ -130,13 +143,15 @@ trait Row {
    * @throws UnsupportedTypeException if the MySQL column is not that type.
    */
   def getBoolean(columnName: String): Option[java.lang.Boolean] =
-    apply(columnName) match {
-      case Some(ByteValue(v)) =>
-        if (v != 0) Row.SomeTrue
-        else Row.SomeFalse
-      case Some(NullValue) => None
-      case Some(v) => unsupportedValue(columnName, v)
-      case None => columnNotFound(columnName)
+    indexOfOrSentinel(columnName) match {
+      case -1 => columnNotFound(columnName)
+      case n => values(n) match {
+        case ByteValue(v) =>
+          if (v != 0) Row.SomeTrue
+          else Row.SomeFalse
+        case NullValue => None
+        case v => unsupportedValue(columnName, v)
+      }
     }
 
   /**
@@ -151,11 +166,13 @@ trait Row {
    * @throws UnsupportedTypeException if the MySQL column is not that type.
    */
   def byteOrZero(columnName: String): Byte =
-    apply(columnName) match {
-      case Some(ByteValue(v)) => v
-      case Some(NullValue) => 0
-      case Some(v) => unsupportedValue(columnName, v)
-      case None => columnNotFound(columnName)
+    indexOfOrSentinel(columnName) match {
+      case -1 => columnNotFound(columnName)
+      case n => values(n) match {
+        case ByteValue(v) => v
+        case NullValue => 0
+        case v => unsupportedValue(columnName, v)
+      }
     }
 
   /**
@@ -170,11 +187,13 @@ trait Row {
    * @throws UnsupportedTypeException if the MySQL column is not that type.
    */
   def getByte(columnName: String): Option[java.lang.Byte] =
-    apply(columnName) match {
-      case Some(ByteValue(v)) => Some(Byte.box(v))
-      case Some(NullValue) => None
-      case Some(v) => unsupportedValue(columnName, v)
-      case None => columnNotFound(columnName)
+    indexOfOrSentinel(columnName) match {
+      case -1 => columnNotFound(columnName)
+      case n => values(n) match {
+        case ByteValue(v) => Some(Byte.box(v))
+        case NullValue => None
+        case v => unsupportedValue(columnName, v)
+      }
     }
 
   /**
@@ -190,12 +209,14 @@ trait Row {
    * @throws UnsupportedTypeException if the MySQL column is not a supported type.
    */
   def shortOrZero(columnName: String): Short =
-    apply(columnName) match {
-      case Some(ShortValue(v)) => v
-      case Some(ByteValue(v)) => v.toShort
-      case Some(NullValue) => 0
-      case Some(v) => unsupportedValue(columnName, v)
-      case None => columnNotFound(columnName)
+    indexOfOrSentinel(columnName) match {
+      case -1 => columnNotFound(columnName)
+      case n => values(n) match {
+        case ShortValue(v) => v
+        case ByteValue(v) => v.toShort
+        case NullValue => 0
+        case v => unsupportedValue(columnName, v)
+      }
     }
 
   /**
@@ -211,12 +232,14 @@ trait Row {
    * @throws UnsupportedTypeException if the MySQL column is not a supported type.
    */
   def getShort(columnName: String): Option[java.lang.Short] =
-    apply(columnName) match {
-      case Some(ShortValue(v)) => Some(Short.box(v))
-      case Some(ByteValue(v)) => Some(Short.box(v.toShort))
-      case Some(NullValue) => None
-      case Some(v) => unsupportedValue(columnName, v)
-      case None => columnNotFound(columnName)
+    indexOfOrSentinel(columnName) match {
+      case -1 => columnNotFound(columnName)
+      case n => values(n) match {
+        case ShortValue(v) => Some(Short.box(v))
+        case ByteValue(v) => Some(Short.box(v.toShort))
+        case NullValue => None
+        case v => unsupportedValue(columnName, v)
+      }
     }
 
   /**
@@ -232,13 +255,15 @@ trait Row {
    * @throws UnsupportedTypeException if the MySQL column is not a supported type.
    */
   def intOrZero(columnName: String): Int =
-    apply(columnName) match {
-      case Some(IntValue(v)) => v
-      case Some(ShortValue(v)) => v.toInt
-      case Some(ByteValue(v)) => v.toInt
-      case Some(NullValue) => 0
-      case Some(v) => unsupportedValue(columnName, v)
-      case None => columnNotFound(columnName)
+    indexOfOrSentinel(columnName) match {
+      case -1 => columnNotFound(columnName)
+      case n => values(n) match {
+        case IntValue(v) => v
+        case ShortValue(v) => v.toInt
+        case ByteValue(v) => v.toInt
+        case NullValue => 0
+        case v => unsupportedValue(columnName, v)
+      }
     }
 
   /**
@@ -254,13 +279,15 @@ trait Row {
    * @throws UnsupportedTypeException if the MySQL column is not a supported type.
    */
   def getInteger(columnName: String): Option[java.lang.Integer] =
-    apply(columnName) match {
-      case Some(IntValue(v)) => Some(Int.box(v))
-      case Some(ShortValue(v)) => Some(Int.box(v.toInt))
-      case Some(ByteValue(v)) => Some(Int.box(v.toInt))
-      case Some(NullValue) => None
-      case Some(v) => unsupportedValue(columnName, v)
-      case None => columnNotFound(columnName)
+    indexOfOrSentinel(columnName) match {
+      case -1 => columnNotFound(columnName)
+      case n => values(n) match {
+        case IntValue(v) => Some(Int.box(v))
+        case ShortValue(v) => Some(Int.box(v.toInt))
+        case ByteValue(v) => Some(Int.box(v.toInt))
+        case NullValue => None
+        case v => unsupportedValue(columnName, v)
+      }
     }
 
   /**
@@ -276,14 +303,16 @@ trait Row {
    * @throws UnsupportedTypeException if the MySQL column is not a supported type.
    */
   def longOrZero(columnName: String): Long =
-    apply(columnName) match {
-      case Some(LongValue(v)) => v
-      case Some(IntValue(v)) => v.toLong
-      case Some(ShortValue(v)) => v.toLong
-      case Some(ByteValue(v)) => v.toLong
-      case Some(NullValue) => 0L
-      case Some(v) => unsupportedValue(columnName, v)
-      case None => columnNotFound(columnName)
+    indexOfOrSentinel(columnName) match {
+      case -1 => columnNotFound(columnName)
+      case n => values(n) match {
+        case LongValue(v) => v
+        case IntValue(v) => v.toLong
+        case ShortValue(v) => v.toLong
+        case ByteValue(v) => v.toLong
+        case NullValue => 0L
+        case v => unsupportedValue(columnName, v)
+      }
     }
 
   /**
@@ -299,14 +328,16 @@ trait Row {
    * @throws UnsupportedTypeException if the MySQL column is not a supported type.
    */
   def getLong(columnName: String): Option[java.lang.Long] =
-    apply(columnName) match {
-      case Some(LongValue(v)) => Some(Long.box(v))
-      case Some(IntValue(v)) => Some(Long.box(v.toLong))
-      case Some(ShortValue(v)) => Some(Long.box(v.toLong))
-      case Some(ByteValue(v)) => Some(Long.box(v.toLong))
-      case Some(NullValue) => None
-      case Some(v) => unsupportedValue(columnName, v)
-      case None => columnNotFound(columnName)
+    indexOfOrSentinel(columnName) match {
+      case -1 => columnNotFound(columnName)
+      case n => values(n) match {
+        case LongValue(v) => Some(Long.box(v))
+        case IntValue(v) => Some(Long.box(v.toLong))
+        case ShortValue(v) => Some(Long.box(v.toLong))
+        case ByteValue(v) => Some(Long.box(v.toLong))
+        case NullValue => None
+        case v => unsupportedValue(columnName, v)
+      }
     }
 
   /**
@@ -321,11 +352,13 @@ trait Row {
    * @throws UnsupportedTypeException if the MySQL column is not a supported type.
    */
   def floatOrZero(columnName: String): Float =
-    apply(columnName) match {
-      case Some(FloatValue(v)) => v
-      case Some(NullValue) => 0.0f
-      case Some(v) => unsupportedValue(columnName, v)
-      case None => columnNotFound(columnName)
+    indexOfOrSentinel(columnName) match {
+      case -1 => columnNotFound(columnName)
+      case n => values(n) match {
+        case FloatValue(v) => v
+        case NullValue => 0.0f
+        case v => unsupportedValue(columnName, v)
+      }
     }
 
   /**
@@ -340,11 +373,13 @@ trait Row {
    * @throws UnsupportedTypeException if the MySQL column is not a supported type.
    */
   def getFloat(columnName: String): Option[java.lang.Float] =
-    apply(columnName) match {
-      case Some(FloatValue(v)) => Some(Float.box(v))
-      case Some(NullValue) => None
-      case Some(v) => unsupportedValue(columnName, v)
-      case None => columnNotFound(columnName)
+    indexOfOrSentinel(columnName) match {
+      case -1 => columnNotFound(columnName)
+      case n => values(n) match {
+        case FloatValue(v) => Some(Float.box(v))
+        case NullValue => None
+        case v => unsupportedValue(columnName, v)
+      }
     }
 
   /**
@@ -360,12 +395,14 @@ trait Row {
    * @throws UnsupportedTypeException if the MySQL column is not a supported type.
    */
   def doubleOrZero(columnName: String): Double =
-    apply(columnName) match {
-      case Some(DoubleValue(v)) => v
-      case Some(FloatValue(v)) => v.toDouble
-      case Some(NullValue) => 0.0
-      case Some(v) => unsupportedValue(columnName, v)
-      case None => columnNotFound(columnName)
+    indexOfOrSentinel(columnName) match {
+      case -1 => columnNotFound(columnName)
+      case n => values(n) match {
+        case DoubleValue(v) => v
+        case FloatValue(v) => v.toDouble
+        case NullValue => 0.0
+        case v => unsupportedValue(columnName, v)
+      }
     }
 
   /**
@@ -381,12 +418,14 @@ trait Row {
    * @throws UnsupportedTypeException if the MySQL column is not a supported type.
    */
   def getDouble(columnName: String): Option[java.lang.Double] =
-    apply(columnName) match {
-      case Some(DoubleValue(v)) => Some(Double.box(v))
-      case Some(FloatValue(v)) => Some(Double.box(v.toDouble))
-      case Some(NullValue) => None
-      case Some(v) => unsupportedValue(columnName, v)
-      case None => columnNotFound(columnName)
+    indexOfOrSentinel(columnName) match {
+      case -1 => columnNotFound(columnName)
+      case n => values(n) match {
+        case DoubleValue(v) => Some(Double.box(v))
+        case FloatValue(v) => Some(Double.box(v.toDouble))
+        case NullValue => None
+        case v => unsupportedValue(columnName, v)
+      }
     }
 
   /**
@@ -402,14 +441,17 @@ trait Row {
    * @throws ColumnNotFoundException if the column is not found in the row.
    * @throws UnsupportedTypeException if the MySQL column is not a supported type.
    */
-  def stringOrNull(columnName: String): String =
-    apply(columnName) match {
-      case Some(StringValue(v)) => v
-      case Some(EmptyValue) => Row.EmptyString
-      case Some(NullValue) => null
-      case Some(v) => unsupportedValue(columnName, v)
-      case None => columnNotFound(columnName)
+  def stringOrNull(columnName: String): String = {
+    indexOfOrSentinel(columnName) match {
+      case -1 => columnNotFound(columnName)
+      case n => values(n) match {
+        case StringValue(v) => v
+        case EmptyValue => Row.EmptyString
+        case NullValue => null
+        case v => unsupportedValue(columnName, v)
+      }
     }
+  }
 
   /**
    * Returns `Some` of a `String` for the given column name,
@@ -440,15 +482,17 @@ trait Row {
    * @throws UnsupportedTypeException if the MySQL column is not a supported type.
    */
   def bigIntOrNull(columnName: String): BigInt =
-    apply(columnName) match {
-      case Some(BigIntValue(v)) => v
-      case Some(ByteValue(v)) => BigInt(v)
-      case Some(ShortValue(v)) => BigInt(v)
-      case Some(IntValue(v)) => BigInt(v)
-      case Some(LongValue(v)) => BigInt(v)
-      case Some(NullValue) => null
-      case Some(v) => unsupportedValue(columnName, v)
-      case None => columnNotFound(columnName)
+    indexOfOrSentinel(columnName) match {
+      case -1 => columnNotFound(columnName)
+      case n => values(n) match {
+        case BigIntValue(v) => v
+        case ByteValue(v) => BigInt(v)
+        case ShortValue(v) => BigInt(v)
+        case IntValue(v) => BigInt(v)
+        case LongValue(v) => BigInt(v)
+        case NullValue => null
+        case v => unsupportedValue(columnName, v)
+      }
     }
 
   /**
@@ -479,13 +523,15 @@ trait Row {
    * @throws UnsupportedTypeException if the MySQL column is not a supported type.
    */
   def bigDecimalOrNull(columnName: String): BigDecimal =
-    apply(columnName) match {
-      case Some(BigDecimalValue(v)) => v
-      case Some(FloatValue(v)) => BigDecimal.decimal(v)
-      case Some(DoubleValue(v)) => BigDecimal.decimal(v)
-      case Some(NullValue) => null
-      case Some(v) => unsupportedValue(columnName, v)
-      case None => columnNotFound(columnName)
+    indexOfOrSentinel(columnName) match {
+      case -1 => columnNotFound(columnName)
+      case n => values(n) match {
+        case BigDecimalValue(v) => v
+        case FloatValue(v) => BigDecimal.decimal(v)
+        case DoubleValue(v) => BigDecimal.decimal(v)
+        case NullValue => null
+        case v => unsupportedValue(columnName, v)
+      }
     }
 
   /**
@@ -516,12 +562,14 @@ trait Row {
    * @throws UnsupportedTypeException if the MySQL column is not that type.
    */
   def bytesOrNull(columnName: String): Array[Byte] =
-    apply(columnName) match {
-      case Some(RawValue(typ, _, _, bytes)) if Row.isBinary(typ) => bytes
-      case Some(EmptyValue) => Array.emptyByteArray
-      case Some(NullValue) => null
-      case Some(v) => unsupportedValue(columnName, v)
-      case None => columnNotFound(columnName)
+    indexOfOrSentinel(columnName) match {
+      case -1 => columnNotFound(columnName)
+      case n => values(n) match {
+        case RawValue(typ, _, _, bytes) if Row.isBinary(typ) => bytes
+        case EmptyValue => Array.emptyByteArray
+        case NullValue => null
+        case v => unsupportedValue(columnName, v)
+      }
     }
 
   /**
@@ -552,15 +600,17 @@ trait Row {
    * @throws UnsupportedTypeException if the MySQL column is not that type.
    */
   def timestampOrNull(columnName: String, timeZone: TimeZone): Timestamp =
-    apply(columnName) match {
-      case Some(value) if TimestampValue.isTimestamp(value) =>
-        TimestampValue.fromValue(value, timeZone) match {
-          case Some(timestamp) => timestamp
-          case None => unsupportedValue(columnName, value)
-        }
-      case Some(NullValue) => null
-      case Some(v) => unsupportedValue(columnName, v)
-      case None => columnNotFound(columnName)
+    indexOfOrSentinel(columnName) match {
+      case -1 => columnNotFound(columnName)
+      case n => values(n) match {
+        case value if TimestampValue.isTimestamp(value) =>
+          TimestampValue.fromValue(value, timeZone) match {
+            case Some(timestamp) => timestamp
+            case None => unsupportedValue(columnName, value)
+          }
+        case NullValue => null
+        case v => unsupportedValue(columnName, v)
+      }
     }
 
   /**
@@ -590,11 +640,13 @@ trait Row {
    * @throws UnsupportedTypeException if the MySQL column is not a supported type.
    */
   def javaSqlDateOrNull(columnName: String): java.sql.Date =
-    apply(columnName) match {
-      case Some(DateValue(v)) => v
-      case Some(NullValue) => null
-      case Some(v) => unsupportedValue(columnName, v)
-      case None => columnNotFound(columnName)
+    indexOfOrSentinel(columnName) match {
+      case -1 => columnNotFound(columnName)
+      case n => values(n) match {
+        case DateValue(v) => v
+        case NullValue => null
+        case v => unsupportedValue(columnName, v)
+      }
     }
 
   /**

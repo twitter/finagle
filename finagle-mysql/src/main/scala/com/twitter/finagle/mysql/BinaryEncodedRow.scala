@@ -83,6 +83,9 @@ private class BinaryEncodedRow(
 
   def indexOf(name: String): Option[Int] = indexMap.get(name)
 
+  override protected def indexOfOrSentinel(columnName: String): Int =
+    indexMap.getOrElse(columnName, -1)
+
   @inline
   private[this] def isSigned(field: Field): Boolean =
     ignoreUnsigned || field.isSigned
