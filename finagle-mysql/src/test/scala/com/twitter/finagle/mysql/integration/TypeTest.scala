@@ -62,11 +62,11 @@ class NumericTypeTest extends FunSuite with IntegrationClient {
         `bigint`, `bigint_unsigned`,
         `float`, `double`, `decimal`, `bit`) VALUES (
         true,
-        127, 255,
-        32767, 63535,
-        8388607, 16777215,
-        2147483647, 4294967295,
-        9223372036854775807, 18446744073709551615,
+        -128, 255,
+        -32768, 63535,
+        -8388608, 16777215,
+        -2147483648, 4294967295,
+        -9223372036854775808, 18446744073709551615,
         1.61, 1.618, 1.61803398875, 1);"""))
 
     val signedTextEncodedQuery =
@@ -103,65 +103,65 @@ class NumericTypeTest extends FunSuite with IntegrationClient {
 
     test("extract %s from %s".format("tinyint", rowType)) {
       row("tinyint") match {
-        case Some(ByteValue(b)) => assert(b == 127)
+        case Some(ByteValue(b)) => assert(b == -128)
         case v => fail("expected ByteValue but got %s".format(v))
       }
-      assert(127 == row.byteOrZero("tinyint"))
-      assert(row.getByte("tinyint").contains(127))
-      assert(BigInt(127) == row.bigIntOrNull("tinyint"))
-      assert(row.getBigInt("tinyint").contains(BigInt(127)))
+      assert(-128 == row.byteOrZero("tinyint"))
+      assert(row.getByte("tinyint").contains(-128))
+      assert(BigInt(-128) == row.bigIntOrNull("tinyint"))
+      assert(row.getBigInt("tinyint").contains(BigInt(-128)))
     }
 
     test("extract %s from %s".format("smallint", rowType)) {
       row("smallint") match {
-        case Some(ShortValue(s)) => assert(s == 32767)
+        case Some(ShortValue(s)) => assert(s == -32768)
         case v => fail("expected ShortValue but got %s".format(v))
       }
-      assert(32767 == row.shortOrZero("smallint"))
-      assert(row.getShort("smallint").contains(32767))
-      assert(32767 == row.intOrZero("smallint"))
-      assert(row.getInteger("smallint").contains(32767))
-      assert(32767L == row.longOrZero("smallint"))
-      assert(row.getLong("smallint").contains(32767L))
-      assert(BigInt(32767) == row.bigIntOrNull("smallint"))
-      assert(row.getBigInt("smallint").contains(BigInt(32767)))
+      assert(-32768 == row.shortOrZero("smallint"))
+      assert(row.getShort("smallint").contains(-32768))
+      assert(-32768 == row.intOrZero("smallint"))
+      assert(row.getInteger("smallint").contains(-32768))
+      assert(-32768L == row.longOrZero("smallint"))
+      assert(row.getLong("smallint").contains(-32768L))
+      assert(BigInt(-32768) == row.bigIntOrNull("smallint"))
+      assert(row.getBigInt("smallint").contains(BigInt(-32768)))
     }
 
     test("extract %s from %s".format("mediumint", rowType)) {
       row("mediumint") match {
-        case Some(IntValue(i)) => assert(i == 8388607)
+        case Some(IntValue(i)) => assert(i == -8388608)
         case v => fail("expected IntValue but got %s".format(v))
       }
-      assert(8388607 == row.intOrZero("mediumint"))
-      assert(row.getInteger("mediumint").contains(8388607))
-      assert(8388607L == row.longOrZero("mediumint"))
-      assert(row.getLong("mediumint").contains(8388607L))
-      assert(BigInt(8388607) == row.bigIntOrNull("mediumint"))
-      assert(row.getBigInt("mediumint").contains(BigInt(8388607)))
+      assert(-8388608 == row.intOrZero("mediumint"))
+      assert(row.getInteger("mediumint").contains(-8388608))
+      assert(-8388608L == row.longOrZero("mediumint"))
+      assert(row.getLong("mediumint").contains(-8388608L))
+      assert(BigInt(-8388608) == row.bigIntOrNull("mediumint"))
+      assert(row.getBigInt("mediumint").contains(BigInt(-8388608)))
     }
 
     test("extract %s from %s".format("int", rowType)) {
       row("int") match {
-        case Some(IntValue(i)) => assert(i == 2147483647)
+        case Some(IntValue(i)) => assert(i == -2147483648)
         case v => fail("expected IntValue but got %s".format(v))
       }
-      assert(2147483647 == row.intOrZero("int"))
-      assert(row.getInteger("int").contains(2147483647))
-      assert(2147483647L == row.longOrZero("int"))
-      assert(row.getLong("int").contains(2147483647L))
-      assert(BigInt(2147483647) == row.bigIntOrNull("int"))
-      assert(row.getBigInt("int").contains(BigInt(2147483647)))
+      assert(-2147483648 == row.intOrZero("int"))
+      assert(row.getInteger("int").contains(-2147483648))
+      assert(-2147483648L == row.longOrZero("int"))
+      assert(row.getLong("int").contains(-2147483648L))
+      assert(BigInt(-2147483648) == row.bigIntOrNull("int"))
+      assert(row.getBigInt("int").contains(BigInt(-2147483648)))
     }
 
     test("extract %s from %s".format("bigint", rowType)) {
       row("bigint") match {
-        case Some(LongValue(l)) => assert(l == 9223372036854775807L)
+        case Some(LongValue(l)) => assert(l == -9223372036854775808L)
         case v => fail("expected LongValue but got %s".format(v))
       }
-      assert(9223372036854775807L == row.longOrZero("bigint"))
-      assert(row.getLong("bigint").contains(9223372036854775807L))
-      assert(BigInt(9223372036854775807L) == row.bigIntOrNull("bigint"))
-      assert(row.getBigInt("bigint").contains(BigInt(9223372036854775807L)))
+      assert(-9223372036854775808L == row.longOrZero("bigint"))
+      assert(row.getLong("bigint").contains(-9223372036854775808L))
+      assert(BigInt(-9223372036854775808L) == row.bigIntOrNull("bigint"))
+      assert(row.getBigInt("bigint").contains(BigInt(-9223372036854775808L)))
     }
 
     test("extract %s from %s".format("float", rowType)) {

@@ -219,7 +219,7 @@ case class Field(
   decimals: Byte
 ) extends Result {
   def id: String = if (name.isEmpty) origName else name
-  override val toString: String = "Field(%s)".format(id)
+  override def toString: String = s"Field($id)"
 
   def isUnsigned: Boolean = (flags & FieldAttributes.UnsignedBitMask) > 0
   def isSigned: Boolean = !isUnsigned
