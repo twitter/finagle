@@ -66,12 +66,14 @@ Serving the IDL:
 Construct a client:
 
 .. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi
+   :language: scala
 
-A ServiceIface is a collection of Services, one for each Thrift method. Call the log method:
+A `ServicePerEndpoint` is a collection of `Services`, one for each Thrift method. Call the `log` method:
 
 .. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi-call
+   :language: scala
 
-Thrift services can be combined with :api:`Filters <com/twitter/finagle/Filter$>`.
+Thrift `Services` can be combined with :api:`Filters <com/twitter/finagle/Filter$>`.
 
 .. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi-filters
    :language: scala
@@ -81,12 +83,12 @@ Here's an example of a retry policy that retries on Thrift exceptions:
 .. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi-retries
    :language: scala
 
-Another way to construct Thrift clients is using the method interface:
+Another way to construct Thrift clients is using the `MethodPerEndpoint` interface:
 
 .. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi-methodiface
    :language: scala
 
-To convert the Service interface to the method interface use :api:`Thrift.newMethodIface <com/twitter/finagle/Thrift$>`:
+To convert the Service interface to the method interface use :api:`Thrift.Client.methodPerEndpoint <com/twitter/finagle/Thrift$>`:
 
 .. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi-method-adapter
    :language: scala

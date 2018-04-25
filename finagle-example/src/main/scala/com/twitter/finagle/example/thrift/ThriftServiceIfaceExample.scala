@@ -11,7 +11,7 @@ object ThriftServiceIfaceExample {
   def main(args: Array[String]) {
     // See the docs at https://twitter.github.io/finagle/guide/Protocols.html#using-finagle-thrift
     //#thriftserverapi
-    val server = Thrift.server.serveIface(
+    val server: ListeningServer = Thrift.server.serveIface(
       "localhost:1234",
       new LoggerService[Future] {
         def log(message: String, logLevel: Int): Future[String] = {
@@ -38,12 +38,15 @@ object ThriftServiceIfaceExample {
     import LoggerService._
 
     //#thriftclientapi
-    val clientServiceIface: LoggerService.ServiceIface =
-      Thrift.client.newServiceIface[LoggerService.ServiceIface]("localhost:1234", "thrift_client")
+    val clientServicePerEndpoint: LoggerService.ServicePerEndpoint =
+      Thrift.client.servicePerEndpoint[LoggerService.ServicePerEndpoint](
+        "localhost:1234",
+        "thrift_client"
+      )
     //#thriftclientapi
 
     //#thriftclientapi-call
-    val result: Future[Log.SuccessType] = clientServiceIface.log(Log.Args("hello", 1))
+    val result: Future[Log.SuccessType] = clientServicePerEndpoint.log(Log.Args("hello", 1))
     //#thriftclientapi-call
 
     Await.result(result)
@@ -64,37 +67,38 @@ object ThriftServiceIfaceExample {
       val timer = DefaultTimer
       new TimeoutFilter[Req, Rep](duration, exc, timer)
     }
-    val filteredLog = timeoutFilter(2.seconds)
+    val filteredLog: Service[Log.Args, Log.SuccessType] = timeoutFilter(2.seconds)
       .andThen(uppercaseFilter)
-      .andThen(clientServiceIface.log)
+      .andThen(clientServicePerEndpoint.log)
 
     filteredLog(Log.Args("hello", 2))
     // [2] Server received: 'HELLO'
     //#thriftclientapi-filters
 
     //#thriftclientapi-retries
-    val retryPolicy = RetryPolicy.tries[Try[GetLogSize.Result]](3, {
-      case Throw(ex: ReadException) => true
-    })
+    val retryPolicy: RetryPolicy[Try[GetLogSize.Result]] =
+      RetryPolicy.tries[Try[GetLogSize.Result]](3, {
+        case Throw(ex: ReadException) => true
+      })
 
-    val retriedGetLogSize =
+    val retriedGetLogSize: Service[GetLogSize.Args, GetLogSize.SuccessType] =
       new RetryExceptionsFilter(retryPolicy, DefaultTimer)
-        .andThen(clientServiceIface.getLogSize)
+        .andThen(clientServicePerEndpoint.getLogSize)
 
     retriedGetLogSize(GetLogSize.Args())
     //#thriftclientapi-retries
 
     //#thriftclientapi-methodiface
-    val client: LoggerService.FutureIface =
-      Thrift.client.newIface[LoggerService.FutureIface]("localhost:1234")
-    client.log("message", 4) onSuccess { response =>
+    val client: LoggerService.MethodPerEndpoint =
+      Thrift.client.build[LoggerService.MethodPerEndpoint]("localhost:1234")
+    client.log("message", 4).onSuccess { response =>
       println("Client received response: " + response)
     }
     //#thriftclientapi-methodiface
 
     //#thriftclientapi-method-adapter
     val filteredMethodIface: LoggerService[Future] =
-      Thrift.Client.newMethodIface(clientServiceIface.copy(log = filteredLog))
+      Thrift.Client.methodPerEndpoint(clientServicePerEndpoint.withLog(filteredLog))
     Await.result(filteredMethodIface.log("ping", 3).map(println))
     //#thriftclientapi-method-adapter
   }

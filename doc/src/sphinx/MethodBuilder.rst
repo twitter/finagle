@@ -445,9 +445,9 @@ latency distribution. Given the IDL:
   }
 
 We create ``MethodBuilder``\s which work on Scrooge's generated
-Service-per-method, ``ServiceIface``.
+Service-per-method, ``ServicePerEndpoint``.
 
-.. note:: Scrooge does not yet generate ``ServiceIface`` for Java users,
+.. note:: Scrooge does not yet generate ``ServicePerEndpoint`` for Java users,
           so this is limited to Scala.
 
 .. code-block:: scala
@@ -469,7 +469,7 @@ Service-per-method, ``ServiceIface``.
       .withTimeoutPerRequest(20.milliseconds)
       .withTimeoutTotal(50.milliseconds)
       .withRetryForClassifier(ThriftMuxResponseClassifier.ThriftExceptionsAsFailures)
-      .newServiceIface[GraphService.ServiceIface](methodName = "followers")
+      .servicePerEndpoint[GraphService.ServicePerEndpoint](methodName = "followers")
       .followers
 
   // `Service` for "follow"
@@ -481,11 +481,12 @@ Service-per-method, ``ServiceIface``.
         case ReqRep(_, Throw(NotFoundException(code))) if code == 5 =>
           ResponseClass.RetryableFailure
       }
-      .newServiceIface[GraphService.ServiceIface](methodName = "follow")
+      .servicePerEndpoint[GraphService.ServicePerEndpoint](methodName = "follow")
       .follow
 
-If you are working with code that prefers Scrooge's ``FutureIface`` you can
-convert the ``ServiceIface`` by wrapping it with a ``MethodIface``.
+If you are working with code that prefers Scrooge's ``MethodPerEndpoint``
+or ``FutureIface`` you can convert from a ``ServicePerEndpoint`` by wrapping it
+with a ``MethodPerEndpoint``.
 
 .. code-block:: scala
 
@@ -495,25 +496,25 @@ convert the ``ServiceIface`` by wrapping it with a ``MethodIface``.
   import com.twitter.util.Future
 
   val stackClient = ThriftMux.client.withLabel("thriftmux_example")
-  val serviceIface: GraphService.ServiceIface =
+  val servicePerEndpoint: GraphService.ServicePerEndpoint =
     stackClient
       .methodBuilder("inet!localhost:8989")
       .withTimeoutPerRequest(20.milliseconds)
-      .newServiceIface[GraphService.ServiceIface](methodName = "followers")
+      .servicePerEndpoint[GraphService.ServicePerEndpoint](methodName = "followers")
 
-  // `FutureIface` is a collection of methods that return `Futures`.
-  // It will use the configuration from the `ServiceIface` which allows you to decorate
-  // the endpoints with `Filters`.
+  // `MethodPerEndpoint` is a collection of methods that return `Futures`.
+  // It will use the configuration from the `ServicePerEndpoint` which allows
+  // you to decorate the endpoints with `Filters`.
   val loggingFilter: Filter[GraphService.Follow.Args, GraphService.Follow.SuccessType] = ???
-  val filtered: GraphService.ServiceIface =
-    serviceIface.copy(follow = loggingFilter.andThen(serviceIface.follow))
-  val futureIface: GraphService.FutureIface =
-    new GraphService.MethodIface(filtered)
+  val filtered: GraphService.ServicePerEndpoint =
+    servicePerEndpoint.withFollow(loggingFilter.andThen(servicePerEndpoint.follow))
+  val methodPerEndpoint: GraphService.MethodPerEndpoint =
+    new GraphService.MethodPerEndpoint(filtered)
 
   val result: Future[Int] =
-    futureIface.follow(follower = 568825492L, followee = 4196983835L)
+    methodPerEndpoint.follow(follower = 568825492L, followee = 4196983835L)
 
-Further details on the differences between ``ServiceIface`` and ``FutureIface``
+Further details on the differences between ``ServicePerEndpoint`` and ``MethodPerEndpoint``
 and how to work with them are in
 `Scrooge's Finagle docs <https://twitter.github.io/scrooge/Finagle.html>`_.
 
