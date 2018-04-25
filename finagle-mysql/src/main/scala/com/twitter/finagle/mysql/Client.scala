@@ -62,6 +62,11 @@ trait Client extends Closable {
    * '''Note:''' this is a lower-level API. For SELECT queries, prefer using
    * [[select]] or [[read]], and use [[modify]] for DML (INSERT/UPDATE/DELETE)
    * and DDL.
+   *
+   * @return a [[Result]] `Future`. A successful SELECT query will satisfy the
+   *         `Future` with a [[ResultSet]] while DML and DDL will be an [[OK]].
+   *         If there is a server error the `Future` will be failed with a [[ServerError]]
+   *         exception, '''not''' an [[Error]] from the [[Result]] ADT.
    */
   def query(sql: String): Future[Result]
 

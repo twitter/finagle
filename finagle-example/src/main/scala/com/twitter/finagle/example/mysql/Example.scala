@@ -59,7 +59,7 @@ object Example extends App {
     val client = Mysql.client
       .withCredentials(username(), password())
       .withDatabase(dbname())
-      .newRichClient("%s:%d".format(host().getHostName, host().getPort))
+      .newRichClient(s"${host().getHostName}:${host().getPort}")
 
     val resultFuture = for {
       _ <- createTable(client)
@@ -75,7 +75,7 @@ object Example extends App {
         println(e)
       }
       .ensure {
-        client.query("DROP TABLE IF EXISTS `finagle-mysql-example`") ensure {
+        client.query("DROP TABLE IF EXISTS `finagle-mysql-example`").ensure {
           client.close()
         }
       }
@@ -83,16 +83,16 @@ object Example extends App {
     Await.ready(resultFuture)
   }
 
-  def createTable(client: Client): Future[Result] = {
-    client.query(SwimmingRecord.createTableSQL)
+  def createTable(client: Client): Future[OK] = {
+    client.modify(SwimmingRecord.createTableSQL)
   }
 
-  def insertValues(client: Client): Future[Seq[Result]] = {
+  def insertValues(client: Client): Future[Seq[OK]] = {
     val insertSQL =
       "INSERT INTO `finagle-mysql-example` (`event`, `time`, `name`, `nationality`, `date`) VALUES (?,?,?,?,?)"
     val ps = client.prepare(insertSQL)
-    val insertResults = SwimmingRecord.records map { r =>
-      ps(r.event, r.time, r.name, r.nationality, r.date)
+    val insertResults = SwimmingRecord.records.map { r =>
+      ps.modify(r.event, r.time, r.name, r.nationality, r.date)
     }
     Future.collect(insertResults)
   }
