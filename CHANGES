@@ -62,6 +62,9 @@ Runtime Behavior Changes
   * finagle-http2: Clients and servers no longer attempt a cleartext upgrade if the
     first request of the HTTP/1.1 session has a body. ``PHAB_ID=D153986``
 
+  * finagle-thriftmux: The push-based client muxer is now the default muxer implementation.
+    The push-based muxer has better performance and a simpler architecture. ``PHAB_ID=D158134``
+
 Bug Fixes
 ~~~~~~~~~
 

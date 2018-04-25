@@ -1,7 +1,7 @@
 package com.twitter.finagle.thriftmux.ssl
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{ChannelClosedException, Mux, SslVerificationFailedException}
+import com.twitter.finagle.{Mux, SslException, SslVerificationFailedException}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.toggle.flag
 import com.twitter.finagle.thriftmux.ssl.ThriftSmuxSslTestComponents._
@@ -152,7 +152,7 @@ class ThriftSmuxSslTest extends FunSuite with Eventually {
       assertGaugeIsZero(serverStats, serverTlsConnections)
       assertGaugeIsZero(clientStats, clientTlsConnections)
 
-      intercept[ChannelClosedException] {
+      intercept[SslException] {
         Await.result(client.query("hello"), 2.seconds)
       }
 

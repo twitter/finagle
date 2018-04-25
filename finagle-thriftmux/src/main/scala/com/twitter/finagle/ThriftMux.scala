@@ -122,11 +122,6 @@ object ThriftMux
 
   object Client extends ThriftClient {
 
-    private[finagle] val UsePushMuxClientToggleName =
-      "com.twitter.finagle.thriftmux.UsePushMuxClient"
-    private[this] val usePushMuxToggle = Toggles(UsePushMuxClientToggleName)
-    private[this] def UsePushMuxClient: Boolean = usePushMuxToggle(ServerInfo().id.hashCode)
-
     def apply(): Client =
       new Client()
         .withLabel("thrift")
@@ -141,9 +136,6 @@ object ThriftMux
       Mux.client
         .copy(stack = BaseClientStack)
         .configured(ProtocolLibrary("thriftmux"))
-
-    private def defaultMuxer: StackClient[mux.Request, mux.Response] =
-      if (UsePushMuxClient) pushMuxer else standardMuxer
   }
 
   /**
@@ -153,7 +145,7 @@ object ThriftMux
    * @see [[https://twitter.github.io/finagle/guide/Protocols.html#thrift Thrift]] documentation
    * @see [[https://twitter.github.io/finagle/guide/Protocols.html#mux Mux]] documentation
    */
-  case class Client(muxer: StackClient[mux.Request, mux.Response] = Client.defaultMuxer)
+  case class Client(muxer: StackClient[mux.Request, mux.Response] = Client.pushMuxer)
     extends StackBasedClient[ThriftClientRequest, Array[Byte]]
       with Stack.Parameterized[Client]
       with Stack.Transformable[Client]
