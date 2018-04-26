@@ -54,6 +54,21 @@ object Client {
   }
 }
 
+/**
+ * A MySQL client that is not `Service`-based like [[com.twitter.finagle.Mysql.Client]] is,
+ * making it easier to use for most cases.
+ *
+ * @example Creation:
+ * {{{
+ * import com.twitter.finagle.Mysql
+ * import com.twitter.finagle.mysql.Client
+ *
+ * val client: Client = Mysql.client
+ *   .withCredentials("username", "password")
+ *   .withDatabase("database")
+ *   .newRichClient("host:port")
+ * }}}
+ */
 trait Client extends Closable {
 
   /**
@@ -73,6 +88,17 @@ trait Client extends Closable {
   /**
    * Executes the given SELECT query given by `sql`.
    *
+   * @example
+   * {{{
+   * import com.twitter.finagle.mysql.{Client, ResultSet}
+   * import com.twitter.util.Future
+   *
+   * val client: Client = ???
+   * val resultSet: Future[ResultSet] =
+   *   client.read("SELECT name FROM employee")
+   * }}}
+   *
+   * @see [[select]]
    * @see [[PreparedStatement.read]]
    */
   def read(sql: String): Future[ResultSet] =
@@ -82,6 +108,16 @@ trait Client extends Closable {
    * Executes the given DML (e.g. INSERT/UPDATE/DELETE) or DDL
    * (e.g. CREATE TABLE, DROP TABLE, COMMIT, START TRANSACTION, etc)
    * given by `sql`.
+   *
+   * @example
+   * {{{
+   * import com.twitter.finagle.mysql.{Client, OK}
+   * import com.twitter.util.Future
+   *
+   * val client: Client = ???
+   * val result: Future[OK] =
+   *   client.modify("INSERT INTO employee (name) VALUES ('Alice')")
+   * }}}
    *
    * @see [[PreparedStatement.modify]]
    */
@@ -93,6 +129,19 @@ trait Client extends Closable {
    * `f`, a function from Row => T. If no ResultSet is returned, the function
    * returns an empty Seq.
    *
+   * @example
+   * {{{
+   * import com.twitter.finagle.mysql.Client
+   * import com.twitter.util.Future
+   *
+   * val client: Client = ???
+   * val names: Future[Seq[String]] =
+   *   client.select("SELECT name FROM employee") { row =>
+   *     row.stringOrNull("name")
+   *   }
+   * }}}
+   *
+   * @see [[read]]
    * @see [[PreparedStatement.select]]
    */
   def select[T](sql: String)(f: Row => T): Future[Seq[T]]

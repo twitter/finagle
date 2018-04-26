@@ -112,7 +112,8 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
     }
 
     object MaxConcurrentPrepareStatements {
-      implicit val param = Stack.Param(MaxConcurrentPrepareStatements(20))
+      implicit val param: Stack.Param[MaxConcurrentPrepareStatements] =
+        Stack.Param(MaxConcurrentPrepareStatements(20))
     }
 
     /**
@@ -131,7 +132,7 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
      */
     case class UnsignedColumns(supported: Boolean)
     object UnsignedColumns {
-      implicit val param = Stack.Param(UnsignedColumns(false))
+      implicit val param: Stack.Param[UnsignedColumns] = Stack.Param(UnsignedColumns(false))
     }
   }
 
@@ -196,8 +197,26 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
    * of features from finagle including connection pooling and load
    * balancing.
    *
-   * Additionally, this class provides methods for constructing a rich
-   * client which exposes a rich mysql api.
+   * Additionally, this class provides methods via [[MysqlRichClient]] for constructing
+   * a client which exposes an API that has use case specific methods, for example
+   * [[mysql.Client.read]], [[mysql.Client.modify]], and [[mysql.Client.prepare]].
+   * This is an easier experience for most users.
+   *
+   * @example
+   * {{{
+   * import com.twitter.finagle.Mysql
+   * import com.twitter.finagle.mysql.Client
+   * import com.twitter.util.Future
+   *
+   * val client: Client = Mysql.client
+   *   .withCredentials("username", "password")
+   *   .withDatabase("database")
+   *   .newRichClient("host:port")
+   * val names: Future[Seq[String]] =
+   *   client.select("SELECT name FROM employee") { row =>
+   *     row.stringOrNull("name")
+   *   }
+   * }}}
    */
   case class Client(
     stack: Stack[ServiceFactory[Request, Result]] = Client.stack,
