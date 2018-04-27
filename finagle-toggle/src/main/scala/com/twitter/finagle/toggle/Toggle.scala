@@ -35,6 +35,11 @@ abstract class Toggle[-T](private[toggle] val id: String) extends PartialFunctio
         self.applyOrElse(v1, that)
     }
   }
+
+  /**
+   * Similar to `PartialFunction.apply` but has better java friendliness.
+   */
+  def isEnabled(t: T): Boolean = apply(t)
 }
 
 object Toggle {

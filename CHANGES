@@ -41,11 +41,17 @@ New Features
     `CursoredStatement.asJava()`. Through this, you can use the API with
     varargs and Java 8 lambdas. ``PHAB_ID=D158399``
 
+  * finagle-toggles: Improved Java compatiblity for `ToggleMap` and `Toggle`. ``PHAB_ID=D164489``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
   * finagle-mysql: `c.t.f.mysql.Client.ping` now returns a `Future[Unit]`
     instead of the broad `Future[Result]` ADT. ``PHAB_ID=D160215``
+
+  * finagle-toggles: Changed `ToggleMap.Mutable` from a trait to an abstract class, and
+    `ToggleMap.Proxy` no longer extends `ToggleMap`, but now has a self-type that conforms to
+    `ToggleMap` instead. ``PHAB_ID=D164489``
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~

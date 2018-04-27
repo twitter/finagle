@@ -196,7 +196,7 @@ class ToggleMapTest extends FunSuite with GeneratorDrivenPropertyChecks with Mat
     assert(NullToggleMap == ToggleMap.of())
   }
 
-  private class NumApply extends ToggleMap.Proxy {
+  private class NumApply extends ToggleMap with ToggleMap.Proxy {
     private var nApply = 0
     def numApply: Int = nApply
 
