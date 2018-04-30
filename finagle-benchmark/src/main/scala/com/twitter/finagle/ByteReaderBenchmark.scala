@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.benchmark.StdBenchAnnotations
-import com.twitter.finagle.netty4.ByteBufAsBuf
+import com.twitter.finagle.netty4.ByteBufConversion
 import com.twitter.io.{Buf, ByteReader}
 import io.netty.buffer.{ByteBuf, Unpooled}
 import org.openjdk.jmh.annotations.{BenchmarkMode, Measurement, Warmup, _}
@@ -41,14 +41,14 @@ class ByteReaderBenchmark extends StdBenchAnnotations {
   @Setup(Level.Iteration)
   def setup(): Unit = {
     if (needsReset(heapReader)) {
-      val heapByteBuf = ByteBufAsBuf(Unpooled.wrappedBuffer(bytes))
+      val heapByteBuf = ByteBufConversion.byteBufAsBuf(Unpooled.wrappedBuffer(bytes))
       heapReader = ByteReader(heapByteBuf)
     }
 
     if (needsReset(directReader) || directByteBufNeedsReset) {
       val direct = Unpooled.directBuffer(Size)
       directByteBuf = direct.writeBytes(bytes)
-      directReader = ByteReader(ByteBufAsBuf(directByteBuf))
+      directReader = ByteReader(ByteBufConversion.byteBufAsBuf(directByteBuf))
     }
   }
 

@@ -1,18 +1,15 @@
 package com.twitter.finagle.netty4.codec
 
 import com.twitter.finagle.Failure
-import com.twitter.finagle.netty4.{BufAsByteBuf, ByteBufAsBuf}
+import com.twitter.finagle.netty4.ByteBufConversion
 import com.twitter.io.Buf
 import io.netty.buffer.{ByteBuf, ByteBufUtil, EmptyByteBuf, Unpooled}
 import io.netty.channel.embedded.EmbeddedChannel
 import java.nio.ByteBuffer
-import org.junit.runner.RunWith
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.{FunSuite, OneInstancePerTest}
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
-@RunWith(classOf[JUnitRunner])
 class BufCodecTest extends FunSuite with GeneratorDrivenPropertyChecks with OneInstancePerTest {
 
   val channel = new EmbeddedChannel(BufCodec)
@@ -31,7 +28,7 @@ class BufCodecTest extends FunSuite with GeneratorDrivenPropertyChecks with OneI
       result <- Gen.oneOf(
         Buf.ByteArray.Owned(bytes, begin, end),
         Buf.ByteBuffer.Owned(ByteBuffer.wrap(bytes, begin, end - begin)),
-        ByteBufAsBuf(Unpooled.wrappedBuffer(bytes, begin, end - begin))
+        ByteBufConversion.byteBufAsBuf(Unpooled.wrappedBuffer(bytes, begin, end - begin))
       )
     } yield result
 
@@ -69,7 +66,7 @@ class BufCodecTest extends FunSuite with GeneratorDrivenPropertyChecks with OneI
   test("decode") {
     forAll(genByteBuf) { in =>
       assert(channel.writeInbound(in.retainedDuplicate()))
-      assert(ByteBufUtil.equals(in, BufAsByteBuf(channel.readInbound[Buf])))
+      assert(ByteBufUtil.equals(in, ByteBufConversion.bufAsByteBuf(channel.readInbound[Buf])))
 
       // BufCodec also makes sure to release the inbound buffer.
       assert(in.isInstanceOf[EmptyByteBuf] || in.release())
@@ -81,16 +78,9 @@ class BufCodecTest extends FunSuite with GeneratorDrivenPropertyChecks with OneI
   test("encode") {
     forAll(genBuf) { in =>
       assert(channel.writeOutbound(in))
-      assert(in == ByteBufAsBuf(channel.readOutbound[ByteBuf]()))
+      assert(in == ByteBufConversion.byteBufAsBuf(channel.readOutbound[ByteBuf]()))
     }
 
-    assert(!channel.finish())
-  }
-
-  test("bypass outbound direct ByteBufs") {
-    val bb = Unpooled.directBuffer(3).writeBytes("foo".getBytes("UTF-8"))
-    assert(channel.writeOutbound(ByteBufAsBuf(bb)))
-    assert(channel.readOutbound[ByteBuf]() eq bb)
     assert(!channel.finish())
   }
 

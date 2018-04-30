@@ -42,12 +42,3 @@ private[finagle] object CopyingFramer extends Netty4Framer {
   def bufferManager: ChannelHandler = BufCodec
   def bufferManagerName: String = "bufCodec"
 }
-
-/**
- * A mux framer which delegates ref-counting of control messages to the mux
- * implementation. Non-control messages are copied to the heap.
- */
-private[finagle] object RefCountingFramer extends Netty4Framer {
-  def bufferManager: ChannelHandler = MuxDirectBufferHandler
-  def bufferManagerName: String = "refCountingControlPlaneFramer"
-}

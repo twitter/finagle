@@ -2,7 +2,7 @@ package com.twitter.finagle.netty4.http
 
 import com.twitter.finagle.http._
 import com.twitter.finagle.http.exp.FormPostEncoder
-import com.twitter.finagle.netty4.{BufAsByteBuf, ByteBufAsBuf}
+import com.twitter.finagle.netty4.ByteBufConversion
 import com.twitter.io.{Buf, Reader}
 import io.netty.buffer.{ByteBufAllocator, PooledByteBufAllocator, UnpooledByteBufAllocator}
 import io.netty.handler.codec.http.multipart.{DefaultHttpDataFactory, HttpDataFactory, HttpPostRequestEncoder}
@@ -31,24 +31,6 @@ private[finagle] object Netty4FormPostEncoder extends FormPostEncoder {
   }
 
   def encode(config: RequestConfig, multipart: Boolean): Request = {
-    // We don't want to leak any `ByteBufAsBuf` instances out to the user because
-    // they are a disaster: if the request gets used twice we get a refcount error
-    val req = doEncode(config, multipart)
-    req.content match {
-      case buf: ByteBufAsBuf =>
-        req.content = Buf.ByteArray.coerce(buf)
-        if (!buf.underlying.release())
-          throw new IllegalStateException(
-            "Unexpected state: Found an underlying ByteBuf that had an unexpected " +
-              s"reference count: ${buf.underlying.refCnt + 1}")
-
-      case _ => ()
-    }
-
-    req
-  }
-
-  private[this] def doEncode(config: RequestConfig, multipart: Boolean): Request = {
     val dataFactory = new DefaultHttpDataFactory(/*useDisk*/ false) // we don't use disk
 
     val netty4Request = makeNetty4Request(config)
@@ -180,7 +162,7 @@ private[finagle] object Netty4FormPostEncoder extends FormPostEncoder {
       null, // charset
       content.length
     )
-    fileUpload.setContent(BufAsByteBuf(content))
+    fileUpload.setContent(ByteBufConversion.bufAsByteBuf(content))
     encoder.addBodyHttpData(fileUpload)
   }
 

@@ -3,7 +3,7 @@ package com.twitter.finagle.netty4.http
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher.wrapWriteException
 import com.twitter.finagle.http._
 import com.twitter.finagle.http.exp.{Multi, StreamTransportProxy}
-import com.twitter.finagle.netty4.{BufAsByteBuf, ByteBufAsBuf}
+import com.twitter.finagle.netty4.ByteBufConversion
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.logging.Logger
@@ -76,7 +76,7 @@ private[http] object StreamTransports {
     case chunk: NettyHttp.HttpContent if chunk.content.readableBytes == 0 =>
       Buf.Empty
     case chunk: NettyHttp.HttpContent =>
-      ByteBufAsBuf(chunk.content)
+      ByteBufConversion.byteBufAsBuf(chunk.content)
 
     case other =>
       throw new IllegalArgumentException(
@@ -84,7 +84,7 @@ private[http] object StreamTransports {
   }
 
   def chunkOfBuf(buf: Buf): NettyHttp.HttpContent =
-    new NettyHttp.DefaultHttpContent(BufAsByteBuf(buf))
+    new NettyHttp.DefaultHttpContent(ByteBufConversion.bufAsByteBuf(buf))
 
   /**
    * Drain a [[Reader]] into a [[Transport]]. The inverse of collation.

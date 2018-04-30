@@ -1,6 +1,5 @@
 package com.twitter.finagle.mux.transport
 
-import com.twitter.finagle.netty4.Bufs
 import com.twitter.finagle.tracing.{Flags, SpanId, TraceId}
 import com.twitter.finagle.{Dentry, Dtab, Failure, NameTree, Path}
 import com.twitter.io.{Buf, BufByteWriter, ByteReader}
@@ -636,10 +635,7 @@ private[finagle] object Message {
   def decode(buf: Buf): Message = {
     val br = ByteReader(buf)
     try decode(br)
-    finally {
-      br.close()
-      Bufs.releaseDirect(buf)
-    }
+    finally br.close()
   }
 
   /**

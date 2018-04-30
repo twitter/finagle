@@ -1,7 +1,7 @@
 package com.twitter.finagle.netty4.http
 
 import com.twitter.finagle.http.{Fields, HeaderMap, Request}
-import com.twitter.finagle.netty4.{BufAsByteBuf, ByteBufAsBuf}
+import com.twitter.finagle.netty4.ByteBufConversion
 import com.twitter.finagle.{http => FinagleHttp}
 import com.twitter.io.{BufReader, Reader, Writer}
 import io.netty.handler.codec.{http => NettyHttp}
@@ -54,7 +54,7 @@ private[finagle] object Bijections {
       in: NettyHttp.FullHttpRequest,
       remoteAddr: InetSocketAddress
     ): FinagleHttp.Request = {
-      val payload = ByteBufAsBuf(in.content)
+      val payload = ByteBufConversion.byteBufAsBuf(in.content)
       val result = requestToFinagleHelper(in, BufReader(payload), remoteAddr, chunked = false)
       result.content = payload
 
@@ -84,7 +84,7 @@ private[finagle] object Bijections {
     }
 
     def fullResponseToFinagle(rep: NettyHttp.FullHttpResponse): FinagleHttp.Response = {
-      val payload = ByteBufAsBuf(rep.content)
+      val payload = ByteBufConversion.byteBufAsBuf(rep.content)
 
       val resp = FinagleHttp.Response(
         versionToFinagle(rep.protocolVersion),
@@ -134,7 +134,7 @@ private[finagle] object Bijections {
       new NettyHttp.DefaultFullHttpResponse(
         versionToNetty(r.version),
         statusToNetty(r.status),
-        BufAsByteBuf(r.content),
+        ByteBufConversion.bufAsByteBuf(r.content),
         headersToNetty(r.headerMap),
         NettyHttp.EmptyHttpHeaders.INSTANCE // only chunked messages have trailing headers
       )
@@ -163,7 +163,7 @@ private[finagle] object Bijections {
           versionToNetty(r.version),
           methodToNetty(r.method),
           r.uri,
-          BufAsByteBuf(r.content),
+          ByteBufConversion.bufAsByteBuf(r.content),
           headersToNetty(r.headerMap),
           NettyHttp.EmptyHttpHeaders.INSTANCE // finagle-http doesn't support trailing headers
         )

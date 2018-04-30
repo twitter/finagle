@@ -1,7 +1,7 @@
 package com.twitter.finagle.netty4.codec
 
 import com.twitter.finagle.Failure
-import com.twitter.finagle.netty4.ByteBufAsBuf
+import com.twitter.finagle.netty4.ByteBufConversion
 import com.twitter.io.Buf
 import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel.{ChannelDuplexHandler, ChannelHandlerContext, ChannelPromise}
@@ -22,10 +22,6 @@ private[finagle] object BufCodec extends ChannelDuplexHandler {
 
   override def write(ctx: ChannelHandlerContext, msg: Any, p: ChannelPromise): Unit =
     msg match {
-      // We bypass N4 byte buffers if they're already direct.
-      case buf: ByteBufAsBuf if buf.underlying.isDirect =>
-        ctx.write(buf.underlying, p)
-
       // We bypass Java NIO byte buffers if they're already direct.
       case Buf.ByteBuffer(buf) if buf.isDirect =>
         ctx.write(Unpooled.wrappedBuffer(buf), p)
@@ -62,11 +58,11 @@ private[finagle] object BufCodec extends ChannelDuplexHandler {
   override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit =
     msg match {
       case bb: ByteBuf =>
-        val array = new Array[Byte](bb.readableBytes)
-        try bb.readBytes(array)
-        finally bb.release()
+        val result =
+          try ByteBufConversion.copyByteBufToBuf(bb)
+          finally bb.release()
 
-        ctx.fireChannelRead(new Buf.ByteArray(array, 0, array.length))
+        ctx.fireChannelRead(result)
 
       case typ =>
         ctx.fireExceptionCaught(

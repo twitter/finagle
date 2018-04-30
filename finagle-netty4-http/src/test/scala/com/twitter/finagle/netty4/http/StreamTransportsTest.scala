@@ -3,30 +3,22 @@ package com.twitter.finagle.netty4.http
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle.Status
-import com.twitter.finagle.netty4.ByteBufAsBuf
+import com.twitter.finagle.netty4.ByteBufConversion
 import com.twitter.finagle.netty4.transport.ChannelTransport
-import com.twitter.finagle.transport.{Transport, QueueTransport, TransportContext, LegacyContext}
+import com.twitter.finagle.transport.{LegacyContext, QueueTransport, Transport, TransportContext}
 import com.twitter.io.Reader.ReaderDiscarded
-import com.twitter.io.{Reader, Buf}
+import com.twitter.io.{Buf, Reader}
 import com.twitter.util._
 import io.netty.buffer.Unpooled
 import io.netty.channel.embedded.EmbeddedChannel
-import io.netty.handler.codec.http.{
-  HttpContent,
-  LastHttpContent,
-  DefaultLastHttpContent,
-  DefaultHttpContent
-}
+import io.netty.handler.codec.http.{DefaultHttpContent, DefaultLastHttpContent, HttpContent, LastHttpContent}
 import io.netty.handler.codec.{http => NettyHttp}
 import java.net.SocketAddress
 import java.nio.charset.StandardCharsets.UTF_8
 import java.security.cert.Certificate
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import scala.language.reflectiveCalls
 
-@RunWith(classOf[JUnitRunner])
 class StreamTransportsTest extends FunSuite {
   import StreamTransports._
 
@@ -113,7 +105,7 @@ class StreamTransportsTest extends FunSuite {
       Future.None
 
     case chunk: HttpContent =>
-      Future.value(Some(ByteBufAsBuf(chunk.content.duplicate)))
+      Future.value(Some(ByteBufConversion.byteBufAsBuf(chunk.content.duplicate)))
   }
 
   test("eof satisfies collated reader") {

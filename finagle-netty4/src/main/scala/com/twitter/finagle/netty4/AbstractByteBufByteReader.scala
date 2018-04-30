@@ -4,6 +4,7 @@ import com.twitter.io.{Buf, ByteReader}
 import com.twitter.io.ByteReader.UnderflowException
 import java.lang.{Double => JDouble, Float => JFloat}
 import io.netty.buffer.ByteBuf
+import io.netty.util.ByteProcessor
 import java.nio.charset.Charset
 
 /**
@@ -34,7 +35,7 @@ private[netty4] abstract class AbstractByteBufByteReader(bb: ByteBuf) extends By
     process(0, bb.readableBytes(), processor)
 
   def process(from: Int, until: Int, processor: Buf.Processor): Int =
-    ByteBufAsBuf.process(from, until, processor, bb)
+    AbstractByteBufByteReader.process(from, until, processor, bb)
 
   final def readString(numBytes: Int, charset: Charset): String = {
     checkRemaining(numBytes)
@@ -198,4 +199,44 @@ private[netty4] abstract class AbstractByteBufByteReader(bb: ByteBuf) extends By
         s"tried to read $needed byte(s) when remaining bytes was $remaining"
       )
     }
+}
+
+private object AbstractByteBufByteReader {
+  /**
+   * Process `bb` 1-byte at a time using the given
+   * [[Buf.Processor]], starting at index `from` of `bb` until
+   * index `until`. Processing will halt if the processor
+   * returns `false` or after processing the final byte.
+   *
+   * @return -1 if the processor processed all bytes or
+   *         the last processed index if the processor returns
+   *         `false`.
+   *         Will return -1 if `from` is greater than or equal to
+   *         `until` or `length` of the underlying buffer.
+   *         Will return -1 if `until` is greater than or equal to
+   *         `length` of the underlying buffer.
+   *
+   * @param from the starting index, inclusive. Must be non-negative.
+   *
+   * @param until the ending index, exclusive. Must be non-negative.
+   */
+  private def process(from: Int, until: Int, processor: Buf.Processor, bb: ByteBuf): Int = {
+    Buf.checkSliceArgs(from, until)
+
+    val length = bb.readableBytes()
+
+    // check if chunk to process is empty
+    if (until <= from || from >= length) -1
+    else {
+      val byteProcessor = new ByteProcessor {
+        def process(value: Byte): Boolean = processor(value)
+      }
+      val readerIndex = bb.readerIndex()
+      val off = readerIndex + from
+      val len = math.min(length - from, until - from)
+      val index = bb.forEachByte(off, len, byteProcessor)
+      if (index == -1) -1
+      else index - readerIndex
+    }
+  }
 }

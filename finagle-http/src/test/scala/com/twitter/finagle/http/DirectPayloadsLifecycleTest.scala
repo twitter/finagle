@@ -2,7 +2,6 @@ package com.twitter.finagle.http
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.http2.param.PriorKnowledge
-import com.twitter.finagle.netty4.ByteBufAsBuf
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.{Service, Http => FinagleHttp}
 import com.twitter.io.Buf
@@ -15,7 +14,6 @@ class DirectPayloadsLifecycleTest extends FunSuite {
   def doTest(name: String, client: FinagleHttp.Client, server: FinagleHttp.Server): Unit = {
     def assertNonDirect(b: Buf): Unit = b match {
       case Buf.ByteBuffer(byteBuffer) => assert(!byteBuffer.isDirect)
-      case ByteBufAsBuf(byteBuf) => assert(!byteBuf.isDirect)
       case _ => () // other cases are guaranteed to be backed by heap buffers
     }
 

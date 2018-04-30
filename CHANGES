@@ -46,6 +46,10 @@ New Features
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-mux: With the introduction of the push-based mux client, we've
+    removed the need for the optimized `c.t.f.Mux.Netty4RefCountingControl`
+    MuxImpl, which has been removed. ``PHAB_ID=D141010``
+
   * finagle-mysql: `c.t.f.mysql.Client.ping` now returns a `Future[Unit]`
     instead of the broad `Future[Result]` ADT. ``PHAB_ID=D160215``
 

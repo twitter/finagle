@@ -13,7 +13,7 @@ import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
 import com.twitter.finagle.netty4.ssl.server.Netty4ServerSslChannelInitializer
 import com.twitter.finagle.netty4.ssl.client.Netty4ClientSslChannelInitializer
 import com.twitter.finagle.netty4.transport.ChannelTransport
-import com.twitter.finagle.param.{Label, ProtocolLibrary, WithDefaultLoadBalancer}
+import com.twitter.finagle.param.{ProtocolLibrary, WithDefaultLoadBalancer}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
 import com.twitter.finagle.stats.{Counter, StatsReceiver}
@@ -135,33 +135,11 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       private[finagle] def tlsHeaders: Boolean = tlsHeadersToggle(ServerInfo().id.hashCode)
 
       /**
-       * A [[MuxImpl]] that uses netty4 as the underlying I/O multiplexer and
-       * ref-counts inbound mux control messages. No application changes are
-       * required to use this implementation.
-       *
-       * @note this is experimental and not yet tested in production.
+       * A [[MuxImpl]] that uses netty4 as the underlying I/O multiplexer.
        */
-      val Netty4RefCountingControl = MuxImpl(
+      val Netty4 = MuxImpl(
         params => {
-          val MaxFrameSize(maxFrameSize) = params[MaxFrameSize]
-
-          // there's no payload copy saved when dealing with fragmented
-          // messages so revert to the copying decoder.
-          if (maxFrameSize == Int.MaxValue.bytes)
-            Netty4Transporter.raw(
-              RefCountingFramer,
-              _,
-              removeTlsIfOpportunisticClient(params),
-              transportFactory = { ch: Channel =>
-                OpportunisticTls.transport(ch, params, new RefCountingTransport(ch))
-              }
-            )
-          else {
-            val lbl = params[Label].label
-            log.debug(
-              s"$lbl disabled Netty4RefCountingControl decoder due to non-sentinel MaxFrameSize value"
-            )
-            Netty4Transporter.raw(
+          Netty4Transporter.raw(
               CopyingFramer,
               _,
               removeTlsIfOpportunisticClient(params),
@@ -169,7 +147,6 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
                 OpportunisticTls.transport(ch, params, new ChannelTransport(ch))
               }
             )
-          }
         },
         params =>
           Netty4Listener(
@@ -182,7 +159,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
         )
       )
 
-      implicit val param = Stack.Param(Netty4RefCountingControl)
+      implicit val param = Stack.Param(Netty4)
     }
   }
 
