@@ -3,7 +3,7 @@ package com.twitter.finagle.memcached.integration
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.memcached.integration.external.TestMemcachedServer
-import com.twitter.finagle.memcached.protocol.ClientError
+import com.twitter.finagle.memcached.protocol.{ClientError, Value}
 import com.twitter.finagle.memcached.{Client, GetResult, GetsResult, PartitionedClient}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.io.Buf
@@ -19,6 +19,12 @@ abstract class MemcachedTest
     with BeforeAndAfter
     with Eventually
     with PatienceConfiguration {
+
+  private val ValueSuffix = ":" + Time.now.inSeconds
+
+  private def randomString(length: Int): String = {
+    Random.alphanumeric.take(length).mkString
+  }
 
   protected[this] val NumServers = 5
   protected[this] val NumConnections = 4
@@ -425,40 +431,35 @@ abstract class MemcachedTest
     assert(failureAccrualEx.getMessage().contains("Downstream Address: localhost/127.0.0.1:1234"))
   }
 
+  def writeKeys(client: Client, numKeys: Int, keyLength: Int): Seq[String] = {
+    // creating multiple random strings so that we get a uniform distribution of keys the
+    // ketama ring and thus the Memcached shards
+    val keys = 1 to numKeys map { _ =>
+      randomString(keyLength)
+    }
+    val writes = keys map { key =>
+      client.set(key, Buf.Utf8(s"$key$ValueSuffix"))
+    }
+    awaitResult(Future.join(writes))
+    keys
+  }
+
+  def assertRead(client: Client, keys: Seq[String]): Unit = {
+    val readValues: Map[String, Buf] = awaitResult { client.get(keys) }
+    assert(readValues.size == keys.length)
+    assert(readValues.keySet.toSeq.sorted == keys.sorted)
+    readValues.keys foreach { key =>
+      val Buf.Utf8(readValue) = readValues(key)
+      assert(readValue == s"$key$ValueSuffix")
+    }
+  }
+
   /**
    * Test compatibility between old and new clients for the migration phase
    */
   protected[this] def testCompatibility() {
     val numKeys = 20
     val keyLength = 50
-    val suffix = ":" + Time.now.inSeconds
-
-    def randomString(length: Int): String = {
-      Random.alphanumeric.take(length).mkString
-    }
-
-    def writeKeys(client: Client): Seq[String] = {
-      // creating multiple random strings so that we get a uniform distribution of keys the
-      // ketama ring and thus the Memcached shards
-      val keys = 1 to numKeys map { _ =>
-        randomString(keyLength)
-      }
-      val writes = keys map { key =>
-        client.set(key, Buf.Utf8(s"$key" + suffix))
-      }
-      awaitResult(Future.join(writes))
-      keys
-    }
-
-    def assertRead(client: Client, keys: Seq[String]): Unit = {
-      val readValues: Map[String, Buf] = awaitResult { client.get(keys) }
-      assert(readValues.size == keys.length)
-      assert(readValues.keySet.toSeq.sorted == keys.sorted)
-      readValues.keys foreach { k =>
-        val Buf.Utf8(readValue) = readValues(k)
-        assert(readValue == k + suffix)
-      }
-    }
 
     val newClient = client
     val oldClient = {
@@ -469,13 +470,56 @@ abstract class MemcachedTest
     }
 
     // make sure old and new client can read the values written by old client
-    val keys1 = writeKeys(oldClient)
+    val keys1 = writeKeys(oldClient, numKeys, keyLength)
     assertRead(oldClient, keys1)
     assertRead(newClient, keys1)
 
     // make sure old and new client can read the values written by new client
-    val keys2 = writeKeys(newClient)
+    val keys2 = writeKeys(newClient, numKeys, keyLength)
     assertRead(oldClient, keys2)
     assertRead(newClient, keys2)
+  }
+
+
+  test("partial success") {
+    val keys = writeKeys(client, 1000, 20)
+    assertRead(client, keys)
+
+    val initialResult = awaitResult { client.getResult(keys) }
+    assert(initialResult.failures.isEmpty)
+    assert(initialResult.misses.isEmpty)
+    assert(initialResult.values.size == keys.size)
+
+    // now kill one server
+    servers.head.stop()
+
+    // test partial success with getResult()
+    if (isOldClient) {
+      intercept[Failure] {
+        // old client blows up while creating the connection, whereas the new one will just
+        // remove it from the ring
+        awaitResult { client.getResult(keys) }
+      }
+    } else {
+      val getResult = awaitResult { client.getResult(keys) }
+
+      // assert the failures are set to the exception received from the failing partition
+      assert(getResult.failures.nonEmpty)
+      getResult.failures.foreach { case (_, e) =>
+        assert(e.isInstanceOf[Failure])
+      }
+      // there should be no misses as all keys are known
+      assert(getResult.misses.isEmpty)
+
+      // assert that the values are what we expect them to be. We are not checking for exact
+      // number of failures and successes here because we don't know how many keys will fall into
+      // the failed partition. The accuracy of the responses are tested in other tests anyways.
+      assert(getResult.values.nonEmpty)
+      assert(getResult.values.size < keys.size)
+      getResult.values.foreach { case (keyStr, valueBuf) =>
+        val Buf.Utf8(valStr) = valueBuf
+        assert(valStr == s"$keyStr$ValueSuffix")
+      }
+    }
   }
 }

@@ -40,12 +40,16 @@ private[finagle] abstract class PartitioningService[Req, Rep] extends Service[Re
    * the request is forked and sent to multiple partitions in parallel. After the responses come
    * back, this method is used to combine the response into a single Response, so that the combined
    * result can be returned back to the caller. Typically the implementations will be combining the
-   * response key-value maps into a merged key-value map.
+   * response key-value maps into a merged key-value map. The PartitioningService groups the
+   * successful and failed responses from various partitions into 'successes' and 'failures' so that
+   * the caller can retry the failed batches again. The mergeResponses implementations should
+   * construct the response object accordingly.
    *
-   * @param responses: per partition responses
+   * @param successes: successful responses
+   * @param failures: map of failed partitioned requests against the exception
    * @return merged response
    */
-  protected def mergeResponses(responses: Seq[Rep]): Rep
+  protected def mergeResponses(successes: Seq[Rep], failures: Map[Req, Throwable]): Rep
 
   protected[this] def applyService(request: Req, service: Future[Service[Req, Rep]]): Future[Rep] = {
     service.transform {
@@ -56,6 +60,11 @@ private[finagle] abstract class PartitioningService[Req, Rep] extends Service[Re
 
   protected[this] val partitionRequestFn = (t: (Req, Future[Service[Req, Rep]])) => {
     applyService(t._1, t._2)
+  }
+
+  private[this] val mergeResponsesFn = (seq: Seq[Either[(Req, Throwable), Rep]]) => {
+    val (failures, successes) = seq.partition(_.isLeft)
+    mergeResponses(successes.map(_.right.get), failures.map(_.left.get).toMap)
   }
 
   /**
@@ -75,12 +84,16 @@ private[finagle] abstract class PartitioningService[Req, Rep] extends Service[Re
       // single partition request (all keys belong to the same partition)
       applyService(request, getPartitionFor(request))
     } else {
-      // multiple partitions
-      Future
-        .collect(
-          partitionRequest(request).map(partitionRequestFn)
-        )
-        .map(mergeResponses)
+      Future.collect(
+        partitionRequest(request).map { case (pReq, service) =>
+          partitionRequestFn((pReq, service)).transform {
+            case Return(response) =>
+              Future.value(Right(response))
+            case Throw(exc) =>
+              Future.value(Left((pReq, exc)))
+          }
+        }
+      ).map(mergeResponsesFn)
     }
   }
 }

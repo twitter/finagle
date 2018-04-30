@@ -82,15 +82,20 @@ class PartitioningServiceTest extends PartitioningServiceTestBase {
     val numServers = 5
     servers = createServers(numServers)
     client = createClient(sr)
-    failingHosts.add("server#3")
+    failingHosts.add("server#4")
 
     assert(servers.length == numServers)
     assert(sr.counters(Seq("client", "loadbalancer", "adds")) == numServers)
 
     val batchedRequest: String = servers.map(_._3).mkString(RequestDelimiter)
-    intercept[ChannelClosedException] {
-      awaitResult(client(batchedRequest))
-    }
+    val batchedResponse = awaitResult(client(batchedRequest))
+    val responses = batchedResponse.split(ResponseDelimiter)
+
+    assertPartialSuccess(
+      numServers,
+      responses,
+      "com.twitter.finagle.ChannelClosedException"
+    )
   }
 
   test("batched request with slow hosts") {
@@ -98,19 +103,70 @@ class PartitioningServiceTest extends PartitioningServiceTestBase {
     val numServers = 5
     servers = createServers(numServers)
     client = createClient(sr)
-    slowHosts.add("server#2")
+    slowHosts.add("server#4")
+
+    // make the client wait for 4 successful responses. Otherwise the following timeControl.advance
+    // will race against the server responses and timeout even the responses from healthy servers
+    val latch = new CountDownLatch(numServers - 1)
+    serverLatchOpt = Some(latch)
 
     assert(servers.length == numServers)
     assert(sr.counters(Seq("client", "loadbalancer", "adds")) == numServers)
 
     Time.withCurrentTimeFrozen { timeControl =>
       val batchedRequest: String = servers.map(_._3).mkString(RequestDelimiter)
-      intercept[IndividualRequestTimeoutException] {
-        val future = client(batchedRequest)
-        timeControl.advance(3.seconds)
-        timer.tick()
-        Await.result(future, 10.seconds)
-      }
+      val future = client(batchedRequest)
+
+      // wait for responses from 4 healthy servers to prevent race condition
+      latch.await()
+
+      // extra sleep to prevent the TimeoutFilter to race against response processing
+      Thread.sleep(100)
+
+      // now force the timeout of remaining response (request timeout is 1.5 seconds)
+      timeControl.advance(3.seconds)
+      timer.tick()
+
+      val batchedResponse = Await.result(future, 10.seconds)
+      val responses = batchedResponse.split(ResponseDelimiter)
+
+      assertPartialSuccess(
+        numServers,
+        responses,
+        "com.twitter.finagle.IndividualRequestTimeoutException"
+      )
+    }
+  }
+
+  private def assertPartialSuccess(
+    numServers: Int,
+    responses: Array[String],
+    expectedException: String
+  ): Unit = {
+    assert(responses.length == numServers)
+
+    // test partial success. There should be exactly one exception in the response. See
+    // the custom test logic in SimplePartitioningService.mergeResponses.
+    val lastResponse = responses(responses.length - 1)
+    assert(lastResponse == expectedException, responses.mkString(ResponseDelimiter))
+
+    // check the rest of the responses as well
+    val responseMap = responses.dropRight(1).map { response =>
+      val portAndName = response.split(EchoDelimiter)
+      assert(portAndName.length == 2, response)
+      val port = portAndName(0)
+      val name = portAndName(1)
+      port -> name
+    }.toMap
+    assert(responseMap.size == numServers - 1)
+
+    // Remove the last server which we have already asserted for failure above.
+    servers.dropRight(1) foreach { case (_, _, port, index) =>
+      val respondedByShard = responseMap.getOrElse(
+        port.toString,
+        fail(s"Response for server#$index not found! ${responses.mkString(ResponseDelimiter)}")
+      )
+      assert(respondedByShard == s"server#$index")
     }
   }
 }
@@ -221,10 +277,21 @@ private[this] class SimplePartitioningService(
     batchedRequest.split(RequestDelimiter).map(stringToTuple).toSeq
   }
 
-  override protected def mergeResponses(responses: Seq[String]): String = {
+  protected override def mergeResponses(
+    successes: Seq[String],
+    failures: Map[String, Throwable]
+  ): String = {
     // responses contain the request keys. So just concatenate. In a real implementation this will
     // typically be a key-value map.
-    responses.mkString(ResponseDelimiter)
+    if (failures.isEmpty) {
+      successes.mkString(ResponseDelimiter)
+    } else if (successes.nonEmpty) {
+      // appending the server exceptions here to easily test partial success for batch operations
+      successes.mkString(ResponseDelimiter) + ResponseDelimiter +
+        failures.values.map(_.getClass.getTypeName).mkString(ResponseDelimiter)
+    } else {
+      failures.values.map(_.getClass.getTypeName).mkString(ResponseDelimiter)
+    }
   }
 
   protected def isSinglePartition(request: String): Boolean = false

@@ -103,14 +103,23 @@ private[finagle] class MemcachedPartitioningService(
    * This method is expected to be invoked only for merging responses for batched requests
    * (get/getv/gets). It barfs upon unexpected invocations.
    */
-  final override protected def mergeResponses(responses: Seq[Response]): Response = {
-    Values(responses.flatMap {
-      case Values(values) => values
-      case nonvalue =>
-        if (logger.isLoggable(Level.DEBUG))
-          logger.log(Level.DEBUG, s"UnsupportedResponse: Expected Values, instead found $nonvalue")
-        throw new UnsupportedResponse(s"Expected Values, instead found $nonvalue")
-    })
+  final override protected def mergeResponses(
+    successes: Seq[Response],
+    failures: Map[Command, Throwable]
+  ): Response = {
+    ValuesAndErrors(
+      successes.flatMap {
+        case Values(values) =>
+          values
+        case nonValue =>
+          if (logger.isLoggable(Level.DEBUG))
+            logger.log(Level.DEBUG, s"UnsupportedResponse: Expected Values, instead found $nonValue")
+          throw new UnsupportedResponse(s"Expected Values, instead found $nonValue")
+      },
+      failures.flatMap { case (command, t) =>
+        getPartitionKeys(command).map(_ -> t)
+      }
+    )
   }
 
   protected def isSinglePartition(request: Command): Boolean = request match {

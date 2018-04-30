@@ -82,6 +82,8 @@ private[finagle] object ResponseToBuf {
     case Error(cause) =>
       val formatted: Seq[Array[Byte]] = ExceptionHandler.format(cause)
       encodeResponse(formatted.map { Buf.ByteArray.Owned(_) })
+    case _: ValuesAndErrors =>
+      throw new IllegalStateException("ValuesAndErrors is expected only on the client side")
     case InfoLines(lines) =>
       val statLines = lines map { line =>
         val key = line.key

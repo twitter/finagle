@@ -86,6 +86,9 @@ Bug Fixes
     retain the original stack trace, suppressed Throwables, and cause when possible.
     ``PHAB_ID=D160402``
 
+  * finagle-memcached: Added the missing support for partial success for the batch
+    operations in the new PartitioningService based Memcached client. ``PHAB_ID=D161249``
+
 18.4.0
 -------
 

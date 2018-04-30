@@ -85,7 +85,7 @@ class KetamaPartitioningServiceTest extends PartitioningServiceTestBase {
     val keys = 1 to numKeys map { _ =>
       randomString(5)
     }
-    val batchedRequest = keys.mkString(RequestDelimiter)
+    val batchedRequest: String = keys.mkString(RequestDelimiter)
 
     // capture the request distribution (request -> server) for asserting stickiness
     val requestToServer: Map[String, String] = {
@@ -212,7 +212,8 @@ class KetamaPartitioningServiceTest extends PartitioningServiceTestBase {
     Time.withCurrentTimeFrozen { timeControl =>
       // Make the host throw an exception
       failingHosts.add(serverName)
-      intercept[Exception] { awaitResult(client(request)) }
+      val response = awaitResult(client(request))
+      assert(response == "com.twitter.finagle.ChannelClosedException")
       failingHosts.clear()
 
       // Node should have been ejected
@@ -243,7 +244,8 @@ class KetamaPartitioningServiceTest extends PartitioningServiceTestBase {
     Time.withCurrentTimeFrozen { timeControl =>
       // Make the host throw an exception
       failingHosts.add(serverName)
-      intercept[Exception] { awaitResult(client(request)) }
+      val response = awaitResult(client(request))
+      assert(response == "com.twitter.finagle.ChannelClosedException")
       failingHosts.clear()
 
       // Node should have been ejected
@@ -253,9 +255,7 @@ class KetamaPartitioningServiceTest extends PartitioningServiceTestBase {
       timeControl.advance(5.minutes)
 
       // Shard should be unavailable
-      intercept[ShardNotAvailableException] {
-        awaitResult(client(request))
-      }
+      assert(awaitResult(client(request)) == "com.twitter.finagle.ShardNotAvailableException")
 
       timeControl.advance(5.minutes)
       timer.tick()
@@ -330,10 +330,21 @@ private[this] class TestKetamaPartitioningService(
     pKeys.mkString(RequestDelimiter)
   }
 
-  protected override def mergeResponses(responses: Seq[String]): String = {
+  protected override def mergeResponses(
+    successes: Seq[String],
+    failures: Map[String, Throwable]
+  ): String = {
     // responses contain the request keys. So just concatenate. In a real implementation this will
     // typically be a key-value map.
-    responses.mkString(ResponseDelimiter)
+    if (failures.isEmpty) {
+      successes.mkString(ResponseDelimiter)
+    } else if (successes.nonEmpty) {
+      // appending the server exceptions here to easily test partial success for batch operations
+      successes.mkString(ResponseDelimiter) + ResponseDelimiter +
+        failures.values.map(_.getClass.getTypeName).mkString(ResponseDelimiter)
+    } else {
+      failures.values.map(_.getClass.getTypeName).mkString(ResponseDelimiter)
+    }
   }
 
   protected def isSinglePartition(request: String): Boolean = false

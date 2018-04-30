@@ -643,6 +643,14 @@ protected class ConnectedClient(protected val service: Service[Command, Response
         val misses = util.NotFound(keys, hits.keySet)
         Future.value(GetResult(hits, misses))
       case Return(Error(e)) => throw e
+      case Return(ValuesAndErrors(values, errors)) =>
+        val hits: Map[String, Value] = hitsFromValues(values)
+        val failures = errors.map { case (buf, e) =>
+          val Buf.Utf8(keyStr) = buf
+          (keyStr, e)
+        }
+        val misses = util.NotFound(keys, hits.keySet ++ failures.keySet)
+        Future.value(GetResult(hits, misses, failures))
       case Return(other) =>
         throw new IllegalStateException(
           "Invalid response type from get: %s".format(other.getClass.getSimpleName)
