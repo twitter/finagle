@@ -7,9 +7,12 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Await, Future}
 import org.scalatest.FunSuite
-import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 
-class Netty4SslTest extends FunSuite with Eventually {
+class Netty4SslTest extends FunSuite with Eventually with IntegrationPatience {
+
+  // Timeout for blocking calls
+  private val timeout = 15.seconds
 
   private[this] val worldService = new Service[String, String] {
     override def apply(request: String): Future[String] = Future.value("world")
@@ -44,7 +47,7 @@ class Netty4SslTest extends FunSuite with Eventually {
   private[this] val assertGaugeIsTwo = assertGaugeIsNonZero(2.0F) _
 
   private[this] def mkSuccessfulHelloRequest(client: Service[String, String]): Unit = {
-    val response = Await.result(client("hello"), 2.seconds)
+    val response = Await.result(client("hello"), timeout)
     assert(response == "world")
   }
 
@@ -52,11 +55,11 @@ class Netty4SslTest extends FunSuite with Eventually {
     val server = mkTlsServer(peerCertService)
     val client = mkTlsClient(getPort(server))
 
-    val response = Await.result(client("peer cert test"), 2.seconds)
+    val response = Await.result(client("peer cert test"), timeout)
     assert(response == "OK")
 
-    Await.result(client.close(), 2.seconds)
-    Await.result(server.close(), 2.seconds)
+    Await.result(client.close(), timeout)
+    Await.result(server.close(), timeout)
   }
 
   test("Single client and server results in server TLS connections incremented and decremented") {
@@ -70,9 +73,9 @@ class Netty4SslTest extends FunSuite with Eventually {
     mkSuccessfulHelloRequest(client)
     assertGaugeIsOne(serverStats, serverTlsConnections)
 
-    Await.ready(client.close(), 2.seconds)
+    Await.ready(client.close(), timeout)
     eventually { assertGaugeIsZero(serverStats, serverTlsConnections) }
-    Await.result(server.close(), 2.seconds)
+    Await.result(server.close(), timeout)
   }
 
   test("Single client and server results in client TLS connections incremented and decremented") {
@@ -86,9 +89,9 @@ class Netty4SslTest extends FunSuite with Eventually {
     mkSuccessfulHelloRequest(client)
     assertGaugeIsOne(clientStats, clientTlsConnections)
 
-    Await.ready(client.close(), 2.seconds)
+    Await.ready(client.close(), timeout)
     eventually { assertGaugeIsZero(clientStats, clientTlsConnections) }
-    Await.result(server.close(), 2.seconds)
+    Await.result(server.close(), timeout)
   }
 
   test("Multiple clients and server results in server TLS connections incremented and decremented") {
@@ -108,11 +111,11 @@ class Netty4SslTest extends FunSuite with Eventually {
     mkSuccessfulHelloRequest(client2)
     assertGaugeIsTwo(serverStats, serverTlsConnections)
 
-    Await.result(client1.close(), 2.seconds)
+    Await.result(client1.close(), timeout)
     eventually { assertGaugeIsOne(serverStats, serverTlsConnections) }
 
-    Await.result(client2.close(), 2.seconds)
-    Await.result(server.close(), 2.seconds)
+    Await.result(client2.close(), timeout)
+    Await.result(server.close(), timeout)
     eventually { assertGaugeIsZero(serverStats, serverTlsConnections) }
   }
 
@@ -139,14 +142,14 @@ class Netty4SslTest extends FunSuite with Eventually {
     assertGaugeIsOne(client1Stats, client1TlsConnections)
     assertGaugeIsOne(client2Stats, client2TlsConnections)
 
-    Await.result(client1.close(), 2.seconds)
+    Await.result(client1.close(), timeout)
     eventually {
       assertGaugeIsZero(client1Stats, client1TlsConnections)
       assertGaugeIsOne(client2Stats, client2TlsConnections)
     }
 
-    Await.result(client2.close(), 2.seconds)
-    Await.result(server.close(), 2.seconds)
+    Await.result(client2.close(), timeout)
+    Await.result(server.close(), timeout)
     eventually {
       assertGaugeIsZero(client1Stats, client1TlsConnections)
       assertGaugeIsZero(client2Stats, client2TlsConnections)
@@ -167,14 +170,14 @@ class Netty4SslTest extends FunSuite with Eventually {
     assertGaugeIsZero(clientStats, clientTlsConnections)
 
     intercept[ChannelClosedException] {
-      Await.result(client("hello"), 2.seconds)
+      Await.result(client("hello"), timeout)
     }
 
     eventually { assertGaugeIsZero(serverStats, serverTlsConnections) }
     eventually { assertGaugeIsZero(clientStats, clientTlsConnections) }
 
-    Await.ready(client.close(), 2.seconds)
-    Await.result(server.close(), 2.seconds)
+    Await.ready(client.close(), timeout)
+    Await.result(server.close(), timeout)
 
     eventually {
       assertGaugeIsZero(serverStats, serverTlsConnections)
@@ -196,7 +199,7 @@ class Netty4SslTest extends FunSuite with Eventually {
     assertGaugeIsZero(clientStats, clientTlsConnections)
 
     intercept[Failure] {
-      Await.result(client("hello"), 2.seconds)
+      Await.result(client("hello"), timeout)
     }
 
     eventually {
@@ -204,8 +207,8 @@ class Netty4SslTest extends FunSuite with Eventually {
       assertGaugeIsZero(clientStats, clientTlsConnections)
     }
 
-    Await.ready(client.close(), 2.seconds)
-    Await.result(server.close(), 2.seconds)
+    Await.ready(client.close(), timeout)
+    Await.result(server.close(), timeout)
 
     eventually {
       assertGaugeIsZero(serverStats, serverTlsConnections)
