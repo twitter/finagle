@@ -8,8 +8,9 @@ import com.twitter.finagle.{param => fparam, _}
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}
 import org.scalatest.FunSuite
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 
-class DefaultTracingTest extends FunSuite {
+class DefaultTracingTest extends FunSuite with Eventually with IntegrationPatience {
   object Svc extends Service[String, String] {
     def apply(str: String): Future[String] = Future.value(str)
   }
@@ -46,14 +47,19 @@ class DefaultTracingTest extends FunSuite {
       )
     )
 
-    assertAnnotationsInOrder(
-      serverTracer.toSeq,
-      Seq(
-        Annotation.ServiceName("theServer"),
-        Annotation.ServerRecv(),
-        Annotation.ServerSend()
+    // We need the `eventually` since the server may actually add the tracing annotation for
+    // the response after sending the response based on it being done via a `respond` block
+    // on the response `Future`, and we only await the clients response.
+    eventually {
+      assertAnnotationsInOrder(
+        serverTracer.toSeq,
+        Seq(
+          Annotation.ServiceName("theServer"),
+          Annotation.ServerRecv(),
+          Annotation.ServerSend()
+        )
       )
-    )
+    }
 
     // need to call finalizer to properly close the client and the server
     Await.ready(finalizer.close(), 1.second)
