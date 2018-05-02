@@ -142,7 +142,7 @@ class StreamTransportFactoryTest extends FunSuite {
     assert(streamFac.numActiveStreams == 0)
   }
 
-  test("StreamTransportFactoryer respects last stream ID on GOAWAY & closes streams") {
+  test("StreamTransportFactory respects last stream ID on GOAWAY & closes streams") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
     val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
       type Context = TransportContext with HasExecutor
@@ -182,7 +182,7 @@ class StreamTransportFactoryTest extends FunSuite {
     assert(streamFac.numActiveStreams == 0)
   }
 
-  test("StreamTransportFactoryer reflects detector status") {
+  test("StreamTransportFactory reflects detector status") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
     val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
       type Context = TransportContext with HasExecutor
@@ -200,7 +200,7 @@ class StreamTransportFactoryTest extends FunSuite {
     assert(streamFac.numActiveStreams == 0)
   }
 
-  test("StreamTransportFactoryer call to first() provides stream with streamId == 1") {
+  test("StreamTransportFactory call to first() provides stream with streamId == 1") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
     val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
       type Context = TransportContext with HasExecutor
@@ -210,7 +210,7 @@ class StreamTransportFactoryTest extends FunSuite {
     assert(streamFac.first().asInstanceOf[streamFac.StreamTransport].curId == 1)
   }
 
-  test("StreamTransportFactoryer streams increment stream ID only on write") {
+  test("StreamTransportFactory streams increment stream ID only on write") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
     val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
       type Context = TransportContext with HasExecutor
