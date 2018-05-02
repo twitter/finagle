@@ -1,7 +1,7 @@
 package com.twitter.finagle.stats
 
 import com.twitter.conversions.time._
-import com.twitter.util.{Time, TimeControl}
+import com.twitter.util.{Duration, Time, TimeControl}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -96,12 +96,12 @@ class MetricsBucketedHistogramTest extends FunSuite {
     }
   }
 
-  class Ctx(tc: TimeControl) {
-    val h = new MetricsBucketedHistogram(name = "h")
+  class Ctx(tc: TimeControl, latchPeriod: Duration = 1.minute) {
+    val h = new MetricsBucketedHistogram(name = "h", latchPeriod = latchPeriod)
     val details = h.histogramDetail
 
-    def roll(): Unit = {
-      tc.advance(60.seconds)
+    def roll(duration: Duration = latchPeriod): Unit = {
+      tc.advance(duration)
       h.snapshot
     }
   }
@@ -235,4 +235,26 @@ class MetricsBucketedHistogramTest extends FunSuite {
       assert(countsSnap1 == Seq.empty)
     }
   }
+
+  test("histogram snapshot respects latchPeriod on the first call") {
+    val latchPeriod = 10.seconds
+    Time.withTimeAt(BeginningOfMinute) { tc =>
+      val ctx = new Ctx(tc, latchPeriod)
+      import ctx._
+
+      h.add(1)
+
+      val snap0 = h.snapshot()
+      assert(snap0.sum == 0, "snapshot is empty")
+
+      roll(latchPeriod / 2)
+      val snap1 = h.snapshot()
+      assert(snap1.sum == 0, "still within window")
+
+      roll(latchPeriod / 2)
+      val snap2 = h.snapshot()
+      assert(snap2.sum == 1, "snapshot is not empty")
+    }
+  }
+
 }
