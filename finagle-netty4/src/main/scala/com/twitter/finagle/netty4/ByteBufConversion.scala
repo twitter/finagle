@@ -21,7 +21,7 @@ private[finagle] object ByteBufConversion {
   }
 
   /**
-   * A read-only and potentially non-copying `ByteBuf` wrapper for [[Buf]].
+   * A read-only and potentially non-copying `ByteBuf` representation of a [[Buf]].
    */
   def bufAsByteBuf(buf: Buf): ByteBuf = {
     val bb = buf match {
@@ -37,16 +37,11 @@ private[finagle] object ByteBufConversion {
   }
 
   /**
-   * Construct a [[Buf]] wrapper for `ByteBuf`.
-   *
-   * @note this wrapper does not support ref-counting and therefore should either
-   *       be used with unpooled and non-leak detecting allocators or managed
-   *       via the ref-counting methods of the wrapped `buf`. Non-empty buffers
-   *       are `retain`ed.
+   * Construct a [[Buf]] from a `ByteBuf`, releasing it.
    *
    * @note if the given is backed by a heap array, it will be coerced into `Buf.ByteArray`
    *       and then released. This basically means it's only safe to use this smart constructor
-   *       with unpooled heap buffers.
+   *       with heap buffers which are unpooled, and non-heap buffers.
    */
   def byteBufAsBuf(buf: ByteBuf): Buf =
     if (buf.readableBytes == 0) Buf.Empty
