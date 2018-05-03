@@ -89,6 +89,8 @@ Bug Fixes
   * finagle-memcached: Added the missing support for partial success for the batch
     operations in the new PartitioningService based Memcached client. ``PHAB_ID=D161249``
 
+  * finagle-thrift: Removed copied libthrift files. ``PHAB_ID=D165455``
+
 18.4.0
 -------
 
