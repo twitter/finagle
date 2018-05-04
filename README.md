@@ -1,3 +1,8 @@
+<div align="center">
+  <img src="https://github.com/twitter/finagle/blob/develop/doc/src/sphinx/_static/logo_medium.png"><br><br>
+</div>
+
+
 # Finagle
 
 [![Build status](https://travis-ci.org/twitter/finagle.svg?branch=develop)](https://travis-ci.org/twitter/finagle)
@@ -6,12 +11,8 @@
 [![Gitter](https://badges.gitter.im/twitter/finagle.svg)](https://gitter.im/twitter/finagle?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.twitter/finagle-core_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.twitter/finagle-core_2.12)
 
-## Status
-
 This project is used in production at Twitter (and many other organizations),
 and is being actively developed and maintained.
-
-![Finagle logo](https://raw.github.com/twitter/finagle/master/doc/src/sphinx/_static/logo_small.png)
 
 ## Releases
 
