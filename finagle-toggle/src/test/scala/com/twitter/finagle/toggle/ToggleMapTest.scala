@@ -200,7 +200,7 @@ class ToggleMapTest extends FunSuite with GeneratorDrivenPropertyChecks with Mat
     private var nApply = 0
     def numApply: Int = nApply
 
-    protected val underlying: ToggleMap = ToggleMap.newMutable()
+    val underlying: ToggleMap = ToggleMap.newMutable()
     override def apply(id: String): Toggle[Int] = {
       nApply += 1
       super.apply(id)
@@ -217,7 +217,7 @@ class ToggleMapTest extends FunSuite with GeneratorDrivenPropertyChecks with Mat
     // for how many times it was added to the aggregated ToggleMap
     assert(1 == tm0.numApply)
     assert(1 == tm1.numApply)
-    assert(Seq(tm0, tm1) == ToggleMap.components(of))
+    assert(Seq(tm0, tm1).flatMap(ToggleMap.components) == ToggleMap.components(of))
   }
 
   test("ToggleMap.Flags with empty Flags") {

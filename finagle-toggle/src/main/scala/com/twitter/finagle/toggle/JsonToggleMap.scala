@@ -228,4 +228,14 @@ object JsonToggleMap {
     val libs = registry.map { case (name, toggleMap) => Library(name, toLibraryToggles(toggleMap)) }
     mapper.writeValueAsString(Libraries(libs.toSeq))
   }
+
+  /**
+   * Serialize a [[ToggleMap]] to JSON format
+   *
+   * @note this is a helper for Java friendliness.  Scala users should continue to
+   * use `toJson`.
+   */
+  def mutableToJson(registry: Map[String, ToggleMap.Mutable]): String =
+    toJson(registry)
+
 }

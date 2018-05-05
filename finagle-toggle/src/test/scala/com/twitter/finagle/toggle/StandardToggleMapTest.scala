@@ -11,8 +11,8 @@ import scala.collection.JavaConverters._
 @RunWith(classOf[JUnitRunner])
 class StandardToggleMapTest extends FunSuite {
 
-  private def newRegistry(): ConcurrentMap[String, ToggleMap] =
-    new ConcurrentHashMap[String, ToggleMap]()
+  private def newRegistry(): ConcurrentMap[String, ToggleMap.Mutable] =
+    new ConcurrentHashMap[String, ToggleMap.Mutable]()
 
   test("registeredLibraries") {
     val uniqueLibName = s"com.twitter.${System.nanoTime}"
@@ -80,7 +80,7 @@ class StandardToggleMapTest extends FunSuite {
       // this will have corresponding file(s) in test/resources/com/twitter/toggles/configs/
       "com.twitter.finagle.toggle.tests.StandardToggleMapTest",
       NullStatsReceiver,
-      NullToggleMap,
+      ToggleMap.newMutable(),
       ServerInfo.Empty,
       newRegistry()
     )
@@ -110,7 +110,7 @@ class StandardToggleMapTest extends FunSuite {
       // this will have corresponding file(s) in test/resources/com/twitter/toggles/configs/
       "com.twitter.finagle.toggle.tests.EnvOverlays",
       NullStatsReceiver,
-      NullToggleMap,
+      ToggleMap.newMutable(),
       serverInfo,
       newRegistry()
     )
@@ -243,4 +243,18 @@ class StandardToggleMapTest extends FunSuite {
     assert(components.exists(_ eq inMem))
   }
 
+  test("mutating a togglemap directly") {
+    val inMem = ToggleMap.newMutable()
+    val togMap: ToggleMap.Mutable = StandardToggleMap(
+      "com.twitter.components",
+      NullStatsReceiver,
+      inMem,
+      ServerInfo.Empty,
+      newRegistry()
+    )
+
+    assert(!togMap("com.twitter.foo").isDefinedAt(1))
+    togMap.put("com.twitter.foo", 1.0)
+    assert(togMap("com.twitter.foo")(1))
+  }
 }

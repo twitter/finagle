@@ -1,5 +1,7 @@
 package com.twitter.finagle.toggle;
 
+import scala.collection.immutable.Map;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -16,5 +18,13 @@ class ToggleMapCompilationTest {
     toggleMap.put("com.twitter.finagle.toggle.test", 1.0);
     Toggle<Integer> toggle = toggleMap.get("com.twitter.fiangle.toggle.test");
     Assert.assertTrue(toggle.isEnabled(5000));
+  }
+
+  @Test
+  public void testRegisterLibraries() {
+    Map<String, ToggleMap.Mutable> map = StandardToggleMap.registeredLibraries();
+    String json = JsonToggleMap.mutableToJson(map);
+    Assert.assertNotNull(map);
+    Assert.assertNotNull(json);
   }
 }

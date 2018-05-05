@@ -51,13 +51,13 @@ object StandardToggleMap {
   private[this] val log = Logger.get()
 
   private[this] val libs =
-    new ConcurrentHashMap[String, ToggleMap]()
+    new ConcurrentHashMap[String, ToggleMap.Mutable]()
 
   /**
    * Returns all registered [[ToggleMap ToggleMaps]] that have been
    * created by [[apply]], keyed by `libraryName`.
    */
-  def registeredLibraries: Map[String, ToggleMap] =
+  def registeredLibraries: Map[String, ToggleMap.Mutable] =
     libs.asScala.toMap
 
   /**
@@ -76,7 +76,7 @@ object StandardToggleMap {
    *                      usage this should not be scoped so that the metrics
    *                      always end up scoped to "toggles/\$libraryName".
    */
-  def apply(libraryName: String, statsReceiver: StatsReceiver): ToggleMap =
+  def apply(libraryName: String, statsReceiver: StatsReceiver): ToggleMap.Mutable =
     apply(
       libraryName,
       statsReceiver,
@@ -89,10 +89,10 @@ object StandardToggleMap {
   private[toggle] def apply(
     libraryName: String,
     statsReceiver: StatsReceiver,
-    mutable: ToggleMap,
+    mutable: ToggleMap.Mutable,
     serverInfo: ServerInfo,
-    registry: ConcurrentMap[String, ToggleMap]
-  ): ToggleMap = {
+    registry: ConcurrentMap[String, ToggleMap.Mutable]
+  ): ToggleMap.Mutable = {
     Toggle.validateId(libraryName)
 
     val svcsJson =
@@ -106,7 +106,12 @@ object StandardToggleMap {
       ServiceLoadedToggleMap(libraryName),
       libsJson
     )
-    val toggleMap = ToggleMap.observed(stacked, statsReceiver.scope("toggles", libraryName))
+    val observed = ToggleMap.observed(stacked, statsReceiver.scope("toggles", libraryName))
+    val toggleMap = new ToggleMap.Mutable with ToggleMap.Proxy {
+      def underlying: ToggleMap = observed
+      def put(id: String, fraction: Double): Unit = mutable.put(id, fraction)
+      def remove(id: String): Unit = mutable.remove(id)
+    }
     val prev = registry.putIfAbsent(libraryName, toggleMap)
     if (prev == null)
       toggleMap

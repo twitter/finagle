@@ -12,17 +12,17 @@ class ServiceLoadedToggleTestA extends ServiceLoadedToggleMap with ToggleMap.Pro
   private val tm = ToggleMap.newMutable()
   tm.put("com.toggle.a", 1.0)
 
-  protected def underlying: ToggleMap = tm
+  def underlying: ToggleMap = tm
   def libraryName: String = "com.twitter.finagle.toggle.test.A"
 }
 
 class ServiceLoadedToggleTestB extends ServiceLoadedToggleMap with ToggleMap.Proxy {
-  protected def underlying: ToggleMap = NullToggleMap
+  def underlying: ToggleMap = NullToggleMap
   def libraryName: String = "com.twitter.finagle.toggle.test.B"
 }
 
 class ServiceLoadedToggleTestBToo extends ServiceLoadedToggleMap with ToggleMap.Proxy {
-  protected def underlying: ToggleMap = NullToggleMap
+  def underlying: ToggleMap = NullToggleMap
   def libraryName: String = "com.twitter.finagle.toggle.test.B"
 }
 

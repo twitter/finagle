@@ -182,7 +182,7 @@ object ToggleMap {
         crc32.getValue.toFloat
       }
 
-      protected def underlying: ToggleMap = toggleMap
+      def underlying: ToggleMap = toggleMap
 
       override def toString: String =
         s"observed($toggleMap, $statsReceiver)"
@@ -244,6 +244,8 @@ object ToggleMap {
     toggleMap match {
       case composite: Composite =>
         composite.components.flatMap(components)
+      case proxy: Proxy =>
+        components(proxy.underlying)
       case _ =>
         Seq(toggleMap)
     }
@@ -540,7 +542,7 @@ object ToggleMap {
    *        can only be used by traits or classes that extend [[ToggleMap]].
    */
   trait Proxy { self: ToggleMap =>
-    protected def underlying: ToggleMap
+    def underlying: ToggleMap
 
     override def toString: String = underlying.toString
     def apply(id: String): Toggle[Int] = underlying(id)
