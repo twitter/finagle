@@ -1,13 +1,9 @@
 package com.twitter.finagle.netty4.ssl.server
 
 import com.twitter.finagle.netty4.ssl.Netty4SslConfigurations
-import com.twitter.finagle.ssl.{
-  ApplicationProtocols,
-  Engine,
-  KeyCredentials,
-  SslConfigurationException
-}
+import com.twitter.finagle.ssl.{ApplicationProtocols, Engine, KeyCredentials, SslConfigurationException}
 import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerEngineFactory}
+import com.twitter.util.Return
 import com.twitter.util.security.{PrivateKeyFile, X509CertificateFile}
 import io.netty.buffer.ByteBufAllocator
 import io.netty.handler.ssl.{SslContext, SslContextBuilder}
@@ -65,6 +61,8 @@ private[finagle] object Netty4ServerSslConfigurations {
           cert <- new X509CertificateFile(certFile).readX509Certificate()
           chain <- new X509CertificateFile(chainFile).readX509Certificates()
         } yield SslContextBuilder.forServer(key, cert +: chain: _*)
+      case KeyCredentials.FromKeyManager(keyManagerFactory) =>
+        Return(SslContextBuilder.forServer(keyManagerFactory))
     }
     Netty4SslConfigurations.unwrapTryContextBuilder(builder)
   }

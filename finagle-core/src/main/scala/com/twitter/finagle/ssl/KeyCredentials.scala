@@ -2,6 +2,8 @@ package com.twitter.finagle.ssl
 
 import java.io.File
 
+import javax.net.ssl.KeyManagerFactory
+
 /**
  * KeyCredentials represent the items necessary for this configured
  * TLS [[Engine]] to authenticate itself to a remote peer. This
@@ -48,4 +50,10 @@ object KeyCredentials {
    */
   case class CertKeyAndChain(certificateFile: File, keyFile: File, caCertificateFile: File)
       extends KeyCredentials
+
+  /**
+   *
+   * @param keyManagerFactory
+   */
+  case class FromKeyManager(keyManagerFactory: KeyManagerFactory) extends KeyCredentials
 }

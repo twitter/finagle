@@ -4,6 +4,10 @@ import com.twitter.finagle.ssl._
 import com.twitter.finagle.ssl.server.SslServerConfiguration
 import com.twitter.io.TempFile
 import java.io.File
+import java.security.KeyStore
+
+import com.twitter.finagle.ssl.client.SslClientConfiguration
+import javax.net.ssl.{KeyManagerFactory, TrustManagerFactory}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -111,6 +115,26 @@ class Netty4ServerEngineFactoryTest extends FunSuite {
       val engine = factory(config)
     }
   }
+
+  test("config with KeyManager succeeds") {
+    // ToDo: Should we also create tests / build the functionality that the keymanagers are rejected if containing expired certs
+
+    val trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm)
+    trustManagerFactory.init(null.asInstanceOf[KeyStore])
+
+    val trustCredentials = TrustCredentials.FromTrustManagerFactory(trustManagerFactory)
+
+    val keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm)
+    keyManagerFactory.init(null, Array[Char]())
+
+    val keyCredentials = KeyCredentials.FromKeyManager(keyManagerFactory)
+    val config = SslServerConfiguration(trustCredentials = trustCredentials, keyCredentials = keyCredentials)
+    val engine = factory(config)
+    val sslEngine = engine.self
+
+    assert(sslEngine != null)
+  }
+
 
   test("config with good cipher suites succeeds") {
     val cipherSuites = CipherSuites.Enabled(Seq("TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"))

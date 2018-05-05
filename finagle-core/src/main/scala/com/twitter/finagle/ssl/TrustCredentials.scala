@@ -2,6 +2,8 @@ package com.twitter.finagle.ssl
 
 import java.io.File
 
+import javax.net.ssl.TrustManagerFactory
+
 /**
  * TrustCredentials represent the items necessary for this configured
  * TLS [[Engine]] to verify a remote peer's credentials.
@@ -34,4 +36,11 @@ object TrustCredentials {
    * in PEM format.
    */
   case class CertCollection(file: File) extends TrustCredentials
+
+
+  /**
+   *
+   * @param trustManagerFactory
+   */
+  case class FromTrustManagerFactory(trustManagerFactory: TrustManagerFactory) extends TrustCredentials
 }

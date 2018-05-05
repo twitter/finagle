@@ -59,6 +59,8 @@ private[finagle] object Netty4ClientSslConfigurations {
           cert <- new X509CertificateFile(certFile).readX509Certificate()
           chain <- new X509CertificateFile(chainFile).readX509Certificates()
         } yield builder.keyManager(key, cert +: chain: _*)
+      case KeyCredentials.FromKeyManager(keyManagerFactory) =>
+        Return(builder.keyManager(keyManagerFactory))
     }
     Netty4SslConfigurations.unwrapTryContextBuilder(withKey)
   }
