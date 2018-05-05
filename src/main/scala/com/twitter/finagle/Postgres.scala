@@ -11,7 +11,7 @@ import com.twitter.finagle.postgres.messages._
 import com.twitter.finagle.postgres.values.ValueDecoder
 import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.service._
-import com.twitter.finagle.ssl.client.SslClientEngineFactory
+import com.twitter.finagle.ssl.client.{ SslClientEngineFactory, SslClientSessionVerifier }
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.{Monitor => _, _}
@@ -77,6 +77,7 @@ object Postgres {
 
   private def pipelineFactory(params: Stack.Params) = {
     val SslClientEngineFactory.Param(sslFactory) = params[SslClientEngineFactory.Param]
+    val SslClientSessionVerifier.Param(sessionVerifier) = params[SslClientSessionVerifier.Param]
     val Transport.ClientSsl(ssl) = params[Transport.ClientSsl]
 
     new ChannelPipelineFactory {
@@ -85,7 +86,7 @@ object Postgres {
 
         pipeline.addLast("binary_to_packet", new PacketDecoder(ssl.nonEmpty))
         pipeline.addLast("packet_to_backend_messages", new BackendMessageDecoder(new BackendMessageParser))
-        pipeline.addLast("backend_messages_to_postgres_response", new PgClientChannelHandler(sslFactory, ssl, ssl.nonEmpty))
+        pipeline.addLast("backend_messages_to_postgres_response", new PgClientChannelHandler(sslFactory, sessionVerifier, ssl, ssl.nonEmpty))
         pipeline
       }
     }

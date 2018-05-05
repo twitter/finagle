@@ -10,7 +10,7 @@ import com.twitter.finagle.postgres.messages._
 import com.twitter.finagle.postgres.values.Md5Encryptor
 import com.twitter.finagle.ssl.client.{ HostnameVerifier, SslClientConfiguration, SslClientEngineFactory, SslClientSessionVerifier }
 import com.twitter.logging.Logger
-import com.twitter.util.Future
+import com.twitter.util.{ Future, Try }
 import javax.net.ssl.{SSLContext, SSLEngine, SSLSession, TrustManagerFactory}
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
@@ -184,6 +184,7 @@ class PacketDecoder(@volatile var inSslNegotation: Boolean) extends FrameDecoder
  */
 class PgClientChannelHandler(
   sslEngineFactory: SslClientEngineFactory,
+  sessionVerifier: SslClientSessionVerifier,
   sslConfig: Option[SslClientConfiguration],
   val useSsl: Boolean
 ) extends SimpleChannelHandler {
@@ -211,29 +212,30 @@ class PgClientChannelHandler(
 
         val pipeline = ctx.getPipeline
 
-        val addr = ctx.getChannel.getRemoteAddress
-        val inetAddr = addr match {
-          case i: InetSocketAddress => Some(i)
-          case _ => None
+        val (engine, verifier) = ctx.getChannel.getRemoteAddress match {
+          case i: InetSocketAddress =>
+            val address = Address(i)
+            val config = sslConfig.getOrElse(SslClientConfiguration(hostname = Some(i.getHostString)))
+            (sslEngineFactory(address, config).self, (s: SSLSession) => sessionVerifier(address, config, s))
+          case _ =>
+            (Ssl.client().self, (_: SSLSession) => true)
         }
-
-        val engine = inetAddr.map(inet =>
-          sslConfig.map(sslEngineFactory(Address(inet), _)).getOrElse(Ssl.client(inet.getHostString, inet.getPort))
-        )
-          .getOrElse(Ssl.client())
-          .self
 
         engine.setUseClientMode(true)
 
         val sslHandler = new SslHandler(engine)
         pipeline.addFirst("ssl", sslHandler)
 
-        val verifier: SSLSession => Boolean = inetAddr match {
-          case Some(inet) =>
-            session => HostnameVerifier(Address(inet), SslClientConfiguration(hostname = Some(inet.getHostName)),session)
-          case None =>
-            _ => true
-        }
+        sslHandler.handshake().addListener(new ChannelFutureListener {
+          override def operationComplete(f: ChannelFuture) = {
+            if (!Try(verifier(engine.getSession)).onFailure { err =>
+              logger.error(err, "Exception thrown during SSL session verification")
+            }.getOrElse(false)) {
+              logger.error("SSL session verification failed")
+              Channels.close(ctx.getChannel)
+            }
+          }
+        })
 
         connection.receive(SwitchToSsl).foreach {
           Channels.fireMessageReceived(ctx, _)

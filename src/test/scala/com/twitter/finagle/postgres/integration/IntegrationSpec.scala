@@ -25,7 +25,8 @@ object IntegrationSpec {
  *
  * If these are conditions are met, the integration tests will be run.
  *
- * The tests can be run with SSL by also setting the USE_PG_SSL variable to "1".
+ * The tests can be run with SSL by also setting the USE_PG_SSL variable to "1", and hostname verification can be added
+ * by setting PG_SSL_HOST.
  *
  */
 class IntegrationSpec extends Spec {
@@ -36,6 +37,7 @@ class IntegrationSpec extends Spec {
     password = sys.env.get("PG_PASSWORD")
     dbname <- sys.env.get("PG_DBNAME")
     useSsl = sys.env.getOrElse("USE_PG_SSL", "0") == "1"
+    sslHost = sys.env.get("PG_SSL_HOST")
   } yield {
 
 
@@ -46,7 +48,7 @@ class IntegrationSpec extends Spec {
         .withCredentials(user, password)
         .database(dbname)
         .withSessionPool.maxSize(1)
-        .conditionally(useSsl, _.withTransport.tlsWithoutValidation)
+        .conditionally(useSsl, c => sslHost.fold(c.withTransport.tls)(c.withTransport.tls(_)))
         .newRichClient(hostPort)
 
       Await.result(Future[PostgresClientImpl] {
@@ -60,7 +62,7 @@ class IntegrationSpec extends Spec {
         .withCredentials(user, password)
         .database(dbname)
         .withSessionPool.maxSize(1)
-        .conditionally(useSsl, _.withTransport.tlsWithoutValidation)
+        .conditionally(useSsl, c => sslHost.fold(c.withTransport.tls)(c.withTransport.tls(_)))
         .newRichClient("badhost:5432")
     }
 
