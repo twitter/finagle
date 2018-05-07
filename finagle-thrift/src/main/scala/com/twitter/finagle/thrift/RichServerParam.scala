@@ -13,13 +13,15 @@ import org.apache.thrift.protocol.{TBinaryProtocol, TCompactProtocol, TProtocolF
  * @param serviceName For server stats, (default: "thrift")
  * @param maxThriftBufferSize The max size of a reusable buffer for the thrift response
  * @param serverStats StatsReceiver for recording metrics
+ * @param perEndpointStats Whether to record per-endpoint stats, (default: false)
  */
 case class RichServerParam(
   protocolFactory: TProtocolFactory = Thrift.param.protocolFactory,
   serviceName: String = "thrift",
   maxThriftBufferSize: Int = Thrift.param.maxThriftBufferSize,
   serverStats: StatsReceiver = LoadedStatsReceiver,
-  responseClassifier: ResponseClassifier = ResponseClassifier.Default
+  responseClassifier: ResponseClassifier = ResponseClassifier.Default,
+  perEndpointStats: Boolean = false
 ) {
 
   def this(

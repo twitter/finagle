@@ -543,7 +543,8 @@ object ThriftMux
       protocolFactory = params[Thrift.param.ProtocolFactory].protocolFactory,
       serviceName = params[Label].label,
       maxThriftBufferSize = params[Thrift.param.MaxReusableBufferSize].maxReusableBufferSize,
-      serverStats = params[Stats].statsReceiver
+      serverStats = params[Stats].statsReceiver,
+      perEndpointStats = params[Thrift.param.PerEndpointStats].enabled
     )
 
     @deprecated("Use serverParam.serviceName", "2017-08-16")
@@ -561,7 +562,7 @@ object ThriftMux
     override protected def maxThriftBufferSize: Int = serverParam.maxThriftBufferSize
 
     /**
-     * Produce a `com.twitter.finagle.Thrift.Server` using the provided
+     * Produce a [[com.twitter.finagle.ThriftMux.Server]] using the provided
      * `TProtocolFactory`.
      */
     def withProtocolFactory(pf: TProtocolFactory): Server =
@@ -595,6 +596,12 @@ object ThriftMux
      */
     def withMaxReusableBufferSize(size: Int): Server =
       configured(Thrift.param.MaxReusableBufferSize(size))
+
+    /**
+     * Produce a [[com.twitter.finagle.ThriftMux.Server]] with per-endpoint stats filters
+     */
+    def withPerEndpointStats: Server =
+      configured(Thrift.param.PerEndpointStats(true))
 
     def withParams(ps: Stack.Params): Server =
       copy(muxer = muxer.withParams(ps))

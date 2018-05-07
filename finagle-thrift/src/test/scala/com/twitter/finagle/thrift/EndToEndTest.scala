@@ -414,6 +414,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       .withStatsReceiver(sr)
       .withResponseClassifier(scalaClassifier)
       .withRequestTimeout(100.milliseconds)
+      .withPerEndpointStats
       .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), iface)
   }
 
@@ -645,6 +646,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     LoadedStatsReceiver.self = sr
 
     val server = Thrift.server
+      .withPerEndpointStats
       .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), iface)
 
     val client = Thrift.client.build[Echo.MethodPerEndpoint](
@@ -679,6 +681,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     val server = Thrift.server
       .withMaxReusableBufferSize(15)
       .withStatsReceiver(serverStats)
+      .withPerEndpointStats
       .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), iface)
 
     val clientStats = new InMemoryStatsReceiver
@@ -709,6 +712,28 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     assert(serverStats.counters(Seq("thrift", "echo", "success")) == 1)
     server.close()
 
+  }
+
+  test("per-endpoint stats won't be recorded if not explicitly set enabled") {
+    val iface: Echo.MethodPerEndpoint = new Echo.MethodPerEndpoint {
+      def echo(x: String) =
+        Future.value(x)
+    }
+    val sr = new InMemoryStatsReceiver
+    val server = Thrift.server
+      .withStatsReceiver(sr)
+      .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), iface)
+
+    val client = Thrift.client.build[Echo.MethodPerEndpoint](
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+      "client"
+    )
+
+    assert(Await.result(client.echo("hi"), 1.second) == "hi")
+    intercept[NoSuchElementException] {assert(sr.counters(Seq("thrift", "echo", "requests")) == 1)}
+    assert(sr.counters(Seq("requests")) == 1)
+
+    server.close()
   }
 
   private[this] val servers: Seq[(String, (StatsReceiver, Echo.MethodPerEndpoint) => ListeningServer)] =

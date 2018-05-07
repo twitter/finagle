@@ -180,6 +180,17 @@ object Thrift
     implicit object MaxReusableBufferSize extends Stack.Param[MaxReusableBufferSize] {
       val default = MaxReusableBufferSize(maxThriftBufferSize)
     }
+
+    /**
+     * A `Param` to control whether to record per-endpoint stats.
+     * If this is set to true, per-endpoint stats will be counted.
+     *
+     * @param enabled Whether to count per-endpoint stats
+     */
+    case class PerEndpointStats(enabled: Boolean)
+    implicit object PerEndpointStats extends Stack.Param[PerEndpointStats] {
+      val default = PerEndpointStats(false)
+    }
   }
 
   object Client extends ThriftClient {
@@ -429,7 +440,8 @@ object Thrift
       protocolFactory = params[Thrift.param.ProtocolFactory].protocolFactory,
       maxThriftBufferSize = params[Thrift.param.MaxReusableBufferSize].maxReusableBufferSize,
       serverStats = params[Stats].statsReceiver,
-      responseClassifier = params[com.twitter.finagle.param.ResponseClassifier].responseClassifier
+      responseClassifier = params[com.twitter.finagle.param.ResponseClassifier].responseClassifier,
+      perEndpointStats = params[Thrift.param.PerEndpointStats].enabled
     )
 
     @deprecated("Use serverParam.serviceName", "2017-08-16")
@@ -468,6 +480,12 @@ object Thrift
      */
     def withMaxReusableBufferSize(size: Int): Server =
       configured(param.MaxReusableBufferSize(size))
+
+    /**
+     * Produce a [[com.twitter.finagle.Thrift.Server]] with per-endpoint stats filters
+     */
+    def withPerEndpointStats: Server =
+      configured(param.PerEndpointStats(true))
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905

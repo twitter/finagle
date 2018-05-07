@@ -100,6 +100,10 @@ Bug Fixes
 
   * finagle-thrift: Removed copied libthrift files. ``PHAB_ID=D165455``
 
+  * finagle-thrift/thriftmux: Server side per-endpoint statsFilter by default is disabled now.
+    It can be set via `c.t.f.thrift.RichServerParam` or a `with`-method as
+    `Thrift{Mux}.server.withPerEndpointStats`. ``PHAB_ID=D167433``
+
 18.4.0
 -------
 
