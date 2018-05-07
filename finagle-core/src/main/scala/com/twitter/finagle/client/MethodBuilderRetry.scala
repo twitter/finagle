@@ -169,10 +169,10 @@ private[client] object MethodBuilderRetry {
   private val LogicalScope = "logical"
 
   // the `StatsReceiver` used is already scoped to `$clientName/$methodName/logical`.
-  // this omits the pending gauge as well as failures/sourcedfailures details.
+  // this omits the pending gauge as well as sourcedfailures details.
   private val LogicalStatsBlacklistFn: Seq[String] => Boolean = { segments =>
     val head = segments.head
-    head == "pending" || head == "failures" || head == "sourcedfailures"
+    head == "pending" || head == "sourcedfailures"
   }
 
   /**

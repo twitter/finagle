@@ -270,6 +270,10 @@ Metrics are scoped to your client's label and method name.
   This does not include any retries.
 - `clnt/your_client_label/method_name/logical/success` — A counter of the total
   number of :ref:`logical <mb_logical_req>` successes.
+- `clnt/your_client_label/method_name/logical/failures` — A counter of the total
+  number of :ref:`logical <mb_logical_req>` failures.
+- `clnt/your_client_label/method_name/logical/failures/exception_name` — A counter of the
+  number of times a specific exception has caused a :ref:`logical <mb_logical_req>` failure.
 - `clnt/your_client_label/method_name/logical/request_latency_ms` — A stat of
   the latency of the :ref:`logical <mb_logical_req>` requests, in milliseconds.
 - `clnt/your_client_label/method_name/retries` — A stat of the number of times

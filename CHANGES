@@ -68,6 +68,8 @@ Runtime Behavior Changes
     The `c.t.f.ChannelException.apply` method will now wrap `javax.net.ssl.SSLException`s in
     `c.t.f.SslException`. ``PHAB_ID=D158344``
 
+  * finagle-core: MethodBuilder metrics now include failures. ``PHAB_ID=D167589``
+
   * finagle-http: ServerAdmissionControl is circumvented for HTTP requests that have
     a body unless the request contains the header 'finagle-http-retryable-request' since
     it cannot be known whether the client can actually retry them, potentially resulting
