@@ -359,15 +359,29 @@ class MethodBuilderTest
       Await.result(client(1), 5.seconds)
     }
 
+    eventually {
+      assert(1 == stats.counters(Seq(clientLabel, methodName, "logical", "requests")))
+      assert(1 == stats.counters(Seq(
+        clientLabel,
+        methodName,
+        "logical",
+        "failures",
+        "com.twitter.finagle.Failure",
+        "java.lang.RuntimeException"))
+      )
+    }
+
     // verify the metrics are getting filtered down
     assert(!stats.gauges.contains(Seq(clientLabel, methodName, "logical", "pending")))
-
-    val failureCounters = stats.counters.exists {
+    val sourcedFailures = stats.counters.exists {
       case (names, _) =>
-        names.containsSlice(Seq(clientLabel, methodName, "logical", "failures")) ||
           names.containsSlice(Seq(clientLabel, methodName, "logical", "sourcedfailures"))
     }
-    assert(!failureCounters)
+    assert(!sourcedFailures)
+    val failures = stats.counters.contains(
+      Seq(clientLabel, methodName, "logical", "failures")
+    )
+    assert(!failures)
   }
 
   test("stats are not filtered with methodName if it does not exist") {
@@ -396,15 +410,29 @@ class MethodBuilderTest
       Await.result(client(1), 5.seconds)
     }
 
+    eventually {
+      assert(1 == stats.counters(Seq(clientLabel, "logical", "requests")))
+      assert(1 == stats.counters(Seq(
+        clientLabel,
+        "logical",
+        "failures",
+        "com.twitter.finagle.Failure",
+        "java.lang.RuntimeException"))
+      )
+    }
+
     // verify the metrics are getting filtered down
     assert(!stats.gauges.contains(Seq(clientLabel, "logical", "pending")))
-
-    val failureCounters = stats.counters.exists {
+    assert(!stats.gauges.contains(Seq(clientLabel, "logical", "pending")))
+    val sourcedFailures = stats.counters.exists {
       case (names, _) =>
-        names.containsSlice(Seq(clientLabel, "logical", "failures")) ||
           names.containsSlice(Seq(clientLabel, "logical", "sourcedfailures"))
     }
-    assert(!failureCounters)
+    assert(!sourcedFailures)
+    val failures = stats.counters.contains(
+      Seq(clientLabel, "logical", "failures")
+    )
+    assert(!failures)
   }
 
   test("underlying service is reference counted") {

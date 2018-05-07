@@ -2,7 +2,7 @@ package com.twitter.finagle.client
 
 import com.twitter.finagle.{Filter, Service, param}
 import com.twitter.finagle.service.{RequeueFilter, _}
-import com.twitter.finagle.stats.{BlacklistStatsReceiver, ExceptionStatsHandler, StatsReceiver}
+import com.twitter.finagle.stats.{BlacklistStatsReceiver, StatsReceiver}
 import com.twitter.logging.{Level, Logger}
 import com.twitter.util.{Future, Stopwatch, Throw, Try}
 
@@ -54,7 +54,7 @@ private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (mb: MethodB
     StatsFilter.typeAgnostic(
       new BlacklistStatsReceiver(stats.scope(LogicalScope), LogicalStatsBlacklistFn),
       mb.config.retry.responseClassifier,
-      ExceptionStatsHandler.Null,
+      mb.params[param.ExceptionStatsHandler].categorizer,
       mb.params[StatsFilter.Param].unit
     )
 
@@ -172,7 +172,16 @@ private[client] object MethodBuilderRetry {
   // this omits the pending gauge as well as sourcedfailures details.
   private val LogicalStatsBlacklistFn: Seq[String] => Boolean = { segments =>
     val head = segments.head
-    head == "pending" || head == "sourcedfailures"
+    if (head == "pending" || head == "sourcedfailures") {
+      true
+    } else if (head == "failures" && segments.size == 1) {
+      // only filter out the failures rollup while keeping the exception
+      // details that are scoped via `ExceptionStatsHandler` to
+      // $clientName/$methodName/logical/failures/<exception_name>
+      true
+    } else {
+      false
+    }
   }
 
   /**
