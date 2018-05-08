@@ -75,8 +75,9 @@ final private[finagle] class Netty4ServerSslChannelInitializer(params: Stack.Par
   def initChannel(ch: Channel): Unit = {
     val remoteAddress: Address =
       // guard against disconnected sessions and test environments with embedded channels
-      if (ch.remoteAddress() == null || !ch.isInstanceOf[InetSocketAddress]) Address.failing
-      else Address(ch.remoteAddress().asInstanceOf[InetSocketAddress])
+      if (ch.remoteAddress == null || !ch.remoteAddress.isInstanceOf[InetSocketAddress])
+        Address.failing
+      else Address(ch.remoteAddress.asInstanceOf[InetSocketAddress])
 
 
     val Transport.ServerSsl(configuration) = params[Transport.ServerSsl]

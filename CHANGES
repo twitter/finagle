@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Bug Fixes
+~~~~~~~~~
+
+  * finagle-netty4: `SslServerSessionVerifier` is now supplied with the proper peer address
+    rather than `Address.failing`. ``PHAB_ID=D168334``
+
 18.5.0
 -------
 
