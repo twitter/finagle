@@ -1,5 +1,6 @@
 package com.twitter.finagle.loadbalancer.aperture
 
+import com.twitter.app.GlobalFlag
 import com.twitter.finagle._
 import com.twitter.finagle.Address.Inet
 import com.twitter.finagle.CoreToggles
@@ -12,6 +13,15 @@ import com.twitter.util.{Future, Time}
 import scala.collection.immutable.VectorBuilder
 import scala.collection.mutable.ListBuffer
 import scala.util.hashing.MurmurHash3
+
+// Temporary flag used to disable dynamic expansion of the deterministic aperture width
+// due to load. This flag is only for testing and to provide a coarse grained escape hatch
+// and should not be considered a standard configuration option. After it has been demonstrated
+// that not dynamically resizing the aperture is preferable for deterministic aperture, the default
+// will be changed to `true` and a short time after that the flag will be removed altogether.
+private object staticDetermisticApertureWidth extends GlobalFlag[Boolean](
+  default = false,
+  help = "Deterministic Aperture doesn't increase its aperture")
 
 private object Aperture {
   private[this] val log = Logger.get()
@@ -59,6 +69,9 @@ private object Aperture {
       12
     }
   }
+
+  // Cache the boolean value so that we don't need to pay the cost of the flag every invocation.
+  private val staticDAperture: Boolean = staticDetermisticApertureWidth()
 }
 
 /**
@@ -255,7 +268,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     /**
      * Returns the current logical aperture.
      */
-    final def logicalAperture: Int = _logicalAperture
+    def logicalAperture: Int = _logicalAperture
 
     /**
      * Represents how many servers `pick` will select over – which may
@@ -431,6 +444,9 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     // but that isn't likely to hold much value given our definition of `min`
     // and how we calculate the `apertureWidth`.
     override def min: Int = math.min(Aperture.MinDeterminsticAperture, vector.size)
+
+    // If we don't allow the aperture to be dynamic based on the load, we just use the min value.
+    override def logicalAperture: Int = if (staticDAperture) min else super.logicalAperture
 
     // Translates the logical `aperture` into a physical one that
     // maps to the ring. Note, we do this in terms of the peer
