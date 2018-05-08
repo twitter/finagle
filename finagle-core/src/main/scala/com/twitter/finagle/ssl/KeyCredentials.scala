@@ -1,8 +1,7 @@
 package com.twitter.finagle.ssl
 
 import java.io.File
-
-import javax.net.ssl.KeyManagerFactory
+import javax.net.ssl
 
 /**
  * KeyCredentials represent the items necessary for this configured
@@ -52,8 +51,9 @@ object KeyCredentials {
       extends KeyCredentials
 
   /**
-   *
-   * @param keyManagerFactory
+   * Indicates that this [[ssl.KeyManagerFactory]] should be used by
+   * the engine factory.
+   * @param keyManagerFactory A factory able of constructing the KeyManagers
    */
-  case class FromKeyManager(keyManagerFactory: KeyManagerFactory) extends KeyCredentials
+  case class KeyManagerFactory(keyManagerFactory: ssl.KeyManagerFactory) extends KeyCredentials
 }

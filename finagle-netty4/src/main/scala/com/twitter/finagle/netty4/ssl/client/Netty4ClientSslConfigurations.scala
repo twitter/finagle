@@ -48,7 +48,7 @@ private[finagle] object Netty4ClientSslConfigurations {
     val withKey = keyCredentials match {
       case KeyCredentials.Unspecified =>
         Return(builder) // Do Nothing
-      case KeyCredentials.CertAndKey(certFile, keyFile) =>
+      case KeyCredentials.CertAndKey(certFile, keyFile)                 =>
         for {
           key <- new PrivateKeyFile(keyFile).readPrivateKey()
           cert <- new X509CertificateFile(certFile).readX509Certificate()
@@ -59,7 +59,7 @@ private[finagle] object Netty4ClientSslConfigurations {
           cert <- new X509CertificateFile(certFile).readX509Certificate()
           chain <- new X509CertificateFile(chainFile).readX509Certificates()
         } yield builder.keyManager(key, cert +: chain: _*)
-      case KeyCredentials.FromKeyManager(keyManagerFactory) =>
+      case KeyCredentials.KeyManagerFactory(keyManagerFactory)          =>
         Return(builder.keyManager(keyManagerFactory))
     }
     Netty4SslConfigurations.unwrapTryContextBuilder(withKey)

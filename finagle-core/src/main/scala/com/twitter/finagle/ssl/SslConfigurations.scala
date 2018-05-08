@@ -21,19 +21,19 @@ private[ssl] object SslConfigurations {
   def getKeyManagers(keyCredentials: KeyCredentials): Option[Array[KeyManager]] =
     keyCredentials match {
       case KeyCredentials.Unspecified => None
-      case KeyCredentials.CertAndKey(certFile, keyFile)     =>
+      case KeyCredentials.CertAndKey(certFile, keyFile) =>
         val factory = new Pkcs8KeyManagerFactory(certFile, keyFile)
         val tryKms = factory.getKeyManagers()
         tryKms match {
           case Return(kms) => Some(kms)
           case Throw(ex) => throw SslConfigurationException(ex)
         }
-      case _: KeyCredentials.CertKeyAndChain                =>
+      case _: KeyCredentials.CertKeyAndChain =>
         throw SslConfigurationException.notSupported(
           "KeyCredentials.CertKeyAndChain",
           "SslConfigurations"
         )
-      case KeyCredentials.FromKeyManager(keyManagerFactory) =>
+      case KeyCredentials.KeyManagerFactory(keyManagerFactory) =>
         Some(keyManagerFactory.getKeyManagers)
     }
 
@@ -60,6 +60,8 @@ private[ssl] object SslConfigurations {
           case Return(tms) => Some(tms)
           case Throw(ex) => throw SslConfigurationException(ex)
         }
+      case TrustCredentials.TrustManagerFactory(trustManagerFactory) =>
+        Some(trustManagerFactory.getTrustManagers)
     }
 
   /**
@@ -145,15 +147,15 @@ private[ssl] object SslConfigurations {
     keyCredentials: KeyCredentials
   ): Unit =
     keyCredentials match {
-      case KeyCredentials.Unspecified              => // Do Nothing
-      case KeyCredentials.CertAndKey(_, _)         =>
+      case KeyCredentials.Unspecified => // Do Nothing
+      case KeyCredentials.CertAndKey(_, _) =>
         throw SslConfigurationException.notSupported("KeyCredentials.CertAndKey", engineFactoryName)
       case KeyCredentials.CertKeyAndChain(_, _, _) =>
         throw SslConfigurationException.notSupported(
           "KeyCredentials.CertKeyAndChain",
           engineFactoryName
         )
-      case KeyCredentials.FromKeyManager(_)        =>
+      case KeyCredentials.KeyManagerFactory(_) =>
         throw SslConfigurationException.notSupported(
           "KeyCredentials.FromKeyManager",
           engineFactoryName
@@ -177,6 +179,8 @@ private[ssl] object SslConfigurations {
           "TrustCredentials.CertCollection",
           engineFactoryName
         )
+      case TrustCredentials.TrustManagerFactory(_) =>
+        throw SslConfigurationException.notSupported("TrustCredentials.TrustManagerFactory", engineFactoryName)
     }
 
   /**

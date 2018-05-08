@@ -120,6 +120,7 @@ class SslConfigurationsTest extends FunSuite {
         ex.cause.getMessage
     )
   }
+  //todo: AV
 
   test("checkTrustCredentialsNotSupported throws for CertCollection") {
     val trustCredentials = TrustCredentials.CertCollection(null)

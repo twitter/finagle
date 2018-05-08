@@ -5,8 +5,6 @@ import com.twitter.finagle.ssl.server.SslServerConfiguration
 import com.twitter.io.TempFile
 import java.io.File
 import java.security.KeyStore
-
-import com.twitter.finagle.ssl.client.SslClientConfiguration
 import javax.net.ssl.{KeyManagerFactory, TrustManagerFactory}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -116,19 +114,32 @@ class Netty4ServerEngineFactoryTest extends FunSuite {
     }
   }
 
-  test("config with KeyManager succeeds") {
-    // ToDo: Should we also create tests / build the functionality that the keymanagers are rejected if containing expired certs
-
+  test("config with TrustManagerFactory and KeyManagerFactory succeeds") {
     val trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm)
     trustManagerFactory.init(null.asInstanceOf[KeyStore])
 
-    val trustCredentials = TrustCredentials.FromTrustManagerFactory(trustManagerFactory)
+    val trustCredentials = TrustCredentials.TrustManagerFactory(trustManagerFactory)
 
     val keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm)
     keyManagerFactory.init(null, Array[Char]())
 
-    val keyCredentials = KeyCredentials.FromKeyManager(keyManagerFactory)
+    val keyCredentials = KeyCredentials.KeyManagerFactory(keyManagerFactory)
+
     val config = SslServerConfiguration(trustCredentials = trustCredentials, keyCredentials = keyCredentials)
+    val engine = factory(config)
+    val sslEngine = engine.self
+
+    assert(sslEngine != null)
+  }
+
+  test("config with only KeyCredentials succeeds") {
+    // ToDo: Should we also create tests / build the functionality that the keymanagers are rejected if containing expired certs
+
+    val keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm)
+    keyManagerFactory.init(null, Array[Char]())
+
+    val keyCredentials = KeyCredentials.KeyManagerFactory(keyManagerFactory)
+    val config = SslServerConfiguration(keyCredentials = keyCredentials)
     val engine = factory(config)
     val sslEngine = engine.self
 

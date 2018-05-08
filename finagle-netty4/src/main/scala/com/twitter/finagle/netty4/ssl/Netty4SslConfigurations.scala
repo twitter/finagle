@@ -23,13 +23,6 @@ private[finagle] object Netty4SslConfigurations {
    * method mutates the `SslContextBuilder`, and returns it as the result.
    *
    * @note TrustCredentials.Unspecified does not change the builder,
-   * as it is not possible to set the trustManager to use the system
-   * trust credentials, like with the JDK engine factories.
-   *
-   * @todo Is the note above still true?
-   *       AFAIK, we can do
-   *       `TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm)``
-   *       to get the default system trust credentials.
    */
   def configureTrust(
     builder: SslContextBuilder,
@@ -42,7 +35,7 @@ private[finagle] object Netty4SslConfigurations {
         builder.trustManager(InsecureTrustManagerFactory.INSTANCE)
       case TrustCredentials.CertCollection(file) =>
         builder.trustManager(file)
-      case TrustCredentials.FromTrustManagerFactory(trustManagerFactory) =>
+      case TrustCredentials.TrustManagerFactory(trustManagerFactory) =>
         builder.trustManager(trustManagerFactory)
     }
   }
