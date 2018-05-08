@@ -309,7 +309,7 @@ service loading mechanism (see <code>com.twitter.app.LoadService</code>) to be l
 or it is currently not &quot;operating&quot; on that <code>id</code>.
 </p></div><dl class="paramcmts block"><dt class="param">id</dt><dd class="cmt"><p>the identifying name of the <code>Toggle</code>.
           These should generally be fully qualified names to avoid conflicts
-          between libraries. For example, &quot;com.twitter.finagle.CoolThing&quot;.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ToggleMap.html" class="extype" name="com.twitter.finagle.toggle.ToggleMap">ToggleMap</a></dd></dl></div>
+          between libraries. For example, &quot;com.twitter.finagle.CoolThing&quot;.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ToggleMap.html" class="extype" name="com.twitter.finagle.toggle.ToggleMap">ToggleMap</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="ToggleMap.html#get(id:String):com.twitter.finagle.toggle.Toggle[Integer]" class="extmbr" name="com.twitter.finagle.toggle.ToggleMap#get">get</a> for a Java friendly version</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.toggle.ToggleMap#iterator" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="iterator:Iterator[com.twitter.finagle.toggle.Toggle.Metadata]"></a><a id="iterator:Iterator[Metadata]"></a>
       <span class="permalink">
@@ -492,6 +492,27 @@ backing <a href="" class="extype" name="com.twitter.finagle.toggle.ServiceLoaded
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.toggle.ToggleMap#get" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get(id:String):com.twitter.finagle.toggle.Toggle[Integer]"></a><a id="get(String):Toggle[Integer]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/toggle/ServiceLoadedToggleMap.html#get(id:String):com.twitter.finagle.toggle.Toggle[Integer]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get</span><span class="params">(<span name="id">id: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a>[<span class="extype" name="java.lang.Integer">Integer</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Get a <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a> for this <code>id</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Get a <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a> for this <code>id</code>.  Java-friendly synonym for <code>apply</code>.</p><p>The <code>Toggle.isDefined</code> method should return <code>false</code> if the
+<a href="ToggleMap.html" class="extype" name="com.twitter.finagle.toggle.ToggleMap">ToggleMap</a> does not know about that <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a>
+or it is currently not &quot;operating&quot; on that <code>id</code>.
+</p></div><dl class="paramcmts block"><dt class="param">id</dt><dd class="cmt"><p>the identifying name of the <code>Toggle</code>.
+          These should generally be fully qualified names to avoid conflicts
+          between libraries. For example, &quot;com.twitter.finagle.CoolThing&quot;.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ToggleMap.html" class="extype" name="com.twitter.finagle.toggle.ToggleMap">ToggleMap</a></dd><dt>Note</dt><dd><span class="cmt"><p>this returns a <code>java.lang.Integer</code> for Java compatibility.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">

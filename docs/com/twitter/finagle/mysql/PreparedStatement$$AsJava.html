@@ -495,6 +495,37 @@ Future&lt;Result&gt; result = preparedStatement.execute(of(<span class="lit">"va
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.PreparedStatement.AsJava#modify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="modify(params:com.twitter.finagle.mysql.Parameter*):com.twitter.util.Future[com.twitter.finagle.mysql.OK]"></a><a id="modify(Parameter*):Future[OK]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/PreparedStatement$$AsJava.html#modify(params:com.twitter.finagle.mysql.Parameter*):com.twitter.util.Future[com.twitter.finagle.mysql.OK]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">modify</span><span class="params">(<span name="params">params: <a href="Parameter.html" class="extype" name="com.twitter.finagle.mysql.Parameter">Parameter</a>*</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="OK.html" class="extype" name="com.twitter.finagle.mysql.OK">OK</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Executes the prepared statement DML (e.g.</p><div class="fullcomment"><div class="comment cmt"><p>Executes the prepared statement DML (e.g. INSERT/UPDATE/DELETE) or DDL
+(e.g. CREATE TABLE, DROP TABLE, COMMIT, START TRANSACTION, etc) with the
+given <code>params</code>.</p><p>Use <a href="Parameters$.html#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameters#of">Parameters.of</a> for converting the inputs into <a href="Parameter.html" class="extype" name="com.twitter.finagle.mysql.Parameter">Parameter</a>s.</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Client;
+<span class="kw">import</span> com.twitter.finagle.mysql.OK;
+<span class="kw">import</span> com.twitter.finagle.mysql.PreparedStatement.AsJava;
+<span class="kw">import</span> com.twitter.util.Future;
+<span class="kw">import</span> static com.twitter.finagle.mysql.Parameters.of;
+
+Client client = ...
+PreparedStatement.AsJava preparedStatement = client
+  .prepare(<span class="lit">"INSERT INTO a_table (column1, column2) VALUES (?, ?)"</span>)
+  .asJava();
+Future&lt;OK&gt; ok = preparedStatement.modify(of(<span class="lit">"value1"</span>), of(<span class="num">1234</span>));</pre></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@varargs</span><span class="args">()</span>
+              
+        </dd><dt>See also</dt><dd><span class="cmt"><p><a href="PreparedStatement.html#modify(params:com.twitter.finagle.mysql.Parameter*):com.twitter.util.Future[com.twitter.finagle.mysql.OK]" class="extmbr" name="com.twitter.finagle.mysql.PreparedStatement#modify">PreparedStatement.modify</a></p></span></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -549,6 +580,35 @@ Future&lt;Result&gt; result = preparedStatement.execute(of(<span class="lit">"va
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.PreparedStatement.AsJava#read" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="read(params:com.twitter.finagle.mysql.Parameter*):com.twitter.util.Future[com.twitter.finagle.mysql.ResultSet]"></a><a id="read(Parameter*):Future[ResultSet]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/PreparedStatement$$AsJava.html#read(params:com.twitter.finagle.mysql.Parameter*):com.twitter.util.Future[com.twitter.finagle.mysql.ResultSet]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">read</span><span class="params">(<span name="params">params: <a href="Parameter.html" class="extype" name="com.twitter.finagle.mysql.Parameter">Parameter</a>*</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="ResultSet.html" class="extype" name="com.twitter.finagle.mysql.ResultSet">ResultSet</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Executes the prepared statement SELECT query with the given <code>params</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Executes the prepared statement SELECT query with the given <code>params</code>.</p><p>Use <a href="Parameters$.html#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameters#of">Parameters.of</a> for converting the inputs into <a href="Parameter.html" class="extype" name="com.twitter.finagle.mysql.Parameter">Parameter</a>s.</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Client;
+<span class="kw">import</span> com.twitter.finagle.mysql.PreparedStatement.AsJava;
+<span class="kw">import</span> com.twitter.finagle.mysql.ResultSet;
+<span class="kw">import</span> com.twitter.util.Future;
+<span class="kw">import</span> static com.twitter.finagle.mysql.Parameters.of;
+
+Client client = ...
+PreparedStatement.AsJava preparedStatement = client
+  .prepare(<span class="lit">"SELECT column1 FROM a_table WHERE column2 = ?"</span>)
+  .asJava();
+Future&lt;ResultSet&gt; resultSet = preparedStatement.read(of(<span class="lit">"value1"</span>), of(<span class="num">1234</span>));</pre></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@varargs</span><span class="args">()</span>
+              
+        </dd><dt>See also</dt><dd><span class="cmt"><p><a href="PreparedStatement.html#read(params:com.twitter.finagle.mysql.Parameter*):com.twitter.util.Future[com.twitter.finagle.mysql.ResultSet]" class="extmbr" name="com.twitter.finagle.mysql.PreparedStatement#read">PreparedStatement.read</a></p></span><span class="cmt"><p><a href="#select[T](f:com.twitter.function.JavaFunction[com.twitter.finagle.mysql.Row,T],params:com.twitter.finagle.mysql.Parameter*):com.twitter.util.Future[java.util.List[T]]" class="extmbr" name="com.twitter.finagle.mysql.PreparedStatement.AsJava#select">select</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.mysql.PreparedStatement.AsJava#select" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="select[T](f:com.twitter.function.JavaFunction[com.twitter.finagle.mysql.Row,T],params:com.twitter.finagle.mysql.Parameter*):com.twitter.util.Future[java.util.List[T]]"></a><a id="select[T](JavaFunction[Row,T],Parameter*):Future[List[T]]"></a>
       <span class="permalink">
@@ -580,14 +640,13 @@ PreparedStatement.AsJava preparedStatement = client
   .prepare(<span class="lit">"SELECT column1 FROM a_table WHERE column2 = ?"</span>)
   .asJava();
 Future&lt;<span class="std">List</span>&lt;<span class="std">String</span>&gt;&gt; result = preparedStatement.select((Row row) -&gt; {
-    StringValue sv = (StringValue) row.apply(<span class="lit">"column1"</span>).get();
-    <span class="kw">return</span> sv.s();
+    <span class="kw">return</span> row.stringOrNull();
   },
   of(<span class="num">1234</span>)
 );</pre></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@varargs</span><span class="args">()</span>
               
-        </dd><dt>See also</dt><dd><span class="cmt"><p><a href="PreparedStatement.html#select[T](params:com.twitter.finagle.mysql.Parameter*)(f:com.twitter.finagle.mysql.Row=&gt;T):com.twitter.util.Future[Seq[T]]" class="extmbr" name="com.twitter.finagle.mysql.PreparedStatement#select">PreparedStatement.select</a></p></span></dd></dl></div>
+        </dd><dt>See also</dt><dd><span class="cmt"><p><a href="PreparedStatement.html#select[T](params:com.twitter.finagle.mysql.Parameter*)(f:com.twitter.finagle.mysql.Row=&gt;T):com.twitter.util.Future[Seq[T]]" class="extmbr" name="com.twitter.finagle.mysql.PreparedStatement#select">PreparedStatement.select</a></p></span><span class="cmt"><p><a href="#read(params:com.twitter.finagle.mysql.Parameter*):com.twitter.util.Future[com.twitter.finagle.mysql.ResultSet]" class="extmbr" name="com.twitter.finagle.mysql.PreparedStatement.AsJava#read">read</a></p></span></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

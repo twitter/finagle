@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>MethodBuilder &#8212; Finagle 18.4.0 documentation</title>
+    <title>MethodBuilder &#8212; Finagle 18.5.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '18.4.0',
+        VERSION:     '18.5.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 18.4.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 18.5.0 documentation" href="index.html" />
    
   
   <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
@@ -296,6 +296,8 @@ number of <a class="reference internal" href="#mb-logical-req"><span class="std 
 This does not include any retries.</li>
 <li><cite>clnt/your_client_label/method_name/logical/success</cite> — A counter of the total
 number of <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> successes.</li>
+<li><cite>clnt/your_client_label/method_name/logical/failures/exception_name</cite> — A counter of the
+number of times a specific exception has caused a <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> failure.</li>
 <li><cite>clnt/your_client_label/method_name/logical/request_latency_ms</cite> — A stat of
 the latency of the <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> requests, in milliseconds.</li>
 <li><cite>clnt/your_client_label/method_name/retries</cite> — A stat of the number of times
@@ -328,6 +330,7 @@ configured.</li>
 <ul class="simple">
 <li><cite>clnt/example_client/get_statuses/logical/requests</cite></li>
 <li><cite>clnt/example_client/get_statuses/logical/success</cite></li>
+<li><cite>clnt/example_client/get_statuses/logical/failures/exception_name</cite></li>
 <li><cite>clnt/example_client/get_statuses/logical/request_latency_ms</cite></li>
 <li><cite>clnt/example_client/get_statuses/retries</cite></li>
 <li><cite>clnt/example_client/get_statuses/backups/send_backup_after_ms</cite></li>
@@ -453,10 +456,10 @@ service GraphService {
 </pre></div>
 </div>
 <p>We create <code class="docutils literal"><span class="pre">MethodBuilder</span></code>s which work on Scrooge&#8217;s generated
-Service-per-method, <code class="docutils literal"><span class="pre">ServiceIface</span></code>.</p>
+Service-per-method, <code class="docutils literal"><span class="pre">ServicePerEndpoint</span></code>.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">Scrooge does not yet generate <code class="docutils literal"><span class="pre">ServiceIface</span></code> for Java users,
+<p class="last">Scrooge does not yet generate <code class="docutils literal"><span class="pre">ServicePerEndpoint</span></code> for Java users,
 so this is limited to Scala.</p>
 </div>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
@@ -476,7 +479,7 @@ so this is limited to Scala.</p>
     <span class="o">.</span><span class="n">withTimeoutPerRequest</span><span class="o">(</span><span class="mf">20.</span><span class="n">milliseconds</span><span class="o">)</span>
     <span class="o">.</span><span class="n">withTimeoutTotal</span><span class="o">(</span><span class="mf">50.</span><span class="n">milliseconds</span><span class="o">)</span>
     <span class="o">.</span><span class="n">withRetryForClassifier</span><span class="o">(</span><span class="nc">ThriftMuxResponseClassifier</span><span class="o">.</span><span class="nc">ThriftExceptionsAsFailures</span><span class="o">)</span>
-    <span class="o">.</span><span class="n">newServiceIface</span><span class="o">[</span><span class="kt">GraphService.ServiceIface</span><span class="o">](</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;followers&quot;</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">servicePerEndpoint</span><span class="o">[</span><span class="kt">GraphService.ServicePerEndpoint</span><span class="o">](</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;followers&quot;</span><span class="o">)</span>
     <span class="o">.</span><span class="n">followers</span>
 
 <span class="c1">// `Service` for &quot;follow&quot;</span>
@@ -488,38 +491,39 @@ so this is limited to Scala.</p>
       <span class="k">case</span> <span class="nc">ReqRep</span><span class="o">(</span><span class="k">_</span><span class="o">,</span> <span class="nc">Throw</span><span class="o">(</span><span class="nc">NotFoundException</span><span class="o">(</span><span class="n">code</span><span class="o">)))</span> <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="mi">5</span> <span class="k">=&gt;</span>
         <span class="nc">ResponseClass</span><span class="o">.</span><span class="nc">RetryableFailure</span>
     <span class="o">}</span>
-    <span class="o">.</span><span class="n">newServiceIface</span><span class="o">[</span><span class="kt">GraphService.ServiceIface</span><span class="o">](</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;follow&quot;</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">servicePerEndpoint</span><span class="o">[</span><span class="kt">GraphService.ServicePerEndpoint</span><span class="o">](</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;follow&quot;</span><span class="o">)</span>
     <span class="o">.</span><span class="n">follow</span>
 </pre></div>
 </div>
-<p>If you are working with code that prefers Scrooge&#8217;s <code class="docutils literal"><span class="pre">FutureIface</span></code> you can
-convert the <code class="docutils literal"><span class="pre">ServiceIface</span></code> by wrapping it with a <code class="docutils literal"><span class="pre">MethodIface</span></code>.</p>
+<p>If you are working with code that prefers Scrooge&#8217;s <code class="docutils literal"><span class="pre">MethodPerEndpoint</span></code>
+or <code class="docutils literal"><span class="pre">FutureIface</span></code> you can convert from a <code class="docutils literal"><span class="pre">ServicePerEndpoint</span></code> by wrapping it
+with a <code class="docutils literal"><span class="pre">MethodPerEndpoint</span></code>.</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Filter</span><span class="o">,</span> <span class="nc">ThriftMux</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.example.graph._</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
 
 <span class="k">val</span> <span class="n">stackClient</span> <span class="k">=</span> <span class="nc">ThriftMux</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">withLabel</span><span class="o">(</span><span class="s">&quot;thriftmux_example&quot;</span><span class="o">)</span>
-<span class="k">val</span> <span class="n">serviceIface</span><span class="k">:</span> <span class="kt">GraphService.ServiceIface</span> <span class="o">=</span>
+<span class="k">val</span> <span class="n">servicePerEndpoint</span><span class="k">:</span> <span class="kt">GraphService.ServicePerEndpoint</span> <span class="o">=</span>
   <span class="n">stackClient</span>
     <span class="o">.</span><span class="n">methodBuilder</span><span class="o">(</span><span class="s">&quot;inet!localhost:8989&quot;</span><span class="o">)</span>
     <span class="o">.</span><span class="n">withTimeoutPerRequest</span><span class="o">(</span><span class="mf">20.</span><span class="n">milliseconds</span><span class="o">)</span>
-    <span class="o">.</span><span class="n">newServiceIface</span><span class="o">[</span><span class="kt">GraphService.ServiceIface</span><span class="o">](</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;followers&quot;</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">servicePerEndpoint</span><span class="o">[</span><span class="kt">GraphService.ServicePerEndpoint</span><span class="o">](</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;followers&quot;</span><span class="o">)</span>
 
-<span class="c1">// `FutureIface` is a collection of methods that return `Futures`.</span>
-<span class="c1">// It will use the configuration from the `ServiceIface` which allows you to decorate</span>
-<span class="c1">// the endpoints with `Filters`.</span>
+<span class="c1">// `MethodPerEndpoint` is a collection of methods that return `Futures`.</span>
+<span class="c1">// It will use the configuration from the `ServicePerEndpoint` which allows</span>
+<span class="c1">// you to decorate the endpoints with `Filters`.</span>
 <span class="k">val</span> <span class="n">loggingFilter</span><span class="k">:</span> <span class="kt">Filter</span><span class="o">[</span><span class="kt">GraphService.Follow.Args</span>, <span class="kt">GraphService.Follow.SuccessType</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
-<span class="k">val</span> <span class="n">filtered</span><span class="k">:</span> <span class="kt">GraphService.ServiceIface</span> <span class="o">=</span>
-  <span class="n">serviceIface</span><span class="o">.</span><span class="n">copy</span><span class="o">(</span><span class="n">follow</span> <span class="k">=</span> <span class="n">loggingFilter</span><span class="o">.</span><span class="n">andThen</span><span class="o">(</span><span class="n">serviceIface</span><span class="o">.</span><span class="n">follow</span><span class="o">))</span>
-<span class="k">val</span> <span class="n">futureIface</span><span class="k">:</span> <span class="kt">GraphService.FutureIface</span> <span class="o">=</span>
-  <span class="k">new</span> <span class="nc">GraphService</span><span class="o">.</span><span class="nc">MethodIface</span><span class="o">(</span><span class="n">filtered</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">filtered</span><span class="k">:</span> <span class="kt">GraphService.ServicePerEndpoint</span> <span class="o">=</span>
+  <span class="n">servicePerEndpoint</span><span class="o">.</span><span class="n">withFollow</span><span class="o">(</span><span class="n">loggingFilter</span><span class="o">.</span><span class="n">andThen</span><span class="o">(</span><span class="n">servicePerEndpoint</span><span class="o">.</span><span class="n">follow</span><span class="o">))</span>
+<span class="k">val</span> <span class="n">methodPerEndpoint</span><span class="k">:</span> <span class="kt">GraphService.MethodPerEndpoint</span> <span class="o">=</span>
+  <span class="k">new</span> <span class="nc">GraphService</span><span class="o">.</span><span class="nc">MethodPerEndpoint</span><span class="o">(</span><span class="n">filtered</span><span class="o">)</span>
 
 <span class="k">val</span> <span class="n">result</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span>
-  <span class="n">futureIface</span><span class="o">.</span><span class="n">follow</span><span class="o">(</span><span class="n">follower</span> <span class="k">=</span> <span class="mi">568825492L</span><span class="o">,</span> <span class="n">followee</span> <span class="k">=</span> <span class="mi">4196983835L</span><span class="o">)</span>
+  <span class="n">methodPerEndpoint</span><span class="o">.</span><span class="n">follow</span><span class="o">(</span><span class="n">follower</span> <span class="k">=</span> <span class="mi">568825492L</span><span class="o">,</span> <span class="n">followee</span> <span class="k">=</span> <span class="mi">4196983835L</span><span class="o">)</span>
 </pre></div>
 </div>
-<p>Further details on the differences between <code class="docutils literal"><span class="pre">ServiceIface</span></code> and <code class="docutils literal"><span class="pre">FutureIface</span></code>
+<p>Further details on the differences between <code class="docutils literal"><span class="pre">ServicePerEndpoint</span></code> and <code class="docutils literal"><span class="pre">MethodPerEndpoint</span></code>
 and how to work with them are in
 <a class="reference external" href="https://twitter.github.io/scrooge/Finagle.html">Scrooge&#8217;s Finagle docs</a>.</p>
 </div>

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>FAQ &#8212; Finagle 18.4.0 documentation</title>
+    <title>FAQ &#8212; Finagle 18.5.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '18.4.0',
+        VERSION:     '18.5.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 18.4.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 18.5.0 documentation" href="index.html" />
     <link rel="next" title="Glossary of Terms" href="Glossary.html" />
     <link rel="prev" title="Unsuccessful Responses" href="UnsuccessfulResponses.html" />
    
@@ -255,6 +255,11 @@ with many other non-fungible services, in which it makes sense to proliferate cl
 created, used, and thrown away, but in the vast majority of cases, clients should be persistent,
 not ephemeral.</p>
 </div>
+<div class="section" id="when-can-i-use-a-null">
+<h3>When can I use a null?<a class="headerlink" href="#when-can-i-use-a-null" title="Permalink to this headline">¶</a></h3>
+<p>None of Finagle&#8217;s APIs admits nulls unless noted otherwise.  Finagle is written in Scala, and by
+convention, we use Scala <cite>Options</cite> when a parameter or a result is optional.</p>
+</div>
 </div>
 <div class="section" id="mux-specific-faq">
 <h2>Mux-specific FAQ<a class="headerlink" href="#mux-specific-faq" title="Permalink to this headline">¶</a></h2>
@@ -330,6 +335,7 @@ is an implementation of the Thrift protocol built on top of Mux.</p>
 <li><a class="reference internal" href="#why-do-clients-see-com-twitter-finagle-failedfastexception-s">Why do clients see com.twitter.finagle.FailedFastException&#8217;s?</a></li>
 <li><a class="reference internal" href="#what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception">What is a com.twitter.finagle.service.ResponseClassificationSyntheticException?</a></li>
 <li><a class="reference internal" href="#how-long-should-my-clients-live">How long should my Clients live?</a></li>
+<li><a class="reference internal" href="#when-can-i-use-a-null">When can I use a null?</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#mux-specific-faq">Mux-specific FAQ</a><ul>

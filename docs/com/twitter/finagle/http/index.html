@@ -341,6 +341,22 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       
+    </li><li name="com.twitter.finagle.http.cookie" visbl="pub" class="indented5 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="cookie"></a><a id="cookie:cookie"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#cookie" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="cookie/index.html"><span class="name">cookie</span></a>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.http.exp" visbl="pub" class="indented5 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="exp"></a><a id="exp:exp"></a>
       <span class="permalink">
@@ -539,8 +555,8 @@ stabilized (moved elsewhere) at any time.
                         <a href="RequestBuilder.html" title="">RequestBuilder</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="RequestParamMap.html" title="HttpRequest-backed param map."></a>
-                        <a href="RequestParamMap.html" title="HttpRequest-backed param map.">RequestParamMap</a>
+                        <a class="class" href="RequestParamMap.html" title="Http Request-backed ParamMap."></a>
+                        <a href="RequestParamMap.html" title="Http Request-backed ParamMap.">RequestParamMap</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="RequestProxy.html" title="Proxy for Request."></a>
@@ -585,6 +601,10 @@ stabilized (moved elsewhere) at any time.
                         <a class="object" href="TooLongMessageException$.html" title=""></a>
                         <a class="class" href="TooLongMessageException.html" title="The Message was too long to be handled correctly"></a>
                         <a href="TooLongMessageException.html" title="The Message was too long to be handled correctly">TooLongMessageException</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="Uri$.html" title=""></a>
+                        <a class="class" href="Uri.html" title="Represents an immutable URI."></a>
+                        <a href="Uri.html" title="Represents an immutable URI.">Uri</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="Version$.html" title=""></a>
                         <a class="class" href="Version.html" title="Represents the HTTP version."></a>
@@ -1600,12 +1620,15 @@ Further details, including the request and response, are available at
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="HttpRequest-backed param map." href="RequestParamMap.html"><span class="name">RequestParamMap</span></a><span class="result"> extends <a href="ParamMap.html" class="extype" name="com.twitter.finagle.http.ParamMap">ParamMap</a></span>
+        <a title="Http Request-backed ParamMap." href="RequestParamMap.html"><span class="name">RequestParamMap</span></a><span class="result"> extends <a href="ParamMap.html" class="extype" name="com.twitter.finagle.http.ParamMap">ParamMap</a></span>
       </span>
       
-      <p class="shortcomment cmt">HttpRequest-backed param map.</p><div class="fullcomment"><div class="comment cmt"><p>HttpRequest-backed param map.  Handle parameters in the URL and form encoded
-body.  Multipart forms are not supported (not needed, could be abusive).</p><p>This map is a multi-map.  Use getAll() to get all values for a key.
-</p></div></div>
+      <p class="shortcomment cmt">Http <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>-backed <a href="ParamMap.html" class="extype" name="com.twitter.finagle.http.ParamMap">ParamMap</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Http <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>-backed <a href="ParamMap.html" class="extype" name="com.twitter.finagle.http.ParamMap">ParamMap</a>. This <a href="ParamMap.html" class="extype" name="com.twitter.finagle.http.ParamMap">ParamMap</a> contains both
+parameters provided as part of the request URI and parameters provided
+as part of the request body.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Request body parameters are considered if the following criteria are true:</p><ol class="decimal"><li>The request is not a TRACE request.
+  2. The request media type is 'application/x-www-form-urlencoded'
+  3. The content length is greater than 0.</li></ol></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.RequestProxy" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="RequestProxyextendsRequest.Proxy"></a><a id="RequestProxy:RequestProxy"></a>
       <span class="permalink">
@@ -1769,6 +1792,22 @@ admin interface is different from the pattern provided in <a href="Route.html#pa
       </span>
       
       <p class="shortcomment cmt">The Message was too long to be handled correctly</p>
+    </li><li name="com.twitter.finagle.http.Uri" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="UriextendsAnyRef"></a><a id="Uri:Uri"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#UriextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Represents an immutable URI." href="Uri.html"><span class="name">Uri</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Represents an immutable URI.</p>
     </li><li name="com.twitter.finagle.http.Version" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="VersionextendsProductwithSerializable"></a><a id="Version:Version"></a>
       <span class="permalink">
@@ -2189,6 +2228,22 @@ its credentials from a provided CredentialSource... usually JAAS.
       </span>
       <span class="symbol">
         <a title="" href="TooLongMessageException$.html"><span class="name">TooLongMessageException</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.http.Uri" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Uri"></a><a id="Uri:Uri"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#Uri" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Uri$.html"><span class="name">Uri</span></a>
       </span>
       
       

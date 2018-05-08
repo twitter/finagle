@@ -359,9 +359,9 @@ one to load.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.toggle.StandardToggleMap#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="apply(libraryName:String,statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.toggle.ToggleMap"></a><a id="apply(String,StatsReceiver):ToggleMap"></a>
+      <a id="apply(libraryName:String,statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.toggle.ToggleMap.Mutable"></a><a id="apply(String,StatsReceiver):Mutable"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/toggle/StandardToggleMap$.html#apply(libraryName:String,statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.toggle.ToggleMap" title="Permalink">
+      <a href="../../../../com/twitter/finagle/toggle/StandardToggleMap$.html#apply(libraryName:String,statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.toggle.ToggleMap.Mutable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -370,7 +370,7 @@ one to load.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="libraryName">libraryName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>)</span><span class="result">: <a href="ToggleMap.html" class="extype" name="com.twitter.finagle.toggle.ToggleMap">ToggleMap</a></span>
+        <span class="name">apply</span><span class="params">(<span name="libraryName">libraryName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>)</span><span class="result">: <a href="ToggleMap$$Mutable.html" class="extype" name="com.twitter.finagle.toggle.ToggleMap.Mutable">Mutable</a></span>
       </span>
       
       <p class="shortcomment cmt">Get a <a href="ToggleMap.html" class="extype" name="com.twitter.finagle.toggle.ToggleMap">ToggleMap</a> for the given <code>libraryName</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Get a <a href="ToggleMap.html" class="extype" name="com.twitter.finagle.toggle.ToggleMap">ToggleMap</a> for the given <code>libraryName</code>.
@@ -381,7 +381,7 @@ one to load.
                    <code>A-Z</code>, <code>a-z</code>, <code>0-9</code>, <code>_</code>, <code>-</code>, <code>.</code>.</p></dd><dt class="param">statsReceiver</dt><dd class="cmt"><p>used to record the outcomes of Toggles. For general
                      usage this should not be scoped so that the metrics
                      always end up scoped to &quot;toggles/$libraryName&quot;.</p></dd></dl><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>If a given <code>libraryName</code> has already been loaded, only a single instance
-will always be returned for all calls to <a href="#apply(libraryName:String,statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.toggle.ToggleMap" class="extmbr" name="com.twitter.finagle.toggle.StandardToggleMap#apply">apply</a> (even if the <code>StatsReceiver</code>
+will always be returned for all calls to <a href="#apply(libraryName:String,statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.toggle.ToggleMap.Mutable" class="extmbr" name="com.twitter.finagle.toggle.StandardToggleMap#apply">apply</a> (even if the <code>StatsReceiver</code>
 differs).</p></span></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
@@ -586,9 +586,9 @@ differs).</p></span></dd></dl></div>
               
         </dd></dl></div>
     </li><li name="com.twitter.finagle.toggle.StandardToggleMap#registeredLibraries" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="registeredLibraries:Map[String,com.twitter.finagle.toggle.ToggleMap]"></a><a id="registeredLibraries:Map[String,ToggleMap]"></a>
+      <a id="registeredLibraries:Map[String,com.twitter.finagle.toggle.ToggleMap.Mutable]"></a><a id="registeredLibraries:Map[String,Mutable]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/toggle/StandardToggleMap$.html#registeredLibraries:Map[String,com.twitter.finagle.toggle.ToggleMap]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/toggle/StandardToggleMap$.html#registeredLibraries:Map[String,com.twitter.finagle.toggle.ToggleMap.Mutable]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -597,11 +597,11 @@ differs).</p></span></dd></dl></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">registeredLibraries</span><span class="result">: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="ToggleMap.html" class="extype" name="com.twitter.finagle.toggle.ToggleMap">ToggleMap</a>]</span>
+        <span class="name">registeredLibraries</span><span class="result">: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="ToggleMap$$Mutable.html" class="extype" name="com.twitter.finagle.toggle.ToggleMap.Mutable">Mutable</a>]</span>
       </span>
       
       <p class="shortcomment cmt">Returns all registered <a href="ToggleMap.html" class="extype" name="com.twitter.finagle.toggle.ToggleMap">ToggleMaps</a> that have been
-created by <a href="#apply(libraryName:String,statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.toggle.ToggleMap" class="extmbr" name="com.twitter.finagle.toggle.StandardToggleMap#apply">apply</a>, keyed by <code>libraryName</code>.</p>
+created by <a href="#apply(libraryName:String,statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.toggle.ToggleMap.Mutable" class="extmbr" name="com.twitter.finagle.toggle.StandardToggleMap#apply">apply</a>, keyed by <code>libraryName</code>.</p>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

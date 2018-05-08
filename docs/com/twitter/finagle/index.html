@@ -1291,6 +1291,10 @@ generator.
                         <a href="SourcedException.html" title="A trait for exceptions that have a source.">SourcedException</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
+                        <a class="class" href="SslException.html" title="Indicates that an SSL/TLS exception occurred."></a>
+                        <a href="SslException.html" title="Indicates that an SSL/TLS exception occurred.">SslException</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
                         <a class="class" href="SslHandshakeException.html" title="Indicates that an error occurred while an SSL handshake was being performed with a server at a given remoteAddress."></a>
                         <a href="SslHandshakeException.html" title="Indicates that an error occurred while an SSL handshake was being performed with a server at a given remoteAddress.">SslHandshakeException</a>
                       </li><li class="current-entities indented3">
@@ -2943,10 +2947,26 @@ behavior.
 specified as a <code>serviceName</code>. The &quot;unspecified&quot; value is used if no
 <code>serviceName</code> is provided by the implementation.
 </p></div></div>
-    </li><li name="com.twitter.finagle.SslHandshakeException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="SslHandshakeExceptionextendsChannelExceptionwithProductwithSerializable"></a><a id="SslHandshakeException:SslHandshakeException"></a>
+    </li><li name="com.twitter.finagle.SslException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SslExceptionextendsChannelException"></a><a id="SslException:SslException"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#SslHandshakeExceptionextendsChannelExceptionwithProductwithSerializable" title="Permalink">
+      <a href="../../../com/twitter/finagle/index.html#SslExceptionextendsChannelException" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Indicates that an SSL/TLS exception occurred." href="SslException.html"><span class="name">SslException</span></a><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Indicates that an SSL/TLS exception occurred.</p>
+    </li><li name="com.twitter.finagle.SslHandshakeException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SslHandshakeExceptionextendsSslExceptionwithProductwithSerializable"></a><a id="SslHandshakeException:SslHandshakeException"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#SslHandshakeExceptionextendsSslExceptionwithProductwithSerializable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -2955,15 +2975,15 @@ specified as a <code>serviceName</code>. The &quot;unspecified&quot; value is us
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="Indicates that an error occurred while an SSL handshake was being performed with a server at a given remoteAddress." href="SslHandshakeException.html"><span class="name">SslHandshakeException</span></a><span class="params">(<span name="ex">ex: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Throwable">Throwable</span>]</span>, <span name="remoteAddr">remoteAddr: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="Indicates that an error occurred while an SSL handshake was being performed with a server at a given remoteAddress." href="SslHandshakeException.html"><span class="name">SslHandshakeException</span></a><span class="params">(<span name="ex">ex: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Throwable">Throwable</span>]</span>, <span name="remoteAddr">remoteAddr: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result"> extends <a href="SslException.html" class="extype" name="com.twitter.finagle.SslException">SslException</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">Indicates that an error occurred while an SSL handshake was being performed
 with a server at a given <code>remoteAddress</code>.</p>
     </li><li name="com.twitter.finagle.SslHostVerificationException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="SslHostVerificationExceptionextendsChannelExceptionwithProductwithSerializable"></a><a id="SslHostVerificationException:SslHostVerificationException"></a>
+      <a id="SslHostVerificationExceptionextendsSslExceptionwithProductwithSerializable"></a><a id="SslHostVerificationException:SslHostVerificationException"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#SslHostVerificationExceptionextendsChannelExceptionwithProductwithSerializable" title="Permalink">
+      <a href="../../../com/twitter/finagle/index.html#SslHostVerificationExceptionextendsSslExceptionwithProductwithSerializable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -2972,14 +2992,14 @@ with a server at a given <code>remoteAddress</code>.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="Indicates that the certificate for a given session was invalidated." href="SslHostVerificationException.html"><span class="name">SslHostVerificationException</span></a><span class="params">(<span name="principal">principal: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="Indicates that the certificate for a given session was invalidated." href="SslHostVerificationException.html"><span class="name">SslHostVerificationException</span></a><span class="params">(<span name="principal">principal: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="SslException.html" class="extype" name="com.twitter.finagle.SslException">SslException</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">Indicates that the certificate for a given session was invalidated.</p>
     </li><li name="com.twitter.finagle.SslVerificationFailedException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="SslVerificationFailedExceptionextendsChannelExceptionwithProductwithSerializable"></a><a id="SslVerificationFailedException:SslVerificationFailedException"></a>
+      <a id="SslVerificationFailedExceptionextendsSslExceptionwithProductwithSerializable"></a><a id="SslVerificationFailedException:SslVerificationFailedException"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#SslVerificationFailedExceptionextendsChannelExceptionwithProductwithSerializable" title="Permalink">
+      <a href="../../../com/twitter/finagle/index.html#SslVerificationFailedExceptionextendsSslExceptionwithProductwithSerializable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -2988,7 +3008,7 @@ with a server at a given <code>remoteAddress</code>.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="Indicates that an error occurred while SslClientSessionVerification was being performed, or the server disconnected from the client in a way that indicates that there was high probability that the server failed to verify the client's certificate." href="SslVerificationFailedException.html"><span class="name">SslVerificationFailedException</span></a><span class="params">(<span name="ex">ex: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Throwable">Throwable</span>]</span>, <span name="remoteAddr">remoteAddr: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="Indicates that an error occurred while SslClientSessionVerification was being performed, or the server disconnected from the client in a way that indicates that there was high probability that the server failed to verify the client's certificate." href="SslVerificationFailedException.html"><span class="name">SslVerificationFailedException</span></a><span class="params">(<span name="ex">ex: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Throwable">Throwable</span>]</span>, <span name="remoteAddr">remoteAddr: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result"> extends <a href="SslException.html" class="extype" name="com.twitter.finagle.SslException">SslException</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">Indicates that an error occurred while <code>SslClientSessionVerification</code> was

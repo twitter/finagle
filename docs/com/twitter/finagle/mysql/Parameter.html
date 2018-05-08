@@ -209,8 +209,8 @@ resources for using Finagle.
                         <a href="Charset$.html" title="">Charset</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="Client$.html" title=""></a>
-                        <a class="trait" href="Client.html" title=""></a>
-                        <a href="Client.html" title="">Client</a>
+                        <a class="trait" href="Client.html" title="A MySQL client that is not Service-based like com.twitter.finagle.Mysql.Client is, making it easier to use for most cases."></a>
+                        <a href="Client.html" title="A MySQL client that is not Service-based like com.twitter.finagle.Mysql.Client is, making it easier to use for most cases.">Client</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="CloseRequest.html" title="A CloseRequest deallocates a prepared statement on the server."></a>
@@ -219,6 +219,10 @@ resources for using Finagle.
                         <span class="separator"></span>
                         <a class="object" href="CloseStatementOK$.html" title="Used internally to synthesize a response from the server when sending a prepared statement CloseRequest"></a>
                         <a href="CloseStatementOK$.html" title="Used internally to synthesize a response from the server when sending a prepared statement CloseRequest">CloseStatementOK</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="ColumnNotFoundException.html" title="Indicates the requested column name was not found."></a>
+                        <a href="ColumnNotFoundException.html" title="Indicates the requested column name was not found.">ColumnNotFoundException</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Command$.html" title=""></a>
@@ -232,9 +236,9 @@ resources for using Finagle.
                         <a class="trait" href="CursorResult.html" title="A closable async stream of projected rows from a CursoredStatement."></a>
                         <a href="CursorResult.html" title="A closable async stream of projected rows from a CursoredStatement.">CursorResult</a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="trait" href="CursoredStatement.html" title="A CursoredStatement represents a parameterized sql statement which when applied to parameters yields a lazy stream of rows."></a>
-                        <a href="CursoredStatement.html" title="A CursoredStatement represents a parameterized sql statement which when applied to parameters yields a lazy stream of rows.">CursoredStatement</a>
+                        <a class="object" href="CursoredStatement$.html" title=""></a>
+                        <a class="trait" href="CursoredStatement.html" title="A CursoredStatement represents a parameterized SQL statement applied concurrently with varying parameters and yields a lazy stream of rows."></a>
+                        <a href="CursoredStatement.html" title="A CursoredStatement represents a parameterized SQL statement applied concurrently with varying parameters and yields a lazy stream of rows.">CursoredStatement</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="DateValue$.html" title=""></a>
@@ -381,8 +385,8 @@ resources for using Finagle.
                         <a href="ResultSet.html" title="">ResultSet</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="trait" href="Row.html" title="A Row makes it easy to extract Value's from a mysql row."></a>
-                        <a href="Row.html" title="A Row makes it easy to extract Value's from a mysql row.">Row</a>
+                        <a class="trait" href="Row.html" title="A Row allows you to extract Value's from a MySQL row."></a>
+                        <a href="Row.html" title="A Row allows you to extract Value's from a MySQL row.">Row</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="ServerError.html" title="A catch-all exception class for errors returned from the upstream MySQL server."></a>
@@ -415,6 +419,10 @@ resources for using Finagle.
                         <span class="separator"></span>
                         <a class="object" href="Type$.html" title=""></a>
                         <a href="Type$.html" title="">Type</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="UnsupportedTypeException.html" title="Indicates the requested column was for an unsupported type."></a>
+                        <a href="UnsupportedTypeException.html" title="Indicates the requested column was for an unsupported type.">UnsupportedTypeException</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="UseRequest.html" title="A UseRequest is used to change the default schema of the connection."></a>
@@ -459,9 +467,13 @@ resources for using Finagle.
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A value of type <code>A</code> can implicitly convert to a <code>Parameter</code> if an evidence
 <code>CanBeParameter[A]</code> is available in scope via the <a href="Parameter$.html#wrap[_A](_value:_A)(implicit_evidence:com.twitter.finagle.mysql.CanBeParameter[_A]):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameter#wrap">Parameter.wrap</a> or
-<a href="Parameter$.html#wrapOption[_A](option:Option[_A])(implicitev:com.twitter.finagle.mysql.CanBeParameter[_A]):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameter#wrapOption">Parameter.wrapOption</a> implicits.</p><p>A Scala example:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter._
+<a href="Parameter$.html#wrapOption[_A](option:Option[_A])(implicitev:com.twitter.finagle.mysql.CanBeParameter[_A]):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameter#wrapOption">Parameter.wrapOption</a> implicits. Explicit conversions are available
+via <a href="Parameter$.html#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameter#of">Parameter.of</a> and <a href="Parameters$.html#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameters#of">Parameters.of</a>.</p><p>A Scala example with implicits:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter
+<span class="kw">import</span> com.twitter.finagle.mysql.Parameter._
 
-<span class="kw">val</span> p: Parameter = <span class="lit">"this will get implicitly converted to a Parameter"</span></pre><p>A Java example:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter;
+<span class="kw">val</span> p: Parameter = <span class="lit">"this will get implicitly converted to a Parameter"</span></pre><p>A Scala example without implicits:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter
+
+<span class="kw">val</span> p: Parameter = Parameter.of(<span class="lit">"explicitly converted to a Parameter"</span>)</pre><p>A Java example:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter;
 <span class="kw">import</span> com.twitter.finagle.mysql.Parameters;
 
 Parameter p = Parameters.of(<span class="lit">"explicitly converted to a Parameter"</span>);</pre></div><div class="toggleContainer block">

@@ -373,6 +373,24 @@ If the buffer size exceeds the specified value, the buffer is not reused,
 and a new buffer is used for the next thrift response.
 The default max size is 16Kb.
 </p></div><dl class="paramcmts block"><dt class="param">maxReusableBufferSize</dt><dd class="cmt"><p>Max buffer size in bytes.</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.Thrift.param.PerEndpointStats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="PerEndpointStatsextendsProductwithSerializable"></a><a id="PerEndpointStats:PerEndpointStats"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Thrift$$param$.html#PerEndpointStatsextendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="A Param to control whether to record per-endpoint stats." href="Thrift$$param$$PerEndpointStats.html"><span class="name">PerEndpointStats</span></a><span class="params">(<span name="enabled">enabled: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A <code>Param</code> to control whether to record per-endpoint stats.</p><div class="fullcomment"><div class="comment cmt"><p>A <code>Param</code> to control whether to record per-endpoint stats.
+If this is set to true, per-endpoint stats will be counted.
+</p></div><dl class="paramcmts block"><dt class="param">enabled</dt><dd class="cmt"><p>Whether to count per-endpoint stats</p></dd></dl></div>
     </li><li name="com.twitter.finagle.Thrift.param.ProtocolFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ProtocolFactoryextendsProductwithSerializable"></a><a id="ProtocolFactory:ProtocolFactory"></a>
       <span class="permalink">
@@ -850,6 +868,22 @@ entering the Finagle transport types.
       </span>
       <span class="symbol">
         <a title="" href="Thrift$$param$$MaxReusableBufferSize$.html"><span class="name">MaxReusableBufferSize</span></a><span class="result"> extends <a href="Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a>[<a href="Thrift$$param$$MaxReusableBufferSize.html" class="extype" name="com.twitter.finagle.Thrift.param.MaxReusableBufferSize">MaxReusableBufferSize</a>] with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.Thrift.param.PerEndpointStats" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PerEndpointStats"></a><a id="PerEndpointStats:PerEndpointStats"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Thrift$$param$.html#PerEndpointStats" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Thrift$$param$$PerEndpointStats$.html"><span class="name">PerEndpointStats</span></a><span class="result"> extends <a href="Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a>[<a href="Thrift$$param$$PerEndpointStats.html" class="extype" name="com.twitter.finagle.Thrift.param.PerEndpointStats">PerEndpointStats</a>] with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       

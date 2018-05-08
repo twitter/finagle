@@ -180,10 +180,14 @@ resources for using Finagle.
       
       <p class="shortcomment cmt">For Scala users, the typical usage is by importing the implicit conversions
 and then letting the compiler do the conversions for you.</p><div class="fullcomment"><div class="comment cmt"><p>For Scala users, the typical usage is by importing the implicit conversions
-and then letting the compiler do the conversions for you.</p><p>Java users should generally be using <a href="Parameters$.html#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameters#of">Parameters.of</a> to do explicit
-conversions.</p><p>A Scala example:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter._
+and then letting the compiler do the conversions for you. Explicit
+runtime conversions are also available via <a href="Parameter$.html#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameter#of">Parameter.of</a>.</p><p>Java users should generally be using <a href="Parameters$.html#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameters#of">Parameters.of</a> to do explicit
+conversions.</p><p>A Scala example with implicits:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter
+<span class="kw">import</span> com.twitter.finagle.mysql.Parameter._
 
-<span class="kw">val</span> p: Parameter = <span class="lit">"this will get implicitly converted to a Parameter"</span></pre><p>A Java example:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter;
+<span class="kw">val</span> p: Parameter = <span class="lit">"this will get implicitly converted to a Parameter"</span></pre><p>A Scala example without implicits:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter
+
+<span class="kw">val</span> p: Parameter = Parameter.of(<span class="lit">"explicitly converted to a Parameter"</span>)</pre><p>A Java example:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter;
 <span class="kw">import</span> com.twitter.finagle.mysql.Parameters;
 
 Parameter p = Parameters.of(<span class="lit">"explicitly converted to a Parameter"</span>);</pre></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.mysql">mysql</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Parameters$.html" class="extype" name="com.twitter.finagle.mysql.Parameters">Parameters</a> for a Java-friendly API.</p></span></dd></dl></div>

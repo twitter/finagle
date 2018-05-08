@@ -1296,6 +1296,10 @@ generator.
                         <a href="SourcedException.html" title="A trait for exceptions that have a source.">SourcedException</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
+                        <a class="class" href="SslException.html" title="Indicates that an SSL/TLS exception occurred."></a>
+                        <a href="SslException.html" title="Indicates that an SSL/TLS exception occurred.">SslException</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
                         <a class="class" href="SslHandshakeException.html" title="Indicates that an error occurred while an SSL handshake was being performed with a server at a given remoteAddress."></a>
                         <a href="SslHandshakeException.html" title="Indicates that an error occurred while an SSL handshake was being performed with a server at a given remoteAddress.">SslHandshakeException</a>
                       </li><li class="current-entities indented3">
@@ -1397,7 +1401,7 @@ generator.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">SslHostVerificationException</span><span class="params">(<span name="principal">principal: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <span class="name">SslHostVerificationException</span><span class="params">(<span name="principal">principal: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="SslException.html" class="extype" name="com.twitter.finagle.SslException">SslException</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       </h4>
 
@@ -1407,7 +1411,7 @@ generator.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/Equals.html#scala.Equals" class="extype" name="scala.Equals">Equals</a>, <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a>, <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a>, <a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a>, <a href="HasRemoteInfo.html" class="extype" name="com.twitter.finagle.HasRemoteInfo">HasRemoteInfo</a>, <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/Equals.html#scala.Equals" class="extype" name="scala.Equals">Equals</a>, <a href="SslException.html" class="extype" name="com.twitter.finagle.SslException">SslException</a>, <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a>, <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a>, <a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a>, <a href="HasRemoteInfo.html" class="extype" name="com.twitter.finagle.HasRemoteInfo">HasRemoteInfo</a>, <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
         </div></div>
         
 
@@ -1433,7 +1437,7 @@ generator.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.SslHostVerificationException"><span>SslHostVerificationException</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="com.twitter.finagle.ChannelException"><span>ChannelException</span></li><li class="in" name="com.twitter.logging.HasLogLevel"><span>HasLogLevel</span></li><li class="in" name="com.twitter.finagle.SourcedException"><span>SourcedException</span></li><li class="in" name="com.twitter.finagle.HasRemoteInfo"><span>HasRemoteInfo</span></li><li class="in" name="java.lang.Exception"><span>Exception</span></li><li class="in" name="java.lang.Throwable"><span>Throwable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.SslHostVerificationException"><span>SslHostVerificationException</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="com.twitter.finagle.SslException"><span>SslException</span></li><li class="in" name="com.twitter.finagle.ChannelException"><span>ChannelException</span></li><li class="in" name="com.twitter.logging.HasLogLevel"><span>HasLogLevel</span></li><li class="in" name="com.twitter.finagle.SourcedException"><span>SourcedException</span></li><li class="in" name="com.twitter.finagle.HasRemoteInfo"><span>HasRemoteInfo</span></li><li class="in" name="java.lang.Exception"><span>Exception</span></li><li class="in" name="java.lang.Throwable"><span>Throwable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -2115,6 +2119,8 @@ generator.
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a></h3>
             </div><div class="parent" name="scala.Equals">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/Equals.html#scala.Equals" class="extype" name="scala.Equals">Equals</a></h3>
+            </div><div class="parent" name="com.twitter.finagle.SslException">
+              <h3>Inherited from <a href="SslException.html" class="extype" name="com.twitter.finagle.SslException">SslException</a></h3>
             </div><div class="parent" name="com.twitter.finagle.ChannelException">
               <h3>Inherited from <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a></h3>
             </div><div class="parent" name="com.twitter.logging.HasLogLevel">

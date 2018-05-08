@@ -179,6 +179,22 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.http">http</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.cookie" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cookie"></a><a id="cookie:cookie"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#cookie" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="cookie/index.html"><span class="name">cookie</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.http">http</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.exp" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="exp"></a><a id="exp:exp"></a>
       <span class="permalink">
@@ -377,8 +393,8 @@ resources for using Finagle.
                         <a href="RequestBuilder.html" title="">RequestBuilder</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="RequestParamMap.html" title="HttpRequest-backed param map."></a>
-                        <a href="RequestParamMap.html" title="HttpRequest-backed param map.">RequestParamMap</a>
+                        <a class="class" href="RequestParamMap.html" title="Http Request-backed ParamMap."></a>
+                        <a href="RequestParamMap.html" title="Http Request-backed ParamMap.">RequestParamMap</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="" title="Proxy for Request."></a>
@@ -423,6 +439,10 @@ resources for using Finagle.
                         <a class="object" href="TooLongMessageException$.html" title=""></a>
                         <a class="class" href="TooLongMessageException.html" title="The Message was too long to be handled correctly"></a>
                         <a href="TooLongMessageException.html" title="The Message was too long to be handled correctly">TooLongMessageException</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="Uri$.html" title=""></a>
+                        <a class="class" href="Uri.html" title="Represents an immutable URI."></a>
+                        <a href="Uri.html" title="Represents an immutable URI.">Uri</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="Version$.html" title=""></a>
                         <a class="class" href="Version.html" title="Represents the HTTP version."></a>
@@ -936,7 +956,8 @@ resources for using Finagle.
         <span class="name">containsParam</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
-      <p class="shortcomment cmt">Check if parameter exists.</p><div class="fullcomment"><div class="comment cmt"><p>Check if parameter exists.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
+      <p class="shortcomment cmt">Check if parameter exists.</p><div class="fullcomment"><div class="comment cmt"><p>Check if parameter exists.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Request.html#params:com.twitter.finagle.http.ParamMap" class="extmbr" name="com.twitter.finagle.http.Request#params">params</a> for details of which parameters are considered.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Request.Proxy#content" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="content:com.twitter.io.Buf"></a><a id="content:Buf"></a>
       <span class="permalink">
@@ -1353,7 +1374,8 @@ associated context explicit.
         <span class="name">getBooleanParam</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="default">default: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
-      <p class="shortcomment cmt">Get Boolean param.</p><div class="fullcomment"><div class="comment cmt"><p>Get Boolean param.  Returns value or default.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
+      <p class="shortcomment cmt">Get Boolean param.</p><div class="fullcomment"><div class="comment cmt"><p>Get Boolean param. Returns value or default.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Request.html#params:com.twitter.finagle.http.ParamMap" class="extmbr" name="com.twitter.finagle.http.Request#params">params</a> for details of which parameters are considered.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Request#getBooleanParam" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getBooleanParam(name:String):Boolean"></a><a id="getBooleanParam(String):Boolean"></a>
       <span class="permalink">
@@ -1369,7 +1391,8 @@ associated context explicit.
         <span class="name">getBooleanParam</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
-      <p class="shortcomment cmt">Get Boolean param.</p><div class="fullcomment"><div class="comment cmt"><p>Get Boolean param.  Returns value or false.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
+      <p class="shortcomment cmt">Get Boolean param.</p><div class="fullcomment"><div class="comment cmt"><p>Get Boolean param. Returns value or false.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Request.html#params:com.twitter.finagle.http.ParamMap" class="extmbr" name="com.twitter.finagle.http.Request#params">params</a> for details of which parameters are considered.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -1454,7 +1477,8 @@ users should use withInputStream.)
         <span class="name">getIntParam</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="default">default: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
       </span>
       
-      <p class="shortcomment cmt">Get Int param.</p><div class="fullcomment"><div class="comment cmt"><p>Get Int param.  Returns value or default.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
+      <p class="shortcomment cmt">Get Int param.</p><div class="fullcomment"><div class="comment cmt"><p>Get Int param. Returns value or default.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Request.html#params:com.twitter.finagle.http.ParamMap" class="extmbr" name="com.twitter.finagle.http.Request#params">params</a> for details of which parameters are considered.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Request#getIntParam" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getIntParam(name:String):Int"></a><a id="getIntParam(String):Int"></a>
       <span class="permalink">
@@ -1470,7 +1494,8 @@ users should use withInputStream.)
         <span class="name">getIntParam</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
       </span>
       
-      <p class="shortcomment cmt">Get Int param.</p><div class="fullcomment"><div class="comment cmt"><p>Get Int param.  Returns value or 0.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
+      <p class="shortcomment cmt">Get Int param.</p><div class="fullcomment"><div class="comment cmt"><p>Get Int param. Returns value or 0.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Request.html#params:com.twitter.finagle.http.ParamMap" class="extmbr" name="com.twitter.finagle.http.Request#params">params</a> for details of which parameters are considered.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#getLength" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getLength():Int"></a>
       <span class="permalink">
@@ -1502,7 +1527,8 @@ users should use withInputStream.)
         <span class="name">getLongParam</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="default">default: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
       </span>
       
-      <p class="shortcomment cmt">Get Long param.</p><div class="fullcomment"><div class="comment cmt"><p>Get Long param.  Returns value or default.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
+      <p class="shortcomment cmt">Get Long param.</p><div class="fullcomment"><div class="comment cmt"><p>Get Long param. Returns value or default.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Request.html#params:com.twitter.finagle.http.ParamMap" class="extmbr" name="com.twitter.finagle.http.Request#params">params</a> for details of which parameters are considered.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Request#getLongParam" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getLongParam(name:String):Long"></a><a id="getLongParam(String):Long"></a>
       <span class="permalink">
@@ -1518,7 +1544,8 @@ users should use withInputStream.)
         <span class="name">getLongParam</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
       </span>
       
-      <p class="shortcomment cmt">Get Long param.</p><div class="fullcomment"><div class="comment cmt"><p>Get Long param.  Returns value or 0.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
+      <p class="shortcomment cmt">Get Long param.</p><div class="fullcomment"><div class="comment cmt"><p>Get Long param. Returns value or 0.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Request.html#params:com.twitter.finagle.http.ParamMap" class="extmbr" name="com.twitter.finagle.http.Request#params">params</a> for details of which parameters are considered.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Request#getParam" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getParam(name:String,default:String):String"></a><a id="getParam(String,String):String"></a>
       <span class="permalink">
@@ -1534,7 +1561,8 @@ users should use withInputStream.)
         <span class="name">getParam</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="default">default: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
-      <p class="shortcomment cmt">Get parameter value.</p><div class="fullcomment"><div class="comment cmt"><p>Get parameter value.  Returns value or default.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
+      <p class="shortcomment cmt">Get parameter value.</p><div class="fullcomment"><div class="comment cmt"><p>Get parameter value. Returns value or default.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Request.html#params:com.twitter.finagle.http.ParamMap" class="extmbr" name="com.twitter.finagle.http.Request#params">params</a> for details of which parameters are considered.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Request#getParam" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getParam(name:String):String"></a><a id="getParam(String):String"></a>
       <span class="permalink">
@@ -1550,7 +1578,8 @@ users should use withInputStream.)
         <span class="name">getParam</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
-      <p class="shortcomment cmt">Get parameter value.</p><div class="fullcomment"><div class="comment cmt"><p>Get parameter value.  Returns value or null.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
+      <p class="shortcomment cmt">Get parameter value.</p><div class="fullcomment"><div class="comment cmt"><p>Get parameter value. Returns value or null.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Request.html#params:com.twitter.finagle.http.ParamMap" class="extmbr" name="com.twitter.finagle.http.Request#params">params</a> for details of which parameters are considered.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Request#getParamNames" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getParamNames():java.util.Set[String]"></a><a id="getParamNames():Set[String]"></a>
       <span class="permalink">
@@ -1566,7 +1595,8 @@ users should use withInputStream.)
         <span class="name">getParamNames</span><span class="params">()</span><span class="result">: <span class="extype" name="java.util.Set">Set</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">Get parameters names.</p><div class="fullcomment"><div class="comment cmt"><p>Get parameters names.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
+      <p class="shortcomment cmt">Get parameters names.</p><div class="fullcomment"><div class="comment cmt"><p>Get parameters names.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Request.html#params:com.twitter.finagle.http.ParamMap" class="extmbr" name="com.twitter.finagle.http.Request#params">params</a> for details of which parameters are considered.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Request#getParams" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getParams():java.util.List[java.util.Map.Entry[String,String]]"></a><a id="getParams():List[Entry[String,String]]"></a>
       <span class="permalink">
@@ -1582,7 +1612,8 @@ users should use withInputStream.)
         <span class="name">getParams</span><span class="params">()</span><span class="result">: <span class="extype" name="java.util.List">List</span>[<span class="extype" name="java.util.Map.Entry">Entry</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]]</span>
       </span>
       
-      <p class="shortcomment cmt">Get all parameters.</p><div class="fullcomment"><div class="comment cmt"><p>Get all parameters.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
+      <p class="shortcomment cmt">Get all parameters.</p><div class="fullcomment"><div class="comment cmt"><p>Get all parameters.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Request.html#params:com.twitter.finagle.http.ParamMap" class="extmbr" name="com.twitter.finagle.http.Request#params">params</a> for details of which parameters are considered.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Request#getParams" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getParams(name:String):java.util.List[String]"></a><a id="getParams(String):List[String]"></a>
       <span class="permalink">
@@ -1598,7 +1629,8 @@ users should use withInputStream.)
         <span class="name">getParams</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="java.util.List">List</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">Get all values of parameter.</p><div class="fullcomment"><div class="comment cmt"><p>Get all values of parameter.  Returns list of values.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
+      <p class="shortcomment cmt">Get all values of parameter.</p><div class="fullcomment"><div class="comment cmt"><p>Get all values of parameter. Returns list of values.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Request.html#params:com.twitter.finagle.http.ParamMap" class="extmbr" name="com.twitter.finagle.http.Request#params">params</a> for details of which parameters are considered.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#getReader" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getReader():java.io.Reader"></a><a id="getReader():Reader"></a>
       <span class="permalink">
@@ -1630,7 +1662,8 @@ users should use withInputStream.)
         <span class="name">getShortParam</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="default">default: <a href="http://www.scala-lang.org/api/2.12.4/scala/Short.html#scala.Short" class="extype" name="scala.Short">Short</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Short.html#scala.Short" class="extype" name="scala.Short">Short</a></span>
       </span>
       
-      <p class="shortcomment cmt">Get Short param.</p><div class="fullcomment"><div class="comment cmt"><p>Get Short param.  Returns value or default.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
+      <p class="shortcomment cmt">Get Short param.</p><div class="fullcomment"><div class="comment cmt"><p>Get Short param. Returns value or default.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Request.html#params:com.twitter.finagle.http.ParamMap" class="extmbr" name="com.twitter.finagle.http.Request#params">params</a> for details of which parameters are considered.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Request#getShortParam" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getShortParam(name:String):Short"></a><a id="getShortParam(String):Short"></a>
       <span class="permalink">
@@ -1646,7 +1679,8 @@ users should use withInputStream.)
         <span class="name">getShortParam</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Short.html#scala.Short" class="extype" name="scala.Short">Short</a></span>
       </span>
       
-      <p class="shortcomment cmt">Get Short param.</p><div class="fullcomment"><div class="comment cmt"><p>Get Short param.  Returns value or 0.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
+      <p class="shortcomment cmt">Get Short param.</p><div class="fullcomment"><div class="comment cmt"><p>Get Short param. Returns value or 0.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Request.html#params:com.twitter.finagle.http.ParamMap" class="extmbr" name="com.twitter.finagle.http.Request#params">params</a> for details of which parameters are considered.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
@@ -2103,10 +2137,22 @@ preserved, though may not be appropriate for the new media type.
         <span class="name">params</span><span class="result">: <a href="ParamMap.html" class="extype" name="com.twitter.finagle.http.ParamMap">ParamMap</a></span>
       </span>
       
-      <p class="shortcomment cmt">Returns a <a href="ParamMap.html" class="extype" name="com.twitter.finagle.http.ParamMap">ParamMap</a> instance, which maintains query string and url-encoded
-params associated with this request.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a <a href="ParamMap.html" class="extype" name="com.twitter.finagle.http.ParamMap">ParamMap</a> instance, which maintains query string and url-encoded
-params associated with this request.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a> → <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
+      <p class="shortcomment cmt">Returns a <a href="ParamMap.html" class="extype" name="com.twitter.finagle.http.ParamMap">ParamMap</a> instance, which contains both parameters provided
+as part of the request URI and parameters provided as part of the request
+body.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a <a href="ParamMap.html" class="extype" name="com.twitter.finagle.http.ParamMap">ParamMap</a> instance, which contains both parameters provided
+as part of the request URI and parameters provided as part of the request
+body.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a> → <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd><dt>Note</dt><dd><span class="cmt"><p>Request body parameters are considered if the following criteria are true:</p><ol class="decimal"><li>The request is not a TRACE request.
+  2. The request media type is 'application/x-www-form-urlencoded'
+  3. The content length is greater than 0.</li></ol><pre><span class="kw">import</span> com.twitter.finagle.http.{MediaType, Method, Request}
+
+<span class="kw">val</span> request = Request(Method.Post, <span class="lit">"/search?a=yes"</span>)
+request.mediaType = MediaType.WwwForm
+request.contentString = <span class="lit">"a=no&b=yes&c=no"</span>
+request.params
+
+<span class="cmt">// Result</span>
+<span class="cmt">// com.twitter.finagle.http.ParamMap = ?c=no&a=no&b=yes&a=yes</span></pre><p>To get just query parameters from the URI, use <a href="Uri.html" class="extype" name="com.twitter.finagle.http.Uri">Uri</a>.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Request#path" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="path:String"></a>
       <span class="permalink">

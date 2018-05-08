@@ -209,8 +209,8 @@ resources for using Finagle.
                         <a href="Charset$.html" title="">Charset</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="Client$.html" title=""></a>
-                        <a class="trait" href="Client.html" title=""></a>
-                        <a href="Client.html" title="">Client</a>
+                        <a class="trait" href="Client.html" title="A MySQL client that is not Service-based like com.twitter.finagle.Mysql.Client is, making it easier to use for most cases."></a>
+                        <a href="Client.html" title="A MySQL client that is not Service-based like com.twitter.finagle.Mysql.Client is, making it easier to use for most cases.">Client</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="CloseRequest.html" title="A CloseRequest deallocates a prepared statement on the server."></a>
@@ -219,6 +219,10 @@ resources for using Finagle.
                         <span class="separator"></span>
                         <a class="object" href="CloseStatementOK$.html" title="Used internally to synthesize a response from the server when sending a prepared statement CloseRequest"></a>
                         <a href="CloseStatementOK$.html" title="Used internally to synthesize a response from the server when sending a prepared statement CloseRequest">CloseStatementOK</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="ColumnNotFoundException.html" title="Indicates the requested column name was not found."></a>
+                        <a href="ColumnNotFoundException.html" title="Indicates the requested column name was not found.">ColumnNotFoundException</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Command$.html" title=""></a>
@@ -232,9 +236,9 @@ resources for using Finagle.
                         <a class="trait" href="CursorResult.html" title="A closable async stream of projected rows from a CursoredStatement."></a>
                         <a href="CursorResult.html" title="A closable async stream of projected rows from a CursoredStatement.">CursorResult</a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="trait" href="CursoredStatement.html" title="A CursoredStatement represents a parameterized sql statement which when applied to parameters yields a lazy stream of rows."></a>
-                        <a href="CursoredStatement.html" title="A CursoredStatement represents a parameterized sql statement which when applied to parameters yields a lazy stream of rows.">CursoredStatement</a>
+                        <a class="object" href="CursoredStatement$.html" title=""></a>
+                        <a class="trait" href="CursoredStatement.html" title="A CursoredStatement represents a parameterized SQL statement applied concurrently with varying parameters and yields a lazy stream of rows."></a>
+                        <a href="CursoredStatement.html" title="A CursoredStatement represents a parameterized SQL statement applied concurrently with varying parameters and yields a lazy stream of rows.">CursoredStatement</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="DateValue$.html" title=""></a>
@@ -381,8 +385,8 @@ resources for using Finagle.
                         <a href="ResultSet.html" title="">ResultSet</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="trait" href="" title="A Row makes it easy to extract Value's from a mysql row."></a>
-                        <a href="" title="A Row makes it easy to extract Value's from a mysql row.">Row</a>
+                        <a class="trait" href="" title="A Row allows you to extract Value's from a MySQL row."></a>
+                        <a href="" title="A Row allows you to extract Value's from a MySQL row.">Row</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="ServerError.html" title="A catch-all exception class for errors returned from the upstream MySQL server."></a>
@@ -415,6 +419,10 @@ resources for using Finagle.
                         <span class="separator"></span>
                         <a class="object" href="Type$.html" title=""></a>
                         <a href="Type$.html" title="">Type</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="UnsupportedTypeException.html" title="Indicates the requested column was for an unsupported type."></a>
+                        <a href="UnsupportedTypeException.html" title="Indicates the requested column was for an unsupported type.">UnsupportedTypeException</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="UseRequest.html" title="A UseRequest is used to change the default schema of the connection."></a>
@@ -455,10 +463,32 @@ resources for using Finagle.
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A <code>Row</code> makes it easy to extract <a href="Value.html" class="extype" name="com.twitter.finagle.mysql.Value">Value</a>'s from a mysql row.
-Specific <a href="Value.html" class="extype" name="com.twitter.finagle.mysql.Value">Value</a>'s based on mysql column name can be accessed
-via the <code>apply</code> method.
-</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A <code>Row</code> allows you to extract <a href="Value.html" class="extype" name="com.twitter.finagle.mysql.Value">Value</a>'s from a MySQL row.</p><p>Column values can be accessed by the MySQL column name via the
+typed <code>xyzOrNull</code> and <code>getXyz</code> methods. For example, <code>stringOrNull</code>
+and <code>getString</code>. The <code>get</code>-prefixed methods return <code>Options</code> and use <code>None</code>
+to represent a SQL NULL. For SQL NULLs, the <code>or</code>-suffixed methods return
+<code>null</code> for Object-types and use a sentinel, like 0, for primitives.</p><p>Alternatively, <a href="Value.html" class="extype" name="com.twitter.finagle.mysql.Value">Value</a>'s based on the column name can be accessed
+via the <code>apply</code> method.</p><p>For example, given the query, <code>SELECT 'text' AS str_col, 123 AS int_col</code>,
+you could extract the columns as such.</p><p>First, in Scala:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Row
+<span class="kw">val</span> row: Row = ???
+
+<span class="cmt">// if the column is not null:</span>
+<span class="kw">val</span> strCol: <span class="std">String</span> = row.stringOrNull(<span class="lit">"str_col"</span>)
+<span class="kw">val</span> intCol: <span class="std">Int</span> = row.intOrZero(<span class="lit">"int_col"</span>)
+
+<span class="cmt">// if the column is nullable:</span>
+<span class="kw">val</span> strCol: <span class="std">Option</span>[<span class="std">String</span>] = row.getString(<span class="lit">"str_col"</span>)
+<span class="kw">val</span> intCol: <span class="std">Option</span>[java.lang.Integer] = row.getInteger(<span class="lit">"int_col"</span>)</pre><p>Then, the same in Java:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Row;
+<span class="kw">import</span> scala.<span class="std">Option</span>;
+Row row = ...
+
+<span class="cmt">// if the column is not null:</span>
+<span class="std">String</span> strCol = row.stringOrNull(<span class="lit">"str_col"</span>);
+int intCol = row.intOrZero(<span class="lit">"int_col"</span>);
+
+<span class="cmt">// if the column is nullable:</span>
+<span class="std">Option</span>&lt;<span class="std">String</span>&gt; strCol = row.getString(<span class="lit">"str_col"</span>);
+<span class="std">Option</span>&lt;Integer&gt; intCol = row.getInteger(<span class="lit">"int_col"</span>);</pre></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="Client.html#cursor(sql:String):com.twitter.finagle.mysql.CursoredStatement" class="extmbr" name="com.twitter.finagle.mysql.Client#cursor">Client.cursor</a></p></span><span class="cmt"><p><a href="Client.html#select[T](sql:String)(f:com.twitter.finagle.mysql.Row=&gt;T):com.twitter.util.Future[Seq[T]]" class="extmbr" name="com.twitter.finagle.mysql.Client#select">Client.select</a></p></span><span class="cmt"><p><a href="PreparedStatement.html#select[T](params:com.twitter.finagle.mysql.Parameter*)(f:com.twitter.finagle.mysql.Row=&gt;T):com.twitter.util.Future[Seq[T]]" class="extmbr" name="com.twitter.finagle.mysql.PreparedStatement#select">PreparedStatement.select</a></p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -527,11 +557,8 @@ via the <code>apply</code> method.
         <span class="name">fields</span><span class="result">: <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<a href="Field.html" class="extype" name="com.twitter.finagle.mysql.Field">Field</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">Contains a Field object for each
-Column in the Row.</p><div class="fullcomment"><div class="comment cmt"><p>Contains a Field object for each
-Column in the Row. The data is 0-indexed
-so fields(0) contains the column meta-data
-for the first column in the Row.
+      <p class="shortcomment cmt">Contains a <a href="Field.html" class="extype" name="com.twitter.finagle.mysql.Field">Field</a> object for each column in the <a href="" class="extype" name="com.twitter.finagle.mysql.Row">Row</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Contains a <a href="Field.html" class="extype" name="com.twitter.finagle.mysql.Field">Field</a> object for each column in the <a href="" class="extype" name="com.twitter.finagle.mysql.Row">Row</a>. The data is 0-indexed
+so <code>fields(0)</code> contains the column metadata for the first column in the <a href="" class="extype" name="com.twitter.finagle.mysql.Row">Row</a>.
 </p></div></div>
     </li><li name="com.twitter.finagle.mysql.Row#indexOf" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="indexOf(columnName:String):Option[Int]"></a><a id="indexOf(String):Option[Int]"></a>
@@ -548,11 +575,8 @@ for the first column in the Row.
         <span class="name">indexOf</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">Retrieves the index of the column with the given
-name.</p><div class="fullcomment"><div class="comment cmt"><p>Retrieves the index of the column with the given
-name.</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>name of the column.</p></dd><dt>returns</dt><dd class="cmt"><p>Some(Int) if the column
-exists with the given name. Otherwise, None.</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.mysql.Row#values" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Retrieves the 0-indexed index of the column with the given name.</p><div class="fullcomment"><div class="comment cmt"><p>Retrieves the 0-indexed index of the column with the given name.</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd><dt>returns</dt><dd class="cmt"><p>Some(Int) if the column exists with the given name. Otherwise, None.</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#values" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="values:IndexedSeq[com.twitter.finagle.mysql.Value]"></a><a id="values:IndexedSeq[Value]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/mysql/Row.html#values:IndexedSeq[com.twitter.finagle.mysql.Value]" title="Permalink">
@@ -567,7 +591,10 @@ exists with the given name. Otherwise, None.</p></dd></dl></div>
         <span class="name">values</span><span class="result">: <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<a href="Value.html" class="extype" name="com.twitter.finagle.mysql.Value">Value</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">The values for this Row.</p>
+      <p class="shortcomment cmt">The values for this <a href="" class="extype" name="com.twitter.finagle.mysql.Row">Row</a>.</p><div class="fullcomment"><div class="comment cmt"><p>The values for this <a href="" class="extype" name="com.twitter.finagle.mysql.Row">Row</a>.
+The data is 0-indexed so <code>values(0)</code> contains the value for the first
+column in the <a href="" class="extype" name="com.twitter.finagle.mysql.Row">Row</a>.
+</p></div></div>
     </li></ol>
             </div>
 
@@ -653,10 +680,7 @@ exists with the given name. Otherwise, None.</p></dd></dl></div>
         <span class="name">apply</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="Value.html" class="extype" name="com.twitter.finagle.mysql.Value">Value</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">Retrieves the Value in the column with the
-given name.</p><div class="fullcomment"><div class="comment cmt"><p>Retrieves the Value in the column with the
-given name.</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>name of the column.</p></dd><dt>returns</dt><dd class="cmt"><p>Some(Value) if the column
-exists with the given name. Otherwise, None.</p></dd></dl></div>
+      <p class="shortcomment cmt">Retrieves the <a href="Value.html" class="extype" name="com.twitter.finagle.mysql.Value">Value</a> in the column with the given name.</p><div class="fullcomment"><div class="comment cmt"><p>Retrieves the <a href="Value.html" class="extype" name="com.twitter.finagle.mysql.Value">Value</a> in the column with the given name.</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd><dt>returns</dt><dd class="cmt"><p>Some(Value) if the column exists with the given name. Otherwise, None.</p></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -673,6 +697,105 @@ exists with the given name. Otherwise, None.</p></dd></dl></div>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#bigDecimalOrNull" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="bigDecimalOrNull(columnName:String):BigDecimal"></a><a id="bigDecimalOrNull(String):BigDecimal"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#bigDecimalOrNull(columnName:String):BigDecimal" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">bigDecimalOrNull</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.BigDecimal">BigDecimal</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns a <code>BigDecimal</code> for the given column name,
+or <code>null</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a <code>BigDecimal</code> for the given column name,
+or <code>null</code> if the SQL value is NULL.</p><p>This can be used for MySQL columns that are <code>NewDecimal</code>,
+<code>float</code>, or <code>double</code>.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not a supported type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#getBigDecimal(columnName:String):Option[BigDecimal]" class="extmbr" name="com.twitter.finagle.mysql.Row#getBigDecimal">getBigDecimal</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#bigIntOrNull" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="bigIntOrNull(columnName:String):BigInt"></a><a id="bigIntOrNull(String):BigInt"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#bigIntOrNull(columnName:String):BigInt" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">bigIntOrNull</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.BigInt">BigInt</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns a <code>BigInt</code> for the given column name,
+or <code>null</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a <code>BigInt</code> for the given column name,
+or <code>null</code> if the SQL value is NULL.</p><p>This can be used for MySQL columns that are <code>tiny</code>, <code>short</code>,
+<code>int24</code>, <code>long</code>, or <code>longlong</code>.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not a supported type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#getBigInt(columnName:String):Option[BigInt]" class="extmbr" name="com.twitter.finagle.mysql.Row#getBigInt">getBigInt</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#booleanOrFalse" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="booleanOrFalse(columnName:String):Boolean"></a><a id="booleanOrFalse(String):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#booleanOrFalse(columnName:String):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">booleanOrFalse</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns a Java primitive <code>boolean</code> for the given column name,
+or <code>false</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a Java primitive <code>boolean</code> for the given column name,
+or <code>false</code> if the SQL value is NULL.</p><p>This is used for MySQL columns that are <code>tiny</code> as <code>boolean</code>
+is a synonym for that type.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not that type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://dev.mysql.com/doc/refman/5.5/en/numeric-type-overview.html" target="_blank">https://dev.mysql.com/doc/refman/5.5/en/numeric-type-overview.html</a></p></span><span class="cmt"><p><a href="#getBoolean(columnName:String):Option[Boolean]" class="extmbr" name="com.twitter.finagle.mysql.Row#getBoolean">getBoolean</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#byteOrZero" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="byteOrZero(columnName:String):Byte"></a><a id="byteOrZero(String):Byte"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#byteOrZero(columnName:String):Byte" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">byteOrZero</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns a Java primitive <code>byte</code> for the given column name,
+or <code>0</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a Java primitive <code>byte</code> for the given column name,
+or <code>0</code> if the SQL value is NULL.</p><p>This is used for MySQL columns that are <code>tiny</code> and signed.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not that type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#getByte(columnName:String):Option[Byte]" class="extmbr" name="com.twitter.finagle.mysql.Row#getByte">getByte</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#bytesOrNull" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="bytesOrNull(columnName:String):Array[Byte]"></a><a id="bytesOrNull(String):Array[Byte]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#bytesOrNull(columnName:String):Array[Byte]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">bytesOrNull</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns a <code>Array[Byte]</code> for the given column name,
+or <code>null</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a <code>Array[Byte]</code> for the given column name,
+or <code>null</code> if the SQL value is NULL.</p><p>This can be used for MySQL columns that are <code>tinyblob</code>,
+<code>mediumblob</code>, <code>blob</code>, <code>binary</code>, or <code>varbinary</code>.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not that type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#getBytes(columnName:String):Option[Array[Byte]]" class="extmbr" name="com.twitter.finagle.mysql.Row#getBytes">getBytes</a></p></span></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
@@ -697,6 +820,26 @@ exists with the given name. Otherwise, None.</p></dd></dl></div>
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#doubleOrZero" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="doubleOrZero(columnName:String):Double"></a><a id="doubleOrZero(String):Double"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#doubleOrZero(columnName:String):Double" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">doubleOrZero</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Double.html#scala.Double" class="extype" name="scala.Double">Double</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns a Java primitive <code>double</code> for the given column name,
+or <code>0</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a Java primitive <code>double</code> for the given column name,
+or <code>0</code> if the SQL value is NULL.</p><p>This can be used for MySQL columns that are <code>float</code> or
+<code>double</code>.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not a supported type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#getDouble(columnName:String):Option[Double]" class="extmbr" name="com.twitter.finagle.mysql.Row#getDouble">getDouble</a></p></span></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -751,6 +894,124 @@ exists with the given name. Otherwise, None.</p></dd></dl></div>
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#floatOrZero" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="floatOrZero(columnName:String):Float"></a><a id="floatOrZero(String):Float"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#floatOrZero(columnName:String):Float" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">floatOrZero</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Float.html#scala.Float" class="extype" name="scala.Float">Float</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns a Java primitive <code>float</code> for the given column name,
+or <code>0</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a Java primitive <code>float</code> for the given column name,
+or <code>0</code> if the SQL value is NULL.</p><p>This is used for MySQL columns that are <code>float</code>.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not a supported type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#getFloat(columnName:String):Option[Float]" class="extmbr" name="com.twitter.finagle.mysql.Row#getFloat">getFloat</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#getBigDecimal" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getBigDecimal(columnName:String):Option[BigDecimal]"></a><a id="getBigDecimal(String):Option[BigDecimal]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#getBigDecimal(columnName:String):Option[BigDecimal]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getBigDecimal</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.BigDecimal">BigDecimal</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns <code>Some</code> of a <code>BigDecimal</code> for the given column name,
+or <code>None</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns <code>Some</code> of a <code>BigDecimal</code> for the given column name,
+or <code>None</code> if the SQL value is NULL.</p><p>This can be used for MySQL columns that are <code>NewDecimal</code>,
+<code>float</code>, or <code>double</code>.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not a supported type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#bigDecimalOrNull(columnName:String):BigDecimal" class="extmbr" name="com.twitter.finagle.mysql.Row#bigDecimalOrNull">bigDecimalOrNull</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#getBigInt" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getBigInt(columnName:String):Option[BigInt]"></a><a id="getBigInt(String):Option[BigInt]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#getBigInt(columnName:String):Option[BigInt]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getBigInt</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.BigInt">BigInt</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns <code>Some</code> of a <code>BigInt</code> for the given column name,
+or <code>None</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns <code>Some</code> of a <code>BigInt</code> for the given column name,
+or <code>None</code> if the SQL value is NULL.</p><p>This can be used for MySQL columns that are <code>tiny</code>, <code>short</code>,
+<code>int24</code>, <code>long</code>, or <code>longlong</code>.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not a supported type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#bigIntOrNull(columnName:String):BigInt" class="extmbr" name="com.twitter.finagle.mysql.Row#bigIntOrNull">bigIntOrNull</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#getBoolean" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getBoolean(columnName:String):Option[Boolean]"></a><a id="getBoolean(String):Option[Boolean]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#getBoolean(columnName:String):Option[Boolean]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getBoolean</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns <code>Some</code> of a boxed Java <code>Boolean</code> for the given column name,
+or <code>None</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns <code>Some</code> of a boxed Java <code>Boolean</code> for the given column name,
+or <code>None</code> if the SQL value is NULL.</p><p>This is used for MySQL columns that are <code>tiny</code> as <code>boolean</code>
+is a synonym for that type.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not that type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://dev.mysql.com/doc/refman/5.5/en/numeric-type-overview.html" target="_blank">https://dev.mysql.com/doc/refman/5.5/en/numeric-type-overview.html</a></p></span><span class="cmt"><p><a href="#booleanOrFalse(columnName:String):Boolean" class="extmbr" name="com.twitter.finagle.mysql.Row#booleanOrFalse">booleanOrFalse</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#getByte" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getByte(columnName:String):Option[Byte]"></a><a id="getByte(String):Option[Byte]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#getByte(columnName:String):Option[Byte]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getByte</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.lang.Byte">Byte</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns <code>Some</code> of a boxed Java <code>Byte</code> for the given column name,
+or <code>None</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns <code>Some</code> of a boxed Java <code>Byte</code> for the given column name,
+or <code>None</code> if the SQL value is NULL.</p><p>This is used for MySQL columns that are signed and <code>tiny</code>.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not that type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#byteOrZero(columnName:String):Byte" class="extmbr" name="com.twitter.finagle.mysql.Row#byteOrZero">byteOrZero</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#getBytes" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getBytes(columnName:String):Option[Array[Byte]]"></a><a id="getBytes(String):Option[Array[Byte]]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#getBytes(columnName:String):Option[Array[Byte]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getBytes</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns <code>Some</code> of an <code>Array[Byte]</code> for the given column name,
+or <code>None</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns <code>Some</code> of an <code>Array[Byte]</code> for the given column name,
+or <code>None</code> if the SQL value is NULL.</p><p>This can be used for MySQL columns that are <code>tinyblob</code>,
+<code>mediumblob</code>, <code>blob</code>, <code>binary</code>, or <code>varbinary</code>.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not that type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#bytesOrNull(columnName:String):Array[Byte]" class="extmbr" name="com.twitter.finagle.mysql.Row#bytesOrNull">bytesOrNull</a></p></span></dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -770,6 +1031,164 @@ exists with the given name. Otherwise, None.</p></dd></dl></div>
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#getDouble" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getDouble(columnName:String):Option[Double]"></a><a id="getDouble(String):Option[Double]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#getDouble(columnName:String):Option[Double]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getDouble</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.lang.Double">Double</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns <code>Some</code> of a boxed Java <code>Double</code> for the given column name,
+or <code>None</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns <code>Some</code> of a boxed Java <code>Double</code> for the given column name,
+or <code>None</code> if the SQL value is NULL.</p><p>This can be used for MySQL columns that are <code>float</code> or
+<code>double</code>.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not a supported type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="doubleOrZero(">doubleOrZero(</span></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#getFloat" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getFloat(columnName:String):Option[Float]"></a><a id="getFloat(String):Option[Float]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#getFloat(columnName:String):Option[Float]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getFloat</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.lang.Float">Float</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns <code>Some</code> of a boxed Java <code>Float</code> for the given column name,
+or <code>None</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns <code>Some</code> of a boxed Java <code>Float</code> for the given column name,
+or <code>None</code> if the SQL value is NULL.</p><p>This is used for MySQL columns that are <code>float</code>.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not a supported type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#floatOrZero(columnName:String):Float" class="extmbr" name="com.twitter.finagle.mysql.Row#floatOrZero">floatOrZero</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#getInteger" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getInteger(columnName:String):Option[Integer]"></a><a id="getInteger(String):Option[Integer]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#getInteger(columnName:String):Option[Integer]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getInteger</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.lang.Integer">Integer</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns <code>Some</code> of a boxed Java <code>Integer</code> for the given column name,
+or <code>None</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns <code>Some</code> of a boxed Java <code>Integer</code> for the given column name,
+or <code>None</code> if the SQL value is NULL.</p><p>This can be used for MySQL columns that are <code>tiny</code>, <code>short</code>,
+<code>int24</code>, or signed and <code>long</code>.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not a supported type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#intOrZero(columnName:String):Int" class="extmbr" name="com.twitter.finagle.mysql.Row#intOrZero">intOrZero</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#getJavaSqlDate" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getJavaSqlDate(columnName:String):Option[java.sql.Date]"></a><a id="getJavaSqlDate(String):Option[Date]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#getJavaSqlDate(columnName:String):Option[java.sql.Date]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getJavaSqlDate</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.sql.Date">Date</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns <code>Some</code> of a <code>java.sql.Date</code> for the given column name,
+or <code>None</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns <code>Some</code> of a <code>java.sql.Date</code> for the given column name,
+or <code>None</code> if the SQL value is NULL.</p><p>This can be used for MySQL columns that are <code>date</code>.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not a supported type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="javaSqlDateOrNull(">javaSqlDateOrNull(</span></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#getLong" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getLong(columnName:String):Option[Long]"></a><a id="getLong(String):Option[Long]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#getLong(columnName:String):Option[Long]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getLong</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns <code>Some</code> of a boxed Java <code>Long</code> for the given column name,
+or <code>None</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns <code>Some</code> of a boxed Java <code>Long</code> for the given column name,
+or <code>None</code> if the SQL value is NULL.</p><p>This can be used for MySQL columns that are <code>tiny</code>, <code>short</code>,
+<code>int24</code>, <code>long</code>, or signed and <code>longlong</code>
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not a supported type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#longOrZero(columnName:String):Long" class="extmbr" name="com.twitter.finagle.mysql.Row#longOrZero">longOrZero</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#getShort" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getShort(columnName:String):Option[Short]"></a><a id="getShort(String):Option[Short]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#getShort(columnName:String):Option[Short]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getShort</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.lang.Short">Short</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns <code>Some</code> of a boxed Java <code>Short</code> for the given column name,
+or <code>None</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns <code>Some</code> of a boxed Java <code>Short</code> for the given column name,
+or <code>None</code> if the SQL value is NULL.</p><p>This can be used for MySQL columns that are <code>tiny</code>, or
+signed and <code>short</code>.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not a supported type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#shortOrZero(columnName:String):Short" class="extmbr" name="com.twitter.finagle.mysql.Row#shortOrZero">shortOrZero</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#getString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getString(columnName:String):Option[String]"></a><a id="getString(String):Option[String]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#getString(columnName:String):Option[String]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getString</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns <code>Some</code> of a <code>String</code> for the given column name,
+or <code>None</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns <code>Some</code> of a <code>String</code> for the given column name,
+or <code>None</code> if the SQL value is NULL.</p><p>This can be used for MySQL columns that are <code>varchar</code>, <code>string</code>, or <code>varstring</code>,
+Also supports <code>tinyblob</code>, <code>blob</code>, and <code>mediumblob</code> if the field's charset
+is not the binary charset.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not a supported type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#stringOrNull(columnName:String):String" class="extmbr" name="com.twitter.finagle.mysql.Row#stringOrNull">stringOrNull</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#getTimestamp" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getTimestamp(columnName:String,timeZone:java.util.TimeZone):Option[java.sql.Timestamp]"></a><a id="getTimestamp(String,TimeZone):Option[Timestamp]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#getTimestamp(columnName:String,timeZone:java.util.TimeZone):Option[java.sql.Timestamp]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getTimestamp</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="timeZone">timeZone: <span class="extype" name="java.util.TimeZone">TimeZone</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.sql.Timestamp">Timestamp</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns <code>Some</code> of an <code>java.sql.Timestamp</code> for the given column name,
+or <code>None</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns <code>Some</code> of an <code>java.sql.Timestamp</code> for the given column name,
+or <code>None</code> if the SQL value is NULL.</p><p>This can be used for MySQL columns that are <code>timestamp</code> or <code>datetime</code>.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd><dt class="param">timeZone</dt><dd class="cmt"><p>the <code>TimeZone</code> used to parse the data.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not that type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#timestampOrNull(columnName:String,timeZone:java.util.TimeZone):java.sql.Timestamp" class="extmbr" name="com.twitter.finagle.mysql.Row#timestampOrNull">timestampOrNull</a></p></span></dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
@@ -789,6 +1208,42 @@ exists with the given name. Otherwise, None.</p></dd></dl></div>
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#indexOfOrSentinel" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="indexOfOrSentinel(columnName:String):Int"></a><a id="indexOfOrSentinel(String):Int"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#indexOfOrSentinel(columnName:String):Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">indexOfOrSentinel</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Retrieves the 0-indexed index of the column with the given name.</p><div class="fullcomment"><div class="comment cmt"><p>Retrieves the 0-indexed index of the column with the given name.</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd><dt>returns</dt><dd class="cmt"><p>-1 if the column does not exist, otherwise the index of the column.</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#intOrZero" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="intOrZero(columnName:String):Int"></a><a id="intOrZero(String):Int"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#intOrZero(columnName:String):Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">intOrZero</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns a Java primitive <code>int</code> for the given column name,
+or <code>0</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a Java primitive <code>int</code> for the given column name,
+or <code>0</code> if the SQL value is NULL.</p><p>This can be used for MySQL columns that are <code>tiny</code>, <code>short</code>,
+<code>int24</code>, or signed and <code>long</code>.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not a supported type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#getInteger(columnName:String):Option[Integer]" class="extmbr" name="com.twitter.finagle.mysql.Row#getInteger">getInteger</a></p></span></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -805,6 +1260,45 @@ exists with the given name. Otherwise, None.</p></dd></dl></div>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#javaSqlDateOrNull" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="javaSqlDateOrNull(columnName:String):java.sql.Date"></a><a id="javaSqlDateOrNull(String):Date"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#javaSqlDateOrNull(columnName:String):java.sql.Date" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">javaSqlDateOrNull</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="java.sql.Date">Date</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns a <code>java.sql.Date</code> for the given column name,
+or <code>null</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a <code>java.sql.Date</code> for the given column name,
+or <code>null</code> if the SQL value is NULL.</p><p>This can be used for MySQL columns that are <code>date</code>.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not a supported type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#getJavaSqlDate(columnName:String):Option[java.sql.Date]" class="extmbr" name="com.twitter.finagle.mysql.Row#getJavaSqlDate">getJavaSqlDate</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#longOrZero" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="longOrZero(columnName:String):Long"></a><a id="longOrZero(String):Long"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#longOrZero(columnName:String):Long" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">longOrZero</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns a Java primitive <code>long</code> for the given column name,
+or <code>0</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a Java primitive <code>long</code> for the given column name,
+or <code>0</code> if the SQL value is NULL.</p><p>This can be used for MySQL columns that are <code>tiny</code>, <code>short</code>,
+<code>int24</code>, <code>long</code>, or signed and <code>longlong</code>
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not a supported type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#getLong(columnName:String):Option[Long]" class="extmbr" name="com.twitter.finagle.mysql.Row#getLong">getLong</a></p></span></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -859,6 +1353,47 @@ exists with the given name. Otherwise, None.</p></dd></dl></div>
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#shortOrZero" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="shortOrZero(columnName:String):Short"></a><a id="shortOrZero(String):Short"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#shortOrZero(columnName:String):Short" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">shortOrZero</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Short.html#scala.Short" class="extype" name="scala.Short">Short</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns a Java primitive <code>short</code> for the given column name,
+or <code>0</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a Java primitive <code>short</code> for the given column name,
+or <code>0</code> if the SQL value is NULL.</p><p>This can be used for MySQL columns that are <code>tiny</code>, or
+signed and <code>short</code>.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not a supported type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#getShort(columnName:String):Option[Short]" class="extmbr" name="com.twitter.finagle.mysql.Row#getShort">getShort</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#stringOrNull" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="stringOrNull(columnName:String):String"></a><a id="stringOrNull(String):String"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#stringOrNull(columnName:String):String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stringOrNull</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns a Java <code>String</code> for the given column name,
+or <code>null</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a Java <code>String</code> for the given column name,
+or <code>null</code> if the SQL value is NULL.</p><p>This can be used for MySQL columns that are <code>varchar</code>, <code>string</code>, or <code>varstring</code>,
+Also supports <code>tinyblob</code>, <code>blob</code>, and <code>mediumblob</code> if the field's charset
+is not the binary charset.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not a supported type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#getString(columnName:String):Option[String]" class="extmbr" name="com.twitter.finagle.mysql.Row#getString">getString</a></p></span></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
@@ -875,6 +1410,25 @@ exists with the given name. Otherwise, None.</p></dd></dl></div>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Row#timestampOrNull" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="timestampOrNull(columnName:String,timeZone:java.util.TimeZone):java.sql.Timestamp"></a><a id="timestampOrNull(String,TimeZone):Timestamp"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Row.html#timestampOrNull(columnName:String,timeZone:java.util.TimeZone):java.sql.Timestamp" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">timestampOrNull</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="timeZone">timeZone: <span class="extype" name="java.util.TimeZone">TimeZone</span></span>)</span><span class="result">: <span class="extype" name="java.sql.Timestamp">Timestamp</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns a <code>java.sql.Timestamp</code> for the given column name,
+or <code>null</code> if the SQL value is NULL.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a <code>java.sql.Timestamp</code> for the given column name,
+or <code>null</code> if the SQL value is NULL.</p><p>This can be used for MySQL columns that are <code>timestamp</code> or <code>datetime</code>.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the case sensitive name of the column.</p></dd><dt class="param">timeZone</dt><dd class="cmt"><p>the <code>TimeZone</code> used to parse the data.</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException"><code>ColumnNotFoundException</code></a> if the column is not found in the row.</p></span><span class="cmt"><p><a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException"><code>UnsupportedTypeException</code></a> if the MySQL column is not that type.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#getTimestamp(columnName:String,timeZone:java.util.TimeZone):Option[java.sql.Timestamp]" class="extmbr" name="com.twitter.finagle.mysql.Row#getTimestamp">getTimestamp</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.mysql.Row#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">

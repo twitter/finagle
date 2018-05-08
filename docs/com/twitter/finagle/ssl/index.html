@@ -1269,9 +1269,9 @@ be enabled with a given TLS <a href="Engine.html" class="extype" name="com.twitt
       
       <p class="shortcomment cmt">Java APIs for <code><a href="Protocols.html" class="extype" name="com.twitter.finagle.ssl.Protocols">Protocols</a></code>.</p>
     </li><li name="com.twitter.finagle.ssl.SslConfigurationException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="SslConfigurationExceptionextendsExceptionwithProductwithSerializable"></a><a id="SslConfigurationException:SslConfigurationException"></a>
+      <a id="SslConfigurationExceptionextendsSslExceptionwithProductwithSerializable"></a><a id="SslConfigurationException:SslConfigurationException"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/ssl/index.html#SslConfigurationExceptionextendsExceptionwithProductwithSerializable" title="Permalink">
+      <a href="../../../../com/twitter/finagle/ssl/index.html#SslConfigurationExceptionextendsSslExceptionwithProductwithSerializable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1280,7 +1280,7 @@ be enabled with a given TLS <a href="Engine.html" class="extype" name="com.twitt
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="SslConfigurationException is an exception which is thrown by a particular engine factory when the engine factory does not support the collection of parameters specified by the SslClientConfiguration or the SslServerConfiguration." href="SslConfigurationException.html"><span class="name">SslConfigurationException</span></a><span class="params">(<span name="msg">msg: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="cause">cause: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="SslConfigurationException is an exception which is thrown by a particular engine factory when the engine factory does not support the collection of parameters specified by the SslClientConfiguration or the SslServerConfiguration." href="SslConfigurationException.html"><span class="name">SslConfigurationException</span></a><span class="params">(<span name="cause">cause: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result"> extends <a href="../SslException.html" class="extype" name="com.twitter.finagle.SslException">SslException</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">SslConfigurationException is an exception which is thrown by

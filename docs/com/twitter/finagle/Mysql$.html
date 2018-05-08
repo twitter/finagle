@@ -1296,6 +1296,10 @@ generator.
                         <a href="SourcedException.html" title="A trait for exceptions that have a source.">SourcedException</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
+                        <a class="class" href="SslException.html" title="Indicates that an SSL/TLS exception occurred."></a>
+                        <a href="SslException.html" title="Indicates that an SSL/TLS exception occurred.">SslException</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
                         <a class="class" href="SslHandshakeException.html" title="Indicates that an error occurred while an SSL handshake was being performed with a server at a given remoteAddress."></a>
                         <a href="SslHandshakeException.html" title="Indicates that an error occurred while an SSL handshake was being performed with a server at a given remoteAddress.">SslHandshakeException</a>
                       </li><li class="current-entities indented3">
@@ -1478,9 +1482,24 @@ generator.
 <a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">com.twitter.finagle.client.StackClient</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Implements a mysql client in terms of a
 <a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">com.twitter.finagle.client.StackClient</a>. The client inherits a wealth
 of features from finagle including connection pooling and load
-balancing.</p><p>Additionally, this class provides methods for constructing a rich
-client which exposes a rich mysql api.
-</p></div></div>
+balancing.</p><p>Additionally, this class provides methods via <a href="MysqlRichClient.html" class="extype" name="com.twitter.finagle.MysqlRichClient">MysqlRichClient</a> for constructing
+a client which exposes an API that has use case specific methods, for example
+<a href="mysql/Client.html#read(sql:String):com.twitter.util.Future[com.twitter.finagle.mysql.ResultSet]" class="extmbr" name="com.twitter.finagle.mysql.Client#read">mysql.Client.read</a>, <a href="mysql/Client.html#modify(sql:String):com.twitter.util.Future[com.twitter.finagle.mysql.OK]" class="extmbr" name="com.twitter.finagle.mysql.Client#modify">mysql.Client.modify</a>, and <a href="mysql/Client.html#prepare(sql:String):com.twitter.finagle.mysql.PreparedStatement" class="extmbr" name="com.twitter.finagle.mysql.Client#prepare">mysql.Client.prepare</a>.
+This is an easier experience for most users.
+</p></div><dl class="attributes block"> <div class="block">Example:
+               <ol><li class="cmt"><p></p><pre><span class="kw">import</span> com.twitter.finagle.Mysql
+<span class="kw">import</span> com.twitter.finagle.mysql.Client
+<span class="kw">import</span> com.twitter.util.Future
+
+<span class="kw">val</span> client: Client = Mysql.client
+  .withCredentials(<span class="lit">"username"</span>, <span class="lit">"password"</span>)
+  .withDatabase(<span class="lit">"database"</span>)
+  .newRichClient(<span class="lit">"host:port"</span>)
+<span class="kw">val</span> names: Future[<span class="std">Seq</span>[<span class="std">String</span>]] =
+  client.select(<span class="lit">"SELECT name FROM employee"</span>) { row <span class="kw">=&gt;</span>
+    row.stringOrNull(<span class="lit">"name"</span>)
+  }</pre></li></ol>
+            </div></dl></div>
     </li></ol>
             </div>
 

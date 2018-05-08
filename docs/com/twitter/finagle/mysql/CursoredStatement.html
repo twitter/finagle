@@ -209,8 +209,8 @@ resources for using Finagle.
                         <a href="Charset$.html" title="">Charset</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="Client$.html" title=""></a>
-                        <a class="trait" href="Client.html" title=""></a>
-                        <a href="Client.html" title="">Client</a>
+                        <a class="trait" href="Client.html" title="A MySQL client that is not Service-based like com.twitter.finagle.Mysql.Client is, making it easier to use for most cases."></a>
+                        <a href="Client.html" title="A MySQL client that is not Service-based like com.twitter.finagle.Mysql.Client is, making it easier to use for most cases.">Client</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="CloseRequest.html" title="A CloseRequest deallocates a prepared statement on the server."></a>
@@ -219,6 +219,10 @@ resources for using Finagle.
                         <span class="separator"></span>
                         <a class="object" href="CloseStatementOK$.html" title="Used internally to synthesize a response from the server when sending a prepared statement CloseRequest"></a>
                         <a href="CloseStatementOK$.html" title="Used internally to synthesize a response from the server when sending a prepared statement CloseRequest">CloseStatementOK</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="ColumnNotFoundException.html" title="Indicates the requested column name was not found."></a>
+                        <a href="ColumnNotFoundException.html" title="Indicates the requested column name was not found.">ColumnNotFoundException</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Command$.html" title=""></a>
@@ -232,9 +236,9 @@ resources for using Finagle.
                         <a class="trait" href="CursorResult.html" title="A closable async stream of projected rows from a CursoredStatement."></a>
                         <a href="CursorResult.html" title="A closable async stream of projected rows from a CursoredStatement.">CursorResult</a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="trait" href="" title="A CursoredStatement represents a parameterized sql statement which when applied to parameters yields a lazy stream of rows."></a>
-                        <a href="" title="A CursoredStatement represents a parameterized sql statement which when applied to parameters yields a lazy stream of rows.">CursoredStatement</a>
+                        <a class="object" href="CursoredStatement$.html" title=""></a>
+                        <a class="trait" href="" title="A CursoredStatement represents a parameterized SQL statement applied concurrently with varying parameters and yields a lazy stream of rows."></a>
+                        <a href="" title="A CursoredStatement represents a parameterized SQL statement applied concurrently with varying parameters and yields a lazy stream of rows.">CursoredStatement</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="DateValue$.html" title=""></a>
@@ -381,8 +385,8 @@ resources for using Finagle.
                         <a href="ResultSet.html" title="">ResultSet</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="trait" href="Row.html" title="A Row makes it easy to extract Value's from a mysql row."></a>
-                        <a href="Row.html" title="A Row makes it easy to extract Value's from a mysql row.">Row</a>
+                        <a class="trait" href="Row.html" title="A Row allows you to extract Value's from a MySQL row."></a>
+                        <a href="Row.html" title="A Row allows you to extract Value's from a MySQL row.">Row</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="ServerError.html" title="A catch-all exception class for errors returned from the upstream MySQL server."></a>
@@ -417,6 +421,10 @@ resources for using Finagle.
                         <a href="Type$.html" title="">Type</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="class" href="UnsupportedTypeException.html" title="Indicates the requested column was for an unsupported type."></a>
+                        <a href="UnsupportedTypeException.html" title="Indicates the requested column was for an unsupported type.">UnsupportedTypeException</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="class" href="UseRequest.html" title="A UseRequest is used to change the default schema of the connection."></a>
                         <a href="UseRequest.html" title="A UseRequest is used to change the default schema of the connection.">UseRequest</a>
                       </li><li class="current-entities indented4">
@@ -434,14 +442,16 @@ resources for using Finagle.
           <div id="content">
             <body class="trait type">
       <div id="definition">
-        <div class="big-circle trait">t</div>
+        <a href="CursoredStatement$.html" title="See companion object"><div class="big-circle trait-companion-object">t</div></a>
         <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="index.html" class="extype" name="com.twitter.finagle.mysql">mysql</a></p>
-        <h1>CursoredStatement<span class="permalink">
+        <h1><a href="CursoredStatement$.html" title="See companion object">CursoredStatement</a><span class="permalink">
       <a href="../../../../com/twitter/finagle/mysql/CursoredStatement.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
-        <h3><span class="morelinks"></span></h3>
+        <h3><span class="morelinks"><div>
+            Companion <a href="CursoredStatement$.html" title="See companion object">object CursoredStatement</a>
+          </div></span></h3>
       </div>
 
       <h4 id="signature" class="signature">
@@ -455,10 +465,11 @@ resources for using Finagle.
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A CursoredStatement represents a parameterized
-sql statement which when applied to parameters yields
-a lazy stream of rows. Can be used concurrently.
-</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A <code>CursoredStatement</code> represents a parameterized SQL statement
+applied concurrently with varying parameters and yields
+a lazy stream of rows.</p><p>These are SQL statements with <code>?</code>'s used for the parameters which are
+&quot;filled in&quot; per usage by <code>apply</code>.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="PreparedStatement.html" class="extype" name="com.twitter.finagle.mysql.PreparedStatement">PreparedStatement</a> for eager processing of <a href="Row.html" class="extype" name="com.twitter.finagle.mysql.Row">Row</a>s.</p></span><span class="cmt"><p><span class="extype" name="Client.cursor(String">Client.cursor(String</span></p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -529,11 +540,33 @@ a lazy stream of rows. Can be used concurrently.
       
       <p class="shortcomment cmt">Executes the cursored statement with the given <code>params</code> and lazily maps <code>f</code>
 over the rows as they are streamed from the database.</p><div class="fullcomment"><div class="comment cmt"><p>Executes the cursored statement with the given <code>params</code> and lazily maps <code>f</code>
-over the rows as they are streamed from the database.
-</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p><code>rowsPerFetch</code> should be carefully picked to balance the minimum number of round
-trips to the database, and the maximum amount of memory used by an individual fetch. For
-example, consider estimating the whole result size with a <code>select count(...)</code> first,
-and then setting <code>rowsPerFetch</code> to <code>Math.log(count)</code>.</p></span></dd></dl></div>
+over the rows as they are streamed from the database.</p><p>For Scala users, you can use the implicit conversions to <a href="Parameter.html" class="extype" name="com.twitter.finagle.mysql.Parameter">Parameter</a>
+by importing <code>Parameter._</code>. For example:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.{Client, CursorResult, CursoredStatement}
+<span class="kw">import</span> com.twitter.finagle.mysql.Parameter._
+<span class="kw">import</span> com.twitter.concurrent.AsyncStream
+<span class="kw">import</span> com.twitter.util.Future
+
+<span class="kw">val</span> client: Client = ???
+<span class="kw">val</span> cursoredStatement: CursoredStatement =
+  client.cursor(<span class="lit">"SELECT int_column FROM a_table WHERE string_column = ?"</span>)
+
+<span class="kw">val</span> rowsToFetch = <span class="num">100</span>
+<span class="kw">val</span> futureCursorResult: Future[CursorResult[<span class="std">Int</span>]] =
+  <span class="cmt">// note the implicit conversions of the String to Parameter</span>
+  cursoredStatement(rowsToFetch, <span class="lit">"cool example"</span>) { row <span class="kw">=&gt;</span>
+    row.intOrZero
+  }
+
+futureCursorResult.foreach { cursorResult <span class="kw">=&gt;</span>
+  <span class="kw">val</span> stream: AsyncStream[<span class="std">Int</span>] = cursorResult.stream
+  stream.take(<span class="num">5</span>).foreach { i <span class="kw">=&gt;</span>
+    println(s<span class="lit">"Read int_column = '$i'"</span>);
+  }.ensure {
+    cursorResult.close()
+  }
+}</pre><p>Java users, see <a href="#asJava:com.twitter.finagle.mysql.CursoredStatement.AsJava" class="extmbr" name="com.twitter.finagle.mysql.CursoredStatement#asJava">asJava</a> and use <a href="CursoredStatement$$AsJava.html#execute[T](rowsPerFetch:Int,f:com.twitter.function.JavaFunction[com.twitter.finagle.mysql.Row,T],params:com.twitter.finagle.mysql.Parameter*):com.twitter.util.Future[com.twitter.finagle.mysql.CursorResult[T]]" class="extmbr" name="com.twitter.finagle.mysql.CursoredStatement.AsJava#execute">CursoredStatement.AsJava.execute</a>.
+</p></div><dl class="paramcmts block"><dt class="param">rowsPerFetch</dt><dd class="cmt"><p>should be picked to balance the minimum number of round
+trips to the database, and the maximum amount of memory used by an individual fetch.</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -604,6 +637,22 @@ and then setting <code>rowsPerFetch</code> to <code>Math.log(count)</code>.</p><
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.CursoredStatement#asJava" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="asJava:com.twitter.finagle.mysql.CursoredStatement.AsJava"></a><a id="asJava:AsJava"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/CursoredStatement.html#asJava:com.twitter.finagle.mysql.CursoredStatement.AsJava" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asJava</span><span class="result">: <a href="CursoredStatement$$AsJava.html" class="extype" name="com.twitter.finagle.mysql.CursoredStatement.AsJava">AsJava</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Provides a Java-friendly API for this <a href="" class="extype" name="com.twitter.finagle.mysql.CursoredStatement">CursoredStatement</a>.</p>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">

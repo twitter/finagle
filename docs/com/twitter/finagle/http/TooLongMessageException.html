@@ -179,6 +179,22 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.http">http</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.cookie" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cookie"></a><a id="cookie:cookie"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#cookie" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="cookie/index.html"><span class="name">cookie</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.http">http</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.exp" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="exp"></a><a id="exp:exp"></a>
       <span class="permalink">
@@ -377,8 +393,8 @@ resources for using Finagle.
                         <a href="RequestBuilder.html" title="">RequestBuilder</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="RequestParamMap.html" title="HttpRequest-backed param map."></a>
-                        <a href="RequestParamMap.html" title="HttpRequest-backed param map.">RequestParamMap</a>
+                        <a class="class" href="RequestParamMap.html" title="Http Request-backed ParamMap."></a>
+                        <a href="RequestParamMap.html" title="Http Request-backed ParamMap.">RequestParamMap</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="RequestProxy.html" title="Proxy for Request."></a>
@@ -423,6 +439,10 @@ resources for using Finagle.
                         <a class="object" href="TooLongMessageException$.html" title=""></a>
                         <a class="class" href="" title="The Message was too long to be handled correctly"></a>
                         <a href="" title="The Message was too long to be handled correctly">TooLongMessageException</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="Uri$.html" title=""></a>
+                        <a class="class" href="Uri.html" title="Represents an immutable URI."></a>
+                        <a href="Uri.html" title="Represents an immutable URI.">Uri</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="Version$.html" title=""></a>
                         <a class="class" href="Version.html" title="Represents the HTTP version."></a>
@@ -677,7 +697,8 @@ resources for using Finagle.
       
       <p class="shortcomment cmt">A copy of this object with the given flags replacing the current flags.</p><div class="fullcomment"><div class="comment cmt"><p>A copy of this object with the given flags replacing the current flags. The
 caller of this method should check to see if a copy is necessary before
-calling.
+calling.</p><p>As this is an internal API, the other <code>Throwable</code> fields such as the cause
+and stack trace should be handled by callers.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.TooLongMessageException">TooLongMessageException</a> → FailureFlags</dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>

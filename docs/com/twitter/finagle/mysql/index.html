@@ -572,8 +572,8 @@ use.</p><p> Flag          Value     Meaning
                         <a href="Charset$.html" title="">Charset</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="Client$.html" title=""></a>
-                        <a class="trait" href="Client.html" title=""></a>
-                        <a href="Client.html" title="">Client</a>
+                        <a class="trait" href="Client.html" title="A MySQL client that is not Service-based like com.twitter.finagle.Mysql.Client is, making it easier to use for most cases."></a>
+                        <a href="Client.html" title="A MySQL client that is not Service-based like com.twitter.finagle.Mysql.Client is, making it easier to use for most cases.">Client</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="CloseRequest.html" title="A CloseRequest deallocates a prepared statement on the server."></a>
@@ -582,6 +582,10 @@ use.</p><p> Flag          Value     Meaning
                         <span class="separator"></span>
                         <a class="object" href="CloseStatementOK$.html" title="Used internally to synthesize a response from the server when sending a prepared statement CloseRequest"></a>
                         <a href="CloseStatementOK$.html" title="Used internally to synthesize a response from the server when sending a prepared statement CloseRequest">CloseStatementOK</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="ColumnNotFoundException.html" title="Indicates the requested column name was not found."></a>
+                        <a href="ColumnNotFoundException.html" title="Indicates the requested column name was not found.">ColumnNotFoundException</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Command$.html" title=""></a>
@@ -595,9 +599,9 @@ use.</p><p> Flag          Value     Meaning
                         <a class="trait" href="CursorResult.html" title="A closable async stream of projected rows from a CursoredStatement."></a>
                         <a href="CursorResult.html" title="A closable async stream of projected rows from a CursoredStatement.">CursorResult</a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="trait" href="CursoredStatement.html" title="A CursoredStatement represents a parameterized sql statement which when applied to parameters yields a lazy stream of rows."></a>
-                        <a href="CursoredStatement.html" title="A CursoredStatement represents a parameterized sql statement which when applied to parameters yields a lazy stream of rows.">CursoredStatement</a>
+                        <a class="object" href="CursoredStatement$.html" title=""></a>
+                        <a class="trait" href="CursoredStatement.html" title="A CursoredStatement represents a parameterized SQL statement applied concurrently with varying parameters and yields a lazy stream of rows."></a>
+                        <a href="CursoredStatement.html" title="A CursoredStatement represents a parameterized SQL statement applied concurrently with varying parameters and yields a lazy stream of rows.">CursoredStatement</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="DateValue$.html" title=""></a>
@@ -744,8 +748,8 @@ use.</p><p> Flag          Value     Meaning
                         <a href="ResultSet.html" title="">ResultSet</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="trait" href="Row.html" title="A Row makes it easy to extract Value's from a mysql row."></a>
-                        <a href="Row.html" title="A Row makes it easy to extract Value's from a mysql row.">Row</a>
+                        <a class="trait" href="Row.html" title="A Row allows you to extract Value's from a MySQL row."></a>
+                        <a href="Row.html" title="A Row allows you to extract Value's from a MySQL row.">Row</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="ServerError.html" title="A catch-all exception class for errors returned from the upstream MySQL server."></a>
@@ -778,6 +782,10 @@ use.</p><p> Flag          Value     Meaning
                         <span class="separator"></span>
                         <a class="object" href="Type$.html" title=""></a>
                         <a href="Type$.html" title="">Type</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="UnsupportedTypeException.html" title="Indicates the requested column was for an unsupported type."></a>
+                        <a href="UnsupportedTypeException.html" title="Indicates the requested column was for an unsupported type.">UnsupportedTypeException</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="UseRequest.html" title="A UseRequest is used to change the default schema of the connection."></a>
@@ -1338,7 +1346,7 @@ generator.
       </span>
       
       
-    </li><li name="com.twitter.finagle.mysql.Client" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.mysql.Client" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="ClientextendsClosable"></a><a id="Client:Client"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/mysql/index.html#ClientextendsClosable" title="Permalink">
@@ -1350,10 +1358,21 @@ generator.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="" href="Client.html"><span class="name">Client</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/util/Closable.html#com.twitter.util.Closable" class="extype" name="com.twitter.util.Closable">Closable</a></span>
+        <a title="A MySQL client that is not Service-based like com.twitter.finagle.Mysql.Client is, making it easier to use for most cases." href="Client.html"><span class="name">Client</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/util/Closable.html#com.twitter.util.Closable" class="extype" name="com.twitter.util.Closable">Closable</a></span>
       </span>
       
-      
+      <p class="shortcomment cmt">A MySQL client that is not <code>Service</code>-based like <a href="../Mysql$$Client.html" class="extype" name="com.twitter.finagle.Mysql.Client">com.twitter.finagle.Mysql.Client</a> is,
+making it easier to use for most cases.</p><div class="fullcomment"><div class="comment cmt"><p>A MySQL client that is not <code>Service</code>-based like <a href="../Mysql$$Client.html" class="extype" name="com.twitter.finagle.Mysql.Client">com.twitter.finagle.Mysql.Client</a> is,
+making it easier to use for most cases.
+</p></div><dl class="attributes block"> <div class="block">Example:
+               <ol><li class="cmt"><p>Creation:</p><pre><span class="kw">import</span> com.twitter.finagle.Mysql
+<span class="kw">import</span> com.twitter.finagle.mysql.Client
+
+<span class="kw">val</span> client: Client = Mysql.client
+  .withCredentials(<span class="lit">"username"</span>, <span class="lit">"password"</span>)
+  .withDatabase(<span class="lit">"database"</span>)
+  .newRichClient(<span class="lit">"host:port"</span>)</pre></li></ol>
+            </div></dl></div>
     </li><li name="com.twitter.finagle.mysql.CloseRequest" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="CloseRequestextendsCommandRequestwithProductwithSerializable"></a><a id="CloseRequest:CloseRequest"></a>
       <span class="permalink">
@@ -1373,6 +1392,22 @@ generator.
 No response is sent back to the client.
 <a href="http://dev.mysql.com/doc/internals/en/com-stmt-close.html" target="_blank">http://dev.mysql.com/doc/internals/en/com-stmt-close.html</a>
 </p></div></div>
+    </li><li name="com.twitter.finagle.mysql.ColumnNotFoundException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ColumnNotFoundExceptionextendsSQLNonTransientExceptionwithFailureFlags[com.twitter.finagle.mysql.ColumnNotFoundException]"></a><a id="ColumnNotFoundException:ColumnNotFoundException"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/index.html#ColumnNotFoundExceptionextendsSQLNonTransientExceptionwithFailureFlags[com.twitter.finagle.mysql.ColumnNotFoundException]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Indicates the requested column name was not found." href="ColumnNotFoundException.html"><span class="name">ColumnNotFoundException</span></a><span class="result"> extends <span class="extype" name="java.sql.SQLNonTransientException">SQLNonTransientException</span> with <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="ColumnNotFoundException.html" class="extype" name="com.twitter.finagle.mysql.ColumnNotFoundException">ColumnNotFoundException</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Indicates the requested column name was not found.</p>
     </li><li name="com.twitter.finagle.mysql.CommandRequest" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="CommandRequestextendsRequest"></a><a id="CommandRequest:CommandRequest"></a>
       <span class="permalink">
@@ -1418,15 +1453,16 @@ and has a cmd byte associated with it.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="A CursoredStatement represents a parameterized sql statement which when applied to parameters yields a lazy stream of rows." href="CursoredStatement.html"><span class="name">CursoredStatement</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+        <a title="A CursoredStatement represents a parameterized SQL statement applied concurrently with varying parameters and yields a lazy stream of rows." href="CursoredStatement.html"><span class="name">CursoredStatement</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
       </span>
       
-      <p class="shortcomment cmt">A CursoredStatement represents a parameterized
-sql statement which when applied to parameters yields
-a lazy stream of rows.</p><div class="fullcomment"><div class="comment cmt"><p>A CursoredStatement represents a parameterized
-sql statement which when applied to parameters yields
-a lazy stream of rows. Can be used concurrently.
-</p></div></div>
+      <p class="shortcomment cmt">A <code>CursoredStatement</code> represents a parameterized SQL statement
+applied concurrently with varying parameters and yields
+a lazy stream of rows.</p><div class="fullcomment"><div class="comment cmt"><p>A <code>CursoredStatement</code> represents a parameterized SQL statement
+applied concurrently with varying parameters and yields
+a lazy stream of rows.</p><p>These are SQL statements with <code>?</code>'s used for the parameters which are
+&quot;filled in&quot; per usage by <code>apply</code>.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="PreparedStatement.html" class="extype" name="com.twitter.finagle.mysql.PreparedStatement">PreparedStatement</a> for eager processing of <a href="Row.html" class="extype" name="com.twitter.finagle.mysql.Row">Row</a>s.</p></span><span class="cmt"><p><span class="extype" name="Client.cursor(String">Client.cursor(String</span></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.mysql.Decoder" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="Decoder[T&lt;:com.twitter.finagle.mysql.Result]extendscom.twitter.finagle.mysql.transport.Packet=&gt;com.twitter.util.Try[T]"></a><a id="Decoder[T&lt;:Result]:Decoder[T]"></a>
       <span class="permalink">
@@ -1755,9 +1791,13 @@ upstream MySQL server.</p>
 <code>CanBeParameter[A]</code> is available in scope via the <a href="Parameter$.html#wrap[_A](_value:_A)(implicit_evidence:com.twitter.finagle.mysql.CanBeParameter[_A]):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameter#wrap">Parameter.wrap</a> or
 <a href="Parameter$.html#wrapOption[_A](option:Option[_A])(implicitev:com.twitter.finagle.mysql.CanBeParameter[_A]):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameter#wrapOption">Parameter.wrapOption</a> implicits.</p><div class="fullcomment"><div class="comment cmt"><p>A value of type <code>A</code> can implicitly convert to a <code>Parameter</code> if an evidence
 <code>CanBeParameter[A]</code> is available in scope via the <a href="Parameter$.html#wrap[_A](_value:_A)(implicit_evidence:com.twitter.finagle.mysql.CanBeParameter[_A]):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameter#wrap">Parameter.wrap</a> or
-<a href="Parameter$.html#wrapOption[_A](option:Option[_A])(implicitev:com.twitter.finagle.mysql.CanBeParameter[_A]):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameter#wrapOption">Parameter.wrapOption</a> implicits.</p><p>A Scala example:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter._
+<a href="Parameter$.html#wrapOption[_A](option:Option[_A])(implicitev:com.twitter.finagle.mysql.CanBeParameter[_A]):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameter#wrapOption">Parameter.wrapOption</a> implicits. Explicit conversions are available
+via <a href="Parameter$.html#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameter#of">Parameter.of</a> and <a href="Parameters$.html#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameters#of">Parameters.of</a>.</p><p>A Scala example with implicits:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter
+<span class="kw">import</span> com.twitter.finagle.mysql.Parameter._
 
-<span class="kw">val</span> p: Parameter = <span class="lit">"this will get implicitly converted to a Parameter"</span></pre><p>A Java example:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter;
+<span class="kw">val</span> p: Parameter = <span class="lit">"this will get implicitly converted to a Parameter"</span></pre><p>A Scala example without implicits:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter
+
+<span class="kw">val</span> p: Parameter = Parameter.of(<span class="lit">"explicitly converted to a Parameter"</span>)</pre><p>A Java example:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter;
 <span class="kw">import</span> com.twitter.finagle.mysql.Parameters;
 
 Parameter p = Parameters.of(<span class="lit">"explicitly converted to a Parameter"</span>);</pre></div></div>
@@ -1815,8 +1855,8 @@ passed in query string.
       <p class="shortcomment cmt">A <code>PreparedStatement</code> represents a parameterized SQL statement which may be
 applied concurrently with varying parameters.</p><div class="fullcomment"><div class="comment cmt"><p>A <code>PreparedStatement</code> represents a parameterized SQL statement which may be
 applied concurrently with varying parameters.</p><p>These are SQL statements with <code>?</code>'s used for the parameters which are
-&quot;filled in&quot; per usage by <code>apply</code> and <code>select</code>.
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="Client.prepare(String)">Client.prepare(String)</span></p></span></dd></dl></div>
+&quot;filled in&quot; per usage by <code>read</code>, <code>select</code>, and <code>modify</code>.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="CursoredStatement.html" class="extype" name="com.twitter.finagle.mysql.CursoredStatement">CursoredStatement</a> for a lazy stream of <a href="Row.html" class="extype" name="com.twitter.finagle.mysql.Row">Row</a>s.</p></span><span class="cmt"><p><span class="extype" name="Client.prepare(String)">Client.prepare(String)</span></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.mysql.QueryRequest" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="QueryRequestextendsSimpleCommandRequestwithWithSqlwithProductwithSerializable"></a><a id="QueryRequest:QueryRequest"></a>
       <span class="permalink">
@@ -1857,7 +1897,7 @@ a value and enough meta data to decode the
 bytes.</p><div class="fullcomment"><div class="comment cmt"><p>A RawValue contains the raw bytes that represent
 a value and enough meta data to decode the
 bytes.
-</p></div><dl class="paramcmts block"><dt class="param">typ</dt><dd class="cmt"><p>The mysql type code for this value.</p></dd><dt class="param">charset</dt><dd class="cmt"><p>The charset encoding of the bytes.</p></dd><dt class="param">isBinary</dt><dd class="cmt"><p>Disambiguates between the text and binary protocol.</p></dd><dt class="param">bytes</dt><dd class="cmt"><p>The raw bytes for this value.</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">typ</dt><dd class="cmt"><p>The MySQL <a href="Type$.html" class="extype" name="com.twitter.finagle.mysql.Type">type</a> code for this value.</p></dd><dt class="param">charset</dt><dd class="cmt"><p>The <a href="Charset$.html" class="extype" name="com.twitter.finagle.mysql.Charset">charset</a> encoding of the bytes.</p></dd><dt class="param">isBinary</dt><dd class="cmt"><p>Disambiguates between the text and binary protocol.</p></dd><dt class="param">bytes</dt><dd class="cmt"><p>The raw bytes for this value.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.mysql.Request" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="RequestextendsAnyRef"></a><a id="Request:Request"></a>
       <span class="permalink">
@@ -1918,13 +1958,35 @@ bytes.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="A Row makes it easy to extract Value's from a mysql row." href="Row.html"><span class="name">Row</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+        <a title="A Row allows you to extract Value's from a MySQL row." href="Row.html"><span class="name">Row</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
       </span>
       
-      <p class="shortcomment cmt">A <code>Row</code> makes it easy to extract <a href="Value.html" class="extype" name="com.twitter.finagle.mysql.Value">Value</a>'s from a mysql row.</p><div class="fullcomment"><div class="comment cmt"><p>A <code>Row</code> makes it easy to extract <a href="Value.html" class="extype" name="com.twitter.finagle.mysql.Value">Value</a>'s from a mysql row.
-Specific <a href="Value.html" class="extype" name="com.twitter.finagle.mysql.Value">Value</a>'s based on mysql column name can be accessed
-via the <code>apply</code> method.
-</p></div></div>
+      <p class="shortcomment cmt">A <code>Row</code> allows you to extract <a href="Value.html" class="extype" name="com.twitter.finagle.mysql.Value">Value</a>'s from a MySQL row.</p><div class="fullcomment"><div class="comment cmt"><p>A <code>Row</code> allows you to extract <a href="Value.html" class="extype" name="com.twitter.finagle.mysql.Value">Value</a>'s from a MySQL row.</p><p>Column values can be accessed by the MySQL column name via the
+typed <code>xyzOrNull</code> and <code>getXyz</code> methods. For example, <code>stringOrNull</code>
+and <code>getString</code>. The <code>get</code>-prefixed methods return <code>Options</code> and use <code>None</code>
+to represent a SQL NULL. For SQL NULLs, the <code>or</code>-suffixed methods return
+<code>null</code> for Object-types and use a sentinel, like 0, for primitives.</p><p>Alternatively, <a href="Value.html" class="extype" name="com.twitter.finagle.mysql.Value">Value</a>'s based on the column name can be accessed
+via the <code>apply</code> method.</p><p>For example, given the query, <code>SELECT 'text' AS str_col, 123 AS int_col</code>,
+you could extract the columns as such.</p><p>First, in Scala:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Row
+<span class="kw">val</span> row: Row = ???
+
+<span class="cmt">// if the column is not null:</span>
+<span class="kw">val</span> strCol: <span class="std">String</span> = row.stringOrNull(<span class="lit">"str_col"</span>)
+<span class="kw">val</span> intCol: <span class="std">Int</span> = row.intOrZero(<span class="lit">"int_col"</span>)
+
+<span class="cmt">// if the column is nullable:</span>
+<span class="kw">val</span> strCol: <span class="std">Option</span>[<span class="std">String</span>] = row.getString(<span class="lit">"str_col"</span>)
+<span class="kw">val</span> intCol: <span class="std">Option</span>[java.lang.Integer] = row.getInteger(<span class="lit">"int_col"</span>)</pre><p>Then, the same in Java:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Row;
+<span class="kw">import</span> scala.<span class="std">Option</span>;
+Row row = ...
+
+<span class="cmt">// if the column is not null:</span>
+<span class="std">String</span> strCol = row.stringOrNull(<span class="lit">"str_col"</span>);
+int intCol = row.intOrZero(<span class="lit">"int_col"</span>);
+
+<span class="cmt">// if the column is nullable:</span>
+<span class="std">Option</span>&lt;<span class="std">String</span>&gt; strCol = row.getString(<span class="lit">"str_col"</span>);
+<span class="std">Option</span>&lt;Integer&gt; intCol = row.getInteger(<span class="lit">"int_col"</span>);</pre></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="Client.html#cursor(sql:String):com.twitter.finagle.mysql.CursoredStatement" class="extmbr" name="com.twitter.finagle.mysql.Client#cursor">Client.cursor</a></p></span><span class="cmt"><p><a href="Client.html#select[T](sql:String)(f:com.twitter.finagle.mysql.Row=&gt;T):com.twitter.util.Future[Seq[T]]" class="extmbr" name="com.twitter.finagle.mysql.Client#select">Client.select</a></p></span><span class="cmt"><p><a href="PreparedStatement.html#select[T](params:com.twitter.finagle.mysql.Parameter*)(f:com.twitter.finagle.mysql.Row=&gt;T):com.twitter.util.Future[Seq[T]]" class="extmbr" name="com.twitter.finagle.mysql.PreparedStatement#select">PreparedStatement.select</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.mysql.ServerError" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ServerErrorextendsExceptionwithProductwithSerializable"></a><a id="ServerError:ServerError"></a>
       <span class="permalink">
@@ -2041,6 +2103,24 @@ associated data into a packet.</p>
       </span>
       
       
+    </li><li name="com.twitter.finagle.mysql.UnsupportedTypeException" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="UnsupportedTypeExceptionextendsSQLNonTransientExceptionwithFailureFlags[com.twitter.finagle.mysql.UnsupportedTypeException]"></a><a id="UnsupportedTypeException:UnsupportedTypeException"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/index.html#UnsupportedTypeExceptionextendsSQLNonTransientExceptionwithFailureFlags[com.twitter.finagle.mysql.UnsupportedTypeException]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Indicates the requested column was for an unsupported type." href="UnsupportedTypeException.html"><span class="name">UnsupportedTypeException</span></a><span class="result"> extends <span class="extype" name="java.sql.SQLNonTransientException">SQLNonTransientException</span> with <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="UnsupportedTypeException.html" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException">UnsupportedTypeException</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Indicates the requested column was for an unsupported type.</p><div class="fullcomment"><div class="comment cmt"><p>Indicates the requested column was for an unsupported type.
+For example, asking for a string when the column is a tinyint.
+</p></div></div>
     </li><li name="com.twitter.finagle.mysql.UseRequest" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="UseRequestextendsSimpleCommandRequestwithProductwithSerializable"></a><a id="UseRequest:UseRequest"></a>
       <span class="permalink">
@@ -2213,6 +2293,22 @@ CloseRequest
       </span>
       <span class="symbol">
         <a title="" href="Command$.html"><span class="name">Command</span></a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.mysql.CursoredStatement" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CursoredStatement"></a><a id="CursoredStatement:CursoredStatement"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/index.html#CursoredStatement" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="CursoredStatement$.html"><span class="name">CursoredStatement</span></a>
       </span>
       
       
@@ -2496,10 +2592,14 @@ to indicate that a command has completed succesfully.
       
       <p class="shortcomment cmt">For Scala users, the typical usage is by importing the implicit conversions
 and then letting the compiler do the conversions for you.</p><div class="fullcomment"><div class="comment cmt"><p>For Scala users, the typical usage is by importing the implicit conversions
-and then letting the compiler do the conversions for you.</p><p>Java users should generally be using <a href="Parameters$.html#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameters#of">Parameters.of</a> to do explicit
-conversions.</p><p>A Scala example:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter._
+and then letting the compiler do the conversions for you. Explicit
+runtime conversions are also available via <a href="Parameter$.html#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameter#of">Parameter.of</a>.</p><p>Java users should generally be using <a href="Parameters$.html#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameters#of">Parameters.of</a> to do explicit
+conversions.</p><p>A Scala example with implicits:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter
+<span class="kw">import</span> com.twitter.finagle.mysql.Parameter._
 
-<span class="kw">val</span> p: Parameter = <span class="lit">"this will get implicitly converted to a Parameter"</span></pre><p>A Java example:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter;
+<span class="kw">val</span> p: Parameter = <span class="lit">"this will get implicitly converted to a Parameter"</span></pre><p>A Scala example without implicits:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter
+
+<span class="kw">val</span> p: Parameter = Parameter.of(<span class="lit">"explicitly converted to a Parameter"</span>)</pre><p>A Java example:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter;
 <span class="kw">import</span> com.twitter.finagle.mysql.Parameters;
 
 Parameter p = Parameters.of(<span class="lit">"explicitly converted to a Parameter"</span>);</pre></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="Parameters$.html" class="extype" name="com.twitter.finagle.mysql.Parameters">Parameters</a> for a Java-friendly API.</p></span></dd></dl></div>
@@ -2609,6 +2709,24 @@ COM_STMT_PREPARE.
       </span>
       
       
+    </li><li name="com.twitter.finagle.mysql.TimestampValue" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="TimestampValue"></a><a id="TimestampValue:TimestampValue"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/index.html#TimestampValue" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Extracts a value in UTC." href="TimestampValue$.html"><span class="name">TimestampValue</span></a><span class="result"> extends <a href="TimestampValue.html" class="extype" name="com.twitter.finagle.mysql.TimestampValue">TimestampValue</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Extracts a value in UTC.</p><div class="fullcomment"><div class="comment cmt"><p>Extracts a value in UTC. To use a different time zone, create an instance of
+<a href="TimestampValue.html" class="extype" name="com.twitter.finagle.mysql.TimestampValue">com.twitter.finagle.mysql.TimestampValue</a>.
+</p></div></div>
     </li><li name="com.twitter.finagle.mysql.Type" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Type"></a><a id="Type:Type"></a>
       <span class="permalink">
@@ -2631,31 +2749,7 @@ COM_STMT_PREPARE.
 
         
 
-        <div class="values members">
-              <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.mysql.TimestampValue" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="TimestampValue"></a><a id="TimestampValue:TimestampValue"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mysql/index.html#TimestampValue" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="Extracts a value in UTC." href="TimestampValue$.html"><span class="name deprecated" title="Deprecated: (Since version 6.20.2)">TimestampValue</span></a><span class="result"> extends <a href="TimestampValue.html" class="extype" name="com.twitter.finagle.mysql.TimestampValue">TimestampValue</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Extracts a value in UTC.</p><div class="fullcomment"><div class="comment cmt"><p>Extracts a value in UTC. To use a different time zone, create an instance of
-<a href="TimestampValue.html" class="extype" name="com.twitter.finagle.mysql.TimestampValue">com.twitter.finagle.mysql.TimestampValue</a>.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.20.2)</i></p></dd></dl></div>
-    </li></ol>
-            </div>
+        
         </div>
 
         <div id="inheritedMembers">

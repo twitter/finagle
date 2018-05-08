@@ -1296,6 +1296,10 @@ generator.
                         <a href="SourcedException.html" title="A trait for exceptions that have a source.">SourcedException</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
+                        <a class="class" href="SslException.html" title="Indicates that an SSL/TLS exception occurred."></a>
+                        <a href="SslException.html" title="Indicates that an SSL/TLS exception occurred.">SslException</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
                         <a class="class" href="SslHandshakeException.html" title="Indicates that an error occurred while an SSL handshake was being performed with a server at a given remoteAddress."></a>
                         <a href="SslHandshakeException.html" title="Indicates that an error occurred while an SSL handshake was being performed with a server at a given remoteAddress.">SslHandshakeException</a>
                       </li><li class="current-entities indented3">
@@ -1634,7 +1638,8 @@ generator.
       
       <p class="shortcomment cmt">A copy of this object with the given flags replacing the current flags.</p><div class="fullcomment"><div class="comment cmt"><p>A copy of this object with the given flags replacing the current flags. The
 caller of this method should check to see if a copy is necessary before
-calling.
+calling.</p><p>As this is an internal API, the other <code>Throwable</code> fields such as the cause
+and stack trace should be handled by callers.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ProxyConnectException">ProxyConnectException</a> → FailureFlags</dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>

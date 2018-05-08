@@ -207,6 +207,12 @@ with many other non-fungible services, in which it makes sense to proliferate cl
 created, used, and thrown away, but in the vast majority of cases, clients should be persistent,
 not ephemeral.
 
+When can I use a null?
+~~~~~~~~~~~~~~~~~~~~~~
+
+None of Finagle's APIs admits nulls unless noted otherwise.  Finagle is written in Scala, and by
+convention, we use Scala `Options` when a parameter or a result is optional.
+
 Mux-specific FAQ
 ----------------
 

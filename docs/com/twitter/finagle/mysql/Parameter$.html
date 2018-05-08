@@ -209,8 +209,8 @@ resources for using Finagle.
                         <a href="Charset$.html" title="">Charset</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="Client$.html" title=""></a>
-                        <a class="trait" href="Client.html" title=""></a>
-                        <a href="Client.html" title="">Client</a>
+                        <a class="trait" href="Client.html" title="A MySQL client that is not Service-based like com.twitter.finagle.Mysql.Client is, making it easier to use for most cases."></a>
+                        <a href="Client.html" title="A MySQL client that is not Service-based like com.twitter.finagle.Mysql.Client is, making it easier to use for most cases.">Client</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="CloseRequest.html" title="A CloseRequest deallocates a prepared statement on the server."></a>
@@ -219,6 +219,10 @@ resources for using Finagle.
                         <span class="separator"></span>
                         <a class="object" href="CloseStatementOK$.html" title="Used internally to synthesize a response from the server when sending a prepared statement CloseRequest"></a>
                         <a href="CloseStatementOK$.html" title="Used internally to synthesize a response from the server when sending a prepared statement CloseRequest">CloseStatementOK</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="ColumnNotFoundException.html" title="Indicates the requested column name was not found."></a>
+                        <a href="ColumnNotFoundException.html" title="Indicates the requested column name was not found.">ColumnNotFoundException</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Command$.html" title=""></a>
@@ -232,9 +236,9 @@ resources for using Finagle.
                         <a class="trait" href="CursorResult.html" title="A closable async stream of projected rows from a CursoredStatement."></a>
                         <a href="CursorResult.html" title="A closable async stream of projected rows from a CursoredStatement.">CursorResult</a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="trait" href="CursoredStatement.html" title="A CursoredStatement represents a parameterized sql statement which when applied to parameters yields a lazy stream of rows."></a>
-                        <a href="CursoredStatement.html" title="A CursoredStatement represents a parameterized sql statement which when applied to parameters yields a lazy stream of rows.">CursoredStatement</a>
+                        <a class="object" href="CursoredStatement$.html" title=""></a>
+                        <a class="trait" href="CursoredStatement.html" title="A CursoredStatement represents a parameterized SQL statement applied concurrently with varying parameters and yields a lazy stream of rows."></a>
+                        <a href="CursoredStatement.html" title="A CursoredStatement represents a parameterized SQL statement applied concurrently with varying parameters and yields a lazy stream of rows.">CursoredStatement</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="DateValue$.html" title=""></a>
@@ -381,8 +385,8 @@ resources for using Finagle.
                         <a href="ResultSet.html" title="">ResultSet</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="trait" href="Row.html" title="A Row makes it easy to extract Value's from a mysql row."></a>
-                        <a href="Row.html" title="A Row makes it easy to extract Value's from a mysql row.">Row</a>
+                        <a class="trait" href="Row.html" title="A Row allows you to extract Value's from a MySQL row."></a>
+                        <a href="Row.html" title="A Row allows you to extract Value's from a MySQL row.">Row</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="ServerError.html" title="A catch-all exception class for errors returned from the upstream MySQL server."></a>
@@ -415,6 +419,10 @@ resources for using Finagle.
                         <span class="separator"></span>
                         <a class="object" href="Type$.html" title=""></a>
                         <a href="Type$.html" title="">Type</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="UnsupportedTypeException.html" title="Indicates the requested column was for an unsupported type."></a>
+                        <a href="UnsupportedTypeException.html" title="Indicates the requested column was for an unsupported type.">UnsupportedTypeException</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="UseRequest.html" title="A UseRequest is used to change the default schema of the connection."></a>
@@ -458,10 +466,14 @@ resources for using Finagle.
 
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>For Scala users, the typical usage is by importing the implicit conversions
-and then letting the compiler do the conversions for you.</p><p>Java users should generally be using <a href="Parameters$.html#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameters#of">Parameters.of</a> to do explicit
-conversions.</p><p>A Scala example:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter._
+and then letting the compiler do the conversions for you. Explicit
+runtime conversions are also available via <a href="#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameter#of">Parameter.of</a>.</p><p>Java users should generally be using <a href="Parameters$.html#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameters#of">Parameters.of</a> to do explicit
+conversions.</p><p>A Scala example with implicits:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter
+<span class="kw">import</span> com.twitter.finagle.mysql.Parameter._
 
-<span class="kw">val</span> p: Parameter = <span class="lit">"this will get implicitly converted to a Parameter"</span></pre><p>A Java example:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter;
+<span class="kw">val</span> p: Parameter = <span class="lit">"this will get implicitly converted to a Parameter"</span></pre><p>A Scala example without implicits:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter
+
+<span class="kw">val</span> p: Parameter = Parameter.of(<span class="lit">"explicitly converted to a Parameter"</span>)</pre><p>A Java example:</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter;
 <span class="kw">import</span> com.twitter.finagle.mysql.Parameters;
 
 Parameter p = Parameters.of(<span class="lit">"explicitly converted to a Parameter"</span>);</pre></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="Parameters$.html" class="extype" name="com.twitter.finagle.mysql.Parameters">Parameters</a> for a Java-friendly API.</p></span></dd></dl><div class="toggleContainer block">
@@ -771,6 +783,24 @@ Parameter p = Parameters.of(<span class="lit">"explicitly converted to a Paramet
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Parameter#of" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="of(value:Any):com.twitter.finagle.mysql.Parameter"></a><a id="of(Any):Parameter"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Parameter$.html#of(value:Any):com.twitter.finagle.mysql.Parameter" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">of</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></span>)</span><span class="result">: <a href="Parameter.html" class="extype" name="com.twitter.finagle.mysql.Parameter">Parameter</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Converts the given <code>value</code> into a <a href="Parameter.html" class="extype" name="com.twitter.finagle.mysql.Parameter">Parameter</a> at runtime.</p><div class="fullcomment"><div class="comment cmt"><p>Converts the given <code>value</code> into a <a href="Parameter.html" class="extype" name="com.twitter.finagle.mysql.Parameter">Parameter</a> at runtime.</p><p>Scala users may use the implicit conversions if they prefer.</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter
+
+<span class="kw">val</span> p: Parameter = Parameter.of(<span class="lit">"a string"</span>)</pre></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Any unknown types are treated as a SQL NULL.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Parameters$.html#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameters#of">Parameters.of</a> for Java users.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
@@ -803,7 +833,7 @@ Parameter p = Parameters.of(<span class="lit">"explicitly converted to a Paramet
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.mysql.Parameter#unsafeWrap" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.mysql.Parameter#unsafeWrap" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="unsafeWrap(value:Any):com.twitter.finagle.mysql.Parameter"></a><a id="unsafeWrap(Any):Parameter"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/mysql/Parameter$.html#unsafeWrap(value:Any):com.twitter.finagle.mysql.Parameter" title="Permalink">
@@ -818,10 +848,7 @@ Parameter p = Parameters.of(<span class="lit">"explicitly converted to a Paramet
         <span class="name">unsafeWrap</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></span>)</span><span class="result">: <a href="Parameter.html" class="extype" name="com.twitter.finagle.mysql.Parameter">Parameter</a></span>
       </span>
       
-      <p class="shortcomment cmt">This converts the compile time error we would get with <code>wrap</code> into
-a runtime error.</p><div class="fullcomment"><div class="comment cmt"><p>This converts the compile time error we would get with <code>wrap</code> into
-a runtime error.</p><p>Java users can use <a href="Parameters$.html#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameters#of">Parameters.of</a>.
-</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Any unknown types are treated as a SQL NULL.</p></span></dd></dl></div>
+      <p class="shortcomment cmt">Synonym for <a href="#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameter#of">of</a>.</p>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
@@ -890,7 +917,7 @@ a runtime error.</p><p>Java users can use <a href="Parameters$.html#of(value:Any
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.mysql.Parameter#wrap" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.mysql.Parameter#wrap" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wrap[_A](_value:_A)(implicit_evidence:com.twitter.finagle.mysql.CanBeParameter[_A]):com.twitter.finagle.mysql.Parameter"></a><a id="wrap[_A](_A)(CanBeParameter[_A]):Parameter"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/mysql/Parameter$.html#wrap[_A](_value:_A)(implicit_evidence:com.twitter.finagle.mysql.CanBeParameter[_A]):com.twitter.finagle.mysql.Parameter" title="Permalink">
@@ -905,8 +932,12 @@ a runtime error.</p><p>Java users can use <a href="Parameters$.html#of(value:Any
         <span class="name">wrap</span><span class="tparams">[<span name="_A">_A</span>]</span><span class="params">(<span name="_value">_value: <span class="extype" name="com.twitter.finagle.mysql.Parameter.wrap._A">_A</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="_evidence">_evidence: <a href="CanBeParameter.html" class="extype" name="com.twitter.finagle.mysql.CanBeParameter">CanBeParameter</a>[<span class="extype" name="com.twitter.finagle.mysql.Parameter.wrap._A">_A</span>]</span>)</span><span class="result">: <a href="Parameter.html" class="extype" name="com.twitter.finagle.mysql.Parameter">Parameter</a></span>
       </span>
       
-      <p class="shortcomment cmt">Java users can use <a href="Parameters$.html#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameters#of">Parameters.of</a>.</p>
-    </li><li name="com.twitter.finagle.mysql.Parameter#wrapOption" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Generally used via implicits.</p><div class="fullcomment"><div class="comment cmt"><p>Generally used via implicits.</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter
+<span class="kw">import</span> com.twitter.finagle.mysql.Parameter._
+
+<span class="kw">val</span> p: Parameter = <span class="lit">"this will get implicitly converted to a Parameter"</span></pre><p>Java users can use <a href="Parameters$.html#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameters#of">Parameters.of</a>.
+</p></div></div>
+    </li><li name="com.twitter.finagle.mysql.Parameter#wrapOption" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wrapOption[_A](option:Option[_A])(implicitev:com.twitter.finagle.mysql.CanBeParameter[_A]):com.twitter.finagle.mysql.Parameter"></a><a id="wrapOption[_A](Option[_A])(CanBeParameter[_A]):Parameter"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/mysql/Parameter$.html#wrapOption[_A](option:Option[_A])(implicitev:com.twitter.finagle.mysql.CanBeParameter[_A]):com.twitter.finagle.mysql.Parameter" title="Permalink">
@@ -921,7 +952,12 @@ a runtime error.</p><p>Java users can use <a href="Parameters$.html#of(value:Any
         <span class="name">wrapOption</span><span class="tparams">[<span name="_A">_A</span>]</span><span class="params">(<span name="option">option: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="com.twitter.finagle.mysql.Parameter.wrapOption._A">_A</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <a href="CanBeParameter.html" class="extype" name="com.twitter.finagle.mysql.CanBeParameter">CanBeParameter</a>[<span class="extype" name="com.twitter.finagle.mysql.Parameter.wrapOption._A">_A</span>]</span>)</span><span class="result">: <a href="Parameter.html" class="extype" name="com.twitter.finagle.mysql.Parameter">Parameter</a></span>
       </span>
       
-      <p class="shortcomment cmt">Java users can use <a href="Parameters$.html#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameters#of">Parameters.of</a>.</p>
+      <p class="shortcomment cmt">Generally used via implicits.</p><div class="fullcomment"><div class="comment cmt"><p>Generally used via implicits.
+Input of <code>None</code> is treated as a <code>NULL</code>.</p><pre><span class="kw">import</span> com.twitter.finagle.mysql.Parameter
+<span class="kw">import</span> com.twitter.finagle.mysql.Parameter._
+
+<span class="kw">val</span> p: Parameter = <span class="std">Some</span>(<span class="lit">"this will get implicitly converted to a Parameter"</span>)</pre><p>Java users can use <a href="Parameters$.html#of(value:Any):com.twitter.finagle.mysql.Parameter" class="extmbr" name="com.twitter.finagle.mysql.Parameters#of">Parameters.of</a>.
+</p></div></div>
     </li><li name="com.twitter.finagle.mysql.Parameter.NullParameter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="NullParameter"></a><a id="NullParameter:NullParameter"></a>
       <span class="permalink">
