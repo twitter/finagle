@@ -7,6 +7,13 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+  * finagle-core: Add `PropagateDeadlines` `Stack.Param` to `TimeoutFilter` for
+    disabling propagation of deadlines to outbound requests.
+    ``PHAB_ID=D168405``
+
 Bug Fixes
 ~~~~~~~~~
 

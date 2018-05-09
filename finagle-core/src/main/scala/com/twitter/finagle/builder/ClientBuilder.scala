@@ -1265,6 +1265,7 @@ private[finagle] object ClientBuilderClient {
       TimeoutFilter.make(
         totalTimeout.tunableTimeout,
         TimeoutFilter.TotalTimeout.Default,
+        TimeoutFilter.PropagateDeadlines.Default,
         Duration.Zero,
         timeout => new GlobalRequestTimeoutException(timeout),
         timerParam.timer,

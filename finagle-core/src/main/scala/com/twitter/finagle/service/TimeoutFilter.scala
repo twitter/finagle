@@ -91,11 +91,30 @@ object TimeoutFilter {
   }
 
   /**
+   * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
+   * [[com.twitter.finagle.service.TimeoutFilter]] module when used for
+   * enabling propagation of deadlines to outbound requests. The default
+   * behavior is to propagate deadlines.
+   */
+  case class PropagateDeadlines(enabled: Boolean) {
+    def mk(): (PropagateDeadlines, Stack.Param[PropagateDeadlines]) =
+      (this, PropagateDeadlines.param)
+  }
+
+  object PropagateDeadlines {
+    val Default: Boolean = true
+
+    implicit val param: Stack.Param[PropagateDeadlines] =
+      Stack.Param(PropagateDeadlines(Default))
+  }
+
+  /**
    * Used for adding, or not, a `TimeoutFilter` for `Stack.Module.make`.
    */
   private[finagle] def make[Req, Rep](
     tunable: Tunable[Duration],
     defaultTimeout: Duration,
+    propagateDeadlines: Boolean,
     compensation: Duration,
     exceptionFn: Duration => RequestTimeoutException,
     timer: Timer,
@@ -120,7 +139,8 @@ object TimeoutFilter {
         new TimeoutFilter[Req, Rep](
           timeoutFn,
           exceptionFn,
-          timer
+          timer,
+          propagateDeadlines
         ).andThen(next)
     }
   }
@@ -130,9 +150,10 @@ object TimeoutFilter {
    * for use in clients.
    */
   def clientModule[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module3[
+    new Stack.Module4[
       TimeoutFilter.Param,
       param.Timer,
+      PropagateDeadlines,
       LatencyCompensation.Compensation,
       ServiceFactory[Req, Rep]
     ] {
@@ -143,12 +164,14 @@ object TimeoutFilter {
       def make(
         param: Param,
         timerParam: com.twitter.finagle.param.Timer,
+        propagateDeadlines: PropagateDeadlines,
         compensation: LatencyCompensation.Compensation,
         next: ServiceFactory[Req, Rep]
       ): ServiceFactory[Req, Rep] =
         TimeoutFilter.make(
           param.tunableTimeout,
           TimeoutFilter.Param.Default,
+          propagateDeadlines.enabled,
           compensation.howlong,
           timeout => new IndividualRequestTimeoutException(timeout),
           timerParam.timer,
@@ -173,6 +196,7 @@ object TimeoutFilter {
         TimeoutFilter.make(
           param.tunableTimeout,
           TimeoutFilter.Param.Default,
+          PropagateDeadlines.Default,
           Duration.Zero,
           timeout => new IndividualRequestTimeoutException(timeout),
           timerParam.timer,
@@ -206,7 +230,7 @@ object TimeoutFilter {
     timer: Timer
   ): TypeAgnostic = new TypeAgnostic {
     def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] =
-      new TimeoutFilter[Req, Rep](timeoutFn, exceptionFn, timer)
+      new TimeoutFilter[Req, Rep](timeoutFn, exceptionFn, timer, PropagateDeadlines.Default)
   }
 
 }
@@ -229,18 +253,30 @@ object TimeoutFilter {
 class TimeoutFilter[Req, Rep](
   timeoutFn: () => Duration,
   exceptionFn: Duration => RequestTimeoutException,
-  timer: Timer
+  timer: Timer,
+  propagateDeadlines: Boolean
 ) extends SimpleFilter[Req, Rep] {
+
+  def this(
+    timeoutFn: () => Duration,
+    exceptionFn: Duration => RequestTimeoutException,
+    timer: Timer
+  ) =
+    this(timeoutFn, exceptionFn, timer, TimeoutFilter.PropagateDeadlines.Default)
 
   def this(
     timeout: Tunable[Duration],
     exceptionFn: Duration => RequestTimeoutException,
     timer: Timer
   ) =
-    this(() => timeout().getOrElse(TimeoutFilter.Param.Default), exceptionFn, timer)
+    this(
+      () => timeout().getOrElse(TimeoutFilter.Param.Default),
+      exceptionFn,
+      timer,
+      TimeoutFilter.PropagateDeadlines.Default)
 
   def this(timeout: Duration, exception: RequestTimeoutException, timer: Timer) =
-    this(() => timeout, _ => exception, timer)
+    this(() => timeout, _ => exception, timer, TimeoutFilter.PropagateDeadlines.Default)
 
   def this(timeout: Duration, timer: Timer) =
     this(timeout, new IndividualRequestTimeoutException(timeout), timer)
@@ -249,24 +285,37 @@ class TimeoutFilter[Req, Rep](
     val timeout = timeoutFn()
     val timeoutDeadline = Deadline.ofTimeout(timeout)
 
-    // If there's a current deadline, we combine it with the one derived
-    // from our timeout.
-    val deadline = Deadline.current match {
-      case Some(current) => Deadline.combined(timeoutDeadline, current)
-      case None => timeoutDeadline
-    }
+    if (propagateDeadlines) {
+      // If there's a current deadline, we combine it with the one derived from our timeout.
+      val deadline = Deadline.current match {
+        case Some(current) => Deadline.combined(timeoutDeadline, current)
+        case None => timeoutDeadline
+      }
 
-    Contexts.broadcast.let(Deadline, deadline) {
-      val res = service(request)
-      if (!timeout.isFinite) {
-        res
-      } else {
-        res.within(timer, timeout).rescue {
-          case exc: java.util.concurrent.TimeoutException =>
-            res.raise(exc)
-            Trace.record(TimeoutFilter.TimeoutAnnotation)
-            Future.exception(exceptionFn(timeout))
-        }
+      Contexts.broadcast.let(Deadline, deadline) {
+        applyTimeout(request, service, timeout)
+      }
+    } else {
+      Contexts.broadcast.letClear(Deadline) {
+        applyTimeout(request, service, timeout)
+      }
+    }
+  }
+
+  private[this] def applyTimeout(
+    request: Req,
+    service: Service[Req, Rep],
+    timeout: Duration
+  ): Future[Rep] = {
+    val res = service(request)
+    if (!timeout.isFinite) {
+      res
+    } else {
+      res.within(timer, timeout).rescue {
+        case exc: java.util.concurrent.TimeoutException =>
+          res.raise(exc)
+          Trace.record(TimeoutFilter.TimeoutAnnotation)
+          Future.exception(exceptionFn(timeout))
       }
     }
   }
