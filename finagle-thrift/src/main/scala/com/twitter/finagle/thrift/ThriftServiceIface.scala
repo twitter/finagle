@@ -5,7 +5,11 @@ import com.twitter.conversions.storage._
 import com.twitter.finagle._
 import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.thrift.service.{ThriftCodec, ThriftMethodStatsHandler, ThriftSourcedException}
+import com.twitter.finagle.thrift.service.{
+  ThriftCodec,
+  ThriftMethodStatsHandler,
+  ThriftSourcedException
+}
 import com.twitter.scrooge._
 import com.twitter.util._
 import org.apache.thrift.TApplicationException
@@ -121,10 +125,17 @@ object ThriftServiceIface { // TODO: Rename ThriftServicePerEndpoint and move to
     method: ThriftMethod,
     thriftService: Service[ThriftClientRequest, Array[Byte]],
     clientParam: RichClientParam
-  ): Service[method.Args, method.SuccessType] =
-    statsFilter(method, clientParam.clientStats, clientParam.responseClassifier)
+  ): Service[method.Args, method.SuccessType] = {
+    val stats: SimpleFilter[method.Args, method.SuccessType] =
+      if (clientParam.perEndpointStats)
+        statsFilter(method, clientParam.clientStats, clientParam.responseClassifier)
+      else
+        Filter.identity
+
+    stats
       .andThen(ThriftCodec.filter(method, clientParam.protocolFactory))
       .andThen(thriftService)
+  }
 
   @deprecated("Use com.twitter.finagle.thrift.RichClientParam", "2017-08-16")
   def apply(

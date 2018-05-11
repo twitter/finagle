@@ -12,16 +12,26 @@ import org.apache.thrift.protocol.{TBinaryProtocol, TCompactProtocol, TProtocolF
  * @param protocolFactory A `TProtocolFactory` creates protocol objects from transports
  * @param serviceName For client stats, (default: empty string)
  * @param maxThriftBufferSize The max size of a reusable buffer for the thrift response
- * @param responseClassifier  See [[com.twitter.finagle.service.ResponseClassifier]]
+ * @param responseClassifier See [[com.twitter.finagle.service.ResponseClassifier]]
  * @param clientStats StatsReceiver for recording metrics
+ * @param perEndpointStats Whether to record per-endpoint stats, (default: false)
  */
 case class RichClientParam(
   protocolFactory: TProtocolFactory = Thrift.param.protocolFactory,
   serviceName: String = "",
   maxThriftBufferSize: Int = Thrift.param.maxThriftBufferSize,
   responseClassifier: ResponseClassifier = ResponseClassifier.Default,
-  clientStats: StatsReceiver = ClientStatsReceiver
+  clientStats: StatsReceiver = ClientStatsReceiver,
+  perEndpointStats: Boolean = false
 ) {
+
+  def this(
+    protocolFactory: TProtocolFactory,
+    serviceName: String,
+    maxThriftBufferSize: Int,
+    responseClassifier: ResponseClassifier,
+    clientStats: StatsReceiver
+  ) = this(protocolFactory, serviceName, maxThriftBufferSize, responseClassifier, clientStats, false)
 
   def this(
     protocolFactory: TProtocolFactory,

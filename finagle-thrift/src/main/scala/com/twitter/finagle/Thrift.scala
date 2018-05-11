@@ -244,7 +244,8 @@ object Thrift
       protocolFactory = params[param.ProtocolFactory].protocolFactory,
       maxThriftBufferSize = params[param.MaxReusableBufferSize].maxReusableBufferSize,
       clientStats = params[Stats].statsReceiver,
-      responseClassifier = params[com.twitter.finagle.param.ResponseClassifier].responseClassifier
+      responseClassifier = params[com.twitter.finagle.param.ResponseClassifier].responseClassifier,
+      perEndpointStats = params[Thrift.param.PerEndpointStats].enabled
     )
 
     protected lazy val Label(defaultClientName) = params[Label]
@@ -300,6 +301,12 @@ object Thrift
      */
     def withMaxReusableBufferSize(size: Int): Client =
       configured(param.MaxReusableBufferSize(size))
+
+    /**
+     * Produce a [[com.twitter.finagle.Thrift.Client]] with per-endpoint stats filters
+     */
+    def withPerEndpointStats: Client =
+      configured(param.PerEndpointStats(true))
 
     def clientId: Option[thrift.ClientId] = params[Thrift.param.ClientId].clientId
 

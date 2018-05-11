@@ -344,3 +344,8 @@ These stats pertain to the :ref:`ThriftMux <whats_thriftmux>` protocol.
 .. include:: metrics/ThriftMux.rst
 
 .. _verbosity levels: https://twitter.github.io/util/guide/util-stats/basics.html#verbosity-levels
+
+
+PerEndpoint StatsFilter
+-----------------------
+.. include:: metrics/PerEndpoint.rst

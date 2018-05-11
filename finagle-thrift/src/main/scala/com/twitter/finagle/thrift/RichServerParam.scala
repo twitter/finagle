@@ -26,6 +26,14 @@ case class RichServerParam(
 
   def this(
     protocolFactory: TProtocolFactory,
+    serviceName: String,
+    maxThriftBufferSize: Int,
+    serverStats: StatsReceiver,
+    responseClassifier: ResponseClassifier
+  ) = this(protocolFactory, serviceName, maxThriftBufferSize, serverStats, responseClassifier, false)
+
+  def this(
+    protocolFactory: TProtocolFactory,
     maxThriftBufferSize: Int
   ) = this(protocolFactory, "thrift", maxThriftBufferSize, LoadedStatsReceiver, ResponseClassifier.Default)
 

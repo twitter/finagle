@@ -55,11 +55,18 @@ object ThriftReqRepServicePerEndpoint {
     method: ThriftMethod,
     thriftService: Service[ThriftClientRequest, Array[Byte]],
     clientParam: RichClientParam
-  ): Service[scrooge.Request[method.Args], scrooge.Response[method.SuccessType]] =
-    statsFilter(method, clientParam.clientStats, clientParam.responseClassifier)
+  ): Service[scrooge.Request[method.Args], scrooge.Response[method.SuccessType]] = {
+    val stats: SimpleFilter[scrooge.Request[method.Args], scrooge.Response[method.SuccessType]] =
+      if (clientParam.perEndpointStats)
+        statsFilter(method, clientParam.clientStats, clientParam.responseClassifier)
+      else
+        Filter.identity
+
+    stats
       .andThen(reqRepFilter(method))
       .andThen(ThriftCodec.filter(method, clientParam.protocolFactory))
       .andThen(thriftService)
+  }
 
   /**
    * Transform a `scrooge.Response[A]` to a `Future[A]`.

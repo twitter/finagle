@@ -735,6 +735,7 @@ abstract class AbstractEndToEndTest
     val server = serverForClassifier()
     val sr = new InMemoryStatsReceiver()
     val client = clientImpl
+      .withPerEndpointStats
       .withStatsReceiver(sr)
       .withResponseClassifier(scalaClassifier)
       .withRequestTimeout(100.milliseconds) // used in conjuection with a "slow" query

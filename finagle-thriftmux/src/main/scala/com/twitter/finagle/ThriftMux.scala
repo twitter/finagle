@@ -170,7 +170,8 @@ object ThriftMux
       protocolFactory = params[Thrift.param.ProtocolFactory].protocolFactory,
       maxThriftBufferSize = params[Thrift.param.MaxReusableBufferSize].maxReusableBufferSize,
       clientStats = params[Stats].statsReceiver,
-      responseClassifier = params[com.twitter.finagle.param.ResponseClassifier].responseClassifier
+      responseClassifier = params[com.twitter.finagle.param.ResponseClassifier].responseClassifier,
+      perEndpointStats = params[Thrift.param.PerEndpointStats].enabled
     )
 
     @deprecated("Use clientParam.protocolFactory", "2017-08-16")
@@ -227,6 +228,12 @@ object ThriftMux
      */
     def withMaxReusableBufferSize(size: Int): Client =
       configured(Thrift.param.MaxReusableBufferSize(size))
+
+    /**
+     * Produce a [[com.twitter.finagle.ThriftMux.Client]] with per-endpoint stats filters
+     */
+    def withPerEndpointStats: Client =
+      configured(Thrift.param.PerEndpointStats(true))
 
     private[this] def clientId: Option[ClientId] = params[Thrift.param.ClientId].clientId
 

@@ -20,6 +20,10 @@ Bug Fixes
   * finagle-netty4: `SslServerSessionVerifier` is now supplied with the proper peer address
     rather than `Address.failing`. ``PHAB_ID=D168334``
 
+  * finagle-thrift/thriftmux: Disabled client side per-endpoint stats by default for client
+    ServicePerEndpoint. It can be set via `c.t.f.thrift.RichClientParam` or a `with`-method
+    as `Thrift{Mux}.client.withPerEndpointStats`. ``PHAB_ID=D169427``
+
 18.5.0
 -------
 
