@@ -68,5 +68,8 @@ private[twitter] object ServerRegistry extends StackRegistry {
     def unregister(remoteAddr: SocketAddress): Unit = map.remove(remoteAddr)
 
     def iterator: Iterator[SocketAddress] = map.keySet.iterator.asScala
+
+    // Exposed for testing
+    def clear(): Unit = map.clear()
   }
 }

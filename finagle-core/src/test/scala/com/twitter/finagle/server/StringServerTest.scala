@@ -79,6 +79,8 @@ class StringServerTest extends FunSuite with Eventually with IntegrationPatience
 
     val client1 = StringClient.client.newService(Name.bound(Address(boundAddress)), "stringClient1")
     val client2 = StringClient.client.newService(Name.bound(Address(boundAddress)), "stringClient2")
+
+    registry.clear()
   }
 
   test("ConnectionRegistry has the right size") {
@@ -108,20 +110,19 @@ class StringServerTest extends FunSuite with Eventually with IntegrationPatience
     }
   }
 
-  if (!sys.props.contains("SKIP_FLAKY"))
   test("ConnectionRegistry correctly removes entries upon client close") {
     new Ctx {
       val initialState = registry.iterator.toArray
 
       assert(Await.result(client1("hello"), 1.second) == "hello")
-      val remoteAddr1 = registry.iterator
-        .find(!initialState.contains(_))
-        .get
+      val remoteAddr1 = eventually {
+        registry.iterator.find(!initialState.contains(_)).get
+      }
 
       assert(Await.result(client2("foo"), 1.second) == "foo")
-      val remoteAddr2 = registry.iterator.find { a =>
-        !initialState.contains(a) && a != remoteAddr1
-      }.get
+      val remoteAddr2 = eventually {
+        registry.iterator.find(a => !initialState.contains(a) && a != remoteAddr1).get
+      }
 
       Await.result(client2.close(), 5.seconds)
       eventually {
