@@ -157,7 +157,7 @@ private[ssl] object SslConfigurations {
         )
       case KeyCredentials.KeyManagerFactory(_) =>
         throw SslConfigurationException.notSupported(
-          "KeyCredentials.FromKeyManager",
+          "KeyCredentials.KeyManagerFactory",
           engineFactoryName
         )
     }

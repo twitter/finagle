@@ -133,8 +133,6 @@ class Netty4ServerEngineFactoryTest extends FunSuite {
   }
 
   test("config with only KeyCredentials succeeds") {
-    // ToDo: Should we also create tests / build the functionality that the keymanagers are rejected if containing expired certs
-
     val keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm)
     keyManagerFactory.init(null, Array[Char]())
 

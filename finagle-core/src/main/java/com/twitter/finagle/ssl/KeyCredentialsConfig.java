@@ -36,7 +36,6 @@ public final class KeyCredentialsConfig {
 
   /**
    * See {@link KeyCredentials.KeyManagerFactory}
-   * @see KeyCredentials.KeyManagerFactory
    */
   public static KeyCredentials keyManagerFactory(KeyManagerFactory keyManagerFactory) {
     return new KeyCredentials.KeyManagerFactory(keyManagerFactory);

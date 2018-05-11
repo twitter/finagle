@@ -42,6 +42,10 @@ private[finagle] object Netty4ServerSslConfigurations {
    * @note `KeyCredentials` must be specified, using `Unspecified` is not supported.
    * @note An `SslConfigurationException` will be thrown if there is an issue loading
    * the certificate(s) or private key.
+   *
+   * @note Will not validate the validity for certificates when configured
+   *       with [[KeyCredentials.KeyManagerFactory]] in contrast to when
+   *       configured with [[KeyCredentials.CertAndKey]] or [[KeyCredentials.CertKeyAndChain]].
    */
   private def startServerWithKey(keyCredentials: KeyCredentials): SslContextBuilder = {
     val builder = keyCredentials match {
@@ -50,7 +54,7 @@ private[finagle] object Netty4ServerSslConfigurations {
           "KeyCredentials.Unspecified",
           "Netty4ServerEngineFactory"
         )
-      case KeyCredentials.CertAndKey(certFile, keyFile)                 =>
+      case KeyCredentials.CertAndKey(certFile, keyFile) =>
         for {
           key <- new PrivateKeyFile(keyFile).readPrivateKey()
           cert <- new X509CertificateFile(certFile).readX509Certificate()
@@ -61,7 +65,7 @@ private[finagle] object Netty4ServerSslConfigurations {
           cert <- new X509CertificateFile(certFile).readX509Certificate()
           chain <- new X509CertificateFile(chainFile).readX509Certificates()
         } yield SslContextBuilder.forServer(key, cert +: chain: _*)
-      case KeyCredentials.KeyManagerFactory(keyManagerFactory)          =>
+      case KeyCredentials.KeyManagerFactory(keyManagerFactory) =>
         Return(SslContextBuilder.forServer(keyManagerFactory))
     }
     Netty4SslConfigurations.unwrapTryContextBuilder(builder)
