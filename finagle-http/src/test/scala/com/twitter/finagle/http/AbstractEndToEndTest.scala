@@ -421,10 +421,13 @@ abstract class AbstractEndToEndTest
       req.content = Buf.Utf8("." * 10)
       await(client(req))
 
-      assert(statsRecv.stat("client", "request_payload_bytes")() == Seq(10.0f))
-      assert(statsRecv.stat("client", "response_payload_bytes")() == Seq(20.0f))
-      assert(statsRecv.stat("server", "request_payload_bytes")() == Seq(10.0f))
-      assert(statsRecv.stat("server", "response_payload_bytes")() == Seq(20.0f))
+      eventually {
+        assert(statsRecv.stat("client", "request_payload_bytes")() == Seq(10.0f))
+        assert(statsRecv.stat("client", "response_payload_bytes")() == Seq(20.0f))
+        assert(statsRecv.stat("server", "request_payload_bytes")() == Seq(10.0f))
+        assert(statsRecv.stat("server", "response_payload_bytes")() == Seq(20.0f))
+      }
+
       await(client.close())
     }
 

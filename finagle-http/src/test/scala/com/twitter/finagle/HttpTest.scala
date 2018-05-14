@@ -7,8 +7,9 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Await, Duration, Future, Return}
 import java.net.InetSocketAddress
 import org.scalatest.FunSuite
+import org.scalatest.concurrent.Eventually
 
-class HttpTest extends FunSuite {
+class HttpTest extends FunSuite with Eventually {
 
   private def classifier(params: Stack.Params): ResponseClassifier =
     params[param.ResponseClassifier].responseClassifier
@@ -105,16 +106,18 @@ class HttpTest extends FunSuite {
 
     Await.result(client(Request()), Duration.fromSeconds(5))
 
-    assert(serverReceiver.counters(Seq("stats_test_server", "http", "status", "404")) == 1)
-    assert(serverReceiver.counters(Seq("stats_test_server", "http", "status", "4XX")) == 1)
-    assert(serverReceiver.stats(Seq("stats_test_server", "http", "response_size")) == Seq(5.0))
+    eventually {
+      assert(serverReceiver.counters(Seq("stats_test_server", "http", "status", "404")) == 1)
+      assert(serverReceiver.counters(Seq("stats_test_server", "http", "status", "4XX")) == 1)
+      assert(serverReceiver.stats(Seq("stats_test_server", "http", "response_size")) == Seq(5.0))
 
-    assert(clientReceiver.counters(Seq("stats_test_client", "http", "status", "404")) == 1)
-    assert(clientReceiver.counters(Seq("stats_test_client", "http", "status", "4XX")) == 1)
-    assert(clientReceiver.stats(Seq("stats_test_client", "http", "response_size")) == Seq(5.0))
-    assert(
-      clientReceiver.gauges.contains(Seq("stats_test_client", "dispatcher", "serial", "queue_size"))
-    )
+      assert(clientReceiver.counters(Seq("stats_test_client", "http", "status", "404")) == 1)
+      assert(clientReceiver.counters(Seq("stats_test_client", "http", "status", "4XX")) == 1)
+      assert(clientReceiver.stats(Seq("stats_test_client", "http", "response_size")) == Seq(5.0))
+      assert(
+        clientReceiver.gauges.contains(Seq("stats_test_client", "dispatcher", "serial", "queue_size"))
+      )
+    }
   }
 
   test("server uses custom response classifier when specified") {
