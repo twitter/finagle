@@ -18,7 +18,7 @@ private[http2] object H2Init {
           false /* validateHeaders */
         ))
         ch.pipeline.addLast(StripHeadersHandler.HandlerName, StripHeadersHandler)
-        ch.pipeline.addLast(new RstHandler)
+        ch.pipeline.addLast(new Http2StreamMessageHandler)
         http.initServer(params)(ch.pipeline)
         ch.pipeline.addLast(init)
       }
