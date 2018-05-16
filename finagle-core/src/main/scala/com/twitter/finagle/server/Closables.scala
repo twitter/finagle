@@ -1,6 +1,10 @@
 package com.twitter.finagle.server
 
 import com.twitter.util.{Closable, CloseAwaitably, Future, Time}
+import java.lang.{Boolean => JBoolean}
+import java.util.Collections
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.locks.ReentrantReadWriteLock
 import scala.collection.JavaConverters._
 
 /**
@@ -10,9 +14,16 @@ import scala.collection.JavaConverters._
  * are immediately closed with the deadline provided by the first call to `close`.
  */
 private final class Closables extends Closable with CloseAwaitably {
-  // We use the `registeredClosables` collection as our intrinsic lock
-  private[this] val registeredClosables = new java.util.HashSet[Closable]
+  private[this] val registeredClosables =
+    Collections.newSetFromMap(new ConcurrentHashMap[Closable, JBoolean])
   private[this] var closeDeadline: Option[Time] = None
+  private[this] val lock = new ReentrantReadWriteLock()
+
+  // we want to avoid registering a new closable after we've initiated closing
+  // but it's fine for registration to race, so we lock registration with
+  // readLock and closing with writeLock.
+  private[this] val readLock = lock.readLock()
+  private[this] val writeLock = lock.writeLock()
 
   /**
    * Register the `Closable`.
@@ -27,11 +38,14 @@ private final class Closables extends Closable with CloseAwaitably {
     // `Closable`. If we have been closed already, we pass the deadline out of the
     // synchronized block so we don't invoke the arbitrary `close` method while holding
     // the lock.
-    val deadline = registeredClosables.synchronized {
+    readLock.lock()
+    val deadline = try {
       if (closeDeadline.isEmpty) {
         registeredClosables.add(closable)
       }
       closeDeadline
+    } finally {
+      readLock.unlock()
     }
 
     deadline match {
@@ -50,16 +64,24 @@ private final class Closables extends Closable with CloseAwaitably {
    *
    * @return True if the closable was registered, False otherwise.
    */
-  def unregister(closable: Closable): Boolean = registeredClosables.synchronized {
-    registeredClosables.remove(closable)
+  def unregister(closable: Closable): Boolean = {
+    readLock.lock()
+    try {
+      registeredClosables.remove(closable)
+    } finally {
+      readLock.unlock()
+    }
   }
 
   def close(deadline: Time): Future[Unit] = closeAwaitably {
-    val toClose = registeredClosables.synchronized {
+    writeLock.lock()
+    val toClose = try {
       closeDeadline = Some(deadline)
       val allClosables = registeredClosables.asScala.toVector
       registeredClosables.clear()
       allClosables
+    } finally {
+      writeLock.unlock()
     }
 
     Closable.all(toClose: _*).close(deadline)
