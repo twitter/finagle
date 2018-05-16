@@ -24,6 +24,9 @@ Bug Fixes
     ServicePerEndpoint. It can be set via `c.t.f.thrift.RichClientParam` or a `with`-method
     as `Thrift{Mux}.client.withPerEndpointStats`. ``PHAB_ID=D169427``
 
+  * finagle-netty4: Avoid NoClassDefFoundError if netty-transport-native-epoll is not available
+    on the classpath.
+
 18.5.0
 -------
 
