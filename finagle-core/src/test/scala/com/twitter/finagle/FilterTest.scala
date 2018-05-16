@@ -14,6 +14,15 @@ class FilterTest extends FunSuite {
     def apply(req: Int, svc: Service[Int, Int]): Future[Int] = svc(req)
   }
 
+  class PassThruTypeAgnosticFilter extends Filter.TypeAgnostic {
+    def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = new Filter[Req, Rep, Req, Rep] {
+      def apply(
+        request: Req,
+        service: Service[Req, Rep]
+      ): Future[Rep] = service(request)
+    }
+  }
+
   class PassThruServiceFactory extends ServiceFactory[Int, Int] {
     def apply(conn: ClientConnection): Future[Service[Int, Int]] = Future.value(constSvc)
     def close(deadline: Time): Future[Unit] = Future.Done
@@ -100,6 +109,57 @@ class FilterTest extends FunSuite {
 
     assert(await(svc(-99)) == 2)
     verify(spied, times(1)).apply(any[Int], any[Service[Int, Int]])
+  }
+
+  test("Filter.TypeAgnostic.Identity.andThen(Filter.TypeAgnostic): applies next filter") {
+    val passThruFilter = new PassThruTypeAgnosticFilter
+
+    assert(
+      Filter.TypeAgnostic.Identity
+        .andThen(passThruFilter)
+        .getClass
+        .getName == passThruFilter.getClass.getName
+    )
+    assert(
+      passThruFilter
+        .andThen(Filter.TypeAgnostic.Identity)
+        .getClass
+        .getName == passThruFilter.getClass.getName
+    )
+  }
+
+  test("Filter.TypeAgnostic.Identity.andThen(Filter): applies next filter") {
+    val passThruFilter = new PassThruFilter
+
+    assert(
+      Filter.TypeAgnostic.Identity
+        .andThen(passThruFilter)
+        .getClass
+        .getName == passThruFilter.getClass.getName
+    )
+    assert(
+      passThruFilter
+        .agnosticAndThen(Filter.TypeAgnostic.Identity)
+        .getClass
+        .getName == passThruFilter.getClass.getName
+    )
+  }
+
+  test("Filter.TypeAgnostic.Identity.andThen(Service): applies service") {
+    assert(
+      Filter.TypeAgnostic.Identity.andThen(constSvc).getClass.getName == constSvc.getClass.getName
+    )
+  }
+
+  test("Filter.TypeAgnostic.Identity.andThen(ServiceFactory): applies serviceFactory") {
+    val passThruServiceFactory = new PassThruServiceFactory
+
+    assert(
+      Filter.TypeAgnostic.Identity
+        .andThen(passThruServiceFactory)
+        .getClass
+        .getName == passThruServiceFactory.getClass.getName
+    )
   }
 
   test("Filter.TypeAgnostic.toFilter distributes over Filter.TypeAgnostic.andThen") {

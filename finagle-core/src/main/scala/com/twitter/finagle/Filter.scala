@@ -207,9 +207,13 @@ object Filter {
     def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep]
 
     def andThen(next: TypeAgnostic): TypeAgnostic =
-      new TypeAgnostic {
-        def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] =
-          self.toFilter[Req, Rep].andThen(next.toFilter[Req, Rep])
+      if (next eq Filter.TypeAgnostic.Identity) {
+        this
+      } else {
+        new TypeAgnostic {
+          def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] =
+            self.toFilter[Req, Rep].andThen(next.toFilter[Req, Rep])
+        }
       }
 
     /**
@@ -240,6 +244,16 @@ object Filter {
     val Identity: TypeAgnostic =
       new TypeAgnostic {
         def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = identity[Req, Rep]
+
+        override def andThen(next: TypeAgnostic): TypeAgnostic = next
+
+        override def andThen[ReqIn, RepOut, ReqOut, RepIn](
+          next: Filter[ReqIn, RepOut, ReqOut, RepIn]
+        ): Filter[ReqIn, RepOut, ReqOut, RepIn] = next
+
+        override def andThen[Req, Rep](svc: Service[Req, Rep]): Service[Req, Rep] = svc
+
+        override def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = factory
       }
   }
 
