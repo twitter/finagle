@@ -5,7 +5,7 @@ import com.twitter.finagle.http.cookie.exp.supportSameSiteCodec
 import com.twitter.finagle.http.netty3.Netty3CookieCodec
 import com.twitter.finagle.http.netty4.Netty4CookieCodec
 import com.twitter.finagle.server.ServerInfo
-import com.twitter.finagle.stats.LoadedStatsReceiver
+import com.twitter.finagle.stats.{LoadedStatsReceiver, Verbosity}
 import org.jboss.netty.handler.codec.http.HttpHeaders
 import scala.collection.mutable
 
@@ -22,9 +22,9 @@ private[finagle] object CookieMap {
   private[finagle] def includeSameSite: Boolean = supportSameSiteCodec()
 
   private[finagle] val flaglessSameSitesCounter =
-    LoadedStatsReceiver.scope("http").scope("cookie").counter("flagless_samesites")
+    LoadedStatsReceiver.scope("http").scope("cookie").counter(Verbosity.Debug, "flagless_samesites")
   private[finagle] val silentlyDroppedSameSitesCounter =
-    LoadedStatsReceiver.scope("http").scope("cookie").counter("dropped_samesites")
+    LoadedStatsReceiver.scope("http").scope("cookie").counter(Verbosity.Debug, "dropped_samesites")
 }
 
 /**

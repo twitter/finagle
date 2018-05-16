@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.cookie
 
 import com.twitter.finagle.http.Cookie
-import com.twitter.finagle.stats.LoadedStatsReceiver
+import com.twitter.finagle.stats.{LoadedStatsReceiver, Verbosity}
 import com.twitter.logging.Logger
 import io.netty.handler.codec.http.CookieDecoder
 import java.lang.reflect.Method
@@ -16,7 +16,7 @@ private[http] object SameSiteCodec {
   private val log: Logger = Logger()
   private val cookieDecoderClass = classOf[CookieDecoder]
   private val initFailureCounter =
-    LoadedStatsReceiver.scope("http").scope("cookie").counter("samesite_failures")
+    LoadedStatsReceiver.scope("http").scope("cookie").counter(Verbosity.Debug, "samesite_failures")
 
   private val _extractKeyValuePairs: Option[Method] = try {
     val method = cookieDecoderClass.getDeclaredMethod(
