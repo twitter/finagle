@@ -3,15 +3,31 @@ package com.twitter.finagle.service
 import com.twitter.finagle.{ChannelClosedException, Failure, TimeoutException}
 import com.twitter.finagle.service.ResponseClass._
 import com.twitter.conversions.time._
-import com.twitter.util.{Return, Throw}
+import com.twitter.util.{Duration, Return, Throw}
 import org.scalatest.FunSuite
 
 class ResponseClassifierTest extends FunSuite {
   def reqRepFromException(exception: Exception): ReqRep = ReqRep(null, Throw(exception))
 
   val timeoutExc = new TimeoutException {
-    protected val timeout = 0.seconds
-    protected val explanation = "!"
+    protected val timeout: Duration = 0.seconds
+    protected val explanation: String = "!"
+  }
+
+  test("named") {
+    val rc1 = ResponseClassifier.named("rc1") {
+      case _ => ResponseClass.Success
+    }
+    val rc2 = ResponseClassifier.named("rc2") {
+      case _ => ResponseClass.Success
+    }
+    val rc3 = ResponseClassifier.named("rc3") {
+      case _ => ResponseClass.Success
+    }
+    assert("rc1" == rc1.toString)
+    assert("rc1.orElse(rc2)" == rc1.orElse(rc2).toString)
+    assert("rc1.orElse(rc2).orElse(rc3)" == rc1.orElse(rc2).orElse(rc3).toString)
+    assert("rc1.orElse(rc2.orElse(rc3))" == rc1.orElse(rc2.orElse(rc3)).toString)
   }
 
   test("Default classification") {

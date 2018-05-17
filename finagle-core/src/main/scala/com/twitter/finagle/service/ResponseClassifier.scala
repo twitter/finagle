@@ -17,6 +17,14 @@ object ResponseClassifier {
       def isDefinedAt(reqRep: ReqRep): Boolean = underlying.isDefinedAt(reqRep)
       def apply(reqRep: ReqRep): ResponseClass = underlying(reqRep)
       override def toString: String = name
+
+      override def orElse[A1 <: ReqRep, B1 >: ResponseClass](
+        that: PartialFunction[A1, B1]
+      ): PartialFunction[A1, B1] = {
+        val orElsed = super.orElse(that).asInstanceOf[ResponseClassifier]
+        named(s"$toString.orElse($that)")(orElsed)
+          .asInstanceOf[PartialFunction[ReqRep, ResponseClass]]
+      }
     }
 
   /**
