@@ -13,6 +13,8 @@ private[loadbalancer] trait P2C[Req, Rep] { self: Balancer[Req, Rep] =>
    */
   protected def rng: Rng
 
+  def additionalMetadata: Map[String, Any] = Map.empty
+
   protected class Distributor(vector: Vector[Node])
       extends DistributorT[Node](vector)
       with P2CPick[Node] {

@@ -174,13 +174,13 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   private[this] def dapertureToggleActive: Boolean =
     dapertureToggle(s"${ServerInfo().clusterId}:$label".hashCode)
 
-  private[this] def dapertureActive: Boolean =
+  protected def dapertureActive: Boolean =
     useDeterministicOrdering match {
       case Some(bool) => bool
       case None => dapertureToggleActive
     }
 
-  @volatile private[this] var vectorHash: Int = -1
+  @volatile private[this] var _vectorHash: Int = -1
   // Make a hash of the passed in `vec` and set `vectorHash`.
   // Only an Inet address of the factory is considered and all
   // other address types are ignored.
@@ -198,8 +198,10 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       case _ => // no-op
     }
 
-    vectorHash = MurmurHash3.finalizeHash(h, n)
+    _vectorHash = MurmurHash3.finalizeHash(h, n)
   }
+
+  protected[this] def vectorHash: Int = _vectorHash
 
   private[this] val gauges = Seq(
     statsReceiver.addGauge("logical_aperture") { logicalAperture },
@@ -207,7 +209,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     statsReceiver.addGauge("use_deterministic_ordering") {
       if (dapertureActive) 1F else 0F
     },
-    statsReceiver.addGauge("vector_hash") { vectorHash }
+    statsReceiver.addGauge("vector_hash") { _vectorHash }
   )
 
   private[this] val coordinateUpdates = statsReceiver.counter("coordinate_updates")
@@ -231,6 +233,16 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   private val rebuildLog = Logger.get(s"com.twitter.finagle.loadbalancer.aperture.Aperture.rebuild-log.$lbl")
 
   protected type Distributor = BaseDist
+
+  def additionalMetadata: Map[String, Any] = {
+    Map(
+      "min_aperture" -> minAperture,
+      "use_deterministic_ordering" -> dapertureActive,
+      "logical_aperture" -> logicalAperture,
+      "physical_aperture" -> dist.physicalAperture,
+      "vector_hash" -> vectorHash
+    ) ++ dist.additionalMetadata
+  }
 
   /**
    * A distributor which implements the logic for controlling the size of an aperture
@@ -306,6 +318,9 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
      * the indices over which `pick` selects.
      */
     def indices: Set[Int]
+
+    def additionalMetadata: Map[String, Any]
+
   }
 
   /**
@@ -318,6 +333,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       def indices: Set[Int] = Set.empty
       def pick(): Node = failingNode(emptyException)
       def needsRebuild: Boolean = false
+      def additionalMetadata: Map[String, Any] = Map.empty
     }
 
   // these are lifted out of `RandomAperture` to avoid unnecessary allocations.
@@ -392,6 +408,14 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     // previously busy node is now available.
     private[this] val busy = vector.filter(nodeBusy)
     def needsRebuild: Boolean = busy.exists(nodeOpen)
+
+    def additionalMetadata: Map[String, Any] =
+      Map(
+        "distributor_class" -> getClass.getSimpleName,
+        "min_serving_units" -> min,
+        "max_serving_units" -> max
+      )
+
   }
 
   /**
@@ -415,30 +439,6 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     require(vector.nonEmpty, "vector must be non empty")
 
     private[this] val ring = new Ring(vector.size, rng)
-    // We log the contents of the aperture on each distributor rebuild when using
-    // deterministic aperture. Rebuilds are not frequent and concentrated around
-    // events where this information would be valuable (i.e. coordinate changes or
-    // host add/removes).
-    if (rebuildLog.isLoggable(Level.DEBUG)) {
-      val apertureSlice: String = {
-        val offset = coord.offset
-        val width = apertureWidth
-        val indices = ring.indices(offset, width)
-        indices.map { i =>
-          val addr = vector(i).factory.address
-          val weight = ring.weight(i, offset, width)
-          f"(index=$i, weight=$weight%1.6f, addr=$addr)"
-        }.mkString("[", ", ", "]")
-      }
-      rebuildLog.debug(s"[DeterministicApeture.rebuild $lbl] nodes=$apertureSlice")
-
-      // It may be useful see the raw server vector for d-aperture since we expect
-      // uniformity across processes.
-      if (rebuildLog.isLoggable(Level.TRACE)) {
-        val vectorString = vector.map(_.factory.address).mkString("[", ", ", "]")
-        rebuildLog.trace(s"[DeterministicApeture.rebuild $lbl] nodes=$vectorString")
-      }
-    }
 
     // Note that this definition ignores the user defined `minAperture`,
     // but that isn't likely to hold much value given our definition of `min`
@@ -485,6 +485,40 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
 
     def indices: Set[Int] = ring.indices(coord.offset, apertureWidth).toSet
 
+    private[this] def nodes: Seq[(Int, Double, Address)] = {
+      val offset = coord.offset
+      val width = apertureWidth
+      val indices = ring.indices(offset, width)
+      indices.map { i =>
+        val addr = vector(i).factory.address
+        val weight = ring.weight(i, offset, width)
+        (i, weight, addr)
+      }
+    }
+
+    // We log the contents of the aperture on each distributor rebuild when using
+    // deterministic aperture. Rebuilds are not frequent and concentrated around
+    // events where this information would be valuable (i.e. coordinate changes or
+    // host add/removes).
+    if (rebuildLog.isLoggable(Level.DEBUG)) {
+      val apertureSlice: String = {
+        val offset = coord.offset
+        val width = apertureWidth
+        val indices = ring.indices(offset, width)
+        nodes.map { case (i, weight, addr) =>
+          f"(index=$i, weight=$weight%1.6f, addr=$addr)"
+        }.mkString("[", ", ", "]")
+      }
+      rebuildLog.debug(s"[DeterministicApeture.rebuild $lbl] nodes=$apertureSlice")
+
+      // It may be useful see the raw server vector for d-aperture since we expect
+      // uniformity across processes.
+      if (rebuildLog.isLoggable(Level.TRACE)) {
+        val vectorString = vector.map(_.factory.address).mkString("[", ", ", "]")
+        rebuildLog.trace(s"[DeterministicApeture.rebuild $lbl] nodes=$vectorString")
+      }
+    }
+
     /**
      * Pick the least loaded (and healthiest) of the two nodes `a` and `b`
      * taking into account their respective weights.
@@ -527,6 +561,22 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     // rebuilds only need to happen when we receive ring updates (from
     // the servers or our coordinate changing).
     def needsRebuild: Boolean = false
+
+    def additionalMetadata: Map[String, Any] = {
+      Map(
+        "distributor_class" -> getClass.getSimpleName,
+        "min_serving_units" -> min,
+        "max_serving_units" -> max,
+        "nodes" -> nodes.map { case (i, weight, addr) =>
+          Map[String, Any](
+            "index" -> i,
+            "weight" -> weight,
+            "address" -> addr.toString
+          )
+        }
+      )
+    }
+
   }
 
   protected def initDistributor(): Distributor = new EmptyVector(1)

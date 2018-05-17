@@ -14,13 +14,13 @@ object BalancerBench {
 
   def newFactory(): EndpointFactory[Unit, Unit] =
     new EndpointFactory[Unit, Unit] {
-      val address = Address.Failed(new Exception)
-      def remake() = {}
-      def apply(conn: ClientConnection) =
+      val address: Address = Address.Failed(new Exception)
+      def remake(): Unit = {}
+      def apply(conn: ClientConnection): Future[Service[Unit, Unit]] =
         Future.value(new Service[Unit, Unit] {
           def apply(req: Unit): Future[Unit] = Future.Done
         })
-      def close(when: Time) = Future.Done
+      def close(when: Time): Future[Unit] = Future.Done
     }
 
   def newActivity(num: Int): Activity[Vector[EndpointFactory[Unit, Unit]]] = {
@@ -34,37 +34,39 @@ object BalancerBench {
       extends ServiceFactoryProxy[Unit, Unit](factory)
       with NodeT[Unit, Unit] {
 
-    override def load: Double = 0.0
-    override def pending: Int = 0
+    def load: Double = 0.0
+    def pending: Int = 0
     override def close(deadline: Time): Future[Unit] = Future.Done
   }
 
   private case class NullDistributor(vec: Vector[NullNode]) extends DistributorT[NullNode](vec) {
-    override type This = NullDistributor
-    override def pick(): NullNode = vector.head
-    override def needsRebuild: Boolean = false
-    override def rebuild(): NullDistributor = this
-    override def rebuild(vector: Vector[NullNode]): NullDistributor = NullDistributor(vector)
+    type This = NullDistributor
+    def pick(): NullNode = vector.head
+    def needsRebuild: Boolean = false
+    def rebuild(): NullDistributor = this
+    def rebuild(vector: Vector[NullNode]): NullDistributor = NullDistributor(vector)
   }
 
   private class NullBalancer extends Balancer[Unit, Unit] {
-    override protected def maxEffort: Int = 0
+    protected def maxEffort: Int = 0
 
-    override protected def emptyException: Throwable = new Exception()
-    override protected def statsReceiver: StatsReceiver = NullStatsReceiver
-    override protected[this] def maxEffortExhausted: Counter =
-      NullStatsReceiver.counter0("")
+    protected def emptyException: Throwable = new Exception()
+    protected def statsReceiver: StatsReceiver = NullStatsReceiver
+    protected[this] def maxEffortExhausted: Counter =
+      NullStatsReceiver.counter("")
 
-    override protected type Node = NullNode
-    override protected type Distributor = NullDistributor
+    protected type Node = NullNode
+    protected type Distributor = NullDistributor
 
-    override protected def newNode(factory: EndpointFactory[Unit, Unit]): Node =
+    protected def newNode(factory: EndpointFactory[Unit, Unit]): Node =
       NullNode(factory)
 
-    override protected def failingNode(cause: Throwable): Node = ???
+    protected def failingNode(cause: Throwable): Node = ???
 
-    override protected def initDistributor(): Distributor =
+    protected def initDistributor(): Distributor =
       NullDistributor(Vector.empty)
+
+    def additionalMetadata: Map[String, Any] = Map.empty
   }
 
   @State(Scope.Benchmark)
@@ -144,7 +146,7 @@ class P2CBalancerBench extends StdBenchAnnotations {
   var p2cEwma: ServiceFactory[Unit, Unit] = _
 
   @Setup
-  def setup() {
+  def setup(): Unit = {
     p2c = Balancers
       .p2c()
       .newBalancer(
@@ -179,7 +181,7 @@ class ApertureBalancerBench extends StdBenchAnnotations {
   var aperture: ServiceFactory[Unit, Unit] = _
 
   @Setup
-  def setup() {
+  def setup(): Unit = {
     aperture = Balancers
       .aperture()
       .newBalancer(

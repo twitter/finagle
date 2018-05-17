@@ -1,16 +1,10 @@
 package com.twitter.finagle.loadbalancer.aperture
 
-import com.twitter.finagle.loadbalancer.{
-  EndpointFactory,
-  FailingEndpointFactory,
-  LeastLoaded,
-  Updating
-}
-import com.twitter.finagle.{NoBrokersAvailableException, ServiceFactoryProxy}
+import com.twitter.finagle.loadbalancer.{EndpointFactory, FailingEndpointFactory, LeastLoaded, Updating}
 import com.twitter.finagle.stats.{Counter, StatsReceiver}
 import com.twitter.finagle.util.Rng
 import com.twitter.finagle.{NoBrokersAvailableException, ServiceFactoryProxy}
-import com.twitter.util.{Activity, Duration, Future, Timer, Time}
+import com.twitter.util.{Activity, Duration, Future, Time, Timer}
 
 /**
  * Aperture (which is backed by the theory behind p2c) along with the [[LeastLoaded]]
@@ -61,4 +55,5 @@ private[loadbalancer] final class ApertureLeastLoaded[Req, Rep](
     expiryTask.cancel()
     super.close(deadline)
   }
+
 }

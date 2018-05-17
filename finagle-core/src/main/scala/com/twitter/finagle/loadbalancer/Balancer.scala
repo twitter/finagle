@@ -26,6 +26,17 @@ private trait BalancerNode[Req, Rep] { self: Balancer[Req, Rep] =>
 private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerNode[Req, Rep] {
 
   /**
+   * Registers this balancer with the global balancer registry.
+   * Nothing prevents multiple registrations with different labels.
+   *
+   * @param label the client's label, as provided by the [[param.Label]]
+   *              Stack Param.
+   * @note unregistration is handled by [[close]].
+   */
+  def register(label: String): Unit =
+    BalancerRegistry.get.register(label, this)
+
+  /**
    * The maximum number of balancing tries (yielding unavailable
    * factories) until we give up.
    */
@@ -90,25 +101,35 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
     if (rebuilt) rebuilds.incr()
   }
 
+  def numAvailable: Int =
+    dist.vector.count(n => n.status == Status.Open)
+
+  def numBusy: Int =
+    dist.vector.count(n => n.status == Status.Busy)
+
+  def numClosed: Int =
+    dist.vector.count(n => n.status == Status.Closed)
+
+  def totalPending: Int =
+    dist.vector.map(_.pending).sum
+
+  def totalLoad: Double =
+    dist.vector.map(_.load).sum
+
+  def size: Int =
+    dist.vector.size
+
   // A counter that should be named "max_effort_exhausted".
   // Due to a scalac compile/runtime problem we were unable
   // to store it as a member variable on this trait.
   protected[this] def maxEffortExhausted: Counter
 
   private[this] val gauges = Seq(
-    statsReceiver.addGauge("available") {
-      dist.vector.count(n => n.status == Status.Open)
-    },
-    statsReceiver.addGauge("busy") {
-      dist.vector.count(n => n.status == Status.Busy)
-    },
-    statsReceiver.addGauge("closed") {
-      dist.vector.count(n => n.status == Status.Closed)
-    },
-    statsReceiver.addGauge("load") {
-      dist.vector.map(_.pending).sum
-    },
-    statsReceiver.addGauge("size") { dist.vector.size }
+    statsReceiver.addGauge("available") { numAvailable },
+    statsReceiver.addGauge("busy") { numBusy },
+    statsReceiver.addGauge("closed") { numClosed },
+    statsReceiver.addGauge("load") { totalPending },
+    statsReceiver.addGauge("size") { size }
   )
 
   private[this] val adds = statsReceiver.counter("adds")
@@ -190,7 +211,15 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
     node(conn)
   }
 
+  /**
+   * Any additional metadata specific to a balancer implementation.
+   *
+   * @see [[Metadata]] and [[BalancerRegistry]]
+   */
+  def additionalMetadata: Map[String, Any]
+
   def close(deadline: Time): Future[Unit] = {
+    BalancerRegistry.get.unregister(this)
     for (gauge <- gauges) gauge.remove()
     removes.incr(dist.vector.size)
     // Note, we don't treat the endpoints as a

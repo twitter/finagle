@@ -1,8 +1,9 @@
 package com.twitter.finagle.loadbalancer
 
+import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.{Future, Time}
+import com.twitter.finagle.stats.{Counter, InMemoryStatsReceiver}
+import com.twitter.util.{Await, Future, Time}
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.Conductors
@@ -18,16 +19,18 @@ class BalancerTest extends FunSuite with Conductors with GeneratorDrivenProperty
     def maxEffort: Int = 5
     def emptyException: Throwable = ???
 
+    def additionalMetadata: Map[String, Any] = Map.empty
+
     def stats: InMemoryStatsReceiver = statsReceiver
-    protected[this] val maxEffortExhausted = stats.counter("max_effort_exhausted")
+    protected[this] val maxEffortExhausted: Counter = stats.counter("max_effort_exhausted")
 
     def nodes: Vector[Node] = dist.vector
     def factories: Set[ServiceFactory[Unit, Unit]] = nodes.map(_.factory).toSet
 
-    def nodeOf(fac: ServiceFactory[Unit, Unit]) = nodes.find(_.factory == fac).get
+    def nodeOf(fac: ServiceFactory[Unit, Unit]): Node = nodes.find(_.factory == fac).get
 
-    def _dist() = dist
-    def _rebuild() = rebuild()
+    def _dist(): Distributor = dist
+    def _rebuild(): Unit = rebuild()
 
     def rebuildDistributor() {}
 
@@ -62,8 +65,8 @@ class BalancerTest extends FunSuite with Conductors with GeneratorDrivenProperty
   }
 
   def newFac(_status: Status = Status.Open) = new EndpointFactory[Unit, Unit] {
-    def address = Address.Failed(new Exception)
-    def remake() = {}
+    def address: Address = Address.Failed(new Exception)
+    def remake(): Unit = ()
 
     def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = Future.never
     override def status: Status = _status
@@ -76,10 +79,10 @@ class BalancerTest extends FunSuite with Conductors with GeneratorDrivenProperty
     }
   }
 
-  val genStatus = Gen.oneOf(Status.Open, Status.Busy, Status.Closed)
-  val genSvcFac = genStatus.map(newFac)
-  val genLoadedNode = for (fac <- genSvcFac) yield fac
-  val genNodes = Gen.containerOf[Vector, EndpointFactory[Unit, Unit]](genLoadedNode)
+  private val genStatus = Gen.oneOf(Status.Open, Status.Busy, Status.Closed)
+  private val genSvcFac = genStatus.map(newFac)
+  private val genLoadedNode = for (fac <- genSvcFac) yield fac
+  private val genNodes = Gen.containerOf[Vector, EndpointFactory[Unit, Unit]](genLoadedNode)
 
   test("status: balancer with no nodes is Closed") {
     val bal = new TestBalancer
@@ -186,4 +189,16 @@ class BalancerTest extends FunSuite with Conductors with GeneratorDrivenProperty
       update1(i) eq bal._dist().vector(i).factory
     })
   }
+
+  test("close unregisters from the registry") {
+    val label = "test_balancer_" + System.currentTimeMillis
+    val bal = new TestBalancer()
+    val registry = BalancerRegistry.get
+    registry.register(label, bal)
+    assert(registry.allMetadata.exists(_.label == label))
+
+    Await.result(bal.close(), 5.seconds)
+    assert(!registry.allMetadata.exists(_.label == label))
+  }
+
 }

@@ -34,6 +34,8 @@ private[loadbalancer] final class RoundRobinBalancer[Req, Rep](
     override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = factory(conn)
   }
 
+  def additionalMetadata: Map[String, Any] = Map.empty
+
   /**
    * A simple round robin distributor.
    */
