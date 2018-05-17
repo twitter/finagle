@@ -25,8 +25,17 @@ private[finagle] final class MuxClientNegotiatingSession(
   stats: StatsReceiver
 ) extends PushSession[ByteReader, Buf](handle) {
 
-  private[this] val negotiatedSession = Promise[MuxClientSession]()
   private[this] val startNegotiation = new AtomicBoolean(false)
+  private[this] val negotiatedSession = Promise[MuxClientSession]()
+
+  // If the session is discarded we tear down and mark the exception
+  // as retryable since at this point, clearly nothing was dispatched
+  // to the peer.
+  negotiatedSession.setInterruptHandler {
+    case ex =>
+      log.debug(ex, "Mux client negotiation interrupted.")
+      failHandshake(Failure.retryable(ex))
+  }
 
   // A debug gauge used to track the number of sessions currently negotiating.
   // The utility of this gauge may be short and will likely be removed fast.

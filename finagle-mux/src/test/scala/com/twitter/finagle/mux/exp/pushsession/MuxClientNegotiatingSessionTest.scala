@@ -2,7 +2,7 @@ package com.twitter.finagle.mux.exp.pushsession
 
 import com.twitter.conversions.storage._
 import com.twitter.conversions.time._
-import com.twitter.finagle.{ChannelClosedException, Failure, Mux, Path, liveness}
+import com.twitter.finagle.{ChannelClosedException, Failure, FailureFlags, Mux, Path, liveness}
 import com.twitter.finagle.Mux.param.{MaxFrameSize, OppTls}
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle.exp.pushsession.{MockChannelHandle, PushChannelHandle}
@@ -208,9 +208,11 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
     handle.close()
     handle.onClosePromise.setDone()
 
-    intercept[ChannelClosedException] {
+    val ex = intercept[ChannelClosedException] {
       await(sessionF)
     }
+
+    assert(ex.isFlagged(FailureFlags.Retryable))
     assert(!stats.gauges.contains(Seq("negotiating")))
   }
 
@@ -239,6 +241,29 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
     }
 
     assert(e == exc)
+    assert(!stats.gauges.contains(Seq("negotiating")))
+  }
+
+  test("can be interrupted") {
+    def negotiate(handle: PushChannelHandle[ByteReader, Buf], hs: Option[Headers]): MuxClientSession =
+      new Negotiation.Client(fragmentingParams).negotiate(handle, hs)
+
+    val (handle, negotiatingSession, stats) = withMockHandle(negotiate, fragmentingParams)
+    assert(stats.gauges(Seq("negotiating")).apply() == 0.0f)
+    val sessionF = negotiatingSession.negotiate()
+    assert(stats.gauges(Seq("negotiating")).apply() == 1.0f)
+
+    val raised = new Exception
+    sessionF.raise(raised)
+
+    assert(handle.closedCalled)
+    handle.onClosePromise.setDone()
+
+    val ex = intercept[Failure] {
+      await(sessionF)
+    }
+    assert(ex.isFlagged(FailureFlags.Retryable))
+    assert(ex.cause == Some(raised))
     assert(!stats.gauges.contains(Seq("negotiating")))
   }
 }
