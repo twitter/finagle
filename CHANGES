@@ -14,6 +14,9 @@ New Features
     disabling propagation of deadlines to outbound requests.
     ``PHAB_ID=D168405``
 
+  * finagle-core: Make `Filter.TypeAgnostic` an abstract class for Java usability.
+    ``PHAB_ID=D172716``
+
 Bug Fixes
 ~~~~~~~~~
 
@@ -61,7 +64,7 @@ New Features
     `CursoredStatement.asJava()`. Through this, you can use the API with
     varargs and Java 8 lambdas. ``PHAB_ID=D158399``
 
-  * finagle-toggle: Improved Java compatiblity for `ToggleMap` and `Toggle`. ``PHAB_ID=D164489``
+  * finagle-toggle: Improved Java compatibility for `ToggleMap` and `Toggle`. ``PHAB_ID=D164489``
 
   * finagle-toggle: `StandardToggleMap.apply` and `StandardToggleMap.registeredLibraries` now
     use `ToggleMap.Mutable` to better support mutating the underlying mutable `ToggleMap`.
