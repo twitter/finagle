@@ -47,6 +47,16 @@ private class ListeningServerBuilder(
   // netty4 params
   private[this] val param.Allocator(allocator) = params[param.Allocator]
 
+  private[ListeningServerBuilder] def mkEpollEventLoopGroup(): EventLoopGroup =
+    new EpollEventLoopGroup(
+      1 /*nThreads*/,
+      new NamedPoolThreadFactory("finagle/netty4/boss", makeDaemons = true))
+
+  private[ListeningServerBuilder] def mkNioEventLoopGroup(): EventLoopGroup =
+    new NioEventLoopGroup(
+      1 /*nThreads*/,
+      new NamedPoolThreadFactory("finagle/netty4/boss", makeDaemons = true))
+
   /**
    * Listen for connections and apply the `serveTransport` callback on
    * connected [[Transport transports]].
@@ -62,15 +72,9 @@ private class ListeningServerBuilder(
     new ListeningServer with CloseAwaitably {
       private[this] val bossLoop: EventLoopGroup =
         if (nativeEpoll.enabled)
-          new EpollEventLoopGroup(
-            1 /*nThreads*/,
-            new NamedPoolThreadFactory("finagle/netty4/boss", makeDaemons = true)
-          )
+          mkEpollEventLoopGroup()
         else
-          new NioEventLoopGroup(
-            1 /*nThreads*/,
-            new NamedPoolThreadFactory("finagle/netty4/boss", makeDaemons = true)
-          )
+          mkNioEventLoopGroup()
 
       private[this] val bootstrap = new ServerBootstrap()
       if (nativeEpoll.enabled)
