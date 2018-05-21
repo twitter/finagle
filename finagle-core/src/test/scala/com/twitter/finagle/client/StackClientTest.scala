@@ -3,6 +3,7 @@ package com.twitter.finagle.client
 import com.twitter.conversions.time._
 import com.twitter.finagle.Stack.Module0
 import com.twitter.finagle._
+import com.twitter.finagle.client.utils.{PushStringClient, StringClient}
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.SerialClientDispatcher
 import com.twitter.finagle.filter.ClearContextValueFilter
@@ -10,7 +11,7 @@ import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.naming.{DefaultInterpreter, NameInterpreter}
 import com.twitter.finagle.netty4.Netty4Transporter
-import com.twitter.finagle.server.StringServer
+import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.service.PendingRequestFilter
 import com.twitter.finagle.stats.InMemoryStatsReceiver

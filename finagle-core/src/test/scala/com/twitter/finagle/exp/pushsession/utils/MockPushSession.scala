@@ -1,6 +1,7 @@
-package com.twitter.finagle.exp.pushsession
+package com.twitter.finagle.exp.pushsession.utils
 
 import com.twitter.finagle.Status
+import com.twitter.finagle.exp.pushsession.{PushChannelHandle, PushSession}
 import com.twitter.util.{Future, Time}
 import scala.collection.mutable
 

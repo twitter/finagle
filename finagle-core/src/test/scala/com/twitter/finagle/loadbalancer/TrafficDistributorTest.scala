@@ -3,8 +3,8 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.addr.WeightedAddress
-import com.twitter.finagle.client.StringClient
-import com.twitter.finagle.server.StringServer
+import com.twitter.finagle.client.utils.StringClient
+import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.stats._
 import com.twitter.finagle.util.Rng
 import com.twitter.util.{Function => _, _}

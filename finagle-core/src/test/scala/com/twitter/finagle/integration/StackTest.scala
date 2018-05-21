@@ -3,9 +3,10 @@ package com.twitter.finagle.integration
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.client.{StackClient, StringClient}
+import com.twitter.finagle.client.StackClient
+import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.liveness.FailureAccrualFactory
-import com.twitter.finagle.server.StringServer
+import com.twitter.finagle.server.utils.StringServer
 import com.twitter.util.{Await, Future}
 import java.net.{InetAddress, InetSocketAddress}
 import org.scalatest.FunSuite

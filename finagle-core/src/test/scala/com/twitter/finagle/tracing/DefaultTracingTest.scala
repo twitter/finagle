@@ -2,8 +2,8 @@ package com.twitter.finagle.tracing
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.client.StringClient
-import com.twitter.finagle.server.StringServer
+import com.twitter.finagle.client.utils.StringClient
+import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.{param => fparam, _}
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}

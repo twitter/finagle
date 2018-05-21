@@ -1,10 +1,11 @@
 package com.twitter.finagle.client
 
 import com.twitter.finagle._
+import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.util.{TestParam, TestParam2}
 import com.twitter.util._
-import com.twitter.util.registry.{GlobalRegistry, SimpleRegistry, Entry}
+import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
 import org.mockito.Matchers.anyObject
 import org.mockito.Mockito.when
 import org.scalatest.{BeforeAndAfter, FunSuite}

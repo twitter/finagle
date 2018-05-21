@@ -1,7 +1,8 @@
 package com.twitter.finagle.mux.exp.pushsession
 
+import com.twitter.finagle.exp.pushsession.utils.MockChannelHandle
 import com.twitter.finagle.{Dtab, Path, Service, Status}
-import com.twitter.finagle.exp.pushsession.{MockChannelHandle, PushChannelHandle, PushSession, RefPushSession, SentinelSession}
+import com.twitter.finagle.exp.pushsession.{PushChannelHandle, PushSession, RefPushSession, SentinelSession}
 import com.twitter.finagle.mux.Handshake.Headers
 import com.twitter.finagle.mux.{Handshake, Request, Response}
 import com.twitter.finagle.mux.transport.Message

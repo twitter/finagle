@@ -1,5 +1,6 @@
 package com.twitter.finagle.exp.pushsession
 
+import com.twitter.finagle.exp.pushsession.utils.{MockChannelHandle, MockPushSession}
 import org.scalatest.FunSuite
 
 class RefPushSessionTest extends FunSuite {

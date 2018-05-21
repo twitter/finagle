@@ -2,7 +2,8 @@ package com.twitter.finagle.integration
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle._
-import com.twitter.finagle.exp.pushsession.{MockChannelHandle, PipeliningClientPushSession, PushChannelHandle}
+import com.twitter.finagle.exp.pushsession.utils.MockChannelHandle
+import com.twitter.finagle.exp.pushsession.{PipeliningClientPushSession, PushChannelHandle}
 import com.twitter.finagle.http
 import com.twitter.finagle.memcached.{protocol => memcached}
 import com.twitter.finagle.http.codec.HttpClientDispatcher

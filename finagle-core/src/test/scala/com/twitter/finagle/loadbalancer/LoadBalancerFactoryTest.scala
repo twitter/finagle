@@ -3,9 +3,9 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.conversions.time._
 import com.twitter.finagle
 import com.twitter.finagle._
-import com.twitter.finagle.client.StringClient
+import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.server.StringServer
+import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.stats.{InMemoryHostStatsReceiver, InMemoryStatsReceiver}
 import com.twitter.util.{Activity, Await, Future, Time, Var}
 import java.net.{InetAddress, InetSocketAddress}

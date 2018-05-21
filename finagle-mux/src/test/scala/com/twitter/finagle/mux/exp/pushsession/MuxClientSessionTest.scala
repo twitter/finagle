@@ -1,7 +1,8 @@
 package com.twitter.finagle.mux.exp.pushsession
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.exp.pushsession.{MockChannelHandle, PushChannelHandle}
+import com.twitter.finagle.exp.pushsession.PushChannelHandle
+import com.twitter.finagle.exp.pushsession.utils.MockChannelHandle
 import com.twitter.finagle.{Failure, Path, Service, Status}
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.mux.{Request, Response}

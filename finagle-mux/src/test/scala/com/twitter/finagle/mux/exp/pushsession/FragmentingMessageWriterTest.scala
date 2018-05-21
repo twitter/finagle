@@ -1,6 +1,6 @@
 package com.twitter.finagle.mux.exp.pushsession
 
-import com.twitter.finagle.exp.pushsession.MockChannelHandle
+import com.twitter.finagle.exp.pushsession.utils.MockChannelHandle
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.{Dtab, Path}
 import com.twitter.finagle.mux.transport.Message.Tdispatch

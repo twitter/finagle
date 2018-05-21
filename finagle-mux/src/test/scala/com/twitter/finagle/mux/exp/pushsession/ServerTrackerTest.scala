@@ -1,8 +1,8 @@
 package com.twitter.finagle.mux.exp.pushsession
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.exp.pushsession.utils.DeferredExecutor
 import com.twitter.finagle.{Dtab, Path, Service, mux}
-import com.twitter.finagle.exp.pushsession.DeferredExecutor
 import com.twitter.finagle.mux.{ClientDiscardedRequestException, Request, Response}
 import com.twitter.finagle.mux.exp.pushsession.MessageWriter.DiscardResult
 import com.twitter.finagle.mux.lease.exp.{Lessor, nackOnExpiredLease}

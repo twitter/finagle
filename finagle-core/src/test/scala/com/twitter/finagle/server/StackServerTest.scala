@@ -5,6 +5,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.context.{Contexts, Deadline}
 import com.twitter.finagle.filter.ServerAdmissionControl
 import com.twitter.finagle.param.{Stats, Timer}
+import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.service.{ExpiringService, TimeoutFilter}
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stats.InMemoryStatsReceiver

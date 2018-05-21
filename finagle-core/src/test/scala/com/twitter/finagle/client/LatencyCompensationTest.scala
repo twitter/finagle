@@ -5,7 +5,8 @@ import com.twitter.finagle.client.LatencyCompensation.Compensator
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle._
-import com.twitter.finagle.server.StringServer
+import com.twitter.finagle.client.utils.StringClient
+import com.twitter.finagle.server.utils.StringServer
 import com.twitter.util._
 import java.net.InetSocketAddress
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}

@@ -2,9 +2,10 @@ package com.twitter.finagle.builder
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.client.{DefaultPool, StringClient}
-import com.twitter.finagle.server.StringServer
+import com.twitter.finagle.client.DefaultPool
+import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.context.RemoteInfo
+import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.tracing.Trace
 import com.twitter.util._

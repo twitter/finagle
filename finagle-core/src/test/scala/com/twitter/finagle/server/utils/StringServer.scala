@@ -1,9 +1,9 @@
-package com.twitter.finagle.server
+package com.twitter.finagle.server.utils
 
-import com.twitter.finagle._
-import com.twitter.finagle.param
 import com.twitter.finagle.dispatch.SerialServerDispatcher
 import com.twitter.finagle.netty4.Netty4Listener
+import com.twitter.finagle.{param, _}
+import com.twitter.finagle.server.{StackServer, StdStackServer}
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import io.netty.channel.ChannelPipeline
 import io.netty.handler.codec.string.{StringDecoder, StringEncoder}

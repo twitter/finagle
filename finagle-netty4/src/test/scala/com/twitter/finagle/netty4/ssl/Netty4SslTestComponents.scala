@@ -1,8 +1,8 @@
 package com.twitter.finagle.netty4.ssl
 
+import com.twitter.finagle.client.utils.StringClient
+import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.{Address, ListeningServer, Service}
-import com.twitter.finagle.client.StringClient
-import com.twitter.finagle.server.StringServer
 import com.twitter.finagle.ssl.{ClientAuth, KeyCredentials, TrustCredentials}
 import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientSessionVerifier}
 import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerSessionVerifier}

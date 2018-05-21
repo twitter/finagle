@@ -1,14 +1,10 @@
 package com.twitter.finagle.builder
 
 import com.twitter.finagle._
-import com.twitter.finagle.param.{ProtocolLibrary, Label}
-import com.twitter.finagle.server.StringServer
+import com.twitter.finagle.param.{Label, ProtocolLibrary}
+import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.ssl.Engine
-import com.twitter.finagle.ssl.server.{
-  SslServerConfiguration,
-  SslServerEngineFactory,
-  SslServerSessionVerifier
-}
+import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerEngineFactory, SslServerSessionVerifier}
 import com.twitter.finagle.transport.Transport
 import com.twitter.util._
 import com.twitter.util.registry.{GlobalRegistry, SimpleRegistry}

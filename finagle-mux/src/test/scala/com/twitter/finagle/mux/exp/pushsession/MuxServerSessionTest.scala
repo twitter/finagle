@@ -1,10 +1,10 @@
 package com.twitter.finagle.mux.exp.pushsession
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.exp.pushsession.{MockChannelHandle}
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.mux.transport.Message._
 import com.twitter.finagle._
+import com.twitter.finagle.exp.pushsession.utils.MockChannelHandle
 import com.twitter.finagle.mux.{Request, Response}
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.util.{Future, MockTimer, Promise, Time}

@@ -1,11 +1,12 @@
 package com.twitter.finagle.memcached.unit.partitioning
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.client.{StackClient, StringClient}
+import com.twitter.finagle.client.StackClient
+import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.server.StringServer
+import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Address, _}

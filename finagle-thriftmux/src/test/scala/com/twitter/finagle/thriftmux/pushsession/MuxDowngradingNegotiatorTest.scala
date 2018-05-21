@@ -1,7 +1,8 @@
 package com.twitter.finagle.thriftmux.pushsession
 
 import com.twitter.finagle.Mux.param.OppTls
-import com.twitter.finagle.exp.pushsession.{MockChannelHandle, RefPushSession}
+import com.twitter.finagle.exp.pushsession.RefPushSession
+import com.twitter.finagle.exp.pushsession.utils.MockChannelHandle
 import com.twitter.finagle.{param => fparam}
 import com.twitter.finagle.mux.{Request, Response}
 import com.twitter.finagle.mux.transport.{Message, OpportunisticTls}

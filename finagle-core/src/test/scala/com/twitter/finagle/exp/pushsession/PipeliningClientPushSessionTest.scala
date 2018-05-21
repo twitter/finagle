@@ -1,6 +1,7 @@
 package com.twitter.finagle.exp.pushsession
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.exp.pushsession.utils.MockChannelHandle
 import com.twitter.finagle.{Failure, IndividualRequestTimeoutException => FinagleTimeoutException}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.util.{Await, MockTimer, Promise, Time, TimeoutException => UtilTimeoutException}

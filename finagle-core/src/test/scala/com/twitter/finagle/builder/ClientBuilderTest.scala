@@ -2,15 +2,11 @@ package com.twitter.finagle.builder
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.client.StringClient
+import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.param.ProtocolLibrary
 import com.twitter.finagle.service.RetryPolicy
 import com.twitter.finagle.ssl.Engine
-import com.twitter.finagle.ssl.client.{
-  SslClientConfiguration,
-  SslClientEngineFactory,
-  SslClientSessionVerifier
-}
+import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientEngineFactory, SslClientSessionVerifier}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.transport.Transport
 import com.twitter.util._

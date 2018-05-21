@@ -1,4 +1,4 @@
-package com.twitter.finagle.exp.pushsession
+package com.twitter.finagle.exp.pushsession.utils
 
 import java.util
 import java.util.concurrent.Executor

@@ -5,7 +5,8 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.{ChannelClosedException, Failure, FailureFlags, Mux, Path, liveness}
 import com.twitter.finagle.Mux.param.{MaxFrameSize, OppTls}
 import com.twitter.finagle.Stack.Params
-import com.twitter.finagle.exp.pushsession.{MockChannelHandle, PushChannelHandle}
+import com.twitter.finagle.exp.pushsession.PushChannelHandle
+import com.twitter.finagle.exp.pushsession.utils.MockChannelHandle
 import com.twitter.finagle.mux.Handshake.{CanTinitMsg, Headers, TinitTag}
 import com.twitter.finagle.mux.Request
 import com.twitter.finagle.mux.transport.Message.Tdispatch

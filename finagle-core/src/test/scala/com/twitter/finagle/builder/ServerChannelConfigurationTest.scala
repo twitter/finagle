@@ -2,9 +2,9 @@ package com.twitter.finagle.builder
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.ChannelClosedException
-import com.twitter.finagle.client.StringClient
-import com.twitter.finagle.server.StringServer
 import com.twitter.finagle.Service
+import com.twitter.finagle.client.utils.StringClient
+import com.twitter.finagle.server.utils.StringServer
 import com.twitter.util.{Await, Future}
 import java.net.{InetAddress, InetSocketAddress}
 import org.scalatest.FunSuite

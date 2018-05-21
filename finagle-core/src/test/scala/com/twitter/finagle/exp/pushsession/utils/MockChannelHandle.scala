@@ -1,8 +1,8 @@
-package com.twitter.finagle.exp.pushsession
+package com.twitter.finagle.exp.pushsession.utils
 
 import com.twitter.finagle.Status
-import com.twitter.util.Return
-import com.twitter.util.{Future, Promise, Time, Try}
+import com.twitter.finagle.exp.pushsession.{PushChannelHandle, PushSession}
+import com.twitter.util.{Future, Promise, Return, Time, Try}
 import java.net.{InetSocketAddress, SocketAddress}
 import java.security.cert.Certificate
 import scala.collection.mutable

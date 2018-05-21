@@ -1,10 +1,10 @@
 package com.twitter.finagle.exp.pushsession
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.exp.pushsession.utils.MockChannelHandle
 import com.twitter.finagle.server.StackServer
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{
-  ClientConnection, ListeningServer, Service, ServiceFactory, Stack, Status}
+import com.twitter.finagle.{ClientConnection, ListeningServer, Service, ServiceFactory, Stack, Status}
 import com.twitter.util.registry.{Entry, GlobalRegistry}
 import com.twitter.util.{Await, Awaitable, Duration, Future, Promise, Time}
 import java.net.{InetSocketAddress, SocketAddress}

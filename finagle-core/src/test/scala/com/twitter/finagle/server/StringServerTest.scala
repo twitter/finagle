@@ -2,7 +2,8 @@ package com.twitter.finagle.server
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.client.StringClient
+import com.twitter.finagle.client.utils.StringClient
+import com.twitter.finagle.server.utils.StringServer
 import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
 import com.twitter.util.{Await, Future, Promise}
 import java.net.{InetAddress, InetSocketAddress, Socket}
