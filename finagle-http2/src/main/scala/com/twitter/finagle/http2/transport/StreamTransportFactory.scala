@@ -2,6 +2,7 @@ package com.twitter.finagle.http2.transport
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.http.TooLongMessageException
+import com.twitter.finagle.http2.{GoAwayException, RstException}
 import com.twitter.finagle.http2.param.PriorKnowledge
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader._
 import com.twitter.finagle.liveness.FailureDetector
@@ -121,15 +122,11 @@ final private[http2] class StreamTransportFactory(
   // this connection as closed, it gets torn down.
   detector.onClose.ensure(close())
 
-  private[this] def handleGoaway(obj: HttpObject, lastStreamId: Int): Unit = {
+  private[this] def handleGoaway(addr: SocketAddress, obj: HttpObject, lastStreamId: Int, errorCode: Long): Unit = {
     dead = true
     activeStreams.values.foreach { stream =>
       if (stream.curId > lastStreamId) {
-        stream
-          .handleCloseStream(
-            s"the stream id (${stream.curId}) was higher than the last stream" +
-              s" id ($lastStreamId) on a GOAWAY"
-          )
+        stream.handleCloseWith(new GoAwayException(errorCode, stream.curId, Some(addr)))
       }
     }
   }
@@ -180,14 +177,14 @@ final private[http2] class StreamTransportFactory(
           }
       }
 
-    case GoAway(msg, lastStreamId, _) =>
-      handleGoaway(msg, lastStreamId)
+    case GoAway(msg, lastStreamId, errorCode) =>
+      handleGoaway(addr, msg, lastStreamId, errorCode)
 
     case Rst(streamId, errorCode) =>
       val error =
         if (errorCode == Http2Error.REFUSED_STREAM.code) Failure.RetryableNackFailure
         else if (errorCode == Http2Error.ENHANCE_YOUR_CALM.code) Failure.NonRetryableNackFailure
-        else new StreamClosedException(addr, streamId.toString)
+        else new RstException(errorCode, streamId, Some(addr))
 
       activeStreams.get(streamId) match {
         case Some(stream) =>

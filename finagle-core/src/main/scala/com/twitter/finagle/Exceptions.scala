@@ -361,14 +361,24 @@ class ChannelClosedException private[finagle](
 class StreamClosedException(
   remoteAddress: Option[SocketAddress],
   streamId: String,
-  whyFailed: String)
+  whyFailed: String,
+  private[finagle] val flags: Long)
     extends ChannelException(None, remoteAddress)
+    with FailureFlags[StreamClosedException]
     with NoStackTrace {
+
+  def this(remoteAddress: Option[SocketAddress], streamId: String, whyFailed: String) =
+    this(remoteAddress, streamId, whyFailed, FailureFlags.Empty)
+
   def this(remoteAddress: Option[SocketAddress], streamId: String) =
     this(remoteAddress, streamId, null)
 
   def this(remoteAddress: SocketAddress, streamId: String) =
     this(Option(remoteAddress), streamId, null)
+
+  protected def copyWithFlags(newFlags: Long): StreamClosedException =
+    new StreamClosedException(remoteAddress, streamId, whyFailed, newFlags)
+
   override def exceptionMessage(): String = {
     if (whyFailed == null) s"Stream: $streamId was closed at remote address: $remoteAddress"
     else s"Stream: $streamId was closed at remote address: $remoteAddress, because $whyFailed"

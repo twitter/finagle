@@ -5,6 +5,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle
 import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.http2.RstException
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.service.ServiceFactoryRef
 import com.twitter.finagle.toggle.flag.overrides
@@ -14,7 +15,7 @@ import com.twitter.util._
 import io.netty.handler.codec.http2.Http2CodecUtil
 import java.net.InetSocketAddress
 import java.util.concurrent.atomic.AtomicInteger
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 
 class Http2EndToEndTest extends AbstractEndToEndTest {
   def implName: String = "netty4 http/2"
@@ -364,5 +365,66 @@ class Http2EndToEndTest extends AbstractEndToEndTest {
       case Return(resp) => assert(resp.status == Status.Ok)
       case Throw(t) => fail("didn't expect pendingReply to fail", t)
     }
+  }
+
+  test("illegal headers produce a non-zero error code on the client") {
+    val srv = serverImpl()
+      .serve("localhost:*", Service.mk[Request, Response](_ => Future.value(Response())))
+
+    val bound = srv.boundAddress.asInstanceOf[InetSocketAddress]
+    val dest = s"${bound.getHostName}:${bound.getPort}"
+
+    val client = clientImpl().newService(dest, "client")
+
+
+    // we need to circumvent the validations in the DefaultHeaderMap
+    val map = new HeaderMap {
+      val underlying = MMap.empty[String, String]
+
+      def get(key: String): Option[String] = underlying.get(key)
+
+      def set(k: String, v: String): HeaderMap = {
+        underlying.update(k, v)
+        this
+      }
+
+      def add(k: String, v: String): HeaderMap = {
+        underlying.update(k, v)
+        this
+      }
+
+      def getAll(key: String): Seq[String] = underlying.get(key).map(Seq(_)).getOrElse(Nil)
+
+      def +=(kv: (String, String)): this.type = {
+        underlying += kv
+        this
+      }
+
+      def -=(key: String): this.type = {
+        underlying -= (key)
+        this
+      }
+
+      def iterator: Iterator[(String, String)] = underlying.iterator
+    }
+
+    val req = new Request.Proxy {
+      val underlying = Request("/")
+      def request: Request = underlying
+      override def headerMap: HeaderMap = map
+    }
+
+    initClient(client)
+
+    // this sends illegal pseudo headers to the server, it should reject them with a non-zero
+    // error code.
+    req.headerMap.set(":invalid", "foo")
+
+    val rep = client(req)
+
+    val error = intercept[RstException] {
+      Await.result(rep, 5.seconds)
+    }
+    assert(error.errorCode != 0) // assert that this was not an error-free rejection
   }
 }
