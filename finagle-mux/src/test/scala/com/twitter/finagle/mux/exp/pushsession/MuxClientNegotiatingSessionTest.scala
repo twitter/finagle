@@ -246,25 +246,27 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
   }
 
   test("can be interrupted") {
-    def negotiate(handle: PushChannelHandle[ByteReader, Buf], hs: Option[Headers]): MuxClientSession =
-      new Negotiation.Client(fragmentingParams).negotiate(handle, hs)
+    allowInterruptingClientNegotiation.let(true) {
+      def negotiate(handle: PushChannelHandle[ByteReader, Buf], hs: Option[Headers]): MuxClientSession =
+        new Negotiation.Client(fragmentingParams).negotiate(handle, hs)
 
-    val (handle, negotiatingSession, stats) = withMockHandle(negotiate, fragmentingParams)
-    assert(stats.gauges(Seq("negotiating")).apply() == 0.0f)
-    val sessionF = negotiatingSession.negotiate()
-    assert(stats.gauges(Seq("negotiating")).apply() == 1.0f)
+      val (handle, negotiatingSession, stats) = withMockHandle(negotiate, fragmentingParams)
+      assert(stats.gauges(Seq("negotiating")).apply() == 0.0f)
+      val sessionF = negotiatingSession.negotiate()
+      assert(stats.gauges(Seq("negotiating")).apply() == 1.0f)
 
-    val raised = new Exception
-    sessionF.raise(raised)
+      val raised = new Exception
+      sessionF.raise(raised)
 
-    assert(handle.closedCalled)
-    handle.onClosePromise.setDone()
+      assert(handle.closedCalled)
+      handle.onClosePromise.setDone()
 
-    val ex = intercept[Failure] {
-      await(sessionF)
+      val ex = intercept[Failure] {
+        await(sessionF)
+      }
+      assert(ex.isFlagged(FailureFlags.Retryable))
+      assert(ex.cause == Some(raised))
+      assert(!stats.gauges.contains(Seq("negotiating")))
     }
-    assert(ex.isFlagged(FailureFlags.Retryable))
-    assert(ex.cause == Some(raised))
-    assert(!stats.gauges.contains(Seq("negotiating")))
   }
 }
