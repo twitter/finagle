@@ -4,7 +4,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.loadbalancer.{BalancerNode, NodeT}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.Ema
-import com.twitter.util.{Duration, Future, Return, Time, Throw}
+import com.twitter.util.{Closable, Duration, Future, Return, Throw, Time}
 
 /**
  * LoadBand is an aperture controller targeting a load band. `lowLoad` and `highLoad` are
@@ -29,7 +29,7 @@ import com.twitter.util.{Duration, Future, Return, Time, Throw}
  * dampen the rate of changes by rolling the offered load into an exponentially weighted
  * moving average.
  */
-private[loadbalancer] trait LoadBand[Req, Rep] extends BalancerNode[Req, Rep] {
+private[loadbalancer] trait LoadBand[Req, Rep] extends BalancerNode[Req, Rep] with Closable {
   self: Aperture[Req, Rep] =>
 
   protected type Node <: LoadBandNode
@@ -106,6 +106,12 @@ private[loadbalancer] trait LoadBand[Req, Rep] extends BalancerNode[Req, Rep] {
       narrow()
       narrowCounter.incr()
     }
+  }
+
+  // This must be mixed in with another type that has a `close()` method due to the `super.close` call
+  abstract override def close(deadline: Time): Future[Unit] = {
+    emaGauge.remove()
+    super.close(deadline)
   }
 
   protected trait LoadBandNode extends NodeT[Req, Rep] {

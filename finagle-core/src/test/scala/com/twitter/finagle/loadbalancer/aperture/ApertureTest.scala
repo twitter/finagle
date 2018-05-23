@@ -1,5 +1,6 @@
 package com.twitter.finagle.loadbalancer.aperture
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.Address.Inet
 import com.twitter.finagle._
 import com.twitter.finagle.loadbalancer.{EndpointFactory, FailingEndpointFactory, NodeT}
@@ -70,6 +71,52 @@ class ApertureTest extends FunSuite with ApertureSuite {
         useDeterministicOrdering = None
       )
     }
+  }
+
+  test("closing ApertureLeastLoaded removes the loadband ema gauge") {
+    val stats = new InMemoryStatsReceiver
+      val aperture = new ApertureLeastLoaded[Unit, Unit](
+        endpoints = Activity.pending,
+        smoothWin = Duration.Bottom,
+        lowLoad = 0,
+        highLoad = 0,
+        minAperture = 10,
+        maxEffort = 0,
+        rng = Rng.threadLocal,
+        statsReceiver = stats,
+        label = "",
+        timer = new NullTimer,
+        emptyException = new NoBrokersAvailableException,
+        useDeterministicOrdering = None
+      )
+
+    assert(stats.gauges.contains(Seq("loadband", "offered_load_ema")))
+    Await.result(aperture.close(), 10.seconds)
+    assert(!stats.gauges.contains(Seq("loadband", "offered_load_ema")))
+  }
+
+  test("closing AperturePeakEwma removes the loadband ema gauge") {
+    val stats = new InMemoryStatsReceiver
+    val aperture = new AperturePeakEwma[Unit, Unit](
+      endpoints = Activity.pending,
+      smoothWin = Duration.Bottom,
+      decayTime = 10.seconds,
+      nanoTime = () => System.nanoTime(),
+      lowLoad = 0,
+      highLoad = 0,
+      minAperture = 10,
+      maxEffort = 0,
+      rng = Rng.threadLocal,
+      statsReceiver = stats,
+      label = "",
+      timer = new NullTimer,
+      emptyException = new NoBrokersAvailableException,
+      useDeterministicOrdering = None
+    )
+
+    assert(stats.gauges.contains(Seq("loadband", "offered_load_ema")))
+    Await.result(aperture.close(), 10.seconds)
+    assert(!stats.gauges.contains(Seq("loadband", "offered_load_ema")))
   }
 
   test("minAperture <= vector.size") {

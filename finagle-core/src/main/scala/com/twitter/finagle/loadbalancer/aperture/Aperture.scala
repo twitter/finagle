@@ -60,7 +60,7 @@ private object Aperture {
   // Therefore, we've assigned the min to 12 to further decrease the probability of having a
   // aperture without any healthy nodes.
   // Note: the flag will be removed and replaced with a constant after tuning.
-  private val MinDeterminsticAperture: Int = {
+  private val MinDeterministicAperture: Int = {
     val min = minDeterminsticAperture()
     if (1 < min) min
     else {
@@ -443,7 +443,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     // Note that this definition ignores the user defined `minAperture`,
     // but that isn't likely to hold much value given our definition of `min`
     // and how we calculate the `apertureWidth`.
-    override def min: Int = math.min(Aperture.MinDeterminsticAperture, vector.size)
+    override def min: Int = math.min(Aperture.MinDeterministicAperture, vector.size)
 
     // If we don't allow the aperture to be dynamic based on the load, we just use the min value.
     override def logicalAperture: Int = if (staticDAperture) min else super.logicalAperture

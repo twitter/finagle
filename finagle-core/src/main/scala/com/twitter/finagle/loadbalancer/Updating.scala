@@ -1,7 +1,7 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle.util.DefaultLogger
-import com.twitter.util.{Time, Activity, Future}
+import com.twitter.util.{Activity, Closable, Future, Time}
 import java.util.logging.Level
 import scala.util.control.NonFatal
 
@@ -9,7 +9,7 @@ import scala.util.control.NonFatal
  * A Balancer mix-in which provides the collection over which to load balance
  * by observing `endpoints`.
  */
-private trait Updating[Req, Rep] extends Balancer[Req, Rep] {
+private trait Updating[Req, Rep] extends Closable { self: Balancer[Req, Rep] =>
 
   /**
    * An activity representing the active set of EndpointFactories.
@@ -38,7 +38,8 @@ private trait Updating[Req, Rep] extends Balancer[Req, Rep] {
     case Activity.Pending => // nop
   }
 
-  override def close(deadline: Time): Future[Unit] = {
+  // This must be mixed in with another type that has a `close()` method due to the `super.close` call
+  abstract override def close(deadline: Time): Future[Unit] = {
     observation.close(deadline).before { super.close(deadline) }
   }
 }
