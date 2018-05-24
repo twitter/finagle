@@ -3,7 +3,7 @@ package com.twitter.finagle.http2.transport
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle.http.TooLongMessageException
-import com.twitter.finagle.http2.SerialExecutor
+import com.twitter.finagle.http2.{GoAwayException, SerialExecutor}
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader._
 import com.twitter.finagle.http2.transport.StreamTransportFactory._
 import com.twitter.finagle.liveness.FailureDetector
@@ -424,5 +424,60 @@ class StreamTransportFactoryTest extends FunSuite {
     streamFac.removeStream(1)
     ready(stream.read())
     assert(stream.state == Dead)
+  }
+
+  def isFlagged(rstCode: Long, finagleFlag: Long): Boolean = {
+    val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
+    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+    type Context = TransportContext with HasExecutor
+  }]
+
+    val noFD = FailureDetector.Param(FailureDetector.NullConfig)
+    val streamFac = new StreamTransportFactory(transport, new SocketAddress {}, Stack.Params.empty + noFD)
+    val stream= await(streamFac())
+
+    stream.write(H1Req)
+    val streamFut = stream.read()
+
+    readq.offer(Rst(1, rstCode))
+
+    val result = intercept[Exception](await(streamFut))
+    FailureFlags.isFlagged(finagleFlag)(result)
+  }
+
+  val retryableResetCodes =
+    Http2Error.values.map(_ -> false).toMap[Http2Error, Boolean].updated(Http2Error.REFUSED_STREAM, true)
+
+  retryableResetCodes.foreach { case (error, retryable) =>
+    if (retryable) test(s"streams are retryable on RST(${error.toString})") { assert(isFlagged(error.code, FailureFlags.Retryable)) }
+    else test(s"streams are NOT retryable on RST(${error.toString})")  { assert(!isFlagged(error.code, FailureFlags.Retryable)) }
+  }
+
+  test("unprocessed streams are retryable on all goaways") {
+    val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
+    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+      type Context = TransportContext with HasExecutor
+    }]
+
+    val noFD = FailureDetector.Param(FailureDetector.NullConfig)
+    val streamFac = new StreamTransportFactory(transport, new SocketAddress {}, Stack.Params.empty + noFD)
+    val a, b, c, d = await(streamFac())
+
+    a.write(H1Req); b.write(H1Req); c.write(H1Req); d.write(H1Req)
+    val (aFut, bFut, cFut, dFut) = (a.read(), b.read(), c.read(), d.read())
+
+    // we know that the active streams are numbered 1, 3, 5, 7 so we pick a goaway value to fail half
+    // of the streams.
+    readq.offer(GoAway(null, 4, 0))
+
+    // these streams are actively being processed so the StreamTransportFactory doesn't fail them
+    assert(!aFut.isDefined)
+    assert(!bFut.isDefined)
+
+
+    // c + d haven't been processed so they should be retryable on another connection
+    val restartable = List(cFut, dFut).map(f => intercept[GoAwayException](await(f)))
+
+    assert(restartable.forall(FailureFlags.isFlagged(FailureFlags.Retryable)(_)))
   }
 }

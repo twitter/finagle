@@ -126,7 +126,10 @@ final private[http2] class StreamTransportFactory(
     dead = true
     activeStreams.values.foreach { stream =>
       if (stream.curId > lastStreamId) {
-        stream.handleCloseWith(new GoAwayException(errorCode, stream.curId, Some(addr)))
+
+        // Any streams beyond `lastStreamId` haven't been processed so we mark them
+        // as retryable.
+        stream.handleCloseWith(new GoAwayException(errorCode, stream.curId, Some(addr), FailureFlags.Retryable))
       }
     }
   }

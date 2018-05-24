@@ -1,6 +1,6 @@
 package com.twitter.finagle.http2
 
-import com.twitter.finagle.StreamClosedException
+import com.twitter.finagle.{FailureFlags, StreamClosedException}
 import io.netty.handler.codec.http2.Http2Error
 import java.net.SocketAddress
 
@@ -15,8 +15,16 @@ private object Http2StreamClosedException {
   }
 }
 
-final class GoAwayException(val errorCode: Long, streamId: Long, remoteAddress: Option[SocketAddress])
-  extends StreamClosedException(remoteAddress, streamId.toString, s"GOAWAY(${Http2StreamClosedException.errorToString(errorCode)})")
+final class GoAwayException private[http2](val errorCode: Long, streamId: Long, remoteAddress: Option[SocketAddress], flags: Long)
+  extends StreamClosedException(remoteAddress, streamId.toString, s"GOAWAY(${Http2StreamClosedException.errorToString(errorCode)})", flags) {
+    def this(errorCode: Long, streamId: Long, remoteAddress: Option[SocketAddress]) =
+      this(errorCode: Long, streamId: Long, remoteAddress: Option[SocketAddress], FailureFlags.Empty)
+  }
 
-final class RstException(val errorCode: Long, streamId: Long, remoteAddress: Option[SocketAddress])
-  extends StreamClosedException(remoteAddress, streamId.toString, s"RST(${Http2StreamClosedException.errorToString(errorCode)})")
+
+final class RstException private[http2](val errorCode: Long, streamId: Long, remoteAddress: Option[SocketAddress], flags: Long)
+  extends StreamClosedException(remoteAddress, streamId.toString, s"RST(${Http2StreamClosedException.errorToString(errorCode)})", flags) {
+
+  def this(errorCode: Long, streamId: Long, remoteAddress: Option[SocketAddress]) =
+    this(errorCode: Long, streamId: Long, remoteAddress: Option[SocketAddress], FailureFlags.Empty)
+}
