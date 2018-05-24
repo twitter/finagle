@@ -23,6 +23,14 @@ New Features
   * finagle-core: Make `Filter.TypeAgnostic` an abstract class for Java usability.
     ``PHAB_ID=D172716``
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+  * finagle-core: Rename `DeadlineFilter.Param(maxRejectFraction)` to
+    `DeadlineFilter.MaxRejectFraction(maxRejectFraction)` to reduce confusion
+    when adding additional params.
+    ``PHAB_ID=D172402``
+
+
 Bug Fixes
 ~~~~~~~~~
 

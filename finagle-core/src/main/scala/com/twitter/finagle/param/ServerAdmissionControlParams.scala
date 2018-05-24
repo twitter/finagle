@@ -3,6 +3,7 @@ package com.twitter.finagle.param
 import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.finagle.Stack
 import com.twitter.finagle.filter.RequestSemaphoreFilter
+import com.twitter.finagle.service.DeadlineFilter
 
 /**
  * A collection of methods for configuring the server-side admission control modules
@@ -29,5 +30,26 @@ class ServerAdmissionControlParams[A <: Stack.Parameterized[A]](self: Stack.Para
       else Some(new AsyncSemaphore(maxConcurrentRequests, maxWaiters))
 
     self.configured(RequestSemaphoreFilter.Param(semaphore))
+  }
+
+  /**
+   *  Configures mode for `DeadlineFilter` to `Enabled`. (default: `Disabled`)
+   */
+  def deadlines: A = {
+    self.configured(DeadlineFilter.Mode(DeadlineFilter.Mode.Enabled))
+  }
+
+  /**
+   *  Configures mode for `DeadlineFilter` to `DarkMode`. (default: `Disabled`)
+   */
+  def darkModeDeadlines: A = {
+    self.configured(DeadlineFilter.Mode(DeadlineFilter.Mode.DarkMode))
+  }
+
+  /**
+   *  Configures mode for `DeadlineFilter` to `Disabled`. (default: `Disabled`)
+   */
+  def noDeadlines: A = {
+    self.configured(DeadlineFilter.Mode(DeadlineFilter.Mode.Disabled))
   }
 }

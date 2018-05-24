@@ -23,7 +23,8 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
     rejectPeriod = 10.seconds,
     maxRejectFraction = 0.2,
     statsReceiver = statsReceiver,
-    nowMillis = Stopwatch.timeMillis
+    nowMillis = Stopwatch.timeMillis,
+    isDarkMode = false
   )
 
   val deadlineService = deadlineFilter.andThen(service)
@@ -85,6 +86,32 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
           Await.result(deadlineService("marco"), 1.second)
         }
         assert(f.getMessage.contains("exceeded request deadline"))
+        assert(statsReceiver.counters.get(List("exceeded")) == Some(1))
+        assert(statsReceiver.counters.get(List("exceeded_beyond_tolerance")) == None)
+        assert(statsReceiver.counters.get(List("rejected")) == Some(1))
+      }
+    }
+  }
+
+  test(
+    "When the deadline is exceeded and the reject token bucket contains sufficient tokens but we " +
+      "are in dark mode, DeadlineFilter should service the request and increment the exceeded " +
+      "and rejected stats"
+  ) {
+    val darkModeDeadlineFilter = new DeadlineFilter[String, String](
+      rejectPeriod = 10.seconds,
+      maxRejectFraction = 0.2,
+      statsReceiver = statsReceiver,
+      nowMillis = Stopwatch.timeMillis,
+      isDarkMode = true
+    )
+    val darkModeService = darkModeDeadlineFilter.andThen(service)
+
+    Time.withCurrentTimeFrozen { tc =>
+      Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.seconds)) {
+        for (i <- 0 until 5) Await.result(darkModeService("marco"), 1.second)
+        tc.advance(2.seconds)
+        assert(Await.result(darkModeService("marco"), 1.second) == "polo")
         assert(statsReceiver.counters.get(List("exceeded")) == Some(1))
         assert(statsReceiver.counters.get(List("exceeded_beyond_tolerance")) == None)
         assert(statsReceiver.counters.get(List("rejected")) == Some(1))
@@ -166,13 +193,23 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
     }
   }
 
-  test("param") {
+  test("MaxRejectFraction param") {
     import DeadlineFilter._
 
-    val p: Param = Param(0.5)
+    val p: MaxRejectFraction = MaxRejectFraction(0.5)
 
     val ps: Stack.Params = Stack.Params.empty + p
-    assert(ps.contains[Param])
-    assert((ps[Param] match { case Param(d) => (d) }) == 0.5)
+    assert(ps.contains[MaxRejectFraction])
+    assert((ps[MaxRejectFraction] match { case MaxRejectFraction(d) => d }) == 0.5)
+  }
+
+  test("RejectPeriod param") {
+    import DeadlineFilter._
+
+    val p: RejectPeriod = RejectPeriod(5.seconds)
+
+    val ps: Stack.Params = Stack.Params.empty + p
+    assert(ps.contains[RejectPeriod])
+    assert((ps[RejectPeriod] match { case RejectPeriod(d) => d }) == 5.seconds)
   }
 }

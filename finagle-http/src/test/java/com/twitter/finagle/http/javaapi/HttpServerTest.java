@@ -48,6 +48,9 @@ public final class HttpServerTest {
     Server<Request, Response> newStyleServer =
         com.twitter.finagle.Http
             .server()
+            .withAdmissionControl().deadlines()
+            .withAdmissionControl().noDeadlines()
+            .withAdmissionControl().darkModeDeadlines()
             .withCompressionLevel(2)
             .configured(new Label("test").mk())
             .withDecompression(true)

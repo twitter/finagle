@@ -5,7 +5,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.context.Deadline
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.{HasLogLevel, Level}
-import com.twitter.util.{Future, Duration, Stopwatch, Time, TokenBucket}
+import com.twitter.util.{Duration, Future, Stopwatch, Time, TokenBucket}
 
 /**
  * DeadlineFilter provides an admission control module that can be pushed onto the stack to
@@ -35,21 +35,69 @@ object DeadlineFilter {
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
    * [[com.twitter.finagle.service.DeadlineFilter]] module.
    *
+   * @param rejectPeriod No more than `maxRejectFraction` of requests will be
+   *        discarded over the `rejectPeriod`. Must be `>= 1 second` and `<= 60 seconds`.
+   */
+  case class RejectPeriod(rejectPeriod: Duration) {
+    require(
+      rejectPeriod.inSeconds >= 1 && rejectPeriod.inSeconds <= 60,
+      s"rejectPeriod must be [1 second, 60 seconds]: $rejectPeriod"
+    )
+
+    def mk(): (RejectPeriod, Stack.Param[RejectPeriod]) =
+      (this, RejectPeriod.param)
+  }
+
+  object RejectPeriod {
+    implicit val param: Stack.Param[DeadlineFilter.RejectPeriod] =
+      Stack.Param(RejectPeriod(DefaultRejectPeriod))
+  }
+
+  /**
+   * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
+   * [[com.twitter.finagle.service.DeadlineFilter]] module.
+   *
    * @param maxRejectFraction Maximum fraction of requests that can be
    *        rejected over `rejectPeriod`. Must be between 0.0 and 1.0.
    */
-  case class Param(maxRejectFraction: Double) {
+  case class MaxRejectFraction(maxRejectFraction: Double) {
     require(
       maxRejectFraction >= 0.0 && maxRejectFraction <= 1.0,
       s"maxRejectFraction must be between 0.0 and 1.0: $maxRejectFraction"
     )
 
-    def mk(): (Param, Stack.Param[Param]) =
-      (this, Param.param)
+    def mk(): (MaxRejectFraction, Stack.Param[MaxRejectFraction]) =
+      (this, MaxRejectFraction.param)
   }
-  object Param {
-    implicit val param: Stack.Param[DeadlineFilter.Param] =
-      Stack.Param(Param(DefaultMaxRejectFraction))
+  object MaxRejectFraction {
+    implicit val param: Stack.Param[DeadlineFilter.MaxRejectFraction] =
+      Stack.Param(MaxRejectFraction(DefaultMaxRejectFraction))
+  }
+
+  /**
+   * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
+   * [[com.twitter.finagle.service.DeadlineFilter]] module.
+   *
+   * @param param `Disabled` will omit `DeadlineFilter` from the server
+   *         stack. `DarkMode` will collect stats about deadlines but not reject requests.
+   *        `Enabled` turns `DeadlineFilter` on.
+   */
+  private[finagle] case class Mode(param: Mode.FilterMode) {
+
+    def mk(): (Mode, Stack.Param[Mode]) =
+      (this, Mode.param)
+  }
+
+  private[finagle] case object Mode {
+
+    sealed trait FilterMode
+    case object Disabled extends FilterMode
+    case object DarkMode extends FilterMode
+    case object Enabled extends FilterMode
+
+    val Default: FilterMode = Disabled
+
+    implicit val param: Stack.Param[Mode] = Stack.Param(Mode(Default))
   }
 
   /**
@@ -57,34 +105,54 @@ object DeadlineFilter {
    * [[com.twitter.finagle.service.DeadlineFilter]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module2[param.Stats, DeadlineFilter.Param, ServiceFactory[Req, Rep]] {
+    new Stack.Module4[
+      param.Stats,
+      DeadlineFilter.RejectPeriod,
+      DeadlineFilter.MaxRejectFraction,
+      DeadlineFilter.Mode,
+      ServiceFactory[Req, Rep]]
+    {
       val role = new Stack.Role("DeadlineFilter")
       val description = "Reject requests when their deadline has passed"
 
       def make(
         _stats: param.Stats,
-        _param: DeadlineFilter.Param,
+        _rejectPeriod: DeadlineFilter.RejectPeriod,
+        _maxRejectFraction: DeadlineFilter.MaxRejectFraction,
+        mode: DeadlineFilter.Mode,
         next: ServiceFactory[Req, Rep]
-      ) = {
-        val Param(maxRejectFraction) = _param
+      ) =
+        mode match {
+          case Mode(Mode.DarkMode) | Mode(Mode.Enabled) =>
+            val rejectPeriod = _rejectPeriod.rejectPeriod
+            val maxRejectFraction = _maxRejectFraction.maxRejectFraction
 
-        if (maxRejectFraction <= 0.0) next
-        else {
-          val param.Stats(statsReceiver) = _stats
-          val scopedStatsReceiver = statsReceiver.scope("admission_control", "deadline")
+            if (maxRejectFraction <= 0.0) next
+            else {
+              val param.Stats(statsReceiver) = _stats
+              val scopedStatsReceiver = statsReceiver.scope("admission_control", "deadline")
+              val darkMode = mode == Mode(Mode.DarkMode)
 
-          new ServiceFactoryProxy[Req, Rep](next) {
+              new ServiceFactoryProxy[Req, Rep](next) {
 
-            private[this] val newDeadlineFilter: Service[Req, Rep] => Service[Req, Rep] = service =>
-              new DeadlineFilter(DefaultRejectPeriod, maxRejectFraction, scopedStatsReceiver)
-                .andThen(service)
+                private[this] val newDeadlineFilter: Service[Req, Rep] => Service[Req, Rep] =
+                  service =>
+                    new DeadlineFilter(
+                      rejectPeriod = rejectPeriod,
+                      maxRejectFraction = maxRejectFraction,
+                      statsReceiver = scopedStatsReceiver,
+                      isDarkMode = darkMode)
+                      .andThen(service)
 
-            override def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
-              // Create a DeadlineFilter per connection, so we don't share the state of the token
-              // bucket for rejecting requests.
-              next(conn).map(newDeadlineFilter)
-          }
-        }
+                override def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
+                // Create a DeadlineFilter per connection, so we don't share the state of the token
+                // bucket for rejecting requests.
+                  next(conn).map(newDeadlineFilter)
+              }
+            }
+
+          case _ =>
+            next
       }
     }
 
@@ -119,6 +187,7 @@ object DeadlineFilter {
  * @param statsReceiver for stats reporting, typically scoped to
  *        ".../admission_control/deadline/"
  * @param nowMillis current time in milliseconds
+ * @param isDarkMode DarkMode will collect stats but not reject requests
  * @see The [[https://twitter.github.io/finagle/guide/Servers.html#request-deadline user guide]]
  *      for more details.
  */
@@ -126,8 +195,23 @@ class DeadlineFilter[Req, Rep](
   rejectPeriod: Duration = DeadlineFilter.DefaultRejectPeriod,
   maxRejectFraction: Double = DeadlineFilter.DefaultMaxRejectFraction,
   statsReceiver: StatsReceiver,
-  nowMillis: () => Long = Stopwatch.systemMillis
+  nowMillis: () => Long = Stopwatch.systemMillis,
+  isDarkMode: Boolean
 ) extends SimpleFilter[Req, Rep] {
+
+  def this(
+    rejectPeriod: Duration,
+    maxRejectFraction: Double,
+    statsReceiver: StatsReceiver,
+    nowMillis: () => Long
+  ) =
+    this(
+      rejectPeriod,
+      maxRejectFraction,
+      statsReceiver,
+      nowMillis,
+      false)
+
   import DeadlineFilter.DeadlineExceededException
 
   require(
@@ -167,9 +251,12 @@ class DeadlineFilter[Req, Rep](
           // There are enough tokens to reject the request
           if (rejectBucket.tryGet(rejectWithdrawal)) {
             rejectedStat.incr()
-            Future.exception(
-              new DeadlineExceededException(timestamp, deadline, exceeded, now)
-            )
+            if (isDarkMode)
+              service(request)
+            else
+              Future.exception(
+                new DeadlineExceededException(timestamp, deadline, exceeded, now)
+              )
           } else {
             rejectBucket.put(serviceDeposit)
             service(request)
