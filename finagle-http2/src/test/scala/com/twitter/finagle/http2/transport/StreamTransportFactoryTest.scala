@@ -125,6 +125,34 @@ class StreamTransportFactoryTest extends FunSuite {
     assert(streamFac.numActiveStreams == 0)
   }
 
+  test("StreamTransportFactory dies if it runs out of stream IDs") {
+    val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
+    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+      type Context = TransportContext with HasExecutor
+    }]
+    val addr = new SocketAddress {}
+    val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
+    streamFac.setStreamId(2147483647)
+
+    val s1, s2 = await(streamFac())
+
+    s1.write(H1Req)
+    s2.write(H1Req)
+
+    assert(s2.onClose.isDefined)
+    val exn = intercept[StreamIdOverflowException] {
+      throw await(s2.onClose)
+    }
+
+    intercept[DeadConnectionException] {
+      await(streamFac())
+    }
+    assert(exn.flags == FailureFlags.Retryable)
+    assert(streamFac.numActiveStreams == 1)
+    assert(streamFac.status == Status.Closed)
+  }
+
+
   test("StreamTransportFactory forbids new streams on GOAWAY") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
     val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {

@@ -10,7 +10,7 @@ Unreleased
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-  * finagle-http2: Unprocessed streams are retryable in case of GOAWAY. 
+  * finagle-http2: Unprocessed streams are retryable in case of GOAWAY.
     ``PHAB_ID=D174401``
 
 New Features
@@ -88,6 +88,10 @@ Breaking API Changes
 
 Bug Fixes
 ~~~~~~~~~
+
+  * finagle-http2: `StreamTransportFactory` now marks itself as dead/closed when it runs out of
+    HTTP/2 stream IDs instead of stalling. This allows the connection to be closed/reestablished in
+    accordance with the spec ``PHAB_ID=D175898``
 
   * finagle-netty4: `SslServerSessionVerifier` is now supplied with the proper peer address
     rather than `Address.failing`. ``PHAB_ID=D168334``

@@ -347,6 +347,8 @@ final private[http2] class StreamTransportFactory(
       case Idle =>
         val newId = id.getAndAdd(2)
         if (newId < 0) {
+          // When stream identifiers have been exhausted, a new connection must be established
+          parent.dead = true
           handleCloseWith(new StreamIdOverflowException(addr))
         } else if (newId % 2 != 1) {
           handleCloseWith(new IllegalStreamIdException(addr, newId))
@@ -391,7 +393,7 @@ final private[http2] class StreamTransportFactory(
 
     private[this] def handleCheckFinished() = state match {
       case a: Active if a.finished && queue.size == 0 =>
-        if (parent.dead) handleCloseStream(s"parent MultiplexedTransporter already dead")
+        if (parent.dead) handleCloseStream(s"parent StreamTransportFactory already dead")
         else {
           if (handleRemoveStream(curId)) {
             removeIdleCounter.incr()
