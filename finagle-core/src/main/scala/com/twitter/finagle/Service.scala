@@ -18,6 +18,7 @@ object Service {
           case NonFatal(e) => Future.exception(e)
         }
       }
+      override def toString: String = service.toString
     }
 
   /**
@@ -75,4 +76,6 @@ abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) with Closable {
    * with a reasonable likelihood of success).
    */
   final def isAvailable: Boolean = status == Status.Open
+
+  override def toString: String = getClass.getName
 }

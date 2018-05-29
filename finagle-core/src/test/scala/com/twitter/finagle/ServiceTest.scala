@@ -1,5 +1,6 @@
 package com.twitter.finagle
 
+import com.twitter.finagle.service.{ConstantService, FailedService, NilService}
 import com.twitter.util._
 import org.junit.runner.RunWith
 import org.mockito.Matchers._
@@ -61,6 +62,45 @@ class ServiceTest extends FunSuite with MockitoSugar {
     intercept[InterruptedException] {
       rescuedService2("fatal")
     }
+  }
+
+  test("Service.toString") {
+    val constSvc = new ConstantService[Int, Int](Future.value(2))
+    assert(constSvc.toString == "com.twitter.finagle.service.ConstantService(ConstFuture(Return(2)))")
+
+    val constSvcFactory = ServiceFactory.const(constSvc)
+    assert(constSvcFactory.toString == "com.twitter.finagle.service.ConstantService(ConstFuture(Return(2)))")
+
+    val failedSvc = new FailedService(new Exception("test"))
+    assert(failedSvc.toString == "com.twitter.finagle.service.FailedService(java.lang.Exception: test)")
+
+    assert(NilService.toString == "com.twitter.finagle.service.NilService$")
+
+    val mkSvc = Service.mk[Int, Int] { x: Int =>
+      Future.value(x + 1)
+    }
+    assert(mkSvc.toString == "com.twitter.finagle.Service$$anon$2")
+
+    val proxied = new ServiceProxy(constSvc) {}
+    assert(proxied.toString == "com.twitter.finagle.service.ConstantService(ConstFuture(Return(2)))")
+
+    val proxiedWithToString = new ServiceProxy(constSvc) {
+      override def toString: String = "ProxiedService"
+    }
+    assert(proxiedWithToString.toString == "ProxiedService")
+
+    val svcFactory = new ServiceFactory[Int, Int] {
+      def apply(conn: ClientConnection): Future[Service[Int, Int]] = Future.value(constSvc)
+      def close(deadline: Time): Future[Unit] = Future.Done
+    }
+    assert(svcFactory.toString == "com.twitter.finagle.ServiceTest$$anonfun$5$$anon$4")
+
+    val svcFactoryWithToString = new ServiceFactory[Int, Int] {
+      def apply(conn: ClientConnection): Future[Service[Int, Int]] = Future.value(constSvc)
+      def close(deadline: Time): Future[Unit] = Future.Done
+      override def toString: String = "ServiceFactory"
+    }
+    assert(svcFactoryWithToString.toString == "ServiceFactory")
   }
 
   test(

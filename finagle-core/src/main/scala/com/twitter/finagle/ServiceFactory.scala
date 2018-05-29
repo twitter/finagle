@@ -39,7 +39,7 @@ abstract class ServiceFactory[-Req, +Rep]
         }
       def close(deadline: Time): Future[Unit] = self.close(deadline)
       override def status: Status = self.status
-      override def toString(): String = self.toString()
+      override def toString: String = self.toString
     }
 
   /**
@@ -66,6 +66,8 @@ abstract class ServiceFactory[-Req, +Rep]
    * Return `true` if and only if [[status]] is currently [[Status.Open]].
    */
   final def isAvailable: Boolean = status == Status.Open
+
+  override def toString: String = getClass.getName
 }
 
 object ServiceFactory {
@@ -82,6 +84,8 @@ object ServiceFactory {
 
       def apply(conn: ClientConnection): Future[Service[Req, Rep]] = noRelease
       def close(deadline: Time): Future[Unit] = Future.Done
+
+      override def toString: String = service.toString
     }
 
   /** Java compatible API for [[const]] as `const` is a reserved word in Java */
@@ -92,5 +96,7 @@ object ServiceFactory {
     new ServiceFactory[Req, Rep] {
       def apply(_conn: ClientConnection): Future[Service[Req, Rep]] = f()
       def close(deadline: Time): Future[Unit] = Future.Done
+
+      override def toString: String = s"${getClass.getName}(${f.toString()})"
     }
 }

@@ -57,7 +57,7 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
     if (next eq Filter.identity) this.asInstanceOf[Filter[ReqIn, RepOut, Req2, Rep2]]
     // Rewrites Filter composition via `andThen` with AndThen's composition
     // which is just function composition.
-    else AndThen(service => andThen(next.andThen(service)))
+    else AndThen(this, next, service => andThen(next.andThen(service)))
 
   /**
    * Convert the [[Filter.TypeAgnostic]] filter to a Filter and chain it with
@@ -80,6 +80,9 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
       def apply(request: ReqIn): Future[RepOut] = Filter.this.apply(request, svc)
       override def close(deadline: Time): Future[Unit] = service.close(deadline)
       override def status: Status = service.status
+      override def toString: String = {
+        s"${Filter.this.toString}.andThen(${service.toString})"
+      }
     }
   }
 
@@ -94,13 +97,15 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
    */
   def andThen(factory: ServiceFactory[ReqOut, RepIn]): ServiceFactory[ReqIn, RepOut] =
     new ServiceFactory[ReqIn, RepOut] {
-      val fn: Service[ReqOut, RepIn] => Service[ReqIn, RepOut] =
+      private val fn: Service[ReqOut, RepIn] => Service[ReqIn, RepOut] =
         svc => Filter.this.andThen(svc)
       def apply(conn: ClientConnection): Future[Service[ReqIn, RepOut]] =
         factory(conn).map(fn)
       def close(deadline: Time): Future[Unit] = factory.close(deadline)
       override def status: Status = factory.status
-      override def toString: String = factory.toString()
+      override def toString: String = {
+        s"${Filter.this.toString}.andThen(${factory.toString})"
+      }
     }
 
   /**
@@ -117,6 +122,9 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
       case (true, filter) => andThen(filter)
       case (false, _) => this
     }
+
+  override def toString: String =
+    this.getClass.getName
 }
 
 /**
@@ -125,35 +133,56 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
 abstract class SimpleFilter[Req, Rep] extends Filter[Req, Rep, Req, Rep]
 
 object Filter {
+  import scala.language.existentials
+
+  private def unroll(filter: Filter[_, _, _, _]): Seq[String] = filter match {
+    case AndThen(left, right, _) => unroll(left) ++ unroll(right)
+    case _ => Seq(filter.toString)
+  }
+
   // `AndThen` is a function that represents the prefix of the filter chain to
   // transform a terminal Service received as an argument.
   private case class AndThen[ReqIn, RepOut, ReqOut, RepIn](
+    first: Filter[_, _, _, _],
+    andNext: Filter[_, _, _, _],
     build: Service[ReqOut, RepIn] => Service[ReqIn, RepOut]
   ) extends Filter[ReqIn, RepOut, ReqOut, RepIn] {
     override def andThen[Req2, Rep2](
       next: Filter[ReqOut, RepIn, Req2, Rep2]
     ): Filter[ReqIn, RepOut, Req2, Rep2] =
       if (next eq Filter.identity) this.asInstanceOf[Filter[ReqIn, RepOut, Req2, Rep2]]
-      else AndThen(service => build(next.andThen(service)))
+      else AndThen(this, next, service => build(next.andThen(service)))
 
-    override def andThen(service: Service[ReqOut, RepIn]): Service[ReqIn, RepOut] =
-      build(service)
+    override def andThen(underlying: Service[ReqOut, RepIn]): Service[ReqIn, RepOut] = {
+      val svc: Service[ReqIn, RepOut] = build(underlying)
+      new ServiceProxy[ReqIn, RepOut](svc) {
+        override def toString: String =
+          s"${AndThen.this.toString}.andThen(${underlying.toString})"
+      }
+    }
 
     override def andThen(
       factory: ServiceFactory[ReqOut, RepIn]
     ): ServiceFactory[ReqIn, RepOut] =
       new ServiceFactory[ReqIn, RepOut] {
-        val fn: Service[ReqOut, RepIn] => Service[ReqIn, RepOut] =
+        private val fn: Service[ReqOut, RepIn] => Service[ReqIn, RepOut] =
           svc => AndThen.this.andThen(svc)
         def apply(conn: ClientConnection): Future[Service[ReqIn, RepOut]] =
           factory(conn).map(fn)
         def close(deadline: Time): Future[Unit] = factory.close(deadline)
         override def status: Status = factory.status
-        override def toString: String = factory.toString()
+        override def toString: String =
+          s"${AndThen.this.toString}.andThen(${factory.toString})"
       }
 
     def apply(request: ReqIn, service: Service[ReqOut, RepIn]): Future[RepOut] =
       build(service)(request)
+
+    override def toString: String = {
+      val unrolled: Seq[String] = unroll(this)
+      val unrolledTail: Seq[String] = unrolled.tail
+      s"${unrolled.head}${if (unrolledTail.nonEmpty) unrolledTail.mkString(".andThen(", ").andThen(", ")") else ""}"
+    }
   }
 
   private case object Identity extends SimpleFilter[Any, Nothing] {
@@ -213,6 +242,8 @@ object Filter {
         new TypeAgnostic {
           def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] =
             self.toFilter[Req, Rep].andThen(next.toFilter[Req, Rep])
+          override def toString: String =
+            s"${self.toString}.andThen(${next.toString})"
         }
       }
 
@@ -238,6 +269,8 @@ object Filter {
      */
     def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] =
       toFilter[Req, Rep].andThen(factory)
+
+    override def toString: String = this.getClass.getName
   }
 
   object TypeAgnostic {
@@ -253,7 +286,11 @@ object Filter {
 
         override def andThen[Req, Rep](svc: Service[Req, Rep]): Service[Req, Rep] = svc
 
-        override def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = factory
+        override def andThen[Req, Rep](
+          factory: ServiceFactory[Req, Rep]
+        ): ServiceFactory[Req, Rep] = factory
+
+        override def toString: String = s"${TypeAgnostic.getClass.getName}Identity"
       }
   }
 

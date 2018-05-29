@@ -20,6 +20,61 @@ New Features
     disabling propagation of deadlines to outbound requests.
     ``PHAB_ID=D168405``
 
+  * finagle-core: Add `toString` implementations to `c.t.finagle.Service` and
+    `c.t.finagle.Filter`. Update in `Filter#andThen` composition to expose a
+    useful `toString` for composed Filters and a composed Service (a Filter chain
+    with a terminal Service or ServiceFactory).
+
+    The default implementation for `Filter` and `Service` is `getClass.getName`. When
+    composing filters, the `andThen` composition method correctly tracks the composed
+    parts to produce a useful `toString`, e.g.,
+
+    ```
+    package com.foo
+
+    import com.twitter.finagle.{Filter, Service}
+    import com.twitter.util.Future
+
+    class MyFilter1 extends Filter[Int, Int, Int, Int] {
+       def apply(request: Int, service: Service[Int, Int]): Future[Int] = ???
+    }
+    ```
+
+    ```
+    package com.foo
+
+    import com.twitter.finagle.{Filter, Service}
+    import com.twitter.util.Future
+
+    class MyFilter2 extends Filter[Int, Int, Int, Int] {
+      def apply(request: Int, service: Service[Int, Int]): Future[Int] = ???
+    }
+    ```
+
+    ```
+    val filters = (new MyFilter1).andThen(new MyFilter2)
+    ```
+
+    `filters.toString` would emit the String "com.foo.MyFilter1.andThen(com.foo.MyFilter2)"
+
+    If a Service (or ServiceFactory) were then added:
+
+    ```
+    import com.twitter.finagle.{Filter, Service}
+    import com.twitter.finagle.service.ConstantService
+    import com.twitter.util.Future
+
+    ...
+
+    val svc: Service[Int, Int] = filters.andThen(new ConstantService[Int, Int](Future.value(2)))
+    ```
+
+    Then, `svc.toString` would thus return the String:
+    "com.foo.MyFilter1.andThen(com.foo.MyFilter2).andThen(com.twitter.finagle.service.ConstantService(ConstFuture(2)))"
+
+    Filter implementations are permitted to override their `toString` implementations which would
+    replace the default of `getClass.getName`. ``PHAB_ID=D172526``
+
   * finagle-core: Make `Filter.TypeAgnostic` an abstract class for Java usability.
     ``PHAB_ID=D172716``
 
