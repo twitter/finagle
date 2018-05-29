@@ -21,7 +21,7 @@ class MetricsBucketedHistogram(
   percentiles: IndexedSeq[Double] = BucketedHistogram.DefaultQuantiles,
   latchPeriod: Duration = MetricsBucketedHistogram.DefaultLatchPeriod
 ) extends MetricsHistogram {
-  import MetricsBucketedHistogram.{MutableSnapshot, HistogramCountsSnapshot}
+  import MetricsBucketedHistogram.{HistogramCountsSnapshot, MutableSnapshot}
   assert(name.length > 0)
 
   private[this] val nextSnapAfter = new AtomicReference(Time.Undefined)
@@ -73,18 +73,22 @@ class MetricsBucketedHistogram(
     // requests for the snapshot will return values from the previous `latchPeriod`.
 
     if (Time.Undefined eq nextSnapAfter.get) {
-      nextSnapAfter.compareAndSet(Time.Undefined, JsonExporter.startOfNextMinute)
+      nextSnapAfter.compareAndSet(Time.Undefined, Time.now + latchPeriod)
     }
 
     current.synchronized {
+      // Once in synchronized block we want `now` to be consistent.
+      // However we want it to be different from time of the method call
+      // because thread can wait on mutex indefinitely long
+      val now = Time.now
       // we give 1 second of wiggle room so that a slightly early request
       // will still trigger a roll.
-      if (Time.now >= nextSnapAfter.get - 1.second) {
+      if (now >= nextSnapAfter.get - 1.second) {
         // if nextSnapAfter has a datetime older than (latchPeriod*2) ago, update it after next minutes.
-        if (nextSnapAfter.get + latchPeriod * 2 > Time.now) {
+        if (nextSnapAfter.get + latchPeriod * 2 > now) {
           nextSnapAfter.set(nextSnapAfter.get + latchPeriod)
         } else {
-          nextSnapAfter.set(JsonExporter.startOfNextMinute)
+          nextSnapAfter.set(now + latchPeriod)
         }
         if (isHistogramRequested) histogramCountsSnap.recomputeFrom(current)
         snap.recomputeFrom(current)
