@@ -77,12 +77,10 @@ case class HandshakeInit(
   status: Short
 ) extends Result
 
-/**
- * Represents the OK Packet received from the server. It is sent
- * to indicate that a command has completed succesfully.
- * [[http://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-OK_Packet]]
- */
 object OK extends Decoder[OK] {
+  /**
+   * @see [[http://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-OK_Packet]]
+   */
   def decode(packet: Packet): OK = {
     val br = MysqlBuf.reader(packet.body)
     try {
@@ -92,12 +90,30 @@ object OK extends Decoder[OK] {
         br.readVariableLong(),
         br.readUnsignedShortLE(),
         br.readUnsignedShortLE(),
-        new String(br.take(br.remaining))
+        {
+          val remaining = br.remaining
+          if (remaining == 0) ""
+          else new String(br.take(remaining))
+        }
       )
     } finally br.close()
   }
 }
 
+/**
+ * Represents the OK Packet received from the server. It is sent
+ * to indicate that a command (e.g. [[PreparedStatement.modify]])
+ * has completed successfully.
+ *
+ * @param affectedRows how many records were changed by the command.
+ *
+ * @param insertId the first automatically generated value successfully
+ *                 inserted for an AUTO_INCREMENT column for an INSERT statement.
+ *
+ * @param serverStatus server status bit mask.
+ * @param warningCount how many warnings were generated.
+ * @param message the status message, which will be an empty String if none is present.
+ */
 case class OK(
   affectedRows: Long,
   insertId: Long,
