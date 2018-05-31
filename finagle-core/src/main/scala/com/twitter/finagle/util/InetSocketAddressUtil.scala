@@ -35,7 +35,7 @@ object InetSocketAddressUtil {
    */
   def parseHostPorts(hosts: String): Seq[HostPort] =
     hosts split Array(' ', ',') filter (_.nonEmpty) map (_.split(":")) map { hp =>
-      require(hp.length == 2, "You must specify host and port")
+      require(hp.length == 2, s"You must specify host and port in hosts: $hosts")
       hp match {
         case Array(host, "*") => (host, 0)
         case Array(host, portStr) => (host, portStr.toInt)
