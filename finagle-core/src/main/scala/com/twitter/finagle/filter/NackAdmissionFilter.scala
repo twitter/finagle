@@ -7,7 +7,7 @@ import com.twitter.finagle.stats.{Counter, Gauge, StatsReceiver, Verbosity}
 import com.twitter.finagle.util.{Ema, Rng}
 import com.twitter.util._
 
-private[finagle] object NackAdmissionFilter {
+object NackAdmissionFilter {
   private val OverloadFailure = Future.exception(
     Failure("Request not issued to the backend due to observed overload.",
       Failure.Rejected | Failure.NonRetryable)
@@ -148,7 +148,7 @@ private[finagle] object NackAdmissionFilter {
  *
  * @param random Random number generator used in probability calculation.
  */
-private[finagle] class NackAdmissionFilter[Req, Rep](
+class NackAdmissionFilter[Req, Rep](
   window: Duration,
   nackRateThreshold: Double,
   random: Rng,

@@ -78,6 +78,8 @@ New Features
   * finagle-core: Make `Filter.TypeAgnostic` an abstract class for Java usability.
     ``PHAB_ID=D172716``
 
+  * finagle-core: `c.t.f.filter.NackAdmissionFilter` is now public. ``PHAB_ID=D177322``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
   * finagle-core: Rename `DeadlineFilter.Param(maxRejectFraction)` to
