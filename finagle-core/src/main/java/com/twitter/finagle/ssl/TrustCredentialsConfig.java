@@ -1,6 +1,7 @@
 package com.twitter.finagle.ssl;
 
 import java.io.File;
+import javax.net.ssl.TrustManagerFactory;
 
 /**
  * Java APIs for {@link TrustCredentials}.
@@ -28,6 +29,13 @@ public final class TrustCredentialsConfig {
    */
   public static TrustCredentials certCollection(File file) {
     return new TrustCredentials.CertCollection(file);
+  }
+
+  /**
+   * See {@link TrustCredentials.TrustManagerFactory}
+   */
+  public static TrustCredentials trustManagerFactory(TrustManagerFactory trustManagerFactory) {
+    return new TrustCredentials.TrustManagerFactory(trustManagerFactory);
   }
 
 }

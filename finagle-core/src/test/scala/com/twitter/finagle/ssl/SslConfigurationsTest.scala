@@ -121,6 +121,17 @@ class SslConfigurationsTest extends FunSuite {
     )
   }
 
+  test("checkTrustCredentialsNotSupported throws for TrustManagerFactory") {
+    val trustCredentials = TrustCredentials.TrustManagerFactory(null)
+    val ex = intercept[SslConfigurationException] {
+      SslConfigurations.checkTrustCredentialsNotSupported("TestFactory", trustCredentials)
+    }
+    assert(
+      "TrustCredentials.TrustManagerFactory is not supported at this time for TestFactory" ==
+        ex.cause.getMessage
+    )
+  }
+
   test("checkTrustCredentialsNotSupported throws for CertCollection") {
     val trustCredentials = TrustCredentials.CertCollection(null)
     val ex = intercept[SslConfigurationException] {
