@@ -8,18 +8,6 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class BucketedHistogramTest extends FunSuite with GeneratorDrivenPropertyChecks with Matchers {
-  test("constructor limits cannot be empty") {
-    intercept[IllegalArgumentException] { new BucketedHistogram(new Array[Int](0)) }
-  }
-
-  test("constructor limits cannot have negative values") {
-    intercept[IllegalArgumentException] { new BucketedHistogram(Array[Int](-1)) }
-  }
-
-  test("constructor limits must be increasing in value") {
-    intercept[IllegalArgumentException] { new BucketedHistogram(Array[Int](0, 0)) }
-  }
-
   test("percentile when empty") {
     val h = BucketedHistogram()
     assert(h.percentile(0.0) == 0)
@@ -210,6 +198,20 @@ class BucketedHistogramTest extends FunSuite with GeneratorDrivenPropertyChecks 
     }
   }
 
+  test("findBucket should behave the same way as binary search") {
+    // scalacheck doesn't seem to respect Gen.choose limits
+    val errors = (1 until 1000 by 5).toVector.map(_.toDouble / 10000.0)
+    errors.foreach { error =>
+      val limits = BucketedHistogram.makeLimitsFor(error)
+      val h = new BucketedHistogram(error)
+      forAll(Gen.choose(0, Int.MaxValue)) { num =>
+        val actual = h.findBucket(num)
+        val expected = Math.abs(java.util.Arrays.binarySearch(limits, num) + 1)
+        assert(actual == expected,
+          s"we saw a misalignment between the approaches for num=$num and error=$error")
+      }
+    }
+  }
 }
 
 private object BucketedHistogramTest {

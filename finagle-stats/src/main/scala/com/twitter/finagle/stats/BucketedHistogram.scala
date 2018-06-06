@@ -1,7 +1,5 @@
 package com.twitter.finagle.stats
 
-import java.util
-
 private[twitter] object BucketedHistogram {
 
   private[stats] val DefaultQuantiles = IndexedSeq(
@@ -12,8 +10,8 @@ private[twitter] object BucketedHistogram {
    * Given an error, compute all the bucket values from 1 until we run out of positive
    * 32-bit ints. The error should be in percent, between 0.0 and 1.0.
    *
-   * Each value in the returned array will be at most `1 + (2 * error)` larger than
-   * the previous (before rounding).
+   * Each value in the returned array will be `max(1, 2 * error * n)` larger than
+   * the previous `n` value (before rounding).
    *
    * Because percentiles are then computed as the midpoint between two adjacent limits,
    * this means that a value can be at most `1 + error` percent off of the actual
@@ -21,7 +19,7 @@ private[twitter] object BucketedHistogram {
    *
    * The last bucket tracks up to `Int.MaxValue`.
    */
-  private[this] def makeLimitsFor(error: Double): Array[Int] = {
+  private[stats] def makeLimitsFor(error: Double): Array[Int] = {
     def build(maxValue: Double, factor: Double, n: Double): Stream[Double] = {
       val next = n * factor
       if (next >= maxValue)
@@ -31,6 +29,18 @@ private[twitter] object BucketedHistogram {
     }
     require(error > 0.0 && error <= 1.0, error)
 
+    // we construct an exponential bucketing system, floor every value, and then remove buckets
+    // that are repeated.  in practice, this means we may or may not see duplicates until the
+    // exponent gets high enough that incrementing the exponent increases the value by at least
+    // one, at which point there's an inflection point.  an alternate way of constructing the same
+    // array would be
+    //
+    // val inflectionPoint = (1.0 / (error * 2)).toInt
+    // val prefix = 0.to(inflectionPoint).toSeq
+    // val unadjusted = prefix ++ build(Int.MaxValue.toDouble, 1.0 + (error * 2), inflectionPoint)
+    // unadjusted.map(_ + 1)
+    //
+    // we exploit this later on in our bucket-finding algorithm
     val values = build(Int.MaxValue.toDouble, 1.0 + (error * 2), 1.0)
       .map(_.toInt + 1) // this ensures that the smallest value is 2 (below we prepend `1`)
       .distinct
@@ -41,7 +51,7 @@ private[twitter] object BucketedHistogram {
   // 0.5% error => 1797 buckets, 7188 bytes, max 11 compares on binary search
   private[stats] val DefaultErrorPercent = 0.005
 
-  private[this] val DefaultLimits: Array[Int] =
+  private[stats] val DefaultLimits: Array[Int] =
     makeLimitsFor(DefaultErrorPercent)
 
   /** check all the limits are non-negative and increasing in value. */
@@ -61,7 +71,7 @@ private[twitter] object BucketedHistogram {
    * Creates an instance using the default bucket limits.
    */
   def apply(): BucketedHistogram =
-    new BucketedHistogram(DefaultLimits)
+    new BucketedHistogram(DefaultErrorPercent)
 
 }
 
@@ -103,8 +113,50 @@ private[twitter] object BucketedHistogram {
  *
  * @see [[BucketedHistogram.apply()]] for creation.
  */
-private[stats] class BucketedHistogram(limits: Array[Int]) {
-  BucketedHistogram.assertLimits(limits)
+private[stats] final class BucketedHistogram(error: Double) {
+  assert(0 < error && error < 1, "Error must be in the range (0.0, 1.0)")
+
+  // this is the point at which we stopped seeing duplicates when we multiplied
+  // the previous  number by the factor.
+  // where x is the inflection point where we no longer see duplicates and y
+  // is the factor
+  // x + 1 > x(1 + y) => x + 1 > x + xy => 1 > xy => 1/x > y => x < 1/y
+  private[this] val inflectionPoint = (1.0 / (error * 2))
+  private[this] val factor = 1.0 + (error * 2)
+
+  // we need to multiply by this to convert to the right base.
+  // log_factor(x) == log10(x) / log10(factor) == log10(x) * 1 / log10(factor)
+  private[this] val logFactor = 1.0 / math.log10(factor)
+  private[this] def logarithm(num: Double): Double = {
+    math.log10(num) * logFactor
+  }
+
+  // this is different from the floor of the inflection point because we
+  // increment the floors of the powers when making the bucket limits
+  private[this] val inflectionBucket = inflectionPoint.toInt + 1
+
+  // we need to subtract the offset because our bucket making algorithm removes duplicates
+  // we can find the number of buckets we would have if we hadn't removed duplicates, and
+  // then subtract the number of buckets we actually have.
+  private[this] val offset: Int = logarithm(inflectionBucket).toInt - inflectionBucket
+
+  private[this] val limits =
+    if (error == BucketedHistogram.DefaultErrorPercent) BucketedHistogram.DefaultLimits
+    else BucketedHistogram.makeLimitsFor(error)
+
+  /**
+   * Given a number that you want to insert into a bucket, find the bucket that it should
+   * go into.  If it's below the point where we're still removing duplicates, index directly
+   * into the bucket.  If it's above, take the logarithm.
+   */
+  // 0 to inflectionPoint
+  private[stats] def findBucket(num: Int): Int = {
+    if (num <= inflectionBucket) {
+      math.max(0, num)
+    } else {
+      logarithm(num).toInt - offset
+    }
+  }
 
   private[this] def countsLength: Int = limits.length + 1
 
@@ -131,7 +183,7 @@ private[stats] class BucketedHistogram(limits: Array[Int]) {
       val asInt = value.toInt
       // recall that limits represent upper bounds, exclusive — so take the next position (+1).
       // we assume that no inputs can be larger than the largest value in the limits array.
-      Math.abs(util.Arrays.binarySearch(limits, asInt) + 1)
+      findBucket(asInt)
     }
     counts(index) += 1
     num += 1
