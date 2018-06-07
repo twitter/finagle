@@ -342,6 +342,30 @@ abstract class AbstractStreamingTest extends FunSuite {
     Closable.all(server, client1, client2).close()
   }
 
+  test("server: empty buf doesn't close response stream") {
+    val service = const(Seq(Buf.Utf8("hello"), Buf.Empty, Buf.Utf8("world")))
+    val server = startServer(service, identity)
+    val client = connect(server.boundAddress, identity, "client")
+    val body = await(client(get("/")).flatMap(res => Reader.readAll(res.reader)))
+    assert(body == Buf.Utf8("helloworld"))
+    Closable.all(server, client).close()
+  }
+
+  test("client: empty buf doesn't close request stream") {
+    val server = startServer(echo, identity)
+    val client = connect(server.boundAddress, identity, "client")
+    val req = get("/")
+    val res = await(client(req))
+    await(for {
+      _ <- req.writer.write(Buf.Utf8("hello"))
+      _ <- req.writer.write(Buf.Empty)
+      _ <- req.writer.write(Buf.Utf8("world"))
+    } yield req.writer.close())
+    val body = await(Reader.readAll(res.reader))
+    assert(body == Buf.Utf8("helloworld"))
+    Closable.all(server, client).close()
+  }
+
   test("end-to-end: server gets content for chunked request made to client with content length") {
     val svc = Service.mk[Request, Response] { req =>
       assert(req.contentString == "hello")
@@ -438,6 +462,21 @@ object StreamingTest {
   val echo = new Service[Request, Response] {
     def apply(req: Request) = Future.value(ok(req.reader))
   }
+
+  def const(bufs: Seq[Buf]): Service[Request, Response] =
+    new Service[Request, Response] {
+      private def drain(writer: Writer, bs: Seq[Buf]): Future[Unit] = bs match {
+        case Nil => Future.Done
+        case head +: tail => writer.write(head).before(drain(writer, tail))
+      }
+
+      def apply(req: Request) = {
+        val writer = Reader.writable()
+        drain(writer, bufs).before(writer.close)
+        Future.value(ok(writer))
+      }
+    }
+
   val neverRespond = new ConstantService[Request, Response](Future.never)
 
   def get(uri: String) = {
