@@ -33,6 +33,8 @@ private[ssl] object SslConfigurations {
           "KeyCredentials.CertKeyAndChain",
           "SslConfigurations"
         )
+      case KeyCredentials.KeyManagerFactory(keyManagerFactory) =>
+        Some(keyManagerFactory.getKeyManagers)
     }
 
   /**
@@ -58,6 +60,8 @@ private[ssl] object SslConfigurations {
           case Return(tms) => Some(tms)
           case Throw(ex) => throw SslConfigurationException(ex)
         }
+      case TrustCredentials.TrustManagerFactory(trustManagerFactory) =>
+        Some(trustManagerFactory.getTrustManagers)
     }
 
   /**
@@ -151,6 +155,11 @@ private[ssl] object SslConfigurations {
           "KeyCredentials.CertKeyAndChain",
           engineFactoryName
         )
+      case KeyCredentials.KeyManagerFactory(_) =>
+        throw SslConfigurationException.notSupported(
+          "KeyCredentials.KeyManagerFactory",
+          engineFactoryName
+        )
     }
 
   /**
@@ -170,6 +179,8 @@ private[ssl] object SslConfigurations {
           "TrustCredentials.CertCollection",
           engineFactoryName
         )
+      case TrustCredentials.TrustManagerFactory(_) =>
+        throw SslConfigurationException.notSupported("TrustCredentials.TrustManagerFactory", engineFactoryName)
     }
 
   /**

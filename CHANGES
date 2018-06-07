@@ -80,6 +80,10 @@ New Features
 
   * finagle-core: `c.t.f.filter.NackAdmissionFilter` is now public. ``PHAB_ID=D177322``
 
+  * finagle-core: Extended `c.t.f.ssl.KeyCredentials` and `c.t.f.ssl.TrustCredentials` to work
+    with `javax.net.ssl.KeyManagerFactory` and `javax.net.ssl.TrustManagerFactory` respectively.
+    ``PHAB_ID=D177484``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
   * finagle-core: Rename `DeadlineFilter.Param(maxRejectFraction)` to

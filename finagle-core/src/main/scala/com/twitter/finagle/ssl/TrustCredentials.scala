@@ -1,6 +1,7 @@
 package com.twitter.finagle.ssl
 
 import java.io.File
+import javax.net.ssl
 
 /**
  * TrustCredentials represent the items necessary for this configured
@@ -30,8 +31,19 @@ object TrustCredentials {
    * The collection of certificates which should be used in
    * verifying a remote peer's credentials.
    *
-   * @file A file containing a collection of X.509 certificates
-   * in PEM format.
+   * @param file A file containing a collection of X.509 certificates
+   *             in PEM format.
    */
   case class CertCollection(file: File) extends TrustCredentials
+
+
+  /**
+   * Indicates that the trust credentials from the [[ssl.TrustManagerFactory]]
+   * should be used in verifying a remote peer's credentials.
+   *
+   * @param trustManagerFactory the factory delivering the TrustManager for
+   *                            validation
+   */
+  case class TrustManagerFactory(trustManagerFactory: ssl.TrustManagerFactory) extends TrustCredentials
+
 }

@@ -1,6 +1,7 @@
 package com.twitter.finagle.ssl;
 
 import java.io.File;
+import javax.net.ssl.KeyManagerFactory;
 
 /**
  * Java APIs for {@link KeyCredentials}.
@@ -33,4 +34,10 @@ public final class KeyCredentialsConfig {
     return new KeyCredentials.CertKeyAndChain(certificateFile, keyFile, caCertificateFile);
   }
 
+  /**
+   * See {@link KeyCredentials.KeyManagerFactory}
+   */
+  public static KeyCredentials keyManagerFactory(KeyManagerFactory keyManagerFactory) {
+    return new KeyCredentials.KeyManagerFactory(keyManagerFactory);
+  }
 }

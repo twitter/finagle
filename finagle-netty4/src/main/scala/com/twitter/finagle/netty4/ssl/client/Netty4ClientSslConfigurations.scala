@@ -42,6 +42,10 @@ private[finagle] object Netty4ClientSslConfigurations {
    *
    * @note An `SslConfigurationException` will be thrown if there is an issue loading
    * the certificate(s) or private key.
+   *
+   * @note Will not validate the validity for certificates when configured
+   *       with [[KeyCredentials.KeyManagerFactory]] in contrast to when
+   *       configured with [[KeyCredentials.CertAndKey]] or [[KeyCredentials.CertKeyAndChain]].
    */
   private def startClientWithKey(keyCredentials: KeyCredentials): SslContextBuilder = {
     val builder: SslContextBuilder = SslContextBuilder.forClient()
@@ -59,6 +63,8 @@ private[finagle] object Netty4ClientSslConfigurations {
           cert <- new X509CertificateFile(certFile).readX509Certificate()
           chain <- new X509CertificateFile(chainFile).readX509Certificates()
         } yield builder.keyManager(key, cert +: chain: _*)
+      case KeyCredentials.KeyManagerFactory(keyManagerFactory) =>
+        Return(builder.keyManager(keyManagerFactory))
     }
     Netty4SslConfigurations.unwrapTryContextBuilder(withKey)
   }

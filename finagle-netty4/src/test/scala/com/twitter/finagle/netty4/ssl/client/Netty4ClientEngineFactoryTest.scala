@@ -6,6 +6,8 @@ import com.twitter.finagle.ssl.client.SslClientConfiguration
 import com.twitter.io.TempFile
 import java.io.File
 import java.net.InetSocketAddress
+import java.security.KeyStore
+import javax.net.ssl.{KeyManagerFactory, TrustManagerFactory}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -119,6 +121,30 @@ class Netty4ClientEngineFactoryTest extends FunSuite {
 
     val trustCredentials = TrustCredentials.CertCollection(tempCertFile)
     val config = SslClientConfiguration(trustCredentials = trustCredentials)
+    val engine = factory(address, config)
+    val sslEngine = engine.self
+
+    assert(sslEngine != null)
+  }
+
+  test("config with TrustManagerFactory succeeds") {
+    val trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm)
+    trustManagerFactory.init(null.asInstanceOf[KeyStore])
+
+    val trustCredentials = TrustCredentials.TrustManagerFactory(trustManagerFactory)
+    val config = SslClientConfiguration(trustCredentials = trustCredentials)
+    val engine = factory(address, config)
+    val sslEngine = engine.self
+
+    assert(sslEngine != null)
+  }
+
+  test("config with KeyManagerFactory succeeds") {
+    val keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm)
+    keyManagerFactory.init(null, Array[Char]())
+
+    val keyCredentials = KeyCredentials.KeyManagerFactory(keyManagerFactory)
+    val config = SslClientConfiguration(keyCredentials = keyCredentials)
     val engine = factory(address, config)
     val sslEngine = engine.self
 
