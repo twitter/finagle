@@ -260,7 +260,7 @@ final private[http2] class StreamTransportFactory(
     if (firstOnce.compareAndSet(false, true)) {
       val st = new StreamTransport()
       st.handleNewStream()
-      st.handleState(Active(finishedWriting = true, finishedReading = false))
+      st.handleState(active(finishedWriting = true, finishedReading = false))
       st
     } else {
       throw new IllegalStateException(s"$this.first() was called multiple times")
@@ -365,7 +365,7 @@ final private[http2] class StreamTransportFactory(
               s"Queue was not empty (size=$queueSize) when creating new stream. Head: $head"
             )
           } else {
-            handleState(Active(finishedReading = false, finishedWriting = false))
+            handleState(active(finishedReading = false, finishedWriting = false))
             activeStreams.put(newId, stream)
             _curId = newId
           }
@@ -420,7 +420,7 @@ final private[http2] class StreamTransportFactory(
     private[this] def handleWriteAndCheck(obj: HttpObject): Future[Unit] = state match {
       case a: Active =>
         if (obj.isInstanceOf[LastHttpContent]) {
-          handleState(a.copy(finishedWriting = true))
+          handleState(a.finishWriting)
           handleCheckFinished()
         }
 
@@ -508,7 +508,7 @@ final private[http2] class StreamTransportFactory(
       state match {
         case a: Active if !a.finishedReading =>
           if (obj.isInstanceOf[LastHttpContent]) {
-            handleState(a.copy(finishedReading = true))
+            handleState(a.finishReading)
           }
 
           if (!queue.offer(obj)) {
@@ -594,9 +594,15 @@ private[http2] object StreamTransportFactory {
   }
 
   /**
-   * Stream represents a stream with active reading/writing
+   * Stream represents a stream with active reading/writing.
+   * Use [[active()]] to get instances.
+   *
+   * Note, these are immutable/persistent structs.
    */
-  private case class Active(finishedReading: Boolean, finishedWriting: Boolean) extends StreamState {
+  final class Active private[StreamTransportFactory](
+    val finishedReading: Boolean,
+    val finishedWriting: Boolean)
+  extends StreamState {
     def finished: Boolean = finishedWriting && finishedReading
     override def toString: String = {
       if (finished)
@@ -607,6 +613,35 @@ private[http2] object StreamTransportFactory {
         "Active(reading)"
       else
         "Active(reading/writing)"
+    }
+
+    def finishReading: Active =
+      active(finishedReading = true, this.finishedWriting)
+
+    def finishWriting: Active =
+      active(this.finishedReading, finishedWriting = true)
+  }
+
+  private val ActiveReadingAndWriting: Active =
+    new Active(finishedReading = false, finishedWriting = false)
+
+  private val ActiveWriting: Active =
+    new Active(finishedReading = true, finishedWriting = false)
+
+  private val ActiveReading: Active =
+    new Active(finishedReading = false, finishedWriting = true)
+
+  private val ActiveFinished: Active =
+    new Active(finishedReading = true, finishedWriting = true)
+
+  /** Get an instance of [[Active]]. */
+  def active(finishedReading: Boolean, finishedWriting: Boolean): Active = {
+    if (finishedReading) {
+      if (finishedWriting) ActiveFinished
+      else ActiveWriting
+    } else {
+      if (finishedWriting) ActiveReading
+      else ActiveReadingAndWriting
     }
   }
 
