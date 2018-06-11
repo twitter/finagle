@@ -4,7 +4,6 @@
 
 
 # Finagle
-This project is used in production at Twitter (and many other organizations),and is being actively developed and maintained.
 
 [![Build status](https://travis-ci.org/twitter/finagle.svg?branch=develop)](https://travis-ci.org/twitter/finagle)
 [![Codecov](https://codecov.io/gh/twitter/finagle/branch/develop/graph/badge.svg)](https://codecov.io/gh/twitter/finagle)
@@ -12,6 +11,8 @@ This project is used in production at Twitter (and many other organizations),and
 [![Gitter](https://badges.gitter.im/twitter/finagle.svg)](https://gitter.im/twitter/finagle?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.twitter/finagle-core_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.twitter/finagle-core_2.12)
 
+## Status
+This project is used in production at Twitter (and many other organizations),and is being actively developed and maintained.
 
 
 ## Releases
