@@ -29,51 +29,51 @@ New Features
     composing filters, the `andThen` composition method correctly tracks the composed
     parts to produce a useful `toString`, e.g.,
 
-    ```
-    package com.foo
+.. code-block:: scala
 
-    import com.twitter.finagle.{Filter, Service}
-    import com.twitter.util.Future
+  package com.foo
 
-    class MyFilter1 extends Filter[Int, Int, Int, Int] {
-       def apply(request: Int, service: Service[Int, Int]): Future[Int] = ???
-    }
-    ```
+  import com.twitter.finagle.{Filter, Service}
+  import com.twitter.util.Future
 
-    ```
-    package com.foo
+  class MyFilter1 extends Filter[Int, Int, Int, Int] {
+     def apply(request: Int, service: Service[Int, Int]): Future[Int] = ???
+  }
 
-    import com.twitter.finagle.{Filter, Service}
-    import com.twitter.util.Future
+.. code-block:: scala
 
-    class MyFilter2 extends Filter[Int, Int, Int, Int] {
-      def apply(request: Int, service: Service[Int, Int]): Future[Int] = ???
-    }
-    ```
+  package com.foo
 
-    ```
-    val filters = (new MyFilter1).andThen(new MyFilter2)
-    ```
+  import com.twitter.finagle.{Filter, Service}
+  import com.twitter.util.Future
 
-    `filters.toString` would emit the String "com.foo.MyFilter1.andThen(com.foo.MyFilter2)"
+  class MyFilter2 extends Filter[Int, Int, Int, Int] {
+    def apply(request: Int, service: Service[Int, Int]): Future[Int] = ???
+  }
 
-    If a Service (or ServiceFactory) were then added:
+.. code-block:: scala
 
-    ```
-    import com.twitter.finagle.{Filter, Service}
-    import com.twitter.finagle.service.ConstantService
-    import com.twitter.util.Future
+  val filters = (new MyFilter1).andThen(new MyFilter2)
 
-    ...
+`filters.toString` would emit the String "com.foo.MyFilter1.andThen(com.foo.MyFilter2)"
 
-    val svc: Service[Int, Int] = filters.andThen(new ConstantService[Int, Int](Future.value(2)))
-    ```
+If a Service (or ServiceFactory) were then added:
 
-    Then, `svc.toString` would thus return the String:
-    "com.foo.MyFilter1.andThen(com.foo.MyFilter2).andThen(com.twitter.finagle.service.ConstantService(ConstFuture(2)))"
+.. code-block:: scala
 
-    Filter implementations are permitted to override their `toString` implementations which would
-    replace the default of `getClass.getName`. ``PHAB_ID=D172526``
+  import com.twitter.finagle.{Filter, Service}
+  import com.twitter.finagle.service.ConstantService
+  import com.twitter.util.Future
+
+  ...
+
+  val svc: Service[Int, Int] = filters.andThen(new ConstantService[Int, Int](Future.value(2)))
+
+Then, `svc.toString` would thus return the String:
+"com.foo.MyFilter1.andThen(com.foo.MyFilter2).andThen(com.twitter.finagle.service.ConstantService(ConstFuture(2)))"
+
+Filter implementations are permitted to override their `toString` implementations which would
+replace the default of `getClass.getName`. ``PHAB_ID=D172526``
 
   * finagle-core: Make `Filter.TypeAgnostic` an abstract class for Java usability.
     ``PHAB_ID=D172716``
@@ -118,11 +118,10 @@ New Features
   * finagle-base-http: Added ability to add SameSite attribute to Cookies to
     comply with https://tools.ietf.org/html/draft-west-first-party-cookies-07.
     The attribute may be set in the constructor via the `c.t.f.http.Cookie`
-    `sameSite` param or via the `c.t.f.http.Cookie.sameSite` method.
+    `sameSite` param or via the `c.t.f.http.Cookie.sameSite` method. ``PHAB_ID=D157942``
 
     - Pass `SameSite.Lax` to the `Cookie` to add the "Lax" attribute.
     - Pass `SameSite.Strict` to the `Cookie` to add the "Strict" attribute.
-    ``PHAB_ID=D157942``
 
   * finagle-base-http: Introduced an API to extract query string params from a
     `c.t.f.http.Request`, `c.t.f.http.Uri.fromRequest` and `c.t.f.http.Uri#params`.
