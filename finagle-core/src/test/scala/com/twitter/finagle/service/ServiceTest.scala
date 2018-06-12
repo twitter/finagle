@@ -1,18 +1,15 @@
 package com.twitter.finagle.service
 
-import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 import com.twitter.finagle.Service
 import com.twitter.util.TimeConversions._
-import com.twitter.util.{Throw, Await, Try}
+import com.twitter.util.{Await, Future, Throw, Try}
+import org.scalatest.FunSuite
 
-@RunWith(classOf[JUnitRunner])
 class ServiceTest extends FunSuite {
   test("Service should rescue") {
     val e = new RuntimeException("yargs")
     val exceptionThrowingService = new Service[Int, Int] {
-      def apply(request: Int) = {
+      def apply(request: Int): Future[Int] = {
         throw e
       }
     }

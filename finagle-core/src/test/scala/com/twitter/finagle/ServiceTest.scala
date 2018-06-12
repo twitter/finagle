@@ -2,17 +2,26 @@ package com.twitter.finagle
 
 import com.twitter.finagle.service.{ConstantService, FailedService, NilService}
 import com.twitter.util._
-import org.junit.runner.RunWith
 import org.mockito.Matchers._
 import org.mockito.Mockito.{times, verify, when}
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
+object ServiceTest {
+
+  class TestServiceFactory extends ServiceFactory[Int, Int] {
+    def apply(conn: ClientConnection): Future[Service[Int, Int]] =
+      Future.value(new ConstantService[Int, Int](Future.value(2)))
+
+    def close(deadline: Time): Future[Unit] = Future.Done
+  }
+
+}
+
 class ServiceTest extends FunSuite with MockitoSugar {
+  import ServiceTest._
 
   test("ServiceProxy should proxy all requests") {
     val service = mock[Service[String, String]]
@@ -89,11 +98,8 @@ class ServiceTest extends FunSuite with MockitoSugar {
     }
     assert(proxiedWithToString.toString == "ProxiedService")
 
-    val svcFactory = new ServiceFactory[Int, Int] {
-      def apply(conn: ClientConnection): Future[Service[Int, Int]] = Future.value(constSvc)
-      def close(deadline: Time): Future[Unit] = Future.Done
-    }
-    assert(svcFactory.toString == "com.twitter.finagle.ServiceTest$$anonfun$5$$anon$4")
+    val svcFactory = new TestServiceFactory
+    assert(svcFactory.toString == "com.twitter.finagle.ServiceTest$TestServiceFactory")
 
     val svcFactoryWithToString = new ServiceFactory[Int, Int] {
       def apply(conn: ClientConnection): Future[Service[Int, Int]] = Future.value(constSvc)
