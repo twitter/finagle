@@ -10,6 +10,11 @@ Unreleased
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-core: By default, the deterministic aperture load balancer doesn't expand
+    based on the loadband. This is because the loadband is influenced by a degree of
+    randomness, and this breaks the deterministic part of deterministic aperture and
+    can lead to aggressive banding on backends. ``PHAB_ID=D180922``
+
   * finagle-http2: Unprocessed streams are retryable in case of GOAWAY.
     ``PHAB_ID=D174401``
 

@@ -20,7 +20,7 @@ import scala.util.hashing.MurmurHash3
 // that not dynamically resizing the aperture is preferable for deterministic aperture, the default
 // will be changed to `true` and a short time after that the flag will be removed altogether.
 private object staticDetermisticApertureWidth extends GlobalFlag[Boolean](
-  default = false,
+  default = true,
   help = "Deterministic Aperture doesn't increase its aperture")
 
 private object Aperture {
