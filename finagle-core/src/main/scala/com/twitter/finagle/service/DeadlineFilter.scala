@@ -82,13 +82,13 @@ object DeadlineFilter {
    *         stack. `DarkMode` will collect stats about deadlines but not reject requests.
    *        `Enabled` turns `DeadlineFilter` on.
    */
-  private[finagle] case class Mode(param: Mode.FilterMode) {
+  case class Mode(param: Mode.FilterMode) {
 
     def mk(): (Mode, Stack.Param[Mode]) =
       (this, Mode.param)
   }
 
-  private[finagle] case object Mode {
+  case object Mode {
 
     sealed trait FilterMode
     case object Disabled extends FilterMode
