@@ -166,9 +166,6 @@ private[finagle] class Netty4ClientStreamTransport(rawTransport: Transport[Any, 
     extends StreamTransportProxy[Request, Response](rawTransport) {
   import StreamTransports._
 
-  private[this] val transport =
-    Transport.cast[NettyHttp.HttpResponse, NettyHttp.HttpRequest](rawTransport)
-
   def write(in: Request): Future[Unit] = {
     val nettyReq = Bijections.finagle.requestToNetty(in)
     rawTransport.write(nettyReq).rescue(wrapWriteException).before {
