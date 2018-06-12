@@ -13,7 +13,7 @@ import io.netty.handler.codec.http2._
 import org.junit.runner.RunWith
 import org.mockito.Matchers.{eq => meq, _}
 import org.mockito.Mockito.{verify, when, RETURNS_SMART_NULLS}
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])

@@ -6,7 +6,7 @@ import org.mockito.Mockito.{never, times, verify}
 import org.mockito.Matchers.anyString
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class DedupingLogsReceiverTest extends FunSuite with MockitoSugar {

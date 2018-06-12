@@ -11,7 +11,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Matchers._
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.FunSuite
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 
 class SslClientConnectHandlerTest extends FunSuite with MockitoSugar {
 

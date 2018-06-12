@@ -8,7 +8,7 @@ import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, times, verify, when, atLeast}
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{OneInstancePerTest, BeforeAndAfter, FunSuite}
 import scala.util.Random
 

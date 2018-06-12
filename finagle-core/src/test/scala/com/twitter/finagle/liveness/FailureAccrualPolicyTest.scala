@@ -6,7 +6,7 @@ import com.twitter.finagle.service._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {

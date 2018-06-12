@@ -8,7 +8,7 @@ import org.mockito.Mockito.{verify, when}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])

@@ -13,7 +13,7 @@ import org.mockito.Matchers.{eq => meq}
 import org.mockito.Mockito.{doNothing, doThrow, verify, when}
 import org.scalatest.{FlatSpec, OneInstancePerTest}
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])

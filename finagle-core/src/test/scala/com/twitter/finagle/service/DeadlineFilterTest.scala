@@ -8,7 +8,7 @@ import com.twitter.util.TimeConversions._
 import org.junit.runner.RunWith
 import org.scalatest.{OneInstancePerTest, FunSuite}
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerTest {

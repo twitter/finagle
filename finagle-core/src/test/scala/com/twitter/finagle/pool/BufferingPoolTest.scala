@@ -3,7 +3,7 @@ package com.twitter.finagle.pool
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import org.mockito.Mockito.{times, verify, when}
 import org.mockito.Matchers._
 import com.twitter.finagle.{ClientConnection, Service, ServiceFactory, Status}

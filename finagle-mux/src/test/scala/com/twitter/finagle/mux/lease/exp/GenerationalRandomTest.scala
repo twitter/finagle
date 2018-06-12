@@ -4,7 +4,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.{when, verify, times}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import scala.util.Random
 
 @RunWith(classOf[JUnitRunner])

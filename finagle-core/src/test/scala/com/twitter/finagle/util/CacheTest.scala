@@ -5,7 +5,7 @@ import com.twitter.util._
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import org.mockito.Mockito.{times, verify}
 import org.mockito.Mockito
 import org.mockito.Matchers._

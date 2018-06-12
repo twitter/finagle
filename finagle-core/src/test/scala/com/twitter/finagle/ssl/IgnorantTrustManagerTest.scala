@@ -6,7 +6,7 @@ import javax.net.ssl.SSLEngine
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class IgnorantTrustManagerTest extends FunSuite with MockitoSugar {

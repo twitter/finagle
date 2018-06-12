@@ -20,7 +20,7 @@ import org.jboss.netty.handler.timeout.ReadTimeoutHandler
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import scala.collection.JavaConverters._
 import scala.reflect.ClassTag
 

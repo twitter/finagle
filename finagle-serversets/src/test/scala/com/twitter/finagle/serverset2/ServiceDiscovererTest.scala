@@ -18,7 +18,7 @@ import org.mockito.Mockito.when
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import java.util.concurrent.atomic.AtomicReference
 
 @RunWith(classOf[JUnitRunner])

@@ -15,7 +15,7 @@ import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import scala.util.Random
 
 @RunWith(classOf[JUnitRunner])

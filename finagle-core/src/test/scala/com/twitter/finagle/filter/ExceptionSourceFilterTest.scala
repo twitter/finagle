@@ -9,7 +9,7 @@ import org.mockito.Matchers.anyInt
 import org.mockito.Mockito.when
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class ExceptionSourceFilterTest extends FunSuite with MockitoSugar {

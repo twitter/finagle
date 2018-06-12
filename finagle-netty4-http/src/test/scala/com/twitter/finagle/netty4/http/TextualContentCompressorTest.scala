@@ -4,7 +4,7 @@ import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])

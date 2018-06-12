@@ -8,7 +8,7 @@ import org.mockito.Matchers.{any, eq => mockitoEq}
 import org.mockito.Mockito.{never, verify}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class SourceTrackingMonitorTest extends FunSuite with MockitoSugar {

@@ -8,7 +8,7 @@ import org.mockito.Matchers.{anyString, any}
 import org.mockito.Mockito.{verify, when, never, times}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class ServersetNamerTest extends FunSuite with MockitoSugar {

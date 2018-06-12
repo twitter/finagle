@@ -10,7 +10,7 @@ import org.mockito.Mockito.{never, times, verify}
 import org.mockito.stubbing.OngoingStubbing
 import org.mockito.{Matchers, ArgumentCaptor}
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{OneInstancePerTest, FunSuite}
 import scala.language.reflectiveCalls
 

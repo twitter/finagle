@@ -10,7 +10,7 @@ import com.twitter.io.Buf
 import com.twitter.util.{Await, Return}
 import java.net.SocketAddress
 import java.security.cert.{Certificate, X509Certificate}
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSuite, OneInstancePerTest}
 import scala.collection.immutable.Queue
 

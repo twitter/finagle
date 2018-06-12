@@ -1,6 +1,6 @@
 package com.twitter.finagle.zipkin.core
 
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import org.scalatest.FunSuite
 import com.twitter.finagle.tracing.{Annotation, Record, SpanId, TraceId}
 import com.twitter.util.Time

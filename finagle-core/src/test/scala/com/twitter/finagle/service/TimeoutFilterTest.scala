@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicReference
 import org.junit.runner.RunWith
 import org.scalatest.{FunSuite, Matchers}
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import scala.language.reflectiveCalls
 
 private object TimeoutFilterTest {

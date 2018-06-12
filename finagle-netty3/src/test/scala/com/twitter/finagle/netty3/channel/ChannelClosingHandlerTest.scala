@@ -1,7 +1,7 @@
 package com.twitter.finagle.netty3.channel
 
 import org.scalatest.FunSuite
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith

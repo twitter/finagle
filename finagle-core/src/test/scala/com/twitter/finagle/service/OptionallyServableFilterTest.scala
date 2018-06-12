@@ -3,7 +3,7 @@ package com.twitter.finagle.service
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import com.twitter.finagle.{NotServableException, Service}
 import org.mockito.Mockito.{times, verify, when}
 import org.mockito.Matchers._
