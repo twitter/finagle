@@ -12,6 +12,7 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.twitter/finagle-core_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.twitter/finagle-core_2.12)
 
 ## Status
+
 This project is used in production at Twitter (and many other organizations),and is being actively developed and maintained.
 
 
