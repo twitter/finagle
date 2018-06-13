@@ -4,7 +4,7 @@ import com.twitter.finagle.{ChannelClosedException, ChannelException, Status, Un
 import com.twitter.finagle.exp.pushsession.{PushChannelHandle, PushSession}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Logger
-import com.twitter.util.{NonFatal => _, _}
+import com.twitter.util._
 import io.netty.buffer.ByteBuf
 import io.netty.channel.{
   Channel,

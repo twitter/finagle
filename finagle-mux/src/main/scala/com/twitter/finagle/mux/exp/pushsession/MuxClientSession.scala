@@ -13,6 +13,7 @@ import com.twitter.io.{Buf, ByteReader}
 import com.twitter.logging.{Level, Logger}
 import com.twitter.util._
 import java.util.concurrent.Executor
+import scala.util.control.NonFatal
 
 /**
  * Push based mux client implementation based on the push-based abstractions.
