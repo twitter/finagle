@@ -81,12 +81,6 @@ object DefaultTimer extends ProxyTimer {
   val twitter: Timer = this
 
   /**
-   * An alias for [[DefaultTimer]].
-   */
-  @deprecated("Use DefaultTimer from Scala and DefaultTimer.getInstance() from Java", "2017-5-4")
-  val get: DefaultTimer.type = this
-
-  /**
    * A Java-friendly accessor for [[DefaultTimer]].
    */
   def getInstance: Timer = this
