@@ -1,6 +1,6 @@
 package com.twitter.finagle.mux.exp.pushsession
 
-import com.twitter.finagle.{Service, Stack, Status, param}
+import com.twitter.finagle.{CancelledRequestException, Service, Stack, Status, param}
 import com.twitter.finagle.context.{Contexts, RemoteInfo}
 import com.twitter.finagle.mux.ServerDispatcher.State
 import com.twitter.finagle.mux.{Request, Response, gracefulShutdownEnabled}
@@ -148,7 +148,14 @@ private[finagle] final class MuxServerSession(
     if (dispatchState != State.Closed) {
       dispatchState = State.Closed
       lessor.unregister(tracker)
-      tracker.interruptOutstandingDispatches()
+      // Construct the exception which we will use to satisfy any outstanding dispatches.
+      // We wrap the underlying exc in a `CancelledRequestException` since it's the
+      // historical API we've used to signal interrupted dispatches.
+      val cause = new CancelledRequestException(reason match {
+        case Return(_) => new Exception("mux server shutdown")
+        case Throw(t) => t
+      })
+      tracker.interruptOutstandingDispatches(cause)
       Closable.all(handle, service).close()
 
       reason.onFailure { t =>

@@ -59,13 +59,12 @@ private class ServerTracker(
   def npending(): Int = dispatches.size
 
   /**
-   * Interrupt all outstanding dispatches, raising on their `Future` with an `InterruptedException`
+   * Interrupt all outstanding dispatches, raising on their `Future` with
    */
-  def interruptOutstandingDispatches(): Unit = {
+  def interruptOutstandingDispatches(exc: Throwable): Unit = {
     // get all the elements, then clear so that the dispatches are definitely cleared
-    // before we raise on them, which may cause them to finish with the InterruptedException
+    // before we raise on them.
     val pending = takeAllDispatches()
-    val exc = new InterruptedException
     log.debug(exc, "Interrupting %d dispatches", pending.size)
     pending.foreach(_.response.raise(exc))
   }

@@ -1,13 +1,14 @@
 package com.twitter.finagle.mux.exp.pushsession
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.CancelledRequestException
 import com.twitter.finagle.exp.pushsession.utils.DeferredExecutor
-import com.twitter.finagle.{Dtab, Path, Service, mux}
-import com.twitter.finagle.mux.{ClientDiscardedRequestException, Request, Response}
 import com.twitter.finagle.mux.exp.pushsession.MessageWriter.DiscardResult
 import com.twitter.finagle.mux.lease.exp.{Lessor, nackOnExpiredLease}
 import com.twitter.finagle.mux.transport.Message._
+import com.twitter.finagle.mux.{ClientDiscardedRequestException, Request, Response}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.{Dtab, Path, Service, mux}
 import com.twitter.io.Buf
 import com.twitter.util._
 import java.net.InetSocketAddress
@@ -95,10 +96,10 @@ class ServerTrackerTest extends FunSuite {
       assert(tracker.npending == 1)
       assert(!p.isDefined)
 
-      tracker.interruptOutstandingDispatches()
+      tracker.interruptOutstandingDispatches(new CancelledRequestException(new Exception))
       val Some(ex) = p.isInterrupted
 
-      assert(ex.isInstanceOf[InterruptedException])
+      assert(ex.isInstanceOf[CancelledRequestException])
       assert(tracker.npending == 0)
     }
   }
