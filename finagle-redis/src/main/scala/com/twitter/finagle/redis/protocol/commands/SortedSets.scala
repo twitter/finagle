@@ -259,7 +259,7 @@ abstract class ZStore extends KeysCommand {
   val weights: Option[Weights]
   val aggregate: Option[Aggregate]
 
-  override protected def validate() {
+  override protected def validate(): Unit = {
     super.validate()
     RequireClientProtocol(destination.length > 0, "destination must not be empty")
     RequireClientProtocol(numkeys > 0, "numkeys must be > 0")
@@ -306,7 +306,7 @@ trait ZScoredRange extends KeyCommand { self =>
     command ++ scores ++ limits
   }
 
-  override def validate() {
+  override def validate(): Unit = {
     super.validate()
     withScores.foreach {
       case WithScores =>

@@ -12,7 +12,7 @@ import org.jboss.netty.channel._
  */
 private[finagle] class WriteCompletionTimeoutHandler(timer: Timer, timeout: Duration)
     extends SimpleChannelDownstreamHandler {
-  override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
+  override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent): Unit = {
     val task = timer.schedule(Time.now + timeout) {
       val channel = ctx.getChannel
       Channels.fireExceptionCaught(

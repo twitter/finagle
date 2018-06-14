@@ -15,7 +15,7 @@ private[lease] class BeanMemoryPool(pool: MemoryPoolMXBean) extends MemoryPool {
 
 private[lease] class FakeMemoryPool(original: MemoryPoolInfo) extends MemoryPool {
   @volatile private[this] var _snapshot: MemoryPoolInfo = original
-  def setSnapshot(snap: MemoryPoolInfo) {
+  def setSnapshot(snap: MemoryPoolInfo): Unit = {
     _snapshot = snap
   }
 
@@ -57,7 +57,7 @@ private[lease] class JvmInfo(val pool: MemoryPool, val collector: GarbageCollect
     snap.committed() - snap.used()
   }
 
-  def record(lr: LogsReceiver, state: String) {
+  def record(lr: LogsReceiver, state: String): Unit = {
     val snap = pool.snapshot()
 
     lr.record("com_%s".format(state), snap.committed().toString)

@@ -16,7 +16,7 @@ private[lease] class Coordinator(
    * Wait until at least 80% of the committed space is
    * available
    */
-  def gateCycle() {
+  def gateCycle(): Unit = {
     Alarm.arm { () =>
       new PredicateAlarm(() => counter.info.remaining >= (counter.info.committed * 80 / 100)) min
         new BytesAlarm(counter, () => 0.bytes)
@@ -25,7 +25,7 @@ private[lease] class Coordinator(
 
   // Warm up a bit: wait until we observe at least one
   // allocated byte.
-  def warmup() {
+  def warmup(): Unit = {
     Alarm.arm { () =>
       new BytesAlarm(
         counter, {
@@ -37,7 +37,7 @@ private[lease] class Coordinator(
     }
   }
 
-  def sleepUntilGc(gc: () => Unit, interval: Duration) {
+  def sleepUntilGc(gc: () => Unit, interval: Duration): Unit = {
     Alarm.armAndExecute({ () =>
       new GenerationAlarm(counter) min new IntervalAlarm(interval)
     }, gc)
@@ -47,7 +47,7 @@ private[lease] class Coordinator(
   // need to be rechecked.  This means that we could just check space.discount
   // once.  If that's the case, this will be broken without a GenerationAlarm
   // though.
-  def sleepUntilDiscountRemaining(space: MemorySpace, fn: () => Unit) {
+  def sleepUntilDiscountRemaining(space: MemorySpace, fn: () => Unit): Unit = {
     // Since the discount might change while we're
     // sleeping; we re-check and loop until we know
     // that it has expired.
@@ -64,7 +64,7 @@ private[lease] class Coordinator(
     maxWait: Duration,
     npending: () => Int,
     log: Logger
-  ) {
+  ): Unit = {
     val elapsed = Stopwatch.start()
     // TODO: if grabbing memory info is slow, rewrite this to only check memory info occasionally
     Alarm.armAndExecute(

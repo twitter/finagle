@@ -5,15 +5,15 @@ import java.util.logging.Logger
 import scala.collection.JavaConverters.mapAsScalaMapConverter
 
 trait LogsReceiver {
-  def record(name: String, value: String)
+  def record(name: String, value: String): Unit
 
-  def flush()
+  def flush(): Unit
 }
 
 object NullLogsReceiver extends LogsReceiver {
-  def record(name: String, value: String) {}
+  def record(name: String, value: String): Unit = {}
 
-  def flush() {}
+  def flush(): Unit = {}
 }
 
 /**
@@ -24,11 +24,11 @@ class DedupingLogsReceiver(log: Logger) extends LogsReceiver {
   // uses a sorted map so the ordering is deterministic
   private[this] val map: TreeMap[String, String] = new TreeMap()
 
-  def record(name: String, value: String) {
+  def record(name: String, value: String): Unit = {
     map.put(name, value)
   }
 
-  def flush() {
+  def flush(): Unit = {
     val strings = map.asScala map {
       case (left, right) =>
         "%s=%s".format(left, right)

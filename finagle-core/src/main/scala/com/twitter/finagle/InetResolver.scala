@@ -139,7 +139,7 @@ private[finagle] class InetResolver(
             val one = Seq(())
             // Just perform one update at a time.
             protected def preprocess(elems: Seq[Unit]) = one
-            protected def handle(unit: Unit) {
+            protected def handle(unit: Unit): Unit = {
               // This always runs in a thread pool; it's okay to block.
               u() = Await.result(toAddr(hosts))
             }

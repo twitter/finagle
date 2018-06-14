@@ -84,7 +84,7 @@ class SingletonPool[Req, Rep](underlying: ServiceFactory[Req, Rep], statsReceive
    * Connect satisfies passed-in promise when the process is
    * complete.
    */
-  private[this] def connect(done: Promise[Unit], conn: ClientConnection) {
+  private[this] def connect(done: Promise[Unit], conn: ClientConnection): Unit = {
     def complete(newState: State[Req, Rep]) = state.get match {
       case s @ Awaiting(d) if d == done => state.compareAndSet(s, newState)
       case Idle | Closed | Awaiting(_) | Open(_) => false

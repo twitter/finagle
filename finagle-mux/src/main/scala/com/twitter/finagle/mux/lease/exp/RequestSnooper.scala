@@ -38,7 +38,7 @@ private[lease] class RequestSnooper(
    * Stores the [[com.twitter.util.Duration]] in a histogram unless the
    * handletime overlaps with a garbage collection.
    */
-  def observe(d: Duration) {
+  def observe(d: Duration): Unit = {
     // discard observations that might overlap with a gc
     // TODO: do we want to buffer and then discard if there might have been a gc?
     // this has gross memory implications . . . on the other hand, this doesn't really work

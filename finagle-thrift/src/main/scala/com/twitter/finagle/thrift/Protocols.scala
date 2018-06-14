@@ -214,7 +214,7 @@ object Protocols {
       ) {
     import TFinagleBinaryProtocol._
 
-    override def writeString(str: String) {
+    override def writeString(str: String): Unit = {
       if (str.length == 0) {
         trans.write(EmptyStringInBytes)
         return
@@ -263,7 +263,7 @@ object Protocols {
 
     // Note: libthrift 0.5.0 has a bug when operating on ByteBuffer's with a non-zero arrayOffset.
     // We instead use the version from head that fixes this issue.
-    override def writeBinary(bin: ByteBuffer) {
+    override def writeBinary(bin: ByteBuffer): Unit = {
       if (bin.hasArray) {
         val length = bin.remaining()
         writeI32(length)

@@ -49,7 +49,7 @@ class BufferingPool[Req, Rep](underlying: ServiceFactory[Req, Rep], size: Int)
         get()
     }
 
-  private[this] def drain() {
+  private[this] def drain(): Unit = {
     draining = true
     while (true) {
       buffer.tryGet() match {

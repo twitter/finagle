@@ -7,7 +7,7 @@ import java.nio.charset.{Charset, StandardCharsets}
 trait ErrorConversion {
   def getException(msg: String): Throwable
 
-  def apply(requirement: Boolean, message: String = "Prerequisite failed") {
+  def apply(requirement: Boolean, message: String = "Prerequisite failed"): Unit = {
     if (!requirement) {
       throw getException(message)
     }

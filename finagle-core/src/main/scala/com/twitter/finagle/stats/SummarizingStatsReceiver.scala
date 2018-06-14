@@ -29,7 +29,7 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
 
   def counter(verbosity: Verbosity, name: String*): Counter = new Counter {
     counters.putIfAbsent(name, new AtomicLong(0))
-    def incr(delta: Long) { counters.get(name).getAndAdd(delta) }
+    def incr(delta: Long): Unit = { counters.get(name).getAndAdd(delta) }
   }
 
   def stat(verbosity: Verbosity, name: String*): Stat = new Stat {

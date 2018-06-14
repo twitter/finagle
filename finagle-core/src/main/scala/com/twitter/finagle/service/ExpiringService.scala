@@ -127,7 +127,7 @@ abstract class ExpiringService[Req, Rep](
       }
       .getOrElse { NullTimerTask }
 
-  private[this] def expire(counter: Counter) {
+  private[this] def expire(counter: Counter): Unit = {
     if (deactivate()) {
       latch.await {
         expired()
@@ -155,7 +155,7 @@ abstract class ExpiringService[Req, Rep](
     }
   }
 
-  protected def onExpire()
+  protected def onExpire(): Unit
 
   override def apply(req: Req): Future[Rep] = {
     val decrLatch = synchronized {

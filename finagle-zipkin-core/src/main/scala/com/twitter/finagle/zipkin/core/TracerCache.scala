@@ -21,7 +21,7 @@ private[zipkin] class TracerCache[T <: RawZipkinTracer] {
   // down. We give it 100ms.
   Runtime.getRuntime.addShutdownHook(new Thread {
     setName("RawZipkinTracer-ShutdownHook")
-    override def run() {
+    override def run(): Unit = {
       val tracers = synchronized(map.values.toSeq)
       val joined = Future.join(tracers map (_.flush()))
       try {

@@ -30,12 +30,12 @@ private[netty3] class SslClientConnectHandler(
 
   private[this] val connectFuture = new AtomicReference[ChannelFuture](null)
 
-  private[this] def fail(c: Channel, t: Throwable) {
+  private[this] def fail(c: Channel, t: Throwable): Unit = {
     Option(connectFuture.get) foreach { _.setFailure(t) }
     Channels.close(c)
   }
 
-  private[this] def fail(c: Channel, exGen: (SocketAddress) => Throwable) {
+  private[this] def fail(c: Channel, exGen: (SocketAddress) => Throwable): Unit = {
     val t = exGen(if (c != null) c.getRemoteAddress else null)
     fail(c, t)
   }
@@ -60,7 +60,7 @@ private[netty3] class SslClientConnectHandler(
         // Proxy failures here so that if the connect fails, it is
         // propagated to the listener, not just on the channel.
         wrappedConnectFuture.addListener(new ChannelFutureListener {
-          def operationComplete(f: ChannelFuture) {
+          def operationComplete(f: ChannelFuture): Unit = {
             if (f.isSuccess || f.isCancelled)
               return
 

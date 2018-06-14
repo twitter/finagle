@@ -51,16 +51,16 @@ private[finagle] class ChannelClosingHandler
     }
   }
 
-  override def beforeAdd(ctx: ChannelHandlerContext) {
+  override def beforeAdd(ctx: ChannelHandlerContext): Unit = {
     if (ctx.getPipeline.isAttached)
       setChannel(ctx.getChannel)
   }
 
-  def afterAdd(ctx: ChannelHandlerContext) { /*nop*/ }
-  def beforeRemove(ctx: ChannelHandlerContext) { /*nop*/ }
-  def afterRemove(ctx: ChannelHandlerContext) { /*nop*/ }
+  def afterAdd(ctx: ChannelHandlerContext): Unit = { /*nop*/ }
+  def beforeRemove(ctx: ChannelHandlerContext): Unit = { /*nop*/ }
+  def afterRemove(ctx: ChannelHandlerContext): Unit = { /*nop*/ }
 
-  override def channelOpen(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
+  override def channelOpen(ctx: ChannelHandlerContext, e: ChannelStateEvent): Unit = {
     setChannel(ctx.getChannel)
     super.channelOpen(ctx, e)
   }

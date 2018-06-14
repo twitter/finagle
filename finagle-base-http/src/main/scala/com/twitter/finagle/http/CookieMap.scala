@@ -73,7 +73,7 @@ class CookieMap private[twitter](message: Message, cookieCodec: CookieCodec)
     }
   }
 
-  protected def rewriteCookieHeaders() {
+  protected def rewriteCookieHeaders(): Unit = {
     // Clear all cookies - there may be more than one with this name.
     message.headerMap.remove(cookieHeaderName)
 
@@ -178,7 +178,7 @@ class CookieMap private[twitter](message: Message, cookieCodec: CookieCodec)
    * @param name the cookie name to add
    * @param cookie the ''Cookie'' to add
    */
-  def add(name: String, cookie: Cookie) {
+  def add(name: String, cookie: Cookie): Unit = {
     underlying(name) = (underlying(name) - cookie) + cookie
     rewriteCookieHeaders()
   }
@@ -191,7 +191,7 @@ class CookieMap private[twitter](message: Message, cookieCodec: CookieCodec)
    *
    * @param cookie the ''Cookie'' to add
    */
-  def add(cookie: Cookie) {
+  def add(cookie: Cookie): Unit = {
     add(cookie.name, cookie)
   }
 

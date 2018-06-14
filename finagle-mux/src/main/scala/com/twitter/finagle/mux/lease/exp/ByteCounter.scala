@@ -92,7 +92,7 @@ private[lease] class WindowedByteCounter private[lease] (
    * Measures the amount of bytes used since the last sample, and bumps
    * the collection number if necessary.
    */
-  override def run() {
+  override def run(): Unit = {
     Local.restore(ctx)
     var prevUsed = info.used()
 

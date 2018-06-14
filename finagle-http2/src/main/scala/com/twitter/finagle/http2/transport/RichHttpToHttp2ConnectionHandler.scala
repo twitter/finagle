@@ -128,7 +128,7 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
     }
   }
 
-  override def handlerAdded(ctx: ChannelHandlerContext) {
+  override def handlerAdded(ctx: ChannelHandlerContext): Unit = {
     super.handlerAdded(ctx)
     onActive()
   }

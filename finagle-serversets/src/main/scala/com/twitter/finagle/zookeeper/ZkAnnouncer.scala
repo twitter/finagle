@@ -55,7 +55,7 @@ class ZkAnnouncer(factory: ZkClientFactory) extends Announcer { self =>
     setDaemon(true)
     start()
 
-    override def run() {
+    override def run(): Unit = {
       while (true) {
         val change = q.take()
         try {

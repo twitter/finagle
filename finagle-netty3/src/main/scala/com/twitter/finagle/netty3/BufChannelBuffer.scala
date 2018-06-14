@@ -143,35 +143,35 @@ private class BufChannelBuffer(val buf: Buf, endianness: ByteOrder) extends Abst
 
   def arrayOffset(): Int = throw new ReadOnlyBufferException()
 
-  override def discardReadBytes() { throw new ReadOnlyBufferException() }
+  override def discardReadBytes(): Unit = { throw new ReadOnlyBufferException() }
 
-  def setByte(index: Int, value: Int) { throw new ReadOnlyBufferException() }
+  def setByte(index: Int, value: Int): Unit = { throw new ReadOnlyBufferException() }
 
-  def setBytes(index: Int, src: ChannelBuffer, srcIndex: Int, length: Int) {
+  def setBytes(index: Int, src: ChannelBuffer, srcIndex: Int, length: Int): Unit = {
     throw new ReadOnlyBufferException()
   }
 
-  def setBytes(index: Int, src: Array[Byte], srcIndex: Int, length: Int) {
+  def setBytes(index: Int, src: Array[Byte], srcIndex: Int, length: Int): Unit = {
     throw new ReadOnlyBufferException()
   }
 
-  def setBytes(index: Int, src: ByteBuffer) {
+  def setBytes(index: Int, src: ByteBuffer): Unit = {
     throw new ReadOnlyBufferException()
   }
 
-  def setShort(index: Int, value: Int) {
+  def setShort(index: Int, value: Int): Unit = {
     throw new ReadOnlyBufferException()
   }
 
-  def setMedium(index: Int, value: Int) {
+  def setMedium(index: Int, value: Int): Unit = {
     throw new ReadOnlyBufferException()
   }
 
-  def setInt(index: Int, value: Int) {
+  def setInt(index: Int, value: Int): Unit = {
     throw new ReadOnlyBufferException()
   }
 
-  def setLong(index: Int, value: Long) {
+  def setLong(index: Int, value: Long): Unit = {
     throw new ReadOnlyBufferException()
   }
 
@@ -187,28 +187,28 @@ private class BufChannelBuffer(val buf: Buf, endianness: ByteOrder) extends Abst
     throw new UnsupportedOperationException()
   }
 
-  def getBytes(index: Int, out: OutputStream, length: Int) {
+  def getBytes(index: Int, out: OutputStream, length: Int): Unit = {
     val s = buf.slice(index, index + length)
     val a = new Array[Byte](s.length)
     s.write(a, 0)
     out.write(a)
   }
 
-  def getBytes(index: Int, dst: Array[Byte], dstIndex: Int, length: Int) {
+  def getBytes(index: Int, dst: Array[Byte], dstIndex: Int, length: Int): Unit = {
     if (index < 0 || dstIndex < 0 || index + length > buf.length || dstIndex + length > dst.length)
       throw new IndexOutOfBoundsException()
 
     buf.slice(index, index + length).write(dst, dstIndex)
   }
 
-  def getBytes(index: Int, dst: ChannelBuffer, dstIndex: Int, length: Int) {
+  def getBytes(index: Int, dst: ChannelBuffer, dstIndex: Int, length: Int): Unit = {
     val s = buf.slice(index, index + length)
     val a = new Array[Byte](s.length)
     s.write(a, 0)
     dst.setBytes(dstIndex, a)
   }
 
-  def getBytes(index: Int, dst: ByteBuffer) {
+  def getBytes(index: Int, dst: ByteBuffer): Unit = {
     if (index < 0)
       throw new IndexOutOfBoundsException()
 

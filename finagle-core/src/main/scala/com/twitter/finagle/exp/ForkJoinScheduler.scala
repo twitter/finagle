@@ -36,7 +36,7 @@ private class ForkJoinScheduler(nthreads: Int, statsReceiver: StatsReceiver = Nu
   }
 
   private[this] val exceptionHandler = new Thread.UncaughtExceptionHandler {
-    def uncaughtException(t: Thread, exc: Throwable) {
+    def uncaughtException(t: Thread, exc: Throwable): Unit = {
       Monitor.handle(exc)
     }
   }
@@ -76,7 +76,7 @@ private class ForkJoinScheduler(nthreads: Int, statsReceiver: StatsReceiver = Nu
     statsReceiver.addGauge("splits") { splitCount.get }
   )
 
-  def submit(r: Runnable) {
+  def submit(r: Runnable): Unit = {
     Thread.currentThread() match {
       case t: ForkJoinWorkerThread if t.getPool eq pool =>
         local.submit(r)

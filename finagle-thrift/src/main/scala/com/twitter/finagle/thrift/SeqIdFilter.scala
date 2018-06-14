@@ -40,7 +40,7 @@ class SeqIdFilter extends SimpleFilter[ThriftClientRequest, Array[Byte]] {
       ((buf(off + 2) & 0xff) << 8) |
       (buf(off + 3) & 0xff)
 
-  private[this] def put32(buf: Array[Byte], off: Int, x: Int) {
+  private[this] def put32(buf: Array[Byte], off: Int, x: Int): Unit = {
     buf(off) = (x >> 24 & 0xff).toByte
     buf(off + 1) = (x >> 16 & 0xff).toByte
     buf(off + 2) = (x >> 8 & 0xff).toByte

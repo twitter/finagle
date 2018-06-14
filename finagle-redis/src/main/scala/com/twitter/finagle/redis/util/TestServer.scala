@@ -49,7 +49,7 @@ object RedisCluster { self =>
     instance
   }
 
-  def stopAll() {
+  def stopAll(): Unit = {
     instanceStack.foreach { i =>
       i.stop()
     }
@@ -60,7 +60,7 @@ object RedisCluster { self =>
   Runtime
     .getRuntime()
     .addShutdownHook(new Thread {
-      override def run() {
+      override def run(): Unit = {
         self.instanceStack.foreach { instance =>
           instance.stop()
         }
@@ -82,14 +82,14 @@ class ExternalRedis(mode: RedisMode = RedisMode.Standalone) {
   private[this] val possiblePorts = 49152.until(55535)
   var address: Option[InetSocketAddress] = None
 
-  private[this] def assertRedisBinaryPresent() {
+  private[this] def assertRedisBinaryPresent(): Unit = {
     val p = new ProcessBuilder("redis-server", "--help").start()
     p.waitFor()
     val exitValue = p.exitValue()
     require(exitValue == 0 || exitValue == 1, "redis-server binary must be present.")
   }
 
-  private[this] def findAddress() {
+  private[this] def findAddress(): Unit = {
     var tries = possiblePorts.size-1
     while (address.isEmpty && tries >= 0) {
       val addr = new InetSocketAddress(possiblePorts(tries))
@@ -143,7 +143,7 @@ dbfilename ${dbFile.getName}
     confFile
   }
 
-  def start() {
+  def start(): Unit = {
     val port = address.get.getPort()
     val conf = createConfigFile(port).getAbsolutePath
     val cmd: Seq[String] = if (mode == RedisMode.Sentinel) {
@@ -156,14 +156,14 @@ dbfilename ${dbFile.getName}
     Thread.sleep(200)
   }
 
-  def stop() {
+  def stop(): Unit = {
     process.foreach { p =>
       p.destroy()
       p.waitFor()
     }
   }
 
-  def restart() {
+  def restart(): Unit = {
     stop()
     start()
   }

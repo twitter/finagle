@@ -11,10 +11,10 @@ class TracingLogHandler(
   level: Option[Level] = None
 ) extends Handler(formatter, level) {
 
-  def flush() {}
-  def close() {}
+  def flush(): Unit = {}
+  def close(): Unit = {}
 
-  def publish(record: javalog.LogRecord) {
+  def publish(record: javalog.LogRecord): Unit = {
     Trace.record(getFormatter.format(record))
   }
 }

@@ -133,7 +133,7 @@ class LoggingFilter[REQUEST <: Request](
 ) extends CoreLoggingFilter[REQUEST, Response] {
 
   // Treat exceptions as empty 500 errors
-  override protected def logException(duration: Duration, request: REQUEST, throwable: Throwable) {
+  override protected def logException(duration: Duration, request: REQUEST, throwable: Throwable): Unit = {
     val response = Response(request.version, Status.InternalServerError)
     val line = formatter.format(request, response, duration)
     log.info(line)

@@ -8,7 +8,7 @@ object ExitGuard {
   @volatile private[util] var guards: Option[(Thread, List[Guard])] = None
 
   private[finagle] case class Guard(reason: String) {
-    def unguard() {
+    def unguard(): Unit = {
       ExitGuard.synchronized {
         guards match {
           case Some((thread, gs)) =>
@@ -24,7 +24,7 @@ object ExitGuard {
     }
   }
 
-  private def updateName() {
+  private def updateName(): Unit = {
     for ((t, gs) <- guards)
       t.setName("Finagle ExitGuard count=%d".format(gs.size))
   }
@@ -39,7 +39,7 @@ object ExitGuard {
     guard
   }
 
-  private[this] def addGuard(guard: Guard) {
+  private[this] def addGuard(guard: Guard): Unit = {
     synchronized {
       guards match {
         case Some((thread, gs)) =>
@@ -70,7 +70,7 @@ object ExitGuard {
       setDaemon(false)
       start()
 
-      override def run() {
+      override def run(): Unit = {
         while (true) {
           try Thread.sleep(Long.MaxValue)
           catch {

@@ -32,7 +32,7 @@ private[finagle] class DelayedReleaseService[-Req <: Request](
 
   private[this] def proxy(in: Response): Response = {
     val released = new AtomicBoolean(false)
-    def done() {
+    def done(): Unit = {
       if (released.compareAndSet(false, true)) {
         latch.decr()
       }

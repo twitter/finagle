@@ -4,12 +4,12 @@ import scala.annotation.tailrec
 
 private object Heap {
   trait Indexer[-T] {
-    def apply(t: T, i: Int)
+    def apply(t: T, i: Int): Unit
   }
 
   object Indexer {
     object nil extends Indexer[Any] {
-      def apply(t: Any, i: Int) {}
+      def apply(t: Any, i: Int): Unit = {}
     }
   }
 
@@ -28,7 +28,7 @@ private object Heap {
 private class Heap[T](ord: Ordering[T], indexer: Heap.Indexer[T]) {
   import ord._
 
-  def swap(heap: Array[T], i: Int, j: Int) {
+  def swap(heap: Array[T], i: Int, j: Int): Unit = {
     val tmp = heap(i)
     heap(i) = heap(j)
     heap(j) = tmp
@@ -37,7 +37,7 @@ private class Heap[T](ord: Ordering[T], indexer: Heap.Indexer[T]) {
   }
 
   @tailrec
-  final def fixDown(heap: Array[T], i: Int, j: Int) {
+  final def fixDown(heap: Array[T], i: Int, j: Int): Unit = {
     if (j < i * 2) return
 
     val m = if (j == i * 2 || heap(2 * i) < heap(2 * i + 1)) 2 * i else 2 * i + 1
@@ -48,7 +48,7 @@ private class Heap[T](ord: Ordering[T], indexer: Heap.Indexer[T]) {
   }
 
   @tailrec
-  final def fixUp(heap: Array[T], i: Int) {
+  final def fixUp(heap: Array[T], i: Int): Unit = {
     if (i != 1 && heap(i) < heap(i / 2)) {
       swap(heap, i, i / 2)
       fixUp(heap, i / 2)

@@ -92,16 +92,16 @@ class SocksConnectHandler(
   // following Netty's ReplayingDecoderBuffer, we throw this when we run out of bytes
   object ReplayError extends scala.Error
 
-  private[this] def fail(c: Channel, t: Throwable) {
+  private[this] def fail(c: Channel, t: Throwable): Unit = {
     Option(connectFuture.get) foreach { _.setFailure(t) }
     Channels.close(c)
   }
 
-  private[this] def write(ctx: ChannelHandlerContext, msg: Any) {
+  private[this] def write(ctx: ChannelHandlerContext, msg: Any): Unit = {
     Channels.write(ctx, Channels.future(ctx.getChannel), msg, null)
   }
 
-  private[this] def writeInit(ctx: ChannelHandlerContext) {
+  private[this] def writeInit(ctx: ChannelHandlerContext): Unit = {
     val buf = ChannelBuffers.dynamicBuffer(1024)
     buf.writeByte(Version5)
     buf.writeByte(supportedTypes.length.toByte)
@@ -119,7 +119,7 @@ class SocksConnectHandler(
       None
   }
 
-  private[this] def writeRequest(ctx: ChannelHandlerContext) {
+  private[this] def writeRequest(ctx: ChannelHandlerContext): Unit = {
     val buf = ChannelBuffers.dynamicBuffer(1024)
     buf.writeBytes(Array[Byte](Version5, Connect, Reserved))
 
@@ -147,7 +147,7 @@ class SocksConnectHandler(
     ctx: ChannelHandlerContext,
     username: String,
     pass: String
-  ) {
+  ): Unit = {
     val buf = ChannelBuffers.buffer(1024)
     buf.writeByte(Version1)
 
@@ -194,17 +194,17 @@ class SocksConnectHandler(
     }
   }
 
-  private[this] def discardBytes(numBytes: Int) {
+  private[this] def discardBytes(numBytes: Int): Unit = {
     checkReadableBytes(numBytes)
     buf.readBytes(numBytes)
   }
 
-  private[this] def checkReadableBytes(numBytes: Int) {
+  private[this] def checkReadableBytes(numBytes: Int): Unit = {
     if (buf.readableBytes < numBytes)
       throw ReplayError
   }
 
-  override def connectRequested(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
+  override def connectRequested(ctx: ChannelHandlerContext, e: ChannelStateEvent): Unit = {
     e match {
       case de: DownstreamChannelStateEvent =>
         if (!connectFuture.compareAndSet(null, e.getFuture)) {
@@ -215,7 +215,7 @@ class SocksConnectHandler(
         // proxy cancellation
         val wrappedConnectFuture = Channels.future(de.getChannel, true)
         de.getFuture.addListener(new ChannelFutureListener {
-          def operationComplete(f: ChannelFuture) {
+          def operationComplete(f: ChannelFuture): Unit = {
             if (f.isCancelled)
               wrappedConnectFuture.cancel()
           }
@@ -223,7 +223,7 @@ class SocksConnectHandler(
         // Proxy failures here so that if the connect fails, it is
         // propagated to the listener, not just on the channel.
         wrappedConnectFuture.addListener(new ChannelFutureListener {
-          def operationComplete(f: ChannelFuture) {
+          def operationComplete(f: ChannelFuture): Unit = {
             if (f.isSuccess || f.isCancelled)
               return
 
@@ -246,7 +246,7 @@ class SocksConnectHandler(
   }
 
   // we delay propagating connection upstream until we've completed the proxy connection.
-  override def channelConnected(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
+  override def channelConnected(ctx: ChannelHandlerContext, e: ChannelStateEvent): Unit = {
     if (connectFuture.get eq null) {
       fail(ctx.getChannel, new InconsistentStateException(addr))
       return
@@ -254,7 +254,7 @@ class SocksConnectHandler(
 
     // proxy cancellations again.
     connectFuture.get.addListener(new ChannelFutureListener {
-      def operationComplete(f: ChannelFuture) {
+      def operationComplete(f: ChannelFuture): Unit = {
         if (f.isSuccess)
           SocksConnectHandler.super.channelConnected(ctx, e)
         else if (f.isCancelled)
@@ -266,7 +266,7 @@ class SocksConnectHandler(
     writeInit(ctx)
   }
 
-  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
+  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent): Unit = {
     if (connectFuture.get eq null) {
       fail(ctx.getChannel, new InconsistentStateException(addr))
       return

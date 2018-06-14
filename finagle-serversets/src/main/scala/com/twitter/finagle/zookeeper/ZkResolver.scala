@@ -29,7 +29,7 @@ private[finagle] class ZkGroup(serverSet: ServerSet, path: String)
 
   protected[finagle] val set = Var(Set[ServiceInstance]())
 
-  override def run() {
+  override def run(): Unit = {
     serverSet.watch(new DynamicHostSet.HostChangeMonitor[ServiceInstance] {
       def onChange(newSet: java.util.Set[ServiceInstance]): Unit = synchronized {
         set() = newSet.asScala.toSet
@@ -47,7 +47,7 @@ private class ZkOffer(serverSet: ServerSet, path: String)
   private[this] val inbound = new Broker[Set[ServiceInstance]]
   private[this] val log = Logger.getLogger("zkoffer")
 
-  override def run() {
+  override def run(): Unit = {
     try {
       serverSet.watch(new DynamicHostSet.HostChangeMonitor[ServiceInstance] {
         def onChange(newSet: java.util.Set[ServiceInstance]): Unit = {

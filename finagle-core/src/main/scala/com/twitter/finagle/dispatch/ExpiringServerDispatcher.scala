@@ -17,6 +17,6 @@ object ExpiringServerDispatcher {
     (transport: Transport[In, Out], service: Service[Req, Rep]) =>
       new ExpiringService(service, maxIdleTime, maxLifeTime, timer, statsReceiver) {
         private[this] val dispatcher = newDispatcher(transport, this)
-        protected def onExpire() { dispatcher.close(Time.now) }
+        protected def onExpire(): Unit = { dispatcher.close(Time.now) }
     }
 }

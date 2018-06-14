@@ -27,7 +27,7 @@ private[lease] object Alarm {
    * calling apply on the function should do setup, and then also return the
    * alarm we will use for figuring out how long to sleep and when to wake up.
    */
-  def arm(setup: () => Alarm) {
+  def arm(setup: () => Alarm): Unit = {
     val alarm = setup()
     while (!alarm.finished) Time.sleep(alarm.sleeptime)
   }
@@ -39,7 +39,7 @@ private[lease] object Alarm {
    * immediately, and then for every time the alarm is found to not yet be ready
    * to finish, the alarm sleeps and also calls the function.
    */
-  private[lease] def armAndExecute(setup: () => Alarm, fn: () => Unit) {
+  private[lease] def armAndExecute(setup: () => Alarm, fn: () => Unit): Unit = {
     val alarm = setup()
     fn()
     while (!alarm.finished) {

@@ -7,11 +7,11 @@ private[client] object EventDeliveryThread
     extends Thread("com.twitter.zookeeper.client.internal event delivery") {
   private val q = new LinkedBlockingDeque[(Updatable[WatchState], WatchState)]
 
-  def offer(u: Updatable[WatchState], s: WatchState) {
+  def offer(u: Updatable[WatchState], s: WatchState): Unit = {
     q.offer((u, s))
   }
 
-  override def run() {
+  override def run(): Unit = {
     while (true) {
       val (u, s) = q.take()
       try {

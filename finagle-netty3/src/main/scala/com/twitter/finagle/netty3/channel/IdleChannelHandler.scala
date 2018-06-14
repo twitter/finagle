@@ -10,7 +10,7 @@ import org.jboss.netty.handler.timeout.{IdleState, IdleStateAwareChannelHandler,
 class IdleChannelHandler(receiver: StatsReceiver) extends IdleStateAwareChannelHandler {
   private[this] val statsReceiver = receiver.scope("disconnects")
 
-  override def channelIdle(ctx: ChannelHandlerContext, e: IdleStateEvent) {
+  override def channelIdle(ctx: ChannelHandlerContext, e: IdleStateEvent): Unit = {
     val state = e.getState
     if (state == IdleState.READER_IDLE || state == IdleState.WRITER_IDLE) {
       statsReceiver.counter(state.toString).incr()

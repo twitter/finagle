@@ -17,7 +17,7 @@ object ByteArrays {
    * Writes the eight bytes of `l` into `bytes` in big-endian order, starting
    * at the position `i`.
    */
-  def put64be(bytes: Array[Byte], i: Int, l: Long) {
+  def put64be(bytes: Array[Byte], i: Int, l: Long): Unit = {
     bytes(i) = (l >> 56 & 0xff).toByte
     bytes(i + 1) = (l >> 48 & 0xff).toByte
     bytes(i + 2) = (l >> 40 & 0xff).toByte

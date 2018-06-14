@@ -6,7 +6,7 @@ import com.twitter.util.{Closable, Future, Promise, Return, Time}
  * Allows resources to register their handlers to be invoked when service is closing.
  */
 trait CloseNotifier {
-  def onClose(h: => Unit)
+  def onClose(h: => Unit): Unit
 }
 
 object CloseNotifier {

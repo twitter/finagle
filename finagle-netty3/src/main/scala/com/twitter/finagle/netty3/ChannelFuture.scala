@@ -8,6 +8,6 @@ import org.jboss.netty.channel._
 private[finagle] class LatentChannelFuture extends DefaultChannelFuture(null, false) {
   @volatile private var channel: Channel = _
 
-  def setChannel(c: Channel) { channel = c }
+  def setChannel(c: Channel): Unit = { channel = c }
   override def getChannel() = channel
 }

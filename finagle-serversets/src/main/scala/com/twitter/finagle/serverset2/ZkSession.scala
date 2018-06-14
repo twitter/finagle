@@ -328,7 +328,7 @@ private[serverset2] object ZkSession {
     @volatile var closing = false
     @volatile var zkSession: ZkSession = ZkSession.nil
 
-    def reconnect() {
+    def reconnect(): Unit = {
       if (closing) return
 
       logger.info(s"Closing zk session ${zkSession.sessionIdAsHex}")

@@ -72,7 +72,7 @@ private[memcached] class MemcachedServerDecoder(storageCommands: immutable.Set[B
     extends ServerDecoder[Command](storageCommands) {
   import MemcachedServerDecoder._
 
-  private[this] def validateAnyStorageCommand(tokens: Seq[Buf]) {
+  private[this] def validateAnyStorageCommand(tokens: Seq[Buf]): Unit = {
     if (tokens.isEmpty) throw new ClientError("No arguments specified")
   }
 

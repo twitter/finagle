@@ -12,14 +12,14 @@ trait ChannelSnooper extends ChannelDownstreamHandler with ChannelUpstreamHandle
 
   private[this] lazy val printStream = new PrintStream(System.out, true, "UTF-8")
 
-  def printer(message: String, exc: Throwable = null) {
+  def printer(message: String, exc: Throwable = null): Unit = {
     printStream.println(message)
     if (exc != null) {
       exc.printStackTrace(printStream)
     }
   }
 
-  def print(id: java.lang.Integer, indicator: String, message: String) {
+  def print(id: java.lang.Integer, indicator: String, message: String): Unit = {
     printer("%08x %6s %s %s".format(id, name, indicator, message))
   }
 
@@ -35,7 +35,7 @@ class ChannelBufferSnooper(val name: String) extends ChannelSnooper {
   // TODO: provide hexdump also. for now we deal only in ASCII
   // characters.
 
-  override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
+  override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent): Unit = {
     e match {
       case me: UpstreamMessageEvent if me.getMessage.isInstanceOf[ChannelBuffer] =>
         val buf = me.getMessage.asInstanceOf[ChannelBuffer]
@@ -47,7 +47,7 @@ class ChannelBufferSnooper(val name: String) extends ChannelSnooper {
     ctx.sendUpstream(e)
   }
 
-  override def handleDownstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
+  override def handleDownstream(ctx: ChannelHandlerContext, e: ChannelEvent): Unit = {
     e match {
       case me: DownstreamMessageEvent if me.getMessage.isInstanceOf[ChannelBuffer] =>
         val buf = me.getMessage.asInstanceOf[ChannelBuffer]
@@ -59,7 +59,7 @@ class ChannelBufferSnooper(val name: String) extends ChannelSnooper {
     ctx.sendDownstream(e)
   }
 
-  def dump(printer: (Channel, String) => Unit, ch: Channel, buf: ChannelBuffer) {
+  def dump(printer: (Channel, String) => Unit, ch: Channel, buf: ChannelBuffer): Unit = {
     val rawStr = buf.toString(buf.readerIndex, buf.readableBytes, Charset.forName("UTF-8"))
     val str = rawStr.replaceAll("\r", "\\\\r").replaceAll("\n", "\\\\n")
     val asciiStr = str map { c =>
@@ -76,7 +76,7 @@ class ChannelBufferSnooper(val name: String) extends ChannelSnooper {
 
 /** Log raw channel events */
 class SimpleChannelSnooper(val name: String) extends ChannelSnooper {
-  override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
+  override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent): Unit = {
     printUp(ctx.getChannel, e.toString)
     if (e.isInstanceOf[ExceptionEvent])
       printer("Snooped exception", e.asInstanceOf[ExceptionEvent].getCause)
@@ -84,7 +84,7 @@ class SimpleChannelSnooper(val name: String) extends ChannelSnooper {
     ctx.sendUpstream(e)
   }
 
-  override def handleDownstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
+  override def handleDownstream(ctx: ChannelHandlerContext, e: ChannelEvent): Unit = {
     printDown(ctx.getChannel, e.toString)
     ctx.sendDownstream(e)
   }

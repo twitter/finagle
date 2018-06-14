@@ -57,7 +57,7 @@ final private[finagle] class Http2CleartextServerInitializer(
         })
 
         new Http2ServerUpgradeCodec(codec) {
-          override def upgradeTo(ctx: ChannelHandlerContext, upgradeRequest: FullHttpRequest) {
+          override def upgradeTo(ctx: ChannelHandlerContext, upgradeRequest: FullHttpRequest): Unit = {
             upgradedCounter.incr()
             // we turn off backpressure because Http2 only works with autoread on for now
             ctx.channel.config.setAutoRead(true)

@@ -37,7 +37,7 @@ private class HashedWheelTimer(underlying: netty.Timer) extends Timer {
       }
     }
 
-    def cancel() {
+    def cancel(): Unit = {
       synchronized {
         isCancelled = true
         ref.cancel()

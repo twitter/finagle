@@ -30,12 +30,12 @@ trait LoggingFilter[Req, Rep] extends SimpleFilter[Req, Rep] {
     future
   }
 
-  protected def log(replyTime: Duration, request: Req, reply: Rep) {
+  protected def log(replyTime: Duration, request: Req, reply: Rep): Unit = {
     val line = formatter.format(request, reply, replyTime)
     log.info(line)
   }
 
-  protected def logException(replyTime: Duration, request: Req, throwable: Throwable) {
+  protected def logException(replyTime: Duration, request: Req, throwable: Throwable): Unit = {
     val line = formatter.formatException(request, throwable, replyTime)
     log.info(throwable, line)
   }

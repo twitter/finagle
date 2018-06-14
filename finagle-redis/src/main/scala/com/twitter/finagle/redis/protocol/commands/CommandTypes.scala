@@ -4,7 +4,7 @@ import com.twitter.io.Buf
 
 trait KeyCommand extends Command {
   def key: Buf
-  protected def validate() {
+  protected def validate(): Unit = {
     RequireClientProtocol(key != null && key.length > 0, "Empty Key found")
   }
 
@@ -16,7 +16,7 @@ trait StrictKeyCommand extends KeyCommand {
 
 trait KeysCommand extends Command {
   def keys: Seq[Buf]
-  protected def validate() {
+  protected def validate(): Unit = {
     RequireClientProtocol(keys != null && keys.nonEmpty, "Empty KeySet found")
     keys.foreach { key =>
       RequireClientProtocol(key != null && key.length > 0, "Empty key found")

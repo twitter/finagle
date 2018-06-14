@@ -103,7 +103,7 @@ private[finagle] class Cache[A](
   /**
    * Insert an item into the cache.
    */
-  def put(item: A) {
+  def put(item: A): Unit = {
     val evicted = synchronized {
       if (deque.isEmpty && ttl != Duration.Top) scheduleTimer()
       deque.push((Time.now, item))

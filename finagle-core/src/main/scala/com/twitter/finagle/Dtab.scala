@@ -96,7 +96,7 @@ case class Dtab(dentries0: IndexedSeq[Dentry]) extends IndexedSeq[Dentry] {
   /**
    * Print a pretty representation of this Dtab.
    */
-  def print(printer: PrintWriter) {
+  def print(printer: PrintWriter): Unit = {
     printer.println("Dtab(" + size + ")")
     for (Dentry(prefix, dst) <- this)
       printer.println("	" + prefix.show + " => " + dst.show)

@@ -65,7 +65,7 @@ class StatsFilter[REQUEST <: Request](stats: StatsReceiver)
     future
   }
 
-  protected def count(duration: Duration, response: Response) {
+  protected def count(duration: Duration, response: Response): Unit = {
     val statusCode = response.statusCode.toString
     val statusClass = (response.statusCode / 100).toString + "XX"
 

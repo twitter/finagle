@@ -22,7 +22,7 @@ private[finagle] class ConcurrentRingBuffer[T: ClassTag](capacity: Int) {
   private[this] val publishedWrite = new AtomicLong(-1)
   private[this] val ring = new Array[T](capacity)
 
-  private[this] def publish(which: Long) {
+  private[this] def publish(which: Long): Unit = {
     while (publishedWrite.get != which - 1) {}
     val ok = publishedWrite.compareAndSet(which - 1, which)
     assert(ok)

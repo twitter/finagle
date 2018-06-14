@@ -1049,7 +1049,7 @@ private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
     case Throw(e) => false
   }
 
-  override protected def didMarkDead() {
+  override protected def didMarkDead(): Unit = {
     if (ejectFailedHost) healthBroker ! NodeMarkedDead(key)
   }
 

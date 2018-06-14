@@ -47,7 +47,7 @@ private[loadbalancer] class HeapLeastLoaded[Req, Rep](
   private[this] val HeapOps = Heap[Node](
     Ordering.by(_.load),
     new Heap.Indexer[Node] {
-      def apply(node: Node, i: Int) {
+      def apply(node: Node, i: Int): Unit = {
         node.index = i
       }
     }
@@ -89,7 +89,7 @@ private[loadbalancer] class HeapLeastLoaded[Req, Rep](
     loads.sum
   }
 
-  private[this] def addNode(serviceFactory: ServiceFactory[Req, Rep]) {
+  private[this] def addNode(serviceFactory: ServiceFactory[Req, Rep]): Unit = {
     size += 1
     val newNode = Node(serviceFactory, Zero, size)
     heap = heap :+ newNode
@@ -97,7 +97,7 @@ private[loadbalancer] class HeapLeastLoaded[Req, Rep](
     adds.incr()
   }
 
-  private[this] def remNode(serviceFactory: ServiceFactory[Req, Rep]) {
+  private[this] def remNode(serviceFactory: ServiceFactory[Req, Rep]): Unit = {
     val i = heap.indexWhere(n => n.factory eq serviceFactory, 1)
     val node = heap(i)
     swap(heap, i, size)
