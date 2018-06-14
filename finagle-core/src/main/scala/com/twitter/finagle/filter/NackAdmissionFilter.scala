@@ -67,7 +67,7 @@ object NackAdmissionFilter {
     def mk(): (Param, Stack.Param[Param]) = (this, Param.param)
   }
 
-  private[finagle] object Param {
+  object Param {
     /**
      * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
      * [[com.twitter.finagle.filter.NackAdmissionFilter]] module.
