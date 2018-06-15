@@ -332,9 +332,9 @@ resources for using Finagle.
                         <a class="object" href="NullValue$.html" title=""></a>
                         <a href="NullValue$.html" title="">NullValue</a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="OK$.html" title="Represents the OK Packet received from the server."></a>
-                        <a class="class" href="" title=""></a>
-                        <a href="" title="">OK</a>
+                        <a class="object" href="OK$.html" title=""></a>
+                        <a class="class" href="" title="Represents the OK Packet received from the server."></a>
+                        <a href="" title="Represents the OK Packet received from the server.">OK</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="Parameter$.html" title="For Scala users, the typical usage is by importing the implicit conversions and then letting the compiler do the conversions for you."></a>
                         <a class="trait" href="Parameter.html" title="A value of type A can implicitly convert to a Parameter if an evidence CanBeParameter[A] is available in scope via the Parameter.wrap or Parameter.wrapOption implicits."></a>
@@ -465,7 +465,11 @@ resources for using Finagle.
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Represents the OK Packet received from the server. It is sent
+to indicate that a command (e.g. <a href="PreparedStatement.html#modify(params:com.twitter.finagle.mysql.Parameter*):com.twitter.util.Future[com.twitter.finagle.mysql.OK]" class="extmbr" name="com.twitter.finagle.mysql.PreparedStatement#modify">PreparedStatement.modify</a>)
+has completed successfully.
+</p></div><dl class="paramcmts block"><dt class="param">affectedRows</dt><dd class="cmt"><p>how many records were changed by the command.</p></dd><dt class="param">insertId</dt><dd class="cmt"><p>the first automatically generated value successfully
+                inserted for an AUTO_INCREMENT column for an INSERT statement.</p></dd><dt class="param">serverStatus</dt><dd class="cmt"><p>server status bit mask.</p></dd><dt class="param">warningCount</dt><dd class="cmt"><p>how many warnings were generated.</p></dd><dt class="param">message</dt><dd class="cmt"><p>the status message, which will be an empty String if none is present.</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -520,7 +524,7 @@ resources for using Finagle.
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="com.twitter.finagle.mysql.OK#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.mysql.OK#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="&lt;init&gt;(affectedRows:Long,insertId:Long,serverStatus:Int,warningCount:Int,message:String):com.twitter.finagle.mysql.OK"></a><a id="&lt;init&gt;:OK"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/mysql/OK.html#&lt;init&gt;(affectedRows:Long,insertId:Long,serverStatus:Int,warningCount:Int,message:String):com.twitter.finagle.mysql.OK" title="Permalink">
@@ -535,7 +539,8 @@ resources for using Finagle.
         <span class="name">OK</span><span class="params">(<span name="affectedRows">affectedRows: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>, <span name="insertId">insertId: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>, <span name="serverStatus">serverStatus: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="warningCount">warningCount: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span>
       </span>
       
-      
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">affectedRows</dt><dd class="cmt"><p>how many records were changed by the command.</p></dd><dt class="param">insertId</dt><dd class="cmt"><p>the first automatically generated value successfully
+                inserted for an AUTO_INCREMENT column for an INSERT statement.</p></dd><dt class="param">serverStatus</dt><dd class="cmt"><p>server status bit mask.</p></dd><dt class="param">warningCount</dt><dd class="cmt"><p>how many warnings were generated.</p></dd><dt class="param">message</dt><dd class="cmt"><p>the status message, which will be an empty String if none is present.</p></dd></dl></div>
     </li></ol>
             </div>
 

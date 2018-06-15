@@ -163,10 +163,10 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.service.DeadlineFilter" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="DeadlineFilter"></a><a id="DeadlineFilter:DeadlineFilter"></a>
+    </li><li name="com.twitter.finagle.service.TimeoutFilter" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="TimeoutFilter"></a><a id="TimeoutFilter:TimeoutFilter"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/index.html#DeadlineFilter" title="Permalink">
+      <a href="../../../../com/twitter/finagle/service/index.html#TimeoutFilter" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -175,66 +175,53 @@ resources for using Finagle.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="DeadlineFilter provides an admission control module that can be pushed onto the stack to reject requests with expired deadlines (deadlines are set in the TimeoutFilter)." href="DeadlineFilter$.html"><span class="name">DeadlineFilter</span></a>
+        <a title="" href="TimeoutFilter$.html"><span class="name">TimeoutFilter</span></a>
       </span>
       
-      <p class="shortcomment cmt">DeadlineFilter provides an admission control module that can be pushed onto the stack to
-reject requests with expired deadlines (deadlines are set in the TimeoutFilter).</p><div class="fullcomment"><div class="comment cmt"><p>DeadlineFilter provides an admission control module that can be pushed onto the stack to
-reject requests with expired deadlines (deadlines are set in the TimeoutFilter).
-For servers, DeadlineFilter.module should be pushed onto the stack after the stats filters so
-stats are recorded for the request, and before TimeoutFilter where a new Deadline is set.
-For clients, DeadlineFilter.module should be after the stats filters; higher in the stack is
-preferable so requests are rejected as early as possible.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.service">service</a></dd><dt>Note</dt><dd><span class="cmt"><p>Deadlines cross process boundaries and can span multiple nodes in a call graph.
-      Even if a direct caller doesn't set a deadline, the server may still receive one and thus
-      potentially fail the request. It is advised that all clients in the call graph be
-      well prepared to handle NACKs before using this.</p></span></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.service">service</a></dd></dl></div>
     </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="class" href="DeadlineFilter$$DeadlineExceededException.html" title=""></a>
-                        <a href="DeadlineFilter$$DeadlineExceededException.html" title="">DeadlineExceededException</a>
+                        <a class="object" href="TimeoutFilter$$Param$.html" title=""></a>
+                        <a class="class" href="TimeoutFilter$$Param.html" title="A class eligible for configuring a com.twitter.finagle.Stackable com.twitter.finagle.service.TimeoutFilter module."></a>
+                        <a href="TimeoutFilter$$Param.html" title="A class eligible for configuring a com.twitter.finagle.Stackable com.twitter.finagle.service.TimeoutFilter module.">Param</a>
                       </li><li class="current-entities indented5">
-                        <a class="object" href="DeadlineFilter$$Param$.html" title=""></a>
-                        <a class="class" href="" title="A class eligible for configuring a com.twitter.finagle.Stackable com.twitter.finagle.service.DeadlineFilter module."></a>
-                        <a href="" title="A class eligible for configuring a com.twitter.finagle.Stackable com.twitter.finagle.service.DeadlineFilter module.">Param</a>
+                        <a class="object" href="" title=""></a>
+                        <a class="class" href="TimeoutFilter$$PropagateDeadlines.html" title="A class eligible for configuring a com.twitter.finagle.Stackable com.twitter.finagle.service.TimeoutFilter module when used for enabling propagation of deadlines to outbound requests."></a>
+                        <a href="TimeoutFilter$$PropagateDeadlines.html" title="A class eligible for configuring a com.twitter.finagle.Stackable com.twitter.finagle.service.TimeoutFilter module when used for enabling propagation of deadlines to outbound requests.">PropagateDeadlines</a>
                       </li>
               </ul>
             </div>
           </div>
           <div id="content">
-            <body class="class type">
+            <body class="object value">
       <div id="definition">
-        <a href="DeadlineFilter$$Param$.html" title="See companion object"><div class="big-circle class-companion-object">c</div></a>
-        <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="index.html" class="extype" name="com.twitter.finagle.service">service</a>.<a href="DeadlineFilter$.html" class="extype" name="com.twitter.finagle.service.DeadlineFilter">DeadlineFilter</a></p>
-        <h1><a href="DeadlineFilter$$Param$.html" title="See companion object">Param</a><span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$$Param.html" title="Permalink">
+        <a href="TimeoutFilter$$PropagateDeadlines.html" title="See companion class"><div class="big-circle object-companion-class">o</div></a>
+        <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="index.html" class="extype" name="com.twitter.finagle.service">service</a>.<a href="TimeoutFilter$.html" class="extype" name="com.twitter.finagle.service.TimeoutFilter">TimeoutFilter</a></p>
+        <h1><a href="TimeoutFilter$$PropagateDeadlines.html" title="See companion class">PropagateDeadlines</a><span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/TimeoutFilter$$PropagateDeadlines$.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
         <h3><span class="morelinks"><div>
-            Companion <a href="DeadlineFilter$$Param$.html" title="See companion object">object Param</a>
+            Companion <a href="TimeoutFilter$$PropagateDeadlines.html" title="See companion class">class PropagateDeadlines</a>
           </div></span></h3>
       </div>
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">case class</span>
+        <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">Param</span><span class="params">(<span name="maxRejectFraction">maxRejectFraction: <a href="http://www.scala-lang.org/api/2.12.4/scala/Double.html#scala.Double" class="extype" name="scala.Double">Double</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <span class="name">PropagateDeadlines</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A class eligible for configuring a <a href="../Stackable.html" class="extype" name="com.twitter.finagle.Stackable">com.twitter.finagle.Stackable</a>
-<a href="DeadlineFilter.html" class="extype" name="com.twitter.finagle.service.DeadlineFilter">com.twitter.finagle.service.DeadlineFilter</a> module.
-</p></div><dl class="paramcmts block"><dt class="param">maxRejectFraction</dt><dd class="cmt"><p>Maximum fraction of requests that can be
-       rejected over <code>rejectPeriod</code>. Must be between 0.0 and 1.0.</p></dd></dl><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/Equals.html#scala.Equals" class="extype" name="scala.Equals">Equals</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
         </div></div>
         
 
@@ -260,7 +247,7 @@ preferable so requests are rejected as early as possible.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.service.DeadlineFilter.Param"><span>Param</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.service.TimeoutFilter.PropagateDeadlines"><span>PropagateDeadlines</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -278,27 +265,7 @@ preferable so requests are rejected as early as possible.
 
       <div id="template">
         <div id="allMembers">
-        <div id="constructors" class="members">
-              <h3>Instance Constructors</h3>
-              <ol><li name="com.twitter.finagle.service.DeadlineFilter.Param#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(maxRejectFraction:Double):com.twitter.finagle.service.DeadlineFilter.Param"></a><a id="&lt;init&gt;:Param"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$$Param.html#&lt;init&gt;(maxRejectFraction:Double):com.twitter.finagle.service.DeadlineFilter.Param" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">new</span>
-      </span>
-      <span class="symbol">
-        <span class="name">Param</span><span class="params">(<span name="maxRejectFraction">maxRejectFraction: <a href="http://www.scala-lang.org/api/2.12.4/scala/Double.html#scala.Double" class="extype" name="scala.Double">Double</a></span>)</span>
-      </span>
-      
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">maxRejectFraction</dt><dd class="cmt"><p>Maximum fraction of requests that can be
-       rejected over <code>rejectPeriod</code>. Must be between 0.0 and 1.0.</p></dd></dl></div>
-    </li></ol>
-            </div>
+        
 
         
 
@@ -310,7 +277,7 @@ preferable so requests are rejected as early as possible.
                 <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$$Param.html#!=(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/service/TimeoutFilter$$PropagateDeadlines$.html#!=(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -326,7 +293,7 @@ preferable so requests are rejected as early as possible.
     </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$$Param.html###():Int" title="Permalink">
+      <a href="../../../../com/twitter/finagle/service/TimeoutFilter$$PropagateDeadlines$.html###():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -342,7 +309,7 @@ preferable so requests are rejected as early as possible.
     </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$$Param.html#==(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/service/TimeoutFilter$$PropagateDeadlines$.html#==(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -355,10 +322,26 @@ preferable so requests are rejected as early as possible.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.service.TimeoutFilter.PropagateDeadlines#Default" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Default:Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/TimeoutFilter$$PropagateDeadlines$.html#Default:Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Default</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+      </span>
+      
+      
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$$Param.html#asInstanceOf[T0]:T0" title="Permalink">
+      <a href="../../../../com/twitter/finagle/service/TimeoutFilter$$PropagateDeadlines$.html#asInstanceOf[T0]:T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -374,7 +357,7 @@ preferable so requests are rejected as early as possible.
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$$Param.html#clone():Object" title="Permalink">
+      <a href="../../../../com/twitter/finagle/service/TimeoutFilter$$PropagateDeadlines$.html#clone():Object" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -398,7 +381,7 @@ preferable so requests are rejected as early as possible.
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$$Param.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/service/TimeoutFilter$$PropagateDeadlines$.html#eq(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -411,10 +394,26 @@ preferable so requests are rejected as early as possible.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/TimeoutFilter$$PropagateDeadlines$.html#equals(x$1:Any):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$$Param.html#finalize():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/service/TimeoutFilter$$PropagateDeadlines$.html#finalize():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -436,7 +435,7 @@ preferable so requests are rejected as early as possible.
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$$Param.html#getClass():Class[_]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/service/TimeoutFilter$$PropagateDeadlines$.html#getClass():Class[_]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -452,10 +451,29 @@ preferable so requests are rejected as early as possible.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/TimeoutFilter$$PropagateDeadlines$.html#hashCode():Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd><dt>Annotations</dt><dd>
+                <span class="name">@native</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$$Param.html#isInstanceOf[T0]:Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/service/TimeoutFilter$$PropagateDeadlines$.html#isInstanceOf[T0]:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -468,42 +486,10 @@ preferable so requests are rejected as early as possible.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.service.DeadlineFilter.Param#maxRejectFraction" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="maxRejectFraction:Double"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$$Param.html#maxRejectFraction:Double" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">maxRejectFraction</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Double.html#scala.Double" class="extype" name="scala.Double">Double</a></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.service.DeadlineFilter.Param#mk" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="mk():(com.twitter.finagle.service.DeadlineFilter.Param,com.twitter.finagle.Stack.Param[com.twitter.finagle.service.DeadlineFilter.Param])"></a><a id="mk():(Param,Stack.Param[Param])"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$$Param.html#mk():(com.twitter.finagle.service.DeadlineFilter.Param,com.twitter.finagle.Stack.Param[com.twitter.finagle.service.DeadlineFilter.Param])" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">mk</span><span class="params">()</span><span class="result">: (<a href="" class="extype" name="com.twitter.finagle.service.DeadlineFilter.Param">Param</a>, <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Stack.Param</a>[<a href="" class="extype" name="com.twitter.finagle.service.DeadlineFilter.Param">Param</a>])</span>
-      </span>
-      
-      
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$$Param.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/service/TimeoutFilter$$PropagateDeadlines$.html#ne(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -519,7 +505,7 @@ preferable so requests are rejected as early as possible.
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$$Param.html#notify():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/service/TimeoutFilter$$PropagateDeadlines$.html#notify():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -538,7 +524,7 @@ preferable so requests are rejected as early as possible.
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$$Param.html#notifyAll():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/service/TimeoutFilter$$PropagateDeadlines$.html#notifyAll():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -554,10 +540,26 @@ preferable so requests are rejected as early as possible.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.service.TimeoutFilter.PropagateDeadlines#param" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="param:com.twitter.finagle.Stack.Param[com.twitter.finagle.service.TimeoutFilter.PropagateDeadlines]"></a><a id="param:Stack.Param[PropagateDeadlines]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/TimeoutFilter$$PropagateDeadlines$.html#param:com.twitter.finagle.Stack.Param[com.twitter.finagle.service.TimeoutFilter.PropagateDeadlines]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">param</span><span class="result">: <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Stack.Param</a>[<a href="TimeoutFilter$$PropagateDeadlines.html" class="extype" name="com.twitter.finagle.service.TimeoutFilter.PropagateDeadlines">PropagateDeadlines</a>]</span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$$Param.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+      <a href="../../../../com/twitter/finagle/service/TimeoutFilter$$PropagateDeadlines$.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -570,10 +572,26 @@ preferable so requests are rejected as early as possible.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/TimeoutFilter$$PropagateDeadlines$.html#toString():String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$$Param.html#wait():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/service/TimeoutFilter$$PropagateDeadlines$.html#wait():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -595,7 +613,7 @@ preferable so requests are rejected as early as possible.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$$Param.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/service/TimeoutFilter$$PropagateDeadlines$.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -617,7 +635,7 @@ preferable so requests are rejected as early as possible.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$$Param.html#wait(x$1:Long):Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/service/TimeoutFilter$$PropagateDeadlines$.html#wait(x$1:Long):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -652,10 +670,6 @@ preferable so requests are rejected as early as possible.
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></h3>
             </div><div class="parent" name="java.io.Serializable">
               <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
-            </div><div class="parent" name="scala.Product">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a></h3>
-            </div><div class="parent" name="scala.Equals">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/Equals.html#scala.Equals" class="extype" name="scala.Equals">Equals</a></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

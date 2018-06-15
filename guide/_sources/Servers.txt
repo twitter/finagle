@@ -35,6 +35,8 @@ comes with variants that allow for serving a simple ``Service`` as well. Typical
           via a Thrift IDL. See the protocols section on :ref:`Thrift <thrift_and_scrooge>`
           for more details.
 
+.. _server_modules:
+
 Server Modules
 --------------
 

@@ -3113,9 +3113,9 @@ to indicate the health of <a href="Service.html" class="extype" name="com.twitte
 <a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">transport.Transport</a>.</p><p>Object <a href="Status$.html" class="extype" name="com.twitter.finagle.Status">Status$</a> contains the status definitions.
 </p></div></div>
     </li><li name="com.twitter.finagle.StreamClosedException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="StreamClosedExceptionextendsChannelExceptionwithNoStackTrace"></a><a id="StreamClosedException:StreamClosedException"></a>
+      <a id="StreamClosedExceptionextendsChannelExceptionwithFailureFlags[com.twitter.finagle.StreamClosedException]withNoStackTrace"></a><a id="StreamClosedException:StreamClosedException"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#StreamClosedExceptionextendsChannelExceptionwithNoStackTrace" title="Permalink">
+      <a href="../../../com/twitter/finagle/index.html#StreamClosedExceptionextendsChannelExceptionwithFailureFlags[com.twitter.finagle.StreamClosedException]withNoStackTrace" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -3124,7 +3124,7 @@ to indicate the health of <a href="Service.html" class="extype" name="com.twitte
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Indicates that a given stream was closed, for instance if the stream was reset by a peer or a proxy." href="StreamClosedException.html"><span class="name">StreamClosedException</span></a><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a></span>
+        <a title="Indicates that a given stream was closed, for instance if the stream was reset by a peer or a proxy." href="StreamClosedException.html"><span class="name">StreamClosedException</span></a><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="StreamClosedException.html" class="extype" name="com.twitter.finagle.StreamClosedException">StreamClosedException</a>] with <a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a></span>
       </span>
       
       <p class="shortcomment cmt">Indicates that a given stream was closed, for instance if the stream

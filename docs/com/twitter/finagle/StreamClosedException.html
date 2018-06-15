@@ -1401,7 +1401,7 @@ generator.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">StreamClosedException</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a></span>
+        <span class="name">StreamClosedException</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="" class="extype" name="com.twitter.finagle.StreamClosedException">StreamClosedException</a>] with <a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a></span>
       </span>
       </h4>
 
@@ -1412,8 +1412,13 @@ was reset by a peer or a proxy.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a>, <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a>, <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a>, <a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a>, <a href="HasRemoteInfo.html" class="extype" name="com.twitter.finagle.HasRemoteInfo">HasRemoteInfo</a>, <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
-        </div></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a>, <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="" class="extype" name="com.twitter.finagle.StreamClosedException">StreamClosedException</a>], <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a>, <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a>, <a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a>, <a href="HasRemoteInfo.html" class="extype" name="com.twitter.finagle.HasRemoteInfo">HasRemoteInfo</a>, <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
+        </div><div class="toggleContainer block">
+            <span class="toggle">
+              Known Subclasses
+            </span>
+            <div class="subClasses hiddenContent"><a href="http2/GoAwayException.html" class="extype" name="com.twitter.finagle.http2.GoAwayException">GoAwayException</a>, <a href="http2/RstException.html" class="extype" name="com.twitter.finagle.http2.RstException">RstException</a></div>
+          </div></div>
         
 
       <div id="mbrsel">
@@ -1438,7 +1443,7 @@ was reset by a peer or a proxy.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.StreamClosedException"><span>StreamClosedException</span></li><li class="in" name="scala.util.control.NoStackTrace"><span>NoStackTrace</span></li><li class="in" name="com.twitter.finagle.ChannelException"><span>ChannelException</span></li><li class="in" name="com.twitter.logging.HasLogLevel"><span>HasLogLevel</span></li><li class="in" name="com.twitter.finagle.SourcedException"><span>SourcedException</span></li><li class="in" name="com.twitter.finagle.HasRemoteInfo"><span>HasRemoteInfo</span></li><li class="in" name="java.lang.Exception"><span>Exception</span></li><li class="in" name="java.lang.Throwable"><span>Throwable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.StreamClosedException"><span>StreamClosedException</span></li><li class="in" name="scala.util.control.NoStackTrace"><span>NoStackTrace</span></li><li class="in" name="com.twitter.finagle.FailureFlags"><span>FailureFlags</span></li><li class="in" name="com.twitter.finagle.ChannelException"><span>ChannelException</span></li><li class="in" name="com.twitter.logging.HasLogLevel"><span>HasLogLevel</span></li><li class="in" name="com.twitter.finagle.SourcedException"><span>SourcedException</span></li><li class="in" name="com.twitter.finagle.HasRemoteInfo"><span>HasRemoteInfo</span></li><li class="in" name="java.lang.Exception"><span>Exception</span></li><li class="in" name="java.lang.Throwable"><span>Throwable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -1503,6 +1508,22 @@ was reset by a peer or a proxy.
       </span>
       <span class="symbol">
         <span class="name">StreamClosedException</span><span class="params">(<span name="remoteAddress">remoteAddress: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>, <span name="streamId">streamId: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="whyFailed">whyFailed: <span class="extype" name="scala.Predef.String">String</span></span>)</span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.StreamClosedException#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(remoteAddress:Option[java.net.SocketAddress],streamId:String,whyFailed:String,flags:Long):com.twitter.finagle.StreamClosedException"></a><a id="&lt;init&gt;:StreamClosedException"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/StreamClosedException.html#&lt;init&gt;(remoteAddress:Option[java.net.SocketAddress],streamId:String,whyFailed:String,flags:Long):com.twitter.finagle.StreamClosedException" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">StreamClosedException</span><span class="params">(<span name="remoteAddress">remoteAddress: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>, <span name="streamId">streamId: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="whyFailed">whyFailed: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span>
       </span>
       
       
@@ -1596,6 +1617,40 @@ was reset by a peer or a proxy.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.FailureFlags#asNonRetryable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asNonRetryable:T"></a><a id="asNonRetryable:StreamClosedException"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/StreamClosedException.html#asNonRetryable:T" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asNonRetryable</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.StreamClosedException">StreamClosedException</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">This as a non-retryable failure.</p><div class="fullcomment"><div class="comment cmt"><p>This as a non-retryable failure. This does not mutate.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>FailureFlags</dd></dl></div>
+    </li><li name="com.twitter.finagle.FailureFlags#asRejected" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asRejected:T"></a><a id="asRejected:StreamClosedException"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/StreamClosedException.html#asRejected:T" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asRejected</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.StreamClosedException">StreamClosedException</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">This as a rejected failure.</p><div class="fullcomment"><div class="comment cmt"><p>This as a rejected failure. This does not mutate.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>FailureFlags</dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
@@ -1620,6 +1675,26 @@ was reset by a peer or a proxy.
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.StreamClosedException#copyWithFlags" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="copyWithFlags(newFlags:Long):com.twitter.finagle.StreamClosedException"></a><a id="copyWithFlags(Long):StreamClosedException"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/StreamClosedException.html#copyWithFlags(newFlags:Long):com.twitter.finagle.StreamClosedException" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">copyWithFlags</span><span class="params">(<span name="newFlags">newFlags: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.StreamClosedException">StreamClosedException</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A copy of this object with the given flags replacing the current flags.</p><div class="fullcomment"><div class="comment cmt"><p>A copy of this object with the given flags replacing the current flags. The
+caller of this method should check to see if a copy is necessary before
+calling.</p><p>As this is an internal API, the other <code>Throwable</code> fields such as the cause
+and stack trace should be handled by callers.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.StreamClosedException">StreamClosedException</a> → FailureFlags</dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -1840,6 +1915,24 @@ was reset by a peer or a proxy.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
+    </li><li name="com.twitter.finagle.FailureFlags#isFlagged" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isFlagged(which:Long):Boolean"></a><a id="isFlagged(Long):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/StreamClosedException.html#isFlagged(which:Long):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isFlagged</span><span class="params">(<span name="which">which: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Test if this is flagged with a particular set of flags
+</p><div class="fullcomment"><div class="comment cmt"><p>Test if this is flagged with a particular set of flags
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>FailureFlags</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -2151,6 +2244,8 @@ was reset by a peer or a proxy.
         <div id="inheritedMembers">
         <div class="parent" name="scala.util.control.NoStackTrace">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a></h3>
+            </div><div class="parent" name="com.twitter.finagle.FailureFlags">
+              <h3>Inherited from <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="" class="extype" name="com.twitter.finagle.StreamClosedException">StreamClosedException</a>]</h3>
             </div><div class="parent" name="com.twitter.finagle.ChannelException">
               <h3>Inherited from <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a></h3>
             </div><div class="parent" name="com.twitter.logging.HasLogLevel">

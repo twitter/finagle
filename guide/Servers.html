@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Servers &#8212; Finagle 18.5.0 documentation</title>
+    <title>Servers &#8212; Finagle 18.6.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '18.5.0',
+        VERSION:     '18.6.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 18.5.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 18.6.0 documentation" href="index.html" />
     <link rel="next" title="Clients" href="Clients.html" />
     <link rel="prev" title="Configuration" href="Configuration.html" />
    
@@ -102,11 +102,11 @@ via a Thrift IDL. See the protocols section on <a class="reference internal" hre
 for more details.</p>
 </div>
 <div class="section" id="server-modules">
-<h2>Server Modules<a class="headerlink" href="#server-modules" title="Permalink to this headline">¶</a></h2>
+<span id="id1"></span><h2>Server Modules<a class="headerlink" href="#server-modules" title="Permalink to this headline">¶</a></h2>
 <p>Finagle servers are simple; they are designed to serve requests quickly. As such,
 Finagle minimally furnishes servers with additional behavior. More sophisticated
 behavior lives in the <a class="reference internal" href="Clients.html#finagle-clients"><span class="std std-ref">clients</span></a>.</p>
-<div class="figure" id="id5">
+<div class="figure" id="id6">
 <img alt="_images/serverstack.svg" src="_images/serverstack.svg" /><p class="caption"><span class="caption-text">Fig. 1: A visual representation of each module in a default Finagle server.
 Requests flow from left to right.</span></p>
 </div>
@@ -244,7 +244,7 @@ for more details.</p>
 the <cite>concurrency</cite> of the Finagle server.</p>
 <p>By default, this module is disabled, which means a Finagle server&#8217;s requests concurrency is unbounded.
 To enable the <cite>Concurrency Limit</cite> module and put some bounds in terms of maximum number of requests
-that might be handled concurrently by your server, use the following example <a class="footnote-reference" href="#example" id="id1">[2]</a>.</p>
+that might be handled concurrently by your server, use the following example <a class="footnote-reference" href="#example" id="id2">[2]</a>.</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 
 <span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">server</span>
@@ -261,7 +261,7 @@ that might be handled concurrently by your server, use the following example <a 
 <li><cite>maxWaiters</cite> - the number of requests (on top of <cite>maxConcurrentRequests</cite>) allowed to be queued</li>
 </ol>
 <p>All the incoming requests on top of <code class="docutils literal"><span class="pre">(maxConcurrentRequests</span> <span class="pre">+</span> <span class="pre">maxWaiters)</span></code> will be
-<cite>rejected</cite> <a class="footnote-reference" href="#nack" id="id2">[1]</a> by the server. That said, the <cite>Concurrency Limit</cite> module acts as
+<cite>rejected</cite> <a class="footnote-reference" href="#nack" id="id3">[1]</a> by the server. That said, the <cite>Concurrency Limit</cite> module acts as
 <cite>static admission controller</cite> monitoring the current concurrency level of the incoming requests.</p>
 <p>See <a class="reference internal" href="Metrics.html#requests-concurrency-limit"><span class="std std-ref">Requests Concurrency metrics</span></a> for more details.</p>
 </div>
@@ -281,7 +281,7 @@ flag set.</p>
 <span class="k">val</span> <span class="n">nonRetryable</span> <span class="k">=</span> <span class="nc">Future</span><span class="o">.</span><span class="n">exception</span><span class="o">(</span><span class="nc">Failure</span><span class="o">(</span><span class="s">&quot;Don&#39;t try again&quot;</span><span class="o">,</span> <span class="nc">Failure</span><span class="o">.</span><span class="nc">Rejected</span><span class="o">|</span><span class="nc">Failure</span><span class="o">.</span><span class="nc">NonRetryable</span><span class="o">))</span>
 </pre></div>
 </div>
-<p>These responses will be considered <cite>rejected</cite> <a class="footnote-reference" href="#nack" id="id3">[1]</a> by Finagle.</p>
+<p>These responses will be considered <cite>rejected</cite> <a class="footnote-reference" href="#nack" id="id4">[1]</a> by Finagle.</p>
 </div>
 <div class="section" id="request-timeout">
 <h3>Request Timeout<a class="headerlink" href="#request-timeout" title="Permalink to this headline">¶</a></h3>
@@ -301,14 +301,14 @@ processed.</p>
 <table class="docutils footnote" frame="void" id="nack" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id3">2</a>)</em> Depending on the protocol, a rejected request might be transformed into a <a class="reference internal" href="Glossary.html#glossary-nack"><span class="std std-ref">nack</span></a>
+<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id3">1</a>, <a class="fn-backref" href="#id4">2</a>)</em> Depending on the protocol, a rejected request might be transformed into a <a class="reference internal" href="Glossary.html#glossary-nack"><span class="std std-ref">nack</span></a>
 (currently supported in HTTP/1.1 and Mux) message.</td></tr>
 </tbody>
 </table>
 <table class="docutils footnote" frame="void" id="example" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[2]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id4">2</a>)</em> Configuration parameters/values provided in this example are only demonstrate
+<tr><td class="label">[2]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id5">2</a>)</em> Configuration parameters/values provided in this example are only demonstrate
 the API usage, not the real world values. We do not recommend blindly applying those values
 to production systems.</td></tr>
 </tbody>
@@ -321,7 +321,7 @@ the lifetime of a session. The <cite>Session Expiration</cite> module is attache
 and expires a service/session after a certain amount of idle time. The module is
 implemented by <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/ExpiringService.scala">ExpiringService</a>.</p>
 <p>The default setting for the <cite>Expiration</cite> module is to never expire a session. Here is how
-it can be configured <a class="footnote-reference" href="#example" id="id4">[2]</a>.</p>
+it can be configured <a class="footnote-reference" href="#example" id="id5">[2]</a>.</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 

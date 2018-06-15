@@ -427,6 +427,10 @@ and Updating).
       
       
     </li><li class="current-entities indented4">
+                        <a class="object" href="BalancerRegistry$.html" title=""></a>
+                        <a class="class" href="BalancerRegistry.html" title="A registry of load balancers currently in use."></a>
+                        <a href="BalancerRegistry.html" title="A registry of load balancers currently in use.">BalancerRegistry</a>
+                      </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Balancers$.html" title="Constructor methods for various load balancers."></a>
                         <a href="Balancers$.html" title="Constructor methods for various load balancers.">Balancers</a>
@@ -442,6 +446,10 @@ and Updating).
                         <a class="object" href="LoadBalancerFactory$.html" title="Exposes a Stack.Module which composes load balancing into the respective Stack."></a>
                         <a class="class" href="LoadBalancerFactory.html" title="A thin interface around a Balancer's constructor that allows Finagle to pass in context from the stack to the balancers at construction time."></a>
                         <a href="LoadBalancerFactory.html" title="A thin interface around a Balancer's constructor that allows Finagle to pass in context from the stack to the balancers at construction time.">LoadBalancerFactory</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="Metadata.html" title="Information about a load balancer."></a>
+                        <a href="Metadata.html" title="Information about a load balancer.">Metadata</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="NoNodesOpenException.html" title="While this exception is safe to retry, the assumption used here is that the underlying situation will not change soon enough to make a retry worthwhile as retrying is most likely to eat up the entire budget."></a>
@@ -1067,7 +1075,24 @@ and Updating).
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.loadbalancer.EndpointFactory" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.loadbalancer.BalancerRegistry" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="BalancerRegistryextendsAnyRef"></a><a id="BalancerRegistry:BalancerRegistry"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/loadbalancer/index.html#BalancerRegistryextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A registry of load balancers currently in use." href="BalancerRegistry.html"><span class="name">BalancerRegistry</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A registry of <span class="extype" name="Balancer">load balancers</span> currently in use.</p><div class="fullcomment"><div class="comment cmt"><p>A registry of <span class="extype" name="Balancer">load balancers</span> currently in use.</p><p>This class is thread-safe.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>TwitterServer's &quot;/admin/balancers.json&quot; admin endpoint.</p></span><span class="cmt"><p><span class="extype" name="BalancerRegistry$.get()">BalancerRegistry$.get()</span></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.loadbalancer.EndpointFactory" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="EndpointFactory[Req,Rep]extendsServiceFactory[Req,Rep]"></a><a id="EndpointFactory[Req,Rep]:EndpointFactory[Req,Rep]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/loadbalancer/index.html#EndpointFactory[Req,Rep]extendsServiceFactory[Req,Rep]" title="Permalink">
@@ -1107,6 +1132,24 @@ context from the stack to the balancers at construction time.</p><div class="ful
 context from the stack to the balancers at construction time.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#load-balancing" target="_blank">user guide</a>
 for more details.</p></span><span class="cmt"><p><a href="Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> for a collection of available balancers.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.loadbalancer.Metadata" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="MetadataextendsAnyRef"></a><a id="Metadata:Metadata"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/loadbalancer/index.html#MetadataextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Information about a load balancer." href="Metadata.html"><span class="name">Metadata</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Information about a <span class="extype" name="Balancer">load balancer</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Information about a <span class="extype" name="Balancer">load balancer</span>.</p><p>This class is thread-safe and while the class itself is immutable,
+it proxies data from a <span class="extype" name="Balancer">Balancer</span> which may be mutable.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>TwitterServer's &quot;/admin/balancers.json&quot; admin endpoint.</p></span><span class="cmt"><p><a href="BalancerRegistry.html" class="extype" name="com.twitter.finagle.loadbalancer.BalancerRegistry">BalancerRegistry</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.loadbalancer.NoNodesOpenException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="NoNodesOpenExceptionextendsRuntimeExceptionwithFailureFlags[com.twitter.finagle.loadbalancer.NoNodesOpenException]withHasLogLevelwithSourcedException"></a><a id="NoNodesOpenException:NoNodesOpenException"></a>
       <span class="permalink">
@@ -1253,6 +1296,22 @@ which override it).
 clients which override it).</p><div class="fullcomment"><div class="comment cmt"><p>Set the default <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a> for the entire process (outside of
 clients which override it).
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="LoadBalancerFactory$$Param.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.Param">LoadBalancerFactory.Param</a> for more info.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.loadbalancer.BalancerRegistry" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BalancerRegistry"></a><a id="BalancerRegistry:BalancerRegistry"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/loadbalancer/index.html#BalancerRegistry" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="BalancerRegistry$.html"><span class="name">BalancerRegistry</span></a>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.loadbalancer.Balancers" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Balancers"></a><a id="Balancers:Balancers"></a>
       <span class="permalink">

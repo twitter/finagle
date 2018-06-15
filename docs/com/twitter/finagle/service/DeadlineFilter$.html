@@ -402,10 +402,10 @@ preferable so requests are rejected as early as possible.
       </span>
       
       
-    </li><li name="com.twitter.finagle.service.DeadlineFilter.Param" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ParamextendsProductwithSerializable"></a><a id="Param:Param"></a>
+    </li><li name="com.twitter.finagle.service.DeadlineFilter.MaxRejectFraction" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="MaxRejectFractionextendsProductwithSerializable"></a><a id="MaxRejectFraction:MaxRejectFraction"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$.html#ParamextendsProductwithSerializable" title="Permalink">
+      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$.html#MaxRejectFractionextendsProductwithSerializable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -414,7 +414,7 @@ preferable so requests are rejected as early as possible.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A class eligible for configuring a com.twitter.finagle.Stackable com.twitter.finagle.service.DeadlineFilter module." href="DeadlineFilter$$Param.html"><span class="name">Param</span></a><span class="params">(<span name="maxRejectFraction">maxRejectFraction: <a href="http://www.scala-lang.org/api/2.12.4/scala/Double.html#scala.Double" class="extype" name="scala.Double">Double</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A class eligible for configuring a com.twitter.finagle.Stackable com.twitter.finagle.service.DeadlineFilter module." href="DeadlineFilter$$MaxRejectFraction.html"><span class="name">MaxRejectFraction</span></a><span class="params">(<span name="maxRejectFraction">maxRejectFraction: <a href="http://www.scala-lang.org/api/2.12.4/scala/Double.html#scala.Double" class="extype" name="scala.Double">Double</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A class eligible for configuring a <a href="../Stackable.html" class="extype" name="com.twitter.finagle.Stackable">com.twitter.finagle.Stackable</a>
@@ -422,6 +422,47 @@ preferable so requests are rejected as early as possible.
 <a href="DeadlineFilter.html" class="extype" name="com.twitter.finagle.service.DeadlineFilter">com.twitter.finagle.service.DeadlineFilter</a> module.
 </p></div><dl class="paramcmts block"><dt class="param">maxRejectFraction</dt><dd class="cmt"><p>Maximum fraction of requests that can be
        rejected over <code>rejectPeriod</code>. Must be between 0.0 and 1.0.</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.service.DeadlineFilter.Mode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ModeextendsProductwithSerializable"></a><a id="Mode:Mode"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$.html#ModeextendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="A class eligible for configuring a com.twitter.finagle.Stackable com.twitter.finagle.service.DeadlineFilter module." href="DeadlineFilter$$Mode.html"><span class="name">Mode</span></a><span class="params">(<span name="param">param: <a href="DeadlineFilter$$Mode$$FilterMode.html" class="extype" name="com.twitter.finagle.service.DeadlineFilter.Mode.FilterMode">FilterMode</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A class eligible for configuring a <a href="../Stackable.html" class="extype" name="com.twitter.finagle.Stackable">com.twitter.finagle.Stackable</a>
+<a href="DeadlineFilter.html" class="extype" name="com.twitter.finagle.service.DeadlineFilter">com.twitter.finagle.service.DeadlineFilter</a> module.</p><div class="fullcomment"><div class="comment cmt"><p>A class eligible for configuring a <a href="../Stackable.html" class="extype" name="com.twitter.finagle.Stackable">com.twitter.finagle.Stackable</a>
+<a href="DeadlineFilter.html" class="extype" name="com.twitter.finagle.service.DeadlineFilter">com.twitter.finagle.service.DeadlineFilter</a> module.
+</p></div><dl class="paramcmts block"><dt class="param">param</dt><dd class="cmt"><p><code>Disabled</code> will omit <code>DeadlineFilter</code> from the server
+        stack. <code>DarkMode</code> will collect stats about deadlines but not reject requests.
+       <code>Enabled</code> turns <code>DeadlineFilter</code> on.</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.service.DeadlineFilter.RejectPeriod" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="RejectPeriodextendsProductwithSerializable"></a><a id="RejectPeriod:RejectPeriod"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$.html#RejectPeriodextendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="A class eligible for configuring a com.twitter.finagle.Stackable com.twitter.finagle.service.DeadlineFilter module." href="DeadlineFilter$$RejectPeriod.html"><span class="name">RejectPeriod</span></a><span class="params">(<span name="rejectPeriod">rejectPeriod: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A class eligible for configuring a <a href="../Stackable.html" class="extype" name="com.twitter.finagle.Stackable">com.twitter.finagle.Stackable</a>
+<a href="DeadlineFilter.html" class="extype" name="com.twitter.finagle.service.DeadlineFilter">com.twitter.finagle.service.DeadlineFilter</a> module.</p><div class="fullcomment"><div class="comment cmt"><p>A class eligible for configuring a <a href="../Stackable.html" class="extype" name="com.twitter.finagle.Stackable">com.twitter.finagle.Stackable</a>
+<a href="DeadlineFilter.html" class="extype" name="com.twitter.finagle.service.DeadlineFilter">com.twitter.finagle.service.DeadlineFilter</a> module.
+</p></div><dl class="paramcmts block"><dt class="param">rejectPeriod</dt><dd class="cmt"><p>No more than <code>maxRejectFraction</code> of requests will be
+       discarded over the <code>rejectPeriod</code>. Must be <code>&gt;= 1 second</code> and <code>&lt;= 60 seconds</code>.</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -797,10 +838,10 @@ preferable so requests are rejected as early as possible.
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.service.DeadlineFilter.Param" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Param"></a><a id="Param:Param"></a>
+    </li><li name="com.twitter.finagle.service.DeadlineFilter.MaxRejectFraction" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MaxRejectFraction"></a><a id="MaxRejectFraction:MaxRejectFraction"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$.html#Param" title="Permalink">
+      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$.html#MaxRejectFraction" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -809,7 +850,39 @@ preferable so requests are rejected as early as possible.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="DeadlineFilter$$Param$.html"><span class="name">Param</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="DeadlineFilter$$MaxRejectFraction$.html"><span class="name">MaxRejectFraction</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.service.DeadlineFilter.Mode" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Mode"></a><a id="Mode:Mode"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$.html#Mode" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="DeadlineFilter$$Mode$.html"><span class="name">Mode</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.service.DeadlineFilter.RejectPeriod" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RejectPeriod"></a><a id="RejectPeriod:RejectPeriod"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/DeadlineFilter$.html#RejectPeriod" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="DeadlineFilter$$RejectPeriod$.html"><span class="name">RejectPeriod</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       

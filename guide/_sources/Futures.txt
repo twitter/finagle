@@ -14,6 +14,55 @@ Futures also decouple Finagle from the operating system and runtime
 thread schedulers. This is used in important ways; for example,
 Finagle uses thread biasing to reduce context switching costs.
 
+The harmony of this analogy has one discordant caveat: *don't
+perform blocking operations in a Future*. Futures aren't
+preemptive; they must yield control via ``flatMap``. Blocking
+operations disrupt this, halting the progress of other asynchronous
+operations, and cause your application to experience unexpected
+slowness, a decrease in throughput, and potentially deadlocks. But
+of course it's possible for blocking operations to be combined safely
+with Futures as we'll see.
+
+Blocking or synchronous work
+----------------------------
+
+When you have work that is blocking, say I/O or a library
+not written in an asynchronous style, you should use a
+``com.twitter.util.FuturePool``. FuturePool manages a pool of
+threads that don't do any other work, which means that blocking
+operations won't halt other asynchronous work.
+
+In the code below, ``someIO`` is an operation that waits for
+I/O and returns a string (e.g., reading from a file). Wrapping
+``someIO(): String`` in ``FuturePool.unboundedPool`` returns a
+``Future[String]``, which allows us to combine this blocking
+operation with other Futures in a safe way.
+
+Scala:
+
+.. code-block:: scala
+
+    import com.twitter.util.{Future, FuturePool}
+
+    def someIO(): String =
+      // does some blocking I/O and returns a string
+
+    val futureResult: Future[String] = FuturePool.unboundedPool {
+      someIO()
+    }
+
+Java:
+
+.. code-block:: java
+
+    import com.twitter.util.Future;
+    import com.twitter.util.FuturePools;
+    import static com.twitter.util.Function.func0;
+
+    Future<String> futureResult = FuturePools.unboundedPool().apply(
+      func0(() -> someIO());
+    );
+
 Futures as containers
 ---------------------
 
@@ -183,6 +232,7 @@ The following retries a request infinitely should it fail with a
       case exc: TimeoutException => fetchUrlWithRetry(url)
     }
 
+
 Other resources
 ---------------
 
@@ -193,9 +243,12 @@ Other resources
   (*com.twitter.util.Future*), but there are still some naming
   differences.
 - Akka_’s documentation also has a `section dedicated to futures`_.
+- `Finagle Block Party`_ details why blocking is bad, and more
+  importantly how to detect and fix it.
 
 .. _Akka: http://akka.io/
 .. _`Effective Scala`: http://twitter.github.com/effectivescala/
+.. _`Finagle Block Party`: https://finagle.github.io/blog/2016/09/01/block-party/
 .. _`section discussing futures`: http://twitter.github.com/effectivescala/#Twitter's%20standard%20libraries-Futures
 .. _here: http://docs.scala-lang.org/overviews/core/futures.html
 .. _`section dedicated to futures`: http://doc.akka.io/docs/akka/2.1.0/scala/futures.html

@@ -192,6 +192,10 @@ resources for using Finagle.
                         <a class="class" href="MonitorFilter.html" title="A com.twitter.finagle.Filter that handles exceptions (incl."></a>
                         <a href="MonitorFilter.html" title="A com.twitter.finagle.Filter that handles exceptions (incl.">MonitorFilter</a>
                       </li><li class="current-entities indented4">
+                        <a class="object" href="NackAdmissionFilter$.html" title=""></a>
+                        <a class="class" href="NackAdmissionFilter.html" title="This filter probabilistically drops requests if the nack rate exceeds the nackRateThreshold."></a>
+                        <a href="NackAdmissionFilter.html" title="This filter probabilistically drops requests if the nack rate exceeds the nackRateThreshold.">NackAdmissionFilter</a>
+                      </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="RequestLogger$.html" title=""></a>
                         <a href="RequestLogger$.html" title="">RequestLogger</a>
@@ -752,7 +756,7 @@ on a configuration file, for instance.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Function2#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.Filter#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/filter/LoggingFilter.html#toString():String" title="Permalink">
@@ -764,10 +768,10 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function2 → AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a> → Function2 → AnyRef → Any</dd></dl></div>
     </li><li name="scala.Function2#tupled" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tupled:((T1,T2))=&gt;R"></a><a id="tupled:((Req,Service[Req,Rep]))⇒Future[Rep]"></a>
       <span class="permalink">

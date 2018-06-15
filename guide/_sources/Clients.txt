@@ -262,7 +262,7 @@ exceptions from the remote server should be applied explicitly.
 
   val retry = new RetryFilter(
     retryPolicy = policy,
-    timer = DefaultTimer.twitter,
+    timer = DefaultTimer,
     statsReceiver = NullStatsReceiver,
     retryBudget = budget
   )

@@ -428,7 +428,7 @@ the <span class="extype" name="Future">Future</span> will be interrupted via <sp
       </span>
       
       
-    </li><li name="com.twitter.finagle.service.TimeoutFilter#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.service.TimeoutFilter#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="&lt;init&gt;(timeoutFn:()=&gt;com.twitter.util.Duration,exceptionFn:com.twitter.util.Duration=&gt;com.twitter.finagle.RequestTimeoutException,timer:com.twitter.util.Timer):com.twitter.finagle.service.TimeoutFilter[Req,Rep]"></a><a id="&lt;init&gt;:TimeoutFilter[Req,Rep]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/service/TimeoutFilter.html#&lt;init&gt;(timeoutFn:()=&gt;com.twitter.util.Duration,exceptionFn:com.twitter.util.Duration=&gt;com.twitter.finagle.RequestTimeoutException,timer:com.twitter.util.Timer):com.twitter.finagle.service.TimeoutFilter[Req,Rep]" title="Permalink">
@@ -441,6 +441,22 @@ the <span class="extype" name="Future">Future</span> will be interrupted via <sp
       </span>
       <span class="symbol">
         <span class="name">TimeoutFilter</span><span class="params">(<span name="timeoutFn">timeoutFn: () ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>, <span name="exceptionFn">exceptionFn: (<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>) ⇒ <a href="../RequestTimeoutException.html" class="extype" name="com.twitter.finagle.RequestTimeoutException">RequestTimeoutException</a></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html#com.twitter.util.Timer" class="extype" name="com.twitter.util.Timer">Timer</a></span>)</span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.service.TimeoutFilter#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="&lt;init&gt;(timeoutFn:()=&gt;com.twitter.util.Duration,exceptionFn:com.twitter.util.Duration=&gt;com.twitter.finagle.RequestTimeoutException,timer:com.twitter.util.Timer,propagateDeadlines:Boolean):com.twitter.finagle.service.TimeoutFilter[Req,Rep]"></a><a id="&lt;init&gt;:TimeoutFilter[Req,Rep]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/TimeoutFilter.html#&lt;init&gt;(timeoutFn:()=&gt;com.twitter.util.Duration,exceptionFn:com.twitter.util.Duration=&gt;com.twitter.finagle.RequestTimeoutException,timer:com.twitter.util.Timer,propagateDeadlines:Boolean):com.twitter.finagle.service.TimeoutFilter[Req,Rep]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">TimeoutFilter</span><span class="params">(<span name="timeoutFn">timeoutFn: () ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>, <span name="exceptionFn">exceptionFn: (<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>) ⇒ <a href="../RequestTimeoutException.html" class="extype" name="com.twitter.finagle.RequestTimeoutException">RequestTimeoutException</a></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html#com.twitter.util.Timer" class="extype" name="com.twitter.util.Timer">Timer</a></span>, <span name="propagateDeadlines">propagateDeadlines: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span>
       </span>
       
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">timeoutFn</dt><dd class="cmt"><p>the timeout to apply to requests</p></dd><dt class="param">exceptionFn</dt><dd class="cmt"><p>an exception object to return in cases of timeout exceedance</p></dd><dt class="param">timer</dt><dd class="cmt"><p>a <code>Timer</code> object used to track elapsed time</p></dd></dl></div>
@@ -844,7 +860,7 @@ on a configuration file, for instance.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Function2#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.Filter#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/service/TimeoutFilter.html#toString():String" title="Permalink">
@@ -856,10 +872,10 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function2 → AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a> → Function2 → AnyRef → Any</dd></dl></div>
     </li><li name="scala.Function2#tupled" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tupled:((T1,T2))=&gt;R"></a><a id="tupled:((Req,Service[Req,Rep]))⇒Future[Rep]"></a>
       <span class="permalink">

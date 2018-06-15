@@ -213,6 +213,50 @@ When can I use a null?
 None of Finagle's APIs admits nulls unless noted otherwise.  Finagle is written in Scala, and by
 convention, we use Scala `Options` when a parameter or a result is optional.
 
+Where is time spent in the client stack?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Finagle's :ref:`clients  <client_modules>` and :ref:`servers <server_modules>`
+have many modules that are tasked with a wide assortment of jobs. When there
+is unexpected latency, it can be useful to have visibility into where time
+is spent. Finagle's `RequestLogger` can help with this. It can be enabled by
+setting the ``com.twitter.finagle.request.Logger`` level to ``TRACE``.
+
+The logs include synchronous and asynchronous time for each stack module's
+`Filter`. Synchronous here means the time spent from the beginning of the
+`Filter.apply` call to when the `Future` is returned from the `Filter`.
+Asynchronous here is how long it takes from the beginning of the
+`Filter.apply` call to when the returned `Future` is satisfied.
+
+As an example, given this stack module with the name "slow-down-module":
+
+.. code-block:: scala
+
+  import com.twitter.conversions.time._
+  import com.twitter.finagle.Filter
+  import com.twitter.finagle.util.DefaultTimer
+
+  class SlowFilterDoNotUse extends Filter[Int, Int, Int, Int] {
+    def apply(request: Int, service: Service[Int, Int]): Future[Int] = {
+      // this delays the synchronous path
+      Thread.sleep(1.second.inMilliseconds)
+
+      // the call to `Future.delayed` delays the asynchronous path
+      service(request).delayed(500.milliseconds)(DefaultTimer)
+    }
+  }
+
+The output of `RequestLogger` would look something like:
+
+.. code-block:: none
+
+  traceId=b07d63561ed1a9b9.b07d63561ed1a9b9<:b07d63561ed1a9b9 server-name slow-down-module begin
+  traceId=b07d63561ed1a9b9.b07d63561ed1a9b9<:b07d63561ed1a9b9 server-name slow-down-module end cumulative sync elapsed 1000025 us
+  traceId=b07d63561ed1a9b9.b07d63561ed1a9b9<:b07d63561ed1a9b9 server-name slow-down-module end cumulative async elapsed 1500045 us
+
+There will be these lines for every stack module and the log format is:
+*traceId=$traceId $client-or-server-label $module-name*.
+
 Mux-specific FAQ
 ----------------
 

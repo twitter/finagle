@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &#8212; Finagle 18.5.0 documentation</title>
+    <title>Metrics &#8212; Finagle 18.6.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '18.5.0',
+        VERSION:     '18.6.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 18.5.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 18.6.0 documentation" href="index.html" />
     <link rel="next" title="Unsuccessful Responses" href="UnsuccessfulResponses.html" />
     <link rel="prev" title="Protocols" href="Protocols.html" />
    
@@ -1085,12 +1085,12 @@ count as 5XX for this counter.</dd>
 <dd>A counter of the number of times a specific exception has been thrown in the middle of a stream.</dd>
 <dt><strong>stream/failures</strong></dt>
 <dd>A counter of the number of times any failure has been observed in the middle of a stream.</dd>
-<dt><strong>http/cookie/samesite_failures</strong></dt>
+<dt><strong>http/cookie/samesite_failures</strong> <cite>verbosity:debug</cite></dt>
 <dd>A counter of the number of failed attempts to decode the SameSite Cookie attribute.</dd>
-<dt><strong>http/cookie/flagless_samesites</strong></dt>
+<dt><strong>http/cookie/flagless_samesites</strong> <cite>verbosity:debug</cite></dt>
 <dd>A counter of the number of times the SameSite attribute was set in a Response despite the
 SameSiteCodec being disabled.</dd>
-<dt><strong>http/cookie/dropped_samesites</strong></dt>
+<dt><strong>http/cookie/dropped_samesites</strong> <cite>verbosity:debug</cite></dt>
 <dd>A counter of the number of times the SameSite attribute was present in a Response Cookie
 but dropped after encoding.</dd>
 </dl>
@@ -1206,6 +1206,27 @@ upgraded a connection to TLS.</dd>
 due to incompatible TLS requirements or capabilities.</dd>
 </dl>
 </div>
+<div class="section" id="perendpoint-statsfilter">
+<h2>PerEndpoint StatsFilter<a class="headerlink" href="#perendpoint-statsfilter" title="Permalink to this headline">¶</a></h2>
+<p>Thrift/ThriftMux server side per-endpoint stats can be enabled by <cite>.withPerEndpointStats</cite>,
+such as <cite>ThriftMux.server.withPerEndpointStats...</cite></p>
+<dl class="docutils">
+<dt><strong>&lt;server_label&gt;/&lt;service_name&gt;/&lt;method_name&gt;/requests</strong></dt>
+<dd>A counter of the total number of successes + failures for &lt;method_name&gt;.</dd>
+<dt><strong>&lt;server_label&gt;/&lt;service_name&gt;/&lt;method_name&gt;/success</strong></dt>
+<dd>A counter of the total number of successes for &lt;method_name&gt;.</dd>
+<dt><strong>&lt;server_label&gt;/&lt;service_name&gt;/&lt;method_name&gt;/failures/&lt;exception_name&gt;+</strong></dt>
+<dd>A counter of the number of times a specific exception has been thrown for &lt;method_name&gt;.</dd>
+<dt><strong>&lt;server_label&gt;/&lt;service_name&gt;/&lt;method_name&gt;/failures</strong></dt>
+<dd>A counter of the number of times any failure has been observed for &lt;method_name&gt;.</dd>
+</dl>
+<p>Thrift/ThriftMux client side per-endpoint stats need to be enabled by <cite>.withPerEndpointStats</cite>
+when constructing a client <cite>ServicePerEndpoint</cite>. Similar metrics as server side:</p>
+<p><strong>&lt;client_label&gt;/&lt;service_name&gt;/&lt;method_name&gt;/requests</strong></p>
+<p><strong>&lt;client_label&gt;/&lt;service_name&gt;/&lt;method_name&gt;/success</strong></p>
+<p><strong>&lt;client_label&gt;/&lt;service_name&gt;/&lt;method_name&gt;/failures/&lt;exception_name&gt;+</strong></p>
+<p><strong>&lt;client_label&gt;/&lt;service_name&gt;/&lt;method_name&gt;/failures</strong></p>
+</div>
 </div>
 
 
@@ -1320,6 +1341,7 @@ due to incompatible TLS requirements or capabilities.</dd>
 <li><a class="reference internal" href="#memcached">Memcached</a></li>
 <li><a class="reference internal" href="#mux">Mux</a></li>
 <li><a class="reference internal" href="#thriftmux">ThriftMux</a></li>
+<li><a class="reference internal" href="#perendpoint-statsfilter">PerEndpoint StatsFilter</a></li>
 </ul>
 </li>
 </ul>

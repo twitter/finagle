@@ -338,6 +338,10 @@ stabilized (moved elsewhere) at any time.
                         <a class="class" href="MonitorFilter.html" title="A com.twitter.finagle.Filter that handles exceptions (incl."></a>
                         <a href="MonitorFilter.html" title="A com.twitter.finagle.Filter that handles exceptions (incl.">MonitorFilter</a>
                       </li><li class="current-entities indented4">
+                        <a class="object" href="NackAdmissionFilter$.html" title=""></a>
+                        <a class="class" href="NackAdmissionFilter.html" title="This filter probabilistically drops requests if the nack rate exceeds the nackRateThreshold."></a>
+                        <a href="NackAdmissionFilter.html" title="This filter probabilistically drops requests if the nack rate exceeds the nackRateThreshold.">NackAdmissionFilter</a>
+                      </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="RequestLogger$.html" title=""></a>
                         <a href="RequestLogger$.html" title="">RequestLogger</a>
@@ -1146,6 +1150,28 @@ the future).</p>
 by the subsequent <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a>. Exceptions are handled
 according to the argument <a href="https://twitter.github.io/util/docs/com/twitter/util/Monitor.html" class="extype" name="com.twitter.util.Monitor">com.twitter.util.Monitor</a>.
 </p></div></div>
+    </li><li name="com.twitter.finagle.filter.NackAdmissionFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="NackAdmissionFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a><a id="NackAdmissionFilter[Req,Rep]:NackAdmissionFilter[Req,Rep]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/filter/index.html#NackAdmissionFilter[Req,Rep]extendsSimpleFilter[Req,Rep]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="This filter probabilistically drops requests if the nack rate exceeds the nackRateThreshold." href="NackAdmissionFilter.html"><span class="name">NackAdmissionFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.filter.NackAdmissionFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.NackAdmissionFilter.Rep">Rep</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">This filter probabilistically drops requests if the nack rate exceeds the
+<code>nackRateThreshold</code>.</p><div class="fullcomment"><div class="comment cmt"><p>This filter probabilistically drops requests if the nack rate exceeds the
+<code>nackRateThreshold</code>. In the case that most or all of the cluster which the
+client is speaking to is overloaded, this will help the cluster cool off.</p><p>The implementation of this filter is heavily inspired by Chapter 21, section
+&quot;Client-Side Throttling&quot; of O'Reilly's &quot;Site Reliability Engineering: How
+Google Runs Production Systems&quot;, by Beyer, Jones, Petoff, and Murphy, 1e.
+</p></div></div>
     </li><li name="com.twitter.finagle.filter.RequestMeterFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="RequestMeterFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a><a id="RequestMeterFilter[Req,Rep]:RequestMeterFilter[Req,Rep]"></a>
       <span class="permalink">
@@ -1231,6 +1257,22 @@ that signals a restartable or idempotent process.
       </span>
       <span class="symbol">
         <a title="" href="MaskCancelFilter$.html"><span class="name">MaskCancelFilter</span></a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.filter.NackAdmissionFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NackAdmissionFilter"></a><a id="NackAdmissionFilter:NackAdmissionFilter"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/filter/index.html#NackAdmissionFilter" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="NackAdmissionFilter$.html"><span class="name">NackAdmissionFilter</span></a>
       </span>
       
       
