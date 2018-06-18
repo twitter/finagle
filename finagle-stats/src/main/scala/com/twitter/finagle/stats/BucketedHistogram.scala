@@ -1,5 +1,7 @@
 package com.twitter.finagle.stats
 
+import java.util.concurrent.atomic.{AtomicLong, AtomicIntegerArray}
+
 private[twitter] object BucketedHistogram {
 
   private[stats] val DefaultQuantiles = IndexedSeq(
@@ -51,6 +53,7 @@ private[twitter] object BucketedHistogram {
   // 0.5% error => 1797 buckets, 7188 bytes, max 11 compares on binary search
   private[stats] val DefaultErrorPercent = 0.005
 
+  // this is exposed for testing, but should not be mutated
   private[stats] val DefaultLimits: Array[Int] =
     makeLimitsFor(DefaultErrorPercent)
 
@@ -73,6 +76,32 @@ private[twitter] object BucketedHistogram {
   def apply(): BucketedHistogram =
     new BucketedHistogram(DefaultErrorPercent)
 
+  /**
+   * A mutable struct used to store the most recent calculation
+   * of snapshot. By reusing a single instance per Stat allows us to
+   * avoid creating objects with medium length lifetimes that would
+   * need to exist from one stat collection to the next.
+   *
+   * @param percentiles represent the quantiles that we will compute, and should
+   *        be between 0 and 1.
+   */
+  private[stats] final class MutableSnapshot(val percentiles: IndexedSeq[Double]) {
+    @volatile var count: Long = 0L
+    @volatile var sum: Long = 0L
+    @volatile var max: Long = 0L
+    @volatile var min: Long = 0L
+    @volatile var avg: Double = 0.0
+    @volatile var quantiles: Array[Long] = new Array[Long](percentiles.length)
+
+    def clear(): Unit = {
+      count = 0L
+      sum = 0L
+      max = 0L
+      min = 0L
+      avg = 0.0
+      quantiles = new Array[Long](percentiles.length) // resets to 0
+    }
+  }
 }
 
 /**
@@ -85,8 +114,7 @@ private[twitter] object BucketedHistogram {
  * For instances created using the defaults via [[BucketedHistogram.apply()]],
  * the memory footprint should be around 7.2 KB.
  *
- * This is ''not'' internally thread-safe and thread-safety must be applied
- * externally. Typically, this is done via [[MetricsBucketedHistogram]].
+ * This is thread-safe.
  *
  * ''Note:'' while the interface for [[add(Long)]] takes a `Long`,
  * internally the maximum value we will observe is `Int.MaxValue`. This is subject
@@ -98,7 +126,6 @@ private[twitter] object BucketedHistogram {
  * A few of the differences include:
  *  - bucket limits are configurable instead of fixed
  *  - counts per bucket are stored in int's
- *  - all synchronization is external
  *  - no tracking of min, max, sum
  *
  * @param limits the values at each index represent upper bounds, exclusive,
@@ -158,16 +185,22 @@ private[stats] final class BucketedHistogram(error: Double) {
     }
   }
 
-  private[this] def countsLength: Int = limits.length + 1
-
-  /** number of samples seen per corresponding bucket in `limits` */
-  private[this] val counts = new Array[Int](countsLength)
+  // we acquire the "read" lock when we add an element to the histogram
+  // we acquire the "write" lock when we need to rezero the histogram, or when
+  // we need to read the histogram.
+  private[this] val sync = new NonReentrantReadWriteLock
+  protected def countsLength: Int = limits.length + 1
 
   /** total number of samples seen */
-  private[this] var num = 0L
+  private[this] val num = new AtomicLong(0)
 
   /** total value of all samples seen */
-  private[this] var total = 0L
+  private[this] val total = new AtomicLong(0)
+
+  /**
+   * Number of samples seen per corresponding bucket in `limits`
+   */
+  private[this] val counts = new AtomicIntegerArray(countsLength)
 
   /**
    * Note: only values between `0` and `Int.MaxValue`, inclusive, are recorded.
@@ -175,33 +208,45 @@ private[stats] final class BucketedHistogram(error: Double) {
    * @inheritdoc
    */
   def add(value: Long): Unit = {
-    val index = if (value >= Int.MaxValue) {
-      total += Int.MaxValue
-      countsLength - 1
-    } else {
-      total += value
-      val asInt = value.toInt
-      // recall that limits represent upper bounds, exclusive — so take the next position (+1).
-      // we assume that no inputs can be larger than the largest value in the limits array.
-      findBucket(asInt)
+    sync.acquireShared(1)
+    try {
+      val index = if (value >= Int.MaxValue) {
+        total.getAndAdd(Int.MaxValue)
+        countsLength - 1
+      } else {
+        total.getAndAdd(value)
+        val asInt = value.toInt
+        // recall that limits represent upper bounds, exclusive — so take the next position (+1).
+        // we assume that no inputs can be larger than the largest value in the limits array.
+        findBucket(asInt)
+      }
+      counts.getAndIncrement(index)
+      num.getAndIncrement()
+    } finally {
+      sync.releaseShared(1)
     }
-    counts(index) += 1
-    num += 1
   }
 
   def clear(): Unit = {
-    var i = 0
-    while (i < countsLength) {
-      counts(i) = 0
-      i += 1
+    sync.acquire(1)
+    try {
+      var i = 0
+      while (i < countsLength) {
+        counts.set(i, 0)
+        i += 1
+      }
+      num.set(0)
+      total.set(0)
+    } finally {
+      sync.release(1)
     }
-    num = 0
-    total = 0
   }
 
   /**
    * Calculate the value of the percentile rank, `p`, for the added data points
    * such that `p * 100`-percent of the data points are the same or less than it.
+   *
+   * Not threadsafe, exposed for testing.
    *
    * @param p must be within 0.0 to 1.0, inclusive.
    * @return the approximate value for the requested percentile.
@@ -212,11 +257,11 @@ private[stats] final class BucketedHistogram(error: Double) {
     if (p < 0.0 || p > 1.0)
       throw new AssertionError(s"percentile must be within 0.0 to 1.0 inclusive: $p")
 
-    val target = Math.round(p * num)
+    val target = Math.round(p * num.get)
     var total = 0L
     var i = 0
     while (i < countsLength && total < target) {
-      total += counts(i)
+      total += counts.get(i)
       i += 1
     }
     i match {
@@ -229,18 +274,20 @@ private[stats] final class BucketedHistogram(error: Double) {
   /**
    * The maximum value seen by calls to [[add]].
    *
+   * Not threadsafe, exposed for testing.
+   *
    * @return 0 if no values have been added.
    *         The returned value will be within
    *         [[BucketedHistogram.DefaultErrorPercent]] of the actual value.
    */
   def maximum: Long = {
-    if (num == 0) {
+    if (num.get == 0) {
       0L
-    } else if (counts(countsLength - 1) > 0) {
+    } else if (counts.get(countsLength - 1) > 0) {
       Int.MaxValue
     } else {
       var i = countsLength - 2 // already checked the last, start 1 before
-      while (i >= 0 && counts(i) == 0) {
+      while (i >= 0 && counts.get(i) == 0) {
         i -= 1
       }
       if (i == 0) 0
@@ -251,21 +298,22 @@ private[stats] final class BucketedHistogram(error: Double) {
   /**
    * The minimum value seen by calls to [[add]].
    *
+   * Not threadsafe, exposed for testing.
+   *
    * @return 0 if no values have been added.
    *         The returned value will be within
    *         [[BucketedHistogram.DefaultErrorPercent]] of the actual value.
    */
-  def minimum: Long = {
-    if (num == 0) {
+  def minimum: Long =
+    if (num.get == 0) {
       0L
     } else {
       var i = 0
-      while (i < countsLength && counts(i) == 0) {
+      while (i < countsLength && counts.get(i) == 0) {
         i += 1
       }
       limitMidpoint(i)
     }
-  }
 
   /** Get the midpoint of bucket `i` */
   private[this] def limitMidpoint(i: Int): Long = {
@@ -294,23 +342,50 @@ private[stats] final class BucketedHistogram(error: Double) {
   }
 
   /**
-   * The total of all the values seen by calls to [[add]].
+   * Recomputes all of the metrics.  Only recompute should be used in a
+   * concurrent context, since the underlying statistics methods are not
+   * threadsafe and only exposed for testing.
    */
-  def sum: Long = total
+  def recompute(snap: BucketedHistogram.MutableSnapshot): Unit = {
+    sync.acquire(1)
+    try {
+      snap.count = count
+      snap.sum = sum
+      snap.max = maximum
+      snap.min = minimum
+      snap.avg = average
+      snap.quantiles = getQuantiles(snap.percentiles)
+    } finally {
+      sync.release(1)
+    }
+  }
+
+  /**
+   * The total of all the values seen by calls to [[add]].
+   *
+   * Not threadsafe, exposed for testing.
+   */
+  def sum: Long = total.get
 
   /**
    * The number of values [[add added]].
+   *
+   * Not threadsafe, exposed for testing.
    */
-  def count: Long = num
+  def count: Long = num.get
 
   /**
    * The average, or arithmetic mean, of all values seen
    * by calls to [[add]].
    *
+   * Not threadsafe, exposed for testing.
+   *
    * @return 0.0 if no values have been [[add added]].
    */
-  def average: Double =
-    if (num == 0) 0.0 else total / num.toDouble
+  def average: Double = {
+    val count = num.get
+    if (count == 0) 0.0 else total.get / count.toDouble
+  }
 
   /**
    * Returns a seq containing nonzero values of the histogram.
@@ -319,19 +394,46 @@ private[stats] final class BucketedHistogram(error: Double) {
    * of times a value in range of the limits was added.
    */
   def bucketAndCounts: Seq[BucketAndCount] = {
-    counts.zipWithIndex.collect {
-      case (count, idx) if count != 0 =>
-        // counts is 1 bucket longer than limits
-        // The last bucket of counts tracks added
-        // values greater than or equal to Int.MaxValue
-        val upperLimit = if (idx != limits.length) {
-          limits(idx)
-        } else Int.MaxValue
-        val lowerLimit = if (idx != 0) {
-          limits(idx - 1)
-        } else 0
-        BucketAndCount(lowerLimit, upperLimit, count)
-    }.toSeq
+    sync.acquire(1)
+
+    // note that this method is optimized for reducing allocations, but has not
+    // been benchmarked.
+    try {
+      // first iterate over to find the exact length of the eventual array
+      var idx = 0
+      var arrayLength = 0
+      while (idx < countsLength) {
+        if (counts.get(idx) > 0) {
+          arrayLength += 1
+        }
+        idx += 1
+      }
+
+      // iterate again after making the array
+      idx = 0
+      var arrayIdx = 0
+      val out = new Array[BucketAndCount](arrayLength)
+      while (idx < countsLength) {
+        val count = counts.get(idx)
+        if (count > 0) {
+          // counts is 1 bucket longer than limits
+          // The last bucket of counts tracks added
+          // values greater than or equal to Int.MaxValue
+          val upperLimit = if (idx != limits.length) {
+            limits(idx)
+          } else Int.MaxValue
+          val lowerLimit = if (idx != 0) {
+            limits(idx - 1)
+          } else 0
+          out(arrayIdx) = BucketAndCount(lowerLimit, upperLimit, count)
+          arrayIdx += 1
+        }
+        idx += 1
+      }
+      out
+    } finally {
+      sync.release(1)
+    }
   }
 
 }

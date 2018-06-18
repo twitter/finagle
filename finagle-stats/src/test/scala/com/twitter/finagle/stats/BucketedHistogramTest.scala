@@ -1,12 +1,9 @@
 package com.twitter.finagle.stats
 
-import org.junit.runner.RunWith
 import org.scalacheck.Gen
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{Matchers, FunSuite}
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class BucketedHistogramTest extends FunSuite with GeneratorDrivenPropertyChecks with Matchers {
   test("percentile when empty") {
     val h = BucketedHistogram()
