@@ -44,7 +44,7 @@ private[lease] class WindowedByteCounter private[lease] (
 
   def this(
     info: JvmInfo
-  ) = this(info, new Context(0))
+  ) = this(info, Local.Context.empty)
 
   /*
    Should we be conservative wrt. count vs. usage?
