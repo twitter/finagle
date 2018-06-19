@@ -223,13 +223,7 @@ private[client] class BackupRequestFilter[Req, Rep](
     Stopwatch.systemMillis,
     statsReceiver,
     timer,
-    () => new WindowedPercentileHistogram(
-      // Based on testing, a window of 30 seconds and 3 buckets tracked request
-      // latency well and had no noticeable performance difference vs. a greater number of
-      // buckets.
-      numBuckets = 3,
-      bucketSize = 10.seconds,
-      timer))
+    () => new WindowedPercentileHistogram(timer))
 
 
   @volatile private[this] var backupRequestRetryBudget: RetryBudget =

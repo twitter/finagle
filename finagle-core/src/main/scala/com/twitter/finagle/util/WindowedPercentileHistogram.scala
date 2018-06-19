@@ -6,6 +6,11 @@ import org.HdrHistogram.{Histogram, Recorder}
 import scala.collection.mutable
 
 object WindowedPercentileHistogram {
+  // Based on testing, a window of 30 seconds and 3 buckets tracked request
+  // latency well and had no noticeable performance difference vs. a greater number of
+  // buckets.
+  private[finagle] val DefaultNumBuckets: Int = 3
+  private[finagle] val DefaultBucketSize: Duration = 10.seconds
 
   // Number of significant decimal digits to which the histogram will maintain value resolution
   // and separation. A value of 3 means +/- 1 unit at 1000.
@@ -43,6 +48,8 @@ class WindowedPercentileHistogram(
     timer: Timer)
   extends Closable {
   import WindowedPercentileHistogram._
+
+  def this(timer: Timer) = this(WindowedPercentileHistogram.DefaultNumBuckets, WindowedPercentileHistogram.DefaultBucketSize, timer)
 
   // Provides stable interval Histogram samples from recorded values without
   // stalling recording. `recordValue` can be called concurrently.
