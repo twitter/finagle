@@ -30,7 +30,7 @@ private[memcached] object InternalMemcached {
       )
       Some(new TestMemcachedServer {
         val address = server.start().boundAddress.asInstanceOf[InetSocketAddress]
-        def stop() { server.stop(true) }
+        def stop(): Unit = { server.stop(true) }
       })
     } catch {
       case NonFatal(_) => None
@@ -86,7 +86,7 @@ private[memcached] object ExternalMemcached { self =>
         if (waitForPort(addr.getPort))
           Some(new TestMemcachedServer {
             val address = addr
-            def stop() {
+            def stop(): Unit = {
               proc.destroy()
               proc.waitFor()
             }
@@ -136,7 +136,7 @@ private[memcached] object ExternalMemcached { self =>
   Runtime
     .getRuntime()
     .addShutdownHook(new Thread {
-      override def run() {
+      override def run(): Unit = {
         processes foreach { p =>
           p.destroy()
           p.waitFor()

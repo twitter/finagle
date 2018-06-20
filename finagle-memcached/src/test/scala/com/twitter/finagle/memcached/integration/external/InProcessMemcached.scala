@@ -30,7 +30,7 @@ class InProcessMemcached(address: SocketAddress) {
     server.get
   }
 
-  def stop(blocking: Boolean = false) {
+  def stop(blocking: Boolean = false): Unit = {
     server.foreach { server =>
       if (blocking) Await.result(server.close())
       else server.close()
