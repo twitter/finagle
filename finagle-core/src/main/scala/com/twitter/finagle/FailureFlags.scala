@@ -50,6 +50,12 @@ object FailureFlags {
   private[twitter] val Ignorable: Long = 1L << 5
 
   /**
+   * DeadlineExceeded indicates that the error occurred because a request was received past its
+   * deadline.
+   */
+  private[twitter] val DeadlineExceeded: Long = 1L << 6
+
+  /**
    * Naming indicates a naming failure. This is Finagle-internal.
    */
   private[finagle] val Naming: Long = 1L << 32

@@ -161,7 +161,7 @@ object DeadlineFilter {
     deadline: Time,
     elapsed: Duration,
     now: Time,
-    private[finagle] val flags: Long = Failure.NonRetryable | Failure.Rejected
+    private[finagle] val flags: Long = Failure.DeadlineExceeded
   ) extends Exception(
         s"exceeded request deadline of ${deadline - timestamp} "
           + s"by $elapsed. Deadline expired at $deadline and now it is $now."

@@ -133,6 +133,12 @@ object Failure {
   val Ignorable: Long = FailureFlags.Ignorable
 
   /**
+   * Flag deadline exceeded indicates that this failure occured because a request was received past
+   * its deadline.
+   */
+  val DeadlineExceeded: Long = FailureFlags.DeadlineExceeded
+
+  /**
    * Flag wrapped indicates that this failure was wrapped, and should
    * not be presented to the user (directly, or via stats). Rather, it must
    * first be unwrapped: the inner cause is the presentable failure.
@@ -319,6 +325,12 @@ object Failure {
    */
   def ignorable(why: String): Failure =
     new Failure(why, None, FailureFlags.Ignorable, logLevel = Level.TRACE)
+
+  /**
+   * Create a new [[DeadlineExceeded]] failure with the given message.
+   */
+  def deadlineExceeded(why: String): Failure =
+    new Failure(why, None, FailureFlags.DeadlineExceeded)
 
   /**
    * A default [[Restartable]] failure.
