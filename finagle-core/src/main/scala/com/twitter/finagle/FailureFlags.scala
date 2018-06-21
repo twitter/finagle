@@ -68,7 +68,7 @@ object FailureFlags {
    * whose behalf the client is working - it may have performed some side
    * effect before issuing the client call.
    */
-  private[finagle] val ShowMask: Long = Interrupted | Rejected | NonRetryable
+  private[finagle] val ShowMask: Long = Interrupted | Rejected | NonRetryable | DeadlineExceeded
 
   /**
    * Expose flags as strings. Used for stats reporting. Here, Retryable is named
@@ -82,6 +82,8 @@ object FailureFlags {
     if ((flags & Rejected) > 0) names += "rejected"
     if ((flags & Naming) > 0) names += "naming"
     if ((flags & NonRetryable) > 0) names += "nonretryable"
+    if ((flags & Ignorable) > 0) names += "ignorable"
+    if ((flags & DeadlineExceeded) > 0) names += "deadline_exceeded"
     names
   }
 
