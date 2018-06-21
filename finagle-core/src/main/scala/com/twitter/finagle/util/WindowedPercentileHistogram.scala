@@ -1,7 +1,7 @@
 package com.twitter.finagle.util
 
 import com.twitter.conversions.time._
-import com.twitter.util.{Closable, Duration, Future, Time, Timer}
+import com.twitter.util.{Closable, Duration, Future, Time, Timer, MockTimer}
 import org.HdrHistogram.{Histogram, Recorder}
 import scala.collection.mutable
 
@@ -103,6 +103,30 @@ class WindowedPercentileHistogram(
 
   override def close(deadline: Time): Future[Unit] = {
     flushCurrentBucketTask.cancel()
+    Future.Done
+  }
+}
+
+/**
+ * Just for testing.  Stores only the last added value
+ */
+private[finagle] class MockWindowedPercentileHistogram(timer: MockTimer)
+  extends WindowedPercentileHistogram(0, Duration.Top, timer) {
+
+  def this() = this(new MockTimer())
+
+  private[this] var _value: Int = 0
+
+  var closed = false
+
+  override def add(value: Int): Unit =
+    _value = value
+
+  override def percentile(percentile: Double): Int =
+    _value
+
+  override def close(deadline: Time): Future[Unit] = {
+    closed = true
     Future.Done
   }
 }

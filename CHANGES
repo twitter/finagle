@@ -7,6 +7,18 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-mux: `ClientDiscardedRequestException` now extends `FailureFlags` and is no longer
+    a case class. ``PHAB_ID=D183456``
+
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-mux: When mux propagates an interrupt started by `BackupRequestFilter` over the
+    network, the `FailureFlags.Ignorable` status is propagated with it.  ``PHAB_ID=D183456``
+
 18.6.0
 -------
 

@@ -6,7 +6,7 @@ import com.twitter.finagle.context.RemoteInfo.Upstream
 import com.twitter.finagle.mux.{OpportunisticTlsParams, Request, Response}
 import com.twitter.finagle.mux.exp.pushsession.MuxPush
 import com.twitter.finagle.mux.lease.exp.Lessor
-import com.twitter.finagle.mux.transport.{MuxContext, OpportunisticTls}
+import com.twitter.finagle.mux.transport.{MuxContext, OpportunisticTls, MuxFailure}
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.server.{Listener, ServerInfo, StackBasedServer, StackServer, StdStackServer}
 import com.twitter.finagle.service._
@@ -493,7 +493,8 @@ object ThriftMux
       }
 
     // Convert unhandled exceptions to TApplicationExceptions, but pass
-    // com.twitter.finagle.FailureFlags to mux for transmission.
+    // com.twitter.finagle.FailureFlags that are flagged in mux-compatible ways
+    // to mux for transmission.
     private[this] class ExnFilter(protocolFactory: TProtocolFactory)
       extends SimpleFilter[mux.Request, mux.Response] {
       def apply(
@@ -501,7 +502,7 @@ object ThriftMux
         service: Service[mux.Request, mux.Response]
       ): Future[mux.Response] =
         service(request).rescue {
-          case f: FailureFlags[_] => Future.exception(f)
+          case f: FailureFlags[_] if MuxFailure.FromThrow.isDefinedAt(f) => Future.exception(f)
           case e if !e.isInstanceOf[TException] =>
             val msg =
               UncaughtAppExceptionFilter.writeExceptionMessage(request.body, e, protocolFactory)

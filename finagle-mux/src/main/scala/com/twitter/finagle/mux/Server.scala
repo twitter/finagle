@@ -2,6 +2,7 @@ package com.twitter.finagle.mux
 
 import com.twitter.app.GlobalFlag
 import com.twitter.finagle._
+import com.twitter.finagle.client.BackupRequestFilter
 import com.twitter.finagle.context.{Contexts, RemoteInfo}
 import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor, nackOnExpiredLease}
 import com.twitter.finagle.mux.transport.{Message, MuxFailure}
@@ -24,11 +25,17 @@ import scala.util.control.NoStackTrace
  * This implies that the client issued a Tdiscarded message for a given tagged
  * request, as per [[com.twitter.finagle.mux]].
  */
-case class ClientDiscardedRequestException(why: String)
+class ClientDiscardedRequestException private[mux](why: String, val flags: Long)
   extends Exception(why)
+  with FailureFlags[ClientDiscardedRequestException]
   with HasLogLevel
   with NoStackTrace {
   def logLevel: com.twitter.logging.Level = com.twitter.logging.Level.DEBUG
+
+  def this(why: String) = this(why, FailureFlags.Interrupted)
+
+  def copyWithFlags(newFlags: Long): ClientDiscardedRequestException =
+    new ClientDiscardedRequestException(why, newFlags)
 }
 
 object gracefulShutdownEnabled
@@ -272,7 +279,13 @@ private[finagle] class ServerDispatcher(
       case Message.Tdiscarded(tag, why) =>
         tracker.get(tag) match {
           case Some(reply) =>
-            reply.raise(new ClientDiscardedRequestException(why))
+           why match {
+             case BackupRequestFilter.SupersededRequestFailureToString =>
+               reply.raise(new ClientDiscardedRequestException(why,
+                 FailureFlags.Interrupted | FailureFlags.Ignorable))
+             case _ =>
+               reply.raise(new ClientDiscardedRequestException(why))
+           }
           case None =>
             orphanedTdiscardCounter.incr()
         }
@@ -394,6 +407,8 @@ private[finagle] class ServerDispatcher(
 private[finagle] object Processor extends Filter[Message, Message, Request, Response] {
   import Message._
 
+  private[this] val AlwaysEmpty = { _: Throwable => MuxFailure.Empty }
+
   private[this] def dispatch(
     tdispatch: Message.Tdispatch,
     service: Service[Request, Response]
@@ -411,11 +426,11 @@ private[finagle] object Processor extends Filter[Message, Message, Request, Resp
         // do not look for MuxFailures, this behavior is left alone. additional
         // MuxFailure flags are still sent.
         case Throw(f: Failure) if f.isFlagged(Failure.Restartable) =>
-          val mFail = MuxFailure.fromThrow(f)
+          val mFail = MuxFailure.FromThrow.applyOrElse(f, AlwaysEmpty)
           Future.value(RdispatchNack(tdispatch.tag, mFail.contexts))
 
         case Throw(exc) =>
-          val mFail = MuxFailure.fromThrow(exc)
+          val mFail = MuxFailure.FromThrow.applyOrElse(exc, AlwaysEmpty)
           Future.value(RdispatchError(tdispatch.tag, mFail.contexts, exc.toString))
       }
     }

@@ -19,8 +19,10 @@ object BackupRequestFilter {
    */
   private val OrigRequestTimeout = Failure("Original request did not complete in time")
 
-  private val SupersededRequestFailure = Failure.ignorable(
-    "Request was superseded by another in BackupRequestFilter")
+  private[finagle] val SupersededRequestFailure =
+    Failure.ignorable("Request was superseded by another in BackupRequestFilter")
+
+  private[finagle] val SupersededRequestFailureToString = SupersededRequestFailure.toString
 
   private val log = Logger.get(this.getClass.getName)
 
@@ -194,7 +196,7 @@ private[client] class BackupRequestFactory[Req, Rep](
  *       so tail latency improvements as a result of this filter will not be reflected in the
  *       request latency stats.
  */
-private[client] class BackupRequestFilter[Req, Rep](
+private[finagle] class BackupRequestFilter[Req, Rep](
     maxExtraLoadTunable: Tunable[Double],
     sendInterrupts: Boolean,
     responseClassifier: ResponseClassifier,

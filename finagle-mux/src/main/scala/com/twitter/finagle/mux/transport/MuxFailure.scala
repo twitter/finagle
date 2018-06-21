@@ -3,7 +3,7 @@ package com.twitter.finagle.mux.transport
 import com.twitter.finagle.FailureFlags
 import com.twitter.io.{Buf, BufByteWriter, ByteReader}
 
-private[mux] object MuxFailure {
+private[finagle] object MuxFailure {
   private val ContextId = Buf.Utf8("MuxFailure")
 
   /**
@@ -26,7 +26,7 @@ private[mux] object MuxFailure {
   /**
    * A MuxFailure that contains no additional information
    */
-  val Empty = MuxFailure(0L)
+  val Empty: MuxFailure = MuxFailure(0L)
 
   private val Extractor: PartialFunction[(Buf, Buf), MuxFailure] = {
     // Ignore anything after the first 8 bytes for future use
@@ -44,22 +44,27 @@ private[mux] object MuxFailure {
   }
 
   /**
-   * Generate a [[MuxFailure]] from a Throwable. If it is a
+   * Mask that covers representable mux failures.
+   *
+   * Note that this uses the FailureFlags representations of the failures, so
+   * it can be used with FailureFlags for checking whether any of them match
+   * MuxFailure failures, but cannot be used for checking MuxFailure failures.
+   */
+  private[this] val Mask: Long =
+    FailureFlags.Retryable | FailureFlags.Rejected | FailureFlags.NonRetryable
+
+  /**
+   * Generate a [[MuxFailure]] from a Throwable where possible. If it is a
    * [[com.twitter.finagle.Failure]], then flags which have [[MuxFailure]]
    * analogs will be translated.
    */
-  def fromThrow(exc: Throwable): MuxFailure = {
-    exc match {
-      case f: FailureFlags[_] =>
-        var flags = 0L
-        if (f.isFlagged(FailureFlags.Retryable)) flags |= Retryable
-        if (f.isFlagged(FailureFlags.Rejected)) flags |= Rejected
-        if (f.isFlagged(FailureFlags.NonRetryable)) flags |= NonRetryable
-        MuxFailure(flags)
-
-      case _ =>
-        Empty
-    }
+  val FromThrow: PartialFunction[Throwable, MuxFailure] = {
+    case f: FailureFlags[_] if (f.flags & Mask) != 0 =>
+      var flags = 0L
+      if (f.isFlagged(FailureFlags.Retryable)) flags |= Retryable
+      if (f.isFlagged(FailureFlags.Rejected)) flags |= Rejected
+      if (f.isFlagged(FailureFlags.NonRetryable)) flags |= NonRetryable
+      MuxFailure(flags)
   }
 }
 

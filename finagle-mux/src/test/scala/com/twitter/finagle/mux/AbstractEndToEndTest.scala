@@ -1,21 +1,24 @@
 package com.twitter.finagle.mux
 
+import com.twitter.conversions.percent._
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.client.EndpointerStackClient
+import com.twitter.finagle.client.{EndpointerStackClient, BackupRequestFilter}
 import com.twitter.finagle.context.RemoteInfo
 import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor}
 import com.twitter.finagle.mux.transport.{BadMessageException, Message}
 import com.twitter.finagle.server.ListeningStackServer
-import com.twitter.finagle.service.Retries
-import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.service.{Retries, ReqRep, ResponseClass, ResponseClassifier, RetryBudget}
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing._
+import com.twitter.finagle.util.MockWindowedPercentileHistogram
 import com.twitter.io.{Buf, BufByteWriter, ByteReader}
 import com.twitter.util._
+import com.twitter.util.tunable.Tunable
 import java.io.{PrintWriter, StringWriter}
 import java.net.{InetAddress, InetSocketAddress, ServerSocket, Socket}
 import java.nio.ByteBuffer
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.{AtomicInteger, AtomicBoolean}
 import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.AssertionsForJUnit
@@ -497,5 +500,69 @@ abstract class AbstractEndToEndTest
     } finally {
       server.close()
     }
+  }
+
+  test("BackupRequestFilter's interrupts are propagated to the remote peer as ignorable") {
+    val slow: Promise[Response] = new Promise[Response]
+    val first = new AtomicBoolean(true)
+    slow.setInterruptHandler { case exn: Throwable =>
+      slow.setException(exn)
+    }
+    val server = serverImpl.serve(
+      "localhost:*",
+      Service.mk[Request, Response] { _ =>
+        if (first.compareAndSet(true, false)) slow
+        else {
+          Future.value(Response.empty)
+        }
+      }
+    )
+
+    val client = clientImpl.newService(
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+      "client"
+    )
+
+    val tunable: Tunable.Mutable[Double] = Tunable.mutable[Double]("tunable", 1.percent)
+    val classifier: ResponseClassifier = {
+      case ReqRep(_ , Return(_)) => ResponseClass.Success
+    }
+    val retryBudget = RetryBudget.Infinite
+    Time.withCurrentTimeFrozen { ctl =>
+      val timer = new MockTimer()
+
+      val wp = new MockWindowedPercentileHistogram(timer)
+      wp.add(1.second.inMillis.toInt)
+
+      val brf = new BackupRequestFilter[Request, Response](
+        tunable,
+        true,
+        classifier,
+        (_, _) => retryBudget,
+        retryBudget,
+        Stopwatch.timeMillis,
+        NullStatsReceiver,
+        timer,
+        () => wp
+      )
+      ctl.advance(3.seconds)
+      timer.tick()
+
+      val filtered = brf.andThen(client)
+
+      val f = filtered(Request.empty)
+
+      ctl.advance(2.seconds)
+      timer.tick()
+
+      Await.result(f, 5.seconds)
+    }
+
+    val e = intercept[ClientDiscardedRequestException] {
+      Await.result(slow, 5.seconds)
+    }
+
+    assert(e.getMessage == BackupRequestFilter.SupersededRequestFailureToString)
+    assert(e.flags == (FailureFlags.Interrupted | FailureFlags.Ignorable))
   }
 }

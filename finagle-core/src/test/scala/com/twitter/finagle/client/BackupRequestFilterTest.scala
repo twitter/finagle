@@ -5,7 +5,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.util.WindowedPercentileHistogram
+import com.twitter.finagle.util.{WindowedPercentileHistogram, MockWindowedPercentileHistogram}
 import com.twitter.util._
 import com.twitter.util.tunable.Tunable
 import org.mockito.Matchers.any
@@ -21,25 +21,6 @@ class BackupRequestFilterTest extends FunSuite
   with Matchers
   with Eventually
   with IntegrationPatience {
-
-  // Stores only the last added value
-  class MockWindowedPercentileHistogram
-    extends WindowedPercentileHistogram(0, Duration.Top, new MockTimer) {
-    private[this] var _value: Int = 0
-
-    var closed = false
-
-    override def add(value: Int): Unit =
-      _value = value
-
-    override def percentile(percentile: Double): Int =
-      _value
-
-    override def close(deadline: Time): Future[Unit] = {
-      closed = true
-      Future.Done
-    }
-  }
 
   private[this] val wp = new MockWindowedPercentileHistogram()
 
@@ -777,5 +758,11 @@ class BackupRequestFilterTest extends FunSuite
     when(underlying.close(any[Time]())).thenReturn(Future.Done)
     svc.close(Time.Top)
     verify(underlying, times(1)).close(any[Time]())
+  }
+
+  test("SupersededRequestFailureToString hasn't changed") {
+    val expected =
+      "Failure(Request was superseded by another in BackupRequestFilter, flags=0x20) with NoSources"
+    assert(BackupRequestFilter.SupersededRequestFailureToString == expected)
   }
 }

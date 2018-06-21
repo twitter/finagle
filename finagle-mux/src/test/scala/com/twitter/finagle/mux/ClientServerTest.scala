@@ -2,6 +2,7 @@ package com.twitter.finagle.mux
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
+import com.twitter.finagle.client.BackupRequestFilter
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.liveness.{FailureDetector, Latch}
 import com.twitter.finagle.mux.lease.exp.Lessor
@@ -9,18 +10,17 @@ import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.QueueTransport
-import com.twitter.finagle.{Failure, Path, Service, SimpleFilter, Status}
+import com.twitter.finagle.{Failure, Path, Service, SimpleFilter, Status, FailureFlags}
 import com.twitter.io.{Buf, BufByteWriter, ByteReader}
 import com.twitter.util.{Await, Duration, Future, Promise, Return, Throw, Time}
 import java.util.concurrent.atomic.AtomicInteger
-import org.junit.runner.RunWith
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, verify, when}
 import org.mockito.stubbing.Answer
 import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
+import org.scalatest.junit.AssertionsForJUnit
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSuite, OneInstancePerTest, Tag}
 
@@ -215,10 +215,32 @@ private[mux] abstract class ClientServerTest
 
     val exc = new Exception("sad panda")
     f.raise(exc)
-    assert(
-      p.isInterrupted == Some(ClientDiscardedRequestException("java.lang.Exception: sad panda"))
-    )
+    val e = intercept[ClientDiscardedRequestException] {
+      throw p.isInterrupted.get
+    }
+    assert(e.flags == FailureFlags.Interrupted)
+    assert(e.getMessage == "java.lang.Exception: sad panda")
+    assert(f.poll == Some(Throw(exc)))
+  }
 
+  test("propagate interrupts with the right flags") {
+    val ctx = new Ctx
+    import ctx._
+
+    val req = Request(Path.empty, Nil, buf(1))
+    val p = new Promise[Response]
+    when(service(req)).thenReturn(p)
+    val f = client(req)
+
+    assert(f.poll == None)
+    assert(p.isInterrupted == None)
+
+    val exc = BackupRequestFilter.SupersededRequestFailure
+    f.raise(exc)
+    val e = intercept[ClientDiscardedRequestException] {
+      throw p.isInterrupted.get
+    }
+    assert(e.flags == (FailureFlags.Interrupted | FailureFlags.Ignorable))
     assert(f.poll == Some(Throw(exc)))
   }
 
@@ -296,7 +318,6 @@ private[mux] abstract class ClientServerTest
   }
 }
 
-@RunWith(classOf[JUnitRunner])
 class ClientServerTestNoDispatch extends ClientServerTest {
   val canDispatch = false
 
@@ -313,7 +334,6 @@ class ClientServerTestNoDispatch extends ClientServerTest {
   }
 }
 
-@RunWith(classOf[JUnitRunner])
 class ClientServerTestDispatch extends ClientServerTest {
   val canDispatch = true
 

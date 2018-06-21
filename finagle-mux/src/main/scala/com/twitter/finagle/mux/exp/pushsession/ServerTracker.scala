@@ -1,6 +1,7 @@
 package com.twitter.finagle.mux.exp.pushsession
 
-import com.twitter.finagle.Service
+import com.twitter.finagle.{Service, FailureFlags}
+import com.twitter.finagle.client.BackupRequestFilter
 import com.twitter.finagle.mux.{ClientDiscardedRequestException, Processor, Request, Response}
 import com.twitter.finagle.mux.exp.pushsession.ServerTracker._
 import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor, nackOnExpiredLease}
@@ -97,7 +98,14 @@ private class ServerTracker(
 
       case dispatch =>
         // We raise on the dispatch and immediately send back a Rdiscarded
-        dispatch.response.raise(new ClientDiscardedRequestException(why))
+        why match {
+          case BackupRequestFilter.SupersededRequestFailureToString =>
+            dispatch.response.raise(new ClientDiscardedRequestException(why,
+              FailureFlags.Interrupted | FailureFlags.Ignorable))
+          case _ =>
+            dispatch.response.raise(new ClientDiscardedRequestException(why))
+        }
+
         messageWriter.write(Rdiscarded(tag))
 
         // By removing a message we may have finished draining, so check.
