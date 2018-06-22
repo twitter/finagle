@@ -60,6 +60,15 @@ private final class Netty4Init extends FinagleInit {
       System.setProperty("io.netty.allocator.maxOrder", "7")
     }
 
+    // We're disabling Netty 4 recyclers (lightweight object pools) as we found out they
+    // come at the non-trivial cost of CPU overhead.
+    //
+    // NOTE: Before overriding it, we check whether or not it was set before. This way users
+    // will have a chance to tune it.
+    if (System.getProperty("io.netty.recycler.maxCapacityPerThread") == null) {
+      System.setProperty("io.netty.recycler.maxCapacityPerThread", "0")
+    }
+
     // Initialize N4 metrics.
     exportNetty4MetricsAndRegistryEntries()
 
