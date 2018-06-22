@@ -21,7 +21,7 @@ class ZkInstance {
   lazy val zookeeperConnectString =
     zookeeperAddress.getHostName() + ":" + zookeeperAddress.getPort()
 
-  def start() {
+  def start(): Unit = {
     started = true
 
     zookeeperServer = new ZooKeeperServer(create(), create(), ZooKeeperServer.DEFAULT_TICK_TIME)
@@ -35,7 +35,7 @@ class ZkInstance {
 //    java.util.logging.LogManager.getLogManager().reset();
   }
 
-  def stop() {
+  def stop(): Unit = {
     connectionFactory.shutdown()
     zookeeperClient.close()
   }

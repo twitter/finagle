@@ -154,7 +154,7 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
 
   // these tests are sophisticated, and use things that ConnectionManager
   // isn't aware of.  we should be careful in the way we use it.
-  def perform(request: Request, response: Response, shouldMarkDead: Boolean) {
+  def perform(request: Request, response: Response, shouldMarkDead: Boolean): Unit = {
     val closeP = new Promise[Throwable]
     val trans = mock[Transport[Request, Response]]
     when(trans.close(any[Time])).thenReturn(Future.Done)

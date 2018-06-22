@@ -32,7 +32,7 @@ object HttpClient {
     }
   }
 
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     val clientWithoutErrorHandling: Service[Request, Response] = ClientBuilder()
       .stack(Http.client)
       .hosts(new InetSocketAddress(8080))

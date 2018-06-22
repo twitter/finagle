@@ -201,7 +201,7 @@ class KetamaFailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       val h = new Helper(false, rep)
       import h._
 
-      def assertReponse(rep: Future[Int]) {
+      def assertReponse(rep: Future[Int]): Unit = {
         if (awaitResult(rep.liftToTry).isReturn)
           assert(awaitResult(service(123)) == awaitResult(rep))
         else intercept[Exception](awaitResult(service(123)))

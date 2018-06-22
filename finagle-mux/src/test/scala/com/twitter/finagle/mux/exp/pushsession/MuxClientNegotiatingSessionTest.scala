@@ -21,7 +21,7 @@ import org.scalatest.mockito.MockitoSugar
 class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
 
   // turn off failure detector since we don't need it for these tests.
-  override def test(testName: String, testTags: Tag*)(f: => Any)(implicit pos: Position) {
+  override def test(testName: String, testTags: Tag*)(f: => Any)(implicit pos: Position): Unit = {
     super.test(testName, testTags: _*) {
       liveness.sessionFailureDetector.let("none") { f }
     }

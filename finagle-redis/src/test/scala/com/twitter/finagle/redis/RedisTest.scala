@@ -364,11 +364,11 @@ trait SentinelClientTest extends RedisTest with BeforeAndAfterAll {
     RedisCluster.address(index).get
   }
 
-  protected def withRedisClient(testCode: TransactionalClient => Any) {
+  protected def withRedisClient(testCode: TransactionalClient => Any): Unit = {
     withRedisClient(sentinelCount, sentinelCount + count)(testCode)
   }
 
-  protected def withRedisClient(index: Int)(testCode: TransactionalClient => Any) {
+  protected def withRedisClient(index: Int)(testCode: TransactionalClient => Any): Unit = {
     withRedisClient(sentinelCount + index, sentinelCount + index + 1)(testCode)
   }
 
@@ -377,7 +377,7 @@ trait SentinelClientTest extends RedisTest with BeforeAndAfterAll {
     try { testCode(client) } finally { client.close() }
   }
 
-  protected def withSentinelClient(index: Int)(testCode: SentinelClient => Any) {
+  protected def withSentinelClient(index: Int)(testCode: SentinelClient => Any): Unit = {
     val client = SentinelClient(
       Redis.client.newClient(RedisCluster.hostAddresses(from = index, until = index + 1))
     )

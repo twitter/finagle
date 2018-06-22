@@ -95,7 +95,7 @@ class BackupRequestFilterTest extends FunSuite
     assert(brf.sendBackupAfterDuration > Duration.Zero)
   }
 
-  def testRetryBudgetEmpty(maxExtraLoad: Tunable[Double]) {
+  def testRetryBudgetEmpty(maxExtraLoad: Tunable[Double]): Unit = {
     var currentRetryBudget: RetryBudget = null
     var currentMaxExtraLoad: Double = -1.0 // sentinel to make sure it gets set to 0.0 below
 

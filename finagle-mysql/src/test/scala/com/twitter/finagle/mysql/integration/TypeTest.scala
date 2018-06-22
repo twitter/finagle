@@ -93,7 +93,7 @@ class NumericTypeTest extends FunSuite with IntegrationClient {
     testFunc(binaryEncoded)
   }
 
-  def testRow(row: Row) {
+  def testRow(row: Row): Unit = {
     val rowType = row.getClass.getName
 
     test("extract %s from %s".format("boolean", rowType)) {
@@ -220,7 +220,7 @@ class NumericTypeTest extends FunSuite with IntegrationClient {
     }
   }
 
-  def testUnsignedRow(row: Row) {
+  def testUnsignedRow(row: Row): Unit = {
     val rowType = row.getClass.getName
 
     test("extract %s from %s".format("tinyint_unsigned", rowType)) {
@@ -312,7 +312,7 @@ class BlobTypeTest extends FunSuite with IntegrationClient {
     testRow(binaryEncoded)
   }
 
-  def testRow(row: Row) {
+  def testRow(row: Row): Unit = {
     val rowType = row.getClass.getName
     test("extract %s from %s".format("char", rowType)) {
       row("char") match {
@@ -458,7 +458,7 @@ class DateTimeTypeTest extends FunSuite with IntegrationClient {
     testRow(binaryEncoded)
   }
 
-  def testRow(row: Row) {
+  def testRow(row: Row): Unit = {
     val rowType = row.getClass.getName
     test("extract %s from %s".format("date", rowType)) {
       row("date") match {

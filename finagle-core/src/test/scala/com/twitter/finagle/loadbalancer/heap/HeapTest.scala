@@ -11,7 +11,7 @@ class HeapTest extends FunSuite {
     val input = (new Random).shuffle(Seq(0 until 100: _*)).toArray
     val indices = new HashMap[Int, Int]
     val indexer = new Heap.Indexer[Int] {
-      def apply(v: Int, i: Int) {
+      def apply(v: Int, i: Int): Unit = {
         indices(v) = i
       }
     }

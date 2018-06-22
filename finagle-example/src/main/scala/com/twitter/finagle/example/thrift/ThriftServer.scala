@@ -5,7 +5,7 @@ import com.twitter.finagle.Thrift
 import com.twitter.util.{Await, Future}
 
 object ThriftServer {
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     //#thriftserverapi
     val server = Thrift.server.serveIface("localhost:8080", new Hello[Future] {
       def hi() = Future.value("hi")

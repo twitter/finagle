@@ -124,7 +124,7 @@ class ChannelBufferBufTest extends FunSuite with GeneratorDrivenPropertyChecks {
     withBufferOfExcessSize(1)
   }
 
-  private def withBufferOfExcessSize(excess: Int) {
+  private def withBufferOfExcessSize(excess: Int): Unit = {
     forAll { bytes: Array[Byte] =>
       val buf = new ChannelBufferBuf(ChannelBuffers.wrappedBuffer(bytes))
       val out = java.nio.ByteBuffer.allocate(bytes.length + excess)

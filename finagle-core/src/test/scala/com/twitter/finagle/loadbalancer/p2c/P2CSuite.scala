@@ -40,7 +40,7 @@ trait P2CSuite {
     emptyException = noBrokers
   )
 
-  def assertEven(fs: Vector[P2CServiceFactory]) {
+  def assertEven(fs: Vector[P2CServiceFactory]): Unit = {
     val ml = fs.head.meanLoad
     for (f <- fs) {
       assert(math.abs(f.meanLoad - ml) < ε, "ml=%f; f.ml=%f; ε=%f".format(ml, f.meanLoad, ε))

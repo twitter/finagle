@@ -28,7 +28,7 @@ class SeqIdFilterTest extends FunSuite with MockitoSugar with OneInstancePerTest
     testFilter("nonstrict(%s)".format(seqId), seqId, mkmsg(_, false))
   }
 
-  def testFilter(how: String, seqId: Int, mkmsg: TMessage => Array[Byte]) {
+  def testFilter(how: String, seqId: Int, mkmsg: TMessage => Array[Byte]): Unit = {
     val service = mock[Service[ThriftClientRequest, Array[Byte]]]
     val p = new Promise[Array[Byte]]
     when(service(Matchers.any[ThriftClientRequest])).thenReturn(p)
@@ -81,7 +81,7 @@ class SeqIdFilterTest extends FunSuite with MockitoSugar with OneInstancePerTest
       }
     }
 
-    def mustExcept(bytes: Array[Byte], exceptionMsg: String) {
+    def mustExcept(bytes: Array[Byte], exceptionMsg: String): Unit = {
       filtered(new ThriftClientRequest(bytes, false)).poll match {
         case Some(Throw(exc: IllegalArgumentException)) => assert(exc.getMessage == exceptionMsg)
         case _ => fail()

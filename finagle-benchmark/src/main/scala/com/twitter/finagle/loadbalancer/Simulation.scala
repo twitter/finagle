@@ -25,7 +25,7 @@ private object Simulation extends com.twitter.app.App {
   // Exception returned by balancers when they have no members in the set.
   private val noBrokers = new NoBrokersAvailableException
 
-  def main() {
+  def main(): Unit = {
     val stats = new SummarizingStatsReceiver
 
     var serverCount: Int = 0

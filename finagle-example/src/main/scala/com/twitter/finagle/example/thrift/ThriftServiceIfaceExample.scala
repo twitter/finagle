@@ -8,7 +8,7 @@ import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util.{Await, Duration, Future, Throw, Try}
 
 object ThriftServiceIfaceExample {
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     // See the docs at https://twitter.github.io/finagle/guide/Protocols.html#using-finagle-thrift
     //#thriftserverapi
     val server: ListeningServer = Thrift.server.serveIface(

@@ -51,7 +51,7 @@ abstract class AbstractEndToEndTest
   }
 
   // turn off failure detector since we don't need it for these tests.
-  override def test(testName: String, testTags: Tag*)(f: => Any)(implicit pos: Position) {
+  override def test(testName: String, testTags: Tag*)(f: => Any)(implicit pos: Position): Unit = {
     super.test(testName, testTags: _*) {
       liveness.sessionFailureDetector.let("none") { f }
     }
@@ -107,7 +107,7 @@ abstract class AbstractEndToEndTest
     Await.result(client.close(), 5.seconds)
   }
 
-  def assertAnnotationsInOrder(tracer: Seq[Record], annos: Seq[Annotation]) {
+  def assertAnnotationsInOrder(tracer: Seq[Record], annos: Seq[Annotation]): Unit = {
     assert(tracer.collect { case Record(_, _, ann, _) if annos.contains(ann) => ann } == annos)
   }
 

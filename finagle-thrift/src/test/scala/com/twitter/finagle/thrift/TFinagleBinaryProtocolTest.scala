@@ -42,7 +42,7 @@ class TFinagleBinaryProtocolTest extends FunSuite with BeforeAndAfter with Match
   }
 
   test("writeString same as TBinaryProtocol") {
-    def compare(str: String) {
+    def compare(str: String): Unit = {
       val plainTrans = new TMemoryBuffer(128)
       val plainProto = new TBinaryProtocol(plainTrans)
 

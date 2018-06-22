@@ -32,7 +32,7 @@ class BalancerTest extends FunSuite with Conductors with GeneratorDrivenProperty
     def _dist(): Distributor = dist
     def _rebuild(): Unit = rebuild()
 
-    def rebuildDistributor() {}
+    def rebuildDistributor(): Unit = {}
 
     case class Distributor(vec: Vector[Node], gen: Int = 1) extends DistributorT[Node](vec) {
       type This = Distributor

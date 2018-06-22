@@ -30,7 +30,7 @@ class PoolBench extends StdBenchAnnotations {
   var composed: ServiceFactory[Int, Int] = _
 
   @Setup
-  def loadPools() {
+  def loadPools(): Unit = {
     watermark = new WatermarkPool(underlying, lowWatermark = 1, highWatermark = poolSize)
     cache = new CachingPool(underlying, poolSize, Duration.Top, DefaultTimer)
     buffer = new BufferingPool(underlying, poolSize)

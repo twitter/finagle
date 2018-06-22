@@ -12,8 +12,8 @@ import StabilizingAddr.State._
 
 class MockHealth {
   val pulse = new Broker[Health]()
-  def mkHealthy() { pulse ! Healthy }
-  def mkUnhealthy() { pulse ! Unhealthy }
+  def mkHealthy(): Unit = { pulse ! Healthy }
+  def mkUnhealthy(): Unit = { pulse ! Unhealthy }
 }
 
 class Context {
@@ -35,7 +35,7 @@ class Context {
     @volatile var set = Set.empty[Address]
 
     def apply() = set
-    def update(newSet: Set[Address]) {
+    def update(newSet: Set[Address]): Unit = {
       set = newSet
       broker !! Addr.Bound(set)
     }
@@ -62,7 +62,7 @@ class Context {
 
   addrs() = allAddrs
 
-  def assertStable() {
+  def assertStable(): Unit = {
     assert(stabilized == Addr.Bound(addrs()))
   }
 }

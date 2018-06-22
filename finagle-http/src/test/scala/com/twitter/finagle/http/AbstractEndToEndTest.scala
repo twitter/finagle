@@ -262,7 +262,7 @@ abstract class AbstractEndToEndTest
       }
   }
 
-  def standardBehaviour(connect: HttpService => HttpService) {
+  def standardBehaviour(connect: HttpService => HttpService): Unit = {
 
     test(implName + ": client stack observes max header size") {
       val service = new HttpService {
@@ -512,7 +512,7 @@ abstract class AbstractEndToEndTest
     }
   }
 
-  def streaming(connect: HttpService => HttpService) {
+  def streaming(connect: HttpService => HttpService): Unit = {
     test(s"$implName (streaming)" + ": stream") {
       def service(r: Reader) = new HttpService {
         def apply(request: Request) = {
@@ -810,7 +810,7 @@ abstract class AbstractEndToEndTest
     }
   }
 
-  def tracing(connect: HttpService => HttpService) {
+  def tracing(connect: HttpService => HttpService): Unit = {
     test(implName + ": trace") {
       var (outerTrace, outerSpan) = ("", "")
 

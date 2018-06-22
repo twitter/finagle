@@ -39,7 +39,7 @@ class SocksConnectHandlerTest extends FunSuite with MockitoSugar {
     val connectRequested =
       new DownstreamChannelStateEvent(channel, connectFuture, ChannelState.CONNECTED, remoteAddress)
 
-    def sendBytesToServer(x: Byte, xs: Byte*) {
+    def sendBytesToServer(x: Byte, xs: Byte*): Unit = {
       val ec = ArgumentCaptor.forClass(classOf[DownstreamMessageEvent])
       verify(ctx, atLeastOnce()).sendDownstream(ec.capture)
       val e = ec.getValue
@@ -52,14 +52,14 @@ class SocksConnectHandlerTest extends FunSuite with MockitoSugar {
       })
     }
 
-    def receiveBytesFromServer(ch: SocksConnectHandler, bytes: Array[Byte]) {
+    def receiveBytesFromServer(ch: SocksConnectHandler, bytes: Array[Byte]): Unit = {
       ch.handleUpstream(
         ctx,
         new UpstreamMessageEvent(channel, ChannelBuffers.wrappedBuffer(bytes), null)
       )
     }
 
-    def connectAndRemoveHandler(ch: SocksConnectHandler) {
+    def connectAndRemoveHandler(ch: SocksConnectHandler): Unit = {
       assert(connectFuture.isDone)
       verify(pipeline).remove(ch)
 
@@ -73,7 +73,7 @@ class SocksConnectHandlerTest extends FunSuite with MockitoSugar {
       assert(e.getValue == remoteAddress)
     }
 
-    def checkDidClose() {
+    def checkDidClose(): Unit = {
       val ec = ArgumentCaptor.forClass(classOf[DownstreamChannelStateEvent])
       verify(pipeline).sendDownstream(ec.capture)
       val e = ec.getValue

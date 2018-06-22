@@ -271,7 +271,7 @@ abstract class MemcachedTest
     intercept[ClientError] { awaitResult(client.delete("bad key")) }
   }
 
-  protected[this] def testRehashUponEject(client: Client, sr: InMemoryStatsReceiver) {
+  protected[this] def testRehashUponEject(client: Client, sr: InMemoryStatsReceiver): Unit = {
     val max = 200
     // set values
     awaitResult(
@@ -323,7 +323,7 @@ abstract class MemcachedTest
 
   protected[this] def testRingReEntryAfterEjection(
     createClient: (MockTimer, ListeningServer, StatsReceiver) => Client
-  ) {
+  ): Unit = {
     import com.twitter.finagle.memcached.protocol._
 
     class MockedMemcacheServer extends Service[Command, Response] {
@@ -373,7 +373,7 @@ abstract class MemcachedTest
     addrs: Seq[Address],
     mutableAddrs: ReadWriteVar[Addr],
     sr: InMemoryStatsReceiver
-  ) {
+  ): Unit = {
     assert(sr.counters(redistributesKey) == 1)
     assert(sr.counters(Seq("test_client", "loadbalancer", "rebuilds")) == 3)
     assert(sr.counters(Seq("test_client", "loadbalancer", "updates")) == 3)
@@ -415,7 +415,7 @@ abstract class MemcachedTest
     assert(sr.counters(Seq("test_client", "loadbalancer", "removes")) == NumConnections)
   }
 
-  protected[this] def testFailureAccrualFactoryExceptionHasRemoteAddress(client: Client) {
+  protected[this] def testFailureAccrualFactoryExceptionHasRemoteAddress(client: Client): Unit = {
     // Trigger transition to "Dead" state
     intercept[Exception] {
       awaitResult(client.delete("foo"))
@@ -457,7 +457,7 @@ abstract class MemcachedTest
   /**
    * Test compatibility between old and new clients for the migration phase
    */
-  protected[this] def testCompatibility() {
+  protected[this] def testCompatibility(): Unit = {
     val numKeys = 20
     val keyLength = 50
 

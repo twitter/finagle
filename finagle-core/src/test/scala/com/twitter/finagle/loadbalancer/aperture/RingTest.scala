@@ -14,7 +14,7 @@ class RingTest extends FunSuite {
   val numRuns = 100000
   def run(mk: => Seq[Int]): Map[Int, Int] = histo(Seq.fill(numRuns)(mk).flatten)
 
-  def assertBalanced(histo: Map[Int, Int]) {
+  def assertBalanced(histo: Map[Int, Int]): Unit = {
     for (Seq(i, j) <- histo.keys.sliding(2)) {
       val a = histo(i).toDouble
       val b = histo(j).toDouble

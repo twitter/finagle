@@ -14,7 +14,7 @@ import java.net.{ConnectException, Socket}
  * replication) or load-balance across replicas.
  */
 object MemcachedProxy {
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     assertMemcachedRunning()
 
     val client: Service[Command, Response] = Memcached.client.newService("localhost:11211")
@@ -28,7 +28,7 @@ object MemcachedProxy {
       .serve("localhost:8080", proxyService)
   }
 
-  private[this] def assertMemcachedRunning() {
+  private[this] def assertMemcachedRunning(): Unit = {
     try {
       new Socket("localhost", 11211)
     } catch {

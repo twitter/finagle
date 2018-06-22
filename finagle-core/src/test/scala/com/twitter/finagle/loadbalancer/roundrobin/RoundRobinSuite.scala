@@ -31,7 +31,7 @@ trait RoundRobinSuite {
     maxEffort = 1
   )
 
-  def assertEven(fs: Vector[RRServiceFactory]) {
+  def assertEven(fs: Vector[RRServiceFactory]): Unit = {
     val ml = fs.head.meanLoad
     for (f <- fs) {
       assert(

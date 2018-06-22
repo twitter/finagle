@@ -9,7 +9,7 @@ object ReadableBufProcessorTest {
   trait CanProcess {
     def process(from: Int, until: Int, processor: Buf.Processor): Int
     def process(processor: Buf.Processor): Int
-    def readBytes(num: Int)
+    def readBytes(num: Int): Unit
     def readerIndex(): Int
   }
 

@@ -32,7 +32,7 @@ class LoadBandTest extends FunSuite with ApertureSuite {
     var n = 0
     var sum = 0
 
-    def update(v: Int) {
+    def update(v: Int): Unit = {
       n += 1
       sum += v
     }

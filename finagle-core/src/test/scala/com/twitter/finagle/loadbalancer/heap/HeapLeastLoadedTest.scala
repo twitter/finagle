@@ -15,7 +15,7 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
     var _status: Status = Status.Open
     var _closed = false
 
-    def setStatus(x: Status) { _status = x }
+    def setStatus(x: Status): Unit = { _status = x }
 
     def apply(conn: ClientConnection) = Future.value {
       load += 1

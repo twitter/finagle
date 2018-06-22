@@ -114,7 +114,7 @@ class RetryFilterTest extends FunSpec with MockitoSugar with BeforeAndAfter {
 
     describe("with RetryPolicy.tries") {
 
-      def runWithTries(retryExceptionsOnly: Boolean) {
+      def runWithTries(retryExceptionsOnly: Boolean): Unit = {
         it("always try once") {
           new TriesFixture(retryExceptionsOnly) {
             when(service(123)) thenReturn Future(321)
@@ -290,7 +290,7 @@ class RetryFilterTest extends FunSpec with MockitoSugar with BeforeAndAfter {
       }
     }
 
-    def testExceptionPolicy(policy: RetryPolicy[_], retryExceptionsOnly: Boolean) {
+    def testExceptionPolicy(policy: RetryPolicy[_], retryExceptionsOnly: Boolean): Unit = {
 
       it("always try once") {
         new PolicyFixture(policy, retryExceptionsOnly, timer) {
@@ -403,7 +403,7 @@ class RetryFilterTest extends FunSpec with MockitoSugar with BeforeAndAfter {
       }
     }
 
-    def testSuccessPolicy(policy: RetryPolicy[(Int, Try[Int])]) {
+    def testSuccessPolicy(policy: RetryPolicy[(Int, Try[Int])]): Unit = {
 
       it("when it succeeds with a bad response, consult the retry strategy") {
         val timer = new MockTimer()

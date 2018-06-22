@@ -31,7 +31,7 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
     val server =
       ServerDispatcher.newRequestResponse(transport, service, lessor, NullTracer, NullStatsReceiver)
 
-    def issue(lease: Duration) {
+    def issue(lease: Duration): Unit = {
       val m = serverToClient.poll()
       assert(!m.isDefined)
       server.issue(lease)
@@ -39,7 +39,7 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
       checkFuture(m, Message.Tlease(lease))
     }
 
-    def demonstrateNack() {
+    def demonstrateNack(): Unit = {
       val m = serverToClient.poll()
       assert(!m.isDefined)
       clientToServer.offer(Message.Tdispatch(0, Seq.empty, Path.empty, Dtab.empty, Buf.Empty))
@@ -47,7 +47,7 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
       checkFuture(m, Message.RdispatchNack(0, Seq.empty))
     }
 
-    def demonstrateNoNack() {
+    def demonstrateNoNack(): Unit = {
       val m = serverToClient.poll()
       assert(!m.isDefined)
       clientToServer.offer(Message.Tdispatch(0, Seq.empty, Path.empty, Dtab.empty, Buf.Empty))
@@ -55,7 +55,7 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
     }
   }
 
-  private[this] def checkFuture(actual: Future[Message], expected: Message) {
+  private[this] def checkFuture(actual: Future[Message], expected: Message): Unit = {
     actual.poll match {
       case Some(Return(msg)) => assert(msg == expected)
       case _ => fail()

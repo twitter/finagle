@@ -87,7 +87,7 @@ private[loadbalancer] trait ApertureSuite {
     @volatile var _status: Status = Status.Open
 
     override def status: Status = _status
-    def status_=(v: Status) { _status = v }
+    def status_=(v: Status): Unit = { _status = v }
 
     def close(deadline: Time): Future[Unit] = {
       _numCloses += 1

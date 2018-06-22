@@ -167,7 +167,7 @@ class StreamTransportsTest extends FunSuite {
     val coll = collate(trans, read)(_ == "eof")
     assert(!coll.isDefined)
 
-    def assertDiscarded(f: Future[_]) {
+    def assertDiscarded(f: Future[_]): Unit = {
       assert(f.isDefined)
       intercept[Reader.ReaderDiscarded] { Await.result(f, 2.seconds) }
     }

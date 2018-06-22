@@ -232,7 +232,7 @@ abstract class AbstractEndToEndTest
     @volatile var cltTraceId: Option[TraceId] = None
     @volatile var srvTraceId: Option[TraceId] = None
     val tracer = new Tracer {
-      def record(record: Record) {
+      def record(record: Record): Unit = {
         record match {
           case Record(id, _, ServerRecv(), _) => srvTraceId = Some(id)
           case Record(id, _, ClientSend(), _) => cltTraceId = Some(id)
@@ -276,7 +276,7 @@ abstract class AbstractEndToEndTest
     @volatile var cltTraceId: Option[TraceId] = None
     @volatile var srvTraceId: Option[TraceId] = None
     val tracer = new Tracer {
-      def record(record: Record) {
+      def record(record: Record): Unit = {
         record match {
           case Record(id, _, ServerRecv(), _) => srvTraceId = Some(id)
           case Record(id, _, ClientSend(), _) => cltTraceId = Some(id)

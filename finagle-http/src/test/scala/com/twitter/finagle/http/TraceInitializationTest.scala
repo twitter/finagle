@@ -17,7 +17,7 @@ private object Svc extends Service[Request, Response] {
 class TraceInitializationTest extends FunSuite {
   def req = RequestBuilder().url("http://foo/this/is/a/uri/path").buildGet()
 
-  def assertAnnotationsInOrder(records: Seq[Record], annos: Seq[Annotation]) {
+  def assertAnnotationsInOrder(records: Seq[Record], annos: Seq[Annotation]): Unit = {
     assert(records.collect { case Record(_, _, ann, _) if annos.contains(ann) => ann } == annos)
   }
 
@@ -25,7 +25,7 @@ class TraceInitializationTest extends FunSuite {
    * Ensure all annotations have the same TraceId (it should be passed between client and server)
    * Ensure core annotations are present and properly ordered
    */
-  def testTraces(f: (Tracer, Tracer) => (Service[Request, Response], Closable)) {
+  def testTraces(f: (Tracer, Tracer) => (Service[Request, Response], Closable)): Unit = {
     val tracer = new BufferingTracer
 
     val (svc, closable) = f(tracer, tracer)

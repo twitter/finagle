@@ -55,7 +55,7 @@ object Example extends App {
   val password = flag("password", "<password>", "mysql password")
   val dbname = flag("database", "test", "default database to connect to")
 
-  def main() {
+  def main(): Unit = {
     val client = Mysql.client
       .withCredentials(username(), password())
       .withDatabase(dbname())

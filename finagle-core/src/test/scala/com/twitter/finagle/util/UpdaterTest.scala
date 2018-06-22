@@ -17,7 +17,7 @@ class UpdaterTest extends FunSuite {
       protected def preprocess(elems: Seq[Work]) =
         Seq(elems.minBy(_.p))
 
-      def handle(w: Work) {
+      def handle(w: Work): Unit = {
         worked :+= w
         first.countDown()
         barrier.await()
@@ -27,7 +27,7 @@ class UpdaterTest extends FunSuite {
 
     val w0 = Work(0)
     val thr = new Thread("Test-Updater") {
-      override def run() {
+      override def run(): Unit = {
         u(w0)
       }
     }

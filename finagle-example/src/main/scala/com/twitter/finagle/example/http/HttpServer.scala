@@ -63,7 +63,7 @@ object HttpServer {
     }
   }
 
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     val handleExceptions = new HandleExceptions
     val authorize = new Authorize
     val respond = new Respond

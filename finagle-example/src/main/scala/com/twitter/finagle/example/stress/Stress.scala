@@ -16,7 +16,7 @@ import scala.collection.JavaConverters._
  * of requests at the command line.
  */
 object Stress {
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     val uri = new URI(args(0))
     val concurrency = args(1).toInt
     val totalRequests = args(2).toInt

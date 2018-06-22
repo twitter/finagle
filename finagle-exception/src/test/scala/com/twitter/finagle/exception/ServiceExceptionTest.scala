@@ -59,7 +59,7 @@ private[exception] class TestServiceException(
       } else true
     }
 
-    def fail(badKey: String, location: String) {
+    def fail(badKey: String, location: String): Unit = {
       assert(false, "unknown element found in " + location + ": " + badKey)
     }
 
@@ -155,7 +155,7 @@ private[exception] class TestServiceException(
     assert(hasMessage, "no message")
     assert(hasStackTrace, "no stacktrace")
 
-    def optionalAssertDefined(o: Option[_], defined: Boolean, msg: String) {
+    def optionalAssertDefined(o: Option[_], defined: Boolean, msg: String): Unit = {
       if (o.isDefined) assert(defined, msg + " expected but not found")
     }
 

@@ -151,7 +151,7 @@ class Netty3TransporterTest extends FunSuite with MockitoSugar with Eventually {
 
   test("should track connections with channelStatsHandler on different connections") {
     val sr = new InMemoryStatsReceiver
-    def hasConnections(scope: String, num: Int) {
+    def hasConnections(scope: String, num: Int): Unit = {
       assert(sr.gauges(Seq(scope, "connections"))() == num)
     }
 

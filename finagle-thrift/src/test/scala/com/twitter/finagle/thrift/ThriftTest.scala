@@ -40,14 +40,14 @@ trait ThriftTest { self: FunSuite =>
   def testThrift(
     label: String,
     clientIdOpt: Option[ClientId] = None
-  )(theTest: (Iface, BufferingTracer) => Unit) {
+  )(theTest: (Iface, BufferingTracer) => Unit): Unit = {
     thriftTests += ThriftTestDefinition(label, clientIdOpt, theTest)
   }
 
   def skipTestThrift(
     label: String,
     clientIdOpt: Option[ClientId] = None
-  )(theTest: (Iface, BufferingTracer) => Unit) {
+  )(theTest: (Iface, BufferingTracer) => Unit): Unit = {
     () // noop
   }
 
@@ -62,7 +62,7 @@ trait ThriftTest { self: FunSuite =>
 
       val boundAddr = server.boundAddress
 
-      def close() {
+      def close(): Unit = {
         server.close()
       }
   }
@@ -89,7 +89,7 @@ trait ThriftTest { self: FunSuite =>
       val service = serviceFactory.toService
       val client = serviceToIface(service, protocolFactory)
 
-      def close() {
+      def close(): Unit = {
         service.close()
       }
   }
@@ -103,7 +103,7 @@ trait ThriftTest { self: FunSuite =>
           .serveIface("localhost:*", processor)
         val boundAddr = server.boundAddress
 
-        def close() {
+        def close(): Unit = {
           server.close()
         }
     }
@@ -142,12 +142,12 @@ trait ThriftTest { self: FunSuite =>
 
   // For some reason, the compiler needs some help here.
   private type NewClient = (TProtocolFactory, SocketAddress, Option[ClientId]) => {
-    def close()
+    def close(): Unit
     val client: Iface
   }
 
   private type NewServer = (TProtocolFactory) => {
-    def close()
+    def close(): Unit
     val boundAddr: SocketAddress
   }
 

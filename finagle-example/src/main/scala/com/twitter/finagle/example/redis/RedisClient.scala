@@ -7,7 +7,7 @@ import com.twitter.util.Await
 
 object RedisClient {
 
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
 
     println("Starting Redis instance...")
     RedisCluster.start(1)

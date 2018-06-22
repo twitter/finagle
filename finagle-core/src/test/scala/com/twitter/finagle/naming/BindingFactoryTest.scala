@@ -48,7 +48,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     def withExpectedTrace(
       f: => Unit,
       expected: Seq[Annotation]
-    ) {
+    ): Unit = {
       val tracer: Tracer = spy(new NullTracer)
       when(tracer.isActivelyTracing(any[TraceId])).thenReturn(true)
       val captor: ArgumentCaptor[Record] = ArgumentCaptor.forClass(classOf[Record])

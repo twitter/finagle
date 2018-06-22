@@ -15,7 +15,7 @@ class DefaultTracingTest extends FunSuite with Eventually with IntegrationPatien
     def apply(str: String): Future[String] = Future.value(str)
   }
 
-  def assertAnnotationsInOrder(tracer: Seq[Record], annos: Seq[Annotation]) {
+  def assertAnnotationsInOrder(tracer: Seq[Record], annos: Seq[Annotation]): Unit = {
     assert(tracer.collect { case Record(_, _, ann, _) if annos.contains(ann) => ann } == annos)
   }
 
@@ -28,7 +28,7 @@ class DefaultTracingTest extends FunSuite with Eventually with IntegrationPatien
    *          otherwise the tests here will prevent [[com.twitter.finagle.util.ExitGuard]] from exiting,
    *          and interfere with [[com.twitter.finagle.util.ExitGuardTest]]
    */
-  def testCoreTraces(f: (Tracer, Tracer) => (Service[String, String], Closable)) {
+  def testCoreTraces(f: (Tracer, Tracer) => (Service[String, String], Closable)): Unit = {
     val serverTracer = new BufferingTracer
     val clientTracer = new BufferingTracer
 

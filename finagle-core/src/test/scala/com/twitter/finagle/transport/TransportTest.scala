@@ -213,7 +213,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
     val coll = Transport.collate(trans, read)
     assert(!coll.isDefined)
 
-    def assertDiscarded(f: Future[_]) {
+    def assertDiscarded(f: Future[_]): Unit = {
       assert(f.isDefined)
       intercept[Reader.ReaderDiscarded] { awaitResult(f) }
     }

@@ -85,7 +85,7 @@ abstract class MemcachedTest
     client: Client,
     stat: Seq[String],
     sr: InMemoryStatsReceiver
-  ) {
+  ): Unit = {
     // wait until we have at least 1 node, or risk getting a ShardNotAvailable exception
     eventually {
       assert(sr.gauges(stat)() >= 1)

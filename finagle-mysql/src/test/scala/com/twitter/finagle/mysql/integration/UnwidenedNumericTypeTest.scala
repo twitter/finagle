@@ -55,7 +55,7 @@ class UnwidenedNumericTypeTest extends FunSuite with IntegrationClient {
     testRow(binaryEncoded, unsignedColumns)
   }
 
-  def testRow(row: Row, unsignedColumns: Boolean) {
+  def testRow(row: Row, unsignedColumns: Boolean): Unit = {
 
     def rowName(base: String): String = {
       if (!unsignedColumns) base

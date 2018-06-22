@@ -120,7 +120,7 @@ class HeapBalancerBench extends StdBenchAnnotations {
   var heap: ServiceFactory[Unit, Unit] = _
 
   @Setup
-  def setup() {
+  def setup(): Unit = {
     heap = Balancers
       .heap()
       .newBalancer(

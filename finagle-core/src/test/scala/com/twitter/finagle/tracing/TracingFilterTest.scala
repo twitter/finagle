@@ -28,7 +28,7 @@ class TracingFilterTest
   var tracer: Tracer = _
   var captor: ArgumentCaptor[Record] = _
 
-  override def test(testName: String, testTags: Tag*)(f: => Any)(implicit pos: Position) {
+  override def test(testName: String, testTags: Tag*)(f: => Any)(implicit pos: Position): Unit = {
     super.test(testName, testTags: _*) {
       tracer = spy(new NullTracer)
       when(tracer.isActivelyTracing(any[TraceId])).thenReturn(true)

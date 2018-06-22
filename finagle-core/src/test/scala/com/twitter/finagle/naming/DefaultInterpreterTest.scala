@@ -15,7 +15,7 @@ class testnamer extends Namer {
 @RunWith(classOf[JUnitRunner])
 class DefaultInterpreterTest extends FunSuite {
 
-  def assertEval(dtab: Dtab, path: String, expected: Name.Bound*) {
+  def assertEval(dtab: Dtab, path: String, expected: Name.Bound*): Unit = {
     DefaultInterpreter.bind(dtab, Path.read(path)).sample().eval match {
       case Some(actual) => assert(actual.map(_.addr.sample) == expected.map(_.addr.sample).toSet)
       case _ => assert(false)
