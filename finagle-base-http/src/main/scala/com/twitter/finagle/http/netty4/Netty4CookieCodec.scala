@@ -25,7 +25,7 @@ private[finagle] object Netty4CookieCodec extends CookieCodec {
   // characters that are prohibited in Netty 4.
   private[this] val ShouldWrapCharsBitSet: JBitSet = {
     val bs = new JBitSet
-    "()/:;<?@[]=>{}".foreach(bs.set(_))
+    "()/:<?@[]=>{}".foreach(bs.set(_))
     bs
   }
 
