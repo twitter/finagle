@@ -48,6 +48,7 @@ object MetricsStatsReceiver {
  */
 class MetricsStatsReceiver(val registry: Metrics)
     extends StatsReceiverWithCumulativeGauges
+    with CollisionTrackingStatsReceiver
     with WithHistogramDetails {
 
   import MetricsStatsReceiver._
@@ -132,6 +133,8 @@ class MetricsStatsReceiver(val registry: Metrics)
     registry.registerGauge(verbosity, name, f)
 
   protected[this] def deregisterGauge(name: Seq[String]): Unit = registry.unregisterGauge(name)
+
+  override def metricsCollisionsLinterRule: Rule = registry.metricsCollisionsLinterRule
 }
 
 class MetricsExporter(val registry: Metrics)

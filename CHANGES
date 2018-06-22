@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+  * finagle-stats: Adds a lint rule to detect when metrics with colliding names are used.
+    ``PHAB_ID=D183494``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

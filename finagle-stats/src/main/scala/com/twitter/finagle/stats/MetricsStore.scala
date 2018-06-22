@@ -3,9 +3,16 @@ package com.twitter.finagle.stats
 private[stats] object MetricsStore {
 
   /**
+   * The internal representation of any metric in a MetricsStore.
+   */
+  trait StoreMetric {
+    def name: String
+  }
+
+  /**
    * The internal representation of counters in a MetricsStore.
    */
-  trait StoreCounter {
+  trait StoreCounter extends StoreMetric {
     def name: String
 
     def count: Long
@@ -16,7 +23,7 @@ private[stats] object MetricsStore {
   /**
    * The internal representation of gauges in a MetricsStore.
    */
-  trait StoreGauge {
+  trait StoreGauge extends StoreMetric {
     def name: String
 
     def read: Number
@@ -25,7 +32,7 @@ private[stats] object MetricsStore {
   /**
    * The internal representation of histograms in a MetricsStore.
    */
-  trait StoreStat {
+  trait StoreStat extends StoreMetric {
     def name: String
 
     def stat: Stat

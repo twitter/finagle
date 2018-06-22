@@ -61,4 +61,13 @@ class StatsFormatterTest extends FunSuite {
     }
   }
 
+  test("name collisions are allowed") {
+    val metrics = newMetrics()
+    val stats = new MetricsStatsReceiver(metrics)
+
+    stats.counter("a", "a")
+    stats.counter("a", "a") // doesn't throw
+    stats.counter("a/a") // doesn't throw
+  }
+
 }

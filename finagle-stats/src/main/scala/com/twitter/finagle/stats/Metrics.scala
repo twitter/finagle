@@ -1,6 +1,7 @@
 package com.twitter.finagle.stats
 
 import com.twitter.logging.Logger
+import com.twitter.util.lint.{Category, Issue, Rule}
 import java.util
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.LongAdder
@@ -224,38 +225,75 @@ private[finagle] class Metrics private(
 
   def unregisterGauge(names: Seq[String]): Unit = {
     gaugesMap.remove(names)
+    reservedNames.remove(format(names))
   }
 
   def gauges: util.Map[String, Number] = {
-    val map = new util.HashMap[String, Number]()
-    val gs = gaugesMap.asScala.foreach {
-      case (names, sg) =>
-        val key = format(names)
-        try {
-          map.put(key, sg.read)
-        } catch {
-          case NonFatal(e) => log.warning(e, s"exception while sampling gauge '$key'")
-        }
+    val map = new util.HashMap[String, Number](gaugesMap.size)
+    gaugesMap.elements().asScala.foreach { sg =>
+      try {
+        map.put(sg.name, sg.read)
+      } catch {
+        case NonFatal(e) => log.warning(e, s"exception while sampling gauge '${sg.name}'")
+      }
     }
     util.Collections.unmodifiableMap(map)
   }
 
   def counters: util.Map[String, Number] = {
-    val cs = countersMap.asScala.map {
-      case (names, sc) =>
-        format(names) -> Long.box(sc.count)
-    }
+    val cs = countersMap
+      .elements()
+      .asScala
+      .map { sc =>
+        sc.name -> Long.box(sc.count)
+      }
+      .toMap
     util.Collections.unmodifiableMap(cs.asJava)
   }
 
   def histograms: util.Map[String, Snapshot] = {
-    val snaps = statsMap.asScala.map {
-      case (names, ss) =>
-        format(names) -> ss.snapshot
-    }
+    val snaps = statsMap
+      .elements()
+      .asScala
+      .map { ss =>
+        ss.name -> ss.snapshot
+      }
+      .toMap
     util.Collections.unmodifiableMap(snaps.asJava)
   }
 
   def verbosity: util.Map[String, Verbosity] =
     util.Collections.unmodifiableMap(verbosityMap)
+
+  def metricsCollisionsLinterRule: Rule =
+    Rule(
+      Category.Configuration,
+      "Metrics name collision",
+      "Identifies metrics with ambiguous names that collide with other metrics. " +
+        """Metrics recorded in a scope Seq("foo", "bar") can collide with Seq("foo/bar") when """ +
+        s"exporting the metrics to JSON. To fix, never use the separator character $separator " +
+        "in metrics names.\nThis linter does not account for blacklisted metrics, verbosity, " +
+        "or collisions between Stats and Counters/Gauges."
+    ) {
+      def toIssue(kind: String, collisions: Iterable[Seq[String]]) =
+        Issue(
+          collisions
+            .map(_.mkString("Seq(\"", "\", \"", "\")"))
+            .mkString(s"$kind:\n", " collides with\n", "")
+        )
+
+      def toMapWithIssues[V <: MetricsStore.StoreMetric](
+        map: ConcurrentHashMap[Seq[String], V],
+        namesToIssue: Iterable[Seq[String]] => Issue
+      ) =
+        map.asScala
+          .groupBy { case (_, metric) => metric.name }
+          .values
+          .filter(_.size > 1)
+          .map(collisions => namesToIssue(collisions.keys))
+
+      toMapWithIssues(gaugesMap, toIssue("Gauge", _)).toSeq ++
+        toMapWithIssues(countersMap, toIssue("Counter", _)) ++
+        toMapWithIssues(statsMap, toIssue("Stat", _))
+    }
 }
