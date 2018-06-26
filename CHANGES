@@ -10,6 +10,9 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
+  * finagle-core: There is now an implicit instance for Finagle's default timer:
+    `DefaultTimer.Implicit`. ``PHAB_ID=D185896``
+
   * finagle-mysql: `com.twitter.util.Time` can now be used with
     `PreparedStatement`s without converting the `ctu.Time` to a `java.sql.Timestamp`.
     ``PHAB_ID=D182973``

@@ -52,6 +52,18 @@ private[finagle] trait ServiceLoadedTimer extends Timer
  * shouldn't be used to schedule tasks that will occupy the executing thread for a significant
  * duration.
  *
+ * Use `DefaultTimer.Implicit` to import an implicit instance of this timer into the scope.
+ *
+ * {{{
+ *  scala> import com.twitter.util.Future, com.twitter.conversions.time._
+ *  scala> import com.twitter.finagle.util.DefaultTimer.Implicit
+ *
+ *  scala> val f = Future.sleep(10.seconds)
+ *  f: com.twitter.util.Future[Unit] = <function0>
+ * }}}
+ *
+ * Java users may prefer `DefaultTimer.getInstance()` to access this timer.
+ *
  * @note This timer is "unstoppable" such that calls to `stop()` is ignored.
  */
 object DefaultTimer extends ProxyTimer {
@@ -73,6 +85,11 @@ object DefaultTimer extends ProxyTimer {
     }
     initializeDefaultTimer(baseTimer)
   }
+
+  /**
+   * An implicit instance supplied for use in the Future.* methods.
+   */
+  implicit val Implicit: Timer = this
 
   /**
    * An alias for [[DefaultTimer]].
