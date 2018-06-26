@@ -300,6 +300,18 @@ object CanBeParameter {
     }
   }
 
+  // Note that Timestamp is UTC only and includes both Date and Time parts.
+  // See https://dev.mysql.com/doc/refman/8.0/en/datetime.html.
+  implicit val ctuTimeCanBeParameter: CanBeParameter[com.twitter.util.Time] = {
+    new CanBeParameter[com.twitter.util.Time] {
+      def sizeOf(param: com.twitter.util.Time): Int = 12
+      def typeCode(param: com.twitter.util.Time): Short = Type.Timestamp
+      def write(writer: MysqlBufWriter, param: com.twitter.util.Time): Unit = {
+        valueCanBeParameter.write(writer, TimestampValue(new java.sql.Timestamp(param.inMillis)))
+      }
+    }
+  }
+
   implicit val nullCanBeParameter: CanBeParameter[Null] = {
     new CanBeParameter[Null] {
       def sizeOf(param: Null): Int = 0

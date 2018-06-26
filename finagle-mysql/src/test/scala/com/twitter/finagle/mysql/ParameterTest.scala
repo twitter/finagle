@@ -135,6 +135,12 @@ class ParameterTest extends FunSuite {
     assert(param.value == value)
   }
 
+  test("com.twitter.util.Time") {
+    val value = com.twitter.util.Time.fromMilliseconds(3L)
+    val param: Parameter = value
+    assert(param.value == value)
+  }
+
   test("null") {
     val value: String = null
     val param: Parameter = value

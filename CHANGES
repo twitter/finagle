@@ -10,6 +10,10 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
+  * finagle-mysql: `com.twitter.util.Time` can now be used with
+    `PreparedStatement`s without converting the `ctu.Time` to a `java.sql.Timestamp`.
+    ``PHAB_ID=D182973``
+
   * finagle-stats: Adds a lint rule to detect when metrics with colliding names are used.
     ``PHAB_ID=D183494``
 
