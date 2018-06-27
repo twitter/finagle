@@ -38,19 +38,19 @@ private[http2] final class Http2UpgradingTransport(
     else super.status
   }
 
-  private[this] def upgradeRejected(): Unit = synchronized {
+  private[this] def upgradeRejected(): Unit = {
     upgradeFailed = true
     p.updateIfEmpty(Return.None)
     // we need ref to update before we can read again
     ref.update(identity)
   }
 
-  private[this] def upgradeIgnored(): Unit = synchronized {
+  private[this] def upgradeIgnored(): Unit = {
     upgradeFailed = true
     p.updateIfEmpty(Throw(UpgradeIgnoredException))
   }
 
-  private[this] def upgradeSuccessful(): Unit = synchronized {
+  private[this] def upgradeSuccessful(): Unit = {
     val inOutCasted = Transport.cast[StreamMessage, StreamMessage](t)
     val contextCasted = inOutCasted.asInstanceOf[
       Transport[StreamMessage, StreamMessage] {
@@ -82,7 +82,7 @@ private[http2] final class Http2UpgradingTransport(
       Future.value(result)
   }
 
-  override def close(deadline: Time): Future[Unit] = synchronized {
+  override def close(deadline: Time): Future[Unit] = {
     p.updateIfEmpty(Throw(new Http2UpgradingTransport.ClosedWhileUpgradingException()))
     super.close(deadline)
   }
