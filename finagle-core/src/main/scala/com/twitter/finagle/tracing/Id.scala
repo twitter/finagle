@@ -164,6 +164,8 @@ object TraceId {
       Return(traceId)
     }
   }
+
+  private val SomeTrue: Some[Boolean] = Some(true)
 }
 
 /**
@@ -239,7 +241,9 @@ final case class TraceId(
    * Override [[_sampled]] to Some(true) if the debug flag is set.
    * @see [[getSampled]] for a Java-friendly API.
    */
-  lazy val sampled: Option[Boolean] = if (flags.isDebug) Some(true) else _sampled
+  def sampled: Option[Boolean] =
+    if (flags.isDebug) TraceId.SomeTrue
+    else _sampled
 
   /**
    * Java-friendly API to convert [[sampled]] to a [[Option]] of [[java.lang.Boolean]].
