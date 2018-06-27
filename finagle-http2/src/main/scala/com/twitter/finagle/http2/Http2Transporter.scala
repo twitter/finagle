@@ -227,7 +227,6 @@ private[finagle] class Http2Transporter(
   }
 
   private[this] def upgrade(): Future[Transport[Any, Any]] = {
-    val conn: Future[Transport[Any, Any]] = underlying()
     val p = Promise[Option[StreamTransportFactory]]()
     if (cachedConnection.compareAndSet(null, p)) {
       p.respond {
@@ -245,7 +244,8 @@ private[finagle] class Http2Transporter(
           log.log(level, exn, s"An upgrade attempt to $remoteAddress failed.")
           tryEvict(p)
       }
-      conn.transform {
+      
+      underlying().transform {
         case Return(trans) =>
           trans.onClose.ensure {
             if (p.isDefined) {
