@@ -76,4 +76,18 @@ class TraceBenchmark extends StdBenchAnnotations {
   def isActivelyTracing: Boolean =
     traced(num)
 
+  @Benchmark
+  def recordAnnotation(): Unit =
+    Trace.letTracer(TraceBenchmark.NoopAlwaysSamplingTracer) {
+      Trace.record(Annotation.WireSend)
+    }
+
+}
+
+private object TraceBenchmark {
+  private val NoopAlwaysSamplingTracer: Tracer = new Tracer {
+    def record(record: Record): Unit = ()
+    def sampleTrace(traceId: TraceId): Option[Boolean] = Tracer.SomeTrue
+    override def isActivelyTracing(traceId: TraceId): Boolean = true
+  }
 }

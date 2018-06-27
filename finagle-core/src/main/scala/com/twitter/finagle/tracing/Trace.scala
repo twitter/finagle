@@ -7,6 +7,7 @@ import com.twitter.io.Buf
 import com.twitter.util._
 import java.net.InetSocketAddress
 import com.twitter.app.GlobalFlag
+import scala.annotation.tailrec
 import scala.util.Random
 
 object traceId128Bit extends GlobalFlag[Boolean](false, "When true, new root spans will have 128-bit trace IDs. Defaults to false (64-bit).")
@@ -33,6 +34,10 @@ object traceId128Bit extends GlobalFlag[Boolean](false, "When true, new root spa
  */
 object Trace {
   private case class TraceCtx(terminal: Boolean, tracers: List[Tracer]) {
+    // compute this lazily as tracers often get pushed onto
+    // a stack before having anything recorded.
+    lazy val distinctTracers: List[Tracer] = tracers.distinct
+
     def withTracer(tracer: Tracer): TraceCtx = copy(tracers = tracer :: this.tracers)
     def withTerminal(terminal: Boolean): TraceCtx =
       if (terminal == this.terminal) this
@@ -40,7 +45,7 @@ object Trace {
   }
 
   private object TraceCtx {
-    val empty = TraceCtx(false, Nil)
+    val empty = TraceCtx(terminal = false, Nil)
   }
 
   private[this] val traceCtx = new Contexts.local.Key[TraceCtx]
@@ -159,10 +164,9 @@ object Trace {
     idOption match {
       case Some(id) =>
         TraceId(Some(id.traceId), Some(id.spanId), spanId, id.sampled, id.flags, id.traceIdHigh)
-      case None => {
+      case None =>
         val traceIdHigh = if (traceId128Bit()) Some(nextTraceIdHigh()) else None
         TraceId(None, None, spanId, None, Flags(), traceIdHigh)
-      }
     }
   }
 
@@ -293,9 +297,14 @@ object Trace {
    * Record a raw record without checking if it's sampled/enabled/etc.
    */
   private[this] def uncheckedRecord(rec: Record): Unit = {
-    tracers.distinct.foreach { t: Tracer =>
-      t.record(rec)
+    @tailrec
+    def unchecked(rec: Record, tracers: List[Tracer]): Unit = tracers match {
+      case t :: ts =>
+        t.record(rec)
+        unchecked(rec, ts)
+      case Nil => ()
     }
+    unchecked(rec, ctx.distinctTracers)
   }
 
   /**
