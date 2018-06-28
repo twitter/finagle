@@ -95,7 +95,7 @@ object DeadlineFilter {
     case object DarkMode extends FilterMode
     case object Enabled extends FilterMode
 
-    val Default: FilterMode = Disabled
+    val Default: FilterMode = DarkMode
 
     implicit val param: Stack.Param[Mode] = Stack.Param(Mode(Default))
   }
