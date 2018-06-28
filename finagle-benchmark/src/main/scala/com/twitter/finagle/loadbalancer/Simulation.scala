@@ -7,7 +7,7 @@ import com.twitter.finagle.NoBrokersAvailableException
 import com.twitter.util.{Activity, Future, Stopwatch, Var}
 
 private object Simulation extends com.twitter.app.App {
-  val qps = flag("qps", 1250, "Number of queries to send per second.")
+  val qps = flag("qps", 1250, "Number of queries to send per second")
   val dur = flag("dur", 45.seconds, "Benchmark duration")
 
   val nBackends = flag("backends", 10, "Number of stable uniform backends")
@@ -16,6 +16,8 @@ private object Simulation extends com.twitter.app.App {
 
   val coldStartBackend = flag("coldstart", false, "Add a cold starting backend")
   val slowMiddleBackend = flag("slowmiddle", false, "Adds a fast-then-slow-then-fast again backend")
+  val temporarilyFailedBackend = flag("temporaryfailure", false, "Adds an unhealthy backend that temporarily fails after 10 seconds for 15 seconds")
+  val permanentlyFailedBackend = flag("permanentfailure", false, "Adds an unhealthy backend that permanently fails after 10 seconds")
 
   val showProgress = flag("showprogress", false, "Print stats each second")
   val showSummary = flag("showsummary", true, "Print a stats summary at the end of the test")
@@ -37,12 +39,13 @@ private object Simulation extends com.twitter.app.App {
     // create a latency distribution from a set of recorded ping latencies.
     val url = getClass.getClassLoader.getResource("real_latencies.data")
     val stableLatency = LatencyProfile.fromFile(url)
+    val alwaysSucceed = FailureProfile.alwaysSucceed
 
     val servers = Var(
       Seq
         .tabulate(nBackends()) { _ =>
           val id = genServerId()
-          ServerFactory(id, stableLatency, stats.scope(s"srv_${id}"))
+          ServerFactory(id, stableLatency, alwaysSucceed, stats.scope(s"srv_${id}"))
         }
         .toSet
     )
@@ -115,6 +118,7 @@ private object Simulation extends com.twitter.app.App {
     var ms = 0
 
     val p = new LatencyProfile(elapsed)
+    val f = new FailureProfile(elapsed)
 
     // TODO: These latency events are dependent on the running time of
     // the simulation. They should probably be defined in terms of a ratio
@@ -124,6 +128,7 @@ private object Simulation extends com.twitter.app.App {
       servers() += ServerFactory(
         genServerId(),
         coldStart(stableLatency),
+        alwaysSucceed,
         stats.scope("srv_cold_start")
       )
     }
@@ -133,7 +138,28 @@ private object Simulation extends com.twitter.app.App {
       servers() += ServerFactory(
         genServerId(),
         slowMiddle(stableLatency),
+        alwaysSucceed,
         stats.scope("srv_slow_middle")
+      )
+    }
+
+    if (temporarilyFailedBackend()) {
+      val failWithin = f.failWithin(10.seconds, 25.seconds)
+      servers() += ServerFactory(
+        genServerId(),
+        stableLatency,
+        failWithin,
+        stats.scope("srv_unhealthy_temporarily")
+      )
+    }
+
+    if (permanentlyFailedBackend()) {
+      val failAfter = f.failAfter(10.seconds)
+      servers() += ServerFactory(
+        genServerId(),
+        stableLatency,
+        failAfter,
+        stats.scope("srv_unhealthy_permanently")
       )
     }
 
@@ -177,9 +203,11 @@ private object Simulation extends com.twitter.app.App {
       srvs.sortBy(_.count).foreach { srv =>
         val variance = math.abs(srv.count - optimal)
         val variancePct = (variance / optimal.toDouble) * 100
+        val successRate = srv.successRate
         println(
           s"srv=${srv.toString} load=${srv.count} " +
-            f"variance=$variance%1.2f (${variancePct}%1.2f%%)"
+            f"variance=$variance%1.2f (${variancePct}%1.2f%%) " +
+            f"successRate=$successRate%1.2f"
         )
       }
       // TODO: export standard deviation.

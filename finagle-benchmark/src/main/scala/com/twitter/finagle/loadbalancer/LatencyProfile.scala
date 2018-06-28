@@ -5,20 +5,18 @@ import com.twitter.util.Duration
 import scala.io.Source
 
 private object LatencyProfile {
-  val rng = Rng("seed".hashCode)
+  val rng: Rng = Rng("seed".hashCode)
 
   /**
    * Creates a latency profile from a file where each line
    * represents recorded latencies.
    */
   def fromFile(path: java.net.URL): () => Duration = {
-    val latencies = Source.fromURL(path).getLines.toIndexedSeq map { line: String =>
+    val latencies = Source.fromURL(path).getLines.toIndexedSeq.map { line: String =>
       Duration.fromNanoseconds((line.toDouble * 1000000).toLong)
     }
-    val size = latencies.size
-    var i = rng.nextInt(size)
-    () =>
-      { i = i + 1; latencies(i % size) }
+
+    () =>  latencies(rng.nextInt(latencies.size))
   }
 
   /**
@@ -69,6 +67,10 @@ private object LatencyProfile {
   }
 }
 
+/**
+ * Creates a profile to determine the latency for the next 
+ * incoming request.
+ */
 private class LatencyProfile(stopWatch: () => Duration) {
 
   /** Increase latency returned from `next` by `factor`. */
