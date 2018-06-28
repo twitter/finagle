@@ -15,6 +15,10 @@ import scala.util.control.NoStackTrace
  * respect that upgrade.  Since `ref` starts out pointing to
  * `Http2UpgradingTransport`, once it updates `ref`, it knows it will no longer
  * take calls to write or read.
+ *
+ * It's possible for a call to `close` to race with the transport upgrade.
+ * However, either outcome of the race is OK. The call to `super.close` ensures
+ * resources are cleaned up appropriately regardless of the stage of the upgrade.
  */
 private[http2] final class Http2UpgradingTransport(
   t: Transport[Any, Any],
