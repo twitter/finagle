@@ -13,6 +13,9 @@ New Features
   * finagle-core: There is now an implicit instance for Finagle's default timer:
     `DefaultTimer.Implicit`. ``PHAB_ID=D185896``
 
+  * finagle-core: Introduce new command-line flag `c.t.f.tracing.enabled` to entirely
+    disable/enable tracing for a given process (default: `true`).  ``PHAB_ID=D186557``
+
   * finagle-mysql: `com.twitter.util.Time` can now be used with
     `PreparedStatement`s without converting the `ctu.Time` to a `java.sql.Timestamp`.
     ``PHAB_ID=D182973``

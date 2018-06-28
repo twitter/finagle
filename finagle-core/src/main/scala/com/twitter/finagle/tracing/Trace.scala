@@ -10,8 +10,18 @@ import com.twitter.app.GlobalFlag
 import scala.annotation.tailrec
 import scala.util.Random
 
-object traceId128Bit extends GlobalFlag[Boolean](false, "When true, new root spans will have 128-bit trace IDs. Defaults to false (64-bit).")
+object traceId128Bit extends GlobalFlag[Boolean](
+  false,
+  "When true, new root spans will have 128-bit trace IDs. Defaults to false (64-bit)."
+)
 
+object enabled extends GlobalFlag[Boolean](
+  true,
+    """
+      |When false, disables any tracing for this process (default: enabled). Note: it's never
+      |recommended to disable tracing in production applications.
+    """.stripMargin
+)
 
 /**
  * This is a tracing system similar to Dapper:
@@ -103,7 +113,8 @@ object Trace {
   private[this] val rng = new Random
   private[this] val defaultId =
     TraceId(None, None, SpanId(rng.nextLong()), None, Flags(), if (traceId128Bit()) Some(nextTraceIdHigh()) else None)
-  @volatile private[this] var tracingEnabled = true
+
+  @volatile private[this] var tracingEnabled = enabled()
 
   private[this] val EmptyTraceCtxFn = () => TraceCtx.empty
 
