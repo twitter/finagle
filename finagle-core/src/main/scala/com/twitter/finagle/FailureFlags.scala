@@ -7,6 +7,8 @@ import com.twitter.util.{Future, Throw, Try}
  * handling of a request.
  */
 object FailureFlags {
+  // NOTE: When adding a new FailureFlag, make sure to add to `flagsOf` so that stats are reported,
+  // to `ShowMask` if applicable, and to com.twitter.finagle.Failure
 
   val Empty: Long = 0L
 
@@ -68,7 +70,8 @@ object FailureFlags {
    * whose behalf the client is working - it may have performed some side
    * effect before issuing the client call.
    */
-  private[finagle] val ShowMask: Long = Interrupted | Rejected | NonRetryable | DeadlineExceeded
+  private[finagle] val ShowMask: Long =
+    Interrupted | Rejected | NonRetryable | DeadlineExceeded | Ignorable
 
   /**
    * Expose flags as strings. Used for stats reporting. Here, Retryable is named
