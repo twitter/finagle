@@ -81,20 +81,18 @@ private[finagle] object MuxPush
       // underlying Netty channel via MuxChannelHandle, giving us the ability to
       // add TLS support later in the lifecycle of the socket connection.
       new Netty4PushTransporter[ByteReader, Buf](
-        _ => (),
-        MuxServerPipelineInit,
-        inetSocketAddress,
-        // we don't want to scope these metrics to mux, so we use `params`
-        Mux.param.removeTlsIfOpportunisticClient(params)
+        transportInit = _ => (),
+        protocolInit = PipelineInit,
+        remoteAddress = inetSocketAddress,
+        params = Mux.param.removeTlsIfOpportunisticClient(params)
       ) {
         override protected def initSession[T <: PushSession[ByteReader, Buf]](
           channel: Channel,
           protocolInit: (ChannelPipeline) => Unit,
           sessionBuilder: (PushChannelHandle[ByteReader, Buf]) => Future[T]
         ): Future[T] = {
-          // With this builder we add support for opportunistic TLS which is
-          // required in the `negotiateClientSession` method above. Adding
-          // more proxy types will break this pathway.
+          // With this builder we add support for opportunistic TLS via `MuxChannelHandle`
+          // and the respective `Negotation` types. Adding more proxy types will break this pathway.
           def wrappedBuilder(pushChannelHandle: PushChannelHandle[ByteReader, Buf]): Future[T] =
             sessionBuilder(new MuxChannelHandle(pushChannelHandle, channel, scopedStatsParams))
 
@@ -159,9 +157,9 @@ private[finagle] object MuxPush
     protected def newListener(): PushListener[ByteReader, Buf] = {
       Mux.Server.validateTlsParamConsistency(params)
       new Netty4PushListener[ByteReader, Buf](
-        MuxServerPipelineInit,
-        Mux.param.removeTlsIfOpportunisticServer(params), // we don't want to scope these metrics to mux
-        identity
+        pipelineInit = PipelineInit,
+        params = Mux.param.removeTlsIfOpportunisticServer(params),
+        setupMarshalling = identity
       ) {
         override protected def initializePushChannelHandle(
           ch: Channel,

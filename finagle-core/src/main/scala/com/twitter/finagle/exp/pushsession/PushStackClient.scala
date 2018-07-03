@@ -27,7 +27,17 @@ abstract class PushStackClient[Req, Rep, This <: PushStackClient[Req, Rep, This]
   protected type Out
 
   /**
-   * Refined type of the [[PushSession]]
+   * Refined type of the [[PushSession]].
+   *
+   * @note the type of `SessionT` is significant as it represents
+   * the type which will `receive` the inbound events from the
+   * handle. It is possible to transition between session implementations
+   * in order to handle protocol transitions (e.g. negotiation).
+   * For example, `newSession` can return the type which will receive
+   * the first phase of inbound events and `toService` can transform
+   * the type via future composition. In this way, the relationship
+   * between `newSession` and `toService` represent a state
+   * machine transition.
    */
   protected type SessionT <: PushSession[In, Out]
 
