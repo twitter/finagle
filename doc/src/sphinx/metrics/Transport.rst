@@ -44,7 +44,7 @@ ChannelStatsHandler
   histograms.
 
 **connection_duration** `verbosity:debug`
-  A histogram of the duration of the lifetime of a connection.
+  A histogram of the duration of the lifetime of a connection, in milliseconds.
 
 **connection_received_bytes** `verbosity:debug`
   A histogram of the number of bytes received over the lifetime of a connection.
