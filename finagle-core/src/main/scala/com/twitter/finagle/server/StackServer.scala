@@ -84,8 +84,8 @@ object StackServer {
     // requests are counted. We may need to adjust how latency are recorded
     // to exclude Nack response from latency stats, CSL-2306.
     stk.push(ServerAdmissionControl.module)
-    stk.push(StatsFilter.module)
     stk.push(RequestSemaphoreFilter.module)
+    stk.push(StatsFilter.module)
     stk.push(MaskCancelFilter.module)
     stk.push(ExceptionSourceFilter.module)
     stk.push(new JvmTracing)

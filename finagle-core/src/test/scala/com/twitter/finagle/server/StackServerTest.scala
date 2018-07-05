@@ -1,9 +1,10 @@
 package com.twitter.finagle.server
 
+import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.context.{Contexts, Deadline}
-import com.twitter.finagle.filter.ServerAdmissionControl
+import com.twitter.finagle.filter.{RequestSemaphoreFilter, ServerAdmissionControl}
 import com.twitter.finagle.param.{Stats, Timer}
 import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.service.{ExpiringService, TimeoutFilter}
@@ -13,8 +14,9 @@ import com.twitter.finagle.util.StackRegistry
 import com.twitter.util.{Await, Duration, Future, MockTimer, Promise, Time}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import org.scalatest.FunSuite
+import org.scalatest.concurrent.Eventually
 
-class StackServerTest extends FunSuite {
+class StackServerTest extends FunSuite with Eventually {
   test("Deadline isn't changed until after it's recorded") {
     val echo = ServiceFactory.const(Service.mk[Unit, Deadline] { unit =>
       Future.value(Contexts.broadcast(Deadline))
@@ -162,6 +164,35 @@ class StackServerTest extends FunSuite {
       assert(wasPromiseSatisfied.isDefined)
     } finally {
       ServerAdmissionControl.unregister(ClosingFilter2.name)
+    }
+  }
+
+  test("Rejections from RequestSemaphoreFilter are captured in stats") {
+    val neverRespond = ServiceFactory.const(Service.mk[String, String](_ => Future.never))
+    val stack = StackServer.newStack[String, String] ++ Stack.Leaf(Endpoint, neverRespond)
+    val sr = new InMemoryStatsReceiver
+    val factory = stack.make(
+      StackServer.defaultParams +
+      RequestSemaphoreFilter.Param(Some(new AsyncSemaphore(initialPermits = 1, maxWaiters = 0))) +
+      Stats(sr)
+    )
+    val svc = Await.result(factory(), 5.seconds)
+
+    // first request should hang
+    svc("foo")
+
+    // second request should be rejected by the filter
+    val exc = intercept[Failure] {
+      Await.result(svc("foo"), 5.seconds)
+    }
+
+    assert(exc.isFlagged(Failure.Rejected) && exc.isFlagged(Failure.Restartable))
+
+    eventually {
+      // First request never returns; dispatches is only incremented for the second request.
+      assert(sr.counters(Seq("requests")) == 1)
+      assert(sr.counters(Seq("failures", "rejected")) == 1)
+      assert(sr.counters(Seq("failures", "restartable")) == 1)
     }
   }
 }

@@ -32,6 +32,10 @@ Breaking API Changes
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-core: Server-side rejections from `c.t.f.filter.RequestSempahoreFilter.module` are now
+    captured by `c.t.f.service.StatsFilter`. They will roll up under "/failures",
+    "/failures/rejected", and "/failures/restartable" in stats. ``PHAB_ID=D187127``
+
   * finagle-mux: When mux propagates an interrupt started by `BackupRequestFilter` over the
     network, the `FailureFlags.Ignorable` status is propagated with it.  ``PHAB_ID=D183456``
 
