@@ -36,6 +36,9 @@ Runtime Behavior Changes
     captured by `c.t.f.service.StatsFilter`. They will roll up under "/failures",
     "/failures/rejected", and "/failures/restartable" in stats. ``PHAB_ID=D187127``
 
+  * finagle-core: `c.t.f.tracing.Trace.tracers` now returns only distinct tracers stored in
+    the local context (returned all tracers before).  ``PHAB_ID=D188389``
+
   * finagle-mux: When mux propagates an interrupt started by `BackupRequestFilter` over the
     network, the `FailureFlags.Ignorable` status is propagated with it.  ``PHAB_ID=D183456``
 

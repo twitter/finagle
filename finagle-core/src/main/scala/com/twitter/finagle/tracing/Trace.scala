@@ -43,25 +43,28 @@ object enabled extends GlobalFlag[Boolean](
  * When reporting, we report to all tracers in the list of `Tracer`s.
  */
 object Trace {
-  private case class TraceCtx(terminal: Boolean, tracers: List[Tracer]) {
-    // compute this lazily as tracers often get pushed onto
-    // a stack before having anything recorded.
-    lazy val distinctTracers: List[Tracer] = tracers.distinct
 
-    def withTracer(tracer: Tracer): TraceCtx = copy(tracers = tracer :: this.tracers)
-    def withTerminal(terminal: Boolean): TraceCtx =
-      if (terminal == this.terminal) this
-      else copy(terminal = terminal)
+  // A collection of methods to work with tracers stored in the local context.
+  // Structured as an implicit syntax for ergonomics.
+  private implicit class Tracers(val ts: List[Tracer]) extends AnyVal {
+
+    @tailrec
+    final def isActivelyTracing(id: TraceId): Boolean =
+      if (ts.isEmpty) false
+      else ts.head.isActivelyTracing(id) || ts.tail.isActivelyTracing(id)
+
+    @tailrec
+    final def record(r: Record): Unit =
+      if (ts.nonEmpty) {
+        ts.head.record(r)
+        ts.tail.record(r)
+      }
   }
-
-  private object TraceCtx {
-    val empty = TraceCtx(terminal = false, Nil)
-  }
-
-  private[this] val traceCtx = new Contexts.local.Key[TraceCtx]
 
   private[this] val someTrue = Some(true)
   private[this] val someFalse = Some(false)
+
+  private[this] val tracersCtx = new Contexts.local.Key[List[Tracer]]
 
   private[finagle] val idCtx = new Contexts.broadcast.Key[TraceId](
     "com.twitter.finagle.tracing.TraceContext"
@@ -111,45 +114,43 @@ object Trace {
   }
 
   private[this] val rng = new Random
+
   private[this] val defaultId =
     TraceId(None, None, SpanId(rng.nextLong()), None, Flags(), if (traceId128Bit()) Some(nextTraceIdHigh()) else None)
 
   @volatile private[this] var tracingEnabled = enabled()
 
-  private[this] val EmptyTraceCtxFn = () => TraceCtx.empty
-
-  private def ctx: TraceCtx =
-    Contexts.local.getOrElse(traceCtx, EmptyTraceCtxFn)
+  /**
+   * @return the current list of tracers
+   */
+  def tracers: List[Tracer] = Contexts.local.get(tracersCtx) match {
+    case Some(ts) => ts
+    case None => Nil
+  }
 
   /**
    * True if there is an identifier for the current trace.
    */
   def hasId: Boolean = Contexts.broadcast.contains(idCtx)
 
-  private[this] val defaultIdFn: () => TraceId = () => defaultId
-
   /**
    * Get the current trace identifier.  If no identifiers have been
    * pushed, a default one is provided.
    */
-  def id: TraceId =
-    Contexts.broadcast.getOrElse(idCtx, defaultIdFn)
+  def id: TraceId = Contexts.broadcast.get(idCtx) match {
+    case Some(i) => i
+    case None => defaultId
+  }
 
   /**
    * Get the current identifier, if it exists.
    */
-  def idOption: Option[TraceId] =
-    Contexts.broadcast.get(idCtx)
+  def idOption: Option[TraceId] = Contexts.broadcast.get(idCtx)
 
   /**
    * @return true if the current trace id is terminal
    */
-  def isTerminal: Boolean = ctx.terminal
-
-  /**
-   * @return the current list of tracers
-   */
-  def tracers: List[Tracer] = ctx.tracers
+  def isTerminal: Boolean = id.terminal
 
   /**
    * Turn trace recording on.
@@ -188,14 +189,12 @@ object Trace {
    * @param terminal true if traceId is a terminal id. Future calls to set() after a terminal
    *                 id is set will not set the traceId
    */
-  def letId[R](traceId: TraceId, terminal: Boolean = false)(f: => R): R = {
+  def letId[R](traceId: TraceId, terminal: Boolean = false)(f: => R): R =
     if (isTerminal) f
-    else if (terminal) {
-      Contexts.local.let(traceCtx, ctx.withTerminal(terminal)) {
-        Contexts.broadcast.let(idCtx, traceId)(f)
-      }
-    } else Contexts.broadcast.let(idCtx, traceId)(f)
-  }
+    else {
+      val tid = if (terminal) traceId.copy(terminal = terminal) else traceId
+      Contexts.broadcast.let(idCtx, tid)(f)
+    }
 
   /**
    * A version of [com.twitter.finagle.tracing.Trace.letId] providing an
@@ -211,8 +210,12 @@ object Trace {
   /**
    * Run computation `f` with `tracer` added onto the tracer stack.
    */
-  def letTracer[R](tracer: Tracer)(f: => R): R =
-    Contexts.local.let(traceCtx, ctx.withTracer(tracer))(f)
+  def letTracer[R](tracer: Tracer)(f: => R): R = {
+    val ts = tracers
+    if (ts.contains(tracer)) f
+    else Contexts.local.let(tracersCtx, tracer :: ts)(f)
+  }
+
 
   /**
    * Run computation `f` with the given tracer, and a derivative TraceId.
@@ -224,8 +227,10 @@ object Trace {
    * @param terminal true if the next traceId is a terminal id. Future
    *                 attempts to set nextId will be ignored.
    */
-  def letTracerAndNextId[R](tracer: Tracer, terminal: Boolean = false)(f: => R): R =
-    letTracerAndId(tracer, nextId, terminal)(f)
+  def letTracerAndNextId[R](tracer: Tracer, terminal: Boolean = false)(f: => R): R = {
+    val tid = if (terminal) nextId.copy(terminal = terminal) else nextId
+    letTracerAndId(tracer, tid)(f)
+  }
 
   /**
    * Run computation `f` with the given tracer and trace id.
@@ -233,17 +238,21 @@ object Trace {
    * @param terminal true if the next traceId is a terminal id. Future
    *                 attempts to set nextId will be ignored.
    */
-  def letTracerAndId[R](tracer: Tracer, id: TraceId, terminal: Boolean = false)(f: => R): R = {
-    if (ctx.terminal) {
-      letTracer(tracer)(f)
-    } else {
-      val newCtx = ctx.withTracer(tracer).withTerminal(terminal)
-      val newId = id.sampled match {
-        case None => id.copy(_sampled = tracer.sampleTrace(id))
-        case Some(_) => id
+  def letTracerAndId[R](tracer: Tracer, traceId: TraceId, terminal: Boolean = false)(f: => R): R = {
+    if (isTerminal) letTracer(tracer)(f)
+    else {
+      val oldId = if (terminal) traceId.copy(terminal = terminal) else traceId
+      val newId = oldId.sampled match {
+        case None => oldId.copy(_sampled = tracer.sampleTrace(oldId))
+        case Some(_) => oldId
       }
-      Contexts.local.let(traceCtx, newCtx) {
-        Contexts.broadcast.let(idCtx, newId)(f)
+
+      val ts = tracers
+      if (ts.contains(tracer)) Contexts.broadcast.let(idCtx, newId)(f)
+      else {
+        Contexts.local.let(tracersCtx, tracer :: ts) {
+          Contexts.broadcast.let(idCtx, newId)(f)
+        }
       }
     }
   }
@@ -253,7 +262,7 @@ object Trace {
    * cleared.
    */
   def letClear[R](f: => R): R =
-    Contexts.local.letClear(traceCtx) {
+    Contexts.local.letClear(tracersCtx) {
       Contexts.broadcast.letClear(idCtx) {
         f
       }
@@ -291,40 +300,21 @@ object Trace {
    * Returns true if tracing is enabled with a good tracer pushed and at least one tracer
    * decides to actively trace the current [[id]]
    */
-  def isActivelyTracing: Boolean = {
-    if (!tracingEnabled)
-      return false
-
-    // store `tracers` and `id` in local vars to avoid repeated `Context` lookups
-    val ts = tracers
-    if (ts.isEmpty)
-      return false
-
-    val tid = id
-    ts.exists(_.isActivelyTracing(tid))
-  }
-
-  /**
-   * Record a raw record without checking if it's sampled/enabled/etc.
-   */
-  private[this] def uncheckedRecord(rec: Record): Unit = {
-    @tailrec
-    def unchecked(rec: Record, tracers: List[Tracer]): Unit = tracers match {
-      case t :: ts =>
-        t.record(rec)
-        unchecked(rec, ts)
-      case Nil => ()
+  def isActivelyTracing: Boolean =
+    if (!tracingEnabled) false
+    else {
+      val ts = tracers
+      ts.nonEmpty && ts.isActivelyTracing(id)
     }
-    unchecked(rec, ctx.distinctTracers)
-  }
 
   /**
    * Record a raw ''Record''.  This will record to a _unique_ set of
    * tracers in the stack.
    */
   def record(rec: => Record): Unit = {
-    if (isActivelyTracing)
-      uncheckedRecord(rec)
+    if (isActivelyTracing) {
+      tracers.record(rec)
+    }
   }
 
   /**
@@ -356,13 +346,14 @@ object Trace {
    * Convenience methods that construct records of different kinds.
    */
   def record(ann: Annotation): Unit = {
-    if (isActivelyTracing)
-      uncheckedRecord(Record(id, Time.now, ann, None))
+    if (isActivelyTracing) {
+      tracers.record(Record(id, Time.now, ann, None))
+    }
   }
 
   def record(ann: Annotation, duration: Duration): Unit = {
     if (isActivelyTracing)
-      uncheckedRecord(Record(id, Time.now, ann, Some(duration)))
+      tracers.record(Record(id, Time.now, ann, Some(duration)))
   }
 
   def record(message: String): Unit = {

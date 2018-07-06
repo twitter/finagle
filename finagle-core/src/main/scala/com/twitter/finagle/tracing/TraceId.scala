@@ -128,6 +128,9 @@ object TraceId {
  * @param flags Flags relevant to this request. Could be things like debug mode on/off. The sampled flag could eventually
  *              be moved in here.
  * @param traceIdHigh The high 64bits of the id for this request, when the id is 128bits.
+ *
+ * @param terminal Whether this trace id is terminal. Any attemtps to override a terminal trace id
+ *                 will be ignored.
  */
 final case class TraceId(
   _traceId: Option[SpanId],
@@ -135,7 +138,8 @@ final case class TraceId(
   spanId: SpanId,
   _sampled: Option[Boolean],
   flags: Flags,
-  traceIdHigh: Option[SpanId] = None
+  traceIdHigh: Option[SpanId] = None,
+  terminal: Boolean = false
 ) {
 
   def this(
@@ -143,8 +147,17 @@ final case class TraceId(
     _parentId: Option[SpanId],
     spanId: SpanId,
     _sampled: Option[Boolean],
+    flags: Flags,
+    traceIdHigh: Option[SpanId]
+  ) = this(_traceId, _parentId, spanId, _sampled: Option[Boolean], flags: Flags, None, false)
+
+  def this(
+    _traceId: Option[SpanId],
+    _parentId: Option[SpanId],
+    spanId: SpanId,
+    _sampled: Option[Boolean],
     flags: Flags
-  ) = this(_traceId, _parentId, spanId, _sampled: Option[Boolean], flags: Flags, None)
+  ) = this(_traceId, _parentId, spanId, _sampled: Option[Boolean], flags: Flags, None, false)
 
   def traceId: SpanId = _traceId match {
     case None => parentId

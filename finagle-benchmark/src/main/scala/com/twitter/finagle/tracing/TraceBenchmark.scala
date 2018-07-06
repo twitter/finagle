@@ -7,7 +7,6 @@ import com.twitter.util.Time
 import org.openjdk.jmh.annotations._
 import org.openjdk.jmh.infra.Blackhole
 
-@OperationsPerInvocation(50)
 @State(Scope.Benchmark)
 class TraceBenchmark extends StdBenchAnnotations {
 
@@ -29,6 +28,7 @@ class TraceBenchmark extends StdBenchAnnotations {
   @Param(Array("3"))
   var num = 3
 
+  @OperationsPerInvocation(50)
   @Benchmark
   def contexts0(hole: Blackhole): Unit = {
     // Because Contexts are only scoped within a `let`, we want
@@ -41,22 +41,27 @@ class TraceBenchmark extends StdBenchAnnotations {
     }
   }
 
+  @OperationsPerInvocation(50)
   @Benchmark
   def contexts1(hole: Blackhole): Unit =
     Trace.letId(traceId, terminal = false) { contexts0(hole) }
 
+  @OperationsPerInvocation(50)
   @Benchmark
   def contexts2(hole: Blackhole): Unit =
     clientId.asCurrent { contexts1(hole) }
 
+  @OperationsPerInvocation(50)
   @Benchmark
   def contexts3(hole: Blackhole): Unit =
     Contexts.broadcast.let(Deadline, deadline) { contexts2(hole) }
 
+  @OperationsPerInvocation(50)
   @Benchmark
   def contexts4(hole: Blackhole): Unit =
     Contexts.broadcast.letClear(Deadline) { contexts3(hole) }
 
+  @OperationsPerInvocation(50)
   @Benchmark
   def contexts5(hole: Blackhole): Unit =
     Trace.letTracer(NullTracer) { contexts4(hole) }
