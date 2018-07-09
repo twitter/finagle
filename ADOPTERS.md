@@ -16,6 +16,7 @@ URLs if possible) and [submit a pull request][1]!
 * [Despegar](http://www.despegar.com/)
 * [DICE](http://dice.se/)
 * [Dwango](http://dwango.co.jp/)
+* [Etsy](https://www.etsy.com/)
 * [EnerNOC](https://www.enernoc.com/)
 * [Fitbit](https://www.fitbit.com/)
 * [Foursquare](https://foursquare.com/)
