@@ -33,48 +33,53 @@ package object http {
    */
   private[finagle] val Http2CodecName = "http2Codec"
 
+  /**
+   * Initialize the client pipeline, adding handlers _before_ the specified role.
+   *
+   * @see `initClientFn` for details about what is added.
+   */
   private[finagle] def initClientBefore(
     role: String,
     params: Stack.Params
   ): ChannelPipeline => Unit = { pipeline =>
-    initClientFn(params, pipeline.addBefore(role, _, _))(pipeline)
+    initClientFn(params, pipeline.addBefore(role, _, _))
   }
 
+  /** Initialize the client pipeline by adding elements to the end of the pipeline
+   *
+   * @see `initClientFn` for details about what is added.
+   */
   private[finagle] def initClient(params: Stack.Params): ChannelPipeline => Unit = { pipeline =>
-    initClientFn(params, pipeline.addLast(_, _))(pipeline)
+    initClientFn(params, pipeline.addLast(_, _))
   }
 
-  private[finagle] def initClientFn(
-    params: Stack.Params,
-    fn: (String, ChannelHandler) => Unit
-  ): ChannelPipeline => Unit = {
+  /** Initialize the client pipeline accessories including decompression, dechunking, etc. */
+  private[finagle] def initClientFn(params: Stack.Params, fn: (String, ChannelHandler) => Unit): Unit = {
     val maxResponseSize = params[MaxResponseSize].size
     val decompressionEnabled = params[Decompression].enabled
     val streaming = params[Streaming].enabled
 
-    { pipeline: ChannelPipeline =>
-      if (decompressionEnabled)
-        fn("httpDecompressor", new HttpContentDecompressor)
+    if (decompressionEnabled)
+      fn("httpDecompressor", new HttpContentDecompressor)
 
-      if (streaming) {
-        // 8 KB is the size of the maxChunkSize parameter used in netty3,
-        // which is where it stops attempting to aggregate messages that lack
-        // a 'Transfer-Encoding: chunked' header.
-        fn("fixedLenAggregator", new FixedLengthMessageAggregator(8.kilobytes))
-      } else {
-        fn(
-          "httpDechunker",
-          new HttpObjectAggregator(maxResponseSize.inBytes.toInt)
-        )
-      }
-      // Map some client related channel exceptions to something meaningful to finagle
-      fn("clientExceptionMapper", ClientExceptionMapper)
-
-      // Given that Finagle's channel transports aren't doing anything special (yet)
-      // about resource management, we have to turn pooled resources into unpooled ones as
-      // the very last step of the pipeline.
-      fn("unpoolHttp", UnpoolHttpHandler)
+    if (streaming) {
+      // 8 KB is the size of the maxChunkSize parameter used in netty3,
+      // which is where it stops attempting to aggregate messages that lack
+      // a 'Transfer-Encoding: chunked' header.
+      fn("fixedLenAggregator", new FixedLengthMessageAggregator(8.kilobytes))
+    } else {
+      fn(
+        "httpDechunker",
+        new HttpObjectAggregator(maxResponseSize.inBytes.toInt)
+      )
     }
+    // Map some client related channel exceptions to something meaningful to finagle
+    fn("clientExceptionMapper", ClientExceptionMapper)
+
+    // Given that Finagle's channel transports aren't doing anything special (yet)
+    // about resource management, we have to turn pooled resources into unpooled ones as
+    // the very last step of the pipeline.
+    fn("unpoolHttp", UnpoolHttpHandler)
   }
 
   private[finagle] val ClientPipelineInit: Stack.Params => ChannelPipeline => Unit = {
