@@ -126,9 +126,12 @@ private[finagle] class Netty4ServerStreamTransport(rawTransport: Transport[Any, 
       else
         Bijections.finagle.fullResponseToNetty(in)
 
-    transport.write(nettyRep).rescue(wrapWriteException).before {
-      if (in.isChunked) streamChunks(rawTransport, in.reader)
-      else Future.Done
+    transport.write(nettyRep).transform {
+      case Throw(exc) =>
+        wrapWriteException(exc)
+      case Return(_) =>
+        if (in.isChunked) streamChunks(rawTransport, in.reader)
+        else Future.Done
     }
   }
 
@@ -168,9 +171,12 @@ private[finagle] class Netty4ClientStreamTransport(rawTransport: Transport[Any, 
 
   def write(in: Request): Future[Unit] = {
     val nettyReq = Bijections.finagle.requestToNetty(in)
-    rawTransport.write(nettyReq).rescue(wrapWriteException).before {
-      if (in.isChunked) streamChunks(rawTransport, in.reader)
-      else Future.Done
+    rawTransport.write(nettyReq).transform {
+      case Throw(exc) =>
+        wrapWriteException(exc)
+      case Return(_) =>
+        if (in.isChunked) streamChunks(rawTransport, in.reader)
+        else Future.Done
     }
   }
 

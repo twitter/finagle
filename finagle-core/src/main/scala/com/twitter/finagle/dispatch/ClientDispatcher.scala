@@ -102,9 +102,8 @@ object GenSerialClientDispatcher {
 
   val StatsScope: String = "dispatcher"
 
-  val wrapWriteException: PartialFunction[Throwable, Future[Nothing]] = {
-    case exc: Throwable => Future.exception(WriteException(exc))
-  }
+  def wrapWriteException(exc: Throwable): Future[Nothing] =
+    Future.exception(WriteException(exc))
 }
 
 /**
@@ -118,13 +117,15 @@ class SerialClientDispatcher[Req, Rep](trans: Transport[Req, Rep], statsReceiver
   def this(trans: Transport[Req, Rep]) =
     this(trans, NullStatsReceiver)
 
-  private[this] val readTheTransport: Unit => Future[Rep] = _ => trans.read()
+  private[this] val tryReadTheTransport: Try[Unit] => Future[Rep] = {
+    case Return(_) => trans.read()
+    case Throw(exc) => wrapWriteException(exc)
+  }
 
   protected def dispatch(req: Req, p: Promise[Rep]): Future[Unit] =
     trans
       .write(req)
-      .rescue(wrapWriteException)
-      .flatMap(readTheTransport)
+      .transform(tryReadTheTransport)
       .respond(rep => p.updateIfEmpty(rep))
       .unit
 

@@ -26,6 +26,9 @@ New Features
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-core: `c.t.f.dispatch.ClientDispatcher.wrapWriteException` has been turned from a
+    partial function instance into a static total function. ``PHAB_ID=D189639``
+
   * finagle-mux: `ClientDiscardedRequestException` now extends `FailureFlags` and is no longer
     a case class. ``PHAB_ID=D183456``
 

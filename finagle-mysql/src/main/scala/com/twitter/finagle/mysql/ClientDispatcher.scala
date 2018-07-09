@@ -3,10 +3,11 @@ package com.twitter.finagle.mysql
 import com.github.benmanes.caffeine.cache.{Caffeine, RemovalCause, RemovalListener}
 import com.twitter.cache.caffeine.CaffeineCache
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
+import com.twitter.finagle.dispatch.GenSerialClientDispatcher.wrapWriteException
 import com.twitter.finagle.mysql.transport.{MysqlBuf, MysqlBufReader, Packet}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.{Service, ServiceProxy, WriteException}
+import com.twitter.finagle.{Service, ServiceProxy}
 import com.twitter.util._
 
 /**
@@ -73,9 +74,6 @@ private[mysql] class PrepareCache(
 private[finagle] object ClientDispatcher {
   private val lostSyncExc = LostSyncException(new Throwable)
   private val emptyTx = (Nil, EOF(0: Short, ServerStatus(0)))
-  private val wrapWriteException: PartialFunction[Throwable, Future[Nothing]] = {
-    case exc: Throwable => Future.exception(WriteException(exc))
-  }
 
   /**
    * Creates a mysql client dispatcher with write-through caches for optimization.
@@ -166,20 +164,20 @@ private[finagle] class ClientDispatcher(
    * This leaves room for implementing streaming results.
    */
   protected def dispatch(req: Request, rep: Promise[Result]): Future[Unit] =
-    trans.write(req.toPacket).rescue {
-      wrapWriteException
-    }.before {
-      val signal = new Promise[Unit]
-      if (req.cmd == Command.COM_STMT_CLOSE) {
-        // synthesize COM_STMT_CLOSE response
-        signal.setDone()
-        rep.updateIfEmpty(Return(CloseStatementOK))
-        signal
-      } else
-        trans.read().flatMap { packet =>
-          rep.become(decodePacket(req, packet, req.cmd, signal))
+    trans.write(req.toPacket).transform {
+      case Throw(exc) => wrapWriteException(exc)
+      case Return(_) =>
+        val signal = new Promise[Unit]
+        if (req.cmd == Command.COM_STMT_CLOSE) {
+          // synthesize COM_STMT_CLOSE response
+          signal.setDone()
+          rep.updateIfEmpty(Return(CloseStatementOK))
           signal
-        }
+        } else
+          trans.read().flatMap { packet =>
+            rep.become(decodePacket(req, packet, req.cmd, signal))
+            signal
+          }
     }
 
   /**
