@@ -24,7 +24,7 @@ class DefaultHeaderMapTest extends AbstractHeaderMapTest with GeneratorDrivenPro
 
   def genNonAsciiHeaderName: Gen[(String, String)] = for {
     (k, v) <- genValidHeader
-    c <- Gen.choose[Char](127, Char.MaxValue)
+    c <- Gen.choose[Char](128, Char.MaxValue)
   } yield (k + c, v)
 
   def genInvalidHeaderValue: Gen[(String, String)] = for {
