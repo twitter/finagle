@@ -9,7 +9,6 @@ import scala.annotation.tailrec
 private object QueryParamDecoder {
 
   private[this] val CharsetName: String = StandardCharsets.UTF_8.name
-  private[this] val MaxParams: Int = 1024
 
   def decode(uri: String): JMap[String, JList[String]] = {
     val qPos = uri.indexOf('?')
@@ -18,17 +17,18 @@ private object QueryParamDecoder {
   }
 
   def decodeParams(s: String): JMap[String, JList[String]] = {
+    // LinkedHashMap is known to handle hash collisions particularly well, instead of worst case
+    // O(n) behavior, it will achieve O(log(n)) for keys which are of type `Comparable`, which
+    // includes `String`, so there is no need to limit the number of keys.
+    // http://openjdk.java.net/jeps/180
     val params = new LinkedHashMap[String, JList[String]]
 
-    // Limit the maximum number of params to 1024 to limit vulnerability to hash collision exploits
-    // https://events.ccc.de/congress/2011/Fahrplan/attachments/2007_28C3_Effective_DoS_on_web_application_platforms.pdf
-    var nParams = 0
     var name: String = null
     var mark: Int = 0 // Beginning of the unprocessed region
 
     @tailrec
     def go(i: Int): Unit = {
-      if (i < s.length && nParams < MaxParams) {
+      if (i < s.length) {
         val c = s.charAt(i)
         if (c == '=' && name == null) {
           if (mark != i) {
@@ -41,10 +41,8 @@ private object QueryParamDecoder {
             // Must be a param of the form '&a&' so add it with
             // an empty value.
             addParam(params, decodeComponent(s.substring(mark, i)), "")
-            nParams += 1
           } else if (name != null) {
             addParam(params, name, decodeComponent(s.substring(mark, i)))
-            nParams += 1
             name = null
           }
           mark = i + 1
@@ -55,9 +53,7 @@ private object QueryParamDecoder {
 
     go(0)
 
-    if (nParams == MaxParams) {
-      // noop: We've hit the max params, so no need to address the tail
-    } else if (mark != s.length) { // Are there characters we haven't dealt with?
+    if (mark != s.length) { // Are there characters we haven't dealt with?
       if (name == null) { // Yes and we haven't seen any '='.
         addParam(params, decodeComponent(s.substring(mark, s.length)), "")
       } else { // Yes and this must be the last value.

@@ -1,13 +1,16 @@
 package com.twitter.finagle.http
 
+import com.twitter.conversions.time._
+import com.twitter.util.Stopwatch
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import scala.collection.JavaConverters._
 
-class QueryParamCodecTest extends FunSuite with GeneratorDrivenPropertyChecks {
+class QueryParamCodecTest extends FunSuite with GeneratorDrivenPropertyChecks with Eventually with IntegrationPatience {
 
   private def encode(s: String): String = URLEncoder.encode(s, StandardCharsets.UTF_8.name)
 
@@ -63,35 +66,6 @@ class QueryParamCodecTest extends FunSuite with GeneratorDrivenPropertyChecks {
     assert(QueryParamEncoder.encode(Map.empty) == "")
   }
 
-  test("Limits decoding to 1024 params with different keys") {
-    val tooLongQueryString = (0 until 1025).map { i =>
-      s"key$i=value$i"
-    }.mkString("&")
-
-    val results = QueryParamDecoder.decode("?" + tooLongQueryString)
-    assert(results.size == 1024)
-
-    (0 until 1024).foreach { i =>
-      val values = results.get(s"key$i")
-      assert(values.size == 1)
-      assert(values.get(0) == s"value$i")
-    }
-  }
-
-  test("Limits decoding to 1024 params for the same key") {
-    val tooLongQueryString = (0 until 1025).map { i =>
-      s"key=value$i"
-    }.mkString("&")
-
-    val results = QueryParamDecoder.decode("?" + tooLongQueryString)
-    assert(results.size == 1)
-    val values = results.get("key")
-    assert(values.size == 1024)
-    (0 until 1024).foreach { i =>
-      assert(values.get(i) == s"value$i")
-    }
-  }
-
   test("Decodes both '%20' and '+' as `space`") {
     Seq(
       "?foo%20=bar",
@@ -114,6 +88,40 @@ class QueryParamCodecTest extends FunSuite with GeneratorDrivenPropertyChecks {
       intercept[IllegalArgumentException] {
         QueryParamDecoder.decode(uri)
       }
+    }
+  }
+
+  private def collisions(num: Int, length: Int): Iterator[String] = {
+    val equiv = Array("Aa", "BB")
+
+    // returns a length 2n string, indexed by x
+    // 0 <= x < 2^n
+    // for a fixed n, all strings have the same hashCode
+    def f(x: Int, n: Int): String = n match {
+      case 0 => ""
+      case _ => equiv(x % 2) + f(x/2, n-1)
+    }
+
+    (0 until num).toIterator.map(f(_, length))
+  }
+
+  test("massive number of collisions isn't super slow") {
+    // Using a quad core laptop i7 (single threaded) this many params took 399771 ms
+    // for scala HashMap and 277 ms using the Java LinkedHashMap on Java 8.
+    val num = 100 * 1000
+
+    val cs = collisions(num, 22)
+    val queryString = cs.map(_ + "=a").mkString("?", "&", "")
+
+    eventually {
+      val stopwatch = Stopwatch.start()
+      val result = QueryParamDecoder.decode(queryString)
+      assert(result.size == num)
+      // we give a generous 2 seconds to complete, 10x what was observed in local
+      // testing because CI can be slow at times. We'd expect quadratic behavior
+      // to take two orders of magnitude longer, so just making sure it's below
+      // 2 seconds should be enough to confirm we're not vulnerable to DoS attack.
+      assert(stopwatch() < 2.seconds)
     }
   }
 }

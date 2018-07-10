@@ -42,6 +42,9 @@ Runtime Behavior Changes
   * finagle-core: `c.t.f.tracing.Trace.tracers` now returns only distinct tracers stored in
     the local context (returned all tracers before).  ``PHAB_ID=D188389``
 
+  * finagle-http: HTTP param decoding is no longer truncated to 1024 params.
+    ``PHAB_ID=D190113``
+
   * finagle-mux: When mux propagates an interrupt started by `BackupRequestFilter` over the
     network, the `FailureFlags.Ignorable` status is propagated with it.  ``PHAB_ID=D183456``
 
