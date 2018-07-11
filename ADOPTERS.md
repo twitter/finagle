@@ -78,6 +78,7 @@ URLs if possible) and [submit a pull request][1]!
 * [Twitter](https://twitter.com/)
   * ["Finagle: A Protocol-Agnostic RPC System"][11]
 * [wasted.io](http://wasted.io/)
+* [Whisk](https://whisk.com/)
 * [XiaoMi](https://www.mi.com/)
   * ["Linden: A distributed and real-time search engine built on top of
     Lucene"][13]
