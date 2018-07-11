@@ -147,10 +147,10 @@ returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.h
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.util" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="util"></a><a id="util:util"></a>
+    </li><li name="com.twitter.finagle.tracing" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="tracing"></a><a id="tracing:tracing"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#util" title="Permalink">
+      <a href="../../../com/twitter/finagle/index.html#tracing" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -159,98 +159,102 @@ resources for using Finagle.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="index.html"><span class="name">util</span></a>
+        <a title="" href="index.html"><span class="name">tracing</span></a>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="AsyncLatch.html" title="A construct providing latched, asynchronous execution of side-effecting functions."></a>
-                        <a href="AsyncLatch.html" title="A construct providing latched, asynchronous execution of side-effecting functions.">AsyncLatch</a>
+                        <a class="object" href="AnnotatingTracingFilter$.html" title=""></a>
+                        <a class="class" href="AnnotatingTracingFilter.html" title="A generic filter that can be used for annotating the Server and Client side of a trace."></a>
+                        <a href="AnnotatingTracingFilter.html" title="A generic filter that can be used for annotating the Server and Client side of a trace.">AnnotatingTracingFilter</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="Annotation$.html" title=""></a>
+                        <a class="trait" href="Annotation.html" title=""></a>
+                        <a href="Annotation.html" title="">Annotation</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="ByteArrays$.html" title=""></a>
-                        <a href="ByteArrays$.html" title="">ByteArrays</a>
+                        <a class="object" href="BroadcastTracer$.html" title=""></a>
+                        <a href="BroadcastTracer$.html" title="">BroadcastTracer</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="trait" href="Chan.html" title=""></a>
-                        <a href="Chan.html" title="">Chan</a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="CloseNotifier$.html" title=""></a>
-                        <a class="trait" href="CloseNotifier.html" title="Allows resources to register their handlers to be invoked when service is closing."></a>
-                        <a href="CloseNotifier.html" title="Allows resources to register their handlers to be invoked when service is closing.">CloseNotifier</a>
+                        <a class="class" href="BufferingTracer.html" title="A tracer that buffers each record in memory."></a>
+                        <a href="BufferingTracer.html" title="A tracer that buffers each record in memory.">BufferingTracer</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="" title="Finagle's default Timer that's intended to be shared across a number of servers/clients."></a>
-                        <a href="" title="Finagle's default Timer that's intended to be shared across a number of servers/clients.">DefaultTimer</a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="Drv$.html" title="Create discrete random variables representing arbitrary distributions."></a>
-                        <a class="trait" href="Drv.html" title=""></a>
-                        <a href="Drv.html" title="">Drv</a>
+                        <a class="class" href="ClientDestTracingFilter.html" title="com.twitter.finagle.Filter for clients to record the remote address of the server."></a>
+                        <a href="ClientDestTracingFilter.html" title="com.twitter.finagle.Filter for clients to record the remote address of the server.">ClientDestTracingFilter</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="ExitGuard$.html" title="ExitGuard prevents the process from exiting normally by use of a nondaemon thread whenever there is at least one guarder."></a>
-                        <a href="ExitGuard$.html" title="ExitGuard prevents the process from exiting normally by use of a nondaemon thread whenever there is at least one guarder.">ExitGuard</a>
+                        <a class="trait" href="ClientRequestTracingFilter.html" title="Adds the basic tracing information to a request."></a>
+                        <a href="ClientRequestTracingFilter.html" title="Adds the basic tracing information to a request.">ClientRequestTracingFilter</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="HashedWheelTimer$.html" title="A HashedWheelTimer that uses org.jboss.netty.util.HashedWheelTimer under the hood."></a>
-                        <a href="HashedWheelTimer$.html" title="A HashedWheelTimer that uses org.jboss.netty.util.HashedWheelTimer under the hood.">HashedWheelTimer</a>
+                        <a class="object" href="ClientTracingFilter$.html" title="Annotate the request with Client specific records (ClientSend, ClientRecv)"></a>
+                        <a href="ClientTracingFilter$.html" title="Annotate the request with Client specific records (ClientSend, ClientRecv)">ClientTracingFilter</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="InetSocketAddressUtil$.html" title=""></a>
-                        <a href="InetSocketAddressUtil$.html" title="">InetSocketAddressUtil</a>
+                        <a class="object" href="ConsoleTracer$.html" title=""></a>
+                        <a href="ConsoleTracer$.html" title="">ConsoleTracer</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="LoadService$.html" title="Load a singleton class in the manner of java.util.ServiceLoader."></a>
-                        <a href="LoadService$.html" title="Load a singleton class in the manner of java.util.ServiceLoader.">LoadService</a>
+                        <a class="object" href="DefaultTracer$.html" title=""></a>
+                        <a href="DefaultTracer$.html" title="">DefaultTracer</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="Flags$.html" title=""></a>
+                        <a class="class" href="Flags.html" title="Represents flags that can be passed along in request headers."></a>
+                        <a href="Flags.html" title="Represents flags that can be passed along in request headers.">Flags</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="NullTracer$.html" title="A singleton instance of a no-op NullTracer."></a>
+                        <a class="class" href="NullTracer.html" title="A no-op Tracer."></a>
+                        <a href="NullTracer.html" title="A no-op Tracer.">NullTracer</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="Record$.html" title=""></a>
+                        <a class="class" href="Record.html" title="Records information of interest to the tracing system."></a>
+                        <a href="Record.html" title="Records information of interest to the tracing system.">Record</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="LoadedReporterFactory$.html" title=""></a>
-                        <a href="LoadedReporterFactory$.html" title="">LoadedReporterFactory</a>
+                        <a class="class" href="ServerDestTracingProxy.html" title="com.twitter.finagle.ServiceFactoryProxy used to trace the local addr and server addr."></a>
+                        <a href="ServerDestTracingProxy.html" title="com.twitter.finagle.ServiceFactoryProxy used to trace the local addr and server addr.">ServerDestTracingProxy</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="NullReporterFactory$.html" title=""></a>
-                        <a href="NullReporterFactory$.html" title="">NullReporterFactory</a>
+                        <a class="object" href="ServerTracingFilter$.html" title="Annotate the request with Server specific records (ServerRecv, ServerSend)"></a>
+                        <a href="ServerTracingFilter$.html" title="Annotate the request with Server specific records (ServerRecv, ServerSend)">ServerTracingFilter</a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="Proc$.html" title=""></a>
-                        <a class="trait" href="Proc.html" title="A Proc is a process that can receive messages."></a>
-                        <a href="Proc.html" title="A Proc is a process that can receive messages.">Proc</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="trait" href="ReporterFactory.html" title=""></a>
-                        <a href="ReporterFactory.html" title="">ReporterFactory</a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="Rng$.html" title="See Rngs for Java compatible APIs."></a>
-                        <a class="trait" href="Rng.html" title="A random number generator."></a>
-                        <a href="Rng.html" title="A random number generator.">Rng</a>
+                        <a class="object" href="SpanId$.html" title=""></a>
+                        <a class="class" href="SpanId.html" title="Defines trace identifiers."></a>
+                        <a href="SpanId.html" title="Defines trace identifiers.">SpanId</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="Rngs$.html" title="Java compatible forwarders."></a>
-                        <a href="Rngs$.html" title="Java compatible forwarders.">Rngs</a>
+                        <a class="object" href="Trace$.html" title="This is a tracing system similar to Dapper:"></a>
+                        <a href="Trace$.html" title="This is a tracing system similar to Dapper:">Trace</a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="Showable$.html" title=""></a>
-                        <a class="trait" href="Showable.html" title="Trait showable is a type-class for showing parseable representations of objects."></a>
-                        <a href="Showable.html" title="Trait showable is a type-class for showing parseable representations of objects.">Showable</a>
+                        <a class="object" href="TraceId$.html" title=""></a>
+                        <a class="class" href="TraceId.html" title="A trace id represents one particular trace for one request."></a>
+                        <a href="TraceId.html" title="A trace id represents one particular trace for one request.">TraceId</a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="StackRegistry$.html" title=""></a>
-                        <a class="trait" href="StackRegistry.html" title="A registry that allows the registration of a string identifier with a a com.twitter.finagle.Stack and its params."></a>
-                        <a href="StackRegistry.html" title="A registry that allows the registration of a string identifier with a a com.twitter.finagle.Stack and its params.">StackRegistry</a>
+                        <a class="object" href="TraceId128$.html" title=""></a>
+                        <a class="class" href="TraceId128.html" title=""></a>
+                        <a href="TraceId128.html" title="">TraceId128</a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="WindowedPercentileHistogram$.html" title=""></a>
-                        <a class="class" href="WindowedPercentileHistogram.html" title="Sliding window of numBuckets histograms."></a>
-                        <a href="WindowedPercentileHistogram.html" title="Sliding window of numBuckets histograms.">WindowedPercentileHistogram</a>
+                        <a class="object" href="TraceInitializerFilter$.html" title=""></a>
+                        <a class="class" href="TraceInitializerFilter.html" title="The TraceInitializerFilter takes care of span lifecycle events."></a>
+                        <a href="TraceInitializerFilter.html" title="The TraceInitializerFilter takes care of span lifecycle events.">TraceInitializerFilter</a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="object" href="defaultTimerProbeSlowTasks$.html" title="Configures whether to probe for slow tasks executing in the default Timer."></a>
-                        <a href="defaultTimerProbeSlowTasks$.html" title="Configures whether to probe for slow tasks executing in the default Timer.">defaultTimerProbeSlowTasks</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="object" href="defaultTimerSlowTaskLogMinInterval$.html" title="Configures the minimum duration between logging stack traces when a slow task is detected in the default Timer."></a>
-                        <a href="defaultTimerSlowTaskLogMinInterval$.html" title="Configures the minimum duration between logging stack traces when a slow task is detected in the default Timer.">defaultTimerSlowTaskLogMinInterval</a>
+                        <a class="object" href="Tracer$.html" title=""></a>
+                        <a class="trait" href="Tracer.html" title="Tracers record trace events."></a>
+                        <a href="Tracer.html" title="Tracers record trace events.">Tracer</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="defaultTimerSlowTaskMaxRuntime$.html" title="Configures the maximum allowed runtime for tasks executing in the default Timer."></a>
-                        <a href="defaultTimerSlowTaskMaxRuntime$.html" title="Configures the maximum allowed runtime for tasks executing in the default Timer.">defaultTimerSlowTaskMaxRuntime</a>
+                        <a class="class" href="TracingLogHandler.html" title="A logging Handler that sends log information via tracing"></a>
+                        <a href="TracingLogHandler.html" title="A logging Handler that sends log information via tracing">TracingLogHandler</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="" title=""></a>
+                        <a href="" title="">enabled</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="traceId128Bit$.html" title=""></a>
+                        <a href="traceId128Bit$.html" title="">traceId128Bit</a>
                       </li>
               </ul>
             </div>
@@ -259,9 +263,9 @@ resources for using Finagle.
             <body class="object value">
       <div id="definition">
         <div class="big-circle object">o</div>
-        <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="index.html" class="extype" name="com.twitter.finagle.util">util</a></p>
-        <h1>DefaultTimer<span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html" title="Permalink">
+        <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="index.html" class="extype" name="com.twitter.finagle.tracing">tracing</a></p>
+        <h1>enabled<span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
@@ -274,23 +278,16 @@ resources for using Finagle.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">DefaultTimer</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/util/ProxyTimer.html#com.twitter.util.ProxyTimer" class="extype" name="com.twitter.util.ProxyTimer">ProxyTimer</a></span>
+        <span class="name">enabled</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Finagle's default <span class="extype" name="Timer">Timer</span> that's intended to be shared across a number of servers/clients.</p><p>The default <span class="extype" name="Timer">Timer</span> is intended for scheduling tasks that will finish very quickly and
-shouldn't be used to schedule tasks that will occupy the executing thread for a significant
-duration.</p><p>Use <code>DefaultTimer.Implicit</code> to import an implicit instance of this timer into the scope.</p><pre>scala&gt; <span class="kw">import</span> com.twitter.util.Future, com.twitter.conversions.time._
-scala&gt; <span class="kw">import</span> com.twitter.finagle.util.DefaultTimer.Implicit
-
-scala&gt; <span class="kw">val</span> f = Future.sleep(<span class="num">10.</span>seconds)
-f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</pre><p>Java users may prefer <code>DefaultTimer.getInstance()</code> to access this timer.
-</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>This timer is &quot;unstoppable&quot; such that calls to <code>stop()</code> is ignored.</p></span></dd></dl><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/com/twitter/util/ProxyTimer.html#com.twitter.util.ProxyTimer" class="extype" name="com.twitter.util.ProxyTimer">ProxyTimer</a>, <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html#com.twitter.util.Timer" class="extype" name="com.twitter.util.Timer">Timer</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>], <a href="https://twitter.github.io/util/docs/com/twitter/app/Flag.html#com.twitter.app.Flag" class="extype" name="com.twitter.app.Flag">Flag</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>], <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
         </div></div>
         
 
@@ -316,7 +313,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.util.DefaultTimer"><span>DefaultTimer</span></li><li class="in" name="com.twitter.util.ProxyTimer"><span>ProxyTimer</span></li><li class="in" name="com.twitter.util.Timer"><span>Timer</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.tracing.enabled"><span>enabled</span></li><li class="in" name="com.twitter.app.GlobalFlag"><span>GlobalFlag</span></li><li class="in" name="com.twitter.app.Flag"><span>Flag</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -346,7 +343,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
                 <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#!=(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#!=(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -362,7 +359,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
     </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html###():Int" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html###():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -378,7 +375,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
     </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#==(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#==(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -391,26 +388,26 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.DefaultTimer#Implicit" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Implicit:com.twitter.util.Timer"></a><a id="Implicit:Timer"></a>
+    </li><li name="com.twitter.app.Flag#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="apply():T"></a><a id="apply():Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#Implicit:com.twitter.util.Timer" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#apply():T" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier">implicit </span>
-        <span class="kind">val</span>
+        <span class="modifier"></span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">Implicit</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html#com.twitter.util.Timer" class="extype" name="com.twitter.util.Timer">Timer</a></span>
+        <span class="name">apply</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
-      <p class="shortcomment cmt">An implicit instance supplied for use in the Future.* methods.</p>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#asInstanceOf[T0]:T0" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#asInstanceOf[T0]:T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -426,7 +423,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#clone():Object" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#clone():Object" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -447,10 +444,10 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.util.Timer#doAt" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="doAt[A](time:com.twitter.util.Time)(f:=&gt;A):com.twitter.util.Future[A]"></a><a id="doAt[A](Time)(⇒A):Future[A]"></a>
+    </li><li name="com.twitter.app.Flag#defaultString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="defaultString():String"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#doAt[A](time:com.twitter.util.Time)(f:=&gt;A):com.twitter.util.Future[A]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#defaultString():String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -459,30 +456,14 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">doAt</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="time">time: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.util.Timer.doAt.A">A</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.util.Timer.doAt.A">A</span>]</span>
+        <span class="name">defaultString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Timer</dd></dl></div>
-    </li><li name="com.twitter.util.Timer#doLater" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="doLater[A](delay:com.twitter.util.Duration)(f:=&gt;A):com.twitter.util.Future[A]"></a><a id="doLater[A](Duration)(⇒A):Future[A]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#doLater[A](delay:com.twitter.util.Duration)(f:=&gt;A):com.twitter.util.Future[A]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">doLater</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="delay">delay: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.util.Timer.doLater.A">A</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.util.Timer.doLater.A">A</span>]</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Timer</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#eq(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -498,7 +479,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
     </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#equals(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#equals(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -514,7 +495,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#finalize():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#finalize():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -533,10 +514,42 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.app.Flag#flaggable" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="flaggable:com.twitter.app.Flaggable[T]"></a><a id="flaggable:Flaggable[Boolean]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#flaggable:com.twitter.app.Flaggable[T]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">flaggable</span><span class="result">: <span class="extype" name="com.twitter.app.Flaggable">Flaggable</span>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Flag</dd></dl></div>
+    </li><li name="com.twitter.app.Flag#get" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get:Option[T]"></a><a id="get:Option[Boolean]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#get:Option[T]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#getClass():Class[_]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#getClass():Class[_]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -552,10 +565,10 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.util.DefaultTimer#getInstance" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="getInstance:com.twitter.util.Timer"></a><a id="getInstance:Timer"></a>
+    </li><li name="com.twitter.app.GlobalFlag#getGlobalFlag" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getGlobalFlag:com.twitter.app.Flag[_]"></a><a id="getGlobalFlag:Flag[_]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#getInstance:com.twitter.util.Timer" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#getGlobalFlag:com.twitter.app.Flag[_]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -564,14 +577,46 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getInstance</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html#com.twitter.util.Timer" class="extype" name="com.twitter.util.Timer">Timer</a></span>
+        <span class="name">getGlobalFlag</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/app/Flag.html#com.twitter.app.Flag" class="extype" name="com.twitter.app.Flag">Flag</a>[_]</span>
       </span>
       
-      <p class="shortcomment cmt">A Java-friendly accessor for <a href="" class="extype" name="com.twitter.finagle.util.DefaultTimer">DefaultTimer</a>.</p>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>GlobalFlag</dd></dl></div>
+    </li><li name="com.twitter.app.GlobalFlag#getValue" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getValue:Option[T]"></a><a id="getValue:Option[Boolean]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#getValue:Option[T]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getValue</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>GlobalFlag → Flag</dd></dl></div>
+    </li><li name="com.twitter.app.Flag#getWithDefault" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getWithDefault:Option[T]"></a><a id="getWithDefault:Option[Boolean]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#getWithDefault:Option[T]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getWithDefault</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#hashCode():Int" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#hashCode():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -587,10 +632,42 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.app.Flag#help" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="help:String"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#help:String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">help</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
+    </li><li name="com.twitter.app.Flag#isDefined" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isDefined:Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#isDefined:Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isDefined</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#isInstanceOf[T0]:Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#isInstanceOf[T0]:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -603,10 +680,58 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.app.Flag#let" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="let[R](t:T)(f:=&gt;R):R"></a><a id="let[R](Boolean)(⇒R):R"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#let[R](t:T)(f:=&gt;R):R" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">let</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="t">t: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.app.Flag.let.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.app.Flag.let.R">R</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
+    </li><li name="com.twitter.app.Flag#letClear" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="letClear[R](f:=&gt;R):R"></a><a id="letClear[R](⇒R):R"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#letClear[R](f:=&gt;R):R" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">letClear</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.app.Flag.letClear.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.app.Flag.letClear.R">R</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
+    </li><li name="com.twitter.app.GlobalFlag#name" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="name:String"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#name:String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">name</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>GlobalFlag → Flag</dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#ne(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -619,10 +744,26 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.app.Flag#noArgumentOk" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="noArgumentOk:Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#noArgumentOk:Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">noArgumentOk</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#notify():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#notify():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -641,7 +782,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#notifyAll():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#notifyAll():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -657,58 +798,10 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.util.Timer#schedule" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="schedule(period:com.twitter.util.Duration)(f:=&gt;Unit):com.twitter.util.TimerTask"></a><a id="schedule(Duration)(⇒Unit):TimerTask"></a>
+    </li><li name="com.twitter.app.Flag#parse" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="parse():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#schedule(period:com.twitter.util.Duration)(f:=&gt;Unit):com.twitter.util.TimerTask" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">schedule</span><span class="params">(<span name="period">period: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/TimerTask.html#com.twitter.util.TimerTask" class="extype" name="com.twitter.util.TimerTask">TimerTask</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Timer</dd></dl></div>
-    </li><li name="com.twitter.util.Timer#schedule" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="schedule(when:com.twitter.util.Time,period:com.twitter.util.Duration)(f:=&gt;Unit):com.twitter.util.TimerTask"></a><a id="schedule(Time,Duration)(⇒Unit):TimerTask"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#schedule(when:com.twitter.util.Time,period:com.twitter.util.Duration)(f:=&gt;Unit):com.twitter.util.TimerTask" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">schedule</span><span class="params">(<span name="when">when: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>, <span name="period">period: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/TimerTask.html#com.twitter.util.TimerTask" class="extype" name="com.twitter.util.TimerTask">TimerTask</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Timer</dd></dl></div>
-    </li><li name="com.twitter.util.Timer#schedule" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="schedule(when:com.twitter.util.Time)(f:=&gt;Unit):com.twitter.util.TimerTask"></a><a id="schedule(Time)(⇒Unit):TimerTask"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#schedule(when:com.twitter.util.Time)(f:=&gt;Unit):com.twitter.util.TimerTask" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">schedule</span><span class="params">(<span name="when">when: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/TimerTask.html#com.twitter.util.TimerTask" class="extype" name="com.twitter.util.TimerTask">TimerTask</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Timer</dd></dl></div>
-    </li><li name="com.twitter.util.ProxyTimer#scheduleOnce" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="scheduleOnce(when:com.twitter.util.Time)(f:=&gt;Unit):com.twitter.util.TimerTask"></a><a id="scheduleOnce(Time)(⇒Unit):TimerTask"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#scheduleOnce(when:com.twitter.util.Time)(f:=&gt;Unit):com.twitter.util.TimerTask" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#parse():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -717,14 +810,14 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">scheduleOnce</span><span class="params">(<span name="when">when: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/TimerTask.html#com.twitter.util.TimerTask" class="extype" name="com.twitter.util.TimerTask">TimerTask</a></span>
+        <span class="name">parse</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>ProxyTimer → Timer</dd></dl></div>
-    </li><li name="com.twitter.util.ProxyTimer#schedulePeriodically" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="schedulePeriodically(when:com.twitter.util.Time,period:com.twitter.util.Duration)(f:=&gt;Unit):com.twitter.util.TimerTask"></a><a id="schedulePeriodically(Time,Duration)(⇒Unit):TimerTask"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
+    </li><li name="com.twitter.app.Flag#parse" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="parse(raw:String):Unit"></a><a id="parse(String):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#schedulePeriodically(when:com.twitter.util.Time,period:com.twitter.util.Duration)(f:=&gt;Unit):com.twitter.util.TimerTask" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#parse(raw:String):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -733,30 +826,14 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">schedulePeriodically</span><span class="params">(<span name="when">when: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>, <span name="period">period: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/TimerTask.html#com.twitter.util.TimerTask" class="extype" name="com.twitter.util.TimerTask">TimerTask</a></span>
+        <span class="name">parse</span><span class="params">(<span name="raw">raw: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>ProxyTimer → Timer</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.DefaultTimer#self" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="self:com.twitter.util.Timer"></a><a id="self:Timer"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
+    </li><li name="com.twitter.app.GlobalFlag#parsingDone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="parsingDone:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#self:com.twitter.util.Timer" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">self</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html#com.twitter.util.Timer" class="extype" name="com.twitter.util.Timer">Timer</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.util.DefaultTimer">DefaultTimer</a> → ProxyTimer</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.DefaultTimer#stop" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="stop():Unit"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#stop():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#parsingDone:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -765,14 +842,30 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">stop</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">parsingDone</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.util.DefaultTimer">DefaultTimer</a> → ProxyTimer → Timer</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd>GlobalFlag → Flag</dd></dl></div>
+    </li><li name="com.twitter.app.Flag#reset" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="reset():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#reset():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">reset</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -785,10 +878,10 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.DefaultTimer#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.app.Flag#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#toString():String" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#toString():String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -800,11 +893,27 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.util.DefaultTimer">DefaultTimer</a> → AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag → AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.app.Flag#usageString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="usageString:String"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#usageString:String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">usageString</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#wait():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#wait():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -826,7 +935,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -848,7 +957,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#wait(x$1:Long):Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/enabled$.html#wait(x$1:Long):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -875,37 +984,14 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
 
         
 
-        <div class="values members">
-              <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.util.DefaultTimer#twitter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="twitter:com.twitter.util.Timer"></a><a id="twitter:Timer"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#twitter:com.twitter.util.Timer" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2017-5-4) Use DefaultTimer from Scala and DefaultTimer.getInstance() from Java">twitter</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html#com.twitter.util.Timer" class="extype" name="com.twitter.util.Timer">Timer</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">An alias for <a href="" class="extype" name="com.twitter.finagle.util.DefaultTimer">DefaultTimer</a>.</p><div class="fullcomment"><div class="comment cmt"><p>An alias for <a href="" class="extype" name="com.twitter.finagle.util.DefaultTimer">DefaultTimer</a>.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-5-4)</i> Use DefaultTimer from Scala and DefaultTimer.getInstance() from Java</p></dd></dl></div>
-    </li></ol>
-            </div>
+        
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="com.twitter.util.ProxyTimer">
-              <h3>Inherited from <a href="https://twitter.github.io/util/docs/com/twitter/util/ProxyTimer.html#com.twitter.util.ProxyTimer" class="extype" name="com.twitter.util.ProxyTimer">ProxyTimer</a></h3>
-            </div><div class="parent" name="com.twitter.util.Timer">
-              <h3>Inherited from <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html#com.twitter.util.Timer" class="extype" name="com.twitter.util.Timer">Timer</a></h3>
+        <div class="parent" name="com.twitter.app.GlobalFlag">
+              <h3>Inherited from <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</h3>
+            </div><div class="parent" name="com.twitter.app.Flag">
+              <h3>Inherited from <a href="https://twitter.github.io/util/docs/com/twitter/app/Flag.html#com.twitter.app.Flag" class="extype" name="com.twitter.app.Flag">Flag</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

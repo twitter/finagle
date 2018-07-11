@@ -920,6 +920,10 @@ generator.
                         <a href="TracingLogHandler.html" title="A logging Handler that sends log information via tracing">TracingLogHandler</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="object" href="enabled$.html" title=""></a>
+                        <a href="enabled$.html" title="">enabled</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="object" href="traceId128Bit$.html" title=""></a>
                         <a href="traceId128Bit$.html" title="">traceId128Bit</a>
                       </li><li name="com.twitter.finagle.transport" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -1202,7 +1206,8 @@ Includes: rpc service name, method name, client sent and client received.
       </span>
       
       <p class="shortcomment cmt">Records information of interest to the tracing system.</p><div class="fullcomment"><div class="comment cmt"><p>Records information of interest to the tracing system. For example when an event happened,
-the service name or ip addresses involved.</p></div><dl class="paramcmts block"><dt class="param">traceId</dt><dd class="cmt"><p>Which trace is this record a part of?</p></dd><dt class="param">timestamp</dt><dd class="cmt"><p>When did the event happen?</p></dd><dt class="param">annotation</dt><dd class="cmt"><p>What kind of information should we record?</p></dd><dt class="param">duration</dt><dd class="cmt"><p>Did this event have a duration? For example: how long did a certain code block take to run</p></dd></dl></div>
+the service name or ip addresses involved.
+</p></div><dl class="paramcmts block"><dt class="param">traceId</dt><dd class="cmt"><p>Which trace is this record a part of?</p></dd><dt class="param">timestamp</dt><dd class="cmt"><p>When did the event happen?</p></dd><dt class="param">annotation</dt><dd class="cmt"><p>What kind of information should we record?</p></dd><dt class="param">duration</dt><dd class="cmt"><p>Did this event have a duration? For example: how long did a certain code block take to run</p></dd></dl></div>
     </li><li name="com.twitter.finagle.tracing.ServerDestTracingProxy" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ServerDestTracingProxy[Req,Rep]extendsServiceFactoryProxy[Req,Rep]"></a><a id="ServerDestTracingProxy[Req,Rep]:ServerDestTracingProxy[Req,Rep]"></a>
       <span class="permalink">
@@ -1251,7 +1256,7 @@ and traceId).
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A trace id represents one particular trace for one request." href="TraceId.html"><span class="name">TraceId</span></a><span class="params">(<span name="_traceId">_traceId: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>, <span name="_parentId">_parentId: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>, <span name="spanId">spanId: <a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a></span>, <span name="_sampled">_sampled: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>, <span name="flags">flags: <a href="Flags.html" class="extype" name="com.twitter.finagle.tracing.Flags">Flags</a></span>, <span name="traceIdHigh">traceIdHigh: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A trace id represents one particular trace for one request." href="TraceId.html"><span class="name">TraceId</span></a><span class="params">(<span name="_traceId">_traceId: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>, <span name="_parentId">_parentId: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>, <span name="spanId">spanId: <a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a></span>, <span name="_sampled">_sampled: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>, <span name="flags">flags: <a href="Flags.html" class="extype" name="com.twitter.finagle.tracing.Flags">Flags</a></span>, <span name="traceIdHigh">traceIdHigh: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>] = <span class="symbol">None</span></span>, <span name="terminal">terminal: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">false</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A trace id represents one particular trace for one request.</p><div class="fullcomment"><div class="comment cmt"><p>A trace id represents one particular trace for one request.</p><p>A request is composed of one or more spans, which are generally RPCs but
@@ -1270,7 +1275,8 @@ they are not present for the very first span in a request. In this case all
 three ids in the resulting TraceId are the same:</p><pre>           TRACE ID         SPAN ID           PARENT ID
 SERVICE A  <span class="num">34429</span>b04b6bbf478.<span class="num">34429</span>b04b6bbf478<span class="kw">&lt;:</span><span class="num">34429</span>b04b6bbf478</pre></div><dl class="paramcmts block"><dt class="param">_traceId</dt><dd class="cmt"><p>The low 64bits of the id for this request.</p></dd><dt class="param">_parentId</dt><dd class="cmt"><p>The id for the request one step up the service stack.</p></dd><dt class="param">spanId</dt><dd class="cmt"><p>The id for this particular request</p></dd><dt class="param">_sampled</dt><dd class="cmt"><p>Should we sample this request or not? True means sample, false means don't, none means we defer
                decision to someone further down in the stack.</p></dd><dt class="param">flags</dt><dd class="cmt"><p>Flags relevant to this request. Could be things like debug mode on/off. The sampled flag could eventually
-             be moved in here.</p></dd><dt class="param">traceIdHigh</dt><dd class="cmt"><p>The high 64bits of the id for this request, when the id is 128bits.</p></dd></dl></div>
+             be moved in here.</p></dd><dt class="param">traceIdHigh</dt><dd class="cmt"><p>The high 64bits of the id for this request, when the id is 128bits.</p></dd><dt class="param">terminal</dt><dd class="cmt"><p>Whether this trace id is terminal. Any attemtps to override a terminal trace id
+                will be ignored.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.tracing.TraceId128" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="TraceId128extendsProductwithSerializable"></a><a id="TraceId128:TraceId128"></a>
       <span class="permalink">
@@ -1615,6 +1621,22 @@ When reporting, we report to all tracers in the list of <code>Tracer</code>s.
       </span>
       <span class="symbol">
         <a title="" href="Tracer$.html"><span class="name">Tracer</span></a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.tracing.enabled" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="enabled"></a><a id="enabled:enabled"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/index.html#enabled" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="enabled$.html"><span class="name">enabled</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
       </span>
       
       

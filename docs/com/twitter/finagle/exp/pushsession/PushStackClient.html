@@ -363,9 +363,16 @@ the <a href="PushSession.html" class="extype" name="com.twitter.finagle.exp.push
         <span class="name">SessionT</span><span class="result"> &lt;: <a href="PushSession.html" class="extype" name="com.twitter.finagle.exp.pushsession.PushSession">PushSession</a>[<a href="#In" class="extmbr" name="com.twitter.finagle.exp.pushsession.PushStackClient.In">In</a>, <a href="#Out" class="extmbr" name="com.twitter.finagle.exp.pushsession.PushStackClient.Out">Out</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">Refined type of the <a href="PushSession.html" class="extype" name="com.twitter.finagle.exp.pushsession.PushSession">PushSession</a>
-</p><div class="fullcomment"><div class="comment cmt"><p>Refined type of the <a href="PushSession.html" class="extype" name="com.twitter.finagle.exp.pushsession.PushSession">PushSession</a>
-</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+      <p class="shortcomment cmt">Refined type of the <a href="PushSession.html" class="extype" name="com.twitter.finagle.exp.pushsession.PushSession">PushSession</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Refined type of the <a href="PushSession.html" class="extype" name="com.twitter.finagle.exp.pushsession.PushSession">PushSession</a>.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Note</dt><dd><span class="cmt"><p>the type of <code>SessionT</code> is significant as it represents
+the type which will <code>receive</code> the inbound events from the
+handle. It is possible to transition between session implementations
+in order to handle protocol transitions (e.g. negotiation).
+For example, <code>newSession</code> can return the type which will receive
+the first phase of inbound events and <code>toService</code> can transform
+the type via future composition. In this way, the relationship
+between <code>newSession</code> and <code>toService</code> represent a state
+machine transition.</p></span></dd></dl></div>
     </li></ol>
             </div>
 

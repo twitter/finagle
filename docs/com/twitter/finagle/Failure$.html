@@ -1513,6 +1513,23 @@ generator.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.Failure#DeadlineExceeded" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DeadlineExceeded:Long"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Failure$.html#DeadlineExceeded:Long" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">DeadlineExceeded</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Flag deadline exceeded indicates that this failure occured because a request was received past
+its deadline.</p>
     </li><li name="com.twitter.finagle.Failure#FutureRetryableNackFailure" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="FutureRetryableNackFailure:com.twitter.util.Future[Nothing]"></a><a id="FutureRetryableNackFailure:Future[Nothing]"></a>
       <span class="permalink">
@@ -1830,6 +1847,22 @@ it returns a new failure with the given flags.
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.Failure#deadlineExceeded" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="deadlineExceeded(why:String):com.twitter.finagle.Failure"></a><a id="deadlineExceeded(String):Failure"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Failure$.html#deadlineExceeded(why:String):com.twitter.finagle.Failure" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">deadlineExceeded</span><span class="params">(<span name="why">why: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Create a new <a href="#DeadlineExceeded:Long" class="extmbr" name="com.twitter.finagle.Failure#DeadlineExceeded">DeadlineExceeded</a> failure with the given message.</p>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">

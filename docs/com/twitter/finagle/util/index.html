@@ -1340,7 +1340,11 @@ be full before being counted in <code>percentile</code>.
       
       <p class="shortcomment cmt">Finagle's default <span class="extype" name="Timer">Timer</span> that's intended to be shared across a number of servers/clients.</p><div class="fullcomment"><div class="comment cmt"><p>Finagle's default <span class="extype" name="Timer">Timer</span> that's intended to be shared across a number of servers/clients.</p><p>The default <span class="extype" name="Timer">Timer</span> is intended for scheduling tasks that will finish very quickly and
 shouldn't be used to schedule tasks that will occupy the executing thread for a significant
-duration.
+duration.</p><p>Use <code>DefaultTimer.Implicit</code> to import an implicit instance of this timer into the scope.</p><pre>scala&gt; <span class="kw">import</span> com.twitter.util.Future, com.twitter.conversions.time._
+scala&gt; <span class="kw">import</span> com.twitter.finagle.util.DefaultTimer.Implicit
+
+scala&gt; <span class="kw">val</span> f = Future.sleep(<span class="num">10.</span>seconds)
+f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</pre><p>Java users may prefer <code>DefaultTimer.getInstance()</code> to access this timer.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>This timer is &quot;unstoppable&quot; such that calls to <code>stop()</code> is ignored.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.util.Drv" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Drv"></a><a id="Drv:Drv"></a>

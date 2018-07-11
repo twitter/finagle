@@ -249,6 +249,10 @@ resources for using Finagle.
                         <a href="TracingLogHandler.html" title="A logging Handler that sends log information via tracing">TracingLogHandler</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="object" href="enabled$.html" title=""></a>
+                        <a href="enabled$.html" title="">enabled</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="object" href="traceId128Bit$.html" title=""></a>
                         <a href="traceId128Bit$.html" title="">traceId128Bit</a>
                       </li>
@@ -731,9 +735,9 @@ altering the trace environment.
       
       <p class="shortcomment cmt">Run computation <code>f</code> with <code>tracer</code> added onto the tracer stack.</p>
     </li><li name="com.twitter.finagle.tracing.Trace#letTracerAndId" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="letTracerAndId[R](tracer:com.twitter.finagle.tracing.Tracer,id:com.twitter.finagle.tracing.TraceId,terminal:Boolean)(f:=&gt;R):R"></a><a id="letTracerAndId[R](Tracer,TraceId,Boolean)(⇒R):R"></a>
+      <a id="letTracerAndId[R](tracer:com.twitter.finagle.tracing.Tracer,traceId:com.twitter.finagle.tracing.TraceId,terminal:Boolean)(f:=&gt;R):R"></a><a id="letTracerAndId[R](Tracer,TraceId,Boolean)(⇒R):R"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#letTracerAndId[R](tracer:com.twitter.finagle.tracing.Tracer,id:com.twitter.finagle.tracing.TraceId,terminal:Boolean)(f:=&gt;R):R" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#letTracerAndId[R](tracer:com.twitter.finagle.tracing.Tracer,traceId:com.twitter.finagle.tracing.TraceId,terminal:Boolean)(f:=&gt;R):R" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -742,7 +746,7 @@ altering the trace environment.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">letTracerAndId</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="tracer">tracer: <a href="Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>, <span name="id">id: <a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>, <span name="terminal">terminal: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">false</span></span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.tracing.Trace.letTracerAndId.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.tracing.Trace.letTracerAndId.R">R</span></span>
+        <span class="name">letTracerAndId</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="tracer">tracer: <a href="Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>, <span name="traceId">traceId: <a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>, <span name="terminal">terminal: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">false</span></span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.tracing.Trace.letTracerAndId.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.tracing.Trace.letTracerAndId.R">R</span></span>
       </span>
       
       <p class="shortcomment cmt">Run computation <code>f</code> with the given tracer and trace id.</p><div class="fullcomment"><div class="comment cmt"><p>Run computation <code>f</code> with the given tracer and trace id.

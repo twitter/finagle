@@ -351,10 +351,10 @@ use.</p><p> Flag          Value     Meaning
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">case class</span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">ClientDiscardedRequestException</span><span class="params">(<span name="why">why: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <span class="name">ClientDiscardedRequestException</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="" class="extype" name="com.twitter.finagle.mux.ClientDiscardedRequestException">ClientDiscardedRequestException</a>] with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a></span>
       </span>
       </h4>
 
@@ -365,7 +365,7 @@ request, as per <a href="index.html" class="extype" name="com.twitter.finagle.mu
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/Equals.html#scala.Equals" class="extype" name="scala.Equals">Equals</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a>, <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a>, <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a>, <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a>, <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="" class="extype" name="com.twitter.finagle.mux.ClientDiscardedRequestException">ClientDiscardedRequestException</a>], <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
         </div></div>
         
 
@@ -391,7 +391,7 @@ request, as per <a href="index.html" class="extype" name="com.twitter.finagle.mu
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.mux.ClientDiscardedRequestException"><span>ClientDiscardedRequestException</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.util.control.NoStackTrace"><span>NoStackTrace</span></li><li class="in" name="com.twitter.logging.HasLogLevel"><span>HasLogLevel</span></li><li class="in" name="java.lang.Exception"><span>Exception</span></li><li class="in" name="java.lang.Throwable"><span>Throwable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.mux.ClientDiscardedRequestException"><span>ClientDiscardedRequestException</span></li><li class="in" name="scala.util.control.NoStackTrace"><span>NoStackTrace</span></li><li class="in" name="com.twitter.logging.HasLogLevel"><span>HasLogLevel</span></li><li class="in" name="com.twitter.finagle.FailureFlags"><span>FailureFlags</span></li><li class="in" name="java.lang.Exception"><span>Exception</span></li><li class="in" name="java.lang.Throwable"><span>Throwable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -517,6 +517,40 @@ request, as per <a href="index.html" class="extype" name="com.twitter.finagle.mu
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.FailureFlags#asNonRetryable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asNonRetryable:T"></a><a id="asNonRetryable:ClientDiscardedRequestException"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mux/ClientDiscardedRequestException.html#asNonRetryable:T" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asNonRetryable</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.mux.ClientDiscardedRequestException">ClientDiscardedRequestException</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">This as a non-retryable failure.</p><div class="fullcomment"><div class="comment cmt"><p>This as a non-retryable failure. This does not mutate.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>FailureFlags</dd></dl></div>
+    </li><li name="com.twitter.finagle.FailureFlags#asRejected" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asRejected:T"></a><a id="asRejected:ClientDiscardedRequestException"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mux/ClientDiscardedRequestException.html#asRejected:T" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asRejected</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.mux.ClientDiscardedRequestException">ClientDiscardedRequestException</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">This as a rejected failure.</p><div class="fullcomment"><div class="comment cmt"><p>This as a rejected failure. This does not mutate.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>FailureFlags</dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
@@ -541,6 +575,26 @@ request, as per <a href="index.html" class="extype" name="com.twitter.finagle.mu
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.mux.ClientDiscardedRequestException#copyWithFlags" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="copyWithFlags(newFlags:Long):com.twitter.finagle.mux.ClientDiscardedRequestException"></a><a id="copyWithFlags(Long):ClientDiscardedRequestException"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mux/ClientDiscardedRequestException.html#copyWithFlags(newFlags:Long):com.twitter.finagle.mux.ClientDiscardedRequestException" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">copyWithFlags</span><span class="params">(<span name="newFlags">newFlags: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.mux.ClientDiscardedRequestException">ClientDiscardedRequestException</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A copy of this object with the given flags replacing the current flags.</p><div class="fullcomment"><div class="comment cmt"><p>A copy of this object with the given flags replacing the current flags. The
+caller of this method should check to see if a copy is necessary before
+calling.</p><p>As this is an internal API, the other <code>Throwable</code> fields such as the cause
+and stack trace should be handled by callers.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.mux.ClientDiscardedRequestException">ClientDiscardedRequestException</a> → FailureFlags</dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -557,6 +611,22 @@ request, as per <a href="index.html" class="extype" name="com.twitter.finagle.mu
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mux/ClientDiscardedRequestException.html#equals(x$1:Any):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.util.control.NoStackTrace#fillInStackTrace" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="fillInStackTrace():Throwable"></a>
       <span class="permalink">
@@ -595,6 +665,22 @@ request, as per <a href="index.html" class="extype" name="com.twitter.finagle.mu
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.mux.ClientDiscardedRequestException#flags" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="flags:Long"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mux/ClientDiscardedRequestException.html#flags:Long" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">flags</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.mux.ClientDiscardedRequestException">ClientDiscardedRequestException</a> → FailureFlags</dd></dl></div>
     </li><li name="java.lang.Throwable#getCause" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getCause():Throwable"></a>
       <span class="permalink">
@@ -694,6 +780,25 @@ request, as per <a href="index.html" class="extype" name="com.twitter.finagle.mu
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mux/ClientDiscardedRequestException.html#hashCode():Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd><dt>Annotations</dt><dd>
+                <span class="name">@native</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="java.lang.Throwable#initCause" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="initCause(x$1:Throwable):Throwable"></a><a id="initCause(Throwable):Throwable"></a>
       <span class="permalink">
@@ -710,6 +815,24 @@ request, as per <a href="index.html" class="extype" name="com.twitter.finagle.mu
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
+    </li><li name="com.twitter.finagle.FailureFlags#isFlagged" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isFlagged(which:Long):Boolean"></a><a id="isFlagged(Long):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mux/ClientDiscardedRequestException.html#isFlagged(which:Long):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isFlagged</span><span class="params">(<span name="which">which: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Test if this is flagged with a particular set of flags
+</p><div class="fullcomment"><div class="comment cmt"><p>Test if this is flagged with a particular set of flags
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>FailureFlags</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -960,22 +1083,6 @@ request, as per <a href="index.html" class="extype" name="com.twitter.finagle.mu
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.mux.ClientDiscardedRequestException#why" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="why:String"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/ClientDiscardedRequestException.html#why:String" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">why</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
-      </span>
-      
-      
     </li>
               </ol>
             </div>
@@ -986,16 +1093,12 @@ request, as per <a href="index.html" class="extype" name="com.twitter.finagle.mu
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.Serializable">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></h3>
-            </div><div class="parent" name="scala.Product">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a></h3>
-            </div><div class="parent" name="scala.Equals">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/Equals.html#scala.Equals" class="extype" name="scala.Equals">Equals</a></h3>
-            </div><div class="parent" name="scala.util.control.NoStackTrace">
+        <div class="parent" name="scala.util.control.NoStackTrace">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a></h3>
             </div><div class="parent" name="com.twitter.logging.HasLogLevel">
               <h3>Inherited from <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a></h3>
+            </div><div class="parent" name="com.twitter.finagle.FailureFlags">
+              <h3>Inherited from <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="" class="extype" name="com.twitter.finagle.mux.ClientDiscardedRequestException">ClientDiscardedRequestException</a>]</h3>
             </div><div class="parent" name="java.lang.Exception">
               <h3>Inherited from <span class="extype" name="java.lang.Exception">Exception</span></h3>
             </div><div class="parent" name="java.lang.Throwable">
