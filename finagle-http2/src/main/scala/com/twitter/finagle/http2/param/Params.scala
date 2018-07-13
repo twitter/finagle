@@ -3,7 +3,7 @@ package com.twitter.finagle.http2.param
 import com.twitter.conversions.storage._
 import com.twitter.finagle.Stack
 import com.twitter.util.StorageUnit
-import io.netty.handler.codec.http2.{Http2MultiplexCodec, Http2HeadersEncoder}
+import io.netty.handler.codec.http2.Http2MultiplexCodec
 
 /**
  * A class eligible for configuring whether to use the http/2 "prior knowledge"
@@ -112,9 +112,11 @@ object EncoderIgnoreMaxHeaderListSize {
 }
 
 /**
- * A class for configuring the http/2 encoder to ignore MaxHeaderListSize.
+ * A class for configuring the http/2 encoder to mark a header entry as
+ * sensitive or not.
  *
- * This is useful when creating clients for testing the behavior of a server.
+ * Entries marked as sensitive will never be cached, and will be encoded as
+ * literals, either with a static huffman encoding or in cleartext.
  */
 case class HeaderSensitivity(sensitivityDetector: (CharSequence, CharSequence) => Boolean) {
   def mk(): (HeaderSensitivity, Stack.Param[HeaderSensitivity]) =
@@ -122,16 +124,20 @@ case class HeaderSensitivity(sensitivityDetector: (CharSequence, CharSequence) =
 }
 
 object HeaderSensitivity {
-  private[this] val DefaultSensitivityDetector: (CharSequence, CharSequence) => Boolean =
+  val NeverSensitive: (CharSequence, CharSequence) => Boolean =
     new Function2[CharSequence, CharSequence, Boolean] {
-      def apply(name: CharSequence, value: CharSequence): Boolean = {
-        Http2HeadersEncoder.NEVER_SENSITIVE.isSensitive(name, value)
-      }
+      def apply(name: CharSequence, value: CharSequence): Boolean = false
 
       override def toString(): String = "NEVER_SENSITIVE"
     }
+  val AlwaysSensitive: (CharSequence, CharSequence) => Boolean =
+    new Function2[CharSequence, CharSequence, Boolean] {
+      def apply(name: CharSequence, value: CharSequence): Boolean = true
 
-  implicit val param = Stack.Param(HeaderSensitivity(DefaultSensitivityDetector))
+      override def toString(): String = "ALWAYS_SENSITIVE"
+    }
+
+  implicit val param = Stack.Param(HeaderSensitivity(NeverSensitive))
 }
 
 /**
