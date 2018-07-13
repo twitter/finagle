@@ -40,7 +40,7 @@ object NackAdmissionFilter {
    * the server receives a small number of non-nacks ("accepts"), the EMA will
    * end up being very close to 1.
    */
-  private val DefaultWindow: Duration = 2.minutes
+  val DefaultWindow: Duration = 2.minutes
 
   /**
    * By default, the client will send all requests when the accept rate EMA is
@@ -51,7 +51,7 @@ object NackAdmissionFilter {
    * 100 - (2 * 20) = 60% probability. If the EMA is 10%, the filter will drop
    * any given request with 100 - (2 * 10) = 80% probability.
    */
-  private val DefaultNackRateThreshold: Double = 0.5
+  val DefaultNackRateThreshold: Double = 0.5
 
   /**
    * If the request rate is below `rpsThreshold`, the filter will not lower

@@ -26,6 +26,10 @@ New Features
   * finagle-stats: Adds a lint rule to detect when metrics with colliding names are used.
     ``PHAB_ID=D183494``
 
+  * finagle-core: Client side `NackAdmissionFilter` can now be configured more easily by
+    calling `$client.withAdmissionControl.nackAdmissionControl(window, threshold)`.
+    ``PHAB_ID=D188877``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
