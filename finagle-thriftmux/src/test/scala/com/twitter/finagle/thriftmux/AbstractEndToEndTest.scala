@@ -1662,8 +1662,8 @@ abstract class AbstractEndToEndTest
     val clientBuilder = ClientBuilder()
     // set tight "default" timeouts that MB must override in
     // order to get successful responses.
-      .requestTimeout(5.milliseconds)
-      .timeout(10.milliseconds)
+      .requestTimeout(1.milliseconds)
+      .timeout(2.milliseconds)
       .reportTo(stats)
       .name("a_label")
       .stack(client)
@@ -1736,7 +1736,6 @@ abstract class AbstractEndToEndTest
     val timer: MockTimer = new MockTimer()
     val service = new TestService.MethodPerEndpoint {
       private val methodCalled = new AtomicBoolean(false)
-
       def query(x: String): Future[String] = {
         if (methodCalled.compareAndSet(false, true)) {
           Future.value(x)
@@ -1755,8 +1754,8 @@ abstract class AbstractEndToEndTest
     val clientBuilder = ClientBuilder()
       // set tight "default" timeouts that MB must override in
       // order to get successful responses.
-      .requestTimeout(5.milliseconds)
-      .timeout(10.milliseconds)
+      .requestTimeout(1.milliseconds)
+      .timeout(2.milliseconds)
       .reportTo(stats)
       .name("a_label")
       .stack(client)
@@ -1771,43 +1770,35 @@ abstract class AbstractEndToEndTest
         .servicePerEndpoint[TestService.ServicePerEndpoint]("good")
         .query
 
-    // send a good response to ensure the stack has a chance to initialized
-    await(tunableTimeoutSvc(TestService.Query.Args("first")))
+    Time.withCurrentTimeFrozen { _ =>
+      // send a good response to ensure the stack has a chance to initialized
+      await(tunableTimeoutSvc(TestService.Query.Args("first")))
+    }
 
     // increase the timeouts via MB and tests should fail after tunable timeouts
     Time.withCurrentTimeFrozen { currentTime =>
       // ------------------ test total timeouts ------------------
       perRequestTimeoutTunable.set(100.seconds)  // long timeout that does not trigger
       totalTimeoutTunable.set(5.seconds)
-      val result = tunableTimeoutSvc(TestService.Query.Args("yep"))
-      assert(!result.isDefined)
+      val result1 = tunableTimeoutSvc(TestService.Query.Args("yep"))
+      assert(!result1.isDefined)
 
       // go past the total timeout
       currentTime.advance(6.seconds)
       timer.tick()
-      try await(result)
-      catch {
-        case ex: RequestTimeoutException =>
-          assert(classOf[GlobalRequestTimeoutException] == ex.getClass)
-          ex.getMessage().contains(totalTimeoutTunable().get.toString)
-        case t: Throwable => fail(t)
-      }
+      val ex1 = intercept[GlobalRequestTimeoutException] { await(result1) }
+      assert(ex1.getMessage().contains(totalTimeoutTunable().get.toString))
 
       // change the timeout
       totalTimeoutTunable.set(3.seconds)
       val result2 = tunableTimeoutSvc(TestService.Query.Args("nope"))
-      assert(!result2.isDefined)
+      assert(result2.poll == None)
 
       // this time, 4 seconds pushes us past
       currentTime.advance(4.seconds)
       timer.tick()
-      try await(result2)
-      catch {
-        case ex: RequestTimeoutException =>
-          assert(classOf[GlobalRequestTimeoutException] == ex.getClass)
-          ex.getMessage().contains(totalTimeoutTunable().get.toString)
-        case t: Throwable => fail(t)
-      }
+      val ex2 = intercept[GlobalRequestTimeoutException] { await(result2) }
+      assert(ex2.getMessage().contains(totalTimeoutTunable().get.toString))
 
     }
 
@@ -1815,35 +1806,25 @@ abstract class AbstractEndToEndTest
       // ------------------ test per request timeouts ------------------
       totalTimeoutTunable.set(100.seconds) // long timeout that does not trigger
       perRequestTimeoutTunable.set(2.seconds)
-      val result = tunableTimeoutSvc(TestService.Query.Args("huh"))
-      assert(!result.isDefined)
+      val result1 = tunableTimeoutSvc(TestService.Query.Args("huh"))
+      assert(result1.poll == None)
 
       // go past the per request timeout
       currentTime.advance(5.seconds)
       timer.tick()
-      try await(result)
-      catch {
-        case ex: RequestTimeoutException =>
-          assert(classOf[IndividualRequestTimeoutException] == ex.getClass)
-          ex.getMessage().contains(totalTimeoutTunable().get.toString)
-        case t: Throwable => fail(t)
-      }
+      val ex1 = intercept[IndividualRequestTimeoutException] { await(result1) }
+      assert(ex1.getMessage().contains(perRequestTimeoutTunable().get.toString))
 
       // change the timeout
       perRequestTimeoutTunable.set(1.seconds)
       val result2 = tunableTimeoutSvc(TestService.Query.Args("what"))
-      assert(!result2.isDefined)
+      assert(result2.poll == None)
 
       // this time, 4 seconds pushes us past
       currentTime.advance(4.seconds)
       timer.tick()
-      try await(result2)
-      catch {
-        case ex: RequestTimeoutException =>
-          assert(classOf[IndividualRequestTimeoutException] == ex.getClass)
-          ex.getMessage().contains(totalTimeoutTunable().get.toString)
-        case t: Throwable => fail(t)
-      }
+      val ex2 = intercept[IndividualRequestTimeoutException] { await(result2) }
+      assert(ex2.getMessage().contains(perRequestTimeoutTunable().get.toString))
     }
 
     await(server.close())
