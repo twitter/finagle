@@ -8,14 +8,14 @@ import com.twitter.util.Future
 
 private[redis] class RedisTracingFilter extends SimpleFilter[Command, Reply] {
 
-  private val traceRecv: () => Unit = () => Trace.record(Annotation.ClientRecv())
+  def apply(command: Command, service: Service[Command, Reply]): Future[Reply] = {
+    val trace = Trace()
+    if (trace.isActivelyTracing) {
+      trace.recordServiceName("redis")
+      trace.recordRpc(BufToString(command.name))
+      trace.record(Annotation.ClientSend())
 
-  override def apply(command: Command, service: Service[Command, Reply]): Future[Reply] = {
-    if (Trace.isActivelyTracing) {
-      Trace.recordServiceName("redis")
-      Trace.recordRpc(BufToString(command.name))
-      Trace.record(Annotation.ClientSend())
-      service(command).ensure(traceRecv())
+      service(command).ensure(trace.record(Annotation.ClientRecv()))
     } else service(command)
   }
 }

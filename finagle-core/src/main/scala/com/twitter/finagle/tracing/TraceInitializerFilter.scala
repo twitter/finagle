@@ -1,7 +1,7 @@
 package com.twitter.finagle.tracing
 
 import com.twitter.finagle._
-import com.twitter.util.{Future, Throw, Try}
+import com.twitter.util.{Future, Throw}
 
 object TraceInitializerFilter {
   val role: Stack.Role = Stack.Role("TraceInitializerFilter")
@@ -100,27 +100,27 @@ sealed class AnnotatingTracingFilter[Req, Rep](
   private[this] val finagleVersionKey = s"$prefix/finagle.version"
   private[this] val dtabLocalKey = s"$prefix/dtab.local"
 
-  private[this] val onResponseFn: Try[Rep] => Unit = { rep =>
-    rep match {
-      case Throw(e) =>
-        Trace.record(afterFailure(s"${e.getClass.getName}: ${e.getMessage}"))
-      case _ =>
-    }
-    Trace.record(after)
-  }
-
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
-    if (Trace.isActivelyTracing) {
+    val trace = Trace()
+    if (trace.isActivelyTracing) {
       if (traceMetaData) {
-        Trace.recordServiceName(label)
-        Trace.recordBinary(finagleVersionKey, finagleVersion())
+        trace.recordServiceName(label)
+        trace.recordBinary(finagleVersionKey, finagleVersion())
         // Trace dtab propagation on all requests that have them.
         if (Dtab.local.nonEmpty) {
-          Trace.recordBinary(dtabLocalKey, Dtab.local.show)
+          trace.recordBinary(dtabLocalKey, Dtab.local.show)
         }
       }
-      Trace.record(before)
-      service(request).respond(onResponseFn)
+
+      trace.record(before)
+
+      service(request).respond {
+        case Throw(e) =>
+          trace.record(afterFailure(s"${e.getClass.getName}: ${e.getMessage}"))
+          trace.record(after)
+        case _ =>
+          trace.record(after)
+      }
     } else {
       service(request)
     }

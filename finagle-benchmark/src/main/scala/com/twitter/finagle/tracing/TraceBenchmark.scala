@@ -82,11 +82,33 @@ class TraceBenchmark extends StdBenchAnnotations {
     traced(num)
 
   @Benchmark
-  def recordAnnotation(): Unit =
+  @Warmup(iterations = 3)
+  @Measurement(iterations = 5)
+  @Threads(4)
+  def recordAnnotationSlow(): Unit =
     Trace.letTracer(TraceBenchmark.NoopAlwaysSamplingTracer) {
-      Trace.record(Annotation.WireSend)
+      if (Trace.isActivelyTracing) {
+        Trace.record(Annotation.WireSend)
+        Trace.record(Annotation.WireSend)
+        Trace.record(Annotation.WireSend)
+        Trace.record(Annotation.WireSend)
+      }
     }
 
+  @Benchmark
+  @Warmup(iterations = 3)
+  @Measurement(iterations = 5)
+  @Threads(4)
+  def recordAnnotationFast(): Unit =
+    Trace.letTracer(TraceBenchmark.NoopAlwaysSamplingTracer) {
+      val trace = Trace()
+      if (trace.isActivelyTracing) {
+        trace.record(Annotation.WireSend)
+        trace.record(Annotation.WireSend)
+        trace.record(Annotation.WireSend)
+        trace.record(Annotation.WireSend)
+      }
+    }
 }
 
 private object TraceBenchmark {

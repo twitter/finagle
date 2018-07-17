@@ -396,7 +396,7 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
   // example from X-Amzn-Trace-Id: Root=1-5759e988-bd862e3fe1be46a994272793;Sampled=1
   test("Trace.nextTraceIdHigh: encodes epoch seconds") {
     Time.withTimeAt(Time.fromSeconds(1465510280)) { tc => // Thursday, June 9, 2016 10:11:20 PM
-      val traceIdHigh = Trace.nextTraceIdHigh()
+      val traceIdHigh = Tracing.nextTraceIdHigh()
       assert(traceIdHigh.toString.startsWith("5759e988"))
     }
   }

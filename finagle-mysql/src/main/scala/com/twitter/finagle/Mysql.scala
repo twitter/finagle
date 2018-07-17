@@ -98,15 +98,17 @@ object MySqlClientTracingFilter {
 
   object TracingFilter extends SimpleFilter[Request, Result] {
     def apply(request: Request, service: Service[Request, Result]): Future[Result] = {
-      if (Trace.isActivelyTracing) {
+      val trace = Trace()
+      if (trace.isActivelyTracing) {
         request match {
-          case QueryRequest(sqlStatement) => Trace.recordBinary("mysql.query", sqlStatement)
-          case PrepareRequest(sqlStatement) => Trace.recordBinary("mysql.prepare", sqlStatement)
+          case QueryRequest(sqlStatement) => trace.recordBinary("mysql.query", sqlStatement)
+          case PrepareRequest(sqlStatement) => trace.recordBinary("mysql.prepare", sqlStatement)
           // TODO: save the prepared statement and put it in the executed request trace
-          case ExecuteRequest(id, _, _, _) => Trace.recordBinary("mysql.execute", id)
-          case _ => Trace.record("mysql." + request.getClass.getSimpleName.replace("$", ""))
+          case ExecuteRequest(id, _, _, _) => trace.recordBinary("mysql.execute", id)
+          case _ => trace.record("mysql." + request.getClass.getSimpleName.replace("$", ""))
         }
       }
+
       service(request)
     }
   }

@@ -93,9 +93,10 @@ private object TraceInfo {
   }
 
   def traceRpc(request: Request): Unit = {
-    if (Trace.isActivelyTracing) {
-      Trace.recordRpc(request.method.toString)
-      Trace.recordBinary("http.uri", stripParameters(request.uri))
+    val trace = Trace()
+    if (trace.isActivelyTracing) {
+      trace.recordRpc(request.method.toString)
+      trace.recordBinary("http.uri", stripParameters(request.uri))
     }
   }
 

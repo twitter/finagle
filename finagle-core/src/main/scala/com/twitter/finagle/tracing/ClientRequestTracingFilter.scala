@@ -1,7 +1,7 @@
 package com.twitter.finagle.tracing
 
 import com.twitter.finagle.{Service, SimpleFilter}
-import com.twitter.util.{Future, Return, Try}
+import com.twitter.util.{Future, Return}
 
 /**
  * Adds the basic tracing information to a request.
@@ -9,26 +9,20 @@ import com.twitter.util.{Future, Return, Try}
  */
 trait ClientRequestTracingFilter[Req, Res] extends SimpleFilter[Req, Res] {
 
-  private[this] val recordClientReceive: Try[Res] => Unit = {
-    case Return(_) =>
-      Trace.record(Annotation.ClientRecv())
-    case _ =>
+  def apply(request: Req, service: Service[Req, Res]): Future[Res] = {
+    val trace = Trace()
+    if (trace.isActivelyTracing) {
+      trace.recordServiceName(serviceName)
+      trace.recordRpc(methodName(request))
+      trace.record(Annotation.ClientSend())
+
+      service(request).respond {
+        case Return(_) => trace.record(Annotation.ClientRecv())
+        case _ =>
+      }
+    } else service(request)
   }
 
-  def apply(
-    request: Req,
-    service: Service[Req, Res]
-  ): Future[Res] = {
-    if (Trace.isActivelyTracing) {
-      Trace.recordServiceName(serviceName)
-      Trace.recordRpc(methodName(request))
-      Trace.record(Annotation.ClientSend())
-
-      service(request).respond(recordClientReceive)
-    } else
-      service(request)
-  }
-
-  val serviceName: String
+  def serviceName: String
   def methodName(req: Req): String
 }

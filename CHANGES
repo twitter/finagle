@@ -7,6 +7,14 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+
+New Features
+~~~~~~~~~~~~
+
+  * finagle-core: Introducing the new `c.t.f.tracing.Tracing` API for more efficient tracing
+    (dramatically reduces the number of context lookups; see scaladoc for `c.t.f.tracing.Trace`).
+    PHAB_ID=``D190670``
+
 18.7.0
 -------
 

@@ -53,10 +53,11 @@ private[finagle] object MemcachedTracingFilter {
 
   object TracingFilter extends SimpleFilter[Command, Response] {
     def apply(command: Command, service: Service[Command, Response]): Future[Response] = {
+      val trace = Trace()
       val response = service(command)
-      if (Trace.isActivelyTracing) {
+      if (trace.isActivelyTracing) {
         // Submitting rpc name here assumes there is no further tracing lower in the stack
-        Trace.recordRpc(command.name)
+        trace.recordRpc(command.name)
         command match {
           case command: RetrievalCommand =>
             response.respond {
@@ -64,20 +65,20 @@ private[finagle] object MemcachedTracingFilter {
                 val misses = mutable.Set.empty[String]
                 command.keys.foreach {
                   case Buf.Utf8(key) =>
-                    misses += key
+                  misses += key
                 }
                 vals.foreach { value =>
                   val Buf.Utf8(key) = value.key
-                  Trace.recordBinary(key, "Hit")
+                  trace.recordBinary(key, "Hit")
                   misses.remove(key)
                 }
                 misses.foreach {
-                  Trace.recordBinary(_, "Miss")
+                  trace.recordBinary(_, "Miss")
                 }
               case _ =>
             }
-          case _ =>
-            response
+            case _ =>
+              response
         }
       } else {
         response

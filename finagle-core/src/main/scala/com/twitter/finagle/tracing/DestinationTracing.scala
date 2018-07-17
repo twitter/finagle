@@ -2,6 +2,7 @@ package com.twitter.finagle.tracing
 
 import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
+import com.twitter.util.Future
 import java.net.InetSocketAddress
 
 /**
@@ -10,29 +11,32 @@ import java.net.InetSocketAddress
  */
 private[finagle]  class ServerDestTracingProxy[Req, Rep](self: ServiceFactory[Req, Rep])
     extends ServiceFactoryProxy[Req, Rep](self) {
-  override def apply(conn: ClientConnection) = {
-    // this filter gymnastics is done so that annotation occurs after
-    // traceId is set by any inbound request with tracing enabled
-    val filter = new SimpleFilter[Req, Rep] {
-      def apply(request: Req, service: Service[Req, Rep]) = {
-        if (Trace.isActivelyTracing) {
-          conn.localAddress match {
-            case ia: InetSocketAddress =>
-              Trace.recordLocalAddr(ia)
-              Trace.recordServerAddr(ia)
-            case _ => // do nothing for non-ip address
-          }
-          conn.remoteAddress match {
-            case ia: InetSocketAddress =>
-              Trace.recordClientAddr(ia)
-            case _ => // do nothing for non-ip address
-          }
-        }
-        service(request)
+
+  override def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
+    self(conn).map(sf => new ServerDestTracingFilter[Req, Rep](conn).andThen(sf))
+}
+
+private final class ServerDestTracingFilter[Req, Rep](
+  conn: ClientConnection
+) extends SimpleFilter[Req, Rep] {
+
+  def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
+    val trace = Trace()
+    if (trace.isActivelyTracing) {
+      conn.localAddress match {
+        case ia: InetSocketAddress =>
+          trace.recordLocalAddr(ia)
+          trace.recordServerAddr(ia)
+        case _ => // do nothing for non-ip address
+      }
+      conn.remoteAddress match {
+        case ia: InetSocketAddress =>
+          trace.recordClientAddr(ia)
+        case _ => // do nothing for non-ip address
       }
     }
 
-    self(conn) map { filter andThen _ }
+    service(request)
   }
 }
 
@@ -66,13 +70,18 @@ private[finagle] object ClientDestTracingFilter {
  * We don't log the local addr here because it's already done in the client Dispatcher.
  */
 class ClientDestTracingFilter[Req, Rep](addr: Address) extends SimpleFilter[Req, Rep] {
-  def apply(request: Req, service: Service[Req, Rep]) = {
-    val ret = service(request)
-    addr match {
-      case Address.Inet(ia, _) =>
-        Trace.recordServerAddr(ia)
-      case _ => // do nothing for non-ip address
+  def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
+    val trace = Trace()
+    val rep = service(request)
+
+    if (trace.isActivelyTracing) {
+      addr match {
+        case Address.Inet(ia, _) =>
+          trace.recordServerAddr(ia)
+        case _ => // do nothing for non-ip address
+      }
     }
-    ret
+
+    rep
   }
 }
