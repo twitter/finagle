@@ -25,6 +25,8 @@ private[finagle] class HttpClientDispatcher(
   private[this] val failureReceiver =
     new RollupStatsReceiver(statsReceiver.scope("stream")).scope("failures")
 
+  private[this] val unit: (Unit, Unit) => Unit = (_, _) => ()
+
   protected def dispatch(req: Request, p: Promise[Response]): Future[Unit] = {
     if (!req.isChunked && !req.headerMap.contains(Fields.ContentLength)) {
       val len = req.content.length
@@ -35,26 +37,21 @@ private[finagle] class HttpClientDispatcher(
     }
 
     // wait on these concurrently:
-    Future
-      .join(
-        Seq(
-          trans.write(req),
-          // Drain the Transport into Response body.
-          trans.read().flatMap {
-            case Multi(res, readFinished) =>
-              p.updateIfEmpty(Return(res))
-              readFinished
-          } // we don't need to satisfy p when we fail because GenSerialClientDispatcher does already
-        )
-      )
-      .onFailure { t =>
-        // This Future represents the totality of the exchange;
-        // thus failure represents *any* failure that can happen
-        // during the exchange.
-        logger.debug(t, "Failed mid-stream. Terminating stream, closing connection")
-        failureReceiver.counter(Throwables.mkString(t): _*).incr()
-        req.reader.discard()
-        trans.close()
-      }
+    trans.write(req).joinWith(
+      // Drain the Transport into Response body.
+      trans.read().flatMap {
+        case Multi(res, readFinished) =>
+          p.updateIfEmpty(Return(res))
+          readFinished
+      } // we don't need to satisfy p when we fail because GenSerialClientDispatcher does already
+    )(unit).onFailure { t =>
+      // This Future represents the totality of the exchange;
+      // thus failure represents *any* failure that can happen
+      // during the exchange.
+      logger.debug(t, "Failed mid-stream. Terminating stream, closing connection")
+      failureReceiver.counter(Throwables.mkString(t): _*).incr()
+      req.reader.discard()
+      trans.close()
+    }
   }
 }
