@@ -1,7 +1,7 @@
 package com.twitter.finagle.mux
 
 import com.twitter.finagle.Mux
-import com.twitter.finagle.mux.exp.pushsession.MuxPush
+import com.twitter.finagle.mux.pushsession.MuxPush
 
 class StandardSmuxTest extends AbstractSmuxTest {
   type ServerT = Mux.Server

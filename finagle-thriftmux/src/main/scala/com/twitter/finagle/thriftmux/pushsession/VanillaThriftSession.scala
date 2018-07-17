@@ -2,7 +2,7 @@ package com.twitter.finagle.thriftmux.pushsession
 
 import com.twitter.finagle.context.{Contexts, RemoteInfo}
 import com.twitter.finagle.{Service, Stack, Status, Thrift, mux, param}
-import com.twitter.finagle.exp.pushsession.{PushChannelHandle, PushSession}
+import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession}
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.mux.{ClientDiscardedRequestException, Processor}
 import com.twitter.finagle.stats.Verbosity

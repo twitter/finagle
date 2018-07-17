@@ -19,9 +19,9 @@ scala_library(
 scala_library(
     name = "pushsession-utils",
     sources = [
-        "com/twitter/finagle/exp/pushsession/utils/DeferredExecutor.scala",
-        "com/twitter/finagle/exp/pushsession/utils/MockChannelHandle.scala",
-        "com/twitter/finagle/exp/pushsession/utils/MockPushSession.scala",
+        "com/twitter/finagle/pushsession/utils/DeferredExecutor.scala",
+        "com/twitter/finagle/pushsession/utils/MockChannelHandle.scala",
+        "com/twitter/finagle/pushsession/utils/MockPushSession.scala",
     ],
     fatal_warnings = True,
     dependencies = [

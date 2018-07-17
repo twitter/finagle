@@ -4,7 +4,7 @@ import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
 import com.twitter.finagle.client.{EndpointerStackClient, _}
 import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, PipeliningDispatcher, SerialServerDispatcher, StalledPipelineTimeout}
-import com.twitter.finagle.exp.pushsession.{PipeliningClientPushSession, PushChannelHandle, PushStackClient, PushTransporter}
+import com.twitter.finagle.pushsession.{PipeliningClientPushSession, PushChannelHandle, PushStackClient, PushTransporter}
 import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
 import com.twitter.finagle.loadbalancer.{Balancers, LoadBalancerFactory}
 import com.twitter.finagle.memcached._
@@ -15,7 +15,7 @@ import com.twitter.finagle.memcached.protocol.text.transport.{MemcachedNetty4Cli
 import com.twitter.finagle.memcached.protocol.{Command, Response, RetrievalCommand, Values}
 import com.twitter.finagle.memcached.Toggles
 import com.twitter.finagle.naming.BindingFactory
-import com.twitter.finagle.netty4.exp.pushsession.Netty4PushTransporter
+import com.twitter.finagle.netty4.pushsession.Netty4PushTransporter
 import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.pool.SingletonPool

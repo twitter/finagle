@@ -8,7 +8,7 @@ import com.twitter.finagle.ssl.{KeyCredentials, TrustCredentials}
 import com.twitter.finagle.thriftmux.thriftscala._
 import com.twitter.finagle.toggle.flag
 import com.twitter.finagle._
-import com.twitter.finagle.mux.exp.pushsession.MuxPush
+import com.twitter.finagle.mux.pushsession.MuxPush
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.io.TempFile
 import com.twitter.util.{Await, Future, Try}

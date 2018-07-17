@@ -1,11 +1,11 @@
 package com.twitter.finagle.thriftmux.pushsession
 
-import com.twitter.finagle.mux.exp.pushsession.{MessageWriter, MuxChannelHandle, MuxMessageDecoder, MuxPush, Negotiation}
+import com.twitter.finagle.mux.pushsession.{MessageWriter, MuxChannelHandle, MuxMessageDecoder, MuxPush, Negotiation}
 import com.twitter.finagle._
 import com.twitter.finagle.mux.{Request, Response}
 import com.twitter.finagle.mux.transport.{BadMessageException, Message}
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.exp.pushsession.{PushChannelHandle, PushSession, RefPushSession}
+import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession, RefPushSession}
 import com.twitter.finagle.thrift.thrift.{ResponseHeader, UpgradeReply}
 import com.twitter.finagle.thrift.{InputBuffer, OutputBuffer, ThriftTracing}
 import com.twitter.io.{Buf, ByteReader}

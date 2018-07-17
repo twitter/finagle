@@ -1,6 +1,6 @@
 package com.twitter.finagle.thriftmux
 
-import com.twitter.finagle.mux.exp.pushsession.MuxPush
+import com.twitter.finagle.mux.pushsession.MuxPush
 import com.twitter.finagle.ThriftMux
 import com.twitter.finagle.toggle.flag
 import org.scalatest.FunSuite

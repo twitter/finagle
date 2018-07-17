@@ -4,7 +4,7 @@ import com.twitter.finagle.client.{ClientRegistry, ExceptionRemoteInfoFactory, S
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.context.RemoteInfo.Upstream
 import com.twitter.finagle.mux.{OpportunisticTlsParams, Request, Response}
-import com.twitter.finagle.mux.exp.pushsession.MuxPush
+import com.twitter.finagle.mux.pushsession.MuxPush
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport.{MuxContext, OpportunisticTls, MuxFailure}
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
@@ -127,12 +127,12 @@ object ThriftMux
         .withLabel("thrift")
         .withStatsReceiver(ClientStatsReceiver)
 
-    private[finagle] def pushMuxer: StackClient[mux.Request, mux.Response] =
+    def pushMuxer: StackClient[mux.Request, mux.Response] =
       MuxPush.client
         .copy(stack = BaseClientStack)
         .configured(ProtocolLibrary("thriftmux"))
 
-    private[finagle] def standardMuxer: StackClient[mux.Request, mux.Response] =
+    def standardMuxer: StackClient[mux.Request, mux.Response] =
       Mux.client
         .copy(stack = BaseClientStack)
         .configured(ProtocolLibrary("thriftmux"))
@@ -460,6 +460,7 @@ object ThriftMux
     def defaultMuxer: StackServer[mux.Request, mux.Response] =
       if(UsePushMuxServer) pushMuxer else standardMuxer
 
+    /** Push-based ThriftMux server implementation. */
     private[finagle] def pushMuxer: StackServer[mux.Request, mux.Response] = {
       MuxPush.server
         .copy(
@@ -468,6 +469,7 @@ object ThriftMux
           sessionFactory = MuxDowngradingNegotiator.build(_, _, _, _))
     }
 
+    /** Pull-based ThriftMux server implementation */
     private[finagle] def standardMuxer: StackServer[mux.Request, mux.Response] = ServerMuxer()
 
     private val MuxToArrayFilter =

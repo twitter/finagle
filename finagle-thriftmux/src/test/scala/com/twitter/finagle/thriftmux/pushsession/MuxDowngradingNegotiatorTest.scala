@@ -1,13 +1,13 @@
 package com.twitter.finagle.thriftmux.pushsession
 
 import com.twitter.finagle.Mux.param.OppTls
-import com.twitter.finagle.exp.pushsession.RefPushSession
-import com.twitter.finagle.exp.pushsession.utils.MockChannelHandle
+import com.twitter.finagle.pushsession.RefPushSession
+import com.twitter.finagle.pushsession.utils.MockChannelHandle
 import com.twitter.finagle.{param => fparam}
 import com.twitter.finagle.mux.{Request, Response}
 import com.twitter.finagle.mux.transport.{Message, OpportunisticTls}
 import com.twitter.finagle.{Service, Stack, ThriftMux}
-import com.twitter.finagle.mux.exp.pushsession.{MuxChannelHandle, MuxClientNegotiatingSession}
+import com.twitter.finagle.mux.pushsession.{MuxChannelHandle, MuxClientNegotiatingSession}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.thriftmux.thriftscala.TestService
 import com.twitter.io.{Buf, ByteReader}

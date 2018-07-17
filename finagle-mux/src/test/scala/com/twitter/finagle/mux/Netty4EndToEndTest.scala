@@ -3,7 +3,7 @@ package com.twitter.finagle.mux
 import com.twitter.finagle.Mux
 import com.twitter.finagle.Mux.param.MaxFrameSize
 import com.twitter.conversions.storage._
-import com.twitter.finagle.mux.exp.pushsession.MuxPush
+import com.twitter.finagle.mux.pushsession.MuxPush
 
 class PushToStandardMuxEndToEndTest extends AbstractEndToEndTest {
   override type ClientT = MuxPush.Client
