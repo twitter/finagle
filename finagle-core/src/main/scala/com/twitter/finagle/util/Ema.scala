@@ -24,7 +24,7 @@ private[finagle] class Ema(window: Long) {
    * Since `update` requires monotonic timestamps, it is up to the caller to
    * ensure that calls to update do not race.
    */
-  def update(stamp: Long, x: Long): Double = {
+  def update(stamp: Long, x: Double): Double = {
     if (time == Long.MinValue) {
       time = stamp
       ema = x
