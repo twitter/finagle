@@ -410,7 +410,7 @@ class FailureAccrualFactory[Req, Rep](
 
         service(request).respond {
           // Don't count `Failure.Ignorable` responses as either successful or failed
-          case Throw(f: Failure) if f.isFlagged(Failure.Ignorable) =>
+          case Throw(f: FailureFlags[_]) if f.isFlagged(Failure.Ignorable) =>
             didReceiveIgnorable()
           case rep =>
             if (isSuccess(ReqRep(request, rep))) didSucceed()
