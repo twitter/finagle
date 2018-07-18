@@ -192,7 +192,7 @@ class NackAdmissionFilter[Req, Rep](
   private[this] val afterSend: Try[Rep] => Unit = (rep: Try[Rep]) => {
     val value =
       if (sufficientRps) rep match {
-        case Throw(f: Failure) if f.isFlagged(Failure.Rejected) => 0
+        case Throw(f: FailureFlags[_]) if f.isFlagged(Failure.Rejected) => 0
         case _ => 1
       } else {
         // Bump up the ema value if the rps is too low to drop the request.

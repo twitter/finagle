@@ -1,12 +1,11 @@
 package com.twitter.finagle.filter
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.param
+import com.twitter.finagle.{Failure, FailureFlags, Service, ServiceFactory, Stack, param}
 import com.twitter.finagle.service.FailedService
-import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.toggle.flag
 import com.twitter.finagle.util.{DefaultLogger, Ema, Rng}
-import com.twitter.finagle.{Failure, Service, Stack, ServiceFactory}
 import com.twitter.util._
 import java.util.logging.Logger
 import org.scalatest.FunSuite
@@ -487,5 +486,34 @@ class NackAdmissionFilterTest extends FunSuite {
       new Ctx(lowRng, DefaultWindow, _nackRateThreshold)
     }
     assert(thrown.getMessage == errMsg)
+  }
+
+  testEnabled("can be triggered by failure-flag encoded nacks") { ctl =>
+    class Reject extends FailureFlags[Reject] {
+      private[finagle] val flags = FailureFlags.Rejected
+
+      protected def copyWithFlags(flags: Long): Reject = ???
+    }
+
+    val nack = new NackAdmissionFilter[Int, Int](
+      DefaultWindow,
+      DefaultNackRateThreshold,
+      Rng(0x5eeded),
+      NullStatsReceiver,
+      new FakeTimer
+    )
+
+    val filtered = nack.andThen(Service.mk[Int, Int](_ => Future.exception(new Reject)))
+    while (nack.emaValue >= 1.0 - DefaultNackRateThreshold) {
+      ctl.advance(1.second)
+      Await.ready(filtered(100), 5.seconds)
+    }
+    val res = filtered(100)
+    Await.ready(res, 5.seconds)
+
+    res.poll.get.throwable match {
+      case f: FailureFlags[_] => assert(f.isFlagged(FailureFlags.NonRetryable))
+      case other => fail(s"expected a nack, got $other")
+    }
   }
 }
