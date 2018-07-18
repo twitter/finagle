@@ -30,7 +30,7 @@ trait ThriftClient {
    * method interface (`MethodPerEndpoint`).
    */
   @deprecated("Use methodPerEndpoint", "2018-01-12")
-  def thriftService[ServicePerEndpoint, ThriftService](servicePerEndpoint: ServicePerEndpoint)(
-    implicit builder: ThriftServiceBuilder[ServicePerEndpoint, ThriftService]
-  ): ThriftService = builder.build(servicePerEndpoint)
+  def thriftService[ServicePerEndpoint, ThriftServiceType](servicePerEndpoint: ServicePerEndpoint)(
+    implicit builder: ThriftServiceBuilder[ServicePerEndpoint, ThriftServiceType]
+  ): ThriftServiceType = builder.build(servicePerEndpoint)
 }

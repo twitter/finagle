@@ -24,7 +24,7 @@ import scala.reflect.ClassTag
  *
  * @define build
  *
- * Create a new client of type `ThriftService`, which must be generated
+ * Create a new client of type `ThriftServiceType`, which must be generated
  * by [[https://github.com/twitter/scrooge Scrooge]].
  *
  * For Scala generated code, the `Class` passed in should be
@@ -205,7 +205,8 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
   /**
    * $build
    */
-  def build[ThriftService](dest: String, cls: Class[_]): ThriftService = {
+  // NB: ThriftServiceType is used to avoid a naming collision with c.t.f.thrift.GeneratedThriftService
+  def build[ThriftServiceType](dest: String, cls: Class[_]): ThriftServiceType = {
     val (n, l) = Resolver.evalLabeled(dest)
     build(n, l, cls)
   }
@@ -213,50 +214,50 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
   /**
    * $build
    */
-  def build[ThriftService](dest: String, label: String, cls: Class[_]): ThriftService =
+  def build[ThriftServiceType](dest: String, label: String, cls: Class[_]): ThriftServiceType =
     build(Resolver.eval(dest), label, cls)
 
   /**
    * $build
    */
-  def build[ThriftService: ClassTag](dest: String): ThriftService = {
+  def build[ThriftServiceType: ClassTag](dest: String): ThriftServiceType = {
     val (n, l) = Resolver.evalLabeled(dest)
-    build[ThriftService](n, l)
+    build[ThriftServiceType](n, l)
   }
 
   /**
    * $build
    */
-  def build[ThriftService: ClassTag](dest: String, label: String): ThriftService = {
-    val cls = implicitly[ClassTag[ThriftService]].runtimeClass
-    build[ThriftService](Resolver.eval(dest), label, cls)
+  def build[ThriftServiceType: ClassTag](dest: String, label: String): ThriftServiceType = {
+    val cls = implicitly[ClassTag[ThriftServiceType]].runtimeClass
+    build[ThriftServiceType](Resolver.eval(dest), label, cls)
   }
 
   /**
    * $build
    */
-  def build[ThriftService: ClassTag](dest: Name, label: String): ThriftService = {
-    val cls = implicitly[ClassTag[ThriftService]].runtimeClass
-    build[ThriftService](dest, label, cls)
+  def build[ThriftServiceType: ClassTag](dest: Name, label: String): ThriftServiceType = {
+    val cls = implicitly[ClassTag[ThriftServiceType]].runtimeClass
+    build[ThriftServiceType](dest, label, cls)
   }
 
   /**
    * $build
    */
-  def build[ThriftService](name: Name, label: String, cls: Class[_]): ThriftService = {
+  def build[ThriftServiceType](name: Name, label: String, cls: Class[_]): ThriftServiceType = {
     build(name, label, cls, clientParam, newService(name, label))
   }
 
   /**
    * $build
    */
-  def build[ThriftService](
+  def build[ThriftServiceType](
     name: Name,
     label: String,
     cls: Class[_],
     clientParam: RichClientParam,
     service: Service[ThriftClientRequest, Array[Byte]]
-  ): ThriftService = {
+  ): ThriftServiceType = {
     val clientLabel = (label, defaultClientName) match {
       case ("", "") => Showable.show(name)
       case ("", l1) => l1
@@ -425,12 +426,13 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
       ThriftRichClient.this.newIface(dest, label, cls, clientConfigMultiplexed, service)
     }
 
-    def build[ThriftService: ClassTag](serviceName: String): ThriftService = {
-      val cls = implicitly[ClassTag[ThriftService]].runtimeClass
-      build[ThriftService](serviceName, cls)
+    // NB: ThriftServiceType is used to avoid a naming collision with c.t.f.thrift.GeneratedThriftService
+    def build[ThriftServiceType: ClassTag](serviceName: String): ThriftServiceType = {
+      val cls = implicitly[ClassTag[ThriftServiceType]].runtimeClass
+      build[ThriftServiceType](serviceName, cls)
     }
 
-    def build[ThriftService](serviceName: String, cls: Class[_]): ThriftService = {
+    def build[ThriftServiceType](serviceName: String, cls: Class[_]): ThriftServiceType = {
       val multiplexedProtocol = Protocols.multiplex(serviceName, clientParam.protocolFactory)
       val clientConfigMultiplexed = clientParam.copy(protocolFactory = multiplexedProtocol)
       ThriftRichClient.this.build(dest, label, cls, clientConfigMultiplexed, service)

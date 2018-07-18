@@ -72,6 +72,10 @@ New Features
     calling `$client.withAdmissionControl.nackAdmissionControl(window, threshold)`.
     ``PHAB_ID=D188877``
 
+  * finagle-thrift: Trait c.t.scrooge.ThriftService is now c.t.finagle.thrift.ThriftService.
+   Scrooge generated service objects now all inherit from c.t.finagle.thrift.GeneratedThriftService.
+   ``PHAB_ID=D180341``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
