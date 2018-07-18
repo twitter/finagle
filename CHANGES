@@ -67,6 +67,15 @@ Breaking API Changes
   * finagle-mux: `ClientDiscardedRequestException` now extends `FailureFlags` and is no longer
     a case class. ``PHAB_ID=D183456``
 
+Bug Fixes
+~~~~~~~~~
+
+  * finagle-core: `c.t.f.filter.NackAdmissionFilter` is now aware of `FailureFlags` encoded
+    failures. ``PHAB_ID=D193390``
+
+  * finagle-mux: Mux's server dispatcher is now aware of `FailureFlags` encoded failures.
+    ``PHAB_ID=D193456``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

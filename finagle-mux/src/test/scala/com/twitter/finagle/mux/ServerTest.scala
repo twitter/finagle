@@ -8,7 +8,7 @@ import com.twitter.finagle.mux.transport.{Message, MuxFailure}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing.NullTracer
 import com.twitter.finagle.transport.{QueueTransport, Transport}
-import com.twitter.finagle.{Dtab, Failure, Path, Service}
+import com.twitter.finagle.{Dtab, Failure, FailureFlags, Path, Service}
 import com.twitter.io.Buf.Utf8
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Duration, Future, Promise, Return, Throw, Time}
@@ -425,5 +425,26 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
 
     assert(Await.result(serverToClient.poll().liftToTry, 30.seconds).isReturn)
     assert(Await.result(serverToClient.poll().liftToTry, 30.seconds).isReturn)
+  }
+
+  private class Restart extends FailureFlags[Restart] {
+    private[finagle] val flags = Failure.Restartable
+    protected def copyWithFlags(flags: Long): Restart = ???
+  }
+
+  val nackableMsgs: Seq[Message] = Seq(
+    Message.Tdispatch(1, Nil, Path.empty, Dtab.empty, Buf.Empty),
+    Message.Treq(1, None, Buf.Empty)
+  )
+
+  nackableMsgs.foreach { msg: Message =>
+    test(s"$msg: server dispatch is aware of failure-flag encoded nacks") {
+      val failing = Service.mk[Request, Response](_ => Future.exception(new Restart))
+      Await.result(Processor(msg, failing), 5.seconds) match {
+         case Message.RdispatchNack(_, _) =>
+         case Message.RreqNack(_) =>
+         case other => fail(s"expected a nack response, saw $other")
+      }
+    }
   }
 }

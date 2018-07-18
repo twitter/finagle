@@ -425,7 +425,7 @@ private[finagle] object Processor extends Filter[Message, Message, Request, Resp
         // messages. In order to keep backwards compatibility with clients that
         // do not look for MuxFailures, this behavior is left alone. additional
         // MuxFailure flags are still sent.
-        case Throw(f: Failure) if f.isFlagged(Failure.Restartable) =>
+        case Throw(f: FailureFlags[_]) if f.isFlagged(Failure.Restartable) =>
           val mFail = MuxFailure.FromThrow.applyOrElse(f, AlwaysEmpty)
           Future.value(RdispatchNack(tdispatch.tag, mFail.contexts))
 
@@ -445,7 +445,7 @@ private[finagle] object Processor extends Filter[Message, Message, Request, Resp
         case Return(rep) =>
           Future.value(RreqOk(treq.tag, rep.body))
 
-        case Throw(f: Failure) if f.isFlagged(Failure.Restartable) =>
+        case Throw(f: FailureFlags[_]) if f.isFlagged(Failure.Restartable) =>
           Future.value(Message.RreqNack(treq.tag))
 
         case Throw(exc) =>
