@@ -1,10 +1,18 @@
 package com.twitter.finagle.mysql
 
-import com.twitter.finagle.{ClientConnection, Service, ServiceFactory, ServiceFactoryProxy}
+import com.twitter.finagle._
 import com.twitter.util.Future
 
 object RollbackFactory {
-  val RollbackQuery = QueryRequest("ROLLBACK")
+  private val RollbackQuery = QueryRequest("ROLLBACK")
+
+  private[finagle] def module: Stackable[ServiceFactory[Request, Result]] =
+    new Stack.Module0[ServiceFactory[Request, Result]] {
+      val role = Stack.Role("RollbackFactory")
+      val description = "Installs a rollback factory in the stack"
+      def make(next: ServiceFactory[Request, Result]): ServiceFactory[Request, Result] =
+        new RollbackFactory(next)
+    }
 }
 
 /**

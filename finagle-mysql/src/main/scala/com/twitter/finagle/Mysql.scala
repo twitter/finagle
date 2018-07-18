@@ -48,34 +48,6 @@ trait MysqlRichClient { self: com.twitter.finagle.Client[Request, Result] =>
    */
   def newRichClient(dest: String): mysql.Client with mysql.Transactions =
     mysql.Client(newClient(dest), richClientStatsReceiver, supportUnsigned)
-
-
-  /**
-   * Creates a new `RichClient` connected to the logical destination described by `dest` with the
-   * assigned `label`, used to scope client stats. This issues a ROLLBACK statement each time a
-   * service is checked out of the connection pool.
-   *
-   * @see [[com.twitter.finagle.mysql.RollbackFactory]]
-   */
-  def newRichClientWithRollback(
-    dest: String,
-    label: String
-  ): mysql.Client with mysql.Transactions = {
-    val factory = new RollbackFactory(newClient(dest, label))
-    mysql.Client(factory, richClientStatsReceiver, supportUnsigned)
-  }
-
-  /**
-   * Creates a new `RichClient` connected to the logical destination described by `dest`. This
-   * issues a ROLLBACK statement each time a service is checked out of the connection pool.
-   *
-   * @see [[com.twitter.finagle.mysql.RollbackFactory]]
-   */
-  def newRichClientWithRollback(dest: String): mysql.Client with mysql.Transactions = {
-    val factory = new RollbackFactory(newClient(dest))
-    mysql.Client(factory, richClientStatsReceiver, supportUnsigned)
-  }
-
 }
 
 object MySqlClientTracingFilter {
@@ -327,6 +299,19 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
       */
     def withAffectedRows(): Client =
       configured(Handshake.FoundRows(false))
+
+    /**
+     * Installs a module on the client which issues a ROLLBACK statement each time a
+     * service is checked out of the connection pool. This exists to prevent a situation
+     * where an unfinished transaction has been written to the wire, the service has been
+     * released back into the pool, the same service is again checked out of the pool, and
+     * a statement that causes an implicit commit is issued.
+     *
+     * @see [[com.twitter.finagle.mysql.RollbackFactory]]
+     * @see https://dev.mysql.com/doc/en/implicit-commit.html
+     */
+    def withRollback(): Client =
+      withStack(stack.prepend(RollbackFactory.module))
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
