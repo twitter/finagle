@@ -162,7 +162,7 @@ class Zk2Resolver(
         // First, convert the Op-based serverset address to a
         // Var[Addr], then select only endpoints that are alive
         // and match any specified endpoint name and shard ID.
-        val va: Var[Addr] = serverSetOf((discoverer, path)).flatMap {
+        val rawServerSetAddr: Var[Addr] = serverSetOf((discoverer, path)).flatMap {
           case Activity.Pending => Var.value(Addr.Pending)
           case Activity.Failed(exc) => Var.value(Addr.Failed(exc))
           case Activity.Ok(weightedEntries) =>
@@ -190,28 +190,30 @@ class Zk2Resolver(
         // The stabilizer ensures that we qualify changes by putting
         // removes in a limbo state for at least one batch epoch, and emitting
         // at most one update per two batch epochs.
-        val stabilized = Stabilizer(va, stabilizerEpoch)
+        val stabilizedServerSetAddr = Stabilizer(rawServerSetAddr, stabilizerEpoch)
 
         // Finally we output `State`s, which are always nonpending
-        // address coupled with statistics from the stabilization
+        // address coupled with metadata from the stabilization
         // process.
-        val states = stabilized.changes.joinLast(va.changes) collect {
-          case (stable, unstable) if stable != Addr.Pending =>
-            val nstable = sizeOf(stable)
-            val nunstable = sizeOf(unstable)
-            State(stable, nstable - nunstable, nstable)
-        }
+        val addrWithMetadata = stabilizedServerSetAddr
+          .changes
+          .joinLast(rawServerSetAddr.changes)
+          .collect {
+            case (stable, unstable) if stable != Addr.Pending =>
+              val nstable = sizeOf(stable)
+              val nunstable = sizeOf(unstable)
+              State(stable, nstable - nunstable, nstable)
+          }
 
         val stabilizedVa = Var.async(Addr.Pending: Addr) { u =>
           nsets.incrementAndGet()
 
-          // Previous value of `u`, used to smooth out state changes in which the
-          // stable Addr doesn't vary.
-          var lastu: Addr = Addr.Pending
-
-          val reg = (discoverer.health.changes joinLast states)
-            .register(Witness { tuple: (ServiceDiscoverer.ClientHealth, Zk2Resolver.State) =>
-              val (clientHealth, state) = tuple
+          // The final addr is either the StabilizedAddr OR Addr.Pending if the
+          // ZkClient is unhealthy.
+          val finalAddr = discoverer.health.changes
+            .joinLast(addrWithMetadata)
+            .map {
+              case (clientHealth, state) => 
 
               if (chatty()) {
                 logger.info(
@@ -222,26 +224,21 @@ class Zk2Resolver(
                 )
               }
 
-              synchronized {
-                val State(addr, _nlimbo, _size) = state
-                nlimbo = _nlimbo
-                size = _size
+              // update gauges based on the metadata
+              val State(addr, _nlimbo, _size) = state
+              nlimbo = _nlimbo
+              size = _size
 
-                val newAddr =
-                  if (clientHealth == ClientHealth.Unhealthy) {
-                    logger.info("ZkResolver reports unhealthy. resolution moving to Addr.Pending")
-                    Addr.Pending
-                  } else addr
-
-                if (lastu != newAddr) {
-                  lastu = newAddr
-                  u() = newAddr
-                }
-              }
-            })
+              if (clientHealth == ClientHealth.Unhealthy) {
+                logger.info("ZkResolver reports unhealthy. resolution moving to Addr.Pending")
+                Addr.Pending
+              } else addr
+            }
+            .dedup // avoid updating if there is no change
+            .register(Witness(u))
 
           Closable.make { deadline =>
-            reg.close(deadline) ensure {
+            finalAddr.close(deadline) ensure {
               nsets.decrementAndGet()
             }
           }
