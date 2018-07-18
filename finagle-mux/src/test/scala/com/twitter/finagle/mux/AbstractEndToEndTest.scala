@@ -142,11 +142,11 @@ abstract class AbstractEndToEndTest
         tracer.toSeq,
         Seq(
           Annotation.ServiceName("theClient"),
-          Annotation.ClientSend(),
+          Annotation.ClientSend,
           Annotation.ServiceName("theServer"),
-          Annotation.ServerRecv(),
-          Annotation.ServerSend(),
-          Annotation.ClientRecv()
+          Annotation.ServerRecv,
+          Annotation.ServerSend,
+          Annotation.ClientRecv
         )
       )
     }

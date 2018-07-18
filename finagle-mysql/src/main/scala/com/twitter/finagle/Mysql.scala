@@ -89,8 +89,8 @@ object MySqlClientTracingFilter {
       // TODO(jeff): should be able to get this directly from ClientTracingFilter
       val annotations = new AnnotatingTracingFilter[Request, Result](
         _label.label,
-        Annotation.ClientSend(),
-        Annotation.ClientRecv()
+        Annotation.ClientSend,
+        Annotation.ClientRecv
       )
       annotations.andThen(TracingFilter).andThen(next)
     }

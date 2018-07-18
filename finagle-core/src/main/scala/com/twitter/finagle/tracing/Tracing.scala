@@ -171,6 +171,45 @@ abstract class Tracing {
   final def record(ann: Annotation, duration: Duration): Unit =
     record(Record(id, Time.now, ann, Some(duration)))
 
+  final def recordWireSend(): Unit =
+    record(Annotation.WireSend)
+
+  final def recordWireRecv(): Unit =
+    record(Annotation.WireRecv)
+
+  final def recordWireRecvError(error: String): Unit =
+    record(Annotation.WireRecvError(error))
+
+  final def recordClientSend(): Unit =
+    record(Annotation.ClientSend)
+
+  final def recordClientRecv(): Unit =
+    record(Annotation.ClientRecv)
+
+  final def recordClientRecvError(error: String): Unit =
+    record(Annotation.ClientRecvError(error))
+
+  final def recordServerSend(): Unit =
+    record(Annotation.ServerSend)
+
+  final def recordServerRecv(): Unit =
+    record(Annotation.ServerRecv)
+
+  final def recordServerSendError(error: String): Unit =
+    record(Annotation.ServerSendError(error))
+
+  final def recordClientSendFrargmet(): Unit =
+    record(Annotation.ClientSendFragment)
+
+  final def recordClientRecvFragment(): Unit =
+    record(Annotation.ClientRecvFragment)
+
+  final def recordServerSendFragment(): Unit =
+    record(Annotation.ServerSendFragment)
+
+  final def recordServerRecvFragment(): Unit =
+    record(Annotation.ServerRecvFragment)
+
   final def record(message: String): Unit =
     record(Annotation.Message(message))
 

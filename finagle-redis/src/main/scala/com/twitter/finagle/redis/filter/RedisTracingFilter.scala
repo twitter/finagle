@@ -13,9 +13,9 @@ private[redis] class RedisTracingFilter extends SimpleFilter[Command, Reply] {
     if (trace.isActivelyTracing) {
       trace.recordServiceName("redis")
       trace.recordRpc(BufToString(command.name))
-      trace.record(Annotation.ClientSend())
+      trace.record(Annotation.ClientSend)
 
-      service(command).ensure(trace.record(Annotation.ClientRecv()))
+      service(command).ensure(trace.record(Annotation.ClientRecv))
     } else service(command)
   }
 }

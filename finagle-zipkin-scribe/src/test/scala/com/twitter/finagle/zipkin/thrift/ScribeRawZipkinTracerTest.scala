@@ -108,8 +108,8 @@ class ScribeRawZipkinTracerTest extends FunSuite {
     tracer.record(
       Record(traceId, Time.fromSeconds(123), Annotation.Message("boohoo"), Some(1.second))
     )
-    tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ClientSend()))
-    tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ClientRecv()))
+    tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ClientSend))
+    tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ClientRecv))
 
     // Note: Since ports are ephemeral, we can't hardcode expected message.
     assert(scribe.messages.size == 1)

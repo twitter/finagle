@@ -249,10 +249,10 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       assert(
         traces.collect { case Record(_, _, Annotation.ServiceName("thriftserver"), _) => () }.size == 1
       )
-      assert(traces.collect { case Record(_, _, Annotation.ClientSend(), _) => () }.size == 1)
-      assert(traces.collect { case Record(_, _, Annotation.ServerRecv(), _) => () }.size == 1)
-      assert(traces.collect { case Record(_, _, Annotation.ServerSend(), _) => () }.size == 1)
-      assert(traces.collect { case Record(_, _, Annotation.ClientRecv(), _) => () }.size == 1)
+      assert(traces.collect { case Record(_, _, Annotation.ClientSend, _) => () }.size == 1)
+      assert(traces.collect { case Record(_, _, Annotation.ServerRecv, _) => () }.size == 1)
+      assert(traces.collect { case Record(_, _, Annotation.ServerSend, _) => () }.size == 1)
+      assert(traces.collect { case Record(_, _, Annotation.ClientRecv, _) => () }.size == 1)
 
       assert(
         Await.result(client.complex_return("a string"), 10.seconds).arg_two

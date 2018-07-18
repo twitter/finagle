@@ -117,23 +117,23 @@ class TracingFilterTest
 
   test("clnt: send and then recv") {
     val annotations = record(mkClient()) collect {
-      case Record(_, _, a @ Annotation.ClientSend(), _) => a
-      case Record(_, _, a @ Annotation.ClientRecv(), _) => a
+      case Record(_, _, Annotation.ClientSend, _) => Annotation.ClientSend
+      case Record(_, _, Annotation.ClientRecv, _) => Annotation.ClientRecv
     }
-    assert(annotations == Seq(Annotation.ClientSend(), Annotation.ClientRecv()))
+    assert(annotations == Seq(Annotation.ClientSend, Annotation.ClientRecv))
   }
 
   test("clnt: recv error") {
     val annotations = recordException(mkClient()) collect {
-      case Record(_, _, a @ Annotation.ClientSend(), _) => a
-      case Record(_, _, a @ Annotation.ClientRecv(), _) => a
+      case Record(_, _, Annotation.ClientSend, _) => Annotation.ClientSend
+      case Record(_, _, Annotation.ClientRecv, _) => Annotation.ClientRecv
       case Record(_, _, a @ Annotation.ClientRecvError(_), _) => a
     }
     assert(
       annotations == Seq(
-        Annotation.ClientSend(),
+        Annotation.ClientSend,
         Annotation.ClientRecvError("java.lang.Exception: bummer"),
-        Annotation.ClientRecv()
+        Annotation.ClientRecv
       )
     )
   }
@@ -148,9 +148,9 @@ class TracingFilterTest
 
   test("srv: recv and then send") {
     val annotations = record(mkServer()) collect {
-      case Record(_, _, a @ Annotation.ServerRecv(), _) => a
-      case Record(_, _, a @ Annotation.ServerSend(), _) => a
+      case Record(_, _, Annotation.ServerRecv, _) => Annotation.ServerRecv
+      case Record(_, _, Annotation.ServerSend, _) => Annotation.ServerSend
     }
-    assert(annotations == Seq(Annotation.ServerRecv(), Annotation.ServerSend()))
+    assert(annotations == Seq(Annotation.ServerRecv, Annotation.ServerSend))
   }
 }

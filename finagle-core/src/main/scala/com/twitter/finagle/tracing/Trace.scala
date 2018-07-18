@@ -236,11 +236,11 @@ object Trace extends Tracing {
         case None =>
       }
 
-      trace.record(Annotation.ServerRecv())
+      trace.record(Annotation.ServerRecv)
 
       try f
       finally {
-        trace.record(Annotation.ServerSend())
+        trace.record(Annotation.ServerSend)
       }
     } else f
   }

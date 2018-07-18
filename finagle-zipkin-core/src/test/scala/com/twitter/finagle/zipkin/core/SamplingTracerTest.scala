@@ -27,7 +27,7 @@ class ZipkinTracerTest extends FunSuite with MockitoSugar with GeneratorDrivenPr
     val underlying = mock[RawZipkinTracer]
     val tracer = new SamplingTracer(underlying, 0f)
     val id = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), Some(true))
-    val record = Record(id, Time.now, Annotation.ClientSend())
+    val record = Record(id, Time.now, Annotation.ClientSend)
     tracer.record(record)
     verify(underlying).record(record)
   }
@@ -36,7 +36,7 @@ class ZipkinTracerTest extends FunSuite with MockitoSugar with GeneratorDrivenPr
     val underlying = mock[RawZipkinTracer]
     val tracer = new SamplingTracer(underlying, 0f)
     val id = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), Some(true))
-    val record = Record(id, Time.now, Annotation.ClientSend())
+    val record = Record(id, Time.now, Annotation.ClientSend)
 
     // true when sampled is true
     assert(tracer.isActivelyTracing(id))
@@ -54,12 +54,12 @@ private[twitter] object ZipkinTracerTest {
   import Arbitrary.arbitrary
 
   val genAnnotation: Gen[Annotation] = Gen.oneOf(
-    Gen.oneOf(ClientSend(), ClientRecv(), ServerSend(), ServerRecv()),
+    Gen.oneOf(ClientSend, ClientRecv, ServerSend, ServerRecv),
     Gen.oneOf(
-      ClientSendFragment(),
-      ClientRecvFragment(),
-      ServerSendFragment(),
-      ServerRecvFragment()
+      ClientSendFragment,
+      ClientRecvFragment,
+      ServerSendFragment,
+      ServerRecvFragment
     ),
     for (s <- arbitrary[String]) yield Message(s),
     for (s <- arbitrary[String]) yield ServiceName(s),

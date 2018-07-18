@@ -44,8 +44,8 @@ private[finagle] object MemcachedTracingFilter {
       val param.Label(label) = _label
       val annotations = new AnnotatingTracingFilter[Command, Response](
         label,
-        Annotation.ClientSend(),
-        Annotation.ClientRecv()
+        Annotation.ClientSend,
+        Annotation.ClientRecv
       )
       annotations.andThen(TracingFilter).andThen(next)
     }

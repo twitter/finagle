@@ -7,7 +7,6 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
-
 New Features
 ~~~~~~~~~~~~
 
@@ -15,8 +14,17 @@ New Features
     (dramatically reduces the number of context lookups; see scaladoc for `c.t.f.tracing.Trace`).
     PHAB_ID=``D190670``
 
+  * finagle-core: `c.t.f.tracing.Trace` facade API now provides forwarding `record` methods for
+    all kinds of annotations and is a preffered way of recording traces. ``PHAB_ID=D192598``
+
   * finagle-thriftmux: Promote the push-based ThriftMux implementation out of experimental
     status.``PHAB_ID=D189187``
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: Parameter-less annotation classes (`c.t.f.tracing.Annotation`) have been
+    promoted to objects for efficiency reasons.  ``PHAB_ID=D192598``
 
 18.7.0
 -------

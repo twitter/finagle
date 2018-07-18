@@ -145,8 +145,8 @@ object ServerTracingFilter {
   ) extends AnnotatingTracingFilter[Req, Rep](
         label,
         "srv",
-        Annotation.ServerRecv(),
-        Annotation.ServerSend(),
+        Annotation.ServerRecv,
+        Annotation.ServerSend,
         Annotation.ServerSendError(_),
         finagleVersion
       )
@@ -182,8 +182,8 @@ object ClientTracingFilter {
   ) extends AnnotatingTracingFilter[Req, Rep](
         label,
         "clnt",
-        Annotation.ClientSend(),
-        Annotation.ClientRecv(),
+        Annotation.ClientSend,
+        Annotation.ClientRecv,
         Annotation.ClientRecvError(_),
         finagleVersion
       )

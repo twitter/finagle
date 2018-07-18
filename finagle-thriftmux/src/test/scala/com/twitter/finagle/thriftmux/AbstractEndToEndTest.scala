@@ -234,8 +234,8 @@ abstract class AbstractEndToEndTest
     val tracer = new Tracer {
       def record(record: Record): Unit = {
         record match {
-          case Record(id, _, ServerRecv(), _) => srvTraceId = Some(id)
-          case Record(id, _, ClientSend(), _) => cltTraceId = Some(id)
+          case Record(id, _, ServerRecv, _) => srvTraceId = Some(id)
+          case Record(id, _, ClientSend, _) => cltTraceId = Some(id)
           case _ =>
         }
       }
@@ -278,8 +278,8 @@ abstract class AbstractEndToEndTest
     val tracer = new Tracer {
       def record(record: Record): Unit = {
         record match {
-          case Record(id, _, ServerRecv(), _) => srvTraceId = Some(id)
-          case Record(id, _, ClientSend(), _) => cltTraceId = Some(id)
+          case Record(id, _, ServerRecv, _) => srvTraceId = Some(id)
+          case Record(id, _, ClientSend, _) => cltTraceId = Some(id)
           case _ =>
         }
       }

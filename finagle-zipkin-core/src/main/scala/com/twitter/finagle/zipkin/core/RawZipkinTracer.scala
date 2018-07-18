@@ -57,25 +57,25 @@ abstract class RawZipkinTracer(statsReceiver: StatsReceiver, timer: Timer = Defa
         annotate(record, thrift.Constants.WIRE_RECV)
       case tracing.Annotation.WireRecvError(error: String) =>
         annotate(record, ErrorAnnotation.format(thrift.Constants.WIRE_RECV_ERROR, error))
-      case tracing.Annotation.ClientSend() =>
+      case tracing.Annotation.ClientSend =>
         annotate(record, thrift.Constants.CLIENT_SEND)
-      case tracing.Annotation.ClientRecv() =>
+      case tracing.Annotation.ClientRecv =>
         annotate(record, thrift.Constants.CLIENT_RECV)
       case tracing.Annotation.ClientRecvError(error: String) =>
         annotate(record, ErrorAnnotation.format(thrift.Constants.CLIENT_RECV_ERROR, error))
-      case tracing.Annotation.ServerSend() =>
+      case tracing.Annotation.ServerSend =>
         annotate(record, thrift.Constants.SERVER_SEND)
-      case tracing.Annotation.ServerRecv() =>
+      case tracing.Annotation.ServerRecv =>
         annotate(record, thrift.Constants.SERVER_RECV)
       case tracing.Annotation.ServerSendError(error: String) =>
         annotate(record, ErrorAnnotation.format(thrift.Constants.SERVER_SEND_ERROR, error))
-      case tracing.Annotation.ClientSendFragment() =>
+      case tracing.Annotation.ClientSendFragment =>
         annotate(record, thrift.Constants.CLIENT_SEND_FRAGMENT)
-      case tracing.Annotation.ClientRecvFragment() =>
+      case tracing.Annotation.ClientRecvFragment =>
         annotate(record, thrift.Constants.CLIENT_RECV_FRAGMENT)
-      case tracing.Annotation.ServerSendFragment() =>
+      case tracing.Annotation.ServerSendFragment =>
         annotate(record, thrift.Constants.SERVER_SEND_FRAGMENT)
-      case tracing.Annotation.ServerRecvFragment() =>
+      case tracing.Annotation.ServerRecvFragment =>
         annotate(record, thrift.Constants.SERVER_RECV_FRAGMENT)
       case tracing.Annotation.Message(value) =>
         annotate(record, value)

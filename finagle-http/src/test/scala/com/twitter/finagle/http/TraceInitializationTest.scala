@@ -40,13 +40,13 @@ class TraceInitializationTest extends FunSuite {
         Annotation.Rpc("GET"),
         Annotation.BinaryAnnotation("http.uri", "/this/is/a/uri/path"),
         Annotation.ServiceName("theClient"),
-        Annotation.ClientSend(),
+        Annotation.ClientSend,
         Annotation.Rpc("GET"),
         Annotation.BinaryAnnotation("http.uri", "/this/is/a/uri/path"),
         Annotation.ServiceName("theServer"),
-        Annotation.ServerRecv(),
-        Annotation.ServerSend(),
-        Annotation.ClientRecv()
+        Annotation.ServerRecv,
+        Annotation.ServerSend,
+        Annotation.ClientRecv
       )
     )
 
