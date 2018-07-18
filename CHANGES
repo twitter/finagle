@@ -29,6 +29,10 @@ Breaking API Changes
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-mysql: Clients will now issue a ROLLBACK each time a service is checked out
+    of the connection pool. This can be disabled via `Mysql.Client.noRollback`.
+    ``PHAB_ID=D193923``
+
   * finagle-thriftmux: The push-based server muxer is now the default. In both synthetic tests
     and production it has shown signifcant performance benefits and is simpler to maintain.
     ``PHAB_ID=D193630``

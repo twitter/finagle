@@ -191,6 +191,7 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
       .replace(ClientTracingFilter.role, MySqlClientTracingFilter.Stackable)
       // Note: there is a stack overflow in insertAfter using CanStackFrom, thus the module.
       .insertAfter(DefaultPool.Role, PoisonConnection.module)
+      .prepend(RollbackFactory.module)
   }
 
   /**
@@ -309,9 +310,26 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
      *
      * @see [[com.twitter.finagle.mysql.RollbackFactory]]
      * @see https://dev.mysql.com/doc/en/implicit-commit.html
+     * @note this module is installed by default.
      */
-    def withRollback(): Client =
-      withStack(stack.prepend(RollbackFactory.module))
+    def withRollback: Client =
+      if (stack.contains(RollbackFactory.Role)) {
+        this
+      } else {
+        withStack(stack.prepend(RollbackFactory.module))
+      }
+
+    /**
+     * Removes the module on the client which issues a ROLLBACK statement each time a
+     * service is checked out of the connection pool. This ''may'' result in better
+     * performance at the risk of partial transactions from other usages being committed.
+     *
+     * @see [[com.twitter.finagle.mysql.RollbackFactory]]
+     * @see https://dev.mysql.com/doc/en/implicit-commit.html
+     * @note the rollback module is installed by default.
+     */
+    def withNoRollback: Client =
+      withStack(stack.remove(RollbackFactory.Role))
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905

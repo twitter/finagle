@@ -6,10 +6,12 @@ import com.twitter.util.Future
 object RollbackFactory {
   private val RollbackQuery = QueryRequest("ROLLBACK")
 
+  val Role: Stack.Role = Stack.Role("RollbackFactory")
+
   private[finagle] def module: Stackable[ServiceFactory[Request, Result]] =
     new Stack.Module0[ServiceFactory[Request, Result]] {
-      val role = Stack.Role("RollbackFactory")
-      val description = "Installs a rollback factory in the stack"
+      val role: Stack.Role = Role
+      val description: String = "Installs a rollback factory in the stack"
       def make(next: ServiceFactory[Request, Result]): ServiceFactory[Request, Result] =
         new RollbackFactory(next)
     }
