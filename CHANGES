@@ -26,6 +26,20 @@ Breaking API Changes
   * finagle-core: Parameter-less annotation classes (`c.t.f.tracing.Annotation`) have been
     promoted to objects for efficiency reasons.  ``PHAB_ID=D192598``
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-thriftmux: The push-based server muxer is now the default. In both synthetic tests
+    and production it has shown signifcant performance benefits and is simpler to maintain.
+    ``PHAB_ID=D193630``
+
+Deprecations
+~~~~~~~~~~~~
+
+  * finagle-mux: The pull based mux implementation, c.t.f.Mux, has been deprecated in favor of
+    the push-based mux implementation, c.t.f.pushsession.MuxPush. ``PHAB_ID=D193630``
+
+
 18.7.0
 -------
 

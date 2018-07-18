@@ -8,7 +8,7 @@ import com.twitter.finagle.mux.pushsession.MuxPush
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport.{MuxContext, OpportunisticTls, MuxFailure}
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
-import com.twitter.finagle.server.{Listener, ServerInfo, StackBasedServer, StackServer, StdStackServer}
+import com.twitter.finagle.server.{Listener, StackBasedServer, StackServer, StdStackServer}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{
   ClientStatsReceiver,
@@ -17,7 +17,6 @@ import com.twitter.finagle.stats.{
   StatsReceiver
 }
 import com.twitter.finagle.thrift._
-import com.twitter.finagle.thriftmux.Toggles
 import com.twitter.finagle.thriftmux.pushsession.MuxDowngradingNegotiator
 import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
 import com.twitter.finagle.tracing.Tracer
@@ -378,6 +377,7 @@ object ThriftMux
    * tracing information embedded in the thrift requests to Mux (which has native
    * tracing support).
    */
+  @deprecated("Use the push-based mux implementation instead", "2018-07-18")
   case class ServerMuxer(
     stack: Stack[ServiceFactory[mux.Request, mux.Response]] = BaseServerStack,
     params: Stack.Params = BaseServerParams
@@ -451,14 +451,8 @@ object ThriftMux
 
   object Server {
 
-    private[finagle] val UsePushMuxServerToggleName =
-      "com.twitter.finagle.thriftmux.UsePushMuxServer"
-    private[this] val usePushMuxToggle = Toggles(UsePushMuxServerToggleName)
-    private[this] def UsePushMuxServer: Boolean = usePushMuxToggle(ServerInfo().id.hashCode)
-
     /** The default underlying muxer for ThriftMux servers */
-    def defaultMuxer: StackServer[mux.Request, mux.Response] =
-      if(UsePushMuxServer) pushMuxer else standardMuxer
+    def defaultMuxer: StackServer[mux.Request, mux.Response] = pushMuxer
 
     /** Push-based ThriftMux server implementation. */
     private[finagle] def pushMuxer: StackServer[mux.Request, mux.Response] = {

@@ -31,6 +31,7 @@ import java.net.SocketAddress
 /**
  * A client and server for the mux protocol described in [[com.twitter.finagle.mux]].
  */
+@deprecated("Use the push-based mux implementation, MuxPush, instead", "2018-07-18")
 object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mux.Response] {
   private val log = Logger.get()
 
