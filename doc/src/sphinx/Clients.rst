@@ -50,7 +50,8 @@ Transport Security
 ------------------
 
 Finagle has robust support for TLS. The most common options such as server validation are accessible
-directly via the `withTls` method in :finagle-http-src:`Http <com/twitter/finagle/Http.scala>`:
+directly via the `tls` members of :src:`ClientTransportParams <com/twitter/finagle/param/ClientTransportParams.scala>` 
+as follows:
 
 
 .. code-block:: scala
@@ -59,15 +60,14 @@ directly via the `withTls` method in :finagle-http-src:`Http <com/twitter/finagl
   import com.twitter.finagle.http.{Request, Response}
 
   val twitter: Service[Request, Response] = Http.client
-    .withTls("twitter.com")
+    .withTransport.tls("twitter.com")
     .newService("twitter.com:443")
 
-
-There are further configuration options including client auth accessible via :src:`ClientTransportParams <com/twitter/finagle/param/ClientTransportParams.scala>`.
+There are further configuration options including client authentication accessible via :src:`ClientTransportParams <com/twitter/finagle/param/ClientTransportParams.scala>`.
 
 
 Finagle also supports `SPNEGO <https://en.wikipedia.org/wiki/SPNEGO>`_ which is an HTTP specific
-extension for negotiating security schemes. A common use-case for SPNEGO is for authentication in `Kerberos <https://en.wikipedia.org/wiki/Kerberos_(protocol)>`_
+extension for negotiating security schemes. A common use case for SPNEGO is for authentication in `Kerberos <https://en.wikipedia.org/wiki/Kerberos_(protocol)>`_
 secured environments.
 
 
@@ -85,7 +85,6 @@ secured environments.
   
   val client: Service[Request, Response] = 
     new ClientFilter(jaas).andThen(Http.client.newService("host:port"))
-
 
 
 HTTP Proxy
