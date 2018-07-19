@@ -10,9 +10,21 @@ import com.twitter.finagle.ssl.client.{
 }
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Address, Stack}
+import com.twitter.util.Try
 import io.netty.channel.{Channel, ChannelInitializer, ChannelPipeline}
 import io.netty.handler.ssl.SslHandler
 import io.netty.util.concurrent.{Future => NettyFuture, GenericFutureListener}
+
+private[finagle] object Netty4ClientSslChannelInitializer {
+  /**
+   * A class eligible for configuring a callback that is triggered when the ssl
+   * handshake is complete. Note, this is intended for internal use only.
+   */
+  case class OnSslHandshakeComplete(onComplete: Try[Unit] => Unit)
+  object OnSslHandshakeComplete {
+    implicit val param = Stack.Param(OnSslHandshakeComplete((_: Try[Unit]) => ()))
+  }
+}
 
 /**
  * A channel initializer that takes [[Stack.Params]] and upgrades the pipeline with missing
@@ -92,7 +104,13 @@ private[finagle] class Netty4ClientSslChannelInitializer(params: Stack.Params)
     config: SslClientConfiguration
   ): SslClientVerificationHandler = {
     val SslClientSessionVerifier.Param(sessionVerifier) = params[SslClientSessionVerifier.Param]
-    new SslClientVerificationHandler(sslHandler, address, config, sessionVerifier)
+    val sslVerifier = new SslClientVerificationHandler(sslHandler, address, config, sessionVerifier)
+
+    val onSslHandshakeComplete =
+      params[Netty4ClientSslChannelInitializer.OnSslHandshakeComplete].onComplete
+    sslVerifier.handshakeComplete.respond(onSslHandshakeComplete)
+
+    sslVerifier
   }
 
   private[this] def addHandlersToPipeline(

@@ -1,11 +1,12 @@
 package com.twitter.finagle.netty4.ssl
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{ChannelClosedException, Failure, Service}
 import com.twitter.finagle.netty4.ssl.Netty4SslTestComponents._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.{ChannelClosedException, Failure, Service}
 import com.twitter.util.{Await, Future}
+import com.twitter.util.{Return, Throw, Try}
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 
@@ -214,5 +215,23 @@ class Netty4SslTest extends FunSuite with Eventually with IntegrationPatience {
       assertGaugeIsZero(serverStats, serverTlsConnections)
       assertGaugeIsZero(clientStats, clientTlsConnections)
     }
+  }
+
+  test("ssl handshake complete callback") {
+    val server = mkTlsServer(peerCertService)
+
+    @volatile var handshakeSuccessful = false
+    val callback: Try[Unit] => Unit = {
+      case Return(_) => handshakeSuccessful = true
+      case Throw(_) => handshakeSuccessful = false
+    }
+    val client = mkTlsClient(getPort(server), onHandshakeComplete = callback)
+
+    val response = Await.result(client("peer cert test"), timeout)
+    assert(response == "OK")
+    assert(handshakeSuccessful)
+
+    Await.result(client.close(), timeout)
+    Await.result(server.close(), timeout)
   }
 }

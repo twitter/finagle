@@ -1,13 +1,15 @@
 package com.twitter.finagle.netty4.ssl
 
 import com.twitter.finagle.client.utils.StringClient
+import com.twitter.finagle.netty4.ssl.client.Netty4ClientSslChannelInitializer
 import com.twitter.finagle.server.utils.StringServer
-import com.twitter.finagle.{Address, ListeningServer, Service}
-import com.twitter.finagle.ssl.{ClientAuth, KeyCredentials, TrustCredentials}
 import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientSessionVerifier}
 import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerSessionVerifier}
+import com.twitter.finagle.ssl.{ClientAuth, KeyCredentials, TrustCredentials}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.{Address, ListeningServer, Service}
 import com.twitter.io.TempFile
+import com.twitter.util.Try
 import java.net.InetSocketAddress
 import javax.net.ssl.SSLSession
 
@@ -51,13 +53,20 @@ object Netty4SslTestComponents {
     port: Int,
     label: String = "client",
     statsReceiver: StatsReceiver = NullStatsReceiver,
-    sessionVerifier: SslClientSessionVerifier = SslClientSessionVerifier.AlwaysValid
+    sessionVerifier: SslClientSessionVerifier = SslClientSessionVerifier.AlwaysValid,
+    onHandshakeComplete: Try[Unit] => Unit = _ => ()
   ): Service[String, String] = {
     val clientConfig = SslClientConfiguration(
       keyCredentials = KeyCredentials.CertAndKey(clientCert, clientKey),
       trustCredentials = TrustCredentials.CertCollection(chainCert))
 
-    StringClient.client
+    // inject a handler which is called when the ssl handshake is complete.
+    // Note, this isn't something which we expose outside of finagle and thus,
+    // we don't have a "friendly" with* API for it.
+    val prms = StringClient.DefaultParams +
+      Netty4ClientSslChannelInitializer.OnSslHandshakeComplete(onHandshakeComplete)
+
+    StringClient.Client(params = prms)
       .withTransport.tls(clientConfig, sessionVerifier)
       .withStatsReceiver(statsReceiver)
       .newService("localhost:" + port, label)

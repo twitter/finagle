@@ -4,7 +4,7 @@ import com.twitter.finagle.{Address, SslVerificationFailedException}
 import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientSessionVerifier}
 import com.twitter.finagle.netty4.channel.BufferingChannelOutboundHandler
 import com.twitter.finagle.netty4.channel.ConnectPromiseDelayListeners._
-import com.twitter.util.{Promise, Return, Throw}
+import com.twitter.util.{Future, Promise, Return, Throw}
 import io.netty.channel._
 import io.netty.handler.ssl.SslHandler
 import io.netty.util.concurrent.{GenericFutureListener, Future => NettyFuture}
@@ -32,6 +32,8 @@ private[netty4] class SslClientVerificationHandler(
     case Address.Inet(addr, _) => Some(addr)
     case _ => None
   }
+
+  val handshakeComplete: Future[Unit] = onHandshakeComplete
 
   private[this] def fail(t: Throwable): Unit = {
     onHandshakeComplete.setException(t)

@@ -41,9 +41,11 @@ object StringClient {
     }
   }
 
+  val DefaultParams: Stack.Params = Stack.Params.empty + ProtocolLibrary(protocolLibrary)
+
   case class Client(
     stack: Stack[ServiceFactory[String, String]] = StackClient.newStack,
-    params: Stack.Params = Stack.Params.empty + ProtocolLibrary(protocolLibrary),
+    params: Stack.Params = DefaultParams,
     appendDelimeter: Boolean = true
   ) extends StdStackClient[String, String, Client] {
     protected def copy1(
