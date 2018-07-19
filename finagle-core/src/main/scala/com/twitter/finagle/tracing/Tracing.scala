@@ -136,10 +136,7 @@ abstract class Tracing {
   /**
    * Record a raw [[Record]]. This will record to a _unique_ set of tracers in the stack.
    */
-  final def record(rec: => Record): Unit =
-    if (isActivelyTracing) {
-      tracers.record(rec)
-    }
+  final def record(rec: Record): Unit = tracers.record(rec)
 
   /**
    * Get the current trace identifier. If no identifiers have been pushed,

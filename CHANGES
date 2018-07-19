@@ -26,8 +26,15 @@ Breaking API Changes
   * finagle-core: Parameter-less annotation classes (`c.t.f.tracing.Annotation`) have been
     promoted to objects for efficiency reasons.  ``PHAB_ID=D192598``
 
+  * finagle-core: `c.t.f.tracing.Trace.record(Record)` now accepts the record argument by
+    value (previously by name). ``PHAB_ID=D193300``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: `c.t.f.tracing.Trace` API is no longer guarding `Trace.record` calls behind
+    `Trace.isActivelyTracing`. Add `Trace.isActivelyTracing` guards on the call sites if
+    materializing tracing annotations is a performance concern.  ``PHAB_ID=D193300``
 
   * finagle-mysql: Clients will now issue a ROLLBACK each time a service is checked out
     of the connection pool. This can be disabled via `Mysql.Client.noRollback`.
@@ -42,7 +49,6 @@ Deprecations
 
   * finagle-mux: The pull based mux implementation, c.t.f.Mux, has been deprecated in favor of
     the push-based mux implementation, c.t.f.pushsession.MuxPush. ``PHAB_ID=D193630``
-
 
 18.7.0
 -------

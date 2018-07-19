@@ -169,29 +169,6 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
     }
   }
 
-  test("Trace.record: not report when tracing turned off") {
-    try {
-      Trace.disable()
-      Trace.letTracer(tracer2) {
-        Trace.letTracerAndId(tracer1, id0) {
-          Trace.letTracer(tracer1) {
-            Trace.letTracer(tracer2) {
-              Trace.letId(id0) {
-                verify(tracer1, never()).record(any[Record])
-                verify(tracer2, never()).record(any[Record])
-                Trace.record("oh hey")
-                verify(tracer1, never()).record(any[Record])
-                verify(tracer2, never()).record(any[Record])
-              }
-            }
-          }
-        }
-      }
-    } finally {
-      Trace.enable()
-    }
-  }
-
   /* TODO temporarily disabled until we can mock stopwatches
       "Trace.time" in Time.withCurrentTimeFrozen { tc =>
         val tracer = new BufferingTracer()
@@ -270,8 +247,6 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
           assert(Trace.isTerminal == false)
           assert(Trace.tracers == List(tracer))
           verify(tracer, never()).sampleTrace(currentId)
-          Trace.record("Hello world")
-          verify(tracer, never()).record(any[Record])
         }
       }
     }
