@@ -52,7 +52,7 @@ class RequestSemaphoreFilterTest extends FunSuite {
     val svc = new RequestSemaphoreFilter(q) andThen neverSvc
     svc(1)
     val f = intercept[Failure] { Await.result(svc(1)) }
-    assert(f.isFlagged(Failure.Restartable))
+    assert(f.isFlagged(FailureFlags.Retryable))
   }
 
   test("service failures are not wrapped as rejected") {

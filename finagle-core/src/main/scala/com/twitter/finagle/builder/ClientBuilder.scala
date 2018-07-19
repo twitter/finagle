@@ -722,7 +722,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *
    * Retries are only done if the request failed with something
    * known to be safe to retry. This includes [[WriteException WriteExceptions]]
-   * and [[Failure]]s that are marked [[Failure.Restartable restartable]].
+   * and [[Failure]]s that are marked [[FailureFlags.Retryable retryable]].
    *
    * The configured policy has jittered backoffs between retries.
    *

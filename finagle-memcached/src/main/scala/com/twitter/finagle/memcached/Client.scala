@@ -1035,13 +1035,12 @@ private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
     case Return(_) => true
     case Throw(f: Failure)
         if f.cause.exists(_.isInstanceOf[CancelledRequestException]) && f
-          .isFlagged(Failure.Interrupted) =>
+          .isFlagged(FailureFlags.Interrupted) =>
       true
     case Throw(f: Failure)
         if f.cause.exists(_.isInstanceOf[CancelledConnectionException]) && f
-          .isFlagged(Failure.Interrupted) =>
+          .isFlagged(FailureFlags.Interrupted) =>
       true
-    // Failure.InterruptedBy(_) would subsume all these eventually after rb/334371
     case Throw(WriteException(_: CancelledRequestException)) => true
     case Throw(_: CancelledRequestException) => true
     case Throw(WriteException(_: CancelledConnectionException)) => true

@@ -7,7 +7,7 @@ import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.mux.transport.Message.Tlease
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.transport.QueueTransport
-import com.twitter.finagle.{Dtab, Failure, Path, Status}
+import com.twitter.finagle.{Dtab, Failure, FailureFlags, Path, Status}
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Throw, Time}
 import org.scalatest.FunSuite
@@ -75,7 +75,7 @@ private class ClientSessionTest extends FunSuite {
 
       session.write(req).poll match {
         case Some(Throw(f: Failure)) =>
-          assert(f.isFlagged(Failure.Restartable))
+          assert(f.isFlagged(FailureFlags.Retryable))
           assert(f.getMessage == "The request was Nacked by the server")
         case _ => fail()
       }

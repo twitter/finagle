@@ -24,7 +24,7 @@ class RetriesTest extends FunSuite {
     )
 
   private[this] val requeableEx =
-    Failure.wrap(new RuntimeException("yep"), Failure.Restartable)
+    Failure.wrap(new RuntimeException("yep"), FailureFlags.Retryable)
 
   private[this] val notRequeueableEx = new RuntimeException("nope")
 
@@ -56,7 +56,7 @@ class RetriesTest extends FunSuite {
 
     val failingFactory: Stack[ServiceFactory[String, String]] = Stack.Leaf(
       Stack.Role("FailingFactory"),
-      new FailingFactory[String, String](new Failure("boom", flags = Failure.Restartable))
+      new FailingFactory[String, String](new Failure("boom", flags = FailureFlags.Retryable))
     )
 
     val svcFactory: ServiceFactory[String, String] =
@@ -81,7 +81,7 @@ class RetriesTest extends FunSuite {
 
     val failingFactory: Stack[ServiceFactory[String, String]] = Stack.Leaf(
       Stack.Role("test"),
-      new FailingFactory[String, String](new Failure("boom", flags = Failure.Restartable))
+      new FailingFactory[String, String](new Failure("boom", flags = FailureFlags.Retryable))
     )
 
     val svcFactory: ServiceFactory[String, String] =

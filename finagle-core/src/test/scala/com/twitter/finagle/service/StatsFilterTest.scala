@@ -134,7 +134,7 @@ class StatsFilterTest extends FunSuite {
     }
   }
 
-  test("don't report failures flagged Failure.Ignorable") {
+  test("don't report failures flagged FailureFlags.Ignorable") {
     val (promise, receiver, statsService) = getService()
 
     assert(!receiver.counters.contains(Seq("requests")))

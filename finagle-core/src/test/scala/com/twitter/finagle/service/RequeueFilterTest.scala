@@ -209,8 +209,8 @@ class RequeueFilterTest extends FunSuite {
 
   test("Requeueable.unapply for non-retryable exceptions") {
     Seq(
-      Failure("not retryable", Failure.NonRetryable),
-      Failure("interrupted", Failure.Interrupted),
+      Failure("not retryable", FailureFlags.NonRetryable),
+      Failure("interrupted", FailureFlags.Interrupted),
       new IOException("an io exception")
     ).foreach {
       case RequeueFilter.Requeueable(x) => fail(s"should not be Requeueable: $x")

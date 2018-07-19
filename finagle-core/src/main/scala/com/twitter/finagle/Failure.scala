@@ -174,23 +174,9 @@ object Failure {
   val NonRetryableNackFailure: Failure =
     Failure(
       "The request was Nacked by the server and should not be retried",
-      Failure.Rejected | Failure.NonRetryable
+      FailureFlags.Rejected | FailureFlags.NonRetryable
     )
 
-  /**
-   * Flag naming indicates a naming failure. This is Finagle-internal.
-   */
-  private[finagle] val Naming: Long = FailureFlags.Naming
-
-  /**
-   * The mask of flags which are safe to show to users. As an example, showing
-   * [[FailureFlags.Retryable]] could be dangerous when such failures are passed
-   * back to Finagle servers. While an individual client's request is
-   * restartable, the same is not automatically true of the server request on
-   * whose behalf the client is working - it may have performed some side
-   * effect before issuing the client call.
-   */
-  private val ShowMask: Long = FailureFlags.ShowMask
 
   /**
    * Create a new failure with the given cause and flags.
@@ -267,7 +253,7 @@ object Failure {
     require(exc != null)
     exc match {
       case f: Failure => f.flagged(flags)
-      case _ => Failure(exc, flags | Failure.Wrapped, computeLogLevel(exc))
+      case _ => Failure(exc, flags | FailureFlags.Wrapped, computeLogLevel(exc))
     }
   }
 
@@ -297,19 +283,19 @@ object Failure {
   }
 
   /**
-   * Create a new [[Restartable]] and [[Rejected]] failure with the given message.
+   * Create a new [[FailureFlags.Retryable]] and [[FailureFlags.Rejected]] failure with the given message.
    */
   def rejected(why: String): Failure =
     new Failure(why, None, FailureFlags.Retryable | FailureFlags.Rejected, logLevel = Level.DEBUG)
 
   /**
-   * Create a new [[Restartable]] and [[Rejected]] failure with the given cause.
+   * Create a new [[FailureFlags.Retryable]] and [[FailureFlags.Rejected]] failure with the given cause.
    */
   def rejected(cause: Throwable): Failure =
     Failure(cause, FailureFlags.Retryable | FailureFlags.Rejected, logLevel = Level.DEBUG)
 
   /**
-   * Create a new [[Restartable]] and [[Rejected]] failure with the given
+   * Create a new [[FailureFlags.Retryable]] and [[FailureFlags.Rejected]] failure with the given
    * message and cause.
    */
   def rejected(why: String, cause: Throwable): Failure =
@@ -321,25 +307,25 @@ object Failure {
     )
 
   /**
-   * Create a new [[Ignorable]] failure with the given message.
+   * Create a new [[FailureFlags.Ignorable]] failure with the given message.
    */
   def ignorable(why: String): Failure =
     new Failure(why, None, FailureFlags.Ignorable, logLevel = Level.TRACE)
 
   /**
-   * Create a new [[DeadlineExceeded]] failure with the given message.
+   * Create a new [[FailureFlags.DeadlineExceeded]] failure with the given message.
    */
   def deadlineExceeded(why: String): Failure =
     new Failure(why, None, FailureFlags.DeadlineExceeded)
 
   /**
-   * A default [[Restartable]] failure.
+   * A default [[FailureFlags.Retryable]] failure.
    */
   val rejected: Failure = rejected("The request was rejected")
 
   @tailrec
   private def show(f: Failure): Throwable = {
-    if (!f.isFlagged(FailureFlags.Wrapped)) f.masked(ShowMask)
+    if (!f.isFlagged(FailureFlags.Wrapped)) f.masked(FailureFlags.ShowMask)
     else
       f.cause match {
         case Some(inner: Failure) => show(inner)
@@ -354,7 +340,7 @@ object Failure {
    * failures to their "showable" form, unwrapping inner failures/throwables and
    * masking off certain flags. See [[FailureFlags.ShowMask]].
    */
-  private[finagle] class ProcessFailures[Req, Rep] extends SimpleFilter[Req, Rep] {
+  private[finagle] final class ProcessFailures[Req, Rep] extends SimpleFilter[Req, Rep] {
     private[this] val Process: PartialFunction[Throwable, Future[Rep]] = {
       case f: Failure => Future.exception(f.show)
       case f: FailureFlags[_] => Future.exception(f.masked(FailureFlags.ShowMask))

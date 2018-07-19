@@ -469,7 +469,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
    * Configures the maximum concurrent requests that are admitted
    * by the server at any given time. If the server receives a
    * burst of traffic that exceeds this limit, the burst is rejected
-   * with a `Failure.Rejected` exception. Note, this failure signals
+   * with a `FailureFlags.Rejected` exception. Note, this failure signals
    * a graceful rejection which is transmitted to clients by certain
    * protocols in Finagle (e.g. Http, ThriftMux). The limit is global
    * to all sessions.

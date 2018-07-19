@@ -44,8 +44,8 @@ class NackAdmissionFilterTest extends FunSuite {
     val svc: Service[Int, Int] = Service.mk[Int, Int](v => Future.value(v))
 
     val nackFailure: Failure = Failure.rejected("mock nack")
-    val interruptedFailure: Failure = new Failure("interrupted", None, Failure.Interrupted)
-    val namingFailure: Failure = new Failure("naming", None, Failure.Naming)
+    val interruptedFailure: Failure = new Failure("interrupted", None, FailureFlags.Interrupted)
+    val namingFailure: Failure = new Failure("naming", None, FailureFlags.Naming)
 
     val nackingSvc: Service[Int, Int] = new FailedService(nackFailure)
     val failingInterruptedSvc: Service[Int, Int] = new FailedService(interruptedFailure)

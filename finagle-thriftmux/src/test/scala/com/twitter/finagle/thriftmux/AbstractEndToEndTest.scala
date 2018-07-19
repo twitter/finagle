@@ -1301,8 +1301,8 @@ abstract class AbstractEndToEndTest
       await(client.query("ok"))
     }
 
-    // Failure.Restartable is stripped.
-    assert(!failure.isFlagged(Failure.Restartable))
+    // FailureFlags.Retryable is stripped.
+    assert(!failure.isFlagged(FailureFlags.Retryable))
 
     // Tried multiple times.
     assert(n > 1)

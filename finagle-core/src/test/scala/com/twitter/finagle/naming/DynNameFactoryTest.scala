@@ -70,8 +70,8 @@ class DynNameFactoryTest extends FunSuite with MockitoSugar {
     val exc = new Exception
     namew.notify(Throw(exc))
 
-    assert(f1.poll == Some(Throw(Failure(exc, Failure.Naming))))
-    assert(f2.poll == Some(Throw(Failure(exc, Failure.Naming))))
+    assert(f1.poll == Some(Throw(Failure(exc, FailureFlags.Naming))))
+    assert(f2.poll == Some(Throw(Failure(exc, FailureFlags.Naming))))
   })
 
   test("dequeue interrupted requests")(new Ctx {

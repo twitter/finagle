@@ -1,7 +1,7 @@
 package com.twitter.finagle.pushsession
 
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.{ChannelClosedException, Failure, Service, Status}
+import com.twitter.finagle.{ChannelClosedException, Failure, FailureFlags, Service, Status}
 import com.twitter.logging.Logger
 import com.twitter.util._
 
@@ -98,7 +98,7 @@ final class PipeliningClientPushSession[In, Out](
   }
 
   private[this] def stalledPipelineException(timeout: Duration) =
-    Failure(s"The connection pipeline could not make progress in $timeout", Failure.Interrupted)
+    Failure(s"The connection pipeline could not make progress in $timeout", FailureFlags.Interrupted)
 
   // All shutdown pathways should funnel through this method
   private[this] def handleShutdown(cause: Option[Throwable]): Unit =

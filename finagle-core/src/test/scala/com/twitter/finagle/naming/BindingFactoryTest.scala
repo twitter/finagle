@@ -248,7 +248,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
           override def bind(dtab: Dtab, path: Path) = Activity.exception(exc)
         }
 
-        assert(intercept[Failure](Await.result(factory())).isFlagged(Failure.Naming))
+        assert(intercept[Failure](Await.result(factory())).isFlagged(FailureFlags.Naming))
       },
       Seq(
         Annotation.BinaryAnnotation("namer.path", "/foo/bar"),

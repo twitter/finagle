@@ -357,9 +357,9 @@ class BackupRequestFilterTest extends FunSuite
       // ensure backup not interrupted, but original is because sendInterrupts=true
       assert(backupPromise.isInterrupted == None)
       origPromise.isInterrupted match {
-        case Some(f: Failure) if f.isFlagged(Failure.Ignorable) =>
+        case Some(f: Failure) if f.isFlagged(FailureFlags.Ignorable) =>
           origPromise.setException(f)
-        case None => fail("expected Failure flagged Failure.Ignorable")
+        case None => fail("expected Failure flagged FailureFlags.Ignorable")
       }
 
       // ensure latency for original recorded
@@ -424,9 +424,9 @@ class BackupRequestFilterTest extends FunSuite
       // ensure original not interrupted, but backup is because sendInterrupts=true
       assert(origPromise.isInterrupted == None)
       backupPromise.isInterrupted match {
-        case Some(f: Failure) if f.isFlagged(Failure.Ignorable) =>
+        case Some(f: Failure) if f.isFlagged(FailureFlags.Ignorable) =>
           backupPromise.setException(f)
-        case None => fail("expected Failure flagged Failure.Ignorable")
+        case None => fail("expected Failure flagged FailureFlags.Ignorable")
       }
 
       // ensure latency for backup recorded

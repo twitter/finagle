@@ -166,10 +166,10 @@ object RetryPolicy extends JavaSingleton {
     def unapply(thr: Throwable): Option[Throwable] = thr match {
       // We don't retry interruptions by default since they indicate that the
       // request was discarded.
-      case f: FailureFlags[_] if f.isFlagged(Failure.Interrupted) => None
-      case f: FailureFlags[_] if f.isFlagged(Failure.NonRetryable) => None
-      case f: Failure if f.isFlagged(Failure.Restartable) => Some(f.show)
-      case f: FailureFlags[_] if f.isFlagged(Failure.Restartable) => Some(f)
+      case f: FailureFlags[_] if f.isFlagged(FailureFlags.Interrupted) => None
+      case f: FailureFlags[_] if f.isFlagged(FailureFlags.NonRetryable) => None
+      case f: Failure if f.isFlagged(FailureFlags.Retryable) => Some(f.show)
+      case f: FailureFlags[_] if f.isFlagged(FailureFlags.Retryable) => Some(f)
       case WriteException(exc) => Some(exc)
       case _ => None
     }

@@ -4,6 +4,7 @@ import com.twitter.finagle.{
   CancelledConnectionException,
   ConnectionFailedException,
   Failure,
+  FailureFlags,
   ProxyConnectException,
   Stack
 }
@@ -112,7 +113,7 @@ private final class ConnectionBuilder(
           transportP.setException(
             Failure(
               cause = new CancelledConnectionException,
-              flags = Failure.Interrupted | Failure.Restartable,
+              flags = FailureFlags.Interrupted | FailureFlags.Retryable,
               logLevel = Level.DEBUG
             )
           )

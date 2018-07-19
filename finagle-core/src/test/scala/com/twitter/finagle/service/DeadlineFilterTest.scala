@@ -130,7 +130,7 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
         val f = intercept[DeadlineExceededException] {
           Await.result(deadlineService("marco"), 1.second)
         }
-        assert(f.isFlagged(Failure.DeadlineExceeded))
+        assert(f.isFlagged(FailureFlags.DeadlineExceeded))
         assert(statsReceiver.counters.get(List("rejected")) == Some(1))
       }
     }
@@ -149,7 +149,7 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
         val f = intercept[DeadlineExceededException] {
           Await.result(deadlineService("marco"), 1.second)
         }
-        assert(f.isFlagged(Failure.DeadlineExceeded))
+        assert(f.isFlagged(FailureFlags.DeadlineExceeded))
         assert(Await.result(deadlineService("marco"), 1.second) == "polo")
         assert(statsReceiver.counters.get(List("rejected")) == Some(1))
       }
@@ -164,7 +164,7 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
         val f = intercept[DeadlineExceededException] {
           Await.result(deadlineService("marco"), 1.second)
         }
-        assert(f.isFlagged(Failure.DeadlineExceeded))
+        assert(f.isFlagged(FailureFlags.DeadlineExceeded))
         assert(statsReceiver.counters.get(List("rejected")) == Some(1))
       }
 

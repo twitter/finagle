@@ -17,7 +17,7 @@ import com.twitter.finagle.ssl.client.{SslClientEngineFactory, SslClientSessionV
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.util.HashedWheelTimer
-import com.twitter.finagle.{CancelledConnectionException, ConnectionFailedException, Failure, Stack}
+import com.twitter.finagle.{CancelledConnectionException, ConnectionFailedException, Failure, FailureFlags, Stack}
 import com.twitter.logging.Level
 import com.twitter.util.{Future, Promise, Stopwatch}
 import java.net.{InetSocketAddress, SocketAddress}
@@ -76,7 +76,7 @@ private[netty3] class ChannelConnector[In, Out](
           promise.setException(
             Failure(
               cause = new CancelledConnectionException,
-              flags = Failure.Interrupted | Failure.Restartable,
+              flags = FailureFlags.Interrupted | FailureFlags.Retryable,
               logLevel = Level.DEBUG
             )
           )

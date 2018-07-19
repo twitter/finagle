@@ -106,7 +106,7 @@ class SingletonPool[Req, Rep](underlying: ServiceFactory[Req, Rep], statsReceive
         complete(Idle)
         svc.close()
         Future.exception(
-          Failure("Returned unavailable service", Failure.Restartable)
+          Failure("Returned unavailable service", FailureFlags.Retryable)
             .withSource(Failure.Source.Role, SingletonPool.role)
         )
 

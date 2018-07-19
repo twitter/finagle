@@ -36,7 +36,7 @@ class DelayedFactory[Req, Rep](
       case t: Throwable =>
         if (p.detach()) {
           q.remove(p)
-          p.setException(Failure.adapt(t, Failure.Interrupted))
+          p.setException(Failure.adapt(t, FailureFlags.Interrupted))
         }
     }
     q.add(p)

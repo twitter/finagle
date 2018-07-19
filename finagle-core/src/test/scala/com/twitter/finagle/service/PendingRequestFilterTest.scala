@@ -2,7 +2,7 @@ package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.{Failure, Service}
+import com.twitter.finagle.{Failure, FailureFlags, Service}
 import com.twitter.util.{Await, Promise, Future}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -30,7 +30,7 @@ class PendingRequestFilterTest extends FunSuite with OneInstancePerTest {
       Await.result(filteredSvc(Future.Done), 3.seconds)
     }
 
-    assert(rejected.isFlagged(Failure.Restartable))
+    assert(rejected.isFlagged(FailureFlags.Retryable))
 
     // one pending request is satisfied
     p1.setDone()

@@ -57,7 +57,7 @@ private class DynNameFactory[Req, Rep](
           case Pending(q) =>
             for ((_, p, elapsed) <- q) {
               latencyStat.add(elapsed().inMicroseconds)
-              p.setException(Failure.adapt(exc, Failure.Naming))
+              p.setException(Failure.adapt(exc, FailureFlags.Naming))
             }
             state = Failed(exc)
           case Failed(_) =>
@@ -79,7 +79,7 @@ private class DynNameFactory[Req, Rep](
 
       case Failed(exc) =>
         Trace.recordBinary("namer.failure", exc.getClass.getName)
-        Future.exception(Failure.adapt(exc, Failure.Naming))
+        Future.exception(Failure.adapt(exc, FailureFlags.Naming))
 
       case Closed() =>
         Trace.record("namer.closed")

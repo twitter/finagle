@@ -212,9 +212,9 @@ abstract class AbstractEndToEndTest
       }
     }
 
-    check(Failure("Nah", Failure.Rejected))
-    check(Failure("Nope", Failure.NonRetryable))
-    check(Failure("", Failure.Restartable))
+    check(Failure("Nah", FailureFlags.Rejected))
+    check(Failure("Nope", FailureFlags.NonRetryable))
+    check(Failure("", FailureFlags.Retryable))
 
     Await.result(server.close(), 30.seconds)
     Await.result(client.close(), 30.seconds)
@@ -237,8 +237,8 @@ abstract class AbstractEndToEndTest
     // This will try until it exhausts its budget. That's o.k.
     val failure = intercept[Failure] { Await.result(client(Request.empty), 30.seconds) }
 
-    // Failure.Restartable is stripped.
-    assert(!failure.isFlagged(Failure.Restartable))
+    // FailureFlags.Retryable is stripped.
+    assert(!failure.isFlagged(FailureFlags.Retryable))
 
     Await.result(server.close(), 30.seconds)
     Await.result(client.close(), 30.seconds)

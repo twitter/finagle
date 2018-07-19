@@ -109,7 +109,7 @@ class ClientDispatcherTest extends FunSuite with MockitoSugar {
 
     p0.setValue("ok")
     assert(f0.poll == Some(Return("ok")))
-    assert(f1.poll == Some(Throw(Failure(intr, Failure.Interrupted))))
+    assert(f1.poll == Some(Throw(Failure(intr, FailureFlags.Interrupted))))
     verify(trans).write(any[String])
   }
 

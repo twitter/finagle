@@ -2,7 +2,7 @@ package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.{FailedFastException, Failure, Service, WriteException}
+import com.twitter.finagle.{FailedFastException, Failure, FailureFlags, Service, WriteException}
 import com.twitter.util._
 import org.junit.runner.RunWith
 import org.mockito.Matchers.anyObject
@@ -259,7 +259,7 @@ class RetryFilterTest extends FunSpec with MockitoSugar with BeforeAndAfter {
         val svc = mock[Service[Int, Int]]
         when(svc.apply(1)).thenReturn(
           Future.exception(Failure.rejected("nack")),
-          Future.exception(Failure("not retryable", Failure.NonRetryable)),
+          Future.exception(Failure("not retryable", FailureFlags.NonRetryable)),
           Future.exception(new RuntimeException("never gonna be seen"))
         )
 
@@ -364,7 +364,7 @@ class RetryFilterTest extends FunSpec with MockitoSugar with BeforeAndAfter {
       it("when failed with a Non-Retryable failure, fail immediately") {
         val timer = new MockTimer()
         new PolicyFixture(policy, retryExceptionsOnly, timer) {
-          when(service(123)) thenReturn Future.exception(Failure("WTF!", Failure.NonRetryable))
+          when(service(123)) thenReturn Future.exception(Failure("WTF!", FailureFlags.NonRetryable))
           val e = intercept[Exception] {
             Await.result(retryingService(123), 5.seconds)
           }

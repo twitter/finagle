@@ -186,7 +186,7 @@ class StackServerTest extends FunSuite with Eventually {
       Await.result(svc("foo"), 5.seconds)
     }
 
-    assert(exc.isFlagged(Failure.Rejected) && exc.isFlagged(Failure.Restartable))
+    assert(exc.isFlagged(FailureFlags.Rejected) && exc.isFlagged(FailureFlags.Retryable))
 
     eventually {
       // First request never returns; dispatches is only incremented for the second request.

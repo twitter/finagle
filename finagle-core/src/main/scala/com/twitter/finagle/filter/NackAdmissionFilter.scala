@@ -10,7 +10,7 @@ import com.twitter.util._
 object NackAdmissionFilter {
   private val OverloadFailure = Future.exception(
     Failure("Request not issued to the backend due to observed overload.",
-      Failure.Rejected | Failure.NonRetryable)
+      FailureFlags.Rejected | FailureFlags.NonRetryable)
   )
   val role: Stack.Role = new Stack.Role("NackAdmissionFilter")
 
@@ -192,7 +192,7 @@ class NackAdmissionFilter[Req, Rep](
   private[this] val afterSend: Try[Rep] => Unit = (rep: Try[Rep]) => {
     val value =
       if (sufficientRps) rep match {
-        case Throw(f: FailureFlags[_]) if f.isFlagged(Failure.Rejected) => 0
+        case Throw(f: FailureFlags[_]) if f.isFlagged(FailureFlags.Rejected) => 0
         case _ => 1
       } else {
         // Bump up the ema value if the rps is too low to drop the request.

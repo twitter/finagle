@@ -219,7 +219,7 @@ object MethodBuilder {
  * Finagle will automatically retry failures that are known to be safe
  * to retry via [[com.twitter.finagle.service.RequeueFilter]]. This includes
  * [[com.twitter.finagle.WriteException WriteExceptions]] and
- * [[com.twitter.finagle.Failure.Restartable retryable nacks]]. As these should have
+ * [[com.twitter.finagle.FailureFlags.Retryable retryable nacks]]. As these should have
  * already been retried, we avoid retrying them again by ignoring them at this layer.
  *
  * Additional information regarding retries can be found in the

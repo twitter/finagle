@@ -165,7 +165,7 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
 
   test("Transmit Failure flags via MuxFailures in response context") {
     val svc = new Service[Request, Response] {
-      def apply(req: Request) = Future.exception(Failure("Super fail", Failure.NonRetryable))
+      def apply(req: Request) = Future.exception(Failure("Super fail", FailureFlags.NonRetryable))
     }
 
     val clientToServer = new AsyncQueue[Message]
@@ -428,7 +428,7 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
   }
 
   private class Restart extends FailureFlags[Restart] {
-    private[finagle] val flags = Failure.Restartable
+    private[finagle] val flags = FailureFlags.Retryable
     protected def copyWithFlags(flags: Long): Restart = ???
   }
 

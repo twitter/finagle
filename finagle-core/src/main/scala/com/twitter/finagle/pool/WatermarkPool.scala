@@ -174,7 +174,7 @@ final class WatermarkPool[Req, Rep](
               if (thePool.synchronized(waiters.remove(p))) {
                 val failure = Failure.adapt(
                   new CancelledConnectionException(_cause),
-                  Failure.Restartable | Failure.Interrupted
+                  FailureFlags.Retryable | FailureFlags.Interrupted
                 )
                 p.setException(failure)
               }
@@ -198,7 +198,7 @@ final class WatermarkPool[Req, Rep](
     }
     p.setInterruptHandler {
       case e =>
-        val failure = Failure.adapt(e, Failure.Restartable | Failure.Interrupted)
+        val failure = Failure.adapt(e, FailureFlags.Retryable | FailureFlags.Interrupted)
         if (p.updateIfEmpty(Throw(failure)))
           underlying.respond(WatermarkPool.CloseOnSuccess)
     }

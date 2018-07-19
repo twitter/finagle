@@ -10,7 +10,7 @@ import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.QueueTransport
-import com.twitter.finagle.{Failure, Path, Service, SimpleFilter, Status, FailureFlags}
+import com.twitter.finagle.{Failure, FailureFlags, Path, Service, SimpleFilter, Status}
 import com.twitter.io.{Buf, BufByteWriter, ByteReader}
 import com.twitter.util.{Await, Duration, Future, Promise, Return, Throw, Time}
 import java.util.concurrent.atomic.AtomicInteger
@@ -166,7 +166,7 @@ private[mux] abstract class ClientServerTest
     assert(f1.poll == None)
     val req2 = Request(Path.empty, Nil, buf(2))
     client(req2).poll match {
-      case Some(Throw(f: Failure)) => assert(f.isFlagged(Failure.Restartable))
+      case Some(Throw(f: Failure)) => assert(f.isFlagged(FailureFlags.Retryable))
       case _ => fail()
     }
     verify(service, never)(req2)
@@ -185,7 +185,7 @@ private[mux] abstract class ClientServerTest
     when(service(req1)).thenReturn(Future.exception(Failure.rejected("come back tomorrow")))
 
     client(req1).poll match {
-      case Some(Throw(f: Failure)) => assert(f.isFlagged(Failure.Restartable))
+      case Some(Throw(f: Failure)) => assert(f.isFlagged(FailureFlags.Retryable))
       case bad => fail(s"got $bad")
     }
   }

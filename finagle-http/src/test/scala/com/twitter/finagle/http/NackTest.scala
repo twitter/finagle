@@ -1,6 +1,6 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.{Address, Failure, Name, Service, Http => FHttp}
+import com.twitter.finagle.{Address, Failure, FailureFlags, Name, Service, Http => FHttp}
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.http.filter.HttpNackFilter
 import com.twitter.finagle.param.{Label, Stats}
@@ -20,7 +20,7 @@ class NackTest extends FunSuite {
         if (n.get == -2) {
           Future.exception(new Exception)
         } else if (n.get == -1) {
-          Future.exception(response.unflagged(Failure.Restartable).flagged(Failure.NonRetryable))
+          Future.exception(response.unflagged(FailureFlags.Retryable).flagged(FailureFlags.NonRetryable))
         } else if (n.getAndIncrement == 0) {
           Future.exception(response)
         } else {
@@ -81,7 +81,7 @@ class NackTest extends FunSuite {
       n.set(-1)
       Await.result(client(request).liftToTry, timeout) match {
         case Throw(f: Failure) =>
-          assert(f.isFlagged(Failure.Rejected) && f.isFlagged(Failure.NonRetryable))
+          assert(f.isFlagged(FailureFlags.Rejected) && f.isFlagged(FailureFlags.NonRetryable))
         case _ => fail("Response was not a non-restartable failure")
       }
 

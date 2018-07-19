@@ -96,7 +96,7 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
 
   test("Invalid flag combinations") {
     intercept[IllegalArgumentException] {
-      Failure("eh", Failure.NonRetryable | FailureFlags.Retryable)
+      Failure("eh", FailureFlags.NonRetryable | FailureFlags.Retryable)
     }
   }
 
@@ -141,8 +141,8 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
       Failure("ok", FailureFlags.Interrupted)
     )
     assertFail(
-      Failure("ok", FailureFlags.Rejected | Failure.NonRetryable),
-      Failure("ok", FailureFlags.Rejected | Failure.NonRetryable)
+      Failure("ok", FailureFlags.Rejected | FailureFlags.NonRetryable),
+      Failure("ok", FailureFlags.Rejected | FailureFlags.NonRetryable)
     )
 
     val inner = new Exception
@@ -156,7 +156,7 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
         new Exception,
         FailureFlags.Interrupted | FailureFlags.Retryable | FailureFlags.Naming | FailureFlags.Rejected | FailureFlags.Wrapped
       ),
-      Failure("abc", Failure.NonRetryable),
+      Failure("abc", FailureFlags.NonRetryable),
       Failure("abc"),
       new Exception
     )
@@ -173,15 +173,15 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
 
   test("Failure.wrap(non-wrapped Failure)") {
     val ex1 = Failure("Not wrapped.")
-    val ex2 = Failure.wrap(ex1, Failure.Naming)
-    assert(ex2.flags == Failure.Naming)
+    val ex2 = Failure.wrap(ex1, FailureFlags.Naming)
+    assert(ex2.flags == FailureFlags.Naming)
   }
 
   test("Failure.retryable(..) strips NonRetryable flag") {
-    val ex = Failure("Not retryable", Failure.NonRetryable)
+    val ex = Failure("Not retryable", FailureFlags.NonRetryable)
     val result = Failure.retryable(ex)
 
-    assert(result.isFlagged(Failure.Restartable))
-    assert(!result.isFlagged(Failure.NonRetryable))
+    assert(result.isFlagged(FailureFlags.Retryable))
+    assert(!result.isFlagged(FailureFlags.NonRetryable))
   }
 }

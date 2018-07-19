@@ -369,7 +369,7 @@ abstract class AbstractStackClientTest
     assert(budget > 0)
   })
 
-  test("service acquisition requeues respect Failure.Restartable")(new RequeueCtx {
+  test("service acquisition requeues respect FailureFlags.Retryable")(new RequeueCtx {
     override val stubLB = new ServiceFactory[String, String] {
       def apply(conn: ClientConnection) = Future.exception(
         Failure("don't restart this!")

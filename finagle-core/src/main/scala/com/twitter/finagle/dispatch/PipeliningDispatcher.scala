@@ -2,7 +2,7 @@ package com.twitter.finagle.dispatch
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Failure, Stack}
+import com.twitter.finagle.{Failure, FailureFlags, Stack}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.logging.Logger
@@ -117,7 +117,7 @@ object GenPipeliningDispatcher {
   private case class Pending[T, Rep](value: T, promise: Promise[Rep])
 
   private def stalledPipelineException(timeout: Duration) =
-    Failure(s"The connection pipeline could not make progress in $timeout", Failure.Interrupted)
+    Failure(s"The connection pipeline could not make progress in $timeout", FailureFlags.Interrupted)
 
   object Timeout {
     def unapply(t: Throwable): Option[Throwable] = t match {

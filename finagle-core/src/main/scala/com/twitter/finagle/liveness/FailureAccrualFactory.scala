@@ -340,7 +340,7 @@ class FailureAccrualFactory[Req, Rep](
 
   private[this] def didReceiveIgnorable(): Unit = self.synchronized {
     state match {
-      // If we receive a `Failure.Ignorable` in the `ProbeClosed` state, we must transition back
+      // If we receive a `FailureFlags.Ignorable` in the `ProbeClosed` state, we must transition back
       // to `ProbeOpen`, since no other state transition will be triggered via `didSucceed` or
       // `didFail`, and we don't want to be stuck in `ProbeClosed`; the status is `Busy` in that
       // state and we do not receive further requests.
@@ -409,8 +409,8 @@ class FailureAccrualFactory[Req, Rep](
         stopProbing()
 
         service(request).respond {
-          // Don't count `Failure.Ignorable` responses as either successful or failed
-          case Throw(f: FailureFlags[_]) if f.isFlagged(Failure.Ignorable) =>
+          // Don't count `FailureFlags.Ignorable` responses as either successful or failed
+          case Throw(f: FailureFlags[_]) if f.isFlagged(FailureFlags.Ignorable) =>
             didReceiveIgnorable()
           case rep =>
             if (isSuccess(ReqRep(request, rep))) didSucceed()
