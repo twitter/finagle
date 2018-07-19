@@ -22,6 +22,10 @@ object ZkMetadata {
 
   /**
    * Orders a Finagle [[Address]] based on a deterministic hash of its shard id.
+   *
+   * If shard id information is identical, either both lack metadata, both lack
+   * a shard id, or both have the same shard id, ordering is then computed by
+   * [[Address.HashOrdering]].
    */
   val shardHashOrdering: Ordering[Address] = new Ordering[Address] {
     private[this] val hashSeed = key.hashCode
@@ -41,17 +45,19 @@ object ZkMetadata {
       case (Address.Inet(_, md0), Address.Inet(_, md1)) =>
         (fromAddrMetadata(md0), fromAddrMetadata(md1)) match {
           case (Some(ZkMetadata(Some(id0))), Some(ZkMetadata(Some(id1)))) =>
-            Integer.compare(hash(id0), hash(id1))
-          // If they don't have two shardIds to compare, we don't really care
-          // about the ordering only that it's consistent.
+            if (id0 == id1) Address.HashOrdering.compare(a0, a1)
+            else Integer.compare(hash(id0), hash(id1))
           case (Some(ZkMetadata(Some(_))), Some(ZkMetadata(None))) => -1
           case (Some(ZkMetadata(None)), Some(ZkMetadata(Some(_)))) => 1
-          case (Some(ZkMetadata(None)), Some(ZkMetadata(None))) => 0
+          case (Some(ZkMetadata(None)), Some(ZkMetadata(None))) =>
+            Address.HashOrdering.compare(a0, a1)
           case (Some(_), None) => -1
           case (None, Some(_)) => 1
-          case (None, None) => 0
+          case (None, None) =>
+            Address.HashOrdering.compare(a0, a1)
         }
-      case _ => 0
+      case _ =>
+        Address.HashOrdering.compare(a0, a1)
     }
 
     override def toString: String = "ZkMetadata.shardHashOrdering"

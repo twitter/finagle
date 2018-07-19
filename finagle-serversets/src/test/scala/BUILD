@@ -60,6 +60,7 @@ junit_tests(
     dependencies = [
         ":core",
         "3rdparty/jvm/com/google/inject:guice",
+        "3rdparty/jvm/org/scalacheck",
         "finagle/finagle-core/src/main/scala",
         "finagle/finagle-serversets/src/main/java",
         "finagle/finagle-serversets/src/main/scala",

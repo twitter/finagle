@@ -4,6 +4,7 @@ import java.net.{InetAddress, InetSocketAddress}
 import java.util.{Map => JMap}
 import scala.collection.JavaConverters._
 import scala.util.control.NoStackTrace
+import scala.util.hashing.MurmurHash3
 
 /**
  * An [[Address]] represents the physical location of a single host or
@@ -20,6 +21,28 @@ object Address {
     Address.Failed(new IllegalArgumentException("failing") with NoStackTrace {
       override def toString: String = """IllegalArgumentException("failing")"""
     })
+
+  /** An ordering of [[Address Addresses]] based on a deterministic hash of their IP and port. */
+  val HashOrdering: Ordering[Address] = new Ordering[Address] {
+    def compare(a0: Address, a1: Address): Int = (a0, a1) match {
+      case (Address.Inet(inet0, _), Address.Inet(inet1, _)) =>
+        if (inet0.isUnresolved || inet1.isUnresolved) 0
+        else {
+          val ipHash0 = MurmurHash3.bytesHash(inet0.getAddress.getAddress)
+          val ipHash1 = MurmurHash3.bytesHash(inet1.getAddress.getAddress)
+          val ipCompare = Integer.compare(ipHash0, ipHash1)
+          if (ipCompare != 0) ipCompare
+          else {
+            Integer.compare(inet0.getPort, inet1.getPort)
+          }
+        }
+      case (_: Address.Inet, _) => -1
+      case (_, _: Address.Inet) => 1
+      case _ => 0
+    }
+
+    override def toString: String = "HashOrdering"
+  }
 
   /**
    * An address represented by an Internet socket address.
