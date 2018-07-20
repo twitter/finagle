@@ -34,11 +34,13 @@ private object allowInterruptingClientNegotiation extends GlobalFlag[Boolean](
 private[finagle] final class MuxClientNegotiatingSession(
   handle: PushChannelHandle[ByteReader, Buf],
   version: Short,
-  negotiator: Option[Headers] => MuxClientSession,
+  negotiator: Option[Headers] => Future[MuxClientSession],
   headers: Handshake.Headers,
   name: String,
   stats: StatsReceiver
 ) extends PushSession[ByteReader, Buf](handle) {
+
+  import MuxClientNegotiatingSession.PushSessionQueue
 
   private[this] val startNegotiation = new AtomicBoolean(false)
   private[this] val negotiatedSession = Promise[MuxClientSession]()
@@ -148,16 +150,28 @@ private[finagle] final class MuxClientNegotiatingSession(
   // result of `negotiate` even if we don't send+receive any headers from the peer.
   private[this] def finishNegotiation(serverHeaders: Option[Headers]): Unit = {
     log.debug("Init result: %s", serverHeaders)
-    Try(negotiator(serverHeaders)) match {
-      case Return(clientSession) =>
-        handle.registerSession(clientSession)
-        if (!negotiatedSession.updateIfEmpty(Return(clientSession))) {
-          log.debug("Finished negotiation with %s but handle already closed.", name)
-        }
+    // Since this session isn't ready to handle any mux messages,
+    // we need to queue them until the `negotiator` is complete.
+    // Technically, we shouldn't get any messages in the interim since
+    // `negotiator` likely represents tls negotation, but we do this
+    // in case there are any subtle races.
+    val q = new PushSessionQueue(handle, stats)
+    handle.registerSession(q)
+    negotiator(serverHeaders).respond { result =>
+      handle.serialExecutor.execute(new Runnable {
+        def run(): Unit = result match {
+          case Return(clientSession) =>
+            q.drainAndRegister(clientSession)
+            if (!negotiatedSession.updateIfEmpty(Return(clientSession))) {
+              log.debug("Finished negotiation with %s but handle already closed.", name)
+            }
 
-      case Throw(exc) =>
-        log.warning(exc, "Mux negotiation failed.")
-        failHandshake(exc)
+          case Throw(exc) =>
+            log.warning(exc, "Mux negotiation failed.")
+            q.drainAndClose()
+            failHandshake(exc)
+        }
+      })
     }
   }
 
@@ -175,4 +189,63 @@ private[finagle] object MuxClientNegotiatingSession {
   private val log = Logger.get
 
   val MarkerRerr: Message.Rerr = Message.Rerr(TinitTag, CanTinitMsg)
+
+  /**
+   * A [[PushSession]] which queues inbound messages until `drainAndRegister` is called.
+   */
+  final class PushSessionQueue(
+    handle: PushChannelHandle[ByteReader, Buf],
+    stats: StatsReceiver
+  ) extends PushSession[ByteReader, Buf](handle) {
+
+    // Based on the usage of this class, we will queue a small amount
+    // of elements to close a race window, so we likely don't need to start
+    // with a large(r) array.
+    private[this] val q = new java.util.ArrayDeque[ByteReader](8)
+    @volatile private[this] var qsize = 0
+
+    private[this] val qsizeGauge = stats.addGauge(Verbosity.Debug, "negotiating_queue_size") {
+      qsize
+    }
+
+    /**
+     * Drains queued messages into `session` and registers `session`
+     * with the handle. Note, this MUST be called from within the `serialExecutor`
+     * since it registers a session and passes messages to it via `receive`.
+     */
+    def drainAndRegister(session: PushSession[ByteReader, Buf]): Unit = {
+      val iter = q.iterator()
+      while (iter.hasNext) {
+        session.receive(iter.next())
+        iter.remove()
+      }
+      handle.registerSession(session)
+      qsize = 0
+    }
+
+    /**
+     * Removes any queued [[ByteReader]]'s and closes them. Note, this MUST
+     * be called from within the `serialExecutor`.
+     */
+    def drainAndClose(): Unit = {
+      val iter = q.iterator()
+      while (iter.hasNext) {
+        iter.next().close()
+        iter.remove()
+      }
+      qsize = 0
+    }
+
+    def receive(m: ByteReader): Unit = {
+      q.add(m)
+      qsize = q.size
+    }
+
+    def status: Status = handle.status
+    def onClose: Future[Unit] = handle.onClose
+    def close(deadline: Time): Future[Unit] = {
+      drainAndClose()
+      handle.close(deadline)
+    }
+  }
 }
