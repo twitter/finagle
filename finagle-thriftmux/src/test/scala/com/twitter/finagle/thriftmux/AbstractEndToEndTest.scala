@@ -1488,14 +1488,21 @@ abstract class AbstractEndToEndTest
           )
 
       val failure = intercept[Exception](await(client.query("ok")))
-      assert(failure.getMessage == "The request was Nacked by the server")
+      assert(
+          // The server hadn't yet issued the drain command
+        failure.getMessage == "The request was Nacked by the server" ||
+          // the service was already closed due to draining when it got to the pool
+        failure.getMessage == "Returned unavailable service")
 
-      assert(serverSr.counters(Seq("thrift", "mux", "draining")) >= 1)
 
+      // Note: we don't check 'client/[requests|failures]' since the value is racy:
+      // the server asks the client to drain immediately so we may never get a live
+      // session out of the singleton pool.
+
+      // We requeue once since the first try will fail so it will try another server
       assert(sr.counters(Seq("client", "retries", "requeues")) == 2 - 1)
-      assert(sr.counters(Seq("client", "requests")) == 2)
-      assert(sr.counters(Seq("client", "failures")) == 2)
-
+      assert(sr.counters(Seq("client", "connects")) == 2)
+      assert(sr.counters(Seq("client", "mux", "drained")) == 2)
       await(closeServers())
     }
   }
@@ -1512,9 +1519,12 @@ abstract class AbstractEndToEndTest
           )
 
       intercept[ChannelClosedException](await(client.query("ok")))
-      assert(sr.counters.get(Seq("client", "retries", "requeues")) == None)
-      assert(sr.counters(Seq("client", "requests")) == 1)
-      assert(sr.counters(Seq("client", "failures")) == 1)
+      // We may have had some retries because the connection get's closed eagerly
+      // so there is some racing between a dispatch writing it's message and being
+      // hung up on.
+      assert(sr.counters(Seq("client", "connects")) >= 1)
+      assert(sr.counters(Seq("client", "failures")) >= 1)
+      assert(!sr.counters.contains(Seq("client", "success")))
 
       await(closeServers())
     }
