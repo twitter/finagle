@@ -770,7 +770,7 @@ class MethodBuilderTest
       timer.tick()
       assert(
         stats.stat("clientLabel", "a_method", "backups", "send_backup_after_ms")()
-          == List(0.0)
+          == List(1.0)
       )
     }
 

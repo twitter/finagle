@@ -745,6 +745,28 @@ class BackupRequestFilterTest extends FunSuite
     }
   }
 
+  test("Minimum sendBackupAfter of 1ms") {
+    Time.withCurrentTimeFrozen { tc =>
+      val brf = newBrf
+      val service = newService(brf)
+
+      (0 until 100).foreach { _ =>
+        val p = new Promise[String]
+        when(underlying("ok")).thenReturn(p)
+        val f = service("ok")
+        p.setValue("ok")
+      }
+
+      // flush
+      tc.advance(3.seconds)
+      timer.tick()
+      assert(numBackupTimerTasks == 0)
+      assert(!statsReceiver.counters.contains(Seq("backups_sent")))
+      assert(brf.sendBackupAfterDuration == 1.millisecond)
+      assert(statsReceiver.stats(Seq("send_backup_after_ms")) == Seq(1))
+    }
+  }
+
   test("filterService returns the passed-in service if BRF not configured") {
     val params = Stack.Params.empty
     assert(BackupRequestFilter.filterService(params, underlying) eq underlying)

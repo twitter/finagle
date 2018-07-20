@@ -19,6 +19,16 @@ object BackupRequestFilter {
    */
   private val OrigRequestTimeout = Failure("Original request did not complete in time")
 
+  /**
+   * Use a minimum non-zero delay to prevent sending unnecessary backup requests
+   * immediately for services where the latency at the percentile where a backup will be sent is
+   * ~0ms. This is preferable to not sending any backups in the aforementioned case; by sending
+   * a backup after 1ms we can still reduce the higher latencies at greater latency percentiles.
+   * For example, if p99 latency is 0 and we are configured to send backups at the p99 latency,
+   * we can a reduce p999 latency of 10 ms to close to 1ms.
+   */
+  private val MinSendBackupAfterMs: Int = 1
+
   private[finagle] val SupersededRequestFailure =
     Failure.ignorable("Request was superseded by another in BackupRequestFilter")
 
@@ -237,7 +247,8 @@ private[finagle] class BackupRequestFilter[Req, Rep](
   private[this] val windowedPercentile: WindowedPercentileHistogram =
     windowedPercentileHistogramFac()
 
-  @volatile private[this] var sendBackupAfter: Int = 0
+  // Prevent sending a backup on the first request
+  @volatile private[this] var sendBackupAfter: Int = Int.MaxValue
 
   // For testing
   private[client] def sendBackupAfterDuration: Duration =
@@ -255,7 +266,7 @@ private[finagle] class BackupRequestFilter[Req, Rep](
         percentile = percentileFromMaxExtraLoad(curMaxExtraLoad)
         backupRequestRetryBudget = newRetryBudget(curMaxExtraLoad, nowMs)
       }
-      sendBackupAfter = windowedPercentile.percentile(percentile)
+      sendBackupAfter = Math.max(MinSendBackupAfterMs, windowedPercentile.percentile(percentile))
       sendAfterStat.add(sendBackupAfter)
     }
   }
@@ -305,10 +316,7 @@ private[finagle] class BackupRequestFilter[Req, Rep](
     backupRequestRetryBudget.deposit()
     val orig = record(req, service(req))
     val howLong = sendBackupAfter
-
-    if (howLong == 0)
-      return orig
-
+    
     orig.within(
       timer,
       Duration.fromMilliseconds(howLong),
