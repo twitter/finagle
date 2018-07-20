@@ -1490,11 +1490,15 @@ abstract class AbstractEndToEndTest
       val failure = intercept[Exception](await(client.query("ok")))
       assert(failure.getMessage == "The request was Nacked by the server")
 
-      assert(serverSr.counters(Seq("thrift", "mux", "draining")) >= 1)
+      val clue = new Object {
+        override def toString = s"Server: ${statsClue(serverSr)}\nClient: ${statsClue(sr)}"
+      }
 
-      assert(sr.counters(Seq("client", "retries", "requeues")) == 2 - 1)
-      assert(sr.counters(Seq("client", "requests")) == 2)
-      assert(sr.counters(Seq("client", "failures")) == 2)
+      withClue(clue) {
+        assert(sr.counters(Seq("client", "retries", "requeues")) == 2 - 1)
+        assert(sr.counters(Seq("client", "requests")) == 2)
+        assert(sr.counters(Seq("client", "failures")) == 2)
+      }
 
       await(closeServers())
     }
@@ -1512,9 +1516,11 @@ abstract class AbstractEndToEndTest
           )
 
       intercept[ChannelClosedException](await(client.query("ok")))
-      assert(sr.counters.get(Seq("client", "retries", "requeues")) == None)
-      assert(sr.counters(Seq("client", "requests")) == 1)
-      assert(sr.counters(Seq("client", "failures")) == 1)
+      withClue(statsClue(sr)) {
+        assert(sr.counters.get(Seq("client", "retries", "requeues")) == None)
+        assert(sr.counters(Seq("client", "requests")) == 1)
+        assert(sr.counters(Seq("client", "failures")) == 1)
+      }
 
       await(closeServers())
     }
@@ -2039,5 +2045,10 @@ abstract class AbstractEndToEndTest
     val builder: MethodBuilder = MethodBuilder.from(clientBuilder)
 
     testMethodBuilderRetries(stats, server, builder)
+  }
+
+  def statsClue(statsReceiver: InMemoryStatsReceiver): Any = new Object {
+    override def toString: String =
+      s"Stats: ${statsReceiver.counters}, ${statsReceiver.gauges}, ${statsReceiver.stats}"
   }
 }
