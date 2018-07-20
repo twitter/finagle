@@ -14,8 +14,10 @@ private[finagle] object CookieMap {
   val UseNetty4CookieCodec =
     Toggles("com.twitter.finagle.http.UseNetty4CookieCodec")
 
-  private val cookieCodec =
-    if (UseNetty4CookieCodec(ServerInfo().id.hashCode())) Netty4CookieCodec
+  private val serverIdHashCode = ServerInfo().id.hashCode()
+
+  private def cookieCodec =
+    if (UseNetty4CookieCodec(serverIdHashCode)) Netty4CookieCodec
     else Netty3CookieCodec
 
   // Note that this is a def to allow it to be toggled for unit tests.
