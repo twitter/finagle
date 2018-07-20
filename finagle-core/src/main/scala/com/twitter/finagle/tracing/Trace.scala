@@ -2,7 +2,6 @@ package com.twitter.finagle.tracing
 
 import com.twitter.finagle.Init
 import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.util.ByteArrays
 import com.twitter.io.Buf
 import com.twitter.util._
 import java.net.InetSocketAddress
@@ -38,17 +37,11 @@ object Trace extends Tracing {
     val idOption: Option[TraceId]
   ) extends Tracing
 
-  private[this] val someTrue = Some(true)
-  private[this] val someFalse = Some(false)
-
   private[this] val tracersCtx = new Contexts.local.Key[List[Tracer]]
 
   private[finagle] val idCtx = new Contexts.broadcast.Key[TraceId](
     "com.twitter.finagle.tracing.TraceContext"
   ) {
-    private val local = new ThreadLocal[Array[Byte]] {
-      override def initialValue(): Array[Byte] = new Array[Byte](40)
-    }
 
     def marshal(id: TraceId): Buf =
       Buf.ByteArray.Owned(TraceId.serialize(id))
@@ -57,37 +50,8 @@ object Trace extends Tracing {
      * The wire format is (big-endian):
      *     ''spanId:8 parentId:8 traceId:8 flags:8 (traceIdHigh:8)''
      */
-    def tryUnmarshal(body: Buf): Try[TraceId] = {
-      // Allows for 64-bit or 128-bit trace identifiers
-      if (body.length != 32 && body.length != 40)
-        return Throw(new IllegalArgumentException("Expected 32 or 40 bytes"))
-
-      val bytes = local.get()
-      body.write(bytes, 0)
-
-      val span64 = ByteArrays.get64be(bytes, 0)
-      val parent64 = ByteArrays.get64be(bytes, 8)
-      val trace64 = ByteArrays.get64be(bytes, 16)
-      val flags64 = ByteArrays.get64be(bytes, 24)
-
-      val traceIdHigh = if (body.length == 40) Some(SpanId(ByteArrays.get64be(bytes, 32))) else None
-
-      val flags = Flags(flags64)
-      val sampled = if (flags.isFlagSet(Flags.SamplingKnown)) {
-        if (flags.isFlagSet(Flags.Sampled)) someTrue else someFalse
-      } else None
-
-      val traceId = TraceId(
-        if (trace64 == parent64) None else Some(SpanId(trace64)),
-        if (parent64 == span64) None else Some(SpanId(parent64)),
-        SpanId(span64),
-        sampled,
-        flags,
-        traceIdHigh
-      )
-
-      Return(traceId)
-    }
+    def tryUnmarshal(body: Buf): Try[TraceId] =
+      TraceId.deserialize(Buf.ByteArray.Owned.extract(body))
   }
 
 

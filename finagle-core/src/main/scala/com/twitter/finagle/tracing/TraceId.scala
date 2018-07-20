@@ -43,7 +43,7 @@ object TraceId {
     }
 
     // For backward compatibility for TraceID: 40 bytes if 128bit, 32 bytes if 64bit
-    val bytes = new Array[Byte](if(traceId.traceIdHigh.isDefined) 40 else 32)
+    val bytes = new Array[Byte](if (traceId.traceIdHigh.isDefined) 40 else 32)
     ByteArrays.put64be(bytes, 0, traceId.spanId.toLong)
     ByteArrays.put64be(bytes, 8, traceId.parentId.toLong)
     ByteArrays.put64be(bytes, 16, traceId.traceId.toLong)
@@ -65,11 +65,12 @@ object TraceId {
       val trace64 = ByteArrays.get64be(bytes, 16)
       val flags64 = ByteArrays.get64be(bytes, 24)
 
-      val traceIdHigh = if (bytes.length == 40) Some(SpanId(ByteArrays.get64be(bytes, 32))) else None
+      val traceIdHigh =
+        if (bytes.length == 40) Some(SpanId(ByteArrays.get64be(bytes, 32))) else None
 
       val flags = Flags(flags64)
       val sampled = if (flags.isFlagSet(Flags.SamplingKnown)) {
-        Some(flags.isFlagSet(Flags.Sampled))
+        if (flags.isFlagSet(Flags.Sampled)) TraceId.SomeTrue else TraceId.SomeFalse
       } else None
 
       val traceId = TraceId(
@@ -85,6 +86,7 @@ object TraceId {
   }
 
   private val SomeTrue: Some[Boolean] = Some(true)
+  private val SomeFalse: Some[Boolean] = Some(false)
 }
 
 /**
