@@ -6,11 +6,15 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.toggle.flag
 import com.twitter.finagle.thriftmux.ssl.ThriftSmuxSslTestComponents._
 import com.twitter.finagle.thriftmux.thriftscala._
-import com.twitter.util.Await
+import com.twitter.util.{Await, Awaitable}
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.Eventually
+import scala.util.control.NonFatal
 
 class ThriftSmuxSslTest extends FunSuite with Eventually {
+  
+  private def await[T](t: Awaitable[T]): T =
+    Await.result(t, 5.seconds)
 
   private[this] def assertGaugeIsZero(
     statsReceiver: InMemoryStatsReceiver,
@@ -32,7 +36,7 @@ class ThriftSmuxSslTest extends FunSuite with Eventually {
   private[this] val assertGaugeIsTwo = assertGaugeIsNonZero(2.0F) _
 
   private[this] def mkSuccessfulHelloRequest(client: TestService.MethodPerEndpoint): Unit = {
-    val response = Await.result(client.query("hello"), 2.seconds)
+    val response = await(client.query("hello"))
     assert(response == "hellohello")
   }
 
@@ -48,9 +52,9 @@ class ThriftSmuxSslTest extends FunSuite with Eventually {
       mkSuccessfulHelloRequest(client)
       assertGaugeIsOne(serverStats, serverTlsConnections)
 
-      Await.ready(client.asClosable.close(), 2.seconds)
+      Await.ready(client.asClosable.close())
       eventually { assertGaugeIsZero(serverStats, serverTlsConnections) }
-      Await.result(server.close(), 2.seconds)
+      await(server.close())
     }
   }
 
@@ -66,9 +70,16 @@ class ThriftSmuxSslTest extends FunSuite with Eventually {
       mkSuccessfulHelloRequest(client)
       assertGaugeIsOne(clientStats, clientTlsConnections)
 
-      Await.ready(client.asClosable.close(), 2.seconds)
+      Await.ready(client.asClosable.close())
       eventually { assertGaugeIsZero(clientStats, clientTlsConnections) }
-      Await.result(server.close(), 2.seconds)
+      await(server.close())
+    }
+  }
+
+  def doWrapped[T](a: => T): T = {
+    try a
+    catch {
+      case NonFatal(t) => throw new Exception("Caught exception", t)
     }
   }
 
@@ -83,19 +94,19 @@ class ThriftSmuxSslTest extends FunSuite with Eventually {
 
       val serverTlsConnections = Array("server", "tls", "connections")
 
-      assertGaugeIsZero(serverStats, serverTlsConnections)
-      mkSuccessfulHelloRequest(client1)
-      assertGaugeIsOne(serverStats, serverTlsConnections)
+      doWrapped { assertGaugeIsZero(serverStats, serverTlsConnections) }
+      doWrapped { mkSuccessfulHelloRequest(client1) }
+      doWrapped { assertGaugeIsOne(serverStats, serverTlsConnections) }
 
-      mkSuccessfulHelloRequest(client2)
-      assertGaugeIsTwo(serverStats, serverTlsConnections)
+      doWrapped { mkSuccessfulHelloRequest(client2) }
+      doWrapped { assertGaugeIsTwo(serverStats, serverTlsConnections) }
 
-      Await.result(client1.asClosable.close(), 2.seconds)
-      eventually { assertGaugeIsOne(serverStats, serverTlsConnections) }
+      doWrapped { await(client1.asClosable.close()) }
+      doWrapped { eventually { assertGaugeIsOne(serverStats, serverTlsConnections) } }
 
-      Await.result(client2.asClosable.close(), 2.seconds)
-      Await.result(server.close(), 2.seconds)
-      eventually { assertGaugeIsZero(serverStats, serverTlsConnections) }
+      doWrapped { await(client2.asClosable.close()) }
+      doWrapped { await(server.close()) }
+      doWrapped { eventually { assertGaugeIsZero(serverStats, serverTlsConnections) } }
     }
   }
 
@@ -123,14 +134,14 @@ class ThriftSmuxSslTest extends FunSuite with Eventually {
       assertGaugeIsOne(client1Stats, client1TlsConnections)
       assertGaugeIsOne(client2Stats, client2TlsConnections)
 
-      Await.result(client1.asClosable.close(), 2.seconds)
+      await(client1.asClosable.close())
       eventually {
         assertGaugeIsZero(client1Stats, client1TlsConnections)
         assertGaugeIsOne(client2Stats, client2TlsConnections)
       }
 
-      Await.result(client2.asClosable.close(), 2.seconds)
-      Await.result(server.close(), 2.seconds)
+      await(client2.asClosable.close())
+      await(server.close())
       eventually {
         assertGaugeIsZero(client1Stats, client1TlsConnections)
         assertGaugeIsZero(client2Stats, client2TlsConnections)
@@ -153,14 +164,14 @@ class ThriftSmuxSslTest extends FunSuite with Eventually {
       assertGaugeIsZero(clientStats, clientTlsConnections)
 
       intercept[SslException] {
-        Await.result(client.query("hello"), 2.seconds)
+        await(client.query("hello"))
       }
 
       eventually { assertGaugeIsZero(serverStats, serverTlsConnections) }
       eventually { assertGaugeIsZero(clientStats, clientTlsConnections) }
 
-      Await.ready(client.asClosable.close(), 2.seconds)
-      Await.result(server.close(), 2.seconds)
+      Await.ready(client.asClosable.close())
+      await(server.close())
 
       eventually {
         assertGaugeIsZero(serverStats, serverTlsConnections)
@@ -184,7 +195,7 @@ class ThriftSmuxSslTest extends FunSuite with Eventually {
       assertGaugeIsZero(clientStats, clientTlsConnections)
 
       intercept[SslVerificationFailedException] {
-        Await.result(client.query("hello"), 2.seconds)
+        await(client.query("hello"))
       }
 
       eventually {
@@ -192,8 +203,8 @@ class ThriftSmuxSslTest extends FunSuite with Eventually {
         assertGaugeIsZero(clientStats, clientTlsConnections)
       }
 
-      Await.ready(client.asClosable.close(), 2.seconds)
-      Await.result(server.close(), 2.seconds)
+      Await.ready(client.asClosable.close())
+      await(server.close())
 
       eventually {
         assertGaugeIsZero(serverStats, serverTlsConnections)
