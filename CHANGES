@@ -44,6 +44,10 @@ Runtime Behavior Changes
     and production it has shown signifcant performance benefits and is simpler to maintain.
     ``PHAB_ID=D193630``
 
+  * finagle-mysql: Remove deprecated `TimestampValue.apply(Timestamp)` and
+    `TimestampValue.unapply(value)` methods. Use `TimestampValue.apply(TimeZone, TimeZone)`
+    instead. ``PHAB_ID=D182920``
+
 Deprecations
 ~~~~~~~~~~~~
 

@@ -105,38 +105,10 @@ class TimestampValue(val injectionTimeZone: TimeZone, val extractionTimeZone: Ti
  */
 object TimestampValue
     extends TimestampValue(
-      TimeZone.getDefault(),
+      TimeZone.getTimeZone("UTC"),
       TimeZone.getTimeZone("UTC")
     ) {
   private[this] val log = Logger.getLogger("finagle-mysql")
-
-  @deprecated(
-    "Injects `java.sql.Timestamp`s in local time and extracts them in UTC." +
-      "To use a different time zone, create an instance of " +
-      "TimestampValue(InjectionTimeZone, ExtractionTimeZone)",
-    "6.20.2"
-  )
-  override def apply(ts: Timestamp): Value = {
-    log.warning(
-      "Injecting timezone-less `java.sql.Timestamp` with a hardcoded local timezone (%s)"
-        .format(injectionTimeZone.getID)
-    )
-    super.apply(ts)
-  }
-
-  @deprecated(
-    "Injects `java.sql.Timestamp`s in local time and extracts them in UTC." +
-      "To use a different time zone, create an instance of " +
-      "TimestampValue(InjectionTimeZone, ExtractionTimeZone)",
-    "6.20.2"
-  )
-  override def unapply(v: Value): Option[Timestamp] = {
-    log.warning(
-      "Extracting TIMESTAMP or DATETIME row as a `java.sql.Timestamp` with a hardcoded timezone (%s)"
-        .format(extractionTimeZone.getID)
-    )
-    super.unapply(v)
-  }
 
   private[mysql] def isTimestamp(value: Value): Boolean =
     value match {

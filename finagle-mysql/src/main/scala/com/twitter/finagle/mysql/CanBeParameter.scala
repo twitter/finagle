@@ -1,6 +1,7 @@
 package com.twitter.finagle.mysql
 
 import com.twitter.finagle.mysql.transport.{MysqlBuf, MysqlBufWriter}
+import java.util.TimeZone
 import java.{lang => jl}
 
 trait CanBeParameter[-A] {
@@ -274,8 +275,12 @@ object CanBeParameter {
     new CanBeParameter[java.sql.Timestamp] {
       def sizeOf(param: java.sql.Timestamp): Int = 12
       def typeCode(param: java.sql.Timestamp): Short = Type.Timestamp
+
       def write(writer: MysqlBufWriter, param: java.sql.Timestamp): Unit = {
-        valueCanBeParameter.write(writer, TimestampValue(param))
+        valueCanBeParameter.write(
+          writer,
+          TimestampValue(param)
+        )
       }
     }
   }
@@ -294,8 +299,12 @@ object CanBeParameter {
     new CanBeParameter[java.util.Date] {
       def sizeOf(param: java.util.Date): Int = 12
       def typeCode(param: java.util.Date): Short = Type.DateTime
+
       def write(writer: MysqlBufWriter, param: java.util.Date): Unit = {
-        valueCanBeParameter.write(writer, TimestampValue(new java.sql.Timestamp(param.getTime)))
+        valueCanBeParameter.write(
+          writer,
+          TimestampValue(new java.sql.Timestamp(param.getTime))
+        )
       }
     }
   }

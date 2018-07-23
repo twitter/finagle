@@ -3,11 +3,9 @@ package com.twitter.finagle.mysql
 import com.twitter.finagle.mysql.Parameter.NullParameter
 import com.twitter.finagle.mysql.transport.MysqlBuf
 import java.sql.{Date => SQLDate, Timestamp}
-import java.util.{Calendar, Date, TimeZone}
-import org.junit.runner.RunWith
+import java.util.{Calendar, Date}
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-@RunWith(classOf[JUnitRunner])
+
 class SimpleCommandRequestTest extends FunSuite {
   test("encode") {
     val bytes = "table".getBytes
@@ -19,7 +17,6 @@ class SimpleCommandRequestTest extends FunSuite {
   }
 }
 
-@RunWith(classOf[JUnitRunner])
 class HandshakeResponseTest extends FunSuite {
   val username = Some("username")
   val password = Some("password")
@@ -66,7 +63,6 @@ class HandshakeResponseTest extends FunSuite {
   }
 }
 
-@RunWith(classOf[JUnitRunner])
 class ExecuteRequestTest extends FunSuite {
   test("null values") {
     val numOfParams = 18
@@ -201,11 +197,9 @@ class ExecuteRequestTest extends FunSuite {
       assert(br.readDoubleLE() == doubleVal)
     }
 
-    val timestampValueLocal = new TimestampValue(TimeZone.getDefault(), TimeZone.getDefault())
-
     test("java.sql.Timestamp") {
       val raw = RawValue(Type.Timestamp, Charset.Binary, true, br.readLengthCodedBytes())
-      val timestampValueLocal(ts) = raw
+      val TimestampValue(ts) = raw
       assert(ts == timestamp)
     }
 
@@ -217,7 +211,7 @@ class ExecuteRequestTest extends FunSuite {
 
     test("java.util.Date") {
       val raw = RawValue(Type.DateTime, Charset.Binary, true, br.readLengthCodedBytes())
-      val timestampValueLocal(dt) = raw
+      val TimestampValue(dt) = raw
       assert(dt.getTime == timestamp.getTime)
     }
 
