@@ -2,18 +2,16 @@ package com.twitter.finagle.http2
 
 import com.twitter.finagle.Stack
 import com.twitter.finagle.http.Fields
-import com.twitter.finagle.http2.param.{EncoderIgnoreMaxHeaderListSize, FrameLoggerNamePrefix}
 import com.twitter.finagle.http2.transport.{H2Init, PingListenerDecorator, PriorKnowledgeHandler}
 import com.twitter.finagle.netty4.http.HttpCodecName
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.stats.Gauge
 import com.twitter.logging.Logger
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel._
 import io.netty.handler.codec.http.HttpServerUpgradeHandler.{SourceCodec, UpgradeCodec, UpgradeCodecFactory}
 import io.netty.handler.codec.http.{FullHttpRequest, HttpRequest, HttpServerUpgradeHandler, HttpUtil, HttpVersion}
 import io.netty.handler.codec.http2._
-import io.netty.util.{AsciiString, AttributeKey}
+import io.netty.util.AsciiString
 
 /**
  * This handler sets us up for a cleartext upgrade
@@ -34,29 +32,13 @@ final private[finagle] class Http2CleartextServerInitializer(
   def upgradeCodecFactory(channel: Channel): UpgradeCodecFactory = new UpgradeCodecFactory {
     override def newUpgradeCodec(protocol: CharSequence): UpgradeCodec = {
       if (AsciiString.contentEquals(Http2CodecUtil.HTTP_UPGRADE_PROTOCOL_NAME, protocol)) {
-        val logger = new LoggerPerFrameTypeLogger(params[FrameLoggerNamePrefix].loggerNamePrefix)
+        val http2MultiplexCodec = ServerCodec.multiplexCodec(
+          params, UpgradeMultiplexCodecBuilder.forServer(initializer))
+        val listener = http2MultiplexCodec.decoder.frameListener
+        http2MultiplexCodec.decoder.frameListener(new PingListenerDecorator(listener))
+        ServerCodec.addStreamsGauge(statsReceiver, http2MultiplexCodec, channel)
 
-        val codec: Http2MultiplexCodec = UpgradeMultiplexCodecBuilder.forServer(initializer)
-          .frameLogger(logger)
-          .initialSettings(Settings.fromParams(params, isServer = true))
-          .encoderIgnoreMaxHeaderListSize(params[EncoderIgnoreMaxHeaderListSize].ignoreMaxHeaderListSize)
-          .build()
-
-        val listener = codec.decoder.frameListener
-        codec.decoder.frameListener(new PingListenerDecorator(listener))
-
-        val streams = statsReceiver.addGauge("streams") { codec.connection.numActiveStreams }
-
-        // We're attaching a gauge to the channel's attributes to make sure it stays referenced
-        // as long as channel is alive.
-        channel.attr(AttributeKey.valueOf[Gauge]("streams_gauge")).set(streams)
-
-        // We're removing the gauge on channel closure.
-        channel.closeFuture.addListener(new ChannelFutureListener() {
-          def operationComplete(f: ChannelFuture): Unit = streams.remove()
-        })
-
-        new Http2ServerUpgradeCodec(codec) {
+        new Http2ServerUpgradeCodec(http2MultiplexCodec) {
           override def upgradeTo(ctx: ChannelHandlerContext, upgradeRequest: FullHttpRequest): Unit = {
             upgradedCounter.incr()
             // we turn off backpressure because Http2 only works with autoread on for now

@@ -1,17 +1,14 @@
 package com.twitter.finagle.http2.transport
 
 import com.twitter.finagle.Stack
-import com.twitter.finagle.http2.param.{EncoderIgnoreMaxHeaderListSize, FrameLoggerNamePrefix}
-import com.twitter.finagle.http2.{LoggerPerFrameTypeLogger, Settings}
+import com.twitter.finagle.http2.ServerCodec
 import com.twitter.finagle.netty4.http._
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.stats.Gauge
 import com.twitter.logging.Logger
 import io.netty.buffer.{ByteBuf, ByteBufUtil}
-import io.netty.channel.{Channel, ChannelFuture, ChannelFutureListener, ChannelHandlerContext, ChannelInboundHandlerAdapter, ChannelInitializer}
+import io.netty.channel.{Channel, ChannelHandlerContext, ChannelInboundHandlerAdapter, ChannelInitializer}
 import io.netty.handler.codec.http2.Http2CodecUtil.connectionPrefaceBuf
 import io.netty.handler.codec.http2.Http2MultiplexCodecBuilder
-import io.netty.util.AttributeKey
 
 /**
  * This handler allows an instant upgrade to HTTP/2 if the first bytes received from the client
@@ -75,14 +72,11 @@ private[http2] class PriorKnowledgeHandler(
           upgradeCounter.incr()
 
           // we have read a complete preface. Setup HTTP/2 pipeline.
-          val initialSettings = Settings.fromParams(params, isServer = true)
-          val logger = new LoggerPerFrameTypeLogger(params[FrameLoggerNamePrefix].loggerNamePrefix)
-          val codec = Http2MultiplexCodecBuilder.forServer(initializer)
-            .frameLogger(logger)
-            .initialSettings(initialSettings)
-            .encoderIgnoreMaxHeaderListSize(params[EncoderIgnoreMaxHeaderListSize].ignoreMaxHeaderListSize)
-            .build()
-          p.replace(HttpCodecName, Http2CodecName, codec)
+          val http2MultiplexCodec = ServerCodec.multiplexCodec(
+            params, Http2MultiplexCodecBuilder.forServer(initializer))
+          ServerCodec.addStreamsGauge(statsReceiver, http2MultiplexCodec, ctx.channel)
+
+          p.replace(HttpCodecName, Http2CodecName, http2MultiplexCodec)
           p.remove("upgradeHandler")
 
           // Since we changed the pipeline, our current ctx points to the wrong handler
@@ -91,17 +85,6 @@ private[http2] class PriorKnowledgeHandler(
           p.remove(this)
 
           nextCtx.channel.config.setAutoRead(true)
-
-          val streams = statsReceiver.addGauge("streams") { codec.connection.numActiveStreams }
-
-          // We're attaching a gauge to the channel's attributes to make sure it stays referenced
-          // as long as channel is alive.
-          nextCtx.channel.attr(AttributeKey.valueOf[Gauge]("streams_gauge")).set(streams)
-
-          // We're removing the gauge on channel closure.
-          nextCtx.channel.closeFuture.addListener(new ChannelFutureListener {
-            def operationComplete(f: ChannelFuture): Unit = streams.remove()
-          })
 
           // Send new preface downstream as HTTP/2 codec needs it and we ate the original.
           // As the preface might have been matched over several iterations, we cannot
