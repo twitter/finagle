@@ -363,10 +363,12 @@ abstract class AbstractEndToEndTest
 
     Await.ready(client(Request(Path.empty, Nil, Buf.Utf8("." * 10))), 5.seconds)
 
-    assert(sr.stat("client", "request_payload_bytes")() == Seq(10.0f))
-    assert(sr.stat("client", "response_payload_bytes")() == Seq(20.0f))
-    assert(sr.stat("server", "request_payload_bytes")() == Seq(10.0f))
-    assert(sr.stat("server", "response_payload_bytes")() == Seq(20.0f))
+    eventually {
+      assert(sr.stat("client", "request_payload_bytes")() == Seq(10.0f))
+      assert(sr.stat("client", "response_payload_bytes")() == Seq(20.0f))
+      assert(sr.stat("server", "request_payload_bytes")() == Seq(10.0f))
+      assert(sr.stat("server", "response_payload_bytes")() == Seq(20.0f))
+    }
 
     Await.ready(Closable.all(server, client).close(), 5.seconds)
   }
@@ -391,8 +393,10 @@ abstract class AbstractEndToEndTest
     Await.ready(client(Request(Path.empty, Nil, Buf.Utf8("." * 10))), 5.seconds)
 
     // Stats defined in the ChannelStatsHandler
-    assert(sr.counter("client", "connects")() > 0)
-    assert(sr.counter("server", "connects")() > 0)
+    eventually {
+      assert(sr.counter("client", "connects")() > 0)
+      assert(sr.counter("server", "connects")() > 0)
+    }
 
     Await.ready(Closable.all(server, client).close(), 5.seconds)
   }
