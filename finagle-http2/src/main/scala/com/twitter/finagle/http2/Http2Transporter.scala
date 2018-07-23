@@ -55,6 +55,7 @@ private[finagle] object Http2Transporter {
     pipeline: ChannelPipeline =>
       val EncoderIgnoreMaxHeaderListSize(ignoreMaxHeaderListSize) =
         params[EncoderIgnoreMaxHeaderListSize]
+      val sensitivityDetector = params[HeaderSensitivity].sensitivityDetector
 
       val connectionHandlerBuilder = new RichHttpToHttp2ConnectionHandlerBuilder()
         .frameListener(Http2ClientDowngrader)
@@ -62,11 +63,15 @@ private[finagle] object Http2Transporter {
         .connection(new DefaultHttp2Connection(false /*server*/ ))
         .initialSettings(Settings.fromParams(params, isServer = false))
         .encoderIgnoreMaxHeaderListSize(ignoreMaxHeaderListSize)
+        .headerSensitivityDetector(new Http2HeadersEncoder.SensitivityDetector {
+          def isSensitive(name: CharSequence, value: CharSequence): Boolean = {
+            sensitivityDetector(name, value)
+          }
+        })
 
       val PriorKnowledge(priorKnowledge) = params[PriorKnowledge]
       val Transport.ClientSsl(config) = params[Transport.ClientSsl]
       val tlsEnabled = config.isDefined
-      val sensitivityDetector = params[HeaderSensitivity].sensitivityDetector
 
       val maxChunkSize = params[http.param.MaxChunkSize].size
       val maxHeaderSize = params[http.param.MaxHeaderSize].size
@@ -85,11 +90,6 @@ private[finagle] object Http2Transporter {
             // need to stop buffering after we've sent the connection preface
             pipeline.remove(buffer)
           }
-          .headerSensitivityDetector(new Http2HeadersEncoder.SensitivityDetector {
-            def isSensitive(name: CharSequence, value: CharSequence): Boolean = {
-              sensitivityDetector(name, value)
-            }
-          })
           .build()
         pipeline.addLast("alpn", new ClientNpnOrAlpnHandler(connectionHandler, params))
         pipeline.addLast(BufferingHandler.HandlerName, buffer)
