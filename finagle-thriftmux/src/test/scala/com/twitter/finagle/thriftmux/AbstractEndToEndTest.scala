@@ -22,7 +22,7 @@ import com.twitter.scrooge
 import com.twitter.util._
 import com.twitter.util.tunable.Tunable
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
-import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
 import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol._
 import org.scalactic.source.Position
@@ -1488,14 +1488,21 @@ abstract class AbstractEndToEndTest
           )
 
       val failure = intercept[Exception](await(client.query("ok")))
-      assert(failure.getMessage == "The request was Nacked by the server")
+      assert(
+          // The server hadn't yet issued the drain command
+        failure.getMessage == "The request was Nacked by the server" ||
+          // the service was already closed due to draining when it got to the pool
+        failure.getMessage == "Returned unavailable service")
 
-      assert(serverSr.counters(Seq("thrift", "mux", "draining")) >= 1)
 
+      // Note: we don't check 'client/[requests|failures]' since the value is racy:
+      // the server asks the client to drain immediately so we may never get a live
+      // session out of the singleton pool.
+
+      // We requeue once since the first try will fail so it will try another server
       assert(sr.counters(Seq("client", "retries", "requeues")) == 2 - 1)
-      assert(sr.counters(Seq("client", "requests")) == 2)
-      assert(sr.counters(Seq("client", "failures")) == 2)
-
+      assert(sr.counters(Seq("client", "connects")) == 2)
+      assert(sr.counters(Seq("client", "mux", "drained")) == 2)
       await(closeServers())
     }
   }
@@ -1512,9 +1519,12 @@ abstract class AbstractEndToEndTest
           )
 
       intercept[ChannelClosedException](await(client.query("ok")))
-      assert(sr.counters.get(Seq("client", "retries", "requeues")) == None)
-      assert(sr.counters(Seq("client", "requests")) == 1)
-      assert(sr.counters(Seq("client", "failures")) == 1)
+      // We may have had some retries because the connection get's closed eagerly
+      // so there is some racing between a dispatch writing it's message and being
+      // hung up on.
+      assert(sr.counters(Seq("client", "connects")) >= 1)
+      assert(sr.counters(Seq("client", "failures")) >= 1)
+      assert(!sr.counters.contains(Seq("client", "success")))
 
       await(closeServers())
     }
@@ -1646,10 +1656,11 @@ abstract class AbstractEndToEndTest
   }
 
   test("methodBuilder timeouts from configured ClientBuilder") {
-    implicit val timer: Timer = DefaultTimer
+    implicit val timer = new MockTimer
+    val sleepTime = new AtomicReference[Duration](Duration.Bottom)
     val service = new TestService.MethodPerEndpoint {
       def query(x: String): Future[String] = {
-        Future.sleep(50.millis).before { Future.value(x) }
+        Future.sleep(sleepTime.get)(DefaultTimer).before { Future.value(x) }
       }
     }
     val server =
@@ -1674,62 +1685,86 @@ abstract class AbstractEndToEndTest
     // ServicePerEndpoint
     val asIs: Service[TestService.Query.Args, TestService.Query.SuccessType] =
       mb.servicePerEndpoint[TestService.ServicePerEndpoint]("as_is").query
-    intercept[RequestTimeoutException] {
-      await(asIs(TestService.Query.Args("nope")))
+
+    Time.withCurrentTimeFrozen { control =>
+      // Send a priming request to get a connection established so we don't timeout service acquisition
+      assert("prime" == await(asIs(TestService.Query.Args("prime"))))
+      sleepTime.set(Duration.Top)
+      val req1 = asIs(TestService.Query.Args("nope"))
+      control.advance(10.milliseconds)
+      timer.tick()
+      intercept[RequestTimeoutException] { await(req1) }
+      eventually {
+        assert(stats.counter("a_label", "as_is", "logical", "requests")() == 2)
+        assert(stats.counter("a_label", "as_is", "logical", "success")() == 1)
+      }
+
+      // ServicePerEndpoint
+      val asIsSvcPerEndpoint: Service[TestService.Query.Args, TestService.Query.SuccessType] =
+        mb.servicePerEndpoint[TestService.ServicePerEndpoint]("as_is").query
+      val req2 = asIsSvcPerEndpoint(TestService.Query.Args("nope"))
+      control.advance(10.milliseconds)
+      timer.tick()
+      intercept[RequestTimeoutException] { await(req2) }
+
+      // ReqRepServicePerEndpoint
+      val asIsReqRepSvcPerEndpoint: Service[scrooge.Request[TestService.Query.Args], scrooge.Response[TestService.Query.SuccessType]] =
+        mb.servicePerEndpoint[TestService.ReqRepServicePerEndpoint]("as_is").query
+      val req3 = asIsReqRepSvcPerEndpoint(scrooge.Request(TestService.Query.Args("nope")))
+      control.advance(10.milliseconds)
+      timer.tick()
+      intercept[RequestTimeoutException] { await(req3) }
+
+      // increase the timeouts via MB and now the request should succeed
+      // ServicePerEndpoint
+      val longTimeout: Service[TestService.Query.Args, TestService.Query.SuccessType] =
+        mb.withTimeoutPerRequest(5.seconds)
+          .withTimeoutTotal(5.seconds)
+          .servicePerEndpoint[TestService.ServicePerEndpoint]("good")
+          .query
+
+      // An actual sleep
+      sleepTime.set(50.milliseconds)
+
+      val req4 = longTimeout(TestService.Query.Args("yep"))
+      control.advance(1.second)
+      timer.tick()
+      val result1 = await(req4)
+      assert("yep" == result1)
+      eventually {
+        assert(stats.counter("a_label", "good", "logical", "requests")() == 1)
+        assert(stats.counter("a_label", "good", "logical", "success")() == 1)
+      }
+
+
+      // ServicePerEndpoint
+      val longTimeoutSvcPerEndpoint: Service[TestService.Query.Args, TestService.Query.SuccessType] =
+        mb.withTimeoutPerRequest(5.seconds)
+          .withTimeoutTotal(5.seconds)
+          .servicePerEndpoint[TestService.ServicePerEndpoint]("good")
+          .query
+
+      val req5 = longTimeoutSvcPerEndpoint(TestService.Query.Args("yep"))
+      control.advance(1.second)
+      timer.tick()
+
+      val result2 = await(req5)
+      assert("yep" == result2)
+      // ReqRepServicePerEndpoint
+      val longTimeoutReqRepSvcPerEndpoint: Service[scrooge.Request[TestService.Query.Args], scrooge.Response[TestService.Query.SuccessType]] =
+        mb.withTimeoutPerRequest(5.seconds)
+          .withTimeoutTotal(5.seconds)
+          .servicePerEndpoint[TestService.ReqRepServicePerEndpoint]("good")
+          .query
+
+      val req6 = longTimeoutReqRepSvcPerEndpoint(scrooge.Request(TestService.Query.Args("yep")))
+      control.advance(1.second)
+      timer.tick()
+      val response = await(req6)
+      assert("yep" == response.value)
+
+      await(server.close())
     }
-    eventually {
-      assert(stats.counter("a_label", "as_is", "logical", "requests")() == 1)
-      assert(stats.counter("a_label", "as_is", "logical", "success")() == 0)
-    }
-
-    // ServicePerEndpoint
-    val asIsSvcPerEndpoint: Service[TestService.Query.Args, TestService.Query.SuccessType] =
-      mb.servicePerEndpoint[TestService.ServicePerEndpoint]("as_is").query
-    intercept[RequestTimeoutException] {
-      await(asIsSvcPerEndpoint(TestService.Query.Args("nope")))
-    }
-    // ReqRepServicePerEndpoint
-    val asIsReqRepSvcPerEndpoint: Service[scrooge.Request[TestService.Query.Args], scrooge.Response[TestService.Query.SuccessType]] =
-      mb.servicePerEndpoint[TestService.ReqRepServicePerEndpoint]("as_is").query
-    intercept[RequestTimeoutException] {
-      await(asIsReqRepSvcPerEndpoint(scrooge.Request(TestService.Query.Args("nope"))))
-    }
-
-    // increase the timeouts via MB and now the request should succeed
-    // ServicePerEndpoint
-    val longTimeout: Service[TestService.Query.Args, TestService.Query.SuccessType] =
-      mb.withTimeoutPerRequest(5.seconds)
-        .withTimeoutTotal(5.seconds)
-        .servicePerEndpoint[TestService.ServicePerEndpoint]("good")
-        .query
-
-    var result = await(longTimeout(TestService.Query.Args("yep")))
-    assert("yep" == result)
-    eventually {
-      assert(stats.counter("a_label", "good", "logical", "requests")() == 1)
-      assert(stats.counter("a_label", "good", "logical", "success")() == 1)
-    }
-
-    // ServicePerEndpoint
-    val longTimeoutSvcPerEndpoint: Service[TestService.Query.Args, TestService.Query.SuccessType] =
-      mb.withTimeoutPerRequest(5.seconds)
-        .withTimeoutTotal(5.seconds)
-        .servicePerEndpoint[TestService.ServicePerEndpoint]("good")
-        .query
-
-    result = await(longTimeoutSvcPerEndpoint(TestService.Query.Args("yep")))
-    assert("yep" == result)
-    // ReqRepServicePerEndpoint
-    val longTimeoutReqRepSvcPerEndpoint: Service[scrooge.Request[TestService.Query.Args], scrooge.Response[TestService.Query.SuccessType]] =
-      mb.withTimeoutPerRequest(5.seconds)
-        .withTimeoutTotal(5.seconds)
-        .servicePerEndpoint[TestService.ReqRepServicePerEndpoint]("good")
-        .query
-
-    val response = await(longTimeoutReqRepSvcPerEndpoint(scrooge.Request(TestService.Query.Args("yep"))))
-    assert("yep" == response.value)
-
-    await(server.close())
   }
 
   test("methodBuilder tunable timeouts from configured ClientBuilder") {
