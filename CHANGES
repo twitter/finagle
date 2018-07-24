@@ -29,6 +29,10 @@ Breaking API Changes
   * finagle-core: `c.t.f.tracing.Trace.record(Record)` now accepts the record argument by
     value (previously by name). ``PHAB_ID=D193300``
 
+  * finagle-mysql: `c.t.f.mysql.CanBeParameter`'s implicit conversions `timestampCanBeParameter`,
+    `sqlDateCanBeParameter`, and `javaDateCanBeParameter` have been consolidated into a single
+    implicit, `dateCanBeParameter`. ``PHAB_ID=D195351``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

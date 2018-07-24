@@ -1,7 +1,6 @@
 package com.twitter.finagle.mysql
 
 import com.twitter.finagle.mysql.transport.{MysqlBuf, MysqlBufWriter}
-import java.util.TimeZone
 import java.{lang => jl}
 
 trait CanBeParameter[-A] {
@@ -271,39 +270,36 @@ object CanBeParameter {
     }
   }
 
-  implicit val timestampCanBeParameter: CanBeParameter[java.sql.Timestamp] = {
-    new CanBeParameter[java.sql.Timestamp] {
-      def sizeOf(param: java.sql.Timestamp): Int = 12
-      def typeCode(param: java.sql.Timestamp): Short = Type.Timestamp
-
-      def write(writer: MysqlBufWriter, param: java.sql.Timestamp): Unit = {
-        valueCanBeParameter.write(
-          writer,
-          TimestampValue(param)
-        )
-      }
-    }
-  }
-
-  implicit val sqlDateCanBeParameter: CanBeParameter[java.sql.Date] = {
-    new CanBeParameter[java.sql.Date] {
-      def sizeOf(param: java.sql.Date): Int = 5
-      def typeCode(param: java.sql.Date): Short = Type.Date
-      def write(writer: MysqlBufWriter, param: java.sql.Date): Unit = {
-        valueCanBeParameter.write(writer, DateValue(param))
-      }
-    }
-  }
-
-  implicit val javaDateCanBeParameter: CanBeParameter[java.util.Date] = {
+  /**
+   * Because java.sql.Date and java.sql.Timestamp extend java.util.Date and
+   * because CanBeParameter's type parameter is contravariant, having separate
+   * implicits for these types results in the one for the supertype being used
+   * when the one for the subtype should be used. To work around this we use
+   * just one implicit and pattern match within it.
+   */
+  implicit val dateCanBeParameter: CanBeParameter[java.util.Date] = {
     new CanBeParameter[java.util.Date] {
-      def sizeOf(param: java.util.Date): Int = 12
-      def typeCode(param: java.util.Date): Short = Type.DateTime
+      def sizeOf(param: java.util.Date): Int = param match {
+        case _: java.sql.Date => 5
+        case _: java.sql.Timestamp => 12
+        case _ => 12
+      }
 
-      def write(writer: MysqlBufWriter, param: java.util.Date): Unit = {
-        valueCanBeParameter.write(
+      def typeCode(param: java.util.Date): Short = param match {
+        case _: java.sql.Date => Type.Date
+        case _: java.sql.Timestamp => Type.Timestamp
+        case _ => Type.DateTime
+      }
+
+      def write(writer: MysqlBufWriter, param: java.util.Date): Unit = param match {
+        case sqlDate: java.sql.Date => valueCanBeParameter.write(writer, DateValue(sqlDate))
+        case sqlTimestamp: java.sql.Timestamp => valueCanBeParameter.write(
           writer,
-          TimestampValue(new java.sql.Timestamp(param.getTime))
+          TimestampValue(sqlTimestamp)
+        )
+        case javaDate => valueCanBeParameter.write(
+          writer,
+          TimestampValue(new java.sql.Timestamp(javaDate.getTime))
         )
       }
     }
