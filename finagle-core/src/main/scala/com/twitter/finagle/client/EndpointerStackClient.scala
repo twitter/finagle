@@ -114,8 +114,16 @@ trait EndpointerStackClient[Req, Rep, This <: EndpointerStackClient[Req, Rep, Th
       case _ => label0
     }
 
-    val tranformer = RequestLogger.newStackTransformer(clientLabel)
-    val clientStack = tranformer(stack ++ (endpointer +: nilStack))
+    val clientStack = {
+      val baseStack = stack ++ (endpointer +: nilStack)
+      params[RequestLogger.Param] match {
+        case RequestLogger.Param.Enabled =>
+          val tranformer = RequestLogger.newStackTransformer(clientLabel)
+          tranformer(baseStack)
+        case RequestLogger.Param.Disabled =>
+          baseStack
+      }
+    }
 
     val clientParams = params +
       Label(clientLabel) +

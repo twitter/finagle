@@ -62,9 +62,14 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
       // finalized parameters.
       private[this] val server: This = {
         val withEndpoint = withStack(stack ++ Stack.Leaf(Endpoint, factory))
-        withEndpoint
-          .transformed(RequestLogger.newStackTransformer(serverLabel))
-          .withParams(serverParams)
+        val transformed =
+          params[RequestLogger.Param] match {
+            case RequestLogger.Param.Enabled =>
+              withEndpoint.transformed(RequestLogger.newStackTransformer(serverLabel))
+            case RequestLogger.Param.Disabled =>
+              withEndpoint
+        }
+        transformed.withParams(serverParams)
       }
 
       private[this] val serviceFactory = server.stack.make(serverParams)

@@ -13,6 +13,7 @@ import com.twitter.finagle.client.DefaultPool;
 import com.twitter.finagle.client.Transporter;
 import com.twitter.finagle.factory.TimeoutFactory;
 import com.twitter.finagle.filter.MaskCancelFilter;
+import com.twitter.finagle.filter.RequestLogger;
 import com.twitter.finagle.filter.RequestSemaphoreFilter;
 import com.twitter.finagle.liveness.FailureAccrualFactory;
 import com.twitter.finagle.liveness.FailureAccrualPolicy;
@@ -114,7 +115,8 @@ public class StackParamCompilationTest {
         .configured(new Transport.ClientSsl(
           Option.<SslClientConfiguration>empty()).mk())
         .configured(new Transport.ServerSsl(
-          Option.<SslServerConfiguration>empty()).mk());
+          Option.<SslServerConfiguration>empty()).mk())
+        .configured(RequestLogger.Disabled().mk());
 
     ClientBuilder.get().failFast(true);
   }

@@ -8,6 +8,27 @@ import java.util.concurrent.TimeUnit
 
 object RequestLogger {
 
+  sealed trait Param {
+    def mk(): (Param, Stack.Param[Param]) = (this, Param.param)
+  }
+
+  private[finagle] object Param {
+    case object Disabled extends Param
+    case object Enabled extends Param
+
+    implicit val param: Stack.Param[Param] = Stack.Param(Param.Enabled)
+  }
+
+  /**
+   * Enables the [[RequestLogger]] (enabled by default).
+   */
+  val Enabled: Param = Param.Enabled
+
+  /**
+   * Disables the [[RequestLogger]].
+   */
+  val Disabled: Param = Param.Disabled
+
   /**
    * The name of the logger used.
    */
