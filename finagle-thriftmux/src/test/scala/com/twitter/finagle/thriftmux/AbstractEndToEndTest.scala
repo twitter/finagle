@@ -9,7 +9,7 @@ import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.PipeliningDispatcher
 import com.twitter.finagle.param.{Label, Stats, Tracer => PTracer}
 import com.twitter.finagle.service._
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats._
 import com.twitter.finagle.thrift.{ClientId, Protocols, ThriftClientRequest}
 import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
 import com.twitter.finagle.thriftmux.thriftscala._
@@ -22,6 +22,7 @@ import com.twitter.scrooge
 import com.twitter.util._
 import com.twitter.util.tunable.Tunable
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
 import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol._
@@ -29,6 +30,7 @@ import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.AssertionsForJUnit
 import org.scalatest.{FunSuite, Tag}
+import scala.collection.JavaConverters._
 import scala.language.reflectiveCalls
 
 abstract class AbstractEndToEndTest
@@ -2075,4 +2077,66 @@ abstract class AbstractEndToEndTest
 
     testMethodBuilderRetries(stats, server, builder)
   }
+
+  test("methodBuilder stats are not eager for all methods") {
+    // note that this CaptureStatsReceiver could be avoided if `InMemoryStatsReceiver`
+    // was eager about creating counters and stats that have not been used.
+    // see CSL-6751
+    val metrics = new ConcurrentHashMap[String, Unit]()
+    class CaptureStatsReceiver(
+      protected val self: StatsReceiver
+    ) extends StatsReceiverProxy {
+      override def counter(verbosity: Verbosity, names: String*): Counter = {
+        metrics.put(names.mkString("/"), ())
+        super.counter(verbosity, names: _*)
+      }
+
+      override def stat(verbosity: Verbosity, names: String*): Stat = {
+        metrics.put(names.mkString("/"), ())
+        super.stat(verbosity, names: _*)
+      }
+
+      override def addGauge(verbosity: Verbosity, names: String*)(f: => Float): Gauge = {
+        metrics.put(names.mkString("/"), ())
+        super.addGauge(verbosity, names: _*)(f)
+      }
+    }
+    val stats = new InMemoryStatsReceiver
+
+    val service = new TestService.MethodPerEndpoint {
+      def query(x: String): Future[String] = Future.value(x)
+    }
+
+    val server =
+      serverImpl.serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), service)
+
+    val client = clientImpl
+      .withStatsReceiver(new CaptureStatsReceiver(stats))
+      .withLabel("a_service")
+    val name = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
+    val builder: MethodBuilder = client.methodBuilder(name)
+
+    // ensure there are no metrics to start with. e.g. "logical", "query"
+    assert(!metrics.keys.asScala.exists(key => key.contains("logical/requests")))
+
+    // ensure that materializing into a ServicePerEndpoint doesn't create the metrics
+    val spe = builder.servicePerEndpoint[TestService.ServicePerEndpoint]("a_method")
+    assert(!metrics.keys.asScala.exists(key => key.contains("a_service/a_method")))
+
+    // ensure that changing configuration doesn't either.
+    val configured = builder
+      .idempotent(0.1)
+      .servicePerEndpoint[TestService.ServicePerEndpoint]("a_method")
+      .query
+    assert(!metrics.keys.asScala.exists(key => key.contains("a_service/a_method")))
+
+    // use it to confirm metrics appear
+    assert("hello" == await(configured(TestService.Query.Args("hello"))))
+    eventually {
+      assert(stats.counter("a_service", "a_method", "logical", "requests")() == 1)
+    }
+
+    server.close()
+  }
+
 }

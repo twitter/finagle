@@ -6,7 +6,7 @@ import com.twitter.finagle.client.RefcountedClosable
 import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.thrift.service.{Filterable, ServicePerEndpointBuilder}
 import com.twitter.finagle.thrift.{ServiceIfaceBuilder, ThriftClientRequest, ThriftRichClient}
-import com.twitter.util.Duration
+import com.twitter.util.{Duration, Future, Time}
 import com.twitter.util.tunable.Tunable
 
 object MethodBuilder {
@@ -322,12 +322,48 @@ class MethodBuilder(
   )(
     implicit builder: ServicePerEndpointBuilder[ServicePerEndpoint]
   ): ServicePerEndpoint = {
-    val filters: Filter.TypeAgnostic = mb.filters(methodName)
     val servicePerEndpoint: ServicePerEndpoint = rich.servicePerEndpoint(
-      mb.wrappedService(methodName),
+      new DelayedService(methodName),
       label
     )(builder)
-    servicePerEndpoint.filtered(filters)
+
+    val filters: Filter.TypeAgnostic = mb.filters(methodName)
+    val delayedTypeAgnostic = new DelayedTypeAgnostic(filters)
+    servicePerEndpoint.filtered(delayedTypeAgnostic)
+  }
+
+  // used to delay creation of the Service until the first request
+  // as `mb.wrappedService` eagerly creates some metrics that are best
+  // avoided until the first request.
+  final private class DelayedService(
+    methodName: Option[String]
+  ) extends Service[ThriftClientRequest, Array[Byte]] {
+    private[this] lazy val svc: Service[ThriftClientRequest, Array[Byte]] =
+      mb.wrappedService(methodName)
+
+    def apply(request: ThriftClientRequest): Future[Array[Byte]] =
+      svc(request)
+
+    override def close(deadline: Time): Future[Unit] =
+      svc.close(deadline)
+
+    override def status: Status =
+      svc.status
+  }
+
+  // used to delay creation of the Filters until the first request
+  // as `servicePerEndpoint.filtered` eagerly creates some metrics
+  // that are best avoided until the first request.
+  final private class DelayedTypeAgnostic(
+    typeAgnostic: Filter.TypeAgnostic
+  ) extends Filter.TypeAgnostic {
+    def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = new Filter[Req, Rep, Req, Rep] {
+      private lazy val filter: Filter[Req, Rep, Req, Rep] =
+        typeAgnostic.toFilter
+
+      def apply(request: Req, service: Service[Req, Rep]): Future[Rep] =
+        filter(request, service)
+    }
   }
 
   /**
