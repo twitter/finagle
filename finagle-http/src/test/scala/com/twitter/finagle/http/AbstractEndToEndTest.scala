@@ -423,7 +423,12 @@ abstract class AbstractEndToEndTest
 
       eventually {
         assert(statsRecv.stat("client", "request_payload_bytes")() == Seq(10.0f))
-        assert(statsRecv.stat("client", "response_payload_bytes")() == Seq(20.0f))
+
+        // the payloadsize filter measures response sizes as a side-effect (.respond)
+        // so for h2c we sometimes see the warmup request's response payload despite
+        // clearing the stats
+        val clientResponse = statsRecv.stat("client", "response_payload_bytes")()
+        assert(clientResponse == Seq(20.0f) || clientResponse == Seq(0f, 20.0f))
         assert(statsRecv.stat("server", "request_payload_bytes")() == Seq(10.0f))
         assert(statsRecv.stat("server", "response_payload_bytes")() == Seq(20.0f))
       }
