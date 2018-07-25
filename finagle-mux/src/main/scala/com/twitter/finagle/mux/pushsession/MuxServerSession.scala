@@ -29,19 +29,18 @@ private[finagle] final class MuxServerSession(
   import MuxServerSession._
 
   // These are the locals we need to have set on each dispatch
-  private[this] def locals: Local.Context =
-    Local.letClear {
-      val remoteAddressLocal = Contexts.local
-        .KeyValuePair(RemoteInfo.Upstream.AddressCtx, handle.remoteAddress)
-      val peerCertLocal = handle.peerCertificate.map(
-        Contexts.local.KeyValuePair(Transport.peerCertCtx, _))
+  private[this] val locals: () => Local.Context = () => Local.letClear {
+    val remoteAddressLocal = Contexts.local
+      .KeyValuePair(RemoteInfo.Upstream.AddressCtx, handle.remoteAddress)
+    val peerCertLocal = handle.peerCertificate.map(
+      Contexts.local.KeyValuePair(Transport.peerCertCtx, _))
 
-      Trace.letTracer(params[param.Tracer].tracer) {
-        Contexts.local.let(Seq(remoteAddressLocal) ++ peerCertLocal) {
-          Local.save()
-        }
+    Trace.letTracer(params[param.Tracer].tracer) {
+      Contexts.local.let(Seq(remoteAddressLocal) ++ peerCertLocal) {
+        Local.save()
       }
     }
+  }
 
   private[this] val exec = handle.serialExecutor
   private[this] val lessor = params[Lessor.Param].lessor

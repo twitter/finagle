@@ -79,12 +79,18 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel, stats
 
   def remoteAddress: SocketAddress = ch.remoteAddress
 
-  // lazy because it's not all that common for it to be called
-  lazy val peerCertificate: Option[Certificate] = for {
-    handler <- Option(ch.pipeline.get(classOf[SslHandler]))
-    certs <- Try(handler.engine.getSession.getPeerCertificates).toOption
-    head <- certs.headOption
-  } yield head
+  // This is a `def` in order to avoid memoizing this value eagerly (and incorrectly)
+  // when doing OppTls.
+  def peerCertificate: Option[Certificate] =
+    ch.pipeline.get(classOf[SslHandler]) match {
+      case null => None
+      case handler =>
+        try {
+          handler.engine.getSession.getPeerCertificates.headOption
+        } catch {
+          case NonFatal(_) => None
+        }
+    }
 
   def status: Status =
     if (failed || !ch.isOpen) Status.Closed

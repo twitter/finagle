@@ -31,7 +31,7 @@ class ServerTrackerTest extends FunSuite {
 
     val executor = new DeferredExecutor
     val messageWriter = new MockMessageWriter
-    val locals = Local.letClear(Local.save())
+    val locals = () => Local.letClear(Local.save())
     val statsReceiver = new InMemoryStatsReceiver
     val lessor = Lessor.nil
 

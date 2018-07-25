@@ -67,6 +67,9 @@ trait PushStackServer[Req, Rep, This <: PushStackServer[Req, Rep, This]]
         session
       }
 
+      // Note, this will not work for OppTls since `peerCertificate`
+      // isn't set at this point. It will, however, propagate the correct
+      // cert during service acquisition for standard Tls.
       val futureService = handle.peerCertificate match {
         case None => serviceFactory(conn)
         case Some(cert) =>

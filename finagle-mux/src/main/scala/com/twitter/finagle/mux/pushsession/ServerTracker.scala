@@ -22,7 +22,7 @@ import scala.collection.JavaConverters._
  */
 private class ServerTracker(
   serialExecutor: Executor,
-  locals: Local.Context,
+  locals: () => Local.Context,
   service: Service[Request, Response],
   messageWriter: MessageWriter,
   lessor: Lessor,
@@ -148,7 +148,7 @@ private class ServerTracker(
 
   private[this] def doDispatch(m: Message): Unit = {
     if (dispatches.containsKey(m.tag)) duplicateTagDetected(m.tag)
-    else Local.let(locals) {
+    else Local.let(locals()) {
       lessor.observeArrival()
       val responseF = Processor(m, service)
       val elapsed = Stopwatch.start()
