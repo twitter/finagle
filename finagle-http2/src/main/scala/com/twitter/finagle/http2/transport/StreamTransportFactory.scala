@@ -417,6 +417,13 @@ final private[http2] class StreamTransportFactory(
         exec.execute(new Runnable { def run(): Unit = handleCloseWith(e) })
     }
 
+    private[this] val failureResponseFn: Try[Unit] => Unit = {
+      case Throw(t) =>
+        exec.execute(new Runnable { def run(): Unit = handleCloseWith(t) })
+      case _ =>
+        ()
+    }
+
     private[this] def handleWriteAndCheck(obj: HttpObject): Future[Unit] = state match {
       case a: Active =>
         if (obj.isInstanceOf[LastHttpContent]) {
@@ -426,9 +433,7 @@ final private[http2] class StreamTransportFactory(
 
         underlying
           .write(Message(obj, curId))
-          .onFailure { e: Throwable =>
-            exec.execute(new Runnable { def run(): Unit = handleCloseWith(e) })
-          }
+          .respond(failureResponseFn)
 
       case _ =>
         _onClose.unit
