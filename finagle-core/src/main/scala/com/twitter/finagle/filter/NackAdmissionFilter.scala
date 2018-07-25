@@ -125,6 +125,29 @@ object NackAdmissionFilter {
  * "Client-Side Throttling" of O'Reilly's "Site Reliability Engineering: How
  * Google Runs Production Systems", by Beyer, Jones, Petoff, and Murphy, 1e.
  *
+ * NOTE: Here is a brief summary of the configurable params.
+ *
+ * A configuration with a `nackRateThreshold` of N% and a `window` of duration
+ * W roughly translates as, "start dropping some requests to the cluster when
+ * the nack rate averages at least N% over a window of duration W."
+ *
+ * Here are some examples of situations with param values chosen to make the
+ * filter useful:
+ *
+ * - Owners of Service A examine their service's nack rate over several days
+ *   and find that it is almost always under 10% and rarely above 1% (e.g.,
+ *   during traffic spikes) or 5% (e.g., during a data center outage). They
+ *   do not want to preemptively drop requests unless the cluster sees an
+ *   extreme overload situation so they choose a nack rate threshold of 20%.
+ *   And in such a situation they want the filter to act relatively quickly,
+ *   so they choose a window of 30 seconds.
+ *
+ * - Owners of Service B observe that excess load typically causes peak nack
+ *   rates of around 25% for up to 60 seconds. They want to be aggressive
+ *   about avoiding cluster overload and don’t mind dropping some innocent
+ *   requests during mild load so they choose a window of 10 seconds and a
+ *   threshold of 0.15 (= 15%).
+ *
  * @param window Size of moving window for exponential moving average, which is
  * used to keep track of the ratio of nacked responses to accepted responses
  * and compute the client's accept rate. E.g., if set to 1 second, then only
