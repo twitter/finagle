@@ -195,4 +195,73 @@ class StackServerTest extends FunSuite with Eventually {
       assert(sr.counters(Seq("failures", "restartable")) == 1)
     }
   }
+
+  test("Items appended to DefaultTransformer appear in the listing") {
+    val transformer = new Stack.NamedTransformer {
+      val name = "id"
+      def apply[A, B](s: Stack[ServiceFactory[A, B]]) = s
+    }
+    assert(!StackServer.DefaultTransformer.transformers.contains(transformer))
+
+    val len = StackServer.DefaultTransformer.transformers.length
+    StackServer.DefaultTransformer.append(transformer)
+    assert(StackServer.DefaultTransformer.transformers.contains(transformer))
+    assert(StackServer.DefaultTransformer.transformers.length == len + 1)
+  }
+
+  test("serve() uses DefaultTransformer") {
+    implicit val stringParam = Stack.Param("")
+
+    var didRun = false
+    val testRole = Stack.Role("test")
+    def testModule[A, B]: Stackable[ServiceFactory[A, B]] =
+      new Stack.Module1[String, ServiceFactory[A, B]] {
+        val role = testRole
+        val description = role.toString
+        def make(greeting: String, next: ServiceFactory[A, B]) = {
+          // We test param and module transformations differently. The note
+          // below explains why.
+          assert(greeting == "hello")
+          didRun = true
+          next
+        }
+      }
+
+    def hello[A, B]: Stackable[ServiceFactory[A, B]] =
+      new Stack.Module[ServiceFactory[A, B]] {
+        val role = Stack.Role("hello")
+        val description = role.toString
+        val parameters = Seq(implicitly[Stack.Param[String]])
+        def make(params: Stack.Params, next: Stack[ServiceFactory[A, B]]) = {
+          Stack.Leaf(this, next.make(params + "hello"))
+        }
+      }
+
+    StackServer.DefaultTransformer.append(
+      new Stack.NamedTransformer {
+        val name = "test"
+        def apply[A, B](stack: Stack[ServiceFactory[A, B]]) =
+          stack
+            // testModule contains the assertion for the "hello" param.
+            .prepend(testModule)
+            .prepend(hello)
+      }
+    )
+
+    ServerRegistry.clear()
+    val svc = Service.const(Future.value("ok"))
+    val server = StringServer.server.serve(new InetSocketAddress(0), svc)
+    val Seq(entry) = ServerRegistry.registrants.toSeq
+    val stack = entry.stack.asInstanceOf[Stack[ServiceFactory[String, String]]]
+
+    // Note: we can consult the stack directly for the existence of modules.
+    // By inspecting the stack for the test role, we can be certain that the
+    // DefaultTransformer was able to add it. Params can't be observed from the
+    // Stack in the same way: they are hidden from query via the Stack API. We
+    // must test for expected params via an assert in the module added above.
+    assert(stack.contains(testRole))
+    assert(didRun)
+
+    Await.ready(server.close(), 10.seconds)
+  }
 }

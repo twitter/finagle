@@ -8,6 +8,7 @@ import com.twitter.finagle.Stack.{Param, Role}
 import com.twitter.finagle.stats.ServerStatsReceiver
 import com.twitter.finagle.tracing._
 import com.twitter.jvm.Jvm
+import scala.collection.immutable
 
 object StackServer {
 
@@ -106,6 +107,19 @@ object StackServer {
    */
   val defaultParams: Stack.Params =
     Stack.Params.empty + Stats(ServerStatsReceiver)
+
+  /**
+   * A set of NamedTransformers for transforming server stacks.
+   */
+  private[finagle] object DefaultTransformer {
+    @volatile private var underlying = immutable.Queue.empty[Stack.NamedTransformer]
+
+    def append(transformer: Stack.NamedTransformer): Unit =
+      synchronized { underlying = underlying :+ transformer }
+
+    def transformers: Seq[Stack.NamedTransformer] =
+      underlying
+  }
 }
 
 /**

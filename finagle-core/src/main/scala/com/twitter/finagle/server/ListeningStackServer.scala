@@ -69,7 +69,9 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
             case RequestLogger.Param.Disabled =>
               withEndpoint
         }
-        transformed.withParams(serverParams)
+        StackServer.DefaultTransformer.transformers.foldLeft(
+          transformed.withParams(serverParams)
+        )((srv, transformer) => srv.transformed(transformer))
       }
 
       private[this] val serviceFactory = server.stack.make(serverParams)
