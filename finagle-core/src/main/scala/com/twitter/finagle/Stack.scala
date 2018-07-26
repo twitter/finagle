@@ -36,7 +36,11 @@ sealed trait Stack[T] {
    * producing a `T`-typed value representing the current
    * configuration.
    */
-  def make(params: Params): T
+  def make(params: Params): T =
+    this match {
+      case Node(_, mk, next) => mk(params, next).make(params)
+      case Leaf(_, t) => t
+    }
 
   /**
    * Transform one stack to another by applying `fn` on each element;
@@ -250,45 +254,38 @@ object Stack {
     def parameters: Seq[Stack.Param[_]]
   }
 
+  private[finagle] case class Leaf[T](head: Stack.Head, t: T) extends Stack[T]
+  private[finagle] case class Node[T](head: Stack.Head, mk: (Params, Stack[T]) => Stack[T], next: Stack[T]) extends Stack[T]
+
   /**
    * Nodes materialize by transforming the underlying stack in
    * some way.
    */
-  case class Node[T](head: Stack.Head, mk: (Params, Stack[T]) => Stack[T], next: Stack[T])
-      extends Stack[T] {
-    def make(params: Params): T = mk(params, next).make(params)
-  }
+  def node[T](head: Stack.Head, mk: (Params, Stack[T]) => Stack[T], next: Stack[T]): Stack[T] =
+    Node(head, mk, next)
 
-  object Node {
-
-    /**
-     * A constructor for a 'simple' Node.
-     */
-    def apply[T](head: Stack.Head, mk: T => T, next: Stack[T]): Node[T] =
-      Node(head, (p, stk) => Leaf(head, mk(stk.make(p))), next)
-  }
+  /**
+   * A constructor for a 'simple' Node.
+   */
+  def node[T](head: Stack.Head, mk: T => T, next: Stack[T]): Stack[T] =
+    Node(head, (p, stk) => Leaf(head, mk(stk.make(p))), next)
 
   /**
    * A static stack element; necessarily the last.
    */
-  case class Leaf[T](head: Stack.Head, t: T) extends Stack[T] {
-    def make(params: Params): T = t
-  }
+  def leaf[T](head: Stack.Head, t: T): Stack[T] = Leaf(head, t)
 
-  object Leaf {
-
-    /**
-     * If only a role is given when constructing a leaf, then the head
-     * is created automatically
-     */
-    def apply[T](_role: Stack.Role, t: T): Leaf[T] = {
-      val head = new Stack.Head {
-        val role: Stack.Role = _role
-        val description: String = _role.toString
-        val parameters: Seq[Stack.Param[_]] = Nil
-      }
-      Leaf(head, t)
+  /**
+   * If only a role is given when constructing a leaf, then the head
+   * is created automatically
+   */
+  def leaf[T](_role: Stack.Role, t: T): Stack[T] = {
+    val head = new Stack.Head {
+      val role: Stack.Role = _role
+      val description: String = _role.toString
+      val parameters: Seq[Stack.Param[_]] = Nil
     }
+    Leaf(head, t)
   }
 
   /**
@@ -487,7 +484,7 @@ object Stack {
    *   def make(params: Params, next: Stack[Int=>Int]): Stack[Int=>Int] = {
    *     val Multiplier(m) = params[Multiplier]
    *     if (m == 1) next // It's a no-op, skip it.
-   *     else Stack.Leaf("multiply", i => next.make(params)(i)*m)
+   *     else Stack.leaf("multiply", i => next.make(params)(i)*m)
    *   }
    * }
    * }}}
@@ -660,7 +657,7 @@ object CanStackFrom {
  * empty stack for [[ServiceFactory]]s.
  */
 class StackBuilder[T](init: Stack[T]) {
-  def this(role: Stack.Role, end: T) = this(Stack.Leaf(role, end))
+  def this(role: Stack.Role, end: T) = this(Stack.leaf(role, end))
 
   private[this] var stack = init
 

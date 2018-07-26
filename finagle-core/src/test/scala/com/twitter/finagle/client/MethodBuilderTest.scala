@@ -27,14 +27,14 @@ private object MethodBuilderTest {
       TimeoutFilter.totalTimeoutRole,
       "testing total timeout"
     )
-    totalModule.toStack(Stack.Leaf(Stack.Role("test"), svcFactory))
+    totalModule.toStack(Stack.leaf(Stack.Role("test"), svcFactory))
   }
 
   val stack: Stack[ServiceFactory[Int, Int]] = {
     val svcFactory = ServiceFactory.const(neverSvc)
     TimeoutFilter
       .clientModule[Int, Int]
-      .toStack(Stack.Leaf(Stack.Role("test"), svcFactory))
+      .toStack(Stack.leaf(Stack.Role("test"), svcFactory))
   }
 
   case class TestStackClient(
@@ -108,7 +108,7 @@ class MethodBuilderTest
 
     val stack = TimeoutFilter
       .clientModule[Int, Int]
-      .toStack(Stack.Leaf(Stack.Role("test"), ServiceFactory.const(svc)))
+      .toStack(Stack.leaf(Stack.Role("test"), ServiceFactory.const(svc)))
     val stackClient = TestStackClient(stack, params)
     val methodBuilder = MethodBuilder.from("together", stackClient)
 
@@ -180,7 +180,7 @@ class MethodBuilderTest
 
     val stack = TimeoutFilter
       .clientModule[Int, Int]
-      .toStack(Stack.Leaf(Stack.Role("test"), ServiceFactory.const(svc)))
+      .toStack(Stack.leaf(Stack.Role("test"), ServiceFactory.const(svc)))
     val stackClient = TestStackClient(stack, params)
     val methodBuilder = MethodBuilder.from("destination", stackClient)
 
@@ -350,7 +350,7 @@ class MethodBuilderTest
       .withSource(Failure.Source.Service, "test_service")
     val svc: Service[Int, Int] = new FailedService(failure)
 
-    val stack = Stack.Leaf(Stack.Role("test"), ServiceFactory.const(svc))
+    val stack = Stack.leaf(Stack.Role("test"), ServiceFactory.const(svc))
     val stackClient = TestStackClient(stack, params)
 
     val methodBuilder = MethodBuilder.from("destination", stackClient)
@@ -406,7 +406,7 @@ class MethodBuilderTest
       .withSource(Failure.Source.Service, "test_service")
     val svc: Service[Int, Int] = new FailedService(failure)
 
-    val stack = Stack.Leaf(Stack.Role("test"), ServiceFactory.const(svc))
+    val stack = Stack.leaf(Stack.Role("test"), ServiceFactory.const(svc))
     val stackClient = TestStackClient(stack, params)
 
     val methodBuilder = MethodBuilder.from("destination", stackClient)
@@ -466,7 +466,7 @@ class MethodBuilderTest
       def close(deadline: Time): Future[Unit] =
         svc.close(deadline)
     }
-    val stk = Stack.Leaf(Stack.Role("test"), svcFac)
+    val stk = Stack.leaf(Stack.Role("test"), svcFac)
     val stackClient = TestStackClient(stk, Stack.Params.empty)
     val methodBuilder = MethodBuilder.from("refcounts", stackClient)
 
@@ -505,7 +505,7 @@ class MethodBuilderTest
     val failure = Failure("some reason", new RuntimeException("welp"))
     val svc: Service[Int, Int] = new FailedService(failure)
 
-    val stack = Stack.Leaf(Stack.Role("test"), ServiceFactory.const(svc))
+    val stack = Stack.leaf(Stack.Role("test"), ServiceFactory.const(svc))
     val stackClient = TestStackClient(stack, params)
 
     val methodBuilder = MethodBuilder.from("destination", stackClient)
@@ -527,7 +527,7 @@ class MethodBuilderTest
     val failure = Failure("some reason", new RuntimeException("welp"))
     val svc: Service[Int, Int] = new FailedService(failure)
 
-    val stack = Stack.Leaf(Stack.Role("test"), ServiceFactory.const(svc))
+    val stack = Stack.leaf(Stack.Role("test"), ServiceFactory.const(svc))
     val stackClient = TestStackClient(stack, params)
 
     val methodBuilder = MethodBuilder.from("destination", stackClient)
@@ -552,7 +552,7 @@ class MethodBuilderTest
     // Configure BackupRequestFilter
     val params = Stack.Params.empty + configuredBrfParam
 
-    val stack = Stack.Leaf(Stack.Role("test"), svc)
+    val stack = Stack.leaf(Stack.Role("test"), svc)
 
     val stackClient = TestStackClient(stack, params)
     val methodBuilder = MethodBuilder.from("with backups", stackClient)
@@ -576,7 +576,7 @@ class MethodBuilderTest
     // Configure BackupRequestFilter
     val params = Stack.Params.empty + configuredResponseClassifierParam
 
-    val stack = Stack.Leaf(Stack.Role("test"), svc)
+    val stack = Stack.leaf(Stack.Role("test"), svc)
 
     val stackClient = TestStackClient(stack, params)
     val methodBuilder = MethodBuilder.from("with classifier", stackClient)
@@ -613,7 +613,7 @@ class MethodBuilderTest
 
     val stack = Retries
       .moduleRequeueable[Int, Int]
-      .toStack(Stack.Leaf(Stack.Role("test"), ServiceFactory.const(svc)))
+      .toStack(Stack.leaf(Stack.Role("test"), ServiceFactory.const(svc)))
     val stackClient = TestStackClient(stack, params)
     val mb = MethodBuilder.from("mb", stackClient)
 
@@ -677,7 +677,7 @@ class MethodBuilderTest
 
     val stack = TimeoutFilter
       .clientModule[Int, Int]
-      .toStack(Stack.Leaf(Stack.Role("test"), ServiceFactory.const(svc)))
+      .toStack(Stack.leaf(Stack.Role("test"), ServiceFactory.const(svc)))
     val stackClient = TestStackClient(stack, params)
     val mb = MethodBuilder
       .from("mb", stackClient)
@@ -734,7 +734,7 @@ class MethodBuilderTest
     val svc = ServiceFactory.const(underlying)
 
     val tunable = Tunable.const("brfTunable", 50.percent)
-    val stack = Stack.Leaf(Stack.Role("test"), svc)
+    val stack = Stack.leaf(Stack.Role("test"), svc)
 
     val stackClient = TestStackClient(stack, Stack.Params.empty)
     val mb = MethodBuilder
@@ -752,7 +752,7 @@ class MethodBuilderTest
     val timer = new MockTimer
 
     val svc: Service[Int, Int] = Service.const(Future.value(1))
-    val stack = Stack.Leaf(Stack.Role("test"), ServiceFactory.const(svc))
+    val stack = Stack.leaf(Stack.Role("test"), ServiceFactory.const(svc))
 
     val stackClient = TestStackClient(
       stack,
@@ -805,7 +805,7 @@ class MethodBuilderTest
 
     val stack = Retries
       .moduleRequeueable[Int, Int]
-      .toStack(Stack.Leaf(Stack.Role("test"), ServiceFactory.const(svc)))
+      .toStack(Stack.leaf(Stack.Role("test"), ServiceFactory.const(svc)))
     val stackClient = TestStackClient(stack, params)
     val client = MethodBuilder
       .from("mb", stackClient)
@@ -847,7 +847,7 @@ class MethodBuilderTest
 
     val stack = Retries
       .moduleRequeueable[Int, Int]
-      .toStack(Stack.Leaf(Stack.Role("test"), ServiceFactory.const(svc)))
+      .toStack(Stack.leaf(Stack.Role("test"), ServiceFactory.const(svc)))
     val stackClient = TestStackClient(stack, params)
     val client = MethodBuilder
       .from("mb", stackClient)
@@ -863,7 +863,7 @@ class MethodBuilderTest
 
     val stack = Retries
       .moduleRequeueable[Int, Int]
-      .toStack(Stack.Leaf(Stack.Role("test"), ServiceFactory.const(svc)))
+      .toStack(Stack.leaf(Stack.Role("test"), ServiceFactory.const(svc)))
     val stackClient = TestStackClient(stack, params)
     val client = MethodBuilder.from("mb", stackClient)
 

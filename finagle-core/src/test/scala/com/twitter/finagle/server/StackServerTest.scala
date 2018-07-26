@@ -21,7 +21,7 @@ class StackServerTest extends FunSuite with Eventually {
     val echo = ServiceFactory.const(Service.mk[Unit, Deadline] { unit =>
       Future.value(Contexts.broadcast(Deadline))
     })
-    val stack = StackServer.newStack[Unit, Deadline] ++ Stack.Leaf(Endpoint, echo)
+    val stack = StackServer.newStack[Unit, Deadline] ++ Stack.leaf(Endpoint, echo)
     val statsReceiver = new InMemoryStatsReceiver
     val factory =
       stack.make(StackServer.defaultParams + TimeoutFilter.Param(1.second) + Stats(statsReceiver))
@@ -52,7 +52,7 @@ class StackServerTest extends FunSuite with Eventually {
       }
       def close(deadline: Time) = Future.Done
     }
-    val stack = StackServer.newStack[Int, Int] ++ Stack.Leaf(Endpoint, connSF)
+    val stack = StackServer.newStack[Int, Int] ++ Stack.leaf(Endpoint, connSF)
     val sr = new InMemoryStatsReceiver
     val timer = new MockTimer
     val lifeTime = 1.second
@@ -153,7 +153,7 @@ class StackServerTest extends FunSuite with Eventually {
     try {
       ServerAdmissionControl.register(ClosingFilter2.name, ClosingFilter2.mkFilter)
       val echo = ServiceFactory.const(Service.mk[String, String](s => Future.value(s)))
-      val stack = StackServer.newStack[String, String] ++ Stack.Leaf(Endpoint, echo)
+      val stack = StackServer.newStack[String, String] ++ Stack.leaf(Endpoint, echo)
       val factory = ServiceFactory.const(Service.const[String](Future.value("hi")))
 
       val server = StringServer.server
@@ -169,7 +169,7 @@ class StackServerTest extends FunSuite with Eventually {
 
   test("Rejections from RequestSemaphoreFilter are captured in stats") {
     val neverRespond = ServiceFactory.const(Service.mk[String, String](_ => Future.never))
-    val stack = StackServer.newStack[String, String] ++ Stack.Leaf(Endpoint, neverRespond)
+    val stack = StackServer.newStack[String, String] ++ Stack.leaf(Endpoint, neverRespond)
     val sr = new InMemoryStatsReceiver
     val factory = stack.make(
       StackServer.defaultParams +

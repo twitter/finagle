@@ -221,7 +221,7 @@ object BindingFactory {
           new BindingFactory(path, newStack(path.show, _), timer, baseDtab, stats.scope("namer"))
       }
 
-      Stack.Leaf(role, factory)
+      Stack.leaf(role, factory)
     }
   }
 

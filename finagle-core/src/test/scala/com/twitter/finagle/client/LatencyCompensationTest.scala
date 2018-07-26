@@ -31,7 +31,7 @@ class LatencyCompensationTest
         val LatencyCompensation.Compensation(compensation) = prms[LatencyCompensation.Compensation]
         assert(expected == compensation)
 
-        Stack.Leaf(this, ServiceFactory.const(Service.mk[String, String](Future.value)))
+        Stack.leaf(this, ServiceFactory.const(Service.mk[String, String](Future.value)))
       }
     }
 

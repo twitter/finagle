@@ -141,7 +141,7 @@ class NackAdmissionFilterTest extends FunSuite {
     val s: Stack[ServiceFactory[Int, Int]] =
       NackAdmissionFilter
         .module[Int, Int]
-        .toStack(Stack.Leaf(Stack.Role("svc"), nackSvc))
+        .toStack(Stack.leaf(Stack.Role("svc"), nackSvc))
 
     val ps: Stack.Params = Stack.Params.empty + param.Stats(stats)
 

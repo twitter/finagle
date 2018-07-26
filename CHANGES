@@ -33,6 +33,9 @@ Breaking API Changes
     `sqlDateCanBeParameter`, and `javaDateCanBeParameter` have been consolidated into a single
     implicit, `dateCanBeParameter`. ``PHAB_ID=D195351``
 
+  * finagle-core: `c.t.f.Leaf` and `c.t.f.Node` are now private; use `Stack.leaf` and
+    `Stack.node` instead. ``PHAB_ID=D195924``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

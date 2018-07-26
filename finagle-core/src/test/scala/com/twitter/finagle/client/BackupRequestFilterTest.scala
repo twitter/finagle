@@ -205,7 +205,7 @@ class BackupRequestFilterTest extends FunSuite
     val s: Stack[ServiceFactory[String, String]] =
       BackupRequestFilter
         .module[String, String]
-        .toStack(Stack.Leaf(Stack.Role("Service"), fac))
+        .toStack(Stack.leaf(Stack.Role("Service"), fac))
 
     val ps: Stack.Params = Stack.Params.empty + param.Stats(statsReceiver) + param.Timer(timer)
 

@@ -169,7 +169,7 @@ class ClientRegistryTest
 
     val factory = ServiceFactory.const(mockSvc)
 
-    val stack = new StackBuilder(Stack.Leaf(new Stack.Head {
+    val stack = new StackBuilder(Stack.leaf(new Stack.Head {
       def role: Stack.Role = headRole
       def description: String = "the head!!"
       def parameters: Seq[Stack.Param[_]] = Seq(TestParam2.param)

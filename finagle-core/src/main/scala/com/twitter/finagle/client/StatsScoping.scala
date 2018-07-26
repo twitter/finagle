@@ -52,7 +52,7 @@ object StatsScoping {
 
         val scoped = scoper(stats, metadata)
         val stack = next.make(params + Stats(scoped))
-        Stack.Leaf(this, stack)
+        Stack.leaf(this, stack)
       }
     }
 }

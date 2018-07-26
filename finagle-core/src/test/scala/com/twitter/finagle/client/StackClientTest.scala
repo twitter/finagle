@@ -205,7 +205,7 @@ abstract class AbstractStackClientTest
 
     val stack = StackClient
       .newStack[Unit, Unit]
-      .concat(Stack.Leaf(Stack.Role("role"), underlyingFactory))
+      .concat(Stack.leaf(Stack.Role("role"), underlyingFactory))
       // don't pool or else we don't see underlying close until service is ejected from pool
       .remove(DefaultPool.Role)
 
@@ -249,7 +249,7 @@ abstract class AbstractStackClientTest
 
     val stack = StackClient
       .newStack[Unit, Unit]
-      .concat(Stack.Leaf(Stack.Role("role"), underlyingFactory))
+      .concat(Stack.leaf(Stack.Role("role"), underlyingFactory))
       // don't pool or else we don't see underlying close until service is ejected from pool
       .remove(DefaultPool.Role)
       .replace(
@@ -571,7 +571,7 @@ abstract class AbstractStackClientTest
     val stack = StackClient
       .newStack[Unit, Unit]
       .concat(
-        Stack.Leaf(
+        Stack.leaf(
           Stack.Role("role"),
           new ServiceFactory[Unit, Unit] {
             def apply(conn: ClientConnection): Future[Service[Unit, Unit]] =

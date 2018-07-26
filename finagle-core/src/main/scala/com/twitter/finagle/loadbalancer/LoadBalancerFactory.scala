@@ -298,7 +298,7 @@ object LoadBalancerFactory {
 
       // Instead of simply creating a newBalancer here, we defer to the
       // traffic distributor to interpret weighted `Addresses`.
-      Stack.Leaf(
+      Stack.leaf(
         role,
         new TrafficDistributor[Req, Rep](
           dest = destActivity,

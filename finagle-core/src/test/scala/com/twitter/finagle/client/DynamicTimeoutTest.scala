@@ -27,7 +27,7 @@ class DynamicTimeoutTest extends FunSuite with Matchers with Eventually with Int
     val svcFactory = ServiceFactory.const(svc)
     DynamicTimeout
       .perRequestModule[Int, Int]
-      .toStack(Stack.Leaf(Stack.Role("test"), svcFactory))
+      .toStack(Stack.leaf(Stack.Role("test"), svcFactory))
   }
 
   private val perReqExn = classOf[IndividualRequestTimeoutException]
@@ -252,7 +252,7 @@ class DynamicTimeoutTest extends FunSuite with Matchers with Eventually with Int
     //   - PerRequestTimeout
     //   - Service
     val stackBuilder =
-      new StackBuilder[ServiceFactory[Int, Int]](Stack.Leaf(Stack.Role("test"), svcFactory))
+      new StackBuilder[ServiceFactory[Int, Int]](Stack.leaf(Stack.Role("test"), svcFactory))
     stackBuilder.push(DynamicTimeout.perRequestModule)
     stackBuilder.push(Retries.moduleWithRetryPolicy)
     val stackSvc =

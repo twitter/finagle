@@ -28,7 +28,7 @@ class RetriesTest extends FunSuite {
 
   private[this] val notRequeueableEx = new RuntimeException("nope")
 
-  private val end: Stack[ServiceFactory[Exception, Int]] = Stack.Leaf(
+  private val end: Stack[ServiceFactory[Exception, Int]] = Stack.leaf(
     Stack.Role("test"),
     ServiceFactory.const(
       Service.mk[Exception, Int] { req =>
@@ -54,7 +54,7 @@ class RetriesTest extends FunSuite {
       param.Stats(stats) +
       Retries.Budget(RetryBudget.Empty)
 
-    val failingFactory: Stack[ServiceFactory[String, String]] = Stack.Leaf(
+    val failingFactory: Stack[ServiceFactory[String, String]] = Stack.leaf(
       Stack.Role("FailingFactory"),
       new FailingFactory[String, String](new Failure("boom", flags = FailureFlags.Retryable))
     )
@@ -79,7 +79,7 @@ class RetriesTest extends FunSuite {
       param.Stats(stats) +
       Retries.Budget(RetryBudget.Empty)
 
-    val failingFactory: Stack[ServiceFactory[String, String]] = Stack.Leaf(
+    val failingFactory: Stack[ServiceFactory[String, String]] = Stack.leaf(
       Stack.Role("test"),
       new FailingFactory[String, String](new Failure("boom", flags = FailureFlags.Retryable))
     )
@@ -276,11 +276,11 @@ class RetriesTest extends FunSuite {
 
     // wire em together.
     val midToBack: Stack[ServiceFactory[Exception, Int]] =
-      Stack.Leaf(Stack.Role("mid-back"), backSvc)
+      Stack.leaf(Stack.Role("mid-back"), backSvc)
     val midSvcFactory = Retries.moduleWithRetryPolicy.toStack(midToBack).make(midParams)
 
     val frontToMid: Stack[ServiceFactory[Exception, Int]] =
-      Stack.Leaf(Stack.Role("front-mid"), midSvcFactory)
+      Stack.leaf(Stack.Role("front-mid"), midSvcFactory)
     val frontSvcFactory = Retries.moduleWithRetryPolicy.toStack(frontToMid).make(frontParams)
     Await.result(frontSvcFactory(), 5.seconds)
   }
@@ -388,7 +388,7 @@ class RetriesTest extends FunSuite {
 
         def make(params: Stack.Params, next: Stack[ServiceFactory[Unit, Unit]]) = {
           assert(params.size == 1 && params.head._2.isInstanceOf[Retries.Budget])
-          Stack.Leaf(this, next.make(params))
+          Stack.leaf(this, next.make(params))
         }
       }
 
@@ -412,7 +412,7 @@ class RetriesTest extends FunSuite {
 
         def make(params: Stack.Params, next: Stack[ServiceFactory[Unit, Unit]]) = {
           assert(params.size == 1 && (params[Retries.Budget] eq budget))
-          Stack.Leaf(this, next.make(params))
+          Stack.leaf(this, next.make(params))
         }
       }
 

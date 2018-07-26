@@ -34,6 +34,6 @@ class EndpointerModule[Req, Rep](
       case Address.Inet(ia, _) => fn(prms, ia)
       case Address.Failed(e) => new FailingFactory[Req, Rep](e)
     }
-    Stack.Leaf(this, factory)
+    Stack.leaf(this, factory)
   }
 }

@@ -45,7 +45,7 @@ class ServerAdmissionControlTest extends FunSuite with MockitoSugar {
     ServerAdmissionControl.unregisterAll()
 
     val echo = ServiceFactory.const(Service.mk[Int, Int](v => Future.value(v)))
-    val stack = StackServer.newStack[Int, Int] ++ Stack.Leaf(Endpoint, echo)
+    val stack = StackServer.newStack[Int, Int] ++ Stack.leaf(Endpoint, echo)
 
     ServerAdmissionControl.register(
       Addition2Filter.name,

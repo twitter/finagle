@@ -154,7 +154,7 @@ object Retries {
           nextSvcFac
         )
 
-        Stack.Leaf(this, svcFactory(budget.retryBudget, filters, scoped, requeues, nextSvcFac))
+        Stack.leaf(this, svcFactory(budget.retryBudget, filters, scoped, requeues, nextSvcFac))
       }
     }
 

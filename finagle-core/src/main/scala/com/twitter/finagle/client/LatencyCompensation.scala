@@ -93,7 +93,7 @@ object LatencyCompensation {
         val AddrMetadata(metadata) = prms[AddrMetadata]
         val compensation = compensator(metadata)
         val compensated = next.make(prms + Compensation(compensation))
-        Stack.Leaf(this, compensated)
+        Stack.leaf(this, compensated)
       }
     }
 

@@ -71,7 +71,7 @@ class RequestLoggerTest extends FunSuite with BeforeAndAfter {
       builder.push(newModule("module0", module0Count, 50.microseconds))
 
       val transformer = RequestLogger.newStackTransformer("aLabel", Stopwatch.timeNanos)
-      val stack = transformer(builder.result ++ Stack.Leaf(Endpoint, endpoint))
+      val stack = transformer(builder.result ++ Stack.leaf(Endpoint, endpoint))
       val svcFac = stack.make(Stack.Params.empty)
       val svc = Await.result(svcFac(ClientConnection.nil), 5.seconds)
 

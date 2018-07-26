@@ -54,7 +54,7 @@ object AddrMetadataExtraction {
           }.toFuture
 
         val delayed = DelayedFactory.swapOnComplete(futureFactory)
-        Stack.Leaf(this, delayed)
+        Stack.leaf(this, delayed)
       }
     }
 }

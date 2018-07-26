@@ -262,7 +262,7 @@ class MemcachedPartitioningServiceTest
           params: Stack.Params,
           next: Stack[ServiceFactory[Command, Response]]
         ): Stack[ServiceFactory[Command, Response]] = {
-          Stack.Leaf(role, ServiceFactory.const(mockService))
+          Stack.leaf(role, ServiceFactory.const(mockService))
         }
       }
     }

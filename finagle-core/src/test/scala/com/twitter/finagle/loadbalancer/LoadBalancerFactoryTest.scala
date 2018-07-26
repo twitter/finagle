@@ -90,7 +90,7 @@ class LoadBalancerFactoryTest extends FunSuite with Eventually with IntegrationP
 
   test("throws NoBrokersAvailableException with negative addresses") {
     val next: Stack[ServiceFactory[String, String]] =
-      Stack.Leaf(
+      Stack.leaf(
         Stack.Role("mock"),
         ServiceFactory.const[String, String](Service.mk[String, String](req => Future.value(req)))
       )
@@ -115,7 +115,7 @@ class LoadBalancerFactoryTest extends FunSuite with Eventually with IntegrationP
       }
       def close(deadline: Time): Future[Unit] = ???
     }
-    val endpoint = Stack.Leaf(Stack.Role("endpoint"), busySvcFac)
+    val endpoint = Stack.leaf(Stack.Role("endpoint"), busySvcFac)
     val stack = LoadBalancerFactory.module.toStack(endpoint)
 
     val address = Address(InetSocketAddress.createUnresolved("inet-address", 0))
@@ -147,7 +147,7 @@ class LoadBalancerFactoryTest extends FunSuite with Eventually with IntegrationP
       }
       def close(deadline: Time): Future[Unit] = ???
     }
-    val endpoint = Stack.Leaf(Stack.Role("endpoint"), busySvcFac)
+    val endpoint = Stack.leaf(Stack.Role("endpoint"), busySvcFac)
     val stack = LoadBalancerFactory.module.toStack(endpoint)
     val address = Address(InetSocketAddress.createUnresolved("inet-address", 0))
     val factory = stack.make(
@@ -212,7 +212,7 @@ class LoadBalancerFactoryTest extends FunSuite with Eventually with IntegrationP
 
   test("Respects the AddressOrdering") {
     val endpoint: Stack[ServiceFactory[String, String]] =
-      Stack.Leaf(
+      Stack.leaf(
         Stack.Role("endpoint"),
         ServiceFactory.const[String, String](Service.mk[String, String](req => ???))
       )
@@ -259,7 +259,7 @@ class LoadBalancerFactoryTest extends FunSuite with Eventually with IntegrationP
 
   test("Respects ReplicateAddresses param") {
     val endpoint: Stack[ServiceFactory[String, String]] =
-      Stack.Leaf(
+      Stack.leaf(
         Stack.Role("endpoint"),
         ServiceFactory.const[String, String](Service.mk[String, String](req => ???))
       )

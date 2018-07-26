@@ -890,7 +890,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     val s: Stack[ServiceFactory[Int, Int]] =
       FailureAccrualFactory
         .module[Int, Int]
-        .toStack(Stack.Leaf(Stack.Role("Service"), h.underlying))
+        .toStack(Stack.leaf(Stack.Role("Service"), h.underlying))
 
     val ps: Stack.Params = Stack.Params.empty + param.Stats(h.statsReceiver)
 

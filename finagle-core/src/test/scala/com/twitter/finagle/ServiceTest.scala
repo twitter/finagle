@@ -194,7 +194,7 @@ class ServiceTest extends FunSuite with MockitoSugar {
 
   test("FactoryToService module delegates isAvailable / close to underlying factory")(new Ctx {
     val stack =
-      FactoryToService.module.toStack(Stack.Leaf(Stack.Role("role"), underlyingFactory))
+      FactoryToService.module.toStack(Stack.leaf(Stack.Role("role"), underlyingFactory))
 
     val factory = stack.make(Stack.Params.empty + FactoryToService.Enabled(true))
 
@@ -209,7 +209,7 @@ class ServiceTest extends FunSuite with MockitoSugar {
     "FactoryToService around module closes underlying service after request, does not close underlying factory"
   )(new Ctx {
     val stack =
-      FactoryToService.module.toStack(Stack.Leaf(Stack.Role("role"), underlyingFactory))
+      FactoryToService.module.toStack(Stack.leaf(Stack.Role("role"), underlyingFactory))
 
     val factory = stack.make(Stack.Params.empty + FactoryToService.Enabled(true))
 
@@ -223,7 +223,7 @@ class ServiceTest extends FunSuite with MockitoSugar {
   test("FactoryToService around module delegates isAvailable / close to underlying factory")(
     new Ctx {
       val stack =
-        FactoryToService.module.toStack(Stack.Leaf(Stack.Role("role"), underlyingFactory))
+        FactoryToService.module.toStack(Stack.leaf(Stack.Role("role"), underlyingFactory))
 
       val factory = stack.make(Stack.Params.empty + FactoryToService.Enabled(true))
 

@@ -191,7 +191,7 @@ private[this] object SimplePartitioningService {
       ): Stack[ServiceFactory[String, String]] = {
         val LoadBalancerFactory.Dest(dest: Var[Addr]) = params[LoadBalancerFactory.Dest]
         val service = new SimplePartitioningService(next, params, dest)
-        Stack.Leaf(role, ServiceFactory.const(service))
+        Stack.leaf(role, ServiceFactory.const(service))
       }
     }
   }

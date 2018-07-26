@@ -389,7 +389,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
 
     val name = Name.Bound(Var(Addr.Pending), "id", Path.read("/alpha"))
 
-    val end = Stack.Leaf(
+    val end = Stack.leaf(
       Stack.Role("end"),
       ServiceFactory(() => Future.value(Service.mk[Path, Path](Future.value)))
     )

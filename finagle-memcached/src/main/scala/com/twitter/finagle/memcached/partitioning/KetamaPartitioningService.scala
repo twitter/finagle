@@ -41,7 +41,7 @@ private[finagle] object KetamaPartitioningService {
       next: Stack[ServiceFactory[Req, Rep]]
     ): Stack[ServiceFactory[Req, Rep]] = {
       val service: Service[Req, Rep] = newKetamaPartitioningService(next, params)
-      Stack.Leaf(role, ServiceFactory.const(service))
+      Stack.leaf(role, ServiceFactory.const(service))
     }
   }
 }

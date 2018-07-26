@@ -35,7 +35,7 @@ class MethodBuilderRetryTest extends FunSuite {
     params: Stack.Params = Stack.Params.empty
   ): MethodBuilder[Int, Int] = {
     val svcFactory = ServiceFactory.const(svc)
-    val stack = Stack.Leaf(Stack.Role("test"), svcFactory)
+    val stack = Stack.leaf(Stack.Role("test"), svcFactory)
     val ps =
       Stack.Params.empty +
         param.Label(clientName) +

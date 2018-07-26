@@ -43,7 +43,7 @@ class StackRegistryTest extends FunSuite {
   val param1 = TestParam(999)
 
   def newStack() = {
-    val stack = new StackBuilder(Stack.Leaf(new Stack.Head {
+    val stack = new StackBuilder(Stack.leaf(new Stack.Head {
       def role: Stack.Role = headRole
       def description: String = "the head!!"
       def parameters: Seq[Stack.Param[_]] = Seq(TestParam2.param)
@@ -99,7 +99,7 @@ class StackRegistryTest extends FunSuite {
       def registryName: String = "test"
     }
     val stack = new StackBuilder(
-      Stack.Leaf(
+      Stack.leaf(
         new Stack.Head {
           def role: Stack.Role = headRole
           def description: String = "the head!!"
@@ -125,7 +125,7 @@ class StackRegistryTest extends FunSuite {
       def registryName: String = "test"
     }
     val stack = new StackBuilder(
-      Stack.Leaf(
+      Stack.leaf(
         new Stack.Head {
           def role: Stack.Role = headRole
           def description: String = "the head!!"
