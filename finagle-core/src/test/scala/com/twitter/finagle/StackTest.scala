@@ -26,6 +26,16 @@ class StackTest extends FunSuite {
   test("Stack.make") {
     assert(newStack().make(empty) == Seq(20, 10, 1, 2, 3, 4))
   }
+
+  test("Stack.map") {
+    val stack = newStack().map { (head, l) =>
+      if (head.role == testRole3) 30 :: l
+      else if (head.role == testRole2) 0 :: l
+      else l
+    }
+
+    assert(stack.make(empty) == Seq(30, 20, 0, 10, 1, 2, 3, 4))
+  }
   
   test("Stack.insertBefore") {
     val stack = newStack()

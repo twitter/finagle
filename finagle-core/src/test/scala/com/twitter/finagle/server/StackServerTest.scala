@@ -233,7 +233,7 @@ class StackServerTest extends FunSuite with Eventually {
         val description = role.toString
         val parameters = Seq(implicitly[Stack.Param[String]])
         def make(params: Stack.Params, next: Stack[ServiceFactory[A, B]]) = {
-          Stack.Leaf(this, next.make(params + "hello"))
+          Stack.leaf(this, next.make(params + "hello"))
         }
       }
 

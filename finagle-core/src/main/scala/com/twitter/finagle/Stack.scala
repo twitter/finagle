@@ -45,12 +45,25 @@ sealed trait Stack[T] {
   /**
    * Transform one stack to another by applying `fn` on each element;
    * the map traverses on the element produced by `fn`, not the
-   * original stack.
+   * original stack. Prefer using [[map]] over [[transform]].
    */
-  def transform(fn: Stack[T] => Stack[T]): Stack[T] =
+  protected def transform(fn: Stack[T] => Stack[T]): Stack[T] =
     fn(this) match {
       case Node(hd, mk, next) => Node(hd, mk, next.transform(fn))
       case leaf @ Leaf(_, _) => leaf
+    }
+
+  /**
+   * Transform one stack to another by applying `fn` on each element.
+   */
+  def map(fn: (Stack.Head, T) => T): Stack[T] =
+    this match {
+      case Node(hd, mk, next) =>
+        def mk2(p: Params, stk: Stack[T]): Stack[T] =
+          Leaf(stk.head, fn(hd, mk(p, stk).make(p)))
+        Node(hd, mk2(_, _), next.map(fn))
+      case Leaf(hd, t) =>
+        Leaf(hd, fn(hd, t))
     }
 
   /**
@@ -254,8 +267,8 @@ object Stack {
     def parameters: Seq[Stack.Param[_]]
   }
 
-  private[finagle] case class Leaf[T](head: Stack.Head, t: T) extends Stack[T]
-  private[finagle] case class Node[T](head: Stack.Head, mk: (Params, Stack[T]) => Stack[T], next: Stack[T]) extends Stack[T]
+  private case class Leaf[T](head: Stack.Head, t: T) extends Stack[T]
+  private case class Node[T](head: Stack.Head, mk: (Params, Stack[T]) => Stack[T], next: Stack[T]) extends Stack[T]
 
   /**
    * Nodes materialize by transforming the underlying stack in
