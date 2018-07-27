@@ -38,7 +38,7 @@ private[finagle] object CookieMap {
  * cookie is removed from the CookieMap, a header is automatically removed from
  * the ''message''
  */
-class CookieMap private[twitter](message: Message, cookieCodec: CookieCodec)
+class CookieMap private[finagle](message: Message, cookieCodec: CookieCodec)
     extends mutable.Map[String, Cookie]
     with mutable.MapLike[String, Cookie, CookieMap] {
 
