@@ -119,12 +119,11 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
     }
 
     /**
-     * Configure whether to support unsigned integer fields should be considered when
-     * returning elements of a [[Row]]. If not supported, unsigned fields will be decoded
-     * as if they were signed, potentially resulting in corruption in the case of overflowing
-     * the signed representation. Because Java doesn't support unsigned integer types
-     * widening may be necessary to support the unsigned variants. For example, an unsigned
-     * Int is represented as a Long.
+     * Configure whether to support unsigned integer fields when returning elements of a [[Row]].
+     * If not supported, unsigned fields will be decoded as if they were signed, potentially
+     * resulting in corruption in the case of overflowing the signed representation. Because
+     * Java doesn't support unsigned integer types widening may be necessary to support the
+     * unsigned variants. For example, an unsigned Int is represented as a Long.
      *
      * `Value` representations of unsigned columns which are widened when enabled:
      * `ByteValue` -> `ShortValue``
@@ -302,11 +301,16 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
       configured(Handshake.FoundRows(false))
 
     /**
-     * Installs a module on the client which issues a ROLLBACK statement each time a
-     * service is checked out of the connection pool. This exists to prevent a situation
-     * where an unfinished transaction has been written to the wire, the service has been
-     * released back into the pool, the same service is again checked out of the pool, and
-     * a statement that causes an implicit commit is issued.
+     * Installs a module on the client which issues a ROLLBACK statement when a service is put
+     * back into the pool. This exists to ensure that a "clean" connection is always returned
+     * from the connection pool. For example, it prevents situations where an unfinished
+     * transaction has been written to the wire, the service has been released back into
+     * the pool, the same service is again checked out of the pool, and a statement
+     * that causes an implicit commit is issued.
+     *
+     * The additional work incurred for the rollback may result in less throughput from the
+     * connection pool and, as such, may require configuring the pool (via `withSessionPool`)
+     * to offer more available connections connections.
      *
      * @see [[com.twitter.finagle.mysql.RollbackFactory]]
      * @see https://dev.mysql.com/doc/en/implicit-commit.html
@@ -321,8 +325,11 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
 
     /**
      * Removes the module on the client which issues a ROLLBACK statement each time a
-     * service is checked out of the connection pool. This ''may'' result in better
-     * performance at the risk of partial transactions from other usages being committed.
+     * service is put back into the pool. This ''may'' result in better performance
+     * at the risk of receiving a connection from the pool with uncommitted state.
+     *
+     * Instead of disabling this feature, consider configuring the connection pool
+     * for the client (via `withSessionPool`) to offer more available connections.
      *
      * @see [[com.twitter.finagle.mysql.RollbackFactory]]
      * @see https://dev.mysql.com/doc/en/implicit-commit.html

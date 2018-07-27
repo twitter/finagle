@@ -46,9 +46,9 @@ Runtime Behavior Changes
     `Trace.isActivelyTracing`. Add `Trace.isActivelyTracing` guards on the call sites if
     materializing tracing annotations is a performance concern.  ``PHAB_ID=D193300``
 
-  * finagle-mysql: Clients will now issue a ROLLBACK each time a service is checked out
-    of the connection pool. This can be disabled via `Mysql.Client.noRollback`.
-    ``PHAB_ID=D193923``
+  * finagle-mysql: Clients will now issue a ROLLBACK each time a service is checked back
+    into the connection pool. This can be disabled via `Mysql.Client.withNoRollback`.
+    ``PHAB_ID=D196673``
 
   * finagle-thriftmux: The push-based server muxer is now the default. In both synthetic tests
     and production it has shown signifcant performance benefits and is simpler to maintain.
