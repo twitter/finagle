@@ -1,7 +1,6 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.http.cookie.SameSite
-import com.twitter.finagle.http.cookie.exp.supportSameSiteCodec
+import com.twitter.finagle.http.cookie.{SameSite, supportSameSiteCodec}
 import com.twitter.finagle.http.netty3.Netty3CookieCodec
 import com.twitter.finagle.http.netty4.Netty4CookieCodec
 import com.twitter.finagle.server.ServerInfo

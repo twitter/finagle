@@ -1,8 +1,7 @@
 package com.twitter.finagle.http.netty3
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.http.cookie.SameSite
-import com.twitter.finagle.http.cookie.exp.supportSameSiteCodec
+import com.twitter.finagle.http.cookie.{SameSite, supportSameSiteCodec}
 import com.twitter.finagle.http.{Cookie, CookieMap, CookieMapTest, Message, Request, Response}
 
 // These tests exercise common N3/N4 cookie behavior via CookieMapTest, and then further

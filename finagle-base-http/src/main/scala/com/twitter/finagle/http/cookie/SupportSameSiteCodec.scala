@@ -1,4 +1,4 @@
-package com.twitter.finagle.http.cookie.exp
+package com.twitter.finagle.http.cookie
 
 import com.twitter.app.GlobalFlag
 

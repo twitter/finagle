@@ -1,7 +1,6 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.http.cookie.SameSite
-import com.twitter.finagle.http.cookie.exp.supportSameSiteCodec
+import com.twitter.finagle.http.cookie.{SameSite, supportSameSiteCodec}
 import com.twitter.finagle.toggle.flag
 import com.twitter.finagle.{Http, Service}
 import com.twitter.util.{Await, Duration, Future}

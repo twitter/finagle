@@ -23,6 +23,9 @@ New Features
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-base-http: `c.t.f.http.cookie.exp.supportSameSiteCodec` has been moved out of the
+    exp package to `c.t.f.http.cookie.supportSameSiteCodec`. ``PHAB_ID=D196517``
+
   * finagle-core: Parameter-less annotation classes (`c.t.f.tracing.Annotation`) have been
     promoted to objects for efficiency reasons.  ``PHAB_ID=D192598``
 
