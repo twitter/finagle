@@ -334,6 +334,10 @@ final private[http2] class StreamTransportFactory(
 
     @volatile private[StreamTransportFactory] var _state: StreamState = Idle
 
+    // Helps avoid a race condition induced between a stream being interrupted or closed
+    // and another request being enqueued
+    @volatile private[this] var wasClosed = false
+
     private[StreamTransportFactory] def handleState(newState: StreamState): Unit = {
       if (log.isLoggable(Level.DEBUG)) {
         log.debug(s"Stream $curId: ${_state} => ${newState}")
@@ -475,6 +479,7 @@ final private[http2] class StreamTransportFactory(
 
     private[this] val closeOnInterrupt: PartialFunction[Throwable, Unit] = {
       case t: Throwable =>
+        wasClosed = true
         exec.execute(new Runnable { def run(): Unit = handleCloseWith(t) })
     }
 
@@ -537,6 +542,7 @@ final private[http2] class StreamTransportFactory(
     }
 
     def status: Status = state match {
+      case _ if wasClosed => Status.Closed
       case _: Active => Status.Open
       case Dead => Status.Closed
       case Idle => parent.status
@@ -551,6 +557,7 @@ final private[http2] class StreamTransportFactory(
     def peerCertificate: Option[Certificate] = underlying.context.peerCertificate
 
     def close(deadline: Time): Future[Unit] = {
+      wasClosed = true
       exec.execute(new Runnable {
         def run(): Unit = handleCloseStream("close called on stream transport", deadline)
       })

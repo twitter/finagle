@@ -42,6 +42,13 @@ Breaking API Changes
   * finagle-core: Marked `transform` in `com.twitter.finagle.Stack` as protected. It is too
     powerful and unnecessary for users, and should be for implementor use only. ``PHAB_ID=D195938``
 
+Bug Fixes
+~~~~~~~~~
+
+  * finagle-http2: Fixed a race condition caused by c.t.f.http.transport.StreamTransports being
+    closed, but that status not being reflected right away, causing a second request to fail.
+    ``PHAB_ID=D198198``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
