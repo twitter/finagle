@@ -32,15 +32,19 @@ Breaking API Changes
   * finagle-core: `c.t.f.tracing.Trace.record(Record)` now accepts the record argument by
     value (previously by name). ``PHAB_ID=D193300``
 
-  * finagle-mysql: `c.t.f.mysql.CanBeParameter`'s implicit conversions `timestampCanBeParameter`,
-    `sqlDateCanBeParameter`, and `javaDateCanBeParameter` have been consolidated into a single
-    implicit, `dateCanBeParameter`. ``PHAB_ID=D195351``
+  * finagle-core: `c.t.f.Failure.{Restartable, Interrupted, Ignorable, DeadlineExceeded, 
+    Wrapped, Rejected, NonRetryable}` are deprecated in favor of the `c.t.f.FailureFlags` 
+    analogs. ``PHAB_ID=D195647``
 
   * finagle-core: `c.t.f.Leaf` and `c.t.f.Node` are now private; use `Stack.leaf` and
     `Stack.node` instead. ``PHAB_ID=D195924``
 
   * finagle-core: Marked `transform` in `com.twitter.finagle.Stack` as protected. It is too
     powerful and unnecessary for users, and should be for implementor use only. ``PHAB_ID=D195938``
+
+  * finagle-mysql: `c.t.f.mysql.CanBeParameter`'s implicit conversions `timestampCanBeParameter`,
+    `sqlDateCanBeParameter`, and `javaDateCanBeParameter` have been consolidated into a single
+    implicit, `dateCanBeParameter`. ``PHAB_ID=D195351``
 
 Bug Fixes
 ~~~~~~~~~

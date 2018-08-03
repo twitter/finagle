@@ -119,23 +119,27 @@ object Failure {
    * Flag restartable indicates that the action that caused the failure
    * is ''restartable'' -- that is, it is safe to simply re-issue the action.
    */
+  @deprecated("Use FailureFlags.Retryable", "2018-7-17")
   val Restartable: Long = FailureFlags.Retryable
 
   /**
    * Flag interrupted indicates that the error was caused due to an
    * interruption. (e.g., by invoking [[Future.raise]].)
    */
+  @deprecated("Use FailureFlags.Interrupted", "2018-7-17")
   val Interrupted: Long = FailureFlags.Interrupted
 
   /**
    * Flag ignorable indicates that the failure can be ignored and should not be surfaced via stats.
    */
+  @deprecated("Use FailureFlags.Ignorable", "2018-7-17")
   val Ignorable: Long = FailureFlags.Ignorable
 
   /**
    * Flag deadline exceeded indicates that this failure occured because a request was received past
    * its deadline.
    */
+  @deprecated("Use FailureFlags.DeadlineExceeded", "2018-7-17")
   val DeadlineExceeded: Long = FailureFlags.DeadlineExceeded
 
   /**
@@ -143,12 +147,14 @@ object Failure {
    * not be presented to the user (directly, or via stats). Rather, it must
    * first be unwrapped: the inner cause is the presentable failure.
    */
+  @deprecated("Use FailureFlags.Wrapped", "2018-7-17")
   val Wrapped: Long = FailureFlags.Wrapped
 
   /**
    * Flag rejected indicates that the work was rejected and therefore cannot be
    * completed. This may indicate an overload condition.
    */
+  @deprecated("Use FailureFlags.Rejected", "2018-7-17")
   val Rejected: Long = FailureFlags.Rejected
 
   /**
@@ -156,6 +162,7 @@ object Failure {
    * not be re-issued. This failure should be propagated back along the call
    * chain as far as possible.
    */
+  @deprecated("Use FailureFlags.NonRetryable", "2018-7-17")
   val NonRetryable: Long = FailureFlags.NonRetryable
 
   /**

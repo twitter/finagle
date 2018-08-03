@@ -18,7 +18,7 @@ object FailureFlags {
    * such failures. Note that this is independent of any user-configured retry
    * logic. This is Finagle-internal.
    */
-  private[finagle] val Retryable: Long = 1L << 0
+  val Retryable: Long = 1L << 0
 
   /**
    * Interrupted indicates that the error was caused due to an
