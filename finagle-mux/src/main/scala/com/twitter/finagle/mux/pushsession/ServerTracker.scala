@@ -36,9 +36,11 @@ private class ServerTracker(
   private[this] val orphanedTdiscardCounter = statsReceiver.counter("orphaned_tdiscard")
 
   private[this] val drainedP = Promise[Unit]()
-  // All variables expect to enjoy single-threaded manipulation through the executor
+  // Note, the vars below are only read within the context of
+  // the `serialExecutor`, thus, we don't need any memory barriers.
   private[this] var state: DrainState = Open
   private[this] var leaseExpiration: Time = Time.Top
+  private[this] var cachedLocals: Option[Local.Context] = None
 
   def issue(howLong: Duration): Unit = {
     require(howLong >= Message.Tlease.MinLease)
@@ -146,9 +148,19 @@ private class ServerTracker(
     else messageWriter.write(Message.RdispatchNack(request.tag, Nil))
   }
 
+  private[this] def getLocals(): Local.Context = {
+    cachedLocals match {
+      case Some(ls) => ls
+      case None =>
+        val ls = locals()
+        cachedLocals = Some(ls)
+        ls
+    }
+  }
+
   private[this] def doDispatch(m: Message): Unit = {
     if (dispatches.containsKey(m.tag)) duplicateTagDetected(m.tag)
-    else Local.let(locals()) {
+    else Local.let(getLocals()) {
       lessor.observeArrival()
       val responseF = Processor(m, service)
       val elapsed = Stopwatch.start()
