@@ -12,7 +12,7 @@ New Features
 
   * finagle-core: Introducing the new `c.t.f.tracing.Tracing` API for more efficient tracing
     (dramatically reduces the number of context lookups; see scaladoc for `c.t.f.tracing.Trace`).
-    PHAB_ID=``D190670``
+    ``PHAB_ID=D190670``
 
   * finagle-core: `c.t.f.tracing.Trace` facade API now provides forwarding `record` methods for
     all kinds of annotations and is a preffered way of recording traces. ``PHAB_ID=D192598``
@@ -32,8 +32,8 @@ Breaking API Changes
   * finagle-core: `c.t.f.tracing.Trace.record(Record)` now accepts the record argument by
     value (previously by name). ``PHAB_ID=D193300``
 
-  * finagle-core: `c.t.f.Failure.{Restartable, Interrupted, Ignorable, DeadlineExceeded, 
-    Wrapped, Rejected, NonRetryable}` are deprecated in favor of the `c.t.f.FailureFlags` 
+  * finagle-core: `c.t.f.Failure.{Restartable, Interrupted, Ignorable, DeadlineExceeded,
+    Wrapped, Rejected, NonRetryable}` are deprecated in favor of the `c.t.f.FailureFlags`
     analogs. ``PHAB_ID=D195647``
 
   * finagle-core: `c.t.f.Leaf` and `c.t.f.Node` are now private; use `Stack.leaf` and
