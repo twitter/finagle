@@ -1,18 +1,18 @@
 package com.twitter.finagle.stats
 
-/**
- * Provides a `StatsReceiver` that prints nice summaries. Handy for
- * short-lived programs where you want summaries.
- */
 import com.github.benmanes.caffeine.cache.{Caffeine, CacheLoader}
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
 
+/**
+ * Provides a `StatsReceiver` that prints nice summaries. Handy for
+ * short-lived programs where you want summaries.
+ */
 class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
 
-  def repr = this
+  def repr: SummarizingStatsReceiver = this
 
   private[this] val counters = new ConcurrentHashMap[Seq[String], AtomicLong]()
 
@@ -29,7 +29,7 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
 
   def counter(verbosity: Verbosity, name: String*): Counter = new Counter {
     counters.putIfAbsent(name, new AtomicLong(0))
-    def incr(delta: Long): Unit = { counters.get(name).getAndAdd(delta) }
+    def incr(delta: Long): Unit = counters.get(name).getAndAdd(delta)
   }
 
   def stat(verbosity: Verbosity, name: String*): Stat = new Stat {
@@ -51,7 +51,7 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
   /* Summary */
   /* ======= */
 
-  private[this] def variableName(name: Seq[String]) = name mkString "/"
+  private[this] def variableName(name: Seq[String]): String = name.mkString("/")
 
   def summary(): String = summary(false)
 
@@ -60,7 +60,7 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
     val gaugeValues = gauges.toSeq map {
       case (names, gauge) => variableName(names) -> gauge().toString
     }
-    val statValues = stats.asMap.asScala collect {
+    val statValues = stats.asMap.asScala.collect {
       case (k, buf) if buf.nonEmpty =>
         val n = buf.size
         val values = new Array[Float](n)
@@ -70,8 +70,10 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
     }
 
     val counterLines =
-      (counterValues map { case (k, v) => (variableName(k), v.get.toString) }).toSeq
-    val statLines = (statValues map {
+      counterValues.map { case (k, v) =>
+        (variableName(k), v.get.toString)
+      }.toSeq
+    val statLines = statValues.map {
       case (k, xs) =>
         val n = xs.length
         def idx(ptile: Double) = math.floor(ptile * n).toInt
@@ -89,9 +91,9 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
             xs(n - 1)
           )
         )
-    }).toSeq
+    }.toSeq
 
-    lazy val tailValues = (statValues map {
+    lazy val tailValues = statValues.map {
       case (k, xs) =>
         val n = xs.length
         def slice(ptile: Double) = {
@@ -100,7 +102,7 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
           for (i <- start to end) yield xs(i)
         }
         (variableName(k), "p999=%s, p9999=%s".format(slice(.999D), slice(.9999D)))
-    }).toSeq
+    }.toSeq
 
     val sortedCounters = counterLines.sortBy { case (k, _) => k }
     val sortedGauges = gaugeValues.sortBy { case (k, _) => k }
@@ -118,7 +120,7 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
     "# counters\n" + fmtCounters.mkString("\n") +
       "\n# gauges\n" + fmtGauges.sorted.mkString("\n") +
       "\n# stats\n" + fmtStats.mkString("\n") +
-      (if (includeTails) "\n# stats-tails\n" + (fmtTails mkString "\n") else "")
+      (if (includeTails) "\n# stats-tails\n" + fmtTails.mkString("\n") else "")
   }
 
   def print(): Unit = println(summary(false))
