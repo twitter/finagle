@@ -167,7 +167,7 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
       Set()
     )
     for ((f, c) <- failures.zip(categories)) {
-      assert(Failure.flagsOf(f) == c)
+      assert(FailureFlags.flagsOf(f) == c)
     }
   }
 

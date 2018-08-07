@@ -21,9 +21,8 @@ final class Failure private[finagle] (
     with NoStackTrace
     with HasLogLevel
     with FailureFlags[Failure] {
-  import Failure._
 
-  require(!isFlagged(Wrapped) || cause.isDefined)
+  require(!isFlagged(FailureFlags.Wrapped) || cause.isDefined)
 
   /**
    * Returns a source for a given key, if it exists.
@@ -116,56 +115,6 @@ object Failure {
   }
 
   /**
-   * Flag restartable indicates that the action that caused the failure
-   * is ''restartable'' -- that is, it is safe to simply re-issue the action.
-   */
-  @deprecated("Use FailureFlags.Retryable", "2018-7-17")
-  val Restartable: Long = FailureFlags.Retryable
-
-  /**
-   * Flag interrupted indicates that the error was caused due to an
-   * interruption. (e.g., by invoking [[Future.raise]].)
-   */
-  @deprecated("Use FailureFlags.Interrupted", "2018-7-17")
-  val Interrupted: Long = FailureFlags.Interrupted
-
-  /**
-   * Flag ignorable indicates that the failure can be ignored and should not be surfaced via stats.
-   */
-  @deprecated("Use FailureFlags.Ignorable", "2018-7-17")
-  val Ignorable: Long = FailureFlags.Ignorable
-
-  /**
-   * Flag deadline exceeded indicates that this failure occured because a request was received past
-   * its deadline.
-   */
-  @deprecated("Use FailureFlags.DeadlineExceeded", "2018-7-17")
-  val DeadlineExceeded: Long = FailureFlags.DeadlineExceeded
-
-  /**
-   * Flag wrapped indicates that this failure was wrapped, and should
-   * not be presented to the user (directly, or via stats). Rather, it must
-   * first be unwrapped: the inner cause is the presentable failure.
-   */
-  @deprecated("Use FailureFlags.Wrapped", "2018-7-17")
-  val Wrapped: Long = FailureFlags.Wrapped
-
-  /**
-   * Flag rejected indicates that the work was rejected and therefore cannot be
-   * completed. This may indicate an overload condition.
-   */
-  @deprecated("Use FailureFlags.Rejected", "2018-7-17")
-  val Rejected: Long = FailureFlags.Rejected
-
-  /**
-   * Flag nonretryable indicates that the action that caused this failure should
-   * not be re-issued. This failure should be propagated back along the call
-   * chain as far as possible.
-   */
-  @deprecated("Use FailureFlags.NonRetryable", "2018-7-17")
-  val NonRetryable: Long = FailureFlags.NonRetryable
-
-  /**
    * Representation of a nack response that is retryable
    */
   val RetryableNackFailure: Failure = Failure.rejected("The request was Nacked by the server")
@@ -235,12 +184,6 @@ object Failure {
    * Extractor for [[Failure]]; returns its cause.
    */
   def unapply(exc: Failure): Option[Option[Throwable]] = Some(exc.cause)
-
-  /**
-   * Expose flags as strings, used for stats reporting
-   */
-  @deprecated("Use `FailureFlags.flagsOf` instead", "2017-05-08")
-  def flagsOf(exc: Throwable): Set[String] = FailureFlags.flagsOf(exc)
 
   /**
    * Adapt an exception. If the passed-in exception is already a failure,
