@@ -39,7 +39,7 @@ abstract class AbstractStreamingTest extends FunSuite {
 
   // We call write repeatedly for `streamChunks` to *be sure* to notice
   // transport failure.
-  def writeLots(writer: Writer, buf: Buf): Future[Unit] =
+  def writeLots(writer: Writer[Buf], buf: Buf): Future[Unit] =
     writer.write(buf) before writeLots(writer, buf)
 
   class ClientCtx {
@@ -465,7 +465,7 @@ object StreamingTest {
 
   def const(bufs: Seq[Buf]): Service[Request, Response] =
     new Service[Request, Response] {
-      private def drain(writer: Writer, bs: Seq[Buf]): Future[Unit] = bs match {
+      private def drain(writer: Writer[Buf], bs: Seq[Buf]): Future[Unit] = bs match {
         case Nil => Future.Done
         case head +: tail => writer.write(head).before(drain(writer, tail))
       }
@@ -485,7 +485,7 @@ object StreamingTest {
     req
   }
 
-  def ok(readerIn: Reader) = {
+  def ok(readerIn: Reader[Buf]) = {
     val res = Response(Version.Http11, Status.Ok, readerIn)
     res.headerMap.set("Connection", "close")
     res

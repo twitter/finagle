@@ -3,7 +3,7 @@ package com.twitter.finagle.netty4.http
 import com.twitter.finagle.http.{Fields, HeaderMap, Request}
 import com.twitter.finagle.netty4.ByteBufConversion
 import com.twitter.finagle.{http => FinagleHttp}
-import com.twitter.io.{BufReader, Reader, Writer}
+import com.twitter.io.{Buf, BufReader, Reader, Writer}
 import io.netty.handler.codec.{http => NettyHttp}
 import java.net.InetSocketAddress
 
@@ -24,7 +24,7 @@ private[finagle] object Bijections {
 
     private def requestToFinagleHelper(
       in: NettyHttp.HttpRequest,
-      r: Reader,
+      r: Reader[Buf],
       remoteAddr: InetSocketAddress,
       chunked: Boolean
     ): Request = {
@@ -46,7 +46,7 @@ private[finagle] object Bijections {
 
     def chunkedRequestToFinagle(
       in: NettyHttp.HttpRequest,
-      r: Reader,
+      r: Reader[Buf],
       remoteAddr: InetSocketAddress
     ): FinagleHttp.Request = requestToFinagleHelper(in, r, remoteAddr, chunked = true)
 
@@ -72,7 +72,7 @@ private[finagle] object Bijections {
       }
     }
 
-    def chunkedResponseToFinagle(in: NettyHttp.HttpResponse, r: Reader): FinagleHttp.Response = {
+    def chunkedResponseToFinagle(in: NettyHttp.HttpResponse, r: Reader[Buf]): FinagleHttp.Response = {
       val resp = FinagleHttp.Response(
         versionToFinagle(in.protocolVersion),
         statusToFinagle(in.status),

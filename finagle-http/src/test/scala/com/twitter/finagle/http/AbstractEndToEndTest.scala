@@ -61,7 +61,7 @@ abstract class AbstractEndToEndTest
 
   def await[T](f: Future[T]): T = Await.result(f, 30.seconds)
 
-  def drip(w: Writer): Future[Unit] = w.write(buf("*")) before drip(w)
+  def drip(w: Writer[Buf]): Future[Unit] = w.write(buf("*")) before drip(w)
   def buf(msg: String): Buf = Buf.Utf8(msg)
   def implName: String
   def skipWholeTest: Boolean = false
@@ -79,7 +79,7 @@ abstract class AbstractEndToEndTest
   /**
    * Read `n` number of bytes from the bytestream represented by `r`.
    */
-  def readNBytes(n: Int, r: Reader): Future[Buf] = {
+  def readNBytes(n: Int, r: Reader[Buf]): Future[Buf] = {
     def loop(left: Buf): Future[Buf] = (n - left.length) match {
       case x if x > 0 =>
         r.read(x) flatMap {
@@ -519,7 +519,7 @@ abstract class AbstractEndToEndTest
 
   def streaming(connect: HttpService => HttpService): Unit = {
     test(s"$implName (streaming)" + ": stream") {
-      def service(r: Reader) = new HttpService {
+      def service(r: Reader[Buf]) = new HttpService {
         def apply(request: Request) = {
           val response = Response.chunked(Version.Http11, Status.Ok, r)
           Future.value(response)

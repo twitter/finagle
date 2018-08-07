@@ -13,7 +13,7 @@ import org.scalatest.FunSuite
 
 @RunWith(classOf[JUnitRunner])
 class Http2ListenerTest extends FunSuite {
-  def evaluate(fn: (Writer, Reader) => Unit): Any = {
+  def evaluate(fn: (Writer[Buf], Reader[Buf]) => Unit): Any = {
     val listener = Http2Listener[HttpMessage, HttpMessage](Stack.Params.empty)
     val q = new SynchronousQueue[Any]()
     val server = listener.listen(new InetSocketAddress(0)) { transport =>

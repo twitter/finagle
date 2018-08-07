@@ -2,9 +2,8 @@ package com.twitter.finagle.http
 
 import com.twitter.finagle.http.Message.BufOutputStream
 import com.twitter.finagle.http.util.StringUtil
-import com.twitter.io.{Buf, BufInputStream, Reader => BufReader, Writer => BufWriter}
+import com.twitter.io.{Buf, BufInputStream, Reader, Writer}
 import com.twitter.util.{Closable, Duration, Future}
-import java.io._
 import java.util.{Date, Locale, Iterator => JIterator}
 import java.nio.charset.Charset
 import java.time.{ZoneId, ZoneOffset}
@@ -27,13 +26,13 @@ abstract class Message {
    * A read-only handle to the internal stream of bytes, representing the
    * message body. See [[com.twitter.io.Reader]] for more information.
    **/
-  def reader: BufReader
+  def reader: Reader[Buf]
 
   /**
    * A write-only handle to the internal stream of bytes, representing the
    * message body. See [[com.twitter.io.Writer]] for more information.
    **/
-  def writer: BufWriter with Closable
+  def writer: Writer[Buf] with Closable
 
   def isRequest: Boolean
   def isResponse = !isRequest
@@ -461,7 +460,7 @@ abstract class Message {
    * Use content as InputStream.  The underlying channel buffer's reader
    * index is advanced.  (Scala interface.  Java users can use getInputStream().)
    */
-  def withInputStream[T](f: InputStream => T): T = {
+  def withInputStream[T](f: java.io.InputStream => T): T = {
     val inputStream = getInputStream()
     try f(inputStream)
     finally inputStream.close()
@@ -471,19 +470,19 @@ abstract class Message {
    * Get InputStream for content.  Caller must close.  (Java interface.  Scala
    * users should use withInputStream.)
    */
-  final def getInputStream(): InputStream = new BufInputStream(content)
+  final def getInputStream(): java.io.InputStream = new BufInputStream(content)
 
   /** Use content as Reader.  (Scala interface.  Java users can use getReader().) */
-  final def withReader[T](f: Reader => T): T = {
+  final def withReader[T](f: java.io.Reader => T): T = {
     withInputStream { inputStream =>
-      val reader = new InputStreamReader(inputStream)
+      val reader = new java.io.InputStreamReader(inputStream)
       f(reader)
     }
   }
 
   /** Get Reader for content.  (Java interface.  Scala users should use withReader.) */
-  final def getReader(): Reader =
-    new InputStreamReader(getInputStream())
+  final def getReader(): java.io.Reader =
+    new java.io.InputStreamReader(getInputStream())
 
   /**
    * Append string to content.
@@ -522,7 +521,7 @@ abstract class Message {
    * An `IllegalStateException` is thrown if this message is chunked.
    */
   @throws(classOf[IllegalStateException])
-  final def withOutputStream[T](f: OutputStream => T): T = {
+  final def withOutputStream[T](f: java.io.OutputStream => T): T = {
     // Use buffer size of 1024 which is only a best guess as to the ideal initial size
     val outputStream = new BufOutputStream(1024)
     try {
@@ -538,10 +537,10 @@ abstract class Message {
    * An `IllegalStateException` is thrown if this message is chunked.
    */
   @throws(classOf[IllegalStateException])
-  final def withWriter[T](f: Writer => T): T = {
+  final def withWriter[T](f: java.io.Writer => T): T = {
     // withOutputStream will write() to the message
     withOutputStream { outputStream =>
-      val writer = new OutputStreamWriter(outputStream, Message.Utf8)
+      val writer = new java.io.OutputStreamWriter(outputStream, Message.Utf8)
       try f(writer)
       finally writer.close()
     }
@@ -575,7 +574,9 @@ abstract class Message {
 
 object Message {
 
-  private final class BufOutputStream(initialSize: Int) extends ByteArrayOutputStream(initialSize) {
+  private final class BufOutputStream(initialSize: Int)
+      extends java.io.ByteArrayOutputStream(initialSize) {
+
     def contentsAsBuf: Buf = Buf.ByteArray.Owned(buf, 0, count)
   }
 

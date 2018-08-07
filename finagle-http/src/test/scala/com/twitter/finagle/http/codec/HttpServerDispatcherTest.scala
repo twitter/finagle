@@ -137,6 +137,6 @@ object HttpServerDispatcherTest {
     new DefaultHttpContent(buf)
   }
 
-  def ok(reader: Reader): Future[Response] =
+  def ok(reader: Reader[Buf]): Future[Response] =
     Future.value(Response(Version.Http11, HttpStatus.Ok, reader))
 }

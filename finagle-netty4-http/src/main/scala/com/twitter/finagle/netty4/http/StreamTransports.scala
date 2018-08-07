@@ -24,7 +24,7 @@ private[http] object StreamTransports {
    */
   def copyToWriter[A](
     trans: Transport[_, A],
-    writer: Writer
+    writer: Writer[Buf]
   )(eos: A => Boolean)(chunkOfA: A => Buf): Future[Unit] =
     trans.read().flatMap { a: A =>
       val chunk = chunkOfA(a)
@@ -47,7 +47,7 @@ private[http] object StreamTransports {
   def collate[A](
     trans: Transport[_, A],
     chunkOfA: A => Buf
-  )(eos: A => Boolean): Reader with Future[Unit] = new Promise[Unit] with Reader {
+  )(eos: A => Boolean): Reader[Buf] with Future[Unit] = new Promise[Unit] with Reader[Buf] {
     private[this] val rw = Reader.writable()
 
     // Ensure that collate's future is satisfied _before_ its reader
@@ -91,7 +91,7 @@ private[http] object StreamTransports {
    */
   def streamChunks(
     trans: Transport[Any, Any],
-    r: Reader,
+    r: Reader[Buf],
     // TODO Find a better number for bufSize, e.g. 32KiB - Buf overhead
     bufSize: Int = Int.MaxValue
   ): Future[Unit] = {

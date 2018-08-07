@@ -253,7 +253,7 @@ object Transport {
    */
   private[finagle] def copyToWriter[A](
     trans: Transport[_, A],
-    w: Writer
+    w: Writer[Buf]
   )(
     f: A => Future[Option[Buf]]
   ): Future[Unit] = {
@@ -280,7 +280,7 @@ object Transport {
   private[finagle] def collate[A](
     trans: Transport[_, A],
     chunkOfA: A => Future[Option[Buf]]
-  ): Reader with Future[Unit] = new Promise[Unit] with Reader {
+  ): Reader[Buf] with Future[Unit] = new Promise[Unit] with Reader[Buf] {
     private[this] val rw = Reader.writable()
 
     // Ensure that collate's future is satisfied _before_ its reader

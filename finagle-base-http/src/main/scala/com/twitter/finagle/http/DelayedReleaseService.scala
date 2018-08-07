@@ -4,7 +4,7 @@ import com.twitter.finagle
 import com.twitter.finagle._
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.util.AsyncLatch
-import com.twitter.io.Reader
+import com.twitter.io.{Buf, Reader}
 import com.twitter.util.{Future, Promise, Return, Throw, Time}
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -42,14 +42,14 @@ private[finagle] class DelayedReleaseService[-Req <: Request](
 
       def response: Response = in
 
-      override def reader: Reader = new Reader {
+      override def reader: Reader[Buf] = new Reader[Buf] {
         def read(n: Int) = in.reader.read(n) respond {
           case Return(None) => done()
           case Throw(_) => done()
           case _ =>
         }
 
-        def discard() = {
+        def discard(): Unit = {
           // Note: Discarding the underlying reader terminates the session and
           // marks the service as unavailable. It's important that we discard
           // before releasing the service (by invoking `done`), to ensure that

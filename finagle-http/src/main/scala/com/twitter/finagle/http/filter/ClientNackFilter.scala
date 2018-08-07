@@ -2,7 +2,7 @@ package com.twitter.finagle.http.filter
 
 import com.twitter.finagle.{Failure, Service, ServiceFactory, SimpleFilter, Stack, Stackable}
 import com.twitter.finagle.http.{Request, Response}
-import com.twitter.io.Reader
+import com.twitter.io.{Buf, Reader}
 import com.twitter.logging.Logger
 import com.twitter.util.{Future, Try}
 
@@ -102,7 +102,7 @@ object ClientNackFilter {
     }
   }
 
-  private[this] def swallowNackBody(reader: Reader, maxRead: Int): Future[Unit] = {
+  private[this] def swallowNackBody(reader: Reader[Buf], maxRead: Int): Future[Unit] = {
     // We add 1 to `readMax` in order to detect large responses earlier
     // and avoid falling into an infinite loop of `read(0)` calls.
     reader.read(maxRead + 1).flatMap {
