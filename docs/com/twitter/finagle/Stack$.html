@@ -638,6 +638,22 @@ finagle clients and servers.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.pushsession" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="pushsession"></a><a id="pushsession:pushsession"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#pushsession" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="pushsession/index.html"><span class="name">pushsession</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.redis" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="redis"></a><a id="redis:redis"></a>
       <span class="permalink">
@@ -1479,22 +1495,6 @@ empty stack for <a href="ServiceFactory.html" class="extype" name="com.twitter.f
       <p class="shortcomment cmt">Trait encompassing all associated metadata of a stack element.</p><div class="fullcomment"><div class="comment cmt"><p>Trait encompassing all associated metadata of a stack element.
 <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackables</a> extend this trait.
 </p></div></div>
-    </li><li name="com.twitter.finagle.Stack.Leaf" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Leaf[T]extendsStack[T]withProductwithSerializable"></a><a id="Leaf[T]:Leaf[T]"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Stack$.html#Leaf[T]extendsStack[T]withProductwithSerializable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="A static stack element; necessarily the last." href="Stack$$Leaf.html"><span class="name">Leaf</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="head">head: <a href="Stack$$Head.html" class="extype" name="com.twitter.finagle.Stack.Head">Head</a></span>, <span name="t">t: <span class="extype" name="com.twitter.finagle.Stack.Leaf.T">T</span></span>)</span><span class="result"> extends <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.Leaf.T">T</span>] with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">A static stack element; necessarily the last.</p>
     </li><li name="com.twitter.finagle.Stack.Module" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="Module[T]extendsStackable[T]"></a><a id="Module[T]:Module[T]"></a>
       <span class="permalink">
@@ -1521,7 +1521,7 @@ and the parameter extraction is derived from type parameters.
   <span class="kw">def</span> make(params: Params, next: Stack[<span class="std">Int</span><span class="kw">=&gt;</span><span class="std">Int</span>]): Stack[<span class="std">Int</span><span class="kw">=&gt;</span><span class="std">Int</span>] = {
     <span class="kw">val</span> Multiplier(m) = params[Multiplier]
     <span class="kw">if</span> (m == <span class="num">1</span>) next <span class="cmt">// It's a no-op, skip it.</span>
-    <span class="kw">else</span> Stack.Leaf(<span class="lit">"multiply"</span>, i <span class="kw">=&gt;</span> next.make(params)(i)*m)
+    <span class="kw">else</span> Stack.leaf(<span class="lit">"multiply"</span>, i <span class="kw">=&gt;</span> next.make(params)(i)*m)
   }
 }</pre></div></div>
     </li><li name="com.twitter.finagle.Stack.Module0" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
@@ -1668,23 +1668,6 @@ and the parameter extraction is derived from type parameters.
       </span>
       
       
-    </li><li name="com.twitter.finagle.Stack.Node" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Node[T]extendsStack[T]withProductwithSerializable"></a><a id="Node[T]:Node[T]"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Stack$.html#Node[T]extendsStack[T]withProductwithSerializable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="Nodes materialize by transforming the underlying stack in some way." href="Stack$$Node.html"><span class="name">Node</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="head">head: <a href="Stack$$Head.html" class="extype" name="com.twitter.finagle.Stack.Head">Head</a></span>, <span name="mk">mk: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>, <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.Node.T">T</span>]) ⇒ <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.Node.T">T</span>]</span>, <span name="next">next: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.Node.T">T</span>]</span>)</span><span class="result"> extends <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.Node.T">T</span>] with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Nodes materialize by transforming the underlying stack in
-some way.</p>
     </li><li name="com.twitter.finagle.Stack.Param" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="Param[P]extendsAnyRef"></a><a id="Param[P]:Param[P]"></a>
       <span class="permalink">
@@ -2006,6 +1989,40 @@ indifferent to these types in order to typecheck.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.Stack#leaf" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="leaf[T](_role:com.twitter.finagle.Stack.Role,t:T):com.twitter.finagle.Stack[T]"></a><a id="leaf[T](Role,T):Stack[T]"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Stack$.html#leaf[T](_role:com.twitter.finagle.Stack.Role,t:T):com.twitter.finagle.Stack[T]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">leaf</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="_role">_role: <a href="Stack$$Role.html" class="extype" name="com.twitter.finagle.Stack.Role">Role</a></span>, <span name="t">t: <span class="extype" name="com.twitter.finagle.Stack.leaf.T">T</span></span>)</span><span class="result">: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.leaf.T">T</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">If only a role is given when constructing a leaf, then the head
+is created automatically
+</p>
+    </li><li name="com.twitter.finagle.Stack#leaf" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="leaf[T](head:com.twitter.finagle.Stack.Head,t:T):com.twitter.finagle.Stack[T]"></a><a id="leaf[T](Head,T):Stack[T]"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Stack$.html#leaf[T](head:com.twitter.finagle.Stack.Head,t:T):com.twitter.finagle.Stack[T]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">leaf</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="head">head: <a href="Stack$$Head.html" class="extype" name="com.twitter.finagle.Stack.Head">Head</a></span>, <span name="t">t: <span class="extype" name="com.twitter.finagle.Stack.leaf.T">T</span></span>)</span><span class="result">: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.leaf.T">T</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A static stack element; necessarily the last.</p>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -2022,6 +2039,39 @@ indifferent to these types in order to typecheck.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.Stack#node" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="node[T](head:com.twitter.finagle.Stack.Head,mk:T=&gt;T,next:com.twitter.finagle.Stack[T]):com.twitter.finagle.Stack[T]"></a><a id="node[T](Head,(T)⇒T,Stack[T]):Stack[T]"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Stack$.html#node[T](head:com.twitter.finagle.Stack.Head,mk:T=&gt;T,next:com.twitter.finagle.Stack[T]):com.twitter.finagle.Stack[T]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">node</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="head">head: <a href="Stack$$Head.html" class="extype" name="com.twitter.finagle.Stack.Head">Head</a></span>, <span name="mk">mk: (<span class="extype" name="com.twitter.finagle.Stack.node.T">T</span>) ⇒ <span class="extype" name="com.twitter.finagle.Stack.node.T">T</span></span>, <span name="next">next: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.node.T">T</span>]</span>)</span><span class="result">: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.node.T">T</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A constructor for a 'simple' Node.</p>
+    </li><li name="com.twitter.finagle.Stack#node" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="node[T](head:com.twitter.finagle.Stack.Head,mk:(com.twitter.finagle.Stack.Params,com.twitter.finagle.Stack[T])=&gt;com.twitter.finagle.Stack[T],next:com.twitter.finagle.Stack[T]):com.twitter.finagle.Stack[T]"></a><a id="node[T](Head,(Params,Stack[T])⇒Stack[T],Stack[T]):Stack[T]"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Stack$.html#node[T](head:com.twitter.finagle.Stack.Head,mk:(com.twitter.finagle.Stack.Params,com.twitter.finagle.Stack[T])=&gt;com.twitter.finagle.Stack[T],next:com.twitter.finagle.Stack[T]):com.twitter.finagle.Stack[T]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">node</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="head">head: <a href="Stack$$Head.html" class="extype" name="com.twitter.finagle.Stack.Head">Head</a></span>, <span name="mk">mk: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>, <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.node.T">T</span>]) ⇒ <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.node.T">T</span>]</span>, <span name="next">next: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.node.T">T</span>]</span>)</span><span class="result">: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.node.T">T</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Nodes materialize by transforming the underlying stack in
+some way.</p>
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
@@ -2160,38 +2210,6 @@ indifferent to these types in order to typecheck.
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.Stack.Leaf" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Leaf"></a><a id="Leaf:Leaf"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Stack$.html#Leaf" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="Stack$$Leaf$.html"><span class="name">Leaf</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.Stack.Node" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Node"></a><a id="Node:Node"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Stack$.html#Node" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="Stack$$Node$.html"><span class="name">Node</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
-      </span>
-      
-      
     </li><li name="com.twitter.finagle.Stack.Param" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Param"></a><a id="Param:Param"></a>
       <span class="permalink">

@@ -361,6 +361,51 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.filter.NackAdmissionFilter#DefaultNackRateThreshold" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="DefaultNackRateThreshold:Double"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/filter/NackAdmissionFilter$.html#DefaultNackRateThreshold:Double" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">DefaultNackRateThreshold</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Double.html#scala.Double" class="extype" name="scala.Double">Double</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">By default, the client will send all requests when the accept rate EMA is
+between 50% and 100%.</p><div class="fullcomment"><div class="comment cmt"><p>By default, the client will send all requests when the accept rate EMA is
+between 50% and 100%. If the EMA drops below 50%, the filter will drop any
+given request with probability proportional to the EMA.</p><p>E.g., if the EMA is 20%, the filter will drop any given request with
+100 - (2 * 20) = 60% probability. If the EMA is 10%, the filter will drop
+any given request with 100 - (2 * 10) = 80% probability.
+</p></div></div>
+    </li><li name="com.twitter.finagle.filter.NackAdmissionFilter#DefaultWindow" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="DefaultWindow:com.twitter.util.Duration"></a><a id="DefaultWindow:Duration"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/filter/NackAdmissionFilter$.html#DefaultWindow:com.twitter.util.Duration" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">DefaultWindow</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">By default, the EMA window is 2 minutes: any response that the filter
+receives over a 2 minute rolling window affects the EMA's value.</p><div class="fullcomment"><div class="comment cmt"><p>By default, the EMA window is 2 minutes: any response that the filter
+receives over a 2 minute rolling window affects the EMA's value. In other
+words, the EMA &quot;forgets&quot; history older than 2 minutes.</p><p>E.g., if the server nacks every request received for one minute, then
+two minutes pass without the server receiving any requests, and then
+the server receives a small number of non-nacks (&quot;accepts&quot;), the EMA will
+end up being very close to 1.
+</p></div></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">

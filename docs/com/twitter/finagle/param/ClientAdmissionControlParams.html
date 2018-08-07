@@ -614,6 +614,40 @@ finagle clients and servers.
 connection.</p><div class="fullcomment"><div class="comment cmt"><p>Configures a limit on the maximum number of outstanding requests per
 connection. Default is no limit.
 </p></div></div>
+    </li><li name="com.twitter.finagle.param.ClientAdmissionControlParams#nackAdmissionControl" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="nackAdmissionControl(window:com.twitter.util.Duration,threshold:Double):A"></a><a id="nackAdmissionControl(Duration,Double):A"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/param/ClientAdmissionControlParams.html#nackAdmissionControl(window:com.twitter.util.Duration,threshold:Double):A" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">nackAdmissionControl</span><span class="params">(<span name="window">window: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>, <span name="threshold">threshold: <a href="http://www.scala-lang.org/api/2.12.4/scala/Double.html#scala.Double" class="extype" name="scala.Double">Double</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientAdmissionControlParams.A">A</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Configures the <code>NackAdmissionFilter</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Configures the <code>NackAdmissionFilter</code>. The <code>NackAdmissionFilter</code> is enabled
+by default and configured with the default values which can be found in
+<span class="extype" name="com.twitter.finagle.filter.NackAdmssionFilter">com.twitter.finagle.filter.NackAdmssionFilter</span>.</p><p>NOTE: Here is a brief summary of the configurable params.</p><p>A configuration with a <code>threshold</code> of N% and a <code>window</code> of duration W
+roughly translates as, &quot;start dropping some requests to the cluster when
+the nack rate averages at least N% over a window of duration W.&quot;</p><p>Here are some examples of situations with param values chosen to make the
+filter useful:</p><p>- Owners of Service A examine their service's nack rate over several days
+  and find that it is almost always under 10% and rarely above 1% (e.g.,
+  during traffic spikes) or 5% (e.g., during a data center outage). They
+  do not want to preemptively drop requests unless the cluster sees an
+  extreme overload situation so they choose a nack rate threshold of 20%.
+  And in such a situation they want the filter to act relatively quickly,
+  so they choose a window of 30 seconds.</p><p>- Owners of Service B observe that excess load typically causes peak nack
+  rates of around 25% for up to 60 seconds. They want to be aggressive
+  about avoiding cluster overload and don’t mind dropping some innocent
+  requests during mild load so they choose a window of 10 seconds and a
+  threshold of 0.15 (= 15%).
+</p></div><dl class="paramcmts block"><dt class="param">window</dt><dd class="cmt"><p>Duration over which to average the ratio of nackd/non-nacked
+responses.</p></dd><dt class="param">threshold</dt><dd class="cmt"><p>The upper limit of the fraction of responses which are
+nacks before the <code>NackAdmissionFilter</code> begins to drop requests.</p></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -630,7 +664,7 @@ connection. Default is no limit.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.param.ClientAdmissionControlParams#noNackAdmissionControl" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.param.ClientAdmissionControlParams#noNackAdmissionControl" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="noNackAdmissionControl:A"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/param/ClientAdmissionControlParams.html#noNackAdmissionControl:A" title="Permalink">
@@ -645,8 +679,10 @@ connection. Default is no limit.
         <span class="name">noNackAdmissionControl</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientAdmissionControlParams.A">A</span></span>
       </span>
       
-      <p class="shortcomment cmt">Disables the NackAdmissionFilter if backing off during overload situations
-is not desirable behavior.</p>
+      <p class="shortcomment cmt">Disables the <code>NackAdmissionFilter</code> if backing off during overload situations
+is not desirable behavior.</p><div class="fullcomment"><div class="comment cmt"><p>Disables the <code>NackAdmissionFilter</code> if backing off during overload situations
+is not desirable behavior. The <code>NackAdmissionFilter</code> is enabled by default.
+</p></div></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">

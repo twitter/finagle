@@ -45,6 +45,48 @@ Finagle clients come with a variety of transport-level parameters that not only 
 options, but also upgrade the transport protocol to support encryption (e.g. TLS/SSL) and proxy
 servers (e.g. HTTP, SOCKS5).
 
+
+Transport Security
+------------------
+
+Finagle has robust support for TLS. The most common options such as server validation are accessible
+directly via the `tls` members of :src:`ClientTransportParams <com/twitter/finagle/param/ClientTransportParams.scala>` 
+as follows:
+
+
+.. code-block:: scala
+
+  import com.twitter.finagle.{Service, Http}
+  import com.twitter.finagle.http.{Request, Response}
+
+  val twitter: Service[Request, Response] = Http.client
+    .withTransport.tls("twitter.com")
+    .newService("twitter.com:443")
+
+There are further configuration options including client authentication accessible via :src:`ClientTransportParams <com/twitter/finagle/param/ClientTransportParams.scala>`.
+
+
+Finagle also supports `SPNEGO <https://en.wikipedia.org/wiki/SPNEGO>`_ which is an HTTP specific
+extension for negotiating security schemes. A common use case for SPNEGO is for authentication in `Kerberos <https://en.wikipedia.org/wiki/Kerberos_(protocol)>`_
+secured environments.
+
+
+.. code-block:: scala
+
+  import com.twitter.finagle.{Service, Http}
+  import com.twitter.finagle.http.{Request, Response}
+  import com.twitter.finagle.http.SpnegoAuthenticator.ClientFilter
+  import com.twitter.finagle.http.SpnegoAuthenticator.Credentials.{ClientSource, JAASClientSource}
+  
+  val jaas: ClientSource = new JAASClientSource(
+    loginContext = "com.sun.security.jgss.krb5.initiate", 
+    _serverPrincipal = "HTTP/SOME_HOST@SOME_DOMAIN"
+  )
+  
+  val client: Service[Request, Response] = 
+    new ClientFilter(jaas).andThen(Http.client.newService("host:port"))
+
+
 HTTP Proxy
 ~~~~~~~~~~
 
@@ -844,6 +886,29 @@ The filter can be configured with the following parameters:
    in. Default is 0.5.
 
 :ref:`Related stats <admission_control_stats>`
+
+Here is a brief summary of the configurable params.
+
+    A configuration with a ``nackRateThreshold`` of N% and a ``window`` of duration
+    W roughly translates as, "start dropping some requests to the cluster when
+    the nack rate averages at least N% over a window of duration W."
+
+Here are some examples of situations with param values chosen to make the
+filter useful:
+
+- Owners of Service A examine their service's nack rate over several days
+  and find that it is almost always under 10% and rarely above 1% (e.g.,
+  during traffic spikes) or 5% (e.g., during a data center outage). They
+  do not want to preemptively drop requests unless the cluster sees an
+  extreme overload situation so they choose a nack rate threshold of 20%.
+  And in such a situation they want the filter to act relatively quickly,
+  so they choose a window of 30 seconds.
+
+- Owners of Service B observe that excess load typically causes peak nack
+  rates of around 25% for up to 60 seconds. They want to be aggressive
+  about avoiding cluster overload and don’t mind dropping some innocent
+  requests during mild load so they choose a window of 10 seconds and a
+  threshold of 0.15 (= 15%).
 
 .. _response_classification:
 

@@ -638,6 +638,22 @@ finagle clients and servers.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.pushsession" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="pushsession"></a><a id="pushsession:pushsession"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#pushsession" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../pushsession/index.html"><span class="name">pushsession</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.redis" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="redis"></a><a id="redis:redis"></a>
       <span class="permalink">
@@ -848,6 +864,10 @@ generator.
                         <a href="DeserializeCtx.html" title="Used by Thrift and ThriftMux to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses.">DeserializeCtx</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="class" href="GeneratedThriftService.html" title="An abstract class that all scrooge-generated thrift service objects inherit directly from, including services that extend other services."></a>
+                        <a href="GeneratedThriftService.html" title="An abstract class that all scrooge-generated thrift service objects inherit directly from, including services that extend other services.">GeneratedThriftService</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="object" href="Headers$.html" title=""></a>
                         <a href="Headers$.html" title="">Headers</a>
                       </li><li class="current-entities indented4">
@@ -912,8 +932,16 @@ generator.
                         <a href="ThriftRichServer.html" title="A mixin trait to provide a rich Thrift server API.">ThriftRichServer</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="trait" href="ThriftService.html" title="A marker trait that signifies that this is a thrift service that can be served by Finagle"></a>
+                        <a href="ThriftService.html" title="A marker trait that signifies that this is a thrift service that can be served by Finagle">ThriftService</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="object" href="ThriftServiceIface$.html" title="Construct Service interface for a Thrift method."></a>
                         <a href="ThriftServiceIface$.html" title="Construct Service interface for a Thrift method.">ThriftServiceIface</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="ToThriftService.html" title="A trait that signifies a ThriftService can be created from this"></a>
+                        <a href="ToThriftService.html" title="A trait that signifies a ThriftService can be created from this">ToThriftService</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="ValidateThriftService.html" title="A filter that invalidates a connection if it suffers from an irrecoverable application exception."></a>
@@ -1206,6 +1234,23 @@ generation, a proper <code>DeserializationCtx</code> will be available
 to code via <code>Contexts.local(DeserializeCtx.Key)</code>.</p><p>While this is thread-safe, it should only be used for the life
 of a single request/response pair.
 </p></div></div>
+    </li><li name="com.twitter.finagle.thrift.GeneratedThriftService" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="GeneratedThriftServiceextendsAnyRef"></a><a id="GeneratedThriftService:GeneratedThriftService"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/index.html#GeneratedThriftServiceextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="An abstract class that all scrooge-generated thrift service objects inherit directly from, including services that extend other services." href="GeneratedThriftService.html"><span class="name">GeneratedThriftService</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">An abstract class that all scrooge-generated thrift service objects inherit
+directly from, including services that extend other services.</p>
     </li><li name="com.twitter.finagle.thrift.InvalidThriftConnectionException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="InvalidThriftConnectionExceptionextendsExceptionwithServiceExceptionwithProductwithSerializable"></a><a id="InvalidThriftConnectionException:InvalidThriftConnectionException"></a>
       <span class="permalink">
@@ -1402,6 +1447,40 @@ not.</p>
       </span>
       
       <p class="shortcomment cmt">A mixin trait to provide a rich Thrift server API.</p>
+    </li><li name="com.twitter.finagle.thrift.ThriftService" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ThriftServiceextendsAnyRef"></a><a id="ThriftService:ThriftService"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/index.html#ThriftServiceextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="A marker trait that signifies that this is a thrift service that can be served by Finagle" href="ThriftService.html"><span class="name">ThriftService</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A marker trait that signifies that this is a thrift service that can be served by Finagle
+</p>
+    </li><li name="com.twitter.finagle.thrift.ToThriftService" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ToThriftServiceextendsAnyRef"></a><a id="ToThriftService:ToThriftService"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/index.html#ToThriftServiceextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="A trait that signifies a ThriftService can be created from this" href="ToThriftService.html"><span class="name">ToThriftService</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A trait that signifies a <code>ThriftService</code> can be created from this
+</p>
     </li><li name="com.twitter.finagle.thrift.ValidateThriftService" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ValidateThriftServiceextendsServiceProxy[com.twitter.finagle.thrift.ThriftClientRequest,Array[Byte]]"></a><a id="ValidateThriftService:ValidateThriftService"></a>
       <span class="permalink">

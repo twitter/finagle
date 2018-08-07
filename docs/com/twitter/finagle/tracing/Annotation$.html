@@ -169,8 +169,8 @@ resources for using Finagle.
                         <a href="AnnotatingTracingFilter.html" title="A generic filter that can be used for annotating the Server and Client side of a trace.">AnnotatingTracingFilter</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="" title=""></a>
-                        <a class="trait" href="Annotation.html" title=""></a>
-                        <a href="Annotation.html" title="">Annotation</a>
+                        <a class="class" href="Annotation.html" title="An ADT describing a tracing annotation."></a>
+                        <a href="Annotation.html" title="An ADT describing a tracing annotation.">Annotation</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="BroadcastTracer$.html" title=""></a>
@@ -213,10 +213,6 @@ resources for using Finagle.
                         <a href="Record.html" title="Records information of interest to the tracing system.">Record</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="ServerDestTracingProxy.html" title="com.twitter.finagle.ServiceFactoryProxy used to trace the local addr and server addr."></a>
-                        <a href="ServerDestTracingProxy.html" title="com.twitter.finagle.ServiceFactoryProxy used to trace the local addr and server addr.">ServerDestTracingProxy</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="object" href="ServerTracingFilter$.html" title="Annotate the request with Server specific records (ServerRecv, ServerSend)"></a>
                         <a href="ServerTracingFilter$.html" title="Annotate the request with Server specific records (ServerRecv, ServerSend)">ServerTracingFilter</a>
                       </li><li class="current-entities indented4">
@@ -225,8 +221,8 @@ resources for using Finagle.
                         <a href="SpanId.html" title="Defines trace identifiers.">SpanId</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="Trace$.html" title="This is a tracing system similar to Dapper:"></a>
-                        <a href="Trace$.html" title="This is a tracing system similar to Dapper:">Trace</a>
+                        <a class="object" href="Trace$.html" title="A singleton instance of Tracing (a facade-style API) that performs a number of Contexts lookups on each operation."></a>
+                        <a href="Trace$.html" title="A singleton instance of Tracing (a facade-style API) that performs a number of Contexts lookups on each operation.">Trace</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="TraceId$.html" title=""></a>
                         <a class="class" href="TraceId.html" title="A trace id represents one particular trace for one request."></a>
@@ -243,6 +239,10 @@ resources for using Finagle.
                         <a class="object" href="Tracer$.html" title=""></a>
                         <a class="trait" href="Tracer.html" title="Tracers record trace events."></a>
                         <a href="Tracer.html" title="Tracers record trace events.">Tracer</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="Tracing$.html" title=""></a>
+                        <a class="class" href="Tracing.html" title="This is a tracing system similar to Dapper:"></a>
+                        <a href="Tracing.html" title="This is a tracing system similar to Dapper:">Tracing</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="TracingLogHandler.html" title="A logging Handler that sends log information via tracing"></a>
@@ -262,15 +262,15 @@ resources for using Finagle.
           <div id="content">
             <body class="object value">
       <div id="definition">
-        <a href="Annotation.html" title="See companion trait"><div class="big-circle object-companion-trait">o</div></a>
+        <a href="Annotation.html" title="See companion class"><div class="big-circle object-companion-class">o</div></a>
         <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="index.html" class="extype" name="com.twitter.finagle.tracing">tracing</a></p>
-        <h1><a href="Annotation.html" title="See companion trait">Annotation</a><span class="permalink">
+        <h1><a href="Annotation.html" title="See companion class">Annotation</a><span class="permalink">
       <a href="../../../../com/twitter/finagle/tracing/Annotation$.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
         <h3><span class="morelinks"><div>
-            Companion <a href="Annotation.html" title="See companion trait">trait Annotation</a>
+            Companion <a href="Annotation.html" title="See companion class">class Annotation</a>
           </div></span></h3>
       </div>
 
@@ -345,7 +345,7 @@ resources for using Finagle.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
@@ -361,27 +361,11 @@ resources for using Finagle.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
         <a title="" href="Annotation$$ClientAddr.html"><span class="name">ClientAddr</span></a><span class="params">(<span name="ia">ia: <span class="extype" name="java.net.InetSocketAddress">InetSocketAddress</span></span>)</span><span class="result"> extends <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.tracing.Annotation.ClientRecv" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ClientRecvextendsAnnotationwithProductwithSerializable"></a><a id="ClientRecv:ClientRecv"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/tracing/Annotation$.html#ClientRecvextendsAnnotationwithProductwithSerializable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="Annotation$$ClientRecv.html"><span class="name">ClientRecv</span></a><span class="params">()</span><span class="result"> extends <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -393,59 +377,11 @@ resources for using Finagle.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
         <a title="" href="Annotation$$ClientRecvError.html"><span class="name">ClientRecvError</span></a><span class="params">(<span name="error">error: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.tracing.Annotation.ClientRecvFragment" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ClientRecvFragmentextendsAnnotationwithProductwithSerializable"></a><a id="ClientRecvFragment:ClientRecvFragment"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/tracing/Annotation$.html#ClientRecvFragmentextendsAnnotationwithProductwithSerializable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="Annotation$$ClientRecvFragment.html"><span class="name">ClientRecvFragment</span></a><span class="params">()</span><span class="result"> extends <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.tracing.Annotation.ClientSend" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ClientSendextendsAnnotationwithProductwithSerializable"></a><a id="ClientSend:ClientSend"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/tracing/Annotation$.html#ClientSendextendsAnnotationwithProductwithSerializable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="Annotation$$ClientSend.html"><span class="name">ClientSend</span></a><span class="params">()</span><span class="result"> extends <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.tracing.Annotation.ClientSendFragment" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ClientSendFragmentextendsAnnotationwithProductwithSerializable"></a><a id="ClientSendFragment:ClientSendFragment"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/tracing/Annotation$.html#ClientSendFragmentextendsAnnotationwithProductwithSerializable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="Annotation$$ClientSendFragment.html"><span class="name">ClientSendFragment</span></a><span class="params">()</span><span class="result"> extends <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -457,7 +393,7 @@ resources for using Finagle.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
@@ -473,7 +409,7 @@ resources for using Finagle.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
@@ -489,7 +425,7 @@ resources for using Finagle.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
@@ -505,59 +441,11 @@ resources for using Finagle.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
         <a title="" href="Annotation$$ServerAddr.html"><span class="name">ServerAddr</span></a><span class="params">(<span name="ia">ia: <span class="extype" name="java.net.InetSocketAddress">InetSocketAddress</span></span>)</span><span class="result"> extends <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.tracing.Annotation.ServerRecv" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ServerRecvextendsAnnotationwithProductwithSerializable"></a><a id="ServerRecv:ServerRecv"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/tracing/Annotation$.html#ServerRecvextendsAnnotationwithProductwithSerializable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="Annotation$$ServerRecv.html"><span class="name">ServerRecv</span></a><span class="params">()</span><span class="result"> extends <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.tracing.Annotation.ServerRecvFragment" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ServerRecvFragmentextendsAnnotationwithProductwithSerializable"></a><a id="ServerRecvFragment:ServerRecvFragment"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/tracing/Annotation$.html#ServerRecvFragmentextendsAnnotationwithProductwithSerializable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="Annotation$$ServerRecvFragment.html"><span class="name">ServerRecvFragment</span></a><span class="params">()</span><span class="result"> extends <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.tracing.Annotation.ServerSend" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ServerSendextendsAnnotationwithProductwithSerializable"></a><a id="ServerSend:ServerSend"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/tracing/Annotation$.html#ServerSendextendsAnnotationwithProductwithSerializable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="Annotation$$ServerSend.html"><span class="name">ServerSend</span></a><span class="params">()</span><span class="result"> extends <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -569,27 +457,11 @@ resources for using Finagle.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
         <a title="" href="Annotation$$ServerSendError.html"><span class="name">ServerSendError</span></a><span class="params">(<span name="error">error: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.tracing.Annotation.ServerSendFragment" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ServerSendFragmentextendsAnnotationwithProductwithSerializable"></a><a id="ServerSendFragment:ServerSendFragment"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/tracing/Annotation$.html#ServerSendFragmentextendsAnnotationwithProductwithSerializable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="Annotation$$ServerSendFragment.html"><span class="name">ServerSendFragment</span></a><span class="params">()</span><span class="result"> extends <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -601,7 +473,7 @@ resources for using Finagle.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
@@ -617,7 +489,7 @@ resources for using Finagle.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
@@ -983,6 +855,134 @@ resources for using Finagle.
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Annotation.ClientRecv" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ClientRecv"></a><a id="ClientRecv:ClientRecv"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Annotation$.html#ClientRecv" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Annotation$$ClientRecv$.html"><span class="name">ClientRecv</span></a><span class="result"> extends <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.tracing.Annotation.ClientRecvFragment" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ClientRecvFragment"></a><a id="ClientRecvFragment:ClientRecvFragment"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Annotation$.html#ClientRecvFragment" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Annotation$$ClientRecvFragment$.html"><span class="name">ClientRecvFragment</span></a><span class="result"> extends <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.tracing.Annotation.ClientSend" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ClientSend"></a><a id="ClientSend:ClientSend"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Annotation$.html#ClientSend" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Annotation$$ClientSend$.html"><span class="name">ClientSend</span></a><span class="result"> extends <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.tracing.Annotation.ClientSendFragment" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ClientSendFragment"></a><a id="ClientSendFragment:ClientSendFragment"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Annotation$.html#ClientSendFragment" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Annotation$$ClientSendFragment$.html"><span class="name">ClientSendFragment</span></a><span class="result"> extends <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.tracing.Annotation.ServerRecv" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ServerRecv"></a><a id="ServerRecv:ServerRecv"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Annotation$.html#ServerRecv" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Annotation$$ServerRecv$.html"><span class="name">ServerRecv</span></a><span class="result"> extends <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.tracing.Annotation.ServerRecvFragment" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ServerRecvFragment"></a><a id="ServerRecvFragment:ServerRecvFragment"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Annotation$.html#ServerRecvFragment" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Annotation$$ServerRecvFragment$.html"><span class="name">ServerRecvFragment</span></a><span class="result"> extends <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.tracing.Annotation.ServerSend" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ServerSend"></a><a id="ServerSend:ServerSend"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Annotation$.html#ServerSend" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Annotation$$ServerSend$.html"><span class="name">ServerSend</span></a><span class="result"> extends <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.tracing.Annotation.ServerSendFragment" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ServerSendFragment"></a><a id="ServerSendFragment:ServerSendFragment"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Annotation$.html#ServerSendFragment" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Annotation$$ServerSendFragment$.html"><span class="name">ServerSendFragment</span></a><span class="result"> extends <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.tracing.Annotation.WireRecv" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="WireRecv"></a><a id="WireRecv:WireRecv"></a>
       <span class="permalink">

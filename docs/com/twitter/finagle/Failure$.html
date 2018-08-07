@@ -638,6 +638,22 @@ finagle clients and servers.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.pushsession" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="pushsession"></a><a id="pushsession:pushsession"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#pushsession" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="pushsession/index.html"><span class="name">pushsession</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.redis" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="redis"></a><a id="redis:redis"></a>
       <span class="permalink">
@@ -1513,23 +1529,6 @@ generator.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.Failure#DeadlineExceeded" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="DeadlineExceeded:Long"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Failure$.html#DeadlineExceeded:Long" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">DeadlineExceeded</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Flag deadline exceeded indicates that this failure occured because a request was received past
-its deadline.</p>
     </li><li name="com.twitter.finagle.Failure#FutureRetryableNackFailure" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="FutureRetryableNackFailure:com.twitter.util.Future[Nothing]"></a><a id="FutureRetryableNackFailure:Future[Nothing]"></a>
       <span class="permalink">
@@ -1547,61 +1546,6 @@ its deadline.</p>
       
       <p class="shortcomment cmt">Representation of a future nack response that is retryable
 </p>
-    </li><li name="com.twitter.finagle.Failure#Ignorable" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Ignorable:Long"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Failure$.html#Ignorable:Long" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">Ignorable</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Flag ignorable indicates that the failure can be ignored and should not be surfaced via stats.</p>
-    </li><li name="com.twitter.finagle.Failure#Interrupted" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Interrupted:Long"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Failure$.html#Interrupted:Long" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">Interrupted</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Flag interrupted indicates that the error was caused due to an
-interruption.</p><div class="fullcomment"><div class="comment cmt"><p>Flag interrupted indicates that the error was caused due to an
-interruption. (e.g., by invoking <span class="extype" name="Future.raise">Future.raise</span>.)
-</p></div></div>
-    </li><li name="com.twitter.finagle.Failure#NonRetryable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="NonRetryable:Long"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Failure$.html#NonRetryable:Long" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">NonRetryable</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Flag nonretryable indicates that the action that caused this failure should
-not be re-issued.</p><div class="fullcomment"><div class="comment cmt"><p>Flag nonretryable indicates that the action that caused this failure should
-not be re-issued. This failure should be propagated back along the call
-chain as far as possible.
-</p></div></div>
     </li><li name="com.twitter.finagle.Failure#NonRetryableNackFailure" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="NonRetryableNackFailure:com.twitter.finagle.Failure"></a><a id="NonRetryableNackFailure:Failure"></a>
       <span class="permalink">
@@ -1619,42 +1563,6 @@ chain as far as possible.
       
       <p class="shortcomment cmt">Representation of a nack response that is non-retryable
 </p>
-    </li><li name="com.twitter.finagle.Failure#Rejected" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Rejected:Long"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Failure$.html#Rejected:Long" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">Rejected</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Flag rejected indicates that the work was rejected and therefore cannot be
-completed.</p><div class="fullcomment"><div class="comment cmt"><p>Flag rejected indicates that the work was rejected and therefore cannot be
-completed. This may indicate an overload condition.
-</p></div></div>
-    </li><li name="com.twitter.finagle.Failure#Restartable" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Restartable:Long"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Failure$.html#Restartable:Long" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">Restartable</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Flag restartable indicates that the action that caused the failure
-is <i>restartable</i> -- that is, it is safe to simply re-issue the action.</p>
     </li><li name="com.twitter.finagle.Failure#RetryableNackFailure" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="RetryableNackFailure:com.twitter.finagle.Failure"></a><a id="RetryableNackFailure:Failure"></a>
       <span class="permalink">
@@ -1672,26 +1580,6 @@ is <i>restartable</i> -- that is, it is safe to simply re-issue the action.</p>
       
       <p class="shortcomment cmt">Representation of a nack response that is retryable
 </p>
-    </li><li name="com.twitter.finagle.Failure#Wrapped" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Wrapped:Long"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Failure$.html#Wrapped:Long" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">Wrapped</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Flag wrapped indicates that this failure was wrapped, and should
-not be presented to the user (directly, or via stats).</p><div class="fullcomment"><div class="comment cmt"><p>Flag wrapped indicates that this failure was wrapped, and should
-not be presented to the user (directly, or via stats). Rather, it must
-first be unwrapped: the inner cause is the presentable failure.
-</p></div></div>
     </li><li name="com.twitter.finagle.Failure#adapt" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="adapt(exc:Throwable,flags:Long):com.twitter.finagle.Failure"></a><a id="adapt(Throwable,Long):Failure"></a>
       <span class="permalink">
@@ -1862,7 +1750,7 @@ it returns a new failure with the given flags.
         <span class="name">deadlineExceeded</span><span class="params">(<span name="why">why: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
       </span>
       
-      <p class="shortcomment cmt">Create a new <a href="#DeadlineExceeded:Long" class="extmbr" name="com.twitter.finagle.Failure#DeadlineExceeded">DeadlineExceeded</a> failure with the given message.</p>
+      <p class="shortcomment cmt">Create a new <span class="extype" name="FailureFlags.DeadlineExceeded">FailureFlags.DeadlineExceeded</span> failure with the given message.</p>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -1970,7 +1858,7 @@ it returns a new failure with the given flags.
         <span class="name">ignorable</span><span class="params">(<span name="why">why: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
       </span>
       
-      <p class="shortcomment cmt">Create a new <a href="#Ignorable:Long" class="extmbr" name="com.twitter.finagle.Failure#Ignorable">Ignorable</a> failure with the given message.</p>
+      <p class="shortcomment cmt">Create a new <span class="extype" name="FailureFlags.Ignorable">FailureFlags.Ignorable</span> failure with the given message.</p>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -2072,7 +1960,7 @@ it returns a new failure with the given flags.
         <span class="name">rejected</span><span class="params">(<span name="why">why: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="cause">cause: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
       </span>
       
-      <p class="shortcomment cmt">Create a new <a href="#Restartable:Long" class="extmbr" name="com.twitter.finagle.Failure#Restartable">Restartable</a> and <a href="#Rejected:Long" class="extmbr" name="com.twitter.finagle.Failure#Rejected">Rejected</a> failure with the given
+      <p class="shortcomment cmt">Create a new <a href="FailureFlags$.html#Retryable:Long" class="extmbr" name="com.twitter.finagle.FailureFlags#Retryable">FailureFlags.Retryable</a> and <a href="FailureFlags$.html#Rejected:Long" class="extmbr" name="com.twitter.finagle.FailureFlags#Rejected">FailureFlags.Rejected</a> failure with the given
 message and cause.</p>
     </li><li name="com.twitter.finagle.Failure#rejected" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="rejected(cause:Throwable):com.twitter.finagle.Failure"></a><a id="rejected(Throwable):Failure"></a>
@@ -2089,7 +1977,7 @@ message and cause.</p>
         <span class="name">rejected</span><span class="params">(<span name="cause">cause: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
       </span>
       
-      <p class="shortcomment cmt">Create a new <a href="#Restartable:Long" class="extmbr" name="com.twitter.finagle.Failure#Restartable">Restartable</a> and <a href="#Rejected:Long" class="extmbr" name="com.twitter.finagle.Failure#Rejected">Rejected</a> failure with the given cause.</p>
+      <p class="shortcomment cmt">Create a new <a href="FailureFlags$.html#Retryable:Long" class="extmbr" name="com.twitter.finagle.FailureFlags#Retryable">FailureFlags.Retryable</a> and <a href="FailureFlags$.html#Rejected:Long" class="extmbr" name="com.twitter.finagle.FailureFlags#Rejected">FailureFlags.Rejected</a> failure with the given cause.</p>
     </li><li name="com.twitter.finagle.Failure#rejected" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="rejected(why:String):com.twitter.finagle.Failure"></a><a id="rejected(String):Failure"></a>
       <span class="permalink">
@@ -2105,7 +1993,7 @@ message and cause.</p>
         <span class="name">rejected</span><span class="params">(<span name="why">why: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
       </span>
       
-      <p class="shortcomment cmt">Create a new <a href="#Restartable:Long" class="extmbr" name="com.twitter.finagle.Failure#Restartable">Restartable</a> and <a href="#Rejected:Long" class="extmbr" name="com.twitter.finagle.Failure#Rejected">Rejected</a> failure with the given message.</p>
+      <p class="shortcomment cmt">Create a new <a href="FailureFlags$.html#Retryable:Long" class="extmbr" name="com.twitter.finagle.FailureFlags#Retryable">FailureFlags.Retryable</a> and <a href="FailureFlags$.html#Rejected:Long" class="extmbr" name="com.twitter.finagle.FailureFlags#Rejected">FailureFlags.Rejected</a> failure with the given message.</p>
     </li><li name="com.twitter.finagle.Failure#rejected" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="rejected:com.twitter.finagle.Failure"></a><a id="rejected:Failure"></a>
       <span class="permalink">
@@ -2121,7 +2009,7 @@ message and cause.</p>
         <span class="name">rejected</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
       </span>
       
-      <p class="shortcomment cmt">A default <a href="#Restartable:Long" class="extmbr" name="com.twitter.finagle.Failure#Restartable">Restartable</a> failure.</p>
+      <p class="shortcomment cmt">A default <a href="FailureFlags$.html#Retryable:Long" class="extmbr" name="com.twitter.finagle.FailureFlags#Retryable">FailureFlags.Retryable</a> failure.</p>
     </li><li name="com.twitter.finagle.Failure#role" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="role:com.twitter.finagle.Stack.Role"></a><a id="role:Role"></a>
       <span class="permalink">
@@ -2314,7 +2202,161 @@ is a failure, it is simply extended, otherwise a new Failure is created.
 
         <div class="values members">
               <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.Failure#flagsOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.Failure#DeadlineExceeded" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="DeadlineExceeded:Long"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Failure$.html#DeadlineExceeded:Long" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2018-7-17) Use FailureFlags.DeadlineExceeded">DeadlineExceeded</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Flag deadline exceeded indicates that this failure occured because a request was received past
+its deadline.</p><div class="fullcomment"><div class="comment cmt"><p>Flag deadline exceeded indicates that this failure occured because a request was received past
+its deadline.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-7-17)</i> Use FailureFlags.DeadlineExceeded</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.Failure#Ignorable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Ignorable:Long"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Failure$.html#Ignorable:Long" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2018-7-17) Use FailureFlags.Ignorable">Ignorable</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Flag ignorable indicates that the failure can be ignored and should not be surfaced via stats.</p><div class="fullcomment"><div class="comment cmt"><p>Flag ignorable indicates that the failure can be ignored and should not be surfaced via stats.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-7-17)</i> Use FailureFlags.Ignorable</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.Failure#Interrupted" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Interrupted:Long"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Failure$.html#Interrupted:Long" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2018-7-17) Use FailureFlags.Interrupted">Interrupted</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Flag interrupted indicates that the error was caused due to an
+interruption.</p><div class="fullcomment"><div class="comment cmt"><p>Flag interrupted indicates that the error was caused due to an
+interruption. (e.g., by invoking <span class="extype" name="Future.raise">Future.raise</span>.)
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-7-17)</i> Use FailureFlags.Interrupted</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.Failure#NonRetryable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="NonRetryable:Long"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Failure$.html#NonRetryable:Long" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2018-7-17) Use FailureFlags.NonRetryable">NonRetryable</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Flag nonretryable indicates that the action that caused this failure should
+not be re-issued.</p><div class="fullcomment"><div class="comment cmt"><p>Flag nonretryable indicates that the action that caused this failure should
+not be re-issued. This failure should be propagated back along the call
+chain as far as possible.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-7-17)</i> Use FailureFlags.NonRetryable</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.Failure#Rejected" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Rejected:Long"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Failure$.html#Rejected:Long" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2018-7-17) Use FailureFlags.Rejected">Rejected</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Flag rejected indicates that the work was rejected and therefore cannot be
+completed.</p><div class="fullcomment"><div class="comment cmt"><p>Flag rejected indicates that the work was rejected and therefore cannot be
+completed. This may indicate an overload condition.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-7-17)</i> Use FailureFlags.Rejected</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.Failure#Restartable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Restartable:Long"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Failure$.html#Restartable:Long" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2018-7-17) Use FailureFlags.Retryable">Restartable</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Flag restartable indicates that the action that caused the failure
+is <i>restartable</i> -- that is, it is safe to simply re-issue the action.</p><div class="fullcomment"><div class="comment cmt"><p>Flag restartable indicates that the action that caused the failure
+is <i>restartable</i> -- that is, it is safe to simply re-issue the action.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-7-17)</i> Use FailureFlags.Retryable</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.Failure#Wrapped" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Wrapped:Long"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Failure$.html#Wrapped:Long" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2018-7-17) Use FailureFlags.Wrapped">Wrapped</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Flag wrapped indicates that this failure was wrapped, and should
+not be presented to the user (directly, or via stats).</p><div class="fullcomment"><div class="comment cmt"><p>Flag wrapped indicates that this failure was wrapped, and should
+not be presented to the user (directly, or via stats). Rather, it must
+first be unwrapped: the inner cause is the presentable failure.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-7-17)</i> Use FailureFlags.Wrapped</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.Failure#flagsOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="flagsOf(exc:Throwable):Set[String]"></a><a id="flagsOf(Throwable):Set[String]"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Failure$.html#flagsOf(exc:Throwable):Set[String]" title="Permalink">

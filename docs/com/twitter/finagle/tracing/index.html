@@ -638,6 +638,22 @@ finagle clients and servers.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.pushsession" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="pushsession"></a><a id="pushsession:pushsession"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#pushsession" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../pushsession/index.html"><span class="name">pushsession</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.redis" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="redis"></a><a id="redis:redis"></a>
       <span class="permalink">
@@ -840,8 +856,8 @@ generator.
                         <a href="AnnotatingTracingFilter.html" title="A generic filter that can be used for annotating the Server and Client side of a trace.">AnnotatingTracingFilter</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="Annotation$.html" title=""></a>
-                        <a class="trait" href="Annotation.html" title=""></a>
-                        <a href="Annotation.html" title="">Annotation</a>
+                        <a class="class" href="Annotation.html" title="An ADT describing a tracing annotation."></a>
+                        <a href="Annotation.html" title="An ADT describing a tracing annotation.">Annotation</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="BroadcastTracer$.html" title=""></a>
@@ -884,10 +900,6 @@ generator.
                         <a href="Record.html" title="Records information of interest to the tracing system.">Record</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="ServerDestTracingProxy.html" title="com.twitter.finagle.ServiceFactoryProxy used to trace the local addr and server addr."></a>
-                        <a href="ServerDestTracingProxy.html" title="com.twitter.finagle.ServiceFactoryProxy used to trace the local addr and server addr.">ServerDestTracingProxy</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="object" href="ServerTracingFilter$.html" title="Annotate the request with Server specific records (ServerRecv, ServerSend)"></a>
                         <a href="ServerTracingFilter$.html" title="Annotate the request with Server specific records (ServerRecv, ServerSend)">ServerTracingFilter</a>
                       </li><li class="current-entities indented4">
@@ -896,8 +908,8 @@ generator.
                         <a href="SpanId.html" title="Defines trace identifiers.">SpanId</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="Trace$.html" title="This is a tracing system similar to Dapper:"></a>
-                        <a href="Trace$.html" title="This is a tracing system similar to Dapper:">Trace</a>
+                        <a class="object" href="Trace$.html" title="A singleton instance of Tracing (a facade-style API) that performs a number of Contexts lookups on each operation."></a>
+                        <a href="Trace$.html" title="A singleton instance of Tracing (a facade-style API) that performs a number of Contexts lookups on each operation.">Trace</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="TraceId$.html" title=""></a>
                         <a class="class" href="TraceId.html" title="A trace id represents one particular trace for one request."></a>
@@ -914,6 +926,10 @@ generator.
                         <a class="object" href="Tracer$.html" title=""></a>
                         <a class="trait" href="Tracer.html" title="Tracers record trace events."></a>
                         <a href="Tracer.html" title="Tracers record trace events.">Tracer</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="Tracing$.html" title=""></a>
+                        <a class="class" href="Tracing.html" title="This is a tracing system similar to Dapper:"></a>
+                        <a href="Tracing.html" title="This is a tracing system similar to Dapper:">Tracing</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="TracingLogHandler.html" title="A logging Handler that sends log information via tracing"></a>
@@ -1088,7 +1104,7 @@ generator.
 of a trace.</p><div class="fullcomment"><div class="comment cmt"><p>A generic filter that can be used for annotating the Server and Client side
 of a trace. Finagle-specific trace information should live here.
 </p></div></div>
-    </li><li name="com.twitter.finagle.tracing.Annotation" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.tracing.Annotation" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="AnnotationextendsAnyRef"></a><a id="Annotation:Annotation"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/tracing/index.html#AnnotationextendsAnyRef" title="Permalink">
@@ -1096,14 +1112,16 @@ of a trace. Finagle-specific trace information should live here.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier">sealed </span>
-        <span class="kind">trait</span>
+        <span class="modifier">sealed abstract </span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="" href="Annotation.html"><span class="name">Annotation</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+        <a title="An ADT describing a tracing annotation." href="Annotation.html"><span class="name">Annotation</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
       </span>
       
-      
+      <p class="shortcomment cmt">An ADT describing a tracing annotation.</p><div class="fullcomment"><div class="comment cmt"><p>An ADT describing a tracing annotation. Prefer <a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a> API to creating raw <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a>
+instances (especially, when used from Java).
+</p></div></div>
     </li><li name="com.twitter.finagle.tracing.BufferingTracer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="BufferingTracerextendsTracerwithIterable[com.twitter.finagle.tracing.Record]"></a><a id="BufferingTracer:BufferingTracer"></a>
       <span class="permalink">
@@ -1208,23 +1226,6 @@ Includes: rpc service name, method name, client sent and client received.
       <p class="shortcomment cmt">Records information of interest to the tracing system.</p><div class="fullcomment"><div class="comment cmt"><p>Records information of interest to the tracing system. For example when an event happened,
 the service name or ip addresses involved.
 </p></div><dl class="paramcmts block"><dt class="param">traceId</dt><dd class="cmt"><p>Which trace is this record a part of?</p></dd><dt class="param">timestamp</dt><dd class="cmt"><p>When did the event happen?</p></dd><dt class="param">annotation</dt><dd class="cmt"><p>What kind of information should we record?</p></dd><dt class="param">duration</dt><dd class="cmt"><p>Did this event have a duration? For example: how long did a certain code block take to run</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.tracing.ServerDestTracingProxy" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ServerDestTracingProxy[Req,Rep]extendsServiceFactoryProxy[Req,Rep]"></a><a id="ServerDestTracingProxy[Req,Rep]:ServerDestTracingProxy[Req,Rep]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/tracing/index.html#ServerDestTracingProxy[Req,Rep]extendsServiceFactoryProxy[Req,Rep]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="com.twitter.finagle.ServiceFactoryProxy used to trace the local addr and server addr." href="ServerDestTracingProxy.html"><span class="name">ServerDestTracingProxy</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../ServiceFactoryProxy.html" class="extype" name="com.twitter.finagle.ServiceFactoryProxy">ServiceFactoryProxy</a>[<span class="extype" name="com.twitter.finagle.tracing.ServerDestTracingProxy.Req">Req</span>, <span class="extype" name="com.twitter.finagle.tracing.ServerDestTracingProxy.Rep">Rep</span>]</span>
-      </span>
-      
-      <p class="shortcomment cmt"><a href="../ServiceFactoryProxy.html" class="extype" name="com.twitter.finagle.ServiceFactoryProxy">com.twitter.finagle.ServiceFactoryProxy</a> used to trace the local addr and
-server addr.</p>
     </li><li name="com.twitter.finagle.tracing.SpanId" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="SpanIdextendsProxy"></a><a id="SpanId:SpanId"></a>
       <span class="permalink">
@@ -1330,6 +1331,45 @@ is capable of parsing trace information out of the codec.</p></span></dd></dl></
       </span>
       
       <p class="shortcomment cmt">Tracers record trace events.</p>
+    </li><li name="com.twitter.finagle.tracing.Tracing" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="TracingextendsAnyRef"></a><a id="Tracing:Tracing"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/index.html#TracingextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="This is a tracing system similar to Dapper:" href="Tracing.html"><span class="name">Tracing</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">This is a tracing system similar to Dapper:</p><div class="fullcomment"><div class="comment cmt"><p>This is a tracing system similar to Dapper:</p><p>  “Dapper, a Large-Scale Distributed Systems Tracing Infrastructure”,
+  Benjamin H. Sigelman, Luiz André Barroso, Mike Burrows, Pat
+  Stephenson, Manoj Plakal, Donald Beaver, Saul Jaspan, Chandan
+  Shanbhag, 2010.</p><p>It is meant to be independent of whatever underlying RPC mechanism is being used,
+and it is up to the underlying codec to implement the transport.</p><p><code>Trace</code> (a singleton object) maintains the state of the tracing stack stored in
+<a href="../context/Contexts$.html" class="extype" name="com.twitter.finagle.context.Contexts">com.twitter.finagle.context.Contexts</a>. The current <a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a> has a <code>terminal</code> flag,
+indicating whether it can be overridden with a different <a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a>. Setting the current
+<a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a> as terminal forces all future annotation to share that <a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a>. When reporting,
+we report to all tracers in the list of <code>Tracer</code>s.</p><p>The <a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a> API is structured in a way it's caller's responsibility to check
+if the current stack of tracers is actively tracing (<code>Trace.isActivelyTracing</code>)
+to avoid unnecessarily allocations.</p><p>It's recommended to &quot;capture&quot; a <a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a> instance while performing multiple tracing
+operations to minimize the number of <a href="../context/Contexts$.html" class="extype" name="com.twitter.finagle.context.Contexts">com.twitter.finagle.context.Contexts</a> lookups
+and increase throughput.</p><pre><span class="cmt">// Performs six context lookups (two for isActivelyTracing, two for each record call).</span>
+<span class="kw">if</span> (Trace.isActivelyTracing()) {
+  Trace.record(<span class="lit">"foo"</span>)
+  Trace.record(<span class="lit">"foo"</span>)
+}
+
+<span class="cmt">// Performs just two context lookups and captures the results in the `Trace` instance.</span>
+<span class="kw">val</span> trace = Trace()
+<span class="kw">if</span> (trace.isActivelyTracing) {
+  trace.record(<span class="lit">"foo"</span>)
+  trace.record(<span class="lit">"bar"</span>)
+}</pre></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Use <code>Trace.getInstance()</code> and <code>Trace.newInstance()</code> in Java.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.tracing.TracingLogHandler" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="TracingLogHandlerextendsHandler"></a><a id="TracingLogHandler:TracingLogHandler"></a>
       <span class="permalink">
@@ -1545,21 +1585,13 @@ is capable of parsing trace information out of the codec.</p></span></dd></dl></
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="This is a tracing system similar to Dapper:" href="Trace$.html"><span class="name">Trace</span></a>
+        <a title="A singleton instance of Tracing (a facade-style API) that performs a number of Contexts lookups on each operation." href="Trace$.html"><span class="name">Trace</span></a><span class="result"> extends <a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></span>
       </span>
       
-      <p class="shortcomment cmt">This is a tracing system similar to Dapper:</p><div class="fullcomment"><div class="comment cmt"><p>This is a tracing system similar to Dapper:</p><p>  “Dapper, a Large-Scale Distributed Systems Tracing Infrastructure”,
-  Benjamin H. Sigelman, Luiz André Barroso, Mike Burrows, Pat
-  Stephenson, Manoj Plakal, Donald Beaver, Saul Jaspan, Chandan
-  Shanbhag, 2010.</p><p>It is meant to be independent of whatever underlying RPC mechanism
-is being used, and it is up to the underlying codec to implement
-the transport.</p><p><code>Trace</code> maintains the state of the tracing stack
-The current <code>TraceId</code> has a terminal flag, indicating whether it
-can be overridden with a different <code>TraceId</code>. Setting the current
-<code>TraceId</code> as terminal forces all future annotations to share that
-<code>TraceId</code>.
-When reporting, we report to all tracers in the list of <code>Tracer</code>s.
-</p></div></div>
+      <p class="shortcomment cmt">A singleton instance of <a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a> (a facade-style API) that performs a number of <span class="extype" name="Contexts">Contexts</span>
+lookups on each operation.</p><div class="fullcomment"><div class="comment cmt"><p>A singleton instance of <a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a> (a facade-style API) that performs a number of <span class="extype" name="Contexts">Contexts</span>
+lookups on each operation. Prefer &quot;capturing&quot; a <a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a> instance for batching lookups.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.tracing.TraceId" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="TraceId"></a><a id="TraceId:TraceId"></a>
       <span class="permalink">
@@ -1621,6 +1653,22 @@ When reporting, we report to all tracers in the list of <code>Tracer</code>s.
       </span>
       <span class="symbol">
         <a title="" href="Tracer$.html"><span class="name">Tracer</span></a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.tracing.Tracing" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Tracing"></a><a id="Tracing:Tracing"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/index.html#Tracing" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Tracing$.html"><span class="name">Tracing</span></a>
       </span>
       
       

@@ -714,6 +714,22 @@ finagle clients and servers.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.pushsession" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="pushsession"></a><a id="pushsession:pushsession"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#pushsession" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../pushsession/index.html"><span class="name">pushsession</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.redis" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="redis"></a><a id="redis:redis"></a>
       <span class="permalink">
@@ -1236,7 +1252,7 @@ Http.client
       
       <p class="shortcomment cmt">Returns the default process global <a href="../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a> ordering as set via
 <code>defaultAddressOrdering</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the default process global <a href="../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a> ordering as set via
-<code>defaultAddressOrdering</code>. If no value is set, <span class="extype" name="Address.OctetOrdering">Address.OctetOrdering</span>
+<code>defaultAddressOrdering</code>. If no value is set, <a href="../Address$.html#HashOrdering:Ordering[com.twitter.finagle.Address]" class="extmbr" name="com.twitter.finagle.Address#HashOrdering">Address.HashOrdering</a>
 is used with the assumption that hosts resolved via Finagle provide the
 load balancer with resolved InetAddresses. If a separate resolution process
 is used, outside of Finagle, the default ordering should be overridden.

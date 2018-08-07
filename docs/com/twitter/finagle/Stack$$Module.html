@@ -169,10 +169,6 @@ empty stack for <a href="ServiceFactory.html" class="extype" name="com.twitter.f
                         <a class="trait" href="Stack$$Head.html" title="Trait encompassing all associated metadata of a stack element."></a>
                         <a href="Stack$$Head.html" title="Trait encompassing all associated metadata of a stack element.">Head</a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="Stack$$Leaf$.html" title=""></a>
-                        <a class="class" href="Stack$$Leaf.html" title="A static stack element; necessarily the last."></a>
-                        <a href="Stack$$Leaf.html" title="A static stack element; necessarily the last.">Leaf</a>
-                      </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="" title="A convenience class to construct stackable modules."></a>
                         <a href="" title="A convenience class to construct stackable modules.">Module</a>
@@ -212,10 +208,6 @@ empty stack for <a href="ServiceFactory.html" class="extype" name="com.twitter.f
                         <span class="separator"></span>
                         <a class="class" href="Stack$$NoOpModule.html" title=""></a>
                         <a href="Stack$$NoOpModule.html" title="">NoOpModule</a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="Stack$$Node$.html" title=""></a>
-                        <a class="class" href="Stack$$Node.html" title="Nodes materialize by transforming the underlying stack in some way."></a>
-                        <a href="Stack$$Node.html" title="Nodes materialize by transforming the underlying stack in some way.">Node</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="Stack$$Param$.html" title=""></a>
                         <a class="trait" href="Stack$$Param.html" title="A typeclass representing P-typed elements, eligible as parameters for stack configuration."></a>
@@ -279,7 +271,7 @@ and the parameter extraction is derived from type parameters.
   <span class="kw">def</span> make(params: Params, next: Stack[<span class="std">Int</span><span class="kw">=&gt;</span><span class="std">Int</span>]): Stack[<span class="std">Int</span><span class="kw">=&gt;</span><span class="std">Int</span>] = {
     <span class="kw">val</span> Multiplier(m) = params[Multiplier]
     <span class="kw">if</span> (m == <span class="num">1</span>) next <span class="cmt">// It's a no-op, skip it.</span>
-    <span class="kw">else</span> Stack.Leaf(<span class="lit">"multiply"</span>, i <span class="kw">=&gt;</span> next.make(params)(i)*m)
+    <span class="kw">else</span> Stack.leaf(<span class="lit">"multiply"</span>, i <span class="kw">=&gt;</span> next.make(params)(i)*m)
   }
 }</pre></div><div class="toggleContainer block">
           <span class="toggle">

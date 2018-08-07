@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Clients &#8212; Finagle 18.7.0 documentation</title>
+    <title>Clients &#8212; Finagle 18.8.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '18.7.0',
+        VERSION:     '18.8.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 18.7.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 18.8.0 documentation" href="index.html" />
     <link rel="next" title="Contexts" href="Contexts.html" />
     <link rel="prev" title="Servers" href="Servers.html" />
    
@@ -104,6 +104,38 @@ the rich API, a more specialized API is exposed. See the protocols section on
 <p>Finagle clients come with a variety of transport-level parameters that not only wire up TCP socket
 options, but also upgrade the transport protocol to support encryption (e.g. TLS/SSL) and proxy
 servers (e.g. HTTP, SOCKS5).</p>
+</div>
+<div class="section" id="transport-security">
+<h2>Transport Security<a class="headerlink" href="#transport-security" title="Permalink to this headline">¶</a></h2>
+<p>Finagle has robust support for TLS. The most common options such as server validation are accessible
+directly via the <cite>tls</cite> members of <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/param/ClientTransportParams.scala">ClientTransportParams</a>
+as follows:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Service</span><span class="o">,</span> <span class="nc">Http</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
+
+<span class="k">val</span> <span class="n">twitter</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
+  <span class="o">.</span><span class="n">withTransport</span><span class="o">.</span><span class="n">tls</span><span class="o">(</span><span class="s">&quot;twitter.com&quot;</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;twitter.com:443&quot;</span><span class="o">)</span>
+</pre></div>
+</div>
+<p>There are further configuration options including client authentication accessible via <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/param/ClientTransportParams.scala">ClientTransportParams</a>.</p>
+<p>Finagle also supports <a class="reference external" href="https://en.wikipedia.org/wiki/SPNEGO">SPNEGO</a> which is an HTTP specific
+extension for negotiating security schemes. A common use case for SPNEGO is for authentication in <a class="reference external" href="https://en.wikipedia.org/wiki/Kerberos_(protocol)">Kerberos</a>
+secured environments.</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Service</span><span class="o">,</span> <span class="nc">Http</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.http.SpnegoAuthenticator.ClientFilter</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.http.SpnegoAuthenticator.Credentials.</span><span class="o">{</span><span class="nc">ClientSource</span><span class="o">,</span> <span class="nc">JAASClientSource</span><span class="o">}</span>
+
+<span class="k">val</span> <span class="n">jaas</span><span class="k">:</span> <span class="kt">ClientSource</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">JAASClientSource</span><span class="o">(</span>
+  <span class="n">loginContext</span> <span class="k">=</span> <span class="s">&quot;com.sun.security.jgss.krb5.initiate&quot;</span><span class="o">,</span>
+  <span class="nc">_serverPrincipal</span> <span class="k">=</span> <span class="s">&quot;HTTP/SOME_HOST@SOME_DOMAIN&quot;</span>
+<span class="o">)</span>
+
+<span class="k">val</span> <span class="n">client</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">]</span> <span class="k">=</span>
+  <span class="k">new</span> <span class="nc">ClientFilter</span><span class="o">(</span><span class="n">jaas</span><span class="o">).</span><span class="n">andThen</span><span class="o">(</span><span class="nc">Http</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;host:port&quot;</span><span class="o">))</span>
+</pre></div>
+</div>
 <div class="section" id="http-proxy">
 <h3>HTTP Proxy<a class="headerlink" href="#http-proxy" title="Permalink to this headline">¶</a></h3>
 <p>There is built-in support for <a class="reference external" href="https://tools.ietf.org/html/draft-luotonen-web-proxy-tunneling-01">tunneling TCP-based protocols</a>
@@ -786,6 +818,27 @@ minutes.</li>
 in. Default is 0.5.</li>
 </ol>
 <p><a class="reference internal" href="Metrics.html#admission-control-stats"><span class="std std-ref">Related stats</span></a></p>
+<p>Here is a brief summary of the configurable params.</p>
+<blockquote>
+<div>A configuration with a <code class="docutils literal"><span class="pre">nackRateThreshold</span></code> of N% and a <code class="docutils literal"><span class="pre">window</span></code> of duration
+W roughly translates as, &#8220;start dropping some requests to the cluster when
+the nack rate averages at least N% over a window of duration W.&#8221;</div></blockquote>
+<p>Here are some examples of situations with param values chosen to make the
+filter useful:</p>
+<ul class="simple">
+<li>Owners of Service A examine their service&#8217;s nack rate over several days
+and find that it is almost always under 10% and rarely above 1% (e.g.,
+during traffic spikes) or 5% (e.g., during a data center outage). They
+do not want to preemptively drop requests unless the cluster sees an
+extreme overload situation so they choose a nack rate threshold of 20%.
+And in such a situation they want the filter to act relatively quickly,
+so they choose a window of 30 seconds.</li>
+<li>Owners of Service B observe that excess load typically causes peak nack
+rates of around 25% for up to 60 seconds. They want to be aggressive
+about avoiding cluster overload and don’t mind dropping some innocent
+requests during mild load so they choose a window of 10 seconds and a
+threshold of 0.15 (= 15%).</li>
+</ul>
 </div>
 <div class="section" id="response-classification">
 <span id="id30"></span><h2>Response Classification<a class="headerlink" href="#response-classification" title="Permalink to this headline">¶</a></h2>
@@ -1026,7 +1079,8 @@ Alvaro Videla&#8217;s <a class="reference external" href="http://videlalvaro.git
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Clients</a><ul>
-<li><a class="reference internal" href="#transport">Transport</a><ul>
+<li><a class="reference internal" href="#transport">Transport</a></li>
+<li><a class="reference internal" href="#transport-security">Transport Security</a><ul>
 <li><a class="reference internal" href="#http-proxy">HTTP Proxy</a></li>
 <li><a class="reference internal" href="#socks5-proxy">SOCKS5 Proxy</a></li>
 </ul>

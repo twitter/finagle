@@ -384,6 +384,10 @@ resources for using Finagle.
                         <a class="class" href="ResultSet.html" title=""></a>
                         <a href="ResultSet.html" title="">ResultSet</a>
                       </li><li class="current-entities indented4">
+                        <a class="object" href="RollbackFactory$.html" title=""></a>
+                        <a class="class" href="RollbackFactory.html" title="A ServiceFactory that ensures a ROLLBACK statement is issued when a service is put back into the connection pool."></a>
+                        <a href="RollbackFactory.html" title="A ServiceFactory that ensures a ROLLBACK statement is issued when a service is put back into the connection pool.">RollbackFactory</a>
+                      </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="trait" href="Row.html" title="A Row allows you to extract Value's from a MySQL row."></a>
                         <a href="Row.html" title="A Row allows you to extract Value's from a MySQL row.">Row</a>
@@ -572,6 +576,26 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.TimestampValue#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="apply(ts:java.sql.Timestamp):com.twitter.finagle.mysql.Value"></a><a id="apply(Timestamp):Value"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/TimestampValue$.html#apply(ts:java.sql.Timestamp):com.twitter.finagle.mysql.Value" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">apply</span><span class="params">(<span name="ts">ts: <span class="extype" name="java.sql.Timestamp">Timestamp</span></span>)</span><span class="result">: <a href="Value.html" class="extype" name="com.twitter.finagle.mysql.Value">Value</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Injects a <span class="extype" name="java.sql.Timestamp">java.sql.Timestamp</span> into a
+<a href="RawValue.html" class="extype" name="com.twitter.finagle.mysql.RawValue">com.twitter.finagle.mysql.RawValue</a> in a given <code>injectionTimeZone</code>
+</p><div class="fullcomment"><div class="comment cmt"><p>Injects a <span class="extype" name="java.sql.Timestamp">java.sql.Timestamp</span> into a
+<a href="RawValue.html" class="extype" name="com.twitter.finagle.mysql.RawValue">com.twitter.finagle.mysql.RawValue</a> in a given <code>injectionTimeZone</code>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TimestampValue.html" class="extype" name="com.twitter.finagle.mysql.TimestampValue">TimestampValue</a> → Injectable</dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -838,6 +862,24 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.TimestampValue#unapply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="unapply(v:com.twitter.finagle.mysql.Value):Option[java.sql.Timestamp]"></a><a id="unapply(Value):Option[Timestamp]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/TimestampValue$.html#unapply(v:com.twitter.finagle.mysql.Value):Option[java.sql.Timestamp]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">unapply</span><span class="params">(<span name="v">v: <a href="Value.html" class="extype" name="com.twitter.finagle.mysql.Value">Value</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.sql.Timestamp">Timestamp</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Value extractor for <span class="extype" name="java.sql.Timestamp">java.sql.Timestamp</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Value extractor for <span class="extype" name="java.sql.Timestamp">java.sql.Timestamp</span>.</p><p>Extracts timestamps in <code>extractionTimeZone</code> for values encoded in either
+the binary or text MySQL protocols.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TimestampValue.html" class="extype" name="com.twitter.finagle.mysql.TimestampValue">TimestampValue</a> → Extractable</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
@@ -912,54 +954,7 @@ resources for using Finagle.
 
         
 
-        <div class="values members">
-              <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.mysql.TimestampValue#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="apply(ts:java.sql.Timestamp):com.twitter.finagle.mysql.Value"></a><a id="apply(Timestamp):Value"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mysql/TimestampValue$.html#apply(ts:java.sql.Timestamp):com.twitter.finagle.mysql.Value" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.20.2)">apply</span><span class="params">(<span name="ts">ts: <span class="extype" name="java.sql.Timestamp">Timestamp</span></span>)</span><span class="result">: <a href="Value.html" class="extype" name="com.twitter.finagle.mysql.Value">Value</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Injects a <span class="extype" name="java.sql.Timestamp">java.sql.Timestamp</span> into a
-<a href="RawValue.html" class="extype" name="com.twitter.finagle.mysql.RawValue">com.twitter.finagle.mysql.RawValue</a> in a given <code>injectionTimeZone</code>
-</p><div class="fullcomment"><div class="comment cmt"><p>Injects a <span class="extype" name="java.sql.Timestamp">java.sql.Timestamp</span> into a
-<a href="RawValue.html" class="extype" name="com.twitter.finagle.mysql.RawValue">com.twitter.finagle.mysql.RawValue</a> in a given <code>injectionTimeZone</code>
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.mysql.TimestampValue">TimestampValue</a> → <a href="TimestampValue.html" class="extype" name="com.twitter.finagle.mysql.TimestampValue">TimestampValue</a> → Injectable</dd><dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.20.2)</i></p></dd></dl></div>
-    </li><li name="com.twitter.finagle.mysql.TimestampValue#unapply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="unapply(v:com.twitter.finagle.mysql.Value):Option[java.sql.Timestamp]"></a><a id="unapply(Value):Option[Timestamp]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mysql/TimestampValue$.html#unapply(v:com.twitter.finagle.mysql.Value):Option[java.sql.Timestamp]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.20.2)">unapply</span><span class="params">(<span name="v">v: <a href="Value.html" class="extype" name="com.twitter.finagle.mysql.Value">Value</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.sql.Timestamp">Timestamp</span>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">Value extractor for <span class="extype" name="java.sql.Timestamp">java.sql.Timestamp</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Value extractor for <span class="extype" name="java.sql.Timestamp">java.sql.Timestamp</span>.</p><p>Extracts timestamps in <code>extractionTimeZone</code> for values encoded in either
-the binary or text MySQL protocols.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.mysql.TimestampValue">TimestampValue</a> → <a href="TimestampValue.html" class="extype" name="com.twitter.finagle.mysql.TimestampValue">TimestampValue</a> → Extractable</dd><dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.20.2)</i></p></dd></dl></div>
-    </li></ol>
-            </div>
+        
         </div>
 
         <div id="inheritedMembers">

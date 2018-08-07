@@ -682,6 +682,22 @@ finagle clients and servers.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.pushsession" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="pushsession"></a><a id="pushsession:pushsession"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#pushsession" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../pushsession/index.html"><span class="name">pushsession</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.redis" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="redis"></a><a id="redis:redis"></a>
       <span class="permalink">
@@ -1170,7 +1186,20 @@ according to the argument <a href="https://twitter.github.io/util/docs/com/twitt
 <code>nackRateThreshold</code>. In the case that most or all of the cluster which the
 client is speaking to is overloaded, this will help the cluster cool off.</p><p>The implementation of this filter is heavily inspired by Chapter 21, section
 &quot;Client-Side Throttling&quot; of O'Reilly's &quot;Site Reliability Engineering: How
-Google Runs Production Systems&quot;, by Beyer, Jones, Petoff, and Murphy, 1e.
+Google Runs Production Systems&quot;, by Beyer, Jones, Petoff, and Murphy, 1e.</p><p>NOTE: Here is a brief summary of the configurable params.</p><p>A configuration with a <code>nackRateThreshold</code> of N% and a <code>window</code> of duration
+W roughly translates as, &quot;start dropping some requests to the cluster when
+the nack rate averages at least N% over a window of duration W.&quot;</p><p>Here are some examples of situations with param values chosen to make the
+filter useful:</p><p>- Owners of Service A examine their service's nack rate over several days
+  and find that it is almost always under 10% and rarely above 1% (e.g.,
+  during traffic spikes) or 5% (e.g., during a data center outage). They
+  do not want to preemptively drop requests unless the cluster sees an
+  extreme overload situation so they choose a nack rate threshold of 20%.
+  And in such a situation they want the filter to act relatively quickly,
+  so they choose a window of 30 seconds.</p><p>- Owners of Service B observe that excess load typically causes peak nack
+  rates of around 25% for up to 60 seconds. They want to be aggressive
+  about avoiding cluster overload and don’t mind dropping some innocent
+  requests during mild load so they choose a window of 10 seconds and a
+  threshold of 0.15 (= 15%).
 </p></div></div>
     </li><li name="com.twitter.finagle.filter.RequestMeterFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="RequestMeterFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a><a id="RequestMeterFilter[Req,Rep]:RequestMeterFilter[Req,Rep]"></a>

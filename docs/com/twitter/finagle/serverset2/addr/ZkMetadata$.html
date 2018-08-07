@@ -540,7 +540,7 @@ return None.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.serverset2.addr.ZkMetadata#shardHashOrdering" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.serverset2.addr.ZkMetadata#shardHashOrdering" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="shardHashOrdering:Ordering[com.twitter.finagle.Address]"></a><a id="shardHashOrdering:Ordering[Address]"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/serverset2/addr/ZkMetadata$.html#shardHashOrdering:Ordering[com.twitter.finagle.Address]" title="Permalink">
@@ -555,7 +555,10 @@ return None.
         <span class="name">shardHashOrdering</span><span class="result">: <span class="extype" name="scala.Ordering">Ordering</span>[<a href="../../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">Orders a Finagle <a href="../../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a> based on a deterministic hash of its shard id.</p>
+      <p class="shortcomment cmt">Orders a Finagle <a href="../../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a> based on a deterministic hash of its shard id.</p><div class="fullcomment"><div class="comment cmt"><p>Orders a Finagle <a href="../../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a> based on a deterministic hash of its shard id.</p><p>If shard id information is identical, either both lack metadata, both lack
+a shard id, or both have the same shard id, ordering is then computed by
+<a href="../../Address$.html#HashOrdering:Ordering[com.twitter.finagle.Address]" class="extmbr" name="com.twitter.finagle.Address#HashOrdering">Address.HashOrdering</a>.
+</p></div></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

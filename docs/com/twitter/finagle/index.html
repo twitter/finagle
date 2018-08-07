@@ -633,6 +633,22 @@ finagle clients and servers.</p>
       </span>
       
       
+    </li><li name="com.twitter.finagle.pushsession" visbl="pub" class="indented4 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="pushsession"></a><a id="pushsession:pushsession"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#pushsession" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="pushsession/index.html"><span class="name">pushsession</span></a>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.redis" visbl="pub" class="indented4 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="redis"></a><a id="redis:redis"></a>
       <span class="permalink">
@@ -3700,22 +3716,6 @@ do not occur.
     .withSession.acquisitionTimeout(<span class="num">20.</span>seconds)
     .newRichClient(dest, <span class="lit">"memcached_client"</span>)</pre></li>, <li class="cmt"><p></p><pre><span class="kw">val</span> client = Memcached.newRichClient(dest)</pre><p>If you want to provide more finely tuned configurations:</p></li></ol>
             </div></dl></div>
-    </li><li name="com.twitter.finagle.Mux" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Mux"></a><a id="Mux:Mux"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#Mux" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="A client and server for the mux protocol described in com.twitter.finagle.mux." href="Mux$.html"><span class="name">Mux</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>] with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">A client and server for the mux protocol described in <a href="mux/index.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.</p>
     </li><li name="com.twitter.finagle.MySqlClientTracingFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MySqlClientTracingFilter"></a><a id="MySqlClientTracingFilter:MySqlClientTracingFilter"></a>
       <span class="permalink">
@@ -4188,7 +4188,7 @@ prefix and servers with &quot;srv/thrift&quot;. If you'd like more configuration
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="An exception that is raised on requests that are discarded because their corresponding backup requests succeeded first." href="BackupRequestLost$.html"><span class="name deprecated" title="Deprecated: (Since version 2017-11-20) Use Failure flagged Failure.Ignorable">BackupRequestLost</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a> with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a></span>
+        <a title="An exception that is raised on requests that are discarded because their corresponding backup requests succeeded first." href="BackupRequestLost$.html"><span class="name deprecated" title="Deprecated: (Since version 2017-11-20) Use Failure flagged FailureFlags.Ignorable">BackupRequestLost</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a> with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a></span>
       </span>
       
       <p class="shortcomment cmt">An exception that is raised on requests that are discarded because
@@ -4198,7 +4198,27 @@ their corresponding backup requests succeeded first. See
 </p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-11-20)</i> Use Failure flagged Failure.Ignorable</p></dd></dl></div>
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-11-20)</i> Use Failure flagged FailureFlags.Ignorable</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.Mux" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Mux"></a><a id="Mux:Mux"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#Mux" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="A client and server for the mux protocol described in com.twitter.finagle.mux." href="Mux$.html"><span class="name deprecated" title="Deprecated: (Since version 2018-07-18) Use the push-based mux implementation, MuxPush, instead">Mux</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>] with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A client and server for the mux protocol described in <a href="mux/index.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A client and server for the mux protocol described in <a href="mux/index.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-07-18)</i> Use the push-based mux implementation, MuxPush, instead</p></dd></dl></div>
     </li></ol>
             </div>
         </div>

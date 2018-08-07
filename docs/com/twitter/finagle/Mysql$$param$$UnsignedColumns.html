@@ -190,8 +190,8 @@ resources for using Finagle.
                         <a href="Mysql$$param$$MaxConcurrentPrepareStatements.html" title="A class eligible for configuring the maximum number of prepare statements.">MaxConcurrentPrepareStatements</a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="Mysql$$param$$UnsignedColumns$.html" title=""></a>
-                        <a class="class" href="" title="Configure whether to support unsigned integer fields should be considered when returning elements of a Row."></a>
-                        <a href="" title="Configure whether to support unsigned integer fields should be considered when returning elements of a Row.">UnsignedColumns</a>
+                        <a class="class" href="" title="Configure whether to support unsigned integer fields when returning elements of a Row."></a>
+                        <a href="" title="Configure whether to support unsigned integer fields when returning elements of a Row.">UnsignedColumns</a>
                       </li>
               </ul>
             </div>
@@ -222,12 +222,11 @@ resources for using Finagle.
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Configure whether to support unsigned integer fields should be considered when
-returning elements of a <span class="extype" name="Row">Row</span>. If not supported, unsigned fields will be decoded
-as if they were signed, potentially resulting in corruption in the case of overflowing
-the signed representation. Because Java doesn't support unsigned integer types
-widening may be necessary to support the unsigned variants. For example, an unsigned
-Int is represented as a Long.</p><p><code>Value</code> representations of unsigned columns which are widened when enabled:
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Configure whether to support unsigned integer fields when returning elements of a <span class="extype" name="Row">Row</span>.
+If not supported, unsigned fields will be decoded as if they were signed, potentially
+resulting in corruption in the case of overflowing the signed representation. Because
+Java doesn't support unsigned integer types widening may be necessary to support the
+unsigned variants. For example, an unsigned Int is represented as a Long.</p><p><code>Value</code> representations of unsigned columns which are widened when enabled:
 <code>ByteValue</code> -&gt; <code>ShortValue</code><code>
 <code>ShortValue</code> -&gt; IntValue</code>
 <code>LongValue</code> -&gt; <code>LongLongValue</code>

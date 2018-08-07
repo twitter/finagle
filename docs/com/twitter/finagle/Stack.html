@@ -638,6 +638,22 @@ finagle clients and servers.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.pushsession" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="pushsession"></a><a id="pushsession:pushsession"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#pushsession" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="pushsession/index.html"><span class="name">pushsession</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.redis" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="redis"></a><a id="redis:redis"></a>
       <span class="permalink">
@@ -1423,12 +1439,7 @@ only!
             Linear Supertypes
           </span>
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
-        </div><div class="toggleContainer block">
-            <span class="toggle">
-              Known Subclasses
-            </span>
-            <div class="subClasses hiddenContent"><a href="Stack$$Leaf.html" class="extype" name="com.twitter.finagle.Stack.Leaf">Leaf</a>, <a href="Stack$$Node.html" class="extype" name="com.twitter.finagle.Stack.Node">Node</a></div>
-          </div></div>
+        </div></div>
         
 
       <div id="mbrsel">
@@ -1496,24 +1507,6 @@ only!
 of the topmost element of the stack.</p><div class="fullcomment"><div class="comment cmt"><p>The head field of the Stack composes all associated metadata
 of the topmost element of the stack.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p><code>head</code> does not give access to the value <code>T</code>, use <code>make</code> instead.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Stack$$Head.html" class="extype" name="com.twitter.finagle.Stack.Head">Stack.Head</a></p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.Stack#make" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="make(params:com.twitter.finagle.Stack.Params):T"></a><a id="make(Params):T"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Stack.html#make(params:com.twitter.finagle.Stack.Params):T" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">make</span><span class="params">(<span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.Stack.T">T</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">Materialize the current stack with the given parameters,
-producing a <code>T</code>-typed value representing the current
-configuration.</p>
     </li></ol>
             </div>
 
@@ -1911,6 +1904,40 @@ unmodified stack is returned.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.Stack#make" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="make(params:com.twitter.finagle.Stack.Params):T"></a><a id="make(Params):T"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Stack.html#make(params:com.twitter.finagle.Stack.Params):T" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">make</span><span class="params">(<span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.Stack.T">T</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Materialize the current stack with the given parameters,
+producing a <code>T</code>-typed value representing the current
+configuration.</p>
+    </li><li name="com.twitter.finagle.Stack#map" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="map(fn:(com.twitter.finagle.Stack.Head,T)=&gt;T):com.twitter.finagle.Stack[T]"></a><a id="map((Head,T)⇒T):Stack[T]"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Stack.html#map(fn:(com.twitter.finagle.Stack.Head,T)=&gt;T):com.twitter.finagle.Stack[T]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">map</span><span class="params">(<span name="fn">fn: (<a href="Stack$$Head.html" class="extype" name="com.twitter.finagle.Stack.Head">Head</a>, <span class="extype" name="com.twitter.finagle.Stack.T">T</span>) ⇒ <span class="extype" name="com.twitter.finagle.Stack.T">T</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.T">T</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Transform one stack to another by applying <code>fn</code> on each element.</p>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -2105,7 +2132,7 @@ unmodified stack is returned.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Stack">Stack</a> → AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.Stack#transform" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.Stack#transform" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="transform(fn:com.twitter.finagle.Stack[T]=&gt;com.twitter.finagle.Stack[T]):com.twitter.finagle.Stack[T]"></a><a id="transform((Stack[T])⇒Stack[T]):Stack[T]"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Stack.html#transform(fn:com.twitter.finagle.Stack[T]=&gt;com.twitter.finagle.Stack[T]):com.twitter.finagle.Stack[T]" title="Permalink">
@@ -2122,7 +2149,10 @@ unmodified stack is returned.
       
       <p class="shortcomment cmt">Transform one stack to another by applying <code>fn</code> on each element;
 the map traverses on the element produced by <code>fn</code>, not the
-original stack.</p>
+original stack.</p><div class="fullcomment"><div class="comment cmt"><p>Transform one stack to another by applying <code>fn</code> on each element;
+the map traverses on the element produced by <code>fn</code>, not the
+original stack. Prefer using <a href="#map(fn:(com.twitter.finagle.Stack.Head,T)=&gt;T):com.twitter.finagle.Stack[T]" class="extmbr" name="com.twitter.finagle.Stack#map">map</a> over <a href="#transform(fn:com.twitter.finagle.Stack[T]=&gt;com.twitter.finagle.Stack[T]):com.twitter.finagle.Stack[T]" class="extmbr" name="com.twitter.finagle.Stack#transform">transform</a>.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">

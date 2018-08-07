@@ -747,6 +747,10 @@ use.</p><p> Flag          Value     Meaning
                         <a class="class" href="ResultSet.html" title=""></a>
                         <a href="ResultSet.html" title="">ResultSet</a>
                       </li><li class="current-entities indented4">
+                        <a class="object" href="RollbackFactory$.html" title=""></a>
+                        <a class="class" href="RollbackFactory.html" title="A ServiceFactory that ensures a ROLLBACK statement is issued when a service is put back into the connection pool."></a>
+                        <a href="RollbackFactory.html" title="A ServiceFactory that ensures a ROLLBACK statement is issued when a service is put back into the connection pool.">RollbackFactory</a>
+                      </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="trait" href="Row.html" title="A Row allows you to extract Value's from a MySQL row."></a>
                         <a href="Row.html" title="A Row allows you to extract Value's from a MySQL row.">Row</a>
@@ -907,6 +911,22 @@ finagle clients and servers.
       </span>
       <span class="symbol">
         <a title="" href="../pool/index.html"><span class="name">pool</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.pushsession" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="pushsession"></a><a id="pushsession:pushsession"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#pushsession" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../pushsession/index.html"><span class="name">pushsession</span></a>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
@@ -1950,6 +1970,25 @@ bytes.
       </span>
       
       
+    </li><li name="com.twitter.finagle.mysql.RollbackFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="RollbackFactoryextendsServiceFactoryProxy[com.twitter.finagle.mysql.Request,com.twitter.finagle.mysql.Result]"></a><a id="RollbackFactory:RollbackFactory"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/index.html#RollbackFactoryextendsServiceFactoryProxy[com.twitter.finagle.mysql.Request,com.twitter.finagle.mysql.Result]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A ServiceFactory that ensures a ROLLBACK statement is issued when a service is put back into the connection pool." href="RollbackFactory.html"><span class="name">RollbackFactory</span></a><span class="result"> extends <a href="../ServiceFactoryProxy.html" class="extype" name="com.twitter.finagle.ServiceFactoryProxy">ServiceFactoryProxy</a>[<a href="Request.html" class="extype" name="com.twitter.finagle.mysql.Request">Request</a>, <a href="Result.html" class="extype" name="com.twitter.finagle.mysql.Result">Result</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A <code>ServiceFactory</code> that ensures a ROLLBACK statement is issued when a service is put
+back into the connection pool.</p><div class="fullcomment"><div class="comment cmt"><p>A <code>ServiceFactory</code> that ensures a ROLLBACK statement is issued when a service is put
+back into the connection pool.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>https://dev.mysql.com/doc/en/implicit-commit.html</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.mysql.Row" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="RowextendsAnyRef"></a><a id="Row:Row"></a>
       <span class="permalink">
@@ -2694,6 +2733,22 @@ COM_STMT_PREPARE.
       <p class="shortcomment cmt">Tells the server that the client wants to close the connection.</p><div class="fullcomment"><div class="comment cmt"><p>Tells the server that the client wants to close the connection.
 <a href="http://dev.mysql.com/doc/internals/en/com-quit.html" target="_blank">http://dev.mysql.com/doc/internals/en/com-quit.html</a>
 </p></div></div>
+    </li><li name="com.twitter.finagle.mysql.RollbackFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RollbackFactory"></a><a id="RollbackFactory:RollbackFactory"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/index.html#RollbackFactory" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="RollbackFactory$.html"><span class="name">RollbackFactory</span></a>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.mysql.ServerStatus" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ServerStatus"></a><a id="ServerStatus:ServerStatus"></a>
       <span class="permalink">

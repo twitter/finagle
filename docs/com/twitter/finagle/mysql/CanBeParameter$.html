@@ -384,6 +384,10 @@ resources for using Finagle.
                         <a class="class" href="ResultSet.html" title=""></a>
                         <a href="ResultSet.html" title="">ResultSet</a>
                       </li><li class="current-entities indented4">
+                        <a class="object" href="RollbackFactory$.html" title=""></a>
+                        <a class="class" href="RollbackFactory.html" title="A ServiceFactory that ensures a ROLLBACK statement is issued when a service is put back into the connection pool."></a>
+                        <a href="RollbackFactory.html" title="A ServiceFactory that ensures a ROLLBACK statement is issued when a service is put back into the connection pool.">RollbackFactory</a>
+                      </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="trait" href="Row.html" title="A Row allows you to extract Value's from a MySQL row."></a>
                         <a href="Row.html" title="A Row allows you to extract Value's from a MySQL row.">Row</a>
@@ -708,6 +712,30 @@ explicitly added to <a href="Parameter$.html#unsafeWrap(value:Any):com.twitter.f
       </span>
       
       
+    </li><li name="com.twitter.finagle.mysql.CanBeParameter#dateCanBeParameter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="dateCanBeParameter:com.twitter.finagle.mysql.CanBeParameter[java.util.Date]"></a><a id="dateCanBeParameter:CanBeParameter[Date]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/CanBeParameter$.html#dateCanBeParameter:com.twitter.finagle.mysql.CanBeParameter[java.util.Date]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">dateCanBeParameter</span><span class="result">: <a href="CanBeParameter.html" class="extype" name="com.twitter.finagle.mysql.CanBeParameter">CanBeParameter</a>[<span class="extype" name="java.util.Date">Date</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Because java.sql.Date and java.sql.Timestamp extend java.util.Date and
+because CanBeParameter's type parameter is contravariant, having separate
+implicits for these types results in the one for the supertype being used
+when the one for the subtype should be used.</p><div class="fullcomment"><div class="comment cmt"><p>Because java.sql.Date and java.sql.Timestamp extend java.util.Date and
+because CanBeParameter's type parameter is contravariant, having separate
+implicits for these types results in the one for the supertype being used
+when the one for the subtype should be used. To work around this we use
+just one implicit and pattern match within it.
+</p></div></div>
     </li><li name="com.twitter.finagle.mysql.CanBeParameter#doubleCanBeParameter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="doubleCanBeParameter:com.twitter.finagle.mysql.CanBeParameter[Double]"></a><a id="doubleCanBeParameter:CanBeParameter[Double]"></a>
       <span class="permalink">
@@ -864,22 +892,6 @@ explicitly added to <a href="Parameter$.html#unsafeWrap(value:Any):com.twitter.f
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.mysql.CanBeParameter#javaDateCanBeParameter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="javaDateCanBeParameter:com.twitter.finagle.mysql.CanBeParameter[java.util.Date]"></a><a id="javaDateCanBeParameter:CanBeParameter[Date]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mysql/CanBeParameter$.html#javaDateCanBeParameter:com.twitter.finagle.mysql.CanBeParameter[java.util.Date]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">implicit </span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">javaDateCanBeParameter</span><span class="result">: <a href="CanBeParameter.html" class="extype" name="com.twitter.finagle.mysql.CanBeParameter">CanBeParameter</a>[<span class="extype" name="java.util.Date">Date</span>]</span>
-      </span>
-      
-      
     </li><li name="com.twitter.finagle.mysql.CanBeParameter#javaLangBooleanCanBeParameter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="javaLangBooleanCanBeParameter:com.twitter.finagle.mysql.CanBeParameter[Boolean]"></a><a id="javaLangBooleanCanBeParameter:CanBeParameter[Boolean]"></a>
       <span class="permalink">
@@ -1094,22 +1106,6 @@ explicitly added to <a href="Parameter$.html#unsafeWrap(value:Any):com.twitter.f
       </span>
       
       
-    </li><li name="com.twitter.finagle.mysql.CanBeParameter#sqlDateCanBeParameter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="sqlDateCanBeParameter:com.twitter.finagle.mysql.CanBeParameter[java.sql.Date]"></a><a id="sqlDateCanBeParameter:CanBeParameter[Date]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mysql/CanBeParameter$.html#sqlDateCanBeParameter:com.twitter.finagle.mysql.CanBeParameter[java.sql.Date]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">implicit </span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">sqlDateCanBeParameter</span><span class="result">: <a href="CanBeParameter.html" class="extype" name="com.twitter.finagle.mysql.CanBeParameter">CanBeParameter</a>[<span class="extype" name="java.sql.Date">Date</span>]</span>
-      </span>
-      
-      
     </li><li name="com.twitter.finagle.mysql.CanBeParameter#stringCanBeParameter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="stringCanBeParameter:com.twitter.finagle.mysql.CanBeParameter[String]"></a><a id="stringCanBeParameter:CanBeParameter[String]"></a>
       <span class="permalink">
@@ -1142,22 +1138,6 @@ explicitly added to <a href="Parameter$.html#unsafeWrap(value:Any):com.twitter.f
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.mysql.CanBeParameter#timestampCanBeParameter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="timestampCanBeParameter:com.twitter.finagle.mysql.CanBeParameter[java.sql.Timestamp]"></a><a id="timestampCanBeParameter:CanBeParameter[Timestamp]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mysql/CanBeParameter$.html#timestampCanBeParameter:com.twitter.finagle.mysql.CanBeParameter[java.sql.Timestamp]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">implicit </span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">timestampCanBeParameter</span><span class="result">: <a href="CanBeParameter.html" class="extype" name="com.twitter.finagle.mysql.CanBeParameter">CanBeParameter</a>[<span class="extype" name="java.sql.Timestamp">Timestamp</span>]</span>
-      </span>
-      
-      
     </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">

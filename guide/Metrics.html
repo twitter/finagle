@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &#8212; Finagle 18.7.0 documentation</title>
+    <title>Metrics &#8212; Finagle 18.8.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '18.7.0',
+        VERSION:     '18.8.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 18.7.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 18.8.0 documentation" href="index.html" />
     <link rel="next" title="Unsuccessful Responses" href="UnsuccessfulResponses.html" />
     <link rel="prev" title="Protocols" href="Protocols.html" />
    
@@ -1188,6 +1188,25 @@ upgraded a connection to TLS.</dd>
 due to incompatible TLS requirements or capabilities.</dd>
 </dl>
 </div>
+<div class="section" id="mysql">
+<h2>Mysql<a class="headerlink" href="#mysql" title="Permalink to this headline">¶</a></h2>
+<p>These stats pertain to the finagle-mysql implementation.</p>
+<dl class="docutils">
+<dt><strong>&lt;label&gt;/rollback_latency_ms</strong></dt>
+<dd>The latency of the automatic rollback issued when a connection
+is put back into the pool.</dd>
+<dt><strong>&lt;label&gt;/cursor/time_per_stream_ms</strong></dt>
+<dd>The latency from start to finish of a cursor stream.</dd>
+<dt><strong>&lt;label&gt;/cursor/time_per_fetch_ms</strong></dt>
+<dd>The latency of individual cursor fetches.</dd>
+<dt><strong>&lt;label&gt;/cursor/time_between_fetch_ms</strong></dt>
+<dd>The latency between individual cursor fetches.</dd>
+<dt><strong>&lt;label&gt;/cursor/opened</strong></dt>
+<dd>A counter of the number of opened cursors.</dd>
+<dt><strong>&lt;label&gt;/cursor/closed</strong></dt>
+<dd>A counter of the number of closed cursors.</dd>
+</dl>
+</div>
 <div class="section" id="thriftmux">
 <h2>ThriftMux<a class="headerlink" href="#thriftmux" title="Permalink to this headline">¶</a></h2>
 <p id="thriftmux-stats">These stats pertain to the <a class="reference internal" href="FAQ.html#whats-thriftmux"><span class="std std-ref">ThriftMux</span></a> protocol.</p>
@@ -1340,6 +1359,7 @@ when constructing a client <cite>ServicePerEndpoint</cite>. Similar metrics as s
 <li><a class="reference internal" href="#http2">HTTP2</a></li>
 <li><a class="reference internal" href="#memcached">Memcached</a></li>
 <li><a class="reference internal" href="#mux">Mux</a></li>
+<li><a class="reference internal" href="#mysql">Mysql</a></li>
 <li><a class="reference internal" href="#thriftmux">ThriftMux</a></li>
 <li><a class="reference internal" href="#perendpoint-statsfilter">PerEndpoint StatsFilter</a></li>
 </ul>

@@ -169,8 +169,8 @@ resources for using Finagle.
                         <a href="AnnotatingTracingFilter.html" title="A generic filter that can be used for annotating the Server and Client side of a trace.">AnnotatingTracingFilter</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="Annotation$.html" title=""></a>
-                        <a class="trait" href="" title=""></a>
-                        <a href="" title="">Annotation</a>
+                        <a class="class" href="" title="An ADT describing a tracing annotation."></a>
+                        <a href="" title="An ADT describing a tracing annotation.">Annotation</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="BroadcastTracer$.html" title=""></a>
@@ -213,10 +213,6 @@ resources for using Finagle.
                         <a href="Record.html" title="Records information of interest to the tracing system.">Record</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="ServerDestTracingProxy.html" title="com.twitter.finagle.ServiceFactoryProxy used to trace the local addr and server addr."></a>
-                        <a href="ServerDestTracingProxy.html" title="com.twitter.finagle.ServiceFactoryProxy used to trace the local addr and server addr.">ServerDestTracingProxy</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="object" href="ServerTracingFilter$.html" title="Annotate the request with Server specific records (ServerRecv, ServerSend)"></a>
                         <a href="ServerTracingFilter$.html" title="Annotate the request with Server specific records (ServerRecv, ServerSend)">ServerTracingFilter</a>
                       </li><li class="current-entities indented4">
@@ -225,8 +221,8 @@ resources for using Finagle.
                         <a href="SpanId.html" title="Defines trace identifiers.">SpanId</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="Trace$.html" title="This is a tracing system similar to Dapper:"></a>
-                        <a href="Trace$.html" title="This is a tracing system similar to Dapper:">Trace</a>
+                        <a class="object" href="Trace$.html" title="A singleton instance of Tracing (a facade-style API) that performs a number of Contexts lookups on each operation."></a>
+                        <a href="Trace$.html" title="A singleton instance of Tracing (a facade-style API) that performs a number of Contexts lookups on each operation.">Trace</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="TraceId$.html" title=""></a>
                         <a class="class" href="TraceId.html" title="A trace id represents one particular trace for one request."></a>
@@ -244,6 +240,10 @@ resources for using Finagle.
                         <a class="trait" href="Tracer.html" title="Tracers record trace events."></a>
                         <a href="Tracer.html" title="Tracers record trace events.">Tracer</a>
                       </li><li class="current-entities indented4">
+                        <a class="object" href="Tracing$.html" title=""></a>
+                        <a class="class" href="Tracing.html" title="This is a tracing system similar to Dapper:"></a>
+                        <a href="Tracing.html" title="This is a tracing system similar to Dapper:">Tracing</a>
+                      </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="TracingLogHandler.html" title="A logging Handler that sends log information via tracing"></a>
                         <a href="TracingLogHandler.html" title="A logging Handler that sends log information via tracing">TracingLogHandler</a>
@@ -260,9 +260,9 @@ resources for using Finagle.
             </div>
           </div>
           <div id="content">
-            <body class="trait type">
+            <body class="class type">
       <div id="definition">
-        <a href="Annotation$.html" title="See companion object"><div class="big-circle trait-companion-object">t</div></a>
+        <a href="Annotation$.html" title="See companion object"><div class="big-circle class-companion-object">c</div></a>
         <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="index.html" class="extype" name="com.twitter.finagle.tracing">tracing</a></p>
         <h1><a href="Annotation$.html" title="See companion object">Annotation</a><span class="permalink">
       <a href="../../../../com/twitter/finagle/tracing/Annotation.html" title="Permalink">
@@ -276,8 +276,8 @@ resources for using Finagle.
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
-        <span class="modifier">sealed </span>
-        <span class="kind">trait</span>
+        <span class="modifier">sealed abstract </span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
         <span class="name">Annotation</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
@@ -285,7 +285,9 @@ resources for using Finagle.
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>An ADT describing a tracing annotation. Prefer <a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a> API to creating raw <a href="" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a>
+instances (especially, when used from Java).
+</p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -294,7 +296,7 @@ resources for using Finagle.
             <span class="toggle">
               Known Subclasses
             </span>
-            <div class="subClasses hiddenContent"><a href="Annotation$$BinaryAnnotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation.BinaryAnnotation">BinaryAnnotation</a>, <a href="Annotation$$ClientAddr.html" class="extype" name="com.twitter.finagle.tracing.Annotation.ClientAddr">ClientAddr</a>, <a href="Annotation$$ClientRecv.html" class="extype" name="com.twitter.finagle.tracing.Annotation.ClientRecv">ClientRecv</a>, <a href="Annotation$$ClientRecvError.html" class="extype" name="com.twitter.finagle.tracing.Annotation.ClientRecvError">ClientRecvError</a>, <a href="Annotation$$ClientRecvFragment.html" class="extype" name="com.twitter.finagle.tracing.Annotation.ClientRecvFragment">ClientRecvFragment</a>, <a href="Annotation$$ClientSend.html" class="extype" name="com.twitter.finagle.tracing.Annotation.ClientSend">ClientSend</a>, <a href="Annotation$$ClientSendFragment.html" class="extype" name="com.twitter.finagle.tracing.Annotation.ClientSendFragment">ClientSendFragment</a>, <a href="Annotation$$LocalAddr.html" class="extype" name="com.twitter.finagle.tracing.Annotation.LocalAddr">LocalAddr</a>, <a href="Annotation$$Message.html" class="extype" name="com.twitter.finagle.tracing.Annotation.Message">Message</a>, <a href="Annotation$$Rpc.html" class="extype" name="com.twitter.finagle.tracing.Annotation.Rpc">Rpc</a>, <a href="Annotation$$ServerAddr.html" class="extype" name="com.twitter.finagle.tracing.Annotation.ServerAddr">ServerAddr</a>, <a href="Annotation$$ServerRecv.html" class="extype" name="com.twitter.finagle.tracing.Annotation.ServerRecv">ServerRecv</a>, <a href="Annotation$$ServerRecvFragment.html" class="extype" name="com.twitter.finagle.tracing.Annotation.ServerRecvFragment">ServerRecvFragment</a>, <a href="Annotation$$ServerSend.html" class="extype" name="com.twitter.finagle.tracing.Annotation.ServerSend">ServerSend</a>, <a href="Annotation$$ServerSendError.html" class="extype" name="com.twitter.finagle.tracing.Annotation.ServerSendError">ServerSendError</a>, <a href="Annotation$$ServerSendFragment.html" class="extype" name="com.twitter.finagle.tracing.Annotation.ServerSendFragment">ServerSendFragment</a>, <a href="Annotation$$ServiceName.html" class="extype" name="com.twitter.finagle.tracing.Annotation.ServiceName">ServiceName</a>, <a href="Annotation$$WireRecv$.html" class="extype" name="com.twitter.finagle.tracing.Annotation.WireRecv">WireRecv</a>, <a href="Annotation$$WireRecvError.html" class="extype" name="com.twitter.finagle.tracing.Annotation.WireRecvError">WireRecvError</a>, <a href="Annotation$$WireSend$.html" class="extype" name="com.twitter.finagle.tracing.Annotation.WireSend">WireSend</a></div>
+            <div class="subClasses hiddenContent"><a href="Annotation$$BinaryAnnotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation.BinaryAnnotation">BinaryAnnotation</a>, <a href="Annotation$$ClientAddr.html" class="extype" name="com.twitter.finagle.tracing.Annotation.ClientAddr">ClientAddr</a>, <a href="Annotation$$ClientRecv$.html" class="extype" name="com.twitter.finagle.tracing.Annotation.ClientRecv">ClientRecv</a>, <a href="Annotation$$ClientRecvError.html" class="extype" name="com.twitter.finagle.tracing.Annotation.ClientRecvError">ClientRecvError</a>, <a href="Annotation$$ClientRecvFragment$.html" class="extype" name="com.twitter.finagle.tracing.Annotation.ClientRecvFragment">ClientRecvFragment</a>, <a href="Annotation$$ClientSend$.html" class="extype" name="com.twitter.finagle.tracing.Annotation.ClientSend">ClientSend</a>, <a href="Annotation$$ClientSendFragment$.html" class="extype" name="com.twitter.finagle.tracing.Annotation.ClientSendFragment">ClientSendFragment</a>, <a href="Annotation$$LocalAddr.html" class="extype" name="com.twitter.finagle.tracing.Annotation.LocalAddr">LocalAddr</a>, <a href="Annotation$$Message.html" class="extype" name="com.twitter.finagle.tracing.Annotation.Message">Message</a>, <a href="Annotation$$Rpc.html" class="extype" name="com.twitter.finagle.tracing.Annotation.Rpc">Rpc</a>, <a href="Annotation$$ServerAddr.html" class="extype" name="com.twitter.finagle.tracing.Annotation.ServerAddr">ServerAddr</a>, <a href="Annotation$$ServerRecv$.html" class="extype" name="com.twitter.finagle.tracing.Annotation.ServerRecv">ServerRecv</a>, <a href="Annotation$$ServerRecvFragment$.html" class="extype" name="com.twitter.finagle.tracing.Annotation.ServerRecvFragment">ServerRecvFragment</a>, <a href="Annotation$$ServerSend$.html" class="extype" name="com.twitter.finagle.tracing.Annotation.ServerSend">ServerSend</a>, <a href="Annotation$$ServerSendError.html" class="extype" name="com.twitter.finagle.tracing.Annotation.ServerSendError">ServerSendError</a>, <a href="Annotation$$ServerSendFragment$.html" class="extype" name="com.twitter.finagle.tracing.Annotation.ServerSendFragment">ServerSendFragment</a>, <a href="Annotation$$ServiceName.html" class="extype" name="com.twitter.finagle.tracing.Annotation.ServiceName">ServiceName</a>, <a href="Annotation$$WireRecv$.html" class="extype" name="com.twitter.finagle.tracing.Annotation.WireRecv">WireRecv</a>, <a href="Annotation$$WireRecvError.html" class="extype" name="com.twitter.finagle.tracing.Annotation.WireRecvError">WireRecvError</a>, <a href="Annotation$$WireSend$.html" class="extype" name="com.twitter.finagle.tracing.Annotation.WireSend">WireSend</a></div>
           </div></div>
         
 

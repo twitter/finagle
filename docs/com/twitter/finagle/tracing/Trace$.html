@@ -169,8 +169,8 @@ resources for using Finagle.
                         <a href="AnnotatingTracingFilter.html" title="A generic filter that can be used for annotating the Server and Client side of a trace.">AnnotatingTracingFilter</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="Annotation$.html" title=""></a>
-                        <a class="trait" href="Annotation.html" title=""></a>
-                        <a href="Annotation.html" title="">Annotation</a>
+                        <a class="class" href="Annotation.html" title="An ADT describing a tracing annotation."></a>
+                        <a href="Annotation.html" title="An ADT describing a tracing annotation.">Annotation</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="BroadcastTracer$.html" title=""></a>
@@ -213,10 +213,6 @@ resources for using Finagle.
                         <a href="Record.html" title="Records information of interest to the tracing system.">Record</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="ServerDestTracingProxy.html" title="com.twitter.finagle.ServiceFactoryProxy used to trace the local addr and server addr."></a>
-                        <a href="ServerDestTracingProxy.html" title="com.twitter.finagle.ServiceFactoryProxy used to trace the local addr and server addr.">ServerDestTracingProxy</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="object" href="ServerTracingFilter$.html" title="Annotate the request with Server specific records (ServerRecv, ServerSend)"></a>
                         <a href="ServerTracingFilter$.html" title="Annotate the request with Server specific records (ServerRecv, ServerSend)">ServerTracingFilter</a>
                       </li><li class="current-entities indented4">
@@ -225,8 +221,8 @@ resources for using Finagle.
                         <a href="SpanId.html" title="Defines trace identifiers.">SpanId</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="" title="This is a tracing system similar to Dapper:"></a>
-                        <a href="" title="This is a tracing system similar to Dapper:">Trace</a>
+                        <a class="object" href="" title="A singleton instance of Tracing (a facade-style API) that performs a number of Contexts lookups on each operation."></a>
+                        <a href="" title="A singleton instance of Tracing (a facade-style API) that performs a number of Contexts lookups on each operation.">Trace</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="TraceId$.html" title=""></a>
                         <a class="class" href="TraceId.html" title="A trace id represents one particular trace for one request."></a>
@@ -243,6 +239,10 @@ resources for using Finagle.
                         <a class="object" href="Tracer$.html" title=""></a>
                         <a class="trait" href="Tracer.html" title="Tracers record trace events."></a>
                         <a href="Tracer.html" title="Tracers record trace events.">Tracer</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="Tracing$.html" title=""></a>
+                        <a class="class" href="Tracing.html" title="This is a tracing system similar to Dapper:"></a>
+                        <a href="Tracing.html" title="This is a tracing system similar to Dapper:">Tracing</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="TracingLogHandler.html" title="A logging Handler that sends log information via tracing"></a>
@@ -278,27 +278,18 @@ resources for using Finagle.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">Trace</span>
+        <span class="name">Trace</span><span class="result"> extends <a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>This is a tracing system similar to Dapper:</p><p>  “Dapper, a Large-Scale Distributed Systems Tracing Infrastructure”,
-  Benjamin H. Sigelman, Luiz André Barroso, Mike Burrows, Pat
-  Stephenson, Manoj Plakal, Donald Beaver, Saul Jaspan, Chandan
-  Shanbhag, 2010.</p><p>It is meant to be independent of whatever underlying RPC mechanism
-is being used, and it is up to the underlying codec to implement
-the transport.</p><p><code>Trace</code> maintains the state of the tracing stack
-The current <code>TraceId</code> has a terminal flag, indicating whether it
-can be overridden with a different <code>TraceId</code>. Setting the current
-<code>TraceId</code> as terminal forces all future annotations to share that
-<code>TraceId</code>.
-When reporting, we report to all tracers in the list of <code>Tracer</code>s.
-</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A singleton instance of <a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a> (a facade-style API) that performs a number of <span class="extype" name="Contexts">Contexts</span>
+lookups on each operation. Prefer &quot;capturing&quot; a <a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a> instance for batching lookups.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
         </div></div>
         
 
@@ -324,7 +315,7 @@ When reporting, we report to all tracers in the list of <code>Tracer</code>s.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.tracing.Trace"><span>Trace</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.tracing.Trace"><span>Trace</span></li><li class="in" name="com.twitter.finagle.tracing.Tracing"><span>Tracing</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -399,6 +390,22 @@ When reporting, we report to all tracers in the list of <code>Tracer</code>s.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Trace#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="apply():com.twitter.finagle.tracing.Tracing"></a><a id="apply():Tracing"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#apply():com.twitter.finagle.tracing.Tracing" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">apply</span><span class="params">()</span><span class="result">: <a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns a <a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a> instance with captured <span class="extype" name="Contexts">Contexts</span> so it's cheap to reuse.</p>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -471,6 +478,23 @@ When reporting, we report to all tracers in the list of <code>Tracer</code>s.
       </span>
       
       <p class="shortcomment cmt">Turn trace recording on.</p>
+    </li><li name="com.twitter.finagle.tracing.Trace#enabled" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="enabled:Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#enabled:Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">enabled</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Whether or not trace recording is enabled on this process: <code>false</code> indicates it
+was shutdown either via <code>-com.twitter.finagle.tracing.enabled</code> flag or <code>Trac.disable()</code> API.</p>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -544,7 +568,7 @@ When reporting, we report to all tracers in the list of <code>Tracer</code>s.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.tracing.Trace#hasId" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.tracing.Trace#hasId" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hasId:Boolean"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/tracing/Trace$.html#hasId:Boolean" title="Permalink">
@@ -559,7 +583,8 @@ When reporting, we report to all tracers in the list of <code>Tracer</code>s.
         <span class="name">hasId</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
-      <p class="shortcomment cmt">True if there is an identifier for the current trace.</p>
+      <p class="shortcomment cmt">True if there is an identifier for the current trace.</p><div class="fullcomment"><div class="comment cmt"><p>True if there is an identifier for the current trace.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.tracing.Trace">Trace</a> → <a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
@@ -579,7 +604,7 @@ When reporting, we report to all tracers in the list of <code>Tracer</code>s.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.tracing.Trace#id" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.tracing.Tracing#id" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="id:com.twitter.finagle.tracing.TraceId"></a><a id="id:TraceId"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/tracing/Trace$.html#id:com.twitter.finagle.tracing.TraceId" title="Permalink">
@@ -587,17 +612,17 @@ When reporting, we report to all tracers in the list of <code>Tracer</code>s.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">id</span><span class="result">: <a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>
       </span>
       
-      <p class="shortcomment cmt">Get the current trace identifier.</p><div class="fullcomment"><div class="comment cmt"><p>Get the current trace identifier.  If no identifiers have been
-pushed, a default one is provided.
-</p></div></div>
-    </li><li name="com.twitter.finagle.tracing.Trace#idOption" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Get the current trace identifier.</p><div class="fullcomment"><div class="comment cmt"><p>Get the current trace identifier. If no identifiers have been pushed,
+a default one is provided.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Trace#idOption" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="idOption:Option[com.twitter.finagle.tracing.TraceId]"></a><a id="idOption:Option[TraceId]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/tracing/Trace$.html#idOption:Option[com.twitter.finagle.tracing.TraceId]" title="Permalink">
@@ -612,8 +637,9 @@ pushed, a default one is provided.
         <span class="name">idOption</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">Get the current identifier, if it exists.</p>
-    </li><li name="com.twitter.finagle.tracing.Trace#isActivelyTracing" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Get the current identifier, if it exists.</p><div class="fullcomment"><div class="comment cmt"><p>Get the current identifier, if it exists.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.tracing.Trace">Trace</a> → <a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Tracing#isActivelyTracing" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isActivelyTracing:Boolean"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/tracing/Trace$.html#isActivelyTracing:Boolean" title="Permalink">
@@ -621,16 +647,17 @@ pushed, a default one is provided.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">isActivelyTracing</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
-      <p class="shortcomment cmt">Returns true if tracing is enabled with a good tracer pushed and at least one tracer
-decides to actively trace the current <a href="#id:com.twitter.finagle.tracing.TraceId" class="extmbr" name="com.twitter.finagle.tracing.Trace#id">id</a>
-</p>
+      <p class="shortcomment cmt">Return true if tracing is enabled with a good tracer pushed and at least one tracer
+decides to actively trace the current <a href="Tracing.html#id:com.twitter.finagle.tracing.TraceId" class="extmbr" name="com.twitter.finagle.tracing.Tracing#id">id</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Return true if tracing is enabled with a good tracer pushed and at least one tracer
+decides to actively trace the current <a href="Tracing.html#id:com.twitter.finagle.tracing.TraceId" class="extmbr" name="com.twitter.finagle.tracing.Tracing#id">id</a>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -647,7 +674,7 @@ decides to actively trace the current <a href="#id:com.twitter.finagle.tracing.T
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.tracing.Trace#isTerminal" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.tracing.Tracing#isTerminal" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isTerminal:Boolean"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/tracing/Trace$.html#isTerminal:Boolean" title="Permalink">
@@ -655,14 +682,15 @@ decides to actively trace the current <a href="#id:com.twitter.finagle.tracing.T
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">isTerminal</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if the current trace id is terminal</p></dd></dl></div>
+      <p class="shortcomment cmt">Return true if the current trace <a href="Tracing.html#id:com.twitter.finagle.tracing.TraceId" class="extmbr" name="com.twitter.finagle.tracing.Tracing#id">id</a> is terminal.</p><div class="fullcomment"><div class="comment cmt"><p>Return true if the current trace <a href="Tracing.html#id:com.twitter.finagle.tracing.TraceId" class="extmbr" name="com.twitter.finagle.tracing.Tracing#id">id</a> is terminal.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
     </li><li name="com.twitter.finagle.tracing.Trace#letClear" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="letClear[R](f:=&gt;R):R"></a><a id="letClear[R](⇒R):R"></a>
       <span class="permalink">
@@ -789,7 +817,7 @@ of request context changes.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.tracing.Trace#nextId" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.tracing.Tracing#nextId" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="nextId:com.twitter.finagle.tracing.TraceId"></a><a id="nextId:TraceId"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/tracing/Trace$.html#nextId:com.twitter.finagle.tracing.TraceId" title="Permalink">
@@ -797,14 +825,15 @@ of request context changes.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">nextId</span><span class="result">: <a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>
       </span>
       
-      <p class="shortcomment cmt">Create a derived id from the current TraceId.</p>
+      <p class="shortcomment cmt">Create a derived id from the current <a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a derived id from the current <a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
@@ -843,7 +872,7 @@ of request context changes.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.tracing.Trace#record" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.tracing.Tracing#record" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="record(message:String,duration:com.twitter.util.Duration):Unit"></a><a id="record(String,Duration):Unit"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/tracing/Trace$.html#record(message:String,duration:com.twitter.util.Duration):Unit" title="Permalink">
@@ -851,15 +880,15 @@ of request context changes.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">record</span><span class="params">(<span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="duration">duration: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
-      
-    </li><li name="com.twitter.finagle.tracing.Trace#record" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Tracing#record" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="record(message:String):Unit"></a><a id="record(String):Unit"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/tracing/Trace$.html#record(message:String):Unit" title="Permalink">
@@ -867,15 +896,15 @@ of request context changes.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">record</span><span class="params">(<span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
-      
-    </li><li name="com.twitter.finagle.tracing.Trace#record" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Tracing#record" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="record(ann:com.twitter.finagle.tracing.Annotation,duration:com.twitter.util.Duration):Unit"></a><a id="record(Annotation,Duration):Unit"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/tracing/Trace$.html#record(ann:com.twitter.finagle.tracing.Annotation,duration:com.twitter.util.Duration):Unit" title="Permalink">
@@ -883,15 +912,15 @@ of request context changes.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">record</span><span class="params">(<span name="ann">ann: <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a></span>, <span name="duration">duration: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
-      
-    </li><li name="com.twitter.finagle.tracing.Trace#record" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Tracing#record" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="record(ann:com.twitter.finagle.tracing.Annotation):Unit"></a><a id="record(Annotation):Unit"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/tracing/Trace$.html#record(ann:com.twitter.finagle.tracing.Annotation):Unit" title="Permalink">
@@ -899,33 +928,32 @@ of request context changes.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">record</span><span class="params">(<span name="ann">ann: <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
-      
-    </li><li name="com.twitter.finagle.tracing.Trace#record" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="record(rec:=&gt;com.twitter.finagle.tracing.Record):Unit"></a><a id="record(⇒Record):Unit"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Tracing#record" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="record(rec:com.twitter.finagle.tracing.Record):Unit"></a><a id="record(Record):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#record(rec:=&gt;com.twitter.finagle.tracing.Record):Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#record(rec:com.twitter.finagle.tracing.Record):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">record</span><span class="params">(<span name="rec">rec: ⇒ <a href="Record.html" class="extype" name="com.twitter.finagle.tracing.Record">Record</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">record</span><span class="params">(<span name="rec">rec: <a href="Record.html" class="extype" name="com.twitter.finagle.tracing.Record">Record</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
-      <p class="shortcomment cmt">Record a raw <i>Record</i>.</p><div class="fullcomment"><div class="comment cmt"><p>Record a raw <i>Record</i>.  This will record to a _unique_ set of
-tracers in the stack.
-</p></div></div>
-    </li><li name="com.twitter.finagle.tracing.Trace#recordBinaries" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Record a raw <a href="Record.html" class="extype" name="com.twitter.finagle.tracing.Record">Record</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Record a raw <a href="Record.html" class="extype" name="com.twitter.finagle.tracing.Record">Record</a>. This will record to a _unique_ set of tracers in the stack.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Tracing#recordBinaries" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="recordBinaries(annotations:Map[String,Any]):Unit"></a><a id="recordBinaries(Map[String,Any]):Unit"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/tracing/Trace$.html#recordBinaries(annotations:Map[String,Any]):Unit" title="Permalink">
@@ -933,15 +961,15 @@ tracers in the stack.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">recordBinaries</span><span class="params">(<span name="annotations">annotations: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
-      
-    </li><li name="com.twitter.finagle.tracing.Trace#recordBinary" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Tracing#recordBinary" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="recordBinary(key:String,value:Any):Unit"></a><a id="recordBinary(String,Any):Unit"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/tracing/Trace$.html#recordBinary(key:String,value:Any):Unit" title="Permalink">
@@ -949,15 +977,15 @@ tracers in the stack.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">recordBinary</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="value">value: <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
-      
-    </li><li name="com.twitter.finagle.tracing.Trace#recordClientAddr" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Tracing#recordClientAddr" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="recordClientAddr(ia:java.net.InetSocketAddress):Unit"></a><a id="recordClientAddr(InetSocketAddress):Unit"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/tracing/Trace$.html#recordClientAddr(ia:java.net.InetSocketAddress):Unit" title="Permalink">
@@ -965,15 +993,95 @@ tracers in the stack.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">recordClientAddr</span><span class="params">(<span name="ia">ia: <span class="extype" name="java.net.InetSocketAddress">InetSocketAddress</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Tracing#recordClientRecv" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="recordClientRecv():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#recordClientRecv():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">recordClientRecv</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
       
-    </li><li name="com.twitter.finagle.tracing.Trace#recordLocalAddr" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Tracing#recordClientRecvError" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="recordClientRecvError(error:String):Unit"></a><a id="recordClientRecvError(String):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#recordClientRecvError(error:String):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">recordClientRecvError</span><span class="params">(<span name="error">error: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Tracing#recordClientRecvFragment" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="recordClientRecvFragment():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#recordClientRecvFragment():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">recordClientRecvFragment</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Tracing#recordClientSend" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="recordClientSend():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#recordClientSend():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">recordClientSend</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Tracing#recordClientSendFrargmet" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="recordClientSendFrargmet():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#recordClientSendFrargmet():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">recordClientSendFrargmet</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Tracing#recordLocalAddr" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="recordLocalAddr(ia:java.net.InetSocketAddress):Unit"></a><a id="recordLocalAddr(InetSocketAddress):Unit"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/tracing/Trace$.html#recordLocalAddr(ia:java.net.InetSocketAddress):Unit" title="Permalink">
@@ -981,15 +1089,15 @@ tracers in the stack.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">recordLocalAddr</span><span class="params">(<span name="ia">ia: <span class="extype" name="java.net.InetSocketAddress">InetSocketAddress</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
-      
-    </li><li name="com.twitter.finagle.tracing.Trace#recordRpc" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Tracing#recordRpc" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="recordRpc(name:String):Unit"></a><a id="recordRpc(String):Unit"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/tracing/Trace$.html#recordRpc(name:String):Unit" title="Permalink">
@@ -997,15 +1105,15 @@ tracers in the stack.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">recordRpc</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
-      
-    </li><li name="com.twitter.finagle.tracing.Trace#recordServerAddr" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Tracing#recordServerAddr" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="recordServerAddr(ia:java.net.InetSocketAddress):Unit"></a><a id="recordServerAddr(InetSocketAddress):Unit"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/tracing/Trace$.html#recordServerAddr(ia:java.net.InetSocketAddress):Unit" title="Permalink">
@@ -1013,15 +1121,95 @@ tracers in the stack.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">recordServerAddr</span><span class="params">(<span name="ia">ia: <span class="extype" name="java.net.InetSocketAddress">InetSocketAddress</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Tracing#recordServerRecv" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="recordServerRecv():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#recordServerRecv():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">recordServerRecv</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
       
-    </li><li name="com.twitter.finagle.tracing.Trace#recordServiceName" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Tracing#recordServerRecvFragment" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="recordServerRecvFragment():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#recordServerRecvFragment():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">recordServerRecvFragment</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Tracing#recordServerSend" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="recordServerSend():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#recordServerSend():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">recordServerSend</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Tracing#recordServerSendError" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="recordServerSendError(error:String):Unit"></a><a id="recordServerSendError(String):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#recordServerSendError(error:String):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">recordServerSendError</span><span class="params">(<span name="error">error: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Tracing#recordServerSendFragment" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="recordServerSendFragment():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#recordServerSendFragment():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">recordServerSendFragment</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Tracing#recordServiceName" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="recordServiceName(serviceName:String):Unit"></a><a id="recordServiceName(String):Unit"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/tracing/Trace$.html#recordServiceName(serviceName:String):Unit" title="Permalink">
@@ -1029,14 +1217,62 @@ tracers in the stack.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">recordServiceName</span><span class="params">(<span name="serviceName">serviceName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Tracing#recordWireRecv" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="recordWireRecv():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#recordWireRecv():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">recordWireRecv</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
       
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Tracing#recordWireRecvError" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="recordWireRecvError(error:String):Unit"></a><a id="recordWireRecvError(String):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#recordWireRecvError(error:String):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">recordWireRecvError</span><span class="params">(<span name="error">error: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.Tracing#recordWireSend" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="recordWireSend():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#recordWireSend():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">recordWireSend</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
@@ -1135,7 +1371,7 @@ the correct fields filled in.
         <span class="name">tracers</span><span class="result">: <span class="extype" name="scala.List">List</span>[<a href="Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a>]</span>
       </span>
       
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the current list of tracers</p></dd></dl></div>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the current list of tracers</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.tracing.Trace">Trace</a> → <a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
@@ -1214,7 +1450,9 @@ the correct fields filled in.
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.AnyRef">
+        <div class="parent" name="com.twitter.finagle.tracing.Tracing">
+              <h3>Inherited from <a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a></h3>
+            </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></h3>
