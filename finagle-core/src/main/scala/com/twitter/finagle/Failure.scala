@@ -115,6 +115,21 @@ object Failure {
   }
 
   /**
+   * Flag wrapped indicates that this failure was wrapped, and should
+   * not be presented to the user (directly, or via stats). Rather, it must
+   * first be unwrapped: the inner cause is the presentable failure.
+   */
+  @deprecated("Use FailureFlags.Wrapped", "2018-7-17")
+  val Wrapped: Long = FailureFlags.Wrapped
+
+  /**
+   * Flag restartable indicates that the action that caused the failure
+   * is ''restartable'' -- that is, it is safe to simply re-issue the action.
+   */
+  @deprecated("Use FailureFlags.Retryable", "2018-7-17")
+  val Restartable: Long = FailureFlags.Retryable
+
+  /**
    * Representation of a nack response that is retryable
    */
   val RetryableNackFailure: Failure = Failure.rejected("The request was Nacked by the server")
