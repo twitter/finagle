@@ -73,7 +73,13 @@ Aperture Based Load Balancers
   0, otherwise.
 
 **vector_hash**
-  A gauge of the hash of the distributors serverset vector.
+  A gauge of the hash of the distributors serverset vector with range from
+  [Int.MinValue, Int.MaxValue]. It is useful for identifying inconsistencies
+  in the serverset observed by different instances of the same client since
+  inconsistencies will result in very different values of vector_hash. This
+  information is useful for identifying load banding issues when using the
+  deterministic aperture load balancer which requires a consistent view of
+  the backends to operate correctly.
 
 **coordinate_updates**
   A counter of the number of times the Aperture implementation receives
