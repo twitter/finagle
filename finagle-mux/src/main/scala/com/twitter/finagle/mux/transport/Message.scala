@@ -1,5 +1,6 @@
 package com.twitter.finagle.mux.transport
 
+import com.twitter.finagle.mux.ContextCodec
 import com.twitter.finagle.tracing.{Flags, SpanId, TraceId}
 import com.twitter.finagle.{Dentry, Dtab, Failure, NameTree, Path}
 import com.twitter.io.{Buf, BufByteWriter, ByteReader}
@@ -231,15 +232,7 @@ private[finagle] object Message {
     lazy val buf: Buf = {
       // first, compute how large the message header is (in 'n')
       var n = 2
-      var iter = contexts.iterator
-      while (iter.hasNext) {
-        // Note: here and below we don't use the scala dereferencing sugar of
-        // `val (k, v) = seq.head` as that caused unnecessary Tuple2 allocations.
-        iter.next() match {
-          case (k, v) =>
-            n += 2 + k.length + 2 + v.length
-        }
-      }
+      n += ContextCodec.encodedLength(contexts.iterator)
 
       val dstbytes = if (dst.isEmpty) noBytes else dst.show.getBytes(Charsets.UTF_8)
       n += 2 + dstbytes.length
@@ -263,18 +256,7 @@ private[finagle] object Message {
       // then, allocate and populate the header
       val hd = BufByteWriter.fixed(n)
       hd.writeShortBE(contexts.length)
-      iter = contexts.iterator
-      while (iter.hasNext) {
-        // TODO: it may or may not make sense
-        // to do zero-copy here.
-        iter.next() match {
-          case (k, v) =>
-            hd.writeShortBE(k.length)
-            hd.writeBytes(k)
-            hd.writeShortBE(v.length)
-            hd.writeBytes(v)
-        }
-      }
+      ContextCodec.encode(hd, contexts.iterator)
 
       hd.writeShortBE(dstbytes.length)
       hd.writeBytes(dstbytes)
@@ -535,31 +517,12 @@ private[finagle] object Message {
     Treq(tag, id, br.readAll())
   }
 
-  private def decodeContexts(br: ByteReader): Seq[(Buf, Buf)] = {
-    val n = br.readShortBE()
-    if (n == 0)
-      return Nil
-
-    val contexts = new Array[(Buf, Buf)](n)
-    var i = 0
-    while (i < n) {
-      val k = br.readBytes(br.readShortBE())
-      val v = br.readBytes(br.readShortBE())
-
-      // For the context keys and values we want to decouple the backing array from the rest of
-      // the Buf that composed the message. The body of the message is typically on the order of a
-      // number of kilobytes and can be much larger, while the context entries are typically
-      // on the order of < 100 bytes. Therefore, it is beneficial to decouple the lifetimes
-      // at the cost of copying the context entries, but this ends up being a net win for the GC.
-      // More context can be found in ``RB_ID=559066``.
-      contexts(i) = (coerceTrimmed(k), coerceTrimmed(v))
-      i += 1
-    }
-    contexts
-  }
-
   private def decodeTdispatch(tag: Int, br: ByteReader) = {
-    val contexts = decodeContexts(br)
+    val contexts = {
+      val n = br.readShortBE()
+      if (n == 0) Nil
+      else ContextCodec.decode(br, n)
+    }
     val ndst = br.readShortBE()
     // Path.read("") fails, so special case empty-dst.
     val dst =
@@ -586,7 +549,11 @@ private[finagle] object Message {
 
   private def decodeRdispatch(tag: Int, br: ByteReader) = {
     val status = br.readByte()
-    val contexts = decodeContexts(br)
+    val contexts = {
+      val n = br.readShortBE()
+      if (n == 0) Nil
+      else ContextCodec.decode(br, n)
+    }
     val rest = br.readAll()
     status match {
       case ReplyStatus.Ok => RdispatchOk(tag, contexts, rest)
@@ -762,26 +729,5 @@ private[finagle] object Message {
     val bytesStr = Buf.slowHexString(toWrite)
     s"unknown message type: $tpe [tag=$tag]. Payload bytes: $remaining. " +
       s"First ${toWrite.length} bytes of the payload: '$bytesStr'"
-  }
-
-  /**
-   * Safely coerce the Buf to a representation that doesn't hold a reference to unused data.
-   *
-   * The resulting Buf will be either the Empty Buf if the input Buf has zero content, or a
-   * ByteArray whos underlying array contains only the bytes exposed by the Buf, making a
-   * copy of the data if necessary.
-   *
-   * For example, calling `coerceTrimmed` on a Buf that is a 10 byte slice of a larger Buf
-   * which contains 1 KB of data will yield a new ByteArray backed by a new Array[Byte]
-   * containing only the 10 bytes exposed by the passed slice.
-   *
-   * @note exposed for testing.
-   */
-  private[transport] def coerceTrimmed(buf: Buf): Buf = buf match {
-    case buf if buf.isEmpty => Buf.Empty
-    case Buf.ByteArray.Owned(bytes, begin, end) if begin == 0 && end == bytes.length => buf
-    case buf =>
-      val bytes = Buf.ByteArray.Owned.extract(buf)
-      Buf.ByteArray.Owned(bytes)
   }
 }

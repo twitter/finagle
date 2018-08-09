@@ -205,29 +205,6 @@ class MessageTest extends FunSuite {
     }
   }
 
-  test("Message.coerceTrimmed(Buf.Empty)") {
-    val coerced = Message.coerceTrimmed(Buf.Empty)
-    assert(coerced eq Buf.Empty)
-  }
-
-  test("Message.coerceTrimmed(correctly sized ByteArray)") {
-    val exact = Buf.ByteArray(1, 2, 3)
-    val coerced = Message.coerceTrimmed(exact)
-    assert(coerced eq exact)
-  }
-
-  test("Message.coerceTrimmed(sliced Buf)") {
-    val slice = Buf.ByteArray(1, 2, 3).slice(0, 2)
-    val coerced = Message.coerceTrimmed(slice)
-    coerced match {
-      case Buf.ByteArray.Owned(data, 0, 2) =>
-        assert(data.length == 2)
-        assert(data(0) == 1 && data(1) == 2)
-
-      case other => fail(s"Unexpected representation: $other")
-    }
-  }
-
   test("Message.encode(Message.PreEncoded)") {
     val preEncodedMessages = Seq(
       PreEncoded.Rping,

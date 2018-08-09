@@ -417,9 +417,15 @@ private[finagle] object Processor extends Filter[Message, Message, Request, Resp
     Contexts.broadcast.letUnmarshal(tdispatch.contexts) {
       if (tdispatch.dtab.nonEmpty)
         Dtab.local ++= tdispatch.dtab
-      service(Request(tdispatch.dst, tdispatch.contexts, tdispatch.req)).transform {
+
+      val result = ReqRepHeaders.withApplicationHeaders { headers =>
+        service(Request(tdispatch.dst, headers, tdispatch.req))
+      }
+
+      result.transform {
         case Return(rep) =>
-          Future.value(RdispatchOk(tdispatch.tag, rep.contexts, rep.body))
+          val contexts = ReqRepHeaders.toDispatchContexts(rep).toSeq
+          Future.value(RdispatchOk(tdispatch.tag, contexts, rep.body))
 
         // Previously, all Restartable failures were sent as RdispatchNack
         // messages. In order to keep backwards compatibility with clients that

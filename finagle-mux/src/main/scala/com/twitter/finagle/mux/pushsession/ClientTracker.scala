@@ -1,9 +1,8 @@
 package com.twitter.finagle.mux.pushsession
 
 import com.twitter.finagle.{ChannelClosedException, Dtab}
-import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.mux.ClientDispatcher.ExhaustedTagsException
-import com.twitter.finagle.mux.{ClientDispatcher, Request, Response}
+import com.twitter.finagle.mux.{ClientDispatcher, ReqRepHeaders, Request, Response}
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.mux.util.TagMap
 import com.twitter.finagle.tracing.Trace
@@ -43,7 +42,6 @@ private class ClientTracker(messageWriter: MessageWriter) {
       case Some(u) => u() = msg
       case None => ()
     }
-
   }
 
   /**
@@ -111,13 +109,8 @@ private class ClientTracker(messageWriter: MessageWriter) {
     try {
       Local.restore(locals)
       if (asDispatch) {
-        val contexts = if (req.contexts.nonEmpty) {
-          req.contexts ++ Contexts.broadcast.marshal()
-        } else {
-          Contexts.broadcast.marshal().toSeq
-        }
-        // NOTE: context values may be duplicated with "local" context values appearing earlier than "broadcast" context values.
-        Message.Tdispatch(tag, contexts, req.destination, Dtab.local, req.body)
+        val contexts = ReqRepHeaders.toDispatchContexts(req)
+        Message.Tdispatch(tag, contexts.toSeq, req.destination, Dtab.local, req.body)
       } else {
         Message.Treq(tag, Trace.idOption, req.body)
       }

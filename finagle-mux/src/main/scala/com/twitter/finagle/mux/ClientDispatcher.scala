@@ -1,11 +1,10 @@
 package com.twitter.finagle.mux
 
-import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.mux.transport.{Message, MuxFailure}
 import com.twitter.finagle.mux.util.TagMap
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Dtab, Filter, Failure, Service, Status}
+import com.twitter.finagle.{Dtab, Failure, Filter, Service, Status}
 import com.twitter.util.{Future, Promise, Return, Throw, Time, Try, Updatable}
 import scala.util.control.NoStackTrace
 
@@ -165,13 +164,9 @@ private class ReqRepFilter extends Filter[Request, Response, Int => Message, Mes
       }
 
       case CanDispatch.Yes | CanDispatch.Unknown => { tag: Int =>
-        val contexts = if (req.contexts.nonEmpty) {
-          req.contexts ++ Contexts.broadcast.marshal()
-        } else {
-          Contexts.broadcast.marshal().toSeq
-        }
+        val contexts = ReqRepHeaders.toDispatchContexts(req)
         // NOTE: context values may be duplicated with "local" context values appearing earlier than "broadcast" context values.
-        Message.Tdispatch(tag, contexts, req.destination, Dtab.local, req.body)
+        Message.Tdispatch(tag, contexts.toSeq, req.destination, Dtab.local, req.body)
       }
     }
 
@@ -208,8 +203,8 @@ private[finagle] object ReqRepFilter {
     case Message.RreqError(_, error) =>
       Throw(ServerApplicationError(error))
 
-    case Message.RdispatchOk(_, contexts, rep) =>
-      Return(Response(contexts, rep))
+    case r@ Message.RdispatchOk(_, _, rep) =>
+      Return(Response(ReqRepHeaders.responseHeaders(r), rep))
 
     case Message.RdispatchError(_, contexts, error) =>
       val appError = ServerApplicationError(error)
