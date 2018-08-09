@@ -74,7 +74,10 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
      * @note opportunistic TLS is not mutually intelligible with simple mux
      *       over TLS
      */
-    case class OppTls(level: Option[OpportunisticTls.Level])
+    case class OppTls(level: Option[OpportunisticTls.Level]) {
+      def mk(): (OppTls, Stack.Param[OppTls]) =
+        (this, OppTls.param)
+    }
     object OppTls {
       implicit val param = Stack.Param(OppTls(None))
 
