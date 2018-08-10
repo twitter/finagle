@@ -6,12 +6,9 @@ import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.{Await, Closable, Future, Time}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import java.security.cert.{Certificate, X509Certificate}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class StdStackServerTest extends FunSuite with MockitoSugar {
 
   val mockCert = mock[X509Certificate]
