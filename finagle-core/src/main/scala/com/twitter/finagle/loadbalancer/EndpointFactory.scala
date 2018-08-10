@@ -51,7 +51,7 @@ private object LazyEndpointFactory {
    * Indicates that the EndpointFactory is closed and will no longer
    * admit any service acquisition requests.
    */
-  case object Closed extends State[Any, Nothing]
+  case class Closed(exn: ServiceClosedException) extends State[Any, Nothing]
 
   /**
    * Indicates that the process of building the underlying resources
@@ -102,7 +102,12 @@ private final class LazyEndpointFactory[Req, Rep](
 
       case Making => apply(conn)
       case Made(underlying) => underlying(conn)
-      case Closed => Future.exception(new ServiceClosedException)
+      case Closed(cause) =>
+        val exn = new ServiceClosedException {
+          override def getMessage: String = "Tried to acquire endpoint after it was closed"
+        }
+        exn.initCause(cause)
+        Future.exception(exn)
     }
 
   /**
@@ -115,7 +120,7 @@ private final class LazyEndpointFactory[Req, Rep](
   }
 
   @tailrec def remake(): Unit = state.get match {
-    case Init | Closed => // nop
+    case Init | Closed(_) => // nop
     case Making => remake()
     case s @ Made(underlying) =>
       // Note, underlying is responsible for draining any outstanding
@@ -125,19 +130,25 @@ private final class LazyEndpointFactory[Req, Rep](
   }
 
   @tailrec def close(when: Time): Future[Unit] = state.get match {
-    case Closed => Future.Done
+    case Closed(_) => Future.Done
     case Making => close(when)
     case Init =>
-      if (!state.compareAndSet(Init, Closed)) close(when)
+      val exn = new ServiceClosedException() {
+        override def getMessage: String = s"Endpoint $address was marked closed"
+      }
+      if (!state.compareAndSet(Init, Closed(exn))) close(when)
       else Future.Done
     case s @ Made(underlying) =>
-      if (!state.compareAndSet(s, Closed)) close(when)
+      val exn = new ServiceClosedException() {
+        override def getMessage: String = s"Endpoint $address was marked closed"
+      }
+      if (!state.compareAndSet(s, Closed(exn))) close(when)
       else underlying.close(when)
   }
 
   override def status: Status = state.get match {
     case Init | Making => Status.Open
-    case Closed => Status.Closed
+    case Closed(_) => Status.Closed
     case Made(underlying) => underlying.status
   }
 
