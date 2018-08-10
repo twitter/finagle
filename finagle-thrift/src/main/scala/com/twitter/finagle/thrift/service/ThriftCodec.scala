@@ -23,16 +23,16 @@ private[thrift] object ThriftCodec {
     new Filter[method.Args, method.SuccessType, ThriftClientRequest, Array[Byte]] {
       private[this] val decodeRepFn: Array[Byte] => Try[method.SuccessType] = { bytes =>
         val result: method.Result = decodeResponse(bytes, method.responseCodec, pf)
-        result.successField match {
-          case Some(v) => Return(v)
+        result.firstException() match {
+          case Some(ex) => Throw(ex)
           case None =>
-            result.firstException() match {
-              case Some(ex) => Throw(ex)
+            result.successField match {
+              case Some(v) => Return(v)
               case None =>
                 Throw(
                   new TApplicationException(
                     TApplicationException.MISSING_RESULT,
-                    s"Thrift method '${method.name}' failed: missing result"
+                    s"Thrift method '${ method.name }' failed: missing result"
                   )
                 )
             }

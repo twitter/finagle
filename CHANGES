@@ -17,6 +17,12 @@ Breaking API Changes
   * finagle-core: Removed deprecated members `c.t.f.Failure.{Interrupted, Ignorable, DeadlineExceeded,
     Rejected, NonRetryable, flagsOf}`. ``PHAB_ID=D199361``
 
+Bug Fixes
+~~~~~~~~~
+
+  * finagle-thrift: Thrift clients created via `.servicePerEndpoint` now propagate exceptions
+    appropriately when the method return type is void. ``PHAB_ID=D200690``
+
 18.8.0
 -------
 
