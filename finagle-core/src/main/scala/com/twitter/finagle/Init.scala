@@ -5,6 +5,7 @@ import com.twitter.finagle.exp.FinagleScheduler
 import com.twitter.finagle.loadbalancer.aperture
 import com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate.FromInstanceId
 import com.twitter.finagle.stats.{DefaultStatsReceiver, FinagleStatsReceiver}
+import com.twitter.finagle.server.StackServer
 import com.twitter.finagle.util.{DefaultLogger, LoadService}
 import com.twitter.jvm.JvmStats
 import com.twitter.util.FuturePool
@@ -108,6 +109,10 @@ private[twitter] object Init {
 
     _finagleVersion.set(p.getProperty("version", unknownVersion))
     _finagleBuildRevision.set(p.getProperty("build_revision", unknownVersion))
+
+    LoadService[Stack.NamedTransformer]().foreach { nt =>
+      StackServer.DefaultTransformer.append(nt)
+    }
 
     log.info(
       "Finagle version %s (rev=%s) built at %s".format(
