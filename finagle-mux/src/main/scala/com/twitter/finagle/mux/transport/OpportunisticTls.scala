@@ -71,6 +71,7 @@ private[twitter] object OpportunisticTls {
   /**
    * Configures the level of TLS that the client or server can support or must
    * support.
+   * @note Java users: See [[OpportunisticTlsConfig]].
    */
   sealed abstract class Level(value: String) {
     val buf: Buf = Buf.Utf8(value)

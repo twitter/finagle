@@ -1,5 +1,6 @@
 target(
     dependencies = [
+        "finagle/finagle-mux/src/main/java",
         "finagle/finagle-mux/src/main/scala",
     ],
 )

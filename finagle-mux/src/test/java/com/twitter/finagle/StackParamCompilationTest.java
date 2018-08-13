@@ -7,7 +7,7 @@ import org.junit.Test;
 import com.twitter.finagle.Mux;
 import com.twitter.finagle.Mux$param$MaxFrameSize$;
 import com.twitter.finagle.Mux$param$OppTls$;
-import com.twitter.finagle.mux.transport.OpportunisticTls;
+import com.twitter.finagle.mux.transport.OpportunisticTlsConfig;
 import com.twitter.util.StorageUnit;
 
 public class StackParamCompilationTest {
@@ -20,12 +20,11 @@ public class StackParamCompilationTest {
       .configured(new Mux$param$MaxFrameSize$().apply(new StorageUnit(8)).mk())
       .configured(new Mux$param$OppTls$().apply(Option.empty()).mk())
       .configured(new Mux$param$OppTls$()
-          .apply(Option.apply(OpportunisticTls.Required$.MODULE$)).mk())
+          .apply(Option.apply(OpportunisticTlsConfig.OFF)).mk())
       .configured(new Mux$param$OppTls$()
-          .apply(Option.apply(OpportunisticTls.Desired$.MODULE$)).mk())
+          .apply(Option.apply(OpportunisticTlsConfig.DESIRED)).mk())
       .configured(new Mux$param$OppTls$()
-          .apply(Option.apply(OpportunisticTls.Off$.MODULE$)).mk());
-
+          .apply(Option.apply(OpportunisticTlsConfig.REQUIRED)).mk());
   }
 
   @Test
@@ -36,11 +35,11 @@ public class StackParamCompilationTest {
       .configured(new Mux$param$MaxFrameSize$().apply(new StorageUnit(8)).mk())
       .configured(new Mux$param$OppTls$().apply(Option.empty()).mk())
       .configured(new Mux$param$OppTls$()
-          .apply(Option.apply(OpportunisticTls.Required$.MODULE$)).mk())
+          .apply(Option.apply(OpportunisticTlsConfig.OFF)).mk())
       .configured(new Mux$param$OppTls$()
-          .apply(Option.apply(OpportunisticTls.Desired$.MODULE$)).mk())
+          .apply(Option.apply(OpportunisticTlsConfig.DESIRED)).mk())
       .configured(new Mux$param$OppTls$()
-          .apply(Option.apply(OpportunisticTls.Off$.MODULE$)).mk());
+          .apply(Option.apply(OpportunisticTlsConfig.REQUIRED)).mk());
   }
 
 }
