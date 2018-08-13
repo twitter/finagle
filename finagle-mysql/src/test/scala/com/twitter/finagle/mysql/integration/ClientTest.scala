@@ -248,8 +248,6 @@ class ClientTest extends FunSuite
       """.stripMargin
   }
 
-  // NOTE: this test case seems to do something bad to the client
-  // and we leave it as the last test case and investigate separately.
   test("CursorResult does not store head of stream") {
     val query = "select * from `finagle-mysql-test`"
     val cursoredStatement = c.cursor(query)
@@ -257,6 +255,7 @@ class ClientTest extends FunSuite
     val first = cursorResult.stream.take(1)
     val second = cursorResult.stream.take(1)
     assert(first != second)
+    cursorResult.close()
   }
 
 }
