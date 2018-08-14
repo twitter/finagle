@@ -63,7 +63,7 @@ object ValueEncoder extends LowPriorityEncoder {
 
   def encodeText[T](t: T, encoder: ValueEncoder[T], charset: Charset = StandardCharsets.UTF_8) =
     Option(t).flatMap(encoder.encodeText) match {
-      case None => nullParam
+      case None => nullParam.duplicate()
       case Some(str) =>
         val bytes = str.getBytes(charset)
         val buf = ChannelBuffers.buffer(bytes.length + 4)
@@ -74,7 +74,7 @@ object ValueEncoder extends LowPriorityEncoder {
 
   def encodeBinary[T](t: T, encoder: ValueEncoder[T], charset: Charset = StandardCharsets.UTF_8) =
     Option(t).flatMap(encoder.encodeBinary(_, charset)) match {
-      case None => nullParam
+      case None => nullParam.duplicate()
       case Some(inBuf) =>
         inBuf.resetReaderIndex()
         val outBuf = ChannelBuffers.buffer(inBuf.readableBytes() + 4)
