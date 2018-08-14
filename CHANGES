@@ -17,6 +17,9 @@ Breaking API Changes
   * finagle-core: Removed deprecated members `c.t.f.Failure.{Interrupted, Ignorable, DeadlineExceeded,
     Rejected, NonRetryable, flagsOf}`. ``PHAB_ID=D199361``
 
+  * finagle-core: the valid range for the argument to `WindowedPercentileHistogram.percentile`
+    is now [0.0..1.0], e.g., 0.95 means 95th percentile. ``PHAB_ID=D198915``
+
 Bug Fixes
 ~~~~~~~~~
 

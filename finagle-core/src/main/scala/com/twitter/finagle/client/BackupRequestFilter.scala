@@ -242,7 +242,7 @@ private[finagle] class BackupRequestFilter[Req, Rep](
     newRetryBudget(getAndValidateMaxExtraLoad(maxExtraLoadTunable), nowMs)
 
   private[this] def percentileFromMaxExtraLoad(maxExtraLoad: Double): Double =
-    (1.0 - maxExtraLoad) * 100
+    1.0 - maxExtraLoad
 
   private[this] val windowedPercentile: WindowedPercentileHistogram =
     windowedPercentileHistogramFac()
@@ -316,7 +316,7 @@ private[finagle] class BackupRequestFilter[Req, Rep](
     backupRequestRetryBudget.deposit()
     val orig = record(req, service(req))
     val howLong = sendBackupAfter
-    
+
     orig.within(
       timer,
       Duration.fromMilliseconds(howLong),

@@ -1,5 +1,6 @@
 package com.twitter.finagle.util
 
+import com.twitter.conversions.percent._
 import com.twitter.conversions.time._
 import com.twitter.util.{MockTimer, Time}
 import org.scalatest.FunSuite
@@ -11,21 +12,21 @@ class WindowedPercentileHistogramTest extends FunSuite with Eventually with Inte
     val wp = new WindowedPercentileHistogram(10, 10.seconds, new MockTimer)
     wp.percentile(0)
     intercept[IllegalArgumentException] {
-      wp.percentile(-0.5)
+      wp.percentile(-0.5.percent)
     }
   }
 
   test("Throws IllegalArgumentException when retrieving a percentile > 100") {
     val wp = new WindowedPercentileHistogram(10, 10.seconds, new MockTimer)
-    wp.percentile(100)
+    wp.percentile(100.percent)
     intercept[IllegalArgumentException] {
-      wp.percentile(100.5)
+      wp.percentile(100.5.percent)
     }
   }
 
   test("Percentile is initially 0") {
     val wp = new WindowedPercentileHistogram(10, 10.seconds, new MockTimer)
-    assert(wp.percentile(50.0) == 0)
+    assert(wp.percentile(50.percent) == 0)
     wp.close()
   }
 
@@ -39,11 +40,11 @@ class WindowedPercentileHistogramTest extends FunSuite with Eventually with Inte
         0.until(initial).foreach(_ => wp.add(10))
         tc.advance(10.seconds)
         timer.tick()
-        assert(wp.percentile(percentile) == 10)
+        assert(wp.percentile(percentile.percent) == 10)
         0.until(10000 - initial).foreach(_ => wp.add(5))
         tc.advance(10.seconds)
         timer.tick()
-        assert(wp.percentile(percentile) == 5)
+        assert(wp.percentile(percentile.percent) == 5)
         wp.close()
       }
     }
@@ -59,8 +60,8 @@ class WindowedPercentileHistogramTest extends FunSuite with Eventually with Inte
       timer.tick()
       eventually {
         assert(wp.percentile(0.0) == 100)
-        assert(wp.percentile(50.0) == 100)
-        assert(wp.percentile(100.0) == 100)
+        assert(wp.percentile(50.percent) == 100)
+        assert(wp.percentile(100.percent) == 100)
       }
       wp.close()
     }
@@ -82,7 +83,7 @@ class WindowedPercentileHistogramTest extends FunSuite with Eventually with Inte
       timer.tick()
 
       eventually {
-        assert(wp.percentile(50.0) == 2) // median of (1, 2, 3)
+        assert(wp.percentile(50.percent) == 2) // median of (1, 2, 3)
       }
 
       wp.add(4)
@@ -94,7 +95,7 @@ class WindowedPercentileHistogramTest extends FunSuite with Eventually with Inte
       timer.tick()
 
       eventually {
-        assert(wp.percentile(50.0) == 4) // median of (1, 2, 3) ∪ (4, 5, 6, 7)
+        assert(wp.percentile(50.percent) == 4) // median of (1, 2, 3) ∪ (4, 5, 6, 7)
       }
 
       wp.add(8)
@@ -109,8 +110,8 @@ class WindowedPercentileHistogramTest extends FunSuite with Eventually with Inte
 
       eventually {
         assert(wp.percentile(0.0) == 4) // min of (4, 5, 6, 7) ∪ (8, 9, 10)
-        assert(wp.percentile(50.0) == 7) // median of (4, 5, 6, 7) ∪ (8, 9, 10)
-        assert(wp.percentile(100.0) == 10) // max of (4, 5, 6, 7) ∪ (8, 9, 10)
+        assert(wp.percentile(50.percent) == 7) // median of (4, 5, 6, 7) ∪ (8, 9, 10)
+        assert(wp.percentile(100.percent) == 10) // max of (4, 5, 6, 7) ∪ (8, 9, 10)
       }
       wp.close()
     }
@@ -128,7 +129,7 @@ class WindowedPercentileHistogramTest extends FunSuite with Eventually with Inte
       tc.advance(10.seconds)
       timer.tick()
       eventually {
-        assert(wp.percentile(50.0) == WindowedPercentileHistogram.MaxHighestTrackableValue)
+        assert(wp.percentile(50.percent) == WindowedPercentileHistogram.MaxHighestTrackableValue)
       }
     }
   }
@@ -148,8 +149,8 @@ class WindowedPercentileHistogramTest extends FunSuite with Eventually with Inte
         timer.tick()
         eventually {
           assert(
-            wp.percentile(50.0) >= ((1000 * i) - i) &&
-            wp.percentile(50.0) <= ((1000 * i) + i))
+            wp.percentile(50.percent) >= ((1000 * i) - i) &&
+            wp.percentile(50.percent) <= ((1000 * i) + i))
         }
       }
     }

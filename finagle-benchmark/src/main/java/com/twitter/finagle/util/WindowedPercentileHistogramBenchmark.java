@@ -48,7 +48,7 @@ public class WindowedPercentileHistogramBenchmark extends StdBenchAnnotations {
 
   @Benchmark
   public int percentile(WindowedPercentileState state) {
-    return state.wp.percentile(50.0);
+    return state.wp.percentile(0.50);
   }
 
   @Benchmark

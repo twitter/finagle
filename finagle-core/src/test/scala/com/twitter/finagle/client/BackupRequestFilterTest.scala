@@ -246,7 +246,7 @@ class BackupRequestFilterTest extends FunSuite
       timer.tick()
 
       // ensure latency recorded
-      assert(wp.percentile(50.0) == (brf.sendBackupAfterDuration / 2).inMillis)
+      assert(wp.percentile(50.percent) == (brf.sendBackupAfterDuration / 2).inMillis)
 
       // ensure timer cancelled
       assert(numBackupTimerTasks == 0)
@@ -340,7 +340,7 @@ class BackupRequestFilterTest extends FunSuite
       val origPromise, backupPromise = new Promise[String]
       val f = sendBackup(origPromise, backupPromise, tc, sendInterrupts = true)
 
-      assert(wp.percentile(50.0) == WarmupRequestLatency.inMillis)
+      assert(wp.percentile(50.percent) == WarmupRequestLatency.inMillis)
 
       tc.advance(1.second)
       timer.tick()
@@ -349,7 +349,7 @@ class BackupRequestFilterTest extends FunSuite
 
       // ensure latency recorded. Backup was sent at `WarmupRequestLatency`, and 1 second
       // has elapsed since then.
-      assert(wp.percentile(50.0) == 1.second.inMillis)
+      assert(wp.percentile(50.percent) == 1.second.inMillis)
 
       // ensure result of backup request returned
       assert(f.poll == Some(Return("backup")))
@@ -363,7 +363,7 @@ class BackupRequestFilterTest extends FunSuite
       }
 
       // ensure latency for original recorded
-      assert(wp.percentile(50.0) == (WarmupRequestLatency + 1.second).inMillis)
+      assert(wp.percentile(50.percent) == (WarmupRequestLatency + 1.second).inMillis)
 
       assert(statsReceiver.counters(Seq("backups_sent")) == 1)
       assert(statsReceiver.counters(Seq("backups_won")) == 1)
@@ -375,7 +375,7 @@ class BackupRequestFilterTest extends FunSuite
       val origPromise, backupPromise = new Promise[String]
       val f = sendBackup(origPromise, backupPromise, tc, sendInterrupts = false)
 
-      assert(wp.percentile(50.0) == WarmupRequestLatency.inMillis)
+      assert(wp.percentile(50.percent) == WarmupRequestLatency.inMillis)
 
       tc.advance(1.second)
       timer.tick()
@@ -384,7 +384,7 @@ class BackupRequestFilterTest extends FunSuite
 
       // ensure latency recorded. Backup was sent at `WarmupRequestLatency`, and 1 second
       // has elapsed since then.
-      assert(wp.percentile(50.0) == 1.second.inMillis)
+      assert(wp.percentile(50.percent) == 1.second.inMillis)
 
       // ensure result of backup request returned
       assert(f.poll == Some(Return("backup")))
@@ -396,7 +396,7 @@ class BackupRequestFilterTest extends FunSuite
       origPromise.setValue("done")
 
       // ensure latency for original recorded
-      assert(wp.percentile(50.0) == (WarmupRequestLatency + 1.second).inMillis)
+      assert(wp.percentile(50.percent) == (WarmupRequestLatency + 1.second).inMillis)
 
       assert(statsReceiver.counters(Seq("backups_sent")) == 1)
       assert(statsReceiver.counters(Seq("backups_won")) == 1)
@@ -408,7 +408,7 @@ class BackupRequestFilterTest extends FunSuite
       val origPromise, backupPromise = new Promise[String]
       val f = sendBackup(origPromise, backupPromise, tc, sendInterrupts = true)
 
-      assert(wp.percentile(50.0) == WarmupRequestLatency.inMillis)
+      assert(wp.percentile(50.percent) == WarmupRequestLatency.inMillis)
 
       tc.advance(1.second)
       timer.tick()
@@ -416,7 +416,7 @@ class BackupRequestFilterTest extends FunSuite
       origPromise.setValue("orig")
 
       // ensure latency recorded
-      assert(wp.percentile(50.0) == (WarmupRequestLatency + 1.second).inMillis)
+      assert(wp.percentile(50.percent) == (WarmupRequestLatency + 1.second).inMillis)
 
       // ensure result of backup request returned
       assert(f.poll == Some(Return("orig")))
@@ -430,7 +430,7 @@ class BackupRequestFilterTest extends FunSuite
       }
 
       // ensure latency for backup recorded
-      assert(wp.percentile(50.0) == 1.second.inMillis)
+      assert(wp.percentile(50.percent) == 1.second.inMillis)
 
       assert(statsReceiver.counters(Seq("backups_sent")) == 1)
       assert(!statsReceiver.counters.contains(Seq("backups_won")))
@@ -442,7 +442,7 @@ class BackupRequestFilterTest extends FunSuite
       val origPromise, backupPromise = new Promise[String]
       val f = sendBackup(origPromise, backupPromise, tc, sendInterrupts = false)
 
-      assert(wp.percentile(50.0) == WarmupRequestLatency.inMillis)
+      assert(wp.percentile(50.percent) == WarmupRequestLatency.inMillis)
 
       tc.advance(1.second)
       timer.tick()
@@ -450,7 +450,7 @@ class BackupRequestFilterTest extends FunSuite
       origPromise.setValue("orig")
 
       // ensure latency recorded
-      assert(wp.percentile(50.0) == (WarmupRequestLatency + 1.second).inMillis)
+      assert(wp.percentile(50.percent) == (WarmupRequestLatency + 1.second).inMillis)
 
       // ensure result of orig request returned
       assert(f.poll == Some(Return("orig")))
@@ -462,7 +462,7 @@ class BackupRequestFilterTest extends FunSuite
       backupPromise.setValue("done")
 
       // ensure latency for backup recorded
-      assert(wp.percentile(50.0) == 1.second.inMillis)
+      assert(wp.percentile(50.percent) == 1.second.inMillis)
 
       assert(statsReceiver.counters(Seq("backups_sent")) == 1)
       assert(!statsReceiver.counters.contains(Seq("backups_won")))
@@ -474,7 +474,7 @@ class BackupRequestFilterTest extends FunSuite
       val origPromise, backupPromise = new Promise[String]
       val f = sendBackup(origPromise, backupPromise, tc, sendInterrupts = false)
 
-      assert(wp.percentile(50.0) == WarmupRequestLatency.inMillis)
+      assert(wp.percentile(50.percent) == WarmupRequestLatency.inMillis)
 
       tc.advance(1.second)
       timer.tick()
@@ -482,7 +482,7 @@ class BackupRequestFilterTest extends FunSuite
       origPromise.setValue("failure")
 
       // ensure latency *not* recorded (because request failed fast)
-      assert(wp.percentile(50.0) == WarmupRequestLatency.inMillis)
+      assert(wp.percentile(50.percent) == WarmupRequestLatency.inMillis)
 
       // ensure result of orig request *not* returned
       assert(f.poll == None)
@@ -502,7 +502,7 @@ class BackupRequestFilterTest extends FunSuite
       val origPromise, backupPromise = new Promise[String]
       val f = sendBackup(origPromise, backupPromise, tc, sendInterrupts = false)
 
-      assert(wp.percentile(50.0) == WarmupRequestLatency.inMillis)
+      assert(wp.percentile(50.percent) == WarmupRequestLatency.inMillis)
 
       tc.advance(1.second)
       timer.tick()
@@ -510,7 +510,7 @@ class BackupRequestFilterTest extends FunSuite
       backupPromise.setValue("failure")
 
       // ensure latency *not* recorded (because backup failed fast)
-      assert(wp.percentile(50.0) == WarmupRequestLatency.inMillis)
+      assert(wp.percentile(50.percent) == WarmupRequestLatency.inMillis)
 
       // ensure result of backup request *not* returned
       assert(f.poll == None)
@@ -521,7 +521,7 @@ class BackupRequestFilterTest extends FunSuite
       assert(f.poll == Some(Return("orig")))
 
       // ensure latency for original recorded
-      assert(wp.percentile(50.0) == (WarmupRequestLatency + 1.second).inMillis)
+      assert(wp.percentile(50.percent) == (WarmupRequestLatency + 1.second).inMillis)
 
       assert(statsReceiver.counters(Seq("backups_sent")) == 1)
       assert(statsReceiver.counters(Seq("backups_won")) == 1)
@@ -600,11 +600,11 @@ class BackupRequestFilterTest extends FunSuite
     Time.withCurrentTimeFrozen { tc =>
       val origPromise, backupPromise = new Promise[String]
       val f = sendBackup(origPromise, backupPromise, tc, sendInterrupts = false)
-      assert(wp.percentile(50.0) == WarmupRequestLatency.inMillis)
+      assert(wp.percentile(50.percent) == WarmupRequestLatency.inMillis)
       tc.advance(1.second)
       timer.tick()
       origPromise.setException(new IndividualRequestTimeoutException(2.seconds))
-      assert(wp.percentile(50.0) == (WarmupRequestLatency + 1.second).inMillis)
+      assert(wp.percentile(50.percent) == (WarmupRequestLatency + 1.second).inMillis)
     }
   }
 

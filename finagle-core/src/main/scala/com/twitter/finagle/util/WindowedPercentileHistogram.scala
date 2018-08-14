@@ -88,15 +88,15 @@ class WindowedPercentileHistogram(
 
   /**
    * Retrieve a percentile from the histogram.
-   * @param percentile Percentile to retrieve. Must be be [0, 100]
+   * @param percentile Percentile to retrieve. Must be be [0.0, 1.0]
    */
   def percentile(percentile: Double): Int = {
-    if (percentile < 0 || percentile > 100) {
-      throw new IllegalArgumentException(s"Percentile must be [0, 100]. Was: $percentile")
+    if (percentile < 0 || percentile > 1) {
+      throw new IllegalArgumentException(s"Percentile must be [0.0, 1.0]. Was: $percentile")
     }
 
     if (currentSnapshot != null)
-      currentSnapshot.getValueAtPercentile(percentile).toInt
+      currentSnapshot.getValueAtPercentile(percentile * 100).toInt
     else
       0
   }

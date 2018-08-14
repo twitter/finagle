@@ -1,5 +1,6 @@
 package com.twitter.finagle.mux.lease.exp
 
+import com.twitter.conversions.percent._
 import com.twitter.conversions.storage._
 import com.twitter.conversions.time._
 import com.twitter.finagle.util.{DefaultTimer, WindowedPercentileHistogram}
@@ -53,7 +54,7 @@ private[lease] class RequestSnooper(
    * bytes that will pass in the time it takes to handle a request.
    */
   def handleBytes(): StorageUnit = {
-    val p = histogram.percentile(percentile)
+    val p = histogram.percentile(percentile.percent)
     lr.record("discountHistoMs", p.toString)
     lr.record("discountRate", counter.rate().toString)
 
