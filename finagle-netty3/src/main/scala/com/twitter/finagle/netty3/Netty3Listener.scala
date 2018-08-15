@@ -215,7 +215,7 @@ class Netty3Listener[In, Out](pipelineFactory: ChannelPipelineFactory, params: S
     val Listener.Backlog(backlog) = params[Listener.Backlog]
     val Transport.BufferSizes(sendBufSize, recvBufSize) = params[Transport.BufferSizes]
     val Transport.Liveness(readTimeout, writeTimeout, keepAlive) = params[Transport.Liveness]
-    val Transport.Options(noDelay, reuseAddr) = params[Transport.Options]
+    val Transport.Options(noDelay, reuseAddr, _) = params[Transport.Options]
 
     val opts = new mutable.HashMap[String, Object]()
     opts += "soLinger" -> (0: java.lang.Integer)
