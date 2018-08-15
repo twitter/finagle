@@ -5,7 +5,7 @@ import java.util.Set;
 import scala.collection.JavaConversions;
 
 /**
- * Java compatibility for the {@link FailureFlags$} companion object.
+ * Java compatibility for the {@link FailureFlags} companion object.
  */
 public final class JavaFailureFlags {
   private JavaFailureFlags() {
