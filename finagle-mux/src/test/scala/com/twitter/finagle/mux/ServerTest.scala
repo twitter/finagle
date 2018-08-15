@@ -428,7 +428,7 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
   }
 
   private class Restart extends FailureFlags[Restart] {
-    private[finagle] val flags = FailureFlags.Retryable
+    val flags = FailureFlags.Retryable
     protected def copyWithFlags(flags: Long): Restart = ???
   }
 

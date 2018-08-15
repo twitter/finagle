@@ -284,7 +284,7 @@ private[http2] object AdapterProxyChannelHandler {
   // already written stuff to the wire.
   class WriteToNackedStreamException(
     id: Int,
-    private[finagle] val flags: Long = FailureFlags.NonRetryable
+    val flags: Long = FailureFlags.NonRetryable
   ) extends Exception(s"Tried to write to already nacked stream id $id.")
       with FailureFlags[WriteToNackedStreamException]
       with HasLogLevel {

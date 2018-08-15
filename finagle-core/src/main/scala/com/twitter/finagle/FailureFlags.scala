@@ -5,6 +5,8 @@ import com.twitter.util.{Future, Throw, Try}
 /**
  * `FailureFlags` may be applied to any Failure/Exception encountered during the
  * handling of a request.
+ *
+ * @see `JavaFailureFlags` for Java compatibility.
  */
 object FailureFlags {
   // NOTE: When adding a new FailureFlag, make sure to add to `flagsOf` so that stats are reported,
@@ -14,9 +16,9 @@ object FailureFlags {
 
   /**
    * Retryable indicates that the action that caused the failure is known
-   * to be safe to retry. The [[RequeueFilter]] will automatically retry any
-   * such failures. Note that this is independent of any user-configured retry
-   * logic. This is Finagle-internal.
+   * to be safe to retry. Finagle client's `RequeueFilter` will automatically
+   * retry any such failures. Note that this is independent of any user-configured
+   * retry logic. This is Finagle-internal.
    */
   val Retryable: Long = 1L << 0
 
@@ -121,15 +123,22 @@ object FailureFlags {
 }
 
 /**
- * A trait for exceptions that are flagged with the additional attributes
- * defined above.
+ * Carries metadata for exceptions such as whether or not the
+ * exception is safe to retry.
+ *
+ * The boolean properties can be tested via the [[FailureFlags.isFlagged(Long)]]
+ * method where the values for the flags are a bitmask from the constants
+ * defined on the companion object. Common flags are `Rejected` and
+ * `NonRetryable`.
+ *
+ * @see [[AbstractFailureFlags]] for creating subclasses in Java.
  */
-private[finagle] trait FailureFlags[T <: FailureFlags[T]] extends Throwable { this: T =>
+trait FailureFlags[T <: FailureFlags[T]] extends Throwable { this: T =>
   import FailureFlags._
 
   require(!isFlagged(Retryable | NonRetryable), "Cannot be flagged both Retryable and NonRetryable")
 
-  private[finagle] def flags: Long
+  def flags: Long
 
   /**
    * Test if this is flagged with a particular set of flags
@@ -192,4 +201,22 @@ private[finagle] trait FailureFlags[T <: FailureFlags[T]] extends Throwable { th
    * This with the mask applied. This does not mutate.
    */
   private[finagle] def masked(mask: Long): T = withFlags(flags & mask)
+}
+
+/**
+ * For Java users wanting to implement exceptions that are [[FailureFlags]].
+ */
+abstract class AbstractFailureFlags[T <: AbstractFailureFlags[T]]
+  extends Throwable
+  with FailureFlags[T] { this: T =>
+
+  // Java-friendly forwarders
+  // See https://issues.scala-lang.org/browse/SI-8905
+  override def asNonRetryable: T = super.asNonRetryable
+  override def asRejected: T = super.asRejected
+  private[finagle] override def withFlags(newFlags: Long): T = super.withFlags(newFlags)
+  private[finagle] override def flagged(addFlags: Long): T = super.flagged(addFlags)
+  private[finagle] override def unflagged(delFlags: Long): T = super.unflagged(delFlags)
+  private[finagle] override def masked(mask: Long): T = super.masked(mask)
+
 }

@@ -7,6 +7,14 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+  * finagle-core: `c.t.f.FailureFlags` is now a public API. This is Finagle's
+    API for attaching metadata to an exception. As an example this is used to
+    check if an exception is known to be safe to retry. Java compatibility has
+    also been added. ``PHAB_ID=D202374``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

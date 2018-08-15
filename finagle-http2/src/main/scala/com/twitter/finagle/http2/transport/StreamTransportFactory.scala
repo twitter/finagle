@@ -669,7 +669,7 @@ private[http2] object StreamTransportFactory {
   class BadStreamStateException(
     msg: String,
     id: Int,
-    private[finagle] val flags: Long = FailureFlags.NonRetryable
+    val flags: Long = FailureFlags.NonRetryable
   ) extends Exception(s"Stream $id in bad state: $msg")
       with FailureFlags[BadStreamStateException] {
 
@@ -677,7 +677,7 @@ private[http2] object StreamTransportFactory {
       new BadStreamStateException(msg, id, newFlags)
   }
 
-  class DeadConnectionException(addr: SocketAddress, private[finagle] val flags: Long)
+  class DeadConnectionException(addr: SocketAddress, val flags: Long)
       extends Exception(s"assigned an already dead connection to address $addr")
       with FailureFlags[DeadConnectionException] {
 
@@ -687,7 +687,7 @@ private[http2] object StreamTransportFactory {
 
   class StreamIdOverflowException(
     addr: SocketAddress,
-    private[finagle] val flags: Long = FailureFlags.Retryable
+    val flags: Long = FailureFlags.Retryable
   ) extends Exception(s"ran out of stream ids for address $addr")
       with FailureFlags[StreamIdOverflowException]
       with HasLogLevel {
@@ -699,7 +699,7 @@ private[http2] object StreamTransportFactory {
   class IllegalStreamIdException(
     addr: SocketAddress,
     id: Int,
-    private[finagle] val flags: Long = FailureFlags.Retryable
+    val flags: Long = FailureFlags.Retryable
   ) extends Exception(
         s"Found an invalid stream id $id on address $addr. "
           + "The id was even, but client initiated stream ids must be odd."

@@ -93,7 +93,7 @@ private[http2] final class Http2UpgradingTransport(
 }
 
 private object Http2UpgradingTransport {
-  class ClosedWhileUpgradingException(private[finagle] val flags: Long = FailureFlags.Empty)
+  class ClosedWhileUpgradingException(val flags: Long = FailureFlags.Empty)
       extends Exception("h2c transport was closed while upgrading")
       with HasLogLevel
       with FailureFlags[ClosedWhileUpgradingException] {

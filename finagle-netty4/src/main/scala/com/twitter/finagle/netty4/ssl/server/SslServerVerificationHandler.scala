@@ -80,7 +80,7 @@ private[netty4] class SslServerVerificationHandler(
  * Indicates that the SslHandler was interrupted while it was trying to complete the TLS handshake.
  */
 private[netty4] class InterruptedSslException(
-  private[finagle] val flags: Long = FailureFlags.Empty
+  val flags: Long = FailureFlags.Empty
 ) extends SslException(None, None)
     with FailureFlags[InterruptedSslException]
     with HasLogLevel {
@@ -95,7 +95,7 @@ private[netty4] class InterruptedSslException(
 
 private[netty4] class HandshakeFailureException(
   exn: Throwable,
-  private[finagle] val flags: Long = FailureFlags.Empty
+  val flags: Long = FailureFlags.Empty
 ) extends Exception("Failed to complete the TLS handshake.", exn)
 
     with FailureFlags[HandshakeFailureException]

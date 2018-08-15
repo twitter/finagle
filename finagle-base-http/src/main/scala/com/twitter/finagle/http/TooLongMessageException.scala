@@ -7,7 +7,7 @@ import java.net.SocketAddress
 final class TooLongMessageException private (
   ex: Option[Exception],
   remote: Option[SocketAddress],
-  private[finagle] val flags: Long
+  val flags: Long
 ) extends ChannelException(ex, remote)
     with FailureFlags[TooLongMessageException] {
 

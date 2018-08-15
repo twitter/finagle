@@ -10,7 +10,7 @@ import java.sql.SQLNonTransientException
 class UnsupportedTypeException private[mysql] (
   columnName: String,
   value: Value,
-  private[finagle] val flags: Long = FailureFlags.NonRetryable
+  val flags: Long = FailureFlags.NonRetryable
 ) extends SQLNonTransientException(
   s"For column name '$columnName', value type not supported: ${value.getClass.getName}"
 ) with FailureFlags[UnsupportedTypeException] {

@@ -490,7 +490,7 @@ class NackAdmissionFilterTest extends FunSuite {
 
   testEnabled("can be triggered by failure-flag encoded nacks") { ctl =>
     class Reject extends FailureFlags[Reject] {
-      private[finagle] val flags = FailureFlags.Rejected
+      val flags = FailureFlags.Rejected
 
       protected def copyWithFlags(flags: Long): Reject = ???
     }

@@ -9,7 +9,7 @@ import com.twitter.logging.{HasLogLevel, Level}
  * a retry worthwhile as retrying is most likely to eat up the entire
  * budget.
  */
-class NoNodesOpenException private[loadbalancer] (private[finagle] val flags: Long)
+class NoNodesOpenException private[loadbalancer] (val flags: Long)
     extends RuntimeException
     with FailureFlags[NoNodesOpenException]
     with HasLogLevel

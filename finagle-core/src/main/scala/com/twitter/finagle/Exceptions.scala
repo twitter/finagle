@@ -208,7 +208,7 @@ class CancelledConnectionException(cause: Throwable)
 class FailedFastException(
   message: String,
   cause: Throwable,
-  private[finagle] val flags: Long = FailureFlags.Empty
+  val flags: Long = FailureFlags.Empty
 ) extends RequestException(message, cause)
     with WriteException
     with HasLogLevel
@@ -338,7 +338,7 @@ class ConnectionFailedException(underlying: Option[Throwable], remoteAddress: Op
 class ChannelClosedException private[finagle](
   underlying: Option[Throwable],
   remoteAddress: Option[SocketAddress],
-  private[finagle] val flags: Long)
+  val flags: Long)
     extends ChannelException(underlying, remoteAddress)
     with FailureFlags[ChannelClosedException] {
 
@@ -362,7 +362,7 @@ class StreamClosedException(
   remoteAddress: Option[SocketAddress],
   streamId: String,
   whyFailed: String,
-  private[finagle] val flags: Long)
+  val flags: Long)
     extends ChannelException(None, remoteAddress)
     with FailureFlags[StreamClosedException]
     with NoStackTrace {

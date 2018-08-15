@@ -8,7 +8,7 @@ import java.sql.SQLNonTransientException
  */
 class ColumnNotFoundException private[mysql] (
   columnName: String,
-  private[finagle] val flags: Long = FailureFlags.NonRetryable
+  val flags: Long = FailureFlags.NonRetryable
 ) extends SQLNonTransientException(s"Column not found: '$columnName'")
   with FailureFlags[ColumnNotFoundException] {
 

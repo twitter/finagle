@@ -109,7 +109,7 @@ private[http2] object UpgradeRequestHandler {
   case object UpgradeRejected extends UpgradeResult
   case object UpgradeAborted extends UpgradeResult
 
-  class CancelledUpgradeException(private[finagle] val flags: Long = FailureFlags.Empty)
+  class CancelledUpgradeException(val flags: Long = FailureFlags.Empty)
       extends Exception("the last write of an upgrade request was cancelled")
       with FailureFlags[CancelledUpgradeException] {
 
