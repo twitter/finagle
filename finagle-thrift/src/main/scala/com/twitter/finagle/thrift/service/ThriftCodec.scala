@@ -1,7 +1,7 @@
 package com.twitter.finagle.thrift.service
 
 import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.thrift.{DeserializeCtx, ThriftClientRequest, maxReusableBufferSize}
+import com.twitter.finagle.thrift.{ClientDeserializeCtx, ThriftClientRequest, maxReusableBufferSize}
 import com.twitter.finagle.{Filter, Service}
 import com.twitter.scrooge.{TReusableBuffer, ThriftMethod, ThriftStruct, ThriftStructCodec}
 import com.twitter.util.{Future, Return, Throw, Try}
@@ -44,8 +44,8 @@ private[thrift] object ThriftCodec {
         service: Service[ThriftClientRequest, Array[Byte]]
       ): Future[method.SuccessType] = {
         val request = encodeRequest(method.name, args, pf, method.oneway)
-        val serdeCtx = new DeserializeCtx[method.SuccessType](args, decodeRepFn)
-        Contexts.local.let(DeserializeCtx.Key, serdeCtx) {
+        val serdeCtx = new ClientDeserializeCtx[method.SuccessType](args, decodeRepFn)
+        Contexts.local.let(ClientDeserializeCtx.Key, serdeCtx) {
           service(request).flatMap { response =>
             Future.const(serdeCtx.deserialize(response))
           }

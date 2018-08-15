@@ -6,8 +6,14 @@ import com.twitter.finagle.context.RemoteInfo.Upstream
 import com.twitter.finagle.mux.{OpportunisticTlsParams, Request, Response}
 import com.twitter.finagle.mux.pushsession.MuxPush
 import com.twitter.finagle.mux.lease.exp.Lessor
-import com.twitter.finagle.mux.transport.{MuxContext, OpportunisticTls, MuxFailure}
-import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
+import com.twitter.finagle.mux.transport.{MuxContext, MuxFailure, OpportunisticTls}
+import com.twitter.finagle.param.{
+  ExceptionStatsHandler => _,
+  Monitor => _,
+  ResponseClassifier => _,
+  Tracer => _,
+  _
+}
 import com.twitter.finagle.server.{Listener, StackBasedServer, StackServer, StdStackServer}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{
@@ -112,7 +118,9 @@ object ThriftMux
   // and failure can be measured properly before converting the exceptions into
   // byte arrays. see CSL-1351
     ThriftMuxUtil.protocolRecorder +:
-      Mux.server.stack.replace(StackServer.Role.preparer, Server.ExnHandler)
+      Mux.server.stack
+        .insertBefore(StackServer.Role.preparer, Server.ServerToReqRepPreparer)
+        .replace(StackServer.Role.preparer, Server.ExnHandler)
 
   /**
    * Base [[com.twitter.finagle.Stack.Params]] for ThriftMux servers.
@@ -270,7 +278,7 @@ object ThriftMux
       }
     }
 
-    private[this] def deserializingClassifier: StackClient[mux.Request, mux.Response] = {
+    private[this] def withDeserializingClassifier: StackClient[mux.Request, mux.Response] = {
       // Note: what type of deserializer used is important if none is specified
       // so that we keep the prior behavior of Thrift exceptions
       // being counted as a success. Otherwise, even using the default
@@ -290,12 +298,12 @@ object ThriftMux
 
     def newService(dest: Name, label: String): Service[ThriftClientRequest, Array[Byte]] = {
       clientId.foreach(id => ClientRegistry.export(params, "ClientId", id.name))
-      ThriftMuxToMux.andThen(deserializingClassifier.newService(dest, label))
+      ThriftMuxToMux.andThen(withDeserializingClassifier.newService(dest, label))
     }
 
     def newClient(dest: Name, label: String): ServiceFactory[ThriftClientRequest, Array[Byte]] = {
       clientId.foreach(id => ClientRegistry.export(params, "ClientId", id.name))
-      ThriftMuxToMux.andThen(deserializingClassifier.newClient(dest, label))
+      ThriftMuxToMux.andThen(withDeserializingClassifier.newClient(dest, label))
     }
 
     /**
@@ -519,6 +527,31 @@ object ThriftMux
           exnFilter.andThen(next)
         }
       }
+
+    // Set an empty ServerToReqRep context in the stack. Scrooge generated finagle service should
+    // then set the value.
+    private[ThriftMux] val ServerToReqRepPreparer =
+      new Stack.Module0[ServiceFactory[mux.Request, mux.Response]] {
+        val role: Stack.Role = Stack.Role("ServerToReqRep Preparer")
+        val description: String = "Set an empty bytes to ReqRep context in the local contexts, " +
+          "scrooge generated service should set the value."
+        def make(
+          next: ServiceFactory[mux.Request, mux.Response]
+        ): ServiceFactory[mux.Request, mux.Response] = {
+          val svcDeserializeCtxFilter = new SimpleFilter[mux.Request, mux.Response] {
+            def apply(
+              request: mux.Request,
+              service: Service[mux.Request, mux.Response]
+            ): Future[mux.Response] = {
+              val deserCtx = new ServerToReqRep
+              Contexts.local.let(ServerToReqRep.Key, deserCtx) {
+                service(request)
+              }
+            }
+          }
+          svcDeserializeCtxFilter.andThen(next)
+        }
+      }
   }
 
   /**
@@ -548,6 +581,7 @@ object ThriftMux
       serviceName = params[Label].label,
       maxThriftBufferSize = params[Thrift.param.MaxReusableBufferSize].maxReusableBufferSize,
       serverStats = params[Stats].statsReceiver,
+      responseClassifier = params[com.twitter.finagle.param.ResponseClassifier].responseClassifier,
       perEndpointStats = params[Thrift.param.PerEndpointStats].enabled
     )
 
@@ -610,11 +644,29 @@ object ThriftMux
     def withParams(ps: Stack.Params): Server =
       copy(muxer = muxer.withParams(ps))
 
+    private[this] def withDeserializingClassifier: StackServer[mux.Request, mux.Response] = {
+      // Note: what type of deserializer used is important if none is specified
+      // so that we keep the prior behavior of Thrift exceptions
+      // being counted as a success. Otherwise, even using the default
+      // ResponseClassifier would then see that response as a `Throw` and thus
+      // a failure. So, when none is specified, a "deserializing-only"
+      // classifier is used to make when deserialization happens in the stack
+      // uniform whether or not a `ResponseClassifier` is wired up.
+      val classifier = if (params.contains[com.twitter.finagle.param.ResponseClassifier]) {
+        ThriftMuxResponseClassifier.usingReqRepCtx(
+          params[com.twitter.finagle.param.ResponseClassifier].responseClassifier
+        )
+      } else {
+        ThriftMuxResponseClassifier.ReqRepCtxOnly
+      }
+      muxer.configured(com.twitter.finagle.param.ResponseClassifier(classifier))
+    }
+
     def serve(
       addr: SocketAddress,
       factory: ServiceFactory[Array[Byte], Array[Byte]]
     ): ListeningServer = {
-      muxer.serve(addr, MuxToArrayFilter.andThen(factory))
+      withDeserializingClassifier.serve(addr, MuxToArrayFilter.andThen(factory))
     }
 
     // Java-friendly forwarders

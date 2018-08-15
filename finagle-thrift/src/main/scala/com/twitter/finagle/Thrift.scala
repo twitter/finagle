@@ -1,6 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.client.{ClientRegistry, StackClient, StdStackClient, Transporter}
+import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.param.{
   ExceptionStatsHandler => _,
@@ -18,7 +19,7 @@ import com.twitter.finagle.thrift.transport.ThriftClientPreparer
 import com.twitter.finagle.thrift.transport.netty4.Netty4Transport
 import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.transport.{Transport, TransportContext}
-import com.twitter.util.{Closable, Duration, Monitor}
+import com.twitter.util.{Closable, Duration, Future, Monitor}
 import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory
 
@@ -310,7 +311,7 @@ object Thrift
 
     def clientId: Option[thrift.ClientId] = params[Thrift.param.ClientId].clientId
 
-    private[this] def deserializingClassifier: Client = {
+    private[this] def withDeserializingClassifier: Client = {
       // Note: what type of deserializer used is important if none is specified
       // so that we keep the prior behavior of Thrift exceptions
       // being counted as a success. Otherwise, even using the default
@@ -336,7 +337,7 @@ object Thrift
       label: String
     ): ServiceFactory[ThriftClientRequest, Array[Byte]] = {
       clientId.foreach(id => ClientRegistry.export(params, "ClientId", id.name))
-      deserializingClassifier.superNewClient(dest, label)
+      withDeserializingClassifier.superNewClient(dest, label)
     }
 
     // Java-friendly forwarders
@@ -416,7 +417,33 @@ object Thrift
         }
       }
 
+    // Set an empty ServerToReqRep context in the stack. Scrooge generated finagle service should
+    // then set the value.
+    private val ServerToReqRepPreparer =
+      new Stack.Module0[ServiceFactory[Array[Byte], Array[Byte]]] {
+        val role: Stack.Role = Stack.Role("ServerToReqRep Preparer")
+        val description: String = "Set an empty bytes to ReqRep context in the local contexts, " +
+          "scrooge generated service should set the value."
+        def make(
+          next: ServiceFactory[Array[Byte], Array[Byte]]
+        ): ServiceFactory[Array[Byte], Array[Byte]] = {
+          val svcDeserializeCtxFilter = new SimpleFilter[Array[Byte], Array[Byte]] {
+            def apply(
+              request: Array[Byte],
+              service: Service[Array[Byte], Array[Byte]]
+            ): Future[Array[Byte]] = {
+              val deserCtx = new ServerToReqRep
+              Contexts.local.let(ServerToReqRep.Key, deserCtx) {
+                service(request)
+              }
+            }
+          }
+          svcDeserializeCtxFilter.andThen(next)
+        }
+      }
+
     private val stack: Stack[ServiceFactory[Array[Byte], Array[Byte]]] = StackServer.newStack
+      .insertBefore(StackServer.Role.preparer, ServerToReqRepPreparer)
       .replace(StackServer.Role.preparer, preparer)
 
     private val params: Stack.Params = StackServer.defaultParams +
@@ -462,6 +489,36 @@ object Thrift
 
     @deprecated("Use serverParam.maxThriftBufferSize", "2017-08-16")
     override protected def maxThriftBufferSize: Int = serverParam.maxThriftBufferSize
+
+    private[this] def withDeserializingClassifier: Server = {
+      // Note: what type of deserializer used is important if none is specified
+      // so that we keep the prior behavior of Thrift exceptions
+      // being counted as a success. Otherwise, even using the default
+      // ResponseClassifier would then see that response as a `Throw` and thus
+      // a failure. So, when none is specified, a "deserializing-only"
+      // classifier is used to make when deserialization happens in the stack
+      // uniform whether or not a `ResponseClassifier` is wired up.
+      val classifier = if (params.contains[com.twitter.finagle.param.ResponseClassifier]) {
+        ThriftResponseClassifier.usingReqRepCtx(
+          params[com.twitter.finagle.param.ResponseClassifier].responseClassifier
+        )
+      } else {
+        ThriftResponseClassifier.ReqRepCtxOnly
+      }
+      configured(com.twitter.finagle.param.ResponseClassifier(classifier))
+    }
+
+    private def superServe(
+      addr: SocketAddress,
+      service: ServiceFactory[Array[Byte], Array[Byte]]
+    ): ListeningServer = super.serve(addr, service)
+
+    override def serve(
+      addr: SocketAddress,
+      service: ServiceFactory[Array[Byte], Array[Byte]]
+    ): ListeningServer = {
+      withDeserializingClassifier.superServe(addr, service)
+    }
 
     protected def newListener(): Listener[In, Out, Context] = Netty4Transport.Server(params)
 

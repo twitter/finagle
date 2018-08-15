@@ -1,21 +1,26 @@
 package com.twitter.finagle.thrift.service
 
 import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.service.{ResponseClassifier, ResponseClass, ReqRep}
+import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
 import com.twitter.finagle.service.ResponseClass._
-import com.twitter.finagle.thrift.DeserializeCtx
-import com.twitter.finagle.thrift.thriftscala.{InvalidQueryException, Echo}
-import com.twitter.util.{Return, Throw}
+import com.twitter.finagle.thrift.{ClientDeserializeCtx, ServerToReqRep}
+import com.twitter.finagle.thrift.thriftscala.{Echo, InvalidQueryException}
+import com.twitter.util.{Return, Throw, Try}
 import java.nio.charset.StandardCharsets.UTF_8
 import org.scalatest.FunSuite
 
 class ThriftResponseClassifierTest extends FunSuite {
 
-  private val classifier = ThriftResponseClassifier.usingDeserializeCtx {
+  private val classifier: ResponseClassifier = {
     case ReqRep(_, Return(rep: String)) if rep == "nope" => RetryableFailure
     case ReqRep(_, Throw(e: InvalidQueryException)) if e.errorCode == 4 => NonRetryableFailure
     case ReqRep(Echo.Echo.Args(in), _) if in == "lol" => NonRetryableFailure
   }
+
+  private val clntClassifier =
+    ThriftResponseClassifier.usingDeserializeCtx(classifier)
+  private val srvClassifier =
+    ThriftResponseClassifier.usingReqRepCtx(classifier)
 
   private val deserializer = { bytes: Array[Byte] =>
     val asString = new String(bytes, UTF_8)
@@ -23,12 +28,17 @@ class ThriftResponseClassifierTest extends FunSuite {
     else Return(asString)
   }
 
-  test("usingDeserializeCtx basics") {
+  private def getRep(in: String): Try[_] = if (in.startsWith("fail")){
+    Throw(new InvalidQueryException(in.length))
+  }  else Return(in)
+
+
+  test("usingDeserializeCtx basics for ClientDeserializeCtx") {
     def testApply(in: String, expectedClass: ResponseClass): Unit = {
-      val ctx = new DeserializeCtx(Echo.Echo.Args(in), deserializer)
-      Contexts.local.let(DeserializeCtx.Key, ctx) {
+      val clntCtx = new ClientDeserializeCtx(Echo.Echo.Args(in), deserializer)
+      Contexts.local.let(ClientDeserializeCtx.Key, clntCtx) {
         val rep = in.getBytes(UTF_8)
-        assert(expectedClass == classifier(ReqRep(in, Return(rep))))
+        assert(expectedClass == clntClassifier(ReqRep(in, Return(rep))))
       }
     }
     testApply("nope", RetryableFailure)
@@ -36,13 +46,13 @@ class ThriftResponseClassifierTest extends FunSuite {
     testApply("fail", NonRetryableFailure)
 
     def testApplyOrElse(in: String, expectedClass: ResponseClass): Unit = {
-      val ctx = new DeserializeCtx(Echo.Echo.Args(in), deserializer)
-      Contexts.local.let(DeserializeCtx.Key, ctx) {
+      val clntCtx = new ClientDeserializeCtx(Echo.Echo.Args(in), deserializer)
+      Contexts.local.let(ClientDeserializeCtx.Key, clntCtx) {
         val rep = in.getBytes(UTF_8)
-        assert(!classifier.isDefinedAt(ReqRep(in, Return(rep))))
+        assert(!clntClassifier.isDefinedAt(ReqRep(in, Return(rep))))
         assert(
           expectedClass ==
-            classifier.applyOrElse(ReqRep(in, Return(rep)), ResponseClassifier.Default)
+            clntClassifier.applyOrElse(ReqRep(in, Return(rep)), ResponseClassifier.Default)
         )
       }
     }
@@ -50,23 +60,35 @@ class ThriftResponseClassifierTest extends FunSuite {
     testApplyOrElse("failing", Success) // falls through to the default classifier
   }
 
-  test("usingDeserializeCtx ignores exceptions during deserialization") {
-    val toThrow = new RuntimeException("welp")
-    val throwingDeser = { bytes: Array[Byte] =>
-      throw toThrow
+  test("usingDeserializeCtx basics for ServerToReqRep") {
+    def testApply(in: String, expectedClass: ResponseClass): Unit = {
+      val srvCtx = new ServerToReqRep
+      Contexts.local.let(ServerToReqRep.Key, srvCtx) {
+        val deserCtx = Contexts.local.get(ServerToReqRep.Key).get
+        deserCtx.setReqRep(ReqRep(Echo.Echo.Args(in), getRep(in)))
+        val rep = in.getBytes(UTF_8)
+        assert(expectedClass == srvClassifier(ReqRep(in, Return(rep))))
+      }
     }
+    testApply("nope", RetryableFailure)
+    testApply("lol", NonRetryableFailure)
+    testApply("fail", NonRetryableFailure)
 
-    val input = "throw"
-    val ctx = new DeserializeCtx(Echo.Echo.Args(input), throwingDeser)
-    Contexts.local.let(DeserializeCtx.Key, ctx) {
-      val rep = input.getBytes(UTF_8)
-
-      assert(!classifier.isDefinedAt(ReqRep(input, Return(rep))))
-      assert(
-        Success ==
-          classifier.applyOrElse(ReqRep(input, Return(rep)), ResponseClassifier.Default)
-      )
+    def testApplyOrElse(in: String, expectedClass: ResponseClass): Unit = {
+      val srvCtx = new ServerToReqRep
+      Contexts.local.let(ServerToReqRep.Key, srvCtx) {
+        val deserCtx = Contexts.local.get(ServerToReqRep.Key).get
+        val rep = in.getBytes(UTF_8)
+        deserCtx.setReqRep(ReqRep(Echo.Echo.Args(in), getRep(in)))
+        assert(!srvClassifier.isDefinedAt(ReqRep(Echo.Echo.Args(in), Return(rep))))
+        assert(
+          expectedClass ==
+            srvClassifier.applyOrElse(ReqRep(in, Return(rep)), ResponseClassifier.Default)
+        )
+      }
     }
+    testApplyOrElse("yep", Success)
+    testApplyOrElse("failing", Success) // falls through to the default classifier
   }
 
   test("usingDeserializeCtx handles no DeserializationCtx") {
@@ -74,7 +96,12 @@ class ThriftResponseClassifierTest extends FunSuite {
       val rep = in.getBytes(UTF_8)
       assert(
         expectedClass ==
-          classifier.applyOrElse(ReqRep(in, Return(rep)), ResponseClassifier.Default)
+          clntClassifier.applyOrElse(ReqRep(in, Return(rep)), ResponseClassifier.Default)
+      )
+
+      assert(
+        expectedClass ==
+          srvClassifier.applyOrElse(ReqRep(in, Return(rep)), ResponseClassifier.Default)
       )
     }
     testApply("nope", Success)
@@ -85,25 +112,25 @@ class ThriftResponseClassifierTest extends FunSuite {
   test("ThriftExceptionsAsFailures") {
     import ThriftResponseClassifier.{ThriftExceptionsAsFailures, usingDeserializeCtx}
 
-    val classifier = usingDeserializeCtx(ThriftExceptionsAsFailures)
-    assert("Thrift.usingDeserializeCtx(ThriftExceptionsAsFailures)" == classifier.toString())
+    val clntClassifier = usingDeserializeCtx(ThriftExceptionsAsFailures)
+    assert("Thrift.usingDeserializeCtx(ThriftExceptionsAsFailures)" == clntClassifier.toString())
 
     def testApply(in: String, expectedClass: ResponseClass): Unit = {
-      val ctx = new DeserializeCtx(Echo.Echo.Args(in), deserializer)
-      Contexts.local.let(DeserializeCtx.Key, ctx) {
+      val ctx = new ClientDeserializeCtx(Echo.Echo.Args(in), deserializer)
+      Contexts.local.let(ClientDeserializeCtx.Key, ctx) {
         val rep = in.getBytes(UTF_8)
-        assert(expectedClass == classifier(ReqRep(in, Return(rep))))
+        assert(expectedClass == clntClassifier(ReqRep(in, Return(rep))))
       }
     }
 
     def testApplyOrElse(in: String, expectedClass: ResponseClass): Unit = {
-      val ctx = new DeserializeCtx(Echo.Echo.Args(in), deserializer)
-      Contexts.local.let(DeserializeCtx.Key, ctx) {
+      val ctx = new ClientDeserializeCtx(Echo.Echo.Args(in), deserializer)
+      Contexts.local.let(ClientDeserializeCtx.Key, ctx) {
         val rep = in.getBytes(UTF_8)
-        assert(!classifier.isDefinedAt(ReqRep(in, Return(rep))))
+        assert(!clntClassifier.isDefinedAt(ReqRep(in, Return(rep))))
         assert(
           expectedClass ==
-            classifier.applyOrElse(ReqRep(in, Return(rep)), ResponseClassifier.Default)
+            clntClassifier.applyOrElse(ReqRep(in, Return(rep)), ResponseClassifier.Default)
         )
       }
     }
@@ -114,13 +141,25 @@ class ThriftResponseClassifierTest extends FunSuite {
 
   test("DeserializeCtxOnly only deserializes and sees Thrift exceptions as success") {
     val in = "fail"
-    val ctx = new DeserializeCtx(Echo.Echo.Args(in), deserializer)
-    Contexts.local.let(DeserializeCtx.Key, ctx) {
+    val clntCtx = new ClientDeserializeCtx(Echo.Echo.Args(in), deserializer)
+    Contexts.local.let(ClientDeserializeCtx.Key, clntCtx) {
       assert(deserializer(in.getBytes(UTF_8)).isThrow)
       val rep = in.getBytes(UTF_8)
       val reqRep = ReqRep(in, Return(rep))
       assert(ThriftResponseClassifier.DeserializeCtxOnly.isDefinedAt(reqRep))
       assert(Success == ThriftResponseClassifier.DeserializeCtxOnly(reqRep))
+    }
+  }
+
+  test("unset ServerToReqRep falls back to NoDeserializeCtx") {
+    val srvCtx = new ServerToReqRep
+    Contexts.local.let(ServerToReqRep.Key, srvCtx) {
+      val req = "someString"
+      val rep = req.getBytes(UTF_8)
+      assert(!srvClassifier.isDefinedAt(ReqRep(req, Return(rep))))
+      assert(
+        Success == srvClassifier.applyOrElse(ReqRep(req, Return(rep)), ResponseClassifier.Default)
+      )
     }
   }
 

@@ -1,9 +1,8 @@
 package com.twitter.finagle.thrift.service
 
-import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.service._
-import com.twitter.finagle.thrift.DeserializeCtx
-import com.twitter.util.{Return, Try, Throw}
+import com.twitter.finagle.thrift.{ClientDeserializeCtx, ServerToReqRep}
+import com.twitter.util.{Return, Throw, Try}
 import scala.util.control.NonFatal
 
 /**
@@ -59,53 +58,40 @@ object ThriftResponseClassifier {
       case ReqRep(_, Throw(_)) => ResponseClass.NonRetryableFailure
     }
 
-  private[this] val NoDeserializeCtx: DeserializeCtx[Nothing] =
-    new DeserializeCtx[Nothing](null, null)
-
-  private[this] val NoDeserializerFn: () => DeserializeCtx[_] =
-    () => NoDeserializeCtx
-
   /**
-   * Thrift responses need to be deserialized from
-   * their `bytes` into their deserialized form in order to do any
+   * Thrift responses need to be in deserialized from in order to do
    * meaningful classification.
    *
-   * The returned classifier will use a context local [[DeserializeCtx]]
-   * (which is expected to be configured by Scrooge or some other means) in
-   * order to know how to deserialize the bytes.
+   * The returned classifier use [[com.twitter.finagle.thrift.ClientDeserializeCtx]] for clients
+   * get responses in deserialized form. This context local is expected to be configured
+   * by Scrooge or some other means.
    *
    * The returned classifier's [[PartialFunction.isDefinedAt]] will return
-   * `false` if there is no [[DeserializeCtx]] available so this is
-   * safe to use with code that does not use a [[DeserializeCtx]].
+   * `false` if there is no context local available so this is
+   * safe to use with code that does not set context locals mentioned above.
    *
    * @note any exceptions thrown during deserialization will be ignored
-   * if `apply` is guarded properly with `isDefinedAt`.
+   *       if `apply` is guarded properly with `isDefinedAt`.
    *
    * @see [[com.twitter.finagle.Thrift.newClient newClient and newService]]
-   * which will automatically apply these transformations to a [[ResponseClassifier]].
+   *      which will automatically apply these transformations to a [[ResponseClassifier]].
    */
   private[finagle] def usingDeserializeCtx(
     classifier: ResponseClassifier
   ): ResponseClassifier = new ResponseClassifier {
-    private[this] def deserialized(
-      deserCtx: DeserializeCtx[_],
-      bytes: Array[Byte]
-    ): ReqRep = {
-      ReqRep(deserCtx.request, deserCtx.deserialize(bytes))
-    }
 
     override def toString: String =
       s"Thrift.usingDeserializeCtx(${classifier.toString})"
 
     def isDefinedAt(reqRep: ReqRep): Boolean = {
-      val deserCtx = Contexts.local.getOrElse(DeserializeCtx.Key, NoDeserializerFn)
-      if (deserCtx eq NoDeserializeCtx)
+      val deserCtx = ClientDeserializeCtx.get
+      if (deserCtx eq ClientDeserializeCtx.nullDeserializeCtx)
         return false
 
       reqRep.response match {
         // we use the deserializer only if its a thrift response
         case Return(bytes: Array[Byte]) =>
-          try classifier.isDefinedAt(deserialized(deserCtx, bytes))
+          try classifier.isDefinedAt(deserCtx(bytes))
           catch {
             case _: Throwable => false
           }
@@ -122,11 +108,11 @@ object ThriftResponseClassifier {
       reqRep.response match {
         // we use the deserializer only if its a thrift response
         case Return(bytes: Array[Byte]) =>
-          val deserCtx = Contexts.local.getOrElse(DeserializeCtx.Key, NoDeserializerFn)
-          if (deserCtx eq NoDeserializeCtx)
+          val deserCtx = ClientDeserializeCtx.get
+          if (deserCtx eq ClientDeserializeCtx.nullDeserializeCtx)
             throw new MatchError("No DeserializeCtx found")
           try {
-            classifier(deserialized(deserCtx, bytes))
+            classifier(deserCtx(bytes))
           } catch {
             case NonFatal(e) => throw new MatchError(e)
           }
@@ -140,9 +126,10 @@ object ThriftResponseClassifier {
   }
 
   /**
-   * A [[ResponseClassifier]] that uses a Context local [[DeserializeCtx]]
-   * to do deserialization, while using [[ResponseClassifier.Default]] for
-   * the actual response classification.
+   * A [[ResponseClassifier]] that uses a Context local
+   * [[com.twitter.finagle.thrift.ClientDeserializeCtx]] for clients to get responses in
+   * deserialized form, while using [[ResponseClassifier.Default]] for the actual
+   * response classification.
    *
    * Used when a user does not wire up a [[ResponseClassifier]]
    * to a [[com.twitter.finagle.Thrift.Client Thrift client]].
@@ -156,10 +143,10 @@ object ThriftResponseClassifier {
       private[this] def deserializeIfPossible(rep: Try[Any]): Unit = {
         rep match {
           case Return(bytes: Array[Byte]) =>
-            val deserCtx = Contexts.local.getOrElse(DeserializeCtx.Key, NoDeserializerFn)
-            if (deserCtx ne NoDeserializeCtx) {
+            val deserCtx = ClientDeserializeCtx.get
+            if (deserCtx ne ClientDeserializeCtx.nullDeserializeCtx) {
               try {
-                deserCtx.deserialize(bytes)
+                deserCtx(bytes).response
               } catch {
                 case _: Throwable =>
               }
@@ -179,4 +166,111 @@ object ThriftResponseClassifier {
       }
     }
 
+  /**
+   * Thrift responses need to be in deserialized form in order to do
+   * meaningful classification.
+   *
+   * The returned classifier use [[com.twitter.finagle.thrift.ServerToReqRep]] for servers
+   * to get responses in deserialized form. This context local is expected to be configured
+   * by Scrooge or some other means.
+   *
+   * The returned classifier's [[PartialFunction.isDefinedAt]] will return
+   * `false` if there is no context local available so this is
+   * safe to use with code that does not set context locals mentioned above.
+   *
+   * @note any exceptions thrown during deserialization will be ignored
+   *       if `apply` is guarded properly with `isDefinedAt`.
+   *
+   * @see [[com.twitter.finagle.Thrift.serve]] which will automatically apply these
+   *     transformations to a [[ResponseClassifier]].
+   */
+  private[finagle] def usingReqRepCtx(
+    classifier: ResponseClassifier
+  ): ResponseClassifier = new ResponseClassifier {
+
+    override def toString: String =
+      s"Thrift.usingDeserializeCtx(${classifier.toString})"
+
+    def isDefinedAt(reqRep: ReqRep): Boolean = {
+      val deserCtx = ServerToReqRep.get
+      if (deserCtx eq ServerToReqRep.nullDeserializeCtx)
+        return false
+
+      reqRep.response match {
+        // we use the deserializer only if its a thrift response
+        case Return(bytes: Array[Byte]) =>
+          try classifier.isDefinedAt(deserCtx(bytes))
+          catch {
+            case _: Throwable => false
+          }
+        // otherwise, we see if the classifier can handle this as is
+        case _ =>
+          try classifier.isDefinedAt(reqRep)
+          catch {
+            case _: Throwable => false
+          }
+      }
+    }
+
+    def apply(reqRep: ReqRep): ResponseClass =
+      reqRep.response match {
+        // we use the deserializer only if its a thrift response
+        case Return(bytes: Array[Byte]) =>
+          val deserCtx = ServerToReqRep.get
+          if (deserCtx eq ServerToReqRep.nullDeserializeCtx)
+            throw new MatchError("No DeserializeCtx found")
+          try {
+            classifier(deserCtx(bytes))
+          } catch {
+            case NonFatal(e) => throw new MatchError(e)
+          }
+        // otherwise, we see if the classifier can handle this as is
+        case _ =>
+          try classifier(reqRep)
+          catch {
+            case NonFatal(e) => throw new MatchError(e)
+          }
+      }
+  }
+
+  /**
+   * A [[ResponseClassifier]] that uses a Context local
+   * [[com.twitter.finagle.thrift.ServerToReqRep]] for servers to get responses in
+   * deserialized form, while using [[ResponseClassifier.Default]] for the actual
+   * response classification.
+   *
+   * Used when a user does not wire up a [[ResponseClassifier]]
+   * to a [[com.twitter.finagle.Thrift.Server Thrift server]].
+   */
+  private[finagle] val ReqRepCtxOnly: ResponseClassifier =
+    new ResponseClassifier {
+      override def toString: String = "DefaultThriftResponseClassifier"
+
+      // we want the side-effect of deserialization if it has not
+      // yet been done
+      private[this] def deserializeIfPossible(rep: Try[Any]): Unit = {
+        rep match {
+          case Return(bytes: Array[Byte]) =>
+            val deserCtx = ServerToReqRep.get
+            if (deserCtx ne ServerToReqRep.nullDeserializeCtx) {
+              try {
+                deserCtx(bytes).response
+              } catch {
+                case _: Throwable =>
+              }
+            }
+          case _ =>
+        }
+      }
+
+      def isDefinedAt(reqRep: ReqRep): Boolean = {
+        deserializeIfPossible(reqRep.response)
+        ResponseClassifier.Default.isDefinedAt(reqRep)
+      }
+
+      def apply(reqRep: ReqRep): ResponseClass = {
+        deserializeIfPossible(reqRep.response)
+        ResponseClassifier.Default(reqRep)
+      }
+    }
 }

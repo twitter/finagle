@@ -10,7 +10,7 @@ This gives Finagle the proper domain knowledge and improves the efficacy of
 
 For HTTP clients and servers, using ``HttpResponseClassifier.ServerErrorsAsFailures`` often works
 great as it classifies any HTTP 5xx response code as a failure. For Thrift/ThriftMux
-clients you may want to use ``ThriftResponseClassifier.ThriftExceptionsAsFailures``
+clients and servers you may want to use ``ThriftResponseClassifier.ThriftExceptionsAsFailures``
 which classifies any deserialized Thrift Exception as a failure. For a large set of
 use cases these should suffice. Classifiers get wired up to your client and server in a
 straightforward manner, for example, in a ThriftMux client:
@@ -84,9 +84,9 @@ Thrift and ThriftMux Classifiers
 Thrift and ThriftMux classifiers require a bit more care as the request and
 response types are not as obvious. This is because there is only a single
 ``Service`` from ``Array[Byte]`` to ``Array[Byte]`` for all the methods of an
-IDL's service. To make this workable, there is support in Scrooge and
-``Thrift/ThriftMux.newService`` and ``Thrift/ThriftMux.newClient`` code to
-deserialize the responses into the expected application types so that
+IDL's service. To make this workable, there is support in Scrooge,
+``Thrift/ThriftMux.newService``, ``Thrift/ThriftMux.newClient`` and ``Thrift/ThriftMux.serve``
+code to deserialize the responses into the expected application types so that
 classifiers can be written in terms of the Scrooge generated request type,
 ``$Service.$Method.Args``, and the method's response type. Given an IDL:
 

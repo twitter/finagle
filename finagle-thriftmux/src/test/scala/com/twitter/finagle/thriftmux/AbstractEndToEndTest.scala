@@ -10,7 +10,7 @@ import com.twitter.finagle.dispatch.PipeliningDispatcher
 import com.twitter.finagle.param.{Label, Stats, Tracer => PTracer}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats._
-import com.twitter.finagle.thrift.{ClientId, Protocols, ThriftClientRequest}
+import com.twitter.finagle.thrift.{ClientId, Protocols, RichServerParam, ThriftClientRequest}
 import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
 import com.twitter.finagle.thriftmux.thriftscala._
 import com.twitter.finagle.tracing.Annotation.{ClientSend, ServerRecv}
@@ -608,9 +608,10 @@ abstract class AbstractEndToEndTest
         ResponseClass.Success
       case ReqRep(_, Throw(_: InvalidQueryException)) =>
         ResponseClass.NonRetryableFailure
-      case ReqRep(_, Throw(_: RequestTimeoutException)) =>
+      case ReqRep(_, Throw(_: RequestTimeoutException)) |
+           ReqRep(_, Throw(_: java.util.concurrent.TimeoutException)) =>
         ResponseClass.Success
-      case ReqRep(_, Return(s: String)) =>
+      case ReqRep(_, Return(_: String)) =>
         ResponseClass.NonRetryableFailure
     }
 
@@ -624,23 +625,34 @@ abstract class AbstractEndToEndTest
       ResponseClass.NonRetryableFailure
   }
 
+  val iface = new TestService.MethodPerEndpoint {
+    def query(x: String): Future[String] =
+      if (x == "safe")
+        Future.value("safe")
+      else if (x == "slow")
+        Future.sleep(1.second)(DefaultTimer).before(Future.value("slow"))
+      else
+        Future.exception(new InvalidQueryException(x.length))
+  }
+
+  private class TestServiceImpl extends thriftjava.TestService.ServiceIface {
+    def query(x: String): Future[String] =
+      if (x == "safe")
+        Future.value("safe")
+      else if (x == "slow")
+        Future.sleep(1.second)(DefaultTimer).before(Future.value("slow"))
+      else
+        Future.exception(new thriftjava.InvalidQueryException(x.length))
+  }
+
   def serverForClassifier(): ListeningServer = {
-    val iface = new TestService.MethodPerEndpoint {
-      def query(x: String): Future[String] =
-        if (x == "safe")
-          Future.value("safe")
-        else if (x == "slow")
-          Future.sleep(1.second)(DefaultTimer).before(Future.value("slow"))
-        else
-          Future.exception(new InvalidQueryException(x.length))
-    }
-    val svc = new TestService.FinagledService(iface, Protocols.binaryFactory())
+    val svc = new TestService.FinagledService(iface, RichServerParam())
     serverImpl
       .withStatsReceiver(NullStatsReceiver)
       .serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), svc)
   }
 
-  private def testScalaFailureClassification(
+  private def testScalaClientFailureClassification(
     sr: InMemoryStatsReceiver,
     client: TestService.MethodPerEndpoint
   ): Unit = {
@@ -692,12 +704,57 @@ abstract class AbstractEndToEndTest
     }
   }
 
-  private def testJavaFailureClassification(
+  private def testScalaServerResponseClassification(
+    sr: InMemoryStatsReceiver,
+    client: TestService.MethodPerEndpoint
+  ): Unit = {
+
+    val ex = intercept[InvalidQueryException] {
+      await(client.query("hi"))
+    }
+    assert("hi".length == ex.errorCode)
+    assert(sr.counters(Seq("thrift", "query", "requests")) == 1)
+    assert(sr.counters.get(Seq("thrift", "query", "success")) == None)
+
+    assert(sr.counters(Seq("thrift", "requests")) == 1)
+    assert(sr.counters.get(Seq("thrift", "success")) == None)
+
+    // test that we can examine the request as well.
+    intercept[InvalidQueryException] {
+      await(client.query("ok"))
+    }
+    assert(sr.counters(Seq("thrift", "query", "requests")) == 2)
+    assert(sr.counters(Seq("thrift", "query", "success")) == 1)
+
+    assert(sr.counters(Seq("thrift", "requests")) == 2)
+    assert(sr.counters(Seq("thrift", "success")) == 1)
+
+    // test that we can mark a successfully deserialized result as a failure
+    assert("safe" == await(client.query("safe")))
+    assert(sr.counters(Seq("thrift", "query", "requests")) == 3)
+    assert(sr.counters(Seq("thrift", "query", "success")) == 1)
+
+    assert(sr.counters(Seq("thrift", "requests")) == 3)
+    assert(sr.counters(Seq("thrift", "success")) == 1)
+
+    // this query produces a Timeout exception in server side and it should be
+    // translated to `Success`
+    intercept[TApplicationException] {
+      await(client.query("slow"))
+    }
+    assert(sr.counters(Seq("thrift", "query", "requests")) == 4)
+    assert(sr.counters(Seq("thrift", "query", "success")) == 2)
+
+    assert(sr.counters(Seq("thrift", "requests")) == 4)
+    assert(sr.counters(Seq("thrift", "success")) == 2)
+  }
+
+  private def testJavaClientFailureClassification(
     sr: InMemoryStatsReceiver,
     client: thriftjava.TestService.ServiceIface
   ): Unit = {
     val ex = intercept[thriftjava.InvalidQueryException] {
-      Await.result(client.query("hi"), 5.seconds)
+      await(client.query("hi"))
     }
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("client", "requests")) == 1)
@@ -705,16 +762,41 @@ abstract class AbstractEndToEndTest
 
     // test that we can examine the request as well.
     intercept[thriftjava.InvalidQueryException] {
-      Await.result(client.query("ok"), 5.seconds)
+      await(client.query("ok"))
     }
     assert(sr.counters(Seq("client", "requests")) == 2)
     assert(sr.counters(Seq("client", "success")) == 1)
 
     // test that we can mark a successfully deserialized result as a failure
-    assert("safe" == Await.result(client.query("safe")))
+    assert("safe" == await(client.query("safe")))
     assert(sr.counters(Seq("client", "requests")) == 3)
     assert(sr.counters(Seq("client", "success")) == 1)
     assert(sr.counters(Seq("client", "failures")) == 2)
+  }
+
+  private def testJavaServerFailureClassification(
+    sr: InMemoryStatsReceiver,
+    client: thriftjava.TestService.ServiceIface
+  ): Unit = {
+    val ex = intercept[thriftjava.InvalidQueryException] {
+      await(client.query("hi"))
+    }
+    assert("hi".length == ex.errorCode)
+    assert(sr.counters(Seq("thrift", "requests")) == 1)
+    assert(sr.counters.get(Seq("thrift", "success")) == None)
+
+    // test that we can examine the request as well.
+    intercept[thriftjava.InvalidQueryException] {
+      await(client.query("ok"))
+    }
+    assert(sr.counters(Seq("thrift", "requests")) == 2)
+    assert(sr.counters(Seq("thrift", "success")) == 1)
+
+    // test that we can mark a successfully deserialized result as a failure
+    assert("safe" == await(client.query("safe")))
+    assert(sr.counters(Seq("thrift", "requests")) == 3)
+    assert(sr.counters(Seq("thrift", "success")) == 1)
+    assert(sr.counters(Seq("thrift", "failures")) == 2)
   }
 
   test("scala thriftmux stack client deserialized response classification with `build`") {
@@ -729,69 +811,177 @@ abstract class AbstractEndToEndTest
         "client"
       )
 
-    testScalaFailureClassification(sr, client)
+    testScalaClientFailureClassification(sr, client)
     server.close()
   }
 
-  test("scala thriftmux stack client deserialized response classification with `servicePerEndpoint`") {
-    val server = serverForClassifier()
+  test("scala thriftmux stack server deserialized response classification with `serveIface`") {
     val sr = new InMemoryStatsReceiver()
-    val client = clientImpl
-      .withPerEndpointStats
+
+    val server = ThriftMux.server
       .withStatsReceiver(sr)
       .withResponseClassifier(scalaClassifier)
-      .withRequestTimeout(100.milliseconds) // used in conjuection with a "slow" query
-      .servicePerEndpoint[TestService.ServicePerEndpoint](
-        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-        "client"
-      )
+      .withRequestTimeout(100.milliseconds)
+      .withPerEndpointStats
+      .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), iface)
+
+    val client = ThriftMux.client.build[TestService.MethodPerEndpoint](
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+      "client"
+    )
+
+    testScalaServerResponseClassification(sr, client)
+    server.close()
+  }
+
+  test("scala thriftmux stack server deserialized response classification with `serve`") {
+    val sr = new InMemoryStatsReceiver()
+
+    val svc = new TestService.FinagledService(iface, RichServerParam(
+      serverStats = sr,
+      responseClassifier = scalaClassifier,
+      perEndpointStats = true
+    ))
+
+    val server = ThriftMux.server
+      .withStatsReceiver(sr)
+      .withResponseClassifier(scalaClassifier)
+      .withRequestTimeout(100.milliseconds)
+      .withPerEndpointStats
+      .serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), svc)
+
+    val client = ThriftMux.client.build[TestService.MethodPerEndpoint](
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+      "client"
+    )
+
+    testScalaServerResponseClassification(sr, client)
+    server.close()
+  }
+
+  test("scala thriftmux stack server deserialized response classification with " +
+    "`servicePerEndpoint[ServicePerEndpoint]`") {
+    val sr = new InMemoryStatsReceiver()
+
+    val svc = new TestService.FinagledService(iface, RichServerParam(
+      serverStats = sr,
+      responseClassifier = scalaClassifier,
+      perEndpointStats = true
+    ))
+
+    val server = ThriftMux.server
+      .withStatsReceiver(sr)
+      .withResponseClassifier(scalaClassifier)
+      .withRequestTimeout(100.milliseconds)
+      .withPerEndpointStats
+      .serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), svc)
+
+    val client = ThriftMux.client.servicePerEndpoint[TestService.ServicePerEndpoint](
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+      "client"
+    )
+
     val ex = intercept[InvalidQueryException] {
       await(client.query(TestService.Query.Args("hi")))
     }
     assert("hi".length == ex.errorCode)
-    assert(sr.counters(Seq("client", "requests")) == 1)
-    assert(sr.counters.get(Seq("client", "success")) == None)
-    assert(sr.counters(Seq("client", "TestService", "query", "requests")) == 1)
-    eventually {
-      assert(sr.counters(Seq("client", "TestService", "query", "failures")) == 1)
-      assert(sr.counters.get(Seq("client", "TestService", "query", "success")) == None)
-    }
+    assert(sr.counters(Seq("thrift", "query", "requests")) == 1)
+    assert(sr.counters.get(Seq("thrift", "query", "success")) == None)
+
+    assert(sr.counters(Seq("thrift", "requests")) == 1)
+    assert(sr.counters.get(Seq("thrift", "success")) == None)
 
     // test that we can examine the request as well.
     intercept[InvalidQueryException] {
       await(client.query(TestService.Query.Args("ok")))
     }
-    assert(sr.counters(Seq("client", "requests")) == 2)
-    assert(sr.counters(Seq("client", "success")) == 1)
-    assert(sr.counters(Seq("client", "TestService", "query", "requests")) == 2)
-    eventually {
-      assert(sr.counters(Seq("client", "TestService", "query", "success")) == 1)
-      assert(sr.counters(Seq("client", "TestService", "query", "failures")) == 1)
-    }
+    assert(sr.counters(Seq("thrift", "query", "requests")) == 2)
+    assert(sr.counters(Seq("thrift", "query", "success")) == 1)
+
+    assert(sr.counters(Seq("thrift", "requests")) == 2)
+    assert(sr.counters(Seq("thrift", "success")) == 1)
 
     // test that we can mark a successfully deserialized result as a failure
     assert("safe" == await(client.query(TestService.Query.Args("safe"))))
-    assert(sr.counters(Seq("client", "requests")) == 3)
-    assert(sr.counters(Seq("client", "success")) == 1)
-    assert(sr.counters(Seq("client", "TestService", "query", "requests")) == 3)
-    eventually {
-      assert(sr.counters(Seq("client", "TestService", "query", "success")) == 1)
-      assert(sr.counters(Seq("client", "TestService", "query", "failures")) == 2)
-    }
+    assert(sr.counters(Seq("thrift", "query", "requests")) == 3)
+    assert(sr.counters(Seq("thrift", "query", "success")) == 1)
 
-    // this query produces a `Throw` response produced on the client side and
-    // we want to ensure that we can translate it to a `Success`.
-    intercept[RequestTimeoutException] {
+    assert(sr.counters(Seq("thrift", "requests")) == 3)
+    assert(sr.counters(Seq("thrift", "success")) == 1)
+
+    // this query produces a Timeout exception in server side and it should be
+    // translated to `Success`
+    intercept[TApplicationException] {
       await(client.query(TestService.Query.Args("slow")))
     }
-    assert(sr.counters(Seq("client", "requests")) == 4)
-    assert(sr.counters(Seq("client", "success")) == 2)
-    assert(sr.counters(Seq("client", "TestService", "query", "requests")) == 4)
-    eventually {
-      assert(sr.counters(Seq("client", "TestService", "query", "success")) == 2)
-      assert(sr.counters(Seq("client", "TestService", "query", "failures")) == 2)
-    }
+    assert(sr.counters(Seq("thrift", "query", "requests")) == 4)
+    assert(sr.counters(Seq("thrift", "query", "success")) == 2)
 
+    assert(sr.counters(Seq("thrift", "requests")) == 4)
+    assert(sr.counters(Seq("thrift", "success")) == 2)
+    server.close()
+  }
+
+  test("scala thriftmux stack server deserialized response classification with " +
+    "`servicePerEndpoint[ReqRepServicePerEndpoint]`") {
+    val sr = new InMemoryStatsReceiver()
+
+    val svc = new TestService.FinagledService(iface, RichServerParam(
+      serverStats = sr,
+      responseClassifier = scalaClassifier,
+      perEndpointStats = true
+    ))
+
+    val server = ThriftMux.server
+      .withStatsReceiver(sr)
+      .withResponseClassifier(scalaClassifier)
+      .withRequestTimeout(100.milliseconds)
+      .withPerEndpointStats
+      .serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), svc)
+
+    val client = ThriftMux.client.servicePerEndpoint[TestService.ReqRepServicePerEndpoint](
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+      "client"
+    )
+
+    val ex = intercept[InvalidQueryException] {
+      await(client.query(scrooge.Request(TestService.Query.Args("hi"))))
+    }
+    assert("hi".length == ex.errorCode)
+    assert(sr.counters(Seq("thrift", "query", "requests")) == 1)
+    assert(sr.counters.get(Seq("thrift", "query", "success")) == None)
+
+    assert(sr.counters(Seq("thrift", "requests")) == 1)
+    assert(sr.counters.get(Seq("thrift", "success")) == None)
+
+    // test that we can examine the request as well.
+    intercept[InvalidQueryException] {
+      await(client.query(scrooge.Request(TestService.Query.Args("ok"))))
+    }
+    assert(sr.counters(Seq("thrift", "query", "requests")) == 2)
+    assert(sr.counters(Seq("thrift", "query", "success")) == 1)
+
+    assert(sr.counters(Seq("thrift", "requests")) == 2)
+    assert(sr.counters(Seq("thrift", "success")) == 1)
+
+    // test that we can mark a successfully deserialized result as a failure
+    assert("safe" == await(client.query(scrooge.Request(TestService.Query.Args("safe")))).value)
+    assert(sr.counters(Seq("thrift", "query", "requests")) == 3)
+    assert(sr.counters(Seq("thrift", "query", "success")) == 1)
+
+    assert(sr.counters(Seq("thrift", "requests")) == 3)
+    assert(sr.counters(Seq("thrift", "success")) == 1)
+
+    // this query produces a Timeout exception in server side and it should be
+    // translated to `Success`
+    intercept[TApplicationException] {
+      await(client.query(scrooge.Request(TestService.Query.Args("slow"))))
+    }
+    assert(sr.counters(Seq("thrift", "query", "requests")) == 4)
+    assert(sr.counters(Seq("thrift", "query", "success")) == 2)
+
+    assert(sr.counters(Seq("thrift", "requests")) == 4)
+    assert(sr.counters(Seq("thrift", "success")) == 2)
     server.close()
   }
 
@@ -806,7 +996,25 @@ abstract class AbstractEndToEndTest
         "client"
       )
 
-    testJavaFailureClassification(sr, client)
+    testJavaClientFailureClassification(sr, client)
+    server.close()
+  }
+
+  test("java thriftmux stack server deserialized response classification") {
+    val sr = new InMemoryStatsReceiver()
+
+    val server = ThriftMux.server
+      .withStatsReceiver(sr)
+      .withResponseClassifier(javaClassifier)
+      .withRequestTimeout(100.milliseconds)
+      .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), new TestServiceImpl)
+
+    val client = ThriftMux.client.build[thriftjava.TestService.ServiceIface](
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+      "client"
+    )
+
+    testJavaServerFailureClassification(sr, client)
     server.close()
   }
 
@@ -828,7 +1036,33 @@ abstract class AbstractEndToEndTest
       responseClassifier = scalaClassifier
     )
 
-    testScalaFailureClassification(sr, client)
+    testScalaClientFailureClassification(sr, client)
+    server.close()
+  }
+
+  test("scala thriftmux ServerBuilder deserialized response classification") {
+    val sr = new InMemoryStatsReceiver()
+
+    val svc = new TestService.FinagledService(iface, RichServerParam(
+      serverStats = sr,
+      responseClassifier = scalaClassifier,
+      perEndpointStats = true))
+
+    val server = ServerBuilder()
+      .stack(ThriftMux.server)
+      .responseClassifier(scalaClassifier)
+      .requestTimeout(100.milliseconds)
+      .name("thrift")
+      .reportTo(sr)
+      .bindTo(new InetSocketAddress(0))
+      .build(svc)
+
+    val client = ThriftMux.client.build[TestService.MethodPerEndpoint](
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+      "client"
+    )
+
+    testScalaServerResponseClassification(sr, client)
     server.close()
   }
 
@@ -848,11 +1082,33 @@ abstract class AbstractEndToEndTest
       javaClassifier
     )
 
-    testJavaFailureClassification(sr, client)
+    testJavaClientFailureClassification(sr, client)
     server.close()
   }
 
-  test("scala thriftmux response classification using ThriftExceptionsAsFailures") {
+  test("java thriftmux ServerBuilder deserialized response classification") {
+    val sr = new InMemoryStatsReceiver()
+    val svc = new thriftjava.TestService.Service(new TestServiceImpl, RichServerParam())
+
+    val server = ServerBuilder()
+      .stack(ThriftMux.server)
+      .responseClassifier(javaClassifier)
+      .requestTimeout(100.milliseconds)
+      .name("thrift")
+      .reportTo(sr)
+      .bindTo(new InetSocketAddress(0))
+      .build(svc)
+
+    val client = ThriftMux.client.build[thriftjava.TestService.ServiceIface](
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+      "client"
+    )
+
+    testJavaServerFailureClassification(sr, client)
+    server.close()
+  }
+
+  test("scala thriftmux client response classification using ThriftExceptionsAsFailures") {
     val server = serverForClassifier()
     val sr = new InMemoryStatsReceiver()
     val client = clientImpl
@@ -877,7 +1133,40 @@ abstract class AbstractEndToEndTest
     await(server.close())
   }
 
-  test("java thriftmux response classification using ThriftExceptionsAsFailures") {
+  test("scala thriftmux server response classification using ThriftExceptionAsFailures") {
+    val sr = new InMemoryStatsReceiver()
+
+    val server = ThriftMux.server
+      .withStatsReceiver(sr)
+      .withResponseClassifier(ThriftMuxResponseClassifier.ThriftExceptionsAsFailures)
+      .withRequestTimeout(100.milliseconds)
+      .withPerEndpointStats
+      .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), iface)
+
+    val client = ThriftMux.client.build[TestService.MethodPerEndpoint](
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+      "client"
+    )
+
+    val ex = intercept[InvalidQueryException] {
+      Await.result(client.query("hi"), 5.seconds)
+    }
+    assert("hi".length == ex.errorCode)
+    assert(sr.counters(Seq("thrift", "requests")) == 1)
+    assert(sr.counters.get(Seq("thrift", "success")) == None)
+    assert(sr.counters(Seq("thrift", "query", "requests")) == 1)
+    assert(sr.counters.get(Seq("thrift", "query", "success")) == None)
+
+    // test that we can mark a successfully deserialized result as a failure
+    assert("safe" == Await.result(client.query("safe"), 10.seconds))
+    assert(sr.counters(Seq("thrift", "requests")) == 2)
+    assert(sr.counters(Seq("thrift", "success")) == 1)
+    assert(sr.counters(Seq("thrift", "query", "requests")) == 2)
+    assert(sr.counters(Seq("thrift", "query", "success")) == 1)
+    server.close()
+  }
+
+  test("java thriftmux client response classification using ThriftExceptionsAsFailures") {
     val server = serverForClassifier()
     val sr = new InMemoryStatsReceiver()
     val client = clientImpl
@@ -900,6 +1189,34 @@ abstract class AbstractEndToEndTest
     assert(sr.counters(Seq("client", "requests")) == 2)
     assert(sr.counters(Seq("client", "success")) == 1)
     assert(sr.counters(Seq("client", "failures")) == 1)
+    server.close()
+  }
+
+  test("java thrift server response classification using ThriftExceptionsAsFailures") {
+    val sr = new InMemoryStatsReceiver()
+
+    val server = ThriftMux.server
+      .withStatsReceiver(sr)
+      .withResponseClassifier(ThriftMuxResponseClassifier.ThriftExceptionsAsFailures)
+      .withRequestTimeout(100.milliseconds)
+      .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), new TestServiceImpl)
+
+    val client = ThriftMux.client.build[thriftjava.TestService.ServiceIface](
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+      "client"
+    )
+
+    val ex = intercept[thriftjava.InvalidQueryException] {
+      Await.result(client.query("hi"), 5.seconds)
+    }
+    assert("hi".length == ex.errorCode)
+    assert(sr.counters(Seq("thrift", "requests")) == 1)
+    assert(sr.counters.get(Seq("thrift", "success")) == None)
+
+    // test that we can mark a successfully deserialized result as a failure
+    assert("safe" == Await.result(client.query("safe"), 10.seconds))
+    assert(sr.counters(Seq("thrift", "requests")) == 2)
+    assert(sr.counters(Seq("thrift", "success")) == 1)
     server.close()
   }
 

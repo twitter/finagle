@@ -28,11 +28,18 @@ Breaking API Changes
   * finagle-core: the valid range for the argument to `WindowedPercentileHistogram.percentile`
     is now [0.0..1.0], e.g., 0.95 means 95th percentile. ``PHAB_ID=D198915``
 
+  * finagle-thrift: `DeserializeCtx` became `ClientDeserializeCtx` for client side response 
+    classification, add `ServerDeserializeCtx` to handle server side response classification. 
+    ``PHAB_ID=D196032``
+
 Bug Fixes
 ~~~~~~~~~
 
   * finagle-thrift: Thrift clients created via `.servicePerEndpoint` now propagate exceptions
     appropriately when the method return type is void. ``PHAB_ID=D200690``
+
+  * finagle-thrift, finagle-thriftmux: Response classification is enabled in server side.
+    ``PHAB_ID=D196032``
 
 18.8.0
 -------
