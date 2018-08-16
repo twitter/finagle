@@ -66,7 +66,11 @@ private[http2] object Http2ClientDowngrader extends Http2EventAdapter {
     padding: Int,
     endOfStream: Boolean
   ): Unit = {
-    val msg = if (endOfStream) {
+
+    // 100-continue response is a special case where Http2HeadersFrame#isEndStream=false
+    // but we need to decode it as a FullHttpResponse to play nice with HttpObjectAggregator.
+    // (this workaround can go away once we move to the netty multipex client)
+    val msg = if (endOfStream || HttpResponseStatus.CONTINUE.codeAsText.contentEquals(headers.status)) {
       HttpConversionUtil.toFullHttpResponse(
         streamId,
         headers,
@@ -132,8 +136,7 @@ private[http2] object Http2ClientDowngrader extends Http2EventAdapter {
     ctx.fireChannelRead(GoAway(rep, lastStreamId, errorCode))
   }
 
-  override def onPingAckRead(ctx: ChannelHandlerContext, data: ByteBuf): Unit = {
+  override def onPingAckRead(ctx: ChannelHandlerContext, data: Long): Unit = {
     ctx.fireChannelRead(Ping)
   }
-
 }

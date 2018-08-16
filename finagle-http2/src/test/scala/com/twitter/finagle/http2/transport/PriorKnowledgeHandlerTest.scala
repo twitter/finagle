@@ -5,20 +5,17 @@ import com.twitter.finagle.param.Stats
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import io.netty.buffer.Unpooled._
-import io.netty.buffer.{ByteBufUtil, ByteBuf}
+import io.netty.buffer.{ByteBuf, ByteBufUtil}
 import io.netty.channel._
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http2.Http2CodecUtil._
 import io.netty.util.CharsetUtil._
-import org.junit.runner.RunWith
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.mockito.{ArgumentCaptor, Matchers}
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-@RunWith(classOf[JUnitRunner])
 class PriorKnowledgeHandlerTest extends FunSuite with BeforeAndAfter with MockitoSugar {
 
   val PriorKnowledgeHandlerName = "priorKnowledgeHandler"

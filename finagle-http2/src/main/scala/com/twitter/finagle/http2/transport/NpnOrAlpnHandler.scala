@@ -20,16 +20,12 @@ final private[http2] class NpnOrAlpnHandler(init: ChannelInitializer[Channel], p
       // Http2 has been negotiated, replace the HttpCodec with an Http2Codec
       upgradeCounter.incr()
       ctx.channel.config.setAutoRead(true)
-
       val initializer = H2Init(init, params)
       val http2MultiplexCodec = ServerCodec.multiplexCodec(
         params, Http2MultiplexCodecBuilder.forServer(initializer))
       ServerCodec.addStreamsGauge(statsReceiver, http2MultiplexCodec, ctx.channel)
-
-      val listener = http2MultiplexCodec.decoder.frameListener
-      http2MultiplexCodec.decoder.frameListener(new PingListenerDecorator(listener))
-
       ctx.pipeline.replace(HttpCodecName, Http2CodecName, http2MultiplexCodec)
+      ctx.pipeline.addAfter(Http2CodecName, "H2Filter", H2Filter)
 
     case ApplicationProtocolNames.HTTP_1_1 =>
     // The Http codec is already in the pipeline, so we are good!

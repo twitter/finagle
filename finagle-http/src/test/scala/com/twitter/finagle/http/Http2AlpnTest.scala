@@ -2,6 +2,7 @@ package com.twitter.finagle.http
 
 import com.twitter.finagle
 import com.twitter.finagle.Service
+import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.ssl.{KeyCredentials, TrustCredentials}
 import com.twitter.finagle.ssl.client.SslClientConfiguration
 import com.twitter.finagle.ssl.server.SslServerConfiguration
@@ -38,6 +39,7 @@ class Http2AlpnTest extends AbstractEndToEndTest {
   def clientImpl(): finagle.Http.Client =
     finagle.Http.client
       .withHttp2
+      .configured(FailureDetector.Param(FailureDetector.NullConfig))
       .configured(Transport.ClientSsl(Some(clientConfiguration())))
 
   def serverImpl(): finagle.Http.Server =

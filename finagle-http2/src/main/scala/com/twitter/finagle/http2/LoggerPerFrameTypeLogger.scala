@@ -126,16 +126,16 @@ private[http2] class LoggerPerFrameTypeLogger(loggerNamePrefix: String)
     }
   }
 
+
   override def logPing(
     direction: Http2FrameLogger.Direction,
     ctx: ChannelHandlerContext,
-    data: ByteBuf
+    data: Long
   ): Unit = {
     if (pingLogger.isLoggable(Level.TRACE)) {
       pingLogger.log(
         Level.TRACE,
-        f"$direction ${ctx.channel} PING: ack=false, length=${data.readableBytes}%d, bytes=${this
-          .toString(pingLogger, data)}"
+        f"$direction ${ ctx.channel } PING: ack=false, data=$data"
       )
     }
   }
@@ -143,13 +143,12 @@ private[http2] class LoggerPerFrameTypeLogger(loggerNamePrefix: String)
   override def logPingAck(
     direction: Http2FrameLogger.Direction,
     ctx: ChannelHandlerContext,
-    data: ByteBuf
+    data: Long
   ): Unit = {
     if (pingLogger.isLoggable(Level.TRACE)) {
       pingLogger.log(
         Level.TRACE,
-        f"$direction ${ctx.channel} PING: ack=true, length=${data.readableBytes}%d, bytes=${this
-          .toString(pingLogger, data)}"
+        f"$direction ${ctx.channel} PING: ack=true, data=$data"
       )
     }
   }

@@ -9,7 +9,7 @@ import com.twitter.finagle.context.{Contexts, Deadline, Retries}
 import com.twitter.finagle.filter.ServerAdmissionControl
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.http2.param.EncoderIgnoreMaxHeaderListSize
-import com.twitter.finagle.liveness.FailureAccrualFactory
+import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureDetector}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing.Trace
@@ -132,6 +132,7 @@ abstract class AbstractEndToEndTest
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
     val client = clientImpl()
       .withStatsReceiver(statsRecv)
+      .configured(FailureDetector.Param(FailureDetector.NullConfig))
       .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
 
     val ret = new ServiceProxy(client) {

@@ -3,7 +3,6 @@ package com.twitter.finagle.http2.transport
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.http.TooLongMessageException
 import com.twitter.finagle.http2.{GoAwayException, RstException}
-import com.twitter.finagle.http2.param.PriorKnowledge
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader._
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.netty4.transport.HasExecutor
@@ -52,7 +51,7 @@ final private[http2] class StreamTransportFactory(
   addr: SocketAddress,
   params: Stack.Params
 ) extends (() => Future[Transport[HttpObject, HttpObject]])
-    with Closable { parent =>
+  with Closable { parent =>
   import StreamTransportFactory._
 
   private[this] val exec = underlying.context.executor
@@ -62,13 +61,7 @@ final private[http2] class StreamTransportFactory(
   // executor.
   private[this] val activeStreams = new MutableHashMap[Int, StreamTransport]()
 
-  // If it's not priorknowledge or tls/alpn, then it must be h2c
-  private[this] val isH2c =
-    !(params[PriorKnowledge].enabled || params[Transport.ClientSsl].sslClientConfiguration.isDefined)
-
-  // For non-H2C sessions we pick a higher initial id to avoid an NPE which can
-  // happen when the first stream is deregistered. see: https://github.com/netty/netty/issues/7898
-  private[this] val id = if (isH2c) new AtomicInteger(1) else new AtomicInteger(3)
+  private[this] val id = new AtomicInteger(1)
 
   // This state as well as operations that start or stop streams and goaways are serialized via `exec`
   @volatile private[this] var dead = false
@@ -284,9 +277,9 @@ final private[http2] class StreamTransportFactory(
   def onClose: Future[Throwable] = underlying.context.onClose
 
   private[this] def handleClose(
-      deadline: Time,
-      streamExn: Option[Throwable] = None
-    ): Unit = {
+    deadline: Time,
+    streamExn: Option[Throwable] = None
+  ): Unit = {
     dead = true
     activeStreams.values.foreach { stream =>
       streamExn match {
@@ -671,12 +664,12 @@ private[http2] object StreamTransportFactory {
     id: Int,
     val flags: Long = FailureFlags.NonRetryable
   ) extends Exception(s"Stream $id in bad state: $msg")
-      with FailureFlags[BadStreamStateException] {
+    with FailureFlags[BadStreamStateException] {
 
     protected def copyWithFlags(newFlags: Long): BadStreamStateException =
       new BadStreamStateException(msg, id, newFlags)
   }
-
+  
   class DeadConnectionException(addr: SocketAddress, val flags: Long)
       extends Exception(s"assigned an already dead connection to address $addr")
       with FailureFlags[DeadConnectionException] {
@@ -689,8 +682,8 @@ private[http2] object StreamTransportFactory {
     addr: SocketAddress,
     val flags: Long = FailureFlags.Retryable
   ) extends Exception(s"ran out of stream ids for address $addr")
-      with FailureFlags[StreamIdOverflowException]
-      with HasLogLevel {
+    with FailureFlags[StreamIdOverflowException]
+    with HasLogLevel {
     def logLevel: Level = Level.INFO // this is normal behavior, so we should log gently
     protected def copyWithFlags(flags: Long): StreamIdOverflowException =
       new StreamIdOverflowException(addr, flags)
@@ -701,11 +694,11 @@ private[http2] object StreamTransportFactory {
     id: Int,
     val flags: Long = FailureFlags.Retryable
   ) extends Exception(
-        s"Found an invalid stream id $id on address $addr. "
-          + "The id was even, but client initiated stream ids must be odd."
-      )
-      with FailureFlags[IllegalStreamIdException]
-      with HasLogLevel {
+    s"Found an invalid stream id $id on address $addr. "
+      + "The id was even, but client initiated stream ids must be odd."
+  )
+    with FailureFlags[IllegalStreamIdException]
+    with HasLogLevel {
     def logLevel: Level = Level.ERROR
     protected def copyWithFlags(flags: Long): IllegalStreamIdException =
       new IllegalStreamIdException(addr, id, flags)

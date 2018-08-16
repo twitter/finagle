@@ -2,7 +2,7 @@ package com.twitter.finagle.http2
 
 import com.twitter.finagle.Stack
 import com.twitter.finagle.http.Fields
-import com.twitter.finagle.http2.transport.{H2Init, PingListenerDecorator, PriorKnowledgeHandler}
+import com.twitter.finagle.http2.transport.{H2Filter, H2Init, PriorKnowledgeHandler}
 import com.twitter.finagle.netty4.http.HttpCodecName
 import com.twitter.finagle.param.Stats
 import com.twitter.logging.Logger
@@ -27,15 +27,13 @@ final private[finagle] class Http2CleartextServerInitializer(
   private[this] val upgradedCounter = upgradeStatsReceiver.counter("success")
   private[this] val ignoredCounter = upgradeStatsReceiver.counter("ignored")
 
-  val initializer = H2Init(init, params)
+  val initializer: ChannelInitializer[Channel] = H2Init(init, params)
 
   def upgradeCodecFactory(channel: Channel): UpgradeCodecFactory = new UpgradeCodecFactory {
     override def newUpgradeCodec(protocol: CharSequence): UpgradeCodec = {
       if (AsciiString.contentEquals(Http2CodecUtil.HTTP_UPGRADE_PROTOCOL_NAME, protocol)) {
         val http2MultiplexCodec = ServerCodec.multiplexCodec(
-          params, UpgradeMultiplexCodecBuilder.forServer(initializer))
-        val listener = http2MultiplexCodec.decoder.frameListener
-        http2MultiplexCodec.decoder.frameListener(new PingListenerDecorator(listener))
+          params, Http2MultiplexCodecBuilder.forServer(initializer))
         ServerCodec.addStreamsGauge(statsReceiver, http2MultiplexCodec, channel)
 
         new Http2ServerUpgradeCodec(http2MultiplexCodec) {
@@ -44,6 +42,10 @@ final private[finagle] class Http2CleartextServerInitializer(
             // we turn off backpressure because Http2 only works with autoread on for now
             ctx.channel.config.setAutoRead(true)
             super.upgradeTo(ctx, upgradeRequest)
+
+            // httpCompressor is the beginning of the h1 pipeline, so we make sure that no h2
+            // messages reach it.
+            ctx.pipeline.addBefore("httpCompressor", "H2Filter", H2Filter)
           }
         }
       } else null

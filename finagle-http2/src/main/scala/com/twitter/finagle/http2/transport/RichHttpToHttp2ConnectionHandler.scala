@@ -108,7 +108,7 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
       case Rst(streamId, errorCode) =>
         encoder.writeRstStream(ctx, streamId, errorCode, promise)
       case Ping =>
-        encoder.writePing(ctx, false /* ack */, Http2CodecUtil.emptyPingBuf, promise)
+        encoder.writePing(ctx, false /* ack */, 0 /* data */, promise)
       case GoAway(obj, streamId, errorCode) =>
         ReferenceCountUtil.release(obj)
         encoder.writeGoAway(
@@ -135,15 +135,16 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
 
   override def onStreamError(
     ctx: ChannelHandlerContext,
+    outbound: Boolean,
     cause: Throwable,
     http2Ex: Http2Exception.StreamException
   ): Unit = {
-    http2Ex match {
+    if (!outbound) http2Ex match {
       case ex: HeaderListSizeException if ex.duringDecode =>
         ctx.fireChannelRead(StreamException(ex, ex.streamId))
       case _ => // nop
     }
 
-    super.onStreamError(ctx, cause, http2Ex)
+    super.onStreamError(ctx, outbound, cause, http2Ex)
   }
 }

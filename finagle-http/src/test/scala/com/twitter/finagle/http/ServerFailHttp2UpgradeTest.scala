@@ -2,6 +2,7 @@ package com.twitter.finagle.http
 
 import com.twitter.finagle
 import com.twitter.finagle.Service
+import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.util.Future
 
 /**
@@ -9,7 +10,8 @@ import com.twitter.util.Future
  */
 class ServerFailHttp2UpgradeTest extends AbstractHttp1EndToEndTest {
   def implName: String = "http/1.1 client, http/2 server"
-  def clientImpl(): finagle.Http.Client = finagle.Http.client
+  def clientImpl(): finagle.Http.Client =
+    finagle.Http.client.configured(FailureDetector.Param(FailureDetector.NullConfig))
 
   def serverImpl(): finagle.Http.Server = finagle.Http.server.withHttp2
 

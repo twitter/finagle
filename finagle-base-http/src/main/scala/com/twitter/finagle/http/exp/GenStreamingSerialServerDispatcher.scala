@@ -115,6 +115,12 @@ private[finagle] abstract class GenStreamingSerialServerDispatcher[Req, Rep, In,
       // we need to close the transport.
       // Note: We don't sequence the transport.close() Future because we don't care to wait
       // for it and also don't want to clobber the result of the loop.
+      if (res.isThrow) {
+        logger.debug(res.throwable, s"closing $trans due to read error")
+      } else {
+        logger.debug(s"closing $trans due to status.cas failure,  state is ${state.get()}, expect Running")
+      }
+
       trans.close()
       Future.const(res)
     }
