@@ -75,6 +75,10 @@ class StackTest extends FunSuite {
         Seq(20, 10, 100, 1, 2, 3, 4))
 
     assert(
+      stack.insertAfter(testRole2, (l: List[Int]) => 5 :: l).make(empty) ==
+        Seq(20, 10, 5, 1, 2, 3, 4))
+
+    assert(
       (stack ++ stack).insertAfter(testRole2, module).make(empty) ==
         Seq(20, 10, 100, 20, 10, 100, 1, 2, 3, 4))
   }

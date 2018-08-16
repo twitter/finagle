@@ -94,11 +94,14 @@ sealed trait Stack[T] {
    * the argument role. If no elements match the role, then an
    * unmodified stack is returned.
    */
-  def insertAfter(target: Role, insertion: Stackable[T]): Stack[T] = transform {
-    case Node(hd, mk, next) if hd.role == target =>
-      Node(hd, mk, insertion +: next)
-    case stk => stk
-  }
+  def insertAfter(target: Role, insertion: Stackable[T]): Stack[T] =
+    this match {
+      case Node(hd, mk, next) if hd.role == target =>
+        Node(hd, mk, insertion +: next.insertAfter(target, insertion))
+      case Node(hd, mk, next) =>
+        Node(hd, mk, next.insertAfter(target, insertion))
+      case leaf @ Leaf(_, _) => leaf
+    }
 
   /**
    * Insert the given [[Stackable]] after the stack elements matching
