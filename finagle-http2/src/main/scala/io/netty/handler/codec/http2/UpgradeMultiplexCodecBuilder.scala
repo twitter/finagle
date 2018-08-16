@@ -19,10 +19,14 @@ private class UpgradeMultiplexCodecBuilder(
         ctx: ChannelHandlerContext,
         stream: Http2FrameStream,
         bytes: Int
-      ): Unit = {
+      ): Boolean = {
         // opt out of flow control for the h2c upgrade--it's actually an http/1.1 message
-        if (stream.id() != 1)
+        if (stream.id() != 1) {
           consumeBytes(stream.id(), bytes)
+          true
+        } else {
+          false
+        }
       }
     }
 }

@@ -6,7 +6,7 @@ val releaseVersion = "18.9.0-SNAPSHOT"
 
 val libthriftVersion = "0.10.0"
 
-val netty4Version = "4.1.16.Final"
+val netty4Version = "4.1.21.Final"
 
 // zkVersion should be kept in sync with the 'util-zk' dependency version
 val zkVersion = "3.5.0-alpha"
@@ -14,7 +14,7 @@ val zkVersion = "3.5.0-alpha"
 val caffeineLib = "com.github.ben-manes.caffeine" % "caffeine" % "2.3.4"
 val hdrHistogramLib = "org.hdrhistogram" % "HdrHistogram" % "2.1.10"
 val jsr305Lib = "com.google.code.findbugs" % "jsr305" % "2.0.1"
-val netty3Lib = "io.netty" % "netty" % "3.10.1.Final"
+val netty3Lib = "io.netty" % "netty" % "3.10.6.Final"
 val netty4Libs = Seq(
   "io.netty" % "netty-handler" % netty4Version,
   "io.netty" % "netty-transport" % netty4Version,
