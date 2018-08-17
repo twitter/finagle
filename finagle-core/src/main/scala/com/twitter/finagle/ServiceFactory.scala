@@ -1,24 +1,28 @@
 package com.twitter.finagle
 
-import com.twitter.util.{Closable, Future, Time}
+import com.twitter.util.{Closable, Future, Return, Throw, Time}
 
 abstract class ServiceFactory[-Req, +Rep]
   extends (ClientConnection => Future[Service[Req, Rep]])
-    with Closable { self =>
+  with Closable { self =>
 
   /**
-   * Reserve the use of a given service instance. This pins the
-   * underlying channel and the returned service has exclusive use of
-   * its underlying connection. To relinquish the use of the reserved
-   * [[Service]], the user must call [[Service.close()]].
+   * Reserve the use of the returned [[Service]] instance.
+   *
+   * To relinquish the use of the reserved [[Service]], the user
+   * must call [[Service.close()]].
+   *
+   * @param conn will be [[ClientConnection.nil]] when called
+   *             on the client-side.
    */
   def apply(conn: ClientConnection): Future[Service[Req, Rep]]
 
   /**
-   * Reserve the use of a given service instance using [[ClientConnection.nil]].
-   * This pins the underlying resources and the returned service has exclusive use
-   * of its underlying connection. To relinquish the use of the reserved
-   * [[Service]], the user must call [[Service.close()]].
+   * Reserve the use of the returned [[Service]] instance using
+   * [[ClientConnection.nil]].
+   *
+   * To relinquish the use of the reserved [[Service]], the user
+   * must call [[Service.close()]].
    */
   final def apply(): Future[Service[Req, Rep]] = this(ClientConnection.nil)
 
@@ -31,12 +35,16 @@ abstract class ServiceFactory[-Req, +Rep]
     f: Service[Req, Rep] => Future[Service[Req1, Rep1]]
   ): ServiceFactory[Req1, Rep1] =
     new ServiceFactory[Req1, Rep1] {
-      def apply(conn: ClientConnection): Future[Service[Req1, Rep1]] =
-        self(conn) flatMap { service =>
-          f(service) onFailure { _ =>
-            service.close()
+      private[this] val svcFn: Service[Req, Rep] => Future[Service[Req1, Rep1]] =
+        service =>
+          f(service).respond {
+            case Return(_) => ()
+            case Throw(_) => service.close()
           }
-        }
+
+      def apply(conn: ClientConnection): Future[Service[Req1, Rep1]] =
+        self(conn).flatMap(svcFn)
+
       def close(deadline: Time): Future[Unit] = self.close(deadline)
       override def status: Status = self.status
       override def toString: String = self.toString

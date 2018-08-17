@@ -5,33 +5,39 @@ import com.twitter.util.{Closable, Future, Time}
 import java.net.SocketAddress
 
 /**
- * Information about a client, passed to a Service factory for each new
+ * Information about a client, passed to a [[ServiceFactory]] for each new
  * connection.
+ *
+ * @note this is represented by [[ClientConnection.nil]] on the client
+ *       side when it initiates a new connection.
  */
 trait ClientConnection extends Closable {
 
   /**
-   * Host/port of the client. This is only available after `Service#connected`
-   * has been signalled.
+   * Host/port of the client.
    */
   def remoteAddress: SocketAddress
 
   /**
-   * Host/port of the local side of a client connection. This is only
-   * available after `Service#connected` has been signalled.
+   * Host/port of the local side of a client connection.
    */
   def localAddress: SocketAddress
 
   /**
-   * Expose a Future[Unit] that will be filled when the connection is closed
-   * Useful if you want to trigger action on connection closing
+   * Expose a `Future` that is satisfied when the connection is closed.
    */
   def onClose: Future[Unit]
 }
 
 object ClientConnection {
 
-  /**  A `ClientConnection` representing an unconnected client */
+  /**
+   * A [[ClientConnection]] representing an unconnected client.
+   *
+   * This is used for clients that are initiating a connection.
+   *
+   * @see [[ServiceFactory.apply]]
+   */
   val nil: ClientConnection = new ClientConnection {
     def remoteAddress: SocketAddress = unconnected
     def localAddress: SocketAddress = unconnected
