@@ -67,7 +67,7 @@ abstract class AbstractStreamingTest extends FunSuite {
 
     // This is flaky. The assertion has been moved to the tests which use res2, and those have been
     // marked as flaky.
-    //assert(!res2.isDefined)
+    //assert(res2.poll == None)
 
     // Assert previously queued request is now processed, and not interrupted
     // midstream.
@@ -96,10 +96,10 @@ abstract class AbstractStreamingTest extends FunSuite {
   })
 
   test("client: response stream fails on read")(new ClientCtx {
-    assert(!res2.isDefined)
+    assert(res2.poll == None)
     // Reader should be suspended in a reading state.
     val f = res.reader.read(1)
-    assert(!f.isDefined)
+    assert(f.poll == None)
 
     // Simulate network failure by closing the transport.
     failure.setDone()
@@ -147,7 +147,7 @@ abstract class AbstractStreamingTest extends FunSuite {
   }
 
   test("client: fail request writer")(new ClientCtx {
-    assert(!res2.isDefined)
+    assert(res2.poll == None)
     val exc = new Exception
     req.writer.fail(exc)
 
@@ -157,7 +157,7 @@ abstract class AbstractStreamingTest extends FunSuite {
   })
 
   test("client: discard respond reader")(new ClientCtx {
-    assert(!res2.isDefined)
+    assert(res2.poll == None)
     res.reader.discard()
     assertSecondRequestOk()
   })
