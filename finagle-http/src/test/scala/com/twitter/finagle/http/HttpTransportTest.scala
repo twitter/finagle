@@ -5,8 +5,8 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.http.codec.ConnectionManager
 import com.twitter.finagle.http.exp.{IdentityStreamTransport, Multi, StreamTransportProxy}
 import com.twitter.finagle.transport.QueueTransport
-import com.twitter.io.Reader
-import com.twitter.util.{Await, Time, Throw, Future, Promise}
+import com.twitter.io.{Buf, Pipe}
+import com.twitter.util.{Await, Future, Promise, Throw, Time}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
@@ -61,7 +61,7 @@ class HttpTransportTest extends FunSuite {
     assert(!manager.shouldClose)
     assert(!closed)
 
-    val rw = Reader.writable()
+    val rw = new Pipe[Buf]()
     val writef = {
       val rep = Response(Version.Http10, Status.Ok, rw)
       rep.setChunked(true)

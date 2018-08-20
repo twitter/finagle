@@ -4,7 +4,7 @@ import com.twitter.concurrent.AsyncStream
 import com.twitter.conversions.time._
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.finagle.{Http, Service}
-import com.twitter.io.{Buf, Reader}
+import com.twitter.io.{Buf, Pipe}
 import com.twitter.util.{Await, Future, JavaTimer}
 import scala.util.Random
 
@@ -30,7 +30,7 @@ object HttpStreamingServer {
       messages.foreach(_ => messages = messages.drop(1))
 
       def apply(request: Request): Future[Response] = {
-        val writable = Reader.writable()
+        val writable = new Pipe[Buf]()
         // Start writing thread.
         messages.foreachF(writable.write)
         Future.value(Response(request.version, Status.Ok, writable))

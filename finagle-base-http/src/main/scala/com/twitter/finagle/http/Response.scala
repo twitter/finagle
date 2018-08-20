@@ -1,7 +1,7 @@
 package com.twitter.finagle.http
 
 import com.twitter.collection.RecordSchema
-import com.twitter.io.{Buf, Reader, Writer}
+import com.twitter.io.{Buf, Pipe, Reader, Writer}
 import com.twitter.util.Closable
 
 /**
@@ -100,10 +100,10 @@ object Response {
 
   /** Create Response from version and status. */
   def apply(version: Version, status: Status): Response = {
-    // Since this is a user made `Response` we use the joined Reader.writable so they
+    // Since this is a user made `Response` we use a Pipe so they
     // can keep a handle to the writer half and the server implementation can use
     // the reader half.
-    val rw = Reader.writable()
+    val rw = new Pipe[Buf]()
     val resp = new Impl(rw, rw)
     resp.version = version
     resp.status = status

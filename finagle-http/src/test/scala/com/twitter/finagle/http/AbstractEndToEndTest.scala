@@ -14,7 +14,7 @@ import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.HashedWheelTimer
-import com.twitter.io.{Buf, Reader, Writer}
+import com.twitter.io.{Buf, Pipe, Reader, Writer}
 import com.twitter.util._
 import io.netty.buffer.PooledByteBufAllocator
 import java.io.{PrintWriter, StringWriter}
@@ -527,7 +527,7 @@ abstract class AbstractEndToEndTest
         }
       }
 
-      val writer = Reader.writable()
+      val writer = new Pipe[Buf]()
       val client = connect(service(writer))
       val reader = await(client(Request())).reader
       await(writer.write(buf("hello")))

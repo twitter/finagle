@@ -3,8 +3,8 @@ package com.twitter.finagle.transport
 import com.twitter.conversions.time._
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.Status
-import com.twitter.io.{Reader, Buf}
-import com.twitter.util.{Await, Future, Promise, Time, Return, Throw}
+import com.twitter.io.{Buf, Pipe, Reader}
+import com.twitter.util.{Await, Future, Promise, Return, Throw, Time}
 import java.net.SocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -131,7 +131,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
     val failed = new Failed {
       override def read() = Future.Done
     }
-    val reader = Reader.writable()
+    val reader = new Pipe[Buf]()
     val done = Transport.copyToWriter(failed, reader) { _ =>
       Future.value(Some(Buf.Empty))
     } respond {
@@ -149,7 +149,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
   test("Transport.copyToWriter - concurrent reads") {
     val p = new Promise[Unit]
     val failed = new Failed { override def read() = p }
-    val reader = Reader.writable()
+    val reader = new Pipe[Buf]()
     val done =
       Transport.copyToWriter(failed, reader)(_ => Future.None) respond {
         case Return(()) => reader.close()
@@ -165,7 +165,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
   test("Transport.copyToWriter - normal operation") {
     forAll { (list: List[String]) =>
       val t = fromList(list)
-      val reader = Reader.writable()
+      val reader = new Pipe[Buf]()
       val done = Transport.copyToWriter(t, reader) {
         case None => Future.None
         case Some(str) => Future.value(Some(Buf.Utf8(str)))
@@ -184,7 +184,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
     forAll { (list: List[Byte]) =>
       val t = fromList(list)
       val exc = new Exception
-      val reader = Reader.writable()
+      val reader = new Pipe[Buf]()
       val done = Transport.copyToWriter(t, reader) {
         case None => Future.exception(exc)
         case Some(b) => Future.value(Some(Buf.ByteArray.Owned(Array(b))))

@@ -7,7 +7,7 @@ import com.twitter.finagle.netty4.ByteBufConversion
 import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.transport.{LegacyContext, QueueTransport, Transport, TransportContext}
 import com.twitter.io.Reader.ReaderDiscarded
-import com.twitter.io.{Buf, Reader}
+import com.twitter.io.{Buf, Pipe, Reader}
 import com.twitter.util._
 import io.netty.buffer.Unpooled
 import io.netty.channel.embedded.EmbeddedChannel
@@ -43,7 +43,7 @@ class StreamTransportsTest extends FunSuite {
   }
 
   test("streamChunks: streams http chunks into transport") {
-    val rw = Reader.writable()
+    val rw = new Pipe[Buf]()
 
     val (write, read) = (new AsyncQueue[Any], new AsyncQueue[Any])
     val tr = new QueueTransport[Any, Any](write, read)
@@ -147,7 +147,7 @@ class StreamTransportsTest extends FunSuite {
   }
 
   test("streamChunks: discard reader on transport write failure") {
-    val rw = Reader.writable()
+    val rw = new Pipe[Buf]()
     rw.write(Buf.Utf8("msg"))
 
     streamChunks(failingT, rw)
