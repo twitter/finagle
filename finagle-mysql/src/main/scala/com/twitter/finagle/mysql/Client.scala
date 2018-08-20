@@ -230,7 +230,7 @@ private object StdClient {
 /**
  * Creates a standard implementation of the mysql client interfaces.
  *
- * @param factory the underyling factory used to checkout services from.
+ * @param factory the underlying factory used to checkout services from.
  * This is usually a finagle client.
  *
  * @param supportUnsigned Configures whether to support unsigned integer fields when

@@ -266,9 +266,8 @@ private[finagle] class ClientDispatcher(
           }
         }
 
-        // TODO: When streaming is implemented the
-        // done signal should dependent on the
-        // completion of the stream.
+        // TODO: When streaming is implemented the done signal should be
+        // dependent on the completion of the stream.
         result.ensure {
           signal.setDone()
         }

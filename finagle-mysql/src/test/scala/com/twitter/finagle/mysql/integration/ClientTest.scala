@@ -241,11 +241,18 @@ class ClientTest extends FunSuite
     assert(err.getMessage.contains(invalidSql))
   }
 
-  test("PreparedStatement reading empty strings") {
+  test("prepare can read records with empty strings") {
     val sql =
       """
-        |INSERT INTO
+        |SELECT *
+        |FROM `finagle-mysql-test`
+        |WHERE `name` = ?
       """.stripMargin
+    val prepared = c.prepare(sql)
+    val res = prepared.select("")(identity)
+    val rows = await(res)
+    assert(rows.size == 1)
+    assert(rows.head("time").get == FloatValue(100))
   }
 
   test("CursorResult does not store head of stream") {

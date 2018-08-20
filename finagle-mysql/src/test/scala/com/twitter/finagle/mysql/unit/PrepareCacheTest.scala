@@ -56,7 +56,7 @@ class PrepareCacheTest extends FunSuite with Eventually with IntegrationPatience
     q.clear()
 
     // Check that the evicted element is not in cache. Caffeine evicts older
-    // elements first, but its not strictly via an LRU policy. We don't actually
+    // elements first, but it's not strictly via an LRU policy. We don't actually
     // need that guarantee so it's okay to loosely check for an eviction.
     for (i <- 1 to 10) svc(PrepareRequest(s"SELECT $i"))
     assert(!q.isEmpty)

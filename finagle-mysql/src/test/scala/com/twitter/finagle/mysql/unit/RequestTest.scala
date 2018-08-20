@@ -69,7 +69,7 @@ class ExecuteRequestTest extends FunSuite {
     val nullParams: Array[Parameter] = Array.fill(numOfParams)(null)
     val e = ExecuteRequest(0, nullParams, false)
     val br = MysqlBuf.reader(e.toPacket.body)
-    br.skip(10) // payload header (10bytes)
+    br.skip(10) // payload header (10 bytes)
     br.skip(1) // new params bound flag
     assert(br.remaining == ((numOfParams + 7) / 8))
   }
