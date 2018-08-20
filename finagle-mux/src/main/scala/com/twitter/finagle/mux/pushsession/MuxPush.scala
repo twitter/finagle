@@ -50,11 +50,10 @@ object MuxPush
       handle: PushChannelHandle[ByteReader, Buf]
     ): Future[MuxClientNegotiatingSession] = {
       val negotiator: Option[Headers] => Future[MuxClientSession] = {
-        // This is async to support waiting for the tls handshake to complete.
-        // It isn't currently wired through, so we return a satisfied future.
-        headers => Future.value(new Negotiation.Client(scopedStatsParams).negotiate(handle, headers))
+        headers => new Negotiation.Client(scopedStatsParams).negotiateAsync(handle, headers)
       }
       val headers = Mux.Client.headers(params[MaxFrameSize].size, params[OppTls].level)
+
       Future.value(
         new MuxClientNegotiatingSession(
           handle = handle,

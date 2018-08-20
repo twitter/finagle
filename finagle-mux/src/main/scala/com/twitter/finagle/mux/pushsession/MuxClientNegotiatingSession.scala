@@ -63,6 +63,11 @@ private[finagle] final class MuxClientNegotiatingSession(
   }
   negotiatedSession.ensure(negotiatingGauge.remove())
 
+  private[this] val muxHandshakeLatencyStat = stats.stat("handshake_latency_us")
+  // note, this needs to be volatile since it's set inside the entrypoint `negotiate`
+  // which is request driven.
+  @volatile private var muxHandshakeStopwatch: () => Duration = null
+
   private type Phase = Message => Unit
 
   // Handshaking goes in 'Phase's which encapsulate the state of the handshake.
@@ -83,6 +88,7 @@ private[finagle] final class MuxClientNegotiatingSession(
   def negotiate(): Future[MuxClientSession] = {
     if (startNegotiation.compareAndSet(false, true)) {
       log.debug("Sending Tinit probe to %s", name)
+      muxHandshakeStopwatch = Stopwatch.start()
       handle.sendAndForget(Message.encode(MarkerRerr))
     } else {
       log.warning("Attempted to negotiate multiple times with %s", name)
@@ -150,6 +156,11 @@ private[finagle] final class MuxClientNegotiatingSession(
   // result of `negotiate` even if we don't send+receive any headers from the peer.
   private[this] def finishNegotiation(serverHeaders: Option[Headers]): Unit = {
     log.debug("Init result: %s", serverHeaders)
+    // Note, this should never be null because the `negotiate` method is the entry point
+    // for the state machine.
+    if (muxHandshakeStopwatch != null) {
+      muxHandshakeLatencyStat.add(muxHandshakeStopwatch().inMicroseconds)
+    }
     // Since this session isn't ready to handle any mux messages,
     // we need to queue them until the `negotiator` is complete.
     // Technically, we shouldn't get any messages in the interim since

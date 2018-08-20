@@ -19,7 +19,6 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSuite, Tag}
 
 class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
-
   import MuxClientNegotiatingSession.PushSessionQueue
 
   // turn off failure detector since we don't need it for these tests.
@@ -29,13 +28,18 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
     }
   }
 
-  type ChannelHandleT = MockChannelHandle[ByteReader, Buf]
-  type Negotiator = (PushChannelHandle[ByteReader, Buf], Option[Headers]) => Future[MuxClientSession]
+  private[this] type Negotiator =
+    (PushChannelHandle[ByteReader, Buf], Option[Headers]) => Future[MuxClientSession]
+
+  private[this] val fragmentingParams = MuxPush.client.params + MaxFrameSize(2.megabytes)
+
+  private[this] val newClientSession: Negotiator = (handle, hs) => {
+    new Negotiation.Client(fragmentingParams).negotiateAsync(handle, hs)
+  }
 
   // Used to observe the headers received from the Server
-  private class HeaderObserver(params: Params) extends Negotiator {
-    @volatile
-    var observedHeaders: Option[Headers] = null
+  private[this] class HeaderObserver(params: Params) extends Negotiator {
+    @volatile var observedHeaders: Option[Headers] = null
 
     def apply(
       handle: PushChannelHandle[ByteReader, Buf],
@@ -44,12 +48,10 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
       if (observedHeaders != null) sys.error("Unexpected state")
       else {
         observedHeaders = hs
-        Future.value(new Negotiation.Client(params).negotiate(handle, hs))
+        newClientSession(handle, hs)
       }
     }
   }
-
-  private[this] val fragmentingParams = MuxPush.client.params + MaxFrameSize(2.megabytes)
 
   private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
 
@@ -59,7 +61,10 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
   private[this] def decodeClientWrite(bufs: Iterable[Buf]): Message =
     Message.decode(bufs.foldLeft(Buf.Empty)(_.concat(_)))
 
-  private def withMockHandle(negotiator: Negotiator, params: Params): (ChannelHandleT, MuxClientNegotiatingSession, InMemoryStatsReceiver) = {
+  private[this] def withMockHandle(
+    negotiator: Negotiator,
+    params: Params
+  ): (MockChannelHandle[ByteReader, Buf], MuxClientNegotiatingSession, InMemoryStatsReceiver) = {
     val handle = new MockChannelHandle[ByteReader, Buf](null)
     val headers = Mux.Client.headers(params[MaxFrameSize].size, params[OppTls].level)
     val stats = new InMemoryStatsReceiver
@@ -159,7 +164,6 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
   }
 
   test("Marker Rerr followed by non-Rinit fails new session") {
-
     val (handle, negotiatingSession, stats) = withMockHandle((_, _) => ???, fragmentingParams)
     assert(stats.gauges(Seq("negotiating")).apply() == 0.0f)
     val sessionF = negotiatingSession.negotiate()
@@ -204,10 +208,7 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
   }
 
   test("Handle normal onClose cancels the handshake") {
-    val negotiate: Negotiator = (handle, hs) =>
-      Future.value(new Negotiation.Client(fragmentingParams).negotiate(handle, hs))
-
-    val (handle, negotiatingSession, stats) = withMockHandle(negotiate, fragmentingParams)
+    val (handle, negotiatingSession, stats) = withMockHandle(newClientSession, fragmentingParams)
     assert(stats.gauges(Seq("negotiating")).apply() == 0.0f)
     val sessionF = negotiatingSession.negotiate()
     assert(stats.gauges(Seq("negotiating")).apply() == 1.0f)
@@ -252,10 +253,7 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
 
   test("can be interrupted") {
     allowInterruptingClientNegotiation.let(true) {
-      val negotiate: Negotiator = (handle, hs) =>
-        Future.value(new Negotiation.Client(fragmentingParams).negotiate(handle, hs))
-
-      val (handle, negotiatingSession, stats) = withMockHandle(negotiate, fragmentingParams)
+      val (handle, negotiatingSession, stats) = withMockHandle(newClientSession, fragmentingParams)
       assert(stats.gauges(Seq("negotiating")).apply() == 0.0f)
       val sessionF = negotiatingSession.negotiate()
       assert(stats.gauges(Seq("negotiating")).apply() == 1.0f)

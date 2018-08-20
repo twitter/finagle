@@ -3,8 +3,10 @@ package com.twitter.finagle.mux.pushsession
 import com.twitter.finagle.Mux.param.TurnOnTlsFn
 import com.twitter.finagle.Stack
 import com.twitter.finagle.pushsession.{PushChannelHandle, PushChannelHandleProxy}
+import com.twitter.finagle.netty4.ssl.client.Netty4ClientSslChannelInitializer.OnSslHandshakeComplete
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.logging.Logger
+import com.twitter.util.Try
 import io.netty.channel.Channel
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -21,13 +23,23 @@ private[finagle] class MuxChannelHandle(
 
   private[this] val tlsGuard = new AtomicBoolean(false)
 
-  /** Enable TLS support */
-  def turnOnTls(): Unit = {
-    if (tlsGuard.compareAndSet(false, true)) params[TurnOnTlsFn].fn(params, ch.pipeline)
-    else MuxChannelHandle.log.warning("Attempted to turn on TLS multiple times")
+  /**
+   * Enable TLS support by adding the appropriate handlers into netty.
+   *
+   * @param onHandshakeComplete Takes a callback which is called when the tls
+   * handshake is complete.
+   */
+  def turnOnTls(onHandshakeComplete: Try[Unit] => Unit): Unit = {
+    if (tlsGuard.compareAndSet(false, true)) {
+      val prms = params + OnSslHandshakeComplete(onHandshakeComplete)
+      params[TurnOnTlsFn].fn(prms, ch.pipeline)
+    } else {
+      MuxChannelHandle.log.warning("Attempted to turn on TLS multiple times")
+    }
   }
 
-  /** A specialized method for sending data without going through the serial executor
+  /**
+   * A specialized method for sending data without going through the serial executor
    *
    * This lives only to avoid the potential race during opportunistic TLS negotiation
    * where we need to send our headers unencrypted to the peer, but immediately after
