@@ -263,8 +263,6 @@ private class StdClient(
 
   private[this] val service = factory.toService
 
-  private[this] val cursorStats = new CursorStats(statsReceiver)
-
   def query(sql: String): Future[Result] = service(QueryRequest(sql))
 
   def ping(): Future[Unit] =
@@ -289,6 +287,9 @@ private class StdClient(
 
   def cursor(sql: String): CursoredStatement = {
     new CursoredStatement {
+
+      private[this] val cursorStats = new CursorStats(statsReceiver)
+
       def apply[T](rowsPerFetch: Int, params: Parameter*)(
         f: (Row) => T
       ): Future[CursorResult[T]] = {
