@@ -191,7 +191,7 @@ class TransactionalClient(factory: ServiceFactory[Command, Reply])
     }
 
   def discard(): Future[Unit] =
-    doRequest(Multi) {
+    doRequest(Discard) {
       case StatusReply(message) =>
         _multi = false
         _watch = false
