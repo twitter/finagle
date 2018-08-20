@@ -133,7 +133,7 @@ object FailureFlags {
  *
  * @see [[AbstractFailureFlags]] for creating subclasses in Java.
  */
-trait FailureFlags[T <: FailureFlags[T]] extends Throwable { this: T =>
+trait FailureFlags[T <: FailureFlags[T]] extends Exception { this: T =>
   import FailureFlags._
 
   require(!isFlagged(Retryable | NonRetryable), "Cannot be flagged both Retryable and NonRetryable")
@@ -207,7 +207,7 @@ trait FailureFlags[T <: FailureFlags[T]] extends Throwable { this: T =>
  * For Java users wanting to implement exceptions that are [[FailureFlags]].
  */
 abstract class AbstractFailureFlags[T <: AbstractFailureFlags[T]]
-  extends Throwable
+  extends Exception
   with FailureFlags[T] { this: T =>
 
   // Java-friendly forwarders
