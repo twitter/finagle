@@ -34,22 +34,14 @@ object ProcessCoordinate {
    * The coordinate is calculated between the range [0, 1.0) and is primarily
    * a function of `instanceId` and `totalInstances`. The latter dictates the size of
    * each uniform slice in the coordinate space and the former dictates this process'
-   * location on the coordinate space. An additional parameter, `offset`, is exposed
-   * that allows clients of the same peer group to coordinate a rotation or offset of
-   * the coordinate space in order to avoid alignment with other client groups of
-   * the same size (i.e. to add some entropy to the system).
+   * location on the coordinate space.
    */
-  private[finagle] case class FromInstanceId(peerOffset: Int, instanceId: Int, totalInstances: Int) extends Coord {
+  private[finagle] case class FromInstanceId(instanceId: Int, totalInstances: Int) extends Coord {
     require(totalInstances > 0, s"totalInstances expected to be > 0 but was $totalInstances")
+    require(instanceId >= 0, s"instanceId expected to be >= 0 but was $instanceId")
 
     val unitWidth: Double = 1.0 / totalInstances
-
-    val offset: Double = {
-      // compute the offset for this process between [0.0, 1.0).
-      val normalizedOffset: Double = peerOffset / Int.MaxValue.toDouble
-      val coord = (instanceId * unitWidth + normalizedOffset) % 1.0
-      if (coord < 0) coord + 1.0 else coord
-    }
+    val offset: Double = (instanceId * unitWidth) % 1.0
   }
 
   /**
@@ -73,19 +65,14 @@ object ProcessCoordinate {
    * Globally set the coordinate for this process from the respective instance
    * metadata.
    *
-   * @param peerOffset A parameter which allows clients of the same peer group to
-   * apply a rotation or offset of the coordinate space in order to avoid any correlations
-   * between peer groups. A good value for this is a deterministic hash of a shared notion
-   * of process identifier (e.g. hash("/s/my-cluster")).
-   *
    * @param instanceId An instance identifier for this process w.r.t its peer
    * cluster.
    *
    * @param totalInstances The total number of instances in this process' peer
    * cluster.
    */
-  def setCoordinate(peerOffset: Int, instanceId: Int, totalInstances: Int): Unit =
-    updateCoordinate(Some(FromInstanceId(peerOffset, instanceId, totalInstances)))
+  def setCoordinate(instanceId: Int, totalInstances: Int): Unit =
+    updateCoordinate(Some(FromInstanceId(instanceId, totalInstances)))
 
   /**
    * Disables the ordering for this process and forces each Finagle client that

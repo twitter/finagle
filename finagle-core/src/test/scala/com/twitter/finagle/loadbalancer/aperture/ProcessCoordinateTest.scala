@@ -10,7 +10,7 @@ class ProcessCoordinateTest extends FunSuite with GeneratorDrivenPropertyChecks 
   test("update coordinate") {
     var coordinate: Option[Coord] = None
     val closable = ProcessCoordinate.changes.respond(coordinate = _)
-    ProcessCoordinate.setCoordinate(1, 2, 10)
+    ProcessCoordinate.setCoordinate(2, 10)
     assert(coordinate.isDefined)
 
     assert(ProcessCoordinate() == coordinate)
@@ -20,15 +20,14 @@ class ProcessCoordinateTest extends FunSuite with GeneratorDrivenPropertyChecks 
   }
 
   test("setCoordinate") {
-    intercept[Exception] { ProcessCoordinate.setCoordinate(0, 0, 0) }
+    intercept[Exception] { ProcessCoordinate.setCoordinate(0, 0) }
 
-    val offset = 0
     val numInstances = 10
 
-    ProcessCoordinate.setCoordinate(offset, 1, numInstances)
+    ProcessCoordinate.setCoordinate(1, numInstances)
     val coord0 = ProcessCoordinate()
 
-    ProcessCoordinate.setCoordinate(offset, 2, numInstances)
+    ProcessCoordinate.setCoordinate(2, numInstances)
     val coord1 = ProcessCoordinate()
 
     assert(coord0.isDefined)
@@ -37,18 +36,17 @@ class ProcessCoordinateTest extends FunSuite with GeneratorDrivenPropertyChecks 
   }
 
   test("setCoordinate range") {
-    ProcessCoordinate.setCoordinate(0, 0, 1)
+    ProcessCoordinate.setCoordinate(0, 1)
     val sample = ProcessCoordinate()
     assert(sample.isDefined)
     assert(1.0 - sample.get.unitWidth <= 1e-6)
 
-    forAll { (peerOffset: Int, instanceId: Int, numInstances: Int) =>
-      whenever(numInstances > 0) {
-        ProcessCoordinate.setCoordinate(peerOffset, instanceId, numInstances)
+    forAll { (instanceId: Int, numInstances: Int) =>
+      whenever(instanceId >= 0 && numInstances > 0) {
+        ProcessCoordinate.setCoordinate(instanceId, numInstances)
         val sample = ProcessCoordinate()
         assert(sample.isDefined)
         val offset = sample.get.offset
-        val rng = new scala.util.Random(12345L)
         val width = sample.get.unitWidth
         assert(offset >= 0 && offset < 1.0)
         assert(width > 0 && width <= 1.0)
@@ -61,7 +59,7 @@ class ProcessCoordinateTest extends FunSuite with GeneratorDrivenPropertyChecks 
       val closable = ProcessCoordinate.changes.respond { coord =>
         assert(ProcessCoordinate() == coord)
       }
-      ProcessCoordinate.setCoordinate(1, 2, i)
+      ProcessCoordinate.setCoordinate(2, i)
       closable
     }
 

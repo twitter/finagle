@@ -45,7 +45,7 @@ private[twitter] object Init {
       },
       apertureStats.addGauge("peerset_size") {
         aperture.ProcessCoordinate() match {
-          case Some(FromInstanceId(_, _, size)) => size.toFloat
+          case Some(FromInstanceId(_, size)) => size.toFloat
           case _ => -1f
         }
       }

@@ -283,7 +283,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
       override protected val useDeterministicOrdering = Some(true)
     }
 
-    ProcessCoordinate.setCoordinate(peerOffset = 0, instanceId = 0, totalInstances = 12)
+    ProcessCoordinate.setCoordinate(instanceId = 0, totalInstances = 12)
     bal.update(counts.range(24))
     bal.rebuildx()
     assert(bal.isDeterministicAperture)
@@ -299,7 +299,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
       override protected val useDeterministicOrdering = Some(true)
     }
 
-    ProcessCoordinate.setCoordinate(peerOffset = 0, instanceId = 1, totalInstances = 4)
+    ProcessCoordinate.setCoordinate(instanceId = 1, totalInstances = 4)
     bal.update(counts.range(18))
     bal.rebuildx()
     assert(bal.isDeterministicAperture)
@@ -322,7 +322,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
       override protected val useDeterministicOrdering = Some(true)
     }
 
-    ProcessCoordinate.setCoordinate(0, 5, 10)
+    ProcessCoordinate.setCoordinate(5, 10)
 
     val servers = Vector.tabulate(10)(Factory)
     bal.update(servers)
@@ -350,7 +350,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
     bal.adjustx(2)
     assert(bal.aperturex == 3)
 
-    ProcessCoordinate.setCoordinate(peerOffset = 0, instanceId = 3, totalInstances = 5)
+    ProcessCoordinate.setCoordinate(instanceId = 3, totalInstances = 5)
 
     // We just happen to know that based on our ordering, instance 2 is in the aperture.
     // Note, we have an aperture of 3 and 1 down, so the probability of picking the down
@@ -375,7 +375,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
       val bal = new Bal {
         override val minAperture = 150
       }
-      ProcessCoordinate.setCoordinate(0, 0, 150)
+      ProcessCoordinate.setCoordinate(0, 150)
       bal.update(Vector.tabulate(150)(Factory))
       bal.rebuildx()
       assert(bal.isDeterministicAperture)
@@ -388,7 +388,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
       val bal = new Bal {
         override val minAperture = 150
       }
-      ProcessCoordinate.setCoordinate(0, 0, 150)
+      ProcessCoordinate.setCoordinate(0, 150)
       bal.update(Vector.tabulate(150)(Factory))
       bal.rebuildx()
       assert(bal.isRandomAperture)

@@ -22,15 +22,22 @@ Breaking API Changes
     they produce/consume (`Reader[A]` and `Writer[A]`) and are no longer fixed to `Buf`.
     ``PHAB_ID=D195638``
 
+  * finagle-core: `Address.hashOrdering` now takes a seed parameter and
+    `PeerCoordinate.setCoordinate` does not take a `peerOffset` any longer.
+    ``PHAB_ID=D199545``
+
   * finagle-core: Removed deprecated members `c.t.f.Failure.{Interrupted, Ignorable, DeadlineExceeded,
     Rejected, NonRetryable, flagsOf}`. ``PHAB_ID=D199361``
 
   * finagle-core: the valid range for the argument to `WindowedPercentileHistogram.percentile`
     is now [0.0..1.0], e.g., 0.95 means 95th percentile. ``PHAB_ID=D198915``
 
-  * finagle-thrift: `DeserializeCtx` became `ClientDeserializeCtx` for client side response 
-    classification, add `ServerDeserializeCtx` to handle server side response classification. 
+  * finagle-thrift: `DeserializeCtx` became `ClientDeserializeCtx` for client side response
+    classification, add `ServerDeserializeCtx` to handle server side response classification.
     ``PHAB_ID=D196032``
+
+  * finagle-serversets: `ZkMetadata.shardHashOrdering` now takes a seed parameter.
+    ``PHAB_ID=D199545``
 
 Bug Fixes
 ~~~~~~~~~

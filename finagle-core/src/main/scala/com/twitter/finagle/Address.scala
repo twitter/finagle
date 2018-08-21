@@ -22,18 +22,36 @@ object Address {
       override def toString: String = """IllegalArgumentException("failing")"""
     })
 
-  /** An ordering of [[Address Addresses]] based on a deterministic hash of their IP and port. */
-  val HashOrdering: Ordering[Address] = new Ordering[Address] {
+  /**
+   * An ordering of [[Address Addresses]] based on a deterministic hash of their IP and port.
+   *
+   * @note In order to keep this hash ordering deterministic, it's important that
+   * we avoid hash collisions for non-equal inputs. We do this by using a murmur hash
+   * under the hood which is known to not have collisions for 32-bit inputs. However,
+   * if the underlying addresses were to be 128-bit (IPv6), we would lose that
+   * property.
+   */
+  def hashOrdering(seed: Int): Ordering[Address] = new Ordering[Address] {
+    private[this] def hash(data: Int): Int = {
+      // We effectively unroll what MurmurHash3.bytesHash does for a single
+      // iteration. That is, it packs groups of four bytes into an int and
+      // mixes then finalizes.
+      MurmurHash3.finalizeHash(
+        hash = MurmurHash3.mixLast(seed, data),
+        // we have four bytes in `data`
+        length = 4
+      )
+    }
     def compare(a0: Address, a1: Address): Int = (a0, a1) match {
       case (Address.Inet(inet0, _), Address.Inet(inet1, _)) =>
         if (inet0.isUnresolved || inet1.isUnresolved) 0
         else {
-          val ipHash0 = MurmurHash3.bytesHash(inet0.getAddress.getAddress)
-          val ipHash1 = MurmurHash3.bytesHash(inet1.getAddress.getAddress)
+          val ipHash0 = MurmurHash3.bytesHash(inet0.getAddress.getAddress, seed)
+          val ipHash1 = MurmurHash3.bytesHash(inet1.getAddress.getAddress, seed)
           val ipCompare = Integer.compare(ipHash0, ipHash1)
           if (ipCompare != 0) ipCompare
           else {
-            Integer.compare(inet0.getPort, inet1.getPort)
+            Integer.compare(hash(inet0.getPort), hash(inet1.getPort))
           }
         }
       case (_: Address.Inet, _) => -1

@@ -1,4 +1,5 @@
 package com.twitter.finagle
+import scala.util.hashing.MurmurHash3
 
 /**
  * This package implements client side load balancing algorithms.
@@ -21,7 +22,8 @@ package object loadbalancer {
    * will require consistent results across comparisons so it may fail
    * during the sort.
    */
-  @volatile private[this] var addressOrdering: Ordering[Address] = Address.HashOrdering
+  @volatile private[this] var addressOrdering: Ordering[Address] =
+    Address.hashOrdering(MurmurHash3.arraySeed)
 
   /**
    * Set the default [[Address]] ordering for the entire process (outside of clients
