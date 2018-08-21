@@ -29,6 +29,10 @@ Breaking API Changes
   * finagle-core: Removed deprecated members `c.t.f.Failure.{Interrupted, Ignorable, DeadlineExceeded,
     Rejected, NonRetryable, flagsOf}`. ``PHAB_ID=D199361``
 
+  * finagle-core: Remove `TimeoutFactory.Role` in favor of passing a role to the `module` function.
+    Since this module is a re-used within the client stack, it needs unique identifiers for each
+    distinct module. ``PHAB_ID=D204647``
+
   * finagle-core: the valid range for the argument to `WindowedPercentileHistogram.percentile`
     is now [0.0..1.0], e.g., 0.95 means 95th percentile. ``PHAB_ID=D198915``
 

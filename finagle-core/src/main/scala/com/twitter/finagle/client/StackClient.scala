@@ -17,15 +17,51 @@ import com.twitter.util.registry.GlobalRegistry
 object StackClient {
 
   /**
-   * Canonical Roles for each Client-related Stack modules.
+   * Canonical Roles for some Client-related Stack module. Other roles are defined
+   * within the companion objects of the respective modules.
    */
   object Role extends Stack.Role("StackClient") {
+    /**
+     * Defines the role of the connection pool in the client stack.
+     */
     val pool = Stack.Role("Pool")
+
+    /**
+     * Defines the role of the [[RefcountedFactory]] in the client stack.
+     */
     val requestDraining = Stack.Role("RequestDraining")
+
+    /**
+     * Defines a preallocated position at the "top" of the stack (after name resolution)
+     * which allows the injection of codec-specific behavior during service acquisition.
+     * For example, it is  used in the HTTP codec to avoid closing a service while a
+     * chunked response is being read.
+     */
     val prepFactory = Stack.Role("PrepFactory")
 
-    /** PrepConn is special in that it's the first role before the `Endpoint` role */
+    /**
+     * Defines the role of the module responsible for the service acquisition
+     * timeout for name resolution in the client stack.
+     */
+    val nameResolutionTimeout = Stack.Role("NameResolutionTimeout")
+
+    /**
+     * Defines the role of the module responsible for the service acquisition
+     * timeout after name resolution is complete. This encompasses the timeout
+     * for establishing a new session (e.g. handshaking), outside of name resolution.
+     */
+    val postNameResolutionTimeout = Stack.Role("PostNameResolutionTimeout")
+
+    /**
+     * Defines a preallocoted position at the "bottom" of the stack which is
+     * special in that it's the first role before the client sends the request to
+     * the underlying transport implementation.
+     */
     val prepConn = Stack.Role("PrepConn")
+
+    /**
+     * Defines a preallocated position in the stack for protocols to inject tracing.
+     */
     val protoTracing = Stack.Role("protoTracing")
   }
 
@@ -274,7 +310,7 @@ object StackClient {
     stk.push(LoadBalancerFactory.module)
     stk.push(StatsFactoryWrapper.module)
     stk.push(Role.requestDraining, (fac: ServiceFactory[Req, Rep]) => new RefcountedFactory(fac))
-    stk.push(TimeoutFactory.module)
+    stk.push(TimeoutFactory.module(Role.postNameResolutionTimeout))
     stk.push(Role.prepFactory, identity[ServiceFactory[Req, Rep]](_))
     stk.push(FactoryToService.module)
     stk.push(Retries.moduleRequeueable)
@@ -336,7 +372,7 @@ object StackClient {
     stk.push(AddrMetadataExtraction.module)
     stk.push(EndpointRecorder.module)
     stk.push(BindingFactory.module)
-    stk.push(TimeoutFactory.module)
+    stk.push(TimeoutFactory.module(Role.nameResolutionTimeout))
     stk.push(FactoryToService.module)
 
     /*
