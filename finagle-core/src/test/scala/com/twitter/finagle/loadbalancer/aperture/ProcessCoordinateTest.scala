@@ -1,6 +1,7 @@
 package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.util.Closable
+import org.scalacheck.Gen
 import org.scalatest.FunSuite
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
@@ -35,22 +36,25 @@ class ProcessCoordinateTest extends FunSuite with GeneratorDrivenPropertyChecks 
     assert(coord0 != coord1)
   }
 
+  private[this] val IdAndCount = for {
+    count <- Gen.choose[Int](1, Int.MaxValue)
+    id <- Gen.choose[Int](0, count - 1)
+  } yield id -> count
+
   test("setCoordinate range") {
     ProcessCoordinate.setCoordinate(0, 1)
     val sample = ProcessCoordinate()
     assert(sample.isDefined)
     assert(1.0 - sample.get.unitWidth <= 1e-6)
 
-    forAll { (instanceId: Int, numInstances: Int) =>
-      whenever(instanceId >= 0 && numInstances > 0) {
-        ProcessCoordinate.setCoordinate(instanceId, numInstances)
-        val sample = ProcessCoordinate()
-        assert(sample.isDefined)
-        val offset = sample.get.offset
-        val width = sample.get.unitWidth
-        assert(offset >= 0 && offset < 1.0)
-        assert(width > 0 && width <= 1.0)
-      }
+    forAll(IdAndCount) { case (instanceId, numInstances) =>
+      ProcessCoordinate.setCoordinate(instanceId, numInstances)
+      val sample = ProcessCoordinate()
+      assert(sample.isDefined)
+      val offset = sample.get.offset
+      val width = sample.get.unitWidth
+      assert(offset >= 0 && offset < 1.0)
+      assert(width > 0 && width <= 1.0)
     }
   }
 
