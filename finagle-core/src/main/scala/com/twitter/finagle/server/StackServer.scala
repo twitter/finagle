@@ -63,7 +63,8 @@ object StackServer {
     // this goes near the listener so it is close to where the handling happens.
     stk.push(ThreadUsage.module)
 
-    stk.push(new ExportSslUsageModule)
+    // `ExportSslUsage` exports the TLS parameter to the R* Registry
+    stk.push(ExportSslUsage.module)
 
     // We want to start expiring services as close to their instantiation
     // as possible. By installing `ExpiringService` here, we are guaranteed

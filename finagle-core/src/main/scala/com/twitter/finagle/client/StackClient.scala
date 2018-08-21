@@ -10,7 +10,7 @@ import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.param._
 import com.twitter.finagle.service._
 import com.twitter.finagle.stack.nilStack
-import com.twitter.finagle.stats.{LoadedHostStatsReceiver, ClientStatsReceiver}
+import com.twitter.finagle.stats.{ClientStatsReceiver, LoadedHostStatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.util.registry.GlobalRegistry
 
@@ -214,6 +214,7 @@ object StackClient {
     /*
      * These modules balance requests across cluster endpoints and
      * handle automatic requeuing of failed requests.
+     *  * `ExportSslUsage` exports the TLS parameter to the R* Registry
      *
      *  * `LoadBalancerFactory` balances requests across the endpoints
      *    of a cluster given by the `LoadBalancerFactory.Dest`
@@ -269,6 +270,7 @@ object StackClient {
      *     clients by client label. This needs to be near the top of the stack so that
      *     request failures anywhere lower in the stack have endpoints attributed to them.
      */
+    stk.push(ExportSslUsage.module)
     stk.push(LoadBalancerFactory.module)
     stk.push(StatsFactoryWrapper.module)
     stk.push(Role.requestDraining, (fac: ServiceFactory[Req, Rep]) => new RefcountedFactory(fac))
