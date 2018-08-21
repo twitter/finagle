@@ -155,8 +155,8 @@ New Features
     ``PHAB_ID=D188877``
 
   * finagle-thrift: Trait c.t.scrooge.ThriftService is now c.t.finagle.thrift.ThriftService.
-   Scrooge generated service objects now all inherit from c.t.finagle.thrift.GeneratedThriftService.
-   ``PHAB_ID=D180341``
+    Scrooge generated service objects now all inherit from c.t.finagle.thrift.GeneratedThriftService.
+    ``PHAB_ID=D180341``
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
@@ -869,6 +869,7 @@ Deprecations
 
   * finagle-base-http: With the intention to make `c.t.f.http.Cookie` immutable,
     `set` methods on `c.t.f.http.Cookie` have been deprecated:
+
       - `comment_=`
       - `commentUrl_=`
       - `domain_=`
@@ -880,6 +881,7 @@ Deprecations
       - `httpOnly_=`
       - `isDiscard_=`
       - `isSecure_=`
+
     Use the `c.t.f.http.Cookie` constructor to set `domain`, `maxAge`, `path`, `value`, `httpOnly`,
     and `secure`. `comment`, `commentUrl`, `ports`, `version`, and `discard` have been removed
     per RFC-6265. ``PHAB_ID=D82164``.
@@ -956,6 +958,7 @@ Deprecations
   * finagle-base-http: Encoding/decoding methods on `c.t.f.http.Request` and `c.t.f.http.Response`
     to/from Strings and arrays of bytes have been deprecated. Use the methods on
     `c.t.f.http.codec.HttpCodec` instead:
+
        - For `c.t.f.http.Request.encodeString`, use `c.t.f.Http.codec.HttpCodec.encodeRequestToString`
        - For `c.t.f.http.Request.encodeBytes`, use `c.t.f.Http.codec.HttpCodec.encodeRequestToBytes`
        - For `c.t.f.http.Request.decodeString`, use `c.t.f.Http.codec.HttpCodec.decodeStringToRequest`
@@ -963,6 +966,7 @@ Deprecations
        - For `c.t.f.http.Response.encodeString`, use `c.t.f.Http.codec.HttpCodec.encodeResponseToString`
        - For `c.t.f.http.Response.decodeString`, use `c.t.f.Http.codec.HttpCodec.decodeStringToResponse`
        - For `c.t.f.http.Response.decodeBytes`, use `c.t.f.Http.codec.HttpCodec.decodeBytesToResponse`
+
     ``PHAB_ID=D81341``
 
 Breaking API Changes
@@ -971,7 +975,7 @@ Breaking API Changes
   * finagle-core: Remove deprecated method `httpProxyTo(String, Option[Transporter.Credentials])`.
     Use `httpProxyTo(String, Transporter.Credentials]` instead. ``PHAB_ID=D84077``
 
-  * finagle-*-http: Netty 3 specific HTTP transport related code has been moved into its own
+  * finagle-\*-http: Netty 3 specific HTTP transport related code has been moved into its own
     project, finagle-netty3-http, in preparation for removing it from Finagle.
     ``PHAB_ID=D84101``
 
@@ -1302,7 +1306,7 @@ Breaking API Changes
     be rebuilt. ``RB_ID=916956``
 
   * finagle-base-http: Remove deprecated `c.t.f.http.Message.ContentTypeWwwFrom`.
-    Use `c.t.f.http.Message.ContentTypeWwwForm` instead. ``RB_ID=915543`
+    Use `c.t.f.http.Message.ContentTypeWwwForm` instead. ``RB_ID=915543``
 
   * finagle-exception: Remove deprecated `c.t.f.exception.Reporter.clientReporter` and
     `c.t.f.exception.Reporter.sourceReporter`. Use `c.t.f.exception.Reporter.monitorFactory`
@@ -1338,10 +1342,12 @@ Breaking API Changes
     ``RB_ID=917137``
 
   * finagle-mysql: Remove deprecated methods on `c.t.f.Mysql`:
+
       - `withCredentials`; use `c.t.f.Mysql.client.withCredentials` instead
       - `withDatabase`; use `c.t.f.Mysql.client.withDatabase` instead
       - `withCharset`; use `c.t.f.Mysql.client.withCharset` instead
       - `configured`; use `c.t.f.Mysql.client.configured` instead
+
     ``RB_ID=916418``
 
   * finagle-native: Removed from the project. ``RB_ID=915204``
@@ -1415,22 +1421,28 @@ Breaking API Changes
     for a deprecated stats library.  Please move to finagle-stats instead.  ``RB_ID=910964``
 
   * finagle-core: SSL/TLS stack params for Finagle running Netty 4 have changed.
+
     - The `TlsConfig` param in `Transport` has been removed.
     - For client engines, the same two parameters as Finagle running Netty 3 are now used:
+
       - `ClientSsl` in `Transport`, which is used for configuring a client `Engine`'s hostname,
         key credentials, trust credentials, cipher suites, protocols, and application protocols.
       - `SslClientEngineFactory` in `SslClientEngineFactory`, which determines how the `Engine`
         is created based off of an `Address` and an `SslClientConfiguration`.
+
     - For server engines, the same two parameters as Finagle running Netty 3 are now used:
+
       - `ServerSsl` in `Transport`, which is used for configuring a server `Engine`'s key
         credentials, trust credentials, cipher suites, protocols, application protocols, and
         where the server supports or requires client authentication.
       - `SslServerEngineFactory` in `SslServerEngineFactory`, which determines how the `Engine`
         is created based off of an `SslServerConfiguration`.
+
     - Note: Not all client and server configurations work with all engine factories. Each engine
       factory should document what is not supported by that specific engine factory.
     - Note: By default, Finagle on Netty 4 will use the `Netty4ClientEngineFactory` and
       `Netty4ServerEngineFactory` respectively.
+
     ``RB_ID=910500``
 
   * finagle-core: Change the API to LoadBalancerFactory to a more concrete
@@ -1452,8 +1464,10 @@ Breaking API Changes
     since orderings were simplified and are no longer composite. ``RB_ID=914113``
 
   * finagle-core: Remove deprecated methods on `c.t.f.Client`:
+
       - newClient(dest: Group[SocketAddress])
       - newService(dest: Group[SocketAddress])
+
     ``RB_ID=914787``
 
   * finagle-core: `c.t.f.ListeningServer` no longer extends `c.t.f.Group`. Use
@@ -1485,6 +1499,7 @@ Breaking API Changes
     now use Netty 4 and cannot be configured for Netty 3. ``RB_ID=911031``
 
   * finagle-kestrel: Remove commands that are not supported by the client:
+
       - `com.twitter.finagle.kestrel.protocol.DumpConfig`
       - `com.twitter.finagle.kestrel.protocol.DumpStats`
       - `com.twitter.finagle.kestrel.protocol.FlushAll`
@@ -1492,6 +1507,7 @@ Breaking API Changes
       - `com.twitter.finagle.kestrel.protocol.ShutDown`
       - `com.twitter.finagle.kestrel.protocol.Stats`
       - `com.twitter.finagle.kestrel.protocol.Version`
+
     ``RB_ID=911206``
 
   * finagle-memcached: Remove deprecated `c.t.f.memcached.KetamaClientBuilder`. Use
@@ -1630,19 +1646,24 @@ Breaking API Changes
     internally. ``RB_ID=909718``
 
   * finagle-core: SSL/TLS stack params for Finagle running Netty 3 have changed.
+
       - The `TLSClientEngine` param in `Transport` has been replaced by two parameters:
+
         - `ClientSsl` in `Transport`, which is used for configuring a client `Engine`'s hostname,
           key credentials, trust credentials, cipher suites, protocols, and application protocols.
         - `SslClientEngineFactory` in `SslClientEngineFactory`, which determines how the `Engine`
           is created based off of an `Address` and an `SslClientConfiguration`.
+
       - The `TLSHostname` param in `Transporter` has been removed. Hostnames should be set as
         part of the `SslClientConfiguration` now.
       - The `TLSServerEngine` param in `Transport` has been replaced by two parameters:
+
         - `ServerSsl` in `Transport`, which is used for configuring a server `Engine`'s key
           credentials, trust credentials, cipher suites, protocols, application protocols, and
           whether the server supports or requires client authentication.
         - `SslServerEngineFactory` in `SslServerEngineFactory`, which determines how the `Engine`
           is created based off of an `SslServerConfiguration`.
+
       - Note: Not all client and server configurations work with all engine factories. Each engine
         factory should document what is not supported by that specific engine factory.
       - Note: Users using Finagle-Native should in the short term use `LegacyServerEngineFactory`
@@ -1653,6 +1674,7 @@ Breaking API Changes
         can explicitly handle those type of keys.
       - Note: By default, Finagle on Netty 3 will use the `JdkClientEngineFactory` and
         `JdkServerEngineFactory` respectively.
+
       ``RB_ID=907923``
 
   * finagle-core: `withLoadBalancer.connectionsPerEndpoint` was removed and moved

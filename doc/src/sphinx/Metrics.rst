@@ -224,6 +224,13 @@ protocol.
 
 .. include:: metrics/FailureDetector.rst
 
+Method Builder
+--------------
+
+Client metrics that are created when using :ref:`MethodBuilder <methodbuilder>`.
+
+.. include:: metrics/MethodBuilder.rst
+
 Transport
 ---------
 
