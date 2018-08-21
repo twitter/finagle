@@ -240,27 +240,36 @@ abstract class AbstractEndToEndTest
       await(client.close())
     }
 
-    if (!sys.props.contains("SKIP_FLAKY"))
-      testIfImplemented(TooLongStream)(
-        implName +
-          ": return 413s for chunked requests which stream too much data"
-      ) {
-        val service = new HttpService {
-          def apply(request: Request) = Future.value(Response())
-        }
-        val client = connect(service)
-
-        val justRight = Request("/")
-        assert(await(client(justRight)).status == Status.Ok)
-
-        val tooMuch = Request("/")
-        tooMuch.setChunked(true)
-        val w = tooMuch.writer
-        w.write(buf("a" * 1000)).before(w.close)
-        val res = await(client(tooMuch))
-        assert(res.status == Status.RequestEntityTooLarge)
-        await(client.close())
+    testIfImplemented(TooLongStream)(
+      implName +
+        ": return 413s for chunked requests which stream too much data"
+    ) {
+      val service = new HttpService {
+        def apply(request: Request) = Future.value(Response())
       }
+      val client = connect(service)
+
+      val justRight = Request("/")
+      assert(await(client(justRight)).status == Status.Ok)
+
+      val tooMuch = Request("/")
+      tooMuch.setChunked(true)
+      val w = tooMuch.writer
+      w.write(buf("a" * 1000)).before(w.close)
+      val res = client(tooMuch)
+      Await.ready(res, 5.seconds)
+
+      res.poll.get match {
+        case Return(resp) =>
+          assert(resp.status == Status.RequestEntityTooLarge)
+        case Throw(_: ChannelClosedException) =>
+          ()
+        case t =>
+          fail(s"expected a 413 or a ChannelClosedException, saw $t")
+      }
+
+      await(client.close())
+    }
   }
 
   def standardBehaviour(connect: HttpService => HttpService): Unit = {
