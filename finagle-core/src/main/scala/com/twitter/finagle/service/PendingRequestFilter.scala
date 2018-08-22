@@ -20,6 +20,9 @@ import scala.annotation.tailrec
  * Note that the "pending" stat recorded in c.t.f.StatsFilter can be
  * greater than L * N because requests can be between c.t.f.StatsFilter and
  * c.t.f.PendingRequestFilter when the stat is read.
+ *
+ * @see The [[https://twitter.github.io/finagle/guide/Servers.html#concurrency-limit user guide]]
+ *      for more details.
  */
 object PendingRequestFilter {
 
@@ -47,7 +50,11 @@ object PendingRequestFilter {
         case Param(Some(limit)) =>
           val param.Stats(stats) = _stats
           next.map(
-            new PendingRequestFilter[Req, Rep](limit, stats.scope("pending_requests")).andThen(_)
+            new PendingRequestFilter[Req, Rep](
+              limit,
+              stats.scope("pending_requests"),
+              PendingRequestsLimitExceeded
+            ).andThen(_)
           )
         case Param(None) => next
       }
@@ -60,15 +67,18 @@ object PendingRequestFilter {
 /**
  * A filter which limits the number of pending requests to a service.
  */
-private[finagle] final class PendingRequestFilter[Req, Rep](limit: Int, stats: StatsReceiver)
-    extends SimpleFilter[Req, Rep] {
-
-  import PendingRequestFilter._
+private[finagle] final class PendingRequestFilter[Req, Rep](
+  limit: Int,
+  stats: StatsReceiver,
+  pendingRequestLimitExceededException: Throwable
+) extends SimpleFilter[Req, Rep] {
 
   if (limit < 1)
     throw new IllegalArgumentException(s"request limit must be greater than zero, saw $limit")
 
   private[this] val rejections = stats.counter("rejected")
+  private[this] val requestConcurrency =
+    stats.addGauge("request_concurrency") { pending.floatValue() }
 
   private[this] val pending = new AtomicInteger(0)
   private[this] val decFn: Any => Unit = { _: Any =>
@@ -76,11 +86,11 @@ private[finagle] final class PendingRequestFilter[Req, Rep](limit: Int, stats: S
   }
 
   @tailrec
-  def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
+  final def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
     val currentPending = pending.get
     if (currentPending >= limit) {
       rejections.incr()
-      Future.exception(Failure.rejected(PendingRequestsLimitExceeded))
+      Future.exception(Failure.rejected(pendingRequestLimitExceededException))
     } else if (pending.compareAndSet(currentPending, currentPending + 1)) {
       service(req).respond(decFn)
     } else apply(req, service)

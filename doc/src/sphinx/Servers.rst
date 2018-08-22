@@ -73,8 +73,9 @@ override the default instance that simply logs exceptions onto a the standard ou
 Concurrency Limit
 ^^^^^^^^^^^^^^^^^
 
-The `Concurrency Limit` module is implemented by
-:src:`RequestSemaphoreFilter <com/twitter/finagle/filter/RequestSemaphoreFilter.scala>` and maintains
+The `Concurrency Limit` module is implemented by both
+:src:`RequestSemaphoreFilter <com/twitter/finagle/filter/RequestSemaphoreFilter.scala>` and
+:src:`PendingRequestFilter <com/twitter/finagle/service/PendingRequestFilter.scala>` and maintains
 the `concurrency` of the Finagle server.
 
 By default, this module is disabled, which means a Finagle server's requests concurrency is unbounded.
@@ -95,7 +96,10 @@ that might be handled concurrently by your server, use the following example [#e
 The `Concurrency Limit` module is configured with two parameters:
 
 1. `maxConcurrentRequests` - the number of requests allowed to be handled concurrently
-2. `maxWaiters` - the number of requests (on top of `maxConcurrentRequests`) allowed to be queued
+2. `maxWaiters` - the number of requests (on top of `maxConcurrentRequests`) allowed to be queued.
+    The value of this parameter determines which filter is used; if `maxWaiters` is 0, `PendingRequestFilter`
+    is used (saving the overhead of the waiters queue in AsyncSemaphore); otherwise,
+    `RequestSemaphoreFilter` is used.
 
 All the incoming requests on top of ``(maxConcurrentRequests + maxWaiters)`` will be
 `rejected` [#nack]_ by the server. That said, the `Concurrency Limit` module acts as

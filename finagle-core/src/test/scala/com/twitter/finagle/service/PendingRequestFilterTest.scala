@@ -16,7 +16,9 @@ class PendingRequestFilterTest extends FunSuite with OneInstancePerTest {
     p
   }
   val sr = new InMemoryStatsReceiver
-  val filteredSvc = new PendingRequestFilter(3, sr).andThen(svc)
+  val filteredSvc = new PendingRequestFilter(
+    3, sr, PendingRequestFilter.PendingRequestsLimitExceeded
+  ).andThen(svc)
 
   test("it rejects excessive requests with restartable failures") {
     val (p1, p2, p3) = (new Promise[Unit], new Promise[Unit], new Promise[Unit])

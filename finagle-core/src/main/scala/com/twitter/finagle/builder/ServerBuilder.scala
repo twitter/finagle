@@ -1,17 +1,12 @@
 package com.twitter.finagle.builder
 
 import com.twitter.util
-import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.finagle.{Server => FinagleServer, _}
-import com.twitter.finagle.filter.{MaskCancelFilter, RequestSemaphoreFilter, ServerAdmissionControl}
+import com.twitter.finagle.filter.{MaskCancelFilter, ServerAdmissionControl}
 import com.twitter.finagle.server.{Listener, StackBasedServer}
-import com.twitter.finagle.service.{ExpiringService, TimeoutFilter}
+import com.twitter.finagle.service.{ExpiringService, PendingRequestFilter, TimeoutFilter}
 import com.twitter.finagle.ssl.{ApplicationProtocols, CipherSuites, KeyCredentials}
-import com.twitter.finagle.ssl.server.{
-  SslServerConfiguration,
-  SslServerEngineFactory,
-  SslServerSessionVerifier
-}
+import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerEngineFactory, SslServerSessionVerifier}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
@@ -483,11 +478,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
    * }}}
    */
   def maxConcurrentRequests(max: Int): This = {
-    val sem =
-      if (max == Int.MaxValue) None
-      else Some(new AsyncSemaphore(max, 0))
-
-    _configured(RequestSemaphoreFilter.Param(sem))
+    _configured(PendingRequestFilter.Param(Some(max)))
   }
 
   /**
