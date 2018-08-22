@@ -2,16 +2,14 @@ package com.twitter.finagle.http
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
+import com.twitter.finagle.{Status => CoreStatus}
 import com.twitter.finagle.http.codec.ConnectionManager
 import com.twitter.finagle.http.exp.{IdentityStreamTransport, Multi, StreamTransportProxy}
 import com.twitter.finagle.transport.QueueTransport
 import com.twitter.io.{Buf, Pipe}
 import com.twitter.util.{Await, Future, Promise, Throw, Time}
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
 
-@RunWith(classOf[JUnitRunner])
 class HttpTransportTest extends FunSuite {
 
   test("exceptions in connection manager stay within Future context") {
@@ -76,7 +74,20 @@ class HttpTransportTest extends FunSuite {
     val readf = rep.reader.read(Int.MaxValue)
     assert(readf.poll == None)
 
+    // The request was not a keep alive request.
+    // But the connection manager is not idle yet, because the response isn't done.
+    // So it shouldn't close.
+    assert(!manager.shouldClose)
+    assert(trans.status != CoreStatus.Closed)
+
     repDone.setDone()
+
+    // The request was not a keep alive request.
+    // And now the connection manager is idle, because the response is done.
+    // So it should close, and the Transport.status should reflect that.
+    assert(manager.shouldClose)
+    assert(trans.status == CoreStatus.Closed)
+
     assert(Await.result(rw.close().before(readf), 10.seconds) == None)
     assert(manager.shouldClose)
     assert(closed)
