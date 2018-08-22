@@ -235,7 +235,7 @@ private[netty3] class Netty3Transporter[In, Out](
     val LatencyCompensation.Compensation(compensation) = params[LatencyCompensation.Compensation]
     val Transport.BufferSizes(sendBufSize, recvBufSize) = params[Transport.BufferSizes]
     val Transport.Liveness(readerTimeout, writerTimeout, keepAlive) = params[Transport.Liveness]
-    val Transport.Options(noDelay, reuseAddr) = params[Transport.Options]
+    val Transport.Options(noDelay, reuseAddr, _) = params[Transport.Options]
 
     val opts = new mutable.HashMap[String, Object]()
     opts += "connectTimeoutMillis" ->

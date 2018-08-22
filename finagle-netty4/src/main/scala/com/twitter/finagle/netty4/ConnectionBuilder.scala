@@ -27,6 +27,7 @@ import io.netty.channel.socket.nio.NioSocketChannel
 import java.lang.{Boolean => JBool, Integer => JInt}
 import java.net.SocketAddress
 import java.nio.channels.UnresolvedAddressException
+
 import scala.util.control.NonFatal
 
 /**
@@ -59,7 +60,7 @@ private final class ConnectionBuilder(
    *       the spawned channel.
    */
   def build[T](builder: Channel => Future[T]): Future[T] = {
-    val Transport.Options(noDelay, reuseAddr) = params[Transport.Options]
+    val Transport.Options(noDelay, reuseAddr, reusePort) = params[Transport.Options]
     val LatencyCompensation.Compensation(compensation) = params[LatencyCompensation.Compensation]
     val Transporter.ConnectTimeout(connectTimeout) = params[Transporter.ConnectTimeout]
     val Transport.BufferSizes(sendBufSize, recvBufSize) = params[Transport.BufferSizes]

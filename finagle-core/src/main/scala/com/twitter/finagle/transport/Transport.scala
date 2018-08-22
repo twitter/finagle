@@ -217,14 +217,24 @@ object Transport {
    *
    * @param reuseAddr enables or disables `SO_REUSEADDR` option on a
    *                  transport socket. Default is `true`.
+   *
+   * @param reusePort enables or disables `SO_REUSEPORT` option on a
+   *                  transport socket (Linux 3.9+ only). This option is only
+   *                  available when using finagle-netty4 and native epoll support
+   *                  is enabled. Default is `false`.
    */
-  case class Options(noDelay: Boolean, reuseAddr: Boolean) {
+  case class Options(noDelay: Boolean, reuseAddr: Boolean, reusePort: Boolean) {
+    def this(noDelay: Boolean, reuseAddr: Boolean) = this(noDelay, reuseAddr, reusePort = false)
+
     def mk(): (Options, Stack.Param[Options]) = (this, Options.param)
   }
 
   object Options {
     implicit val param: Stack.Param[Options] =
-      Stack.Param(Options(noDelay = true, reuseAddr = true))
+      Stack.Param(Options(noDelay = true, reuseAddr = true, reusePort = false))
+
+    def apply(noDelay: Boolean, reuseAddr: Boolean): Options =
+      this.apply(noDelay = noDelay, reuseAddr = reuseAddr, reusePort = false)
   }
 
   /**
