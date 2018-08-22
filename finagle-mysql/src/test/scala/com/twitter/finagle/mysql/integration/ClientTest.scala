@@ -1,10 +1,12 @@
 package com.twitter.finagle.mysql.integration
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.Mysql
+import com.twitter.finagle.{IndividualRequestTimeoutException, Mysql}
 import com.twitter.finagle.mysql._
+import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Await, Future}
 import java.sql.Date
+import org.scalatest.concurrent.Eventually
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 case class SwimmingRecord(
@@ -69,7 +71,8 @@ object SwimmingRecord {
 
 class ClientTest extends FunSuite
   with IntegrationClient
-  with BeforeAndAfterAll {
+  with BeforeAndAfterAll
+  with Eventually {
   import SwimmingRecord._
 
   private[this] def await[T](f: Future[T]): T =
@@ -263,6 +266,50 @@ class ClientTest extends FunSuite
     val second = cursorResult.stream.take(1)
     assert(first != second)
     cursorResult.close()
+  }
+
+  // NOTE: This relies on the timeout being shorter than the time it takes for
+  // the benchmark to run (1.34 sec). If the machine finishes the query before
+  // the timeout then it's possible the test will fail.
+  //
+  // We may wish to mark this test flaky if we observe that it fails.
+  test("client connection closed on interrupt") {
+    val stats: InMemoryStatsReceiver = new InMemoryStatsReceiver()
+
+    val timeoutClient: Client with Transactions = configureClient()
+      .withLabel("timeoutClient")
+      .withStatsReceiver(stats)
+      .withRequestTimeout(100.milliseconds)
+      .newRichClient(dest)
+
+    def poolSize: Int = {
+      stats.gauges.get(Seq("timeoutClient", "pool_size")) match {
+        case Some(f) => f().toInt
+        case None => -1
+      }
+    }
+
+    val processesQuery: String = "select * from information_schema.processlist"
+
+    // Running time on an early 2015 MacBook Pro.
+    // mysql> select benchmark(100000000, 1+1);
+    // <snip>
+    // 1 row in set (1.34 sec)
+    val expensiveQuery: String = "select benchmark(100000000, 1+1)"
+    val res: Future[Result] = timeoutClient.query(expensiveQuery)
+
+    intercept[IndividualRequestTimeoutException] {
+      await(res)
+    }
+
+    // Query timed out but it's still running on the server.
+    def processes: String = await(c.query(processesQuery)).asInstanceOf[ResultSet].rows.toString
+    assert(processes.contains(expensiveQuery))
+
+    // Client connection closed.
+    eventually {
+      assert(poolSize == 0)
+    }
   }
 
 }

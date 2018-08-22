@@ -230,6 +230,12 @@ private object StdClient {
 /**
  * Creates a standard implementation of the mysql client interfaces.
  *
+ * Note that command interrupts are handled by `GenSerialClientDispatcher`'s
+ * interrupt handler. It initiates closing the transport but does not cancel
+ * the interrupted command. That is, the client's connection will be closed,
+ * the server will finish executing the command, and no dependent work
+ * (e.g., via `flatMap`) will run.
+ *
  * @param factory the underlying factory used to checkout services from.
  * This is usually a finagle client.
  *
