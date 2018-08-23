@@ -1,6 +1,7 @@
 package com.twitter.finagle.netty4.ssl.server
 
-import com.twitter.finagle.netty4.ssl.Alpn
+import com.twitter.finagle.netty4.ssl.{Alpn, Netty4SslHandler}
+import com.twitter.finagle.param.Stats
 import com.twitter.finagle.ssl.{ApplicationProtocols, Engine}
 import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerEngineFactory, SslServerSessionVerifier}
 import com.twitter.finagle.transport.Transport
@@ -44,10 +45,12 @@ final private[finagle] class Netty4ServerSslChannelInitializer(params: Stack.Par
     )
   }
 
-  private[this] def createSslHandler(engine: Engine): SslHandler =
+  private[this] def createSslHandler(engine: Engine): SslHandler = {
     // Rip the `SSLEngine` out of the wrapper `Engine` and use it to
     // create an `SslHandler`.
-    new SslHandler(engine.self)
+    val statsReceiver = params[Stats].statsReceiver.scope("tls")
+    new Netty4SslHandler(engine, statsReceiver)
+  }
 
   private[this] def createSslConnectHandler(
     sslHandler: SslHandler,

@@ -1,19 +1,16 @@
 package com.twitter.finagle.netty4.ssl.client
 
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.netty4.ssl.Alpn
+import com.twitter.finagle.netty4.ssl.{Alpn,Netty4SslHandler}
+import com.twitter.finagle.param.Stats
 import com.twitter.finagle.ssl.{ApplicationProtocols, Engine}
-import com.twitter.finagle.ssl.client.{
-  SslClientConfiguration,
-  SslClientEngineFactory,
-  SslClientSessionVerifier
-}
+import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientEngineFactory, SslClientSessionVerifier}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Address, Stack}
 import com.twitter.util.Try
 import io.netty.channel.{Channel, ChannelInitializer, ChannelPipeline}
 import io.netty.handler.ssl.SslHandler
-import io.netty.util.concurrent.{Future => NettyFuture, GenericFutureListener}
+import io.netty.util.concurrent.{GenericFutureListener, Future => NettyFuture}
 
 private[finagle] object Netty4ClientSslChannelInitializer {
   /**
@@ -86,7 +83,8 @@ private[finagle] class Netty4ClientSslChannelInitializer(params: Stack.Params)
   private[this] def createSslHandler(engine: Engine): SslHandler = {
     // Rip the `SSLEngine` out of the wrapper `Engine` and use it to
     // create an `SslHandler`.
-    val ssl = new SslHandler(engine.self)
+    val statsReceiver = params[Stats].statsReceiver.scope("tls")
+    val ssl = new Netty4SslHandler(engine, statsReceiver)
 
     // Close channel on close_notify received from a remote peer.
     ssl.sslCloseFuture().addListener(closeChannelOnCloseNotify)

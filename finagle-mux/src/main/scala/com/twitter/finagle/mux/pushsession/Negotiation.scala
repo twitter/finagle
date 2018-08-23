@@ -9,7 +9,7 @@ import com.twitter.finagle.mux.{Handshake, Request, Response}
 import com.twitter.finagle.{Service, Stack, param}
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.logging.{Level, Logger}
-import com.twitter.util.{Future, Promise, Try, Return, Throw, Stopwatch}
+import com.twitter.util.{Future, Promise, Try, Return, Throw}
 
 /**
  * Abstraction of negotiation logic for push-based mux clients and servers
@@ -23,8 +23,7 @@ private[finagle] abstract class Negotiation(params: Stack.Params) {
 
   private[this] val tlsSr = statsReceiver.scope("tls")
   private[this] val tlsSuccessCounter = tlsSr.counter("upgrade", "success")
-  private[this] val tslFailureCounter = tlsSr.counter("upgrade", "incompatible")
-  private[this] val tlsHandshakeLatencyStat = tlsSr.stat("handshake_latency_ms")
+  private[this] val tlsFailureCounter = tlsSr.counter("upgrade", "incompatible")
 
   protected def builder(
     handle: PushChannelHandle[ByteReader, Buf],
@@ -76,7 +75,7 @@ private[finagle] abstract class Negotiation(params: Stack.Params) {
       }
     } catch {
       case exn: IncompatibleNegotiationException =>
-        tslFailureCounter.incr()
+        tlsFailureCounter.incr()
         log.fatal(
           exn,
           s"The local peer wanted $localEncryptLevel and the remote peer wanted" +
@@ -134,9 +133,7 @@ private[finagle] abstract class Negotiation(params: Stack.Params) {
     // interrupts by closing the underlying channel. This is what
     // `MuxClientNegotiatingSession` does.
     val p = Promise[Unit]
-    val elapsed = Stopwatch.start()
     val onHandshakeComplete: Try[Unit] => Unit = { result =>
-      tlsHandshakeLatencyStat.add(elapsed().inMillis)
       result match {
         case Return(_) => p.setDone
         case Throw(t) => p.setException(t)

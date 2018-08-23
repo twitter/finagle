@@ -95,3 +95,12 @@ Thrift
   frequently. Use the ``com.twitter.finagle.Thrift.param.MaxReusableBufferSize``
   param to set the max buffer size to the size of a typical thrift response for
   your server.
+
+SSL/TLS
+<<<<<<<
+
+**handshake_latency_ms**
+   A histogram of the tls handshake latency in milliseconds.
+
+**failed_handshake_latency_ms** `verbosity:debug`
+   A histogram of the failed tls handshake latency in milliseconds.
