@@ -32,7 +32,7 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
 
   test("DeadlineFilter should service the request when no deadline is set") {
     val res = deadlineService("marco")
-    assert(statsReceiver.counters.get(List("exceeded")) == None)
+    assert(statsReceiver.counters(List("exceeded")) == 0)
     assert(Await.result(res, 1.second) == "polo")
   }
 
@@ -52,7 +52,7 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
       Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.second)) {
         tc.advance(200.milliseconds)
         val res = deadlineService("marco")
-        assert(!statsReceiver.stats.contains(Seq("expired_ms")))
+        assert(statsReceiver.stats(Seq("expired_ms")) == Nil)
         assert(Await.result(res, 1.second) == "polo")
       }
     }
@@ -68,8 +68,7 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
         tc.advance(2.seconds)
         assert(Await.result(deadlineService("marco"), 1.second) == "polo")
         assert(statsReceiver.counters.get(List("exceeded")) == Some(1))
-        assert(statsReceiver.counters.get(List("exceeded_beyond_tolerance")) == None)
-        assert(statsReceiver.counters.get(List("rejected")) == None)
+        assert(statsReceiver.counters(List("rejected")) == 0)
       }
     }
   }
@@ -87,7 +86,6 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
         }
         assert(f.getMessage.contains("exceeded request deadline"))
         assert(statsReceiver.counters.get(List("exceeded")) == Some(1))
-        assert(statsReceiver.counters.get(List("exceeded_beyond_tolerance")) == None)
         assert(statsReceiver.counters.get(List("rejected")) == Some(1))
       }
     }
@@ -113,7 +111,6 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
         tc.advance(2.seconds)
         assert(Await.result(darkModeService("marco"), 1.second) == "polo")
         assert(statsReceiver.counters.get(List("exceeded")) == Some(1))
-        assert(statsReceiver.counters.get(List("exceeded_beyond_tolerance")) == None)
         assert(statsReceiver.counters.get(List("rejected")) == Some(1))
       }
     }
@@ -187,7 +184,7 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
       Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.seconds)) {
         tc.advance(2.seconds)
         Await.result(deadlineService("marco"), 1.second)
-        assert(statsReceiver.counters.get(List("rejected")) == None)
+        assert(statsReceiver.counters(List("rejected")) == 0)
       }
     }
   }

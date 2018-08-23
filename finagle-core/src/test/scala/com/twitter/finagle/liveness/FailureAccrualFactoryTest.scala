@@ -95,7 +95,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       }
       // Now failed
 
-      assert(statsReceiver.counters.get(List("removals")) == Some(1))
+      assert(statsReceiver.counters(List("removals")) == 1)
       assert(!factory.isAvailable)
       assert(!service.isAvailable)
 
@@ -228,7 +228,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
 
         // ensure that the ignorable not counted as a success, but that we can still send requests
         // (ProbeOpen state)
-        assert(stats.counters.get(List("revivals")) == None)
+        assert(stats.counters(List("revivals")) == 0)
         assert(stats.counter("probes")() == 1)
         assert(stats.counter("removals")() == 1)
         assert(faf.isAvailable)
@@ -246,7 +246,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
           Await.result(service(123), 5.seconds)
         }
       }
-      assert(statsReceiver.counters.get(List("removals")) == Some(1))
+      assert(statsReceiver.counters(List("removals")) == 1)
       assert(!factory.isAvailable)
       assert(!service.isAvailable)
 
@@ -254,8 +254,8 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       timer.tick()
 
       // Probing, not revived yet.
-      assert(statsReceiver.counters.get(List("removals")) == Some(1))
-      assert(statsReceiver.counters.get(List("revivals")) == None)
+      assert(statsReceiver.counters(List("removals")) == 1)
+      assert(statsReceiver.counters(List("revivals")) == 0)
 
       assert(factory.isAvailable)
       assert(service.isAvailable)
@@ -312,7 +312,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
 
         // The service should be available for a probe
         assert(statsReceiver.counters.get(List("removals")) == Some(1))
-        assert(statsReceiver.counters.get(List("revivals")) == None)
+        assert(statsReceiver.counters(List("revivals")) == 0)
         assert(factory.isAvailable)
         assert(service.isAvailable)
 
@@ -388,7 +388,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
 
         // The service should be available for a probe
         assert(statsReceiver.counters.get(List("removals")) == Some(1))
-        assert(statsReceiver.counters.get(List("revivals")) == None)
+        assert(statsReceiver.counters(List("revivals")) == 0)
         assert(factory.isAvailable)
         assert(service.isAvailable)
       }
@@ -592,7 +592,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       timer.tick()
 
       // Probing, not revived yet.
-      assert(statsReceiver.counters.get(List("revivals")) == None)
+      assert(statsReceiver.counters(List("revivals")) == 0)
       assert(statsReceiver.counters.get(List("removals")) == Some(1))
       assert(factory.isAvailable)
       assert(service.isAvailable)

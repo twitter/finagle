@@ -43,17 +43,17 @@ abstract class AbstractEndToEndTest
   object SetsPooledAllocatorMaxOrder extends Feature
 
   var saveBase: Dtab = Dtab.empty
-  val statsRecv: InMemoryStatsReceiver = new InMemoryStatsReceiver()
+  var statsRecv: InMemoryStatsReceiver = new InMemoryStatsReceiver()
 
   before {
     saveBase = Dtab.base
     Dtab.base = Dtab.read("/foo=>/bar; /baz=>/biz")
-    statsRecv.clear()
+    statsRecv = new InMemoryStatsReceiver()
   }
 
   after {
     Dtab.base = saveBase
-    statsRecv.clear()
+    statsRecv = new InMemoryStatsReceiver()
   }
 
   type HttpService = Service[Request, Response]
@@ -950,8 +950,8 @@ abstract class AbstractEndToEndTest
     }
     assert(e.isFlagged(FailureFlags.Rejected))
 
-    assert(!statsRecv.counters.contains(Seq(clientName, "failure_accrual", "removals")))
-    assert(!statsRecv.counters.contains(Seq(clientName, "retries", "requeues")))
+    assert(statsRecv.counters(Seq(clientName, "failure_accrual", "removals")) == 0)
+    assert(statsRecv.counters(Seq(clientName, "retries", "requeues")) == 0)
     assert(!statsRecv.counters.contains(Seq(clientName, "failures", "restartable")))
     assert(statsRecv.counters(Seq(clientName, "failures")) == 1)
     assert(statsRecv.counters(Seq(clientName, "requests")) == 1)
@@ -1243,7 +1243,7 @@ abstract class AbstractEndToEndTest
 
     val conn = await(client())
 
-    assert(sr.counters.get(Seq("client", "retries", "requeues")) == None)
+    assert(sr.counters(Seq("client", "retries", "requeues")) == 0)
 
     await(conn.close())
     await(server.close())

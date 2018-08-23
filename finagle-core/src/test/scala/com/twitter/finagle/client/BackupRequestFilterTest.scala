@@ -91,7 +91,7 @@ class BackupRequestFilterTest extends FunSuite
     tc.advance(3.seconds)
     timer.tick()
     assert(numBackupTimerTasks == 0)
-    assert(!statsReceiver.counters.contains(Seq("backups_sent")))
+    assert(statsReceiver.counters(Seq("backups_sent")) == 0)
     assert(brf.sendBackupAfterDuration > Duration.Zero)
   }
 
@@ -254,7 +254,7 @@ class BackupRequestFilterTest extends FunSuite
       // ensure result of original request returned
       assert(f.poll == Some(Return("orig")))
 
-      assert(!statsReceiver.counters.contains(Seq("backups_sent")))
+      assert(statsReceiver.counters(Seq("backups_sent")) == 0)
     }
   }
 
@@ -289,7 +289,7 @@ class BackupRequestFilterTest extends FunSuite
       // ensure result of original request is exception
       assert(f.poll == Some(Throw(exc)))
 
-      assert(!statsReceiver.counters.contains(Seq("backups_sent")))
+      assert(statsReceiver.counters(Seq("backups_sent")) == 0)
     }
   }
 
@@ -433,7 +433,7 @@ class BackupRequestFilterTest extends FunSuite
       assert(wp.percentile(50.percent) == 1.second.inMillis)
 
       assert(statsReceiver.counters(Seq("backups_sent")) == 1)
-      assert(!statsReceiver.counters.contains(Seq("backups_won")))
+      assert(statsReceiver.counters(Seq("backups_won")) == 0)
     }
   }
 
@@ -465,7 +465,7 @@ class BackupRequestFilterTest extends FunSuite
       assert(wp.percentile(50.percent) == 1.second.inMillis)
 
       assert(statsReceiver.counters(Seq("backups_sent")) == 1)
-      assert(!statsReceiver.counters.contains(Seq("backups_won")))
+      assert(statsReceiver.counters(Seq("backups_won")) == 0)
     }
   }
 
@@ -493,7 +493,7 @@ class BackupRequestFilterTest extends FunSuite
       assert(f.poll == Some(Return("backup")))
 
       assert(statsReceiver.counters(Seq("backups_sent")) == 1)
-      assert(!statsReceiver.counters.contains(Seq("backups_won")))
+      assert(statsReceiver.counters(Seq("backups_won")) == 0)
     }
   }
 
@@ -588,7 +588,7 @@ class BackupRequestFilterTest extends FunSuite
         p.setValue("orig")
         assert(f.poll == Some(Return("orig")))
         assert(statsReceiver.counters(Seq("budget_exhausted")) == 1)
-        assert(!statsReceiver.counters.contains(Seq("backups_sent")))
+        assert(statsReceiver.counters(Seq("backups_sent")) == 0)
       }
     }
   }
@@ -655,7 +655,7 @@ class BackupRequestFilterTest extends FunSuite
       p.setValue("orig")
       assert(f.poll == Some(Return("orig")))
       assert(statsReceiver.counters(Seq("budget_exhausted")) == 1)
-      assert(!statsReceiver.counters.contains(Seq("backups_sent")))
+      assert(statsReceiver.counters(Seq("backups_sent")) == 0)
     }
   }
 
@@ -761,7 +761,7 @@ class BackupRequestFilterTest extends FunSuite
       tc.advance(3.seconds)
       timer.tick()
       assert(numBackupTimerTasks == 0)
-      assert(!statsReceiver.counters.contains(Seq("backups_sent")))
+      assert(statsReceiver.counters(Seq("backups_sent")) == 0)
       assert(brf.sendBackupAfterDuration == 1.millisecond)
       assert(statsReceiver.stats(Seq("send_backup_after_ms")) == Seq(1))
     }

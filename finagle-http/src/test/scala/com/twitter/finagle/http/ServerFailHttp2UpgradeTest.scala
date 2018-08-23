@@ -24,7 +24,7 @@ class ServerFailHttp2UpgradeTest extends AbstractHttp1EndToEndTest {
 
     await(client(Request("/")))
 
-    assert(!statsRecv.counters.contains(Seq("server", "upgrade", "success")))
+    assert(statsRecv.counters(Seq("server", "upgrade", "success")) == 0)
     assert(!statsRecv.counters.contains(Seq("client", "upgrade", "success")))
 
     await(client.close())

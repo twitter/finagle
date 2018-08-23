@@ -184,7 +184,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     }
 
     assert(sr.counters(Seq("requests")) == 1)
-    assert(sr.counters.get(Seq("success")) == None)
+    assert(sr.counters(Seq("success")) == 0)
     assert(sr.counters(Seq("failures")) == 1)
     server.close()
   }
@@ -429,7 +429,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     }
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("client", "requests")) == 1)
-    assert(sr.counters.get(Seq("client", "success")) == None)
+    assert(sr.counters(Seq("client", "success")) == 0)
 
     // test that we can examine the request as well.
     intercept[InvalidQueryException] {
@@ -461,10 +461,10 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     }
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("thrift", "echo", "requests")) == 1)
-    assert(sr.counters.get(Seq("thrift", "echo", "success")) == None)
+    assert(sr.counters(Seq("thrift", "echo", "success")) == 0)
 
     assert(sr.counters(Seq("requests")) == 1)
-    assert(sr.counters.get(Seq("success")) == None)
+    assert(sr.counters.get(Seq("success")) == Some(0))
 
     // test that we can examine the request as well.
     intercept[InvalidQueryException] {
@@ -505,7 +505,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     }
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("client", "requests")) == 1)
-    assert(sr.counters.get(Seq("client", "success")) == None)
+    assert(sr.counters(Seq("client", "success")) == 0)
 
     // test that we can examine the request as well.
     intercept[thriftjava.InvalidQueryException] {
@@ -529,7 +529,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     }
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("requests")) == 1)
-    assert(sr.counters.get(Seq("success")) == None)
+    assert(sr.counters(Seq("success")) == 0)
 
     // test that we can examine the request as well.
     intercept[thriftjava.InvalidQueryException] {
@@ -627,10 +627,10 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     }
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("thrift", "echo", "requests")) == 1)
-    assert(sr.counters.get(Seq("thrift", "echo", "success")) == None)
+    assert(sr.counters(Seq("thrift", "echo", "success")) == 0)
 
     assert(sr.counters(Seq("requests")) == 1)
-    assert(sr.counters.get(Seq("success")) == None)
+    assert(sr.counters(Seq("success")) == 0)
 
     // test that we can examine the request as well.
     intercept[InvalidQueryException] {
@@ -684,10 +684,10 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     }
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("thrift", "echo", "requests")) == 1)
-    assert(sr.counters.get(Seq("thrift", "echo", "success")) == None)
+    assert(sr.counters(Seq("thrift", "echo", "success")) == 0)
 
     assert(sr.counters(Seq("requests")) == 1)
-    assert(sr.counters.get(Seq("success")) == None)
+    assert(sr.counters(Seq("success")) == 0)
 
     // test that we can examine the request as well.
     intercept[InvalidQueryException] {
@@ -855,7 +855,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     }
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("client", "requests")) == 1)
-    assert(sr.counters.get(Seq("client", "success")) == None)
+    assert(sr.counters(Seq("client", "success")) == 0)
 
     // test that we can mark a successfully deserialized result as a failure
     assert("safe" == await(client.echo("safe"), 10.seconds))
@@ -884,9 +884,9 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     }
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("requests")) == 1)
-    assert(sr.counters.get(Seq("success")) == None)
+    assert(sr.counters(Seq("success")) == 0)
     assert(sr.counters(Seq("thrift", "echo", "requests")) == 1)
-    assert(sr.counters.get(Seq("thrift", "echo", "success")) == None)
+    assert(sr.counters(Seq("thrift", "echo", "success")) == 0)
 
     // test that we can mark a successfully deserialized result as a failure
     assert("safe" == await(client.echo("safe"), 10.seconds))
@@ -913,7 +913,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     }
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("client", "requests")) == 1)
-    assert(sr.counters.get(Seq("client", "success")) == None)
+    assert(sr.counters(Seq("client", "success")) == 0)
 
     // test that we can mark a successfully deserialized result as a failure
     assert("safe" == await(client.echo("safe"), 10.seconds))
@@ -941,7 +941,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     }
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("requests")) == 1)
-    assert(sr.counters.get(Seq("success")) == None)
+    assert(sr.counters(Seq("success")) == 0)
 
     // test that we can mark a successfully deserialized result as a failure
     assert("safe" == await(client.echo("safe"), 10.seconds))
@@ -1008,9 +1008,9 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     }
     assert("hi".length == ex.errorCode)
     assert(clientStats.counters(Seq("client", "requests")) == 1)
-    assert(clientStats.counters.get(Seq("client", "success")) == None)
+    assert(clientStats.counters(Seq("client", "success")) == 0)
     assert(serverStats.counters(Seq("thrift", "echo", "requests")) == 1)
-    assert(serverStats.counters.get(Seq("thrift", "echo", "success")) == None)
+    assert(serverStats.counters(Seq("thrift", "echo", "success")) == 0)
 
     // test that we can mark a successfully deserialized result as a failure
     assert("safe" == await(client.echo("safe"), 10.seconds))

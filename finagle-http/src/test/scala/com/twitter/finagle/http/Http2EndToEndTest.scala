@@ -76,7 +76,7 @@ class Http2EndToEndTest extends AbstractEndToEndTest {
       assert(statsRecv.counters(Seq("client", "upgrade", "ignored")) == 1)
 
       // Should still be zero since the client didn't attempt the upgrade at all
-      assert(!statsRecv.counters.contains(Seq("server", "upgrade", "ignored")))
+      assert(statsRecv.counters(Seq("server", "upgrade", "ignored")) == 0)
       await(client.close())
     }
 
@@ -215,8 +215,11 @@ class Http2EndToEndTest extends AbstractEndToEndTest {
         val errorMsg = s"Upgraded when the client was $clientStatus, the server was " +
           s"$serverStatus, the client toggle was $clientToggleName, the server toggle was " +
           s"$serverToggleName"
-        assert(!sr.counters.contains(Seq("client", "upgrade", "success")), errorMsg)
-        assert(!sr.counters.contains(Seq("server", "upgrade", "success")), errorMsg)
+        val clientSuccess = sr.counters.get(Seq("client", "upgrade", "success"))
+        assert(clientSuccess.isEmpty || clientSuccess.contains(0), errorMsg)
+
+        val serverSuccess = sr.counters.get(Seq("server", "upgrade", "success"))
+        assert(serverSuccess.isEmpty || serverSuccess.contains(0), errorMsg)
       }
       await(Closable.all(client, server).close())
     }
@@ -249,7 +252,8 @@ class Http2EndToEndTest extends AbstractEndToEndTest {
           "Failed to upgrade when both parties were on")
       } else {
         assert(!sr.counters.contains(Seq("client", "upgrade", "success")))
-        assert(!sr.counters.contains(Seq("server", "upgrade", "success")))
+        val serverSuccess = sr.counters.get(Seq("server", "upgrade", "success"))
+        assert(serverSuccess.isEmpty || serverSuccess.contains(0L))
       }
       await(Closable.all(client, server).close())
     }
@@ -281,7 +285,7 @@ class Http2EndToEndTest extends AbstractEndToEndTest {
         assert(sr.counters.get(Seq("server", "upgrade", "success")) == Some(1),
           "Failed to upgrade when both parties were on")
       } else {
-        assert(!sr.counters.contains(Seq("client", "upgrade", "success")))
+        assert(sr.counters(Seq("client", "upgrade", "success")) == 0)
         assert(!sr.counters.contains(Seq("server", "upgrade", "success")))
       }
       await(Closable.all(client, server).close())

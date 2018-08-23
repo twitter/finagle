@@ -150,7 +150,7 @@ class ThresholdFailureDetectorTest
     tc.advance(1.milliseconds)
     latch.flip() // rtt = 1, maxPing = 1
     assert(n.get == 1)
-    assert(sr.counters.get(Seq("close")).isEmpty)
+    assert(sr.counters(Seq("close")) == 0)
     assert(d.status == Status.Open)
     tc.advance(10.milliseconds)
     timer.tick()
@@ -204,6 +204,6 @@ class ThresholdFailureDetectorTest
     assert(d.onClose.isDefined)
     assert(sr.counters(Seq("failures")) == 1)
     assert(sr.counters(Seq("close")) == 1)
-    assert(sr.counters.get(Seq("marked_busy")).isEmpty)
+    assert(sr.counters(Seq("marked_busy")) == 0)
   }
 }

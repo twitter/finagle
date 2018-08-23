@@ -112,7 +112,7 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
     val ctx = new TestContext(sharedStats)
     val handler = ctx.channelStatsHandler
 
-    assert(!sr.counters.contains(Seq(counterName)))
+    assert(sr.counters(Seq(counterName)) == 0)
     f(handler, ctx.ctx)
     assert(sr.counters(Seq(counterName)) == 1)
   }

@@ -9,11 +9,8 @@ import com.twitter.finagle.stats.{
 import com.twitter.finagle._
 import com.twitter.util._
 import java.util.concurrent.TimeUnit
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class StatsFilterTest extends FunSuite {
   val BasicExceptions = new CategorizingExceptionStatsHandler(_ => None, _ => None, rollup = false)
 
@@ -34,9 +31,9 @@ class StatsFilterTest extends FunSuite {
     val sr = new InMemoryStatsReceiver()
     val filter = new StatsFilter[String, String](sr)
     val promise = new Promise[String]
-    val svc = filter andThen new Service[String, String] {
-      def apply(request: String) = promise
-    }
+    val svc = filter.andThen(new Service[String, String] {
+      def apply(request: String): Promise[String] = promise
+    })
 
     Time.withCurrentTimeFrozen { tc =>
       svc("1")
@@ -52,7 +49,7 @@ class StatsFilterTest extends FunSuite {
       new StatsFilter[String, String](sr, StatsFilter.DefaultExceptions, TimeUnit.MICROSECONDS)
     val promise = new Promise[String]
     val svc = filter andThen new Service[String, String] {
-      def apply(request: String) = promise
+      def apply(request: String): Promise[String] = promise
     }
 
     Time.withCurrentTimeFrozen { tc =>
@@ -118,18 +115,14 @@ class StatsFilterTest extends FunSuite {
     for (exc <- Seq(BackupRequestLost, WriteException(BackupRequestLost))) {
       val (promise, receiver, statsService) = getService()
 
-      // It may seem strange to test for the absence
-      // of these keys, but StatsReceiver semantics are
-      // lazy: they are accessed only when incremented.
-
-      assert(!receiver.counters.contains(Seq("requests")))
-      assert(!receiver.counters.keys.exists(_ contains "failure"))
+      assert(receiver.counters(Seq("requests")) == 0)
+      assert(!receiver.counters.keys.exists(_.contains("failure")))
       statsService("foo")
       assert(receiver.gauges(Seq("pending"))() == 1.0)
       promise.setException(BackupRequestLost)
-      assert(!receiver.counters.keys.exists(_ contains "failure"))
-      assert(!receiver.counters.contains(Seq("requests")))
-      assert(!receiver.counters.contains(Seq("success")))
+      assert(!receiver.counters.keys.exists(_.contains("failure")))
+      assert(receiver.counters(Seq("requests")) == 0)
+      assert(receiver.counters(Seq("success")) == 0)
       assert(receiver.gauges(Seq("pending"))() == 0.0)
     }
   }
@@ -137,16 +130,16 @@ class StatsFilterTest extends FunSuite {
   test("don't report failures flagged FailureFlags.Ignorable") {
     val (promise, receiver, statsService) = getService()
 
-    assert(!receiver.counters.contains(Seq("requests")))
-    assert(!receiver.counters.keys.exists(_ contains "failure"))
+    assert(receiver.counters(Seq("requests")) == 0)
+    assert(!receiver.counters.keys.exists(_.contains("failure")))
     statsService("foo")
 
     assert(receiver.gauges(Seq("pending"))() == 1.0)
     promise.setException(Failure.ignorable("Ignore me (disappear)."))
 
-    assert(!receiver.counters.keys.exists(_ contains "failure"))
-    assert(!receiver.counters.contains(Seq("requests")))
-    assert(!receiver.counters.contains(Seq("success")))
+    assert(!receiver.counters.keys.exists(_.contains("failure")))
+    assert(receiver.counters(Seq("requests")) == 0)
+    assert(receiver.counters(Seq("success")) == 0)
     assert(receiver.gauges(Seq("pending"))() == 0.0)
   }
 
@@ -206,13 +199,13 @@ class StatsFilterTest extends FunSuite {
   test("should count failure requests only after they are finished") {
     val (promise, receiver, statsService) = getService()
 
-    assert(receiver.counters.contains(Seq("requests")) == false)
-    assert(receiver.counters.contains(Seq("failures")) == false)
+    assert(receiver.counters(Seq("requests")) == 0)
+    assert(!receiver.counters.contains(Seq("failures")))
 
     val f = statsService("foo")
 
-    assert(receiver.counters.contains(Seq("requests")) == false)
-    assert(receiver.counters.contains(Seq("failures")) == false)
+    assert(receiver.counters(Seq("requests")) == 0)
+    assert(!receiver.counters.contains(Seq("failures")))
 
     promise.setException(new Exception)
 
@@ -223,13 +216,13 @@ class StatsFilterTest extends FunSuite {
   test("should count successful requests only after they are finished") {
     val (promise, receiver, statsService) = getService()
 
-    assert(receiver.counters.contains(Seq("requests")) == false)
-    assert(receiver.counters.contains(Seq("failures")) == false)
+    assert(receiver.counters(Seq("requests")) == 0)
+    assert(!receiver.counters.contains(Seq("failures")))
 
     val f = statsService("foo")
 
-    assert(receiver.counters.contains(Seq("requests")) == false)
-    assert(receiver.counters.contains(Seq("failures")) == false)
+    assert(receiver.counters(Seq("requests")) == 0)
+    assert(!receiver.counters.contains(Seq("failures")))
 
     promise.setValue("whatever")
 

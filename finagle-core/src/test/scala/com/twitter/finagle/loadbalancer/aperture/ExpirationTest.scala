@@ -23,7 +23,7 @@ class ExpirationTest extends FunSuite with ApertureSuite {
       with Expiration[Unit, Unit] {
 
     def expired: Long = stats.counters(Seq("expired"))
-    def noExpired: Boolean = stats.counters.get(Seq("expired")).isEmpty
+    def noExpired: Boolean = stats.counters(Seq("expired")) == 0
 
     protected def endpointIdleTime: Duration = idleTime / 2
     protected def statsReceiver: StatsReceiver = stats

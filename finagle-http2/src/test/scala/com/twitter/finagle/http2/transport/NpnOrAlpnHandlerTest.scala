@@ -59,6 +59,6 @@ class NpnOrAlpnHandlerTest extends FunSuite with BeforeAndAfter with MockitoSuga
     pipeline.fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS)
     assert(pipeline.names().contains(HttpCodecName))
     assert(!pipeline.names().contains(Http2CodecName))
-    assert(!stats.counters.contains(Seq("upgrade", "success")))
+    assert(stats.counters(Seq("upgrade", "success")) == 0)
   }
 }

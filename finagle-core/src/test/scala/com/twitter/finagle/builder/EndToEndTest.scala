@@ -230,9 +230,9 @@ class EndToEndTest extends FunSuite {
 
     val requestFailures = mem.counters(Seq("client", "failures"))
     val requeues =
-      mem.counters.get(Seq("client", "retries", "requeues"))
+      mem.counters(Seq("client", "retries", "requeues"))
     assert(requestFailures == 1)
-    assert(requeues == None)
+    assert(requeues == 0)
   }
 
   test("ClientBuilder should be properly instrumented on service acquisition failure") {
@@ -264,11 +264,11 @@ class EndToEndTest extends FunSuite {
     val serviceCreationFailures =
       mem.counters(Seq("client", "service_creation", "failures"))
     val requeues =
-      mem.counters.get(Seq("client", "retries", "requeues"))
+      mem.counters(Seq("client", "retries", "requeues"))
 
     // initial write exception and no requeues
     assert(serviceCreationFailures == 1)
-    assert(requeues == None)
+    assert(requeues == 0)
   }
 
   test("ClientBuilder should be properly instrumented on success") {

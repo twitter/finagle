@@ -18,13 +18,13 @@ class ClientNackFilterTest extends FunSuite {
       def nackBody: Buf = Buf.Utf8("Non-chunked nack body")
 
       assert(await(client(Request("/foo"))).status == http.Status.Ok)
-      assert(serverSr.counters.get(Seq("myservice", "nacks")).isEmpty)
-      assert(clientSr.counters.get(Seq("http", "retries", "requeues")).isEmpty)
+      assert(serverSr.counters(Seq("myservice", "nacks")) == 0)
+      assert(clientSr.counters(Seq("http", "retries", "requeues")) == 0)
 
       // reuse connections
       assert(await(client(Request("/bar"))).status == http.Status.Ok)
       assert(clientSr.counters(Seq("http", "connects")) == 1)
-      assert(serverSr.counters.get(Seq("myservice", "nacks")).isEmpty)
+      assert(serverSr.counters(Seq("myservice", "nacks")) == 0)
 
       closeCtx()
     }

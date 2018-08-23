@@ -220,7 +220,7 @@ class RetriesTest extends FunSuite {
 
     // should not be requeued, but should have been retried
     // up to what the budget allows for.
-    assert(!stats.counters.contains(Seq("retries", "requeues")))
+    assert(stats.counters(Seq("retries", "requeues")) == 0)
     // the budget gives us 20, we should use only that many
     // and not all the way up to the RetryPolicy's allotment of 100.
     assert(Seq(20f) == stats.stats(Seq("retries")))
@@ -246,7 +246,7 @@ class RetriesTest extends FunSuite {
     }
 
     // should not have triggered either requeue or retries
-    assert(!stats.counters.contains(Seq("retries", "requeues")))
+    assert(stats.counters(Seq("retries", "requeues")) == 0)
     assert(Seq(0.0) == stats.stats(Seq("retries")))
     assert(0 == stats.counter("retries", "budget_exhausted")())
   }

@@ -107,8 +107,11 @@ class Http2AlpnTest extends AbstractEndToEndTest {
         val errorMsg = s"Upgraded when the client was $clientStatus, the server was " +
           s"$serverStatus, the client toggle was $clientToggleName, the server toggle was " +
           s"$serverToggleName"
-        assert(!sr.counters.contains(Seq("client", "upgrade", "success")), errorMsg)
-        assert(!sr.counters.contains(Seq("server", "upgrade", "success")), errorMsg)
+
+        val clientSuccess = sr.counters.get(Seq("client", "upgrade", "success"))
+        assert(clientSuccess.isEmpty || clientSuccess.contains(0), errorMsg)
+        val serverSuccess = sr.counters.get(Seq("server", "upgrade", "success"))
+        assert(serverSuccess.isEmpty || serverSuccess.contains(0L))
       }
       await(Closable.all(client, server).close())
     }

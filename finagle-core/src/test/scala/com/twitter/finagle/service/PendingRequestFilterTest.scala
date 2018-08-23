@@ -52,7 +52,7 @@ class PendingRequestFilterTest extends FunSuite with OneInstancePerTest {
     filteredSvc(p2)
     filteredSvc(p3)
 
-    assert(sr.counters.get(Seq("rejected")) == None)
+    assert(sr.counters(Seq("rejected")) == 0)
 
     intercept[Failure] {
       Await.result(filteredSvc(Future.Done), 3.seconds)

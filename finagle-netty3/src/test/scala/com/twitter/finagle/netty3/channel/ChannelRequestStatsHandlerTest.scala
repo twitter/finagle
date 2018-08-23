@@ -20,13 +20,13 @@ class ChannelRequestStatsHandlerTest extends FunSuite with MockitoSugar {
     val e = mock[ChannelStateEvent]
     val msg = mock[MessageEvent]
 
-    assert(sr.stats.get(Seq("connection_requests")) == None)
+    assert(sr.stats(Seq("connection_requests")) == Nil)
     handler.channelOpen(ctx, e)
 
     when(ctx.getAttachment.asInstanceOf[AtomicInteger]).thenReturn(cnt)
     handler.messageReceived(ctx, msg)
     handler.messageReceived(ctx, msg)
-    assert(sr.stats.get(Seq("connection_requests")) == None)
+    assert(sr.stats(Seq("connection_requests")) == Nil)
 
     handler.channelClosed(ctx, e)
     assert(sr.stats(Seq("connection_requests")) == Seq(2.0f))

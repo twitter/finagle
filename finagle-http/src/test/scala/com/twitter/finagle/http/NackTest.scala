@@ -85,7 +85,7 @@ class NackTest extends FunSuite {
         case _ => fail("Response was not a non-restartable failure")
       }
 
-      assert(clientSr.counters.get(Seq("http-client", "requeue", "requeues")) == None)
+      assert(!clientSr.counters.contains(Seq("http-client", "requeue", "requeues")))
       assert(serverSr.counters(Seq("myservice", "nonretryable_nacks")) == 1)
 
       Closable.all(client, server).close()
@@ -168,17 +168,17 @@ class NackTest extends FunSuite {
       val rep = Await.result(client(request), timeout)
       assert(rep.status == Status.InternalServerError)
       assert(rep.headerMap.get(HttpNackFilter.RetryableNackHeader) == None)
-      assert(clientSr.counters.get(Seq("http-client", "requeue", "requeues")) == None)
+      assert(!clientSr.counters.contains(Seq("http-client", "requeue", "requeues")))
 
       n.set(-1)
       val rep2 = Await.result(client(request), timeout)
       assert(rep2.status == Status.InternalServerError)
       assert(rep2.headerMap.get(HttpNackFilter.NonRetryableNackHeader) == None)
 
-      assert(serverSr.counters.get(Seq("myservice", "success")) == None)
+      assert(serverSr.counters(Seq("myservice", "success")) == 0)
       assert(serverSr.counters(Seq("myservice", "failures")) == 2)
-      assert(serverSr.counters.get(Seq("myservice", "nacks")) == None)
-      assert(serverSr.counters.get(Seq("myservice", "nonretryable_nacks")) == None)
+      assert(!serverSr.counters.contains(Seq("myservice", "nacks")))
+      assert(!serverSr.counters.contains(Seq("myservice", "nonretryable_nacks")))
       Closable.all(client, server).close()
     }
   }
@@ -203,12 +203,12 @@ class NackTest extends FunSuite {
       assert(rep.status == Status.InternalServerError)
       assert(rep.headerMap.get(HttpNackFilter.RetryableNackHeader) == None)
       assert(rep.headerMap.get(HttpNackFilter.NonRetryableNackHeader) == None)
-      assert(clientSr.counters.get(Seq("http-client", "requeue", "requeues")) == None)
+      assert(!clientSr.counters.contains(Seq("http-client", "requeue", "requeues")))
 
-      assert(serverSr.counters.get(Seq("myservice", "success")) == None)
+      assert(serverSr.counters(Seq("myservice", "success")) == 0)
       assert(serverSr.counters(Seq("myservice", "failures")) == 1)
-      assert(serverSr.counters.get(Seq("myservice", "nacks")) == None)
-      assert(serverSr.counters.get(Seq("myservice", "nonretryable_nacks")) == None)
+      assert(serverSr.counters(Seq("myservice", "nacks")) == 0)
+      assert(serverSr.counters(Seq("myservice", "nonretryable_nacks")) == 0)
 
       Closable.all(client, server).close()
     }

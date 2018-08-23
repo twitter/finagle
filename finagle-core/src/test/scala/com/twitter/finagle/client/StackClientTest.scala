@@ -167,7 +167,7 @@ abstract class AbstractStackClientTest
       assert(e == ex)
       failFastOn match {
         case Some(on) if !on =>
-          assert(ctx.sr.counters.get(Seq(name, "failfast", "marked_dead")) == None)
+          assert(!ctx.sr.counters.contains(Seq(name, "failfast", "marked_dead")))
           intercept[RuntimeException] { await(svc("hi2")) }
         case _ =>
           eventually {
@@ -343,7 +343,7 @@ abstract class AbstractStackClientTest
       // failing request and Busy | Closed load balancer => zero requeues
       _svcFacStatus = status
       await(cl().map(_("hi")))
-      assert(requeues.isEmpty)
+      assert(requeues == Some(0))
     })
   }
 
@@ -379,14 +379,14 @@ abstract class AbstractStackClientTest
 
     intercept[Failure] { await(cl()) }
 
-    assert(requeues.isEmpty)
+    assert(requeues == Some(0))
     assert(budget > 0)
   })
 
   test("service acquisition requeues respect Status.Open")(new RequeueCtx {
     _svcFacStatus = Status.Closed
     await(cl())
-    assert(requeues.isEmpty)
+    assert(requeues == Some(0))
     assert(budget > 0)
   })
 

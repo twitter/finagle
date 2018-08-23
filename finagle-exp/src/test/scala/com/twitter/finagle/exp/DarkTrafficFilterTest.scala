@@ -48,9 +48,9 @@ class DarkTrafficFilterTest extends FunSuite with MockitoSugar {
       assert(Await.result(filter(request, service)) == response)
 
       verify(service).apply(request)
-      assert(statsReceiver.counters.get(Seq("test_applyCounts")) == None)
+      assert(statsReceiver.counters.get(Seq("test_applyCounts")) == Some(0))
 
-      assert(statsReceiver.counters.get(forwarded) == None)
+      assert(statsReceiver.counters.get(forwarded) == Some(0))
       assert(statsReceiver.counters.get(skipped) == Some(1))
     }
   }

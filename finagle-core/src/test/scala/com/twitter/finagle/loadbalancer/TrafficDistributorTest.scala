@@ -435,7 +435,7 @@ class TrafficDistributorTest extends FunSuite {
       assert(sr.counters(Seq("test", "loadbalancer", "removes")) == i - 1)
       assert(sr.gauges(Seq("test", "loadbalancer", "meanweight"))() == i)
       assert(sr.numGauges(Seq("test", "loadbalancer", "meanweight")) == 1)
-      assert(sr.counters.get(Seq("test", "closes")).isEmpty)
+      assert(sr.counters(Seq("test", "closes")) == 0)
     }
 
     va() = Addr.Bound(Set.empty[Address])

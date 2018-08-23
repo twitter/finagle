@@ -564,7 +564,7 @@ abstract class AbstractEndToEndTest
     }
     assert(ex.getMessage.contains("lolol"))
     assert(sr.counters(Seq("thrift", "requests")) == 1)
-    assert(sr.counters.get(Seq("thrift", "success")) == None)
+    assert(sr.counters(Seq("thrift", "success")) == 0)
     assert(sr.counters(Seq("thrift", "failures")) == 1)
 
     await(server.close())
@@ -661,11 +661,11 @@ abstract class AbstractEndToEndTest
     }
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("client", "requests")) == 1)
-    assert(sr.counters.get(Seq("client", "success")) == None)
+    assert(sr.counters(Seq("client", "success")) == 0)
     assert(sr.counters(Seq("client", "query", "requests")) == 1)
     eventually {
       assert(sr.counters(Seq("client", "query", "failures")) == 1)
-      assert(sr.counters.get(Seq("client", "query", "success")) == None)
+      assert(sr.counters(Seq("client", "query", "success")) == 0)
     }
 
     // test that we can examine the request as well.
@@ -714,10 +714,10 @@ abstract class AbstractEndToEndTest
     }
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("thrift", "query", "requests")) == 1)
-    assert(sr.counters.get(Seq("thrift", "query", "success")) == None)
+    assert(sr.counters.get(Seq("thrift", "query", "success")) == Some(0))
 
     assert(sr.counters(Seq("thrift", "requests")) == 1)
-    assert(sr.counters.get(Seq("thrift", "success")) == None)
+    assert(sr.counters.get(Seq("thrift", "success")) == Some(0))
 
     // test that we can examine the request as well.
     intercept[InvalidQueryException] {
@@ -758,7 +758,7 @@ abstract class AbstractEndToEndTest
     }
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("client", "requests")) == 1)
-    assert(sr.counters.get(Seq("client", "success")) == None)
+    assert(sr.counters(Seq("client", "success")) == 0)
 
     // test that we can examine the request as well.
     intercept[thriftjava.InvalidQueryException] {
@@ -783,7 +783,7 @@ abstract class AbstractEndToEndTest
     }
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("thrift", "requests")) == 1)
-    assert(sr.counters.get(Seq("thrift", "success")) == None)
+    assert(sr.counters.get(Seq("thrift", "success")) == Some(0))
 
     // test that we can examine the request as well.
     intercept[thriftjava.InvalidQueryException] {
@@ -881,33 +881,40 @@ abstract class AbstractEndToEndTest
       "client"
     )
 
+    def thriftQuerySuccess: Long =
+      sr.counters.getOrElse(Seq("thrift", "query", "success"), 0L)
+
+    def thriftSuccess: Long =
+      sr.counters.getOrElse(Seq("thrift", "success"), 0L)
+
     val ex = intercept[InvalidQueryException] {
       await(client.query(TestService.Query.Args("hi")))
     }
+
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("thrift", "query", "requests")) == 1)
-    assert(sr.counters.get(Seq("thrift", "query", "success")) == None)
+    assert(thriftQuerySuccess == 0L)
 
     assert(sr.counters(Seq("thrift", "requests")) == 1)
-    assert(sr.counters.get(Seq("thrift", "success")) == None)
+    assert(thriftSuccess == 0)
 
     // test that we can examine the request as well.
     intercept[InvalidQueryException] {
       await(client.query(TestService.Query.Args("ok")))
     }
     assert(sr.counters(Seq("thrift", "query", "requests")) == 2)
-    assert(sr.counters(Seq("thrift", "query", "success")) == 1)
+    assert(thriftQuerySuccess == 1)
 
     assert(sr.counters(Seq("thrift", "requests")) == 2)
-    assert(sr.counters(Seq("thrift", "success")) == 1)
+    assert(thriftSuccess == 1)
 
     // test that we can mark a successfully deserialized result as a failure
     assert("safe" == await(client.query(TestService.Query.Args("safe"))))
     assert(sr.counters(Seq("thrift", "query", "requests")) == 3)
-    assert(sr.counters(Seq("thrift", "query", "success")) == 1)
+    assert(thriftQuerySuccess == 1)
 
     assert(sr.counters(Seq("thrift", "requests")) == 3)
-    assert(sr.counters(Seq("thrift", "success")) == 1)
+    assert(thriftSuccess == 1)
 
     // this query produces a Timeout exception in server side and it should be
     // translated to `Success`
@@ -915,10 +922,10 @@ abstract class AbstractEndToEndTest
       await(client.query(TestService.Query.Args("slow")))
     }
     assert(sr.counters(Seq("thrift", "query", "requests")) == 4)
-    assert(sr.counters(Seq("thrift", "query", "success")) == 2)
+    assert(thriftQuerySuccess == 2)
 
     assert(sr.counters(Seq("thrift", "requests")) == 4)
-    assert(sr.counters(Seq("thrift", "success")) == 2)
+    assert(thriftSuccess == 2)
     server.close()
   }
 
@@ -949,10 +956,10 @@ abstract class AbstractEndToEndTest
     }
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("thrift", "query", "requests")) == 1)
-    assert(sr.counters.get(Seq("thrift", "query", "success")) == None)
+    assert(sr.counters.get(Seq("thrift", "query", "success")) == Some(0))
 
     assert(sr.counters(Seq("thrift", "requests")) == 1)
-    assert(sr.counters.get(Seq("thrift", "success")) == None)
+    assert(sr.counters.get(Seq("thrift", "success")) == Some(0))
 
     // test that we can examine the request as well.
     intercept[InvalidQueryException] {
@@ -1124,7 +1131,7 @@ abstract class AbstractEndToEndTest
     }
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("client", "requests")) == 1)
-    assert(sr.counters.get(Seq("client", "success")) == None)
+    assert(sr.counters(Seq("client", "success")) == 0)
 
     // test that we can mark a successfully deserialized result as a failure
     assert("safe" == await(client.query("safe")))
@@ -1153,9 +1160,9 @@ abstract class AbstractEndToEndTest
     }
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("thrift", "requests")) == 1)
-    assert(sr.counters.get(Seq("thrift", "success")) == None)
+    assert(sr.counters.get(Seq("thrift", "success")) == Some(0))
     assert(sr.counters(Seq("thrift", "query", "requests")) == 1)
-    assert(sr.counters.get(Seq("thrift", "query", "success")) == None)
+    assert(sr.counters.get(Seq("thrift", "query", "success")) == Some(0))
 
     // test that we can mark a successfully deserialized result as a failure
     assert("safe" == Await.result(client.query("safe"), 10.seconds))
@@ -1182,7 +1189,7 @@ abstract class AbstractEndToEndTest
     }
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("client", "requests")) == 1)
-    assert(sr.counters.get(Seq("client", "success")) == None)
+    assert(sr.counters(Seq("client", "success")) == 0)
 
     // test that we can mark a successfully deserialized result as a failure
     assert("safe" == Await.result(client.query("safe")))
@@ -1211,7 +1218,7 @@ abstract class AbstractEndToEndTest
     }
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("thrift", "requests")) == 1)
-    assert(sr.counters.get(Seq("thrift", "success")) == None)
+    assert(sr.counters.get(Seq("thrift", "success")) == Some(0))
 
     // test that we can mark a successfully deserialized result as a failure
     assert("safe" == Await.result(client.query("safe"), 10.seconds))
@@ -1750,7 +1757,7 @@ abstract class AbstractEndToEndTest
       assert(sr.counters(Seq("client", "requests")) == 1)
       assert(sr.counters(Seq("client", "failures")) == 1)
       assert(sr.stats(Seq("client", "connection_duration")).size == 1)
-      assert(sr.counters.get(Seq("client", "retries", "requeues")) == None)
+      assert(sr.counters(Seq("client", "retries", "requeues")) == 0)
 
       intercept[ChannelClosedException](await(client.query("ok")))
       // reconnects on the second request
@@ -1843,7 +1850,7 @@ abstract class AbstractEndToEndTest
       // hung up on.
       assert(sr.counters(Seq("client", "connects")) >= 1)
       assert(sr.counters(Seq("client", "failures")) >= 1)
-      assert(!sr.counters.contains(Seq("client", "success")))
+      assert(sr.counters(Seq("client", "success")) == 0)
 
       await(closeServers())
     }
