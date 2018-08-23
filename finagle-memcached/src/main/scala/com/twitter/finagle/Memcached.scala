@@ -254,7 +254,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
      * has a single pipelined connection.
      */
     private val stack: Stack[ServiceFactory[Command, Response]] = StackClient.newStack
-      .replace(DefaultPool.Role, SingletonPool.module[Command, Response])
+      .replace(DefaultPool.Role, SingletonPool.module[Command, Response](allowInterrupts = true))
       .replace(ClientTracingFilter.role, MemcachedTracingFilter.Module)
 
     /**

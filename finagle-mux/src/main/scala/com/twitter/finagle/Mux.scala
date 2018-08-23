@@ -264,7 +264,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       param.TurnOnTlsFn(tlsEnable)
 
     private val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackClient.newStack
-      .replace(StackClient.Role.pool, SingletonPool.module[mux.Request, mux.Response])
+      .replace(StackClient.Role.pool, SingletonPool.module[mux.Request, mux.Response](allowInterrupts = true))
       .replace(BindingFactory.role, MuxBindingFactory)
       .prepend(PayloadSizeFilter.module(_.body.length, _.body.length))
       // Since NackAdmissionFilter should operate on all requests sent over

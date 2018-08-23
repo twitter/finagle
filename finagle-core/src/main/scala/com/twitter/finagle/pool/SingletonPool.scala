@@ -12,14 +12,19 @@ private[finagle] object SingletonPool {
 
   /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.pool.SingletonPool]].
+   *
+   * @param allowInterrupts forwards the parameter to the [[SingletonPool]] constructor.
+   * See the constructor for semantics. Note, this isn't a [[Stack.Param]] since it's not
+   * something we want to be configured by users, but rather it is a parameter for protocol
+   * implementors.
    */
-  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+  def module[Req, Rep](allowInterrupts: Boolean): Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module1[param.Stats, ServiceFactory[Req, Rep]] {
       val role: Stack.Role = SingletonPool.role
       val description = "Maintain at most one connection"
       def make(_stats: param.Stats, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = {
         val param.Stats(sr) = _stats
-        new SingletonPool(next, sr.scope("singletonpool"))
+        new SingletonPool(next, allowInterrupts, sr.scope("singletonpool"))
       }
     }
 
@@ -67,9 +72,22 @@ private[finagle] object SingletonPool {
  * ServiceFactory -- concurrent leases share the same, cached
  * service. A new Service is established whenever the service factory
  * fails or the current service has become unavailable.
+ *
+ * @param underlying the underlying shared resource which the pool manages.
+ *
+ * @param allowInterrupts Because the pool hands back a shared resource, it
+ * may be useful to manage interrupts such that they are isolated from independent
+ * service acquisition requests. Thus, setting this value to `false` will ensure that
+ * an outstanding dispatch to the underlying resource from the pool is uninterruptible
+ * but individual service acquisition requests are.
+ *
+ * @param statsReceiver the [[StatsReceiver]] that is used to report pool specific stats.
  */
-class SingletonPool[Req, Rep](underlying: ServiceFactory[Req, Rep], statsReceiver: StatsReceiver)
-    extends ServiceFactory[Req, Rep] {
+class SingletonPool[Req, Rep](
+  underlying: ServiceFactory[Req, Rep],
+  allowInterrupts: Boolean,
+  statsReceiver: StatsReceiver
+) extends ServiceFactory[Req, Rep] {
   import SingletonPool._
 
   private[this] val scoped = statsReceiver.scope("connects")
@@ -120,8 +138,14 @@ class SingletonPool[Req, Rep](underlying: ServiceFactory[Req, Rep], statsReceive
 
   // These two await* methods are required to trick the compiler into accepting
   // the definitions of 'apply' and 'close' as tail-recursive.
-  private[this] def awaitApply(done: Future[Unit], conn: ClientConnection) =
-    done before apply(conn)
+  private[this] def awaitApply(done: Future[Unit], conn: ClientConnection) = {
+    // `f` represents a request to `underlying` to acquire a new service.
+    val f = done.before(apply(conn))
+    // if we allow interrupts, we return a direct handle to the process. Otherwise,
+    // we returned a derivative future which can be interruptible but doesn't forward
+    // the interrupts to `f`.
+    if (allowInterrupts) f else f.interruptible
+  }
 
   @tailrec
   final def apply(conn: ClientConnection): Future[Service[Req, Rep]] = state.get match {

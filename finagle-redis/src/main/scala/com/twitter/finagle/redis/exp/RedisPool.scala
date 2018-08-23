@@ -49,10 +49,10 @@ class RedisPool(underlying: ServiceFactory[Command, Reply], statsReceiver: Stats
     extends ServiceFactory[Command, Reply] {
 
   private[this] val singletonPool =
-    new SingletonPool(underlying, statsReceiver.scope("singletonpool"))
+    new SingletonPool(underlying, true, statsReceiver.scope("singletonpool"))
 
   private[this] val subscribePool =
-    new SingletonPool(underlying, statsReceiver.scope("subscribepool"))
+    new SingletonPool(underlying, true, statsReceiver.scope("subscribepool"))
 
   final def apply(conn: ClientConnection): Future[Service[Command, Reply]] = {
     RedisPool.useFor() match {

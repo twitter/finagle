@@ -71,7 +71,7 @@ class PoolBench extends StdBenchAnnotations {
 class SingletonPoolBench extends StdBenchAnnotations {
   import PoolBench._
 
-  val singleton = new SingletonPool(underlying, NullStatsReceiver)
+  val singleton = new SingletonPool(underlying, true, NullStatsReceiver)
 
   @Benchmark
   def getAndPut(): Unit = Await.result(singleton().flatMap(_.close()))
