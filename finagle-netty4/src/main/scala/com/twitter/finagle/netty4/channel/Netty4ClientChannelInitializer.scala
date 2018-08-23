@@ -23,7 +23,7 @@ private[netty4] object Netty4ClientChannelInitializer {
  * @param params configuration parameters.
  * @param decoderFactory initialize per-channel decoder for emitting messages.
  */
-private[netty4] class Netty4ClientChannelInitializer[T](
+final private[netty4] class Netty4ClientChannelInitializer[T](
   params: Stack.Params,
   decoderFactory: Option[() => Decoder[T]] = None
 ) extends AbstractNetty4ClientChannelInitializer(params) {

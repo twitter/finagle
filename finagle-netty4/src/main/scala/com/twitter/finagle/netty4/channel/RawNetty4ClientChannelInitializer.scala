@@ -9,7 +9,7 @@ import io.netty.channel.{Channel, ChannelPipeline}
  * @param params configuration parameters.
  * @param pipelineInit a callback for initialized pipelines
  */
-private[netty4] class RawNetty4ClientChannelInitializer(
+final private[netty4] class RawNetty4ClientChannelInitializer(
   pipelineInit: ChannelPipeline => Unit,
   params: Stack.Params
 ) extends AbstractNetty4ClientChannelInitializer(params) {

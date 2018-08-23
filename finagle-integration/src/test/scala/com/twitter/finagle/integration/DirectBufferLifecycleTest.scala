@@ -14,9 +14,7 @@ import io.netty.channel.ChannelPipeline
 import io.netty.channel.embedded.EmbeddedChannel
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.transport.{TFramedTransport, TMemoryBuffer}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
 /**
  * The majority of finagle protocols manage inbound direct buffers in their netty pipeline.
@@ -25,13 +23,12 @@ import org.scalatest.junit.JUnitRunner
  *
  *  kestrel (implicitly via memcached)
  *  memcached
- *  mux (copying framer only)
+ *  mux
  *  thrift
- *
  *  mysql (coverage from c.t.f.netty4.channel.Netty4ClientChannelInitializerTest)
+ *  redis (uses framed n4 channel init so coverage comes from c.t.f.n4.channel.Netty4ClientChannelInitializerTest)
  *  http/1.1, http/2 (coverage from c.t.f.http.DirectPayloadsLifecycleTest)
  */
-@RunWith(classOf[JUnitRunner])
 class DirectBufferLifecycleTest extends FunSuite {
 
   /**
