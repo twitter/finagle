@@ -10,10 +10,10 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
-  * finagle-core: `c.t.f.FailureFlags` is now a public API. This is Finagle's
-    API for attaching metadata to an exception. As an example this is used to
-    check if an exception is known to be safe to retry. Java compatibility has
-    also been added. ``PHAB_ID=D202374``
+* finagle-core: `c.t.f.FailureFlags` is now a public API. This is Finagle's
+  API for attaching metadata to an exception. As an example this is used to
+  check if an exception is known to be safe to retry. Java compatibility has
+  also been added. ``PHAB_ID=D202374``
 
   * finagle-netty4: Allow sockets to be configured with the [SO_REUSEPORT](http://lwn.net/Articles/542629/) option
     when using native epoll, which allows multiple processes to bind and accept connections
