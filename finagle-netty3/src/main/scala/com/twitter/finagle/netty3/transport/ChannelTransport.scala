@@ -1,20 +1,17 @@
 package com.twitter.finagle.netty3.transport
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.transport.{Transport, TransportContext, LegacyContext}
+import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{ChannelClosedException, ChannelException, Status}
 import com.twitter.util.{Future, Promise, Return, Time}
 import java.net.SocketAddress
 import java.security.cert.Certificate
-import java.util.concurrent.atomic.AtomicBoolean
 import org.jboss.netty.channel._
-import org.jboss.netty.handler.ssl.SslHandler
-import scala.util.control.NonFatal
 
 class ChannelTransport[In, Out](ch: Channel)
     extends Transport[In, Out]
     with ChannelUpstreamHandler {
-  type Context = TransportContext
+  type Context = ChannelTransportContext
 
   private[this] var nneed = 0
   private[this] def need(n: Int): Unit = synchronized {
@@ -29,14 +26,13 @@ class ChannelTransport[In, Out](ch: Channel)
   ch.getPipeline.addLast("finagleTransportBridge", this)
 
   private[this] val readq = new AsyncQueue[Out]
-  private[this] val failed = new AtomicBoolean(false)
 
   private[this] val readInterruptHandler: PartialFunction[Throwable, Unit] = {
     case e => fail(e)
   }
 
   private[this] def fail(exc: Throwable): Unit = {
-    if (!failed.compareAndSet(false, true))
+    if (!context.failed.compareAndSet(false, true))
       return
 
     // Do not discard existing queue items. Doing so causes a race
@@ -49,7 +45,7 @@ class ChannelTransport[In, Out](ch: Channel)
     // returned to netty potentially allowing subsequent offers to the readq,
     // which should be illegal after failure.
     close()
-    closep.updateIfEmpty(Return(exc))
+    context.closep.updateIfEmpty(Return(exc))
   }
 
   override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent): Unit = {
@@ -143,34 +139,14 @@ class ChannelTransport[In, Out](ch: Channel)
     p
   }
 
-  def status: Status =
-    if (failed.get || !ch.isOpen) Status.Closed
-    else Status.Open
+  def status: Status = context.status
+  def localAddress: SocketAddress = context.localAddress
+  def remoteAddress: SocketAddress = context.remoteAddress
+  def peerCertificate: Option[Certificate] = context.peerCertificate
+  def onClose: Future[Throwable] = context.closep
+  def close(deadline: Time): Future[Unit] = context.close(deadline)
 
-  def close(deadline: Time): Future[Unit] = {
-    if (ch.isOpen)
-      Channels.close(ch)
-    closep.unit
-  }
+  override def toString = s"Transport<channel=$ch, onClose=${context.closep}>"
 
-  def localAddress: SocketAddress = ch.getLocalAddress()
-  def remoteAddress: SocketAddress = ch.getRemoteAddress()
-
-  val peerCertificate: Option[Certificate] =
-    ch.getPipeline.get(classOf[SslHandler]) match {
-      case null => None
-      case handler =>
-        try {
-          handler.getEngine.getSession.getPeerCertificates.headOption
-        } catch {
-          case NonFatal(_) => None
-        }
-    }
-
-  private[this] val closep = new Promise[Throwable]
-  val onClose: Future[Throwable] = closep
-
-  override def toString = s"Transport<channel=$ch, onClose=$closep>"
-
-  val context: TransportContext = new LegacyContext(this)
+  val context: ChannelTransportContext = new ChannelTransportContext(ch)
 }

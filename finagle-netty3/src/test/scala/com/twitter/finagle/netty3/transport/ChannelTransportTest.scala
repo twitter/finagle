@@ -4,17 +4,14 @@ import com.twitter.finagle.ChannelException
 import com.twitter.util.{Return, Throw, Await}
 import java.net.SocketAddress
 import org.jboss.netty.channel._
-import org.junit.runner.RunWith
 import org.mockito.Mockito
 import org.mockito.Mockito.{never, times, verify}
 import org.mockito.stubbing.OngoingStubbing
 import org.mockito.{Matchers, ArgumentCaptor}
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{OneInstancePerTest, FunSuite}
 import scala.language.reflectiveCalls
 
-@RunWith(classOf[JUnitRunner])
 class ChannelTransportTest extends FunSuite with MockitoSugar with OneInstancePerTest {
 
   // For some reason, the scala compiler has a difficult time with
