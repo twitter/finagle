@@ -7,14 +7,9 @@ import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
 import com.twitter.finagle.redis.util.BufToString
 import com.twitter.io.Buf
 import com.twitter.util.Await
-import org.junit.Ignore
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 
 import scala.collection.{Set => CollectionSet}
 
-@Ignore
-@RunWith(classOf[JUnitRunner])
 final class SetClientIntegrationSuite extends RedisClientTest {
 
   private[this] val oneElemAdded = 1

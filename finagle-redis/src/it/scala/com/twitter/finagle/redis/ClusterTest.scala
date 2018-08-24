@@ -2,13 +2,29 @@ package com.twitter.finagle.redis
 
 import com.twitter.finagle.Redis
 import com.twitter.finagle.redis.protocol.ClusterNode
-import com.twitter.finagle.redis.util.{RedisCluster, RedisMode}
+import com.twitter.finagle.redis.util.{RedisCluster, RedisMode, RedisTestHelper}
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Future}
 import java.net.InetSocketAddress
-import org.scalatest.BeforeAndAfterAll
+import org.scalactic.source.Position
+import org.scalatest.{BeforeAndAfterAll, Tag}
 
 trait ClusterClientTest extends RedisTest with BeforeAndAfterAll {
+
+  override def test(
+    testName: String,
+    testTags: Tag*
+  )(
+    f: => Any
+  )(
+    implicit pos: Position
+  ): Unit = {
+    if (RedisTestHelper.redisServerExists) {
+      super.test(testName, testTags: _*)(f)(pos)
+    } else {
+      ignore(testName)(f)(pos)
+    }
+  }
 
   val TotalHashSlots: Int = 16384
   val LastHashSlot: Int = TotalHashSlots-1
@@ -138,8 +154,6 @@ trait ClusterClientTest extends RedisTest with BeforeAndAfterAll {
     } yield ()
 
   }
-
-
 
   private def reshardSingle(a: ClusterClient, aId: String, b: ClusterClient, bNode: ClusterNode)(slot: Int): Future[Unit] = for {
     // The protocol has four steps:

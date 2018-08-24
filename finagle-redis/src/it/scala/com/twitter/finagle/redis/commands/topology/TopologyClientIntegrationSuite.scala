@@ -6,12 +6,7 @@ import com.twitter.finagle.redis.RedisClientTest
 import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Return}
-import org.junit.Ignore
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 
-@Ignore
-@RunWith(classOf[JUnitRunner])
 final class TopologyClientIntegrationSuite extends RedisClientTest {
 
   val TIMEOUT = 10.seconds
@@ -22,26 +17,26 @@ final class TopologyClientIntegrationSuite extends RedisClientTest {
   protected val bufValNonNumeric = Buf.Utf8("g")
   protected val bufValLarge = Buf.Utf8("99999") // a value >= #databases (configured in redis)
 
-  test("Correctly perform TOPOLOGYADD", RedisTest, ClientTest) {
+  ignore("Correctly perform TOPOLOGYADD", RedisTest, ClientTest) {
     withRedisClient { client =>
       assert(Await.result(client.topologyAdd(bufKey, bufVal).liftToTry, TIMEOUT) == Return.Unit)
     }
   }
 
-  test("Correctly perform TOPOLOGYGET after TOPOLOGYADD", RedisTest, ClientTest) {
+  ignore("Correctly perform TOPOLOGYGET after TOPOLOGYADD", RedisTest, ClientTest) {
     withRedisClient { client =>
       assert(Await.result(client.topologyAdd(bufKey, bufVal).liftToTry, TIMEOUT) == Return.Unit)
       assert(Await.result(client.topologyGet(bufKey), TIMEOUT) == Some(bufVal))
     }
   }
 
-  test("Correctly perform TOPOLOGYDELETE", RedisTest, ClientTest) {
+  ignore("Correctly perform TOPOLOGYDELETE", RedisTest, ClientTest) {
     withRedisClient { client =>
       assert(Await.result(client.topologyDelete(bufKey).liftToTry, TIMEOUT) == Return.Unit)
     }
   }
 
-  test("Correctly perform TOPOLOGYGET after TOPOLOGYDELETE", RedisTest, ClientTest) {
+  ignore("Correctly perform TOPOLOGYGET after TOPOLOGYDELETE", RedisTest, ClientTest) {
     withRedisClient { client =>
       assert(Await.result(client.topologyDelete(bufKey).liftToTry, TIMEOUT) == Return.Unit)
       assert(Await.result(client.topologyGet(bufKey).liftToTry, TIMEOUT) == Return.None)

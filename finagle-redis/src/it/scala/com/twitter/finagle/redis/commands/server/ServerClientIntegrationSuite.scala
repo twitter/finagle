@@ -5,12 +5,7 @@ import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
 import com.twitter.util.Await
 import com.twitter.finagle.redis.util.BufToString
 import com.twitter.io.Buf
-import org.junit.Ignore
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 
-@Ignore
-@RunWith(classOf[JUnitRunner])
 final class ServerClientIntegrationSuite extends RedisClientTest {
 
   test("Correctly perform the FLUSHALL command", RedisTest, ClientTest) {

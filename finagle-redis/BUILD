@@ -10,3 +10,10 @@ target(
         "finagle/finagle-redis/src/test/scala",
     ],
 )
+
+target(
+    name = "integration-tests",
+    dependencies = [
+        "finagle/finagle-redis/src/it/scala",
+    ],
+)

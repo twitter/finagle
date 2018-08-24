@@ -7,12 +7,7 @@ import com.twitter.finagle.redis.{Client, ServerError}
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Future}
 import java.math.BigInteger
-import org.junit.Ignore
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 
-@Ignore
-@RunWith(classOf[JUnitRunner])
 class ScriptClientIntegrationSuite extends RedisClientTest {
   def stringToBuffer(s: String): Buf = Buf.Utf8(s)
 

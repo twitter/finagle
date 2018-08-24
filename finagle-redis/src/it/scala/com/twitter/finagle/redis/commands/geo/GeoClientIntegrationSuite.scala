@@ -1,4 +1,4 @@
-package com.twitter.finagle.redis.commands.geo
+package com.twitter.finagle.redis.integration
 
 
 import com.twitter.conversions.time._
@@ -8,9 +8,7 @@ import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
 import com.twitter.io.Buf
 import com.twitter.io.Buf.Utf8
 import com.twitter.util.{Await, Future}
-import org.junit.runner.RunWith
 import org.scalatest.{Matchers, OptionValues}
-import org.scalatest.junit.JUnitRunner
 
 class GeoClientIntegrationSuite extends RedisClientTest with Matchers with OptionValues {
   def await[A](a: Future[A]): A = Await.result(a, 5.seconds)
@@ -33,7 +31,7 @@ class GeoClientIntegrationSuite extends RedisClientTest with Matchers with Optio
     }
   }
 
-  test("Example in GEOHASH command page", RedisTest, ClientTest) {
+  ignore("Example in GEOHASH command page", RedisTest, ClientTest) {
     withRedisClient { client =>
       assert(await(client.geoAdd(sicily, palermoGeo, cataniaGeo)) === 2L)
       assert(await(client.geoHash(sicily, palermo, catania)) ===

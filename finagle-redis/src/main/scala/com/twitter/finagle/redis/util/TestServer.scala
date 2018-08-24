@@ -1,12 +1,25 @@
 package com.twitter.finagle.redis.util
 
 import java.net.{InetSocketAddress, Socket}
-import java.io.{BufferedWriter, FileWriter, PrintWriter, File}
+import java.io.{BufferedWriter, File, FileWriter, PrintWriter}
 import com.twitter.finagle.Redis
 import com.twitter.finagle.redis.Client
-import com.twitter.util.RandomSocket
+import java.util.concurrent.TimeUnit
 import scala.collection.JavaConverters._
 import scala.util.Random
+
+object RedisTestHelper {
+  def redisServerExists: Boolean = {
+    try {
+      val p = new ProcessBuilder("redis-server", "--help").start()
+      p.waitFor(10, TimeUnit.SECONDS)
+      val exitValue = p.exitValue()
+      exitValue == 0 || exitValue == 1
+    } catch {
+      case _: Exception => false
+    }
+  }
+}
 
 // Helper classes for spinning up a little redis cluster
 object RedisCluster { self =>
@@ -83,10 +96,7 @@ class ExternalRedis(mode: RedisMode = RedisMode.Standalone) {
   var address: Option[InetSocketAddress] = None
 
   private[this] def assertRedisBinaryPresent(): Unit = {
-    val p = new ProcessBuilder("redis-server", "--help").start()
-    p.waitFor()
-    val exitValue = p.exitValue()
-    require(exitValue == 0 || exitValue == 1, "redis-server binary must be present.")
+    require(RedisTestHelper.redisServerExists, "redis-server binary must be present.")
   }
 
   private[this] def findAddress(): Unit = {

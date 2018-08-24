@@ -3,12 +3,7 @@ package com.twitter.finagle.redis.integration
 import com.twitter.finagle.redis.RedisClientTest
 import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
 import com.twitter.util.{Await, Future, Return}
-import org.junit.Ignore
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 
-@Ignore
-@RunWith(classOf[JUnitRunner])
 final class HyperLogLogClientIntegrationSuite extends RedisClientTest {
 
   test("Correctly perform the PFADD command", RedisTest, ClientTest) {

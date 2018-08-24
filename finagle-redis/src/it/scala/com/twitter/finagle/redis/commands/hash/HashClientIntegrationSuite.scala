@@ -6,12 +6,7 @@ import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
 import com.twitter.finagle.redis.util.BufToString
 import com.twitter.io.Buf
 import com.twitter.util.Await
-import org.junit.Ignore
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 
-@Ignore
-@RunWith(classOf[JUnitRunner])
 final class HashClientIntegrationSuite extends RedisClientTest {
 
   val TIMEOUT = 5.seconds
@@ -76,7 +71,7 @@ final class HashClientIntegrationSuite extends RedisClientTest {
     }
   }
 
-  test("Correctly merge lkeys with destination and set expiry", RedisTest, ClientTest) {
+  ignore("Correctly merge lkeys with destination and set expiry", RedisTest, ClientTest) {
     withRedisClient { client =>
       Await.result(client.hMSet(bufFoo, Map(bufBaz -> bufBar)), TIMEOUT)
       Await.result(client.pExpire(bufFoo, 10000), TIMEOUT)
@@ -93,7 +88,7 @@ final class HashClientIntegrationSuite extends RedisClientTest {
     }
   }
 
-  test("Correctly merge lkeys with destination without expiry", RedisTest, ClientTest) {
+  ignore("Correctly merge lkeys with destination without expiry", RedisTest, ClientTest) {
     withRedisClient { client =>
       Await.result(client.hMSet(bufFoo, Map(bufBaz -> bufBar)), TIMEOUT)
       var result = Await.result(client.hMGet(bufFoo, Seq(bufBaz)), TIMEOUT).toList
@@ -107,7 +102,7 @@ final class HashClientIntegrationSuite extends RedisClientTest {
     }
   }
 
-  test("TTL updated on merge only if a field was added.", RedisTest, ClientTest) {
+  ignore("TTL updated on merge only if a field was added.", RedisTest, ClientTest) {
     withRedisClient { client =>
       Await.result(client.hMSet(bufFoo, Map(bufBaz -> bufBar)), TIMEOUT)
       Await.result(client.pExpire(bufFoo, 10000), TIMEOUT)

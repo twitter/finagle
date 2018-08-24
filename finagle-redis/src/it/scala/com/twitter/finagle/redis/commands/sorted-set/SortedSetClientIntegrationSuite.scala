@@ -7,12 +7,7 @@ import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
 import com.twitter.finagle.redis.util.BufToString
 import com.twitter.io.Buf
 import com.twitter.util.Await
-import org.junit.Ignore
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 
-@Ignore
-@RunWith(classOf[JUnitRunner])
 final class SortedSetClientIntegrationSuite extends RedisClientTest {
 
   val TIMEOUT = 5.seconds

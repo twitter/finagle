@@ -1,19 +1,10 @@
 package com.twitter.finagle.redis.integration
 
-import com.twitter.conversions.time._
-import com.twitter.finagle.redis.{ClusterClient, ClusterClientTest, ServerError}
+import com.twitter.finagle.redis.{ClusterClientTest, ServerError}
 import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
-import com.twitter.finagle.redis.util.{BufToString, RedisCluster}
-import com.twitter.finagle.util.DefaultTimer
-import com.twitter.io.Buf
-import com.twitter.logging.Logger
-import com.twitter.util.{Await, Awaitable, Future, Time}
-import org.junit.Ignore
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+import com.twitter.finagle.redis.util.RedisCluster
+import com.twitter.util.Await
 
-@Ignore
-@RunWith(classOf[JUnitRunner])
 final class ClusterClientIntegrationSuite extends ClusterClientTest {
 
   // Generate hash keys/slots for testing:

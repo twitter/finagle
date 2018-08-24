@@ -6,14 +6,9 @@ import com.twitter.finagle.redis.util.BufToString
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Duration}
 import java.util.UUID
-import org.junit.Ignore
-import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
-import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
 
-@Ignore
-@RunWith(classOf[JUnitRunner])
 final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll {
   var client: Client = _
   var dict: mutable.HashMap[String, mutable.HashMap[String, String]] = _
@@ -38,59 +33,59 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
     println("Done!")
   }
 
-  test("Correctly add outerkey, innerkey and value tuples using BADD command") {
+  ignore("Correctly add outerkey, innerkey and value tuples using BADD command") {
     testBadd(client, dict)
   }
 
-  test("Correctly return cardinality for outerkey using BCARD command") {
+  ignore("Correctly return cardinality for outerkey using BCARD command") {
     testBcard(client, dict)
   }
 
-  test("Correctly return value for outerkey, innerkey pair using BGET command") {
+  ignore("Correctly return value for outerkey, innerkey pair using BGET command") {
     testBget(client, dict)
   }
 
-  test("Correctly return BRANGE from start to end for outerkey") {
+  ignore("Correctly return BRANGE from start to end for outerkey") {
     testBrange(client, dict)
   }
 
-  test("Correctly return BRANGE from a start key that exists to the end for outerkey") {
+  ignore("Correctly return BRANGE from a start key that exists to the end for outerkey") {
     testBrangeInclusiveStart(client, dict)
   }
 
-  test("Correctly return BRANGE from start to end key that exists for outerkey") {
+  ignore("Correctly return BRANGE from start to end key that exists for outerkey") {
     testBrangeInclusiveEnd(client, dict)
   }
 
-  test("Correctly return BRANGE from start key to end key where both exist for outerkey") {
+  ignore("Correctly return BRANGE from start key to end key where both exist for outerkey") {
     testBrangeInclusiveStartEnd(client, dict)
   }
 
-  test("Correctly return BRANGE from start key that doesn't exist to end for outerkey") {
+  ignore("Correctly return BRANGE from start key that doesn't exist to end for outerkey") {
     testBrangeExclusiveStart(client, dict)
   }
 
-  test("Correctly return BRANGE from start to end key that doesn't exist for outerkey") {
+  ignore("Correctly return BRANGE from start to end key that doesn't exist for outerkey") {
     testBrangeExclusiveEnd(client, dict)
   }
 
-  test("Correctly return BRANGE from start key to end key where both don't exist for outerkey") {
+  ignore("Correctly return BRANGE from start key to end key where both don't exist for outerkey") {
     testBrangeExclusiveStartEnd(client, dict)
   }
 
-  test("Correctly return removal of innerkey value pairs for outerkey using BREM command") {
+  ignore("Correctly return removal of innerkey value pairs for outerkey using BREM command") {
     testBrem(client, dict)
   }
 
-  test("Correctly return cardinality function for outerkey using BCARD command") {
+  ignore("Correctly return cardinality function for outerkey using BCARD command") {
     testBcard(client, dict)
   }
 
-  test("Test commands for a key that doesn't exist") {
+  ignore("Test commands for a key that doesn't exist") {
     testCacheMissOnCommands(client, dict)
   }
 
-  test("Correctly merge lkeys with destination and set expiry") {
+  ignore("Correctly merge lkeys with destination and set expiry") {
     val bufFoo = Buf.Utf8("foo")
     val bufBoo = Buf.Utf8("boo")
     val bufBaz = Buf.Utf8("baz")
@@ -112,7 +107,7 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
     Await.result(client.flushAll(), TIMEOUT) //clear the keys
   }
 
-  test("Correctly merge lkeys with destination without expiry") {
+  ignore("Correctly merge lkeys with destination without expiry") {
     val bufFoo = Buf.Utf8("foo")
     val bufBoo = Buf.Utf8("boo")
     val bufBaz = Buf.Utf8("baz")
@@ -132,7 +127,7 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
     Await.result(client.flushAll(), TIMEOUT) //clear the keys
   }
 
-  test("TTL updated on merge only if a field was added.") {
+  ignore("TTL updated on merge only if a field was added.") {
     val bufFoo = Buf.Utf8("foo")
     val bufBoo = Buf.Utf8("boo")
     val bufBaz = Buf.Utf8("baz")

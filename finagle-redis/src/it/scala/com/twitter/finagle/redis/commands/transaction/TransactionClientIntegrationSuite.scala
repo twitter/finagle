@@ -6,12 +6,7 @@ import com.twitter.finagle.redis.protocol.{ErrorReply, Get, HDel, HMGet, HSet, I
 import com.twitter.finagle.redis.tags.{RedisTest, ClientTest}
 import com.twitter.finagle.redis.util.ReplyFormat
 import com.twitter.util.Await
-import org.junit.Ignore
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 
-@Ignore
-@RunWith(classOf[JUnitRunner])
 final class TransactionClientIntegrationSuite extends RedisClientTest {
 
   test("Correctly set and get transaction", RedisTest, ClientTest) {

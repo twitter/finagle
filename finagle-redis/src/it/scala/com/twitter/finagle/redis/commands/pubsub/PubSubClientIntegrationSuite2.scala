@@ -9,14 +9,9 @@ import com.twitter.io.Buf
 import com.twitter.util._
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
-import org.junit.Ignore
-import org.junit.runner.RunWith
 import org.scalatest.Matchers._
-import org.scalatest.junit.JUnitRunner
 import scala.collection.JavaConverters._
 
-@Ignore
-@RunWith(classOf[JUnitRunner])
 final class PubSubClientIntegrationSuite2 extends RedisClientTest {
 
   lazy val master: ExternalRedis = RedisCluster.start().head

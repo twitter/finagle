@@ -7,9 +7,10 @@ import com.twitter.finagle.Redis
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Awaitable, Duration, Future, Try}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.scalatest.{BeforeAndAfterAll, FunSuite}
+import org.scalatest.{BeforeAndAfterAll, FunSuite, Tag}
 import org.scalacheck.{Arbitrary, Gen}
 import java.net.InetSocketAddress
+import org.scalactic.source.Position
 import scala.language.implicitConversions
 
 trait RedisTest extends FunSuite {
@@ -285,6 +286,21 @@ trait RedisRequestTest extends RedisTest with GeneratorDrivenPropertyChecks with
 
 trait RedisClientTest extends RedisTest with BeforeAndAfterAll {
 
+  override def test(
+    testName: String,
+    testTags: Tag*
+  )(
+    f: => Any
+  )(
+    implicit pos: Position
+  ): Unit = {
+    if (RedisTestHelper.redisServerExists) {
+      super.test(testName, testTags: _*)(f)(pos)
+    } else {
+      ignore(testName)(f)(pos)
+    }
+  }
+
   implicit def s2b(s: String): Buf = Buf.Utf8(s)
   implicit def b2s(b: Buf): String = BufToString(b)
 
@@ -337,6 +353,21 @@ trait RedisClientTest extends RedisTest with BeforeAndAfterAll {
 }
 
 trait SentinelClientTest extends RedisTest with BeforeAndAfterAll {
+
+  override def test(
+    testName: String,
+    testTags: Tag*
+  )(
+    f: => Any
+  )(
+    implicit pos: Position
+  ): Unit = {
+    if (RedisTestHelper.redisServerExists) {
+      super.test(testName, testTags: _*)(f)(pos)
+    } else {
+      ignore(testName)(f)(pos)
+    }
+  }
 
   override def beforeAll(): Unit = {
     RedisCluster.start(count = count, mode = RedisMode.Standalone)

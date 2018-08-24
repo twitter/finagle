@@ -3,12 +3,7 @@ package com.twitter.finagle.redis.integration
 import com.twitter.finagle.redis._
 import com.twitter.finagle.redis.tags.{RedisTest, ClientTest}
 import com.twitter.util.{Await, Return}
-import org.junit.Ignore
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 
-@Ignore
-@RunWith(classOf[JUnitRunner])
 final class ConnectionClientIntegrationSuite extends RedisClientTest {
 
   test("Correctly perform the SELECT command", RedisTest, ClientTest) {

@@ -5,12 +5,7 @@ import com.twitter.finagle.redis.protocol.BitOp
 import com.twitter.finagle.redis.tags.{RedisTest, ClientTest}
 import com.twitter.io.Buf
 import com.twitter.util.Await
-import org.junit.Ignore
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 
-@Ignore
-@RunWith(classOf[JUnitRunner])
 final class StringClientIntegrationSuite extends RedisClientTest {
 
   test("Correctly perform the APPEND command", RedisTest, ClientTest) {

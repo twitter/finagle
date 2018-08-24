@@ -7,13 +7,8 @@ import com.twitter.finagle.redis.util._
 import com.twitter.io.Buf
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicInteger
-import org.junit.Ignore
-import org.junit.runner.RunWith
 import org.scalatest.Matchers._
-import org.scalatest.junit.JUnitRunner
 
-@Ignore
-@RunWith(classOf[JUnitRunner])
 final class PubSubClientIntegrationSuite extends RedisClientTest {
 
   test("Correctly perform the SUBSCRIBE/UNSUBSCRIBE command", RedisTest, ClientTest) {

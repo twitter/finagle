@@ -4,12 +4,7 @@ import com.twitter.finagle.redis.RedisClientTest
 import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
 import com.twitter.io.Buf
 import com.twitter.util.Await
-import org.junit.Ignore
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 
-@Ignore
-@RunWith(classOf[JUnitRunner])
 final class ListClientIntegrationSuite extends RedisClientTest {
 
   val IndexFailureMessage = "Unknown failure calling Index"

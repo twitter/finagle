@@ -6,12 +6,7 @@ import com.twitter.finagle.redis.tags.{RedisTest, ClientTest}
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Future}
 import java.util.Arrays
-import org.junit.Ignore
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 
-@Ignore
-@RunWith(classOf[JUnitRunner])
 final class KeyClientIntegrationSuite extends RedisClientTest {
 
   def await[A](a: Future[A]): A = Await.result(a, 5.seconds)
@@ -24,7 +19,7 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
     }
   }
 
-  test("Correctly perform the DUMP command", RedisTest, ClientTest) {
+  ignore("Correctly perform the DUMP command", RedisTest, ClientTest) {
     withRedisClient { client =>
       val k = Buf.Utf8("mykey")
       val v = Buf.Utf8("10")
