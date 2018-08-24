@@ -87,8 +87,8 @@ compatibility can be kept by adding a forwarding method. Note that we
 avoid adding default arguments because this is not a compatible change
 for our Java users.  However, when the benefits outweigh the costs, we
 are willing to break APIs. The break should be noted in the Breaking
-API Changes section of the [changelog](CHANGES). Note that changes to
-non-public APIs will not be called out in the [changelog](CHANGES).
+API Changes section of the [changelog][changes]. Note that changes to
+non-public APIs will not be called out in the [changelog][changes].
 
 ## Java
 
@@ -234,5 +234,5 @@ requests that improve the existing Scaladocs!
 [ssg]: http://docs.scala-lang.org/style/scaladoc.html
 [travis-ci]: https://travis-ci.org/twitter/finagle
 [metrics]: https://twitter.github.io/finagle/guide/Metrics.html
-[changes]: https://github.com/twitter/finagle/blob/develop/CHANGES
+[changes]: https://github.com/twitter/finagle/blob/develop/CHANGELOG.rst
 [gendrivenprop]: http://www.scalatest.org/user_guide/generator_driven_property_checks
