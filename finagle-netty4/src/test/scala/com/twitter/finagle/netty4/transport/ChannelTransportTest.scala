@@ -8,17 +8,14 @@ import com.twitter.util.{Await, Future, Return, Throw}
 import io.netty.channel.{ChannelException => _, _}
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.ssl.SslHandler
-import org.junit.runner.RunWith
 import org.scalatest.{FunSuite, OneInstancePerTest}
 import org.scalatest.concurrent.Eventually._
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.mockito.Mockito._
 import java.security.cert.Certificate
 import javax.net.ssl.{SSLEngine, SSLSession}
 
-@RunWith(classOf[JUnitRunner])
 class ChannelTransportTest
     extends FunSuite
     with GeneratorDrivenPropertyChecks

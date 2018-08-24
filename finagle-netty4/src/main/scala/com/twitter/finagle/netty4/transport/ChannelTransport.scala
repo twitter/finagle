@@ -1,15 +1,14 @@
 package com.twitter.finagle.netty4.transport
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle._
+import com.twitter.finagle.{ChannelClosedException, ChannelException, Failure, Status}
 import com.twitter.finagle.transport.Transport
-import com.twitter.util._
+import com.twitter.util.{Future, Promise, Return, Time}
 import io.netty.{channel => nettyChan}
-import io.netty.handler.ssl.SslHandler
 import java.net.SocketAddress
 import java.security.cert.Certificate
-import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
-import scala.util.control.{NonFatal, NoStackTrace}
+import java.util.concurrent.atomic.AtomicInteger
+import scala.util.control.NoStackTrace
 
 /**
  * A [[Transport]] implementation based on Netty's [[nettyChan.Channel]].
@@ -28,13 +27,9 @@ private[finagle] class ChannelTransport(
   omitStackTraceOnInactive: Boolean = false
 ) extends Transport[Any, Any] {
 
-  type Context = Netty4Context
+  type Context = ChannelTransportContext
 
   import ChannelTransport._
-
-  private[this] val failed = new AtomicBoolean(false)
-  private[this] val closed = new Promise[Throwable]
-  private[this] val alreadyClosed = new AtomicBoolean(false)
 
   private[this] val readInterruptHandler: PartialFunction[Throwable, Unit] = {
     case e =>
@@ -42,8 +37,6 @@ private[finagle] class ChannelTransport(
       // the transport on read interrupts, that becomes moot.
       fail(e)
   }
-
-  val onClose: Future[Throwable] = closed
 
   private[transport] object ReadManager {
     // Negative `msgsNeeded` means we're buffering data in our offer queue
@@ -79,7 +72,7 @@ private[finagle] class ChannelTransport(
   }
 
   private[this] def fail(exc: Throwable): Unit = {
-    if (!failed.compareAndSet(false, true))
+    if (!context.failed.compareAndSet(false, true))
       return
 
     // We do have to fail the queue before fail exits, otherwise control is
@@ -94,7 +87,7 @@ private[finagle] class ChannelTransport(
     // returned to netty potentially allowing subsequent offers to the queue,
     // which should be illegal after failure.
     close()
-    closed.updateIfEmpty(Return(exc))
+    context.closed.updateIfEmpty(Return(exc))
   }
 
   def write(msg: Any): Future[Unit] = {
@@ -136,33 +129,15 @@ private[finagle] class ChannelTransport(
     p
   }
 
-  def status: Status =
-    if (failed.get || !ch.isOpen) Status.Closed
-    else Status.Open
+  def status: Status = context.status
+  def onClose: Future[Throwable] = context.onClose
+  def localAddress: SocketAddress = context.localAddress
+  def remoteAddress: SocketAddress = context.remoteAddress
+  def peerCertificate: Option[Certificate] = context.peerCertificate
 
-  def close(deadline: Time): Future[Unit] = {
-    // we check if this has already been closed because of a netty bug
-    // https://github.com/netty/netty/issues/7638.  Remove this work-around once
-    // it's fixed.
-    if (alreadyClosed.compareAndSet(false, true) && ch.isOpen) ch.close()
-    closed.unit
-  }
+  def close(deadline: Time): Future[Unit] = context.close(deadline)
 
-  val peerCertificate: Option[Certificate] = ch.pipeline.get(classOf[SslHandler]) match {
-    case null => None
-    case handler =>
-      try {
-        handler.engine.getSession.getPeerCertificates.headOption
-      } catch {
-        case NonFatal(_) => None
-      }
-  }
-
-  def localAddress: SocketAddress = ch.localAddress
-
-  def remoteAddress: SocketAddress = ch.remoteAddress
-
-  override def toString = s"Transport<channel=$ch, onClose=$closed>"
+  override def toString = s"Transport<channel=$ch, onClose=${context.closed}>"
 
   ch.pipeline.addLast(
     HandlerName,
@@ -190,7 +165,7 @@ private[finagle] class ChannelTransport(
       }
 
       override def channelInactive(ctx: nettyChan.ChannelHandlerContext): Unit = {
-        alreadyClosed.set(true)
+        context.alreadyClosed.set(true)
         if (omitStackTraceOnInactive) {
           fail(new ChannelClosedException(remoteAddress) with NoStackTrace)
         } else fail(new ChannelClosedException(remoteAddress))
@@ -202,7 +177,7 @@ private[finagle] class ChannelTransport(
     }
   )
 
-  val context: Netty4Context = new Netty4Context(this, ch.eventLoop)
+  val context: ChannelTransportContext = new ChannelTransportContext(ch)
 }
 
 private[finagle] object ChannelTransport {

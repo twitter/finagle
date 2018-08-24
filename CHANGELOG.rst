@@ -43,6 +43,9 @@ Breaking API Changes
   * finagle-core: the valid range for the argument to `WindowedPercentileHistogram.percentile`
     is now [0.0..1.0], e.g., 0.95 means 95th percentile. ``PHAB_ID=D198915``
 
+  * finagle-netty4: The type of context of a `ChannelTransport` has been changed from a
+    `Netty4Context` to a `ChannelTransportContext`. ``PHAB_ID=D205794``
+
   * finagle-thrift: `DeserializeCtx` became `ClientDeserializeCtx` for client side response
     classification, add `ServerDeserializeCtx` to handle server side response classification.
     ``PHAB_ID=D196032``
