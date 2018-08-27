@@ -93,22 +93,25 @@ private class ForkJoinScheduler(nthreads: Int, statsReceiver: StatsReceiver = Nu
     }
   }
 
+  private def flushLocalScheduler(): Unit = {
+    var n = 0
+    while (local.hasNext) {
+      ForkJoinTask.adapt(local.next()).fork()
+      n += 1
+    }
+    if (n > 0) splitCount.addAndGet(n)
+  }
+
   def blocking[T](f: => T)(implicit perm: CanAwait): T = {
     Thread.currentThread() match {
       case _: IsManagedThread =>
         // Flush out our local scheduler before proceeding.
-        var n = 0
-        while (local.hasNext) {
-          ForkJoinTask.adapt(local.next()).fork()
-          n += 1
-        }
-        if (n > 0)
-          splitCount.addAndGet(n)
+        flushLocalScheduler()
 
         var res: T = null.asInstanceOf[T]
         ForkJoinPool.managedBlock(new ForkJoinPool.ManagedBlocker {
           @volatile private[this] var ok = false
-          override def block() = {
+          override def block(): Boolean = {
             numBlocks.incr()
             activeBlocks.incrementAndGet()
             res = try f
@@ -118,7 +121,7 @@ private class ForkJoinScheduler(nthreads: Int, statsReceiver: StatsReceiver = Nu
             }
             true
           }
-          override def isReleasable = ok
+          override def isReleasable: Boolean = ok
         })
         res
 
@@ -128,7 +131,14 @@ private class ForkJoinScheduler(nthreads: Int, statsReceiver: StatsReceiver = Nu
     }
   }
 
+  def flush(): Unit = Thread.currentThread() match {
+    case _: IsManagedThread =>
+      // Flush out our local scheduler before proceeding.
+      flushLocalScheduler()
+    case _ =>
+      // Nothing to do.
+  }
+
   // We can't provide useful/cheap implementations of these.
-  def numDispatches = -1L
-  def flush() = ()
+  def numDispatches: Long = -1L
 }
