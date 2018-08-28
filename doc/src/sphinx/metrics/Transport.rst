@@ -83,19 +83,6 @@ IdleChannelHandler
   A counter of the number of times a connection was disconnected because of a
   given idle state.
 
-Thrift
-<<<<<<
-
-**srv/thrift/buffer/resetCount**
-  A counter for the number of times the thrift server re-initialized the buffer
-  for thrift responses. The thrift server maintains a growable reusable buffer
-  for responses. Once the buffer reaches the threshold size it is discarded and
-  reset to a smaller size. This is done to accommodate variable response sizes.
-  A high resetCount means the server is allocating and releasing memory
-  frequently. Use the ``com.twitter.finagle.Thrift.param.MaxReusableBufferSize``
-  param to set the max buffer size to the size of a typical thrift response for
-  your server.
-
 SSL/TLS
 <<<<<<<
 
