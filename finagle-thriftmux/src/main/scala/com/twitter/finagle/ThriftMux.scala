@@ -415,10 +415,6 @@ object ThriftMux
     protected def newListener(): Listener[In, Out, Context] =
       params[Mux.param.MuxImpl].listener(params)
 
-    // we cache tlsHeaders here because it's hard to propagate a `let` to the
-    // server's dispatcher in tests
-    private[this] val cachedTlsHeaders = Mux.param.MuxImpl.tlsHeaders
-
     protected def newDispatcher(
       transport: Transport[In, Out] { type Context <: ServerMuxer.this.Context },
       service: Service[mux.Request, mux.Response]
@@ -437,7 +433,7 @@ object ThriftMux
       val negotiatedTrans = mux.Handshake.server(
         trans = thriftEmulator,
         version = Mux.LatestVersion,
-        headers = Mux.Server.headers(_, frameSize, if (cachedTlsHeaders) level else None),
+        headers = Mux.Server.headers(_, frameSize, level.getOrElse(OpportunisticTls.Off)),
         negotiate = Mux.negotiate(
           frameSize,
           muxStatsReceiver,

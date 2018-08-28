@@ -9,7 +9,7 @@ import com.twitter.finagle.pushsession.utils.MockChannelHandle
 import com.twitter.finagle.mux.Handshake.{CanTinitMsg, Headers, TinitTag}
 import com.twitter.finagle.mux.Request
 import com.twitter.finagle.mux.transport.Message.Tdispatch
-import com.twitter.finagle.mux.transport.{Message, MuxFramer}
+import com.twitter.finagle.mux.transport.{Message, MuxFramer, OpportunisticTls}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.{ChannelClosedException, Failure, FailureFlags, Mux, Path, liveness}
 import com.twitter.io.{Buf, ByteReader}
@@ -66,7 +66,8 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
     params: Params
   ): (MockChannelHandle[ByteReader, Buf], MuxClientNegotiatingSession, InMemoryStatsReceiver) = {
     val handle = new MockChannelHandle[ByteReader, Buf](null)
-    val headers = Mux.Client.headers(params[MaxFrameSize].size, params[OppTls].level)
+    val headers = Mux.Client.headers(
+      params[MaxFrameSize].size, params[OppTls].level.getOrElse(OpportunisticTls.Off))
     val stats = new InMemoryStatsReceiver
     val session = new MuxClientNegotiatingSession(
       handle = handle,

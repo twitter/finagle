@@ -1,9 +1,0 @@
-{
-  "toggles": [
-    {
-      "id": "com.twitter.finagle.mux.TlsHeaders",
-      "description": "Initiate sending tls headers.",
-      "fraction": 0.0
-    }
-  ]
-}

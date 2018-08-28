@@ -8,7 +8,7 @@ import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.mux.Handshake.Headers
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport._
-import com.twitter.finagle.mux.{Handshake, OpportunisticTlsParams, Request, Response, Toggles}
+import com.twitter.finagle.mux.{Handshake, OpportunisticTlsParams, Request, Response}
 import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
 import com.twitter.finagle.netty4.ssl.server.Netty4ServerSslChannelInitializer
 import com.twitter.finagle.netty4.ssl.client.Netty4ClientSslChannelInitializer
@@ -17,7 +17,6 @@ import com.twitter.finagle.param.{ProtocolLibrary, WithDefaultLoadBalancer}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
 import com.twitter.finagle.stats.{Counter, StatsReceiver}
-import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport.{ClientSsl, ServerSsl}
 import com.twitter.finagle.transport.{StatsTransport, Transport}
@@ -133,11 +132,6 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     }
 
     object MuxImpl {
-      // exposed for testing
-      private[finagle] val TlsHeadersToggleId: String = "com.twitter.finagle.mux.TlsHeaders"
-      private val tlsHeadersToggle: Toggle[Int] = Toggles(TlsHeadersToggleId)
-      private[finagle] def tlsHeaders: Boolean = tlsHeadersToggle(ServerInfo().id.hashCode)
-
       /**
        * A [[MuxImpl]] that uses netty4 as the underlying I/O multiplexer.
        */
@@ -284,15 +278,10 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
      */
     private[finagle] def headers(
       maxFrameSize: StorageUnit,
-      tlsLevel: Option[OpportunisticTls.Level]
-    ): Handshake.Headers = {
-      val muxFrameHeader =
-        MuxFramer.Header.KeyBuf -> MuxFramer.Header.encodeFrameSize(maxFrameSize.inBytes.toInt)
-      tlsLevel match {
-        case Some(level) => Seq(muxFrameHeader, OpportunisticTls.Header.KeyBuf -> level.buf)
-        case _ => Seq(muxFrameHeader)
-      }
-    }
+      tlsLevel: OpportunisticTls.Level
+    ): Handshake.Headers = Seq(
+      MuxFramer.Header.KeyBuf -> MuxFramer.Header.encodeFrameSize(maxFrameSize.inBytes.toInt),
+      OpportunisticTls.Header.KeyBuf -> tlsLevel.buf)
 
     /**
      * Check the opportunistic TLS configuration to ensure it's in a consistent state
@@ -351,7 +340,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
         version = LatestVersion,
         headers = Client.headers(
           maxFrameSize,
-          if (param.MuxImpl.tlsHeaders) level.orElse(Some(OpportunisticTls.Off)) else None),
+          level.getOrElse(OpportunisticTls.Off)),
         negotiate = negotiate(
           maxFrameSize,
           statsReceiver,
@@ -402,16 +391,10 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     private[finagle] def headers(
       clientHeaders: Handshake.Headers,
       maxFrameSize: StorageUnit,
-      tlsLevel: Option[OpportunisticTls.Level]
-    ): Handshake.Headers = {
-      val muxFrameHeader =
-        MuxFramer.Header.KeyBuf -> MuxFramer.Header.encodeFrameSize(maxFrameSize.inBytes.toInt)
-
-      tlsLevel match {
-        case Some(level) => Seq(muxFrameHeader, OpportunisticTls.Header.KeyBuf -> level.buf)
-        case _ => Seq(muxFrameHeader)
-      }
-    }
+      tlsLevel: OpportunisticTls.Level
+    ): Handshake.Headers = Seq(
+      MuxFramer.Header.KeyBuf -> MuxFramer.Header.encodeFrameSize(maxFrameSize.inBytes.toInt),
+      OpportunisticTls.Header.KeyBuf -> tlsLevel.buf)
 
     /**
      * Check the opportunistic TLS configuration to ensure it's in a consistent state
@@ -455,9 +438,6 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     protected def newListener(): Listener[In, Out, MuxContext] =
       params[param.MuxImpl].listener(params)
 
-    // we cache tlsHeaders here because it's hard to do a let on servers
-    private[this] val cachedTlsHeaders = param.MuxImpl.tlsHeaders
-
     protected def newDispatcher(
       transport: Transport[In, Out] { type Context <: Server.this.Context },
       service: Service[mux.Request, mux.Response]
@@ -475,7 +455,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
         headers = Server.headers(
           _,
           maxFrameSize,
-          if (cachedTlsHeaders) level.orElse(Some(OpportunisticTls.Off)) else None),
+          level.getOrElse(OpportunisticTls.Off)),
         negotiate = negotiate(
           maxFrameSize,
           statsReceiver,

@@ -6,6 +6,7 @@ import com.twitter.finagle.mux.Handshake.Headers
 import com.twitter.finagle.mux.{OpportunisticTlsParams, Request, Response}
 import com.twitter.finagle.netty4.pushsession.{Netty4PushListener, Netty4PushTransporter}
 import com.twitter.finagle._
+import com.twitter.finagle.mux.transport.OpportunisticTls
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.util.Future
 import io.netty.channel.{Channel, ChannelPipeline}
@@ -52,7 +53,8 @@ object MuxPush
       val negotiator: Option[Headers] => Future[MuxClientSession] = {
         headers => new Negotiation.Client(scopedStatsParams).negotiateAsync(handle, headers)
       }
-      val headers = Mux.Client.headers(params[MaxFrameSize].size, params[OppTls].level)
+      val headers = Mux.Client.headers(
+        params[MaxFrameSize].size, params[OppTls].level.getOrElse(OpportunisticTls.Off))
 
       Future.value(
         new MuxClientNegotiatingSession(
@@ -135,7 +137,8 @@ object MuxPush
         handle = handle,
         service = service,
         makeLocalHeaders = Mux.Server
-          .headers(_: Headers, params[MaxFrameSize].size, params[OppTls].level),
+          .headers(_: Headers, params[MaxFrameSize].size,
+            params[OppTls].level.getOrElse(OpportunisticTls.Off)),
         negotiate = (service, headers) =>
           new Negotiation.Server(scopedStatsParams, service).negotiate(handle, headers),
         timer = params[param.Timer].timer

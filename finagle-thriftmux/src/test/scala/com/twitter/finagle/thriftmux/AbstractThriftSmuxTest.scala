@@ -6,7 +6,6 @@ import com.twitter.finagle.netty4.channel.ChannelSnooper
 import com.twitter.finagle.ssl.server.SslServerConfiguration
 import com.twitter.finagle.ssl.{KeyCredentials, TrustCredentials}
 import com.twitter.finagle.thriftmux.thriftscala._
-import com.twitter.finagle.toggle.flag
 import com.twitter.finagle._
 import com.twitter.finagle.mux.pushsession.MuxPush
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
@@ -63,17 +62,14 @@ abstract class AbstractThriftSmuxTest extends FunSuite {
       withClue(s"clientOppTlsLevel=$clientLevel serverOppTlsLevel=$serverLevel") {
         val buffer = new StringBuffer()
         val stats = new InMemoryStatsReceiver
+        val server = serve(serverLevel)
+        val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
 
-        flag.overrides.let(Mux.param.MuxImpl.TlsHeadersToggleId, 1.0) {
-          val server = serve(serverLevel)
-          val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+        val client = newService(clientLevel, record(buffer), stats, addr)
+        val results = await(client.query("." * 10).liftToTry)
+        testFn(results, buffer.toString, stats)
 
-          val client = newService(clientLevel, record(buffer), stats, addr)
-          val results = await(client.query("." * 10).liftToTry)
-          testFn(results, buffer.toString, stats)
-
-          Await.ready(server.close(), 10.seconds)
-        }
+        Await.ready(server.close(), 10.seconds)
       }
     }
   }
