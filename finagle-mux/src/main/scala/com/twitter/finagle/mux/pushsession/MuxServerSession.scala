@@ -21,8 +21,8 @@ import scala.util.control.NonFatal
  */
 private[finagle] final class MuxServerSession(
   params: Stack.Params,
-  decoder: MuxMessageDecoder,
-  messageWriter: MessageWriter,
+  h_decoder: MuxMessageDecoder,
+  h_messageWriter: MessageWriter,
   handle: PushChannelHandle[ByteReader, Buf], // Maybe we should refine into a PushClientConnection...
   service: Service[Request, Response]
 ) extends PushSession[ByteReader, Buf](handle) {
@@ -45,19 +45,18 @@ private[finagle] final class MuxServerSession(
   private[this] val exec = handle.serialExecutor
   private[this] val lessor = params[Lessor.Param].lessor
   private[this] val statsReceiver = params[param.Stats].statsReceiver
-  private[this] val tracker = new ServerTracker(
-    exec, locals, service, messageWriter, lessor, statsReceiver, handle.remoteAddress)
+  private[this] val h_tracker = new ServerTracker(
+    exec, locals, service, h_messageWriter, lessor, statsReceiver, handle.remoteAddress)
 
   // Must only be modified from within the session executor, but can be
   // observed concurrently via status.
   // State transitions can only go Open -> Draining -> Closed, potentially skipping Draining.
-  @volatile
-  private[this] var dispatchState: State.Value = State.Open
+  @volatile private[this] var h_dispatchState: State.Value = State.Open
 
-  lessor.register(tracker)
+  lessor.register(h_tracker.lessee)
 
   // Hook up the shutdown logic from the tracker and handle.
-  tracker.drained.respond { result =>
+  h_tracker.drained.respond { result =>
     exec.execute(new Runnable { def run(): Unit = handleShutdown(result) })
   }
 
@@ -67,46 +66,45 @@ private[finagle] final class MuxServerSession(
 
   def receive(reader: ByteReader): Unit = {
     try {
-      val message = decoder.decode(reader)
-      if (message != null) processMessage(message)
+      val message = h_decoder.decode(reader)
+      if (message != null) handleMessage(message)
     } catch { case NonFatal(t) =>
       handleShutdown(Throw(t))
     }
   }
 
-  private[this] def processMessage(message: Message): Unit = message match {
+  private[this] def handleMessage(message: Message): Unit = message match {
     case m: Message.Tdispatch =>
-      tracker.dispatch(m)
+      h_tracker.dispatch(m)
 
     case m: Message.Treq =>
-      tracker.dispatch(m)
+      h_tracker.dispatch(m)
 
     case Message.Tping(tag) =>
       val response =
         if (tag == Tags.PingTag) Message.PreEncoded.Rping
         else Message.Rping(tag)
-      messageWriter.write(response)
+      h_messageWriter.write(response)
 
     case Message.Tdiscarded(tag, why) =>
-      tracker.discarded(tag, why)
+      h_tracker.discarded(tag, why)
 
-    case Message.Rdrain(Tags.ControlTag) if dispatchState == State.Draining =>
+    case Message.Rdrain(Tags.ControlTag) if h_dispatchState == State.Draining =>
       log.debug("Received Rdrain")
-      tracker.drain()
+      h_tracker.drain()
 
     // We should not expect fragments as they are accumulated by the decoder
     case other =>
       val rerror = Message.Rerr(other.tag, s"Unexpected mux message type ${other.typ}")
-      messageWriter.write(rerror)
+      h_messageWriter.write(rerror)
   }
 
   def status: Status = {
-    val stateStatus = dispatchState match {
+    val stateStatus = h_dispatchState match {
       case State.Open => Status.Open
       case State.Draining => Status.Busy
       case State.Closed => Status.Closed
     }
-
     Status.worst(handle.status, stateStatus)
   }
 
@@ -117,22 +115,22 @@ private[finagle] final class MuxServerSession(
 
   private[this] def handleClose(deadline: Time): Unit = {
     // The we can only gracefully close once, and from the `Open` state.
-    if (dispatchState == State.Open) {
-      dispatchState = State.Draining
+    if (h_dispatchState == State.Open) {
+      h_dispatchState = State.Draining
 
       if (!gracefulShutdownEnabled()) handleShutdown(Return.Unit)
       else {
         log.debug("Draining session")
         statsReceiver.counter("draining").incr()
 
-        messageWriter.write(Message.Tdrain(Tags.ControlTag))
+        h_messageWriter.write(Message.Tdrain(Tags.ControlTag))
 
         // We set a timer to make sure we've drained within the allotted amount of time
-        tracker.drained.by(params[param.Timer].timer, deadline).respond {
+        h_tracker.drained.by(params[param.Timer].timer, deadline).respond {
           case Throw(_: TimeoutException) =>
             exec.execute(new Runnable { def run(): Unit = {
               val t = new TimeoutException(
-                s"Failed to drain within the deadline $deadline. Tracker state: ${tracker.currentState}")
+                s"Failed to drain within the deadline $deadline. Tracker state: ${h_tracker.currentState}")
               handleShutdown(Throw(t))
             } })
 
@@ -144,9 +142,9 @@ private[finagle] final class MuxServerSession(
 
   // All shutdown pathways should flow through this method.
   private[this] def handleShutdown(reason: Try[Unit]): Unit = {
-    if (dispatchState != State.Closed) {
-      dispatchState = State.Closed
-      lessor.unregister(tracker)
+    if (h_dispatchState != State.Closed) {
+      h_dispatchState = State.Closed
+      lessor.unregister(h_tracker.lessee)
       // Construct the exception which we will use to satisfy any outstanding dispatches.
       // We wrap the underlying exc in a `CancelledRequestException` since it's the
       // historical API we've used to signal interrupted dispatches.
@@ -154,7 +152,7 @@ private[finagle] final class MuxServerSession(
         case Return(_) => new Exception("mux server shutdown")
         case Throw(t) => t
       })
-      tracker.interruptOutstandingDispatches(cause)
+      h_tracker.interruptOutstandingDispatches(cause)
       Closable.all(handle, service).close()
 
       reason.onFailure { t =>

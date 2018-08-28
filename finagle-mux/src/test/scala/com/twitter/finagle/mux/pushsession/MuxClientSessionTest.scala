@@ -43,8 +43,8 @@ class MuxClientSessionTest extends FunSuite {
 
     val session = new MuxClientSession(
       handle = handle,
-      decoder = new FragmentDecoder(NullStatsReceiver),
-      messageWriter = newMessageWriter(handle),
+      h_decoder = new FragmentDecoder(NullStatsReceiver),
+      h_messageWriter = newMessageWriter(handle),
       detectorConfig = FailureDetector.MockConfig(() => failureDetectorStatus),
       name = name,
       statsReceiver = statsReceiver,

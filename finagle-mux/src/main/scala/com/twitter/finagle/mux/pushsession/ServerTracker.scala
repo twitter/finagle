@@ -18,48 +18,52 @@ import scala.collection.JavaConverters._
 /**
  * Representation of the Mux server data plane
  *
- * Class responsible for tracking outstanding dispatches, including during draining.
+ * Class responsible for tracking outstanding dispatches, including during draining. All public
+ * methods of this class are intended to be used from within the serial executor associated
+ * with the session.
  */
 private class ServerTracker(
   serialExecutor: Executor,
   locals: () => Local.Context,
   service: Service[Request, Response],
-  messageWriter: MessageWriter,
+  h_messageWriter: MessageWriter,
   lessor: Lessor,
   statsReceiver: StatsReceiver,
   remoteAddress: SocketAddress
-) extends Lessee {
+) {
 
   // We use the netty type because it results in less allocations, but this could
   // just as well be a java Map if we wanted.
-  private[this] val dispatches = new IntObjectHashMap[Dispatch]
+  private[this] val h_dispatches = new IntObjectHashMap[Dispatch]
   private[this] val orphanedTdiscardCounter = statsReceiver.counter("orphaned_tdiscard")
 
   private[this] val drainedP = Promise[Unit]()
   // Note, the vars below are only read within the context of
   // the `serialExecutor`, thus, we don't need any memory barriers.
-  private[this] var state: DrainState = Open
-  private[this] var leaseExpiration: Time = Time.Top
-  private[this] var cachedLocals: Option[Local.Context] = None
+  private[this] var h_state: DrainState = Open
+  private[this] var h_leaseExpiration: Time = Time.Top
+  private[this] var h_cachedLocals: Option[Local.Context] = None
 
-  def issue(howLong: Duration): Unit = {
-    require(howLong >= Message.Tlease.MinLease)
+  /** `Lessee` used for issuing lease duration. */
+  val lessee: Lessee = new Lessee {
+    def issue(howLong: Duration): Unit = {
+      require(howLong >= Message.Tlease.MinLease)
 
-    // The update of the leaseExpiration and the write of that expiration must be done in
-    // one atomic step to ensure that we keep a consistent view of the lease between the
-    // client and the server.
-    serialExecutor.execute(new Runnable {
-      def run(): Unit = {
-        leaseExpiration = Time.now + howLong
-        messageWriter.write(Message.Tlease(howLong.min(Message.Tlease.MaxLease)))
-      }
-    })
+      // The update of the leaseExpiration and the write of that expiration must be done in
+      // one atomic step to ensure that we keep a consistent view of the lease between the
+      // client and the server.
+      serialExecutor.execute(new Runnable {
+        def run(): Unit = {
+          h_leaseExpiration = Time.now + howLong
+          h_messageWriter.write(Message.Tlease(howLong.min(Message.Tlease.MaxLease)))
+        }
+      })
+    }
+
+    // The value produced is subject to races in the underlying hashmap but since
+    // the value produced is already racy in nature we accept it.
+    def npending(): Int = h_dispatches.size
   }
-
-  /**
-   * The number of outstanding dispatches waiting for service response or discard
-   */
-  def npending(): Int = dispatches.size
 
   /**
    * Interrupt all outstanding dispatches, raising on their `Future` with
@@ -67,18 +71,18 @@ private class ServerTracker(
   def interruptOutstandingDispatches(exc: Throwable): Unit = {
     // get all the elements, then clear so that the dispatches are definitely cleared
     // before we raise on them.
-    val pending = takeAllDispatches()
+    val pending = handleTakeAllDispatches()
     log.debug(exc, "Interrupting %d dispatches", pending.size)
     pending.foreach(_.response.raise(exc))
   }
 
   private[this] def canDispatch: Boolean =
-    state == Open && !(nackOnExpiredLease() && leaseExpiration <= Time.now)
+    h_state == Open && !(nackOnExpiredLease() && h_leaseExpiration <= Time.now)
 
   /**
    * Provide the current state of the tracker
    */
-  def currentState: DrainState = state
+  def currentState: DrainState = h_state
 
   /**
    * Called when receiving a Tdiscarded from the client
@@ -86,16 +90,16 @@ private class ServerTracker(
    * This call will handle the details of writing a response to the peer, if necessary.
    */
   def discarded(tag: Int, why: String): Unit = {
-    dispatches.remove(tag) match {
+    h_dispatches.remove(tag) match {
       case null =>
-        if (messageWriter.removeForTag(tag) == MessageWriter.DiscardResult.NotFound) {
+        if (h_messageWriter.removeForTag(tag) == MessageWriter.DiscardResult.NotFound) {
           // We either never had a dispatch and the client is misbehaving or
           // or we already sent the response so the tag is freed in servers eyes.
           orphanedTdiscardCounter.incr()
         } else {
           // We had something queued for write so send an `Rdiscarded` to let
           // the peer know that we've aborted the dispatch.
-          messageWriter.write(Rdiscarded(tag))
+          h_messageWriter.write(Rdiscarded(tag))
         }
 
       case dispatch =>
@@ -108,10 +112,10 @@ private class ServerTracker(
             dispatch.response.raise(new ClientDiscardedRequestException(why))
         }
 
-        messageWriter.write(Rdiscarded(tag))
+        h_messageWriter.write(Rdiscarded(tag))
 
         // By removing a message we may have finished draining, so check.
-        checkDrained()
+        handleCheckDrained()
     }
   }
 
@@ -121,9 +125,9 @@ private class ServerTracker(
    * When all pending dispatches are drained the `MessageWriter` will be drained as well.
    */
   def drain(): Unit = {
-    if (state == Open) {
-      state = Draining
-      checkDrained()
+    if (h_state == Open) {
+      h_state = Draining
+      handleCheckDrained()
     }
   }
 
@@ -136,49 +140,49 @@ private class ServerTracker(
    * Dispatch a Treq message
    */
   def dispatch(request: Treq): Unit = {
-    if (canDispatch) doDispatch(request)
-    else messageWriter.write(Message.RreqNack(request.tag))
+    if (canDispatch) handleDispatch(request)
+    else h_messageWriter.write(Message.RreqNack(request.tag))
   }
 
   /**
    * Dispatch a Tdispatch message
    */
   def dispatch(request: Tdispatch): Unit = {
-    if (canDispatch) doDispatch(request)
-    else messageWriter.write(Message.RdispatchNack(request.tag, Nil))
+    if (canDispatch) handleDispatch(request)
+    else h_messageWriter.write(Message.RdispatchNack(request.tag, Nil))
   }
 
-  private[this] def getLocals(): Local.Context = {
-    cachedLocals match {
+  private[this] def handleGetLocals(): Local.Context = {
+    h_cachedLocals match {
       case Some(ls) => ls
       case None =>
         val ls = locals()
-        cachedLocals = Some(ls)
+        h_cachedLocals = Some(ls)
         ls
     }
   }
 
-  private[this] def doDispatch(m: Message): Unit = {
-    if (dispatches.containsKey(m.tag)) duplicateTagDetected(m.tag)
-    else Local.let(getLocals()) {
+  private[this] def handleDispatch(m: Message): Unit = {
+    if (h_dispatches.containsKey(m.tag)) handleDuplicateTagDetected(m.tag)
+    else Local.let(handleGetLocals()) {
       lessor.observeArrival()
       val responseF = Processor(m, service)
       val elapsed = Stopwatch.start()
       val dispatch = Dispatch(m.tag, responseF, elapsed)
-      dispatches.put(m.tag, dispatch)
+      h_dispatches.put(m.tag, dispatch)
 
       // Concurrency is controlled by the serial executor so we must
       // bounce the result through it.
       responseF.respond { result =>
         serialExecutor.execute(new Runnable {
-          def run(): Unit = renderResponse(dispatch, result)
+          def run(): Unit = handleRenderResponse(dispatch, result)
         })
       }
     }
   }
 
-  private[this] def renderResponse(dispatch: Dispatch, response: Try[Message]): Unit = {
-    dispatches.remove(dispatch.tag) match {
+  private[this] def handleRenderResponse(dispatch: Dispatch, response: Try[Message]): Unit = {
+    h_dispatches.remove(dispatch.tag) match {
       case null => // nop: the dispatch was discarded and the tag is unused
 
       case storedDispatch if storedDispatch eq dispatch =>
@@ -191,28 +195,28 @@ private class ServerTracker(
             Message.Rerr(dispatch.tag, exc.toString)
         }
 
-        messageWriter.write(result)
-        checkDrained()
+        h_messageWriter.write(result)
+        handleCheckDrained()
 
       case storedDispatch =>
         // This was the result of a race between a request that was canceled
         // and its tag being reused, and the dispatch of the initial request.
         // We discard this result and place the dispatch back in the map so it
         //  can be handled.
-        dispatches.put(storedDispatch.tag, storedDispatch)
+        h_dispatches.put(storedDispatch.tag, storedDispatch)
     }
   }
 
   // Should be called every time an element is removed from the dispatch map.
-  private[this] def checkDrained(): Unit = {
-    if (state == Draining && dispatches.isEmpty) {
+  private[this] def handleCheckDrained(): Unit = {
+    if (h_state == Draining && h_dispatches.isEmpty) {
       // The dispatches are all finished, so lets make sure the write manager is finished
-      state = Closed
-      messageWriter.drain().respond(drainedP.updateIfEmpty(_))
+      h_state = Closed
+      h_messageWriter.drain().respond(drainedP.updateIfEmpty(_))
     }
   }
 
-  private[this] def duplicateTagDetected(tag: Int): Unit = {
+  private[this] def handleDuplicateTagDetected(tag: Int): Unit = {
     // We have a pathological client which is sending duplicate tags. This represents
     // a protocol fault, and we abort all pending requests and close the session.
     // Note: we don't send two Rerr's for the dispatches that had the duplicate tag
@@ -220,27 +224,27 @@ private class ServerTracker(
     log.warning(msg)
     statsReceiver.counter("duplicate_tag").incr()
 
-    val pending = takeAllDispatches()
+    val pending = handleTakeAllDispatches()
     val exc = new InterruptedException
 
     pending.foreach { dispatch =>
-      messageWriter.write(Rerr(dispatch.tag, msg))
+      h_messageWriter.write(Rerr(dispatch.tag, msg))
       dispatch.response.raise(exc)
     }
 
     // We drain the `MessageWriter` and then complete our drain future with an exception
     // so that we let everyone know we had a bad peer.
-    state = Closed
-    messageWriter.drain.ensure {
+    h_state = Closed
+    h_messageWriter.drain.ensure {
       drainedP.updateIfEmpty(Throw(new IllegalStateException(msg)))
     }
   }
 
-  private[this] def takeAllDispatches(): Vector[Dispatch] = {
+  private[this] def handleTakeAllDispatches(): Vector[Dispatch] = {
     // get all the elements, then clear so that the dispatches are definitely cleared
     // before we raise on them, which may cause them to finish with the InterruptedException
-    val pending = dispatches.values.asScala.toVector
-    dispatches.clear()
+    val pending = h_dispatches.values.asScala.toVector
+    h_dispatches.clear()
     pending
   }
 }

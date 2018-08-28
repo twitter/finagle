@@ -27,18 +27,20 @@ final class PipeliningClientPushSession[In, Out](
   extends PushSession[In, Out](handle) { self =>
 
   private[this] val logger = Logger.get
-  private[this] val queue = new java.util.ArrayDeque[Promise[In]]()
-  private[this] var stalled: Boolean = false   // used only within SerialExecutor
 
-  // volatile because accessed outside of SerialExecutor
-  @volatile private[this] var queueSize: Int = 0  // avoids synchronization on `queue`
-  @volatile private[this] var running: Boolean = true
+  // used only within SerialExecutor
+  private[this] val h_queue = new java.util.ArrayDeque[Promise[In]]()
+  private[this] var h_stalled: Boolean = false
+  // These are marked volatile because they are read outside of SerialExecutor but
+  // are only modified from within the serial executor.
+  @volatile private[this] var h_queueSize: Int = 0  // avoids synchronization on `queue`
+  @volatile private[this] var h_running: Boolean = true
 
   // exposed for testing
-  private[pushsession] def getQueueSize: Int = queueSize
+  private[pushsession] def getQueueSize: Int = h_queueSize
 
   handle.onClose.respond { result =>
-    if (running) handle.serialExecutor.execute(new Runnable {
+    if (h_running) handle.serialExecutor.execute(new Runnable {
       def run(): Unit = result match {
         case Return(_) => handleShutdown(None)
         case Throw(t) => handleShutdown(Some(t))
@@ -46,10 +48,10 @@ final class PipeliningClientPushSession[In, Out](
     })
   }
 
-  def receive(message: In): Unit = if (running) {
-    val p = queue.poll()
+  def receive(message: In): Unit = if (h_running) {
+    val p = h_queue.poll()
     if (p != null) {
-      queueSize -= 1
+      h_queueSize -= 1
       p.updateIfEmpty(Return(message))
     }
     else
@@ -59,7 +61,7 @@ final class PipeliningClientPushSession[In, Out](
   }
 
   def status: Status = {
-    if (!running) Status.Closed
+    if (!h_running) Status.Closed
     else handle.status
   }
 
@@ -75,11 +77,11 @@ final class PipeliningClientPushSession[In, Out](
               def run(): Unit = {
                 val exc = stalledPipelineException(stallTimeout)
                 if (p.updateIfEmpty(Throw(exc))) {
-                  if (!stalled) {
-                    stalled = true
+                  if (!h_stalled) {
+                    h_stalled = true
                     val addr = handle.remoteAddress
                     logger.warning(
-                      s"pipelined connection stalled with $queueSize items, talking to $addr"
+                      s"pipelined connection stalled with $h_queueSize items, talking to $addr"
                     )
                   }
                   handleShutdown(Some(exc))
@@ -102,24 +104,24 @@ final class PipeliningClientPushSession[In, Out](
 
   // All shutdown pathways should funnel through this method
   private[this] def handleShutdown(cause: Option[Throwable]): Unit =
-    if (running) {
-      running = false
+    if (h_running) {
+      h_running = false
       cause.foreach(logger.info(_, "Session closing with exception"))
       close()
       val exc = cause.getOrElse(new ChannelClosedException(handle.remoteAddress))
 
       // Clear the queue.
-      while (!queue.isEmpty) {
-        queue.poll().updateIfEmpty(Throw(exc))
-        queueSize -=1
+      while (!h_queue.isEmpty) {
+        h_queue.poll().updateIfEmpty(Throw(exc))
+        h_queueSize -=1
       }
     }
 
   private[this] def handleDispatch(request: Out, p: Promise[In]): Unit = {
-    if (!running) p.setException(new ChannelClosedException(handle.remoteAddress))
+    if (!h_running) p.setException(new ChannelClosedException(handle.remoteAddress))
     else {
-      queue.offer(p)
-      queueSize +=1
+      h_queue.offer(p)
+      h_queueSize +=1
       handle.sendAndForget(request)
     }
   }

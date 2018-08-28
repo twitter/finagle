@@ -18,7 +18,7 @@ import com.twitter.util.Closable
  *   `Transport` and `Dispatcher` based model.
  * - The session itself provides a clear pattern for managing synchronization
  *   that works well with the `Promise` abstraction by avoiding explicit
- *   synchronization.
+ *   synchronization. See the `README.md` for more details.
  */
 abstract class PushSession[In, Out](handle: PushChannelHandle[In, Out]) extends Closable {
 

@@ -37,8 +37,8 @@ import scala.util.control.NonFatal
  */
 private[finagle] final class MuxClientSession(
   handle: PushChannelHandle[ByteReader, Buf],
-  decoder: MuxMessageDecoder,
-  messageWriter: MessageWriter,
+  h_decoder: MuxMessageDecoder,
+  h_messageWriter: MessageWriter,
   detectorConfig: FailureDetector.Config,
   name: String,
   statsReceiver: StatsReceiver,
@@ -52,21 +52,16 @@ private[finagle] final class MuxClientSession(
   // Drained represents the terminal phase of the session, and is only set in the
   // `handleShutdown` method. The session will only dispatch while in the Dispatching
   // and Leasing states.
-  @volatile
-  private[this] var dispatchState: ClientSession.State = ClientSession.Dispatching
-
-  @volatile
-  private[this] var canDispatch: CanDispatch.State = CanDispatch.Unknown
+  @volatile private[this] var h_dispatchState: ClientSession.State = ClientSession.Dispatching
+  @volatile private[this] var h_canDispatch: CanDispatch.State = CanDispatch.Unknown
+  private[this] var h_pingPromise: Promise[Unit] = null
+  private[this] val h_tracker = new ClientTracker(h_messageWriter)
 
   private[this] val log: Logger = Logger.get(getClass.getName)
   private[this] val exec: Executor = handle.serialExecutor
-  private[this] val tracker = new ClientTracker(messageWriter)
 
   private[this] val failureDetector =
     FailureDetector(detectorConfig, ping, statsReceiver.scope("failuredetector"))
-
-  // All modifications to session state must be done from within the serial executor
-  private[this] var pingPromise: Promise[Unit] = null
 
   // Metrics
   private[this] val leaseCounter = statsReceiver.counter(Verbosity.Debug, "leased")
@@ -74,22 +69,22 @@ private[finagle] final class MuxClientSession(
   private[this] val drainedCounter = statsReceiver.counter("drained")
 
   // exposed for testing
-  private[pushsession] def currentLease: Option[Duration] = dispatchState match {
+  private[pushsession] def currentLease: Option[Duration] = h_dispatchState match {
     case l: Leasing => Some(l.remaining)
     case _ => None
   }
 
-  private[this] def isDraining: Boolean = dispatchState match {
+  private[this] def isDraining: Boolean = h_dispatchState match {
     case Draining | Drained => true
     case _ => false
   }
 
-  private[this] def isDrained: Boolean = dispatchState == Drained
+  private[this] def isDrained: Boolean = h_dispatchState == Drained
 
   // Implementation of the Service to interface with the session
   private[this] object MuxClientServiceImpl extends Service[Request, Response] {
     def apply(request: Request): Future[Response] = {
-      if (canDispatch != CanDispatch.Unknown) {
+      if (h_canDispatch != CanDispatch.Unknown) {
         dispatch(request)
       } else {
         // We don't know yet if we can Tdispatch, so the first try may fail
@@ -98,11 +93,11 @@ private[finagle] final class MuxClientSession(
           case Throw(ServerError(_)) =>
             // We've determined that the server cannot handle Tdispatch messages,
             // so we fall back to a Treq.
-            canDispatch = CanDispatch.No
+            h_canDispatch = CanDispatch.No
             apply(request)
 
           case m @ Return(_) =>
-            canDispatch = CanDispatch.Yes
+            h_canDispatch = CanDispatch.Yes
             Future.const(m)
 
           case t @ Throw(_) =>
@@ -135,7 +130,7 @@ private[finagle] final class MuxClientSession(
     // We decode every `ByteReader` explicitly to ensure any underlying resources
     // are released by the decoder whether we intend to use the result or not.
     try {
-      val message = decoder.decode(reader)
+      val message = h_decoder.decode(reader)
       // If the session isn't open, we just drop the message since the waiters were cleared
       if (message != null && !isDrained) {
         handleProcessMessage(message)
@@ -163,13 +158,13 @@ private[finagle] final class MuxClientSession(
   ): Unit = {
     if (isDraining) dispatchP.setException(Failure.RetryableNackFailure)
     else {
-      val asDispatch = canDispatch != CanDispatch.No
-      val tag = tracker.dispatchRequest(req, asDispatch, locals, dispatchP)
+      val asDispatch = h_canDispatch != CanDispatch.No
+      val tag = h_tracker.dispatchRequest(req, asDispatch, locals, dispatchP)
       dispatchP.setInterruptHandler {
         case cause: Throwable =>
           exec.execute(new Runnable {
             def run(): Unit = {
-              tracker.requestInterrupted(dispatchP, tag, cause)
+              h_tracker.requestInterrupted(dispatchP, tag, cause)
             }
           })
       }
@@ -186,10 +181,10 @@ private[finagle] final class MuxClientSession(
     val pp = Promise[Unit]()
     exec.execute(new Runnable {
       def run(): Unit = {
-        if (isDrained || pingPromise != null) ClientSession.FuturePingNack.proxyTo(pp)
+        if (isDrained || h_pingPromise != null) ClientSession.FuturePingNack.proxyTo(pp)
         else {
-          pingPromise = pp
-          messageWriter.write(Message.PreEncoded.Tping)
+          h_pingPromise = pp
+          h_messageWriter.write(Message.PreEncoded.Tping)
         }
       }
     })
@@ -206,7 +201,10 @@ private[finagle] final class MuxClientSession(
     Status.worst(failureDetector.status, Status.worst(handle.status, dispatchStateToStatus))
   }
 
-  private[this] def dispatchStateToStatus: Status = dispatchState match {
+  // This is not a method that is always called from within the serial executor but
+  // it's safe to _read_ the `h_dispatchState` field since the usage is racy and the
+  // field is marked volatile to ensure prompt visibility of updates.
+  private[this] def dispatchStateToStatus: Status = h_dispatchState match {
     case leased: Leasing if leased.expired => Status.Busy
     case Leasing(_) | Dispatching => Status.Open
     case Draining => Status.Busy
@@ -214,22 +212,22 @@ private[finagle] final class MuxClientSession(
   }
 
   private[this] def handleShutdown(oexc: Option[Throwable]): Unit = {
-    if (dispatchState != Drained) {
+    if (h_dispatchState != Drained) {
       // The client doesn't force the connection close, instead it just transitions
       // to the `Drained` state, and that is reflected in the `status` as `Closed`
       // The underlying socket isn't actually closed by the session but waits for an
       // external call to `.close()`
 
-      dispatchState = Drained
+      h_dispatchState = Drained
 
       // Fail an outstanding Ping, if it exists
-      if (pingPromise != null) {
-        val pp = pingPromise
-        pingPromise = null
+      if (h_pingPromise != null) {
+        val pp = h_pingPromise
+        h_pingPromise = null
         ClientSession.FuturePingNack.proxyTo(pp)
       }
 
-      tracker.shutdown(oexc, Some(handle.remoteAddress))
+      h_tracker.shutdown(oexc, Some(handle.remoteAddress))
 
       oexc match {
         case Some(t) => log.info(t, s"Closing mux client session to $name due to error")
@@ -241,39 +239,39 @@ private[finagle] final class MuxClientSession(
   private[this] def handleProcessMessage(msg: Message): Unit = {
     msg match {
       case Message.Tping(Message.Tags.PingTag) =>
-        messageWriter.write(Message.PreEncoded.Rping)
+        h_messageWriter.write(Message.PreEncoded.Rping)
 
       case Message.Tping(tag) =>
-        messageWriter.write(Message.Rping(tag))
+        h_messageWriter.write(Message.Rping(tag))
 
       case p @ Message.Rping(_) =>
-        if (pingPromise == null) {
+        if (h_pingPromise == null) {
           log.info(s"($name) Received unexpected ping response: $p")
         } else {
-          val p = pingPromise
-          pingPromise = null
+          val p = h_pingPromise
+          h_pingPromise = null
           p.setDone()
         }
 
       case Message.Rerr(_, err) =>
         log.info(s"($name) Server error: $err")
-        tracker.receivedResponse(msg.tag, Throw(ServerError(err)))
+        h_tracker.receivedResponse(msg.tag, Throw(ServerError(err)))
 
       case Message.Rmessage(_) =>
-        tracker.receivedResponse(msg.tag, ReqRepFilter.reply(msg))
+        h_tracker.receivedResponse(msg.tag, ReqRepFilter.reply(msg))
 
       case Message.Tdrain(tag) =>
         // Ack the Tdrain and begin shutting down.
-        messageWriter.write(Message.Rdrain(tag))
-        dispatchState = Draining
+        h_messageWriter.write(Message.Rdrain(tag))
+        h_dispatchState = Draining
         drainingCounter.incr()
         if (log.isLoggable(Level.TRACE))
           log.trace(s"Started draining a connection to $name")
 
       case Message.Tlease(Message.Tlease.MillisDuration, millis) =>
-        dispatchState match {
+        h_dispatchState match {
           case Leasing(_) | Dispatching =>
-            dispatchState = Leasing(Time.now + millis.milliseconds)
+            h_dispatchState = Leasing(Time.now + millis.milliseconds)
             if (log.isLoggable(Level.DEBUG))
               log.debug(s"($name) leased for ${millis.milliseconds} to $name")
             leaseCounter.incr()
@@ -286,7 +284,7 @@ private[finagle] final class MuxClientSession(
     }
 
     // Check if we're in a finished-draining state and transition accordingly
-    if (dispatchState == Draining && tracker.pendingDispatches == 0) {
+    if (h_dispatchState == Draining && h_tracker.pendingDispatches == 0) {
       if (log.isLoggable(Level.TRACE)) {
         log.trace(s"Finished draining a connection to $name")
       }

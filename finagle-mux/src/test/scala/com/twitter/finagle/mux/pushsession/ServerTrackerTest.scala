@@ -94,14 +94,14 @@ class ServerTrackerTest extends FunSuite {
 
       executor.executeAll()
 
-      assert(tracker.npending == 1)
+      assert(tracker.lessee.npending == 1)
       assert(!p.isDefined)
 
       tracker.interruptOutstandingDispatches(new CancelledRequestException(new Exception))
       val Some(ex) = p.isInterrupted
 
       assert(ex.isInstanceOf[CancelledRequestException])
-      assert(tracker.npending == 0)
+      assert(tracker.lessee.npending == 0)
     }
   }
 
@@ -115,7 +115,7 @@ class ServerTrackerTest extends FunSuite {
 
       executor.executeAll()
 
-      assert(tracker.npending == 1)
+      assert(tracker.lessee.npending == 1)
       assert(!p.isDefined)
 
       tracker.discarded(2, "Foo")
@@ -123,7 +123,7 @@ class ServerTrackerTest extends FunSuite {
       val Some(ex) = p.isInterrupted
 
       assert(ex.isInstanceOf[ClientDiscardedRequestException])
-      assert(tracker.npending == 0)
+      assert(tracker.lessee.npending == 0)
 
       val Rdiscarded(2) = messageWriter.messages.dequeue()
 
@@ -131,7 +131,7 @@ class ServerTrackerTest extends FunSuite {
       p.setValue(Response(data))
       executor.executeAll()
 
-      assert(tracker.npending == 0)
+      assert(tracker.lessee.npending == 0)
       assert(messageWriter.messages.isEmpty)
     }
   }
@@ -146,7 +146,7 @@ class ServerTrackerTest extends FunSuite {
 
       executor.executeAll()
 
-      assert(tracker.npending == 1)
+      assert(tracker.lessee.npending == 1)
       assert(!p.isDefined)
 
       tracker.discarded(2, BackupRequestFilter.SupersededRequestFailureToString)
@@ -156,7 +156,7 @@ class ServerTrackerTest extends FunSuite {
       }
 
       assert(ex.flags == (FailureFlags.Interrupted | FailureFlags.Ignorable))
-      assert(tracker.npending == 0)
+      assert(tracker.lessee.npending == 0)
 
       val Rdiscarded(2) = messageWriter.messages.dequeue()
 
@@ -164,7 +164,7 @@ class ServerTrackerTest extends FunSuite {
       p.setValue(Response(data))
       executor.executeAll()
 
-      assert(tracker.npending == 0)
+      assert(tracker.lessee.npending == 0)
       assert(messageWriter.messages.isEmpty)
     }
   }
@@ -183,7 +183,7 @@ class ServerTrackerTest extends FunSuite {
       val RdispatchOk(2, _, _) = messageWriter.messages.dequeue()
 
       tracker.discarded(2, "Foo")
-      assert(tracker.npending == 0)
+      assert(tracker.lessee.npending == 0)
 
       val Rdiscarded(2) = messageWriter.messages.dequeue()
     }
@@ -203,7 +203,7 @@ class ServerTrackerTest extends FunSuite {
       val RdispatchOk(2, _, `data`) = messageWriter.messages.dequeue()
 
       tracker.discarded(2, "Foo")
-      assert(tracker.npending == 0)
+      assert(tracker.lessee.npending == 0)
 
       val Rdiscarded(2) = messageWriter.messages.dequeue()
     }
@@ -215,12 +215,12 @@ class ServerTrackerTest extends FunSuite {
         Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data))
 
       executor.executeAll()
-      assert(tracker.npending == 0)
+      assert(tracker.lessee.npending == 0)
 
       val RdispatchOk(2, _, `data`) = messageWriter.messages.dequeue()
 
       tracker.discarded(2, "Foo")
-      assert(tracker.npending == 0)
+      assert(tracker.lessee.npending == 0)
 
       // Nothing to be done: tag already released due to writing the complete response.
       assert(messageWriter.messages.isEmpty)
@@ -230,10 +230,10 @@ class ServerTrackerTest extends FunSuite {
   test("Discard for dispatch that doesn't exist") {
     new Ctx {
       assert(tracker.currentState == ServerTracker.Open) // touch the lazy to initialize
-      assert(tracker.npending == 0)
+      assert(tracker.lessee.npending == 0)
 
       tracker.discarded(2, "Foo")
-      assert(tracker.npending == 0)
+      assert(tracker.lessee.npending == 0)
 
       // Nothing to be done: tag wasn't occupied
       assert(messageWriter.messages.isEmpty)
@@ -245,7 +245,7 @@ class ServerTrackerTest extends FunSuite {
     nackOnExpiredLease.let(true) {
       new Ctx {
         // Shut down dispatching
-        tracker.issue(Duration.Zero)
+        tracker.lessee.issue(Duration.Zero)
         executor.executeAll()
 
         val Tlease(0, 0) = messageWriter.messages.dequeue()
@@ -254,7 +254,7 @@ class ServerTrackerTest extends FunSuite {
           Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data))
 
         executor.executeAll()
-        assert(tracker.npending == 0)
+        assert(tracker.lessee.npending == 0)
 
         val RdispatchNack(2, _) = messageWriter.messages.dequeue()
       }
@@ -278,11 +278,11 @@ class ServerTrackerTest extends FunSuite {
       executor.executeAll()
 
       assert(tracker.currentState == ServerTracker.Open)
-      assert(tracker.npending == 1)
+      assert(tracker.lessee.npending == 1)
 
       tracker.drain()
       // Still nothing happening.
-      assert(tracker.npending == 1)
+      assert(tracker.lessee.npending == 1)
       assert(!tracker.drained.isDefined)
       assert(tracker.currentState == ServerTracker.Draining)
 
@@ -295,7 +295,7 @@ class ServerTrackerTest extends FunSuite {
       serviceP.setValue(Response(data))
       executor.executeAll()
 
-      assert(tracker.npending == 0)
+      assert(tracker.lessee.npending == 0)
       assert(tracker.currentState == ServerTracker.Closed)
       // Still hasn't flushed the writer
       val RdispatchOk(2, _, `data`) = messageWriter.messages.dequeue()
@@ -321,14 +321,14 @@ class ServerTrackerTest extends FunSuite {
       tracker.dispatch(
         Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data))
       tracker.discarded(2, "lolz") // cancel it, but the Future still remains
-      assert(tracker.npending() == 0)
+      assert(tracker.lessee.npending() == 0)
 
       val Rdiscarded(2) = messageWriter.messages.dequeue()
 
       // Same tag, and now two outstanding promises for the same tag
       tracker.dispatch(
         Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data))
-      assert(tracker.npending() == 1)
+      assert(tracker.lessee.npending() == 1)
 
       val firstP = servicePs.dequeue()
       assert(firstP.isInterrupted.isDefined) // should be interrupted, but we don't care
@@ -340,7 +340,7 @@ class ServerTrackerTest extends FunSuite {
       firstP.setValue(Response(Nil, Buf.Empty))
       secondP.setValue(Response(Nil, data))
       executor.executeAll()
-      assert(tracker.npending() == 0)
+      assert(tracker.lessee.npending() == 0)
 
       assert(messageWriter.messages.size == 1)
       val RdispatchOk(2, _, msg) = messageWriter.messages.dequeue()
@@ -368,7 +368,7 @@ class ServerTrackerTest extends FunSuite {
 
       executor.executeAll()
 
-      assert(tracker.npending == 0)
+      assert(tracker.lessee.npending == 0)
 
       // Waiting for the writer to drain
       assert(!tracker.drained.isDefined)
@@ -392,7 +392,7 @@ class ServerTrackerTest extends FunSuite {
 
       executor.executeAll()
 
-      assert(tracker.npending == 0)
+      assert(tracker.lessee.npending == 0)
       assert(!tracker.drained.isDefined)
 
       // Drain writer

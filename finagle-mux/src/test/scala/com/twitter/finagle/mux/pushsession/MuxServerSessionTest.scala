@@ -40,8 +40,8 @@ class MuxServerSessionTest extends FunSuite {
 
     lazy val session: MuxServerSession = new MuxServerSession(
       params = params,
-      decoder = decoder,
-      messageWriter = messageWriter,
+      h_decoder = decoder,
+      h_messageWriter = messageWriter,
       handle = handle,
       service = proxyService
     )
