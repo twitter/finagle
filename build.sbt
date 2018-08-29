@@ -34,7 +34,7 @@ val netty4LibsTest = Seq(
 val netty4Http = "io.netty" % "netty-codec-http" % netty4Version
 val netty4Http2 = "io.netty" % "netty-codec-http2" % netty4Version
 val netty4StaticSsl = "io.netty" % "netty-tcnative-boringssl-static" % "2.0.12.Final"
-val jacksonVersion = "2.8.4"
+val jacksonVersion = "2.9.6"
 val jacksonLibs = Seq(
   "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
