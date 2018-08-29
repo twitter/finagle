@@ -65,6 +65,12 @@ Bug Fixes
 * finagle-thrift, finagle-thriftmux: Response classification is enabled in server side.
   ``PHAB_ID=D196032``
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-memcached: A Memcached client (`c.t.f.Memcached.Client`) is now backed by a more efficient,
+  push-based implementation. ``PHAB_ID=D208047``
+
 18.8.0
 -------
 

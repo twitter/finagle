@@ -3,29 +3,27 @@ package com.twitter.finagle.memcached.integration
 import com.twitter.conversions.time._
 import com.twitter.finagle.Address
 import com.twitter.finagle.Memcached
-import com.twitter.finagle.Memcached.UsePushMemcachedToggleName
 import com.twitter.finagle.Name
 import com.twitter.finagle.Service
 import com.twitter.finagle.memcached.Interpreter
 import com.twitter.finagle.memcached.integration.external.InProcessMemcached
 import com.twitter.finagle.memcached.protocol._
-import com.twitter.finagle.toggle.flag
 import com.twitter.io.Buf
 import com.twitter.util.TimeConversions._
 import com.twitter.util.{Await, Awaitable, Time}
 import java.net.{InetAddress, InetSocketAddress}
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-abstract class InterpreterServiceTest extends FunSuite with BeforeAndAfter {
+class InterpreterServiceTest extends FunSuite with BeforeAndAfter {
 
-  val TimeOut = 15.seconds
+  private val TimeOut = 15.seconds
 
   private def awaitResult[T](awaitable: Awaitable[T]): T = Await.result(awaitable, TimeOut)
 
-  var server: InProcessMemcached = null
-  var client: Service[Command, Response] = null
+  private var server: InProcessMemcached = null
+  private var client: Service[Command, Response] = null
 
-  protected def baseClient: Memcached.Client
+  private val baseClient: Memcached.Client = Memcached.client
 
   before {
     server = new InProcessMemcached(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
@@ -93,19 +91,4 @@ abstract class InterpreterServiceTest extends FunSuite with BeforeAndAfter {
     val newRetrievedValue = awaitResult(client(Get(Seq(key))))
     assert(newRetrievedValue == Values(Seq(Value(key, newValue, None, Some(Buf.Utf8(zero))))))
   }
-
-}
-
-class InterpreterServicePushClientTest extends InterpreterServiceTest {
-  protected def baseClient: Memcached.Client =
-    flag.overrides.let(UsePushMemcachedToggleName, 1.0) {
-      Memcached.client
-    }
-}
-
-class InterpreterServiceTestNonPushClientTest extends InterpreterServiceTest {
-  protected def baseClient: Memcached.Client =
-    flag.overrides.let(UsePushMemcachedToggleName, 0.0) {
-      Memcached.client
-    }
 }

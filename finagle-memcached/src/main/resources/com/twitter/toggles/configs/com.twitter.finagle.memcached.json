@@ -4,11 +4,6 @@
       "id": "com.twitter.finagle.memcached.UsePartitioningMemcachedClient",
       "description": "Enables the new partitioning client for Memcached",
       "fraction": 0.0
-    },
-    {
-      "id": "com.twitter.finagle.memcached.UsePushMemcachedClient",
-      "description": "Enables the push-based client for Memcached",
-      "fraction": 0.0
     }
   ]
 }

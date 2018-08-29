@@ -2,7 +2,7 @@ package com.twitter.finagle.memcached.unit.util
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.Memcached.{UsePartitioningMemcachedClientToggle, UsePushMemcachedToggleName}
+import com.twitter.finagle.Memcached.UsePartitioningMemcachedClientToggle
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.factory.TimeoutFactory
 import com.twitter.finagle.filter.NackAdmissionFilter
@@ -18,13 +18,13 @@ import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.mockito.MockitoSugar
 
-abstract class MemcachedTest
+class MemcachedTest
     extends FunSuite
     with MockitoSugar
     with Eventually
     with IntegrationPatience {
 
-  protected def baseClient: Memcached.Client
+  protected def baseClient: Memcached.Client = Memcached.client
 
   test("Memcached.Client has expected stack and params") {
     val markDeadFor = Backoff.const(1.second)
@@ -125,18 +125,3 @@ abstract class MemcachedTest
     }
   }
 }
-
-class PushClientTest extends MemcachedTest {
-  protected def baseClient: Memcached.Client =
-    flag.overrides.let(UsePushMemcachedToggleName, 1.0) {
-      Memcached.client
-    }
-}
-
-class NonPushClientTest extends MemcachedTest {
-  protected def baseClient: Memcached.Client =
-    flag.overrides.let(UsePushMemcachedToggleName, 0.0) {
-      Memcached.client
-    }
-}
-

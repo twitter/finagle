@@ -2,8 +2,8 @@ package com.twitter.finagle
 
 import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
-import com.twitter.finagle.client.{EndpointerStackClient, _}
-import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, PipeliningDispatcher, SerialServerDispatcher, StalledPipelineTimeout}
+import com.twitter.finagle.client._
+import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, SerialServerDispatcher, StalledPipelineTimeout}
 import com.twitter.finagle.pushsession.{PipeliningClientPushSession, PushChannelHandle, PushStackClient, PushTransporter}
 import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
 import com.twitter.finagle.loadbalancer.{Balancers, LoadBalancerFactory}
@@ -16,7 +16,7 @@ import com.twitter.finagle.memcached.protocol.{Command, Response, RetrievalComma
 import com.twitter.finagle.memcached.Toggles
 import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.netty4.pushsession.Netty4PushTransporter
-import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
+import com.twitter.finagle.netty4.Netty4Listener
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server.{Listener, ServerInfo, StackServer, StdStackServer}
@@ -126,18 +126,10 @@ trait MemcachedRichClient { self: finagle.Client[Command, Response] =>
 
   private def evalLabeledDest(dest: String): (Name, String) = {
     val _dest = if (LocalMemcached.enabled) {
-      mkDestination("localhost", LocalMemcached.port)
+      Memcached.Client.mkDestination("localhost", LocalMemcached.port)
     } else dest
     Resolver.evalLabeled(_dest)
   }
-
-  /**
-   * The memcached client should be using fixed hosts that do not change
-   * IP addresses. Force usage of the FixedInetResolver to prevent spurious
-   * DNS lookups and polling.
-   */
-  private def mkDestination(hostName: String, port: Int): String =
-    s"${FixedInetResolver.scheme}!$hostName:$port"
 }
 
 /**
@@ -173,11 +165,6 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
     "com.twitter.finagle.memcached.UsePartitioningMemcachedClient"
   private[this] val toggle = Toggles(UsePartitioningMemcachedClientToggle)
   private[this] def UsePartitioningMemcachedClient = toggle(ServerInfo().id.hashCode)
-
-  private[finagle] val UsePushMemcachedToggleName =
-    "com.twitter.finagle.memcached.UsePushMemcachedClient"
-  private[this] val usePushMemcachedToggle = Toggles(UsePushMemcachedToggleName)
-  private[this] def UsePushMemcached = usePushMemcachedToggle(ServerInfo().id.hashCode)
 
   /**
    * Memcached specific stack params.
@@ -273,91 +260,6 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
      * the client is hard-coded to use the non-push underlying client.
      */
 
-    /**
-     * Used by [[PushClient]] and [[NonPushClient]] to expose their endpointers to
-     * [[Memcached.Client]]
-     */
-    private[finagle] trait EndpointerClient {
-      def endptr: Stackable[ServiceFactory[Command, Response]]
-    }
-
-    /**
-     * A push-based Memcached client.
-     *
-     * Exposed for testing.
-     */
-    private[finagle] case class PushClient(
-        stack: Stack[ServiceFactory[Command, Response]] = stack,
-        params: Stack.Params = params)
-      extends PushStackClient[Command, Response, PushClient]
-      with EndpointerClient {
-
-      def endptr: Stackable[ServiceFactory[Command, Response]] =
-        this.endpointer
-
-      protected type In = Response
-      protected type Out = Command
-      protected type SessionT = PipeliningClientPushSession[Response, Command]
-
-      protected def newPushTransporter(ia: InetSocketAddress): PushTransporter[Response, Command] =
-        Netty4PushTransporter.raw(MemcachedNetty4ClientPipelineInit, ia, params)
-
-      protected def newSession(handle: PushChannelHandle[Response, Command]): Future[SessionT] = {
-        Future.value(
-          new PipeliningClientPushSession[Response, Command](
-            handle,
-            params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope),
-            params[StalledPipelineTimeout].timeout,
-            params[finagle.param.Timer].timer
-          )
-        )
-      }
-
-      protected def toService(session: SessionT): Future[Service[Command, Response]] =
-        Future.value(session.toService)
-
-      protected def copy1(
-        stack: Stack[ServiceFactory[Command, Response]],
-        params: Stack.Params
-      ): PushClient = copy(stack, params)
-    }
-
-    /**
-     * A non-push-based Memcached client.
-     *
-     * Exposed for testing.
-     */
-    private[finagle] case class NonPushClient(
-        stack: Stack[ServiceFactory[Command, Response]] = stack,
-        params: Stack.Params = params)
-      extends StdStackClient[Command, Response, NonPushClient]
-      with EndpointerClient {
-
-      def endptr: Stackable[ServiceFactory[Command, Response]] =
-        this.endpointer
-
-      protected type In = Command
-      protected type Out = Response
-      protected type Context = TransportContext
-
-      protected def newTransporter(addr: SocketAddress): Transporter[In, Out, Context] =
-        Netty4Transporter.raw(MemcachedNetty4ClientPipelineInit, addr, params)
-
-      protected def newDispatcher(transport: Transport[Command, Response] {
-        type Context <: NonPushClient.this.Context
-      }): Service[Command, Response] =
-        new PipeliningDispatcher[Command, Response](
-          transport,
-          params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope),
-          params[StalledPipelineTimeout].timeout,
-          params[finagle.param.Timer].timer
-        )
-
-      protected def copy1(
-        stack: Stack[ServiceFactory[Command, Response]],
-        params: Stack.Params
-      ): NonPushClient = copy(stack, params)
-    }
   }
 
   private[finagle] def registerClient(
@@ -377,24 +279,37 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
   case class Client(
     stack: Stack[ServiceFactory[Command, Response]] = Client.stack,
     params: Stack.Params = Client.params
-  ) extends EndpointerStackClient[Command, Response, Client]
-      with MemcachedRichClient {
-    import Client.{EndpointerClient, NonPushClient, PushClient, mkDestination}
+  ) extends PushStackClient[Command, Response, Client] with MemcachedRichClient {
 
-    private[this] val underlying: EndpointerClient =
-      if  (UsePushMemcached) PushClient(stack, params)
-      else NonPushClient(stack, params)
+    protected type In = Response
+    protected type Out = Command
+    protected type SessionT = PipeliningClientPushSession[Response, Command]
 
-    protected def endpointer: Stackable[ServiceFactory[Command, Response]] = underlying.endptr
+    protected def newPushTransporter(ia: InetSocketAddress): PushTransporter[Response, Command] =
+      Netty4PushTransporter.raw(MemcachedNetty4ClientPipelineInit, ia, params)
+
+    protected def newSession(handle: PushChannelHandle[Response, Command]): Future[SessionT] = {
+      Future.value(
+        new PipeliningClientPushSession[Response, Command](
+          handle,
+          params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope),
+          params[StalledPipelineTimeout].timeout,
+          params[finagle.param.Timer].timer
+        )
+      )
+    }
+
+    protected def toService(session: SessionT): Future[Service[Command, Response]] =
+      Future.value(session.toService)
 
     protected def copy1(
-      stack: Stack[ServiceFactory[Command, Response]] = this.stack,
-      params: Stack.Params = this.params
+      stack: Stack[ServiceFactory[Command, Response]],
+      params: Stack.Params
     ): Client = copy(stack, params)
 
     def newTwemcacheClient(dest: Name, label: String): TwemcacheClient = {
       val destination = if (LocalMemcached.enabled) {
-        Resolver.eval(mkDestination("localhost", LocalMemcached.port))
+        Resolver.eval(Client.mkDestination("localhost", LocalMemcached.port))
       } else dest
 
       val Logger(logger) = params[Logger]
@@ -430,7 +345,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
             FailureAccrualFactory.role,
             KetamaFailureAccrualFactory.module[Command, Response](key, healthBroker)
           )
-          withStack(stk).newService(mkDestination(node.host, node.port), label0)
+          withStack(stk).newService(Client.mkDestination(node.host, node.port), label0)
         }
 
         new KetamaPartitionedClient(va, newService, healthBroker, scopedSr, hasher, numReps)

@@ -101,7 +101,7 @@ class ClientSessionTest extends FunSuite with MockitoSugar {
     }
   )
 
-  class MyPushClient extends com.twitter.finagle.Memcached.Client.PushClient {
+  class MyPushClient extends com.twitter.finagle.Memcached.Client {
     def toSvc(
       handle: PushChannelHandle[memcached.Response, memcached.Command]
     ): Service[memcached.Command, memcached.Response] = {
@@ -119,22 +119,6 @@ class ClientSessionTest extends FunSuite with MockitoSugar {
     "memcached-session", { handle: PushChannelHandle[memcached.Response, memcached.Command] =>
       val cl: MyPushClient = new MyPushClient
       val svc = cl.toSvc(handle)
-      () =>
-        svc.status
-    }
-  )
-
-  class MyNonPushClient extends com.twitter.finagle.Memcached.Client.NonPushClient {
-    def newDisp(
-      transport: Transport[memcached.Command, memcached.Response]
-    ): Service[memcached.Command, memcached.Response] =
-      super.newDispatcher(transport)
-  }
-
-  testSessionStatus(
-    "memcached-dispatcher", { tr: Transport[memcached.Command, memcached.Response] =>
-      val cl: MyNonPushClient = new MyNonPushClient
-      val svc = cl.newDisp(tr)
       () =>
         svc.status
     }

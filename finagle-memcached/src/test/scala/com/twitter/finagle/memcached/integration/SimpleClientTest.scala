@@ -1,32 +1,30 @@
 package com.twitter.finagle.memcached.integration
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.Memcached.UsePushMemcachedToggleName
 import com.twitter.finagle.{Address, Memcached, Name}
 import com.twitter.finagle.memcached.Client
 import com.twitter.finagle.memcached.integration.external.TestMemcachedServer
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.stats.SummarizingStatsReceiver
-import com.twitter.finagle.toggle.flag
 import com.twitter.io.Buf
 import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
 import com.twitter.util.{Await, Awaitable}
 import java.net.InetSocketAddress
 import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
 
-abstract class SimpleClientTest extends FunSuite with BeforeAndAfter {
+class SimpleClientTest extends FunSuite with BeforeAndAfter {
 
   /**
    * Note: This integration test requires a real Memcached server to run.
    */
-  var client: Client = null
-  var testServer: Option[TestMemcachedServer] = None
+  private var client: Client = null
+  private var testServer: Option[TestMemcachedServer] = None
 
-  val stats = new SummarizingStatsReceiver
+  private val stats = new SummarizingStatsReceiver
 
   private def awaitResult[T](awaitable: Awaitable[T]): T = Await.result(awaitable, 5.seconds)
 
-  protected def baseClient: Memcached.Client
+  private val baseClient: Memcached.Client = Memcached.client
 
   before {
     testServer = TestMemcachedServer.start()
@@ -187,46 +185,16 @@ abstract class SimpleClientTest extends FunSuite with BeforeAndAfter {
     intercept[ClientError] { awaitResult(client.decr("bad key")) }
     intercept[ClientError] { awaitResult(client.delete("bad key")) }
   }
-}
-
-class SimplePushClientTest extends SimpleClientTest {
-  protected def baseClient: Memcached.Client =
-    flag.overrides.let(UsePushMemcachedToggleName, 1.0) {
-      Memcached.client
-    }
 
   test("Push client uses Netty4PushTransporter") {
     val simple = new SimpleRegistry()
     val address = Address(testServer.get.address.asInstanceOf[InetSocketAddress])
     GlobalRegistry.withRegistry(simple) {
-      flag.overrides.let(UsePushMemcachedToggleName, 1.0) {
-        val client = Memcached.client.newService(Name.bound(address), "memcache")
-        client(Quit())
-        val entries = simple.toSet
-        assert(entries.contains(
-          Entry(Seq("client", "memcached", "memcache", "Transporter"), "Netty4PushTransporter")))
-      }
-    }
-  }
-}
-
-class SimpleNonPushClientTest extends SimpleClientTest {
-  protected def baseClient: Memcached.Client =
-    flag.overrides.let(UsePushMemcachedToggleName, 0.0) {
-      Memcached.client
-    }
-
-  test("Non-push client uses Netty4Transporter") {
-    val simple = new SimpleRegistry()
-    val address = Address(testServer.get.address.asInstanceOf[InetSocketAddress])
-    GlobalRegistry.withRegistry(simple) {
-      flag.overrides.let(UsePushMemcachedToggleName, 0.0) {
-        val client = Memcached.client.newService(Name.bound(address), "memcache")
-        client(Quit())
-        val entries = simple.toSet
-        assert(entries.contains(
-          Entry(Seq("client", "memcached", "memcache", "Transporter"), "Netty4Transporter")))
-      }
+      val client = Memcached.client.newService(Name.bound(address), "memcache")
+      client(Quit())
+      val entries = simple.toSet
+      assert(entries.contains(
+        Entry(Seq("client", "memcached", "memcache", "Transporter"), "Netty4PushTransporter")))
     }
   }
 }

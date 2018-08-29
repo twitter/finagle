@@ -1,7 +1,6 @@
 package com.twitter.finagle.memcached.integration
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.Memcached.UsePushMemcachedToggleName
 import com.twitter.finagle._
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.liveness.FailureAccrualFactory
@@ -12,16 +11,15 @@ import com.twitter.finagle.memcached.{Client, TwemcacheClient}
 import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.toggle.flag
 import com.twitter.hashing.KeyHasher
 import com.twitter.util._
 import java.net.InetSocketAddress
 
-abstract class MemcachedPartitioningClientTest extends MemcachedTest {
+class MemcachedPartitioningClientTest extends MemcachedTest {
 
   protected[this] val isOldClient: Boolean = false
 
-  protected def baseClient: Memcached.Client
+  protected def baseClient: Memcached.Client = Memcached.client
 
   protected def createClient(dest: Name, clientName: String): Client = {
     newClient(dest)
@@ -139,18 +137,4 @@ abstract class MemcachedPartitioningClientTest extends MemcachedTest {
   test("data read/write consistency between old and new clients") {
     testCompatibility()
   }
-}
-
-class PushClientTest extends MemcachedPartitioningClientTest {
-  protected def baseClient: Memcached.Client =
-    flag.overrides.let(UsePushMemcachedToggleName, 1.0) {
-      Memcached.client
-    }
-}
-
-class NonPushClientTest extends MemcachedPartitioningClientTest {
-  protected def baseClient: Memcached.Client =
-    flag.overrides.let(UsePushMemcachedToggleName, 0.0) {
-      Memcached.client
-    }
 }
