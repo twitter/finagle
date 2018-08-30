@@ -27,7 +27,7 @@ class PoolingReadRepairClient(
       futures.head
     } else {
       // We construct a return value future that we will update manually ourselves
-      // to accomodate the more complicated logic.
+      // to accommodate the more complicated logic.
       val answer = new Promise[GetResult]
 
       // First pass: return the first complete, correct answer from the clients
