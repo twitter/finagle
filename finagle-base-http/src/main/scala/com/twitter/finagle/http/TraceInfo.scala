@@ -12,6 +12,47 @@ private object TraceInfo {
   }
 
   def letTraceIdFromRequestHeaders[R](request: Request)(f: => R): R = {
+    // rather than rewrite all this to handle more I'm just shimming
+    // in a check for the new trace b3 header and if it exists I'm
+    // extracting out its components to be handled by the existing
+    // code.
+    if (request.headerMap.contains(Header.TraceContext)) {
+      def handleOne(headers: HeaderMap,value: String): Unit =
+        value match {
+          case "d" => headers.set(Header.Flags,"1")
+          case "1" => headers.set(Header.Sampled,"1")
+          case _ => ()
+        }
+      def handleTwo(headers: HeaderMap, a: String,b: String): Unit = {
+        headers.set(Header.TraceId,a)
+        headers.set(Header.SpanId,b)
+      }
+
+      val _ = request.headerMap.get(Header.TraceContext).map(_.split("-").toList) match {
+        case Some(a) =>
+          val headers = request.headerMap
+          a.size match {
+            case 0 =>
+              // bogus
+              ()
+          case 1 =>
+              // either debug flag or sampled
+              handleOne(headers,a(0))
+          case 2 =>
+              // this is required to be traceId, spanId
+              handleTwo(headers,a(0),a(1))
+          case 3 =>
+              handleTwo(headers,a(0),a(1))
+              handleOne(headers,a(2))
+          case 4 =>
+              handleTwo(headers,a(0),a(1))
+              handleOne(headers,a(2))
+              headers.set(Header.ParentSpanId,a(3))
+          }
+        case None =>
+          ()
+      }
+    }
     val id =
       if (Header.hasAllRequired(request.headerMap)) {
         val spanId = SpanId.fromString(request.headerMap(Header.SpanId))
