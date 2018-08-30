@@ -39,10 +39,10 @@ class RefTransport[In, Out](underlying: Transport[In, Out])
    *         otherwise
    */
   def update(fn: Transport[In, Out] => Transport[In, Out]): Boolean = synchronized {
-//    if (!closing) {
+    if (!closing) {
       mapped = fn(underlying)
       true
-//    } else false
+    } else false
   }
 
   /**
