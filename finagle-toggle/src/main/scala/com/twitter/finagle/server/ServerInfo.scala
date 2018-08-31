@@ -14,7 +14,7 @@ abstract class ServerInfo {
    * Commonly used values include: "production", "test", "development",
    * and "staging".
    *
-   * @see [[com.twitter.finagle.toggle.StandardToggleMap]]
+   * @see `com.twitter.finagle.toggle.StandardToggleMap`
    */
   def environment: Option[String]
 
@@ -58,7 +58,7 @@ object ServerInfo {
   registerServerInfo(global())
 
   /**
-   * Initialize the global [[ServerInfo]] returned by [[ServerInfo$.apply]].
+   * Initialize the global [[ServerInfo]] returned by [[ServerInfo.apply]].
    *
    * May only be called once.
    */
