@@ -75,14 +75,14 @@ object StackServer {
       (next: ServiceFactory[Req, Rep]) => new ServerDestTracingProxy[Req, Rep](next)
     )
     stk.push(TimeoutFilter.serverModule)
-    // The DeadlineFilter is pushed after the stats filters so stats are
+    // The DeadlineFilter is pushed before the stats filters so stats are
     // recorded for the request. If a server processing deadlines is set in
     // TimeoutFilter, the deadline will start from the current time, and
     // therefore not be expired if the request were to then pass through
-    // DeadlineFilter. Thus, DeadlineFilter is pushed before TimeoutFilter.
+    // DeadlineFilter. Thus, DeadlineFilter is pushed after TimeoutFilter.
     stk.push(DeadlineFilter.module)
     stk.push(DtabStatsFilter.module)
-    // Admission Control filters are inserted after `StatsFilter` so that rejected
+    // Admission Control filters are inserted before `StatsFilter` so that rejected
     // requests are counted. We may need to adjust how latency are recorded
     // to exclude Nack response from latency stats, CSL-2306.
     stk.push(ServerAdmissionControl.module)

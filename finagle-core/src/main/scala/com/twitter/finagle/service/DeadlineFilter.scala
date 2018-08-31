@@ -10,10 +10,10 @@ import com.twitter.util.{Duration, Future, Stopwatch, Time, TokenBucket}
 /**
  * DeadlineFilter provides an admission control module that can be pushed onto the stack to
  * reject requests with expired deadlines (deadlines are set in the TimeoutFilter).
- * For servers, DeadlineFilter.module should be pushed onto the stack after the stats filters so
- * stats are recorded for the request, and before TimeoutFilter where a new Deadline is set.
- * For clients, DeadlineFilter.module should be after the stats filters; higher in the stack is
- * preferable so requests are rejected as early as possible.
+ * For servers, DeadlineFilter.module should be pushed onto the stack before the stats filters so
+ * stats are recorded for the request, and pushed after TimeoutFilter where a new Deadline is set.
+ * For clients, DeadlineFilter.module should be pushed before the stats filters; higher in the stack
+ * is preferable so requests are rejected as early as possible.
  *
  * @note Deadlines cross process boundaries and can span multiple nodes in a call graph.
  *       Even if a direct caller doesn't set a deadline, the server may still receive one and thus

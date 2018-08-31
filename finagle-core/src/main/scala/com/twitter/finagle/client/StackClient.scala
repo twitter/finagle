@@ -243,6 +243,14 @@ object StackClient {
      * back up. This is opposite to how modules are written on the
      * page; a request starts at the bottom of the `newStack` method
      * and goes up.
+     *
+     * Also note that the term "stack" does not refer to a stack in the
+     * computer science sense but instead in the sense of a chain of objects,
+     * i.e., stack modules. Because modules are composed sequentially, it also
+     * makes sense to speak of modules coming "before" or "after" others.
+     *
+     * Lastly, note that "module A comes before module B" has the same meaning
+     * as "module A is pushed after module B".
      */
 
     val stk = new StackBuilder(endpointStack[Req, Rep])
