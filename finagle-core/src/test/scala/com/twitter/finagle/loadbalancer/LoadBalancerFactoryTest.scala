@@ -9,6 +9,8 @@ import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.stats.{InMemoryHostStatsReceiver, InMemoryStatsReceiver}
 import com.twitter.util.{Activity, Await, Future, Time, Var}
 import java.net.{InetAddress, InetSocketAddress}
+
+import com.twitter.finagle.loadbalancer.LoadBalancerFactory.ErrorLabel
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.FunSuite
 
@@ -100,8 +102,17 @@ class LoadBalancerFactoryTest extends FunSuite with Eventually with IntegrationP
     }.toStack(next)
 
     val dest = LoadBalancerFactory.Dest(Var(Addr.Neg))
-    val factory = stack.make(Stack.Params.empty + dest)
-    intercept[NoBrokersAvailableException](Await.result(factory()))
+    val label = "mystack"
+    val factory = stack.make(Stack.Params.empty + dest + ErrorLabel(label))
+
+    Dtab.unwind {
+      val newDtab = Dtab.read("/foo => /bar")
+      Dtab.local = newDtab
+      val noBrokers = intercept[NoBrokersAvailableException](Await.result(factory()))
+      assert(noBrokers.name == "mystack")
+      assert(noBrokers.localDtab == newDtab)
+    }
+
   }
 
   test("when no nodes are Open and configured to fail fast") {
