@@ -312,4 +312,37 @@ class ClientTest extends FunSuite
     }
   }
 
+  test("stored procedure returns result set") {
+    val createProcedure =
+      """
+        |create procedure getSwimmerByEvent(IN eventName varchar(30))
+        |begin
+        |select *
+        |from `finagle-mysql-test`
+        |where `event` = eventName collate utf8_general_ci;
+        |end
+      """.stripMargin
+
+    val executeProcedure =
+      """
+        |call getSwimmerByEvent('50 m freestyle')
+      """.stripMargin
+
+    val dropProcedure =
+      """
+        |drop procedure if exists getSwimmerByEvent
+      """.stripMargin
+
+    await(c.query(createProcedure))
+
+    val result = await(
+      c.select(executeProcedure) { row =>
+        row.stringOrNull("name")
+      }
+    )
+
+    assert(result == List("Cesar Cielo"))
+    await(c.query(dropProcedure))
+  }
+
 }

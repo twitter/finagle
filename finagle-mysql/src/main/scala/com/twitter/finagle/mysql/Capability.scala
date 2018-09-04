@@ -53,7 +53,8 @@ object Capability {
     Capability.LongPassword,
     Capability.ConnectWithDB,
     Capability.SecureConnection,
-    Capability.LocalFiles
+    Capability.LocalFiles,
+    Capability.MultiResults
   )
 
   def apply(flags: Int*): Capability = {
