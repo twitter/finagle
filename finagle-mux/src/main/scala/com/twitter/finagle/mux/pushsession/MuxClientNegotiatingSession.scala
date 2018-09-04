@@ -9,7 +9,7 @@ import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession}
 import com.twitter.finagle.mux.Handshake
 import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
 import com.twitter.io.{Buf, ByteReader}
-import com.twitter.logging.Logger
+import com.twitter.logging.{Level, Logger}
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicBoolean
 import scala.util.control.NonFatal
@@ -131,6 +131,9 @@ private[finagle] final class MuxClientNegotiatingSession(
   private[this] def phaseReceiveMarkerRerr(message: Message): Unit = message match {
     case Message.Rerr(`TinitTag`, `CanTinitMsg`) => // we can negotiate
       phase = phaseReceiveRinit
+      if (log.isLoggable(Level.TRACE)) {
+        log.trace(s"Server can negotiate; client sending headers $headers")
+      }
       handle.sendAndForget(Message.encode(Message.Tinit(TinitTag, version, headers)))
 
     case _ => // Don't know how to init

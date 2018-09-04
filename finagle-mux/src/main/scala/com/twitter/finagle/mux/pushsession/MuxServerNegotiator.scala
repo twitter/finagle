@@ -93,7 +93,15 @@ private[finagle] class MuxServerNegotiator private(
         // `sendAndForget` we bounce the send through the serial executor. If we try to execute
         // the pipeline changes via the continuation provided to `send`, we are not guaranteed
         // that it will happen before handling inbound bytes.
+
+        if (log.isLoggable(Level.TRACE)) {
+          log.trace(s"Server received client headers $headers; Server sending headers $localHeaders")
+        }
+
         handle.sendNowAndForget(Message.encode(Message.Rinit(tag, Mux.LatestVersion, localHeaders)))
+
+        if (log.isLoggable(Level.TRACE))
+          log.trace(s"Server has sent $localHeaders")
 
         // pipeline changes for Opp-TLS
         val session = negotiate(service, Some(headers))

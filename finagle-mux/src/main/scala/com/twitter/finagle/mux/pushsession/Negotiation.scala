@@ -9,7 +9,7 @@ import com.twitter.finagle.mux.{Handshake, Request, Response}
 import com.twitter.finagle.{Service, Stack, param}
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.logging.{Level, Logger}
-import com.twitter.util.{Future, Promise, Try, Return, Throw}
+import com.twitter.util.{Future, Promise, Return, Throw, Try}
 
 /**
  * Abstraction of negotiation logic for push-based mux clients and servers
@@ -115,7 +115,18 @@ private[finagle] abstract class Negotiation(params: Stack.Params) {
     handle: PushChannelHandle[ByteReader, Buf],
     peerHeaders: Option[Headers]
   ): SessionT = {
-    negotiateOppTls(handle, peerHeaders, _ => ())
+    val onHandshakeComplete: Try[Unit] => Unit = {
+      case Return(_) =>
+        log.trace("Successfully negotiated oppTls handshake")
+      case Throw(t) =>
+        log.trace("OppTls handshake failed")
+    }
+
+    if (log.isLoggable(Level.TRACE)) {
+      negotiateOppTls(handle, peerHeaders, onHandshakeComplete)
+    } else {
+      negotiateOppTls(handle, peerHeaders, _ => ())
+    }
     negotiateMuxSession(handle, peerHeaders)
   }
 
@@ -135,8 +146,17 @@ private[finagle] abstract class Negotiation(params: Stack.Params) {
     val p = Promise[Unit]
     val onHandshakeComplete: Try[Unit] => Unit = { result =>
       result match {
-        case Return(_) => p.setDone
-        case Throw(t) => p.setException(t)
+        case Return(_) => {
+          if (log.isLoggable(Level.TRACE))
+            log.trace("Client side successfully negotiated oppTls handshake")
+          p.setDone
+        }
+
+        case Throw(t) => {
+          if (log.isLoggable(Level.TRACE))
+            log.trace("Client side failed to negotiate oppTls handshake")
+          p.setException(t)
+        }
       }
     }
     Try(negotiateOppTls(handle, peerHeaders, onHandshakeComplete)) match {
