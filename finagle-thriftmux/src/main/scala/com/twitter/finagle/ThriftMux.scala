@@ -3,10 +3,8 @@ package com.twitter.finagle
 import com.twitter.finagle.client.{ClientRegistry, ExceptionRemoteInfoFactory, StackBasedClient, StackClient}
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.context.RemoteInfo.Upstream
-import com.twitter.finagle.mux.{OpportunisticTlsParams, Request, Response}
-import com.twitter.finagle.mux.pushsession.MuxPush
-import com.twitter.finagle.mux.lease.exp.Lessor
-import com.twitter.finagle.mux.transport.{MuxContext, MuxFailure, OpportunisticTls}
+import com.twitter.finagle.mux.OpportunisticTlsParams
+import com.twitter.finagle.mux.transport.MuxFailure
 import com.twitter.finagle.param.{
   ExceptionStatsHandler => _,
   Monitor => _,
@@ -14,7 +12,7 @@ import com.twitter.finagle.param.{
   Tracer => _,
   _
 }
-import com.twitter.finagle.server.{Listener, StackBasedServer, StackServer, StdStackServer}
+import com.twitter.finagle.server.{StackBasedServer, StackServer}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{
   ClientStatsReceiver,
@@ -26,7 +24,6 @@ import com.twitter.finagle.thrift._
 import com.twitter.finagle.thriftmux.pushsession.MuxDowngradingNegotiator
 import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
 import com.twitter.finagle.tracing.Tracer
-import com.twitter.finagle.transport.{StatsTransport, Transport}
 import com.twitter.io.Buf
 import com.twitter.util._
 import java.net.SocketAddress
@@ -135,7 +132,7 @@ object ThriftMux
         .withStatsReceiver(ClientStatsReceiver)
 
     def pushMuxer: StackClient[mux.Request, mux.Response] =
-      MuxPush.client
+      Mux.client
         .copy(stack = BaseClientStack)
         .configured(ProtocolLibrary("thriftmux"))
 
@@ -369,87 +366,6 @@ object ThriftMux
   ): Service[ThriftClientRequest, Array[Byte]] =
     client.newService(dest, label)
 
-  /**
-   * A server for the Thrift protocol served over [[com.twitter.finagle.mux]].
-   * ThriftMuxServer is backwards-compatible with Thrift clients that use the
-   * framed transport and binary protocol. It switches to the backward-compatible
-   * mode when the first request is not recognized as a valid Mux message but can
-   * be successfully handled by the underlying Thrift service. Since a Thrift
-   * message that is encoded with the binary protocol starts with a header value of
-   * 0x800100xx, Mux does not confuse it with a valid Mux message (0x80 = -128 is
-   * an invalid Mux message type) and the server can reliably detect the non-Mux
-   * Thrift client and switch to the backwards-compatible mode.
-   *
-   * Note that the server is also compatible with non-Mux finagle-thrift clients.
-   * It correctly responds to the protocol up-negotiation request and passes the
-   * tracing information embedded in the thrift requests to Mux (which has native
-   * tracing support).
-   */
-  @deprecated("Use the push-based mux implementation instead", "2018-07-18")
-  case class ServerMuxer(
-    stack: Stack[ServiceFactory[mux.Request, mux.Response]] = BaseServerStack,
-    params: Stack.Params = BaseServerParams
-  ) extends StdStackServer[mux.Request, mux.Response, ServerMuxer] {
-
-    protected type In = Buf
-    protected type Out = Buf
-    protected type Context = MuxContext
-
-    private[this] val statsReceiver = params[Stats].statsReceiver
-
-
-    override def serve(
-      addr: SocketAddress,
-      factory: ServiceFactory[Request, Response]
-    ): ListeningServer = {
-      // // We want to fail fast if the server's OppTls configuration is invalid
-      Mux.Server.validateTlsParamConsistency(params)
-      super.serve(addr, factory)
-    }
-
-    protected def copy1(
-      stack: Stack[ServiceFactory[mux.Request, mux.Response]] = this.stack,
-      params: Stack.Params = this.params
-    ): ServerMuxer = copy(stack, params)
-
-    protected def newListener(): Listener[In, Out, Context] =
-      params[Mux.param.MuxImpl].listener(params)
-
-    protected def newDispatcher(
-      transport: Transport[In, Out] { type Context <: ServerMuxer.this.Context },
-      service: Service[mux.Request, mux.Response]
-    ): Closable = {
-      val Lessor.Param(lessor) = params[Lessor.Param]
-      val Mux.param.MaxFrameSize(frameSize) = params[Mux.param.MaxFrameSize]
-      val muxStatsReceiver = statsReceiver.scope("mux")
-      val param.ExceptionStatsHandler(excRecorder) = params[param.ExceptionStatsHandler]
-      val param.Tracer(tracer) = params[param.Tracer]
-      val Thrift.param.ProtocolFactory(pf) = params[Thrift.param.ProtocolFactory]
-      val Mux.param.OppTls(level) = params[Mux.param.OppTls]
-      val upgrades = muxStatsReceiver.counter("tls", "upgrade", "success")
-
-      val thriftEmulator = thriftmux.ThriftEmulator(transport, pf, statsReceiver.scope("thriftmux"))
-
-      val negotiatedTrans = mux.Handshake.server(
-        trans = thriftEmulator,
-        version = Mux.LatestVersion,
-        headers = Mux.Server.headers(_, frameSize, level.getOrElse(OpportunisticTls.Off)),
-        negotiate = Mux.negotiate(
-          frameSize,
-          muxStatsReceiver,
-          level.getOrElse(OpportunisticTls.Off),
-          transport.context.turnOnTls _,
-          upgrades
-        )
-      )
-
-      val statsTrans =
-        new StatsTransport(negotiatedTrans, excRecorder, muxStatsReceiver.scope("transport"))
-
-      mux.ServerDispatcher.newRequestResponse(statsTrans, service, lessor, tracer, muxStatsReceiver)
-    }
-  }
-
   @deprecated("Use Server.defaultMuxer instead", "2018-02-01")
   def serverMuxer: StackServer[mux.Request, mux.Response] = Server.defaultMuxer
 
@@ -460,15 +376,12 @@ object ThriftMux
 
     /** Push-based ThriftMux server implementation. */
     private[finagle] def pushMuxer: StackServer[mux.Request, mux.Response] = {
-      MuxPush.server
+      Mux.server
         .copy(
           stack = BaseServerStack,
           params = BaseServerParams,
           sessionFactory = MuxDowngradingNegotiator.build(_, _, _, _))
     }
-
-    /** Pull-based ThriftMux server implementation */
-    private[finagle] def standardMuxer: StackServer[mux.Request, mux.Response] = ServerMuxer()
 
     private val MuxToArrayFilter =
       new Filter[mux.Request, mux.Response, Array[Byte], Array[Byte]] {

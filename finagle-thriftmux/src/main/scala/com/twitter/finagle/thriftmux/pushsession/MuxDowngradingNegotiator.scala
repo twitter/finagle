@@ -1,6 +1,6 @@
 package com.twitter.finagle.thriftmux.pushsession
 
-import com.twitter.finagle.mux.pushsession.{MessageWriter, MuxChannelHandle, MuxMessageDecoder, MuxPush, Negotiation}
+import com.twitter.finagle.mux.pushsession.{MessageWriter, MuxChannelHandle, MuxMessageDecoder, Negotiation}
 import com.twitter.finagle._
 import com.twitter.finagle.mux.{Request, Response}
 import com.twitter.finagle.mux.transport.{BadMessageException, Message}
@@ -111,7 +111,7 @@ private[finagle] final class MuxDowngradingNegotiator(
     thriftmuxConnects.incr()
     // We have a normal mux transport! Just install the handshaker, give it this
     // first message, and be on our way!
-    MuxPush.Server.defaultSessionFactory(refSession, params, handle, service)
+    Mux.Server.defaultSessionFactory(refSession, params, handle, service)
     refSession.receive(ByteReader(buf))
 
   }

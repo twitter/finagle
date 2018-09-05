@@ -8,9 +8,12 @@ import com.twitter.finagle.http
 import com.twitter.finagle.memcached.{protocol => memcached}
 import com.twitter.finagle.http.codec.HttpClientDispatcher
 import com.twitter.finagle.http.exp.IdentityStreamTransport
-import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.liveness.FailureDetector
+import com.twitter.finagle.mux.pushsession.{MessageWriter, MuxMessageDecoder}
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.finagle.util.DefaultTimer
+import com.twitter.io.{Buf, ByteReader}
 import com.twitter.util._
 import com.twitter.util.TimeConversions._
 import org.mockito.Mockito.when
@@ -58,20 +61,21 @@ class ClientSessionTest extends FunSuite with MockitoSugar {
     }
   }
 
-  testSessionStatus[mux.transport.Message, mux.transport.Message](
-    "mux-transport", { tr: Transport[mux.transport.Message, mux.transport.Message] =>
-      val session: mux.ClientSession =
-        new mux.ClientSession(tr, liveness.FailureDetector.NullConfig, "test", NullStatsReceiver)
+  testPushSessionStatus(
+    "mux-dispatcher", { handle: PushChannelHandle[ByteReader, Buf] =>
+      val session = new mux.pushsession.MuxClientSession(
+        handle = handle,
+        h_decoder = mock[MuxMessageDecoder],
+        h_messageWriter = mock[MessageWriter],
+        detectorConfig = FailureDetector.NullConfig,
+        name = "test-dispatcher",
+        statsReceiver = new InMemoryStatsReceiver,
+        timer = mock[Timer]
+      )
+
+
       () =>
         session.status
-    }
-  )
-
-  testSessionStatus[mux.transport.Message, mux.transport.Message](
-    "mux-dispatcher", { tr: Transport[mux.transport.Message, mux.transport.Message] =>
-      val dispatcher = mux.ClientDispatcher.newRequestResponse(tr)
-      () =>
-        dispatcher.status
     }
   )
 

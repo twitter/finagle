@@ -1,40 +1,43 @@
 package com.twitter.finagle.mux
 
-import com.twitter.finagle.{param => fparam}
-import com.twitter.finagle.mux.lease.exp.Lessor
-import com.twitter.finagle.mux.transport.{Message, MuxContext}
-import com.twitter.finagle.transport.{StatsTransport, Transport}
-import com.twitter.finagle.{Mux, Service, ServiceFactory, Stack, mux}
-import com.twitter.io.Buf
-import com.twitter.util.Closable
+import com.twitter.finagle.{Mux, Service, ServiceFactory, Stack, mux, param => fparam}
+import com.twitter.finagle.Mux.Server.SessionF
+import com.twitter.finagle.mux.pushsession._
+import com.twitter.finagle.pushsession.RefPushSession
+import com.twitter.io.{Buf, ByteReader}
 
 // Implementation of the standard mux server that doesn't attempt to negotiate.
 // Only useful for testing Smux to ensure that failing to negotiate doesn't circumvent TLS.
-private class NonNegotiatingServer(
-  stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Mux.server.stack,
-  params: Stack.Params = Mux.server.params
-) extends Mux.Server(stack, params) {
-  override protected def copy1(
-    stack: Stack[ServiceFactory[Request, Response]],
-    params: Stack.Params
-  ): NonNegotiatingServer = new NonNegotiatingServer(stack, params)
+private object NonNegotiatingServer {
 
-  override protected def newDispatcher(
-    transport: Transport[Buf, Buf] {
-      type Context <: MuxContext
-    },
-    service: Service[Request, Response]
-  ): Closable = {
+  private val NonNegotiatingSessionFactory: SessionF = (
+  ref: RefPushSession[ByteReader, Buf],
+  params: Stack.Params,
+  handle: MuxChannelHandle,
+  service: Service[Request, Response]
+  ) => {
     val statsReceiver = params.apply[fparam.Stats].statsReceiver.scope("mux")
-    val fparam.Tracer(tracer) = params.apply[fparam.Tracer]
-    val Lessor.Param(lessor) = params.apply[Lessor.Param]
-    val fparam.ExceptionStatsHandler(excRecorder) = params.apply[fparam.ExceptionStatsHandler]
+    val framingStats = statsReceiver.scope("framer")
 
-    val negotiatedTrans = transport.map(Message.encode, Message.decode)
+    val session = new MuxServerSession(
+      params,
+      new FragmentDecoder(framingStats),
+      new FragmentingMessageWriter(handle, Int.MaxValue, framingStats),
+      handle,
+      service
+    )
 
-    val statsTrans =
-      new StatsTransport(negotiatedTrans, excRecorder, statsReceiver.scope("transport"))
-
-    mux.ServerDispatcher.newRequestResponse(statsTrans, service, lessor, tracer, statsReceiver)
+    ref.updateRef(session)
+    ref
   }
+
+  def apply(
+    stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Mux.server.stack,
+    params: Stack.Params = Mux.server.params
+  ): Mux.Server =
+    Mux.Server(
+      stack = stack,
+      params = params,
+      sessionFactory = NonNegotiatingSessionFactory
+    )
 }

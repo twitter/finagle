@@ -7,7 +7,6 @@ import com.twitter.finagle.ssl.server.SslServerConfiguration
 import com.twitter.finagle.ssl.{KeyCredentials, TrustCredentials}
 import com.twitter.finagle.thriftmux.thriftscala._
 import com.twitter.finagle._
-import com.twitter.finagle.mux.pushsession.MuxPush
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.io.TempFile
 import com.twitter.util.{Await, Future, Try}
@@ -133,23 +132,10 @@ abstract class AbstractThriftSmuxTest extends FunSuite {
         results.get
       }
       assert(string.isEmpty)
-
-      // TODO: remove the special casing once we get rid of the standard mux client
-      // The standard client doesn't have a mechanism for failing service acquisition
-      // based on the result of the handshake and adding that would be pretty invasive
-      // so we are going to punt on that for now and just wait for the push-based
-      // client to become the primary implementation since it does have that ability.
-      if (clientImpl().muxer.isInstanceOf[MuxPush.Client]) {
-        assert(stats.counters.get(Seq("client", "failures")) == None)
-        assert(stats.counters.get(Seq("client", "service_creation", "failures")) == Some(1))
-        assert(stats.counters.get(Seq("client", "service_creation", "failures",
-          "com.twitter.finagle.mux.transport.IncompatibleNegotiationException")) == Some(1))
-      } else if (clientImpl().muxer.isInstanceOf[Mux.Client]) {
-        assert(stats.counters.get(Seq("client", "failures")) == Some(1))
-        assert(stats.counters.get(Seq("client", "service_creation", "failures")) == None)
-      } else {
-        fail(s"Unexpected client muxer (${clientImpl().muxer}): update this test")
-      }
+      assert(stats.counters.get(Seq("client", "failures")) == None)
+      assert(stats.counters.get(Seq("client", "service_creation", "failures")) == Some(1))
+      assert(stats.counters.get(Seq("client", "service_creation", "failures",
+        "com.twitter.finagle.mux.transport.IncompatibleNegotiationException")) == Some(1))
     })
   }
 }

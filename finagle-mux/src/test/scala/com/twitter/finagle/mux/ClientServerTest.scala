@@ -4,15 +4,20 @@ import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle.client.BackupRequestFilter
 import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.liveness.{FailureDetector, Latch}
-import com.twitter.finagle.mux.lease.exp.Lessor
+import com.twitter.finagle.liveness.FailureDetector
+import com.twitter.finagle.mux.pushsession.{
+  FragmentDecoder,
+  FragmentingMessageWriter,
+  MuxClientSession,
+  MuxServerSession
+}
 import com.twitter.finagle.mux.transport.Message
-import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.stats.{NullStatsReceiver}
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.transport.QueueTransport
-import com.twitter.finagle.{Failure, FailureFlags, Path, Service, SimpleFilter, Status}
+import com.twitter.finagle._
+import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.{Buf, BufByteWriter, ByteReader}
-import com.twitter.util.{Await, Duration, Future, Promise, Return, Throw, Time}
+import com.twitter.util._
 import java.util.concurrent.atomic.AtomicInteger
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.Matchers.any
@@ -39,57 +44,92 @@ private[mux] abstract class ClientServerTest
     with Eventually
     with IntegrationPatience {
 
+  def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
+
   def canDispatch: Boolean
 
   val tracer = new BufferingTracer
 
   class Ctx(config: FailureDetector.Config = FailureDetector.NullConfig) {
-    import Message.{encode, decode}
 
-    val clientToServer = new AsyncQueue[Message]
-    val serverToClient = new AsyncQueue[Message]
+    val toServerQueue = new AsyncQueue[Buf]
+    val toClientQueue = new AsyncQueue[Buf]
 
-    val serverTransport =
-      new QueueTransport(writeq = serverToClient, readq = clientToServer) {
-        override def write(m: Message) = super.write(decode(encode(m)))
+    private val clientHandle = new QueueChannelHandle[ByteReader, Buf](toServerQueue)
+    private val serverHandle = new QueueChannelHandle[ByteReader, Buf](toClientQueue)
+
+    val pingSends = new AtomicInteger(0)
+    val pingReceives = new AtomicInteger(0)
+
+    {  // launch the read loops for each queue
+      def loop(source: AsyncQueue[Buf], dest: QueueChannelHandle[ByteReader, _]): Unit = {
+        source.poll().respond {
+          case Return(m) =>
+            val decoded = Message.decode(m)
+
+            if (decoded.typ == Message.Types.Tping) {
+              assert(source eq toServerQueue)
+              pingSends.incrementAndGet()
+            } else if (decoded.typ == Message.Types.Rping) {
+              assert(source eq toClientQueue)
+              pingReceives.incrementAndGet()
+            }
+
+            if (!canDispatch && decoded.typ == Message.Types.Tdispatch) {
+              assert(source eq toServerQueue)
+              assert(dest eq serverHandle)
+              val err = Message.Rerr(decoded.tag, "Tdispatch not enabled")
+              toClientQueue.offer(Message.encode(err))
+            } else {
+              dest.sessionReceive(ByteReader(m))
+            }
+            loop(source, dest)
+
+          case Throw(_: ChannelClosedException) =>
+            dest.failHandle(Return.Unit)
+
+          case Throw(cause) =>
+            dest.failHandle(Throw(cause))
+        }
       }
 
-    val clientTransport =
-      new QueueTransport(writeq = clientToServer, readq = serverToClient) {
-        override def write(m: Message) = super.write(decode(encode(m)))
-      }
+      loop(toServerQueue, serverHandle)
+      loop(toClientQueue, clientHandle)
+    }
 
     val service = mock[Service[Request, Response]]
+    when(service.close(any())).thenReturn(Future.Done)
 
-    val session = new ClientSession(clientTransport, config, "test", NullStatsReceiver)
-    val client = ClientDispatcher.newRequestResponse(session)
-
-    val nping = new AtomicInteger(0)
-    val pingReq, pingRep = new Latch
-    def ping() = {
-      nping.incrementAndGet()
-      val f = pingRep.get
-      pingReq.flip()
-      f
+    val clientSession: MuxClientSession = {
+      val session = new MuxClientSession(
+        handle = clientHandle,
+        h_decoder = new FragmentDecoder(NullStatsReceiver),
+        h_messageWriter = new FragmentingMessageWriter(clientHandle, Int.MaxValue, NullStatsReceiver),
+        detectorConfig = config,
+        name = "test",
+        statsReceiver = NullStatsReceiver,
+        timer = DefaultTimer)
+      // Register ourselves
+      clientHandle.serialExecutor.execute(new Runnable {
+        def run(): Unit = clientHandle.registerSession(session)
+      })
+      session
     }
 
-    val filter = new SimpleFilter[Message, Message] {
-      def apply(req: Message, service: Service[Message, Message]): Future[Message] = req match {
-        case Message.Tdispatch(tag, _, _, _, _) if !canDispatch =>
-          Future.value(Message.Rerr(tag, "Tdispatch not enabled"))
-        case Message.Tping(tag) =>
-          ping().before { Future.value(Message.Rping(tag)) }
-        case req => service(req)
-      }
+    val server: Closable = {
+      val session = new MuxServerSession(
+        params = Mux.server.params,
+        h_decoder = new FragmentDecoder(NullStatsReceiver),
+        h_messageWriter = new FragmentingMessageWriter(serverHandle, Int.MaxValue, NullStatsReceiver),
+        handle = serverHandle,
+        service = service)
+      serverHandle.serialExecutor.execute(new Runnable {
+        def run(): Unit = serverHandle.registerSession(session)
+      })
+      session
     }
 
-    val server = new ServerDispatcher(
-      serverTransport,
-      filter andThen Processor andThen service,
-      Lessor.nil,
-      tracer,
-      NullStatsReceiver
-    )
+    val client: Service[Request, Response] = await(clientSession.asService)
   }
 
   // Push a tracer for the client.
@@ -142,13 +182,13 @@ private[mux] abstract class ClientServerTest
     val ctx = new Ctx
     import ctx._
     for (i <- 0 until 5) {
-      assert(nping.get == i)
-      val pinged = session.ping()
-      assert(!pinged.isDefined)
-      pingRep.flip()
-      Await.result(pinged, 30.seconds)
-      assert(Await.result(pinged.liftToTry, 5.seconds) == Return.Unit)
-      assert(nping.get == i + 1)
+      assert(pingSends.get == i)
+      assert(pingReceives.get == i)
+      val pinged = clientSession.ping()
+      await(pinged)
+      assert(await(pinged.liftToTry) == Return.Unit)
+      assert(pingSends.get == i + 1)
+      assert(pingReceives.get == i + 1)
     }
   }
 
@@ -260,7 +300,7 @@ private[mux] abstract class ClientServerTest
       client(Request(Path.empty, Nil, buf(1)))
     }
     assert(resp.poll.isDefined)
-    val Buf.Utf8(respStr) = Await.result(resp, 5.seconds).body
+    val Buf.Utf8(respStr) = await(resp).body
     assert(respStr == id.toString)
   }
 
@@ -285,36 +325,10 @@ private[mux] abstract class ClientServerTest
       p
     }
     assert(resp.poll.isDefined)
-    val respBr = ByteReader(Await.result(resp, 5.seconds).body)
+    val respBr = ByteReader(await(resp).body)
     assert(respBr.remaining == 8)
     val respFlags = Flags(respBr.readLongBE())
     assert(respFlags == flags)
-  }
-
-  test("failure detection") {
-    val config =
-      FailureDetector.ThresholdConfig(minPeriod = 10.milliseconds, closeTimeout = Duration.Top)
-
-    val ctx = new Ctx(config)
-    import ctx._
-
-    assert(nping.get == 1)
-    assert(client.status == Status.Open)
-    pingRep.flip()
-
-    // This is technically racy, but would require a pretty
-    // pathological test environment.
-    assert(client.status == Status.Open)
-    eventually { assert(client.status == Status.Busy) }
-
-    // Now begin replying.
-    def loop(): Future[Unit] = {
-      val f = pingReq.get
-      pingRep.flip()
-      f.before(loop())
-    }
-    loop()
-    eventually { assert(client.status == Status.Open) }
   }
 }
 
@@ -329,7 +343,7 @@ class ClientServerTestNoDispatch extends ClientServerTest {
     val withoutDst = Request(Path.empty, Nil, buf(123))
     val rep = Response(Nil, buf(23))
     when(service(withoutDst)).thenReturn(Future.value(rep))
-    assert(Await.result(client(withDst), 5.seconds) == rep)
+    assert(await(client(withDst)) == rep)
     verify(service)(withoutDst)
   }
 }
@@ -360,13 +374,13 @@ class ClientServerTestDispatch extends ClientServerTest {
     )
 
     // No context set
-    assert(Await.result(client(Request(Path.empty, Nil, Buf.Empty)), 5.seconds).body.isEmpty)
+    assert(await(client(Request(Path.empty, Nil, Buf.Empty))).body.isEmpty)
 
     val f = Contexts.broadcast.let(testContext, Buf.Utf8("My context!")) {
       client(Request.empty)
     }
 
-    assert(Await.result(f, 5.seconds).body == Buf.Utf8("My context!"))
+    assert(await(f).body == Buf.Utf8("My context!"))
   }
 
   test("dispatches destinations") {
@@ -376,7 +390,7 @@ class ClientServerTestDispatch extends ClientServerTest {
     val req = Request(Path.read("/dst/name"), Nil, buf(123))
     val rep = Response(Nil, buf(23))
     when(service(req)).thenReturn(Future.value(rep))
-    assert(Await.result(client(req), 5.seconds) == rep)
+    assert(await(client(req)) == rep)
     verify(service)(req)
   }
 
@@ -395,7 +409,7 @@ class ClientServerTestDispatch extends ClientServerTest {
       }
     )
 
-    val response = Await.result(client(request), 5.seconds)
+    val response = await(client(request))
     assert(response.contexts.nonEmpty)
     assert(response.contexts == ctxts)
   }

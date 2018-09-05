@@ -1,8 +1,7 @@
 package com.twitter.finagle.mux.pushsession
 
-import com.twitter.finagle.{ChannelClosedException, Dtab}
-import com.twitter.finagle.mux.ClientDispatcher.ExhaustedTagsException
-import com.twitter.finagle.mux.{ClientDispatcher, ReqRepHeaders, Request, Response}
+import com.twitter.finagle.{ChannelClosedException, Dtab, Failure}
+import com.twitter.finagle.mux.{ReqRepHeaders, Request, Response}
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.mux.util.TagMap
 import com.twitter.finagle.tracing.Trace
@@ -18,10 +17,11 @@ import java.net.SocketAddress
  * @param messageWriter message writer belonging to parent `MuxClientSession`
  */
 private class ClientTracker(messageWriter: MessageWriter) {
+  import ClientTracker._
 
   // outstanding messages, each tagged with a unique int between `MinTag` and `MaxTag`.
   private[this] val messages =
-    TagMap[Updatable[Try[Response]]](ClientDispatcher.TagRange, ClientDispatcher.InitialTagMapSize)
+    TagMap[Updatable[Try[Response]]](TagRange, InitialTagMapSize)
 
   def pendingDispatches: Int = messages.size
 
@@ -116,4 +116,12 @@ private class ClientTracker(messageWriter: MessageWriter) {
       }
     } finally Local.restore(saved)
   }
+}
+
+private object ClientTracker {
+  private val TagRange: Range = Message.Tags.MinTag to Message.Tags.MaxTag
+
+  private val InitialTagMapSize: Int = 256
+
+  private val ExhaustedTagsException = Failure.rejected("Exhausted tags")
 }

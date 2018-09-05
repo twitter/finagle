@@ -4,7 +4,7 @@ import com.twitter.finagle.context.{Contexts, RemoteInfo}
 import com.twitter.finagle.{Service, Stack, Status, Thrift, mux, param}
 import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession}
 import com.twitter.finagle.mux.transport.Message
-import com.twitter.finagle.mux.{ClientDiscardedRequestException, Processor}
+import com.twitter.finagle.mux.{ClientDiscardedRequestException, ServerProcessor}
 import com.twitter.finagle.stats.Verbosity
 import com.twitter.finagle.thriftmux.ThriftEmulator
 import com.twitter.finagle.tracing.Trace
@@ -86,7 +86,7 @@ private final class VanillaThriftSession(
     if (state != Closed) {
       val f = Local.let(locals) {
         val dispatch = ThriftEmulator.thriftToMux(isTTwitter, tProtocolFactory, reader.readAll())
-        Processor(dispatch, service)
+        ServerProcessor(dispatch, service)
       }
 
       pending.offer(f)

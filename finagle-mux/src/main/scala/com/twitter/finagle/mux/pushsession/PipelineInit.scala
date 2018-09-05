@@ -6,7 +6,7 @@ import com.twitter.finagle.netty4.codec.BufCodec
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel._
 
-private object PipelineInit extends Netty4Framer {
+private[finagle] object PipelineInit extends Netty4Framer {
 
   def bufferManagerName: String = "muxPipelineInit"
 

@@ -69,7 +69,7 @@ private[finagle] object MessageWriter {
  * @note this class is _very_ stateful and expects to enjoy the benefits of executing inside of
  *       a `PushSession`s serial `Executor`.
  */
-private final class FragmentingMessageWriter(
+private[finagle] final class FragmentingMessageWriter(
     handle: PushChannelHandle[_, Buf],
     windowBytes: Int,
     statsReceiver: StatsReceiver)

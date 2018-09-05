@@ -28,7 +28,7 @@ private[finagle] abstract class MuxMessageDecoder {
   protected def doDecode(reader: ByteReader): Message
 }
 
-private class FragmentDecoder(statsReceiver: StatsReceiver) extends MuxMessageDecoder {
+private[mux] final class FragmentDecoder(statsReceiver: StatsReceiver) extends MuxMessageDecoder {
 
   // The keys of the fragment map are 'normalized' since fragments are signaled
   // in the MSB of the tag field. See `getKey` below.

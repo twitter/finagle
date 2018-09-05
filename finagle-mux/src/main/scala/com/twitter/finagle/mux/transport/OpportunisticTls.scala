@@ -1,11 +1,8 @@
 package com.twitter.finagle.mux.transport
 
-import com.twitter.finagle.{FailureFlags, Mux, SourcedException, Stack}
-import com.twitter.finagle.transport.{Transport, ContextBasedTransport}
+import com.twitter.finagle.{FailureFlags, SourcedException}
 import com.twitter.io.Buf
 import com.twitter.logging.{Logger, HasLogLevel, Level}
-import com.twitter.util.Future
-import io.netty.channel.Channel
 import scala.util.control.NoStackTrace
 
 private[twitter] object OpportunisticTls {
@@ -50,22 +47,6 @@ private[twitter] object OpportunisticTls {
     case (Required, Off) => throw new IncompatibleNegotiationException
     case (Required, Desired) => true
     case (Required, Required) => true
-  }
-
-  /**
-   * Wraps the underlying transport, adding a way to turn on tls for clients.
-   */
-  private[finagle] def transport(
-    ch: Channel,
-    params: Stack.Params,
-    transport: Transport[Any, Any]
-  ): Transport[Any, Any] { type Context = MuxContext } = {
-    new ContextBasedTransport[Any, Any, MuxContext](
-      new MuxContext(transport.context, () => params[Mux.param.TurnOnTlsFn].fn(params, ch.pipeline))
-    ) {
-      def read(): Future[Any] = transport.read()
-      def write(any: Any): Future[Unit] = transport.write(any)
-    }
   }
 
   /**

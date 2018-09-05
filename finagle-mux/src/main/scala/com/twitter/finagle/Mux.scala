@@ -1,36 +1,34 @@
 package com.twitter.finagle
 
 import com.twitter.conversions.storage._
+import com.twitter.finagle.Mux.param.{MaxFrameSize, OppTls}
 import com.twitter.finagle.client._
 import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.filter.{NackAdmissionFilter, PayloadSizeFilter}
-import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.mux.Handshake.Headers
-import com.twitter.finagle.mux.lease.exp.Lessor
+import com.twitter.finagle.mux.pushsession._
 import com.twitter.finagle.mux.transport._
 import com.twitter.finagle.mux.{Handshake, OpportunisticTlsParams, Request, Response}
-import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
+import com.twitter.finagle.netty4.pushsession.{Netty4PushListener, Netty4PushTransporter}
 import com.twitter.finagle.netty4.ssl.server.Netty4ServerSslChannelInitializer
 import com.twitter.finagle.netty4.ssl.client.Netty4ClientSslChannelInitializer
-import com.twitter.finagle.netty4.transport.ChannelTransport
-import com.twitter.finagle.param.{ProtocolLibrary, WithDefaultLoadBalancer}
+import com.twitter.finagle.param.{Label, ProtocolLibrary, Stats, Timer, WithDefaultLoadBalancer}
 import com.twitter.finagle.pool.SingletonPool
+import com.twitter.finagle.pushsession._
 import com.twitter.finagle.server._
-import com.twitter.finagle.stats.{Counter, StatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport.{ClientSsl, ServerSsl}
-import com.twitter.finagle.transport.{StatsTransport, Transport}
-import com.twitter.finagle.{param => fparam}
-import com.twitter.io.Buf
-import com.twitter.logging.{Level, Logger}
-import com.twitter.util.{Closable, StorageUnit}
+import com.twitter.finagle.transport.Transport
+import com.twitter.io.{Buf, ByteReader}
+import com.twitter.logging.Logger
+import com.twitter.util.{Future, StorageUnit}
 import io.netty.channel.{Channel, ChannelPipeline}
-import java.net.SocketAddress
+import java.net.{InetSocketAddress, SocketAddress}
+import java.util.concurrent.Executor
 
 /**
  * A client and server for the mux protocol described in [[com.twitter.finagle.mux]].
  */
-@deprecated("Use the push-based mux implementation, MuxPush, instead", "2018-07-18")
 object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mux.Response] {
   private val log = Logger.get()
 
@@ -98,23 +96,6 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       implicit val param = Stack.Param(TurnOnTlsFn((_: Stack.Params, _: ChannelPipeline) => ()))
     }
 
-    /**
-     * A param that controls the [[Transporter]] and [[Listener]] implementation
-     * used by Mux. This allows us to easily swap the underlying I/O multiplexer
-     * implementation.
-     *
-     * @note the listener and transporter don't strictly need to be
-     * coupled but we do so for ease of configuration (e.g. both
-     * servers and clients can use the same parameter).
-     */
-    case class MuxImpl(
-      transporter: Stack.Params => SocketAddress => Transporter[Buf, Buf, MuxContext],
-      listener: Stack.Params => Listener[Buf, Buf, MuxContext]
-    ) {
-      def mk(): (MuxImpl, Stack.Param[MuxImpl]) =
-        (this, MuxImpl.param)
-    }
-
     // tells the Netty4Transporter not to turn on TLS so we can turn it on later
     private[finagle] def removeTlsIfOpportunisticClient(params: Stack.Params): Stack.Params = {
       params[param.OppTls].level match {
@@ -131,112 +112,11 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       }
     }
 
-    object MuxImpl {
-      /**
-       * A [[MuxImpl]] that uses netty4 as the underlying I/O multiplexer.
-       */
-      val Netty4 = MuxImpl(
-        params => {
-          Netty4Transporter.raw(
-              CopyingFramer,
-              _,
-              removeTlsIfOpportunisticClient(params),
-              transportFactory = { ch: Channel =>
-                OpportunisticTls.transport(ch, params, new ChannelTransport(ch))
-              }
-            )
-        },
-        params =>
-          Netty4Listener(
-            CopyingFramer,
-            removeTlsIfOpportunisticServer(params),
-            identity,
-            transportFactory = { ch: Channel =>
-              OpportunisticTls.transport(ch, params, new ChannelTransport(ch))
-            }
-        )
-      )
+    private[finagle] case class PingManager(builder: (Executor, MessageWriter) => ServerPingManager)
 
-      implicit val param = Stack.Param(Netty4)
-    }
-  }
-
-  /**
-   * Extract feature flags from peer headers and decorate the trans.
-   *
-   * @param maxFrameSize the maximum frame size that was sent to the peer.
-   *
-   * @param statsReceiver the stats receiver used to configure various modules
-   * configured during negotiation.
-   */
-  private[finagle] def negotiate(
-    maxFrameSize: StorageUnit,
-    statsReceiver: StatsReceiver,
-    localEncryptLevel: OpportunisticTls.Level,
-    turnOnTlsFn: () => Unit,
-    upgrades: Counter
-  ): Handshake.Negotiator = (optionalPeerHeaders: Option[Headers], trans: Transport[Buf, Buf]) => {
-    import OpportunisticTls._
-
-    val peerHeaders = optionalPeerHeaders.getOrElse(Seq.empty)
-
-    // If the peer didn't handshake, or didn't specify an opportunistic TLS preference,
-    // we default to a removeEncryptionLevel of `Off` since we cannot know if the peer
-    // supports opportunistic TLS.
-    val remoteEncryptLevel = Handshake.valueOf(OpportunisticTls.Header.KeyBuf, peerHeaders) match {
-      case Some(buf) => OpportunisticTls.Header.decodeLevel(buf)
-      case None => Off
-    }
-
-    try {
-      val useTls = OpportunisticTls.negotiate(localEncryptLevel, remoteEncryptLevel)
-      if (log.isLoggable(Level.DEBUG)) {
-        log.debug(s"Successfully negotiated TLS with remote peer. Using TLS: $useTls " +
-          s"local level: $localEncryptLevel, remote level: $remoteEncryptLevel")
-      }
-      if (useTls) {
-        upgrades.incr()
-        turnOnTlsFn()
-      }
-    } catch {
-      // TODO: handle IncompatibleNegotiationExceptions gracefully
-      case exn: IncompatibleNegotiationException =>
-        log.fatal(
-          exn,
-          s"The local peer wanted $localEncryptLevel and the remote peer wanted" +
-            s" $remoteEncryptLevel which are incompatible."
-        )
-        throw exn
-    }
-
-    if (optionalPeerHeaders.isEmpty) {
-      // We didn't actually negotiate, so we fall back to the base protocol.
-      // Note that we default to `remoteEncryptionLevel = Off` in the case
-      // of not negotiating, so if we required TLS, we would have thrown an
-      // exception above via the `OpportunisticTls.negotiate` function.
-      trans.map(Message.encode, Message.decode)
-    } else {
-      // Decorate the transport with the MuxFramer. We need to handle the
-      // cross product of local and remote configuration. The idea is that
-      // both clients and servers can specify the maximum frame size they
-      // would like their peer to send.
-      val remoteMaxFrameSize = Handshake
-        .valueOf(MuxFramer.Header.KeyBuf, peerHeaders)
-        .map(MuxFramer.Header.decodeFrameSize)
-
-      val framerStats = statsReceiver.scope("framer")
-      (maxFrameSize, remoteMaxFrameSize) match {
-        // The remote peer has suggested a max frame size less than the
-        // sentinel value. We need to configure the framer to fragment.
-        case (_, s @ Some(remote)) if remote < Int.MaxValue =>
-          MuxFramer(trans, s, framerStats)
-        // The local instance has requested a max frame size less than the
-        // sentinel value. We need to be prepared for the remote to send
-        // fragments.
-        case (local, _) if local.inBytes < Int.MaxValue =>
-          MuxFramer(trans, None, framerStats)
-        case (_, _) => trans.map(Message.encode, Message.decode)
-      }
+    private[finagle] object PingManager {
+      implicit val param = Stack.Param(PingManager { (_, writer) =>
+        ServerPingManager.default(writer) })
     }
   }
 
@@ -295,71 +175,88 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     }
   }
 
-  case class Client(
-    stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Client.stack,
-    params: Stack.Params = Client.params
-  ) extends StdStackClient[mux.Request, mux.Response, Client]
-      with WithDefaultLoadBalancer[Client]
-      with OpportunisticTlsParams[Client] {
+  final case class Client(
+    stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Mux.Client.stack,
+    params: Stack.Params = Mux.Client.params
+  ) extends PushStackClient[mux.Request, mux.Response, Client]
+    with WithDefaultLoadBalancer[Client]
+    with OpportunisticTlsParams[Client] {
 
-    protected def copy1(
-      stack: Stack[ServiceFactory[mux.Request, mux.Response]] = this.stack,
-      params: Stack.Params = this.params
-    ): Client = copy(stack, params)
+    private[this] val scopedStatsParams = params + Stats(
+      params[Stats].statsReceiver.scope("mux"))
 
-    protected type In = Buf
+    protected type SessionT = MuxClientNegotiatingSession
+    protected type In = ByteReader
     protected type Out = Buf
-    protected type Context = MuxContext
 
-    private[this] val statsReceiver = params[fparam.Stats].statsReceiver.scope("mux")
+    protected def newSession(
+      handle: PushChannelHandle[ByteReader, Buf]
+    ): Future[MuxClientNegotiatingSession] = {
+      val negotiator: Option[Headers] => Future[MuxClientSession] = {
+        headers => new Negotiation.Client(scopedStatsParams).negotiateAsync(handle, headers)
+      }
+      val headers = Mux.Client.headers(
+        params[MaxFrameSize].size, params[OppTls].level.getOrElse(OpportunisticTls.Off))
 
-    protected def newTransporter(addr: SocketAddress): Transporter[In, Out, MuxContext] =
-      params[param.MuxImpl].transporter(params)(addr)
+      Future.value(
+        new MuxClientNegotiatingSession(
+          handle = handle,
+          version = Mux.LatestVersion,
+          negotiator = negotiator,
+          headers = headers,
+          name = params[Label].label,
+          stats = scopedStatsParams[Stats].statsReceiver))
+    }
 
     override def newClient(
       dest: Name,
       label0: String
     ): ServiceFactory[Request, Response] = {
       // We want to fail fast if the client's TLS configuration is inconsistent
-      Client.validateTlsParamConsistency(params)
+      Mux.Client.validateTlsParamConsistency(params)
       super.newClient(dest, label0)
     }
 
-    protected def newDispatcher(
-      transport: Transport[In, Out] { type Context <: Client.this.Context }
-    ): Service[mux.Request, mux.Response] = {
-      val FailureDetector.Param(detectorConfig) = params[FailureDetector.Param]
-      val fparam.ExceptionStatsHandler(excRecorder) = params[fparam.ExceptionStatsHandler]
-      val fparam.Label(name) = params[fparam.Label]
-      val param.MaxFrameSize(maxFrameSize) = params[param.MaxFrameSize]
-      val param.OppTls(level) = params[param.OppTls]
-      val upgrades = statsReceiver.counter("tls", "upgrade", "success")
+    protected def newPushTransporter(
+      inetSocketAddress: InetSocketAddress
+    ): PushTransporter[ByteReader, Buf] = {
 
-      val negotiatedTrans = mux.Handshake.client(
-        trans = transport,
-        version = LatestVersion,
-        headers = Client.headers(
-          maxFrameSize,
-          level.getOrElse(OpportunisticTls.Off)),
-        negotiate = negotiate(
-          maxFrameSize,
-          statsReceiver,
-          level.getOrElse(OpportunisticTls.Off),
-          transport.context.turnOnTls _,
-          upgrades
-        )
-      )
+      // We use a custom Netty4PushTransporter to provide a handle to the
+      // underlying Netty channel via MuxChannelHandle, giving us the ability to
+      // add TLS support later in the lifecycle of the socket connection.
+      new Netty4PushTransporter[ByteReader, Buf](
+        transportInit = _ => (),
+        protocolInit = PipelineInit,
+        remoteAddress = inetSocketAddress,
+        params = Mux.param.removeTlsIfOpportunisticClient(params)
+      ) {
+        override protected def initSession[T <: PushSession[ByteReader, Buf]](
+          channel: Channel,
+          protocolInit: (ChannelPipeline) => Unit,
+          sessionBuilder: (PushChannelHandle[ByteReader, Buf]) => Future[T]
+        ): Future[T] = {
+          // With this builder we add support for opportunistic TLS via `MuxChannelHandle`
+          // and the respective `Negotation` types. Adding more proxy types will break this pathway.
+          def wrappedBuilder(pushChannelHandle: PushChannelHandle[ByteReader, Buf]): Future[T] =
+            sessionBuilder(new MuxChannelHandle(pushChannelHandle, channel, scopedStatsParams))
 
-      val statsTrans =
-        new StatsTransport(negotiatedTrans, excRecorder, statsReceiver.scope("transport"))
-
-      val session = new mux.ClientSession(statsTrans, detectorConfig, name, statsReceiver)
-
-      mux.ClientDispatcher.newRequestResponse(session)
+          super.initSession(channel, protocolInit, wrappedBuilder)
+        }
+      }
     }
+
+    protected def toService(
+      session: MuxClientNegotiatingSession
+    ): Future[Service[Request, Response]] =
+      session.negotiate().flatMap(_.asService)
+
+    protected def copy1(
+      stack: Stack[ServiceFactory[Request, Response]],
+      params: Stack.Params
+    ): Client = copy(stack, params)
   }
 
-  def client: Mux.Client = Client()
+  def client: Client = Client()
 
   def newService(dest: Name, label: String): Service[mux.Request, mux.Response] =
     client.newService(dest, label)
@@ -368,7 +265,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     client.newClient(dest, label)
 
   object Server {
-    private val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackServer.newStack
+
+    private[finagle] val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackServer.newStack
       .remove(TraceInitializerFilter.role)
       .prepend(PayloadSizeFilter.module(_.body.length, _.body.length))
 
@@ -378,6 +276,35 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     private[finagle] val params: Stack.Params = StackServer.defaultParams +
       ProtocolLibrary("mux") +
       param.TurnOnTlsFn(tlsEnable)
+
+    type SessionF = (
+      RefPushSession[ByteReader, Buf],
+        Stack.Params,
+        MuxChannelHandle,
+        Service[Request, Response]
+      ) => PushSession[ByteReader, Buf]
+
+    val defaultSessionFactory: SessionF = (
+    ref: RefPushSession[ByteReader, Buf],
+    params: Stack.Params,
+    handle: MuxChannelHandle,
+    service: Service[Request, Response]
+    ) => {
+      val scopedStatsParams = params + Stats(
+        params[Stats].statsReceiver.scope("mux"))
+      MuxServerNegotiator.build(
+        ref = ref,
+        handle = handle,
+        service = service,
+        makeLocalHeaders = Mux.Server
+          .headers(_: Headers, params[MaxFrameSize].size,
+            params[OppTls].level.getOrElse(OpportunisticTls.Off)),
+        negotiate = (service, headers) =>
+          new Negotiation.Server(scopedStatsParams, service).negotiate(handle, headers),
+        timer = params[Timer].timer
+      )
+      ref
+    }
 
     /**
      * Returns the headers that a server sends to a client.
@@ -409,70 +336,60 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     }
   }
 
-  case class Server(
-    stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Server.stack,
-    params: Stack.Params = Server.params
-  ) extends StdStackServer[mux.Request, mux.Response, Server]
+  final case class Server(
+    stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Mux.Server.stack,
+    params: Stack.Params = Mux.Server.params,
+    sessionFactory: Server.SessionF = Server.defaultSessionFactory
+  ) extends PushStackServer[mux.Request, mux.Response, Server]
     with OpportunisticTlsParams[Server] {
 
+    protected type PipelineReq = ByteReader
+    protected type PipelineRep = Buf
+
+    protected def newListener(): PushListener[ByteReader, Buf] = {
+      Mux.Server.validateTlsParamConsistency(params)
+      new Netty4PushListener[ByteReader, Buf](
+        pipelineInit = PipelineInit,
+        params = Mux.param.removeTlsIfOpportunisticServer(params),
+        setupMarshalling = identity
+      ) {
+        override protected def initializePushChannelHandle(
+          ch: Channel,
+          sessionFactory: SessionFactory
+        ): Unit = {
+          val proxyFactory: SessionFactory = { handle =>
+            // We need to proxy via the MuxChannelHandle to get a vector
+            // into the netty pipeline for handling installing the TLS
+            // components of the pipeline after the negotiation.
+            sessionFactory(new MuxChannelHandle(handle, ch, params))
+          }
+          super.initializePushChannelHandle(ch, proxyFactory)
+        }
+      }
+    }
+
+    protected def newSession(
+      handle: PushChannelHandle[ByteReader, Buf],
+      service: Service[Request, Response]
+    ): RefPushSession[ByteReader, Buf] = handle match {
+      case h: MuxChannelHandle =>
+        val ref = new RefPushSession[ByteReader, Buf](h, SentinelSession[ByteReader, Buf](h))
+        sessionFactory(ref, params, h, service)
+        ref
+
+      case other =>
+        throw new IllegalStateException(
+          s"Expected to find a `MuxChannelHandle` but found ${other.getClass.getSimpleName}")
+    }
+
+
     protected def copy1(
-      stack: Stack[ServiceFactory[mux.Request, mux.Response]] = this.stack,
-      params: Stack.Params = this.params
+      stack: Stack[ServiceFactory[Request, Response]],
+      params: Stack.Params
     ): Server = copy(stack, params)
-
-    protected type In = Buf
-    protected type Out = Buf
-    protected type Context = MuxContext
-
-    private[this] val statsReceiver = params[fparam.Stats].statsReceiver.scope("mux")
-
-    override def serve(
-      addr: SocketAddress,
-      factory: ServiceFactory[Request, Response]
-    ): ListeningServer = {
-      // We want to fail fast if the server's TLS configuration is inconsistent
-      Server.validateTlsParamConsistency(params)
-      super.serve(addr, factory)
-    }
-
-    protected def newListener(): Listener[In, Out, MuxContext] =
-      params[param.MuxImpl].listener(params)
-
-    protected def newDispatcher(
-      transport: Transport[In, Out] { type Context <: Server.this.Context },
-      service: Service[mux.Request, mux.Response]
-    ): Closable = {
-      val fparam.Tracer(tracer) = params[fparam.Tracer]
-      val Lessor.Param(lessor) = params[Lessor.Param]
-      val fparam.ExceptionStatsHandler(excRecorder) = params[fparam.ExceptionStatsHandler]
-      val param.MaxFrameSize(maxFrameSize) = params[param.MaxFrameSize]
-      val param.OppTls(level) = params[param.OppTls]
-      val upgrades = statsReceiver.counter("tls", "upgrade", "success")
-
-      val negotiatedTrans = mux.Handshake.server(
-        trans = transport,
-        version = LatestVersion,
-        headers = Server.headers(
-          _,
-          maxFrameSize,
-          level.getOrElse(OpportunisticTls.Off)),
-        negotiate = negotiate(
-          maxFrameSize,
-          statsReceiver,
-          level.getOrElse(OpportunisticTls.Off),
-          transport.context.turnOnTls _,
-          upgrades
-        )
-      )
-
-      val statsTrans =
-        new StatsTransport(negotiatedTrans, excRecorder, statsReceiver.scope("transport"))
-
-      mux.ServerDispatcher.newRequestResponse(statsTrans, service, lessor, tracer, statsReceiver)
-    }
   }
 
-  def server: Mux.Server = Server()
+  def server: Server = Server()
 
   def serve(
     addr: SocketAddress,

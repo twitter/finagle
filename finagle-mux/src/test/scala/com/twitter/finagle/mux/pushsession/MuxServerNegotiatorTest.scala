@@ -1,7 +1,7 @@
 package com.twitter.finagle.mux.pushsession
 
 import com.twitter.finagle.pushsession.utils.MockChannelHandle
-import com.twitter.finagle.{Dtab, Path, Service, Status}
+import com.twitter.finagle.{Dtab, Mux, Path, Service, Status}
 import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession, RefPushSession, SentinelSession}
 import com.twitter.finagle.mux.Handshake.Headers
 import com.twitter.finagle.mux.{Handshake, Request, Response}
@@ -44,7 +44,7 @@ class MuxServerNegotiatorTest extends FunSuite with Eventually with IntegrationP
       override def sendNowAndForget(buf: Buf): Unit = sendAndForget(buf)
     }
 
-    def params = MuxPush.server.params
+    def params = Mux.server.params
 
     var resolvedSession: MockSession = null
 

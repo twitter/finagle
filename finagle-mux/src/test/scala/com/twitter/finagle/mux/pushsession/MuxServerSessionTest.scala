@@ -17,7 +17,7 @@ class MuxServerSessionTest extends FunSuite {
   private abstract class Ctx {
     lazy val mockTimer: MockTimer = new MockTimer
 
-    lazy val params: Stack.Params = MuxPush.server.params + (param.Timer(mockTimer))
+    lazy val params: Stack.Params = Mux.server.params + (param.Timer(mockTimer))
 
     lazy val decoder: MuxMessageDecoder = new FragmentDecoder(params[param.Stats].statsReceiver)
 

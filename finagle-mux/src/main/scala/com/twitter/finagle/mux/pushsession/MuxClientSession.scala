@@ -3,8 +3,7 @@ package com.twitter.finagle.mux.pushsession
 import com.twitter.conversions.time._
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle._
-import com.twitter.finagle.mux.ClientSession.{Dispatching, Drained, Draining, Leasing}
-import com.twitter.finagle.mux.{ClientSession, ReqRepFilter, Request, Response, ServerError}
+import com.twitter.finagle.mux.{ReqRepFilter, Request, Response, ServerError}
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession}
 import com.twitter.finagle.mux.ReqRepFilter.CanDispatch
@@ -44,6 +43,7 @@ private[finagle] final class MuxClientSession(
   statsReceiver: StatsReceiver,
   timer: Timer
 ) extends PushSession[ByteReader, Buf](handle) {
+  import MuxClientSession._
 
   // Volatile only to ensure prompt visibility from the synchronous
   // `status` method and `leaseGauge`.
@@ -52,7 +52,7 @@ private[finagle] final class MuxClientSession(
   // Drained represents the terminal phase of the session, and is only set in the
   // `handleShutdown` method. The session will only dispatch while in the Dispatching
   // and Leasing states.
-  @volatile private[this] var h_dispatchState: ClientSession.State = ClientSession.Dispatching
+  @volatile private[this] var h_dispatchState: State = Dispatching
   @volatile private[this] var h_canDispatch: CanDispatch.State = CanDispatch.Unknown
   private[this] var h_pingPromise: Promise[Unit] = null
   private[this] val h_tracker = new ClientTracker(h_messageWriter)
@@ -181,7 +181,7 @@ private[finagle] final class MuxClientSession(
     val pp = Promise[Unit]()
     exec.execute(new Runnable {
       def run(): Unit = {
-        if (isDrained || h_pingPromise != null) ClientSession.FuturePingNack.proxyTo(pp)
+        if (isDrained || h_pingPromise != null) FuturePingNack.proxyTo(pp)
         else {
           h_pingPromise = pp
           h_messageWriter.write(Message.PreEncoded.Tping)
@@ -224,7 +224,7 @@ private[finagle] final class MuxClientSession(
       if (h_pingPromise != null) {
         val pp = h_pingPromise
         h_pingPromise = null
-        ClientSession.FuturePingNack.proxyTo(pp)
+        FuturePingNack.proxyTo(pp)
       }
 
       h_tracker.shutdown(oexc, Some(handle.remoteAddress))
@@ -292,5 +292,19 @@ private[finagle] final class MuxClientSession(
       drainedCounter.incr()
       handleShutdown(None)
     }
+  }
+}
+
+private object MuxClientSession {
+  private val FuturePingNack: Future[Nothing] =
+    Future.exception(Failure("A ping is already outstanding on this session."))
+
+  private sealed trait State
+  private case object Dispatching extends State
+  private case object Draining extends State
+  private case object Drained extends State
+  private case class Leasing(end: Time) extends State {
+    def remaining: Duration = end.sinceNow
+    def expired: Boolean = end < Time.now
   }
 }

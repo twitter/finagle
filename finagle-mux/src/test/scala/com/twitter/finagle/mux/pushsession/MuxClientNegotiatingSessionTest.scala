@@ -31,7 +31,7 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
   private[this] type Negotiator =
     (PushChannelHandle[ByteReader, Buf], Option[Headers]) => Future[MuxClientSession]
 
-  private[this] val fragmentingParams = MuxPush.client.params + MaxFrameSize(2.megabytes)
+  private[this] val fragmentingParams = Mux.client.params + MaxFrameSize(2.megabytes)
 
   private[this] val newClientSession: Negotiator = (handle, hs) => {
     new Negotiation.Client(fragmentingParams).negotiateAsync(handle, hs)

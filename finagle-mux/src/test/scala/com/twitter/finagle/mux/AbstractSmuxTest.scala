@@ -3,7 +3,6 @@ package com.twitter.finagle.mux
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.client.EndpointerStackClient
-import com.twitter.finagle.mux.pushsession.MuxPush
 import com.twitter.finagle.mux.transport.{IncompatibleNegotiationException, OpportunisticTls}
 import com.twitter.finagle.netty4.channel.ChannelSnooper
 import com.twitter.finagle.server.ListeningStackServer
@@ -140,22 +139,11 @@ abstract class AbstractSmuxTest extends FunSuite {
       }
       assert(string.isEmpty)
 
-      // TODO: remove the special casing once we get rid of the standard mux client
-      // The standard client doesn't have a mechanism for failing service acquisition
-      // based on the result of the handshake and adding that would be pretty invasive
-      // so we are going to punt on that for now and just wait for the push-based
-      // client to become the primary implementation since it does have that ability.
-      if (clientImpl().isInstanceOf[MuxPush.Client]) {
-        assert(stats.counters.get(Seq("client", "failures")) == None)
-        assert(stats.counters.get(Seq("client", "service_creation", "failures")) == Some(1))
-        assert(stats.counters.get(Seq("client", "service_creation", "failures",
-          "com.twitter.finagle.mux.transport.IncompatibleNegotiationException")) == Some(1))
-      } else if (clientImpl().isInstanceOf[Mux.Client]) {
-        assert(stats.counters.get(Seq("client", "failures")) == Some(1))
-        assert(stats.counters.get(Seq("client", "service_creation", "failures")) == None)
-      } else {
-        fail(s"Unexpected client (${clientImpl()}): update this test")
-      }
+      assert(stats.counters.get(Seq("client", "failures")) == None)
+      assert(stats.counters.get(Seq("client", "service_creation", "failures")) == Some(1))
+      assert(stats.counters.get(Seq("client", "service_creation", "failures",
+        "com.twitter.finagle.mux.transport.IncompatibleNegotiationException")) == Some(1))
+
     })
   }
 
@@ -178,7 +166,7 @@ abstract class AbstractSmuxTest extends FunSuite {
   }
 
   test("smux: client which requires TLS will reject connections if negotiation doesn't happen") {
-    val server = new NonNegotiatingServer().serve("localhost:*", concatService)
+    val server = NonNegotiatingServer().serve("localhost:*", concatService)
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
 
     val client = newService(Some(OpportunisticTls.Required), identity, NullStatsReceiver, addr)

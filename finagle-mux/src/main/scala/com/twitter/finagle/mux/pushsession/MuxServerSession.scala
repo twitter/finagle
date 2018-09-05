@@ -1,8 +1,7 @@
 package com.twitter.finagle.mux.pushsession
 
-import com.twitter.finagle.{CancelledRequestException, Service, Stack, Status, param}
+import com.twitter.finagle.{CancelledRequestException, Mux, Service, Stack, Status, param}
 import com.twitter.finagle.context.{Contexts, RemoteInfo}
-import com.twitter.finagle.mux.ServerDispatcher.State
 import com.twitter.finagle.mux.{Request, Response, gracefulShutdownEnabled}
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport.Message
@@ -45,6 +44,7 @@ private[finagle] final class MuxServerSession(
   private[this] val exec = handle.serialExecutor
   private[this] val lessor = params[Lessor.Param].lessor
   private[this] val statsReceiver = params[param.Stats].statsReceiver
+  private[this] val h_pingManager = params[Mux.param.PingManager].builder(exec, h_messageWriter)
   private[this] val h_tracker = new ServerTracker(
     exec, locals, service, h_messageWriter, lessor, statsReceiver, handle.remoteAddress)
 
@@ -81,10 +81,7 @@ private[finagle] final class MuxServerSession(
       h_tracker.dispatch(m)
 
     case Message.Tping(tag) =>
-      val response =
-        if (tag == Tags.PingTag) Message.PreEncoded.Rping
-        else Message.Rping(tag)
-      h_messageWriter.write(response)
+      h_pingManager.pingReceived(tag)
 
     case Message.Tdiscarded(tag, why) =>
       h_tracker.discarded(tag, why)
@@ -165,4 +162,8 @@ private[finagle] final class MuxServerSession(
 
 private object MuxServerSession {
   private val log = Logger.get
+
+  private object State extends Enumeration {
+    val Open, Draining, Closed = Value
+  }
 }

@@ -2,7 +2,7 @@ package com.twitter.finagle.mux.pushsession
 
 import com.twitter.finagle.{Service, FailureFlags}
 import com.twitter.finagle.client.BackupRequestFilter
-import com.twitter.finagle.mux.{ClientDiscardedRequestException, Processor, Request, Response}
+import com.twitter.finagle.mux.{ClientDiscardedRequestException, ServerProcessor, Request, Response}
 import com.twitter.finagle.mux.pushsession.ServerTracker._
 import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor, nackOnExpiredLease}
 import com.twitter.finagle.mux.transport.Message
@@ -166,7 +166,7 @@ private class ServerTracker(
     if (h_dispatches.containsKey(m.tag)) handleDuplicateTagDetected(m.tag)
     else Local.let(handleGetLocals()) {
       lessor.observeArrival()
-      val responseF = Processor(m, service)
+      val responseF = ServerProcessor(m, service)
       val elapsed = Stopwatch.start()
       val dispatch = Dispatch(m.tag, responseF, elapsed)
       h_dispatches.put(m.tag, dispatch)
