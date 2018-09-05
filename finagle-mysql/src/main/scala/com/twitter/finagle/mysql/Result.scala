@@ -23,46 +23,54 @@ trait Decoder[T <: Result] extends (Packet => Try[T]) {
 object HandshakeInit extends Decoder[HandshakeInit] {
   def decode(packet: Packet): HandshakeInit = {
     val br = MysqlBuf.reader(packet.body)
+
     try {
-      val protocol = br.readByte()
-      val bytesVersion = br.readNullTerminatedBytes()
-      val threadId = br.readIntLE()
-      val salt1 = Buf.ByteArray.Owned.extract(br.readBytes(8))
-      br.skip(1) // 1 filler byte always 0x00
+      // If an error occurs during the handshake, the first packet will tell us.
+      // Otherwise the first packet will be the protocol packet.
+      br.readByte() match {
+        case Packet.ErrorByte =>
+          val code: Int = br.readShortLE()
+          throw new Exception(s"Exception in MySQL handshake, error code $code")
+        case protocol =>
+          val bytesVersion = br.readNullTerminatedBytes()
+          val threadId = br.readIntLE()
+          val salt1 = Buf.ByteArray.Owned.extract(br.readBytes(8))
+          br.skip(1) // 1 filler byte always 0x00
 
-      // the rest of the fields are optional and protocol version specific
-      val capLow = if (br.remaining >= 2) br.readUnsignedShortLE() else 0
+          // the rest of the fields are optional and protocol version specific
+          val capLow = if (br.remaining >= 2) br.readUnsignedShortLE() else 0
 
-      require(
-        protocol == 10 && (capLow & Capability.Protocol41) != 0,
-        "unsupported protocol version"
-      )
+          require(
+            protocol == 10 && (capLow & Capability.Protocol41) != 0,
+            "unsupported protocol version"
+          )
 
-      val charset = br.readUnsignedByte()
-      val status = br.readShortLE()
-      val capHigh = br.readUnsignedShortLE() << 16
-      val serverCap = Capability(capHigh, capLow)
+          val charset = br.readUnsignedByte()
+          val status = br.readShortLE()
+          val capHigh = br.readUnsignedShortLE() << 16
+          val serverCap = Capability(capHigh, capLow)
 
-      // auth plugin data. Currently unused but we could verify
-      // that our secure connections respect the expected size.
-      br.skip(1)
+          // auth plugin data. Currently unused but we could verify
+          // that our secure connections respect the expected size.
+          br.skip(1)
 
-      // next 10 bytes are all reserved
-      br.readBytes(10)
+          // next 10 bytes are all reserved
+          br.readBytes(10)
 
-      val salt2 =
-        if (!serverCap.has(Capability.SecureConnection)) Array.empty[Byte]
-        else br.readNullTerminatedBytes()
+          val salt2 =
+            if (!serverCap.has(Capability.SecureConnection)) Array.empty[Byte]
+            else br.readNullTerminatedBytes()
 
-      HandshakeInit(
-        protocol,
-        new String(bytesVersion, Charset(charset)),
-        threadId,
-        Array.concat(salt1, salt2),
-        serverCap,
-        charset,
-        status
-      )
+          HandshakeInit(
+            protocol,
+            new String(bytesVersion, Charset(charset)),
+            threadId,
+            Array.concat(salt1, salt2),
+            serverCap,
+            charset,
+            status
+          )
+      }
     } finally br.close()
   }
 }

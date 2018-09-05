@@ -345,4 +345,16 @@ class ClientTest extends FunSuite
     await(c.query(dropProcedure))
   }
 
+  test("mysql server error during handshake is reported with error code") {
+    // The default maximum number of connections is 150, so we open 151.
+    val err = intercept[Exception] {
+      for (i <- 0 to 150) {
+        val newClient = configureClient().newRichClient(dest)
+        await(newClient.ping)
+      }
+    }
+
+    assert(err.getMessage.contains("Exception in MySQL handshake, error code 1040"))
+  }
+
 }
