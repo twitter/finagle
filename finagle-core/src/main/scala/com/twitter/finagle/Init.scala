@@ -110,7 +110,7 @@ private[twitter] object Init {
     _finagleVersion.set(p.getProperty("version", unknownVersion))
     _finagleBuildRevision.set(p.getProperty("build_revision", unknownVersion))
 
-    LoadService[Stack.NamedTransformer]().foreach { nt =>
+    LoadService[StackTransformer]().foreach { nt =>
       StackServer.DefaultTransformer.append(nt)
     }
 

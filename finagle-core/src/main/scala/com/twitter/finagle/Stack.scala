@@ -621,24 +621,24 @@ object Stack {
         next
       )
   }
+}
 
-  /**
-   * NamedTransformer is a standard mechanism for transforming the default
-   * shape of the Stack. It is a [[Stack.Transformer]] with a name.
-   * Registration and retrieval of transformers from global state is managed by
-   * [[StackServer.DefaultTransformer]]. The transformers will run at
-   * materialization time for Finagle servers, allowing users to mutate a Stack
-   * in a consistent way.
-   *
-   * Warning: While it's possible to modify params with this API, it's strongly
-   * discouraged. Modifying params via transformers creates subtle dependencies
-   * between modules and makes it difficult to reason about the value of
-   * params, as it may change depending on the module's placement in the stack.
-   */
-  private[finagle] abstract class NamedTransformer extends Transformer {
-    def name: String
-    override def toString: String = s"NamedTransformer(name=$name)"
-  }
+/**
+ * StackTransformer is a standard mechanism for transforming the default
+ * shape of the Stack. It is a [[Stack.Transformer]] with a name.
+ * Registration and retrieval of transformers from global state is managed by
+ * [[StackServer.DefaultTransformer]]. The transformers will run at
+ * materialization time for Finagle servers, allowing users to mutate a Stack
+ * in a consistent way.
+ *
+ * Warning: While it's possible to modify params with this API, it's strongly
+ * discouraged. Modifying params via transformers creates subtle dependencies
+ * between modules and makes it difficult to reason about the value of
+ * params, as it may change depending on the module's placement in the stack.
+ */
+abstract class StackTransformer extends Stack.Transformer {
+  def name: String
+  override def toString: String = s"StackTransformer(name=$name)"
 }
 
 /**

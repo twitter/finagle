@@ -4,19 +4,18 @@ import com.twitter.finagle._
 import com.twitter.finagle.filter._
 import com.twitter.finagle.param._
 import com.twitter.finagle.service.{DeadlineFilter, ExpiringService, StatsFilter, TimeoutFilter}
-import com.twitter.finagle.Stack.{Param, Role}
+import com.twitter.finagle.{StackTransformer, Stack}
 import com.twitter.finagle.stats.ServerStatsReceiver
 import com.twitter.finagle.tracing._
 import com.twitter.jvm.Jvm
 import scala.collection.immutable
 
 object StackServer {
-
   private[this] lazy val newJvmFilter = new MkJvmFilter(Jvm())
 
   private[this] class JvmTracing[Req, Rep]
       extends Stack.Module1[param.Tracer, ServiceFactory[Req, Rep]] {
-    def role: Role = Role.jvmTracing
+    def role: Stack.Role = Role.jvmTracing
     def description: String = "Server-side JVM tracing"
     def make(
       _tracer: param.Tracer,
@@ -110,15 +109,15 @@ object StackServer {
     Stack.Params.empty + Stats(ServerStatsReceiver)
 
   /**
-   * A set of NamedTransformers for transforming server stacks.
+   * A set of StackTransformers for transforming server stacks.
    */
   private[finagle] object DefaultTransformer {
-    @volatile private var underlying = immutable.Queue.empty[Stack.NamedTransformer]
+    @volatile private var underlying = immutable.Queue.empty[StackTransformer]
 
-    def append(transformer: Stack.NamedTransformer): Unit =
+    def append(transformer: StackTransformer): Unit =
       synchronized { underlying = underlying :+ transformer }
 
-    def transformers: Seq[Stack.NamedTransformer] =
+    def transformers: Seq[StackTransformer] =
       underlying
   }
 }
@@ -148,9 +147,9 @@ trait StackServer[Req, Rep]
 
   def withParams(ps: Stack.Params): StackServer[Req, Rep]
 
-  override def configured[P: Param](p: P): StackServer[Req, Rep]
+  override def configured[P: Stack.Param](p: P): StackServer[Req, Rep]
 
-  override def configured[P](psp: (P, Param[P])): StackServer[Req, Rep]
+  override def configured[P](psp: (P, Stack.Param[P])): StackServer[Req, Rep]
 
   override def configuredParams(params: Stack.Params): StackServer[Req, Rep]
 }

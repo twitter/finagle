@@ -15,6 +15,9 @@ New Features
   check if an exception is known to be safe to retry. Java compatibility has
   also been added. ``PHAB_ID=D202374``
 
+* finagle-core: Introducing StackTransformer, a consistent mechanism for
+  accessing and transforming the default ServerStack. ``PHAB_ID=D207980``
+
 * finagle-netty4: Allow sockets to be configured with the [SO_REUSEPORT](http://lwn.net/Articles/542629/) option
   when using native epoll, which allows multiple processes to bind and accept connections
   from the same port.
