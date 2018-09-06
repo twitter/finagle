@@ -5,12 +5,13 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.http2.param.PriorKnowledge
 import com.twitter.util.Future
 
-class Http2PriorKnowledgeTest extends AbstractEndToEndTest {
+class Http2PriorKnowledgeTest extends AbstractHttp2EndToEndTest {
   def implName: String = "prior knowledge http/2"
   def clientImpl(): finagle.Http.Client =
     finagle.Http.client
       .withHttp2
       .configured(PriorKnowledge(true))
+      .withStatsReceiver(statsRecv)
 
   def serverImpl(): finagle.Http.Server =
     finagle.Http.server

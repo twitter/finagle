@@ -8,7 +8,7 @@ import io.netty.channel.{Channel, ChannelHandlerContext, ChannelInitializer}
 import io.netty.handler.codec.http2.{Http2MultiplexCodecBuilder}
 import io.netty.handler.ssl.{ApplicationProtocolNames, ApplicationProtocolNegotiationHandler}
 
-final private[http2] class NpnOrAlpnHandler(init: ChannelInitializer[Channel], params: Stack.Params)
+final private[http2] class ServerNpnOrAlpnHandler(init: ChannelInitializer[Channel], params: Stack.Params)
     extends ApplicationProtocolNegotiationHandler(ApplicationProtocolNames.HTTP_1_1) {
 
   private[this] val Stats(statsReceiver) = params[Stats]

@@ -68,7 +68,7 @@ abstract class AbstractEndToEndTest
   def clientImpl(): finagle.Http.Client
   def serverImpl(): finagle.Http.Server
   def initClient(client: HttpService): Unit = {}
-  def initService: HttpService = Service.mk { req: Request =>
+  def initService: HttpService = Service.mk { _: Request =>
     Future.exception(new Exception("boom!"))
   }
   def featureImplemented(feature: Feature): Boolean
@@ -1206,7 +1206,7 @@ abstract class AbstractEndToEndTest
   }
 
   test(s"$implName client handles cut connection properly") {
-    val svc = Service.mk[Request, Response] { req: Request =>
+    val svc = Service.mk[Request, Response] { _: Request =>
       Future.value(Response())
     }
     val server1 = serverImpl()
@@ -1230,7 +1230,7 @@ abstract class AbstractEndToEndTest
   }
 
   test("Does not retry service acquisition many times when not using FactoryToService") {
-    val svc = Service.mk[Request, Response] { req: Request =>
+    val svc = Service.mk[Request, Response] { _: Request =>
       Future.value(Response())
     }
     val sr = new InMemoryStatsReceiver

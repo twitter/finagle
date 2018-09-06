@@ -7,15 +7,12 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import io.netty.channel._
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.ssl.{SslHandler, SslHandshakeCompletionEvent, ApplicationProtocolNames}
-import org.junit.runner.RunWith
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-@RunWith(classOf[JUnitRunner])
-class NpnOrAlpnHandlerTest extends FunSuite with BeforeAndAfter with MockitoSugar {
+class ServerNpnOrAlpnHandlerTest extends FunSuite with BeforeAndAfter with MockitoSugar {
 
   val http2 = ApplicationProtocolNames.HTTP_2
   val http11 = ApplicationProtocolNames.HTTP_1_1
@@ -39,7 +36,7 @@ class NpnOrAlpnHandlerTest extends FunSuite with BeforeAndAfter with MockitoSuga
     doCallRealMethod().when(sslHandler).userEventTriggered(any[ChannelHandlerContext], anyObject())
     pipeline.addLast(sslHandler)
 
-    val handler = new NpnOrAlpnHandler(init, params)
+    val handler = new ServerNpnOrAlpnHandler(init, params)
     pipeline.addLast(handler)
 
     val dummyHttp11Codec = new ChannelHandlerAdapter() {}

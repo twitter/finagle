@@ -13,7 +13,7 @@ import com.twitter.io.TempFile
 import com.twitter.util.{Closable, Future}
 import java.net.InetSocketAddress
 
-class Http2AlpnTest extends AbstractEndToEndTest {
+class Http2AlpnTest extends AbstractHttp2EndToEndTest {
 
   def clientConfiguration(): SslClientConfiguration = {
     val intermediateFile = TempFile.fromResourcePath("/ssl/certs/intermediate.cert.pem")
@@ -41,6 +41,7 @@ class Http2AlpnTest extends AbstractEndToEndTest {
       .withHttp2
       .configured(FailureDetector.Param(FailureDetector.NullConfig))
       .configured(Transport.ClientSsl(Some(clientConfiguration())))
+      .withStatsReceiver(statsRecv)
 
   def serverImpl(): finagle.Http.Server =
     finagle.Http.server
@@ -115,28 +116,6 @@ class Http2AlpnTest extends AbstractEndToEndTest {
       }
       await(Closable.all(client, server).close())
     }
-  }
-
-  test("client closes properly when closed") {
-    val sr = new InMemoryStatsReceiver()
-    val server = serverImpl()
-      .serve("localhost:*", initService)
-
-    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-    val client = clientImpl()
-      .withStatsReceiver(sr)
-      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
-
-    initClient(client)
-
-    val request = Request(Method.Post, "/")
-
-    val rep = await(client(request))
-
-    await(client.close())
-    assert(sr.counters(Seq("client", "closes")) == 1)
-
-    await(server.close())
   }
 
   test("clients don't leak connections when h2 is rejected") {

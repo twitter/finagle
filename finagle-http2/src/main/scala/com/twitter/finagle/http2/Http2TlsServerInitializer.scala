@@ -1,7 +1,7 @@
 package com.twitter.finagle.http2
 
 import com.twitter.finagle.Stack
-import com.twitter.finagle.http2.transport.NpnOrAlpnHandler
+import com.twitter.finagle.http2.transport.ServerNpnOrAlpnHandler
 import io.netty.channel.{Channel, ChannelInitializer}
 import io.netty.channel.socket.SocketChannel
 
@@ -15,7 +15,7 @@ private[http2] class Http2TlsServerInitializer(
 
   def initChannel(ch: SocketChannel): Unit = {
     val p = ch.pipeline()
-    p.addLast(new NpnOrAlpnHandler(init, params))
+    p.addLast(new ServerNpnOrAlpnHandler(init, params))
     p.addLast(init)
   }
 }

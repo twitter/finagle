@@ -9,6 +9,7 @@ import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatche
 import com.twitter.finagle.http.exp.StreamTransport
 import com.twitter.finagle.http.filter._
 import com.twitter.finagle.http.service.HttpResponseClassifier
+import com.twitter.finagle.http2.transport.MultiplexTransporter
 import com.twitter.finagle.http2.{Http2Listener, Http2Transporter}
 import com.twitter.finagle.netty4.http.{Netty4HttpListener, Netty4HttpTransporter}
 import com.twitter.finagle.netty4.http.{Netty4ClientStreamTransport, Netty4ServerStreamTransport}
@@ -213,12 +214,12 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
                 }
 
               def close(deadline: Time): Future[Unit] = transporter match {
-                case http2: Http2Transporter => http2.close(deadline)
+                case multiplex: MultiplexTransporter => multiplex.close(deadline)
                 case _ => Future.Done
               }
 
               override def status: Status = transporter match {
-                case http2: Http2Transporter => http2.status
+                case http2: MultiplexTransporter => http2.sessionStatus
                 case _ => super.status
               }
             }

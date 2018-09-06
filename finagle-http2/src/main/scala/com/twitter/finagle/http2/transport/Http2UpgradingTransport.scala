@@ -21,19 +21,19 @@ import scala.util.control.NoStackTrace
  * resources are cleaned up appropriately regardless of the stage of the upgrade.
  */
 private[http2] final class Http2UpgradingTransport(
-  t: Transport[Any, Any],
+  underlying: Transport[Any, Any],
   ref: RefTransport[Any, Any],
   p: Promise[Option[StreamTransportFactory]],
   params: Stack.Params,
   http1Status: () => Status
-) extends TransportProxy[Any, Any](t) {
+) extends TransportProxy[Any, Any](underlying) {
 
   import Http2Transporter._
   import Http2ClientDowngrader.StreamMessage
 
   @volatile private[this] var upgradeFailed = false
 
-  def write(any: Any): Future[Unit] = t.write(any)
+  def write(any: Any): Future[Unit] = underlying.write(any)
 
   // If we failed the upgrade, we want to mark ourselves closed once the parent transporter
   // has generated an H2 session so that we can converge to H2 sessions, if possible.
@@ -55,13 +55,13 @@ private[http2] final class Http2UpgradingTransport(
   }
 
   private[this] def upgradeSuccessful(): Unit = {
-    val inOutCasted = Transport.cast[StreamMessage, StreamMessage](t)
+    val inOutCasted = Transport.cast[StreamMessage, StreamMessage](underlying)
     val contextCasted = inOutCasted.asInstanceOf[
       Transport[StreamMessage, StreamMessage] {
         type Context = TransportContext with HasExecutor
       }
     ]
-    val fac = new StreamTransportFactory(contextCasted, t.remoteAddress, params)
+    val fac = new StreamTransportFactory(contextCasted, underlying.remoteAddress, params)
     // This removes us from the transport pathway
     ref.update { _ =>
       unsafeCast(fac.first())
@@ -72,7 +72,7 @@ private[http2] final class Http2UpgradingTransport(
     p.updateIfEmpty(Return(Some(fac)))
   }
 
-  def read(): Future[Any] = t.read().flatMap {
+  def read(): Future[Any] = underlying.read().flatMap {
     case UpgradeRequestHandler.UpgradeRejected =>
       upgradeRejected()
       ref.read()

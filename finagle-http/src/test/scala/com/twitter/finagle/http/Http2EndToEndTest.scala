@@ -17,7 +17,7 @@ import java.net.InetSocketAddress
 import java.util.concurrent.atomic.AtomicInteger
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 
-class Http2EndToEndTest extends AbstractEndToEndTest {
+class Http2EndToEndTest extends AbstractHttp2EndToEndTest {
   def implName: String = "netty4 http/2"
   def clientImpl(): finagle.Http.Client = finagle.Http.client.withHttp2.withStatsReceiver(statsRecv)
 
@@ -42,7 +42,7 @@ class Http2EndToEndTest extends AbstractEndToEndTest {
     }
   }
 
-  override def initService: HttpService = Service.mk { req: Request =>
+  override def initService: HttpService = Service.mk { _: Request =>
     Future.value(Response())
   }
 

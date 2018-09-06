@@ -9,7 +9,7 @@ import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.netty4.http.{HttpCodecName, Netty4HttpTransporter, initClient}
 import com.twitter.finagle.netty4.transport.HasExecutor
 import com.twitter.finagle.param.{Timer => TimerParam}
-import com.twitter.finagle.transport.{LegacyContext, Transport, TransportContext, TransportProxy}
+import com.twitter.finagle.transport.{Transport, TransportContext, TransportProxy}
 import com.twitter.finagle.{Stack, Status}
 import com.twitter.logging.{HasLogLevel, Level, Logger}
 import com.twitter.util._
@@ -18,7 +18,6 @@ import io.netty.handler.codec.http._
 import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
 import io.netty.handler.codec.http2._
 import java.net.SocketAddress
-import java.security.cert.Certificate
 import java.util.concurrent.atomic.AtomicReference
 
 private[finagle] object Http2Transporter {
@@ -142,20 +141,7 @@ private[finagle] class Http2Transporter(
   params: Stack.Params,
   implicit val timer: Timer
 ) extends Transporter[Any, Any, TransportContext]
-    with Closable { self =>
-
-  private[this] def deadTransport(exn: Throwable) = new Transport[Any, Any] {
-    type Context = TransportContext
-    def read(): Future[Any] = Future.never
-    def write(msg: Any): Future[Unit] = Future.never
-    val status: Status = Status.Closed
-    def onClose: Future[Throwable] = Future.value(exn)
-    def remoteAddress: SocketAddress = self.remoteAddress
-    def localAddress: SocketAddress = new SocketAddress {}
-    def peerCertificate: Option[Certificate] = None
-    def close(deadline: Time): Future[Unit] = Future.Done
-    val context: TransportContext = new LegacyContext(this)
-  }
+    with MultiplexTransporter { self =>
 
   def remoteAddress: SocketAddress = underlying.remoteAddress
 
@@ -200,7 +186,7 @@ private[finagle] class Http2Transporter(
           tryEvict(f)
 
           // we expect finagle to treat this specially and retry if possible
-          Future.value(deadTransport(exn))
+          Future.value(new DeadTransport(exn, remoteAddress))
       }
     case Return(None) =>
       // we didn't upgrade
@@ -329,7 +315,7 @@ private[finagle] class Http2Transporter(
     else f.flatMap(maybeClose).by(deadline).rescue { case exn: Throwable => Future.Done }
   }
 
-  def status: Status = {
+  def sessionStatus: Status = {
     val f = cachedConnection.get
 
     // Status.Open is a good default since this is just here to do liveness checks with Ping.

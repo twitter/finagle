@@ -1,16 +1,15 @@
 package com.twitter.finagle.http2.transport
 
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.http2.Http2Transporter
+import com.twitter.finagle.http2.{DeadTransport, Http2Transporter}
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader.StreamMessage
 import com.twitter.finagle.netty4.transport.HasExecutor
-import com.twitter.finagle.param.Stats
+import com.twitter.finagle.param.{Stats, Timer => TimerParam}
 import com.twitter.finagle.{Stack, Status}
-import com.twitter.finagle.transport.{Transport, TransportContext, LegacyContext}
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.logging.Logger
-import com.twitter.util.{Future, Promise, Time}
+import com.twitter.util.{Future, Promise, Return, Time}
 import java.net.SocketAddress
-import java.security.cert.Certificate
 import java.util.concurrent.atomic.AtomicReference
 
 /**
@@ -22,18 +21,18 @@ import java.util.concurrent.atomic.AtomicReference
  * to http/1.1 over the wire if the remote server doesn't speak http/2.
  * Instead, it speaks http/2 from birth.
  */
-private[http2] class PriorKnowledgeTransporter(
+private[http2] final class PriorKnowledgeTransporter(
   underlying: Transporter[Any, Any, TransportContext],
   params: Stack.Params
-) extends Transporter[Any, Any, TransportContext] { self =>
+) extends Transporter[Any, Any, TransportContext] with MultiplexTransporter { self =>
 
   private[this] val log = Logger.get()
   private[this] val Stats(statsReceiver) = params[Stats]
   private[this] val upgradeCounter = statsReceiver.scope("upgrade").counter("success")
+  private[this] val timer = params[TimerParam].timer
+  private[this] val cachedSession = new AtomicReference[Option[Future[StreamTransportFactory]]](None)
 
   def remoteAddress: SocketAddress = underlying.remoteAddress
-
-  private[this] val ref = new AtomicReference[Future[StreamTransportFactory]](null)
 
   private[this] def createStreamTransportFactory(): Future[StreamTransportFactory] = {
     underlying().map { transport =>
@@ -49,7 +48,7 @@ private[http2] class PriorKnowledgeTransporter(
         params
       )
       transport.onClose.ensure {
-        ref.set(null)
+        cachedSession.set(None)
       }
 
       // Consider the creation of a new prior knowledge transport as an upgrade
@@ -59,28 +58,15 @@ private[http2] class PriorKnowledgeTransporter(
   }
 
   private[this] def getStreamTransportFactory(): Future[StreamTransportFactory] = {
-    Option(ref.get) match {
+    cachedSession.get match {
+      case Some(f) => f
       case None =>
         val p = Promise[StreamTransportFactory]()
-        if (ref.compareAndSet(null, p)) {
+        if (cachedSession.compareAndSet(None, Some(p))) {
           p.become(createStreamTransportFactory())
           p
         } else getStreamTransportFactory()
-      case Some(f) => f
     }
-  }
-
-  private[this] def deadTransport(exn: Throwable) = new Transport[Any, Any] {
-    type Context = TransportContext
-    def read(): Future[Any] = Future.never
-    def write(msg: Any): Future[Unit] = Future.never
-    val status: Status = Status.Closed
-    def onClose: Future[Throwable] = Future.value(exn)
-    def remoteAddress: SocketAddress = self.remoteAddress
-    def localAddress: SocketAddress = new SocketAddress {}
-    def peerCertificate: Option[Certificate] = None
-    def close(deadline: Time): Future[Unit] = Future.Done
-    val context: TransportContext = new LegacyContext(this)
   }
 
   def apply(): Future[Transport[Any, Any]] = getStreamTransportFactory().flatMap { fac =>
@@ -91,8 +77,28 @@ private[http2] class PriorKnowledgeTransporter(
           s"A previously successful connection to address $remoteAddress stopped being successful."
         )
 
-        ref.set(null)
-        deadTransport(exn)
+        cachedSession.set(None)
+        new DeadTransport(exn, remoteAddress)
     }
+  }
+
+  def close(deadline: Time): Future[Unit] = cachedSession.get match {
+    case None => Future.Done
+    case Some(f) =>
+      f.flatMap(_.close(deadline))
+        .by(timer, deadline)
+        .rescue { case _: Throwable => Future.Done }
+  }
+
+  def sessionStatus: Status = cachedSession.get match {
+    case None => Status.Open
+    case Some(session) =>
+      session.poll match {
+        case Some(Return(session)) => session.status
+        case _ =>
+          // this state is transient, either we're going to kill a dead session soon or
+          // we haven't resolved a session yet.
+          Status.Open
+      }
   }
 }
