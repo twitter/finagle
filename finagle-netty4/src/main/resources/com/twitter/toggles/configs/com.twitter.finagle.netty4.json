@@ -1,9 +1,0 @@
-{
-  "toggles": [
-    {
-      "id": "com.twitter.finagle.netty4.UseNativeEpollV2",
-      "description": "Enable native epoll transport for netty4. Requires linux-x86_64",
-      "fraction": 0.0
-    }
-  ]
-}

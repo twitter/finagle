@@ -1,10 +1,10 @@
 package com.twitter.finagle.netty4.param
 
 import com.twitter.finagle.Stack
-import com.twitter.finagle.netty4.{nativeEpoll, numWorkers}
+import com.twitter.finagle.netty4.{numWorkers, useNativeEpoll}
 import com.twitter.finagle.util.BlockingTimeTrackingThreadFactory
 import io.netty.channel.EventLoopGroup
-import io.netty.channel.epoll.EpollEventLoopGroup
+import io.netty.channel.epoll.{Epoll, EpollEventLoopGroup}
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.util.concurrent.DefaultThreadFactory
 import java.util.concurrent.{Executor, Executors, ThreadFactory}
@@ -20,7 +20,7 @@ import java.util.concurrent.{Executor, Executors, ThreadFactory}
  */
 case class WorkerPool(eventLoopGroup: EventLoopGroup) {
   def this(executor: Executor, numWorkers: Int) = this(
-    if (nativeEpoll.enabled) WorkerPool.mkEpollEventLoopGroup(numWorkers, executor)
+    if (useNativeEpoll() && Epoll.isAvailable) WorkerPool.mkEpollEventLoopGroup(numWorkers, executor)
     else WorkerPool.mkNioEventLoopGroup(numWorkers, executor))
 
   def mk() : (WorkerPool, Stack.Param[WorkerPool]) =

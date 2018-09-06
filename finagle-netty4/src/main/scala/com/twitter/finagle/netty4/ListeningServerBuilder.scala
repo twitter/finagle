@@ -12,7 +12,7 @@ import com.twitter.util.{CloseAwaitably, Future, Promise, Time}
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel._
 import io.netty.channel.unix.UnixChannelOption
-import io.netty.channel.epoll.{EpollEventLoopGroup, EpollServerSocketChannel}
+import io.netty.channel.epoll.{Epoll, EpollEventLoopGroup, EpollServerSocketChannel}
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.util.concurrent.{FutureListener, Future => NettyFuture}
@@ -72,14 +72,12 @@ private class ListeningServerBuilder(
   def bindWithBridge(bridge: ChannelInboundHandler, addr: SocketAddress): ListeningServer =
     new ListeningServer with CloseAwaitably {
       private[this] val bossLoop: EventLoopGroup =
-        if (nativeEpoll.enabled)
-          mkEpollEventLoopGroup()
-        else
-          mkNioEventLoopGroup()
+        if (useNativeEpoll() && Epoll.isAvailable) mkEpollEventLoopGroup()
+        else mkNioEventLoopGroup()
 
       private[this] val bootstrap = new ServerBootstrap()
 
-      if (nativeEpoll.enabled) {
+      if (useNativeEpoll() && Epoll.isAvailable) {
         bootstrap.channel(classOf[EpollServerSocketChannel])
         bootstrap.option[JBool](UnixChannelOption.SO_REUSEPORT, reusePort)
       } else

@@ -1,13 +1,6 @@
 package com.twitter.finagle.netty4
 
-import com.twitter.finagle.{
-  CancelledConnectionException,
-  ConnectionFailedException,
-  Failure,
-  FailureFlags,
-  ProxyConnectException,
-  Stack
-}
+import com.twitter.finagle.{CancelledConnectionException, ConnectionFailedException, Failure, FailureFlags, ProxyConnectException, Stack}
 import com.twitter.finagle.client.{LatencyCompensation, Transporter}
 import com.twitter.finagle.netty4.Netty4Transporter.Backpressure
 import com.twitter.finagle.param.Stats
@@ -15,19 +8,12 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.logging.Level
 import com.twitter.util.{Future, Promise, Stopwatch}
 import io.netty.bootstrap.Bootstrap
-import io.netty.channel.{
-  Channel,
-  ChannelFuture,
-  ChannelFutureListener,
-  ChannelInitializer,
-  ChannelOption
-}
-import io.netty.channel.epoll.EpollSocketChannel
+import io.netty.channel.{Channel, ChannelFuture, ChannelFutureListener, ChannelInitializer, ChannelOption}
+import io.netty.channel.epoll.{Epoll, EpollSocketChannel}
 import io.netty.channel.socket.nio.NioSocketChannel
 import java.lang.{Boolean => JBool, Integer => JInt}
 import java.net.SocketAddress
 import java.nio.channels.UnresolvedAddressException
-
 import scala.util.control.NonFatal
 
 /**
@@ -72,7 +58,7 @@ private final class ConnectionBuilder(
       (compensation + connectTimeout).inMillis.min(Int.MaxValue)
 
     val channelClass =
-      if (nativeEpoll.enabled) classOf[EpollSocketChannel]
+      if (useNativeEpoll() && Epoll.isAvailable) classOf[EpollSocketChannel]
       else classOf[NioSocketChannel]
 
     val bootstrap =

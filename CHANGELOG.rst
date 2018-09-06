@@ -76,6 +76,10 @@ Runtime Behavior Changes
 * finagle-memcached: A Memcached client (`c.t.f.Memcached.Client`) is now backed by a more efficient,
   push-based implementation. ``PHAB_ID=D208047``
 
+* finagle-netty4: Finagle's Netty 4 implementation now defaults to use Linux's native epoll
+  transport, when available. Run with `-com.twitter.finagle.netty4.useNativeEpoll=false` to opt out.
+  ``PHAB_ID=D208088``
+
 18.8.0
 -------
 
