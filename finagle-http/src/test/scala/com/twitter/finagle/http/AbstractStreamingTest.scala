@@ -42,7 +42,7 @@ abstract class AbstractStreamingTest extends FunSuite {
   def writeLots(writer: Writer[Buf], buf: Buf): Future[Unit] =
     writer.write(buf) before writeLots(writer, buf)
 
-  class ClientCtx {
+  class ClientCtx(singletonPool: Boolean = false) {
     @volatile var shouldFail = true
     val failure = new Promise[Unit]
 
@@ -50,7 +50,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     val client = connect(server.boundAddress, transport => {
       if (shouldFail) failure.ensure { transport.close() }
       transport
-    })
+    }, singletonPool = singletonPool)
 
     val buf = Buf.Utf8(".")
     val req = get("/")
@@ -64,10 +64,6 @@ abstract class AbstractStreamingTest extends FunSuite {
     shouldFail = false
     val req2 = get("abc")
     val res2 = client(req2)
-
-    // This is flaky. The assertion has been moved to the tests which use res2, and those have been
-    // marked as flaky.
-    //assert(res2.poll == None)
 
     // Assert previously queued request is now processed, and not interrupted
     // midstream.
@@ -95,7 +91,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     assertSecondRequestOk()
   })
 
-  test("client: response stream fails on read")(new ClientCtx {
+  test("client: response stream fails on read")(new ClientCtx(singletonPool = true) {
     assert(res2.poll == None)
     // Reader should be suspended in a reading state.
     val f = res.reader.read(1)
@@ -146,7 +142,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     await(closable.close())
   }
 
-  test("client: fail request writer")(new ClientCtx {
+  test("client: fail request writer")(new ClientCtx(singletonPool = true) {
     assert(res2.poll == None)
     val exc = new Exception
     req.writer.fail(exc)
@@ -156,7 +152,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     assertSecondRequestOk()
   })
 
-  test("client: discard respond reader")(new ClientCtx {
+  test("client: discard respond reader")(new ClientCtx(singletonPool = true) {
     assert(res2.poll == None)
     res.reader.discard()
     assertSecondRequestOk()
@@ -259,7 +255,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     Closable.all(server, client1, client2, closable).close()
   }
 
-  test("server: fail response writer") {
+    test("server: fail response writer") {
     val buf = Buf.Utf8(".")
     val n = new AtomicInteger(0)
     val failure = new Promise[Unit]
@@ -423,10 +419,13 @@ abstract class AbstractStreamingTest extends FunSuite {
   def connect(
     addr: SocketAddress,
     mod: Modifier,
-    name: String = "client"
+    name: String = "client",
+    singletonPool: Boolean = false
   ): Service[Request, Response] = {
+    val poolSize = if (singletonPool) 1 else Int.MaxValue
     val modifiedImpl = impl.copy(transporter = modifiedTransporterFn(mod, impl.transporter))
     configureClient(FinagleHttp.client)
+      .withSessionPool.maxSize(poolSize)
       .withStreaming(true)
       .configured(modifiedImpl)
       .newService(Name.bound(Address(addr.asInstanceOf[InetSocketAddress])), name)
