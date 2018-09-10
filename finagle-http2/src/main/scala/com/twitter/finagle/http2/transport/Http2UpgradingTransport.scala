@@ -1,7 +1,7 @@
 package com.twitter.finagle.http2.transport
 
 import com.twitter.finagle.{FailureFlags, Stack, Status}
-import com.twitter.finagle.http2.{Http2Transporter, RefTransport}
+import com.twitter.finagle.http2.RefTransport
 import com.twitter.finagle.http2.transport.Http2UpgradingTransport.UpgradeIgnoredException
 import com.twitter.finagle.netty4.transport.HasExecutor
 import com.twitter.finagle.transport.{Transport, TransportContext, TransportProxy}
@@ -28,7 +28,6 @@ private[http2] final class Http2UpgradingTransport(
   http1Status: () => Status
 ) extends TransportProxy[Any, Any](underlying) {
 
-  import Http2Transporter._
   import Http2ClientDowngrader.StreamMessage
 
   @volatile private[this] var upgradeFailed = false
@@ -63,9 +62,7 @@ private[http2] final class Http2UpgradingTransport(
     ]
     val fac = new StreamTransportFactory(contextCasted, underlying.remoteAddress, params)
     // This removes us from the transport pathway
-    ref.update { _ =>
-      unsafeCast(fac.first())
-    }
+    ref.update { _ => fac.first() }
 
     // Let the `Http2Transporter` know about the shiny new h2 session.
     // We need to do this *after* taking the first stream.

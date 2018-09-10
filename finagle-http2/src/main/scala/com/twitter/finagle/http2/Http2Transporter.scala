@@ -110,9 +110,6 @@ private[finagle] object Http2Transporter {
         initClient(params)(pipeline)
       }
   }
-
-  def unsafeCast(t: Transport[HttpObject, HttpObject]): Transport[Any, Any] =
-    t.map(_.asInstanceOf[HttpObject], _.asInstanceOf[Any])
 }
 
 /**
@@ -175,9 +172,9 @@ private[finagle] class Http2Transporter(
   private[this] def useExistingConnection(
     f: Future[Option[StreamTransportFactory]]
   ): Future[Transport[Any, Any]] = f.transform {
-    case Return(Some(fn)) =>
-      fn().transform {
-        case Return(transport) => Future.value(unsafeCast(transport))
+    case Return(Some(fac)) =>
+      fac.newChildTransport().transform {
+        case Return(transport) => Future.value(transport)
         case Throw(exn) =>
           log.warning(
             exn,

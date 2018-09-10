@@ -12,7 +12,7 @@ import com.twitter.finagle.transport.{LegacyContext, Transport, TransportContext
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Failure, FailureFlags, Stack, Status, StreamClosedException}
 import com.twitter.logging.{HasLogLevel, Level, Logger}
-import com.twitter.util.{Closable, Future, Promise, Return, Throw, Time, Try}
+import com.twitter.util.{Future, Promise, Return, Throw, Time, Try}
 import io.netty.handler.codec.http.{HttpObject, HttpRequest, LastHttpContent}
 import io.netty.handler.codec.http2.Http2Error
 import java.net.SocketAddress
@@ -50,8 +50,7 @@ final private[http2] class StreamTransportFactory(
   },
   addr: SocketAddress,
   params: Stack.Params
-) extends (() => Future[Transport[HttpObject, HttpObject]])
-  with Closable { parent =>
+) extends ClientSession { parent =>
   import StreamTransportFactory._
 
   private[this] val exec = underlying.context.executor
@@ -249,7 +248,13 @@ final private[http2] class StreamTransportFactory(
    *       [[StreamTransportFactory]] state concurrently to any instances produced via
    *       `apply`.
    */
-  def first(): Transport[HttpObject, HttpObject] = {
+  def first(): Transport[Any, Any] = unsafeCast(firstStreamTransport())
+
+  def newChildTransport(): Future[Transport[Any, Any]] =
+    childStreamTransport().map(unsafeCast)
+
+  // Exposed for testing
+  private[transport] def firstStreamTransport(): StreamTransport = {
     if (firstOnce.compareAndSet(false, true)) {
       val st = new StreamTransport()
       st.handleNewStream()
@@ -260,8 +265,9 @@ final private[http2] class StreamTransportFactory(
     }
   }
 
-  def apply(): Future[Transport[HttpObject, HttpObject]] = {
-    val p = new Promise[Transport[HttpObject, HttpObject]]
+  // Exposed for testing
+  private[transport] def childStreamTransport(): Future[StreamTransport] = {
+    val p = new Promise[StreamTransport]
     exec.execute(new Runnable {
       def run(): Unit = {
         if (dead) p.setException(new DeadConnectionException(addr, FailureFlags.Retryable))
@@ -703,4 +709,7 @@ private[http2] object StreamTransportFactory {
     protected def copyWithFlags(flags: Long): IllegalStreamIdException =
       new IllegalStreamIdException(addr, id, flags)
   }
+
+  private def unsafeCast(t: Transport[HttpObject, HttpObject]): Transport[Any, Any] =
+    t.map(_.asInstanceOf[HttpObject], _.asInstanceOf[Any])
 }

@@ -1,7 +1,7 @@
 package com.twitter.finagle.http2.transport
 
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.http2.{DeadTransport, Http2Transporter}
+import com.twitter.finagle.http2.DeadTransport
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader.StreamMessage
 import com.twitter.finagle.netty4.transport.HasExecutor
 import com.twitter.finagle.param.{Stats, Timer => TimerParam}
@@ -70,7 +70,7 @@ private[http2] final class PriorKnowledgeTransporter(
   }
 
   def apply(): Future[Transport[Any, Any]] = getStreamTransportFactory().flatMap { fac =>
-    fac().map(Http2Transporter.unsafeCast).handle {
+    fac.newChildTransport().handle {
       case exn: Throwable =>
         log.warning(
           exn,

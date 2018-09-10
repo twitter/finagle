@@ -44,8 +44,8 @@ class StreamTransportFactoryTest extends FunSuite {
     val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
     streamFac.setStreamId(Int.MaxValue)
 
-    val first = await(streamFac())
-    val second = await(streamFac())
+    val first = await(streamFac.newChildTransport())
+    val second = await(streamFac.newChildTransport())
 
     first.write(H1Req)
     second.write(H1Req)
@@ -68,7 +68,7 @@ class StreamTransportFactoryTest extends FunSuite {
     val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
     streamFac.setStreamId(Int.MaxValue)
 
-    val stream = await(streamFac())
+    val stream = await(streamFac.newChildTransport())
 
     assert(!stream.onClose.isDefined)
     stream.write(H1Req)
@@ -93,7 +93,7 @@ class StreamTransportFactoryTest extends FunSuite {
     val addr = new SocketAddress {}
     val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
 
-    val conn = await(streamFac())
+    val conn = await(streamFac.newChildTransport())
 
     conn.write(H1Req)
     assert(streamFac.numActiveStreams == 1)
@@ -113,7 +113,7 @@ class StreamTransportFactoryTest extends FunSuite {
     val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
     streamFac.setStreamId(2)
 
-    val stream = await(streamFac())
+    val stream = await(streamFac.newChildTransport())
 
     stream.write(H1Req)
 
@@ -134,7 +134,7 @@ class StreamTransportFactoryTest extends FunSuite {
     val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
     streamFac.setStreamId(2147483647)
 
-    val s1, s2 = await(streamFac())
+    val s1, s2 = await(streamFac.newChildTransport())
 
     s1.write(H1Req)
     s2.write(H1Req)
@@ -145,7 +145,7 @@ class StreamTransportFactoryTest extends FunSuite {
     }
 
     intercept[DeadConnectionException] {
-      await(streamFac())
+      await(streamFac.newChildTransport())
     }
     assert(exn.flags == FailureFlags.Retryable)
     assert(streamFac.numActiveStreams == 1)
@@ -161,11 +161,11 @@ class StreamTransportFactoryTest extends FunSuite {
     val addr = new SocketAddress {}
     val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
 
-    val stream = await(streamFac())
+    val stream = await(streamFac.newChildTransport())
     readq.offer(GoAway(LastHttpContent.EMPTY_LAST_CONTENT, 1, Http2Error.PROTOCOL_ERROR.code))
 
     intercept[DeadConnectionException] {
-      await(streamFac())
+      await(streamFac.newChildTransport())
     }
     assert(streamFac.numActiveStreams == 0)
   }
@@ -178,7 +178,7 @@ class StreamTransportFactoryTest extends FunSuite {
     val addr = new SocketAddress {}
     val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
 
-    val c1, c3 = await(streamFac())
+    val c1, c3 = await(streamFac.newChildTransport())
 
     val res = new DefaultFullHttpResponse(
       HttpVersion.HTTP_1_1,
@@ -235,7 +235,7 @@ class StreamTransportFactoryTest extends FunSuite {
     }]
     val addr = new SocketAddress {}
     val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
-    assert(streamFac.first().asInstanceOf[streamFac.StreamTransport].curId == 1)
+    assert(streamFac.firstStreamTransport().curId == 1)
   }
 
   test("StreamTransportFactory streams increment stream ID only on write") {
@@ -246,7 +246,7 @@ class StreamTransportFactoryTest extends FunSuite {
     val addr = new SocketAddress {}
     val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
 
-    val cA, cB = await(streamFac()).asInstanceOf[streamFac.StreamTransport]
+    val cA, cB = await(streamFac.childStreamTransport())
 
     cB.write(H1Req)
     cA.write(H1Req)
@@ -264,7 +264,7 @@ class StreamTransportFactoryTest extends FunSuite {
     val addr = new SocketAddress {}
     val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
 
-    val stream = await(streamFac())
+    val stream = await(streamFac.newChildTransport())
 
     val thrown = intercept[BadStreamStateException] {
       await(stream.read())
@@ -283,7 +283,7 @@ class StreamTransportFactoryTest extends FunSuite {
     val addr = new SocketAddress {}
     val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
 
-    val stream = await(streamFac()).asInstanceOf[streamFac.StreamTransport]
+    val stream = await(streamFac.childStreamTransport())
 
     val t1 = new Throwable("derp")
     val t2 = new Throwable("blam")
@@ -374,7 +374,7 @@ class StreamTransportFactoryTest extends FunSuite {
       new FailureDetector.MockConfig(() => cur)
     )
     val streamFac = new StreamTransportFactory(transport, addr, params)
-    val conn = await(streamFac())
+    val conn = await(streamFac.newChildTransport())
 
     streamFac.setStreamId(11)
     conn.write(H1Req)
@@ -427,7 +427,7 @@ class StreamTransportFactoryTest extends FunSuite {
     val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
     streamFac.setStreamId(3)
 
-    val stream = await(streamFac())
+    val stream = await(streamFac.newChildTransport())
     stream.write(H1Req)
     readq.offer(exn)
     val f = stream.read()
@@ -445,7 +445,7 @@ class StreamTransportFactoryTest extends FunSuite {
 
     val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
 
-    val stream = streamFac.first().asInstanceOf[streamFac.StreamTransport]
+    val stream = streamFac.firstStreamTransport()
     readq.offer(Message(LastHttpContent.EMPTY_LAST_CONTENT, 1))
 
     // fake a lost stream
@@ -462,7 +462,7 @@ class StreamTransportFactoryTest extends FunSuite {
 
     val noFD = FailureDetector.Param(FailureDetector.NullConfig)
     val streamFac = new StreamTransportFactory(transport, new SocketAddress {}, Stack.Params.empty + noFD)
-    val stream= await(streamFac())
+    val stream= await(streamFac.newChildTransport())
 
     stream.write(H1Req)
     val streamFut = stream.read()
@@ -489,7 +489,7 @@ class StreamTransportFactoryTest extends FunSuite {
 
     val noFD = FailureDetector.Param(FailureDetector.NullConfig)
     val streamFac = new StreamTransportFactory(transport, new SocketAddress {}, Stack.Params.empty + noFD)
-    val a, b, c, d = await(streamFac())
+    val a, b, c, d = await(streamFac.newChildTransport())
 
     a.write(H1Req); b.write(H1Req); c.write(H1Req); d.write(H1Req)
     val (aFut, bFut, cFut, dFut) = (a.read(), b.read(), c.read(), d.read())
