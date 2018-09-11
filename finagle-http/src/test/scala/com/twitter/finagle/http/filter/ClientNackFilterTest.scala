@@ -6,6 +6,7 @@ import com.twitter.finagle._
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Awaitable, Closable, Duration, Future}
 import java.net.InetSocketAddress
+import java.util.concurrent.atomic.AtomicBoolean
 import org.scalatest.FunSuite
 
 class ClientNackFilterTest extends FunSuite {
@@ -119,6 +120,34 @@ class ClientNackFilterTest extends FunSuite {
     chunkedRequest.setChunked(true)
     val chunkedResponse = await(service(chunkedRequest))
     assert(!chunkedResponse.headerMap.contains(markerHeader))
+  }
+
+  test("multiple nack headers are not added if the request is retried") {
+    val first = new AtomicBoolean(false)
+    val service = new ClientNackFilter().andThen(Service.mk { req: Request =>
+      if (first.compareAndSet(false, true)) {
+        // Nack the first one
+        Future.exception(Failure.rejected)
+      } else {
+        val resp = Response()
+        resp.contentString = req.headerMap.getAll(HttpNackFilter.RetryableRequestHeader).length.toString
+        Future.value(resp)
+      }
+    })
+
+    val request = Request(method = Method.Post, uri = "/")
+    request.contentString = "post"
+
+    request.contentString
+    val ex = intercept[FailureFlags[_]] { await(service(request)) }
+
+    assert(ex.isFlagged(FailureFlags.Retryable))
+    assert(request.headerMap.getAll(HttpNackFilter.RetryableRequestHeader).length == 1)
+
+    // Do it again.
+    val response = await(service(request))
+    assert(request.headerMap.getAll(HttpNackFilter.RetryableRequestHeader).length == 1)
+    assert(response.contentString == "1")
   }
 
   // Scaffold for checking nack behavior
