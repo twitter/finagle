@@ -1,6 +1,6 @@
 junit_tests(
     sources = rglobs("*.scala"),
-    fatal_warnings = True,
+    compiler_option_sets = {"fatal_warnings"},
     dependencies = [
         scoped(
             "3rdparty/jvm/io/netty",

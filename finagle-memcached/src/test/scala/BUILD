@@ -24,7 +24,7 @@ junit_tests(
         "*.scala",
         exclude = [EXTERNAL_SOURCES],
     ),
-    fatal_warnings = True,
+    compiler_option_sets = {"fatal_warnings"},
     dependencies = [
         ":external",
         "3rdparty/jvm/com/fasterxml/jackson/core:jackson-databind",

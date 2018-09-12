@@ -1,6 +1,6 @@
 scala_library(
     sources = rglobs("com/twitter/finagle/exp/*.scala"),
-    fatal_warnings = True,
+    compiler_option_sets = {"fatal_warnings"},
     provides = scala_artifact(
         org = "com.twitter",
         name = "finagle-exp",

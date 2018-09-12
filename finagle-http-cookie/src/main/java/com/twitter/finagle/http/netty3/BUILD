@@ -1,6 +1,6 @@
 java_library(
     sources = rglobs("*.java"),
-    fatal_warnings = True,
+    compiler_option_sets = {"fatal_warnings"},
     provides = artifact(
         org = "com.twitter",
         name = "finagle-http-cookie",

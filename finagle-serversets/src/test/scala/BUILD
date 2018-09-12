@@ -39,7 +39,7 @@ junit_tests(
 junit_tests(
     name = "client",
     sources = globs("com/twitter/finagle/serverset2/client/*.scala"),
-    fatal_warnings = True,
+    compiler_option_sets = {"fatal_warnings"},
     dependencies = [
         ":core",
         "finagle/finagle-serversets/src/main/scala",

@@ -1,6 +1,6 @@
 java_library(
     sources = rglobs("*.java"),
-    fatal_warnings = False,
+    compiler_option_sets = {},
     provides = artifact(
         org = "com.twitter",
         name = "finagle-example-java",

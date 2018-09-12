@@ -1,6 +1,6 @@
 junit_tests(
     sources = rglobs("*.java"),
-    fatal_warnings = False,
+    compiler_option_sets = {},
     dependencies = [
         "3rdparty/jvm/junit",
         "3rdparty/jvm/org/mockito:mockito-all",
