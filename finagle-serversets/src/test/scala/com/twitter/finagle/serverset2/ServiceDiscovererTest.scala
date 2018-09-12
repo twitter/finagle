@@ -354,10 +354,11 @@ class ServiceDiscovererTest
         stabilizedHealth
       })
 
-      // should start as healthy until updated otherwise
-      assert(stabilizedHealth.get == ClientHealth.Healthy)
+      // should start as unknown until updated otherwise
+      assert(stabilizedHealth.get == ClientHealth.Unknown)
 
       val (session1, state1) = newZkSession()
+      state1.notify(WatchState.SessionState(SessionState.SyncConnected))
       zkSession.notify(session1)
       assert(stabilizedHealth.get == ClientHealth.Healthy)
 
@@ -389,10 +390,11 @@ class ServiceDiscovererTest
       health
     })
 
-    // should start as healthy until updated otherwise
-    assert(health.get == ClientHealth.Healthy)
+    // should start as unknown until updated otherwise
+    assert(health.get == ClientHealth.Unknown)
 
     val (session1, state1) = newZkSession()
+    state1.notify(WatchState.SessionState(SessionState.SyncConnected))
     zkSession.notify(session1)
     assert(health.get == ClientHealth.Healthy)
 

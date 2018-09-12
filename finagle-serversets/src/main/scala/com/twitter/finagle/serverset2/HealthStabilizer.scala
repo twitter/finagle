@@ -30,7 +30,7 @@ private[serverset2] object HealthStabilizer {
     statsReceiver: StatsReceiver
   ): Var[ClientHealth] = {
 
-    Var.async[ClientHealth](ClientHealth.Healthy) { u =>
+    Var.async[ClientHealth](ClientHealth.Unknown) { u =>
       val stateChanges = va.changes.dedup.select(probationEpoch.event).foldLeft[Status](Unknown) {
         // always take the first update as our status
         case (Unknown, Left(ClientHealth.Healthy)) => Healthy
@@ -68,6 +68,7 @@ private[serverset2] object HealthStabilizer {
           // re-map to the underlying health status
           case Healthy | Probation(_) => ClientHealth.Healthy
           case Unhealthy => ClientHealth.Unhealthy
+          case Unknown => ClientHealth.Unknown
         }
         .dedup
         .register(Witness(u))

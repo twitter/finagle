@@ -31,10 +31,13 @@ private[serverset2] object ServiceDiscoverer {
   private[serverset2] object ClientHealth {
     case object Healthy extends ClientHealth
     case object Unhealthy extends ClientHealth
+    case object Unknown extends ClientHealth
 
     def apply(sessionState: SessionState): ClientHealth = {
       sessionState match {
-        case SessionState.Expired | SessionState.NoSyncConnected | SessionState.Unknown |
+        case SessionState.Unknown =>
+          Unknown
+        case SessionState.Expired | SessionState.NoSyncConnected |
             SessionState.AuthFailed | SessionState.Disconnected =>
           Unhealthy
         case SessionState.ConnectedReadOnly | SessionState.SaslAuthenticated |
@@ -80,7 +83,7 @@ private[serverset2] class ServiceDiscoverer(
    * the connection is healthy or unhealthy. Exposed for testing
    */
   private[serverset2] val rawHealth: Var[ClientHealth] =
-    Var.async[ClientHealth](ClientHealth.Healthy) { u =>
+    Var.async[ClientHealth](ClientHealth.Unknown) { u =>
       @volatile var stateListener = Closable.nop
 
       val sessionChanges = varZkSession.changes.dedup.respond { zk =>
