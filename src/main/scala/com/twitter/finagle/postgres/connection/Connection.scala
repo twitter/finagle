@@ -11,7 +11,7 @@ import scala.collection.mutable.ListBuffer
  */
 class Connection(startState: State = AuthenticationRequired) {
   val id = Connection.nextId()
-  private[this] val logger = Logger(s"connection-$id")
+  private[this] val logger = Logger(s"${getClass.getName}.connection-$id")
   private[this] val stateMachine = new ConnectionStateMachine(startState, id)
 
 

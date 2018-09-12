@@ -20,7 +20,7 @@ trait StateMachine[E, R, S] {
 
   val id: Int
 
-  private[this] val logger = Logger(s"state machine-$id")
+  private[this] val logger = Logger(s"${getClass.getName}.state machine-$id")
   private[this] var transitionFunction: Transition = Undefined
 
   @volatile private[this] var currentState: S = _
