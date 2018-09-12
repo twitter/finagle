@@ -54,6 +54,7 @@ Contents
    Names
    Protocols
    Metrics
+   Flags
    UnsuccessfulResponses
    FAQ
    Glossary

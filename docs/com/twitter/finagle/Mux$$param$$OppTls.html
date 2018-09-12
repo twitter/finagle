@@ -159,14 +159,11 @@ resources for using Finagle.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="A client and server for the mux protocol described in com.twitter.finagle.mux." href="Mux$.html"><span class="name deprecated" title="Deprecated: (Since version 2018-07-18) Use the push-based mux implementation, MuxPush, instead">Mux</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>] with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>
+        <a title="A client and server for the mux protocol described in com.twitter.finagle.mux." href="Mux$.html"><span class="name">Mux</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>] with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>
       </span>
       
       <p class="shortcomment cmt">A client and server for the mux protocol described in <a href="mux/index.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A client and server for the mux protocol described in <a href="mux/index.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd><dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-07-18)</i> Use the push-based mux implementation, MuxPush, instead</p></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Mux.param" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="param"></a><a id="param:param"></a>
       <span class="permalink">
@@ -188,10 +185,6 @@ resources for using Finagle.
                         <a class="object" href="Mux$$param$$MaxFrameSize$.html" title=""></a>
                         <a class="class" href="Mux$$param$$MaxFrameSize.html" title="A class eligible for configuring the maximum size of a mux frame."></a>
                         <a href="Mux$$param$$MaxFrameSize.html" title="A class eligible for configuring the maximum size of a mux frame.">MaxFrameSize</a>
-                      </li><li class="current-entities indented5">
-                        <a class="object" href="Mux$$param$$MuxImpl$.html" title=""></a>
-                        <a class="class" href="Mux$$param$$MuxImpl.html" title="A param that controls the Transporter and Listener implementation used by Mux."></a>
-                        <a href="Mux$$param$$MuxImpl.html" title="A param that controls the Transporter and Listener implementation used by Mux.">MuxImpl</a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="Mux$$param$$OppTls$.html" title=""></a>
                         <a class="class" href="" title="A class eligible for configuring if a client's TLS mode is opportunistic."></a>
@@ -481,6 +474,22 @@ with the remote peer, and if TLS is configured, it will use mux over TLS.
       </span>
       <span class="symbol">
         <span class="name">level</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="com.twitter.finagle.mux.transport.OpportunisticTls.Level">Level</span>]</span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.Mux.param.OppTls#mk" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="mk():(com.twitter.finagle.Mux.param.OppTls,com.twitter.finagle.Stack.Param[com.twitter.finagle.Mux.param.OppTls])"></a><a id="mk():(OppTls,Param[OppTls])"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Mux$$param$$OppTls.html#mk():(com.twitter.finagle.Mux.param.OppTls,com.twitter.finagle.Stack.Param[com.twitter.finagle.Mux.param.OppTls])" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">mk</span><span class="params">()</span><span class="result">: (<a href="" class="extype" name="com.twitter.finagle.Mux.param.OppTls">OppTls</a>, <a href="Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a>[<a href="" class="extype" name="com.twitter.finagle.Mux.param.OppTls">OppTls</a>])</span>
       </span>
       
       

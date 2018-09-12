@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Clients &#8212; Finagle 18.8.0 documentation</title>
+    <title>Clients &#8212; Finagle 18.9.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '18.8.0',
+        VERSION:     '18.9.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 18.8.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 18.9.0 documentation" href="index.html" />
     <link rel="next" title="Contexts" href="Contexts.html" />
     <link rel="prev" title="Servers" href="Servers.html" />
    
@@ -850,7 +850,7 @@ This gives Finagle the proper domain knowledge and improves the efficacy of
 <a class="reference internal" href="Metrics.html#metrics-stats-filter"><span class="std std-ref">success rate stats</span></a>.</p>
 <p>For HTTP clients and servers, using <code class="docutils literal"><span class="pre">HttpResponseClassifier.ServerErrorsAsFailures</span></code> often works
 great as it classifies any HTTP 5xx response code as a failure. For Thrift/ThriftMux
-clients you may want to use <code class="docutils literal"><span class="pre">ThriftResponseClassifier.ThriftExceptionsAsFailures</span></code>
+clients and servers you may want to use <code class="docutils literal"><span class="pre">ThriftResponseClassifier.ThriftExceptionsAsFailures</span></code>
 which classifies any deserialized Thrift Exception as a failure. For a large set of
 use cases these should suffice. Classifiers get wired up to your client and server in a
 straightforward manner, for example, in a ThriftMux client:</p>
@@ -912,9 +912,9 @@ always using user defined classifiers in combination with
 <p>Thrift and ThriftMux classifiers require a bit more care as the request and
 response types are not as obvious. This is because there is only a single
 <code class="docutils literal"><span class="pre">Service</span></code> from <code class="docutils literal"><span class="pre">Array[Byte]</span></code> to <code class="docutils literal"><span class="pre">Array[Byte]</span></code> for all the methods of an
-IDL&#8217;s service. To make this workable, there is support in Scrooge and
-<code class="docutils literal"><span class="pre">Thrift/ThriftMux.newService</span></code> and <code class="docutils literal"><span class="pre">Thrift/ThriftMux.newClient</span></code> code to
-deserialize the responses into the expected application types so that
+IDL&#8217;s service. To make this workable, there is support in Scrooge,
+<code class="docutils literal"><span class="pre">Thrift/ThriftMux.newService</span></code>, <code class="docutils literal"><span class="pre">Thrift/ThriftMux.newClient</span></code> and <code class="docutils literal"><span class="pre">Thrift/ThriftMux.serve</span></code>
+code to deserialize the responses into the expected application types so that
 classifiers can be written in terms of the Scrooge generated request type,
 <code class="docutils literal"><span class="pre">$Service.$Method.Args</span></code>, and the method&#8217;s response type. Given an IDL:</p>
 <div class="highlight-none"><div class="highlight"><pre><span></span>exception NotFoundException { 1: string reason }

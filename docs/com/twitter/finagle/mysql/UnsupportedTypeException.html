@@ -462,7 +462,7 @@ resources for using Finagle.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">UnsupportedTypeException</span><span class="result"> extends <span class="extype" name="java.sql.SQLNonTransientException">SQLNonTransientException</span> with <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException">UnsupportedTypeException</a>]</span>
+        <span class="name">UnsupportedTypeException</span><span class="result"> extends <span class="extype" name="java.sql.SQLNonTransientException">SQLNonTransientException</span> with <a href="../FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a>[<a href="" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException">UnsupportedTypeException</a>]</span>
       </span>
       </h4>
 
@@ -473,7 +473,7 @@ For example, asking for a string when the column is a tinyint.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException">UnsupportedTypeException</a>], <span class="extype" name="java.sql.SQLNonTransientException">SQLNonTransientException</span>, <span class="extype" name="java.sql.SQLException">SQLException</span>, <span class="extype" name="java.lang.Iterable">Iterable</span>[<span class="extype" name="java.lang.Throwable">Throwable</span>], <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="../FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a>[<a href="" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException">UnsupportedTypeException</a>], <span class="extype" name="java.sql.SQLNonTransientException">SQLNonTransientException</span>, <span class="extype" name="java.sql.SQLException">SQLException</span>, <span class="extype" name="java.lang.Iterable">Iterable</span>[<span class="extype" name="java.lang.Throwable">Throwable</span>], <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
         </div></div>
         
 
@@ -622,7 +622,7 @@ For example, asking for a string when the column is a tinyint.
       </span>
       
       <p class="shortcomment cmt">This as a non-retryable failure.</p><div class="fullcomment"><div class="comment cmt"><p>This as a non-retryable failure. This does not mutate.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>FailureFlags</dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a></dd></dl></div>
     </li><li name="com.twitter.finagle.FailureFlags#asRejected" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asRejected:T"></a><a id="asRejected:UnsupportedTypeException"></a>
       <span class="permalink">
@@ -639,7 +639,7 @@ For example, asking for a string when the column is a tinyint.
       </span>
       
       <p class="shortcomment cmt">This as a rejected failure.</p><div class="fullcomment"><div class="comment cmt"><p>This as a rejected failure. This does not mutate.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>FailureFlags</dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
@@ -683,7 +683,7 @@ For example, asking for a string when the column is a tinyint.
 caller of this method should check to see if a copy is necessary before
 calling.</p><p>As this is an internal API, the other <code>Throwable</code> fields such as the cause
 and stack trace should be handled by callers.
-</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException">UnsupportedTypeException</a> → FailureFlags</dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException">UnsupportedTypeException</a> → <a href="../FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -754,6 +754,22 @@ and stack trace should be handled by callers.
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.UnsupportedTypeException#flags" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="flags:Long"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/UnsupportedTypeException.html#flags:Long" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">flags</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException">UnsupportedTypeException</a> → <a href="../FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a></dd></dl></div>
     </li><li name="java.lang.Iterable#forEach" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="forEach(x$1:java.util.function.Consumer[_&gt;:T]):Unit"></a><a id="forEach(Consumer[_&gt;:Throwable]):Unit"></a>
       <span class="permalink">
@@ -969,7 +985,7 @@ and stack trace should be handled by callers.
       
       <p class="shortcomment cmt">Test if this is flagged with a particular set of flags
 </p><div class="fullcomment"><div class="comment cmt"><p>Test if this is flagged with a particular set of flags
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>FailureFlags</dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -1263,7 +1279,7 @@ and stack trace should be handled by callers.
 
         <div id="inheritedMembers">
         <div class="parent" name="com.twitter.finagle.FailureFlags">
-              <h3>Inherited from <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException">UnsupportedTypeException</a>]</h3>
+              <h3>Inherited from <a href="../FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a>[<a href="" class="extype" name="com.twitter.finagle.mysql.UnsupportedTypeException">UnsupportedTypeException</a>]</h3>
             </div><div class="parent" name="java.sql.SQLNonTransientException">
               <h3>Inherited from <span class="extype" name="java.sql.SQLNonTransientException">SQLNonTransientException</span></h3>
             </div><div class="parent" name="java.sql.SQLException">

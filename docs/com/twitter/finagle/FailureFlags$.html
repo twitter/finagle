@@ -936,6 +936,10 @@ generator.
                         <a href="AbstractCodec.html" title="An abstract class version of the above for java compatibility.">AbstractCodec</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
+                        <a class="class" href="AbstractFailureFlags.html" title="For Java users wanting to implement exceptions that are FailureFlags."></a>
+                        <a href="AbstractFailureFlags.html" title="For Java users wanting to implement exceptions that are FailureFlags.">AbstractFailureFlags</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
                         <a class="class" href="AbstractNamer.html" title="Abstract Namer class for Java compatibility."></a>
                         <a href="AbstractNamer.html" title="Abstract Namer class for Java compatibility.">AbstractNamer</a>
                       </li><li class="current-entities indented3">
@@ -1020,8 +1024,8 @@ generator.
                         <a href="ClientCodecConfig.html" title="Clients">ClientCodecConfig</a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="ClientConnection$.html" title=""></a>
-                        <a class="trait" href="ClientConnection.html" title="Information about a client, passed to a Service factory for each new connection."></a>
-                        <a href="ClientConnection.html" title="Information about a client, passed to a Service factory for each new connection.">ClientConnection</a>
+                        <a class="trait" href="ClientConnection.html" title="Information about a client, passed to a ServiceFactory for each new connection."></a>
+                        <a href="ClientConnection.html" title="Information about a client, passed to a ServiceFactory for each new connection.">ClientConnection</a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="Codec$.html" title=""></a>
                         <a class="trait" href="Codec.html" title="Codecs provide protocol encoding and decoding via netty pipelines as well as a standard filter stack that is applied to services from this codec."></a>
@@ -1071,9 +1075,9 @@ generator.
                         <a class="class" href="Failure.html" title="Base exception for all Finagle originated failures."></a>
                         <a href="Failure.html" title="Base exception for all Finagle originated failures.">Failure</a>
                       </li><li class="current-entities indented3">
-                        <span class="separator"></span>
                         <a class="object" href="" title="FailureFlags may be applied to any Failure/Exception encountered during the handling of a request."></a>
-                        <a href="" title="FailureFlags may be applied to any Failure/Exception encountered during the handling of a request.">FailureFlags</a>
+                        <a class="trait" href="FailureFlags.html" title="Carries metadata for exceptions such as whether or not the exception is safe to retry."></a>
+                        <a href="FailureFlags.html" title="Carries metadata for exceptions such as whether or not the exception is safe to retry.">FailureFlags</a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="Filter$.html" title=""></a>
                         <a class="class" href="Filter.html" title="A Filter acts as a decorator/transformer of a service."></a>
@@ -1118,6 +1122,10 @@ generator.
                         <span class="separator"></span>
                         <a class="object" href="InetResolver$.html" title="Resolver for inet scheme."></a>
                         <a href="InetResolver$.html" title="Resolver for inet scheme.">InetResolver</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="JavaFailureFlags.html" title="Java compatibility for the FailureFlags companion object."></a>
+                        <a href="JavaFailureFlags.html" title="Java compatibility for the FailureFlags companion object.">JavaFailureFlags</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="class" href="LabelledGroup.html" title="A mixin trait to assign a name to the group."></a>
@@ -1340,6 +1348,10 @@ generator.
                         <a href="StackParams$.html" title="Stack.Params forwarder to provide a clean Java API.">StackParams</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
+                        <a class="class" href="StackTransformer.html" title="StackTransformer is a standard mechanism for transforming the default shape of the Stack."></a>
+                        <a href="StackTransformer.html" title="StackTransformer is a standard mechanism for transforming the default shape of the Stack.">StackTransformer</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
                         <a class="trait" href="Stackable.html" title="Produce a stack from a T-typed element."></a>
                         <a href="Stackable.html" title="Produce a stack from a T-typed element.">Stackable</a>
                       </li><li class="current-entities indented3">
@@ -1401,14 +1413,16 @@ generator.
           <div id="content">
             <body class="object value">
       <div id="definition">
-        <div class="big-circle object">o</div>
+        <a href="FailureFlags.html" title="See companion trait"><div class="big-circle object-companion-trait">o</div></a>
         <p id="owner"><a href="../../index.html" class="extype" name="com">com</a>.<a href="../index.html" class="extype" name="com.twitter">twitter</a>.<a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></p>
-        <h1>FailureFlags<span class="permalink">
+        <h1><a href="FailureFlags.html" title="See companion trait">FailureFlags</a><span class="permalink">
       <a href="../../../com/twitter/finagle/FailureFlags$.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
-        <h3><span class="morelinks"></span></h3>
+        <h3><span class="morelinks"><div>
+            Companion <a href="FailureFlags.html" title="See companion trait">trait FailureFlags</a>
+          </div></span></h3>
       </div>
 
       <h4 id="signature" class="signature">
@@ -1424,7 +1438,7 @@ generator.
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p><code>FailureFlags</code> may be applied to any Failure/Exception encountered during the
 handling of a request.
-</p></div><div class="toggleContainer block">
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><code>JavaFailureFlags</code> for Java compatibility.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -1620,9 +1634,9 @@ completed. This may indicate an overload condition.
       
       <p class="shortcomment cmt">Retryable indicates that the action that caused the failure is known
 to be safe to retry.</p><div class="fullcomment"><div class="comment cmt"><p>Retryable indicates that the action that caused the failure is known
-to be safe to retry. The <span class="extype" name="RequeueFilter">RequeueFilter</span> will automatically retry any
-such failures. Note that this is independent of any user-configured retry
-logic. This is Finagle-internal.
+to be safe to retry. Finagle client's <code>RequeueFilter</code> will automatically
+retry any such failures. Note that this is independent of any user-configured
+retry logic. This is Finagle-internal.
 </p></div></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>

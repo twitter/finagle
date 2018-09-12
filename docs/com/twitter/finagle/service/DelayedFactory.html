@@ -487,11 +487,10 @@ Promises are detached on interruption.</p></span></dd></dl><div class="toggleCon
         <span class="name">apply</span><span class="params">(<span name="conn">conn: <a href="../ClientConnection.html" class="extype" name="com.twitter.finagle.ClientConnection">ClientConnection</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.service.DelayedFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.DelayedFactory.Rep">Rep</span>]]</span>
       </span>
       
-      <p class="shortcomment cmt">Reserve the use of a given service instance.</p><div class="fullcomment"><div class="comment cmt"><p>Reserve the use of a given service instance. This pins the
-underlying channel and the returned service has exclusive use of
-its underlying connection. To relinquish the use of the reserved
-<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>, the user must call <span class="extype" name="Service.close()">Service.close()</span>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.service.DelayedFactory">DelayedFactory</a> → <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a> → Function1</dd></dl></div>
+      <p class="shortcomment cmt">Reserve the use of the returned <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a> instance.</p><div class="fullcomment"><div class="comment cmt"><p>Reserve the use of the returned <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a> instance.</p><p>To relinquish the use of the reserved <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>, the user
+must call <span class="extype" name="Service.close()">Service.close()</span>.
+</p></div><dl class="paramcmts block"><dt class="param">conn</dt><dd class="cmt"><p>will be <a href="../ClientConnection$.html#nil:com.twitter.finagle.ClientConnection" class="extmbr" name="com.twitter.finagle.ClientConnection#nil">ClientConnection.nil</a> when called
+            on the client-side.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.service.DelayedFactory">DelayedFactory</a> → <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a> → Function1</dd></dl></div>
     </li><li name="com.twitter.finagle.ServiceFactory#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="apply():com.twitter.util.Future[com.twitter.finagle.Service[Req,Rep]]"></a><a id="apply():Future[Service[Req,Rep]]"></a>
       <span class="permalink">
@@ -507,10 +506,10 @@ its underlying connection. To relinquish the use of the reserved
         <span class="name">apply</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.service.DelayedFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.DelayedFactory.Rep">Rep</span>]]</span>
       </span>
       
-      <p class="shortcomment cmt">Reserve the use of a given service instance using <a href="../ClientConnection$.html#nil:com.twitter.finagle.ClientConnection" class="extmbr" name="com.twitter.finagle.ClientConnection#nil">ClientConnection.nil</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Reserve the use of a given service instance using <a href="../ClientConnection$.html#nil:com.twitter.finagle.ClientConnection" class="extmbr" name="com.twitter.finagle.ClientConnection#nil">ClientConnection.nil</a>.
-This pins the underlying resources and the returned service has exclusive use
-of its underlying connection. To relinquish the use of the reserved
-<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>, the user must call <span class="extype" name="Service.close()">Service.close()</span>.
+      <p class="shortcomment cmt">Reserve the use of the returned <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a> instance using
+<a href="../ClientConnection$.html#nil:com.twitter.finagle.ClientConnection" class="extmbr" name="com.twitter.finagle.ClientConnection#nil">ClientConnection.nil</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Reserve the use of the returned <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a> instance using
+<a href="../ClientConnection$.html#nil:com.twitter.finagle.ClientConnection" class="extmbr" name="com.twitter.finagle.ClientConnection#nil">ClientConnection.nil</a>.</p><p>To relinquish the use of the reserved <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>, the user
+must call <span class="extype" name="Service.close()">Service.close()</span>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>

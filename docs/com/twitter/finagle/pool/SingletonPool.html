@@ -257,10 +257,10 @@ fails or the current service has become unavailable.
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="com.twitter.finagle.pool.SingletonPool#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(underlying:com.twitter.finagle.ServiceFactory[Req,Rep],statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.pool.SingletonPool[Req,Rep]"></a><a id="&lt;init&gt;:SingletonPool[Req,Rep]"></a>
+              <ol><li name="com.twitter.finagle.pool.SingletonPool#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="&lt;init&gt;(underlying:com.twitter.finagle.ServiceFactory[Req,Rep],allowInterrupts:Boolean,statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.pool.SingletonPool[Req,Rep]"></a><a id="&lt;init&gt;:SingletonPool[Req,Rep]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/pool/SingletonPool.html#&lt;init&gt;(underlying:com.twitter.finagle.ServiceFactory[Req,Rep],statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.pool.SingletonPool[Req,Rep]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/pool/SingletonPool.html#&lt;init&gt;(underlying:com.twitter.finagle.ServiceFactory[Req,Rep],allowInterrupts:Boolean,statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.pool.SingletonPool[Req,Rep]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -269,10 +269,14 @@ fails or the current service has become unavailable.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">SingletonPool</span><span class="params">(<span name="underlying">underlying: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.pool.SingletonPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.pool.SingletonPool.Rep">Rep</span>]</span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>)</span>
+        <span class="name">SingletonPool</span><span class="params">(<span name="underlying">underlying: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.pool.SingletonPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.pool.SingletonPool.Rep">Rep</span>]</span>, <span name="allowInterrupts">allowInterrupts: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>)</span>
       </span>
       
-      
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">underlying</dt><dd class="cmt"><p>the underlying shared resource which the pool manages.</p></dd><dt class="param">allowInterrupts</dt><dd class="cmt"><p>Because the pool hands back a shared resource, it
+may be useful to manage interrupts such that they are isolated from independent
+service acquisition requests. Thus, setting this value to <code>false</code> will ensure that
+an outstanding dispatch to the underlying resource from the pool is uninterruptible
+but individual service acquisition requests are.</p></dd><dt class="param">statsReceiver</dt><dd class="cmt"><p>the <span class="extype" name="StatsReceiver">StatsReceiver</span> that is used to report pool specific stats.</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -365,11 +369,10 @@ fails or the current service has become unavailable.
         <span class="name">apply</span><span class="params">(<span name="conn">conn: <a href="../ClientConnection.html" class="extype" name="com.twitter.finagle.ClientConnection">ClientConnection</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.pool.SingletonPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.pool.SingletonPool.Rep">Rep</span>]]</span>
       </span>
       
-      <p class="shortcomment cmt">Reserve the use of a given service instance.</p><div class="fullcomment"><div class="comment cmt"><p>Reserve the use of a given service instance. This pins the
-underlying channel and the returned service has exclusive use of
-its underlying connection. To relinquish the use of the reserved
-<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>, the user must call <span class="extype" name="Service.close()">Service.close()</span>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.pool.SingletonPool">SingletonPool</a> → <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a> → Function1</dd><dt>Annotations</dt><dd>
+      <p class="shortcomment cmt">Reserve the use of the returned <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a> instance.</p><div class="fullcomment"><div class="comment cmt"><p>Reserve the use of the returned <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a> instance.</p><p>To relinquish the use of the reserved <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>, the user
+must call <span class="extype" name="Service.close()">Service.close()</span>.
+</p></div><dl class="paramcmts block"><dt class="param">conn</dt><dd class="cmt"><p>will be <a href="../ClientConnection$.html#nil:com.twitter.finagle.ClientConnection" class="extmbr" name="com.twitter.finagle.ClientConnection#nil">ClientConnection.nil</a> when called
+            on the client-side.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.pool.SingletonPool">SingletonPool</a> → <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a> → Function1</dd><dt>Annotations</dt><dd>
                 <span class="name">@tailrec</span><span class="args">()</span>
               
         </dd></dl></div>
@@ -388,10 +391,10 @@ its underlying connection. To relinquish the use of the reserved
         <span class="name">apply</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.pool.SingletonPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.pool.SingletonPool.Rep">Rep</span>]]</span>
       </span>
       
-      <p class="shortcomment cmt">Reserve the use of a given service instance using <a href="../ClientConnection$.html#nil:com.twitter.finagle.ClientConnection" class="extmbr" name="com.twitter.finagle.ClientConnection#nil">ClientConnection.nil</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Reserve the use of a given service instance using <a href="../ClientConnection$.html#nil:com.twitter.finagle.ClientConnection" class="extmbr" name="com.twitter.finagle.ClientConnection#nil">ClientConnection.nil</a>.
-This pins the underlying resources and the returned service has exclusive use
-of its underlying connection. To relinquish the use of the reserved
-<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>, the user must call <span class="extype" name="Service.close()">Service.close()</span>.
+      <p class="shortcomment cmt">Reserve the use of the returned <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a> instance using
+<a href="../ClientConnection$.html#nil:com.twitter.finagle.ClientConnection" class="extmbr" name="com.twitter.finagle.ClientConnection#nil">ClientConnection.nil</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Reserve the use of the returned <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a> instance using
+<a href="../ClientConnection$.html#nil:com.twitter.finagle.ClientConnection" class="extmbr" name="com.twitter.finagle.ClientConnection#nil">ClientConnection.nil</a>.</p><p>To relinquish the use of the reserved <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>, the user
+must call <span class="extype" name="Service.close()">Service.close()</span>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>

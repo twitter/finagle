@@ -159,14 +159,11 @@ resources for using Finagle.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="A client and server for the mux protocol described in com.twitter.finagle.mux." href="Mux$.html"><span class="name deprecated" title="Deprecated: (Since version 2018-07-18) Use the push-based mux implementation, MuxPush, instead">Mux</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>] with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>
+        <a title="A client and server for the mux protocol described in com.twitter.finagle.mux." href="Mux$.html"><span class="name">Mux</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>] with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>
       </span>
       
       <p class="shortcomment cmt">A client and server for the mux protocol described in <a href="mux/index.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A client and server for the mux protocol described in <a href="mux/index.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd><dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-07-18)</i> Use the push-based mux implementation, MuxPush, instead</p></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <a class="object" href="Mux$$Client$.html" title=""></a>
                         <a class="class" href="Mux$$Client.html" title=""></a>
@@ -259,7 +256,26 @@ resources for using Finagle.
         <div id="allMembers">
         
 
-        
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="com.twitter.finagle.Mux.Server.SessionF" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SessionF=(com.twitter.finagle.pushsession.RefPushSession[com.twitter.io.ByteReader,com.twitter.io.Buf],com.twitter.finagle.Stack.Params,com.twitter.finagle.mux.pushsession.MuxChannelHandle,com.twitter.finagle.Service[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response])=&gt;com.twitter.finagle.pushsession.PushSession[com.twitter.io.ByteReader,com.twitter.io.Buf]"></a><a id="SessionF:SessionF"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Mux$$Server$.html#SessionF=(com.twitter.finagle.pushsession.RefPushSession[com.twitter.io.ByteReader,com.twitter.io.Buf],com.twitter.finagle.Stack.Params,com.twitter.finagle.mux.pushsession.MuxChannelHandle,com.twitter.finagle.Service[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response])=&gt;com.twitter.finagle.pushsession.PushSession[com.twitter.io.ByteReader,com.twitter.io.Buf]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">SessionF</span><span class="result alias"> = (<a href="pushsession/RefPushSession.html" class="extype" name="com.twitter.finagle.pushsession.RefPushSession">RefPushSession</a>[<span class="extype" name="com.twitter.io.ByteReader">ByteReader</span>, <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>], <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>, <span class="extype" name="com.twitter.finagle.mux.pushsession.MuxChannelHandle">MuxChannelHandle</span>, <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]) ⇒ <a href="pushsession/PushSession.html" class="extype" name="com.twitter.finagle.pushsession.PushSession">PushSession</a>[<span class="extype" name="com.twitter.io.ByteReader">ByteReader</span>, <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>]</span>
+      </span>
+      
+      
+    </li></ol>
+            </div>
 
         
 
@@ -354,6 +370,22 @@ resources for using Finagle.
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.Mux.Server#defaultSessionFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="defaultSessionFactory:com.twitter.finagle.Mux.Server.SessionF"></a><a id="defaultSessionFactory:SessionF"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Mux$$Server$.html#defaultSessionFactory:com.twitter.finagle.Mux.Server.SessionF" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">defaultSessionFactory</span><span class="result">: <a href="#SessionF=(com.twitter.finagle.pushsession.RefPushSession[com.twitter.io.ByteReader,com.twitter.io.Buf],com.twitter.finagle.Stack.Params,com.twitter.finagle.mux.pushsession.MuxChannelHandle,com.twitter.finagle.Service[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response])=&gt;com.twitter.finagle.pushsession.PushSession[com.twitter.io.ByteReader,com.twitter.io.Buf]" class="extmbr" name="com.twitter.finagle.Mux.Server.SessionF">SessionF</a></span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">

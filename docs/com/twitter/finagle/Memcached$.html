@@ -936,6 +936,10 @@ generator.
                         <a href="AbstractCodec.html" title="An abstract class version of the above for java compatibility.">AbstractCodec</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
+                        <a class="class" href="AbstractFailureFlags.html" title="For Java users wanting to implement exceptions that are FailureFlags."></a>
+                        <a href="AbstractFailureFlags.html" title="For Java users wanting to implement exceptions that are FailureFlags.">AbstractFailureFlags</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
                         <a class="class" href="AbstractNamer.html" title="Abstract Namer class for Java compatibility."></a>
                         <a href="AbstractNamer.html" title="Abstract Namer class for Java compatibility.">AbstractNamer</a>
                       </li><li class="current-entities indented3">
@@ -1020,8 +1024,8 @@ generator.
                         <a href="ClientCodecConfig.html" title="Clients">ClientCodecConfig</a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="ClientConnection$.html" title=""></a>
-                        <a class="trait" href="ClientConnection.html" title="Information about a client, passed to a Service factory for each new connection."></a>
-                        <a href="ClientConnection.html" title="Information about a client, passed to a Service factory for each new connection.">ClientConnection</a>
+                        <a class="trait" href="ClientConnection.html" title="Information about a client, passed to a ServiceFactory for each new connection."></a>
+                        <a href="ClientConnection.html" title="Information about a client, passed to a ServiceFactory for each new connection.">ClientConnection</a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="Codec$.html" title=""></a>
                         <a class="trait" href="Codec.html" title="Codecs provide protocol encoding and decoding via netty pipelines as well as a standard filter stack that is applied to services from this codec."></a>
@@ -1071,9 +1075,9 @@ generator.
                         <a class="class" href="Failure.html" title="Base exception for all Finagle originated failures."></a>
                         <a href="Failure.html" title="Base exception for all Finagle originated failures.">Failure</a>
                       </li><li class="current-entities indented3">
-                        <span class="separator"></span>
                         <a class="object" href="FailureFlags$.html" title="FailureFlags may be applied to any Failure/Exception encountered during the handling of a request."></a>
-                        <a href="FailureFlags$.html" title="FailureFlags may be applied to any Failure/Exception encountered during the handling of a request.">FailureFlags</a>
+                        <a class="trait" href="FailureFlags.html" title="Carries metadata for exceptions such as whether or not the exception is safe to retry."></a>
+                        <a href="FailureFlags.html" title="Carries metadata for exceptions such as whether or not the exception is safe to retry.">FailureFlags</a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="Filter$.html" title=""></a>
                         <a class="class" href="Filter.html" title="A Filter acts as a decorator/transformer of a service."></a>
@@ -1118,6 +1122,10 @@ generator.
                         <span class="separator"></span>
                         <a class="object" href="InetResolver$.html" title="Resolver for inet scheme."></a>
                         <a href="InetResolver$.html" title="Resolver for inet scheme.">InetResolver</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="JavaFailureFlags.html" title="Java compatibility for the FailureFlags companion object."></a>
+                        <a href="JavaFailureFlags.html" title="Java compatibility for the FailureFlags companion object.">JavaFailureFlags</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="class" href="LabelledGroup.html" title="A mixin trait to assign a name to the group."></a>
@@ -1340,6 +1348,10 @@ generator.
                         <a href="StackParams$.html" title="Stack.Params forwarder to provide a clean Java API.">StackParams</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
+                        <a class="class" href="StackTransformer.html" title="StackTransformer is a standard mechanism for transforming the default shape of the Stack."></a>
+                        <a href="StackTransformer.html" title="StackTransformer is a standard mechanism for transforming the default shape of the Stack.">StackTransformer</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
                         <a class="trait" href="Stackable.html" title="Produce a stack from a T-typed element."></a>
                         <a href="Stackable.html" title="Produce a stack from a T-typed element.">Stackable</a>
                       </li><li class="current-entities indented3">
@@ -1484,9 +1496,9 @@ generator.
         <div id="types" class="types members">
               <h3>Type Members</h3>
               <ol><li name="com.twitter.finagle.Memcached.Client" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ClientextendsEndpointerStackClient[com.twitter.finagle.memcached.protocol.Command,com.twitter.finagle.memcached.protocol.Response,com.twitter.finagle.Memcached.Client]withMemcachedRichClientwithProductwithSerializable"></a><a id="Client:Client"></a>
+      <a id="ClientextendsPushStackClient[com.twitter.finagle.memcached.protocol.Command,com.twitter.finagle.memcached.protocol.Response,com.twitter.finagle.Memcached.Client]withMemcachedRichClientwithProductwithSerializable"></a><a id="Client:Client"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/Memcached$.html#ClientextendsEndpointerStackClient[com.twitter.finagle.memcached.protocol.Command,com.twitter.finagle.memcached.protocol.Response,com.twitter.finagle.Memcached.Client]withMemcachedRichClientwithProductwithSerializable" title="Permalink">
+      <a href="../../../com/twitter/finagle/Memcached$.html#ClientextendsPushStackClient[com.twitter.finagle.memcached.protocol.Command,com.twitter.finagle.memcached.protocol.Response,com.twitter.finagle.Memcached.Client]withMemcachedRichClientwithProductwithSerializable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1495,7 +1507,7 @@ generator.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A memcached client with support for pipelined requests, consistent hashing, and per-node load-balancing." href="Memcached$$Client.html"><span class="name">Client</span></a><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]] = <span class="symbol"><span class="name"><a href="Memcached$$Client$.html">Client.stack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol"><span class="name"><a href="Memcached$$Client$.html">Client.params</a></span></span></span>)</span><span class="result"> extends <a href="client/EndpointerStackClient.html" class="extype" name="com.twitter.finagle.client.EndpointerStackClient">EndpointerStackClient</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>, <a href="Memcached$$Client.html" class="extype" name="com.twitter.finagle.Memcached.Client">Client</a>] with <a href="MemcachedRichClient.html" class="extype" name="com.twitter.finagle.MemcachedRichClient">MemcachedRichClient</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A memcached client with support for pipelined requests, consistent hashing, and per-node load-balancing." href="Memcached$$Client.html"><span class="name">Client</span></a><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]] = <span class="symbol"><span class="name"><a href="Memcached$$Client$.html">Client.stack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol"><span class="name"><a href="Memcached$$Client$.html">Client.params</a></span></span></span>)</span><span class="result"> extends <a href="pushsession/PushStackClient.html" class="extype" name="com.twitter.finagle.pushsession.PushStackClient">PushStackClient</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>, <a href="Memcached$$Client.html" class="extype" name="com.twitter.finagle.Memcached.Client">Client</a>] with <a href="MemcachedRichClient.html" class="extype" name="com.twitter.finagle.MemcachedRichClient">MemcachedRichClient</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A memcached client with support for pipelined requests, consistent hashing,

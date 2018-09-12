@@ -618,9 +618,9 @@ associated context explicit.
       <p class="shortcomment cmt">Sets the HTTP method of this request to the given <code>method</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the HTTP method of this request to the given <code>method</code>.</p><p>* @see <span class="extype" name="method(Method)">method(Method)</span> for Java users.
 </p></div></div>
     </li><li name="com.twitter.finagle.http.Message#reader" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="reader:com.twitter.io.Reader"></a><a id="reader:Reader"></a>
+      <a id="reader:com.twitter.io.Reader[com.twitter.io.Buf]"></a><a id="reader:Reader[Buf]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/Request.html#reader:com.twitter.io.Reader" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/Request.html#reader:com.twitter.io.Reader[com.twitter.io.Buf]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -629,7 +629,7 @@ associated context explicit.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">reader</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/io/Reader.html#com.twitter.io.Reader" class="extype" name="com.twitter.io.Reader">Reader</a></span>
+        <span class="name">reader</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/io/Reader.html#com.twitter.io.Reader" class="extype" name="com.twitter.io.Reader">Reader</a>[<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>]</span>
       </span>
       
       <p class="shortcomment cmt">A read-only handle to the internal stream of bytes, representing the
@@ -692,9 +692,9 @@ ephemeral address for requests that have yet to be dispatched.
       <p class="shortcomment cmt">Set the URI of this request to the given <code>uri</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Set the URI of this request to the given <code>uri</code>.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="uri(String)">uri(String)</span> for Java users.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#writer" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="writer:com.twitter.io.Writerwithcom.twitter.util.Closable"></a><a id="writer:WriterwithClosable"></a>
+      <a id="writer:com.twitter.io.Writer[com.twitter.io.Buf]withcom.twitter.util.Closable"></a><a id="writer:Writer[Buf]withClosable"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/Request.html#writer:com.twitter.io.Writerwithcom.twitter.util.Closable" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/Request.html#writer:com.twitter.io.Writer[com.twitter.io.Buf]withcom.twitter.util.Closable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -703,7 +703,7 @@ ephemeral address for requests that have yet to be dispatched.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writer</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/io/Writer.html#com.twitter.io.Writer" class="extype" name="com.twitter.io.Writer">Writer</a> with <a href="https://twitter.github.io/util/docs/com/twitter/util/Closable.html#com.twitter.util.Closable" class="extype" name="com.twitter.util.Closable">Closable</a></span>
+        <span class="name">writer</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/io/Writer.html#com.twitter.io.Writer" class="extype" name="com.twitter.io.Writer">Writer</a>[<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>] with <a href="https://twitter.github.io/util/docs/com/twitter/util/Closable.html#com.twitter.util.Closable" class="extype" name="com.twitter.util.Closable">Closable</a></span>
       </span>
       
       <p class="shortcomment cmt">A write-only handle to the internal stream of bytes, representing the

@@ -271,6 +271,10 @@ use.</p><p> Flag          Value     Meaning
                         <span class="separator"></span>
                         <a class="class" href="" title="Unable to negotiate whether to use TLS or not with the remote peer."></a>
                         <a href="" title="Unable to negotiate whether to use TLS or not with the remote peer.">IncompatibleNegotiationException</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="OpportunisticTlsConfig.html" title="Java APIs for OpportunisticTls."></a>
+                        <a href="OpportunisticTlsConfig.html" title="Java APIs for OpportunisticTls.">OpportunisticTlsConfig</a>
                       </li>
               </ul>
             </div>
@@ -294,7 +298,7 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">IncompatibleNegotiationException</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="" class="extype" name="com.twitter.finagle.mux.transport.IncompatibleNegotiationException">IncompatibleNegotiationException</a>] with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a> with <a href="../../SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a></span>
+        <span class="name">IncompatibleNegotiationException</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="../../FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a>[<a href="" class="extype" name="com.twitter.finagle.mux.transport.IncompatibleNegotiationException">IncompatibleNegotiationException</a>] with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a> with <a href="../../SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a></span>
       </span>
       </h4>
 
@@ -306,7 +310,7 @@ didn't support negotiating encryption at all.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a>, <a href="../../SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a>, <a href="../../HasRemoteInfo.html" class="extype" name="com.twitter.finagle.HasRemoteInfo">HasRemoteInfo</a>, <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a>, <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="" class="extype" name="com.twitter.finagle.mux.transport.IncompatibleNegotiationException">IncompatibleNegotiationException</a>], <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a>, <a href="../../SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a>, <a href="../../HasRemoteInfo.html" class="extype" name="com.twitter.finagle.HasRemoteInfo">HasRemoteInfo</a>, <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a>, <a href="../../FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a>[<a href="" class="extype" name="com.twitter.finagle.mux.transport.IncompatibleNegotiationException">IncompatibleNegotiationException</a>], <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
         </div></div>
         
 
@@ -474,7 +478,7 @@ didn't support negotiating encryption at all.
       </span>
       
       <p class="shortcomment cmt">This as a non-retryable failure.</p><div class="fullcomment"><div class="comment cmt"><p>This as a non-retryable failure. This does not mutate.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>FailureFlags</dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a></dd></dl></div>
     </li><li name="com.twitter.finagle.FailureFlags#asRejected" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asRejected:T"></a><a id="asRejected:IncompatibleNegotiationException"></a>
       <span class="permalink">
@@ -491,7 +495,7 @@ didn't support negotiating encryption at all.
       </span>
       
       <p class="shortcomment cmt">This as a rejected failure.</p><div class="fullcomment"><div class="comment cmt"><p>This as a rejected failure. This does not mutate.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>FailureFlags</dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
@@ -535,7 +539,7 @@ didn't support negotiating encryption at all.
 caller of this method should check to see if a copy is necessary before
 calling.</p><p>As this is an internal API, the other <code>Throwable</code> fields such as the cause
 and stack trace should be handled by callers.
-</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.mux.transport.IncompatibleNegotiationException">IncompatibleNegotiationException</a> → FailureFlags</dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.mux.transport.IncompatibleNegotiationException">IncompatibleNegotiationException</a> → <a href="../../FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -622,6 +626,22 @@ and stack trace should be handled by callers.
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.mux.transport.IncompatibleNegotiationException#flags" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="flags:Long"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/mux/transport/IncompatibleNegotiationException.html#flags:Long" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">flags</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.mux.transport.IncompatibleNegotiationException">IncompatibleNegotiationException</a> → <a href="../../FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a></dd></dl></div>
     </li><li name="java.lang.Throwable#getCause" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getCause():Throwable"></a>
       <span class="permalink">
@@ -773,7 +793,7 @@ and stack trace should be handled by callers.
       
       <p class="shortcomment cmt">Test if this is flagged with a particular set of flags
 </p><div class="fullcomment"><div class="comment cmt"><p>Test if this is flagged with a particular set of flags
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>FailureFlags</dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -1075,7 +1095,7 @@ and stack trace should be handled by callers.
             </div><div class="parent" name="com.twitter.logging.HasLogLevel">
               <h3>Inherited from <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a></h3>
             </div><div class="parent" name="com.twitter.finagle.FailureFlags">
-              <h3>Inherited from <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="" class="extype" name="com.twitter.finagle.mux.transport.IncompatibleNegotiationException">IncompatibleNegotiationException</a>]</h3>
+              <h3>Inherited from <a href="../../FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a>[<a href="" class="extype" name="com.twitter.finagle.mux.transport.IncompatibleNegotiationException">IncompatibleNegotiationException</a>]</h3>
             </div><div class="parent" name="java.lang.Exception">
               <h3>Inherited from <span class="extype" name="java.lang.Exception">Exception</span></h3>
             </div><div class="parent" name="java.lang.Throwable">

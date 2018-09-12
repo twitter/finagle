@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Servers &#8212; Finagle 18.8.0 documentation</title>
+    <title>Servers &#8212; Finagle 18.9.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '18.8.0',
+        VERSION:     '18.9.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 18.8.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 18.9.0 documentation" href="index.html" />
     <link rel="next" title="Clients" href="Clients.html" />
     <link rel="prev" title="Configuration" href="Configuration.html" />
    
@@ -139,7 +139,7 @@ This gives Finagle the proper domain knowledge and improves the efficacy of
 <a class="reference internal" href="Metrics.html#metrics-stats-filter"><span class="std std-ref">success rate stats</span></a>.</p>
 <p>For HTTP clients and servers, using <code class="docutils literal"><span class="pre">HttpResponseClassifier.ServerErrorsAsFailures</span></code> often works
 great as it classifies any HTTP 5xx response code as a failure. For Thrift/ThriftMux
-clients you may want to use <code class="docutils literal"><span class="pre">ThriftResponseClassifier.ThriftExceptionsAsFailures</span></code>
+clients and servers you may want to use <code class="docutils literal"><span class="pre">ThriftResponseClassifier.ThriftExceptionsAsFailures</span></code>
 which classifies any deserialized Thrift Exception as a failure. For a large set of
 use cases these should suffice. Classifiers get wired up to your client and server in a
 straightforward manner, for example, in a ThriftMux client:</p>
@@ -196,9 +196,9 @@ always using user defined classifiers in combination with
 <p>Thrift and ThriftMux classifiers require a bit more care as the request and
 response types are not as obvious. This is because there is only a single
 <code class="docutils literal"><span class="pre">Service</span></code> from <code class="docutils literal"><span class="pre">Array[Byte]</span></code> to <code class="docutils literal"><span class="pre">Array[Byte]</span></code> for all the methods of an
-IDL&#8217;s service. To make this workable, there is support in Scrooge and
-<code class="docutils literal"><span class="pre">Thrift/ThriftMux.newService</span></code> and <code class="docutils literal"><span class="pre">Thrift/ThriftMux.newClient</span></code> code to
-deserialize the responses into the expected application types so that
+IDL&#8217;s service. To make this workable, there is support in Scrooge,
+<code class="docutils literal"><span class="pre">Thrift/ThriftMux.newService</span></code>, <code class="docutils literal"><span class="pre">Thrift/ThriftMux.newClient</span></code> and <code class="docutils literal"><span class="pre">Thrift/ThriftMux.serve</span></code>
+code to deserialize the responses into the expected application types so that
 classifiers can be written in terms of the Scrooge generated request type,
 <code class="docutils literal"><span class="pre">$Service.$Method.Args</span></code>, and the method&#8217;s response type. Given an IDL:</p>
 <div class="highlight-none"><div class="highlight"><pre><span></span>exception NotFoundException { 1: string reason }
@@ -239,8 +239,9 @@ as a <code class="docutils literal"><span class="pre">com.twitter.finagle.servic
 for more details.</p>
 <div class="section" id="concurrency-limit">
 <h3>Concurrency Limit<a class="headerlink" href="#concurrency-limit" title="Permalink to this headline">¶</a></h3>
-<p>The <cite>Concurrency Limit</cite> module is implemented by
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/filter/RequestSemaphoreFilter.scala">RequestSemaphoreFilter</a> and maintains
+<p>The <cite>Concurrency Limit</cite> module is implemented by both
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/filter/RequestSemaphoreFilter.scala">RequestSemaphoreFilter</a> and
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/PendingRequestFilter.scala">PendingRequestFilter</a> and maintains
 the <cite>concurrency</cite> of the Finagle server.</p>
 <p>By default, this module is disabled, which means a Finagle server&#8217;s requests concurrency is unbounded.
 To enable the <cite>Concurrency Limit</cite> module and put some bounds in terms of maximum number of requests
@@ -256,9 +257,17 @@ that might be handled concurrently by your server, use the following example <a 
 </pre></div>
 </div>
 <p>The <cite>Concurrency Limit</cite> module is configured with two parameters:</p>
-<ol class="arabic simple">
-<li><cite>maxConcurrentRequests</cite> - the number of requests allowed to be handled concurrently</li>
-<li><cite>maxWaiters</cite> - the number of requests (on top of <cite>maxConcurrentRequests</cite>) allowed to be queued</li>
+<ol class="arabic">
+<li><p class="first"><cite>maxConcurrentRequests</cite> - the number of requests allowed to be handled concurrently</p>
+</li>
+<li><dl class="first docutils">
+<dt><cite>maxWaiters</cite> - the number of requests (on top of <cite>maxConcurrentRequests</cite>) allowed to be queued.</dt>
+<dd><p class="first last">The value of this parameter determines which filter is used; if <cite>maxWaiters</cite> is 0, <cite>PendingRequestFilter</cite>
+is used (saving the overhead of the waiters queue in AsyncSemaphore); otherwise,
+<cite>RequestSemaphoreFilter</cite> is used.</p>
+</dd>
+</dl>
+</li>
 </ol>
 <p>All the incoming requests on top of <code class="docutils literal"><span class="pre">(maxConcurrentRequests</span> <span class="pre">+</span> <span class="pre">maxWaiters)</span></code> will be
 <cite>rejected</cite> <a class="footnote-reference" href="#nack" id="id3">[1]</a> by the server. That said, the <cite>Concurrency Limit</cite> module acts as

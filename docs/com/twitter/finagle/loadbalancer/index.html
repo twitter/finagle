@@ -1178,7 +1178,7 @@ it proxies data from a <span class="extype" name="Balancer">Balancer</span> whic
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="While this exception is safe to retry, the assumption used here is that the underlying situation will not change soon enough to make a retry worthwhile as retrying is most likely to eat up the entire budget." href="NoNodesOpenException.html"><span class="name">NoNodesOpenException</span></a><span class="result"> extends <span class="extype" name="scala.RuntimeException">RuntimeException</span> with <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="NoNodesOpenException.html" class="extype" name="com.twitter.finagle.loadbalancer.NoNodesOpenException">NoNodesOpenException</a>] with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a> with <a href="../SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a></span>
+        <a title="While this exception is safe to retry, the assumption used here is that the underlying situation will not change soon enough to make a retry worthwhile as retrying is most likely to eat up the entire budget." href="NoNodesOpenException.html"><span class="name">NoNodesOpenException</span></a><span class="result"> extends <span class="extype" name="scala.RuntimeException">RuntimeException</span> with <a href="../FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a>[<a href="NoNodesOpenException.html" class="extype" name="com.twitter.finagle.loadbalancer.NoNodesOpenException">NoNodesOpenException</a>] with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a> with <a href="../SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a></span>
       </span>
       
       <p class="shortcomment cmt">While this exception is safe to retry, the assumption used here is
@@ -1252,7 +1252,7 @@ Http.client
       
       <p class="shortcomment cmt">Returns the default process global <a href="../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a> ordering as set via
 <code>defaultAddressOrdering</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the default process global <a href="../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a> ordering as set via
-<code>defaultAddressOrdering</code>. If no value is set, <a href="../Address$.html#HashOrdering:Ordering[com.twitter.finagle.Address]" class="extmbr" name="com.twitter.finagle.Address#HashOrdering">Address.HashOrdering</a>
+<code>defaultAddressOrdering</code>. If no value is set, <span class="extype" name="Address.HashOrdering">Address.HashOrdering</span>
 is used with the assumption that hosts resolved via Finagle provide the
 load balancer with resolved InetAddresses. If a separate resolution process
 is used, outside of Finagle, the default ordering should be overridden.

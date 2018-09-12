@@ -630,9 +630,9 @@ that wraps Request without exposing the underlying netty http type.
 to generate <a href="https://twitter.github.io/util/docs/com/twitter/collection/RecordSchema$Record.html" class="extype" name="com.twitter.collection.RecordSchema.Record">Record</a> instances
 for Request.ctx.</p>
     </li><li name="com.twitter.finagle.http.Request#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="apply(version:com.twitter.finagle.http.Version,method:com.twitter.finagle.http.Method,uri:String,reader:com.twitter.io.Reader):com.twitter.finagle.http.Request"></a><a id="apply(Version,Method,String,Reader):Request"></a>
+      <a id="apply(version:com.twitter.finagle.http.Version,method:com.twitter.finagle.http.Method,uri:String,reader:com.twitter.io.Reader[com.twitter.io.Buf]):com.twitter.finagle.http.Request"></a><a id="apply(Version,Method,String,Reader[Buf]):Request"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/Request$.html#apply(version:com.twitter.finagle.http.Version,method:com.twitter.finagle.http.Method,uri:String,reader:com.twitter.io.Reader):com.twitter.finagle.http.Request" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/Request$.html#apply(version:com.twitter.finagle.http.Version,method:com.twitter.finagle.http.Method,uri:String,reader:com.twitter.io.Reader[com.twitter.io.Buf]):com.twitter.finagle.http.Request" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -641,7 +641,7 @@ for Request.ctx.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="version">version: <a href="Version.html" class="extype" name="com.twitter.finagle.http.Version">Version</a></span>, <span name="method">method: <a href="Method.html" class="extype" name="com.twitter.finagle.http.Method">Method</a></span>, <span name="uri">uri: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="reader">reader: <a href="https://twitter.github.io/util/docs/com/twitter/io/Reader.html#com.twitter.io.Reader" class="extype" name="com.twitter.io.Reader">Reader</a></span>)</span><span class="result">: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>
+        <span class="name">apply</span><span class="params">(<span name="version">version: <a href="Version.html" class="extype" name="com.twitter.finagle.http.Version">Version</a></span>, <span name="method">method: <a href="Method.html" class="extype" name="com.twitter.finagle.http.Method">Method</a></span>, <span name="uri">uri: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="reader">reader: <a href="https://twitter.github.io/util/docs/com/twitter/io/Reader.html#com.twitter.io.Reader" class="extype" name="com.twitter.io.Reader">Reader</a>[<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>]</span>)</span><span class="result">: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>
       </span>
       
       <p class="shortcomment cmt">Create an HTTP/1.1 request from Version, Method, URI, and Reader.</p><div class="fullcomment"><div class="comment cmt"><p>Create an HTTP/1.1 request from Version, Method, URI, and Reader.</p><p>A <a href="https://twitter.github.io/util/docs/com/twitter/io/Reader.html" class="extype" name="com.twitter.io.Reader">com.twitter.io.Reader</a> is a stream of bytes serialized to HTTP chunks.

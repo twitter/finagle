@@ -280,9 +280,9 @@ use.</p><p> Flag          Value     Meaning
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.mux">mux</a></dd></dl></div>
     </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="object" href="MuxPush$.html" title="A push-based client for the mux protocol described in com.twitter.finagle.mux."></a>
-                        <a href="MuxPush$.html" title="A push-based client for the mux protocol described in com.twitter.finagle.mux.">MuxPush</a>
+                        <a class="object" href="ServerPingManager$.html" title=""></a>
+                        <a class="trait" href="ServerPingManager.html" title="Manage the ping behavior of the mux server session."></a>
+                        <a href="ServerPingManager.html" title="Manage the ping behavior of the mux server session.">ServerPingManager</a>
                       </li><li name="com.twitter.finagle.mux.stats" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="stats"></a><a id="stats:stats"></a>
       <span class="permalink">
@@ -376,17 +376,37 @@ use.</p><p> Flag          Value     Meaning
         <div id="allMembers">
         
 
-        
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="com.twitter.finagle.mux.pushsession.ServerPingManager" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ServerPingManagerextendsAnyRef"></a><a id="ServerPingManager:ServerPingManager"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/mux/pushsession/index.html#ServerPingManagerextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Manage the ping behavior of the mux server session." href="ServerPingManager.html"><span class="name">ServerPingManager</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Manage the ping behavior of the mux server session.</p><div class="fullcomment"><div class="comment cmt"><p>Manage the ping behavior of the mux server session.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>This expects to always be called from within the serial executor.</p></span></dd></dl></div>
+    </li></ol>
+            </div>
 
         
 
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="com.twitter.finagle.mux.pushsession.MuxPush" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="MuxPush"></a><a id="MuxPush:MuxPush"></a>
+                <li name="com.twitter.finagle.mux.pushsession.ServerPingManager" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ServerPingManager"></a><a id="ServerPingManager:ServerPingManager"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/mux/pushsession/index.html#MuxPush" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/mux/pushsession/index.html#ServerPingManager" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -395,10 +415,10 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="A push-based client for the mux protocol described in com.twitter.finagle.mux." href="MuxPush$.html"><span class="name">MuxPush</span></a><span class="result"> extends <a href="../../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>] with <a href="../../Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>
+        <a title="" href="ServerPingManager$.html"><span class="name">ServerPingManager</span></a>
       </span>
       
-      <p class="shortcomment cmt">A push-based client for the mux protocol described in <a href="../index.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.</p>
+      
     </li>
               </ol>
             </div>

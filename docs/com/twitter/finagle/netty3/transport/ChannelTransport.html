@@ -191,6 +191,10 @@ package netty3 can move into its own package, so that only the
                         <span class="separator"></span>
                         <a class="class" href="" title=""></a>
                         <a href="" title="">ChannelTransport</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="ChannelTransportContext.html" title="TransportContext for use with a Finagle Netty 3 ChannelTransport."></a>
+                        <a href="ChannelTransportContext.html" title="TransportContext for use with a Finagle Netty 3 ChannelTransport.">ChannelTransportContext</a>
                       </li>
               </ul>
             </div>
@@ -291,9 +295,9 @@ package netty3 can move into its own package, so that only the
         <div id="types" class="types members">
               <h3>Type Members</h3>
               <ol><li name="com.twitter.finagle.netty3.transport.ChannelTransport.Context" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Context=com.twitter.finagle.transport.TransportContext"></a><a id="Context:Context"></a>
+      <a id="Context=com.twitter.finagle.netty3.transport.ChannelTransportContext"></a><a id="Context:Context"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/netty3/transport/ChannelTransport.html#Context=com.twitter.finagle.transport.TransportContext" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/netty3/transport/ChannelTransport.html#Context=com.twitter.finagle.netty3.transport.ChannelTransportContext" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -302,7 +306,7 @@ package netty3 can move into its own package, so that only the
         <span class="kind">type</span>
       </span>
       <span class="symbol">
-        <span class="name">Context</span><span class="result alias"> = <a href="../../transport/TransportContext.html" class="extype" name="com.twitter.finagle.transport.TransportContext">TransportContext</a></span>
+        <span class="name">Context</span><span class="result alias"> = <a href="ChannelTransportContext.html" class="extype" name="com.twitter.finagle.netty3.transport.ChannelTransportContext">ChannelTransportContext</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.netty3.transport.ChannelTransport">ChannelTransport</a> → <a href="../../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a></dd></dl></div>
@@ -451,9 +455,9 @@ package netty3 can move into its own package, so that only the
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
     </li><li name="com.twitter.finagle.netty3.transport.ChannelTransport#context" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="context:com.twitter.finagle.transport.TransportContext"></a><a id="context:TransportContext"></a>
+      <a id="context:com.twitter.finagle.netty3.transport.ChannelTransportContext"></a><a id="context:ChannelTransportContext"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/netty3/transport/ChannelTransport.html#context:com.twitter.finagle.transport.TransportContext" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/netty3/transport/ChannelTransport.html#context:com.twitter.finagle.netty3.transport.ChannelTransportContext" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -462,7 +466,7 @@ package netty3 can move into its own package, so that only the
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">context</span><span class="result">: <a href="../../transport/TransportContext.html" class="extype" name="com.twitter.finagle.transport.TransportContext">TransportContext</a></span>
+        <span class="name">context</span><span class="result">: <a href="ChannelTransportContext.html" class="extype" name="com.twitter.finagle.netty3.transport.ChannelTransportContext">ChannelTransportContext</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.netty3.transport.ChannelTransport">ChannelTransport</a> → <a href="../../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a></dd></dl></div>
@@ -688,13 +692,17 @@ in <code>f</code> and <code>g</code> are lifted to a <a href="https://twitter.gi
     </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">onClose</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="scala.Throwable">Throwable</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.netty3.transport.ChannelTransport">ChannelTransport</a> → <a href="../../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a></dd></dl></div>
+      <p class="shortcomment cmt">The channel closed with the given exception.</p><div class="fullcomment"><div class="comment cmt"><p>The channel closed with the given exception. This is the
+same exception you would get if attempting to read or
+write on the Transport, but this allows clients to listen to
+close events.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.netty3.transport.ChannelTransport">ChannelTransport</a> → <a href="../../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a></dd></dl></div>
     </li><li name="com.twitter.finagle.netty3.transport.ChannelTransport#peerCertificate" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="peerCertificate:Option[java.security.cert.Certificate]"></a><a id="peerCertificate:Option[Certificate]"></a>
       <span class="permalink">
@@ -704,13 +712,14 @@ in <code>f</code> and <code>g</code> are lifted to a <a href="https://twitter.gi
     </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">peerCertificate</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.security.cert.Certificate">Certificate</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.netty3.transport.ChannelTransport">ChannelTransport</a> → <a href="../../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a></dd></dl></div>
+      <p class="shortcomment cmt">The peer certificate if a TLS session is established.</p><div class="fullcomment"><div class="comment cmt"><p>The peer certificate if a TLS session is established.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.netty3.transport.ChannelTransport">ChannelTransport</a> → <a href="../../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a></dd></dl></div>
     </li><li name="com.twitter.finagle.netty3.transport.ChannelTransport#read" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="read():com.twitter.util.Future[Out]"></a><a id="read():Future[Out]"></a>
       <span class="permalink">

@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Flags &#8212; Finagle 18.9.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '18.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="Finagle 18.9.0 documentation" href="index.html" />
+    <link rel="next" title="Unsuccessful Responses" href="UnsuccessfulResponses.html" />
+    <link rel="prev" title="Metrics" href="Metrics.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-39101739-4', 'twitter.github.io');
+    ga('send', 'pageview');
+
+  </script>
+
+  </head>
+  <body role="document">
+  
+  
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="UnsuccessfulResponses.html" title="Unsuccessful Responses"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Metrics.html" title="Metrics"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="flags">
+<h1>Flags<a class="headerlink" href="#flags" title="Permalink to this headline">¶</a></h1>
+<p>Finagle features that cannot be turned on/off on a per client/server basis are usually controlled
+via global command line flags. This document lists such flags along with their default values.</p>
+<p>Finagle&#8217;s global flags could be either passed as Java application flags (when run within
+Twitter Server) or as JVM properties.</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">com</span><span class="o">.</span><span class="n">twitter</span><span class="o">.</span><span class="n">finagle</span><span class="o">.</span><span class="n">foo</span><span class="k">=</span><span class="n">bar</span>  <span class="c1">// Java application argument</span>
+<span class="o">-</span><span class="nc">Dcom</span><span class="o">.</span><span class="n">twitter</span><span class="o">.</span><span class="n">finagle</span><span class="o">.</span><span class="n">foo</span><span class="k">=</span><span class="n">bar</span> <span class="c1">// JVM arg/property</span>
+</pre></div>
+</div>
+<div class="section" id="common">
+<h2>Common<a class="headerlink" href="#common" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt><strong>com.twitter.finagle.loadbalancer.defaultBalancer</strong> <cite>choice|heap|aperture</cite></dt>
+<dd>The default load balancer used in clients (default: <cite>choice</cite>).</dd>
+<dt><strong>com.twitter.finagle.loadbalancer.perHostStats</strong> <cite>bool</cite></dt>
+<dd>Enable/disable per-host granularity for stats (default: <cite>false</cite>). When enabled,the configured stats
+receiver will be used, or the loaded stats receiver if none given.</dd>
+<dt><strong>com.twitter.finagle.socks.socksProxyHost</strong> <cite>string</cite></dt>
+<dd>When non empty, enables SOCKS proxy on each Finagle client (default: empty string).</dd>
+<dt><strong>com.twitter.finagle.socks.socksProxyPort</strong> <cite>int</cite></dt>
+<dd>A port number for a SOCKS proxy (default: <cite>0</cite>).</dd>
+<dt><strong>com.twitter.finagle.socks.socksUsername</strong> <cite>string</cite></dt>
+<dd>A username for a SOCKS proxy (default: empty string).</dd>
+<dt><strong>com.twitter.finagle.socks.socksPassword</strong> <cite>string</cite></dt>
+<dd>A cleartext password for a SOCKS proxy (default: empty string).</dd>
+<dt><strong>com.twitter.finagle.tracing.enabled</strong> <cite>bool</cite></dt>
+<dd>When false, disables any tracing for this process (default: <cite>true</cite>). Note: it&#8217;s never recommended
+to disable tracing in production applications.</dd>
+<dt><strong>com.twitter.finagle.tracing.traceId128Bit</strong> <cite>bool</cite></dt>
+<dd>When true, new root spans will have 128-bit trace IDs (default: <cite>false</cite>, 64-bit IDs).</dd>
+<dt><strong>com.twitter.finagle.util.defaultTimerProbeSlowTasks</strong> <cite>bool</cite></dt>
+<dd>Enable reporting of slow timer tasks executing in the default timer (default: <cite>false</cite>).</dd>
+<dt><strong>com.twitter.finagle.util.defaultTimerSlowTaskMaxRuntime</strong> <cite>duration</cite></dt>
+<dd>Maximum runtime allowed for tasks before they are reported (default: <cite>2.seconds</cite>).</dd>
+<dt><strong>com.twitter.finagle.util.defaultTimerSlowTaskLogMinInterval</strong> <cite>duration</cite></dt>
+<dd>Minimum interval between recording stack traces for slow tasks (default: <cite>20.seconds</cite>).</dd>
+</dl>
+</div>
+<div class="section" id="netty-4">
+<h2>Netty 4<a class="headerlink" href="#netty-4" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt><strong>com.twitter.finagle.netty4.numWorkers</strong> <cite>int</cite></dt>
+<dd>The number of Netty 4 worker threads in the shared even pool (default: <cite>CPUs * 2</cite>)</dd>
+<dt><strong>com.twitter.finagle.netty4.trackReferenceLeaks</strong> <cite>bool</cite></dt>
+<dd>Enable reference leak tracking in Netty 4 and export a counter at <cite>finagle/netty4/reference_leaks</cite>
+(default: <cite>true</cite>).</dd>
+<dt><strong>com.twitter.finagle.netty4.timerTicksPerWheel</strong> <cite>int</cite></dt>
+<dd>Netty 4 timer ticks per wheel (default: <cite>512</cite>).</dd>
+<dt><strong>com.twitter.finagle.netty4.timerTickDuration</strong> <cite>duration</cite></dt>
+<dd>Netty 4 timer tick duration (default: <cite>10.milliseconds</cite>).</dd>
+<dt><strong>com.twitter.finagle.netty4.useNativeEpoll</strong> <cite>bool</cite></dt>
+<dd>When available, use Linux&#8217;s native epoll transport directly instead of bouncing through JDK
+(default: <cite>true</cite>).</dd>
+</dl>
+</div>
+<div class="section" id="stats">
+<h2>Stats<a class="headerlink" href="#stats" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt><strong>com.twitter.finagle.stats.statsFilter</strong> <cite>string</cite></dt>
+<dd>Comma-separated list of regexes that indicate which metrics to filter out (default: empty string).</dd>
+<dt><strong>com.twitter.finagle.stats.statsFilterFile</strong> <cite>list of files</cite></dt>
+<dd>Comma-separated list of files of newline-separated regexes that indicate which metrics to filter
+out (default: empty list).</dd>
+<dt><strong>com.twitter.finagle.stats.useCounterDeltas</strong> <cite>bool</cite></dt>
+<dd>When true, export deltas for counters instead of absolute values (default: <cite>false</cite>).</dd>
+<dt><strong>com.twitter.finagle.stats.debugLoggedStatNames</strong> <cite>list of strings</cite></dt>
+<dd>Comma-separated stat names for logging observed values (default: empty list).</dd>
+<dt><strong>com.twitter.finagle.stats.scopeSeparator</strong> <cite>string</cite></dt>
+<dd>Override the default scope separator (default: <cite>/</cite>).</dd>
+<dt><strong>com.twitter.finagle.stats.format</strong> <cite>commonsmetrics|commonsstats|ostrich</cite></dt>
+<dd>Format style for stat names (default: <cite>commonmetrics</cite>).</dd>
+<dt><strong>com.twitter.finagle.stats.includeEmptyHistograms</strong> <cite>bool</cite></dt>
+<dd>Include full histogram details when there are no data points (default: <cite>false</cite>).</dd>
+</dl>
+</div>
+<div class="section" id="http">
+<h2>Http<a class="headerlink" href="#http" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt><strong>com.twitter.finagle.http.serverErrorsAsFailures</strong> <cite>bool</cite></dt>
+<dd>Treat responses with status codes in the 500s as failures (default: <cite>true</cite>).</dd>
+</dl>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
+  <img class="logo" src="_static/logo_small.png" alt="Logo"/>
+</a></p><a href="index.html"><h3>Finagle</h3></a>
+<p>
+  Finagle is a network stack for distributed systems.
+</p>
+
+<h3>Useful Links</h3>
+<ul>
+  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+</ul>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Flags</a><ul>
+<li><a class="reference internal" href="#common">Common</a></li>
+<li><a class="reference internal" href="#netty-4">Netty 4</a></li>
+<li><a class="reference internal" href="#stats">Stats</a></li>
+<li><a class="reference internal" href="#http">Http</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="Metrics.html" title="previous chapter">Metrics</a></li>
+      <li>Next: <a href="UnsuccessfulResponses.html" title="next chapter">Unsuccessful Responses</a></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Search the contents of this site.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">&copy; Copyright 2018 Twitter, Inc.</div>
+  
+  </body>
+</html>

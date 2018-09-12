@@ -564,9 +564,9 @@ is now part of a topology with a sense of order and proximity.
               
         </dd></dl></div>
     </li><li name="com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate#setCoordinate" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="setCoordinate(peerOffset:Int,instanceId:Int,totalInstances:Int):Unit"></a><a id="setCoordinate(Int,Int,Int):Unit"></a>
+      <a id="setCoordinate(instanceId:Int,totalInstances:Int):Unit"></a><a id="setCoordinate(Int,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$.html#setCoordinate(peerOffset:Int,instanceId:Int,totalInstances:Int):Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$.html#setCoordinate(instanceId:Int,totalInstances:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -575,16 +575,13 @@ is now part of a topology with a sense of order and proximity.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setCoordinate</span><span class="params">(<span name="peerOffset">peerOffset: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="instanceId">instanceId: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="totalInstances">totalInstances: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">setCoordinate</span><span class="params">(<span name="instanceId">instanceId: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="totalInstances">totalInstances: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <p class="shortcomment cmt">Globally set the coordinate for this process from the respective instance
 metadata.</p><div class="fullcomment"><div class="comment cmt"><p>Globally set the coordinate for this process from the respective instance
 metadata.
-</p></div><dl class="paramcmts block"><dt class="param">peerOffset</dt><dd class="cmt"><p>A parameter which allows clients of the same peer group to
-apply a rotation or offset of the coordinate space in order to avoid any correlations
-between peer groups. A good value for this is a deterministic hash of a shared notion
-of process identifier (e.g. hash(&quot;/s/my-cluster&quot;)).</p></dd><dt class="param">instanceId</dt><dd class="cmt"><p>An instance identifier for this process w.r.t its peer
+</p></div><dl class="paramcmts block"><dt class="param">instanceId</dt><dd class="cmt"><p>An instance identifier for this process w.r.t its peer
 cluster.</p></dd><dt class="param">totalInstances</dt><dd class="cmt"><p>The total number of instances in this process' peer
 cluster.</p></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">

@@ -1711,10 +1711,10 @@ is to be retried.
       <p class="shortcomment cmt">DeadlineFilter provides an admission control module that can be pushed onto the stack to
 reject requests with expired deadlines (deadlines are set in the TimeoutFilter).</p><div class="fullcomment"><div class="comment cmt"><p>DeadlineFilter provides an admission control module that can be pushed onto the stack to
 reject requests with expired deadlines (deadlines are set in the TimeoutFilter).
-For servers, DeadlineFilter.module should be pushed onto the stack after the stats filters so
-stats are recorded for the request, and before TimeoutFilter where a new Deadline is set.
-For clients, DeadlineFilter.module should be after the stats filters; higher in the stack is
-preferable so requests are rejected as early as possible.
+For servers, DeadlineFilter.module should be pushed onto the stack before the stats filters so
+stats are recorded for the request, and pushed after TimeoutFilter where a new Deadline is set.
+For clients, DeadlineFilter.module should be pushed before the stats filters; higher in the stack
+is preferable so requests are rejected as early as possible.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Deadlines cross process boundaries and can span multiple nodes in a call graph.
       Even if a direct caller doesn't set a deadline, the server may still receive one and thus
       potentially fail the request. It is advised that all clients in the call graph be
@@ -1807,7 +1807,8 @@ configured as L and there are N per-host connections,
 &quot;dispatcher/.../pending&quot; will be no greater than L * N.</p><p>Note that the &quot;pending&quot; stat recorded in c.t.f.StatsFilter can be
 greater than L * N because requests can be between c.t.f.StatsFilter and
 c.t.f.PendingRequestFilter when the stat is read.
-</p></div></div>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Servers.html#concurrency-limit" target="_blank">user guide</a>
+     for more details.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.service.RequeueFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="RequeueFilter"></a><a id="RequeueFilter:RequeueFilter"></a>
       <span class="permalink">

@@ -159,14 +159,11 @@ resources for using Finagle.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="A client and server for the mux protocol described in com.twitter.finagle.mux." href="Mux$.html"><span class="name deprecated" title="Deprecated: (Since version 2018-07-18) Use the push-based mux implementation, MuxPush, instead">Mux</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>] with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>
+        <a title="A client and server for the mux protocol described in com.twitter.finagle.mux." href="Mux$.html"><span class="name">Mux</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>] with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>
       </span>
       
       <p class="shortcomment cmt">A client and server for the mux protocol described in <a href="mux/index.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A client and server for the mux protocol described in <a href="mux/index.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd><dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-07-18)</i> Use the push-based mux implementation, MuxPush, instead</p></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <a class="object" href="Mux$$Client$.html" title=""></a>
                         <a class="class" href="Mux$$Client.html" title=""></a>
@@ -281,28 +278,6 @@ transmissions. Clients and Servers can use this to set an upper bound
 on the size of messages they are willing to receive. The value is exchanged
 and applied during the mux handshake.
 </p></div></div>
-    </li><li name="com.twitter.finagle.Mux.param.MuxImpl" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="MuxImplextendsProductwithSerializable"></a><a id="MuxImpl:MuxImpl"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Mux$$param$.html#MuxImplextendsProductwithSerializable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="A param that controls the Transporter and Listener implementation used by Mux." href="Mux$$param$$MuxImpl.html"><span class="name">MuxImpl</span></a><span class="params">(<span name="transporter">transporter: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>) ⇒ <a href="client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>, <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>, <span class="extype" name="com.twitter.finagle.mux.transport.MuxContext">MuxContext</span>]</span>, <span name="listener">listener: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ <a href="server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>, <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>, <span class="extype" name="com.twitter.finagle.mux.transport.MuxContext">MuxContext</span>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">A param that controls the <span class="extype" name="Transporter">Transporter</span> and <span class="extype" name="Listener">Listener</span> implementation
-used by Mux.</p><div class="fullcomment"><div class="comment cmt"><p>A param that controls the <span class="extype" name="Transporter">Transporter</span> and <span class="extype" name="Listener">Listener</span> implementation
-used by Mux. This allows us to easily swap the underlying I/O multiplexer
-implementation.
-</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>the listener and transporter don't strictly need to be
-coupled but we do so for ease of configuration (e.g. both
-servers and clients can use the same parameter).</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.Mux.param.OppTls" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="OppTlsextendsProductwithSerializable"></a><a id="OppTls:OppTls"></a>
       <span class="permalink">
@@ -695,22 +670,6 @@ with the remote peer, and if TLS is configured, it will use mux over TLS.
       </span>
       <span class="symbol">
         <a title="" href="Mux$$param$$MaxFrameSize$.html"><span class="name">MaxFrameSize</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.Mux.param.MuxImpl" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="MuxImpl"></a><a id="MuxImpl:MuxImpl"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Mux$$param$.html#MuxImpl" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="Mux$$param$$MuxImpl$.html"><span class="name">MuxImpl</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       

@@ -936,6 +936,10 @@ generator.
                         <a href="AbstractCodec.html" title="An abstract class version of the above for java compatibility.">AbstractCodec</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
+                        <a class="class" href="AbstractFailureFlags.html" title="For Java users wanting to implement exceptions that are FailureFlags."></a>
+                        <a href="AbstractFailureFlags.html" title="For Java users wanting to implement exceptions that are FailureFlags.">AbstractFailureFlags</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
                         <a class="class" href="AbstractNamer.html" title="Abstract Namer class for Java compatibility."></a>
                         <a href="AbstractNamer.html" title="Abstract Namer class for Java compatibility.">AbstractNamer</a>
                       </li><li class="current-entities indented3">
@@ -1020,8 +1024,8 @@ generator.
                         <a href="ClientCodecConfig.html" title="Clients">ClientCodecConfig</a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="ClientConnection$.html" title=""></a>
-                        <a class="trait" href="ClientConnection.html" title="Information about a client, passed to a Service factory for each new connection."></a>
-                        <a href="ClientConnection.html" title="Information about a client, passed to a Service factory for each new connection.">ClientConnection</a>
+                        <a class="trait" href="ClientConnection.html" title="Information about a client, passed to a ServiceFactory for each new connection."></a>
+                        <a href="ClientConnection.html" title="Information about a client, passed to a ServiceFactory for each new connection.">ClientConnection</a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="Codec$.html" title=""></a>
                         <a class="trait" href="Codec.html" title="Codecs provide protocol encoding and decoding via netty pipelines as well as a standard filter stack that is applied to services from this codec."></a>
@@ -1071,9 +1075,9 @@ generator.
                         <a class="class" href="Failure.html" title="Base exception for all Finagle originated failures."></a>
                         <a href="Failure.html" title="Base exception for all Finagle originated failures.">Failure</a>
                       </li><li class="current-entities indented3">
-                        <span class="separator"></span>
                         <a class="object" href="FailureFlags$.html" title="FailureFlags may be applied to any Failure/Exception encountered during the handling of a request."></a>
-                        <a href="FailureFlags$.html" title="FailureFlags may be applied to any Failure/Exception encountered during the handling of a request.">FailureFlags</a>
+                        <a class="trait" href="FailureFlags.html" title="Carries metadata for exceptions such as whether or not the exception is safe to retry."></a>
+                        <a href="FailureFlags.html" title="Carries metadata for exceptions such as whether or not the exception is safe to retry.">FailureFlags</a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="Filter$.html" title=""></a>
                         <a class="class" href="Filter.html" title="A Filter acts as a decorator/transformer of a service."></a>
@@ -1118,6 +1122,10 @@ generator.
                         <span class="separator"></span>
                         <a class="object" href="InetResolver$.html" title="Resolver for inet scheme."></a>
                         <a href="InetResolver$.html" title="Resolver for inet scheme.">InetResolver</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="JavaFailureFlags.html" title="Java compatibility for the FailureFlags companion object."></a>
+                        <a href="JavaFailureFlags.html" title="Java compatibility for the FailureFlags companion object.">JavaFailureFlags</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="class" href="LabelledGroup.html" title="A mixin trait to assign a name to the group."></a>
@@ -1340,6 +1348,10 @@ generator.
                         <a href="StackParams$.html" title="Stack.Params forwarder to provide a clean Java API.">StackParams</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
+                        <a class="class" href="StackTransformer.html" title="StackTransformer is a standard mechanism for transforming the default shape of the Stack."></a>
+                        <a href="StackTransformer.html" title="StackTransformer is a standard mechanism for transforming the default shape of the Stack.">StackTransformer</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
                         <a class="trait" href="Stackable.html" title="Produce a stack from a T-typed element."></a>
                         <a href="Stackable.html" title="Produce a stack from a T-typed element.">Stackable</a>
                       </li><li class="current-entities indented3">
@@ -1517,11 +1529,10 @@ generator.
         <span class="name">apply</span><span class="params">(<span name="conn">conn: <a href="ClientConnection.html" class="extype" name="com.twitter.finagle.ClientConnection">ClientConnection</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.ServiceFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.ServiceFactory.Rep">Rep</span>]]</span>
       </span>
       
-      <p class="shortcomment cmt">Reserve the use of a given service instance.</p><div class="fullcomment"><div class="comment cmt"><p>Reserve the use of a given service instance. This pins the
-underlying channel and the returned service has exclusive use of
-its underlying connection. To relinquish the use of the reserved
-<a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>, the user must call <span class="extype" name="Service.close()">Service.close()</span>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a> → Function1</dd></dl></div>
+      <p class="shortcomment cmt">Reserve the use of the returned <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a> instance.</p><div class="fullcomment"><div class="comment cmt"><p>Reserve the use of the returned <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a> instance.</p><p>To relinquish the use of the reserved <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>, the user
+must call <span class="extype" name="Service.close()">Service.close()</span>.
+</p></div><dl class="paramcmts block"><dt class="param">conn</dt><dd class="cmt"><p>will be <a href="ClientConnection$.html#nil:com.twitter.finagle.ClientConnection" class="extmbr" name="com.twitter.finagle.ClientConnection#nil">ClientConnection.nil</a> when called
+            on the client-side.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a> → Function1</dd></dl></div>
     </li><li name="com.twitter.util.Closable#close" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="close(deadline:com.twitter.util.Time):com.twitter.util.Future[Unit]"></a><a id="close(Time):Future[Unit]"></a>
       <span class="permalink">
@@ -1626,10 +1637,10 @@ its underlying connection. To relinquish the use of the reserved
         <span class="name">apply</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.ServiceFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.ServiceFactory.Rep">Rep</span>]]</span>
       </span>
       
-      <p class="shortcomment cmt">Reserve the use of a given service instance using <a href="ClientConnection$.html#nil:com.twitter.finagle.ClientConnection" class="extmbr" name="com.twitter.finagle.ClientConnection#nil">ClientConnection.nil</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Reserve the use of a given service instance using <a href="ClientConnection$.html#nil:com.twitter.finagle.ClientConnection" class="extmbr" name="com.twitter.finagle.ClientConnection#nil">ClientConnection.nil</a>.
-This pins the underlying resources and the returned service has exclusive use
-of its underlying connection. To relinquish the use of the reserved
-<a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>, the user must call <span class="extype" name="Service.close()">Service.close()</span>.
+      <p class="shortcomment cmt">Reserve the use of the returned <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a> instance using
+<a href="ClientConnection$.html#nil:com.twitter.finagle.ClientConnection" class="extmbr" name="com.twitter.finagle.ClientConnection#nil">ClientConnection.nil</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Reserve the use of the returned <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a> instance using
+<a href="ClientConnection$.html#nil:com.twitter.finagle.ClientConnection" class="extmbr" name="com.twitter.finagle.ClientConnection#nil">ClientConnection.nil</a>.</p><p>To relinquish the use of the reserved <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>, the user
+must call <span class="extype" name="Service.close()">Service.close()</span>.
 </p></div></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>

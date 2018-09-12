@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &#8212; Finagle 18.8.0 documentation</title>
+    <title>Metrics &#8212; Finagle 18.9.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '18.8.0',
+        VERSION:     '18.9.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,8 +26,8 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 18.8.0 documentation" href="index.html" />
-    <link rel="next" title="Unsuccessful Responses" href="UnsuccessfulResponses.html" />
+    <link rel="top" title="Finagle 18.9.0 documentation" href="index.html" />
+    <link rel="next" title="Flags" href="Flags.html" />
     <link rel="prev" title="Protocols" href="Protocols.html" />
    
   
@@ -55,7 +55,7 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="UnsuccessfulResponses.html" title="Unsuccessful Responses"
+          <a href="Flags.html" title="Flags"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="Protocols.html" title="Protocols"
@@ -407,7 +407,13 @@ this value.</dd>
 <dd>1 if the Aperture implementation uses deterministic ordering
 0, otherwise.</dd>
 <dt><strong>vector_hash</strong></dt>
-<dd>A gauge of the hash of the distributors serverset vector.</dd>
+<dd>A gauge of the hash of the distributors serverset vector with range from
+[Int.MinValue, Int.MaxValue]. It is useful for identifying inconsistencies
+in the serverset observed by different instances of the same client since
+inconsistencies will result in very different values of vector_hash. This
+information is useful for identifying load banding issues when using the
+deterministic aperture load balancer which requires a consistent view of
+the backends to operate correctly.</dd>
 <dt><strong>coordinate_updates</strong></dt>
 <dd>A counter of the number of times the Aperture implementation receives
 updates from the <cite>ProcessCoordinate</cite> process global.</dd>
@@ -700,6 +706,36 @@ protocol.</p>
 </dl>
 </div>
 </div>
+<div class="section" id="method-builder">
+<h2>Method Builder<a class="headerlink" href="#method-builder" title="Permalink to this headline">¶</a></h2>
+<p>Client metrics that are created when using <a class="reference internal" href="MethodBuilder.html#methodbuilder"><span class="std std-ref">MethodBuilder</span></a>.</p>
+<p>Metrics are scoped to your client&#8217;s label and method name.</p>
+<ul class="simple">
+<li><cite>clnt/your_client_label/method_name/logical/requests</cite> — A counter of the total
+number of <a class="reference internal" href="MethodBuilder.html#mb-logical-req"><span class="std std-ref">logical</span></a> successes and failures.
+This does not include any retries.</li>
+<li><cite>clnt/your_client_label/method_name/logical/success</cite> — A counter of the total
+number of <a class="reference internal" href="MethodBuilder.html#mb-logical-req"><span class="std std-ref">logical</span></a> successes.</li>
+<li><cite>clnt/your_client_label/method_name/logical/failures/exception_name</cite> — A counter of the
+number of times a specific exception has caused a <a class="reference internal" href="MethodBuilder.html#mb-logical-req"><span class="std std-ref">logical</span></a> failure.</li>
+<li><cite>clnt/your_client_label/method_name/logical/request_latency_ms</cite> — A stat of
+the latency of the <a class="reference internal" href="MethodBuilder.html#mb-logical-req"><span class="std std-ref">logical</span></a> requests, in milliseconds.</li>
+<li><cite>clnt/your_client_label/method_name/retries</cite> — A stat of the number of times
+requests are retried.</li>
+<li><cite>clnt/your_client_label/method_name/backups/send_backup_after_ms</cite> - A stat of the time,
+in  milliseconds, after which a request will be re-issued (backup sent) if it has not yet
+completed. Present only if <cite>idempotent</cite> is configured.</li>
+<li><cite>clnt/your_client_label/method_name/backups/backups_sent</cite> - A counter of the number of backup
+requests sent. Present only if <cite>idempotent</cite> is configured.</li>
+<li><cite>clnt/your_client_label/method_name/backups/backups_won</cite> - A counter of the number of backup
+requests that completed before the original, regardless of whether they succeeded. Present only
+if <cite>idempotent</cite> is configured.</li>
+<li><cite>clnt/your_client_label/method_name/backups/budget_exhausted</cite> - A counter of the number of times
+the backup request budget (computed using the current value of the <cite>maxExtraLoad</cite> param) or client
+retry budget was exhausted, preventing a backup from being sent. Present only if <cite>idempotent</cite> is
+configured.</li>
+</ul>
+</div>
 <div class="section" id="transport">
 <h2>Transport<a class="headerlink" href="#transport" title="Permalink to this headline">¶</a></h2>
 <p id="transport-stats">These metrics pertain to where the Finagle abstraction ends and the bytes are sent over the wire.
@@ -781,18 +817,13 @@ the channel.</dd>
 given idle state.</dd>
 </dl>
 </div>
-<div class="section" id="thrift">
-<h3>Thrift<a class="headerlink" href="#thrift" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="ssl-tls">
+<h3>SSL/TLS<a class="headerlink" href="#ssl-tls" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
-<dt><strong>srv/thrift/buffer/resetCount</strong></dt>
-<dd>A counter for the number of times the thrift server re-initialized the buffer
-for thrift responses. The thrift server maintains a growable reusable buffer
-for responses. Once the buffer reaches the threshold size it is discarded and
-reset to a smaller size. This is done to accommodate variable response sizes.
-A high resetCount means the server is allocating and releasing memory
-frequently. Use the <code class="docutils literal"><span class="pre">com.twitter.finagle.Thrift.param.MaxReusableBufferSize</span></code>
-param to set the max buffer size to the size of a typical thrift response for
-your server.</dd>
+<dt><strong>handshake_latency_ms</strong></dt>
+<dd>A histogram of the tls handshake latency in milliseconds.</dd>
+<dt><strong>failed_handshake_latency_ms</strong> <cite>verbosity:debug</cite></dt>
+<dd>A histogram of the failed tls handshake latency in milliseconds.</dd>
 </dl>
 </div>
 </div>
@@ -1186,6 +1217,8 @@ upgraded a connection to TLS.</dd>
 <dt><strong>&lt;label&gt;/mux/tls/upgrade/incompatible</strong></dt>
 <dd>A counter of the number of times a client or server failed to establish a session
 due to incompatible TLS requirements or capabilities.</dd>
+<dt><strong>&lt;label&gt;/mux/handshake_latency_us</strong></dt>
+<dd>A histogram of the mux handshake latency.</dd>
 </dl>
 </div>
 <div class="section" id="mysql">
@@ -1333,13 +1366,14 @@ when constructing a client <cite>ServicePerEndpoint</cite>. Similar metrics as s
 <li><a class="reference internal" href="#thresholdfailuredetector">ThresholdFailureDetector</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#method-builder">Method Builder</a></li>
 <li><a class="reference internal" href="#transport">Transport</a><ul>
 <li><a class="reference internal" href="#netty-transporter">Netty Transporter</a></li>
 <li><a class="reference internal" href="#serverbridge">ServerBridge</a></li>
 <li><a class="reference internal" href="#channelrequeststatshandler">ChannelRequestStatsHandler</a></li>
 <li><a class="reference internal" href="#channelstatshandler">ChannelStatsHandler</a></li>
 <li><a class="reference internal" href="#idlechannelhandler">IdleChannelHandler</a></li>
-<li><a class="reference internal" href="#thrift">Thrift</a></li>
+<li><a class="reference internal" href="#ssl-tls">SSL/TLS</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#service-discovery">Service Discovery</a><ul>
@@ -1369,7 +1403,7 @@ when constructing a client <cite>ServicePerEndpoint</cite>. Similar metrics as s
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="Protocols.html" title="previous chapter">Protocols</a></li>
-      <li>Next: <a href="UnsuccessfulResponses.html" title="next chapter">Unsuccessful Responses</a></li>
+      <li>Next: <a href="Flags.html" title="next chapter">Flags</a></li>
   </ul></li>
 </ul>
 <div id="searchbox" style="display: none">

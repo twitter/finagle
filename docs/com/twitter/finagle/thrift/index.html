@@ -851,6 +851,10 @@ generator.
       
       
     </li><li class="current-entities indented4">
+                        <a class="object" href="ClientDeserializeCtx$.html" title=""></a>
+                        <a class="class" href="ClientDeserializeCtx.html" title="Used by Thrift and ThriftMux Client to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses."></a>
+                        <a href="ClientDeserializeCtx.html" title="Used by Thrift and ThriftMux Client to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses.">ClientDeserializeCtx</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="ClientId$.html" title="ClientId provides the client identification of the incoming request if available."></a>
                         <a class="class" href="ClientId.html" title=""></a>
                         <a href="ClientId.html" title="">ClientId</a>
@@ -860,8 +864,8 @@ generator.
                         <a href="ClientIdRequiredFilter.html" title="A Filter for Thrift services that enforces all requests specify a com.twitter.finagle.thrift.ClientId.">ClientIdRequiredFilter</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="DeserializeCtx$.html" title=""></a>
-                        <a class="class" href="DeserializeCtx.html" title="Used by Thrift and ThriftMux to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses."></a>
-                        <a href="DeserializeCtx.html" title="Used by Thrift and ThriftMux to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses.">DeserializeCtx</a>
+                        <a class="class" href="DeserializeCtx.html" title=""></a>
+                        <a href="DeserializeCtx.html" title="">DeserializeCtx</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="GeneratedThriftService.html" title="An abstract class that all scrooge-generated thrift service objects inherit directly from, including services that extend other services."></a>
@@ -906,6 +910,10 @@ generator.
                         <span class="separator"></span>
                         <a class="class" href="SeqMismatchException.html" title="Indicates that a Thrift response did not have the correct sequence ID according to that assigned by com.twitter.finagle.thrift.SeqIdFilter on the corresponding request."></a>
                         <a href="SeqMismatchException.html" title="Indicates that a Thrift response did not have the correct sequence ID according to that assigned by com.twitter.finagle.thrift.SeqIdFilter on the corresponding request.">SeqMismatchException</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="ServerToReqRep$.html" title=""></a>
+                        <a class="class" href="ServerToReqRep.html" title="Used by Thrift and ThriftMux Server to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses."></a>
+                        <a href="ServerToReqRep.html" title="Used by Thrift and ThriftMux Server to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses.">ServerToReqRep</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="trait" href="ServiceIfaceBuilder.html" title="Typeclass ServiceIfaceBuilder[T] creates T-typed interfaces from thrift clients."></a>
@@ -1177,7 +1185,31 @@ generator.
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.thrift.ClientId" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.thrift.ClientDeserializeCtx" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ClientDeserializeCtx[Rep]extendsArray[Byte]=&gt;com.twitter.finagle.service.ReqRep"></a><a id="ClientDeserializeCtx[Rep]:ClientDeserializeCtx[Rep]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/index.html#ClientDeserializeCtx[Rep]extendsArray[Byte]=&gt;com.twitter.finagle.service.ReqRep" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Used by Thrift and ThriftMux Client to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses." href="ClientDeserializeCtx.html"><span class="name">ClientDeserializeCtx</span></a><span class="tparams">[<span name="Rep">Rep</span>]</span><span class="result"> extends (<a href="http://www.scala-lang.org/api/2.12.4/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]) ⇒ <a href="../service/ReqRep.html" class="extype" name="com.twitter.finagle.service.ReqRep">ReqRep</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Used by Thrift and ThriftMux Client to facilitate giving
+the Finagle stack access to the deserialized forms of
+Thrift requests and responses.</p><div class="fullcomment"><div class="comment cmt"><p>Used by Thrift and ThriftMux Client to facilitate giving
+the Finagle stack access to the deserialized forms of
+Thrift requests and responses.</p><p>While this is thread-safe, it should only be used for the life
+of a single request/response pair.</p><p>When using <a href="https://twitter.github.io/scrooge/" target="_blank">Scrooge</a> for code
+generation, a proper <code>ClientDeserializeCtx</code> will be available
+to code via <code>Contexts.local(ClientDeserializeCtx.Key)</code>.
+</p></div></div>
+    </li><li name="com.twitter.finagle.thrift.ClientId" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ClientIdextendsProductwithSerializable"></a><a id="ClientId:ClientId"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/thrift/index.html#ClientIdextendsProductwithSerializable" title="Permalink">
@@ -1210,30 +1242,6 @@ generator.
       
       <p class="shortcomment cmt">A <code>Filter</code> for Thrift services that enforces all
 requests specify a <code>com.twitter.finagle.thrift.ClientId</code>.</p>
-    </li><li name="com.twitter.finagle.thrift.DeserializeCtx" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="DeserializeCtx[Rep]extendsAnyRef"></a><a id="DeserializeCtx[Rep]:DeserializeCtx[Rep]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/thrift/index.html#DeserializeCtx[Rep]extendsAnyRef" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="Used by Thrift and ThriftMux to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses." href="DeserializeCtx.html"><span class="name">DeserializeCtx</span></a><span class="tparams">[<span name="Rep">Rep</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Used by Thrift and ThriftMux to facilitate giving
-the Finagle stack access to the deserialized forms of
-Thrift requests and responses.</p><div class="fullcomment"><div class="comment cmt"><p>Used by Thrift and ThriftMux to facilitate giving
-the Finagle stack access to the deserialized forms of
-Thrift requests and responses.</p><p>When using <a href="https://twitter.github.io/scrooge/" target="_blank">Scrooge</a> for code
-generation, a proper <code>DeserializationCtx</code> will be available
-to code via <code>Contexts.local(DeserializeCtx.Key)</code>.</p><p>While this is thread-safe, it should only be used for the life
-of a single request/response pair.
-</p></div></div>
     </li><li name="com.twitter.finagle.thrift.GeneratedThriftService" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="GeneratedThriftServiceextendsAnyRef"></a><a id="GeneratedThriftService:GeneratedThriftService"></a>
       <span class="permalink">
@@ -1364,6 +1372,30 @@ failing any requests that do not.
       <p class="shortcomment cmt">Indicates that a Thrift response did not have the correct sequence
 ID according to that assigned by <a href="SeqIdFilter.html" class="extype" name="com.twitter.finagle.thrift.SeqIdFilter">com.twitter.finagle.thrift.SeqIdFilter</a>
 on the corresponding request.</p>
+    </li><li name="com.twitter.finagle.thrift.ServerToReqRep" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ServerToReqRepextendsArray[Byte]=&gt;com.twitter.finagle.service.ReqRep"></a><a id="ServerToReqRep:ServerToReqRep"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/index.html#ServerToReqRepextendsArray[Byte]=&gt;com.twitter.finagle.service.ReqRep" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Used by Thrift and ThriftMux Server to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses." href="ServerToReqRep.html"><span class="name">ServerToReqRep</span></a><span class="result"> extends (<a href="http://www.scala-lang.org/api/2.12.4/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]) ⇒ <a href="../service/ReqRep.html" class="extype" name="com.twitter.finagle.service.ReqRep">ReqRep</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Used by Thrift and ThriftMux Server to facilitate giving
+the Finagle stack access to the deserialized forms of
+Thrift requests and responses.</p><div class="fullcomment"><div class="comment cmt"><p>Used by Thrift and ThriftMux Server to facilitate giving
+the Finagle stack access to the deserialized forms of
+Thrift requests and responses.</p><p>While this is thread-safe, it should only be used for the life
+of a single request/response pair.</p><p>When using <a href="https://twitter.github.io/scrooge/" target="_blank">Scrooge</a> for code
+generation, a proper <code>ServerToReqRep</code> will be available
+to code via <code>Contexts.local(ServerToReqRep.Key)</code>.
+</p></div></div>
     </li><li name="com.twitter.finagle.thrift.ThriftClient" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ThriftClientextendsAnyRef"></a><a id="ThriftClient:ThriftClient"></a>
       <span class="permalink">
@@ -1503,6 +1535,25 @@ bad state without closing it, and furthermore only expose such
 errors as an &quot;application&quot; exception.</p><p>All we can do is sigh, pinch our noses, and apply
 <code>ValidateThriftService</code>.
 </p></div></div>
+    </li><li name="com.twitter.finagle.thrift.DeserializeCtx" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="DeserializeCtx[Rep]extendsClientDeserializeCtx[Rep]"></a><a id="DeserializeCtx[Rep]:DeserializeCtx[Rep]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/index.html#DeserializeCtx[Rep]extendsClientDeserializeCtx[Rep]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="DeserializeCtx.html"><span class="name deprecated" title="Deprecated: (Since version 2018-8-13) Use ClientDeserializeCtx.">DeserializeCtx</span></a><span class="tparams">[<span name="Rep">Rep</span>]</span><span class="result"> extends <a href="ClientDeserializeCtx.html" class="extype" name="com.twitter.finagle.thrift.ClientDeserializeCtx">ClientDeserializeCtx</a>[<span class="extype" name="com.twitter.finagle.thrift.DeserializeCtx.Rep">Rep</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-8-13)</i> Use ClientDeserializeCtx.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.MethodIfaceBuilder" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="MethodIfaceBuilder[ServiceIface,MethodIface]extendsAnyRef"></a><a id="MethodIfaceBuilder[ServiceIface,MethodIface]:MethodIfaceBuilder[ServiceIface,MethodIface]"></a>
       <span class="permalink">
@@ -1554,7 +1605,23 @@ Scrooge generates implementations of this builder.
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="com.twitter.finagle.thrift.ClientId" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+                <li name="com.twitter.finagle.thrift.ClientDeserializeCtx" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ClientDeserializeCtx"></a><a id="ClientDeserializeCtx:ClientDeserializeCtx"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/index.html#ClientDeserializeCtx" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ClientDeserializeCtx$.html"><span class="name">ClientDeserializeCtx</span></a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.thrift.ClientId" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ClientId"></a><a id="ClientId:ClientId"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/thrift/index.html#ClientId" title="Permalink">
@@ -1574,22 +1641,6 @@ It is set at the beginning of the request and is available throughout the life-c
 of the request. It is iff the client has an upgraded finagle connection and has chosen
 to specify the client ID in their codec.
 </p></div></div>
-    </li><li name="com.twitter.finagle.thrift.DeserializeCtx" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="DeserializeCtx"></a><a id="DeserializeCtx:DeserializeCtx"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/thrift/index.html#DeserializeCtx" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="DeserializeCtx$.html"><span class="name">DeserializeCtx</span></a>
-      </span>
-      
-      
     </li><li name="com.twitter.finagle.thrift.Headers" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Headers"></a><a id="Headers:Headers"></a>
       <span class="permalink">
@@ -1651,6 +1702,22 @@ to specify the client ID in their codec.
       </span>
       <span class="symbol">
         <a title="" href="SeqIdFilter$.html"><span class="name">SeqIdFilter</span></a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.thrift.ServerToReqRep" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ServerToReqRep"></a><a id="ServerToReqRep:ServerToReqRep"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/index.html#ServerToReqRep" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ServerToReqRep$.html"><span class="name">ServerToReqRep</span></a>
       </span>
       
       
@@ -1718,7 +1785,29 @@ to specify the client ID in their codec.
 
         
 
-        
+        <div class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="com.twitter.finagle.thrift.DeserializeCtx" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="DeserializeCtx"></a><a id="DeserializeCtx:DeserializeCtx"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/index.html#DeserializeCtx" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="DeserializeCtx$.html"><span class="name deprecated" title="Deprecated: (Since version 2018-8-13) Use ClientDeserializeCtx.">DeserializeCtx</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-8-13)</i> Use ClientDeserializeCtx.</p></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">

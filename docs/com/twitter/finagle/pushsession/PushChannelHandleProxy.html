@@ -563,8 +563,7 @@ resources for using Finagle.
         <span class="name">localAddress</span><span class="result">: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>
       </span>
       
-      <p class="shortcomment cmt">Host/port of the local side of a client connection.</p><div class="fullcomment"><div class="comment cmt"><p>Host/port of the local side of a client connection. This is only
-available after <code>Service#connected</code> has been signalled.
+      <p class="shortcomment cmt">Host/port of the local side of a client connection.</p><div class="fullcomment"><div class="comment cmt"><p>Host/port of the local side of a client connection.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.pushsession.PushChannelHandleProxy">PushChannelHandleProxy</a> → <a href="../ClientConnection.html" class="extype" name="com.twitter.finagle.ClientConnection">ClientConnection</a></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
@@ -635,10 +634,7 @@ available after <code>Service#connected</code> has been signalled.
         <span class="name">onClose</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">Expose a Future[Unit] that will be filled when the connection is closed
-Useful if you want to trigger action on connection closing
-</p><div class="fullcomment"><div class="comment cmt"><p>Expose a Future[Unit] that will be filled when the connection is closed
-Useful if you want to trigger action on connection closing
+      <p class="shortcomment cmt">Expose a <code>Future</code> that is satisfied when the connection is closed.</p><div class="fullcomment"><div class="comment cmt"><p>Expose a <code>Future</code> that is satisfied when the connection is closed.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.pushsession.PushChannelHandleProxy">PushChannelHandleProxy</a> → <a href="../ClientConnection.html" class="extype" name="com.twitter.finagle.ClientConnection">ClientConnection</a></dd></dl></div>
     </li><li name="com.twitter.finagle.pushsession.PushChannelHandleProxy#peerCertificate" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="peerCertificate:Option[java.security.cert.Certificate]"></a><a id="peerCertificate:Option[Certificate]"></a>
@@ -693,8 +689,7 @@ Useful if you want to trigger action on connection closing
         <span class="name">remoteAddress</span><span class="result">: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>
       </span>
       
-      <p class="shortcomment cmt">Host/port of the client.</p><div class="fullcomment"><div class="comment cmt"><p>Host/port of the client. This is only available after <code>Service#connected</code>
-has been signalled.
+      <p class="shortcomment cmt">Host/port of the client.</p><div class="fullcomment"><div class="comment cmt"><p>Host/port of the client.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.pushsession.PushChannelHandleProxy">PushChannelHandleProxy</a> → <a href="../ClientConnection.html" class="extype" name="com.twitter.finagle.ClientConnection">ClientConnection</a></dd></dl></div>
     </li><li name="com.twitter.finagle.pushsession.PushChannelHandleProxy#send" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="send(message:Out)(onComplete:com.twitter.util.Try[Unit]=&gt;Unit):Unit"></a><a id="send(Out)((Try[Unit])⇒Unit):Unit"></a>

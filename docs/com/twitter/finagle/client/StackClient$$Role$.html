@@ -181,8 +181,8 @@ resources for using Finagle.
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.client">client</a></dd></dl></div>
     </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="object" href="" title="Canonical Roles for each Client-related Stack modules."></a>
-                        <a href="" title="Canonical Roles for each Client-related Stack modules.">Role</a>
+                        <a class="object" href="" title="Canonical Roles for some Client-related Stack module."></a>
+                        <a href="" title="Canonical Roles for some Client-related Stack module.">Role</a>
                       </li>
               </ul>
             </div>
@@ -211,7 +211,8 @@ resources for using Finagle.
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Canonical Roles for each Client-related Stack modules.
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Canonical Roles for some Client-related Stack module. Other roles are defined
+within the companion objects of the respective modules.
 </p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
@@ -446,6 +447,23 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Stack$$Role.html" class="extype" name="com.twitter.finagle.Stack.Role">Role</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.client.StackClient.Role#nameResolutionTimeout" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="nameResolutionTimeout:com.twitter.finagle.Stack.Role"></a><a id="nameResolutionTimeout:Role"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/client/StackClient$$Role$.html#nameResolutionTimeout:com.twitter.finagle.Stack.Role" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">nameResolutionTimeout</span><span class="result">: <a href="../Stack$$Role.html" class="extype" name="com.twitter.finagle.Stack.Role">Role</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Defines the role of the module responsible for the service acquisition
+timeout for name resolution in the client stack.</p>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -515,7 +533,27 @@ resources for using Finagle.
         <span class="name">pool</span><span class="result">: <a href="../Stack$$Role.html" class="extype" name="com.twitter.finagle.Stack.Role">Role</a></span>
       </span>
       
+      <p class="shortcomment cmt">Defines the role of the connection pool in the client stack.</p>
+    </li><li name="com.twitter.finagle.client.StackClient.Role#postNameResolutionTimeout" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="postNameResolutionTimeout:com.twitter.finagle.Stack.Role"></a><a id="postNameResolutionTimeout:Role"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/client/StackClient$$Role$.html#postNameResolutionTimeout:com.twitter.finagle.Stack.Role" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">postNameResolutionTimeout</span><span class="result">: <a href="../Stack$$Role.html" class="extype" name="com.twitter.finagle.Stack.Role">Role</a></span>
+      </span>
       
+      <p class="shortcomment cmt">Defines the role of the module responsible for the service acquisition
+timeout after name resolution is complete.</p><div class="fullcomment"><div class="comment cmt"><p>Defines the role of the module responsible for the service acquisition
+timeout after name resolution is complete. This encompasses the timeout
+for establishing a new session (e.g. handshaking), outside of name resolution.
+</p></div></div>
     </li><li name="com.twitter.finagle.client.StackClient.Role#prepConn" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="prepConn:com.twitter.finagle.Stack.Role"></a><a id="prepConn:Role"></a>
       <span class="permalink">
@@ -531,8 +569,10 @@ resources for using Finagle.
         <span class="name">prepConn</span><span class="result">: <a href="../Stack$$Role.html" class="extype" name="com.twitter.finagle.Stack.Role">Role</a></span>
       </span>
       
-      <p class="shortcomment cmt">PrepConn is special in that it's the first role before the <code>Endpoint</code> role</p>
-    </li><li name="com.twitter.finagle.client.StackClient.Role#prepFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Defines a preallocoted position at the &quot;bottom&quot; of the stack which is
+special in that it's the first role before the client sends the request to
+the underlying transport implementation.</p>
+    </li><li name="com.twitter.finagle.client.StackClient.Role#prepFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="prepFactory:com.twitter.finagle.Stack.Role"></a><a id="prepFactory:Role"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/client/StackClient$$Role$.html#prepFactory:com.twitter.finagle.Stack.Role" title="Permalink">
@@ -547,7 +587,12 @@ resources for using Finagle.
         <span class="name">prepFactory</span><span class="result">: <a href="../Stack$$Role.html" class="extype" name="com.twitter.finagle.Stack.Role">Role</a></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Defines a preallocated position at the &quot;top&quot; of the stack (after name resolution)
+which allows the injection of codec-specific behavior during service acquisition.</p><div class="fullcomment"><div class="comment cmt"><p>Defines a preallocated position at the &quot;top&quot; of the stack (after name resolution)
+which allows the injection of codec-specific behavior during service acquisition.
+For example, it is  used in the HTTP codec to avoid closing a service while a
+chunked response is being read.
+</p></div></div>
     </li><li name="com.twitter.finagle.client.StackClient.Role#protoTracing" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="protoTracing:com.twitter.finagle.Stack.Role"></a><a id="protoTracing:Role"></a>
       <span class="permalink">
@@ -563,7 +608,7 @@ resources for using Finagle.
         <span class="name">protoTracing</span><span class="result">: <a href="../Stack$$Role.html" class="extype" name="com.twitter.finagle.Stack.Role">Role</a></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Defines a preallocated position in the stack for protocols to inject tracing.</p>
     </li><li name="com.twitter.finagle.client.StackClient.Role#requestDraining" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="requestDraining:com.twitter.finagle.Stack.Role"></a><a id="requestDraining:Role"></a>
       <span class="permalink">
@@ -579,7 +624,7 @@ resources for using Finagle.
         <span class="name">requestDraining</span><span class="result">: <a href="../Stack$$Role.html" class="extype" name="com.twitter.finagle.Stack.Role">Role</a></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Defines the role of the <span class="extype" name="RefcountedFactory">RefcountedFactory</span> in the client stack.</p>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

@@ -936,6 +936,10 @@ generator.
                         <a href="AbstractCodec.html" title="An abstract class version of the above for java compatibility.">AbstractCodec</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
+                        <a class="class" href="AbstractFailureFlags.html" title="For Java users wanting to implement exceptions that are FailureFlags."></a>
+                        <a href="AbstractFailureFlags.html" title="For Java users wanting to implement exceptions that are FailureFlags.">AbstractFailureFlags</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
                         <a class="class" href="AbstractNamer.html" title="Abstract Namer class for Java compatibility."></a>
                         <a href="AbstractNamer.html" title="Abstract Namer class for Java compatibility.">AbstractNamer</a>
                       </li><li class="current-entities indented3">
@@ -1020,8 +1024,8 @@ generator.
                         <a href="ClientCodecConfig.html" title="Clients">ClientCodecConfig</a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="ClientConnection$.html" title=""></a>
-                        <a class="trait" href="ClientConnection.html" title="Information about a client, passed to a Service factory for each new connection."></a>
-                        <a href="ClientConnection.html" title="Information about a client, passed to a Service factory for each new connection.">ClientConnection</a>
+                        <a class="trait" href="ClientConnection.html" title="Information about a client, passed to a ServiceFactory for each new connection."></a>
+                        <a href="ClientConnection.html" title="Information about a client, passed to a ServiceFactory for each new connection.">ClientConnection</a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="Codec$.html" title=""></a>
                         <a class="trait" href="Codec.html" title="Codecs provide protocol encoding and decoding via netty pipelines as well as a standard filter stack that is applied to services from this codec."></a>
@@ -1071,9 +1075,9 @@ generator.
                         <a class="class" href="" title="Base exception for all Finagle originated failures."></a>
                         <a href="" title="Base exception for all Finagle originated failures.">Failure</a>
                       </li><li class="current-entities indented3">
-                        <span class="separator"></span>
                         <a class="object" href="FailureFlags$.html" title="FailureFlags may be applied to any Failure/Exception encountered during the handling of a request."></a>
-                        <a href="FailureFlags$.html" title="FailureFlags may be applied to any Failure/Exception encountered during the handling of a request.">FailureFlags</a>
+                        <a class="trait" href="FailureFlags.html" title="Carries metadata for exceptions such as whether or not the exception is safe to retry."></a>
+                        <a href="FailureFlags.html" title="Carries metadata for exceptions such as whether or not the exception is safe to retry.">FailureFlags</a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="Filter$.html" title=""></a>
                         <a class="class" href="Filter.html" title="A Filter acts as a decorator/transformer of a service."></a>
@@ -1118,6 +1122,10 @@ generator.
                         <span class="separator"></span>
                         <a class="object" href="InetResolver$.html" title="Resolver for inet scheme."></a>
                         <a href="InetResolver$.html" title="Resolver for inet scheme.">InetResolver</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="JavaFailureFlags.html" title="Java compatibility for the FailureFlags companion object."></a>
+                        <a href="JavaFailureFlags.html" title="Java compatibility for the FailureFlags companion object.">JavaFailureFlags</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="class" href="LabelledGroup.html" title="A mixin trait to assign a name to the group."></a>
@@ -1340,6 +1348,10 @@ generator.
                         <a href="StackParams$.html" title="Stack.Params forwarder to provide a clean Java API.">StackParams</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
+                        <a class="class" href="StackTransformer.html" title="StackTransformer is a standard mechanism for transforming the default shape of the Stack."></a>
+                        <a href="StackTransformer.html" title="StackTransformer is a standard mechanism for transforming the default shape of the Stack.">StackTransformer</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
                         <a class="trait" href="Stackable.html" title="Produce a stack from a T-typed element."></a>
                         <a href="Stackable.html" title="Produce a stack from a T-typed element.">Stackable</a>
                       </li><li class="current-entities indented3">
@@ -1419,7 +1431,7 @@ generator.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">Failure</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a> with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a> with <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a>]</span>
+        <span class="name">Failure</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a> with <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a> with <a href="FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a>[<a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a>]</span>
       </span>
       </h4>
 
@@ -1432,7 +1444,7 @@ mark attributes of the Failure (e.g. Restartable).
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a>], <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a>, <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a>[<a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a>], <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/util/control/NoStackTrace.html#scala.util.control.NoStackTrace" class="extype" name="scala.util.control.NoStackTrace">NoStackTrace</a>, <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
         </div></div>
         
 
@@ -1581,7 +1593,7 @@ mark attributes of the Failure (e.g. Restartable).
       </span>
       
       <p class="shortcomment cmt">This as a non-retryable failure.</p><div class="fullcomment"><div class="comment cmt"><p>This as a non-retryable failure. This does not mutate.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>FailureFlags</dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a></dd></dl></div>
     </li><li name="com.twitter.finagle.FailureFlags#asRejected" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asRejected:T"></a><a id="asRejected:Failure"></a>
       <span class="permalink">
@@ -1598,7 +1610,7 @@ mark attributes of the Failure (e.g. Restartable).
       </span>
       
       <p class="shortcomment cmt">This as a rejected failure.</p><div class="fullcomment"><div class="comment cmt"><p>This as a rejected failure. This does not mutate.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>FailureFlags</dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Failure#cause" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="cause:Option[Throwable]"></a>
       <span class="permalink">
@@ -1674,7 +1686,7 @@ mark attributes of the Failure (e.g. Restartable).
 caller of this method should check to see if a copy is necessary before
 calling.</p><p>As this is an internal API, the other <code>Throwable</code> fields such as the cause
 and stack trace should be handled by callers.
-</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a> → FailureFlags</dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a> → <a href="FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -1760,7 +1772,7 @@ and stack trace should be handled by callers.
         <span class="name">flags</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a> → FailureFlags</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a> → <a href="FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a></dd></dl></div>
     </li><li name="java.lang.Throwable#getCause" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getCause():Throwable"></a>
       <span class="permalink">
@@ -1925,7 +1937,7 @@ and stack trace should be handled by callers.
       
       <p class="shortcomment cmt">Test if this is flagged with a particular set of flags
 </p><div class="fullcomment"><div class="comment cmt"><p>Test if this is flagged with a particular set of flags
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>FailureFlags</dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -2256,7 +2268,7 @@ within finagle and this only applies to ones that are.
 
         <div id="inheritedMembers">
         <div class="parent" name="com.twitter.finagle.FailureFlags">
-              <h3>Inherited from <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a>]</h3>
+              <h3>Inherited from <a href="FailureFlags.html" class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</a>[<a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a>]</h3>
             </div><div class="parent" name="com.twitter.logging.HasLogLevel">
               <h3>Inherited from <a href="https://twitter.github.io/util/docs/com/twitter/logging/HasLogLevel.html#com.twitter.logging.HasLogLevel" class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</a></h3>
             </div><div class="parent" name="scala.util.control.NoStackTrace">

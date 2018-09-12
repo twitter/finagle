@@ -759,10 +759,10 @@ to facilitate connection resource management.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a> → <a href="thrift/ThriftRichServer.html" class="extype" name="com.twitter.finagle.thrift.ThriftRichServer">ThriftRichServer</a> → <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a> → <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.server.ListeningStackServer#serve" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="serve(addr:java.net.SocketAddress,factory:com.twitter.finagle.ServiceFactory[Req,Rep]):com.twitter.finagle.ListeningServer"></a><a id="serve(SocketAddress,ServiceFactory[Array[Byte],Array[Byte]]):ListeningServer"></a>
+    </li><li name="com.twitter.finagle.Thrift.Server#serve" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="serve(addr:java.net.SocketAddress,service:com.twitter.finagle.ServiceFactory[Array[Byte],Array[Byte]]):com.twitter.finagle.ListeningServer"></a><a id="serve(SocketAddress,ServiceFactory[Array[Byte],Array[Byte]]):ListeningServer"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/Thrift$$Server.html#serve(addr:java.net.SocketAddress,factory:com.twitter.finagle.ServiceFactory[Req,Rep]):com.twitter.finagle.ListeningServer" title="Permalink">
+      <a href="../../../com/twitter/finagle/Thrift$$Server.html#serve(addr:java.net.SocketAddress,service:com.twitter.finagle.ServiceFactory[Array[Byte],Array[Byte]]):com.twitter.finagle.ListeningServer" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -771,12 +771,12 @@ to facilitate connection resource management.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">serve</span><span class="params">(<span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="factory">factory: <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>], <a href="http://www.scala-lang.org/api/2.12.4/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
+        <span class="name">serve</span><span class="params">(<span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="service">service: <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>], <a href="http://www.scala-lang.org/api/2.12.4/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
       
       <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code>
 </p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code>
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="server/ListeningStackServer.html" class="extype" name="com.twitter.finagle.server.ListeningStackServer">ListeningStackServer</a> → <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a> → <a href="server/ListeningStackServer.html" class="extype" name="com.twitter.finagle.server.ListeningStackServer">ListeningStackServer</a> → <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Server#serve" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="serve(addr:String,service:com.twitter.finagle.Service[Req,Rep]):com.twitter.finagle.ListeningServer"></a><a id="serve(String,Service[Array[Byte],Array[Byte]]):ListeningServer"></a>
       <span class="permalink">

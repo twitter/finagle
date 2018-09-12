@@ -936,6 +936,10 @@ generator.
                         <a href="AbstractCodec.html" title="An abstract class version of the above for java compatibility.">AbstractCodec</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
+                        <a class="class" href="AbstractFailureFlags.html" title="For Java users wanting to implement exceptions that are FailureFlags."></a>
+                        <a href="AbstractFailureFlags.html" title="For Java users wanting to implement exceptions that are FailureFlags.">AbstractFailureFlags</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
                         <a class="class" href="AbstractNamer.html" title="Abstract Namer class for Java compatibility."></a>
                         <a href="AbstractNamer.html" title="Abstract Namer class for Java compatibility.">AbstractNamer</a>
                       </li><li class="current-entities indented3">
@@ -1020,8 +1024,8 @@ generator.
                         <a href="ClientCodecConfig.html" title="Clients">ClientCodecConfig</a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="ClientConnection$.html" title=""></a>
-                        <a class="trait" href="ClientConnection.html" title="Information about a client, passed to a Service factory for each new connection."></a>
-                        <a href="ClientConnection.html" title="Information about a client, passed to a Service factory for each new connection.">ClientConnection</a>
+                        <a class="trait" href="ClientConnection.html" title="Information about a client, passed to a ServiceFactory for each new connection."></a>
+                        <a href="ClientConnection.html" title="Information about a client, passed to a ServiceFactory for each new connection.">ClientConnection</a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="Codec$.html" title=""></a>
                         <a class="trait" href="Codec.html" title="Codecs provide protocol encoding and decoding via netty pipelines as well as a standard filter stack that is applied to services from this codec."></a>
@@ -1071,9 +1075,9 @@ generator.
                         <a class="class" href="Failure.html" title="Base exception for all Finagle originated failures."></a>
                         <a href="Failure.html" title="Base exception for all Finagle originated failures.">Failure</a>
                       </li><li class="current-entities indented3">
-                        <span class="separator"></span>
                         <a class="object" href="FailureFlags$.html" title="FailureFlags may be applied to any Failure/Exception encountered during the handling of a request."></a>
-                        <a href="FailureFlags$.html" title="FailureFlags may be applied to any Failure/Exception encountered during the handling of a request.">FailureFlags</a>
+                        <a class="trait" href="FailureFlags.html" title="Carries metadata for exceptions such as whether or not the exception is safe to retry."></a>
+                        <a href="FailureFlags.html" title="Carries metadata for exceptions such as whether or not the exception is safe to retry.">FailureFlags</a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="Filter$.html" title=""></a>
                         <a class="class" href="Filter.html" title="A Filter acts as a decorator/transformer of a service."></a>
@@ -1118,6 +1122,10 @@ generator.
                         <span class="separator"></span>
                         <a class="object" href="InetResolver$.html" title="Resolver for inet scheme."></a>
                         <a href="InetResolver$.html" title="Resolver for inet scheme.">InetResolver</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="JavaFailureFlags.html" title="Java compatibility for the FailureFlags companion object."></a>
+                        <a href="JavaFailureFlags.html" title="Java compatibility for the FailureFlags companion object.">JavaFailureFlags</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="class" href="LabelledGroup.html" title="A mixin trait to assign a name to the group."></a>
@@ -1338,6 +1346,10 @@ generator.
                         <span class="separator"></span>
                         <a class="object" href="StackParams$.html" title="Stack.Params forwarder to provide a clean Java API."></a>
                         <a href="StackParams$.html" title="Stack.Params forwarder to provide a clean Java API.">StackParams</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="StackTransformer.html" title="StackTransformer is a standard mechanism for transforming the default shape of the Stack."></a>
+                        <a href="StackTransformer.html" title="StackTransformer is a standard mechanism for transforming the default shape of the Stack.">StackTransformer</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="trait" href="Stackable.html" title="Produce a stack from a T-typed element."></a>
@@ -1564,22 +1576,6 @@ generator.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.Address#HashOrdering" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="HashOrdering:Ordering[com.twitter.finagle.Address]"></a><a id="HashOrdering:Ordering[Address]"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Address$.html#HashOrdering:Ordering[com.twitter.finagle.Address]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">HashOrdering</span><span class="result">: <span class="extype" name="scala.Ordering">Ordering</span>[<a href="Address.html" class="extype" name="com.twitter.finagle.Address">Address</a>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">An ordering of <a href="Address.html" class="extype" name="com.twitter.finagle.Address">Addresses</a> based on a deterministic hash of their IP and port.</p>
     </li><li name="com.twitter.finagle.Address#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="apply(port:Int):com.twitter.finagle.Address"></a><a id="apply(Int):Address"></a>
       <span class="permalink">
@@ -1760,6 +1756,27 @@ generator.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.Address#hashOrdering" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashOrdering(seed:Int):Ordering[com.twitter.finagle.Address]"></a><a id="hashOrdering(Int):Ordering[Address]"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Address$.html#hashOrdering(seed:Int):Ordering[com.twitter.finagle.Address]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashOrdering</span><span class="params">(<span name="seed">seed: <a href="http://www.scala-lang.org/api/2.12.4/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <span class="extype" name="scala.Ordering">Ordering</span>[<a href="Address.html" class="extype" name="com.twitter.finagle.Address">Address</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">An ordering of <a href="Address.html" class="extype" name="com.twitter.finagle.Address">Addresses</a> based on a deterministic hash of their IP and port.</p><div class="fullcomment"><div class="comment cmt"><p>An ordering of <a href="Address.html" class="extype" name="com.twitter.finagle.Address">Addresses</a> based on a deterministic hash of their IP and port.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>In order to keep this hash ordering deterministic, it's important that
+we avoid hash collisions for non-equal inputs. We do this by using a murmur hash
+under the hood which is known to not have collisions for 32-bit inputs. However,
+if the underlying addresses were to be 128-bit (IPv6), we would lose that
+property.</p></span></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">

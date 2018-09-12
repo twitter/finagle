@@ -241,8 +241,7 @@ resources for using Finagle.
 to the given <a href="https://twitter.github.io/util/docs/com/twitter/concurrent/AsyncSemaphore.html" class="extype" name="com.twitter.concurrent.AsyncSemaphore">com.twitter.concurrent.AsyncSemaphore</a>. Requests that are
 unable to acquire a permit are failed immediately with a <a href="../Failure.html" class="extype" name="com.twitter.finagle.Failure">com.twitter.finagle.Failure</a>
 that signals a restartable or idempotent process.
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Servers.html#concurrency-limit" target="_blank">user guide</a>
-     for more details.</p></span></dd></dl><div class="toggleContainer block">
+</p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -305,6 +304,22 @@ that signals a restartable or idempotent process.
       </span>
       <span class="symbol">
         <span class="name">RequestSemaphoreFilter</span><span class="params">(<span name="sem">sem: <a href="https://twitter.github.io/util/docs/com/twitter/concurrent/AsyncSemaphore.html#com.twitter.concurrent.AsyncSemaphore" class="extype" name="com.twitter.concurrent.AsyncSemaphore">AsyncSemaphore</a></span>)</span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.filter.RequestSemaphoreFilter#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(sem:com.twitter.concurrent.AsyncSemaphore,stats:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.filter.RequestSemaphoreFilter[Req,Rep]"></a><a id="&lt;init&gt;:RequestSemaphoreFilter[Req,Rep]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/filter/RequestSemaphoreFilter.html#&lt;init&gt;(sem:com.twitter.concurrent.AsyncSemaphore,stats:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.filter.RequestSemaphoreFilter[Req,Rep]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">RequestSemaphoreFilter</span><span class="params">(<span name="sem">sem: <a href="https://twitter.github.io/util/docs/com/twitter/concurrent/AsyncSemaphore.html#com.twitter.concurrent.AsyncSemaphore" class="extype" name="com.twitter.concurrent.AsyncSemaphore">AsyncSemaphore</a></span>, <span name="stats">stats: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>)</span>
       </span>
       
       

@@ -936,6 +936,10 @@ generator.
                         <a href="AbstractCodec.html" title="An abstract class version of the above for java compatibility.">AbstractCodec</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
+                        <a class="class" href="AbstractFailureFlags.html" title="For Java users wanting to implement exceptions that are FailureFlags."></a>
+                        <a href="AbstractFailureFlags.html" title="For Java users wanting to implement exceptions that are FailureFlags.">AbstractFailureFlags</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
                         <a class="class" href="AbstractNamer.html" title="Abstract Namer class for Java compatibility."></a>
                         <a href="AbstractNamer.html" title="Abstract Namer class for Java compatibility.">AbstractNamer</a>
                       </li><li class="current-entities indented3">
@@ -1020,8 +1024,8 @@ generator.
                         <a href="ClientCodecConfig.html" title="Clients">ClientCodecConfig</a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="ClientConnection$.html" title=""></a>
-                        <a class="trait" href="ClientConnection.html" title="Information about a client, passed to a Service factory for each new connection."></a>
-                        <a href="ClientConnection.html" title="Information about a client, passed to a Service factory for each new connection.">ClientConnection</a>
+                        <a class="trait" href="ClientConnection.html" title="Information about a client, passed to a ServiceFactory for each new connection."></a>
+                        <a href="ClientConnection.html" title="Information about a client, passed to a ServiceFactory for each new connection.">ClientConnection</a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="Codec$.html" title=""></a>
                         <a class="trait" href="Codec.html" title="Codecs provide protocol encoding and decoding via netty pipelines as well as a standard filter stack that is applied to services from this codec."></a>
@@ -1071,9 +1075,9 @@ generator.
                         <a class="class" href="Failure.html" title="Base exception for all Finagle originated failures."></a>
                         <a href="Failure.html" title="Base exception for all Finagle originated failures.">Failure</a>
                       </li><li class="current-entities indented3">
-                        <span class="separator"></span>
                         <a class="object" href="FailureFlags$.html" title="FailureFlags may be applied to any Failure/Exception encountered during the handling of a request."></a>
-                        <a href="FailureFlags$.html" title="FailureFlags may be applied to any Failure/Exception encountered during the handling of a request.">FailureFlags</a>
+                        <a class="trait" href="FailureFlags.html" title="Carries metadata for exceptions such as whether or not the exception is safe to retry."></a>
+                        <a href="FailureFlags.html" title="Carries metadata for exceptions such as whether or not the exception is safe to retry.">FailureFlags</a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="Filter$.html" title=""></a>
                         <a class="class" href="Filter.html" title="A Filter acts as a decorator/transformer of a service."></a>
@@ -1118,6 +1122,10 @@ generator.
                         <span class="separator"></span>
                         <a class="object" href="InetResolver$.html" title="Resolver for inet scheme."></a>
                         <a href="InetResolver$.html" title="Resolver for inet scheme.">InetResolver</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="JavaFailureFlags.html" title="Java compatibility for the FailureFlags companion object."></a>
+                        <a href="JavaFailureFlags.html" title="Java compatibility for the FailureFlags companion object.">JavaFailureFlags</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="class" href="LabelledGroup.html" title="A mixin trait to assign a name to the group."></a>
@@ -1340,6 +1348,10 @@ generator.
                         <a href="StackParams$.html" title="Stack.Params forwarder to provide a clean Java API.">StackParams</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
+                        <a class="class" href="StackTransformer.html" title="StackTransformer is a standard mechanism for transforming the default shape of the Stack."></a>
+                        <a href="StackTransformer.html" title="StackTransformer is a standard mechanism for transforming the default shape of the Stack.">StackTransformer</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
                         <a class="trait" href="Stackable.html" title="Produce a stack from a T-typed element."></a>
                         <a href="Stackable.html" title="Produce a stack from a T-typed element.">Stackable</a>
                       </li><li class="current-entities indented3">
@@ -1417,16 +1429,13 @@ generator.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2018-07-18) Use the push-based mux implementation, MuxPush, instead">Mux</span><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>] with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>
+        <span class="name">Mux</span><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>] with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>
       </span>
       </h4>
 
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A client and server for the mux protocol described in <a href="mux/index.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-07-18)</i> Use the push-based mux implementation, MuxPush, instead</p></dd></dl><div class="toggleContainer block">
+</p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -1479,34 +1488,34 @@ generator.
         <div id="types" class="types members">
               <h3>Type Members</h3>
               <ol><li name="com.twitter.finagle.Mux.Client" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ClientextendsStdStackClient[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response,com.twitter.finagle.Mux.Client]withWithDefaultLoadBalancer[com.twitter.finagle.Mux.Client]withOpportunisticTlsParams[com.twitter.finagle.Mux.Client]withProductwithSerializable"></a><a id="Client:Client"></a>
+      <a id="ClientextendsPushStackClient[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response,com.twitter.finagle.Mux.Client]withWithDefaultLoadBalancer[com.twitter.finagle.Mux.Client]withOpportunisticTlsParams[com.twitter.finagle.Mux.Client]withProductwithSerializable"></a><a id="Client:Client"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/Mux$.html#ClientextendsStdStackClient[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response,com.twitter.finagle.Mux.Client]withWithDefaultLoadBalancer[com.twitter.finagle.Mux.Client]withOpportunisticTlsParams[com.twitter.finagle.Mux.Client]withProductwithSerializable" title="Permalink">
+      <a href="../../../com/twitter/finagle/Mux$.html#ClientextendsPushStackClient[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response,com.twitter.finagle.Mux.Client]withWithDefaultLoadBalancer[com.twitter.finagle.Mux.Client]withOpportunisticTlsParams[com.twitter.finagle.Mux.Client]withProductwithSerializable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="" href="Mux$$Client.html"><span class="name">Client</span></a><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]] = <span class="symbol"><span class="name"><a href="Mux$$Client$.html">Client.stack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol"><span class="name"><a href="Mux$$Client$.html">Client.params</a></span></span></span>)</span><span class="result"> extends <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>, <a href="Mux$$Client.html" class="extype" name="com.twitter.finagle.Mux.Client">Client</a>] with <a href="param/WithDefaultLoadBalancer.html" class="extype" name="com.twitter.finagle.param.WithDefaultLoadBalancer">WithDefaultLoadBalancer</a>[<a href="Mux$$Client.html" class="extype" name="com.twitter.finagle.Mux.Client">Client</a>] with <a href="mux/OpportunisticTlsParams.html" class="extype" name="com.twitter.finagle.mux.OpportunisticTlsParams">OpportunisticTlsParams</a>[<a href="Mux$$Client.html" class="extype" name="com.twitter.finagle.Mux.Client">Client</a>] with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="Mux$$Client.html"><span class="name">Client</span></a><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]] = <span class="symbol"><span class="name"><a href="">Mux.Client.stack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol"><span class="name"><a href="">Mux.Client.params</a></span></span></span>)</span><span class="result"> extends <a href="pushsession/PushStackClient.html" class="extype" name="com.twitter.finagle.pushsession.PushStackClient">PushStackClient</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>, <a href="Mux$$Client.html" class="extype" name="com.twitter.finagle.Mux.Client">Client</a>] with <a href="param/WithDefaultLoadBalancer.html" class="extype" name="com.twitter.finagle.param.WithDefaultLoadBalancer">WithDefaultLoadBalancer</a>[<a href="Mux$$Client.html" class="extype" name="com.twitter.finagle.Mux.Client">Client</a>] with <a href="mux/OpportunisticTlsParams.html" class="extype" name="com.twitter.finagle.mux.OpportunisticTlsParams">OpportunisticTlsParams</a>[<a href="Mux$$Client.html" class="extype" name="com.twitter.finagle.Mux.Client">Client</a>] with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
     </li><li name="com.twitter.finagle.Mux.Server" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ServerextendsStdStackServer[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response,com.twitter.finagle.Mux.Server]withOpportunisticTlsParams[com.twitter.finagle.Mux.Server]withProductwithSerializable"></a><a id="Server:Server"></a>
+      <a id="ServerextendsPushStackServer[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response,com.twitter.finagle.Mux.Server]withOpportunisticTlsParams[com.twitter.finagle.Mux.Server]withProductwithSerializable"></a><a id="Server:Server"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/Mux$.html#ServerextendsStdStackServer[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response,com.twitter.finagle.Mux.Server]withOpportunisticTlsParams[com.twitter.finagle.Mux.Server]withProductwithSerializable" title="Permalink">
+      <a href="../../../com/twitter/finagle/Mux$.html#ServerextendsPushStackServer[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response,com.twitter.finagle.Mux.Server]withOpportunisticTlsParams[com.twitter.finagle.Mux.Server]withProductwithSerializable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="" href="Mux$$Server.html"><span class="name">Server</span></a><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]] = <span class="symbol"><span class="name"><a href="Mux$$Server$.html">Server.stack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol"><span class="name"><a href="Mux$$Server$.html">Server.params</a></span></span></span>)</span><span class="result"> extends <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>, <a href="Mux$$Server.html" class="extype" name="com.twitter.finagle.Mux.Server">Server</a>] with <a href="mux/OpportunisticTlsParams.html" class="extype" name="com.twitter.finagle.mux.OpportunisticTlsParams">OpportunisticTlsParams</a>[<a href="Mux$$Server.html" class="extype" name="com.twitter.finagle.Mux.Server">Server</a>] with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="Mux$$Server.html"><span class="name">Server</span></a><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]] = <span class="symbol"><span class="name"><a href="">Mux.Server.stack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol"><span class="name"><a href="">Mux.Server.params</a></span></span></span>, <span name="sessionFactory">sessionFactory: <a href="Mux$$Server$.html#SessionF=(com.twitter.finagle.pushsession.RefPushSession[com.twitter.io.ByteReader,com.twitter.io.Buf],com.twitter.finagle.Stack.Params,com.twitter.finagle.mux.pushsession.MuxChannelHandle,com.twitter.finagle.Service[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response])=&gt;com.twitter.finagle.pushsession.PushSession[com.twitter.io.ByteReader,com.twitter.io.Buf]" class="extmbr" name="com.twitter.finagle.Mux.Server.SessionF">SessionF</a> = <span class="symbol"><span class="name"><a href="Mux$$Server$.html">Server.defaultSessionFactory</a></span></span></span>)</span><span class="result"> extends <a href="pushsession/PushStackServer.html" class="extype" name="com.twitter.finagle.pushsession.PushStackServer">PushStackServer</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>, <a href="Mux$$Server.html" class="extype" name="com.twitter.finagle.Mux.Server">Server</a>] with <a href="mux/OpportunisticTlsParams.html" class="extype" name="com.twitter.finagle.mux.OpportunisticTlsParams">OpportunisticTlsParams</a>[<a href="Mux$$Server.html" class="extype" name="com.twitter.finagle.Mux.Server">Server</a>] with <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       

@@ -338,14 +338,17 @@ If None, the implementation default is used.</p></dd></dl></div>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="$param the options (i.e., socket options) of a Transport." href="Transport$$Options.html"><span class="name">Options</span></a><span class="params">(<span name="noDelay">noDelay: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>, <span name="reuseAddr">reuseAddr: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="$param the options (i.e., socket options) of a Transport." href="Transport$$Options.html"><span class="name">Options</span></a><span class="params">(<span name="noDelay">noDelay: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>, <span name="reuseAddr">reuseAddr: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>, <span name="reusePort">reusePort: <a href="http://www.scala-lang.org/api/2.12.4/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.4/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">$param the options (i.e., socket options) of a <code>Transport</code>.</p><div class="fullcomment"><div class="comment cmt"><p>$param the options (i.e., socket options) of a <code>Transport</code>.
 </p></div><dl class="paramcmts block"><dt class="param">noDelay</dt><dd class="cmt"><p>enables or disables <code>TCP_NODELAY</code> (Nagle's algorithm)
                option on a transport socket (<code>noDelay = true</code> means
                disabled). Default is <code>true</code> (disabled).</p></dd><dt class="param">reuseAddr</dt><dd class="cmt"><p>enables or disables <code>SO_REUSEADDR</code> option on a
-                 transport socket. Default is <code>true</code>.</p></dd></dl></div>
+                 transport socket. Default is <code>true</code>.</p></dd><dt class="param">reusePort</dt><dd class="cmt"><p>enables or disables <code>SO_REUSEPORT</code> option on a
+                 transport socket (Linux 3.9+ only). This option is only
+                 available when using finagle-netty4 and native epoll support
+                 is enabled. Default is <code>false</code>.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.transport.Transport.ServerSsl" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ServerSslextendsProductwithSerializable"></a><a id="ServerSsl:ServerSsl"></a>
       <span class="permalink">

@@ -232,6 +232,10 @@ generator.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.thrift">thrift</a></dd></dl></div>
     </li><li class="current-entities indented4">
+                        <a class="object" href="ClientDeserializeCtx$.html" title=""></a>
+                        <a class="class" href="ClientDeserializeCtx.html" title="Used by Thrift and ThriftMux Client to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses."></a>
+                        <a href="ClientDeserializeCtx.html" title="Used by Thrift and ThriftMux Client to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses.">ClientDeserializeCtx</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="ClientId$.html" title="ClientId provides the client identification of the incoming request if available."></a>
                         <a class="class" href="ClientId.html" title=""></a>
                         <a href="ClientId.html" title="">ClientId</a>
@@ -241,8 +245,8 @@ generator.
                         <a href="ClientIdRequiredFilter.html" title="A Filter for Thrift services that enforces all requests specify a com.twitter.finagle.thrift.ClientId.">ClientIdRequiredFilter</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="" title=""></a>
-                        <a class="class" href="DeserializeCtx.html" title="Used by Thrift and ThriftMux to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses."></a>
-                        <a href="DeserializeCtx.html" title="Used by Thrift and ThriftMux to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses.">DeserializeCtx</a>
+                        <a class="class" href="DeserializeCtx.html" title=""></a>
+                        <a href="DeserializeCtx.html" title="">DeserializeCtx</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="GeneratedThriftService.html" title="An abstract class that all scrooge-generated thrift service objects inherit directly from, including services that extend other services."></a>
@@ -287,6 +291,10 @@ generator.
                         <span class="separator"></span>
                         <a class="class" href="SeqMismatchException.html" title="Indicates that a Thrift response did not have the correct sequence ID according to that assigned by com.twitter.finagle.thrift.SeqIdFilter on the corresponding request."></a>
                         <a href="SeqMismatchException.html" title="Indicates that a Thrift response did not have the correct sequence ID according to that assigned by com.twitter.finagle.thrift.SeqIdFilter on the corresponding request.">SeqMismatchException</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="ServerToReqRep$.html" title=""></a>
+                        <a class="class" href="ServerToReqRep.html" title="Used by Thrift and ThriftMux Server to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses."></a>
+                        <a href="ServerToReqRep.html" title="Used by Thrift and ThriftMux Server to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses.">ServerToReqRep</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="trait" href="ServiceIfaceBuilder.html" title="Typeclass ServiceIfaceBuilder[T] creates T-typed interfaces from thrift clients."></a>
@@ -356,12 +364,15 @@ generator.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">DeserializeCtx</span>
+        <span class="name deprecated" title="Deprecated: (Since version 2018-8-13) Use ClientDeserializeCtx.">DeserializeCtx</span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-8-13)</i> Use ClientDeserializeCtx.</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -467,9 +478,9 @@ generator.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.DeserializeCtx#Key" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Key:com.twitter.finagle.context.Contexts.local.Key[com.twitter.finagle.thrift.DeserializeCtx[_]]"></a><a id="Key:Key[DeserializeCtx[_]]"></a>
+      <a id="Key:com.twitter.finagle.context.Contexts.local.Key[com.twitter.finagle.thrift.ClientDeserializeCtx[_]]"></a><a id="Key:Key[ClientDeserializeCtx[_]]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/thrift/DeserializeCtx$.html#Key:com.twitter.finagle.context.Contexts.local.Key[com.twitter.finagle.thrift.DeserializeCtx[_]]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/DeserializeCtx$.html#Key:com.twitter.finagle.context.Contexts.local.Key[com.twitter.finagle.thrift.ClientDeserializeCtx[_]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -478,7 +489,7 @@ generator.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">Key</span><span class="result">: <a href="../context/LocalContext$Key.html" class="extype" name="com.twitter.finagle.context.LocalContext.Key">Key</a>[<a href="DeserializeCtx.html" class="extype" name="com.twitter.finagle.thrift.DeserializeCtx">DeserializeCtx</a>[_]]</span>
+        <span class="name">Key</span><span class="result">: <a href="../context/LocalContext$Key.html" class="extype" name="com.twitter.finagle.context.LocalContext.Key">Key</a>[<a href="ClientDeserializeCtx.html" class="extype" name="com.twitter.finagle.thrift.ClientDeserializeCtx">ClientDeserializeCtx</a>[_]]</span>
       </span>
       
       

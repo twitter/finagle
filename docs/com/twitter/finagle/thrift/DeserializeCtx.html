@@ -232,6 +232,10 @@ generator.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.thrift">thrift</a></dd></dl></div>
     </li><li class="current-entities indented4">
+                        <a class="object" href="ClientDeserializeCtx$.html" title=""></a>
+                        <a class="class" href="ClientDeserializeCtx.html" title="Used by Thrift and ThriftMux Client to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses."></a>
+                        <a href="ClientDeserializeCtx.html" title="Used by Thrift and ThriftMux Client to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses.">ClientDeserializeCtx</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="ClientId$.html" title="ClientId provides the client identification of the incoming request if available."></a>
                         <a class="class" href="ClientId.html" title=""></a>
                         <a href="ClientId.html" title="">ClientId</a>
@@ -241,8 +245,8 @@ generator.
                         <a href="ClientIdRequiredFilter.html" title="A Filter for Thrift services that enforces all requests specify a com.twitter.finagle.thrift.ClientId.">ClientIdRequiredFilter</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="DeserializeCtx$.html" title=""></a>
-                        <a class="class" href="" title="Used by Thrift and ThriftMux to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses."></a>
-                        <a href="" title="Used by Thrift and ThriftMux to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses.">DeserializeCtx</a>
+                        <a class="class" href="" title=""></a>
+                        <a href="" title="">DeserializeCtx</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="GeneratedThriftService.html" title="An abstract class that all scrooge-generated thrift service objects inherit directly from, including services that extend other services."></a>
@@ -287,6 +291,10 @@ generator.
                         <span class="separator"></span>
                         <a class="class" href="SeqMismatchException.html" title="Indicates that a Thrift response did not have the correct sequence ID according to that assigned by com.twitter.finagle.thrift.SeqIdFilter on the corresponding request."></a>
                         <a href="SeqMismatchException.html" title="Indicates that a Thrift response did not have the correct sequence ID according to that assigned by com.twitter.finagle.thrift.SeqIdFilter on the corresponding request.">SeqMismatchException</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="ServerToReqRep$.html" title=""></a>
+                        <a class="class" href="ServerToReqRep.html" title="Used by Thrift and ThriftMux Server to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses."></a>
+                        <a href="ServerToReqRep.html" title="Used by Thrift and ThriftMux Server to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses.">ServerToReqRep</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="trait" href="ServiceIfaceBuilder.html" title="Typeclass ServiceIfaceBuilder[T] creates T-typed interfaces from thrift clients."></a>
@@ -352,26 +360,23 @@ generator.
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">DeserializeCtx</span><span class="tparams">[<span name="Rep">Rep</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+        <span class="name deprecated" title="Deprecated: (Since version 2018-8-13) Use ClientDeserializeCtx.">DeserializeCtx</span><span class="tparams">[<span name="Rep">Rep</span>]</span><span class="result"> extends <a href="ClientDeserializeCtx.html" class="extype" name="com.twitter.finagle.thrift.ClientDeserializeCtx">ClientDeserializeCtx</a>[<span class="extype" name="com.twitter.finagle.thrift.DeserializeCtx.Rep">Rep</span>]</span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Used by Thrift and ThriftMux to facilitate giving
-the Finagle stack access to the deserialized forms of
-Thrift requests and responses.</p><p>When using <a href="https://twitter.github.io/scrooge/" target="_blank">Scrooge</a> for code
-generation, a proper <code>DeserializationCtx</code> will be available
-to code via <code>Contexts.local(DeserializeCtx.Key)</code>.</p><p>While this is thread-safe, it should only be used for the life
-of a single request/response pair.
-</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-8-13)</i> Use ClientDeserializeCtx.</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="ClientDeserializeCtx.html" class="extype" name="com.twitter.finagle.thrift.ClientDeserializeCtx">ClientDeserializeCtx</a>[<span class="extype" name="com.twitter.finagle.thrift.DeserializeCtx.Rep">Rep</span>], (<a href="http://www.scala-lang.org/api/2.12.4/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]) ⇒ <a href="../service/ReqRep.html" class="extype" name="com.twitter.finagle.service.ReqRep">ReqRep</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
         </div></div>
         
 
@@ -397,7 +402,7 @@ of a single request/response pair.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.thrift.DeserializeCtx"><span>DeserializeCtx</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.thrift.DeserializeCtx"><span>DeserializeCtx</span></li><li class="in" name="com.twitter.finagle.thrift.ClientDeserializeCtx"><span>ClientDeserializeCtx</span></li><li class="in" name="scala.Function1"><span>Function1</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -417,7 +422,7 @@ of a single request/response pair.
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="com.twitter.finagle.thrift.DeserializeCtx#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.thrift.DeserializeCtx#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="&lt;init&gt;(request:Any,replyDeserializer:Array[Byte]=&gt;com.twitter.util.Try[Rep]):com.twitter.finagle.thrift.DeserializeCtx[Rep]"></a><a id="&lt;init&gt;:DeserializeCtx[Rep]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/thrift/DeserializeCtx.html#&lt;init&gt;(request:Any,replyDeserializer:Array[Byte]=&gt;com.twitter.util.Try[Rep]):com.twitter.finagle.thrift.DeserializeCtx[Rep]" title="Permalink">
@@ -432,9 +437,7 @@ of a single request/response pair.
         <span class="name">DeserializeCtx</span><span class="params">(<span name="request">request: <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></span>, <span name="replyDeserializer">replyDeserializer: (<a href="http://www.scala-lang.org/api/2.12.4/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Try.html#com.twitter.util.Try" class="extype" name="com.twitter.util.Try">Try</a>[<span class="extype" name="com.twitter.finagle.thrift.DeserializeCtx.Rep">Rep</span>]</span>)</span>
       </span>
       
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">request</dt><dd class="cmt"><p>the request that was used to generate response
-to be seen by <a href="#deserialize(responseBytes:Array[Byte]):com.twitter.util.Try[Rep]" class="extmbr" name="com.twitter.finagle.thrift.DeserializeCtx#deserialize">deserialize</a>. <code>request</code> is of type <code>Any</code> because
-requests in generated Scala and Java services do not share a supertype.</p></dd></dl></div>
+      
     </li></ol>
             </div>
 
@@ -493,6 +496,41 @@ requests in generated Scala and Java services do not share a supertype.</p></dd>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.Function1#andThen" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="andThen[A](g:R=&gt;A):T1=&gt;A"></a><a id="andThen[A]((ReqRep)⇒A):(Array[Byte])⇒A"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/DeserializeCtx.html#andThen[A](g:R=&gt;A):T1=&gt;A" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">andThen</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<a href="../service/ReqRep.html" class="extype" name="com.twitter.finagle.service.ReqRep">ReqRep</a>) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>)</span><span class="result">: (<a href="http://www.scala-lang.org/api/2.12.4/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd><dt>Annotations</dt><dd>
+                <span class="name">@unspecialized</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="com.twitter.finagle.thrift.ClientDeserializeCtx#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="apply(responseBytes:Array[Byte]):com.twitter.finagle.service.ReqRep"></a><a id="apply(Array[Byte]):ReqRep"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/DeserializeCtx.html#apply(responseBytes:Array[Byte]):com.twitter.finagle.service.ReqRep" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">apply</span><span class="params">(<span name="responseBytes">responseBytes: <a href="http://www.scala-lang.org/api/2.12.4/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]</span>)</span><span class="result">: <a href="../service/ReqRep.html" class="extype" name="com.twitter.finagle.service.ReqRep">ReqRep</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ClientDeserializeCtx.html" class="extype" name="com.twitter.finagle.thrift.ClientDeserializeCtx">ClientDeserializeCtx</a> → Function1</dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -533,7 +571,26 @@ requests in generated Scala and Java services do not share a supertype.</p></dd>
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.thrift.DeserializeCtx#deserialize" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="scala.Function1#compose" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="compose[A](g:A=&gt;T1):A=&gt;R"></a><a id="compose[A]((A)⇒Array[Byte]):(A)⇒ReqRep"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/DeserializeCtx.html#compose[A](g:A=&gt;T1):A=&gt;R" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">compose</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <a href="http://www.scala-lang.org/api/2.12.4/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]</span>)</span><span class="result">: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <a href="../service/ReqRep.html" class="extype" name="com.twitter.finagle.service.ReqRep">ReqRep</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd><dt>Annotations</dt><dd>
+                <span class="name">@unspecialized</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="com.twitter.finagle.thrift.ClientDeserializeCtx#deserialize" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="deserialize(responseBytes:Array[Byte]):com.twitter.util.Try[Rep]"></a><a id="deserialize(Array[Byte]):Try[Rep]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/thrift/DeserializeCtx.html#deserialize(responseBytes:Array[Byte]):com.twitter.util.Try[Rep]" title="Permalink">
@@ -551,7 +608,7 @@ requests in generated Scala and Java services do not share a supertype.</p></dd>
       <p class="shortcomment cmt">Deserialize the given bytes.</p><div class="fullcomment"><div class="comment cmt"><p>Deserialize the given bytes.</p><p>Ensures that deserialization will only happen once regardless of future
 inputs. If different bytes are seen on future calls, this will still
 return the first deserialized result.
-</p></div></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ClientDeserializeCtx.html" class="extype" name="com.twitter.finagle.thrift.ClientDeserializeCtx">ClientDeserializeCtx</a></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -714,7 +771,7 @@ return the first deserialized result.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.thrift.DeserializeCtx#request" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.thrift.DeserializeCtx#request" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="request:Any"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/thrift/DeserializeCtx.html#request:Any" title="Permalink">
@@ -729,7 +786,7 @@ return the first deserialized result.
         <span class="name">request</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></span>
       </span>
       
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thrift.DeserializeCtx">DeserializeCtx</a> → <a href="ClientDeserializeCtx.html" class="extype" name="com.twitter.finagle.thrift.ClientDeserializeCtx">ClientDeserializeCtx</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
@@ -746,7 +803,7 @@ return the first deserialized result.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="scala.Function1#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/thrift/DeserializeCtx.html#toString():String" title="Permalink">
@@ -761,7 +818,7 @@ return the first deserialized result.
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1 → AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
@@ -840,7 +897,11 @@ return the first deserialized result.
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.AnyRef">
+        <div class="parent" name="com.twitter.finagle.thrift.ClientDeserializeCtx">
+              <h3>Inherited from <a href="ClientDeserializeCtx.html" class="extype" name="com.twitter.finagle.thrift.ClientDeserializeCtx">ClientDeserializeCtx</a>[<span class="extype" name="com.twitter.finagle.thrift.DeserializeCtx.Rep">Rep</span>]</h3>
+            </div><div class="parent" name="scala.Function1">
+              <h3>Inherited from (<a href="http://www.scala-lang.org/api/2.12.4/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.4/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]) ⇒ <a href="../service/ReqRep.html" class="extype" name="com.twitter.finagle.service.ReqRep">ReqRep</a></h3>
+            </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.4/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></h3>

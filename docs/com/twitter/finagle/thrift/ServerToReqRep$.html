@@ -147,10 +147,10 @@ returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.h
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.netty4" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="netty4"></a><a id="netty4:netty4"></a>
+    </li><li name="com.twitter.finagle.thrift" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="thrift"></a><a id="thrift:thrift"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#netty4" title="Permalink">
+      <a href="../../../com/twitter/finagle/index.html#thrift" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -159,19 +159,34 @@ resources for using Finagle.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="Package netty4 implements the bottom finagle primitives: com.twitter.finagle.Server and a client transport in terms of the netty4 event loop." href="index.html"><span class="name">netty4</span></a>
+        <a title="Please use the new interface, com.twitter.finagle.Thrift, for constructing Thrift clients and servers." href="index.html"><span class="name">thrift</span></a>
       </span>
       
-      <p class="shortcomment cmt">Package netty4 implements the bottom finagle primitives:
-<a href="../Server.html" class="extype" name="com.twitter.finagle.Server">com.twitter.finagle.Server</a> and a client transport in terms of
-the netty4 event loop.</p><div class="fullcomment"><div class="comment cmt"><p>Package netty4 implements the bottom finagle primitives:
-<a href="../Server.html" class="extype" name="com.twitter.finagle.Server">com.twitter.finagle.Server</a> and a client transport in terms of
-the netty4 event loop.
+      <p class="shortcomment cmt">Please use the new interface, <a href="../Thrift$.html" class="extype" name="com.twitter.finagle.Thrift">com.twitter.finagle.Thrift</a>,
+for constructing Thrift clients and servers.</p><div class="fullcomment"><div class="comment cmt"><h3>Deprecation</h3><p>Please use the new interface, <a href="../Thrift$.html" class="extype" name="com.twitter.finagle.Thrift">com.twitter.finagle.Thrift</a>,
+for constructing Thrift clients and servers.</p><h4>Thrift codecs</h4><p>We provide client and server protocol support for the framed protocol.
+The public implementations are defined on the Thrift object:</p><ul><li><a href="../Thrift$.html#client:com.twitter.finagle.Thrift.Client" class="extmbr" name="com.twitter.finagle.Thrift#client">com.twitter.finagle.Thrift.client</a></li><li><a href="../Thrift$.html#server:com.twitter.finagle.Thrift.Server" class="extmbr" name="com.twitter.finagle.Thrift#server">com.twitter.finagle.Thrift.server</a></li></ul><p>The type of the server codec is <code>Service[Array[Byte], Array[Byte]]</code>
+and the client codecs are <code>Service[ThriftClientRequest,
+Array[Byte]]</code>. The service provided is that of a &quot;transport&quot; of
+thrift messages (requests and replies) according to the protocol
+chosen. This is why the client codecs need to have access to a
+thrift <code>ProtocolFactory</code>.</p><p>These transports are used by the services produced by the
+<a href="https://github.com/mariusaeriksen/thrift-finagle" target="_blank">finagle thrift codegenerator</a>.</p><pre><span class="kw">val</span> service: Service[ThriftClientRequest, <span class="std">Array</span>[<span class="std">Byte</span>]] = ClientBuilder()
+  .hosts(<span class="lit">"foobar.com:123"</span>)
+  .stack(Thrift.client)
+  .build()
+
+<span class="cmt">// Wrap the raw Thrift transport in a Client decorator. The client</span>
+<span class="cmt">// provides a convenient procedural interface for accessing the Thrift</span>
+<span class="cmt">// server.</span>
+<span class="kw">val</span> client = <span class="kw">new</span> Hello.ServiceToClient(service, protocolFactory)</pre><p>In this example, <code>Hello</code> is the thrift interface, and the inner
+class <code>ServiceToClient</code> is provided by the finagle thrift code
+generator.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.netty4.param" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="param"></a><a id="param:param"></a>
+    </li><li name="com.twitter.finagle.thrift.service" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="service"></a><a id="service:service"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/index.html#param" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/index.html#service" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -180,14 +195,14 @@ the netty4 event loop.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="param/index.html"><span class="name">param</span></a>
+        <a title="" href="service/index.html"><span class="name">service</span></a>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.netty4">netty4</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.netty4.pushsession" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="pushsession"></a><a id="pushsession:pushsession"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.thrift">thrift</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.thrift.thrift" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="thrift"></a><a id="thrift:thrift"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/index.html#pushsession" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/index.html#thrift" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -196,14 +211,14 @@ the netty4 event loop.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="pushsession/index.html"><span class="name">pushsession</span></a>
+        <a title="" href="thrift/index.html"><span class="name">thrift</span></a>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.netty4">netty4</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.netty4.ssl" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ssl"></a><a id="ssl:ssl"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.thrift">thrift</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.thrift.thriftscala" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="thriftscala"></a><a id="thriftscala:thriftscala"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/index.html#ssl" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/index.html#thriftscala" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -212,46 +227,118 @@ the netty4 event loop.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="ssl/index.html"><span class="name">ssl</span></a>
+        <a title="" href="thriftscala/index.html"><span class="name">thriftscala</span></a>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.netty4">netty4</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.netty4.threading" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="threading"></a><a id="threading:threading"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/index.html#threading" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="threading/index.html"><span class="name">threading</span></a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.netty4">netty4</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.thrift">thrift</a></dd></dl></div>
     </li><li class="current-entities indented4">
-                        <a class="object" href="Netty4Listener$.html" title=""></a>
-                        <a class="class" href="Netty4Listener.html" title="Constructs a Listener[In, Out] given a pipelineInit function responsible for framing a Transport stream."></a>
-                        <a href="Netty4Listener.html" title="Constructs a Listener[In, Out] given a pipelineInit function responsible for framing a Transport stream.">Netty4Listener</a>
+                        <a class="object" href="ClientDeserializeCtx$.html" title=""></a>
+                        <a class="class" href="ClientDeserializeCtx.html" title="Used by Thrift and ThriftMux Client to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses."></a>
+                        <a href="ClientDeserializeCtx.html" title="Used by Thrift and ThriftMux Client to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses.">ClientDeserializeCtx</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="ClientId$.html" title="ClientId provides the client identification of the incoming request if available."></a>
+                        <a class="class" href="ClientId.html" title=""></a>
+                        <a href="ClientId.html" title="">ClientId</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="Netty4Transporter$.html" title=""></a>
-                        <a href="Netty4Transporter$.html" title="">Netty4Transporter</a>
+                        <a class="class" href="ClientIdRequiredFilter.html" title="A Filter for Thrift services that enforces all requests specify a com.twitter.finagle.thrift.ClientId."></a>
+                        <a href="ClientIdRequiredFilter.html" title="A Filter for Thrift services that enforces all requests specify a com.twitter.finagle.thrift.ClientId.">ClientIdRequiredFilter</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="DeserializeCtx$.html" title=""></a>
+                        <a class="class" href="DeserializeCtx.html" title=""></a>
+                        <a href="DeserializeCtx.html" title="">DeserializeCtx</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="class" href="GeneratedThriftService.html" title="An abstract class that all scrooge-generated thrift service objects inherit directly from, including services that extend other services."></a>
+                        <a href="GeneratedThriftService.html" title="An abstract class that all scrooge-generated thrift service objects inherit directly from, including services that extend other services.">GeneratedThriftService</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="Headers$.html" title=""></a>
+                        <a href="Headers$.html" title="">Headers</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="InputBuffers$.html" title=""></a>
+                        <a href="InputBuffers$.html" title="">InputBuffers</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="InvalidThriftConnectionException.html" title="Indicates that the connection on which a Thrift request was issued is invalid, where &quot;validity&quot; is determined by com.twitter.finagle.thrift.ValidateThriftService."></a>
+                        <a href="InvalidThriftConnectionException.html" title="Indicates that the connection on which a Thrift request was issued is invalid, where &quot;validity&quot; is determined by com.twitter.finagle.thrift.ValidateThriftService.">InvalidThriftConnectionException</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="MethodIfaceBuilder.html" title="A typeclass to construct a MethodIface by wrapping a ServiceIface."></a>
+                        <a href="MethodIfaceBuilder.html" title="A typeclass to construct a MethodIface by wrapping a ServiceIface.">MethodIfaceBuilder</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="NoClientIdSpecifiedException.html" title="Indicates that a request without a com.twitter.finagle.thrift.ClientId was issued to a server that requires them."></a>
+                        <a href="NoClientIdSpecifiedException.html" title="Indicates that a request without a com.twitter.finagle.thrift.ClientId was issued to a server that requires them.">NoClientIdSpecifiedException</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="Protocols$.html" title=""></a>
+                        <a href="Protocols$.html" title="">Protocols</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="RichClientParam.html" title="Produce a client with params wrapped in RichClientParam"></a>
+                        <a href="RichClientParam.html" title="Produce a client with params wrapped in RichClientParam">RichClientParam</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="RichServerParam.html" title="Produce a server with params wrapped in RichServerParam"></a>
+                        <a href="RichServerParam.html" title="Produce a server with params wrapped in RichServerParam">RichServerParam</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="SeqIdFilter$.html" title=""></a>
+                        <a class="class" href="SeqIdFilter.html" title="A Filter that overrides Thrift request sequence IDs, replacing them with our own randomly-assigned i32s."></a>
+                        <a href="SeqIdFilter.html" title="A Filter that overrides Thrift request sequence IDs, replacing them with our own randomly-assigned i32s.">SeqIdFilter</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="SeqMismatchException.html" title="Indicates that a Thrift response did not have the correct sequence ID according to that assigned by com.twitter.finagle.thrift.SeqIdFilter on the corresponding request."></a>
+                        <a href="SeqMismatchException.html" title="Indicates that a Thrift response did not have the correct sequence ID according to that assigned by com.twitter.finagle.thrift.SeqIdFilter on the corresponding request.">SeqMismatchException</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="" title=""></a>
-                        <a href="" title="">nativeEpoll</a>
+                        <a class="class" href="ServerToReqRep.html" title="Used by Thrift and ThriftMux Server to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses."></a>
+                        <a href="ServerToReqRep.html" title="Used by Thrift and ThriftMux Server to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses.">ServerToReqRep</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="numWorkers$.html" title="Flag for defining the number of worker threads used by the Finagle Netty 4 backend"></a>
-                        <a href="numWorkers$.html" title="Flag for defining the number of worker threads used by the Finagle Netty 4 backend">numWorkers</a>
+                        <a class="trait" href="ServiceIfaceBuilder.html" title="Typeclass ServiceIfaceBuilder[T] creates T-typed interfaces from thrift clients."></a>
+                        <a href="ServiceIfaceBuilder.html" title="Typeclass ServiceIfaceBuilder[T] creates T-typed interfaces from thrift clients.">ServiceIfaceBuilder</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="referenceLeakLintRule$.html" title=""></a>
-                        <a href="referenceLeakLintRule$.html" title="">referenceLeakLintRule</a>
+                        <a class="trait" href="ThriftClient.html" title="Stateless helper methods which wrap a given ServiceIface (deprecated) or a given ServicePerEndpoint with another type via the given method's implicit Builder."></a>
+                        <a href="ThriftClient.html" title="Stateless helper methods which wrap a given ServiceIface (deprecated) or a given ServicePerEndpoint with another type via the given method's implicit Builder.">ThriftClient</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="ThriftClientRequest.html" title="Defines a (framed) thrift request, simply composed of the raw message and a boolean indicating whether it is a one-shot message or not."></a>
+                        <a href="ThriftClientRequest.html" title="Defines a (framed) thrift request, simply composed of the raw message and a boolean indicating whether it is a one-shot message or not.">ThriftClientRequest</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="ThriftMethodStats$.html" title=""></a>
+                        <a class="class" href="ThriftMethodStats.html" title=""></a>
+                        <a href="ThriftMethodStats.html" title="">ThriftMethodStats</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="ThriftRichClient.html" title="A mixin trait to provide a rich Thrift client API."></a>
+                        <a href="ThriftRichClient.html" title="A mixin trait to provide a rich Thrift client API.">ThriftRichClient</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="ThriftRichServer.html" title="A mixin trait to provide a rich Thrift server API."></a>
+                        <a href="ThriftRichServer.html" title="A mixin trait to provide a rich Thrift server API.">ThriftRichServer</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="ThriftService.html" title="A marker trait that signifies that this is a thrift service that can be served by Finagle"></a>
+                        <a href="ThriftService.html" title="A marker trait that signifies that this is a thrift service that can be served by Finagle">ThriftService</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="ThriftServiceIface$.html" title="Construct Service interface for a Thrift method."></a>
+                        <a href="ThriftServiceIface$.html" title="Construct Service interface for a Thrift method.">ThriftServiceIface</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="ToThriftService.html" title="A trait that signifies a ThriftService can be created from this"></a>
+                        <a href="ToThriftService.html" title="A trait that signifies a ThriftService can be created from this">ToThriftService</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="ValidateThriftService.html" title="A filter that invalidates a connection if it suffers from an irrecoverable application exception."></a>
+                        <a href="ValidateThriftService.html" title="A filter that invalidates a connection if it suffers from an irrecoverable application exception.">ValidateThriftService</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="maxReusableBufferSize$.html" title=""></a>
+                        <a href="maxReusableBufferSize$.html" title="">maxReusableBufferSize</a>
                       </li>
               </ul>
             </div>
@@ -259,14 +346,16 @@ the netty4 event loop.
           <div id="content">
             <body class="object value">
       <div id="definition">
-        <div class="big-circle object">o</div>
-        <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="index.html" class="extype" name="com.twitter.finagle.netty4">netty4</a></p>
-        <h1>nativeEpoll<span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/nativeEpoll$.html" title="Permalink">
+        <a href="ServerToReqRep.html" title="See companion class"><div class="big-circle object-companion-class">o</div></a>
+        <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="index.html" class="extype" name="com.twitter.finagle.thrift">thrift</a></p>
+        <h1><a href="ServerToReqRep.html" title="See companion class">ServerToReqRep</a><span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/ServerToReqRep$.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
-        <h3><span class="morelinks"></span></h3>
+        <h3><span class="morelinks"><div>
+            Companion <a href="ServerToReqRep.html" title="See companion class">class ServerToReqRep</a>
+          </div></span></h3>
       </div>
 
       <h4 id="signature" class="signature">
@@ -275,7 +364,7 @@ the netty4 event loop.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">nativeEpoll</span>
+        <span class="name">ServerToReqRep</span>
       </span>
       </h4>
 
@@ -310,7 +399,7 @@ the netty4 event loop.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.netty4.nativeEpoll"><span>nativeEpoll</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.thrift.ServerToReqRep"><span>ServerToReqRep</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -340,7 +429,7 @@ the netty4 event loop.
                 <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/nativeEpoll$.html#!=(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/ServerToReqRep$.html#!=(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -356,7 +445,7 @@ the netty4 event loop.
     </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/nativeEpoll$.html###():Int" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/ServerToReqRep$.html###():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -372,7 +461,7 @@ the netty4 event loop.
     </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/nativeEpoll$.html#==(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/ServerToReqRep$.html#==(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -385,10 +474,10 @@ the netty4 event loop.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.netty4.nativeEpoll#Id" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Id:String"></a>
+    </li><li name="com.twitter.finagle.thrift.ServerToReqRep#Key" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Key:com.twitter.finagle.context.Contexts.local.Key[com.twitter.finagle.thrift.ServerToReqRep]"></a><a id="Key:Key[ServerToReqRep]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/nativeEpoll$.html#Id:String" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/ServerToReqRep$.html#Key:com.twitter.finagle.context.Contexts.local.Key[com.twitter.finagle.thrift.ServerToReqRep]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -397,14 +486,14 @@ the netty4 event loop.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">Id</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+        <span class="name">Key</span><span class="result">: <a href="../context/LocalContext$Key.html" class="extype" name="com.twitter.finagle.context.LocalContext.Key">Key</a>[<a href="ServerToReqRep.html" class="extype" name="com.twitter.finagle.thrift.ServerToReqRep">ServerToReqRep</a>]</span>
       </span>
       
       
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/nativeEpoll$.html#asInstanceOf[T0]:T0" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/ServerToReqRep$.html#asInstanceOf[T0]:T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -420,7 +509,7 @@ the netty4 event loop.
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/nativeEpoll$.html#clone():Object" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/ServerToReqRep$.html#clone():Object" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -444,7 +533,7 @@ the netty4 event loop.
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/nativeEpoll$.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/ServerToReqRep$.html#eq(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -460,7 +549,7 @@ the netty4 event loop.
     </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/nativeEpoll$.html#equals(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/ServerToReqRep$.html#equals(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -476,7 +565,7 @@ the netty4 event loop.
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/nativeEpoll$.html#finalize():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/ServerToReqRep$.html#finalize():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -495,10 +584,26 @@ the netty4 event loop.
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.thrift.ServerToReqRep#get" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="get:com.twitter.finagle.thrift.ServerToReqRep"></a><a id="get:ServerToReqRep"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/ServerToReqRep$.html#get:com.twitter.finagle.thrift.ServerToReqRep" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get</span><span class="result">: <a href="ServerToReqRep.html" class="extype" name="com.twitter.finagle.thrift.ServerToReqRep">ServerToReqRep</a></span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/nativeEpoll$.html#getClass():Class[_]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/ServerToReqRep$.html#getClass():Class[_]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -517,7 +622,7 @@ the netty4 event loop.
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/nativeEpoll$.html#hashCode():Int" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/ServerToReqRep$.html#hashCode():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -536,7 +641,7 @@ the netty4 event loop.
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/nativeEpoll$.html#isInstanceOf[T0]:Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/ServerToReqRep$.html#isInstanceOf[T0]:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -552,7 +657,7 @@ the netty4 event loop.
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/nativeEpoll$.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/ServerToReqRep$.html#ne(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -568,7 +673,7 @@ the netty4 event loop.
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/nativeEpoll$.html#notify():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/ServerToReqRep$.html#notify():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -587,7 +692,7 @@ the netty4 event loop.
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/nativeEpoll$.html#notifyAll():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/ServerToReqRep$.html#notifyAll():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -603,10 +708,42 @@ the netty4 event loop.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.thrift.ServerToReqRep#nullDeserializeCtx" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="nullDeserializeCtx:com.twitter.finagle.thrift.ServerToReqRep"></a><a id="nullDeserializeCtx:ServerToReqRep"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/ServerToReqRep$.html#nullDeserializeCtx:com.twitter.finagle.thrift.ServerToReqRep" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">nullDeserializeCtx</span><span class="result">: <a href="ServerToReqRep.html" class="extype" name="com.twitter.finagle.thrift.ServerToReqRep">ServerToReqRep</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.thrift.ServerToReqRep#setCtx" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="setCtx(reqRep:com.twitter.finagle.service.ReqRep):Unit"></a><a id="setCtx(ReqRep):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/ServerToReqRep$.html#setCtx(reqRep:com.twitter.finagle.service.ReqRep):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setCtx</span><span class="params">(<span name="reqRep">reqRep: <a href="../service/ReqRep.html" class="extype" name="com.twitter.finagle.service.ReqRep">ReqRep</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/nativeEpoll$.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/ServerToReqRep$.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -622,7 +759,7 @@ the netty4 event loop.
     </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/nativeEpoll$.html#toString():String" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/ServerToReqRep$.html#toString():String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -638,7 +775,7 @@ the netty4 event loop.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/nativeEpoll$.html#wait():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/ServerToReqRep$.html#wait():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -660,7 +797,7 @@ the netty4 event loop.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/nativeEpoll$.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/ServerToReqRep$.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -682,7 +819,7 @@ the netty4 event loop.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/nativeEpoll$.html#wait(x$1:Long):Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/ServerToReqRep$.html#wait(x$1:Long):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>

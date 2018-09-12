@@ -936,6 +936,10 @@ generator.
                         <a href="AbstractCodec.html" title="An abstract class version of the above for java compatibility.">AbstractCodec</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
+                        <a class="class" href="AbstractFailureFlags.html" title="For Java users wanting to implement exceptions that are FailureFlags."></a>
+                        <a href="AbstractFailureFlags.html" title="For Java users wanting to implement exceptions that are FailureFlags.">AbstractFailureFlags</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
                         <a class="class" href="AbstractNamer.html" title="Abstract Namer class for Java compatibility."></a>
                         <a href="AbstractNamer.html" title="Abstract Namer class for Java compatibility.">AbstractNamer</a>
                       </li><li class="current-entities indented3">
@@ -1020,8 +1024,8 @@ generator.
                         <a href="ClientCodecConfig.html" title="Clients">ClientCodecConfig</a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="ClientConnection$.html" title=""></a>
-                        <a class="trait" href="ClientConnection.html" title="Information about a client, passed to a Service factory for each new connection."></a>
-                        <a href="ClientConnection.html" title="Information about a client, passed to a Service factory for each new connection.">ClientConnection</a>
+                        <a class="trait" href="ClientConnection.html" title="Information about a client, passed to a ServiceFactory for each new connection."></a>
+                        <a href="ClientConnection.html" title="Information about a client, passed to a ServiceFactory for each new connection.">ClientConnection</a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="Codec$.html" title=""></a>
                         <a class="trait" href="Codec.html" title="Codecs provide protocol encoding and decoding via netty pipelines as well as a standard filter stack that is applied to services from this codec."></a>
@@ -1071,9 +1075,9 @@ generator.
                         <a class="class" href="Failure.html" title="Base exception for all Finagle originated failures."></a>
                         <a href="Failure.html" title="Base exception for all Finagle originated failures.">Failure</a>
                       </li><li class="current-entities indented3">
-                        <span class="separator"></span>
                         <a class="object" href="FailureFlags$.html" title="FailureFlags may be applied to any Failure/Exception encountered during the handling of a request."></a>
-                        <a href="FailureFlags$.html" title="FailureFlags may be applied to any Failure/Exception encountered during the handling of a request.">FailureFlags</a>
+                        <a class="trait" href="FailureFlags.html" title="Carries metadata for exceptions such as whether or not the exception is safe to retry."></a>
+                        <a href="FailureFlags.html" title="Carries metadata for exceptions such as whether or not the exception is safe to retry.">FailureFlags</a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="Filter$.html" title=""></a>
                         <a class="class" href="Filter.html" title="A Filter acts as a decorator/transformer of a service."></a>
@@ -1118,6 +1122,10 @@ generator.
                         <span class="separator"></span>
                         <a class="object" href="InetResolver$.html" title="Resolver for inet scheme."></a>
                         <a href="InetResolver$.html" title="Resolver for inet scheme.">InetResolver</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="JavaFailureFlags.html" title="Java compatibility for the FailureFlags companion object."></a>
+                        <a href="JavaFailureFlags.html" title="Java compatibility for the FailureFlags companion object.">JavaFailureFlags</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="class" href="LabelledGroup.html" title="A mixin trait to assign a name to the group."></a>
@@ -1338,6 +1346,10 @@ generator.
                         <span class="separator"></span>
                         <a class="object" href="StackParams$.html" title="Stack.Params forwarder to provide a clean Java API."></a>
                         <a href="StackParams$.html" title="Stack.Params forwarder to provide a clean Java API.">StackParams</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="StackTransformer.html" title="StackTransformer is a standard mechanism for transforming the default shape of the Stack."></a>
+                        <a href="StackTransformer.html" title="StackTransformer is a standard mechanism for transforming the default shape of the Stack.">StackTransformer</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="trait" href="Stackable.html" title="Produce a stack from a T-typed element."></a>
@@ -2202,116 +2214,7 @@ is a failure, it is simply extended, otherwise a new Failure is created.
 
         <div class="values members">
               <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.Failure#DeadlineExceeded" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="DeadlineExceeded:Long"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Failure$.html#DeadlineExceeded:Long" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2018-7-17) Use FailureFlags.DeadlineExceeded">DeadlineExceeded</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Flag deadline exceeded indicates that this failure occured because a request was received past
-its deadline.</p><div class="fullcomment"><div class="comment cmt"><p>Flag deadline exceeded indicates that this failure occured because a request was received past
-its deadline.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-7-17)</i> Use FailureFlags.DeadlineExceeded</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.Failure#Ignorable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Ignorable:Long"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Failure$.html#Ignorable:Long" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2018-7-17) Use FailureFlags.Ignorable">Ignorable</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Flag ignorable indicates that the failure can be ignored and should not be surfaced via stats.</p><div class="fullcomment"><div class="comment cmt"><p>Flag ignorable indicates that the failure can be ignored and should not be surfaced via stats.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-7-17)</i> Use FailureFlags.Ignorable</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.Failure#Interrupted" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Interrupted:Long"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Failure$.html#Interrupted:Long" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2018-7-17) Use FailureFlags.Interrupted">Interrupted</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Flag interrupted indicates that the error was caused due to an
-interruption.</p><div class="fullcomment"><div class="comment cmt"><p>Flag interrupted indicates that the error was caused due to an
-interruption. (e.g., by invoking <span class="extype" name="Future.raise">Future.raise</span>.)
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-7-17)</i> Use FailureFlags.Interrupted</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.Failure#NonRetryable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="NonRetryable:Long"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Failure$.html#NonRetryable:Long" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2018-7-17) Use FailureFlags.NonRetryable">NonRetryable</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Flag nonretryable indicates that the action that caused this failure should
-not be re-issued.</p><div class="fullcomment"><div class="comment cmt"><p>Flag nonretryable indicates that the action that caused this failure should
-not be re-issued. This failure should be propagated back along the call
-chain as far as possible.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-7-17)</i> Use FailureFlags.NonRetryable</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.Failure#Rejected" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Rejected:Long"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Failure$.html#Rejected:Long" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2018-7-17) Use FailureFlags.Rejected">Rejected</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.4/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Flag rejected indicates that the work was rejected and therefore cannot be
-completed.</p><div class="fullcomment"><div class="comment cmt"><p>Flag rejected indicates that the work was rejected and therefore cannot be
-completed. This may indicate an overload condition.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-7-17)</i> Use FailureFlags.Rejected</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.Failure#Restartable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.Failure#Restartable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Restartable:Long"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Failure$.html#Restartable:Long" title="Permalink">
@@ -2356,27 +2259,6 @@ first be unwrapped: the inner cause is the presentable failure.
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-7-17)</i> Use FailureFlags.Wrapped</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.Failure#flagsOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="flagsOf(exc:Throwable):Set[String]"></a><a id="flagsOf(Throwable):Set[String]"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Failure$.html#flagsOf(exc:Throwable):Set[String]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2017-05-08) Use FailureFlags.flagsOf instead">flagsOf</span><span class="params">(<span name="exc">exc: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">Expose flags as strings, used for stats reporting
-</p><div class="fullcomment"><div class="comment cmt"><p>Expose flags as strings, used for stats reporting
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-05-08)</i> Use <code>FailureFlags.flagsOf</code> instead</p></dd></dl></div>
     </li></ol>
             </div>
         </div>
