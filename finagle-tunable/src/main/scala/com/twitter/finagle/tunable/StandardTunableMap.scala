@@ -1,15 +1,15 @@
 package com.twitter.finagle.tunable
 
 import com.twitter.util.tunable.{
-  NullTunableMap,
   JsonTunableMapper,
+  NullTunableMap,
   ServiceLoadedTunableMap,
   TunableMap
 }
 import com.twitter.finagle.server.ServerInfo
 
 import java.util.concurrent.ConcurrentHashMap
-import java.util.function.{Function => JFunction}
+import java.util.function.{BiFunction, Function => JFunction}
 import scala.collection.JavaConverters._
 
 /**
@@ -35,17 +35,14 @@ object StandardTunableMap {
 
   private[this] val clientMaps = new ConcurrentHashMap[String, TunableMap]()
 
-  private[this] def composeMap(mutable: TunableMap, serverInfo: ServerInfo) =
-    new JFunction[String, TunableMap] {
-      def apply(id: String): TunableMap = {
-        val json = loadJsonConfig(id, serverInfo)
-        TunableMap.of(
-          mutable,
-          ServiceLoadedTunableMap(id),
-          json
-        )
-      }
-    }
+  private[this] val composeMap = (mutable: TunableMap, serverInfo: ServerInfo, id: String) => {
+    val json = loadJsonConfig(id, serverInfo)
+    TunableMap.of(
+      mutable,
+      ServiceLoadedTunableMap(id),
+      json
+    )
+  }
 
   def apply(id: String): TunableMap =
     apply(id, ServerInfo(), TunableMap.newMutable(s"Mutable($id)"))
@@ -56,7 +53,42 @@ object StandardTunableMap {
     serverInfo: ServerInfo,
     mutable: TunableMap
   ): TunableMap =
-    clientMaps.computeIfAbsent(id, composeMap(mutable, serverInfo))
+    clientMaps.computeIfAbsent(id, new JFunction[String, TunableMap] {
+      def apply(ID: String): TunableMap = composeMap(mutable, serverInfo, id)
+    })
+
+  /**
+   * Re-compose [[TunableMap]]s after ServerInfo initialized, re-subscribe
+   * [[com.twitter.util.tunable.ServiceLoadedTunableMap]]s to ConfigBus.
+   *
+   * @note this should be called after ServerInfo.initialized().
+   */
+  private[twitter] def reloadAll(): Unit = {
+    ServiceLoadedTunableMap.reloadAll()
+    clientMaps.keys().asScala.toSeq.foreach { id =>
+      clientMaps.computeIfPresent(id, new BiFunction[String, TunableMap, TunableMap] {
+        def apply(
+          id: String,
+          curr: TunableMap
+        ): TunableMap = {
+          val mutable = collectFirstOrElse(
+            TunableMap.components(curr),
+            TunableMap.newMutable(s"Mutable($id)")
+          )
+          composeMap(mutable, ServerInfo(), id)
+        }
+      })
+    }
+  }
+
+  private[this] def collectFirstOrElse(
+    elements: Seq[TunableMap],
+    default: TunableMap.Mutable
+  ): TunableMap.Mutable = {
+    elements.collectFirst {
+      case mutable: TunableMap.Mutable => mutable
+    }.getOrElse(default)
+  }
 
   /**
    * Returns all registered [[TunableMap TunableMaps]] that have been
