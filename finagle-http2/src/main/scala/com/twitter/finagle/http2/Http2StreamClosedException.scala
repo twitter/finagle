@@ -16,7 +16,7 @@ private object Http2StreamClosedException {
 }
 
 final class GoAwayException private[http2](val errorCode: Long, streamId: Long, remoteAddress: Option[SocketAddress], flags: Long)
-  extends StreamClosedException(remoteAddress, streamId.toString, s"GOAWAY(${Http2StreamClosedException.errorToString(errorCode)})", flags) {
+  extends StreamClosedException(remoteAddress, streamId.toString, s"GOAWAY(${Http2StreamClosedException.errorToString(errorCode)}, $streamId)", flags) {
     def this(errorCode: Long, streamId: Long, remoteAddress: Option[SocketAddress]) =
       this(errorCode: Long, streamId: Long, remoteAddress: Option[SocketAddress], FailureFlags.Empty)
   }
