@@ -18,17 +18,20 @@ object TimeoutFactory {
 
   /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.factory.TimeoutFactory]].
+   *
+   * @param _role The stack role used to identify the TimeoutFactory when inserted
+   * into a stack.
    */
   private[finagle] def module[Req, Rep](_role: Stack.Role): Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module3[Param, param.Timer, param.Label, ServiceFactory[Req, Rep]] {
       val role = _role
-      val description = "Time out service acquisition after a given period"
+      val description = "Timeout service acquisition after a given period"
       def make(
         _timeout: Param,
         _timer: param.Timer,
         _label: param.Label,
         next: ServiceFactory[Req, Rep]
-      ) = {
+      ): TimeoutFactory[Req, Rep] = {
         val Param(timeout) = _timeout
         val param.Label(label) = _label
         val param.Timer(timer) = _timer
@@ -55,12 +58,12 @@ class TimeoutFactory[Req, Rep](
 ) extends ServiceFactoryProxy[Req, Rep](self) {
   private[this] val failure = Future.exception(Failure.adapt(exception, FailureFlags.Retryable))
 
-  override def apply(conn: ClientConnection) = {
+  override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
     val res = super.apply(conn)
-    res.within(timer, timeout) rescue {
+    res.within(timer, timeout).rescue {
       case exc: java.util.concurrent.TimeoutException =>
         res.raise(exc)
-        res onSuccess { _.close() }
+        res.onSuccess { _.close() }
         failure
     }
   }

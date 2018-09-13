@@ -1,6 +1,5 @@
 package com.twitter.finagle.mux.pushsession
 
-import com.twitter.app.GlobalFlag
 import com.twitter.finagle.{ChannelClosedException, Failure, FailureFlags, Status}
 import com.twitter.finagle.mux.Handshake.{CanTinitMsg, Headers, TinitTag}
 import com.twitter.finagle.mux.pushsession.MuxClientNegotiatingSession._
@@ -15,17 +14,15 @@ import java.util.concurrent.atomic.AtomicBoolean
 import scala.util.control.NonFatal
 
 /**
- * Allow interrupting mux client negotiation. This is behind a flag because we've seen
- * some ill effects in production. This is related to session acquisition being the burden
- * of the first request of the session and interrupting a single request being able to
- * abort session acquisition.
- *
- * @note flag is temporary so we can easily test it. After we resolve the production
- *       issues this will become enabled by default, and soon thereafter the flag will
- *       be removed.
+ * Allow interrupting mux client negotiation. This was only exposed as a temporary solution
+ * to some ill effects we noticed in production and will be removed in the near future.
+ * Setting this flag to false can be dangerous since there is no way to reclaim resources
+ * during the negotation phase if the peer, effectively, becomes a "black hole". Instead,
+ * the more appropriate solution is to tune the service acquisition timeouts for the
+ * respective client.
  */
-private object allowInterruptingClientNegotiation extends GlobalFlag[Boolean](
-  default = false,
+private object allowInterruptingClientNegotiation extends com.twitter.app.GlobalFlag[Boolean](
+  default = true,
   help = "Allow interrupting the Mux client negotiation.")
 
 /**

@@ -3,6 +3,7 @@ package com.twitter.finagle
 import com.twitter.conversions.storage._
 import com.twitter.finagle.Mux.param.{MaxFrameSize, OppTls}
 import com.twitter.finagle.client._
+import com.twitter.finagle.factory.TimeoutFactory
 import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.filter.{NackAdmissionFilter, PayloadSizeFilter}
 import com.twitter.finagle.mux.Handshake.Headers
@@ -138,17 +139,25 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       param.TurnOnTlsFn(tlsEnable)
 
     private val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackClient.newStack
-      .replace(StackClient.Role.pool, SingletonPool.module[mux.Request, mux.Response](allowInterrupts = true))
+      // We use a singleton pool to manage a multiplexed session. Because it's mux'd, we
+      // don't want arbitrary interrupts on individual dispatches to cancel outstanding service
+      // acquisitions, so we disable `allowInterrupts`.
+      .replace(StackClient.Role.pool,
+        SingletonPool.module[mux.Request, mux.Response](allowInterrupts = false))
+      // As per the config above, we don't allow interrupts to propagate past the pool.
+      // However, we need to provide a way to cancel service acquisitions which are taking
+      // too long, so we "move" the [[TimeoutFactory]] below the pool.
+      .remove(StackClient.Role.postNameResolutionTimeout)
+      .insertAfter(StackClient.Role.pool,
+        TimeoutFactory.module[mux.Request, mux.Response](Stack.Role("MuxSessionTimeout")))
       .replace(BindingFactory.role, MuxBindingFactory)
       .prepend(PayloadSizeFilter.module(_.body.length, _.body.length))
       // Since NackAdmissionFilter should operate on all requests sent over
       // the wire including retries, it must be below `Retries`. Since it
       // aggregates the status of the entire cluster, it must be above
       // `LoadBalancerFactory` (not part of the endpoint stack).
-      .insertBefore(
-        StackClient.Role.prepFactory,
-        NackAdmissionFilter.module[mux.Request, mux.Response]
-      )
+      .insertBefore(StackClient.Role.prepFactory,
+        NackAdmissionFilter.module[mux.Request, mux.Response])
 
     /**
      * Returns the headers that a client sends to a server.
