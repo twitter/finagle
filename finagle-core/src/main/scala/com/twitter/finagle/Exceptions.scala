@@ -134,10 +134,18 @@ class GlobalRequestTimeoutException(timeout: Duration)
  *
  * [1] https://twitter.github.io/finagle/guide/Names.html
  */
-class NoBrokersAvailableException(val name: String, val baseDtab: Dtab, val localDtab: Dtab)
+class NoBrokersAvailableException(val name: String, val baseDtabFn: () => Dtab, val localDtabFn: () => Dtab)
     extends RequestException
     with SourcedException {
-  def this(name: String = "unknown") = this(name, Dtab.empty, Dtab.empty)
+
+  // backwards compatibility constructor
+  def this(name: String, baseDtab: Dtab, localDtab: Dtab) =
+    this(name, () => baseDtab, () => localDtab)
+
+  def this(name: String = "unknown") = this(name, () => Dtab.base, () => Dtab.local)
+
+  def baseDtab: Dtab = baseDtabFn()
+  def localDtab: Dtab = localDtabFn()
 
   override def exceptionMessage: String =
     s"No hosts are available for $name, Dtab.base=[${baseDtab.show}], Dtab.local=[${localDtab.show}]"
