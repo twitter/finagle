@@ -3,6 +3,10 @@ sudo: false
 
 language: scala
 
+git:
+  quiet: true # (default = false)
+  depth: 5 # (default = 50)
+
 env:
   global:
     - JAVA_OPTS="-DSKIP_FLAKY=1 -Dsbt.log.noformat=true"
@@ -31,6 +35,7 @@ env:
 
 # These directories are cached to S3 at the end of the build
 cache:
+  timeout: 300 # seconds = 5 mins (default = 3 mins)
   directories:
    - $HOME/.m2
    - $HOME/.ivy2
@@ -43,7 +48,7 @@ before_cache:
   - find $HOME/.sbt -name "*.lock" -delete
 
 scala:
-  - 2.11.11
+  - 2.11.12
   - 2.12.4
 
 jdk:
@@ -51,20 +56,31 @@ jdk:
 
 notifications:
   slack:
-    secure: Xd8uDpC8fR9I6RiVZMHCqQ1MRLyBKrBfWtefRbXoUv4kOmyB+JPtNqe+PqNb18xtMvx5GYHNu+Cqel2m6Z5ZVekTPVKJIoVFvW+NytcF/zE1v0wYuCJdfQm58VMKOskriRZxBf4w3HUkcArc8r1N6AnCY5h35jsrI1ER59lTcso=
-
-before_script:
-  # default $SBT_OPTS is irrelevant to sbt lancher
-  - unset SBT_OPTS
-  - curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test finagle
-  - travis_retry ./sbt --error ++$TRAVIS_SCALA_VERSION ci:update finagle-memcached/update
-  # don't test these projects because they don't pass on travis-ci
-  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
+    secure: PfUgPphNmKcZLIjTjd46IHBzqB0vkzK8clCqdsUr5taJRHhMSgRg8ks81sUhCmu+hTl3FG+jEzGgqMUvcisS+OziP/8QR/C41f5jdaETfkBE53DZIWVXZ80QRabphRTCbRUfibC39WWrhhLgWCIqzvTM8qsO/43JuQOGLQbuqcs=
 
 script:
-  # run for all environments
+  - unset SBT_OPTS # default $SBT_OPTS is irrelevant to sbt lancher
   - travis_retry ./sbt ++$TRAVIS_SCALA_VERSION coverage "$PROJECT/test" coverageReport
 
 after_success:
   - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
   - bash <(curl -s https://codecov.io/bash)
+
+jobs:
+  include:
+    - stage: dodo
+      scala: 2.11.12
+      jdk: oraclejdk8
+      script: curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test finagle
+    - stage: memcached-test
+      scala: 2.11.12
+      scala: 2.12.4
+      jdk: oraclejdk8
+      script: unset SBT_OPTS # default $SBT_OPTS is irrelevant to sbt lancher
+      script: travis_retry ./sbt --error ++$TRAVIS_SCALA_VERSION ci:update finagle-memcached/update
+      scirpt: ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile # don't test these projects because they don't pass on travis-ci
+
+stages:
+  - dodo
+  - memached-test
+  - test
