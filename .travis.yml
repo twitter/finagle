@@ -68,9 +68,9 @@ after_success:
   - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
   - bash <(curl -s https://codecov.io/bash)
 
-stages: # put above jobs.include
+stages:
   - dodo
-  - memached
+  - memcached
   - test
 
 jobs:
