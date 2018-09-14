@@ -68,6 +68,11 @@ after_success:
   - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
   - bash <(curl -s https://codecov.io/bash)
 
+stages: # put above jobs.include
+  - dodo
+  - memached
+  - test
+
 jobs:
   include:
     - stage: dodo
@@ -88,8 +93,3 @@ jobs:
       script: 
         - travis_retry ./sbt --error ++$TRAVIS_SCALA_VERSION ci:update finagle-memcached/update
         - ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile # don't test these projects because they don't pass on travis-ci
-
-stages:
-  - dodo
-  - memached
-  - test
