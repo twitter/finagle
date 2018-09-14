@@ -72,7 +72,7 @@ jobs:
       scala: 2.11.12
       jdk: oraclejdk8
       script: curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test finagle
-    - stage: memcached-test
+    - stage: memcached
       scala: 
         - 2.11.12
         - 2.12.4
@@ -84,5 +84,5 @@ jobs:
 
 stages:
   - dodo
-  - memached-test
+  - memached
   - test
