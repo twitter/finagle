@@ -95,23 +95,21 @@ class PostgresClientImpl(
    * Execute some actions inside of a transaction using a single connection
    */
   override def inTransaction[T](fn: PostgresClient => Future[T]): Future[T] = for {
-    types               <- typeMap()
-    service             <- factory()
-    constFactory        =  ServiceFactory.const(service)
-    id                  =  Random.alphanumeric.take(28).mkString
-    transactionalClient = new PostgresClientImpl(constFactory, id, Some(types), receiveFunctions, binaryResults, binaryParams)
-    _                   <- transactionalClient.query("BEGIN")
-    result              <- fn(transactionalClient).rescue {
+    types                    <- typeMap()
+    service                  <- factory()
+    constFactory             =  ServiceFactory.const(service)
+    id                       =  Random.alphanumeric.take(28).mkString
+    transactionalClient      =  new PostgresClientImpl(constFactory, id, Some(types), receiveFunctions, binaryResults, binaryParams)
+    closeTransaction         =  () => transactionalClient.close().ensure(constFactory.close().ensure(service.close()))
+    completeTransactionQuery =  (sql: String) => transactionalClient.query(sql).ensure(closeTransaction())
+    _                        <- transactionalClient.query("BEGIN").onFailure(_ => closeTransaction())
+    result                   <- fn(transactionalClient).rescue {
       case err => for {
-        _ <- transactionalClient.query("ROLLBACK")
-        _ <- constFactory.close()
-        _ <- service.close()
+        _ <- completeTransactionQuery("ROLLBACK")
         _ <- Future.exception(err)
       } yield null.asInstanceOf[T]
     }
-    _                   <- transactionalClient.query("COMMIT")
-    _                   <- constFactory.close()
-    _                   <- service.close()
+    _                        <- completeTransactionQuery("COMMIT")
   } yield result
 
   /*
@@ -179,7 +177,6 @@ class PostgresClientImpl(
 
   /**
     * Close the underlying connection pool and make this Client eternally down
-    *
     * @return
     */
   override def close(): Future[Unit] = {
