@@ -10,6 +10,8 @@ import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.stats.{InMemoryHostStatsReceiver, InMemoryStatsReceiver}
 import com.twitter.util.{Activity, Await, Future, Time, Var}
 import java.net.{InetAddress, InetSocketAddress}
+
+import com.twitter.finagle.loadbalancer.LoadBalancerFactory.ErrorLabel
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.FunSuite
 
