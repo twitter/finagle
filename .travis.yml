@@ -54,17 +54,17 @@ scala:
 jdk:
   - oraclejdk8
 
-# notifications:
-#   slack:
-#     secure: PfUgPphNmKcZLIjTjd46IHBzqB0vkzK8clCqdsUr5taJRHhMSgRg8ks81sUhCmu+hTl3FG+jEzGgqMUvcisS+OziP/8QR/C41f5jdaETfkBE53DZIWVXZ80QRabphRTCbRUfibC39WWrhhLgWCIqzvTM8qsO/43JuQOGLQbuqcs=
+notifications:
+  slack:
+    secure: PfUgPphNmKcZLIjTjd46IHBzqB0vkzK8clCqdsUr5taJRHhMSgRg8ks81sUhCmu+hTl3FG+jEzGgqMUvcisS+OziP/8QR/C41f5jdaETfkBE53DZIWVXZ80QRabphRTCbRUfibC39WWrhhLgWCIqzvTM8qsO/43JuQOGLQbuqcs=
 
 before_script:
-  - unset SBT_OPTS # default $SBT_OPTS is irrelevant to sbt lancher
+  - unset SBT_OPTS # default $SBT_OPTS is irrelevant to sbt launcher
 
 script:
   - travis_retry ./sbt ++$TRAVIS_SCALA_VERSION coverage "$PROJECT/test" coverageReport
 
-after_success:
+after_success:  # note this is run per job in the matrix but only the last run is kept by codecov.io.
   - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
   - bash <(curl -s https://codecov.io/bash)
 
@@ -76,7 +76,6 @@ stages:
 jobs:
   include:
     - stage: dodo
-      scala: 2.11.12
       jdk: oraclejdk8
       script: curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test finagle
     - stage: memcached
