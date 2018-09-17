@@ -33,12 +33,14 @@ private[http2] object ServerCodec {
     http2MultiplexCodec: Http2MultiplexCodec,
     channel: Channel
   ): Unit = {
+    // scalafix:off StoreGaugesAsMemberVariables
     val streams = statsReceiver.addGauge("streams") {
       // Note that this isn't thread-safe because the session state is intended to be
       // single-threaded and used only from within the channel, but addressing that
       // would be very challenging.
       http2MultiplexCodec.connection.numActiveStreams
     }
+    // scalafix:on StoreGaugesAsMemberVariables
 
     // We're attaching a gauge to the channel's attributes to make sure it stays referenced
     // as long as channel is alive.

@@ -10,7 +10,7 @@ class MetricsStatsReceiverTest extends FunSuite {
 
   private[this] def readGaugeInRoot(name: String) = readGauge(rootReceiver, name)
   private[this] def readCounterInRoot(name: String) = rootReceiver.registry.counters.get(name)
-
+  // scalafix:off StoreGaugesAsMemberVariables
   test("MetricsStatsReceiver should store and read gauge into the root StatsReceiver") {
     val x = 1.5f
     // gauges are weakly referenced by the registry so we need to keep a strong reference
@@ -134,4 +134,5 @@ class MetricsStatsReceiverTest extends FunSuite {
     assert(metrics1.histograms.containsKey("baz"))
     assert(metrics2.histograms.containsKey("baz"))
   }
+  // scalafix:on StoreGaugesAsMemberVariables
 }

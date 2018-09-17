@@ -54,6 +54,7 @@ private[serverset2] object HealthStabilizer {
 
       val currentStatus = new AtomicReference[Status]()
       val gaugeListener = stateChanges.dedup.register(Witness { currentStatus })
+      // scalafix:off StoreGaugesAsMemberVariables
       val gauge = statsReceiver.addGauge("zkHealth") {
         currentStatus.get() match {
           case Unknown => 0
@@ -62,6 +63,7 @@ private[serverset2] object HealthStabilizer {
           case Probation(_) => 3
         }
       }
+      // scalafix:on StoreGaugesAsMemberVariables
 
       val notify = stateChanges
         .collect {
