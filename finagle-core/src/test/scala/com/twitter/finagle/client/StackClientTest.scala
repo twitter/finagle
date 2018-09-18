@@ -391,7 +391,7 @@ abstract class AbstractStackClientTest
   })
 
   test("service acquisition requeues will close Status.Closed sessions") {
-    val ctx = new RequeueCtx { }
+    val ctx = new RequeueCtx {}
     ctx._svcFacStatus = Status.Open
     ctx._sessionStatus = Status.Closed
     ctx.closeSideEffect = () => ctx._sessionStatus = Status.Open
@@ -408,15 +408,15 @@ abstract class AbstractStackClientTest
     class CountFactory extends ServiceFactory[Unit, Unit] {
       var count = 0
 
-      val service = new Service[Unit, Unit] {
+      val service: Service[Unit, Unit] = new Service[Unit, Unit] {
         def apply(request: Unit): Future[Unit] = {
           count = count + 1
           Future.exception(WriteException(null))
         }
       }
 
-      def apply(conn: ClientConnection) = Future.value(service)
-      def close(deadline: Time) = Future.Done
+      def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = Future.value(service)
+      def close(deadline: Time): Future[Unit] = Future.Done
     }
 
     val fac1 = new CountFactory
@@ -449,7 +449,7 @@ abstract class AbstractStackClientTest
       .replace(
         LoadBalancerFactory.role,
         new Stack.Module1[LoadBalancerFactory.Dest, ServiceFactory[Unit, Unit]] {
-          val role = new Stack.Role("role")
+          val role = Stack.Role("role")
           val description = "description"
           def make(dest: LoadBalancerFactory.Dest, next: ServiceFactory[Unit, Unit]) = {
             val LoadBalancerFactory.Dest(va) = dest
@@ -474,7 +474,7 @@ abstract class AbstractStackClientTest
         )
       )
 
-    intercept[Failure] {
+    intercept[ChannelWriteException] {
       await(service(()))
     }
 
@@ -545,7 +545,7 @@ abstract class AbstractStackClientTest
         StringServer.server.serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), echoSvc)
       val ia = server.boundAddress.asInstanceOf[InetSocketAddress]
 
-      val client = new LocalCheckingStringClient(key)
+      val client = LocalCheckingStringClient(key)
         .newService(Name.bound(Address(ia)), "a-label")
 
       val result = await(client("abc"))
@@ -703,14 +703,14 @@ abstract class AbstractStackClientTest
     // We could insert using [[ExceptionSourceFilter]] as the relative insertion point, but we use
     // another module instead so that if the [[ExceptionSourceFilter]] were moved earlier in the
     // stack, this test would fail.
-    val svc = baseClient.withStack(baseClient.stack.insertBefore(
-      ClearContextValueFilter.role, throwsModule))
+    val svc = baseClient
+      .withStack(baseClient.stack.insertBefore(ClearContextValueFilter.role, throwsModule))
       .newService(Name.bound(Address(boundAddress)), label)
 
     val failure = intercept[Failure] {
       await(svc("hello"))
     }
 
-   assert(failure.toString == "Failure(boom!, flags=0x00) with Service -> stringClient")
+    assert(failure.toString == "Failure(boom!, flags=0x00) with Service -> stringClient")
   }
 }

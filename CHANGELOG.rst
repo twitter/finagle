@@ -7,6 +7,14 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: When Finagle would exhaust a retry budget with an exception that was
+  not a `FailureFlags`, previously it would wrap that exception with a non-retryable
+  failure. This lead to surprising behavior for users. Those exceptions will no longer
+  be wrapped. ``PHAB_ID=D216281``
+
 18.9.0
 -------
 

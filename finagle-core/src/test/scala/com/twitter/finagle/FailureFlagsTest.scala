@@ -1,5 +1,7 @@
 package com.twitter.finagle
 
+import com.twitter.conversions.time._
+import com.twitter.util.{Await, Future, Throw}
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
@@ -7,12 +9,15 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 class FailureFlagsTest extends FunSuite with GeneratorDrivenPropertyChecks {
   import FailureFlags._
 
+  private def await[T](f: Future[T]): T =
+    Await.result(f, 5.seconds)
+
   case class FlagCheck(flags: Long) extends FailureFlags[FlagCheck] {
     protected def copyWithFlags(f: Long): FlagCheck = FlagCheck(f)
   }
 
   private val flag = Gen.oneOf(
-    0L,
+    FailureFlags.Empty,
     FailureFlags.Retryable,
     FailureFlags.Interrupted,
     FailureFlags.Wrapped,
@@ -69,4 +74,30 @@ class FailureFlagsTest extends FunSuite with GeneratorDrivenPropertyChecks {
     assert(copied.getCause == initial.getCause)
     assert(copied.getSuppressed.toSeq == initial.getSuppressed.toSeq)
   }
+
+  test("FailureFlags.asNonRetryable removes retryable flag from FailureFlags exceptions") {
+    val t = Throw(Failure.RetryableNackFailure)
+    val asNonRetryable = intercept[FailureFlags[_]] {
+      await(FailureFlags.asNonRetryable(t))
+    }
+    assert(!asNonRetryable.isFlagged(FailureFlags.Retryable))
+  }
+
+  test("FailureFlags.asNonRetryable on non-retryable FailureFlags exceptions") {
+    val t = Throw(Failure.NonRetryableNackFailure)
+    val asNonRetryable = intercept[FailureFlags[_]] {
+      await(FailureFlags.asNonRetryable(t))
+    }
+    assert(!asNonRetryable.isFlagged(FailureFlags.Retryable))
+  }
+
+  test("FailureFlags.asNonRetryable does not modify non-FailureFlags exceptions") {
+    val ex = new RuntimeException("not a FailureFlags")
+    val t = Throw(ex)
+    val notWrapped = intercept[RuntimeException] {
+      await(FailureFlags.asNonRetryable(t))
+    }
+    assert(ex == notWrapped)
+  }
+
 }

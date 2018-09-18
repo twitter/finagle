@@ -102,13 +102,12 @@ object FailureFlags {
   }
 
   /**
-   * A function for transforming unsuccessful responses into ones that are
-   * flagged as NonRetryable
+   * A function for transforming unsuccessful [[FailureFlags]] responses
+   * into ones that are flagged as [[NonRetryable]].
    */
   private[finagle] def asNonRetryable[Rep](t: Try[Rep]): Future[Rep] = {
     t match {
       case Throw(f: FailureFlags[_]) => Future.exception(f.asNonRetryable)
-      case Throw(exn) => Future.exception(Failure(exn, FailureFlags.NonRetryable))
       case _ => Future.const(t)
     }
   }
@@ -207,8 +206,8 @@ trait FailureFlags[T <: FailureFlags[T]] extends Exception { this: T =>
  * For Java users wanting to implement exceptions that are [[FailureFlags]].
  */
 abstract class AbstractFailureFlags[T <: AbstractFailureFlags[T]]
-  extends Exception
-  with FailureFlags[T] { this: T =>
+    extends Exception
+    with FailureFlags[T] { this: T =>
 
   // Java-friendly forwarders
   // See https://issues.scala-lang.org/browse/SI-8905

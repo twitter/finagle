@@ -10,7 +10,11 @@ import org.scalatest.FunSuite
 
 class RetriesTest extends FunSuite {
 
-  private[this] class MyRetryEx extends Exception
+  private[this] class MyRetryEx(val flags: Long = FailureFlags.Empty)
+      extends Exception
+      with FailureFlags[MyRetryEx] {
+    protected def copyWithFlags(flags: Long): MyRetryEx = new MyRetryEx(flags)
+  }
   private[this] class AnotherEx extends Exception
 
   private[this] val retryFn: PartialFunction[Try[Nothing], Boolean] = {
@@ -214,7 +218,7 @@ class RetriesTest extends FunSuite {
     val svc: Service[Exception, Int] =
       Await.result(svcFactory(), 5.seconds)
 
-    intercept[Failure] {
+    intercept[MyRetryEx] {
       Await.result(svc(new MyRetryEx()), 5.seconds)
     }
 
@@ -308,7 +312,7 @@ class RetriesTest extends FunSuite {
     val numReqs = 100
     Time.withCurrentTimeFrozen { _ =>
       0.until(numReqs).foreach { _ =>
-        intercept[Failure] {
+        intercept[MyRetryEx] {
           Await.result(svc(new MyRetryEx()), 5.seconds)
         }
       }
@@ -426,12 +430,13 @@ class RetriesTest extends FunSuite {
 
   test("hashCode and equals for Retries.Budget only checks RetryBudget, not Backoff stream") {
     val budget = Retries.Budget(RetryBudget.Empty, Backoff.const(1.second))
-    val budgetWithDifferentBackoffStream = Retries.Budget(RetryBudget.Empty, Backoff.const(2.second))
+    val budgetWithDifferentBackoffStream =
+      Retries.Budget(RetryBudget.Empty, Backoff.const(2.second))
     val differentBudget = Retries.Budget(RetryBudget.Infinite, Backoff.const(3.second))
 
     assert(budget.equals(budget))
     assert(budget.equals(budgetWithDifferentBackoffStream))
-    assert(! budget.equals(differentBudget))
+    assert(!budget.equals(differentBudget))
 
     assert(budget.## == budget.##)
     assert(budget.## == budgetWithDifferentBackoffStream.##)
