@@ -2,7 +2,7 @@ package com.twitter.finagle.http2.transport
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.http.TooLongMessageException
-import com.twitter.finagle.http2.{GoAwayException, RstException}
+import com.twitter.finagle.http2.{DeadConnectionException, GoAwayException, RstException}
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader._
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.netty4.transport.HasExecutor
@@ -674,14 +674,6 @@ private[http2] object StreamTransportFactory {
 
     protected def copyWithFlags(newFlags: Long): BadStreamStateException =
       new BadStreamStateException(msg, id, newFlags)
-  }
-  
-  class DeadConnectionException(addr: SocketAddress, val flags: Long)
-      extends Exception(s"assigned an already dead connection to address $addr")
-      with FailureFlags[DeadConnectionException] {
-
-    protected def copyWithFlags(newFlags: Long): DeadConnectionException =
-      new DeadConnectionException(addr, newFlags)
   }
 
   class StreamIdOverflowException(
