@@ -32,7 +32,7 @@ private[twitter] object ServerAdmissionControl {
    * Signal that the request cannot be retried by the client and thus the server
    * should attempt to handle it, if at all possible.
    */
-  private[finagle] val NonRetryable: Contexts.local.Key[Unit] = Contexts.local.newKey[Unit]()
+  private[twitter] val NonRetryable: Contexts.local.Key[Unit] = Contexts.local.newKey[Unit]()
 
   /**
    * Passed to filter factories to allow behavioral adjustment on a per-service
