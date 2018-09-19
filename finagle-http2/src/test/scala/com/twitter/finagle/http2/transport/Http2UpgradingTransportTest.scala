@@ -22,7 +22,7 @@ class Http2UpgradingTransportTest extends FunSuite {
       }
     }
     val ref = new RefTransport(transport)
-    val p = Promise[Option[StreamTransportFactory]]()
+    val p = Promise[Option[ClientSession]]()
 
     def http1Status: Status = Status.Open
 
@@ -40,7 +40,7 @@ class Http2UpgradingTransportTest extends FunSuite {
 
   def await[A](f: Future[A]): A = Await.result(f, 5.seconds)
 
-  test("Http2UpgradingTransport upgrades properly") {
+  test("upgrades properly") {
     val ctx = new Ctx
     import ctx._
 
@@ -54,11 +54,11 @@ class Http2UpgradingTransportTest extends FunSuite {
     assert(await(readF) == fullResponse)
   }
 
-  test("Http2UpgradingTransport can reject an upgrade") {
+  test("can reject an upgrade") {
     val ctx = new Ctx
     import ctx._
 
-    val writeF = upgradingTransport.write(fullRequest)
+    upgradingTransport.write(fullRequest)
     assert(await(writeq.poll) == fullRequest)
     val readF = upgradingTransport.read()
     assert(!readF.isDefined)
@@ -68,7 +68,7 @@ class Http2UpgradingTransportTest extends FunSuite {
     assert(await(readF) == fullResponse)
   }
 
-    test("Http2UpgradingTransport honors aborted upgrade dispatches") {
+    test("honors aborted upgrade dispatches") {
       val ctx = new Ctx
       import ctx._
 
@@ -87,7 +87,7 @@ class Http2UpgradingTransportTest extends FunSuite {
       assert(await(readF) == fullResponse)
     }
 
-  test("Http2UpgradingTransport honors the status if the upgrade is rejected") {
+  test("honors the status if the upgrade is rejected") {
     var status: Status = Status.Open
 
     val ctx = new Ctx {
@@ -114,7 +114,7 @@ class Http2UpgradingTransportTest extends FunSuite {
     assert(upgradingTransport.status == Status.Closed)
   }
 
-  test("Http2UpgradingTransport honors the status if the upgrade is ignored") {
+  test("honors the status if the upgrade is ignored") {
     var status: Status = Status.Open
 
     val ctx = new Ctx {

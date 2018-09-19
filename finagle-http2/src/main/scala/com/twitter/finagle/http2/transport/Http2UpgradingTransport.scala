@@ -23,7 +23,7 @@ import scala.util.control.NoStackTrace
 private[http2] final class Http2UpgradingTransport(
   underlying: Transport[Any, Any],
   ref: RefTransport[Any, Any],
-  p: Promise[Option[StreamTransportFactory]],
+  p: Promise[Option[ClientSession]],
   params: Stack.Params,
   http1Status: () => Status
 ) extends TransportProxy[Any, Any](underlying) {

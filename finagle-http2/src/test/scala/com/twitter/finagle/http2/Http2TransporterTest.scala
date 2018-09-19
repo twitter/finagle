@@ -19,7 +19,6 @@ import java.net.{InetSocketAddress, SocketAddress}
 import java.security.cert.Certificate
 import java.util.concurrent.Executor
 import org.scalatest.FunSuite
-import scala.language.reflectiveCalls
 
 class Http2TransporterTest extends FunSuite {
   def await[T](f: Future[T], wait: Duration = 1.second) =
@@ -59,31 +58,6 @@ class Http2TransporterTest extends FunSuite {
   }
 
   class TestTransporter extends BackingTransporter(new TestTransport(_))
-
-  test("Http2Transporter caches transports") {
-    val (t1, t2) = (new TestTransporter(), new TestTransporter())
-    val transporter = new Http2Transporter(t1, t2, false, Stack.Params.empty, new MockTimer()) {
-      def cached: Boolean = cachedConnection.get != null
-    }
-
-    val addr = new InetSocketAddress("127.1", 14400)
-    val tf = transporter()
-    assert(transporter.cached)
-  }
-
-  test("Http2Transporter decaches transport when closed") {
-    val (t1, t2) = (new TestTransporter(), new TestTransporter())
-    val transporter = new Http2Transporter(t1, t2, false, Stack.Params.empty, new MockTimer()) {
-      def cached: Boolean = cachedConnection.get != null
-    }
-
-    val addr = new InetSocketAddress("127.1", 14400)
-    val tf = transporter()
-    assert(transporter.cached)
-    val t = await(tf)
-    await(t.close())
-    assert(!transporter.cached)
-  }
 
   test("Http2Transporter uses http11 for the second outstanding transport preupgrade") {
     val (t1, t2) = (new TestTransporter(), new TestTransporter())
