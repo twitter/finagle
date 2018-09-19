@@ -4,7 +4,7 @@ import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Status, Stack}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.util.parsers.{double, duration, int, list}
+import com.twitter.finagle.util.parsers.{duration, list}
 import com.twitter.util.{Duration, Future, Promise}
 import java.util.logging.Logger
 
@@ -54,14 +54,14 @@ private class MockFailureDetector(fn: () => Status) extends FailureDetector {
  *
  * Value of:
  * "none": turn off threshold failure detector
- * "threshold:minPeriod:threshold:win:closeTimeout":
+ * "threshold:minPeriod:closeTimeout":
  *         use the specified configuration for failure detection
  */
 object sessionFailureDetector
     extends GlobalFlag[String](
-      "threshold:5.seconds:2:100:4.seconds",
+      "threshold:5.seconds:4.seconds",
       "The failure detector used to determine session liveness " +
-        "[none|threshold:minPeriod:threshold:win:closeTimeout]"
+        "[none|threshold:minPeriod:closeTimeout]"
     )
 
 /**
@@ -110,8 +110,6 @@ object FailureDetector {
    */
   case class ThresholdConfig(
     minPeriod: Duration = 5.seconds,
-    threshold: Double = 2,
-    windowSize: Int = 100,
     closeTimeout: Duration = 4.seconds
   ) extends Config
 
@@ -147,8 +145,6 @@ object FailureDetector {
         new ThresholdFailureDetector(
           ping,
           cfg.minPeriod,
-          cfg.threshold,
-          cfg.windowSize,
           cfg.closeTimeout,
           statsReceiver = statsReceiver
         )
@@ -168,34 +164,13 @@ object FailureDetector {
     statsReceiver: StatsReceiver = NullStatsReceiver
   ): FailureDetector = {
     sessionFailureDetector() match {
-      case list("threshold", duration(min), double(threshold), int(win), duration(closeTimeout)) =>
+      case list("threshold", duration(min), duration(closeTimeout)) =>
         new ThresholdFailureDetector(
           ping,
           min,
-          threshold,
-          win,
           closeTimeout,
           nanoTime,
           statsReceiver
-        )
-
-      case list("threshold", duration(min), double(threshold), int(win)) =>
-        new ThresholdFailureDetector(
-          ping,
-          min,
-          threshold,
-          win,
-          nanoTime = nanoTime,
-          statsReceiver = statsReceiver
-        )
-
-      case list("threshold", duration(min), double(threshold)) =>
-        new ThresholdFailureDetector(
-          ping,
-          min,
-          threshold,
-          nanoTime = nanoTime,
-          statsReceiver = statsReceiver
         )
 
       case list("threshold", duration(min)) =>

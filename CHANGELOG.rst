@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: Remove slow host detection from `ThresholdFailureDetector`.
+  ``PHAB_ID=D210015``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

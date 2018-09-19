@@ -35,8 +35,6 @@ class ThresholdFailureDetectorTest
     val d = new ThresholdFailureDetector(
       ping,
       minPeriod = 10.milliseconds,
-      threshold = 2,
-      windowSize = 5,
       closeTimeout = closeTimeout,
       nanoTime = nanoTime,
       statsReceiver = sr,
@@ -78,70 +76,6 @@ class ThresholdFailureDetectorTest
     assert(n.get == 3)
   }
 
-  testt("mark suspect when reaching threshold; recover") { tc =>
-    val ctx = new Ctx
-    import ctx._
-
-    assert(n.get == 1)
-    tc.advance(2.milliseconds)
-    latch.flip() // rtt = 2, maxPing = 2
-    // We got the reply, but we're not scheduling another ping yet.
-    assert(n.get == 1)
-
-    assert(d.status == Status.Open)
-    tc.advance(5.milliseconds)
-    timer.tick()
-    assert(d.status == Status.Open)
-
-    tc.advance(10.milliseconds)
-
-    // One more ping; we're not going to reply for a little while.
-    assert(n.get == 1)
-    timer.tick()
-    assert(n.get == 2)
-
-    tc.advance(2.milliseconds)
-    assert(d.status == Status.Open)
-    // this crosses 2*maxPing
-    tc.advance(3.milliseconds)
-    timer.tick()
-    assert(d.status == Status.Busy)
-    val until = Status.whenOpen(d.status)
-    assert(!until.isDefined)
-
-    timer.tick()
-    assert(n.get == 2)
-
-    tc.advance(5.milliseconds)
-    latch.flip() // rtt = 10, maxPing = 10
-
-    eventually {
-      assert(until.isDefined)
-      assert(Await.result(until.liftToTry, 5.seconds) == Return.Unit)
-    }
-
-    assert(d.status == Status.Open)
-
-    timer.tick()
-    assert(n.get == 3)
-
-    // cutoff is 20
-    assert(d.status == Status.Open)
-    tc.advance(10.milliseconds)
-    timer.tick()
-    assert(d.status == Status.Open)
-    tc.advance(9.milliseconds)
-    timer.tick()
-    assert(d.status == Status.Open)
-    tc.advance(2.milliseconds)
-    timer.tick()
-    assert(d.status == Status.Busy)
-
-    // Recover again.
-    latch.flip()
-    assert(d.status == Status.Open)
-  }
-
   testt("close the connection if it becomes unresponsive for too long") { tc =>
     val ctx = new Ctx
     import ctx._
@@ -155,11 +89,9 @@ class ThresholdFailureDetectorTest
     tc.advance(10.milliseconds)
     timer.tick()
     assert(d.status == Status.Open)
-    // after 10ms mark busy, keep in busy state for 1000ms until it closes
     (1 to 99) foreach { p =>
       tc.advance(10.milliseconds)
       timer.tick()
-      assert(d.status == Status.Busy)
       assert(!d.onClose.isDefined)
     }
     tc.advance(10.milliseconds)
@@ -184,8 +116,6 @@ class ThresholdFailureDetectorTest
     val d = new ThresholdFailureDetector(
       ping,
       minPeriod = 10.milliseconds,
-      threshold = 2,
-      windowSize = 5,
       closeTimeout = Duration.Top,
       nanoTime = nanoTime,
       timer = timer,
@@ -204,6 +134,5 @@ class ThresholdFailureDetectorTest
     assert(d.onClose.isDefined)
     assert(sr.counters(Seq("failures")) == 1)
     assert(sr.counters(Seq("close")) == 1)
-    assert(sr.counters(Seq("marked_busy")) == 0)
   }
 }
