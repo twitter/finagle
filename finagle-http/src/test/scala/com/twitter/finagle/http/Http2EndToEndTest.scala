@@ -15,7 +15,7 @@ import com.twitter.util._
 import io.netty.handler.codec.http2.Http2CodecUtil
 import java.net.InetSocketAddress
 import java.util.concurrent.atomic.AtomicInteger
-import scala.collection.mutable.{ArrayBuffer, Map => MMap}
+import scala.collection.mutable.ArrayBuffer
 
 class Http2EndToEndTest extends AbstractHttp2EndToEndTest {
   def implName: String = "netty4 http/2"
@@ -380,49 +380,16 @@ class Http2EndToEndTest extends AbstractHttp2EndToEndTest {
 
     val client = clientImpl().newService(dest, "client")
 
-
-    // we need to circumvent the validations in the DefaultHeaderMap
-    val map = new HeaderMap {
-      val underlying = MMap.empty[String, String]
-
-      def get(key: String): Option[String] = underlying.get(key)
-
-      def set(k: String, v: String): HeaderMap = {
-        underlying.update(k, v)
-        this
-      }
-
-      def add(k: String, v: String): HeaderMap = {
-        underlying.update(k, v)
-        this
-      }
-
-      def getAll(key: String): Seq[String] = underlying.get(key).map(Seq(_)).getOrElse(Nil)
-
-      def +=(kv: (String, String)): this.type = {
-        underlying += kv
-        this
-      }
-
-      def -=(key: String): this.type = {
-        underlying -= (key)
-        this
-      }
-
-      def iterator: Iterator[(String, String)] = underlying.iterator
-    }
-
     val req = new Request.Proxy {
       val underlying = Request("/")
       def request: Request = underlying
-      override def headerMap: HeaderMap = map
     }
 
     initClient(client)
 
     // this sends illegal pseudo headers to the server, it should reject them with a non-zero
     // error code.
-    req.headerMap.set(":invalid", "foo")
+    req.headerMap.setUnsafe(":invalid", "foo")
 
     val rep = client(req)
 

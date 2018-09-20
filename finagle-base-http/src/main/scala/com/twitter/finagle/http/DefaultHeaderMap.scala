@@ -22,12 +22,28 @@ private final class DefaultHeaderMap extends HeaderMap {
     underlying.getAll(key)
   }
 
-  def add(k: String, v: String): HeaderMap = underlying.synchronized {
+  // Validates key and value.
+  def add(k: String, v: String): HeaderMap = {
+    DefaultHeaderMap.validateName(k)
+    DefaultHeaderMap.validateValue(v)
+    addUnsafe(k, v)
+  }
+
+  // Does not validate key and value.
+  def addUnsafe(k: String, v: String): HeaderMap = underlying.synchronized {
     underlying.add(k, v)
     this
   }
 
-  def set(key: String, value: String): HeaderMap = underlying.synchronized {
+  // Validates key and value.
+  def set(key: String, value: String): HeaderMap = {
+    DefaultHeaderMap.validateName(key)
+    DefaultHeaderMap.validateValue(value)
+    setUnsafe(key, value)
+  }
+
+  // Does not validate key and value.
+  def setUnsafe(key: String, value: String): HeaderMap = underlying.synchronized {
     underlying.set(key, value)
     this
   }
@@ -131,9 +147,6 @@ private object DefaultHeaderMap {
   }
 
   private final class Header(val name: String, val value: String, var next: Header = null) {
-
-    validateName(name)
-    validateValue(value)
 
     def values: Seq[String] =
       if (next == null) value :: Nil

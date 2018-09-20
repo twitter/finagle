@@ -10,6 +10,10 @@ Unreleased
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+* finagle-base-http: `DefaultHeaderMap` now validates HTTP Header names and
+  values in `add` and `set`. `addUnsafe` and `setUnsafe` have been created to
+  allow adding and setting headers without validation. ``PHAB_ID=D217035``
+
 * finagle-core: Remove slow host detection from `ThresholdFailureDetector`.
   ``PHAB_ID=D210015``
 

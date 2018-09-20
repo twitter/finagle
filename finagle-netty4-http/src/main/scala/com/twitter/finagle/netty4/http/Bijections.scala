@@ -68,7 +68,8 @@ private[finagle] object Bijections {
       val itr = head.iteratorAsString()
       while (itr.hasNext) {
         val entry = itr.next()
-        out.add(entry.getKey, entry.getValue)
+        // addUnsafe because Netty already validates Headers for us.
+        out.addUnsafe(entry.getKey, entry.getValue)
       }
     }
 

@@ -42,6 +42,12 @@ abstract class HeaderMap
   def add(k: String, v: String): HeaderMap
 
   /**
+   * Adds a header without replacing existing headers without validating the
+   * key and value.
+   */
+  def addUnsafe(k: String, v: String): HeaderMap
+
+  /**
    * Adds a header without replacing existing headers, as in [[add(String, String)]],
    * but with standard formatting for dates in HTTP headers.
    */
@@ -52,6 +58,11 @@ abstract class HeaderMap
    * Set a header. If an entry already exists, it is replaced.
    */
   def set(k: String, v: String): HeaderMap
+
+  /**
+   * Set or replace a header without validating the key and value.
+   */
+  def setUnsafe(k: String, v: String): HeaderMap
 
   /**
    * Set or replace a header, as in [[set(String, String)]],
