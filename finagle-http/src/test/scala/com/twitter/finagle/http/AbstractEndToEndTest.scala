@@ -59,7 +59,7 @@ abstract class AbstractEndToEndTest
   type HttpService = Service[Request, Response]
   type HttpTest = (HttpService => HttpService) => Unit
 
-  def await[T](f: Future[T]): T = Await.result(f, 30.seconds)
+  def await[T](f: Future[T]): T = Await.result(f, 5.seconds)
 
   def drip(w: Writer[Buf]): Future[Unit] = w.write(buf("*")) before drip(w)
   def buf(msg: String): Buf = Buf.Utf8(msg)
