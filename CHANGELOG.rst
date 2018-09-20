@@ -37,7 +37,7 @@ New Features
 
 * finagle-netty4: Allow sockets to be configured with the [SO_REUSEPORT](http://lwn.net/Articles/542629/) option
   when using native epoll, which allows multiple processes to bind and accept connections
-  from the same port.
+  from the same port. ``PHAB_ID=D205535``
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
