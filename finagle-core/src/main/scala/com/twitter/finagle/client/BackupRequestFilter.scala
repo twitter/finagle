@@ -77,6 +77,23 @@ object BackupRequestFilter {
   val Disabled: Param = Param.Disabled
 
   /**
+   * Define the bounds of values tracked by the histogram.
+   *
+   * Note: this is an expert-level API; the defaults work well for the typical user.
+   *
+   * @param lowestDiscernibleMsValue The lowest value in milliseconds that can be discerned by the histogram.
+   * @param highestTrackableMsValue The highest value in milliseconds to be tracked by the histogram..
+   */
+  case class Histogram(lowestDiscernibleMsValue: Int, highestTrackableMsValue: Int) {
+    def mk(): (Histogram, Stack.Param[Histogram]) = (this, Histogram.param)
+  }
+  object Histogram {
+    implicit val param: Stack.Param[Histogram] = Stack.Param(Histogram(
+      WindowedPercentileHistogram.DefaultLowestDiscernibleValue,
+      WindowedPercentileHistogram.DefaultHighestTrackableValue))
+  }
+
+  /**
    * Configure [[BackupRequestFilter]].
    *
    * @param maxExtraLoad How much extra load, as a fraction, we are willing to send to the server.
@@ -107,6 +124,8 @@ object BackupRequestFilter {
       sendInterrupts,
       params[param.ResponseClassifier].responseClassifier,
       params[Retries.Budget].retryBudget,
+      params[Histogram].lowestDiscernibleMsValue,
+      params[Histogram].highestTrackableMsValue,
       params[param.Stats].statsReceiver.scope("backups"),
       params[param.Timer].timer
     )
@@ -236,6 +255,31 @@ private[finagle] class BackupRequestFilter[Req, Rep](
     statsReceiver,
     timer,
     () => new WindowedPercentileHistogram(timer))
+
+  def this(
+    maxExtraLoadTunable: Tunable[Double],
+    sendInterrupts: Boolean,
+    responseClassifier: ResponseClassifier,
+    clientRetryBudget: RetryBudget,
+    lowestDiscernibleMsValue: Int,
+    highestTrackableMsValue: Int,
+    statsReceiver: StatsReceiver,
+    timer: Timer
+  ) = this(
+    maxExtraLoadTunable,
+    sendInterrupts,
+    responseClassifier,
+    newRetryBudget = BackupRequestFilter.newRetryBudget,
+    clientRetryBudget = clientRetryBudget,
+    Stopwatch.systemMillis,
+    statsReceiver,
+    timer,
+    () => new WindowedPercentileHistogram(
+      WindowedPercentileHistogram.DefaultNumBuckets,
+      WindowedPercentileHistogram.DefaultBucketSize,
+      lowestDiscernibleMsValue,
+      highestTrackableMsValue,
+      timer))
 
 
   @volatile private[this] var backupRequestRetryBudget: RetryBudget =

@@ -117,26 +117,29 @@ class WindowedPercentileHistogramTest extends FunSuite with Eventually with Inte
     }
   }
 
-  test("Caps values at MaxHighestTrackableValue") {
+  test("Caps values at DefaultHighestTrackableValue") {
     val timer = new MockTimer
     Time.withCurrentTimeFrozen { tc =>
+      val highestTrackable = WindowedPercentileHistogram.DefaultHighestTrackableValue + 10
       val wp = new WindowedPercentileHistogram(
         3,
         10.seconds,
+        WindowedPercentileHistogram.DefaultLowestDiscernibleValue,
+        highestTrackable,
         timer)
 
-      wp.add(WindowedPercentileHistogram.MaxHighestTrackableValue + 10)
+      wp.add(highestTrackable + 10)
       tc.advance(10.seconds)
       timer.tick()
       eventually {
-        assert(wp.percentile(50.percent) == WindowedPercentileHistogram.MaxHighestTrackableValue)
+        assert(wp.percentile(50.percent) == highestTrackable)
       }
     }
   }
 
   test("Has precision of +/- 1 at 1000") {
     val timer = new MockTimer
-    1.until(WindowedPercentileHistogram.MaxHighestTrackableValue / 1000).foreach { i =>
+    1.until(WindowedPercentileHistogram.DefaultHighestTrackableValue / 1000).foreach { i =>
       Time.withCurrentTimeFrozen { tc =>
         val wp = new WindowedPercentileHistogram(
           3,
