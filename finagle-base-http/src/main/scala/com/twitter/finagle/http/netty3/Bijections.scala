@@ -21,6 +21,7 @@ object Bijections {
   def versionToNetty(v: Version): HttpVersion = v match {
     case Version.Http11 => HttpVersion.HTTP_1_1
     case Version.Http10 => HttpVersion.HTTP_1_0
+    case x => throw new RuntimeException(s"Unexpected version: $x")
   }
 
   // Note: netty 3's HttpVersion allows arbitrary protocol names so the bijection

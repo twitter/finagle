@@ -45,6 +45,7 @@ object HttpResponseClassifier {
 
     def apply(x: ReqRep): ResponseClass = x match {
       case ReqRep(req: Request, Return(rep: Response)) => underlying((req, rep))
+      case _ => throw new AssertionError(s"$this applied to $x")
     }
   }
 }
