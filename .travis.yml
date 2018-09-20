@@ -1,5 +1,5 @@
-# container-based build
-sudo: false
+dist: trusty
+sudo: required
 
 language: scala
 
