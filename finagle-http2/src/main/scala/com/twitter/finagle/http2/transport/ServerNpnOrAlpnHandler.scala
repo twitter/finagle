@@ -25,7 +25,7 @@ final private[http2] class ServerNpnOrAlpnHandler(init: ChannelInitializer[Chann
         params, Http2MultiplexCodecBuilder.forServer(initializer))
       ServerCodec.addStreamsGauge(statsReceiver, http2MultiplexCodec, ctx.channel)
       ctx.pipeline.replace(HttpCodecName, Http2CodecName, http2MultiplexCodec)
-      ctx.pipeline.addAfter(Http2CodecName, "H2Filter", H2Filter)
+      ctx.pipeline.addAfter(Http2CodecName, H2Filter.HandlerName, H2Filter)
 
     case ApplicationProtocolNames.HTTP_1_1 =>
     // The Http codec is already in the pipeline, so we are good!

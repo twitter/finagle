@@ -78,7 +78,7 @@ final private[http2] class PriorKnowledgeHandler(
 
           p.replace(HttpCodecName, Http2CodecName, http2MultiplexCodec)
           p.remove("upgradeHandler")
-          p.addAfter(Http2CodecName, "H2Filter", H2Filter)
+          p.addAfter(Http2CodecName, H2Filter.HandlerName, H2Filter)
 
           // Since we changed the pipeline, our current ctx points to the wrong handler
           // but we can still use this handler as the reference point in the new pipeline

@@ -45,7 +45,7 @@ final private[finagle] class Http2CleartextServerInitializer(
 
             // httpCompressor is the beginning of the h1 pipeline, so we make sure that no h2
             // messages reach it.
-            ctx.pipeline.addBefore("httpCompressor", "H2Filter", H2Filter)
+            ctx.pipeline.addBefore("httpCompressor", H2Filter.HandlerName, H2Filter)
           }
         }
       } else null

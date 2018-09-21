@@ -12,6 +12,9 @@ import io.netty.util.ReferenceCountUtil
  */
 @Sharable
 private[http2] object H2Filter extends ChannelDuplexHandler {
+
+  val HandlerName: String = "H2Filter"
+
   override def channelRead(ctx: ChannelHandlerContext, msg: Object): Unit = msg match {
     case frame: Http2Frame =>
       ReferenceCountUtil.release(frame)
