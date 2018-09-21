@@ -152,6 +152,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     assertSecondRequestOk()
   })
 
+  if (!sys.props.contains("SKIP_FLAKY"))
   test("client: discard respond reader")(new ClientCtx(singletonPool = true) {
     assert(res2.poll == None)
     res.reader.discard()

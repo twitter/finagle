@@ -223,6 +223,7 @@ abstract class AbstractEndToEndTest
       await(client.close())
     }
 
+    if (!sys.props.contains("SKIP_FLAKY"))
     test(implName + ": return 413s for fixed-length requests with too large payloads") {
       val service = new HttpService {
         def apply(request: Request) = Future.value(Response())
@@ -240,6 +241,7 @@ abstract class AbstractEndToEndTest
       await(client.close())
     }
 
+    if (!sys.props.contains("SKIP_FLAKY"))
     testIfImplemented(TooLongStream)(
       implName +
         ": return 413s for chunked requests which stream too much data"
@@ -901,6 +903,7 @@ abstract class AbstractEndToEndTest
     await(Closable.all(client, server).close())
   }
 
+  if (!sys.props.contains("SKIP_FLAKY"))
   test(implName + ": Status.busy propagates along the Stack") {
     val failService = new HttpService {
       def apply(req: Request): Future[Response] =
@@ -1435,6 +1438,7 @@ abstract class AbstractEndToEndTest
     await(server.close())
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // Maybe netty4 http/2 only
   test(implName + ": methodBuilder retries from Stack") {
     val svc = new Service[Request, Response] {
       def apply(req: Request): Future[Response] = {
@@ -1463,6 +1467,7 @@ abstract class AbstractEndToEndTest
     testMethodBuilderRetries(stats, server, builder)
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // Maybe netty4 http/2 only
   test(implName + ": methodBuilder retries from ClientBuilder") {
     val svc = new Service[Request, Response] {
       def apply(req: Request): Future[Response] = {

@@ -41,6 +41,7 @@ class ClientTest extends FunSuite {
       }
     }
 
+  if (!sys.props.contains("SKIP_FLAKY"))
   test("report a closed connection when the server doesn't reply") {
     withServer(failingFactory) { clientBuilder =>
       counter = 0
@@ -56,6 +57,7 @@ class ClientTest extends FunSuite {
     }
   }
 
+  if (!sys.props.contains("SKIP_FLAKY"))
   test("report a closed connection when the server doesn't reply, without retrying") {
     withServer(failingFactory) { clientBuilder =>
       counter = 0

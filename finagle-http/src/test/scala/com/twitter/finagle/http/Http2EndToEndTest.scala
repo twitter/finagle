@@ -155,6 +155,7 @@ class Http2EndToEndTest extends AbstractHttp2EndToEndTest {
     assert(rh.get("TE").get == "trailers")
   }
 
+  if (!sys.props.contains("SKIP_FLAKY"))
   test("The upgrade request is ineligible for flow control") {
     val server = serverImpl()
       .withMaxHeaderSize(1.kilobyte)
