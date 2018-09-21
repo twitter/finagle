@@ -102,7 +102,10 @@ private[finagle] object Http2Transporter {
         )
       } else {
         pipeline.addLast(HttpCodecName, sourceCodec)
-        pipeline.addLast(UpgradeRequestHandler.HandlerName, new UpgradeRequestHandler(params, sourceCodec, connectionHandlerBuilder))
+        pipeline.addLast(
+          UpgradeRequestHandler.HandlerName,
+          new UpgradeRequestHandler(params, sourceCodec, connectionHandlerBuilder)
+        )
         initClient(params)(pipeline)
       }
   }
@@ -133,7 +136,11 @@ private[http2] class Http2Transporter(
   alpnUpgrade: Boolean,
   params: Stack.Params,
   implicit val timer: Timer
-) extends Http2NegotiatingTransporter(params, underlyingHttp11) { self =>
+) extends Http2NegotiatingTransporter(
+      params,
+      underlyingHttp11,
+      fallbackToHttp11WhileNegotiating = !alpnUpgrade
+    ) { self =>
 
   private[this] val log = Logger.get()
 
@@ -157,10 +164,10 @@ private[http2] class Http2Transporter(
                   Transport[StreamMessage, StreamMessage] {
                     type Context = TransportContext with HasExecutor
                   }
-                  ]
+                ]
 
-              val streamTransportFactory = new StreamTransportFactory(
-                contextCasted, trans.remoteAddress, params)
+              val streamTransportFactory =
+                new StreamTransportFactory(contextCasted, trans.remoteAddress, params)
 
               clientSessionF.setValue(Some(streamTransportFactory))
               streamTransportFactory.newChildTransport()
@@ -172,8 +179,11 @@ private[http2] class Http2Transporter(
               underlyingHttp11()
 
             case Throw(exn) =>
-              log.error(exn, "Failed to clearly negotiate either HTTP/2 or HTTP/1.1.  " +
-                "Falling back to HTTP/1.1.")
+              log.error(
+                exn,
+                "Failed to clearly negotiate either HTTP/2 or HTTP/1.1.  " +
+                  "Falling back to HTTP/1.1."
+              )
               trans.close()
               clientSessionF.setValue(None)
               underlyingHttp11()
@@ -194,4 +204,3 @@ private[http2] class Http2Transporter(
     clientSessionF -> firstTransport
   }
 }
-

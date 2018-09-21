@@ -11,9 +11,23 @@ import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicReference
 import scala.annotation.tailrec
 
+/**
+ * A foundation for [[Transporter]] implementations that cache an underlying
+ * shared session.
+ *
+ * @param params [[Stack.Params]] used to configure the client.
+ * @param underlyingHttp11 A HTTP/1.x [[Transporter]] to use in the case of failure to
+ *                         negotiate or for use while an upgrade is pending if
+ *                         `waitForSingleton` is `false`.
+ * @param fallbackToHttp11WhileNegotiating If `false`, requests sent while negotiation is in
+ *                                         progress will wait for the outcome, allowing them
+ *                                         to use the same shared session if that is the
+ *                                         upgrade result.
+ */
 private[http2] abstract class Http2NegotiatingTransporter(
   params: Stack.Params,
-  underlyingHttp11: Transporter[Any, Any, TransportContext]
+  underlyingHttp11: Transporter[Any, Any, TransportContext],
+  fallbackToHttp11WhileNegotiating: Boolean
 ) extends Transporter[Any, Any, TransportContext]
   with MultiplexTransporter {
 
@@ -89,7 +103,7 @@ private[http2] abstract class Http2NegotiatingTransporter(
         }
 
       case futureSession =>
-        if (futureSession.isDefined) useExistingConnection(futureSession)
+        if (!fallbackToHttp11WhileNegotiating || futureSession.isDefined) useExistingConnection(futureSession)
         else fallbackToHttp11() // fall back to http/1.1 while upgrading
 
     }

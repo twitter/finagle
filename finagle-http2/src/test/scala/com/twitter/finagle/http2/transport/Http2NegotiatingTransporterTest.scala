@@ -20,8 +20,9 @@ class Http2NegotiatingTransporterTest extends FunSuite with MockitoSugar with Ev
 
   private abstract class TestableNegotiatingTransporter(
     params: Stack.Params,
-    http1Transporter: Transporter[Any, Any, TransportContext]
-  ) extends Http2NegotiatingTransporter(params, http1Transporter) {
+    http1Transporter: Transporter[Any, Any, TransportContext],
+    fallbackToHttp11WhileNegotiating: Boolean = true
+  ) extends Http2NegotiatingTransporter(params, http1Transporter, fallbackToHttp11WhileNegotiating) {
     final def cached: Boolean = connectionCached
   }
 
@@ -83,14 +84,14 @@ class Http2NegotiatingTransporterTest extends FunSuite with MockitoSugar with Ev
     eventually { assert(p.isInterrupted.isDefined) }
   }
 
-  test("uses http11 for the second outstanding transport pre-upgrade") {
+  test("uses http11 for the second outstanding transport pre-upgrade if fallbackToHttp11WhileNegotiating=true") {
     val http1Transporter = mock[Transporter[Any, Any, TransportContext]]
     val http1Transport = mock[Transport[Any, Any]]
     when(http1Transporter.apply()).thenReturn(Future.value(http1Transport))
     when(http1Transport.status).thenReturn(Status.Open)
 
     val transport = mock[Transport[Any, Any]]
-    val transporter = new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter) {
+    val transporter = new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter, true) {
       protected def attemptUpgrade(): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
         Future.never-> Future.value(transport)
       }
@@ -106,6 +107,36 @@ class Http2NegotiatingTransporterTest extends FunSuite with MockitoSugar with Ev
     assert(http11Trans.status == Status.Open)
     // Make sure we used the http1 transport
     verify(http1Transport, times(1)).status
+  }
+
+  test("waits for the singleton if fallbackToHttp11WhileNegotiating=false") {
+    // This should be unused for this test
+    val http1Transporter = mock[Transporter[Any, Any, TransportContext]]
+
+    val singleton = Promise[Option[ClientSession]]()
+    val transporter = new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter, false) {
+      protected def attemptUpgrade(): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
+        singleton -> singleton.flatMap {
+          case Some(session) => session.newChildTransport()
+          case None => fail("Expected a ClientSession, found None.")
+        }
+      }
+    }
+
+    transporter()
+    eventually { assert(transporter.cached) }
+    transporter()
+
+    val clientSession = mock[ClientSession]
+    when(clientSession.status).thenReturn(Status.Open)
+    when(clientSession.newChildTransport()).thenReturn(Future.never)
+
+    singleton.setValue(Some(clientSession))
+
+    eventually {
+      verify(clientSession, times(2)).newChildTransport()
+      verify(http1Transporter, times(0)).apply()
+    }
   }
 
   test("reuses the http2 transporter postupgrade") {
