@@ -57,6 +57,7 @@ before_script:
   - unset SBT_OPTS # default $SBT_OPTS is irrelevant to sbt lancher
 
 script:
+  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
   - travis_retry ./sbt ++$TRAVIS_SCALA_VERSION coverage "$PROJECT/test" coverageReport
 
 after_success:
@@ -65,7 +66,6 @@ after_success:
 
 stages:
   - dodo
-  - memcached
   - test
 
 jobs:
@@ -73,8 +73,3 @@ jobs:
     - stage: dodo
       script: curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test finagle
       scala: 2.12.6
-    - stage: memcached
-      script: ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
-      scala:
-        - 2.11.12
-        - 2.12.6
