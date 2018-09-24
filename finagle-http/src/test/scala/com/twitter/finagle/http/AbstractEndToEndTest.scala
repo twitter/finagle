@@ -1637,6 +1637,7 @@ abstract class AbstractEndToEndTest
     await(server.close())
   }
 
+  if (!sys.props.contains("SKIP_FLAKY"))
   test("ServerAdmissionControl doesn't filter requests with a chunked body") {
     val responseString = "a response"
     val svc = Service.mk[Request, Response] { _ =>
@@ -1683,6 +1684,7 @@ abstract class AbstractEndToEndTest
     await(server.close())
   }
 
+  if (!sys.props.contains("SKIP_FLAKY"))
   test("ServerAdmissionControl can filter requests with the magic header") {
     val responseString = "a response"
     val svc = Service.mk[Request, Response] { _ =>
