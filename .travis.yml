@@ -54,17 +54,27 @@ notifications:
     secure: PfUgPphNmKcZLIjTjd46IHBzqB0vkzK8clCqdsUr5taJRHhMSgRg8ks81sUhCmu+hTl3FG+jEzGgqMUvcisS+OziP/8QR/C41f5jdaETfkBE53DZIWVXZ80QRabphRTCbRUfibC39WWrhhLgWCIqzvTM8qsO/43JuQOGLQbuqcs=
 
 before_script:
-  # default $SBT_OPTS is irrelevant to sbt lancher
-  - unset SBT_OPTS
-  - curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test finagle
-  - travis_retry ./sbt --error ++$TRAVIS_SCALA_VERSION ci:update finagle-memcached/update
-  # don't test these projects because they don't pass on travis-ci
-  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
+  - unset SBT_OPTS # default $SBT_OPTS is irrelevant to sbt launcher
 
 script:
-  # run for all environments
   - travis_retry ./sbt ++$TRAVIS_SCALA_VERSION coverage "$PROJECT/test" coverageReport
 
 after_success:
   - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
   - bash <(curl -s https://codecov.io/bash)
+
+stages:
+  - dodo
+  - memcached
+  - test
+
+jobs:
+  include:
+    - stage: dodo
+      script: curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test finagle
+    - stage: memcached # don't test these projects because they don't pass on travis-ci, compile tests only
+      scala: 2.11.12
+      script: ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
+    - stage: memcached # multiple definitions with the same name end up as matrix under the given stage
+      scala: 2.12.6
+      script: ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
