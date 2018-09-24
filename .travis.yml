@@ -75,3 +75,6 @@ jobs:
       scala: 2.12.6
     - stage: memcached
       script: ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
+      scala:
+        - 2.11.12
+        - 2.12.6
