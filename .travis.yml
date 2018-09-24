@@ -74,8 +74,4 @@ jobs:
       script: curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test finagle
       scala: 2.12.6
     - stage: memcached
-      scala: 2.11.12
-      script: ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
-    - stage: memcached
-      scala: 2.12.6
       script: ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
