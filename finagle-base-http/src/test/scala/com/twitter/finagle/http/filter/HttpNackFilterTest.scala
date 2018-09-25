@@ -3,7 +3,7 @@ package com.twitter.finagle.http.filter
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.filter.ServerAdmissionControl
 import com.twitter.finagle.{Failure, Service}
-import com.twitter.finagle.http.{Method, Request, Response, Status}
+import com.twitter.finagle.http.{Fields, Method, Request, Response, Status}
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.util.{Await, Awaitable, Duration, Future}
 import java.util.concurrent.atomic.AtomicBoolean
@@ -102,6 +102,7 @@ class HttpNackFilterTest extends FunSuite {
       val rep = await(service(request))
       assert(rep.status == Status.ServiceUnavailable)
       assert(rep.headerMap.get(HttpNackFilter.RetryableNackHeader) == Some("true"))
+      assert(rep.headerMap.get(Fields.RetryAfter) == Some("0"))
       assert(rep.headerMap.get(HttpNackFilter.NonRetryableNackHeader) == None)
       assert(!rep.content.isEmpty)
     }
@@ -119,6 +120,7 @@ class HttpNackFilterTest extends FunSuite {
     val rep = await(service(request))
     assert(rep.status == Status.ServiceUnavailable)
     assert(rep.headerMap.get(HttpNackFilter.RetryableNackHeader) == Some("true"))
+    assert(rep.headerMap.get(Fields.RetryAfter) == Some("0"))
     assert(rep.headerMap.get(HttpNackFilter.NonRetryableNackHeader) == None)
     assert(rep.content.isEmpty)
   }

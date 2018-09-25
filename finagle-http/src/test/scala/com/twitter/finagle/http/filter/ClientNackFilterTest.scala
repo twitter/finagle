@@ -1,8 +1,8 @@
 package com.twitter.finagle.http.filter
 
-import com.twitter.finagle.http.{Method, Request, Response}
+import com.twitter.finagle.http.{Fields, Method, Request, Response, Status}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle._
+import com.twitter.finagle.{Status => _, _}
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Awaitable, Closable, Duration, Future}
 import java.net.InetSocketAddress
@@ -13,6 +13,38 @@ class ClientNackFilterTest extends FunSuite {
 
   private def await[T](t: Awaitable[T]): T =
     Await.result(t, Duration.fromSeconds(15))
+
+  test("converts nacked requests into failures with the right flags") {
+    def withHeaderService(key: String, value: String) =
+      (new ClientNackFilter).andThen(Service.mk[Request, Response] { _ =>
+        val resp = Response(Status.ServiceUnavailable)
+        resp.headerMap.set(key, value)
+        Future.value(resp)
+      })
+
+    def req = Request("/foo")
+
+    { // Retry-After: 0 nack
+      val retryAfterSvc = withHeaderService(Fields.RetryAfter, "0")
+      val retryAfterFailure = intercept[Failure] { await(retryAfterSvc(req)) }
+      assert(retryAfterFailure.isFlagged(FailureFlags.Retryable))
+      assert(retryAfterFailure.isFlagged(FailureFlags.Rejected))
+    }
+
+    { // finagle retryable nack
+      val nackSvc = withHeaderService(HttpNackFilter.RetryableNackHeader, "true")
+      val retryableFailure = intercept[Failure] { await(nackSvc(req)) }
+      assert(retryableFailure.isFlagged(FailureFlags.Retryable))
+      assert(retryableFailure.isFlagged(FailureFlags.Rejected))
+    }
+
+    { // finagle non-retryable nack
+      val nackSvc = withHeaderService(HttpNackFilter.NonRetryableNackHeader, "true")
+      val nonRetryableFailure = intercept[Failure] { await(nackSvc(req)) }
+      assert(!nonRetryableFailure.isFlagged(FailureFlags.Retryable))
+      assert(nonRetryableFailure.isFlagged(FailureFlags.Rejected))
+    }
+  }
 
   test("Lets a regular request through") {
     new NackCtx(withStreaming = false) {

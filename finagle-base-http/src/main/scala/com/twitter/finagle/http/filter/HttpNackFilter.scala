@@ -3,7 +3,7 @@ package com.twitter.finagle.http.filter
 import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.filter.ServerAdmissionControl
-import com.twitter.finagle.http.{Method, Request, Response, Status}
+import com.twitter.finagle.http.{Fields, Method, Request, Response, Status}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.service.RetryPolicy
 import com.twitter.io.Buf
@@ -58,8 +58,18 @@ object HttpNackFilter {
     }
   }
 
+  // We consider a `Retry-After: 0` header to also represent a retryable nack.
+  // We don't consider values other than 0 since we don't want to make this
+  // a problem of this filter.
+  private[this] def containsRetryAfter0(rep: Response): Boolean =
+    rep.headerMap.get(Fields.RetryAfter) match {
+      case Some("0") => true
+      case _ => false
+    }
+
   private[finagle] def isRetryableNack(rep: Response): Boolean =
-    rep.status == ResponseStatus && rep.headerMap.contains(RetryableNackHeader)
+    rep.status == ResponseStatus &&
+      (rep.headerMap.contains(RetryableNackHeader) || containsRetryAfter0(rep))
 
   private[finagle] def isNonRetryableNack(rep: Response): Boolean =
     rep.status == ResponseStatus && rep.headerMap.contains(NonRetryableNackHeader)
@@ -113,6 +123,7 @@ private final class HttpNackFilter(statsReceiver: StatsReceiver) extends SimpleF
       nackCounts.incr()
       val rep = Response(ResponseStatus)
       rep.headerMap.set(RetryableNackHeader, "true")
+      rep.headerMap.set(Fields.RetryAfter, "0")
       if (includeBody) {
         rep.content = RetryableNackBody
       }

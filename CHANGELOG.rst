@@ -25,6 +25,11 @@ Runtime Behavior Changes
   failure. This lead to surprising behavior for users. Those exceptions will no longer
   be wrapped. ``PHAB_ID=D216281``
 
+* finagle-http: The finagle HTTP clients and servers now consider a `Retry-After: 0`
+  header to be a retryable nack. Servers will set this header when the response is
+  a retryable failure, and clients will interpret responses with this header as a
+  `Failure.RetryableNackFailure`. ``PHAB_ID=D216539``
+
 18.9.0
 -------
 
