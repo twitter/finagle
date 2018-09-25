@@ -18,6 +18,16 @@ abstract class AbstractStreamingTest extends FunSuite {
   def configureClient: FinagleHttp.Client => FinagleHttp.Client = identity
   def configureServer: FinagleHttp.Server => FinagleHttp.Server = identity
 
+  /**
+   * Run a test that is known to be flaky in Travis on scala 2.12
+   */
+  val runTravisFlaky212: Boolean = {
+    sys.props.get("TRAVIS_SCALA_VERSION") match {
+      case Some(sv) if sv.startsWith("2.12") => false
+      case _ => true
+    }
+  }
+
   import StreamingTest._
 
   // Enumerated Failure Cases
@@ -152,7 +162,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     assertSecondRequestOk()
   })
 
-  if (!sys.props.contains("SKIP_FLAKY"))
+  if (runTravisFlaky212)
   test("client: discard respond reader")(new ClientCtx(singletonPool = true) {
     assert(res2.poll == None)
     res.reader.discard()

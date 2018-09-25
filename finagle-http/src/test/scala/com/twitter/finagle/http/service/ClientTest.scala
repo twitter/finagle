@@ -41,7 +41,17 @@ class ClientTest extends FunSuite {
       }
     }
 
-  if (!sys.props.contains("SKIP_FLAKY"))
+  /**
+   * Run a test that is known to be flaky in Travis on scala 2.12
+   */
+  val runTravisFlaky212: Boolean = {
+    sys.props.get("TRAVIS_SCALA_VERSION") match {
+      case Some(sv) if sv.startsWith("2.12") => false
+      case _ => true
+    }
+  }
+
+  if (runTravisFlaky212)
   test("report a closed connection when the server doesn't reply") {
     withServer(failingFactory) { clientBuilder =>
       counter = 0
