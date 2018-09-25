@@ -40,7 +40,7 @@ class WindowedPercentileHistogram(
     numBuckets: Int,
     bucketSize: Duration,
     lowestDiscernibleValue: Int,
-    highestTrackableValue: Int,
+    val highestTrackableValue: Int,
     timer: Timer)
   extends Closable {
   import WindowedPercentileHistogram._

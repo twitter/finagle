@@ -71,19 +71,20 @@ class BackupRequestFilterTest extends FunSuite
 
   private[this] val rng = new Random(123)
 
-  private[this] val WarmupRequestLatency = 2.seconds
+  private[this] val WarmupRequestLatency = 1.second
 
   private[this] def warmFilterForBackup(
     tc: TimeControl,
     service: Service[String, String],
-    brf: BackupRequestFilter[String, String]
+    brf: BackupRequestFilter[String, String],
+    requestLatency: Duration
   ): Unit = {
     assert(numBackupTimerTasks == 0)
     (0 until 100).foreach { _ =>
       val p = new Promise[String]
       when(underlying("ok")).thenReturn(p)
       val f = service("ok")
-      tc.advance(WarmupRequestLatency)
+      tc.advance(requestLatency)
       p.setValue("ok")
     }
 
@@ -228,7 +229,7 @@ class BackupRequestFilterTest extends FunSuite
     Time.withCurrentTimeFrozen { tc =>
       val brf = newBrf
       val service = newService(brf)
-      warmFilterForBackup(tc, service, brf)
+      warmFilterForBackup(tc, service, brf, WarmupRequestLatency)
 
       val p = new Promise[String]
       when(underlying("b")).thenReturn(p)
@@ -263,7 +264,7 @@ class BackupRequestFilterTest extends FunSuite
       val brf = newBrf
       val service = newService(brf)
       val exc = new Exception("boom")
-      warmFilterForBackup(tc, service, brf)
+      warmFilterForBackup(tc, service, brf, WarmupRequestLatency)
 
       val p = new Promise[String]
       when(underlying("b")).thenReturn(p)
@@ -313,7 +314,7 @@ class BackupRequestFilterTest extends FunSuite
 
     val service = brf.andThen(underlying)
 
-    warmFilterForBackup(tc, service, brf)
+    warmFilterForBackup(tc, service, brf, WarmupRequestLatency)
 
     when(underlying("a")).thenReturn(origPromise)
     verify(underlying, times(0)).apply("a")
@@ -568,7 +569,7 @@ class BackupRequestFilterTest extends FunSuite
       Time.withCurrentTimeFrozen { tc =>
         val brf = newBrf
         val service = newService(brf)
-        warmFilterForBackup(tc, service, brf)
+        warmFilterForBackup(tc, service, brf, WarmupRequestLatency)
 
         val p = new Promise[String]
         when(underlying("a")).thenReturn(p)
@@ -629,7 +630,7 @@ class BackupRequestFilterTest extends FunSuite
         timer,
         () => wp)
       val service = newService(brf)
-      warmFilterForBackup(tc, service, brf)
+      warmFilterForBackup(tc, service, brf, WarmupRequestLatency)
       assert(currentRetryBudget.balance == 100)
 
       // Set filter to send no backups; advance 3 seconds so we see the change
@@ -678,7 +679,7 @@ class BackupRequestFilterTest extends FunSuite
         timer,
         () => wp)
       val service = newService(brf)
-      warmFilterForBackup(tc, service, brf)
+      warmFilterForBackup(tc, service, brf, WarmupRequestLatency)
       assert(newRetryBudgetCalls == 1)
       maxExtraLoadTunable.set(1.percent)
       // we refresh the budget every 3 seconds if the Tunable value has changed
@@ -786,5 +787,33 @@ class BackupRequestFilterTest extends FunSuite
     val expected =
       "Failure(Request was superseded by another in BackupRequestFilter, flags=0x20) with NoSources"
     assert(BackupRequestFilter.SupersededRequestFailureToString == expected)
+  }
+
+  test("Percentile latency exceeds measurable latency") {
+    Time.withCurrentTimeFrozen { tc =>
+      val brf = newBrf
+      val service = newService(brf)
+      warmFilterForBackup(tc, service, brf, wp.highestTrackableValue.millis)
+
+      val p = new Promise[String]
+      when(underlying("b")).thenReturn(p)
+      val f = service("b")
+      verify(underlying).apply("b")
+      assert(numBackupTimerTasks == 0)
+      tc.advance(brf.sendBackupAfterDuration / 2)
+      p.setValue("orig")
+      timer.tick()
+
+      // ensure latency recorded
+      assert(wp.percentile(50.percent) == (brf.sendBackupAfterDuration / 2).inMillis)
+
+      // ensure timer cancelled
+      assert(numBackupTimerTasks == 0)
+
+      // ensure result of original request returned
+      assert(f.poll == Some(Return("orig")))
+
+      assert(statsReceiver.counters(Seq("backups_sent")) == 0)
+    }
   }
 }

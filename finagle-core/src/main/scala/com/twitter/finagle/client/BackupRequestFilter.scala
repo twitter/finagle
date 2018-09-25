@@ -361,39 +361,44 @@ private[finagle] class BackupRequestFilter[Req, Rep](
     val orig = record(req, service(req))
     val howLong = sendBackupAfter
 
-    orig.within(
-      timer,
-      Duration.fromMilliseconds(howLong),
-      OrigRequestTimeout
-    ).transform {
-      case Throw(OrigRequestTimeout) =>
-        // If we've waited long enough to fire the backup normally, do so and
-        // pass on the first successful result we get back.
-        if (canIssueBackup()) {
-          backupsSent.incr()
-          val backup = record(req, service(req))
-          orig.select(backup).transform { _ =>
-            val winner = if (orig.isDefined) orig else backup
-            val loser = if (winner eq orig) backup else orig
-            winner.transform { response =>
-              if (backup eq winner) backupsWon.incr()
-              if (isSuccess(ReqRep(req, response))) {
-                if (sendInterrupts) {
-                  loser.raise(SupersededRequestFailure)
+    // once our percentile exceeds how high we can track, we should stop sending backups.
+    if (howLong >= windowedPercentile.highestTrackableValue) {
+      orig
+    } else {
+      orig.within(
+        timer,
+        Duration.fromMilliseconds(howLong),
+        OrigRequestTimeout
+      ).transform {
+        case Throw(OrigRequestTimeout) =>
+          // If we've waited long enough to fire the backup normally, do so and
+          // pass on the first successful result we get back.
+          if (canIssueBackup()) {
+            backupsSent.incr()
+            val backup = record(req, service(req))
+            orig.select(backup).transform { _ =>
+              val winner = if (orig.isDefined) orig else backup
+              val loser = if (winner eq orig) backup else orig
+              winner.transform { response =>
+                if (backup eq winner) backupsWon.incr()
+                if (isSuccess(ReqRep(req, response))) {
+                  if (sendInterrupts) {
+                    loser.raise(SupersededRequestFailure)
+                  }
+                  Future.const(response)
+                } else {
+                  loser
                 }
-                Future.const(response)
-              } else {
-                loser
               }
             }
+          } else {
+            budgetExhausted.incr()
+            orig
           }
-        } else {
-          budgetExhausted.incr()
+        case _ =>
+          // Return the original request when it completed first (regardless of success)
           orig
-        }
-      case _ =>
-        // Return the original request when it completed first (regardless of success)
-        orig
+      }
     }
   }
 
