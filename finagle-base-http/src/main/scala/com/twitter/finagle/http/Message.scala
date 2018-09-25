@@ -3,7 +3,7 @@ package com.twitter.finagle.http
 import com.twitter.finagle.http.Message.BufOutputStream
 import com.twitter.finagle.http.util.StringUtil
 import com.twitter.io.{Buf, BufInputStream, Reader, Writer}
-import com.twitter.util.{Closable, Duration, Future}
+import com.twitter.util.{Duration, Future}
 import java.util.{Date, Locale, Iterator => JIterator}
 import java.nio.charset.Charset
 import java.time.{ZoneId, ZoneOffset}
@@ -32,7 +32,7 @@ abstract class Message {
    * A write-only handle to the internal stream of bytes, representing the
    * message body. See [[com.twitter.io.Writer]] for more information.
    **/
-  def writer: Writer[Buf] with Closable
+  def writer: Writer[Buf]
 
   def isRequest: Boolean
   def isResponse = !isRequest

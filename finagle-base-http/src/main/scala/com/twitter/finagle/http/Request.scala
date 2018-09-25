@@ -2,7 +2,6 @@ package com.twitter.finagle.http
 
 import com.twitter.collection.RecordSchema
 import com.twitter.io.{Buf, Pipe, Reader, Writer}
-import com.twitter.util.Closable
 import java.net.{InetAddress, InetSocketAddress}
 import java.util.{AbstractMap, List => JList, Map => JMap, Set => JSet}
 import scala.beans.BeanProperty
@@ -399,7 +398,7 @@ object Request {
     def ctx: Schema.Record = request.ctx
     def remoteSocketAddress: InetSocketAddress = request.remoteSocketAddress
     def reader: Reader[Buf] = request.reader
-    def writer: Writer[Buf] with Closable = request.writer
+    def writer: Writer[Buf] = request.writer
     override lazy val cookies: CookieMap = request.cookies
     def headerMap: HeaderMap = request.headerMap
     override def params: ParamMap = request.params
@@ -420,7 +419,7 @@ object Request {
 
   private[finagle] final class Impl(
     val reader: Reader[Buf],
-    val writer: Writer[Buf] with Closable,
+    val writer: Writer[Buf],
     val remoteSocketAddress: InetSocketAddress) extends Request {
 
     private var _method: Method = Method.Get
