@@ -17,7 +17,7 @@ import scala.util.control.NonFatal
  * Allow interrupting mux client negotiation. This was only exposed as a temporary solution
  * to some ill effects we noticed in production and will be removed in the near future.
  * Setting this flag to false can be dangerous since there is no way to reclaim resources
- * during the negotation phase if the peer, effectively, becomes a "black hole". Instead,
+ * during the negotiation phase if the peer, effectively, becomes a "black hole". Instead,
  * the more appropriate solution is to tune the service acquisition timeouts for the
  * respective client.
  */
@@ -48,7 +48,8 @@ private[finagle] final class MuxClientNegotiatingSession(
     // to the peer.
     negotiatedSession.setInterruptHandler {
       case ex =>
-        log.info(ex, "Mux client negotiation interrupted.")
+        log.info(ex, "Mux client negotiation interrupted. "
+          + s"Client label: $name, remote address: ${handle.remoteAddress}")
         failHandshake(Failure.retryable(ex))
     }
   }
@@ -164,7 +165,7 @@ private[finagle] final class MuxClientNegotiatingSession(
     // Since this session isn't ready to handle any mux messages,
     // we need to queue them until the `negotiator` is complete.
     // Technically, we shouldn't get any messages in the interim since
-    // `negotiator` likely represents tls negotation, but we do this
+    // `negotiator` likely represents tls negotiation, but we do this
     // in case there are any subtle races.
     val q = new PushSessionQueue(handle, stats)
     handle.registerSession(q)
@@ -172,9 +173,12 @@ private[finagle] final class MuxClientNegotiatingSession(
       handle.serialExecutor.execute(new Runnable {
         def run(): Unit = result match {
           case Return(clientSession) =>
-            q.drainAndRegister(clientSession)
             if (!negotiatedSession.updateIfEmpty(Return(clientSession))) {
-              log.debug("Finished negotiation with %s but handle already closed.", name)
+              log.info(s"Finished negotiation with $name but handle already closed. "
+              + s"Remote address: ${handle.remoteAddress}")
+              q.drainAndClose()
+            } else {
+              q.drainAndRegister(clientSession)
             }
 
           case Throw(exc) =>
@@ -213,6 +217,7 @@ private[finagle] object MuxClientNegotiatingSession {
     // of elements to close a race window, so we likely don't need to start
     // with a large(r) array.
     private[this] val q = new java.util.ArrayDeque[ByteReader](8)
+    private[this] var drained = false
     @volatile private[this] var qsize = 0
 
     private[this] val qsizeGauge = stats.addGauge(Verbosity.Debug, "negotiating_queue_size") {
@@ -232,6 +237,7 @@ private[finagle] object MuxClientNegotiatingSession {
       }
       handle.registerSession(session)
       qsize = 0
+      drained = true
     }
 
     /**
@@ -245,11 +251,16 @@ private[finagle] object MuxClientNegotiatingSession {
         iter.remove()
       }
       qsize = 0
+      drained = true
     }
 
     def receive(m: ByteReader): Unit = {
-      q.add(m)
-      qsize = q.size
+      if (!drained) {
+        q.add(m)
+        qsize = q.size
+      } else {
+        m.close()
+      }
     }
 
     def status: Status = handle.status

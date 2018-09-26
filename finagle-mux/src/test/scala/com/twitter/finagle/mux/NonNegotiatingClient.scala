@@ -64,7 +64,7 @@ final case class NonNegotiatingClient(
         sessionBuilder: (PushChannelHandle[ByteReader, Buf]) => Future[T]
       ): Future[T] = {
         // With this builder we add support for opportunistic TLS via `MuxChannelHandle`
-        // and the respective `Negotation` types. Adding more proxy types will break this pathway.
+        // and the respective `Negotiation` types. Adding more proxy types will break this pathway.
         def wrappedBuilder(pushChannelHandle: PushChannelHandle[ByteReader, Buf]): Future[T] =
           sessionBuilder(new MuxChannelHandle(pushChannelHandle, channel, scopedStatsParams))
 
