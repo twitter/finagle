@@ -5,7 +5,7 @@ language: scala
 
 env:
   global:
-    - JAVA_OPTS="-DSKIP_FLAKY=1 -Dsbt.log.noformat=true"
+    - JAVA_OPTS="-DSKIP_FLAKY=1 -DSKIP_FLAKY_TRAVIS=1 -Dsbt.log.noformat=true"
 
   matrix:
     - PROJECT=finagle-core
