@@ -74,7 +74,11 @@ jobs:
       script: curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test finagle
     - stage: memcached # don't test these projects because they don't pass on travis-ci, compile tests only
       scala: 2.11.12
-      script: ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
+      script: 
+        - travis_retry ./sbt --error ++$TRAVIS_SCALA_VERSION ci:update finagle-memcached/update
+        - ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
     - stage: memcached # multiple definitions with the same name end up as matrix under the given stage
       scala: 2.12.6
-      script: ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
+      script: 
+        - travis_retry ./sbt --error ++$TRAVIS_SCALA_VERSION ci:update finagle-memcached/update
+        - ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
