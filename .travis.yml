@@ -32,15 +32,14 @@ env:
 # These directories are cached to S3 at the end of the build
 cache:
   directories:
-   - $HOME/.m2
-   - $HOME/.ivy2
-   - $HOME/.sbt/boot/scala-$TRAVIS_SCALA_VERSION
+   - $HOME/.ivy2/cache
+   - $HOME/.sbt
    - $HOME/.dodo
 
 before_cache:
-  # Tricks to avoid unnecessary cache updates
-  - find $HOME/.ivy2 -name "ivydata-*.properties" -delete
-  - find $HOME/.sbt -name "*.lock" -delete
+  # Cleanup the cached directories to avoid unnecessary cache updates
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
+  - find $HOME/.sbt        -name "*.lock"               -print -delete
 
 scala:
   - 2.11.12
@@ -73,12 +72,6 @@ jobs:
     - stage: dodo
       script: curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test finagle
     - stage: memcached # don't test these projects because they don't pass on travis-ci, compile tests only
-      scala: 2.11.12
       script: 
-        - travis_retry ./sbt --error ++$TRAVIS_SCALA_VERSION ci:update finagle-memcached/update
-        - ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
-    - stage: memcached # multiple definitions with the same name end up as matrix under the given stage
-      scala: 2.12.6
-      script: 
-        - travis_retry ./sbt --error ++$TRAVIS_SCALA_VERSION ci:update finagle-memcached/update
-        - ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
+        - travis_retry ./sbt --error +ci:update "project finagle-memcached" +update
+        - ./sbt "project finagle-memcached" +test:compile
