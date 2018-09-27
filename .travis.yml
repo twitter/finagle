@@ -58,10 +58,6 @@ before_script:
 script:
   - travis_retry ./sbt ++$TRAVIS_SCALA_VERSION coverage "$PROJECT/test" coverageReport
 
-after_success:
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
-  - bash <(curl -s https://codecov.io/bash)
-
 stages:
   - dodo
   - memcached
@@ -75,4 +71,7 @@ jobs:
       script: 
         - travis_retry ./sbt --error +ci:update "project finagle-memcached" +update
         - ./sbt "project finagle-memcached" +test:compile
+    - stage: test
       after_success:
+        - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
+        - bash <(curl -s https://codecov.io/bash)
