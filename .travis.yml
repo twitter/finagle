@@ -70,10 +70,10 @@ jobs:
   include:
     - stage: dodo
       scala: 2.11.12
-      script: curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test --scala-version $TRAVIS_SCALA_VERSION finagle
+      script: curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test --scala-version 2.11.12 finagle
     - stage: dodo
       scala: 2.12.6
-      script: curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test --scala-version $TRAVIS_SCALA_VERSION finagle  
+      script: curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test --scala-version $2.12.6 finagle  
     - stage: memcached # don't test these projects because they don't pass on travis-ci, compile tests only
       script: 
         - travis_retry ./sbt --error +ci:update "project finagle-memcached" +update
