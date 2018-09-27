@@ -33,13 +33,13 @@ env:
 cache:
   directories:
    - $HOME/.ivy2/cache
-   - $HOME/.sbt/boot/scala-$TRAVIS_SCALA_VERSION
+   - $HOME/.sbt
    - $HOME/.dodo
 
 before_cache:
   # Cleanup the cached directories to avoid unnecessary cache updates
-  - find $HOME/.ivy2 -name "ivydata-*.properties" -delete
-  - find $HOME/.sbt -name "*.lock" -delete
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -delete
+  - find $HOME/.sbt        -name "*.lock"               -delete
 
 scala:
   - 2.11.12
@@ -51,6 +51,8 @@ jdk:
 notifications:
   slack:
     secure: PfUgPphNmKcZLIjTjd46IHBzqB0vkzK8clCqdsUr5taJRHhMSgRg8ks81sUhCmu+hTl3FG+jEzGgqMUvcisS+OziP/8QR/C41f5jdaETfkBE53DZIWVXZ80QRabphRTCbRUfibC39WWrhhLgWCIqzvTM8qsO/43JuQOGLQbuqcs=
+    on_failure: change
+    on_success: change
 
 before_script:
   - unset SBT_OPTS # default $SBT_OPTS is irrelevant to sbt launcher
