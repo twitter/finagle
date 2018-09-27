@@ -142,9 +142,16 @@ class SingletonPool[Req, Rep](
     // `f` represents a request to `underlying` to acquire a new service.
     val f = done.before(apply(conn))
     // if we allow interrupts, we return a direct handle to the process. Otherwise,
-    // we returned a derivative future which can be interruptible but doesn't forward
-    // the interrupts to `f`.
-    if (allowInterrupts) f else f.interruptible
+    // we returned a derivative future which can be interrupted immediately, but will
+    // ensure the release of its interest in any ref-counted session that materializes.
+    if (allowInterrupts) f
+    else f.interruptible().onFailure {
+      case _: Throwable =>
+        // If this fails it is either because `f` failed or we were interrupted. If `f`
+        // does succeed we need to release the ref-count since the caller will never
+        // get a reference to the `Service` to release it.
+        f.onSuccess(_.close())
+      }
   }
 
   @tailrec
