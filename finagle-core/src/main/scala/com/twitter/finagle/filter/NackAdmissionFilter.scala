@@ -9,10 +9,12 @@ import com.twitter.util._
 
 object NackAdmissionFilter {
   private val OverloadFailure = Future.exception(
-    Failure("Request not issued to the backend due to observed overload.",
-      FailureFlags.Rejected | FailureFlags.NonRetryable)
+    Failure(
+      "Request not issued to the backend due to observed overload.",
+      FailureFlags.Rejected | FailureFlags.NonRetryable
+    )
   )
-  val role: Stack.Role = new Stack.Role("NackAdmissionFilter")
+  val role: Stack.Role = Stack.Role("NackAdmissionFilter")
 
   /**
    * For feature roll out only.
@@ -62,12 +64,12 @@ object NackAdmissionFilter {
    */
   private val rpsThreshold: Long = 5
 
-
   sealed trait Param {
     def mk(): (Param, Stack.Param[Param]) = (this, Param.param)
   }
 
   object Param {
+
     /**
      * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
      * [[com.twitter.finagle.filter.NackAdmissionFilter]] module.
@@ -94,7 +96,7 @@ object NackAdmissionFilter {
         _param: Param,
         _stats: param.Stats,
         next: ServiceFactory[Req, Rep]
-      ): ServiceFactory[Req, Rep] =  _param match {
+      ): ServiceFactory[Req, Rep] = _param match {
         case Param.Configured(window, threshold) =>
           val param.Stats(stats) = _stats
 
@@ -202,8 +204,8 @@ class NackAdmissionFilter[Req, Rep](
   // Start the ema at 1.0. No need for synchronization during construction.
   ema.update(monoTime.nanos(), 1)
 
-  // visible for testing. Synchronized as Ema is not threadsafe
-  private[filter] def emaValue: Double = synchronized { ema.last }
+  // visible for testing. `Ema.last` is threadsafe
+  private[filter] def emaValue: Double = ema.last
 
   private[this] val droppedRequestCounter: Counter = statsReceiver.counter("dropped_requests")
   private[this] val emaPercent: Gauge = statsReceiver.addGauge(Verbosity.Debug, "ema_value") {
