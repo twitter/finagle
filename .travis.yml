@@ -33,7 +33,7 @@ env:
 cache:
   directories:
    - $HOME/.ivy2/cache
-   - $HOME/.ivy2/local
+   - $HOME/.ivy2/local/com.twitter
    - $HOME/.sbt
    - $HOME/.dodo
 
@@ -41,10 +41,6 @@ before_cache:
   # Cleanup the cached directories to avoid unnecessary cache updates
   - find $HOME/.ivy2/cache -name "ivydata-*.properties" -delete
   - find $HOME/.sbt        -name "*.lock"               -delete
-
-scala:
-  - 2.11.12
-  - 2.12.6
 
 jdk:
   - oraclejdk8
@@ -58,9 +54,6 @@ notifications:
 before_script:
   - unset SBT_OPTS # default $SBT_OPTS is irrelevant to sbt launcher
 
-script:
-  - travis_retry ./sbt ++$TRAVIS_SCALA_VERSION coverage "$PROJECT/test" coverageReport
-
 stages:
   - dodo
   - memcached
@@ -69,12 +62,24 @@ stages:
 jobs:
   include:
     - stage: dodo
-      script: curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test finagle
+      scala: 2.11.12
+      script: curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test --scala-version $TRAVIS_SCALA_VERSION finagle
+    - stage: dodo
+      scala: 2.12.6
+      script: curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test --scala-version $TRAVIS_SCALA_VERSION finagle  
     - stage: memcached # don't test these projects because they don't pass on travis-ci, compile tests only
+      scala: 2.11.12
       script: 
         - travis_retry ./sbt --error +ci:update "project finagle-memcached" +update
         - ./sbt "project finagle-memcached" +test:compile
     - stage: test
+      scala: 2.11.12
+      script:
+        - travis_retry ./sbt ++$TRAVIS_SCALA_VERSION coverage "$PROJECT/test" coverageReport
+    - stage: test
+      scala: 2.12.6
+      script:
+        - travis_retry ./sbt ++$TRAVIS_SCALA_VERSION coverage "$PROJECT/test" coverageReport
       after_success:
         - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
         - bash <(curl -s https://codecov.io/bash)
