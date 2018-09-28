@@ -85,7 +85,14 @@ jobs:
         - matrix: ignore
       after_success: skip
     - stage: memcached # don't test these projects because they don't pass on travis-ci, compile tests only
-      script: travis_retry ./sbt "project finagle-memcached" +test:compile
+      scala: 2.11.12 # need to set this explicitly
+      script: ./sbt ++2.11.12 finagle-memcached/test:compile
+      env: 
+        - matrix: ignore
+      after_success: skip
+    - stage: memcached # multiple definitions with the same name end up as matrix under the given stage
+      scala: 2.12.6 # need to set this explicitly
+      script: ./sbt ++2.12.6 finagle-memcached/test:compile
       env: 
         - matrix: ignore
       after_success: skip
