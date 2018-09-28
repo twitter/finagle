@@ -61,6 +61,10 @@ before_script:
 script: # we define this here in the implicit test build stage as this is the only way the matrix expansion for PROJECT works properly
   - travis_retry ./sbt ++$TRAVIS_SCALA_VERSION coverage "$PROJECT/test" coverageReport
 
+after_success:
+  - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
+  - bash <(curl -s https://codecov.io/bash)  
+
 stages:
   - dodo
   - memcached
@@ -71,16 +75,17 @@ jobs:
     - stage: dodo
       scala: 2.11.12 # need to set this explicitly
       script: curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test --scala-version 2.11.12 finagle
-      env:
-        - PROJECT=
+      env: 
+        - matrix: ignore
+      after_success: skip
     - stage: dodo
       scala: 2.12.6  # need to set this explicitly
       script: curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test --scala-version 2.12.6 finagle
-      env:
-        - PROJECT=
+      env: 
+        - matrix: ignore
+      after_success: skip
     - stage: memcached # don't test these projects because they don't pass on travis-ci, compile tests only
       script: travis_retry ./sbt "project finagle-memcached" +test:compile
-    - stage: test
-      after_success: # only want to collect code coverage in the test build stage on success of the script run
-        - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
-        - bash <(curl -s https://codecov.io/bash)
+      env: 
+        - matrix: ignore
+      after_success: skip
