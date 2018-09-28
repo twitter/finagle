@@ -15,6 +15,7 @@ abstract class TransportContext extends Closable {
    * The status of this transport; see [[com.twitter.finagle.Status]] for
    * status definitions.
    */
+  @deprecated("Please use Transport.status instead", "2018-09-27")
   def status: Status
 
   /**
@@ -23,6 +24,7 @@ abstract class TransportContext extends Closable {
    * write on the Transport, but this allows clients to listen to
    * close events.
    */
+  @deprecated("Please use Transport.onClose instead", "2018-09-27")
   def onClose: Future[Throwable]
 
   /**
