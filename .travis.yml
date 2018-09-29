@@ -67,7 +67,7 @@ before_script:
   - ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
 
 script: 
-  - travis_retry ./sbt ++2.12.6 coverage "$PROJECT/test" coverageReport
+  - travis_retry ./sbt ++$TRAVIS_SCALA_VERSION coverage "$PROJECT/test" coverageReport
 
 after_success:
   - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
