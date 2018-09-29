@@ -3,6 +3,10 @@ sudo: required
 
 language: scala
 
+git:
+  depth: 3
+  quiet: true
+
 env:
   global:
     - JAVA_OPTS="-DSKIP_FLAKY=1 -DSKIP_FLAKY_TRAVIS=1 -Dsbt.log.noformat=true"
