@@ -10,6 +10,27 @@ git:
 env:
   global:
     - JAVA_OPTS="-DSKIP_FLAKY=1 -DSKIP_FLAKY_TRAVIS=1 -Dsbt.log.noformat=true"
+  matrix:
+    - PROJECT=finagle-core
+    - PROJECT=finagle-exception
+    - PROJECT=finagle-exp
+    - PROJECT=finagle-http
+    - PROJECT=finagle-http2
+    - PROJECT=finagle-integration
+    - PROJECT=finagle-mux
+    - PROJECT=finagle-mysql
+    - PROJECT=finagle-netty4
+    - PROJECT=finagle-netty4-http
+    - PROJECT=finagle-netty3
+    - PROJECT=finagle-redis
+    - PROJECT=finagle-serversets
+    - PROJECT=finagle-stats
+    - PROJECT=finagle-thrift
+    - PROJECT=finagle-thriftmux
+    - PROJECT=finagle-toggle
+    - PROJECT=finagle-tunable
+    - PROJECT=finagle-zipkin-core
+    - PROJECT=finagle-zipkin-scribe 
 
 # These directories are cached to S3 at the end of the build
 cache:
@@ -35,76 +56,14 @@ notifications:
 
 before_script:
   - unset SBT_OPTS # default $SBT_OPTS is irrelevant to sbt launcher
+  - curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test --scala-version $TRAVIS_SCALA_VERSION finagle
+  - travis_retry ./sbt --error ++$TRAVIS_SCALA_VERSION ci:update finagle-memcached/update
+  # don't test these projects because they require a running Memcached instance
+  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
 
-stages:
-  - dodo
-  - memcached
-  - test
+script: 
+  - travis_retry ./sbt ++2.12.6 coverage "$PROJECT/test" coverageReport
 
-jobs:
-  include:
-    - stage: dodo
-      scala: 2.11.12  # need to set this explicitly
-      script: curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test --scala-version 2.11.12 finagle
-    - stage: dodo
-      scala: 2.12.6   # need to set this explicitly
-      script: curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test --scala-version 2.12.6 finagle
-    - stage: memcached # don't test these projects because they don't pass on travis-ci, compile tests only
-      scala: 2.11.12  # need to set this explicitly
-      script: ./sbt ++2.11.12 finagle-memcached/test:compile
-    - stage: memcached # multiple definitions with the same name end up as matrix under the given stage
-      scala: 2.12.6   # need to set this explicitly
-      script: ./sbt ++2.12.6 finagle-memcached/test:compile
-    - stage: test
-      scala: 2.11.12  # need to set this explicitly
-      script: travis_retry ./sbt ++2.11.12 coverage "$PROJECT/test" coverageReport
-      env:
-        matrix:
-          - PROJECT=finagle-core
-          - PROJECT=finagle-exception
-          - PROJECT=finagle-exp
-          - PROJECT=finagle-http
-          - PROJECT=finagle-http2
-          - PROJECT=finagle-integration
-          - PROJECT=finagle-mux
-          - PROJECT=finagle-mysql
-          - PROJECT=finagle-netty4
-          - PROJECT=finagle-netty4-http
-          - PROJECT=finagle-netty3
-          - PROJECT=finagle-redis
-          - PROJECT=finagle-serversets
-          - PROJECT=finagle-stats
-          - PROJECT=finagle-thrift
-          - PROJECT=finagle-thriftmux
-          - PROJECT=finagle-toggle
-          - PROJECT=finagle-tunable
-          - PROJECT=finagle-zipkin-core
-          - PROJECT=finagle-zipkin-scribe
-    - stage: test
-      scala: 2.12.6   # need to set this explicitly
-      script: travis_retry ./sbt ++2.12.6 coverage "$PROJECT/test" coverageReport
-      after_success:
-        - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
-        - bash <(curl -s https://codecov.io/bash)  
-      env:
-        matrix:
-          - PROJECT=finagle-core
-          - PROJECT=finagle-exception
-          - PROJECT=finagle-exp
-          - PROJECT=finagle-http
-          - PROJECT=finagle-http2
-          - PROJECT=finagle-integration
-          - PROJECT=finagle-mux
-          - PROJECT=finagle-mysql
-          - PROJECT=finagle-netty4
-          - PROJECT=finagle-netty4-http
-          - PROJECT=finagle-netty3
-          - PROJECT=finagle-redis
-          - PROJECT=finagle-serversets
-          - PROJECT=finagle-stats
-          - PROJECT=finagle-thrift
-          - PROJECT=finagle-thriftmux
-          - PROJECT=finagle-toggle
-          - PROJECT=finagle-tunable
-          - PROJECT=finagle-zipkin-core
-          - PROJECT=finagle-zipkin-scribe
+after_success:
+  - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
+  - bash <(curl -s https://codecov.io/bash)    
