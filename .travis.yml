@@ -62,6 +62,7 @@ before_script:
   - unset SBT_OPTS # default $SBT_OPTS is irrelevant to sbt launcher
 
 script: # we define this here in the implicit test build stage as this is the only way the matrix expansion for PROJECT works properly
+  - ls -al $HOME/.ivy2/local/com.twitter/scrooge-sbt-plugin/
   - travis_retry ./sbt ++$TRAVIS_SCALA_VERSION coverage "$PROJECT/test" coverageReport
 
 after_success:
