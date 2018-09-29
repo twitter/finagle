@@ -36,7 +36,8 @@ env:
 # These directories are cached to S3 at the end of the build
 cache:
   directories:
-   - $HOME/.ivy2
+   - $HOME/.ivy2/cache
+   - $HOME/.ivy2/local/com.twitter
    - $HOME/.sbt
    - $HOME/.dodo
 
@@ -60,43 +61,14 @@ notifications:
 
 before_script:
   - unset SBT_OPTS # default $SBT_OPTS is irrelevant to sbt launcher
+  - curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test --scala-version $TRAVIS_SCALA_VERSION finagle
+  - travis_retry ./sbt --error ++$TRAVIS_SCALA_VERSION ci:update finagle-memcached/update
+  # don't test these projects because they require a running memcached installation
+  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
 
 script: # we define this here in the implicit test build stage as this is the only way the matrix expansion for PROJECT works properly
-  - ls -al $HOME/.ivy2/local/com.twitter/scrooge-sbt-plugin/
   - travis_retry ./sbt ++$TRAVIS_SCALA_VERSION coverage "$PROJECT/test" coverageReport
 
 after_success:
   - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
-  - bash <(curl -s https://codecov.io/bash)  
-
-stages:
-  - dodo
-  - memcached
-  - test
-
-jobs:
-  include:
-    - stage: dodo
-      scala: 2.11.12 # need to set this explicitly
-      script: curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test --scala-version 2.11.12 finagle
-      env: 
-        - matrix: ignore
-      after_success: skip
-    - stage: dodo
-      scala: 2.12.6  # need to set this explicitly
-      script: curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test --scala-version 2.12.6 finagle
-      env: 
-        - matrix: ignore
-      after_success: skip
-    - stage: memcached # don't test these projects because they don't pass on travis-ci, compile tests only
-      scala: 2.11.12 # need to set this explicitly
-      script: ./sbt ++2.11.12 finagle-memcached/test:compile
-      env: 
-        - matrix: ignore
-      after_success: skip
-    - stage: memcached # multiple definitions with the same name end up as matrix under the given stage
-      scala: 2.12.6 # need to set this explicitly
-      script: ./sbt ++2.12.6 finagle-memcached/test:compile
-      env: 
-        - matrix: ignore
-      after_success: skip
+  - bash <(curl -s https://codecov.io/bash)
