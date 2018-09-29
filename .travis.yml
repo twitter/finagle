@@ -56,6 +56,7 @@ notifications:
 
 before_script:
   - unset SBT_OPTS # default $SBT_OPTS is irrelevant to sbt launcher
+  # note: this is not ideal to run before every job in the matrix but is the only way that works consistently
   - curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test --scala-version $TRAVIS_SCALA_VERSION finagle
   - travis_retry ./sbt --error ++$TRAVIS_SCALA_VERSION ci:update finagle-memcached/update
   # don't test these projects because they require a running Memcached instance
