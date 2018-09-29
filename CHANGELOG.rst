@@ -7,6 +7,20 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Deprecations
+~~~~~~~~~~~~
+
+* finagle-core: Deprecation warnings have been removed from the 'status', 'onClose',
+  and 'close' methods on `c.t.f.t.Transport`, and added to the corresponding methods
+  on `c.t.f.t.TransportContext`. ``PHAB_ID=D221528``
+
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-netty3: Implementations for 'status', 'onClose', and 'close' methods have
+  been moved from `c.t.f.n.t.ChannelTransportContext` to `c.t.f.n.t.ChannelTransport`.
+  ``PHAB_ID=D221528``
+
 18.9.1
 -------
 

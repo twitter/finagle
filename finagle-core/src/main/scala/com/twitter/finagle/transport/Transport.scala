@@ -36,7 +36,6 @@ trait Transport[In, Out] extends Closable { self =>
    * The status of this transport; see [[com.twitter.finagle.Status]] for
    * status definitions.
    */
-  @deprecated("Please use Transport.context.status instead", "2017-08-21")
   def status: Status
 
   /**
@@ -45,7 +44,6 @@ trait Transport[In, Out] extends Closable { self =>
    * write on the Transport, but this allows clients to listen to
    * close events.
    */
-  @deprecated("Please use Transport.context.onClose instead", "2017-08-21")
   def onClose: Future[Throwable]
 
   /**

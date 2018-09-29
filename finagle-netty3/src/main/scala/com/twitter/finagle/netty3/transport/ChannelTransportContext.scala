@@ -2,11 +2,10 @@ package com.twitter.finagle.netty3.transport
 
 import com.twitter.finagle.Status
 import com.twitter.finagle.transport.TransportContext
-import com.twitter.util.{Future, Promise, Time}
+import com.twitter.util.{Future, Time}
 import java.net.SocketAddress
 import java.security.cert.Certificate
-import java.util.concurrent.atomic.AtomicBoolean
-import org.jboss.netty.channel.{Channel, Channels}
+import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.ssl.SslHandler
 import scala.util.control.NonFatal
 
@@ -15,15 +14,6 @@ import scala.util.control.NonFatal
  * `ChannelTransport`.
  */
 final class ChannelTransportContext private[transport](ch: Channel) extends TransportContext {
-  // accessible by the ChannelTransport and for testing
-  private[transport] val failed = new AtomicBoolean(false)
-  private[transport] val closep = new Promise[Throwable]
-
-  def status: Status =
-    if (failed.get || !ch.isOpen) Status.Closed
-    else Status.Open
-
-  def onClose: Future[Throwable] = closep
 
   def localAddress: SocketAddress = ch.getLocalAddress()
   def remoteAddress: SocketAddress = ch.getRemoteAddress()
@@ -39,10 +29,12 @@ final class ChannelTransportContext private[transport](ch: Channel) extends Tran
         }
     }
 
-  def close(deadline: Time): Future[Unit] = {
-    if (ch.isOpen)
-      Channels.close(ch)
-    closep.unit
-  }
+  @deprecated("Please use ChannelTransport.status instead", "2018-09-27")
+  def status: Status = Status.Closed
 
+  @deprecated("Please use ChannelTransport.onClose instead", "2018-09-27")
+  def onClose: Future[Throwable] = Future.???
+
+  @deprecated("Please use ChannelTransport.close instead", "2018-09-27")
+  def close(deadline: Time): Future[Unit] = Future.???
 }

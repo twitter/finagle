@@ -6,12 +6,16 @@ import com.twitter.finagle.{ChannelClosedException, ChannelException, Status}
 import com.twitter.util.{Future, Promise, Return, Time}
 import java.net.SocketAddress
 import java.security.cert.Certificate
+import java.util.concurrent.atomic.AtomicBoolean
 import org.jboss.netty.channel._
 
 class ChannelTransport[In, Out](ch: Channel)
     extends Transport[In, Out]
     with ChannelUpstreamHandler {
   type Context = ChannelTransportContext
+
+  private[this] val failed = new AtomicBoolean(false)
+  private[this] val closep = new Promise[Throwable]
 
   private[this] var nneed = 0
   private[this] def need(n: Int): Unit = synchronized {
@@ -32,7 +36,7 @@ class ChannelTransport[In, Out](ch: Channel)
   }
 
   private[this] def fail(exc: Throwable): Unit = {
-    if (!context.failed.compareAndSet(false, true))
+    if (!failed.compareAndSet(false, true))
       return
 
     // Do not discard existing queue items. Doing so causes a race
@@ -45,7 +49,7 @@ class ChannelTransport[In, Out](ch: Channel)
     // returned to netty potentially allowing subsequent offers to the readq,
     // which should be illegal after failure.
     close()
-    context.closep.updateIfEmpty(Return(exc))
+    closep.updateIfEmpty(Return(exc))
   }
 
   override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent): Unit = {
@@ -139,14 +143,23 @@ class ChannelTransport[In, Out](ch: Channel)
     p
   }
 
-  def status: Status = context.status
+  def status: Status =
+    if (failed.get || !ch.isOpen) Status.Closed
+    else Status.Open
+
+  def onClose: Future[Throwable] = closep
+
+  def close(deadline: Time): Future[Unit] = {
+    if (ch.isOpen)
+      Channels.close(ch)
+    closep.unit
+  }
+
   def localAddress: SocketAddress = context.localAddress
   def remoteAddress: SocketAddress = context.remoteAddress
   def peerCertificate: Option[Certificate] = context.peerCertificate
-  def onClose: Future[Throwable] = context.closep
-  def close(deadline: Time): Future[Unit] = context.close(deadline)
 
-  override def toString = s"Transport<channel=$ch, onClose=${context.closep}>"
+  override def toString = s"Transport<channel=$ch, onClose=$closep>"
 
   val context: ChannelTransportContext = new ChannelTransportContext(ch)
 }
