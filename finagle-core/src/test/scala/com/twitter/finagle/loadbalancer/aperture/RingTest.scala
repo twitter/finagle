@@ -79,15 +79,52 @@ class RingTest extends FunSuite {
     }
   }
 
-  test("pick2: respects range") {
+  test("range boundary cases") {
+    val r0 = new Ring(1, rng)
+    assert(r0.range(rng.nextDouble, 0.0) == 1)
+    assert(r0.range(rng.nextDouble, 0.5) == 1)
+    assert(r0.range(rng.nextDouble, 1.0) == 1)
+
+    val size = 2 + (rng.nextDouble * 10000).toInt
+    val r1 = new Ring(size, rng)
+    assert(r1.range(rng.nextDouble, 0.0) == 1)
+    assert(r1.range(rng.nextDouble, Double.MinPositiveValue) == 1)
+    assert(r1.range(rng.nextDouble, 0.000001) == 1)
+    assert(r1.range(rng.nextDouble, .999999) == size)
+    assert(r1.range(rng.nextDouble, 1.0-Double.MinPositiveValue) == size)
+    assert(r1.range(rng.nextDouble, 1.0) == size)
+  }
+
+  test("range projects pick2") {
     val ring = new Ring(10, rng)
-    val histo = run {
-      val (a, b) = ring.pick2(1/4D, 1/4D)
+    def histo(offset: Double, width: Double) = run {
+      val (a, b) = ring.pick2(offset, width)
       Seq(a, b)
     }
-    assert(ring.range(1/4D, 1/4D) == histo.keys.size)
-    assert(histo.keys == Set(2, 3, 4))
-    assertBalanced(histo)
+
+    // aligned with ring units
+    val h0 = histo(offset = .1D, width = .3D)
+    val r0 = ring.range(offset = .1D, width = .3D)
+    assert(h0.keys == Set(1, 2, 3))
+    assert(r0 == h0.keys.size)
+
+    // misaligned at end
+    val h1 = histo(offset = .1D, width = .35D)
+    val r1 = ring.range(offset = .1D, width = .35D)
+    assert(h1.keys == Set(1, 2, 3, 4))
+    assert(r1 == h1.keys.size)
+
+    // misaligned at start
+    val h2 = histo(offset = .35D, width = .15D)
+    val r2 = ring.range(offset = .35D, width = .15D)
+    assert(h2.keys == Set(3, 4))
+    assert(r2 == h2.keys.size)
+
+    // misaligned at both
+    val h3 = histo(offset = .25D, width = .2D)
+    val r3 = ring.range(offset = .25D, width = .2D)
+    assert(h3.keys == Set(2, 3, 4))
+    assert(r3 == h3.keys.size)
   }
 
   test("pick2: wraps around and respects weights") {
@@ -109,30 +146,20 @@ class RingTest extends FunSuite {
     assert(b/a - 0.5 < 1e-1)
   }
 
-  test("range + indices") {
-    val r0 = new Ring(1, rng)
-    assert(r0.range(rng.nextDouble, 0.0) == 1)
-    assert(r0.range(rng.nextDouble, 0.5) == 1)
-    assert(r0.range(rng.nextDouble, 1.0) == 1)
-
-    val size = 2 + (rng.nextDouble * 10000).toInt
-    val r1 = new Ring(size, rng)
-    assert(r1.range(rng.nextDouble, 0.0) == 1)
-    assert(r1.range(rng.nextDouble, 1.0) == size)
-
-    val r2 = new Ring(10, rng)
-    assert(r2.range(1/4D, 1/4D) == 3)
-    assert(r2.indices(1/4D, 1/4D) == Seq(2, 3, 4))
+  test("indices") {
+    val ring = new Ring(10, rng)
+    assert(ring.range(1/4D, 1/4D) == 3)
+    assert(ring.indices(1/4D, 1/4D) == Seq(2, 3, 4))
 
     // wrap around
-    assert(r2.range(3/4D, 1/2D) == 6)
-    assert(r2.indices(3/4D, 1/2D) == Seq(7, 8, 9, 0, 1, 2))
+    assert(ring.range(3/4D, 1/2D) == 6)
+    assert(ring.indices(3/4D, 1/2D) == Seq(7, 8, 9, 0, 1, 2))
 
     // walk the indices
     for (i <- 0 to 10) {
       withClue(s"offset=${i/10D} width=${1/10D}") {
-        assert(r2.range(i/10D, 1/10D) == 1)
-        assert(r2.indices(i/10D, 1/10D) == Seq(i % 10))
+        assert(ring.range(i/10D, 1/10D) == 1)
+        assert(ring.indices(i/10D, 1/10D) == Seq(i % 10))
       }
     }
   }

@@ -64,26 +64,25 @@ private class Ring(size: Int, rng: Rng) {
     if (width < 0 || width > 1.0)
       throw new IllegalArgumentException(s"width must be between [0, 1.0]: $width")
 
-    // We will wrap around the entire ring, so return the size.
-    if (width == 1) size
+    val begin = index(offset)
+    val end = index((offset + width) % 1.0)
+
+    // We wrapped around the entire ring, so return the size.
+    if (begin == end && width > unitWidth) size
     // We only have one index to select from. Arguably, returning
     // a diff of zero here is correct too. However, in order to
     // project what `pick2` will do we return a range of 1.
-    else if (width == 0) 1
+    else if (begin == end) 1
     else {
-      val ab = {
-        val i = index(offset)
-        val w = weight(i, offset, width)
-        if (w > 0) i else i + 1
-      }
+      val beginWeight = weight(begin, offset, width)
+      val endWeight = weight(end, offset, width)
 
-      val ae = {
-        val i = index((offset + width) % 1.0)
-        val w = weight(i, offset, width)
-        if (w > 0) i + 1 else i
-      }
+      // we want to project what `pick2` will do, so we need to
+      // take into account the weight of `begin` and `end`.
+      val adjustedBegin = if (beginWeight > 0) begin else begin + 1
+      val adjustedEnd = if (endWeight > 0) end + 1 else end
 
-      val diff = ae - ab
+      val diff = adjustedEnd - adjustedBegin
       if (diff < 0) diff + size else diff
     }
   }

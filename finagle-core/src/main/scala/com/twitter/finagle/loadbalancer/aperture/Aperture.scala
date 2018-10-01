@@ -236,10 +236,11 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
 
   def additionalMetadata: Map[String, Any] = {
     Map(
-      "min_aperture" -> minAperture,
-      "use_deterministic_ordering" -> dapertureActive,
-      "logical_aperture" -> logicalAperture,
-      "physical_aperture" -> dist.physicalAperture,
+      "distributor_class" -> dist.getClass.getSimpleName,
+      "logical_aperture_size" -> dist.logicalAperture,
+      "physical_aperture_size" -> dist.physicalAperture,
+      "min_aperture_size" -> dist.min,
+      "max_aperture_size" -> dist.max,
       "vector_hash" -> vectorHash
     ) ++ dist.additionalMetadata
   }
@@ -393,9 +394,13 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     protected def emptyNode: Node = failingNode(emptyException)
     protected def rng: Rng = self.rng
 
+    private[this] def vecAsString: String = vec
+      .take(logicalAperture)
+      .map(_.factory.address)
+      .mkString("[", ", ", "]")
+
     if (rebuildLog.isLoggable(Level.DEBUG)) {
-      val vecString = vec.take(logicalAperture).map(_.factory.address).mkString("[", ", ", "]")
-      rebuildLog.debug(s"[RandomAperture.rebuild $lbl] nodes=$vecString")
+      rebuildLog.debug(s"[RandomAperture.rebuild $lbl] nodes=$vecAsString")
     }
 
     def indices: Set[Int] = (0 until logicalAperture).toSet
@@ -409,13 +414,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     private[this] val busy = vector.filter(nodeBusy)
     def needsRebuild: Boolean = busy.exists(nodeOpen)
 
-    def additionalMetadata: Map[String, Any] =
-      Map(
-        "distributor_class" -> getClass.getSimpleName,
-        "min_serving_units" -> min,
-        "max_serving_units" -> max
-      )
-
+    def additionalMetadata: Map[String, Any] = Map("nodes" -> vecAsString)
   }
 
   /**
@@ -562,21 +561,19 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     // the servers or our coordinate changing).
     def needsRebuild: Boolean = false
 
-    def additionalMetadata: Map[String, Any] = {
-      Map(
-        "distributor_class" -> getClass.getSimpleName,
-        "min_serving_units" -> min,
-        "max_serving_units" -> max,
-        "nodes" -> nodes.map { case (i, weight, addr) =>
-          Map[String, Any](
-            "index" -> i,
-            "weight" -> weight,
-            "address" -> addr.toString
-          )
-        }
-      )
-    }
-
+    def additionalMetadata: Map[String, Any] = Map(
+      "ring_unit_width" -> ring.unitWidth,
+      "peer_offset" -> coord.offset,
+      "peer_unit_width" -> coord.unitWidth,
+      "aperture_width" -> apertureWidth,
+      "nodes" -> nodes.map { case (i, weight, addr) =>
+        Map[String, Any](
+          "index" -> i,
+          "weight" -> weight,
+          "address" -> addr.toString
+        )
+      }
+    )
   }
 
   protected def initDistributor(): Distributor = new EmptyVector(1)
