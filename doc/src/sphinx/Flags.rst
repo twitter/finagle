@@ -15,8 +15,11 @@ Twitter Server) or as JVM properties.
 Common
 ------
 
-**com.twitter.finagle.loadbalancer.defaultBalancer** `choice|heap|aperture`
-  The default load balancer used in clients (default: `choice`).
+**com.twitter.finagle.loadbalancer.defaultBalancer** `choice|heap|aperture|random_aperture`
+  The default load balancer used in clients (default: `choice`). `random_aperture` should only
+  be used in situations where subsetting is a firm requirement. An example of that is in a testing
+  situation where p2c behavior isn't acceptable. In other cases `aperture` will select between
+  random aperture and deterministic aperture when appropriate.
 
 **com.twitter.finagle.loadbalancer.perHostStats** `bool`
   Enable/disable per-host granularity for stats (default: `false`). When enabled,the configured stats
