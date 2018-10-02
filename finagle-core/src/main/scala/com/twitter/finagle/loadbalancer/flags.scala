@@ -9,7 +9,11 @@ import com.twitter.app.GlobalFlag
  */
 /**
  * A [[GlobalFlag]] that changes the default balancer for every client in the process.
- * Valid choices are ['heap', 'choice', and 'aperture'].
+ * Valid choices are ['heap', 'choice', 'aperture', and 'random_aperture'].
+ *
+ * @note that 'random_aperture' should only be used in unusual situations such as for
+ *       testing instances and requires extra configuration. See the aperture
+ *       documentation for more information.
  *
  * To configure the load balancer on a per-client granularity instead, use the
  * `withLoadBalancer` method like so:

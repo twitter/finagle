@@ -366,17 +366,18 @@ object FlagBalancerFactory extends LoadBalancerFactory {
       case _ => Balancers.p2c()
     }
 
-  private def aperture(): LoadBalancerFactory =
+  private def aperture(useDeterminsticOrdering: Option[Boolean]): LoadBalancerFactory =
     exp.loadMetric() match {
-      case "ewma" => Balancers.aperturePeakEwma()
-      case _ => Balancers.aperture()
+      case "ewma" => Balancers.aperturePeakEwma(useDeterministicOrdering = useDeterminsticOrdering)
+      case _ => Balancers.aperture(useDeterministicOrdering = useDeterminsticOrdering)
     }
 
   private val underlying: LoadBalancerFactory =
     defaultBalancer() match {
       case "heap" => Balancers.heap()
       case "choice" => p2c()
-      case "aperture" => aperture()
+      case "aperture" => aperture(None)
+      case "random_aperture" => aperture(Some(false))
       case x =>
         log.warning(s"""Invalid load balancer $x, using "choice" balancer.""")
         p2c()
