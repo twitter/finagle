@@ -3,7 +3,7 @@ package com.twitter.finagle.decoder
 import com.twitter.io.{Buf, ByteReader}
 import scala.collection.mutable.ArrayBuffer
 
-private[finagle] object LengthFieldFramer {
+private[twitter] object LengthFieldFramer {
 
   class FrameTooLargeException(size: Long, max: Long)
       extends Exception(s"Frame of size $size exceeds max length of $max")
@@ -48,7 +48,7 @@ private[finagle] object LengthFieldFramer {
  * @param bigEndian Set to false if the length field is little endian. This has
  *                  no effect on the rest of the frame.
  */
-private[finagle] class LengthFieldFramer(
+private[twitter] class LengthFieldFramer(
   lengthFieldBegin: Int,
   lengthFieldLength: Int,
   lengthAdjust: Int,

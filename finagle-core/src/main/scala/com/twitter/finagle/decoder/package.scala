@@ -12,7 +12,7 @@ package object decoder {
    * returned.
    * Stateful implementations should be expected.
    */
-  private[finagle] type Decoder[T] = (Buf => IndexedSeq[T])
+  private[twitter] type Decoder[T] = (Buf => IndexedSeq[T])
 
   /**
    * A `Framer` performs protocol framing. As `Buf`s arrive on the wire, a
@@ -25,5 +25,5 @@ package object decoder {
    * @see [[LengthFieldFramer]] as an example
    *      implementation.
    */
-  private[finagle] type Framer = Decoder[Buf]
+  private[twitter] type Framer = Decoder[Buf]
 }
