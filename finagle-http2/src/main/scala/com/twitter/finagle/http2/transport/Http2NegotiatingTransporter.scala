@@ -3,9 +3,10 @@ package com.twitter.finagle.http2.transport
 import com.twitter.finagle.{Stack, Status}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.http2.DeadTransport
-import com.twitter.finagle.param.{Timer => TimerParam}
+import com.twitter.finagle.param.{Stats, Timer => TimerParam}
+import com.twitter.finagle.stats.Verbosity
 import com.twitter.finagle.transport.{Transport, TransportContext, TransportProxy}
-import com.twitter.logging.Logger
+import com.twitter.logging.{HasLogLevel, Level, Logger}
 import com.twitter.util._
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicReference
@@ -36,6 +37,11 @@ private[http2] abstract class Http2NegotiatingTransporter(
 
   private[this] val cachedConnection =
     new AtomicReference[Future[Option[ClientSession]]]()
+
+  private[this] val statsReceiver = params[Stats].statsReceiver
+
+  private[this] val cachedSessionClosed = statsReceiver.counter(Verbosity.Debug, "dead_session")
+  private[this] val childTransportClosed = statsReceiver.counter(Verbosity.Debug, "dead_child_transport")
 
   /** Attempt to upgrade to a multiplexed session */
   protected def attemptUpgrade(): (Future[Option[ClientSession]], Future[Transport[Any, Any]])
@@ -116,10 +122,17 @@ private[http2] abstract class Http2NegotiatingTransporter(
   private[this] def useExistingConnection(
     f: Future[Option[ClientSession]]
   ): Future[Transport[Any, Any]] = f.transform {
+    case Return(Some(session)) if session.status == Status.Closed =>
+      log.info("Existing session is closed.")
+      cachedSessionClosed.incr()
+      tryEvict(f)
+      apply()
+
     case Return(Some(session)) =>
       session.newChildTransport().transform {
         case Return(transport) if transport.status == Status.Closed =>
           log.debug(s"A cached connection to address %s was failed.", remoteAddress)
+          childTransportClosed.incr()
           // We evict and give it another go round.
           tryEvict(f)
           apply()
@@ -143,7 +156,11 @@ private[http2] abstract class Http2NegotiatingTransporter(
       underlyingHttp11()
 
     case Throw(exn) =>
-      log.warning(exn, s"A cached connection to address $remoteAddress was failed.")
+      val level = exn match {
+        case HasLogLevel(level) => level
+        case _ => Level.WARNING
+      }
+      log.log(level, exn, s"An upgrade attempt to $remoteAddress failed.")
       // We evict and give it another go round.
       tryEvict(f)
       apply()

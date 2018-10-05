@@ -4,6 +4,7 @@ import com.twitter.finagle.{FailureFlags, Stack, Status}
 import com.twitter.finagle.http2.RefTransport
 import com.twitter.finagle.http2.transport.Http2UpgradingTransport.UpgradeIgnoredException
 import com.twitter.finagle.netty4.transport.HasExecutor
+import com.twitter.finagle.param.Stats
 import com.twitter.finagle.transport.{Transport, TransportContext, TransportProxy}
 import com.twitter.logging.{HasLogLevel, Level}
 import com.twitter.util.{Future, Promise, Return, Throw, Time}
@@ -84,7 +85,10 @@ private[http2] final class Http2UpgradingTransport(
   }
 
   override def close(deadline: Time): Future[Unit] = {
-    p.updateIfEmpty(Throw(new Http2UpgradingTransport.ClosedWhileUpgradingException()))
+    if (p.updateIfEmpty(Throw(new Http2UpgradingTransport.ClosedWhileUpgradingException()))) {
+      val statsReceiver = params[Stats].statsReceiver
+      statsReceiver.counter("closed_before_upgrade").incr()
+    }
     super.close(deadline)
   }
 }

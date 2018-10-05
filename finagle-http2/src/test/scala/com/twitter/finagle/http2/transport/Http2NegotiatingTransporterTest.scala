@@ -2,7 +2,6 @@ package com.twitter.finagle.http2.transport
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.http2.DeadTransport
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.{Stack, Status}
 import com.twitter.util._
@@ -283,13 +282,6 @@ class Http2NegotiatingTransporterTest extends FunSuite with MockitoSugar with Ev
 
     assert(transporter().poll == Some(Return(transport)))
     assert(upgradeCalls.get == 1)
-
-    // This could arguably this could be changed to 'try again' but right now we return a
-    // dead transport to prevent infinite loops. This could change in the future.
-    transporter().poll match {
-      case Some(Return(_: DeadTransport)) => () // expected
-      case _ => fail("expected the next call to return a dead transport")
-    }
 
     assert(transporter().poll == Some(Return(transport)))
     assert(upgradeCalls.get == 2)
