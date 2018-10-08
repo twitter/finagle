@@ -5,7 +5,7 @@ import com.twitter.finagle.http2.ServerCodec
 import com.twitter.finagle.netty4.http._
 import com.twitter.finagle.param.Stats
 import io.netty.channel.{Channel, ChannelHandlerContext, ChannelInitializer}
-import io.netty.handler.codec.http2.{Http2MultiplexCodecBuilder}
+import io.netty.handler.codec.http2.Http2MultiplexCodecBuilder
 import io.netty.handler.ssl.{ApplicationProtocolNames, ApplicationProtocolNegotiationHandler}
 
 final private[http2] class ServerNpnOrAlpnHandler(init: ChannelInitializer[Channel], params: Stack.Params)
@@ -20,7 +20,7 @@ final private[http2] class ServerNpnOrAlpnHandler(init: ChannelInitializer[Chann
       // Http2 has been negotiated, replace the HttpCodec with an Http2Codec
       upgradeCounter.incr()
       ctx.channel.config.setAutoRead(true)
-      val initializer = H2Init(init, params)
+      val initializer = H2StreamChannelInit.initServer(init, params)
       val http2MultiplexCodec = ServerCodec.multiplexCodec(
         params, Http2MultiplexCodecBuilder.forServer(initializer))
       ServerCodec.addStreamsGauge(statsReceiver, http2MultiplexCodec, ctx.channel)

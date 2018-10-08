@@ -2,7 +2,7 @@ package com.twitter.finagle.http2
 
 import com.twitter.finagle.Stack
 import com.twitter.finagle.http.Fields
-import com.twitter.finagle.http2.transport.{H2Filter, H2Init, PriorKnowledgeHandler}
+import com.twitter.finagle.http2.transport.{H2Filter, H2StreamChannelInit, PriorKnowledgeHandler}
 import com.twitter.finagle.netty4.http.HttpCodecName
 import com.twitter.finagle.param.Stats
 import com.twitter.logging.Logger
@@ -27,7 +27,7 @@ final private[finagle] class Http2CleartextServerInitializer(
   private[this] val upgradedCounter = upgradeStatsReceiver.counter("success")
   private[this] val ignoredCounter = upgradeStatsReceiver.counter("ignored")
 
-  val initializer: ChannelInitializer[Channel] = H2Init(init, params)
+  val initializer: ChannelInitializer[Channel] = H2StreamChannelInit.initServer(init, params)
 
   def upgradeCodecFactory(channel: Channel): UpgradeCodecFactory = new UpgradeCodecFactory {
     override def newUpgradeCodec(protocol: CharSequence): UpgradeCodec = {
