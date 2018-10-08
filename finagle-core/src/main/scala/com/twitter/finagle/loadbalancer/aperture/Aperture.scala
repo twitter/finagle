@@ -3,10 +3,8 @@ package com.twitter.finagle.loadbalancer.aperture
 import com.twitter.app.GlobalFlag
 import com.twitter.finagle._
 import com.twitter.finagle.Address.Inet
-import com.twitter.finagle.CoreToggles
 import com.twitter.finagle.loadbalancer.p2c.P2CPick
 import com.twitter.finagle.loadbalancer.{Balancer, DistributorT, NodeT}
-import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.util.Rng
 import com.twitter.logging.{Level, Logger}
 import com.twitter.util.{Future, Time}
@@ -25,9 +23,6 @@ private object staticDetermisticApertureWidth extends GlobalFlag[Boolean](
 
 private object Aperture {
   private[this] val log = Logger.get()
-
-  val dapertureToggleKey = "com.twitter.finagle.core.UseDeterministicAperture"
-  private val dapertureToggle = CoreToggles(dapertureToggleKey)
 
   // When picking a min aperture, we want to ensure that p2c can actually converge
   // when there are weights present. Based on empirical measurements, weights are well
@@ -167,17 +162,10 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    */
   protected def label: String
 
-  // We set the toggle to take into account both the cluster id and the `label`
-  // for the client. Effectively, we want all the clients of a particular
-  // cluster to be included during the same experiment window since d-aperture
-  // needs all the respective clients to participate in order to be effective.
-  private[this] def dapertureToggleActive: Boolean =
-    dapertureToggle(s"${ServerInfo().clusterId}:$label".hashCode)
-
   protected def dapertureActive: Boolean =
     useDeterministicOrdering match {
       case Some(bool) => bool
-      case None => dapertureToggleActive
+      case None => true
     }
 
   @volatile private[this] var _vectorHash: Int = -1

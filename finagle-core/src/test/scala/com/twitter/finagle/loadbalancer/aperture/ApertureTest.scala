@@ -5,7 +5,6 @@ import com.twitter.finagle.Address.Inet
 import com.twitter.finagle._
 import com.twitter.finagle.loadbalancer.{EndpointFactory, FailingEndpointFactory, NodeT}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.toggle
 import com.twitter.finagle.util.Rng
 import com.twitter.util.{Activity, Await, Duration, NullTimer}
 import java.net.InetSocketAddress
@@ -371,29 +370,23 @@ class ApertureTest extends FunSuite with ApertureSuite {
   }
 
   test("daperture toggle") {
-    toggle.flag.overrides.let(Aperture.dapertureToggleKey, 1.0) {
-      val bal = new Bal {
-        override val minAperture = 150
-      }
-      ProcessCoordinate.setCoordinate(0, 150)
-      bal.update(Vector.tabulate(150)(Factory))
-      bal.rebuildx()
-      assert(bal.isDeterministicAperture)
-      // ignore 150, since we are using d-aperture and instead
-      // default to 12.
-      assert(bal.minUnitsx == 12)
+    val bal = new Bal {
+      override val minAperture = 150
     }
+    ProcessCoordinate.setCoordinate(0, 150)
+    bal.update(Vector.tabulate(150)(Factory))
+    bal.rebuildx()
+    assert(bal.isDeterministicAperture)
+    // ignore 150, since we are using d-aperture and instead
+    // default to 12.
+    assert(bal.minUnitsx == 12)
 
-    toggle.flag.overrides.let(Aperture.dapertureToggleKey, 0.0) {
-      val bal = new Bal {
-        override val minAperture = 150
-      }
-      ProcessCoordinate.setCoordinate(0, 150)
-      bal.update(Vector.tabulate(150)(Factory))
-      bal.rebuildx()
-      assert(bal.isRandomAperture)
-      assert(bal.minUnitsx == 150)
-    }
+    // Now unset the coordinate which should send us back to random aperture
+    ProcessCoordinate.unsetCoordinate()
+    assert(bal.isRandomAperture)
+    bal.update(Vector.tabulate(150)(Factory))
+    bal.rebuildx()
+    assert(bal.minUnitsx == 150)
   }
 
   test("vectorHash") {
