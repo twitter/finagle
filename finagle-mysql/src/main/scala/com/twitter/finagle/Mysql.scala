@@ -139,43 +139,6 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
 
   object Client {
 
-    private object PoisonConnection {
-      val Role: Stack.Role = Stack.Role("PoisonConnection")
-
-      def module: Stackable[ServiceFactory[Request, Result]] =
-        new Stack.Module0[ServiceFactory[Request, Result]] {
-          def role: Stack.Role = Role
-
-          def description: String = "Allows the connection to be poisoned and recycled"
-
-          def make(next: ServiceFactory[Request, Result]): ServiceFactory[Request, Result] =
-            new PoisonConnection(next)
-        }
-    }
-
-    /**
-     * This is a workaround for connection pooling that allows us to close a connection.
-     */
-    private class PoisonConnection(underlying: ServiceFactory[Request, Result])
-      extends ServiceFactoryProxy(underlying) {
-
-      override def apply(conn: ClientConnection): Future[Service[Request, Result]] = {
-        super.apply(conn).map { svc =>
-          new ServiceProxy[Request, Result](svc) {
-            override def apply(request: Request): Future[Result] = {
-              if (request eq PoisonConnectionRequest) {
-                underlying.close().before {
-                  Future.value(PoisonedConnectionResult)
-                }
-              } else {
-                super.apply(request)
-              }
-            }
-          }
-        }
-      }
-    }
-
     private val params: Stack.Params = StackClient.defaultParams +
       ProtocolLibrary("mysql") +
       DefaultPool.Param(
