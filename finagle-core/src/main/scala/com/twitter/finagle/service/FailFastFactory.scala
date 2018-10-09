@@ -139,21 +139,20 @@ private[finagle] class FailFastFactory[Req, Rep](
   private[this] val markedAvailableCounter = statsReceiver.counter("marked_available")
   private[this] val markedDeadCounter = statsReceiver.counter("marked_dead")
 
-  private[this] val unhealthyForMsGauge =
+  private[this] val gauges = Seq(
     statsReceiver.addGauge("unhealthy_for_ms") {
       state match {
         case r: Retrying => r.since.untilNow.inMilliseconds
         case _ => 0
       }
-    }
-
-  private[this] val unhealthyNumRetriesGauge =
+    },
     statsReceiver.addGauge("unhealthy_num_tries") {
       state match {
         case r: Retrying => r.ntries
         case _ => 0
       }
     }
+  )
 
   private[this] val update = new Updater[Observation] {
     def preprocess(elems: Seq[Observation]): Seq[Observation] = elems
@@ -238,6 +237,7 @@ private[finagle] class FailFastFactory[Req, Rep](
   override val toString: String = s"fail_fast_$underlying"
 
   override def close(deadline: Time): Future[Unit] = {
+    gauges.foreach(_.remove())
     update(Observation.Close)
     underlying.close(deadline)
   }
