@@ -1,13 +1,14 @@
 package com.twitter.finagle.mysql.integration
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{IndividualRequestTimeoutException, Mysql}
+import com.twitter.finagle.{IndividualRequestTimeoutException, Mysql, mysql}
 import com.twitter.finagle.mysql._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.{Await, Future}
+import com.twitter.util.{Await, Closable, Future}
 import java.sql.Date
 import org.scalatest.concurrent.Eventually
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
+import scala.collection.mutable.ArrayBuffer
 
 case class SwimmingRecord(
   event: String,
@@ -347,14 +348,19 @@ class ClientTest extends FunSuite
 
   test("mysql server error during handshake is reported with error code") {
     // The default maximum number of connections is 150, so we open 151.
-    val err = intercept[Exception] {
-      for (i <- 0 to 150) {
-        val newClient = configureClient().newRichClient(dest)
-        await(newClient.ping)
+    val clients = new ArrayBuffer[mysql.Client]()
+    try {
+      val err = intercept[Exception] {
+        for (_ <- 0 to 150) {
+          val newClient = configureClient().newRichClient(dest)
+          clients += newClient
+          await(newClient.ping)
+        }
       }
+      assert(err.getMessage.contains("Exception in MySQL handshake, error code 1040"))
+    } finally {
+      Closable.all(clients:_*).close()
     }
-
-    assert(err.getMessage.contains("Exception in MySQL handshake, error code 1040"))
   }
 
 }
