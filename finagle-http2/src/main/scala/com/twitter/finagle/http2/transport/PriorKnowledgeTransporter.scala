@@ -90,11 +90,11 @@ private[http2] final class PriorKnowledgeTransporter(
         .rescue { case _: Throwable => Future.Done }
   }
 
-  def sessionStatus: Status = cachedSession.get match {
+  def transporterStatus: Status = cachedSession.get match {
     case None => Status.Open
     case Some(session) =>
       session.poll match {
-        case Some(Return(session)) => session.status
+        case Some(Return(session)) if session.status == Status.Busy => Status.Busy
         case _ =>
           // this state is transient, either we're going to kill a dead session soon or
           // we haven't resolved a session yet.

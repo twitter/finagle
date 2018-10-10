@@ -286,4 +286,33 @@ class Http2NegotiatingTransporterTest extends FunSuite with MockitoSugar with Ev
     assert(transporter().poll == Some(Return(transport)))
     assert(upgradeCalls.get == 2)
   }
+
+  test("session status is bubbled up correctly") {
+    val http1Transporter = mock[Transporter[Any, Any, TransportContext]]
+    val transport = mock[Transport[Any, Any]]
+    val clientSession = mock[ClientSession]
+    when(clientSession.status).thenReturn(Status.Open)
+
+    val transporter = new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter) {
+      protected def attemptUpgrade(): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
+        when(clientSession.newChildTransport()).thenReturn(Future.exception(new Exception()))
+        Future.value(Some(clientSession)) -> Future.value(transport)
+      }
+    }
+
+    // Initial status is Open
+    assert(transporter.transporterStatus == Status.Open)
+
+    // After a session resolves and has status Open, we should still be Open.
+    assert(transporter().poll == Some(Return(transport)))
+    assert(transporter.transporterStatus == Status.Open)
+
+    // Now set it to busy, and the session status should reflect this.
+    when(clientSession.status).thenReturn(Status.Busy)
+    assert(transporter.transporterStatus == Status.Busy)
+
+    // When the session is Closed, we are going to evict it so we go back to an Open state.
+    when(clientSession.status).thenReturn(Status.Closed)
+    assert(transporter.transporterStatus == Status.Open)
+  }
 }

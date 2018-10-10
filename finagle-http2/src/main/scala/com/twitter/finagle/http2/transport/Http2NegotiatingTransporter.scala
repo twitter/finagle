@@ -69,14 +69,16 @@ private[http2] abstract class Http2NegotiatingTransporter(
     }
   }
 
-  final def sessionStatus: Status = {
+  final def transporterStatus: Status = {
+    // This reflects the general health of the backend. We want to reflect the busy
+    // status of the underlying session since that may reflect health of the backend.
+    // However, if it's `Status.Closed` it could be due to normal reasons and our job
+    // is to make a new shared session, so this `Transporter` is still `Status.Open`
+    // for business.
     val f = cachedConnection.get
-
-    // Status.Open is a good default since this is just here to do liveness checks with Ping.
-    // We assume all other failure detection is handled up the chain.
     if (f == null) Status.Open
     else f.poll match {
-      case Some(Return(Some(fac))) => fac.status
+      case Some(Return(Some(fac))) if fac.status == Status.Busy => Status.Busy
       case _ => Status.Open
     }
   }

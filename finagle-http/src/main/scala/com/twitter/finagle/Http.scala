@@ -219,7 +219,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
               }
 
               override def status: Status = transporter match {
-                case http2: MultiplexTransporter => http2.sessionStatus
+                case http2: MultiplexTransporter => http2.transporterStatus
                 case _ => super.status
               }
             }
