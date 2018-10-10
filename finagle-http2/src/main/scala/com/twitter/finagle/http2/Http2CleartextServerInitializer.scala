@@ -22,19 +22,17 @@ final private[finagle] class Http2CleartextServerInitializer(
 ) extends ChannelInitializer[SocketChannel] {
   import Http2CleartextServerInitializer._
 
+  private[this] val initializer = H2StreamChannelInit.initServer(init, params)
   private[this] val statsReceiver = params[Stats].statsReceiver
   private[this] val upgradeStatsReceiver = statsReceiver.scope("upgrade")
   private[this] val upgradedCounter = upgradeStatsReceiver.counter("success")
   private[this] val ignoredCounter = upgradeStatsReceiver.counter("ignored")
 
-  val initializer: ChannelInitializer[Channel] = H2StreamChannelInit.initServer(init, params)
-
   def upgradeCodecFactory(channel: Channel): UpgradeCodecFactory = new UpgradeCodecFactory {
     override def newUpgradeCodec(protocol: CharSequence): UpgradeCodec = {
       if (AsciiString.contentEquals(Http2CodecUtil.HTTP_UPGRADE_PROTOCOL_NAME, protocol)) {
-        val http2MultiplexCodec = ServerCodec.multiplexCodec(
-          params, Http2MultiplexCodecBuilder.forServer(initializer))
-        ServerCodec.addStreamsGauge(statsReceiver, http2MultiplexCodec, channel)
+        val http2MultiplexCodec = MultiplexCodecBuilder.serverMultiplexCodec(params, initializer)
+        MultiplexCodecBuilder.addStreamsGauge(statsReceiver, http2MultiplexCodec, channel)
 
         new Http2ServerUpgradeCodec(http2MultiplexCodec) {
           override def upgradeTo(ctx: ChannelHandlerContext, upgradeRequest: FullHttpRequest): Unit = {

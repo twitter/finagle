@@ -1,14 +1,13 @@
 package com.twitter.finagle.http2.transport
 
 import com.twitter.finagle.Stack
-import com.twitter.finagle.http2.ServerCodec
+import com.twitter.finagle.http2.MultiplexCodecBuilder
 import com.twitter.finagle.netty4.http._
 import com.twitter.finagle.param.Stats
 import com.twitter.logging.Logger
 import io.netty.buffer.{ByteBuf, ByteBufUtil}
 import io.netty.channel.{Channel, ChannelHandlerContext, ChannelInboundHandlerAdapter, ChannelInitializer}
 import io.netty.handler.codec.http2.Http2CodecUtil.connectionPrefaceBuf
-import io.netty.handler.codec.http2.Http2MultiplexCodecBuilder
 
 /**
  * This handler allows an instant upgrade to HTTP/2 if the first bytes received from the client
@@ -72,9 +71,8 @@ final private[http2] class PriorKnowledgeHandler(
           upgradeCounter.incr()
 
           // we have read a complete preface. Setup HTTP/2 pipeline.
-          val http2MultiplexCodec = ServerCodec.multiplexCodec(
-            params, Http2MultiplexCodecBuilder.forServer(initializer))
-          ServerCodec.addStreamsGauge(statsReceiver, http2MultiplexCodec, ctx.channel)
+          val http2MultiplexCodec = MultiplexCodecBuilder.serverMultiplexCodec(params, initializer)
+          MultiplexCodecBuilder.addStreamsGauge(statsReceiver, http2MultiplexCodec, ctx.channel)
 
           p.replace(HttpCodecName, Http2CodecName, http2MultiplexCodec)
           p.remove("upgradeHandler")
