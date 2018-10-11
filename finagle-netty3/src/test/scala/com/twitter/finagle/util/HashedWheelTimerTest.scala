@@ -1,6 +1,6 @@
 package com.twitter.finagle.util
 
-import com.twitter.util.TimeConversions._
+import com.twitter.conversions.time._
 import com.twitter.util.{Timer, TimerTask}
 import java.util.Collections
 import java.util.concurrent.atomic.AtomicInteger

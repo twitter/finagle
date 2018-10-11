@@ -2,7 +2,7 @@ package com.twitter.finagle.netty4.channel
 
 import com.twitter.finagle.netty4.channel.ChannelStatsHandler.SharedChannelStats
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.TimeConversions.intToTimeableNumber
+import com.twitter.conversions.time.intToTimeableNumber
 import com.twitter.util.{Duration, Time}
 import io.netty.buffer.Unpooled.wrappedBuffer
 import io.netty.channel._

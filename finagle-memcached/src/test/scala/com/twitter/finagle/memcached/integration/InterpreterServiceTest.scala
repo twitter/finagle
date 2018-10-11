@@ -9,7 +9,7 @@ import com.twitter.finagle.memcached.Interpreter
 import com.twitter.finagle.memcached.integration.external.InProcessMemcached
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.io.Buf
-import com.twitter.util.TimeConversions._
+import com.twitter.conversions.time._
 import com.twitter.util.{Await, Awaitable, Time}
 import java.net.{InetAddress, InetSocketAddress}
 import org.scalatest.{BeforeAndAfter, FunSuite}

@@ -1,6 +1,6 @@
 package com.twitter.finagle.util
 
-import com.twitter.util.TimeConversions._
+import com.twitter.conversions.time._
 import com.twitter.util._
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner

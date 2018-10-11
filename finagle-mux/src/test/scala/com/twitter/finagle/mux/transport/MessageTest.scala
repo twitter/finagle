@@ -3,7 +3,7 @@ package com.twitter.finagle.mux.transport
 import com.twitter.finagle.{Dentry, Dtab, Failure, Path, tracing}
 import com.twitter.io.Buf
 import com.twitter.util.Time
-import com.twitter.util.TimeConversions.intToTimeableNumber
+import com.twitter.conversions.time.intToTimeableNumber
 import org.scalatest.FunSuite
 import scala.collection.mutable
 

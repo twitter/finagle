@@ -7,7 +7,7 @@ import org.scalatest.mockito.MockitoSugar
 import org.mockito.Mockito.when
 import org.mockito.Matchers
 import org.mockito.Matchers._
-import com.twitter.util.TimeConversions._
+import com.twitter.conversions.time._
 import com.twitter.finagle.Service
 import com.twitter.util.{Await, Time, Future}
 
