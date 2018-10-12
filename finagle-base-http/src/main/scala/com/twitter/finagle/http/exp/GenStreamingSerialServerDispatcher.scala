@@ -4,7 +4,7 @@ import com.twitter.finagle.{CancelledRequestException, Failure}
 import com.twitter.finagle.context.{Contexts, RemoteInfo}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.logging.Logger
+import com.twitter.logging.{Level, Logger}
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicReference
 
@@ -115,10 +115,12 @@ private[finagle] abstract class GenStreamingSerialServerDispatcher[Req, Rep, In,
       // we need to close the transport.
       // Note: We don't sequence the transport.close() Future because we don't care to wait
       // for it and also don't want to clobber the result of the loop.
-      if (res.isThrow) {
-        logger.debug(res.throwable, s"closing $trans due to read error")
-      } else {
-        logger.debug(s"closing $trans due to status.cas failure,  state is ${state.get()}, expect Running")
+      if (logger.isLoggable(Level.TRACE)) {
+        if (res.isThrow) {
+          logger.trace(res.throwable, s"closing $trans due to read error")
+        } else {
+          logger.trace(s"closing $trans due to status.cas failure,  state is ${state.get()}, expect Running")
+        }
       }
 
       trans.close()
