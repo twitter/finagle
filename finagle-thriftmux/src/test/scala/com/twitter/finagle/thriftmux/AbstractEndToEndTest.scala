@@ -1563,6 +1563,19 @@ abstract class AbstractEndToEndTest
     }
 
   test("drain downgraded connections") {
+    new ThriftMuxTestServer {
+      val client =
+        Thrift.client.build[TestService.MethodPerEndpoint](
+          Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+          "client"
+        )
+      1 to 5 foreach { _ =>
+        assert(await(client.query("ok")) == "okok")
+      }
+
+      await(server.close())
+    }
+
     val response = new Promise[String]()
     val iface = new TestService.MethodPerEndpoint {
       def query(x: String): Future[String] = response
