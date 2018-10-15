@@ -84,10 +84,10 @@ class ThriftSmuxSslTest extends FunSuite with Eventually {
     mkSuccessfulHelloRequest(client2)
     assertGaugeIsTwo(serverStats, serverTlsConnections)
 
-    Await.result(client1.asClosable.close(), 2.seconds)
+    Await.ready(client1.asClosable.close(), 2.seconds)
     eventually { assertGaugeIsOne(serverStats, serverTlsConnections) }
 
-    Await.result(client2.asClosable.close(), 2.seconds)
+    Await.ready(client2.asClosable.close(), 2.seconds)
     Await.result(server.close(), 2.seconds)
     eventually { assertGaugeIsZero(serverStats, serverTlsConnections) }
   }
@@ -115,13 +115,13 @@ class ThriftSmuxSslTest extends FunSuite with Eventually {
     assertGaugeIsOne(client1Stats, client1TlsConnections)
     assertGaugeIsOne(client2Stats, client2TlsConnections)
 
-    Await.result(client1.asClosable.close(), 2.seconds)
+    Await.ready(client1.asClosable.close(), 2.seconds)
     eventually {
       assertGaugeIsZero(client1Stats, client1TlsConnections)
       assertGaugeIsOne(client2Stats, client2TlsConnections)
     }
 
-    Await.result(client2.asClosable.close(), 2.seconds)
+    Await.ready(client2.asClosable.close(), 2.seconds)
     Await.result(server.close(), 2.seconds)
     eventually {
       assertGaugeIsZero(client1Stats, client1TlsConnections)

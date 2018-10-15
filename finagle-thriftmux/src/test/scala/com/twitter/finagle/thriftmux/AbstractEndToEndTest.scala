@@ -1841,7 +1841,7 @@ abstract class AbstractEndToEndTest
       // We requeue once since the first try will fail so it will try another server
       assert(sr.counters(Seq("client", "retries", "requeues")) == 2 - 1)
       assert(sr.counters(Seq("client", "connects")) == 2)
-      assert(sr.counters(Seq("client", "mux", "drained")) == 2)
+      assert(sr.counters(Seq("client", "mux", "draining")) == 2)
       await(closeServers())
     }
   }
