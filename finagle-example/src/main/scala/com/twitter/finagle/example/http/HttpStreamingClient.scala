@@ -1,10 +1,9 @@
 package com.twitter.finagle.example.http
 
-import com.twitter.concurrent.AsyncStream
-import com.twitter.util.{Await, Base64StringEncoder => Base64}
+import com.twitter.io.{Buf, Reader}
 import com.twitter.finagle.http.{Request, Method, Status}
 import com.twitter.finagle.Http
-import com.twitter.io.Buf
+import com.twitter.util.{Await, Base64StringEncoder => Base64}
 
 /**
  * This client connects to a Streaming HTTP service, prints 1000 messages, then
@@ -34,7 +33,7 @@ object HttpStreamingClient {
 
       case response =>
         var messageCount = 0 // Wait for 1000 messages then shut down.
-        AsyncStream.fromReader(response.reader).foreach {
+        Reader.toAsyncStream(response.reader).foreach {
           case Buf.Utf8(buf) if messageCount < 1000 =>
             messageCount += 1
             println(buf)
