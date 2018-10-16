@@ -208,8 +208,12 @@ private class TrafficDistributor[Req, Rep](
       case (balancers, activeSet) =>
         val weightedGroups: Map[Double, Set[WeightedFactory[Req, Rep]]] =
           activeSet.groupBy(_.weight)
-
-        val merged = weightedGroups.foldLeft(balancers) {
+        val merged = if (weightedGroups.isEmpty) {
+          val emptyEndpoints: BalancerEndpoints[Req, Rep] = Var(Activity.Ok(Set.empty[EndpointFactory[Req, Rep]]))
+          val lb = newBalancer(Activity(emptyEndpoints))
+          balancers + (0.0 -> CachedBalancer(lb, emptyEndpoints, 0))
+        } else {
+        weightedGroups.foldLeft(balancers) {
           case (cache, (weight, factories)) =>
             val unweighted = factories.map { case WeightedFactory(f, _) => f }
             val newCacheEntry = if (cache.contains(weight)) {
@@ -224,6 +228,7 @@ private class TrafficDistributor[Req, Rep](
               CachedBalancer(lb, endpoints, unweighted.size)
             }
             cache + (weight -> newCacheEntry)
+        }
         }
 
         // weight classes that no longer exist in the update are removed from
@@ -278,12 +283,9 @@ private class TrafficDistributor[Req, Rep](
   // ServiceFactories that can service requests.
   private[this] val underlying: Event[ServiceFactory[Req, Rep]] =
     weightClasses.foldLeft(init) {
-      case (_, Activity.Ok(wcs)) if wcs.isEmpty =>
-        // Defer the handling of an empty destination set to `newBalancer`
-        val emptyBal = newBalancer(Activity(Var(Activity.Ok(Set.empty[EndpointFactory[Req, Rep]]))))
-        updateGauges(wcs)
-        pending.updateIfEmpty(Return(emptyBal))
-        emptyBal
+      case (_, Activity.Ok(List(WeightClass(lb, _, _,sz)))) if sz == 0 =>
+        pending.updateIfEmpty(Return(lb))
+        lb
       case (_, Activity.Ok(wcs)) =>
         val dist = new Distributor(wcs, rng)
         updateGauges(wcs)

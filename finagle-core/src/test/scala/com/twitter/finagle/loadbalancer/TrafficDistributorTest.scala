@@ -470,4 +470,20 @@ class TrafficDistributorTest extends FunSuite {
     Await.ready(client.close())
     intercept[ServiceClosedException] { Await.result(client("x")) }
   }
+
+  test("transition to empty balancer on empty address state")(new Ctx{
+    val init: Activity.State[Set[Address]] = Activity.Pending
+    val dest = Var(init)
+    val dist = newDist(dest)
+
+    dest() = Activity.Ok(Set((1, 2.0),(2, 1.0),(3, 2.0)).map(x => WeightedAddress(Address(x._1), x._2)))
+    val bal0 = Await.result(dist())
+    assert(balancers.size == 2)
+
+    dest() = Activity.Ok(Set.empty[Address])
+    val bal1 = intercept[Exception] {Await.result(dist())}
+    assert(balancers.size == 3)
+
+  }
+  )
 }
