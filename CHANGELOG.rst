@@ -6,6 +6,8 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 
 Unreleased
 ----------
+* finagle-base-http: logging levels in `c.t.f.h.c.ResponseConformanceFilter` have
+  been change from `info` to `debug`
 
 Deprecations
 ~~~~~~~~~~~~
