@@ -99,6 +99,14 @@ class FilterTest extends FunSuite {
     override def toString: String = "agnosticFilter3"
   }
 
+  class OTTypeAgnostic extends Filter.OneTime {
+    def apply[Req, Rep](req: Req, svc: Service[Req, Rep]): Future[Rep] = {
+      svc(req)
+    }
+
+    override def toString = "simple"
+  }
+
   test("Filter.andThen(Filter): applies next filter") {
     val spied = spy(new PassThruFilter)
     val svc = (new PassThruFilter).andThen(spied).andThen(constSvc)
@@ -548,4 +556,30 @@ class FilterTest extends FunSuite {
     // Right identity
     isIdentity(_.andThen(Filter.TypeAgnostic.Identity))
   }
+
+  test("OneTime may only generate one filter per instance") {
+    val simple1, simple2, simple3 = new OTTypeAgnostic
+
+    simple1.toFilter[Int, Int]
+    intercept[IllegalStateException] {
+      simple1.toFilter[Int, Int]
+    }
+
+    simple2.toFilter[Int, Int]
+    intercept[IllegalStateException] {
+      simple2.toFilter[Int, Int]
+    }
+
+    val invalidChain = simple3.andThen(new PassThruTypeAgnosticFilter).andThen(simple3)
+    intercept[IllegalStateException] {
+      invalidChain.andThen(constSvc)
+    }
+  }
+
+  test("OneTime passes name for toString") {
+    val simple = new OTTypeAgnostic
+    assert(simple.andThen(new PassThruTypeAgnosticFilter).toString ==
+      "simple.andThen(com.twitter.finagle.FilterTest$PassThruTypeAgnosticFilter)")
+  }
+
 }

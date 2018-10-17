@@ -1,6 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.util.{Future, Time}
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * A [[Filter]] acts as a decorator/transformer of a [[Service service]].
@@ -271,6 +272,29 @@ object Filter {
       toFilter[Req, Rep].andThen(factory)
 
     override def toString: String = this.getClass.getName
+  }
+
+  /**
+   * OneTime is a TypeAgnostic filter that can be materialized exactly once.
+   * This provides a simple way to create the most commonly used kind of
+   * TypeAgnosic filters while ensuring that the apply method is not shared.
+   */
+  abstract class OneTime extends TypeAgnostic { self =>
+    private[this] val toFilterCalled = new AtomicBoolean(false)
+
+    def apply[Req, Rep](req: Req, svc: Service[Req, Rep]): Future[Rep]
+
+    def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = {
+      if (toFilterCalled.compareAndSet(false, true)) {
+        new Filter[Req, Rep, Req, Rep] {
+          def apply(req: Req, svc: Service[Req, Rep]): Future[Rep] = self.apply(req, svc)
+          override def toString: String = self.toString
+        }
+      } else {
+        throw new IllegalStateException(
+          "Each instance of a OneTime filter can only have toFilter called once")
+      }
+    }
   }
 
   object TypeAgnostic {
