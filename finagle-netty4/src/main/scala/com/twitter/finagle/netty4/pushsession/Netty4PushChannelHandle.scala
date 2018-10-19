@@ -162,9 +162,10 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel, stats
 
   // We don't have any scarce resources that need some deadline to cleanup
   // so we just clean everything up now.
+  // onClose should handle exceptions and not surface those.
   def close(deadline: Time): Future[Unit] = {
     if (ch.isOpen) ch.close()
-    onClose.unit
+    onClose.transform(_ => Future.Done)
   }
 
   def registerSession(newSession: PushSession[In, Out]): Unit = {

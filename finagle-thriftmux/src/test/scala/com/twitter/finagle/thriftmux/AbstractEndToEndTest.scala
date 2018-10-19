@@ -1563,9 +1563,13 @@ abstract class AbstractEndToEndTest
     }
 
   test("drain downgraded connections") {
+    val latch = Promise[Unit]()
     val response = new Promise[String]()
     val iface = new TestService.MethodPerEndpoint {
-      def query(x: String): Future[String] = response
+      def query(x: String): Future[String] = {
+        latch.setDone
+        response
+      }
     }
 
     val inet = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
@@ -1576,18 +1580,20 @@ abstract class AbstractEndToEndTest
         "client"
       )
 
+    // hold the connection open later
     val f = client.query("ok")
-    intercept[Exception] { await(f, 10.milliseconds) }
+    // make sure the connection established
+    await(latch)
 
-    val close = server.close(1.minute) // up to a minute
+    // wait for the pending request satisfied up to 1 minute
+    val close = server.close(1.minute)
     intercept[Exception] { await(close, 10.milliseconds) }
 
     response.setValue("done")
 
+    // connection closed after satisfied the request
     assert(await(close.liftToTry) == Return.Unit)
     assert(await(f) == "done")
-
-    await(server.close())
   }
 
   test("gracefully reject sessions") {
@@ -1828,7 +1834,7 @@ abstract class AbstractEndToEndTest
       // We requeue once since the first try will fail so it will try another server
       assert(sr.counters(Seq("client", "retries", "requeues")) == 2 - 1)
       assert(sr.counters(Seq("client", "connects")) == 2)
-      assert(sr.counters(Seq("client", "mux", "drained")) == 2)
+      assert(sr.counters(Seq("client", "mux", "draining")) == 2)
       await(closeServers())
     }
   }
