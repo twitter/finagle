@@ -7,10 +7,8 @@ import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
 import com.twitter.finagle.redis.util._
 import com.twitter.io.Buf
 import com.twitter.util._
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import org.scalatest.Matchers._
-import scala.collection.JavaConverters._
 
 final class PubSubClientIntegrationSuite2 extends RedisClientTest {
 
@@ -145,34 +143,44 @@ final class PubSubClientIntegrationSuite2 extends RedisClientTest {
 
   class TestContext(val masterClnt: Client, val slaveClnt: Client, val clusterClnt: Client) {
 
-    val q = collection.mutable.HashMap[String, Promise[(String, String, Option[String])]]()
-    val c = new ConcurrentHashMap[String, AtomicInteger]().asScala
+    private[this] val i = new AtomicInteger(0)
+    // We want subscription updates to be atomic so access to these
+    // two collections are mediated by the `lock`.
+    private[this] val lock = new Object
+    private[this] val q = collection.mutable.HashMap[String, Promise[(String, String, Option[String])]]()
+    private[this] val c = collection.mutable.HashMap[String, AtomicInteger]()
 
-    def subscribe(channels: Seq[Buf]) = {
+    def subscribe(channels: Seq[Buf]): Map[Buf, Throwable] = {
       result(clusterClnt.subscribe(channels) {
         case (channel, message) =>
-          q.get(message).map(_.setValue((channel, message, None)))
-          c.getOrElseUpdate(message, new AtomicInteger(0)).getAndIncrement
+          val pending = lock.synchronized {
+            c.getOrElseUpdate(message, new AtomicInteger(0)).getAndIncrement
+            q.get(message)
+          }
+          pending.map(_.setValue((channel, message, None)))
       })
     }
 
-    def unsubscribe(channels: Seq[Buf]) = {
+    def unsubscribe(channels: Seq[Buf]): Map[Buf, Throwable] = {
       result(clusterClnt.unsubscribe(channels))
     }
 
-    def pSubscribe(patterns: Seq[Buf]) = {
+    def pSubscribe(patterns: Seq[Buf]): Map[Buf, Throwable] = {
       result(clusterClnt.pSubscribe(patterns) {
         case (pattern, channel, message) =>
-          q.get(message).map(_.setValue((channel, message, Some(pattern))))
-          c.getOrElseUpdate(message, new AtomicInteger(0)).getAndIncrement
+          val pending = lock.synchronized {
+            c.getOrElseUpdate(message, new AtomicInteger(0)).getAndIncrement
+            q.get(message)
+          }
+          pending.map(_.setValue((channel, message, Some(pattern))))
       })
     }
 
-    def pUnsubscribe(patterns: Seq[Buf]) = {
+    def pUnsubscribe(patterns: Seq[Buf]): Map[Buf, Throwable] = {
       result(clusterClnt.pUnsubscribe(patterns))
     }
 
-    def pubSubChannels(client: Client, pattern: Option[Buf] = None) = {
+    def pubSubChannels(client: Client, pattern: Option[Buf] = None): Set[Buf] = {
       result(client.pubSubChannels(pattern)).toSet
     }
 
@@ -188,19 +196,17 @@ final class PubSubClientIntegrationSuite2 extends RedisClientTest {
       List(masterClnt, slaveClnt).map(clnt => result(clnt.pubSubNumPat())).sum
     }
 
-    def publish(channel: String, pattern: Option[String] = None) = {
+    def publish(channel: String, pattern: Option[String] = None): String = {
       val p = new Promise[(String, String, Option[String])]
       val message = nextMessage
-      q.put(message, p)
+      lock.synchronized(q.put(message, p))
       result(masterClnt.publish(channel, message))
       assert(result(p) == ((channel, message, pattern)))
       message
     }
 
-    def recvCount(message: String) = c.get(message).map(_.get()).getOrElse(0)
+    def recvCount(message: String): Int = lock.synchronized(c.get(message)).map(_.get()).getOrElse(0)
 
-    val i = new AtomicInteger(0)
-
-    def nextMessage = "message-" + i.incrementAndGet()
+    private[this] def nextMessage: String = "message-" + i.incrementAndGet()
   }
 }

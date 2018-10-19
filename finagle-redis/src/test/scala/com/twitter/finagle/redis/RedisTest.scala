@@ -22,10 +22,10 @@ trait RedisTest extends FunSuite {
   protected val bufMoo = Buf.Utf8("moo")
   protected val bufNum = Buf.Utf8("num")
 
-  def result[T](awaitable: Awaitable[T], timeout: Duration = 1.second): T =
+  def result[T](awaitable: Awaitable[T], timeout: Duration = 5.second): T =
     Await.result(awaitable, timeout)
 
-  def ready[T <: Awaitable[_]](awaitable: T, timeout: Duration = 1.second): T =
+  def ready[T <: Awaitable[_]](awaitable: T, timeout: Duration = 5.second): T =
     Await.ready(awaitable, timeout)
 
   def waitUntil(message: String, countDown: Int = 10)(ready: => Boolean): Unit = {
