@@ -144,7 +144,7 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
     // Make sure we are fragmenting the messages
 
     // Server only wants 100 byte chunks, so make the message at lest 150 bytes
-    val decoder = new FragmentDecoder(NullStatsReceiver)
+    val decoder = new FragmentDecoder(Future.never, NullStatsReceiver)
     val data = Buf.ByteArray((0 until 150).map(_.toByte):_*)
 
     service.apply(Request(Path(), data))

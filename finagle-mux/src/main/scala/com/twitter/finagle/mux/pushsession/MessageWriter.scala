@@ -87,6 +87,8 @@ private[finagle] final class FragmentingMessageWriter(
     // to be tolerable for a debug metric.
     messageQueue.size
   }
+  // Make sure we remove the gauge when we're done
+  handle.onClose.ensure(pendingWriteStreamsGuage.remove())
 
   // State of the MessageWriter. Transitions can be:
   // Idle <-> Flushing

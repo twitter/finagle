@@ -103,7 +103,7 @@ private[mux] abstract class ClientServerTest
     val clientSession: MuxClientSession = {
       val session = new MuxClientSession(
         handle = clientHandle,
-        h_decoder = new FragmentDecoder(NullStatsReceiver),
+        h_decoder = new FragmentDecoder(Future.never, NullStatsReceiver),
         h_messageWriter = new FragmentingMessageWriter(clientHandle, Int.MaxValue, NullStatsReceiver),
         detectorConfig = config,
         name = "test",
@@ -119,7 +119,7 @@ private[mux] abstract class ClientServerTest
     val server: Closable = {
       val session = new MuxServerSession(
         params = Mux.server.params,
-        h_decoder = new FragmentDecoder(NullStatsReceiver),
+        h_decoder = new FragmentDecoder(Future.never, NullStatsReceiver),
         h_messageWriter = new FragmentingMessageWriter(serverHandle, Int.MaxValue, NullStatsReceiver),
         handle = serverHandle,
         service = service)

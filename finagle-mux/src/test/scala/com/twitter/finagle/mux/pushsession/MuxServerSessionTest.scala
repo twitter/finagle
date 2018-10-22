@@ -19,7 +19,7 @@ class MuxServerSessionTest extends FunSuite {
 
     lazy val params: Stack.Params = Mux.server.params + (param.Timer(mockTimer))
 
-    lazy val decoder: MuxMessageDecoder = new FragmentDecoder(params[param.Stats].statsReceiver)
+    lazy val decoder: MuxMessageDecoder = new FragmentDecoder(Future.never, params[param.Stats].statsReceiver)
 
     lazy val messageWriter: MockMessageWriter = new MockMessageWriter
 

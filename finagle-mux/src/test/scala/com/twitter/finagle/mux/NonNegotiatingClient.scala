@@ -36,7 +36,7 @@ final case class NonNegotiatingClient(
     Future.value(
       new MuxClientSession(
         handle = handle,
-        h_decoder = new FragmentDecoder(framerStats),
+        h_decoder = new FragmentDecoder(handle.onClose, framerStats),
         h_messageWriter = new FragmentingMessageWriter(handle, Int.MaxValue, framerStats),
         detectorConfig = params[FailureDetector.Param].param,
         name = params[param.Label].label,

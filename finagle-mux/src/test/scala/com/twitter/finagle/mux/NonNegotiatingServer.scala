@@ -21,7 +21,7 @@ private object NonNegotiatingServer {
 
     val session = new MuxServerSession(
       params,
-      new FragmentDecoder(framingStats),
+      new FragmentDecoder(handle.onClose, framingStats),
       new FragmentingMessageWriter(handle, Int.MaxValue, framingStats),
       handle,
       service

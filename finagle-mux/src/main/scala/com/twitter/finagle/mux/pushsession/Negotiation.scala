@@ -102,7 +102,7 @@ private[finagle] abstract class Negotiation(params: Stack.Params) {
         .getOrElse(Int.MaxValue)
       new FragmentingMessageWriter(handle, fragmentSize, framingStats)
     }
-    val messageDecoder = new FragmentDecoder(framingStats)
+    val messageDecoder = new FragmentDecoder(handle.onClose, framingStats)
 
     builder(handle, writeManager, messageDecoder)
   }
