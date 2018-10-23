@@ -5,10 +5,24 @@ import com.twitter.util.StorageUnit
 import io.netty.handler.codec.http._
 
 /**
- * netty can chunk fixed length messages so we dechunk them if the content-length
- * is sufficiently small so that streaming clients and servers can access message
- * contents via `content` and `contentString`. Chunked transfer encoded messages
- * still require accessing `reader`.
+ * Aggregates fixed length http messages and emits [[FullHttpMessage]] downstream.
+ *
+ * Http message is considered fixed length if it has `Content-Length` header and
+ * `Transfer-Encoding` header is not `chunked`.
+ *
+ * Fixed length messages may arrive as a series of smaller pieces (hereinafter referred
+ * to as chunks, but not to be confused with http chunks) from the upstream handlers
+ * in pipeline. To eventually build a [[com.twitter.finagle.http.Request]] object with
+ * content available as [[com.twitter.finagle.http.Request.content]] or
+ * [[com.twitter.finagle.http.Request.contentString]] all chunks must be stored in
+ * temporary buffer and combined together into a [[FullHttpMessage]] as soon as the last
+ * chunk of the message is received.
+ *
+ * `maxContentLength` parameter sets the limit on message's `Content-Length`.
+ * If `Content-Length` exceeds `maxContentLength`, the message bypasses this aggregator
+ * and is emitted to downstream handler in pipeline unaltered.
+ *
+ * Messages with `Transfer-Encoding: chunked` are always emitted unaltered.
  */
 private[http] class FixedLengthMessageAggregator(
   maxContentLength: StorageUnit,
