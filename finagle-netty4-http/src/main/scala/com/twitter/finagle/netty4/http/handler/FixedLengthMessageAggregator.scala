@@ -8,7 +8,8 @@ import io.netty.handler.codec.http._
  * Aggregates fixed length http messages and emits [[FullHttpMessage]] downstream.
  *
  * Http message is considered fixed length if it has `Content-Length` header and
- * `Transfer-Encoding` header is not `chunked`.
+ * `Transfer-Encoding` header is not `chunked` or if we can deduce actual content
+ * length to be 0 even if `Content-Length` header is not specified (f.ex. from RFCs).
  *
  * Fixed length messages may arrive as a series of smaller pieces (hereinafter referred
  * to as chunks, but not to be confused with http chunks) from the upstream handlers
