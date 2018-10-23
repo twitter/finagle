@@ -64,6 +64,12 @@ object Streaming {
     Stack.Param(Streaming(enabled = false))
 }
 
+case class MinChunkSize(size: StorageUnit)
+object MinChunkSize {
+  implicit val minChunkSize: Stack.Param[MinChunkSize] =
+    Stack.Param(MinChunkSize(StorageUnit.zero))
+}
+
 case class Decompression(enabled: Boolean)
 object Decompression extends {
   implicit val decompressionParam: Stack.Param[Decompression] =
