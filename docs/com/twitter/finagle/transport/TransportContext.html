@@ -221,7 +221,7 @@ transport.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/com/twitter/util/Closable.html#com.twitter.util.Closable" class="extype" name="com.twitter.util.Closable">Closable</a>, <a href="http://www.scala-lang.org/api/2.12.6/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.6/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/com/twitter/util/Closable.html#com.twitter.util.Closable" class="extype" name="com.twitter.util.Closable">Closable</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div><div class="toggleContainer block">
             <span class="toggle">
               Known Subclasses
@@ -307,7 +307,7 @@ transport.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.6/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
+        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
@@ -327,26 +327,6 @@ transport.
       </span>
       
       <p class="shortcomment cmt">The locally bound address of this transport.</p>
-    </li><li name="com.twitter.finagle.transport.TransportContext#onClose" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="onClose:com.twitter.util.Future[Throwable]"></a><a id="onClose:Future[Throwable]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/transport/TransportContext.html#onClose:com.twitter.util.Future[Throwable]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">onClose</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="scala.Throwable">Throwable</span>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">The channel closed with the given exception.</p><div class="fullcomment"><div class="comment cmt"><p>The channel closed with the given exception. This is the
-same exception you would get if attempting to read or
-write on the Transport, but this allows clients to listen to
-close events.
-</p></div></div>
     </li><li name="com.twitter.finagle.transport.TransportContext#peerCertificate" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="peerCertificate:Option[java.security.cert.Certificate]"></a><a id="peerCertificate:Option[Certificate]"></a>
       <span class="permalink">
@@ -359,7 +339,7 @@ close events.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">peerCertificate</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.6/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.security.cert.Certificate">Certificate</span>]</span>
+        <span class="name">peerCertificate</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.security.cert.Certificate">Certificate</span>]</span>
       </span>
       
       <p class="shortcomment cmt">The peer certificate if a TLS session is established.</p>
@@ -379,7 +359,30 @@ close events.
       </span>
       
       <p class="shortcomment cmt">The remote address to which the transport is connected.</p>
-    </li><li name="com.twitter.finagle.transport.TransportContext#status" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.transport.TransportContext#onClose" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="onClose:com.twitter.util.Future[Throwable]"></a><a id="onClose:Future[Throwable]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/transport/TransportContext.html#onClose:com.twitter.util.Future[Throwable]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2018-09-27) Please use Transport.onClose instead">onClose</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="scala.Throwable">Throwable</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">The channel closed with the given exception.</p><div class="fullcomment"><div class="comment cmt"><p>The channel closed with the given exception. This is the
+same exception you would get if attempting to read or
+write on the Transport, but this allows clients to listen to
+close events.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-09-27)</i> Please use Transport.onClose instead</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.transport.TransportContext#status" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="status:com.twitter.finagle.Status"></a><a id="status:Status"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/transport/TransportContext.html#status:com.twitter.finagle.Status" title="Permalink">
@@ -391,11 +394,16 @@ close events.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">status</span><span class="result">: <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a></span>
+        <span class="name deprecated" title="Deprecated: (Since version 2018-09-27) Please use Transport.status instead">status</span><span class="result">: <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a></span>
       </span>
       
       <p class="shortcomment cmt">The status of this transport; see <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">com.twitter.finagle.Status</a> for
-status definitions.</p>
+status definitions.</p><div class="fullcomment"><div class="comment cmt"><p>The status of this transport; see <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">com.twitter.finagle.Status</a> for
+status definitions.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2018-09-27)</i> Please use Transport.status instead</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -414,7 +422,7 @@ status definitions.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.6/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.6/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -430,7 +438,7 @@ status definitions.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.6/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -446,7 +454,7 @@ status definitions.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.6/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.6/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -478,7 +486,7 @@ status definitions.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.6/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java/lang/index.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -502,7 +510,7 @@ status definitions.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">(<span name="after">after: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.6/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
+        <span class="name">close</span><span class="params">(<span name="after">after: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
@@ -518,7 +526,7 @@ status definitions.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.6/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
+        <span class="name">close</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
@@ -534,7 +542,7 @@ status definitions.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.6/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.6/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -550,7 +558,7 @@ status definitions.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.6/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.6/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -566,7 +574,7 @@ status definitions.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.6/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java/lang/index.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -607,7 +615,7 @@ status definitions.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.6/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd><dt>Annotations</dt><dd>
@@ -626,7 +634,7 @@ status definitions.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.6/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
@@ -642,7 +650,7 @@ status definitions.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.6/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.6/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -658,7 +666,7 @@ status definitions.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.6/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -677,7 +685,7 @@ status definitions.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.6/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -728,7 +736,7 @@ status definitions.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.6/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -750,7 +758,7 @@ status definitions.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.6/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.12.6/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.6/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.12.7/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -772,7 +780,7 @@ status definitions.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.6/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.6/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -797,9 +805,9 @@ status definitions.</p>
         <div class="parent" name="com.twitter.util.Closable">
               <h3>Inherited from <a href="https://twitter.github.io/util/docs/com/twitter/util/Closable.html#com.twitter.util.Closable" class="extype" name="com.twitter.util.Closable">Closable</a></h3>
             </div><div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.6/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.6/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>
             </div>
         
         </div>

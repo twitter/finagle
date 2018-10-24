@@ -1116,7 +1116,7 @@ of a trace. Finagle-specific trace information should live here.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="An ADT describing a tracing annotation." href="Annotation.html"><span class="name">Annotation</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.6/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="An ADT describing a tracing annotation." href="Annotation.html"><span class="name">Annotation</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">An ADT describing a tracing annotation.</p><div class="fullcomment"><div class="comment cmt"><p>An ADT describing a tracing annotation. Prefer <a href="Tracing.html" class="extype" name="com.twitter.finagle.tracing.Tracing">Tracing</a> API to creating raw <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a>
@@ -1188,7 +1188,7 @@ Includes: rpc service name, method name, client sent and client received.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="Represents flags that can be passed along in request headers." href="Flags.html"><span class="name">Flags</span></a><span class="params">(<span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.6/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.6/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.6/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="Represents flags that can be passed along in request headers." href="Flags.html"><span class="name">Flags</span></a><span class="params">(<span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.7/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.7/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">Represents flags that can be passed along in request headers.</p><div class="fullcomment"><div class="comment cmt"><p>Represents flags that can be passed along in request headers.</p></div><dl class="paramcmts block"><dt class="param">flags</dt><dd class="cmt"><p>Initial flag state. May be 0.</p></dd></dl></div>
@@ -1220,7 +1220,7 @@ Includes: rpc service name, method name, client sent and client received.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="Records information of interest to the tracing system." href="Record.html"><span class="name">Record</span></a><span class="params">(<span name="traceId">traceId: <a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>, <span name="timestamp">timestamp: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>, <span name="annotation">annotation: <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a></span>, <span name="duration">duration: <a href="http://www.scala-lang.org/api/2.12.6/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.6/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.6/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="Records information of interest to the tracing system." href="Record.html"><span class="name">Record</span></a><span class="params">(<span name="traceId">traceId: <a href="TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>, <span name="timestamp">timestamp: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>, <span name="annotation">annotation: <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a></span>, <span name="duration">duration: <a href="http://www.scala-lang.org/api/2.12.7/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.7/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">Records information of interest to the tracing system.</p><div class="fullcomment"><div class="comment cmt"><p>Records information of interest to the tracing system. For example when an event happened,
@@ -1257,7 +1257,7 @@ and traceId).
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A trace id represents one particular trace for one request." href="TraceId.html"><span class="name">TraceId</span></a><span class="params">(<span name="_traceId">_traceId: <a href="http://www.scala-lang.org/api/2.12.6/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>, <span name="_parentId">_parentId: <a href="http://www.scala-lang.org/api/2.12.6/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>, <span name="spanId">spanId: <a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a></span>, <span name="_sampled">_sampled: <a href="http://www.scala-lang.org/api/2.12.6/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="http://www.scala-lang.org/api/2.12.6/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>, <span name="flags">flags: <a href="Flags.html" class="extype" name="com.twitter.finagle.tracing.Flags">Flags</a></span>, <span name="traceIdHigh">traceIdHigh: <a href="http://www.scala-lang.org/api/2.12.6/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>] = <span class="symbol">None</span></span>, <span name="terminal">terminal: <a href="http://www.scala-lang.org/api/2.12.6/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">false</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.6/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.6/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A trace id represents one particular trace for one request." href="TraceId.html"><span class="name">TraceId</span></a><span class="params">(<span name="_traceId">_traceId: <a href="http://www.scala-lang.org/api/2.12.7/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>, <span name="_parentId">_parentId: <a href="http://www.scala-lang.org/api/2.12.7/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>, <span name="spanId">spanId: <a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a></span>, <span name="_sampled">_sampled: <a href="http://www.scala-lang.org/api/2.12.7/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>, <span name="flags">flags: <a href="Flags.html" class="extype" name="com.twitter.finagle.tracing.Flags">Flags</a></span>, <span name="traceIdHigh">traceIdHigh: <a href="http://www.scala-lang.org/api/2.12.7/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>] = <span class="symbol">None</span></span>, <span name="terminal">terminal: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">false</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.7/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A trace id represents one particular trace for one request.</p><div class="fullcomment"><div class="comment cmt"><p>A trace id represents one particular trace for one request.</p><p>A request is composed of one or more spans, which are generally RPCs but
@@ -1290,7 +1290,7 @@ SERVICE A  <span class="num">34429</span>b04b6bbf478.<span class="num">34429</sp
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="" href="TraceId128.html"><span class="name">TraceId128</span></a><span class="params">(<span name="low">low: <a href="http://www.scala-lang.org/api/2.12.6/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>, <span name="high">high: <a href="http://www.scala-lang.org/api/2.12.6/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.6/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.6/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="TraceId128.html"><span class="name">TraceId128</span></a><span class="params">(<span name="low">low: <a href="http://www.scala-lang.org/api/2.12.7/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>, <span name="high">high: <a href="http://www.scala-lang.org/api/2.12.7/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.7/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -1327,7 +1327,7 @@ is capable of parsing trace information out of the codec.</p></span></dd></dl></
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="Tracers record trace events." href="Tracer.html"><span class="name">Tracer</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.6/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="Tracers record trace events." href="Tracer.html"><span class="name">Tracer</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">Tracers record trace events.</p>
@@ -1343,7 +1343,7 @@ is capable of parsing trace information out of the codec.</p></span></dd></dl></
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="This is a tracing system similar to Dapper:" href="Tracing.html"><span class="name">Tracing</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.6/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="This is a tracing system similar to Dapper:" href="Tracing.html"><span class="name">Tracing</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">This is a tracing system similar to Dapper:</p><div class="fullcomment"><div class="comment cmt"><p>This is a tracing system similar to Dapper:</p><p>  “Dapper, a Large-Scale Distributed Systems Tracing Infrastructure”,
@@ -1504,7 +1504,7 @@ and increase throughput.</p><pre><span class="cmt">// Performs six context looku
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="Flags$.html"><span class="name">Flags</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.6/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="Flags$.html"><span class="name">Flags</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -1536,7 +1536,7 @@ and increase throughput.</p><pre><span class="cmt">// Performs six context looku
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="Record$.html"><span class="name">Record</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.6/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="Record$.html"><span class="name">Record</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -1604,7 +1604,7 @@ lookups on each operation. Prefer &quot;capturing&quot; a <a href="Tracing.html"
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="TraceId$.html"><span class="name">TraceId</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.6/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="TraceId$.html"><span class="name">TraceId</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -1620,7 +1620,7 @@ lookups on each operation. Prefer &quot;capturing&quot; a <a href="Tracing.html"
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="TraceId128$.html"><span class="name">TraceId128</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.6/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="TraceId128$.html"><span class="name">TraceId128</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -1684,7 +1684,7 @@ lookups on each operation. Prefer &quot;capturing&quot; a <a href="Tracing.html"
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="enabled$.html"><span class="name">enabled</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.6/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
+        <a title="" href="enabled$.html"><span class="name">enabled</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
       </span>
       
       
@@ -1700,7 +1700,7 @@ lookups on each operation. Prefer &quot;capturing&quot; a <a href="Tracing.html"
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="traceId128Bit$.html"><span class="name">traceId128Bit</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.6/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
+        <a title="" href="traceId128Bit$.html"><span class="name">traceId128Bit</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
       </span>
       
       

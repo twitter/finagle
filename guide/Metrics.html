@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &#8212; Finagle 18.9.1 documentation</title>
+    <title>Metrics &#8212; Finagle 18.10.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '18.9.1',
+        VERSION:     '18.10.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 18.9.1 documentation" href="index.html" />
+    <link rel="top" title="Finagle 18.10.0 documentation" href="index.html" />
     <link rel="next" title="Flags" href="Flags.html" />
     <link rel="prev" title="Protocols" href="Protocols.html" />
    
@@ -1144,6 +1144,13 @@ but dropped after encoding.</dd>
 <dd>A gauge exposing the number of opened streams on the server.</dd>
 <dt><strong>&lt;client_label&gt;/streams</strong></dt>
 <dd>A gauge exposing the number of opened streams on the client.</dd>
+<dt><strong>&lt;client_label&gt;/dead_session</strong></dt>
+<dd>A counter of the number of closed sessions evicted.</dd>
+<dt><strong>&lt;client_label&gt;/dead_child_transport</strong></dt>
+<dd>A counter of the number of child transports that were returned in a dead state.</dd>
+<dt><strong>&lt;client_label&gt;closed_before_upgrade</strong></dt>
+<dd>A counter of the number of h2c upgrade transports that were closed before the
+upgrade had completed.</dd>
 </dl>
 </div>
 <div class="section" id="memcached">

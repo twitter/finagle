@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Flags &#8212; Finagle 18.9.1 documentation</title>
+    <title>Flags &#8212; Finagle 18.10.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '18.9.1',
+        VERSION:     '18.10.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 18.9.1 documentation" href="index.html" />
+    <link rel="top" title="Finagle 18.10.0 documentation" href="index.html" />
     <link rel="next" title="Unsuccessful Responses" href="UnsuccessfulResponses.html" />
     <link rel="prev" title="Metrics" href="Metrics.html" />
    
@@ -82,8 +82,11 @@ Twitter Server) or as JVM properties.</p>
 <div class="section" id="common">
 <h2>Common<a class="headerlink" href="#common" title="Permalink to this headline">¶</a></h2>
 <dl class="docutils">
-<dt><strong>com.twitter.finagle.loadbalancer.defaultBalancer</strong> <cite>choice|heap|aperture</cite></dt>
-<dd>The default load balancer used in clients (default: <cite>choice</cite>).</dd>
+<dt><strong>com.twitter.finagle.loadbalancer.defaultBalancer</strong> <cite>choice|heap|aperture|random_aperture</cite></dt>
+<dd>The default load balancer used in clients (default: <cite>choice</cite>). <cite>random_aperture</cite> should only
+be used in situations where subsetting is a firm requirement. An example of that is in a testing
+situation where p2c behavior isn&#8217;t acceptable. In other cases <cite>aperture</cite> will select between
+random aperture and deterministic aperture when appropriate.</dd>
 <dt><strong>com.twitter.finagle.loadbalancer.perHostStats</strong> <cite>bool</cite></dt>
 <dd>Enable/disable per-host granularity for stats (default: <cite>false</cite>). When enabled,the configured stats
 receiver will be used, or the loaded stats receiver if none given.</dd>
