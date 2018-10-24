@@ -320,7 +320,7 @@ class ClientTest extends FunSuite
         |begin
         |select *
         |from `finagle-mysql-test`
-        |where `event` = eventName collate utf8_general_ci;
+        |where `event` = convert(eventName using utf8) collate utf8_general_ci;
         |end
       """.stripMargin
 
@@ -334,6 +334,9 @@ class ClientTest extends FunSuite
         |drop procedure if exists getSwimmerByEvent
       """.stripMargin
 
+    // Drop the procedure if it was left over from a previously
+    // failed run.
+    await(c.query(dropProcedure))
     await(c.query(createProcedure))
 
     val result = await(
@@ -357,7 +360,9 @@ class ClientTest extends FunSuite
           await(newClient.ping)
         }
       }
-      assert(err.getMessage.contains("Exception in MySQL handshake, error code 1040"))
+      val rootErrorMsg = "Exception in MySQL handshake, error code 1040"
+      val nonRootErrorMsg = "Too many connections"
+      assert(err.getMessage.contains(rootErrorMsg) || err.getMessage.contains(nonRootErrorMsg))
     } finally {
       Closable.all(clients:_*).close()
     }
