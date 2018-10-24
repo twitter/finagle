@@ -65,7 +65,10 @@ private[finagle] object Netty4CookieCodec extends CookieCodec {
     val nc = new NettyDefaultCookie(c.name, c.value)
     nc.setDomain(c.domain)
     nc.setPath(c.path)
-    if (c.maxAge != Cookie.DefaultMaxAge) {
+    // We convert the Durations to Ints to circumvent maxAge being
+    // Int.MinValue.seconds, which does not equal Duration.Bottom, even though
+    // they have the same integer value in seconds.
+    if (c.maxAge.inSeconds != Cookie.DefaultMaxAge.inSeconds) {
       nc.setMaxAge(c.maxAge.inSeconds)
     }
     nc.setSecure(c.secure)
@@ -83,6 +86,7 @@ private[finagle] object Netty4CookieCodec extends CookieCodec {
       secure = nc.isSecure(),
       httpOnly = nc.isHttpOnly())
 
+    // Note: Long.MinValue is what Netty 4 uses to indicate "never expires."
     if (nc.maxAge() != Long.MinValue) cookie.maxAge(Some(nc.maxAge().seconds))
     else cookie
   }

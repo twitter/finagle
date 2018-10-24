@@ -94,7 +94,7 @@ class CookieTest extends FunSuite {
     assert(c5.equals(c6))
   }
 
-  test("default are the same as DefaultCookie default") {
+  test("defaults are the same as DefaultCookie defaults") {
     val cookie = new Cookie("name", "value")
     val nettyCookie = new DefaultCookie("name", "value")
 
@@ -102,7 +102,7 @@ class CookieTest extends FunSuite {
     assert(cookie.value == nettyCookie.getValue)
     assert(cookie.domain == nettyCookie.getDomain)
     assert(cookie.path == nettyCookie.getPath)
-    assert(cookie.maxAge == nettyCookie.getMaxAge.seconds)
+    assert(cookie.maxAge.inSeconds == nettyCookie.getMaxAge)
     assert(cookie.secure == nettyCookie.isSecure)
     assert(cookie.httpOnly == nettyCookie.isHttpOnly)
 
@@ -116,10 +116,8 @@ class CookieTest extends FunSuite {
     }
   }
 
-  test("Throws exception if name starts with $") {
-    intercept[IllegalArgumentException] {
-      new Cookie("$dolladollabillz", "value")
-    }
+  test("Does not throw exception if name starts with $") {
+    new Cookie("$dolladollabillz", "value")
   }
 
   test("Throws exception if name contains illegal char") {
