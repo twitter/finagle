@@ -5,7 +5,7 @@ import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.{Stack, Status}
 import com.twitter.finagle.ssl.client.SslClientConfiguration
 import com.twitter.finagle.ssl.server.SslServerConfiguration
-import com.twitter.io.{Buf, Pipe, Reader, Writer}
+import com.twitter.io.{Buf, Pipe, Reader, ReaderDiscardedException, Writer}
 import com.twitter.util._
 import java.net.SocketAddress
 import java.security.cert.Certificate
@@ -309,7 +309,7 @@ object Transport {
 
     def discard(): Unit = {
       rw.discard()
-      raise(new Reader.ReaderDiscarded)
+      raise(new ReaderDiscardedException)
     }
   }
 

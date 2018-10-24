@@ -8,7 +8,7 @@ import com.twitter.finagle.http.exp.StreamTransport
 import com.twitter.finagle.netty4.http.{Bijections, Netty4ServerStreamTransport}
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.transport.{QueueTransport, Transport}
-import com.twitter.io.{Buf, Reader}
+import com.twitter.io.{Buf, Reader, ReaderDiscardedException}
 import com.twitter.util.{Await, Awaitable, Future, Promise}
 import io.netty.buffer.Unpooled
 import io.netty.handler.codec.http.{DefaultHttpContent, HttpContent, HttpRequest, HttpResponse, HttpResponseStatus, LastHttpContent}
@@ -116,7 +116,7 @@ class HttpServerDispatcherTest extends FunSuite {
 
     // Simulate channel closure
     out.close()
-    intercept[Reader.ReaderDiscarded] { await(res.writer.write(Buf.Utf8("."))) }
+    intercept[ReaderDiscardedException] { await(res.writer.write(Buf.Utf8("."))) }
   }
 }
 

@@ -6,7 +6,7 @@ import com.twitter.finagle.http.{Request, Response, Version, Status => HttpStatu
 import com.twitter.finagle.netty4.http.{Bijections, Netty4ClientStreamTransport}
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.transport.{LegacyContext, QueueTransport, Transport, TransportContext}
-import com.twitter.io.{Buf, Reader}
+import com.twitter.io.{Buf, ReaderDiscardedException}
 import com.twitter.util.{Await, Awaitable, Duration, Future, Promise, Return, Throw, Time}
 import io.netty.buffer.Unpooled
 import io.netty.handler.codec.http.{DefaultHttpContent, HttpContent, HttpRequest, HttpUtil, LastHttpContent}
@@ -224,7 +224,7 @@ class HttpClientDispatcherTest extends FunSuite {
     writep.setException(new Exception)
 
     assert(g.isDefined)
-    intercept[Reader.ReaderDiscarded] { await(g) }
+    intercept[ReaderDiscardedException] { await(g) }
   }
 
   test("upstream interrupt: during req stream (read)") {
@@ -255,7 +255,7 @@ class HttpClientDispatcherTest extends FunSuite {
     readp.setException(new Exception)
 
     // The reader is now discarded
-    intercept[Reader.ReaderDiscarded] {
+    intercept[ReaderDiscardedException] {
       await(req.writer.write(Buf.Utf8(".")))
     }
   }
@@ -293,7 +293,7 @@ class HttpClientDispatcherTest extends FunSuite {
     chunkp.setException(new Exception)
 
     // The reader is now discarded
-    intercept[Reader.ReaderDiscarded] {
+    intercept[ReaderDiscardedException] {
       await(req.writer.write(Buf.Utf8(".")))
     }
   }

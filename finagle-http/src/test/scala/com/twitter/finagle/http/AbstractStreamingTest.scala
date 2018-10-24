@@ -6,7 +6,7 @@ import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.service.ConstantService
 import com.twitter.finagle.transport.{Transport, TransportContext}
-import com.twitter.io.{Buf, Pipe, Reader, Writer}
+import com.twitter.io.{Buf, Pipe, Reader, ReaderDiscardedException, Writer}
 import com.twitter.util.{Await, Closable, Future, Promise, Return, Throw}
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
@@ -84,7 +84,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     // Simulate network failure by closing the transport.
     failure.setDone()
 
-    intercept[Reader.ReaderDiscarded] { await(writeLots(req.writer, buf)) }
+    intercept[ReaderDiscardedException] { await(writeLots(req.writer, buf)) }
     // We call read for the collating function to notice transport failure.
     intercept[ChannelException] { await(res.reader.read(1)) }
 
@@ -102,7 +102,7 @@ abstract class AbstractStreamingTest extends FunSuite {
 
     // Assert reading state suspension is interrupted by transport closure.
     intercept[ChannelException] { await(f) }
-    intercept[Reader.ReaderDiscarded] { await(writeLots(req.writer, buf)) }
+    intercept[ReaderDiscardedException] { await(writeLots(req.writer, buf)) }
 
     assertSecondRequestOk()
   })
@@ -197,10 +197,10 @@ abstract class AbstractStreamingTest extends FunSuite {
 
     failure.setDone()
     intercept[ChannelClosedException] { await(readp) }
-    intercept[Reader.ReaderDiscarded] { await(writeLots(writer, buf)) }
+    intercept[ReaderDiscardedException] { await(writeLots(writer, buf)) }
 
     intercept[ChannelException] { await(res.reader.read(1)) }
-    intercept[Reader.ReaderDiscarded] { await(writeLots(req1.writer, buf)) }
+    intercept[ReaderDiscardedException] { await(writeLots(req1.writer, buf)) }
 
     val res2 = await(f2)
     await(Reader.readAll(res2.reader))
@@ -246,10 +246,10 @@ abstract class AbstractStreamingTest extends FunSuite {
     val res = await(f1)
 
     failure.setDone()
-    intercept[Reader.ReaderDiscarded] { await(writep) }
+    intercept[ReaderDiscardedException] { await(writep) }
     intercept[ChannelClosedException] { await(readp) }
     intercept[ChannelException] { await(res.reader.read(1)) }
-    intercept[Reader.ReaderDiscarded] { await(writeLots(req1.writer, buf)) }
+    intercept[ReaderDiscardedException] { await(writeLots(req1.writer, buf)) }
 
     val res2 = await(f2)
     await(Reader.readAll(res2.reader))
@@ -289,7 +289,7 @@ abstract class AbstractStreamingTest extends FunSuite {
 
     failure.setDone()
     intercept[ChannelException] { await(res.reader.read(1)) }
-    intercept[Reader.ReaderDiscarded] { await(writeLots(req1.writer, buf)) }
+    intercept[ReaderDiscardedException] { await(writeLots(req1.writer, buf)) }
 
     val res2 = await(f2)
     await(Reader.readAll(res2.reader))
@@ -332,7 +332,7 @@ abstract class AbstractStreamingTest extends FunSuite {
 
     failure.setDone()
     intercept[ChannelException] { await(res.reader.read(1)) }
-    intercept[Reader.ReaderDiscarded] { await(writeLots(req1.writer, buf)) }
+    intercept[ReaderDiscardedException] { await(writeLots(req1.writer, buf)) }
 
     val res2 = await(f2)
     await(Reader.readAll(res2.reader))

@@ -14,7 +14,7 @@ import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.HashedWheelTimer
-import com.twitter.io.{Buf, Pipe, Reader, Writer}
+import com.twitter.io.{Buf, Pipe, Reader, ReaderDiscardedException, Writer}
 import com.twitter.util._
 import io.netty.buffer.PooledByteBufAllocator
 import java.io.{PrintWriter, StringWriter}
@@ -697,7 +697,7 @@ abstract class AbstractEndToEndTest
       req.setChunked(true)
       await(client(req))
       await(client.close())
-      intercept[Reader.ReaderDiscarded] { await(drip(req.writer)) }
+      intercept[ReaderDiscardedException] { await(drip(req.writer)) }
     }
 
     test(
@@ -732,7 +732,7 @@ abstract class AbstractEndToEndTest
       assert(await(contentf) == Buf.Utf8("hello"))
 
       // drip should terminate because the request is discarded.
-      intercept[Reader.ReaderDiscarded] { await(drip(req.writer)) }
+      intercept[ReaderDiscardedException] { await(drip(req.writer)) }
     }
 
     test(

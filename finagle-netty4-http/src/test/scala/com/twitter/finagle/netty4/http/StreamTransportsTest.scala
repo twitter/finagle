@@ -6,7 +6,7 @@ import com.twitter.finagle.Status
 import com.twitter.finagle.netty4.ByteBufConversion
 import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.transport.{LegacyContext, QueueTransport, Transport, TransportContext}
-import com.twitter.io.Reader.ReaderDiscarded
+import com.twitter.io.ReaderDiscardedException
 import com.twitter.io.{Buf, Pipe, Reader}
 import com.twitter.util._
 import io.netty.buffer.Unpooled
@@ -152,7 +152,7 @@ class StreamTransportsTest extends FunSuite {
 
     streamChunks(failingT, rw)
 
-    intercept[ReaderDiscarded] { Await.result(rw.read(1)) }
+    intercept[ReaderDiscardedException] { Await.result(rw.read(1)) }
   }
 
   trait Collate {
@@ -169,7 +169,7 @@ class StreamTransportsTest extends FunSuite {
 
     def assertDiscarded(f: Future[_]): Unit = {
       assert(f.isDefined)
-      intercept[Reader.ReaderDiscarded] { Await.result(f, 2.seconds) }
+      intercept[ReaderDiscardedException] { Await.result(f, 2.seconds) }
     }
   }
 
@@ -236,7 +236,7 @@ class StreamTransportsTest extends FunSuite {
 
     assert(!coll1.isDefined)
     assert(trans1.theIntr != null)
-    assert(trans1.theIntr.isInstanceOf[Reader.ReaderDiscarded])
+    assert(trans1.theIntr.isInstanceOf[ReaderDiscardedException])
 
     // This is what a typical transport will do.
     trans1.p.setException(trans1.theIntr)

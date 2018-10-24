@@ -3,7 +3,7 @@ package com.twitter.finagle.http
 import com.twitter.finagle.{ListeningServer, Service}
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.io.Buf
-import com.twitter.io.Reader.ReaderDiscarded
+import com.twitter.io.ReaderDiscardedException
 import com.twitter.util.{Future, Promise, Return, Throw}
 import java.net.InetSocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
@@ -214,7 +214,7 @@ abstract class AbstractHttp1EndToEndTest extends AbstractEndToEndTest {
         } yield ()
 
         f.respond {
-          case Return(_) | Throw(_: ReaderDiscarded) => writerFinished.set(true) // must finish
+          case Return(_) | Throw(_: ReaderDiscardedException) => writerFinished.set(true) // must finish
           case _ => ()
         }
 

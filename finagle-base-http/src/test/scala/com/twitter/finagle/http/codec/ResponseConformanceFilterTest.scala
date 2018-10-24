@@ -5,7 +5,7 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Fields, Method, Request, Response, Status, Version}
 import com.twitter.finagle.http.Status._
 import com.twitter.io.Buf
-import com.twitter.io.Reader.ReaderDiscarded
+import com.twitter.io.ReaderDiscardedException
 import com.twitter.util.{Await, Future}
 import org.scalatest.FunSuite
 
@@ -131,7 +131,7 @@ class ResponseConformanceFilterTest extends FunSuite {
     assert(response.headerMap.get(Fields.ContentLength) == None)
 
     // Make sure to close the Reader/Writer pair, just in case someone is listening
-    intercept[ReaderDiscarded] { Await.result(res.writer.write(Buf.Empty), 5.seconds) }
+    intercept[ReaderDiscardedException] { Await.result(res.writer.write(Buf.Empty), 5.seconds) }
   }
 
   List(Continue, SwitchingProtocols, Processing, NoContent, NotModified).foreach { status =>

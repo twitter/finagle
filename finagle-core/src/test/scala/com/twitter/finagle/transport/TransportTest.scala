@@ -3,7 +3,7 @@ package com.twitter.finagle.transport
 import com.twitter.conversions.time._
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.Status
-import com.twitter.io.{Buf, Pipe, Reader}
+import com.twitter.io.{Buf, Pipe, Reader, ReaderDiscardedException}
 import com.twitter.util.{Await, Future, Promise, Return, Throw, Time}
 import java.net.SocketAddress
 import org.junit.runner.RunWith
@@ -143,7 +143,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
     reader.discard()
     assert(awaitResult(f) == Some(Buf.Empty))
     assert(done.isDefined)
-    intercept[Reader.ReaderDiscarded] { awaitResult(reader.read(1)) }
+    intercept[ReaderDiscardedException] { awaitResult(reader.read(1)) }
   }
 
   test("Transport.copyToWriter - concurrent reads") {
@@ -215,7 +215,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
     def assertDiscarded(f: Future[_]): Unit = {
       assert(f.isDefined)
-      intercept[Reader.ReaderDiscarded] { awaitResult(f) }
+      intercept[ReaderDiscardedException] { awaitResult(f) }
     }
   }
 
@@ -279,7 +279,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
     assert(!coll1.isDefined)
     assert(trans1.theIntr != null)
-    assert(trans1.theIntr.isInstanceOf[Reader.ReaderDiscarded])
+    assert(trans1.theIntr.isInstanceOf[ReaderDiscardedException])
 
     // This is what a typical transport will do.
     trans1.p.setException(trans1.theIntr)
