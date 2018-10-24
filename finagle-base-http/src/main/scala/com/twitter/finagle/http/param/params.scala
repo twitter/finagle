@@ -64,10 +64,10 @@ object Streaming {
     Stack.Param(Streaming(enabled = false))
 }
 
-case class MinChunkSize(size: StorageUnit)
-object MinChunkSize {
-  implicit val minChunkSize: Stack.Param[MinChunkSize] =
-    Stack.Param(MinChunkSize(StorageUnit.zero))
+case class AggregateIfLessThan(size: StorageUnit)
+object AggregateIfLessThan {
+  implicit val aggregateIfLessThan: Stack.Param[AggregateIfLessThan] =
+    Stack.Param(AggregateIfLessThan(StorageUnit.zero))
 }
 
 case class Decompression(enabled: Boolean)

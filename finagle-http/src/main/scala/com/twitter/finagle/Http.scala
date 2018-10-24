@@ -1,5 +1,6 @@
 package com.twitter.finagle
 
+import com.twitter.conversions.storage._
 import com.twitter.finagle.client._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
@@ -20,6 +21,7 @@ import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.{Transport, TransportContext}
+import com.twitter.util.StorageUnit.zero
 import com.twitter.util.{Duration, Future, Monitor, StorageUnit, Time}
 import java.net.{InetSocketAddress, SocketAddress}
 
@@ -462,21 +464,23 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
 
     /**
      * Streaming allows applications to work with HTTP messages that have large
-     * (or infinite) content bodies. When `enabled` is set to `true`, the message content is
-     * available through a [[com.twitter.io.Reader]], which gives the application a
-     * handle to the byte stream. If `minChunkSize` is set to a positive non-zero value,
-     * then messages with no `Transfer-Encoding` and with `Content-Length` up to the
-     * `minChunkSize` value will be buffered into a [[com.twitter.io.Buf]].
-     * [[Request.isChunked]] should be used to determine whether the message is streamed
-     * (`isChunked == true`) or buffered (`isChunked == false`).
+     * (or infinite) content bodies. When `enabled` is set to `true`, the message content
+     * is available through a [[com.twitter.io.Reader]], which gives the application a
+     * handle to the byte stream.
      *
-     * If `enabled` is set to `false`, the entire message content is buffered into a
-     * [[com.twitter.io.Buf]] up to a maximum allowed message size.
+     * If length of a message is known upfront and if it is smaller than
+     * `aggregateIfLessThen` then the message is buffered and its content is available
+     * through [[Request.content]] or [[Request.contentString]]. [[Request.isChunked]]
+     * should be used to determine whether a message is streamed (`isChunked == true`) or
+     * buffered (`isChunked == false`).
+     *
+     * If `enabled` is set to `false`, the entire message content is buffered up to
+     * maximum allowed message size.
      */
-    def withStreaming(enabled: Boolean, minChunkSize: StorageUnit = StorageUnit.zero): Server =
+    def withStreaming(enabled: Boolean, aggregateIfLessThen: StorageUnit = zero): Server =
       this
         .configured(http.param.Streaming(enabled))
-        .configured(http.param.MinChunkSize(minChunkSize))
+        .configured(http.param.AggregateIfLessThan(aggregateIfLessThen))
 
     /**
      * Enables decompression of http content bodies.

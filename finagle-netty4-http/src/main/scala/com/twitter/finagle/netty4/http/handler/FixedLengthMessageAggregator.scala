@@ -9,21 +9,21 @@ import io.netty.handler.codec.http._
  *
  * Http message is considered fixed length if it has `Content-Length` header and
  * `Transfer-Encoding` header is not `chunked` or if we can deduce actual content
- * length to be 0 even if `Content-Length` header is not specified (f.ex. from RFCs).
+ * length to be 0 even if `Content-Length` header is not specified.
  *
- * Fixed length messages may arrive as a series of smaller pieces (hereinafter referred
- * to as chunks, but not to be confused with http chunks) from the upstream handlers
- * in pipeline. To eventually build a [[com.twitter.finagle.http.Request]] object with
- * content available as [[com.twitter.finagle.http.Request.content]] or
- * [[com.twitter.finagle.http.Request.contentString]] all chunks must be stored in
+ * Fixed length messages may arrive as a series of chunks (not to be confused with chunks
+ * as in `Transfer-Encoding: chunked`) from the upstream handlers in pipeline. To
+ * eventually build a [[com.twitter.finagle.http.Request]] object with content available
+ * as [[com.twitter.finagle.http.Request.content]] or
+ * [[com.twitter.finagle.http.Request.contentString]] all chunks must be stored in a
  * temporary buffer and combined together into a [[FullHttpMessage]] as soon as the last
  * chunk of the message is received.
  *
- * `maxContentLength` parameter sets the limit on message's `Content-Length`.
- * If `Content-Length` exceeds `maxContentLength`, the message bypasses this aggregator
- * and is emitted to downstream handler in pipeline unaltered.
+ * The `maxContentLength` determines when to aggregate chunks and when to bypass the
+ * message as is. Only sufficiently small messages (smaller than `maxContentLength`) are
+ * aggregated.
  *
- * Messages with `Transfer-Encoding: chunked` are always emitted unaltered.
+ * Messages with `Transfer-Encoding: chunked` are always bypassed.
  */
 private[http] class FixedLengthMessageAggregator(
   maxContentLength: StorageUnit,
