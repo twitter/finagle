@@ -1,12 +1,13 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.{ListeningServer, Service}
+import com.twitter.conversions.storage._
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.io.Buf
-import com.twitter.io.ReaderDiscardedException
-import com.twitter.util.{Future, Promise, Return, Throw}
+import com.twitter.finagle.{ListeningServer, Service}
+import com.twitter.io.{Buf, Reader, ReaderDiscardedException}
+import com.twitter.util.{Future, Promise, Return, StorageUnit, Throw}
 import java.net.InetSocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
+import org.scalatest.prop.TableDrivenPropertyChecks._
 
 abstract class AbstractHttp1EndToEndTest extends AbstractEndToEndTest {
 
@@ -235,6 +236,77 @@ abstract class AbstractHttp1EndToEndTest extends AbstractEndToEndTest {
     assert(await(client(Request(Method.Get, "/"))).contentString == responseString)
     await(client.close())
     await(server.close())
+  }
+
+  test(s"streaming server does not stream sufficiently small fixed length messages") {
+    val fixedLengthStreamedAfter: StorageUnit = 4.bytes
+    Table(
+      ("body", "expectChunked"),
+      ("", false),
+      ("hal", false),
+      ("hall", false),
+      ("hello", true)
+    ).forEvery { (body, expectChunked) =>
+      val receivedRequestFuture: Promise[Request] = Promise()
+      // given
+      val svc = Service.mk[Request, Response] { req =>
+        receivedRequestFuture.setValue(req)
+        Future.value(Response(req))
+      }
+
+      val server = serverImpl()
+        .withStreaming(true, fixedLengthStreamedAfter)
+        .serve("localhost:*", svc)
+
+      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+      val client = clientImpl().newService(s"${addr.getHostName}:${addr.getPort}", "client")
+      initClient(client)
+
+      val req = Request()
+      req.contentString = body
+      req.headerMap.put("Content-Length", body.length.toString)
+
+      // when
+      client(req)
+
+      // then
+      val receivedRequest = await(receivedRequestFuture)
+      assert(receivedRequest.isChunked == expectChunked)
+      val receivedBody = await(Reader.readAll(receivedRequest.reader))
+      assert(receivedBody == Buf.Utf8(body))
+
+      await(server.close())
+      await(client.close())
+    }
+  }
+
+  test(s"streaming server won't accept fixed length messages that exceed maxRequestSize") {
+    // given
+    val svc = Service.mk[Request, Response] { req =>
+      Future.value(Response(req))
+    }
+
+    val server = serverImpl()
+      .withStreaming(true, 1.gigabyte)
+      .withMaxRequestSize(4.bytes)
+      .serve("localhost:*", svc)
+
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl().newService(s"${addr.getHostName}:${addr.getPort}", "client")
+    initClient(client)
+
+    val req = Request()
+    req.contentString = "hello"
+    req.headerMap.put("Content-Length", "5")
+
+    // when
+    val resp = await(client(req))
+
+    // then
+    assert(resp.statusCode == 413)
+
+    await(server.close())
+    await(client.close())
   }
 
   run(multiplePipelines(implName, _))(nonStreamingConnect)
