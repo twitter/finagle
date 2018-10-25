@@ -7,12 +7,6 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
-New Features
-~~~~~~~~~~~~
-
-* finagle-mysql: introduce `session` to be able to perform multiple operations that require
-  session state on a guaranteed single connection. ``PHAB_ID=D219322``
-
 18.10.0
 -------
 

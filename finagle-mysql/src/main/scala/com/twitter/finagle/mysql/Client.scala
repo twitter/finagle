@@ -173,44 +173,6 @@ trait Client extends Closable {
    * Returns the result of pinging the server.
    */
   def ping(): Future[Unit]
-
-  /**
-   * Reserve a session for exclusive use. This can be useful when operations that require
-   * connection state are to be performed, for example: transactions, locks, or cursors.
-   *
-   * A session's life cycle is managed through the completion of the provided Future. If a
-   * session is no longer usable it can be explicitly discarded.
-   *
-   * @example
-   * {{{
-   * import com.twitter.finagle.mysql.{Client, Transactions}
-   * import com.twitter.util.{Future, Throw}
-   *
-   * case class ReallyBadException() extends Exception
-   *
-   * val client: Client with Transactions = ???
-   *
-   * client.session { session =>
-   *   val result = for {
-   *     _ <- session.query("LOCK")
-   *     r <- session.transaction { tx =>
-   *       tx.query("...")
-   *     }
-   *     _ <- session.query("UNLOCK")
-   *   } yield r
-   *
-   *   result.rescue {
-   *     case e: ReallyBadException =>
-   *       session.discard().flatMap(_ =>
-   *         Future.exception(e)
-   *       )
-   *   }
-   * }
-   * }}}
-   *
-   * @see Session
-   */
-  def session[T](f: Client with Transactions with Session => Future[T]): Future[T]
 }
 
 trait Transactions {
@@ -294,8 +256,7 @@ private class StdClient(
   supportUnsigned: Boolean,
   statsReceiver: StatsReceiver,
   rollbackQuery: String
-) extends Client
-    with Transactions {
+) extends Client with Transactions {
 
   import StdClient._
   import Client._
@@ -347,43 +308,6 @@ private class StdClient(
     }
   }
 
-  private def session(): Future[Client with Transactions with Session] = {
-    val singleton: ServiceFactory[Request, Result] = new ServiceFactory[Request, Result] {
-      private val svc: Future[Service[Request, Result]] = factory()
-
-      // Because the `singleton` is used in the context of a `FactoryToService` we override
-      // `Service#close` to ensure that we can control the checkout lifetime of the `Service`.
-      private val proxiedService: Future[Service[Request, Result]] = svc.map { service =>
-        new ServiceProxy(service) {
-          override def close(deadline: Time): Future[Unit] = Future.Done
-        }
-      }
-
-      def apply(conn: ClientConnection): Future[Service[Request, Result]] = proxiedService
-
-      def close(deadline: Time): Future[Unit] = svc.flatMap(_.close(deadline))
-    }
-
-    val client = new StdClient(singleton, supportUnsigned, statsReceiver, rollbackQuery) with Session {
-      def discard(): Future[Unit] = {
-        singleton().flatMap { svc =>
-          svc(PoisonConnectionRequest)
-        }.unit
-      }
-    }
-
-    Future.value(client)
-  }
-
-  def session[T](f: Client with Transactions with Session => Future[T]): Future[T] = {
-    session().flatMap { client =>
-      f(client).transform { r =>
-        client.close()
-        Future.const(r)
-      }
-    }
-  }
-
   def transactionWithIsolation[T](
     isolationLevel: IsolationLevel
   )(f: Client => Future[T]): Future[T] = {
@@ -398,51 +322,69 @@ private class StdClient(
     isolationLevel: Option[IsolationLevel],
     f: Client => Future[T]
   ): Future[T] = {
-    session().flatMap { client =>
-      val result = for {
-        _ <- isolationLevel match {
-          case Some(iso) => client.query(s"SET TRANSACTION ISOLATION LEVEL ${iso.name}")
-          case None => Future.Done
+    val singleton = new ServiceFactory[Request, Result] {
+      private val svc: Future[Service[Request, Result]] = factory()
+
+      // Because the `singleton` is used in the context of a `FactoryToService` we override
+      // `Service#close` to ensure that we can control the checkout lifetime of the `Service`.
+      private val proxiedService: Future[Service[Request, Result]] = svc.map { service =>
+        new ServiceProxy(service) {
+          override def close(deadline: Time): Future[Unit] = Future.Done
         }
-        _ <- client.query("START TRANSACTION")
-        result <- f(client)
-        _ <- client.query("COMMIT")
-      } yield {
-        result
       }
 
-      // handle the result of the transaction, do not sequence closing/discarding the session
-      // instead perform them in parallel and allow control to return to the user as soon as
-      // possible. The trade off is that the closed/discard takes longer than expected and the user
-      // is caught waiting for a new session.
-      result.transform {
-        case Return(r) =>
-          client.close()
-          Future.value(r)
-        case Throw(e @ WrappedChannelClosedException()) =>
-          // We don't attempt a rollback in the event of a [[ChannelClosedException]]; the rollback
-          // would simply fail with the same exception.
-          Future.exception(e)
-        case Throw(e) =>
-          // the rollback is `masked` in order to protect it from prior interrupts/raises.
-          // this statement should run regardless.
-          client.query(rollbackQuery).masked.transform {
-            case Return(_) =>
-              client.close()
-              Future.exception(e)
-            case Throw(e @ WrappedChannelClosedException()) =>
-              Future.exception(e)
-            case Throw(rollbackEx) =>
-              log.info(rollbackEx, s"Rolled back due to $e. Failed during rollback, closing " +
-                "connection")
-              // the rollback failed and we don't want any uncommitted state to leak
-              // to the next usage of the connection. issue a "poisoned" request to close
-              // the underlying connection. this is necessary due to the connection
-              // pooling underneath. then, close the service.
-              client.discard()
-              Future.exception(e)
-          }
+      def apply(conn: ClientConnection): Future[Service[Request, Result]] = proxiedService
+      def close(deadline: Time): Future[Unit] = svc.flatMap(_.close(deadline))
+    }
+    val client = Client(singleton, statsReceiver, supportUnsigned)
+    val transaction = for {
+      _ <- isolationLevel match {
+        case Some(iso) => client.query(s"SET TRANSACTION ISOLATION LEVEL ${iso.name}")
+        case None => Future.Done
       }
+      _ <- client.query("START TRANSACTION")
+      result <- f(client)
+      _ <- client.query("COMMIT")
+    } yield {
+      result
+    }
+
+    // handle failures and put connection back in the pool
+
+    def closeWith(e: Throwable): Future[T] = {
+      singleton.close()
+      Future.exception(e)
+    }
+
+    transaction.transform {
+      case Return(r) =>
+        singleton.close()
+        Future.value(r)
+      case Throw(e @ WrappedChannelClosedException()) =>
+        // We don't attempt a rollback in the event of a [[ChannelClosedException]]; the rollback
+        // would simply fail with the same exception.
+        closeWith(e)
+      case Throw(e) =>
+        // the rollback is `masked` in order to protect it from prior interrupts/raises.
+        // this statement should run regardless.
+        client.query(rollbackQuery).masked.transform {
+          case Return(_) =>
+            closeWith(e)
+          case Throw(e @ WrappedChannelClosedException()) =>
+            closeWith(e)
+          case Throw(rollbackEx) =>
+            log.info(rollbackEx, s"Rolled back due to $e. Failed during rollback, closing " +
+              "connection")
+            // the rollback failed and we don't want any uncommitted state to leak
+            // to the next usage of the connection. issue a "poisoned" request to close
+            // the underlying connection. this is necessary due to the connection
+            // pooling underneath. then, close the service.
+            singleton().flatMap { svc =>
+              svc(PoisonConnectionRequest)
+            }.transform { _ =>
+              closeWith(e)
+            }
+        }
     }
   }
 
