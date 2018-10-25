@@ -464,23 +464,47 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
 
     /**
      * Streaming allows applications to work with HTTP messages that have large
-     * (or infinite) content bodies. When `enabled` is set to `true`, the message content
-     * is available through a [[com.twitter.io.Reader]], which gives the application a
-     * handle to the byte stream.
+     * (or infinite) content bodies.
      *
-     * If length of a message is known upfront and if it is smaller than
-     * `aggregateIfLessThen` then the message is buffered and its content is available
-     * through [[Request.content]] or [[Request.contentString]]. [[Request.isChunked]]
-     * should be used to determine whether a message is streamed (`isChunked == true`) or
-     * buffered (`isChunked == false`).
+     * If `enabled` is set to `true`, the message content is available through a
+     * [[com.twitter.io.Reader]], which gives the application a handle to the byte stream.
      *
      * If `enabled` is set to `false`, the entire message content is buffered up to
      * maximum allowed message size.
      */
-    def withStreaming(enabled: Boolean, aggregateIfLessThen: StorageUnit = zero): Server =
+    def withStreaming(enabled: Boolean): Server =
+      configured(http.param.Streaming(enabled))
+
+    /**
+     * Streaming allows applications to work with HTTP messages that have large
+     * (or infinite) content bodies.
+     *
+     * If `enabled` is set to `true`, the message content is available through a
+     * [[com.twitter.io.Reader]], which gives the application a handle to the byte stream.
+     *
+     * `fixedLengthStreamedAfter` disables streaming for sufficiently small messages of
+     * known fixed length.
+     *
+     * If `Content-Length` of a message does not exceed `fixedLengthStreamedAfter` it is
+     * buffered and its content is available through [[Request.content]] or
+     * [[Request.contentString]].
+     *
+     * Messages without `Content-Length` header are always streamed regardless of their
+     * actual content length and the `fixedLengthStreamedAfter` value.
+     *
+     * [[Request.isChunked]] should be used to determine whether a message is streamed
+     * (`isChunked == true`) or buffered (`isChunked == false`).
+     *
+     * Value for `fixedLengthStreamedAfter` is capped by `maxRequestSize`. If larger
+     * value is passed, finagle will silently use `maxRequestSize`.
+     *
+     * If `enabled` is set to `false`, the entire message content is buffered up to
+     * maximum allowed message size.
+     */
+    def withStreaming(enabled: Boolean, fixedLengthStreamedAfter: StorageUnit): Server =
       this
         .configured(http.param.Streaming(enabled))
-        .configured(http.param.AggregateIfLessThan(aggregateIfLessThen))
+        .configured(http.param.FixedLengthStreamedAfter(fixedLengthStreamedAfter))
 
     /**
      * Enables decompression of http content bodies.

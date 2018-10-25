@@ -64,10 +64,10 @@ object Streaming {
     Stack.Param(Streaming(enabled = false))
 }
 
-case class AggregateIfLessThan(size: StorageUnit)
-object AggregateIfLessThan {
-  implicit val aggregateIfLessThan: Stack.Param[AggregateIfLessThan] =
-    Stack.Param(AggregateIfLessThan(StorageUnit.zero))
+case class FixedLengthStreamedAfter(size: StorageUnit)
+object FixedLengthStreamedAfter {
+  implicit val fixedLengthStreamedAfter: Stack.Param[FixedLengthStreamedAfter] =
+    Stack.Param(FixedLengthStreamedAfter(StorageUnit.zero))
 }
 
 case class Decompression(enabled: Boolean)
