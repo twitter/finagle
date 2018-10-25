@@ -1,9 +1,12 @@
 package com.twitter.finagle.http2.transport
 
+import com.twitter.finagle.http2.transport.Http2ClientDowngrader.StreamMessage
+import com.twitter.finagle.http2.transport.Http2UpgradingTransport.{UpgradeAborted, UpgradeRejected, UpgradeSuccessful}
 import com.twitter.finagle.netty4.Netty4Listener.BackPressure
 import com.twitter.finagle.netty4.http.initClient
-import com.twitter.finagle.netty4.transport.ChannelTransport
+import com.twitter.finagle.netty4.transport.{ChannelTransport, HasExecutor}
 import com.twitter.finagle.param.Stats
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.{FailureFlags, Stack}
 import io.netty.channel._
 import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
@@ -27,6 +30,18 @@ private[http2] final class UpgradeRequestHandler(
   private[this] val attemptCounter = statsReceiver.counter("attempt")
   private[this] val upgradeCounter = statsReceiver.counter("success")
   private[this] val ignoredCounter = statsReceiver.counter("ignored")
+
+  // Used by the `Http2UpgradingTransport` to build a H2 session out of the `ChannelTransport`
+  private[this] def upgradeMessage = UpgradeSuccessful { underlying =>
+    val inOutCasted = Transport.cast[StreamMessage, StreamMessage](underlying)
+    val contextCasted = inOutCasted.asInstanceOf[
+      Transport[StreamMessage, StreamMessage] {
+        type Context = TransportContext with HasExecutor
+      }
+      ]
+    val fac = new StreamTransportFactory(contextCasted, underlying.remoteAddress, params)
+    fac -> fac.first()
+  }
 
   private[this] def addUpgradeHandler(ctx: ChannelHandlerContext): Unit = {
     // Reshape the pipeline
@@ -73,41 +88,43 @@ private[http2] final class UpgradeRequestHandler(
         ctx.fireUserEventTriggered(UpgradeRejected)
 
       case UpgradeEvent.UPGRADE_SUCCESSFUL =>
-        val p = ctx.pipeline
-        p.asScala.toList
-          .dropWhile(_.getKey != HandlerName)
-          .tail
-          .takeWhile(_.getKey != ChannelTransport.HandlerName)
-          .foreach {
-            entry => p.remove(entry.getValue)
-          }
-        p.addBefore(
-          ChannelTransport.HandlerName,
-          AdapterProxyChannelHandler.HandlerName,
-          new AdapterProxyChannelHandler({ pipeline: ChannelPipeline =>
-            pipeline.addLast(SchemifyingHandler.HandlerName, new SchemifyingHandler("http"))
-            pipeline.addLast(StripHeadersHandler.HandlerName, StripHeadersHandler)
-            initClient(params)(pipeline)
-         }, statsReceiver.scope("adapter_proxy"))
-        )
-        upgradeCounter.incr()
-        // let the Http2UpgradingTransport know that this was an upgrade request
-        ctx.pipeline.remove(this)
-        ctx.fireChannelRead(UpgradeSuccessful)
+        prepareForUpgrade(ctx)
 
       case _ =>
         super.userEventTriggered(ctx, event)
     }
   }
+
+  private[this] def prepareForUpgrade(ctx: ChannelHandlerContext): Unit = {
+    // This removes us from the transport pathway. We do the pipeline modifications
+    // in this method so that we know we're in the right executor.
+    val p = ctx.pipeline
+    p.asScala.toList
+      .dropWhile(_.getKey != HandlerName)
+      .tail
+      .takeWhile(_.getKey != ChannelTransport.HandlerName)
+      .foreach {
+        entry => p.remove(entry.getValue)
+      }
+    p.addBefore(
+      ChannelTransport.HandlerName,
+      AdapterProxyChannelHandler.HandlerName,
+      new AdapterProxyChannelHandler({ pipeline: ChannelPipeline =>
+        pipeline.addLast(SchemifyingHandler.HandlerName, new SchemifyingHandler("http"))
+        pipeline.addLast(StripHeadersHandler.HandlerName, StripHeadersHandler)
+        initClient(params)(pipeline)
+      }, statsReceiver.scope("adapter_proxy"))
+    )
+    upgradeCounter.incr()
+    // let the Http2UpgradingTransport know that this was an upgrade request
+    ctx.pipeline.remove(this)
+
+    ctx.fireChannelRead(upgradeMessage)
+  }
 }
 
 private[http2] object UpgradeRequestHandler {
   val HandlerName = "pipelineUpgrader"
-
-  sealed trait UpgradeResult extends Product with Serializable
-  case object UpgradeSuccessful extends UpgradeResult
-  case object UpgradeRejected extends UpgradeResult
-  case object UpgradeAborted extends UpgradeResult
 
   class CancelledUpgradeException(val flags: Long = FailureFlags.Empty)
       extends Exception("the last write of an upgrade request was cancelled")

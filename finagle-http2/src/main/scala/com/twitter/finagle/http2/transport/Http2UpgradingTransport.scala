@@ -2,10 +2,8 @@ package com.twitter.finagle.http2.transport
 
 import com.twitter.finagle.{FailureFlags, Stack, Status}
 import com.twitter.finagle.http2.RefTransport
-import com.twitter.finagle.http2.transport.Http2UpgradingTransport.UpgradeIgnoredException
-import com.twitter.finagle.netty4.transport.HasExecutor
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.transport.{Transport, TransportContext, TransportProxy}
+import com.twitter.finagle.transport.{Transport, TransportProxy}
 import com.twitter.logging.{HasLogLevel, Level}
 import com.twitter.util.{Future, Promise, Return, Throw, Time}
 import scala.util.control.NoStackTrace
@@ -29,7 +27,7 @@ private[http2] final class Http2UpgradingTransport(
   http1Status: () => Status
 ) extends TransportProxy[Any, Any](underlying) {
 
-  import Http2ClientDowngrader.StreamMessage
+  import Http2UpgradingTransport._
 
   @volatile private[this] var upgradeFailed = false
 
@@ -54,30 +52,24 @@ private[http2] final class Http2UpgradingTransport(
     p.updateIfEmpty(Throw(UpgradeIgnoredException))
   }
 
-  private[this] def upgradeSuccessful(): Unit = {
-    val inOutCasted = Transport.cast[StreamMessage, StreamMessage](underlying)
-    val contextCasted = inOutCasted.asInstanceOf[
-      Transport[StreamMessage, StreamMessage] {
-        type Context = TransportContext with HasExecutor
-      }
-    ]
-    val fac = new StreamTransportFactory(contextCasted, underlying.remoteAddress, params)
+  private[this] def upgradeSuccessful(session: ClientSession, firstStream: Transport[Any, Any]): Unit = {
     // This removes us from the transport pathway
-    ref.update { _ => fac.first() }
+    ref.update { _ => firstStream }
 
     // Let the `Http2Transporter` know about the shiny new h2 session.
     // We need to do this *after* taking the first stream.
-    p.updateIfEmpty(Return(Some(fac)))
+    p.updateIfEmpty(Return(Some(session)))
   }
 
   def read(): Future[Any] = underlying.read().flatMap {
-    case UpgradeRequestHandler.UpgradeRejected =>
+    case UpgradeSuccessful(f) =>
+      val (session, first) = f(underlying)
+      upgradeSuccessful(session, first)
+      ref.read()
+    case UpgradeRejected =>
       upgradeRejected()
       ref.read()
-    case UpgradeRequestHandler.UpgradeSuccessful =>
-      upgradeSuccessful()
-      ref.read()
-    case UpgradeRequestHandler.UpgradeAborted =>
+    case UpgradeAborted =>
       upgradeIgnored()
       ref.read()
     case result =>
@@ -93,7 +85,25 @@ private[http2] final class Http2UpgradingTransport(
   }
 }
 
-private object Http2UpgradingTransport {
+private[http2] object Http2UpgradingTransport {
+
+  sealed trait UpgradeResult extends Product with Serializable
+
+  /**
+   * Signals that the h2c pipeline was upgraded.
+   *
+   * TODO: once we remove the old H2 client impl we should not have UpgradeSuccessful carrying a lambda
+   * The lambda carries the logic necessary to generate a `ClientSession` and the first `Transport`
+   * that represents the stream of the upgrade request.
+   */
+  case class UpgradeSuccessful(makeSession: Transport[Any, Any] => (ClientSession, Transport[Any, Any])) extends UpgradeResult
+
+  /** Signals that the h2c upgrade was rejected or ignored by the peer. */
+  case object UpgradeRejected extends UpgradeResult
+
+  /** Signals that client refused to attempt an upgrade due to the nature of the request. */
+  case object UpgradeAborted extends UpgradeResult
+
   class ClosedWhileUpgradingException(val flags: Long = FailureFlags.Empty)
       extends Exception("h2c transport was closed while upgrading")
       with HasLogLevel

@@ -12,8 +12,9 @@ import com.twitter.util.{Await, Future, Promise}
 import java.util.concurrent.Executor
 import io.netty.handler.codec.http._
 import org.scalatest.FunSuite
+import org.scalatest.mockito.MockitoSugar
 
-class Http2UpgradingTransportTest extends FunSuite {
+class Http2UpgradingTransportTest extends FunSuite with MockitoSugar {
   class Ctx {
     val (writeq, readq) = (new AsyncQueue[Any](), new AsyncQueue[Any]())
     val transport = new QueueTransport[Any, Any](writeq, readq) {
@@ -23,6 +24,7 @@ class Http2UpgradingTransportTest extends FunSuite {
     }
     val ref = new RefTransport(transport)
     val p = Promise[Option[ClientSession]]()
+    val clientSession = mock[ClientSession]
 
     def http1Status: Status = Status.Open
 
@@ -44,13 +46,18 @@ class Http2UpgradingTransportTest extends FunSuite {
     val ctx = new Ctx
     import ctx._
 
+    var upgradeCalled = false
     val writeF = upgradingTransport.write(fullRequest)
     assert(await(writeq.poll) == fullRequest)
     val readF = upgradingTransport.read()
     assert(!readF.isDefined)
-    assert(readq.offer(UpgradeRequestHandler.UpgradeSuccessful))
+    assert(readq.offer(Http2UpgradingTransport.UpgradeSuccessful { _ =>
+      upgradeCalled = true
+      // We just give it back the same old transport.
+      clientSession -> transport
+    }))
     assert(await(p).nonEmpty)
-    assert(readq.offer(Http2ClientDowngrader.Message(fullResponse, 1)))
+    assert(readq.offer(fullResponse))
     assert(await(readF) == fullResponse)
   }
 
@@ -62,7 +69,7 @@ class Http2UpgradingTransportTest extends FunSuite {
     assert(await(writeq.poll) == fullRequest)
     val readF = upgradingTransport.read()
     assert(!readF.isDefined)
-    assert(readq.offer(UpgradeRequestHandler.UpgradeRejected))
+    assert(readq.offer(Http2UpgradingTransport.UpgradeRejected))
     assert(await(p).isEmpty)
     assert(readq.offer(fullResponse))
     assert(await(readF) == fullResponse)
@@ -78,7 +85,7 @@ class Http2UpgradingTransportTest extends FunSuite {
 
       val readF = upgradingTransport.read()
       assert(!readF.isDefined)
-      assert(readq.offer(UpgradeRequestHandler.UpgradeAborted))
+      assert(readq.offer(Http2UpgradingTransport.UpgradeAborted))
       intercept[UpgradeIgnoredException.type] {
         await(p)
       }
@@ -105,7 +112,7 @@ class Http2UpgradingTransportTest extends FunSuite {
     assert(await(writeq.poll) == fullRequest)
     val readF = upgradingTransport.read()
     assert(!readF.isDefined)
-    assert(readq.offer(UpgradeRequestHandler.UpgradeRejected))
+    assert(readq.offer(Http2UpgradingTransport.UpgradeRejected))
     assert(await(p).isEmpty)
     assert(readq.offer(fullResponse))
     assert(await(readF) == fullResponse)
@@ -132,7 +139,7 @@ class Http2UpgradingTransportTest extends FunSuite {
     assert(await(writeq.poll) == fullRequest)
     val readF = upgradingTransport.read()
     assert(!readF.isDefined)
-    assert(readq.offer(UpgradeRequestHandler.UpgradeAborted))
+    assert(readq.offer(Http2UpgradingTransport.UpgradeAborted))
 
     intercept[UpgradeIgnoredException.type] { await(p) }
     assert(readq.offer(fullResponse))

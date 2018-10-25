@@ -154,7 +154,7 @@ private[http2] final class AdapterProxyChannelHandler(
     case goaway: GoAway => ctx.fireChannelRead(goaway)
     case Ping => ctx.fireChannelRead(Ping)
     case exn: StreamException => ctx.fireChannelRead(exn)
-    case upgrade: UpgradeRequestHandler.UpgradeResult => ctx.fireChannelRead(upgrade)
+    case upgrade: Http2UpgradingTransport.UpgradeResult => ctx.fireChannelRead(upgrade)
     case _ =>
       val wrongType = new IllegalArgumentException(
         s"Expected a StreamMessage or UpgradeEvent, got ${msg.getClass.getName} instead."
