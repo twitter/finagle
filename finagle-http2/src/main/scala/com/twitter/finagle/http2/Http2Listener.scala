@@ -1,18 +1,18 @@
 package com.twitter.finagle.http2
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.{http, Stack, ListeningServer, Announcement}
 import com.twitter.finagle.netty4.Netty4Listener
 import com.twitter.finagle.netty4.http.{HttpCodecName, initServer}
 import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.transport.{Transport, TransportContext}
+import com.twitter.finagle.{http, Stack, ListeningServer, Announcement}
 import com.twitter.util.Awaitable.CanAwait
 import com.twitter.util.{Future, Time, Duration}
+import io.netty.channel.group.DefaultChannelGroup
 import io.netty.channel.{ChannelInitializer, Channel, ChannelPipeline, ChannelHandler}
 import io.netty.handler.codec.http.HttpServerCodec
 import io.netty.handler.codec.http2.Http2ConnectionHandler
-import io.netty.channel.group.DefaultChannelGroup
 import io.netty.util.concurrent.GlobalEventExecutor
 import java.net.SocketAddress
 import scala.collection.JavaConverters._
@@ -35,16 +35,15 @@ private[finagle] object Http2Listener {
         )
       else new Http2CleartextServerInitializer(_: ChannelInitializer[Channel], params)
 
-    new Http2Listener(params, initializer, mIn, mOut)
+    new Http2Listener(params, initializer)
   }
 }
 
 private[http2] class Http2Listener[In, Out](
   params: Stack.Params,
-  setupMarshalling: ChannelInitializer[Channel] => ChannelHandler,
-  implicit val mIn: Manifest[In],
-  implicit val mOut: Manifest[Out]
-) extends Listener[In, Out, TransportContext] {
+  setupMarshalling: ChannelInitializer[Channel] => ChannelHandler
+)(implicit mIn: Manifest[In], mOut: Manifest[Out])
+  extends Listener[In, Out, TransportContext] {
 
   private[this] val channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE)
 
