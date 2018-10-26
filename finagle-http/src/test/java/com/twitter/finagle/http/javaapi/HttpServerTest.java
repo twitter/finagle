@@ -11,6 +11,7 @@ import com.twitter.finagle.http.Request;
 import com.twitter.finagle.http.Response;
 import com.twitter.finagle.param.Label;
 import com.twitter.util.Future;
+import com.twitter.util.StorageUnit;
 
 public final class HttpServerTest {
 
@@ -52,6 +53,7 @@ public final class HttpServerTest {
             .withAdmissionControl().noDeadlines()
             .withAdmissionControl().darkModeDeadlines()
             .withCompressionLevel(2)
+            .withStreaming(true, StorageUnit.fromMegabytes(1))
             .configured(new Label("test").mk())
             .withDecompression(true)
             .withHttp2();

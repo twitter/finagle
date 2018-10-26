@@ -117,6 +117,7 @@ package object http {
     val decompressionEnabled = params[Decompression].enabled
     val compressionLevel = params[CompressionLevel].level
     val streaming = params[Streaming].enabled
+    val fixedLengthStreamedAfter = params[FixedLengthStreamedAfter].size
     val log = params[Logger].log
 
     { pipeline: ChannelPipeline =>
@@ -142,11 +143,12 @@ package object http {
         if (autoContinue)
           pipeline.addLast("expectContinue", new HttpServerExpectContinueHandler)
 
-        // no need to handle expect headers in the finexLenAggregator since we have the task
+        val fixedLengthBufferSize = fixedLengthStreamedAfter.min(maxRequestSize)
+        // no need to handle expect headers in the fixedLenAggregator since we have the task
         // specific HttpServerExpectContinueHandler above.
         pipeline.addLast(
           "fixedLenAggregator",
-          new FixedLengthMessageAggregator(maxRequestSize, handleExpectContinue = false)
+          new FixedLengthMessageAggregator(fixedLengthBufferSize, handleExpectContinue = false)
         )
       } else
         pipeline.addLast(

@@ -64,6 +64,12 @@ object Streaming {
     Stack.Param(Streaming(enabled = false))
 }
 
+case class FixedLengthStreamedAfter(size: StorageUnit)
+object FixedLengthStreamedAfter {
+  implicit val fixedLengthStreamedAfter: Stack.Param[FixedLengthStreamedAfter] =
+    Stack.Param(FixedLengthStreamedAfter(5.megabytes))
+}
+
 case class Decompression(enabled: Boolean)
 object Decompression extends {
   implicit val decompressionParam: Stack.Param[Decompression] =

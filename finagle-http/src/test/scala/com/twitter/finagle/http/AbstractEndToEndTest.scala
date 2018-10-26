@@ -651,12 +651,15 @@ abstract class AbstractEndToEndTest
 
     test(s"$implName (streaming)" + ": symmetric reader and getContent") {
       val s = Service.mk[Request, Response] { req =>
-        val buf = await(Reader.readAll(req.reader))
-        assert(buf == Buf.Utf8("hello"))
-        assert(req.contentString == "hello")
-
-        req.response.content = req.content
-        Future.value(req.response)
+        Reader.readAll(req.reader).map { buf =>
+          assert(buf == Buf.Utf8("hello"))
+          if (!req.isChunked) {
+            assert(req.contentString == "hello")
+          }
+          val resp = Response(req)
+          resp.content = buf
+          resp
+        }
       }
       val req = Request()
       req.contentString = "hello"
