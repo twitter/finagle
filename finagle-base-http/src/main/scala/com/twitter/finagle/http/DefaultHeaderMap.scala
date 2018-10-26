@@ -48,6 +48,11 @@ private final class DefaultHeaderMap extends HeaderMap {
     this
   }
 
+  // Overriding this for efficiency reasons.
+  override def getOrNull(key: String): String = {
+    underlying.getFirstOrNull(key)
+  }
+
   // ---- Map/MapLike -----
 
   def get(key: String): Option[String] = underlying.synchronized {
@@ -266,23 +271,26 @@ private object DefaultHeaderMap {
       }
     }
 
-    def getFirst(key: String): Option[String] =
-      get(key) match {
-        case Some(h) => Some(h.value)
-        case None => None
+    def getFirstOrNull(key: String): String =
+      findEntry(key) match {
+        case null => null
+        case e => e.value.value
       }
 
+    def getFirst(key: String): Option[String] =
+      Option(getFirstOrNull(key))
+
     def getAll(key: String): Seq[String] =
-      get(key) match {
-        case Some(hs) => hs.values
-        case None => Nil
+      findEntry(key) match {
+        case null => Nil
+        case e => e.value.values
       }
 
     def add(key: String, value: String): Unit = {
       val h = new Header(key, value)
-      get(key) match {
-        case Some(hs) => hs.add(h)
-        case None => update(key, h)
+      findEntry(key) match {
+        case null => update(key, h)
+        case e => e.value.add(h)
       }
     }
 

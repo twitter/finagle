@@ -93,4 +93,14 @@ class DefaultHeaderMapTest extends AbstractHeaderMapTest with GeneratorDrivenPro
       headerMap.setUnsafe(h._1, h._2)
     }
   }
+
+  test("getOrNull acts as get().orNull") {
+    forAll(genValidHeader) { case (k, v) =>
+      val h = DefaultHeaderMap(k -> v)
+      assert(h.getOrNull(k) == h.get(k).orNull)
+    }
+
+    val empty = DefaultHeaderMap()
+    assert(empty.getOrNull("foo") == empty.get("foo").orNull)
+  }
 }
