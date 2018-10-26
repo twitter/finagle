@@ -503,7 +503,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
      */
     def withStreaming(enabled: Boolean, fixedLengthStreamedAfter: StorageUnit): Server =
       this
-        .configured(http.param.Streaming(enabled))
+        .withStreaming(enabled)
         .configured(http.param.FixedLengthStreamedAfter(fixedLengthStreamedAfter))
 
     /**
