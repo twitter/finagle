@@ -1,8 +1,8 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle.context.Contexts
-import com.twitter.util.{Return, Throw, Try}
 import com.twitter.io.Buf
+import com.twitter.util.{Return, Try}
 
 case class ClientId(name: String) {
 
@@ -34,7 +34,6 @@ object ClientId {
       def tryUnmarshal(buf: Buf): Try[Option[ClientId]] = buf match {
         case b if b.isEmpty => Return.None
         case Buf.Utf8(name) => Return(Some(ClientId(name)))
-        case invalid => Throw(new IllegalArgumentException("client id not a utf8 string"))
       }
     }
 

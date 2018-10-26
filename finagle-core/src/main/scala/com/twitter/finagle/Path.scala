@@ -157,8 +157,6 @@ object Path {
         elems(i) match {
           case Buf.Utf8(s) =>
             elemss(i) = s
-          case _ =>
-            return None
         }
         i += 1
       }

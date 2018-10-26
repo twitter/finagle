@@ -279,7 +279,8 @@ private[finagle] object Message {
   }
 
   /** A reply to a `Tdispatch` message */
-  abstract class Rdispatch(status: Byte, contexts: Seq[(Buf, Buf)], body: Buf) extends Fragmentable {
+  abstract class Rdispatch(status: Byte, contexts: Seq[(Buf, Buf)], body: Buf)
+      extends Fragmentable {
     def typ = Types.Rdispatch
     lazy val buf: Buf = {
       var n = 1 + 2
@@ -364,7 +365,6 @@ private[finagle] object Message {
     val FutureRping: Future[Message] = Future.value(Rping)
   }
 
-
   /** Response to a `Tping` message */
   case class Rping(tag: Int) extends EmptyMessage { def typ = Types.Rping }
 
@@ -448,7 +448,6 @@ private[finagle] object Message {
 
   def decodeUtf8(buf: Buf): String = buf match {
     case Buf.Utf8(str) => str
-    case _ => throwBadMessageException(s"expected Utf8 string, but got $buf")
   }
 
   def encodeString(str: String): Buf = Buf.Utf8(str)

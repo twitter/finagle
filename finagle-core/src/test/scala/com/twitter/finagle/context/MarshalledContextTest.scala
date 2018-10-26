@@ -13,7 +13,6 @@ class MarshalledContextTest extends AbstractContextTest {
     def marshal(value: String) = Buf.Utf8(value)
     def tryUnmarshal(buf: Buf) = buf match {
       case Buf.Utf8(value) => Return(value)
-      case _ => Throw(new IllegalArgumentException)
     }
   }
 
