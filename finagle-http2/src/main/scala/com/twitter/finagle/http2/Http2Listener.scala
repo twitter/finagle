@@ -35,16 +35,15 @@ private[finagle] object Http2Listener {
         )
       else new Http2CleartextServerInitializer(_: ChannelInitializer[Channel], params)
 
-    new Http2Listener(params, initializer, mIn, mOut)
+    new Http2Listener(params, initializer)
   }
 }
 
 private[http2] class Http2Listener[In, Out](
   params: Stack.Params,
-  setupMarshalling: ChannelInitializer[Channel] => ChannelHandler,
-  implicit val mIn: Manifest[In],
-  implicit val mOut: Manifest[Out]
-) extends Listener[In, Out, TransportContext] {
+  setupMarshalling: ChannelInitializer[Channel] => ChannelHandler
+)(implicit mIn: Manifest[In], mOut: Manifest[Out])
+  extends Listener[In, Out, TransportContext] {
 
   private[this] val channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE)
 

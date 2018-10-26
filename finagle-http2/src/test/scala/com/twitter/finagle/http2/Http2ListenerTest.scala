@@ -1,71 +1,77 @@
 package com.twitter.finagle.http2
 
+import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle.Stack
 import com.twitter.io.{Buf, Writer, Reader}
-import com.twitter.util.Await
-import io.netty.handler.codec.http.HttpMessage
+import com.twitter.util._
+import io.netty.handler.codec.http.{HttpMessage, HttpRequest}
 import java.net.{Socket, InetAddress, InetSocketAddress}
-import java.util.concurrent.{SynchronousQueue, TimeUnit}
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
+import scala.collection.JavaConverters._
 
-@RunWith(classOf[JUnitRunner])
+private object Http2ListenerTest {
+  def await[A](f: Future[A], to: Duration = 5.seconds) = Await.result(f, to)
+
+  class Ctx {
+    val recvdByServer = new AsyncQueue[Any]
+
+    private[this] val server = {
+      Http2Listener[HttpMessage, HttpMessage](Stack.Params.empty)
+        .listen(new InetSocketAddress(0)) { transport =>
+          transport.read().respond {
+            case Return(m) => recvdByServer.offer(m)
+            case Throw(exc) => recvdByServer.fail(exc)
+          }
+        }
+    }
+
+    private[this] val (writer, reader) = {
+      val port = server.boundAddress.asInstanceOf[InetSocketAddress].getPort
+      val socket = new Socket(InetAddress.getLoopbackAddress, port)
+      (
+        Writer.fromOutputStream(socket.getOutputStream),
+        Reader.fromStream(socket.getInputStream)
+      )
+    }
+
+    def write(message: String): Future[Unit] =
+      writer.write(Buf.Utf8(message))
+
+    def read(): Future[Option[String]] =
+      reader.read(Int.MaxValue).map(_.map {
+        case Buf.Utf8(message) => message
+      })
+
+    def close(): Future[Unit] = {
+      reader.discard()
+      Closable.all(writer, server).close()
+    }
+  }
+}
+
 class Http2ListenerTest extends FunSuite {
-  def evaluate(fn: (Writer[Buf], Reader[Buf]) => Unit): Any = {
-    val listener = Http2Listener[HttpMessage, HttpMessage](Stack.Params.empty)
-    val q = new SynchronousQueue[Any]()
-    val server = listener.listen(new InetSocketAddress(0)) { transport =>
-      transport.read().onSuccess { msg =>
-        q.offer(msg)
-      }
-    }
-    val port = server.boundAddress match {
-      case addr: InetSocketAddress => addr.getPort
-      case _ => ???
-    }
-    val socket = new Socket(InetAddress.getLoopbackAddress, port)
-    val writer = Writer.fromOutputStream(socket.getOutputStream)
-    val reader = Reader.fromStream(socket.getInputStream)
+  import Http2ListenerTest._
 
-    fn(writer, reader)
-    assert(socket.isConnected && !socket.isClosed)
+  test("Http2Listener should upgrade neatly") (new Ctx {
+    await(write("""GET http:/// HTTP/1.1
+      |x-http2-stream-id: 1
+      |upgrade: h2c
+      |HTTP2-Settings: AAEAABAAAAIAAAABAAN_____AAQAAP__AAUAAEAAAAZ_____
+      |connection: HTTP2-Settings,upgrade
+      |content-length: 0
+      |x-hello: world
+      |
+      |""".stripMargin.replaceAll("\n", "\r\n")))
 
-    val result = q.poll(5, TimeUnit.SECONDS)
+    assert(await(read()).get == """HTTP/1.1 101 Switching Protocols
+      |connection: upgrade
+      |upgrade: h2c
+      |
+      |""".stripMargin.replaceAll("\n", "\r\n"))
 
-    reader.discard()
-    Await.result(writer.close(), 5.seconds)
-    Await.result(server.close(), 5.seconds)
-    result
-  }
-
-  // this test fails on travisci, so let's disable it until we understand why
-  ignore("Http2Listener should upgrade neatly") {
-    val result = evaluate {
-      case (writer, reader) =>
-        val msg = s"""GET http:/// HTTP/1.1
-       |x-http2-stream-id: 1
-       |upgrade: h2c
-       |HTTP2-Settings: AAEAABAAAAIAAAABAAN_____AAQAAP__AAUAAEAAAAZ_____
-       |connection: HTTP2-Settings,upgrade
-       |content-length: 0
-       |
-       |""".stripMargin.replaceAll("\n", "\r\n")
-
-        val response = """HTTP/1.1 101 Switching Protocols
-       |connection: upgrade
-       |upgrade: h2c
-       |content-length: 0
-       |
-       |""".stripMargin.replaceAll("\n", "\r\n")
-
-        Await.result(writer.write(Buf.Utf8(msg)), 5.seconds)
-
-        val Buf.Utf8(rep1) = Await.result(reader.read(Int.MaxValue), 5.seconds).get
-        assert(rep1 == response)
-    }
-
-    assert(result.isInstanceOf[HttpMessage])
-  }
+    val req = await(recvdByServer.poll()).asInstanceOf[HttpRequest]
+    assert(req.headers.get("x-hello") == "world")
+    await(close())
+  })
 }
