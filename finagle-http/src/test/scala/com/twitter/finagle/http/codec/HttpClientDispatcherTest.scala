@@ -109,7 +109,7 @@ class HttpClientDispatcherTest extends FunSuite {
     out.write(r)
     val res = await(f)
 
-    val c = res.reader.read(Int.MaxValue)
+    val c = res.reader.read()
     assert(!c.isDefined)
     req.writer.write(Buf.Utf8("a"))
     out.read() flatMap { c =>
@@ -117,7 +117,7 @@ class HttpClientDispatcherTest extends FunSuite {
     }
     assert(await(c) === Some(Buf.Utf8("a")))
 
-    val cc = res.reader.read(Int.MaxValue)
+    val cc = res.reader.read()
     assert(!cc.isDefined)
     req.writer.write(Buf.Utf8("some other thing"))
     out.read() flatMap { c =>
@@ -125,7 +125,7 @@ class HttpClientDispatcherTest extends FunSuite {
     }
     assert(await(cc) === Some(Buf.Utf8("some other thing")))
 
-    val last = res.reader.read(Int.MaxValue)
+    val last = res.reader.read()
     assert(!last.isDefined)
     req.close()
     out.read() flatMap { c =>
@@ -165,16 +165,16 @@ class HttpClientDispatcherTest extends FunSuite {
     out.write(httpRes)
     val reader = await(f).reader
 
-    val c = reader.read(Int.MaxValue)
+    val c = reader.read()
     out.write(chunk("hello"))
     assert(await(c) == Some(Buf.Utf8("hello")))
 
-    val cc = reader.read(Int.MaxValue)
+    val cc = reader.read()
     out.write(chunk("world"))
     assert(await(cc) == Some(Buf.Utf8("world")))
 
     out.write(LastHttpContent.EMPTY_LAST_CONTENT)
-    assert(await(reader.read(Int.MaxValue)).isEmpty)
+    assert(await(reader.read()).isEmpty)
   }
 
   test("error mid-chunk") {
@@ -188,11 +188,11 @@ class HttpClientDispatcherTest extends FunSuite {
     out.write(httpRes)
     val reader = await(f).reader
 
-    val c = reader.read(Int.MaxValue)
+    val c = reader.read()
     out.write(chunk("hello"))
     assert(await(c) == Some(Buf.Utf8("hello")))
 
-    val cc = reader.read(Int.MaxValue)
+    val cc = reader.read()
     out.write("something else")
     intercept[IllegalArgumentException] { await(cc) }
     verify(inSpy, times(1)).close()

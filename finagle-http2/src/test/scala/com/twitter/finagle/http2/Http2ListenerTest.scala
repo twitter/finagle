@@ -38,7 +38,7 @@ private object Http2ListenerTest {
       writer.write(Buf.Utf8(message))
 
     def read(): Future[Option[String]] =
-      reader.read(Int.MaxValue).map(_.map {
+      reader.read().map(_.map {
         case Buf.Utf8(message) => message
       })
 

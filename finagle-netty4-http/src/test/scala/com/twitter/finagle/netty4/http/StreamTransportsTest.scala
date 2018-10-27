@@ -113,7 +113,7 @@ class StreamTransportsTest extends FunSuite {
     val chanTran = Transport.cast[Any, HttpContent](new ChannelTransport(channel))
     val coll: Reader[Buf] with Future[Unit] =
       collate(chanTran, readChunk)(_.isInstanceOf[LastHttpContent])
-    val read = coll.read(10)
+    val read = coll.read()
 
     val bytes: Array[Byte] = (1 to 10).map(_.toByte).toArray
     channel.writeInbound(new DefaultHttpContent(io.netty.buffer.Unpooled.wrappedBuffer(bytes)))
@@ -147,12 +147,12 @@ class StreamTransportsTest extends FunSuite {
   }
 
   test("streamChunks: discard reader on transport write failure") {
-    val rw = new Pipe[Buf]()
+    val rw = new Pipe[Buf]
     rw.write(Buf.Utf8("msg"))
 
     streamChunks(failingT, rw)
 
-    intercept[ReaderDiscardedException] { Await.result(rw.read(1)) }
+    intercept[ReaderDiscardedException] { Await.result(rw.read()) }
   }
 
   trait Collate {
@@ -176,32 +176,27 @@ class StreamTransportsTest extends FunSuite {
   test("collate: read through") {
     val c = new Collate {}
     // Long read
-    val r1 = c.coll.read(10)
+    val r1 = c.coll.read()
     assert(!r1.isDefined)
     c.readq.offer("hello")
+    c.readq.offer("world")
+
     assert(Await.result(r1, 2.seconds) == Some(Buf.Utf8("hello")))
-
     assert(!c.coll.isDefined)
 
-    // Short read
-    val r2 = c.coll.read(2)
-    assert(!r2.isDefined)
-    c.readq.offer("hello")
-    assert(Await.result(r2, 2.seconds) == Some(Buf.Utf8("he")))
-
-    // Now, the EOF; but this isn't propagated until the buffered bytes are read.
     c.readq.offer("eof")
+    // Now, the EOF; but this isn't propagated until the buffered bytes are read.
     assert(!c.coll.isDefined)
 
-    val r3 = c.coll.read(10)
-    assert(r3.isDefined)
-    assert(Await.result(r3, 2.seconds) == Some(Buf.Utf8("llo")))
+    val r2 = c.coll.read()
+    assert(r2.isDefined)
+    assert(Await.result(r2, 2.seconds) == Some(Buf.Utf8("world")))
 
     assert(c.coll.isDefined)
     Await.result(c.coll, 2.seconds) // no exceptions
 
     // Further reads are EOF
-    val r4 = Await.result(c.coll.read(10), 2.seconds)
+    val r4 = Await.result(c.coll.read(), 2.seconds)
     assert(r4 == None)
   }
 
@@ -227,7 +222,7 @@ class StreamTransportsTest extends FunSuite {
     }
 
     val coll1 = collate[String](trans1, read)(_ == "eof")
-    val r1 = coll1.read(10)
+    val r1 = coll1.read()
     assert(!r1.isDefined)
 
     assert(trans1.theIntr == null)
@@ -243,21 +238,10 @@ class StreamTransportsTest extends FunSuite {
     assertDiscarded(coll1)
   })
 
-  test("collate: discard while writing")(new Collate {
+  test("collate: discard while idle")(new Collate {
     readq.offer("hello")
-
     coll.discard()
     assertDiscarded(coll)
-    assertDiscarded(coll.read(10))
-  })
-
-  test("collate: discard while buffering")(new Collate {
-    readq.offer("hello")
-    val r1 = coll.read(1)
-    assert(Await.result(r1, 2.seconds) == Some(Buf.Utf8("h")))
-
-    coll.discard()
-    assertDiscarded(coll)
-    assertDiscarded(coll.read(10))
+    assertDiscarded(coll.read())
   })
 }

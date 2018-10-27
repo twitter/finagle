@@ -102,10 +102,8 @@ object ClientNackFilter {
     }
   }
 
-  private[this] def swallowNackBody(reader: Reader[Buf], maxRead: Int): Future[Unit] = {
-    // We add 1 to `readMax` in order to detect large responses earlier
-    // and avoid falling into an infinite loop of `read(0)` calls.
-    reader.read(maxRead + 1).flatMap {
+  private[this] def swallowNackBody(reader: Reader[Buf], maxRead: Int): Future[Unit] =
+    reader.read().flatMap {
       case Some(chunk) if chunk.length <= maxRead =>
         swallowNackBody(reader, maxRead - chunk.length)
 
@@ -116,5 +114,4 @@ object ClientNackFilter {
 
       case None => Future.Done
     }
-  }
 }

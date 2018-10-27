@@ -289,7 +289,7 @@ object Transport {
     trans: Transport[_, A],
     chunkOfA: A => Future[Option[Buf]]
   ): Reader[Buf] with Future[Unit] = new Promise[Unit] with Reader[Buf] {
-    private[this] val rw = new Pipe[Buf]()
+    private[this] val rw = new Pipe[Buf]
 
     // Ensure that collate's future is satisfied _before_ its reader
     // is closed. This allows callers to observe the stream completion
@@ -305,7 +305,7 @@ object Transport {
         rw.close()
     }
 
-    def read(n: Int): Future[Option[Buf]] = rw.read(n)
+    def read(): Future[Option[Buf]] = rw.read()
 
     def discard(): Unit = {
       rw.discard()

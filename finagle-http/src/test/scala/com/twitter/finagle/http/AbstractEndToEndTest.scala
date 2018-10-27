@@ -80,10 +80,10 @@ abstract class AbstractEndToEndTest
    * Read `n` number of bytes from the bytestream represented by `r`.
    */
   def readNBytes(n: Int, r: Reader[Buf]): Future[Buf] = {
-    def loop(left: Buf): Future[Buf] = (n - left.length) match {
+    def loop(left: Buf): Future[Buf] = n - left.length match {
       case x if x > 0 =>
-        r.read(x) flatMap {
-          case Some(right) => loop(left concat right)
+        r.read().flatMap {
+          case Some(right) => loop(left.concat(right))
           case None => Future.value(left)
         }
       case _ => Future.value(left)
@@ -712,7 +712,7 @@ abstract class AbstractEndToEndTest
         res.setChunked(true)
         def go =
           for {
-            Some(c) <- req.reader.read(Int.MaxValue)
+            Some(c) <- req.reader.read()
             _ <- res.writer.write(c)
             _ <- res.close()
           } yield ()

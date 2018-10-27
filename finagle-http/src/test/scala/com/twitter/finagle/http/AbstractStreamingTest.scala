@@ -58,7 +58,7 @@ abstract class AbstractStreamingTest extends FunSuite {
 
     // Demonstrate normal operations by testing for a single echo'd chunk.
     await(req.writer.write(buf))
-    assert(await(res.reader.read(1)) == Some(buf))
+    assert(await(res.reader.read()) == Some(buf))
 
     // This request should queue in the service pool.
     shouldFail = false
@@ -86,7 +86,7 @@ abstract class AbstractStreamingTest extends FunSuite {
 
     intercept[ReaderDiscardedException] { await(writeLots(req.writer, buf)) }
     // We call read for the collating function to notice transport failure.
-    intercept[ChannelException] { await(res.reader.read(1)) }
+    intercept[ChannelException] { await(res.reader.read()) }
 
     assertSecondRequestOk()
   })
@@ -94,7 +94,7 @@ abstract class AbstractStreamingTest extends FunSuite {
   test("client: response stream fails on read")(new ClientCtx(singletonPool = true) {
     assert(res2.poll == None)
     // Reader should be suspended in a reading state.
-    val f = res.reader.read(1)
+    val f = res.reader.read()
     assert(f.poll == None)
 
     // Simulate network failure by closing the transport.
@@ -136,7 +136,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     })
 
     val res = await(client(get("/")))
-    assert(await(res.reader.read(1)) == None)
+    assert(await(res.reader.read()) == None)
     serverClose.setDone()
     await(clientClosed)
     await(closable.close())
@@ -169,7 +169,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     val service = new Service[Request, Response] {
       def apply(req: Request) = n.getAndIncrement() match {
         case 0 =>
-          req.reader.read(1).unit proxyTo readp
+          req.reader.read().unit proxyTo readp
           Future.value(ok(writer))
         case _ =>
           val writer = new Pipe[Buf]()
@@ -199,7 +199,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     intercept[ChannelClosedException] { await(readp) }
     intercept[ReaderDiscardedException] { await(writeLots(writer, buf)) }
 
-    intercept[ChannelException] { await(res.reader.read(1)) }
+    intercept[ChannelException] { await(res.reader.read()) }
     intercept[ReaderDiscardedException] { await(writeLots(req1.writer, buf)) }
 
     val res2 = await(f2)
@@ -219,7 +219,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     val service = new Service[Request, Response] {
       def apply(req: Request) = n.getAndIncrement() match {
         case 0 =>
-          writep.ensure { req.reader.read(1).unit.proxyTo(readp) }
+          writep.ensure { req.reader.read().unit.proxyTo(readp) }
           Future.value(ok(writer))
         case _ =>
           val writer = new Pipe[Buf]()
@@ -248,7 +248,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     failure.setDone()
     intercept[ReaderDiscardedException] { await(writep) }
     intercept[ChannelClosedException] { await(readp) }
-    intercept[ChannelException] { await(res.reader.read(1)) }
+    intercept[ChannelException] { await(res.reader.read()) }
     intercept[ReaderDiscardedException] { await(writeLots(req1.writer, buf)) }
 
     val res2 = await(f2)
@@ -288,7 +288,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     val res = await(f1)
 
     failure.setDone()
-    intercept[ChannelException] { await(res.reader.read(1)) }
+    intercept[ChannelException] { await(res.reader.read()) }
     intercept[ReaderDiscardedException] { await(writeLots(req1.writer, buf)) }
 
     val res2 = await(f2)
@@ -331,7 +331,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     val res = await(f1)
 
     failure.setDone()
-    intercept[ChannelException] { await(res.reader.read(1)) }
+    intercept[ChannelException] { await(res.reader.read()) }
     intercept[ReaderDiscardedException] { await(writeLots(req1.writer, buf)) }
 
     val res2 = await(f2)

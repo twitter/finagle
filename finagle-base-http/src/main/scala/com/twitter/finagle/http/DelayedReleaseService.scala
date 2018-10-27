@@ -43,7 +43,7 @@ private[finagle] class DelayedReleaseService[-Req <: Request](
       def response: Response = in
 
       override def reader: Reader[Buf] = new Reader[Buf] {
-        def read(n: Int) = in.reader.read(n) respond {
+        def read(): Future[Option[Buf]] = in.reader.read() respond {
           case Return(None) => done()
           case Throw(_) => done()
           case _ =>

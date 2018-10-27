@@ -48,7 +48,7 @@ private[http] object StreamTransports {
     trans: Transport[_, A],
     chunkOfA: A => Buf
   )(eos: A => Boolean): Reader[Buf] with Future[Unit] = new Promise[Unit] with Reader[Buf] {
-    private[this] val rw = new Pipe[Buf]()
+    private[this] val rw = new Pipe[Buf]
 
     // Ensure that collate's future is satisfied _before_ its reader
     // is closed. This allows callers to observe the stream completion
@@ -64,7 +64,7 @@ private[http] object StreamTransports {
         rw.close()
     }
 
-    def read(n: Int): Future[Option[Buf]] = rw.read(n)
+    def read(): Future[Option[Buf]] = rw.read()
 
     def discard(): Unit = {
       rw.discard()
@@ -91,20 +91,17 @@ private[http] object StreamTransports {
    */
   def streamChunks(
     trans: Transport[Any, Any],
-    r: Reader[Buf],
-    // TODO Find a better number for bufSize, e.g. 32KiB - Buf overhead
-    bufSize: Int = Int.MaxValue
+    r: Reader[Buf]
   ): Future[Unit] = {
-    r.read(bufSize).flatMap {
+    r.read().flatMap {
       case None =>
         trans.write(NettyHttp.LastHttpContent.EMPTY_LAST_CONTENT)
       case Some(buf) =>
         trans.write(chunkOfBuf(buf)).transform {
-          case Return(_) => streamChunks(trans, r, bufSize)
-          case Throw(t) => {
+          case Return(_) => streamChunks(trans, r)
+          case Throw(t) =>
             log.debug(t, "Failure while writing chunk to stream")
             Future(r.discard())
-          }
         }
     }
   }

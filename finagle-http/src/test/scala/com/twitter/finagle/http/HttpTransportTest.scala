@@ -71,7 +71,7 @@ class HttpTransportTest extends FunSuite {
     assert(!manager.shouldClose)
     assert(!closed)
 
-    val readf = rep.reader.read(Int.MaxValue)
+    val readf = rep.reader.read()
     assert(readf.poll == None)
 
     // The request was not a keep alive request.
