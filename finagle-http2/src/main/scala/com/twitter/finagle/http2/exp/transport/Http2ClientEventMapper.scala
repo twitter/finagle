@@ -1,9 +1,16 @@
 package com.twitter.finagle.http2.exp.transport
 
-import com.twitter.finagle.http.{Fields, TooLongMessageException}
+import com.twitter.finagle.http.{BadRequestResponse, Fields}
+import com.twitter.finagle.netty4.http.Bijections
 import io.netty.channel.ChannelHandler.Sharable
-import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
-import io.netty.handler.codec.http.HttpResponse
+import io.netty.channel.{
+  ChannelDuplexHandler,
+  ChannelFuture,
+  ChannelFutureListener,
+  ChannelHandlerContext,
+  ChannelPromise
+}
+import io.netty.handler.codec.http.{FullHttpResponse, HttpRequest, HttpResponse}
 import io.netty.handler.codec.http2.Http2Exception.HeaderListSizeException
 
 /**
@@ -14,17 +21,15 @@ import io.netty.handler.codec.http2.Http2Exception.HeaderListSizeException
  * stream channel from the `Http2MultiplexCodec`.
  */
 @Sharable
-object Http2ClientEventMapper extends ChannelInboundHandlerAdapter {
-  override def exceptionCaught(
-    ctx: ChannelHandlerContext,
-    cause: Throwable
-  ): Unit = {
-    val ex = cause match {
-      case ex: HeaderListSizeException => TooLongMessageException(ex, ctx.channel.remoteAddress)
-      case other => other
-    }
+private[http2] object Http2ClientEventMapper extends ChannelDuplexHandler {
 
-    super.exceptionCaught(ctx, ex)
+  override def write(
+    ctx: ChannelHandlerContext,
+    msg: scala.Any,
+    promise: ChannelPromise
+  ): Unit = msg match {
+    case headers: HttpRequest => super.write(ctx, headers, mapWriteExceptions(ctx, promise))
+    case _ => super.write(ctx, msg, promise)
   }
 
   override def channelRead(
@@ -32,7 +37,7 @@ object Http2ClientEventMapper extends ChannelInboundHandlerAdapter {
     msg: scala.Any
   ): Unit = {
     msg match {
-        // We don't reuse streams, so we need to alert the dispatcher that we're closed.
+      // We don't reuse streams, so we need to alert the dispatcher that we're closed.
       case resp: HttpResponse =>
         resp.headers.set(Fields.Connection, "close")
 
@@ -40,4 +45,30 @@ object Http2ClientEventMapper extends ChannelInboundHandlerAdapter {
     }
     ctx.fireChannelRead(msg)
   }
+
+  private[this] def mapWriteExceptions(
+    ctx: ChannelHandlerContext,
+    promise: ChannelPromise
+  ): ChannelPromise = {
+    val p = ctx.newPromise()
+    p.addListener(new ChannelFutureListener {
+      override def operationComplete(future: ChannelFuture): Unit = {
+        if (future.isSuccess) promise.setSuccess()
+        else if (future.isCancelled) promise.cancel(true)
+        else
+          future.cause match {
+            case _: HeaderListSizeException =>
+              // In this case we want to synthesize a 431 response and close down the channel.
+              ctx.fireChannelRead(headerListSizeResponse())
+              ctx.channel.close(promise)
+            case other => promise.setFailure(other)
+
+          }
+      }
+    })
+    p
+  }
+
+  private[this] def headerListSizeResponse(): FullHttpResponse =
+    Bijections.finagle.fullResponseToNetty(BadRequestResponse.headerTooLong())
 }

@@ -70,8 +70,7 @@ private object MultiplexCodecBuilder {
     builder
       .frameLogger(logger)
       .initialSettings(initialSettings)
-      // We ignore the max header list size for the client encoder because we enforce it elsewhere.
-      .encoderIgnoreMaxHeaderListSize(!isServer || params[EncoderIgnoreMaxHeaderListSize].ignoreMaxHeaderListSize)
+      .encoderIgnoreMaxHeaderListSize(params[EncoderIgnoreMaxHeaderListSize].ignoreMaxHeaderListSize)
       .headerSensitivityDetector(detector(params))
   }
 

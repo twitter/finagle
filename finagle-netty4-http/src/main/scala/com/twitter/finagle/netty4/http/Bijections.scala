@@ -131,7 +131,7 @@ private[finagle] object Bijections {
         headersToNetty(r.headerMap)
       )
 
-    def fullResponseToNetty(r: FinagleHttp.Response): NettyHttp.HttpResponse =
+    def fullResponseToNetty(r: FinagleHttp.Response): NettyHttp.FullHttpResponse =
       new NettyHttp.DefaultFullHttpResponse(
         versionToNetty(r.version),
         statusToNetty(r.status),

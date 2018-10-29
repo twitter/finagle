@@ -41,7 +41,7 @@ private[http2] object H2StreamChannelInit {
           http.initServer(params)(ch.pipeline)
         } else {
           http.initClient(params)(ch.pipeline)
-          ch.pipeline.addLast("exception-mapper", Http2ClientEventMapper)
+          ch.pipeline.addLast("event-mapper", Http2ClientEventMapper)
         }
 
         init match {
