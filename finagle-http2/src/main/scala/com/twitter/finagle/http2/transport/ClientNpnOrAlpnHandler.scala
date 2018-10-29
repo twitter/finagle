@@ -35,13 +35,16 @@ private[http2] class ClientNpnOrAlpnHandler(connectionHandler: ChannelHandler, p
         ctx.fireChannelRead(UpgradeEvent.UPGRADE_SUCCESSFUL)
 
       case ApplicationProtocolNames.HTTP_1_1 =>
-        val maxChunkSize = params[http.param.MaxChunkSize].size
         val maxHeaderSize = params[http.param.MaxHeaderSize].size
         val maxInitialLineSize = params[http.param.MaxInitialLineSize].size
+
+        // We unset the limit for maxChunkSize (8k by default) so Netty emits entire available
+        // payload as a single chunk instead of splitting it. This way we put the data into use
+        // quicker, as soon as it's available.
         val sourceCodec = new HttpClientCodec(
           maxInitialLineSize.inBytes.toInt,
           maxHeaderSize.inBytes.toInt,
-          maxChunkSize.inBytes.toInt
+          Int.MaxValue /*maxChunkSize*/
         )
         pipeline.addBefore(ChannelTransport.HandlerName, HttpCodecName, sourceCodec)
         pipeline.remove(BufferingHandler.HandlerName)

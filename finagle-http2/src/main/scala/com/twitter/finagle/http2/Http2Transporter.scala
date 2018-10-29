@@ -68,13 +68,15 @@ private[finagle] object Http2Transporter {
       val Transport.ClientSsl(config) = params[Transport.ClientSsl]
       val tlsEnabled = config.isDefined
 
-      val maxChunkSize = params[http.param.MaxChunkSize].size
+      // We unset the limit for maxChunkSize (8k by default) so Netty emits entire available
+      // payload as a single chunk instead of splitting it. This way we put the data into use
+      // quicker, as soon as it's available.
       val maxHeaderSize = params[http.param.MaxHeaderSize].size
       val maxInitialLineSize = params[http.param.MaxInitialLineSize].size
       val sourceCodec = new HttpClientCodec(
         maxInitialLineSize.inBytes.toInt,
         maxHeaderSize.inBytes.toInt,
-        maxChunkSize.inBytes.toInt
+        Int.MaxValue /*maxChunkSize*/
       )
 
       if (tlsEnabled) {

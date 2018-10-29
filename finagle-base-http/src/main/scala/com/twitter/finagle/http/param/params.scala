@@ -16,15 +16,6 @@ object AutomaticContinue {
 }
 
 /**
- * the maximum size of a chunk.
- */
-case class MaxChunkSize(size: StorageUnit)
-object MaxChunkSize {
-  implicit val maxChunkSizeParam: Stack.Param[MaxChunkSize] =
-    Stack.Param(MaxChunkSize(8.kilobytes))
-}
-
-/**
  * the maximum size of all headers.
  */
 case class MaxHeaderSize(size: StorageUnit)

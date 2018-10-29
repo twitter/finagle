@@ -13,6 +13,19 @@ New Features
 * finagle-mysql: introduce `session` to be able to perform multiple operations that require
   session state on a guaranteed single connection. ``PHAB_ID=D219322``
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-http: `c.t.f.http.param.MaxChunkSize` has been removed. There is no good reason to
+  configure it with anything but `Int.MaxValue` (unlimited). ``PHAB_ID=D233538``
+
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-http: Unset `maxChunkSize` limit in Netty HTTP codecs. Now both clients and servers
+  emit all available data as a single chunk so we can put it into use quicker.
+  ``PHAB_ID=D233538``
+
 18.10.0
 -------
 

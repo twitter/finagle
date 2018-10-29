@@ -50,12 +50,14 @@ private[http2] class Http2Listener[In, Out](
   private[this] def sourceCodec(params: Stack.Params) = {
     val maxInitialLineSize = params[http.param.MaxInitialLineSize].size
     val maxHeaderSize = params[http.param.MaxHeaderSize].size
-    val maxRequestSize = params[http.param.MaxRequestSize].size
 
+    // We unset the limit for maxChunkSize (8k by default) so Netty emits entire available
+    // payload as a single chunk instead of splitting it. This way we put the data into use
+    // quicker, as soon as it's available.
     new HttpServerCodec(
       maxInitialLineSize.inBytes.toInt,
       maxHeaderSize.inBytes.toInt,
-      maxRequestSize.inBytes.toInt
+      Int.MaxValue /*maxChunkSize*/
     )
   }
 

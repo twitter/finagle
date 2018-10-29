@@ -85,14 +85,16 @@ package object http {
   private[finagle] val ClientPipelineInit: Stack.Params => ChannelPipeline => Unit = {
     params: Stack.Params => pipeline: ChannelPipeline =>
       {
-        val maxChunkSize = params[MaxChunkSize].size
         val maxHeaderSize = params[MaxHeaderSize].size
         val maxInitialLineSize = params[MaxInitialLineSize].size
 
+        // We unset the limit for maxChunkSize (8k by default) so Netty emits entire available
+        // payload as a single chunk instead of splitting it. This way we put the data into use
+        // quicker, the moment it's available.
         val codec = new HttpClientCodec(
           maxInitialLineSize.inBytes.toInt,
           maxHeaderSize.inBytes.toInt,
-          maxChunkSize.inBytes.toInt
+          Int.MaxValue /*maxChunkSize*/
         )
 
         pipeline.addLast(HttpCodecName, codec)
@@ -174,12 +176,14 @@ package object http {
       {
         val maxInitialLineSize = params[MaxInitialLineSize].size
         val maxHeaderSize = params[MaxHeaderSize].size
-        val maxRequestSize = params[MaxRequestSize].size
 
+        // We unset the limit for maxChunkSize (8k by default) so Netty emits entire available
+        // payload as a single chunk instead of splitting it. This way we put the data into use
+        // quicker, the moment it's available.
         val codec = new HttpServerCodec(
           maxInitialLineSize.inBytes.toInt,
           maxHeaderSize.inBytes.toInt,
-          maxRequestSize.inBytes.toInt
+          Int.MaxValue /*maxChunkSize*/
         )
 
         pipeline.addLast(HttpCodecName, codec)
