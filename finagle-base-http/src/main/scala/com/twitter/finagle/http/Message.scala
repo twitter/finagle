@@ -4,10 +4,10 @@ import com.twitter.finagle.http.Message.BufOutputStream
 import com.twitter.finagle.http.util.StringUtil
 import com.twitter.io.{Buf, BufInputStream, Reader, Writer}
 import com.twitter.util.{Duration, Future}
-import java.util.{Date, Locale, Iterator => JIterator}
-import java.nio.charset.Charset
-import java.time.{ZoneId, ZoneOffset}
+import java.nio.charset.{Charset, StandardCharsets}
 import java.time.format.DateTimeFormatter
+import java.time.{ZoneId, ZoneOffset}
+import java.util.{Date, Locale, Iterator => JIterator}
 import scala.collection.JavaConverters._
 
 /**
@@ -35,7 +35,7 @@ abstract class Message {
   def writer: Writer[Buf]
 
   def isRequest: Boolean
-  def isResponse = !isRequest
+  def isResponse: Boolean = !isRequest
 
   /**
    * Retrieve the current content of this `Message`.
@@ -150,11 +150,11 @@ abstract class Message {
 
   /** Accept header media types (normalized, no parameters) */
   def acceptMediaTypes: Seq[String] =
-    accept.map {
+    accept.flatMap {
       _.split(";", 2).headOption
         .map(_.trim.toLowerCase) // media types are case-insensitive
         .filter(_.nonEmpty) // skip blanks
-    }.flatten
+    }
 
   /** Allow header */
   def allow: Option[String] = headerMap.get(Fields.Allow)
@@ -187,7 +187,7 @@ abstract class Message {
   def charset: Option[String] = {
     contentType.foreach { contentType =>
       val parts = StringUtil.split(contentType, ';')
-      1.to(parts.length - 1) foreach { i =>
+      1.until(parts.length).foreach { i =>
         val part = parts(i).trim
         if (part.startsWith("charset=")) {
           val equalsIndex = part.indexOf('=')
@@ -209,18 +209,18 @@ abstract class Message {
     }
 
     val builder = new StringBuilder(parts(0))
-    if (!(parts.exists { _.trim.startsWith("charset=") })) {
+    if (!parts.exists(_.trim.startsWith("charset="))) {
       // No charset parameter exist, add charset after media type
       builder.append(";charset=")
       builder.append(value)
       // Copy other parameters
-      1.to(parts.length - 1) foreach { i =>
+      1.until(parts.length).foreach { i =>
         builder.append(";")
         builder.append(parts(i))
       }
     } else {
       // Replace charset= parameter(s)
-      1.to(parts.length - 1) foreach { i =>
+      1.until(parts.length).foreach { i =>
         val part = parts(i)
         if (part.trim.startsWith("charset=")) {
           builder.append(";charset=")
@@ -438,9 +438,9 @@ abstract class Message {
   /** Get the content as a string. */
   def contentString: String = {
     val encoding = try {
-      Charset.forName(charset getOrElse "UTF-8")
+      Charset.forName(charset.getOrElse("UTF-8"))
     } catch {
-      case _: Throwable => Message.Utf8
+      case _: Throwable => StandardCharsets.UTF_8
     }
     Buf.decodeString(content, encoding)
   }
@@ -540,7 +540,7 @@ abstract class Message {
   final def withWriter[T](f: java.io.Writer => T): T = {
     // withOutputStream will write() to the message
     withOutputStream { outputStream =>
-      val writer = new java.io.OutputStreamWriter(outputStream, Message.Utf8)
+      val writer = new java.io.OutputStreamWriter(outputStream, StandardCharsets.UTF_8)
       try f(writer)
       finally writer.close()
     }
@@ -580,12 +580,11 @@ object Message {
     def contentsAsBuf: Buf = Buf.ByteArray.Owned(buf, 0, count)
   }
 
-  private[http] val Utf8 = Charset.forName("UTF-8")
-  val CharsetUtf8 = "charset=utf-8"
-  val ContentTypeJson = MediaType.Json + ";" + CharsetUtf8
-  val ContentTypeJsonPatch = MediaType.JsonPatch + ";" + CharsetUtf8
-  val ContentTypeJavascript = MediaType.Javascript + ";" + CharsetUtf8
-  val ContentTypeWwwForm = MediaType.WwwForm + ";" + CharsetUtf8
+  val CharsetUtf8: String = "charset=utf-8"
+  val ContentTypeJson: String = MediaType.Json + ";" + CharsetUtf8
+  val ContentTypeJsonPatch: String = MediaType.JsonPatch + ";" + CharsetUtf8
+  val ContentTypeJavascript: String = MediaType.Javascript + ";" + CharsetUtf8
+  val ContentTypeWwwForm: String = MediaType.WwwForm + ";" + CharsetUtf8
 
   private val HttpDateFormat: DateTimeFormatter =
     DateTimeFormatter

@@ -44,7 +44,7 @@ Runtime Behavior Changes
   ``PHAB_ID=D221528``
 
 18.9.1
--------
+------
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
@@ -70,7 +70,7 @@ Runtime Behavior Changes
   `Failure.RetryableNackFailure`. ``PHAB_ID=D216539``
 
 18.9.0
--------
+------
 
 New Features
 ~~~~~~~~~~~~
@@ -149,7 +149,7 @@ Runtime Behavior Changes
   ``PHAB_ID=D208088``
 
 18.8.0
--------
+------
 
 New Features
 ~~~~~~~~~~~~
@@ -223,7 +223,7 @@ Deprecations
   the push-based mux implementation, c.t.f.pushsession.MuxPush. ``PHAB_ID=D193630``
 
 18.7.0
--------
+------
 
 New Features
 ~~~~~~~~~~~~
@@ -293,7 +293,7 @@ Runtime Behavior Changes
   network, the `FailureFlags.Ignorable` status is propagated with it.  ``PHAB_ID=D183456``
 
 18.6.0
--------
+------
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -404,7 +404,7 @@ Bug Fixes
   on the classpath.
 
 18.5.0
--------
+------
 
 New Features
 ~~~~~~~~~~~~
@@ -504,7 +504,7 @@ Bug Fixes
   `Thrift{Mux}.server.withPerEndpointStats`. ``PHAB_ID=D167433``
 
 18.4.0
--------
+------
 
 New Features
 ~~~~~~~~~~~~
@@ -590,7 +590,7 @@ Deprecations
   ``PHAB_ID=D124620``
 
 18.3.0
--------
+------
 
 New Features
 ~~~~~~~~~~~~
@@ -686,7 +686,7 @@ Breaking API Changes
   ``PHAB_ID=D141940``
 
 18.2.0
--------
+------
 
 New Features
 ~~~~~~~~~~~~
@@ -742,7 +742,7 @@ Runtime Behavior Changes
   ``PHAB_ID=D126486``
 
 18.1.0
--------
+------
 
 New Features
 ~~~~~~~~~~~~
@@ -852,7 +852,7 @@ New Features
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
-* finagle-base-http: Remove deprecated [Request|Response].[encode|decode][Bytes|String]
+* finagle-base-http: Remove deprecated `[Request|Response].[encode|decode][Bytes|String]`
   methods. Use c.t.f.h.codec.HttpCodec methods instead. ``PHAB_ID=D116350``
 
 * finagle-memcached: `ConcurrentLoadBalancerFactory` was removed and its behavior
@@ -1008,7 +1008,7 @@ Breaking API Changes
   ``PHAB_ID=D100357``
 
 7.1.0
-------
+-----
 
 New Features
 ~~~~~~~~~~~~
@@ -1104,7 +1104,7 @@ Deprecations
   `Thrift.param.MaxReusableBufferSize` for both server and client use. ``PHAB_ID=D83190``
 
 7.0.0
-------
+-----
 
 New Features
 ~~~~~~~~~~~~
@@ -3261,7 +3261,7 @@ Breaking API Changes
   to `ClassTag`. ``RB_ID=720455``
 
 6.26.0
--------
+------
 
 Deprecations
 ~~~~~~~~~~~~
@@ -3701,7 +3701,7 @@ Runtime Behavior Changes
 * `finagle`: Improve allocation semantics for uses of Buf.
 
 6.22.0
--------
+------
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
@@ -3820,7 +3820,7 @@ Bug Fixes
 - `finagle-zipkin`: Reduce allocations when tracing
 
 6.20.0
--------
+------
 
 - `finagle`: Smattering of minor cleanups in util and finagle
 - `finagle`: Upgrade sbt to 0.13
@@ -3858,7 +3858,7 @@ Bug Fixes
 - `finagle-thrift`: Remove usage of java_sources, should be able to depend on it normally
 
 6.19.0
--------
+------
 
 - `finagle-core`: Allow trailing semicolons in dtabs
 - `finagle-core`: Rescue exceptions thrown by filter in `Filter.andthen(Filter)`
@@ -3877,7 +3877,7 @@ Bug Fixes
 - `finagle-thriftmux`: Don't reuse InMemoryStatsReceiver in the same test
 
 6.18.0
--------
+------
 
 - `finagle-*`: release scrooge v3.16.0
 - `finagle-*`: release util v6.18.0
@@ -3908,7 +3908,7 @@ Bug Fixes
 - `wily`: Add Dtab expansion
 
 6.17.0
--------
+------
 
 - `finagle`: Add list of Finagle adopters
 - `finagle`: Upgrade third-party dependencies
@@ -3946,7 +3946,7 @@ Bug Fixes
 - `finagle-thriftmux`: pass along ClientId with ClientBuilder API
 
 6.16.0
--------
+------
 
 - `finagle-core`: Add Stack#remove
 - `finagle-core`: Add a copy constructor to Stack{Client, Server}
@@ -3980,7 +3980,7 @@ Bug Fixes
 - `finagle-{core,thrift,mux}`: Clean up contexts, delimit Locals
 
 6.15.0
--------
+------
 
 - `finagle-core`: Fixed DefaultClient to use the base close method
 - `finagle-core`: Fix a race condition when closing in DefaultServer
@@ -4015,7 +4015,7 @@ Bug Fixes
 - `finagle-serversets`: facade for ZooKeeper libraries
 
 6.14.0
--------
+------
 
 - `finagle-*`: Add com.twitter.io.Charsets and replace the use of org.jboss.netty.util.CharsetUtil
 - `finagle-benchmark`: Fix caliper failures due to new guava
