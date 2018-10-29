@@ -184,6 +184,7 @@ lazy val projectList = Seq[sbt.ProjectReference](
   finagleException,
   finagleIntegration,
   finagleExp,
+  finagleGrpcContext,
   finagleInit,
 
   // Protocols
@@ -612,6 +613,19 @@ lazy val finagleExp = Project(
 ).settings(
   name := "finagle-exp"
 ).dependsOn(finagleCore, finagleThrift)
+
+lazy val finagleGrpcContext = Project(
+  id = "finagle-grpc-context",
+  base = file("finagle-grpc-context")
+).settings(
+  sharedSettings
+).settings(
+  name := "finagle-grpc-context",
+  libraryDependencies ++= Seq(
+    util("core"),
+    "io.grpc" % "grpc-context" % "1.13.2"
+  )
+)
 
 lazy val finagleExample = Project(
   id = "finagle-example",

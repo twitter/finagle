@@ -1,0 +1,12 @@
+java_library(
+    compiler_option_sets = {"fatal_warnings"},
+    provides = artifact(
+        org = "com.twitter",
+        name = "finagle-grpc-context",
+        repo = artifactory,
+    ),
+    dependencies = [
+        "3rdparty/jvm/io/grpc:grpc-context",
+        "util/util-core/src/main/scala/com/twitter/util",
+    ],
+)
