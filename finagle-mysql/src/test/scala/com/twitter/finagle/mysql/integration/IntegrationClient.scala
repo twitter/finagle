@@ -3,7 +3,7 @@ package com.twitter.finagle.mysql.integration
 import com.twitter.finagle.Mysql
 import com.twitter.finagle.mysql._
 import java.io.{File, FileInputStream}
-import java.net.{BindException, ServerSocket}
+import java.net.{BindException, InetAddress, ServerSocket}
 import java.util.logging.{Level, Logger}
 import java.util.Properties
 import org.scalactic.source.Position
@@ -15,8 +15,13 @@ trait IntegrationClient extends FunSuiteLike {
 
   // Check if default mysql port is available.
   val isPortAvailable: Boolean = try {
-    val socket = new ServerSocket(3306)
+    val address = InetAddress.getByName("localhost")
+    // 50 is the connection backlog, meaningless here
+    // but this is the only constructor overload that
+    // allows us to specify an address and a port.
+    val socket = new ServerSocket(3306, 50, address)
     socket.close()
+    logger.log(Level.WARNING, "Error mysql is not running on port 3306, skipping integration test")
     true
   } catch {
     case e: BindException => false
