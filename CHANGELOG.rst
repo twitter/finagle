@@ -10,6 +10,9 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
+* finagle-base-http: Add `Message.httpDateFormat(millis)` to format the epoch millis into
+  an RFC 7231 formatted String representation. ``PHAB_ID=D234867``
+
 * finagle-mysql: introduce `session` to be able to perform multiple operations that require
   session state on a guaranteed single connection. ``PHAB_ID=D219322``
 
