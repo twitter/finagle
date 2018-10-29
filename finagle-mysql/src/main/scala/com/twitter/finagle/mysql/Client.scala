@@ -347,21 +347,20 @@ private class StdClient(
     }
   }
 
-  private def session(): Future[Client with Transactions with Session] = {
-    val singleton: ServiceFactory[Request, Result] = new ServiceFactory[Request, Result] {
-      private val svc: Future[Service[Request, Result]] = factory()
+  private def session(): Future[Client with Transactions with Session] = factory().map { svc =>
 
+    val singleton: ServiceFactory[Request, Result] = new ServiceFactory[Request, Result] {
       // Because the `singleton` is used in the context of a `FactoryToService` we override
       // `Service#close` to ensure that we can control the checkout lifetime of the `Service`.
-      private val proxiedService: Future[Service[Request, Result]] = svc.map { service =>
-        new ServiceProxy(service) {
+      private[this] val proxiedService: Future[Service[Request, Result]] = Future.value(
+        new ServiceProxy(svc) {
           override def close(deadline: Time): Future[Unit] = Future.Done
         }
-      }
+      )
 
       def apply(conn: ClientConnection): Future[Service[Request, Result]] = proxiedService
 
-      def close(deadline: Time): Future[Unit] = svc.flatMap(_.close(deadline))
+      def close(deadline: Time): Future[Unit] = svc.close(deadline)
     }
 
     val client = new StdClient(singleton, supportUnsigned, statsReceiver, rollbackQuery) with Session {
@@ -372,7 +371,7 @@ private class StdClient(
       }
     }
 
-    Future.value(client)
+    client
   }
 
   def session[T](f: Client with Transactions with Session => Future[T]): Future[T] = {
