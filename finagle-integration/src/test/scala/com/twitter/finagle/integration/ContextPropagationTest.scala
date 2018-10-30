@@ -10,12 +10,9 @@ import com.twitter.finagle.thriftmux.thriftscala.TestService
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Future, Return}
 import java.net.{InetAddress, InetSocketAddress}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class ContextPropagationTest extends FunSuite with MockitoSugar {
 
   case class TestContext(buf: Buf)
@@ -166,7 +163,7 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
       )
 
     val clientB = Thrift.client
-      .withStack(Thrift.client.stack.remove(Retries.Role))
+      .withStack(_.remove(Retries.Role))
       .newIface[TestService.FutureIface](
         Name.bound(Address(serverB.boundAddress.asInstanceOf[InetSocketAddress])),
         "clientB"

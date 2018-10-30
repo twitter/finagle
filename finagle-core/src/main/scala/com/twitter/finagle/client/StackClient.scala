@@ -21,6 +21,7 @@ object StackClient {
    * within the companion objects of the respective modules.
    */
   object Role extends Stack.Role("StackClient") {
+
     /**
      * Defines the role of the connection pool in the client stack.
      */
@@ -444,8 +445,43 @@ trait StackClient[Req, Rep]
   /** The current parameter map. */
   def params: Stack.Params
 
-  /** A new StackClient with the provided stack. */
+  /**
+   * A new [[StackClient]] with the provided `stack`.
+   *
+   * @see `withStack` that takes a `Function1` for a more ergonomic
+   *     API when used with method chaining.
+   */
   def withStack(stack: Stack[ServiceFactory[Req, Rep]]): StackClient[Req, Rep]
+
+  /**
+   * A new [[StackClient]] using the function to create a new [[Stack]].
+   *
+   * The input to `fn` is the [[stack client's current stack]].
+   * This API allows for easier usage when writing code that
+   * uses method chaining.
+   *
+   * @example
+   * From Scala:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withStack(_.prepend(MyStackModule))
+   * }}}
+   *
+   * From Java:
+   * {{{
+   * import com.twitter.finagle.Http;
+   * import static com.twitter.util.Function.func;
+   *
+   * Http.client().withStack(func(stack -> stack.prepend(MyStackModule)));
+   * }}}
+   *
+   * @see [[withStack(Stack)]]
+   */
+  def withStack(
+    fn: Stack[ServiceFactory[Req, Rep]] => Stack[ServiceFactory[Req, Rep]]
+  ): StackClient[Req, Rep] =
+    withStack(fn(stack))
 
   def transformed(t: Stack.Transformer): StackClient[Req, Rep] =
     withStack(t(stack))

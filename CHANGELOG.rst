@@ -13,7 +13,11 @@ New Features
 * finagle-base-http: Add `Message.httpDateFormat(millis)` to format the epoch millis into
   an RFC 7231 formatted String representation. ``PHAB_ID=D234867``
 
-* finagle-mysql: introduce `session` to be able to perform multiple operations that require
+* finagle-core: Introduce an `StackClient.withStack` overload that
+  makes modifying the existing `Stack` easier when using method chaining.
+  ``PHAB_ID=D234739``
+
+* finagle-mysql: Introduce `session` to be able to perform multiple operations that require
   session state on a guaranteed single connection. ``PHAB_ID=D219322``
 
 Breaking API Changes
@@ -28,6 +32,13 @@ Runtime Behavior Changes
 * finagle-http: Unset `maxChunkSize` limit in Netty HTTP codecs. Now both clients and servers
   emit all available data as a single chunk so we can put it into use quicker.
   ``PHAB_ID=D233538``
+
+Deprecations
+~~~~~~~~~~~~
+
+* finagle-core: Deprecate
+  `EndpointerStackClient.transformed(Stack[ServiceFactory[Req, Rep]] => Stack[ServiceFactory[Req, Rep]])`
+  in favor of the `withStack` variant. ``PHAB_ID=D234739``
 
 18.10.0
 -------

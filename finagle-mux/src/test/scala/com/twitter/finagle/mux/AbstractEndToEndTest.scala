@@ -199,7 +199,7 @@ abstract class AbstractEndToEndTest
     // Remove the retries module because otherwise requests will be retried until the default budget
     // is exceeded and then flagged as NonRetryable.
     val client = clientImpl
-      .transformed(_.remove(Failure.role).remove(Retries.Role))
+      .withStack(_.remove(Failure.role).remove(Retries.Role))
       .newService(address, "client")
 
     def check(f: Failure): Unit = {
@@ -410,7 +410,7 @@ abstract class AbstractEndToEndTest
 
       private[this] def swallowMessage(): Unit = {
         val is = client.getInputStream
-        val sizeField = (3 to 0 by -1).foldLeft(0){  (acc: Int, i: Int) =>
+        val sizeField = (3 to 0 by -1).foldLeft(0) { (acc: Int, i: Int) =>
           acc | (is.read().toByte << i)
         }
         // swallow sizeField bytes
@@ -509,8 +509,9 @@ abstract class AbstractEndToEndTest
   test("BackupRequestFilter's interrupts are propagated to the remote peer as ignorable") {
     val slow: Promise[Response] = new Promise[Response]
     val first = new AtomicBoolean(true)
-    slow.setInterruptHandler { case exn: Throwable =>
-      slow.setException(exn)
+    slow.setInterruptHandler {
+      case exn: Throwable =>
+        slow.setException(exn)
     }
     val server = serverImpl.serve(
       "localhost:*",
@@ -529,7 +530,7 @@ abstract class AbstractEndToEndTest
 
     val tunable: Tunable.Mutable[Double] = Tunable.mutable[Double]("tunable", 1.percent)
     val classifier: ResponseClassifier = {
-      case ReqRep(_ , Return(_)) => ResponseClass.Success
+      case ReqRep(_, Return(_)) => ResponseClass.Success
     }
     val retryBudget = RetryBudget.Infinite
     Time.withCurrentTimeFrozen { ctl =>

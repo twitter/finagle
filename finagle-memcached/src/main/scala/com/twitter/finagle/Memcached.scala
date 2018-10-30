@@ -3,21 +3,39 @@ package com.twitter.finagle
 import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
 import com.twitter.finagle.client._
-import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, SerialServerDispatcher, StalledPipelineTimeout}
-import com.twitter.finagle.pushsession.{PipeliningClientPushSession, PushChannelHandle, PushStackClient, PushTransporter}
+import com.twitter.finagle.dispatch.{
+  GenSerialClientDispatcher,
+  SerialServerDispatcher,
+  StalledPipelineTimeout
+}
+import com.twitter.finagle.pushsession.{
+  PipeliningClientPushSession,
+  PushChannelHandle,
+  PushStackClient,
+  PushTransporter
+}
 import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
 import com.twitter.finagle.loadbalancer.{Balancers, LoadBalancerFactory}
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.exp.LocalMemcached
 import com.twitter.finagle.memcached.partitioning.MemcachedPartitioningService
 import com.twitter.finagle.memcached.protocol.text.server.ServerTransport
-import com.twitter.finagle.memcached.protocol.text.transport.{MemcachedNetty4ClientPipelineInit, Netty4ServerFramer}
+import com.twitter.finagle.memcached.protocol.text.transport.{
+  MemcachedNetty4ClientPipelineInit,
+  Netty4ServerFramer
+}
 import com.twitter.finagle.memcached.protocol.{Command, Response, RetrievalCommand, Values}
 import com.twitter.finagle.memcached.Toggles
 import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.netty4.pushsession.Netty4PushTransporter
 import com.twitter.finagle.netty4.Netty4Listener
-import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
+import com.twitter.finagle.param.{
+  ExceptionStatsHandler => _,
+  Monitor => _,
+  ResponseClassifier => _,
+  Tracer => _,
+  _
+}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server.{Listener, ServerInfo, StackServer, StdStackServer}
 import com.twitter.finagle.service._
@@ -65,7 +83,7 @@ private[finagle] object MemcachedTracingFilter {
                 val misses = mutable.Set.empty[String]
                 command.keys.foreach {
                   case Buf.Utf8(key) =>
-                  misses += key
+                    misses += key
                 }
                 vals.foreach { value =>
                   val Buf.Utf8(key) = value.key
@@ -77,8 +95,8 @@ private[finagle] object MemcachedTracingFilter {
                 }
               case _ =>
             }
-            case _ =>
-              response
+          case _ =>
+            response
         }
       } else {
         response
@@ -253,12 +271,12 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
       s"${FixedInetResolver.scheme}!$hostName:$port"
 
     /*
-     * We are migrating the Memcached client to be push-based. To facilitate a gradual rollout,
-     * The PushClient and NonPushClient provide endpointer service factories (`enptr`) for the
-     * [[Memcached.Client]] to use. In the future, the client will be able to be toggled to use
-     * the push or non-push underlying client and its endpointer implementation. Currently,
-     * the client is hard-coded to use the non-push underlying client.
-     */
+   * We are migrating the Memcached client to be push-based. To facilitate a gradual rollout,
+   * The PushClient and NonPushClient provide endpointer service factories (`enptr`) for the
+   * [[Memcached.Client]] to use. In the future, the client will be able to be toggled to use
+   * the push or non-push underlying client and its endpointer implementation. Currently,
+   * the client is hard-coded to use the non-push underlying client.
+   */
 
   }
 
@@ -279,7 +297,8 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
   case class Client(
     stack: Stack[ServiceFactory[Command, Response]] = Client.stack,
     params: Stack.Params = Client.params
-  ) extends PushStackClient[Command, Response, Client] with MemcachedRichClient {
+  ) extends PushStackClient[Command, Response, Client]
+      with MemcachedRichClient {
 
     protected type In = Response
     protected type Out = Command
@@ -433,6 +452,10 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
 
     override def withStack(stack: Stack[ServiceFactory[Command, Response]]): Client =
       super.withStack(stack)
+    override def withStack(
+      fn: Stack[ServiceFactory[Command, Response]] => Stack[ServiceFactory[Command, Response]]
+    ): Client =
+      super.withStack(fn)
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
     override def filtered(filter: Filter[Command, Response, Command, Response]): Client =
       super.filtered(filter)

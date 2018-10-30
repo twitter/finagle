@@ -5,7 +5,13 @@ import com.twitter.finagle.decoder.LengthFieldFramer
 import com.twitter.finagle.mysql._
 import com.twitter.finagle.mysql.transport.Packet
 import com.twitter.finagle.netty4.Netty4Transporter
-import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
+import com.twitter.finagle.param.{
+  ExceptionStatsHandler => _,
+  Monitor => _,
+  ResponseClassifier => _,
+  Tracer => _,
+  _
+}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing._
@@ -254,12 +260,12 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
       configured(Handshake.Charset(charset))
 
     /**
-      * Don't set the CLIENT_FOUND_ROWS flag when establishing a new
-      * session. This will make "INSERT ... ON DUPLICATE KEY UPDATE"
-      * statements return the "correct" update count.
-      *
-      * See https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_row-count
-      */
+     * Don't set the CLIENT_FOUND_ROWS flag when establishing a new
+     * session. This will make "INSERT ... ON DUPLICATE KEY UPDATE"
+     * statements return the "correct" update count.
+     *
+     * See https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_row-count
+     */
     def withAffectedRows(): Client =
       configured(Handshake.FoundRows(false))
 
@@ -333,6 +339,10 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
 
     override def withStack(stack: Stack[ServiceFactory[Request, Result]]): Client =
       super.withStack(stack)
+    override def withStack(
+      fn: Stack[ServiceFactory[Request, Result]] => Stack[ServiceFactory[Request, Result]]
+    ): Client =
+      super.withStack(fn)
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
     override def filtered(filter: Filter[Request, Result, Request, Result]): Client =
       super.filtered(filter)

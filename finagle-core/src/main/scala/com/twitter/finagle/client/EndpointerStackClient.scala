@@ -17,7 +17,7 @@ import com.twitter.finagle.util.Showable
  *      clients.
  */
 trait EndpointerStackClient[Req, Rep, This <: EndpointerStackClient[Req, Rep, This]]
-  extends StackClient[Req, Rep]
+    extends StackClient[Req, Rep]
     with Stack.Parameterized[This]
     with CommonParams[This]
     with ClientParams[This]
@@ -38,13 +38,22 @@ trait EndpointerStackClient[Req, Rep, This <: EndpointerStackClient[Req, Rep, Th
   def withStack(stack: Stack[ServiceFactory[Req, Rep]]): This =
     copy1(stack = stack)
 
+  override def withStack(
+    fn: Stack[ServiceFactory[Req, Rep]] => Stack[ServiceFactory[Req, Rep]]
+  ): This =
+    withStack(fn(stack))
+
   /**
    * Creates a new StackClient with `f` applied to `stack`.
    *
-   * For expert users only.
+   * This is the same as [[withStack]].
    */
+  @deprecated(
+    "Use withStack(Stack[ServiceFactory[Req, Rep]] => Stack[ServiceFactory[Req, Rep]]) instead",
+    "2018-10-30"
+  )
   def transformed(f: Stack[ServiceFactory[Req, Rep]] => Stack[ServiceFactory[Req, Rep]]): This =
-    copy1(stack = f(stack))
+    withStack(f)
 
   /**
    * Creates a new StackClient with parameter `p`.

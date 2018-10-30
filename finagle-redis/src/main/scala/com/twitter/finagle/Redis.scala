@@ -116,6 +116,10 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
 
     override def withStack(stack: Stack[ServiceFactory[Command, Reply]]): Client =
       super.withStack(stack)
+    override def withStack(
+      fn: Stack[ServiceFactory[Command, Reply]] => Stack[ServiceFactory[Command, Reply]]
+    ): Client =
+      super.withStack(fn)
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
     override def filtered(filter: Filter[Command, Reply, Command, Reply]): Client =
       super.filtered(filter)

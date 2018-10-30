@@ -177,9 +177,10 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
           new Stack.NoOpModule(http.filter.StatsFilter.role, http.filter.StatsFilter.description)
         )
 
-    private def params: Stack.Params = StackClient.defaultParams +
-      protocolLibrary +
-      responseClassifierParam
+    private def params: Stack.Params =
+      StackClient.defaultParams +
+        protocolLibrary +
+        responseClassifierParam
   }
 
   case class Client(
@@ -361,6 +362,10 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
 
     override def withStack(stack: Stack[ServiceFactory[Request, Response]]): Client =
       super.withStack(stack)
+    override def withStack(
+      fn: Stack[ServiceFactory[Request, Response]] => Stack[ServiceFactory[Request, Response]]
+    ): Client =
+      super.withStack(fn)
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
     override def configuredParams(newParams: Stack.Params): Client =
       super.configuredParams(newParams)
@@ -375,8 +380,9 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
         if (params[Transport.ClientSsl].sslClientConfiguration == None) useH2CClients()
         else useH2()
       val explicitlyConfigured = params.contains[HttpImpl]
-      val client = if (!explicitlyConfigured && shouldHttp2) this.configuredParams(Http2)
-      else this
+      val client =
+        if (!explicitlyConfigured && shouldHttp2) this.configuredParams(Http2)
+        else this
       client.superNewClient(dest, label0)
     }
   }
@@ -595,18 +601,21 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
 
     protected def superServe(
       addr: SocketAddress,
-      factory: ServiceFactory[Request, Response]): ListeningServer = {
+      factory: ServiceFactory[Request, Response]
+    ): ListeningServer = {
       super.serve(addr, factory)
     }
     override def serve(
       addr: SocketAddress,
-      factory: ServiceFactory[Request, Response]): ListeningServer = {
+      factory: ServiceFactory[Request, Response]
+    ): ListeningServer = {
       val shouldHttp2 =
         if (params[Transport.ServerSsl].sslServerConfiguration == None) useH2CServers()
         else useH2()
       val explicitlyConfigured = params.contains[HttpImpl]
-      val server = if (!explicitlyConfigured && shouldHttp2) this.configuredParams(Http2)
-      else this
+      val server =
+        if (!explicitlyConfigured && shouldHttp2) this.configuredParams(Http2)
+        else this
       server.superServe(addr, factory)
     }
   }

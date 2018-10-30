@@ -148,12 +148,11 @@ abstract class AbstractStackClientTest
     val alwaysFailStack = new StackBuilder(stack.nilStack[String, String])
       .push(alwaysFail)
       .result
-    val stk = ctx.client.stack.concat(alwaysFailStack)
 
     def newClient(name: String, failFastOn: Option[Boolean]): Service[String, String] = {
       var stack = ctx.client
         .configured(param.Label(name))
-        .withStack(stk)
+        .withStack(_.concat(alwaysFailStack))
       failFastOn.foreach { ffOn =>
         stack = stack.configured(FailFast(ffOn))
       }
@@ -180,6 +179,25 @@ abstract class AbstractStackClientTest
     testClient("ff-client-default", None)
     testClient("ff-client-enabled", Some(true))
     testClient("ff-client-disabled", Some(false))
+  }
+
+  test("withStack (Function1)") {
+    val module = new Module0[ServiceFactory[String, String]] {
+      def make(next: ServiceFactory[String, String]): ServiceFactory[String, String] = ???
+      def role: Stack.Role = Stack.Role("no-op")
+      def description: String = "no-op"
+    }
+
+    val ctx = new Ctx {}
+    val init = ctx.client.stack
+    assert(!init.contains(module.role))
+
+    val modified = ctx.client.withStack(_.prepend(module)).stack
+    assert(modified.contains(module.role))
+
+    init.tails.map(_.head).foreach { stackHead =>
+      assert(modified.contains(stackHead.role))
+    }
   }
 
   test("FactoryToService close propagated to underlying service") {
@@ -312,13 +330,10 @@ abstract class AbstractStackClientTest
     val sr = new InMemoryStatsReceiver
     val client = baseClient.configured(param.Stats(sr))
 
-    val stk = client.stack.replace(
-      LoadBalancerFactory.role,
-      (_: ServiceFactory[String, String]) => stubLB
-    )
-
     val cl = client
-      .withStack(stk)
+      .withStack { stack =>
+        stack.replace(LoadBalancerFactory.role, (_: ServiceFactory[String, String]) => stubLB)
+      }
       .configured(param.Label("myclient"))
       .newClient("/$/inet/localhost/0")
 
@@ -656,7 +671,7 @@ abstract class AbstractStackClientTest
 
   test("exports transporter type to registry") {
     val listeningServer = StringServer.server
-      .serve(":*", Service.mk[String, String](Future.value(_)))
+      .serve(":*", Service.mk[String, String](Future.value))
     val boundAddress = listeningServer.boundAddress.asInstanceOf[InetSocketAddress]
 
     val label = "stringClient"
@@ -680,7 +695,7 @@ abstract class AbstractStackClientTest
 
   test("Sources exceptions") {
     val listeningServer = StringServer.server
-      .serve(":*", Service.mk[String, String](Future.value(_)))
+      .serve(":*", Service.mk[String, String](Future.value))
     val boundAddress = listeningServer.boundAddress.asInstanceOf[InetSocketAddress]
     val label = "stringClient"
 
@@ -691,12 +706,12 @@ abstract class AbstractStackClientTest
       def make(
         next: ServiceFactory[String, String]
       ): ServiceFactory[String, String] =
-        (new SimpleFilter[String, String] {
+        new SimpleFilter[String, String] {
           def apply(
             request: String,
             service: Service[String, String]
           ): Future[String] = Future.exception(new Failure("boom!"))
-        }).andThen(next)
+        }.andThen(next)
     }
 
     // Insert a module that throws near before [[ExceptionSourceFilter]].
@@ -704,7 +719,7 @@ abstract class AbstractStackClientTest
     // another module instead so that if the [[ExceptionSourceFilter]] were moved earlier in the
     // stack, this test would fail.
     val svc = baseClient
-      .withStack(baseClient.stack.insertBefore(ClearContextValueFilter.role, throwsModule))
+      .withStack(_.insertBefore(ClearContextValueFilter.role, throwsModule))
       .newService(Name.bound(Address(boundAddress)), label)
 
     val failure = intercept[Failure] {

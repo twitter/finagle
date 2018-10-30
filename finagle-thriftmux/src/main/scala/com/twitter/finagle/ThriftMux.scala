@@ -1,6 +1,11 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.client.{ClientRegistry, ExceptionRemoteInfoFactory, StackBasedClient, StackClient}
+import com.twitter.finagle.client.{
+  ClientRegistry,
+  ExceptionRemoteInfoFactory,
+  StackBasedClient,
+  StackClient
+}
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.context.RemoteInfo.Upstream
 import com.twitter.finagle.mux.OpportunisticTlsParams
@@ -96,28 +101,28 @@ import org.apache.thrift.TException
  * configuration documentation]].
  */
 object ThriftMux
-  extends Client[ThriftClientRequest, Array[Byte]]
+    extends Client[ThriftClientRequest, Array[Byte]]
     with Server[Array[Byte], Array[Byte]] {
 
   /**
    * Base [[com.twitter.finagle.Stack]] for ThriftMux clients.
    */
   val BaseClientStack: Stack[ServiceFactory[mux.Request, mux.Response]] =
-    (ThriftMuxUtil.protocolRecorder +: Mux.client.stack)
+    ThriftMuxUtil.protocolRecorder +: Mux.client.stack
 
   /**
    * Base [[com.twitter.finagle.Stack]] for ThriftMux servers.
    */
   val BaseServerStack: Stack[ServiceFactory[mux.Request, mux.Response]] =
-  // NOTE: ideally this would not use the `prepConn` role, but it's conveniently
-  // located in the right location of the stack and is defaulted to a no-op.
-  // We would like this located anywhere before the StatsFilter so that success
-  // and failure can be measured properly before converting the exceptions into
-  // byte arrays. see CSL-1351
+    // NOTE: ideally this would not use the `prepConn` role, but it's conveniently
+    // located in the right location of the stack and is defaulted to a no-op.
+    // We would like this located anywhere before the StatsFilter so that success
+    // and failure can be measured properly before converting the exceptions into
+    // byte arrays. see CSL-1351
     ThriftMuxUtil.protocolRecorder +:
       Mux.server.stack
-        .insertBefore(StackServer.Role.preparer, Server.ServerToReqRepPreparer)
-        .replace(StackServer.Role.preparer, Server.ExnHandler)
+      .insertBefore(StackServer.Role.preparer, Server.ServerToReqRepPreparer)
+      .replace(StackServer.Role.preparer, Server.ExnHandler)
 
   /**
    * Base [[com.twitter.finagle.Stack.Params]] for ThriftMux servers.
@@ -150,7 +155,7 @@ object ThriftMux
    * @see [[https://twitter.github.io/finagle/guide/Protocols.html#mux Mux]] documentation
    */
   case class Client(muxer: StackClient[mux.Request, mux.Response] = Client.pushMuxer)
-    extends StackBasedClient[ThriftClientRequest, Array[Byte]]
+      extends StackBasedClient[ThriftClientRequest, Array[Byte]]
       with Stack.Parameterized[Client]
       with Stack.Transformable[Client]
       with CommonParams[Client]
@@ -210,6 +215,13 @@ object ThriftMux
     def withStack(stack: Stack[ServiceFactory[mux.Request, mux.Response]]): Client =
       this.copy(muxer = muxer.withStack(stack))
 
+    def withStack(
+      fn: Stack[ServiceFactory[mux.Request, mux.Response]] => Stack[
+        ServiceFactory[mux.Request, mux.Response]
+      ]
+    ): Client =
+      withStack(fn(stack))
+
     /**
      * Prepends `filter` to the top of the client. That is, after materializing
      * the client (newClient/newService) `filter` will be the first element which
@@ -242,7 +254,7 @@ object ThriftMux
     private[this] def clientId: Option[ClientId] = params[Thrift.param.ClientId].clientId
 
     private[this] object ThriftMuxToMux
-      extends Filter[ThriftClientRequest, Array[Byte], mux.Request, mux.Response] {
+        extends Filter[ThriftClientRequest, Array[Byte], mux.Request, mux.Response] {
 
       private val extractResponseBytesFn = (response: mux.Response) => {
         val responseCtx = Contexts.local.getOrElse(Headers.Response.Key, EmptyResponseHeadersFn)
@@ -268,7 +280,8 @@ object ThriftMux
           ClientId.let(clientId) {
             val requestCtx = Contexts.local.getOrElse(Headers.Request.Key, EmptyRequestHeadersFn)
             // TODO set the Path here.
-            val muxRequest = mux.Request(Path.empty, requestCtx.values, Buf.ByteArray.Owned(req.message))
+            val muxRequest =
+              mux.Request(Path.empty, requestCtx.values, Buf.ByteArray.Owned(req.message))
             service(muxRequest).map(extractResponseBytesFn)
           }
         }
@@ -322,7 +335,7 @@ object ThriftMux
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
     override val withTransport: ClientTransportParams[Client] =
-    new ClientTransportParams(this)
+      new ClientTransportParams(this)
     override val withSession: ClientSessionParams[Client] =
       new ClientSessionParams(this)
     override val withLoadBalancer: DefaultLoadBalancingParams[Client] =
@@ -380,7 +393,8 @@ object ThriftMux
         .copy(
           stack = BaseServerStack,
           params = BaseServerParams,
-          sessionFactory = MuxDowngradingNegotiator.build(_, _, _, _))
+          sessionFactory = MuxDowngradingNegotiator.build(_, _, _, _)
+        )
     }
 
     private val MuxToArrayFilter =
@@ -388,7 +402,8 @@ object ThriftMux
         private[this] val responseBytesToMuxResponseFn = (responseBytes: Array[Byte]) => {
           mux.Response(
             ctxts = Contexts.local(Headers.Response.Key).values,
-            buf = Buf.ByteArray.Owned(responseBytes))
+            buf = Buf.ByteArray.Owned(responseBytes)
+          )
         }
 
         def apply(
@@ -397,8 +412,10 @@ object ThriftMux
         ): Future[mux.Response] = {
           val reqBytes = Buf.ByteArray.Owned.extract(request.body)
           Contexts.local.let(
-            Headers.Request.Key, Headers.Values(request.contexts),
-            Headers.Response.Key, Headers.Response.newValues
+            Headers.Request.Key,
+            Headers.Values(request.contexts),
+            Headers.Response.Key,
+            Headers.Response.newValues
           ) {
             service(reqBytes).map(responseBytesToMuxResponseFn)
           }
@@ -409,7 +426,7 @@ object ThriftMux
     // com.twitter.finagle.FailureFlags that are flagged in mux-compatible ways
     // to mux for transmission.
     private[this] class ExnFilter(protocolFactory: TProtocolFactory)
-      extends SimpleFilter[mux.Request, mux.Response] {
+        extends SimpleFilter[mux.Request, mux.Response] {
       def apply(
         request: mux.Request,
         service: Service[mux.Request, mux.Response]
@@ -471,7 +488,7 @@ object ThriftMux
    * @see [[https://twitter.github.io/finagle/guide/Protocols.html#mux Mux]] documentation
    */
   final case class Server(muxer: StackServer[mux.Request, mux.Response] = Server.defaultMuxer)
-    extends StackBasedServer[Array[Byte], Array[Byte]]
+      extends StackBasedServer[Array[Byte], Array[Byte]]
       with ThriftRichServer
       with Stack.Parameterized[Server]
       with CommonParams[Server]
@@ -581,7 +598,7 @@ object ThriftMux
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
     override val withTransport: ServerTransportParams[Server] =
-    new ServerTransportParams(this)
+      new ServerTransportParams(this)
     override val withSession: SessionParams[Server] =
       new SessionParams(this)
     override val withAdmissionControl: ServerAdmissionControlParams[Server] =
@@ -599,9 +616,10 @@ object ThriftMux
     override def configured[P](psp: (P, Stack.Param[P])): Server = super.configured(psp)
   }
 
-  def server: ThriftMux.Server = Server()
-    .configured(Label("thrift"))
-    .configured(Stats(ServerStatsReceiver))
+  def server: ThriftMux.Server =
+    Server()
+      .configured(Label("thrift"))
+      .configured(Stats(ServerStatsReceiver))
 
   def serve(
     addr: SocketAddress,

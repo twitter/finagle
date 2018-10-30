@@ -371,6 +371,12 @@ object Thrift
 
     override def withStack(stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]]): Client =
       super.withStack(stack)
+    override def withStack(
+      fn: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] => Stack[
+        ServiceFactory[ThriftClientRequest, Array[Byte]]
+      ]
+    ): Client =
+      super.withStack(fn)
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
     override def filtered(
       filter: Filter[ThriftClientRequest, Array[Byte], ThriftClientRequest, Array[Byte]]
