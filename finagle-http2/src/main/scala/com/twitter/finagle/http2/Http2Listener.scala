@@ -1,18 +1,18 @@
 package com.twitter.finagle.http2
 
 import com.twitter.concurrent.AsyncQueue
+import com.twitter.finagle.http2.transport.H2Filter
+import com.twitter.finagle.{Announcement, ListeningServer, Stack, http}
 import com.twitter.finagle.netty4.Netty4Listener
 import com.twitter.finagle.netty4.http.{HttpCodecName, initServer}
 import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.transport.{Transport, TransportContext}
-import com.twitter.finagle.{http, Stack, ListeningServer, Announcement}
 import com.twitter.util.Awaitable.CanAwait
-import com.twitter.util.{Future, Time, Duration}
-import io.netty.channel.group.DefaultChannelGroup
-import io.netty.channel.{ChannelInitializer, Channel, ChannelPipeline, ChannelHandler}
+import com.twitter.util.{Duration, Future, Time}
+import io.netty.channel.{Channel, ChannelHandler, ChannelInitializer, ChannelPipeline}
 import io.netty.handler.codec.http.HttpServerCodec
-import io.netty.handler.codec.http2.Http2ConnectionHandler
+import io.netty.channel.group.DefaultChannelGroup
 import io.netty.util.concurrent.GlobalEventExecutor
 import java.net.SocketAddress
 import scala.collection.JavaConverters._
@@ -35,29 +35,28 @@ private[finagle] object Http2Listener {
         )
       else new Http2CleartextServerInitializer(_: ChannelInitializer[Channel], params)
 
-    new Http2Listener(params, initializer)
+    new Http2Listener(params, initializer, mIn, mOut)
   }
 }
 
 private[http2] class Http2Listener[In, Out](
   params: Stack.Params,
-  setupMarshalling: ChannelInitializer[Channel] => ChannelHandler
-)(implicit mIn: Manifest[In], mOut: Manifest[Out])
-  extends Listener[In, Out, TransportContext] {
+  setupMarshalling: ChannelInitializer[Channel] => ChannelHandler,
+  implicit val mIn: Manifest[In],
+  implicit val mOut: Manifest[Out]
+) extends Listener[In, Out, TransportContext] {
 
   private[this] val channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE)
 
   private[this] def sourceCodec(params: Stack.Params) = {
     val maxInitialLineSize = params[http.param.MaxInitialLineSize].size
     val maxHeaderSize = params[http.param.MaxHeaderSize].size
+    val maxRequestSize = params[http.param.MaxRequestSize].size
 
-    // We unset the limit for maxChunkSize (8k by default) so Netty emits entire available
-    // payload as a single chunk instead of splitting it. This way we put the data into use
-    // quicker, as soon as it's available.
     new HttpServerCodec(
       maxInitialLineSize.inBytes.toInt,
       maxHeaderSize.inBytes.toInt,
-      Int.MaxValue /*maxChunkSize*/
+      maxRequestSize.inBytes.toInt
     )
   }
 
@@ -81,9 +80,12 @@ private[http2] class Http2Listener[In, Out](
     if (duration > 0) {
       channels.asScala.foreach { channel =>
         val pipeline = channel.pipeline
-        val handler = Option(pipeline.get(classOf[Http2ConnectionHandler]))
-        handler.foreach { handler =>
-          handler.gracefulShutdownTimeoutMillis(duration)
+        val handler = pipeline.get(classOf[H2Filter])
+        if (handler != null) {
+          // This is a HTTP/2 connection. Add the deadline to the `H2Filter` and
+          // we'll let it take care of the rest. Note that this races with upgrades
+          // but we can't win them all.
+          handler.setDeadline(deadline)
         }
       }
     }

@@ -4,7 +4,7 @@ import com.twitter.finagle.Stack
 import com.twitter.finagle.http.Fields
 import com.twitter.finagle.http2.transport.{H2Filter, H2StreamChannelInit, PriorKnowledgeHandler}
 import com.twitter.finagle.netty4.http.HttpCodecName
-import com.twitter.finagle.param.Stats
+import com.twitter.finagle.param.{Stats, Timer => TimerParam}
 import com.twitter.logging.Logger
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel._
@@ -43,7 +43,8 @@ final private[finagle] class Http2CleartextServerInitializer(
 
             // httpCompressor is the beginning of the h1 pipeline, so we make sure that no h2
             // messages reach it.
-            ctx.pipeline.addBefore("httpCompressor", H2Filter.HandlerName, H2Filter)
+            val timer = params[TimerParam].timer
+            ctx.pipeline.addBefore("httpCompressor", H2Filter.HandlerName, new H2Filter(timer))
           }
         }
       } else null

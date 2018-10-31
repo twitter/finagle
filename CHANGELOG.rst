@@ -33,6 +33,12 @@ Runtime Behavior Changes
   emit all available data as a single chunk so we can put it into use quicker.
   ``PHAB_ID=D233538``
 
+* finagle-http2: HTTP/2 servers perform a more graceful shutdown where an initial
+  GOAWAY is sent with the maximum possible stream id and waits for either the client
+  to hang up or for the close deadline, at which time a second GOAWAY is sent with
+  the true last processed stream and the connection is then closed.
+  ``PHAB_ID=D206683``
+
 Deprecations
 ~~~~~~~~~~~~
 
