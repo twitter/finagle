@@ -397,7 +397,7 @@ private class StdClient(
     isolationLevel: Option[IsolationLevel],
     f: Client => Future[T]
   ): Future[T] = {
-    session().flatMap { client =>
+    session { client =>
       val result = for {
         _ <- isolationLevel match {
           case Some(iso) => client.query(s"SET TRANSACTION ISOLATION LEVEL ${iso.name}")
@@ -416,22 +416,18 @@ private class StdClient(
       // is caught waiting for a new session.
       result.transform {
         case Return(r) =>
-          client.close()
           Future.value(r)
         case Throw(e @ WrappedChannelClosedException()) =>
           // We don't attempt a rollback in the event of a [[ChannelClosedException]]; the rollback
           // would simply fail with the same exception.
-          client.close()
           Future.exception(e)
         case Throw(e) =>
           // the rollback is `masked` in order to protect it from prior interrupts/raises.
           // this statement should run regardless.
           client.query(rollbackQuery).masked.transform {
             case Return(_) =>
-              client.close()
               Future.exception(e)
             case Throw(e @ WrappedChannelClosedException()) =>
-              client.close()
               Future.exception(e)
             case Throw(rollbackEx) =>
               log.info(rollbackEx, s"Rolled back due to $e. Failed during rollback, closing " +
@@ -441,7 +437,6 @@ private class StdClient(
               // the underlying connection. this is necessary due to the connection
               // pooling underneath. then, close the service.
               client.discard().transform { _ =>
-                client.close()
                 Future.exception(e)
               }
           }
