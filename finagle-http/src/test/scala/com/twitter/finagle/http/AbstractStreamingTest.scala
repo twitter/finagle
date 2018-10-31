@@ -153,11 +153,11 @@ abstract class AbstractStreamingTest extends FunSuite {
   })
 
   if (!sys.props.contains("SKIP_FLAKY_TRAVIS"))
-  test("client: discard respond reader")(new ClientCtx(singletonPool = true) {
-    assert(res2.poll == None)
-    res.reader.discard()
-    assertSecondRequestOk()
-  })
+    test("client: discard respond reader")(new ClientCtx(singletonPool = true) {
+      assert(res2.poll == None)
+      res.reader.discard()
+      assertSecondRequestOk()
+    })
 
   test("server: request stream fails read") {
     val buf = Buf.Utf8(".")
@@ -256,7 +256,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     Closable.all(server, client1, client2, closable).close()
   }
 
-    test("server: fail response writer") {
+  test("server: fail response writer") {
     val buf = Buf.Utf8(".")
     val n = new AtomicInteger(0)
     val failure = new Promise[Unit]
@@ -312,7 +312,7 @@ abstract class AbstractStreamingTest extends FunSuite {
           Future.value(ok(writer))
         case _ =>
           val writer = new Pipe[Buf]()
-          failure.ensure { writer.write(buf). ensure { writer.close() } }
+          failure.ensure { writer.write(buf).ensure { writer.close() } }
           Future.value(ok(writer))
       }
     }
@@ -425,8 +425,8 @@ abstract class AbstractStreamingTest extends FunSuite {
   ): Service[Request, Response] = {
     val poolSize = if (singletonPool) 1 else Int.MaxValue
     val modifiedImpl = impl.copy(transporter = modifiedTransporterFn(mod, impl.transporter))
-    configureClient(FinagleHttp.client)
-      .withSessionPool.maxSize(poolSize)
+    configureClient(FinagleHttp.client).withSessionPool
+      .maxSize(poolSize)
       .withStreaming(true)
       .configured(modifiedImpl)
       .newService(Name.bound(Address(addr.asInstanceOf[InetSocketAddress])), name)

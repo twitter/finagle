@@ -13,7 +13,7 @@ import scala.util.control.NonFatal
  * `TransportContext` for use with a Finagle Netty 3
  * `ChannelTransport`.
  */
-final class ChannelTransportContext private[transport](ch: Channel) extends TransportContext {
+final class ChannelTransportContext private[transport] (ch: Channel) extends TransportContext {
 
   def localAddress: SocketAddress = ch.getLocalAddress()
   def remoteAddress: SocketAddress = ch.getRemoteAddress()

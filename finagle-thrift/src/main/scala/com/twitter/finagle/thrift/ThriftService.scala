@@ -61,5 +61,7 @@ abstract class GeneratedThriftService {
    *
    * @throws IllegalArgumentException if an implementation is missing
    */
-  def unsafeBuildFromMethods(methods: Map[ThriftMethod, Service[Request[_], Response[_]]]): ReqRepServicePerEndpoint
+  def unsafeBuildFromMethods(
+    methods: Map[ThriftMethod, Service[Request[_], Response[_]]]
+  ): ReqRepServicePerEndpoint
 }

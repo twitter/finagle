@@ -15,6 +15,7 @@ object ProcessCoordinate {
    * An ADT which represents the process coordinate.
    */
   sealed trait Coord {
+
     /**
      * Returns a position between the range [0, 1.0) which represents this
      * process' offset on the shared coordinate space.

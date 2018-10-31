@@ -34,16 +34,21 @@ private[http2] abstract class Http2StreamMessageHandler private () extends Chann
   private[this] var resetErrorCode: Option[Long] = None
   private[this] var observedFirstHttpObject = false
 
-  protected def handleReset(ctx: ChannelHandlerContext, rst: Http2ResetFrame, observedFirstHttpObject: Boolean): Unit
+  protected def handleReset(
+    ctx: ChannelHandlerContext,
+    rst: Http2ResetFrame,
+    observedFirstHttpObject: Boolean
+  ): Unit
 
-  override def write(ctx: ChannelHandlerContext, msg: Object, p: ChannelPromise): Unit = resetErrorCode match {
-    case None =>
-      super.write(ctx, msg, p)
+  override def write(ctx: ChannelHandlerContext, msg: Object, p: ChannelPromise): Unit =
+    resetErrorCode match {
+      case None =>
+        super.write(ctx, msg, p)
 
-    case Some(code) =>
-      ReferenceCountUtil.release(msg)
-      p.tryFailure(new ClientDiscardedRequestException(code))
-  }
+      case Some(code) =>
+        ReferenceCountUtil.release(msg)
+        p.tryFailure(new ClientDiscardedRequestException(code))
+    }
 
   override def channelRead(ctx: ChannelHandlerContext, msg: Object): Unit = msg match {
     case update: Http2WindowUpdateFrame =>
@@ -102,7 +107,10 @@ private[http2] object Http2StreamMessageHandler {
     }
   }
 
-  private[this] def rstToException(rst: Http2ResetFrame, remoteAddress: Option[SocketAddress]): RstException = {
+  private[this] def rstToException(
+    rst: Http2ResetFrame,
+    remoteAddress: Option[SocketAddress]
+  ): RstException = {
     val rstCode = rst.errorCode
     val flags = if (rstCode == Http2Error.REFUSED_STREAM.code) {
       FailureFlags.Retryable | FailureFlags.Rejected

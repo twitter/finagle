@@ -457,7 +457,6 @@ class TimeoutFilterTest extends FunSuite with Matchers with MockitoSugar {
       new TimeoutFilter[String, Boolean](() => timeout, exceptionFn, timer, true)
     val propagationEnabledService = propagationEnabledFilter.andThen(service)
 
-
     assert(Await.result(propagationEnabledService("bar")) == true)
   }
 }

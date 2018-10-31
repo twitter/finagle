@@ -4,7 +4,12 @@ import com.twitter.conversions.storage._
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Service, SimpleFilter, Thrift}
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.stats.{BlacklistStatsReceiver, ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{
+  BlacklistStatsReceiver,
+  ClientStatsReceiver,
+  NullStatsReceiver,
+  StatsReceiver
+}
 import com.twitter.finagle.thrift.Protocols
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.DefaultTimer
@@ -191,7 +196,7 @@ private[thrift] class ScribeRawZipkinTracer(
 
     override def reset(): Unit = synchronized {
       if (buf.length > maxSize) {
-         buf = new Array[Byte](maxSize)
+        buf = new Array[Byte](maxSize)
       }
       super.reset()
     }

@@ -1,10 +1,14 @@
 package com.twitter.finagle.netty4.ssl.client
 
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.netty4.ssl.{Alpn,Netty4SslHandler}
+import com.twitter.finagle.netty4.ssl.{Alpn, Netty4SslHandler}
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.ssl.{ApplicationProtocols, Engine}
-import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientEngineFactory, SslClientSessionVerifier}
+import com.twitter.finagle.ssl.client.{
+  SslClientConfiguration,
+  SslClientEngineFactory,
+  SslClientSessionVerifier
+}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Address, Stack}
 import com.twitter.util.Try
@@ -13,6 +17,7 @@ import io.netty.handler.ssl.SslHandler
 import io.netty.util.concurrent.{GenericFutureListener, Future => NettyFuture}
 
 private[finagle] object Netty4ClientSslChannelInitializer {
+
   /**
    * A class eligible for configuring a callback that is triggered when the ssl
    * handshake is complete. Note, this is intended for internal use only.

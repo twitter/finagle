@@ -4,6 +4,7 @@ import com.twitter.finagle.util.Rng
 import scala.collection.mutable.ListBuffer
 
 private object Ring {
+
   /**
    * Returns the length of the intersection between the two ranges.
    *

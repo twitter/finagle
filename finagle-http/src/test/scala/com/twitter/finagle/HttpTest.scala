@@ -115,7 +115,9 @@ class HttpTest extends FunSuite with Eventually {
       assert(clientReceiver.counters(Seq("stats_test_client", "http", "status", "4XX")) == 1)
       assert(clientReceiver.stats(Seq("stats_test_client", "http", "response_size")) == Seq(5.0))
       assert(
-        clientReceiver.gauges.contains(Seq("stats_test_client", "dispatcher", "serial", "queue_size"))
+        clientReceiver.gauges.contains(
+          Seq("stats_test_client", "dispatcher", "serial", "queue_size")
+        )
       )
     }
   }

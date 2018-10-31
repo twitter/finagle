@@ -70,7 +70,8 @@ object SslClientEngineFactory {
     config: SslClientConfiguration
   ): Engine = {
     val sslEngine = address match {
-      case Address.Inet(isa, _) => sslContext.createSSLEngine(getHostString(isa, config), isa.getPort)
+      case Address.Inet(isa, _) =>
+        sslContext.createSSLEngine(getHostString(isa, config), isa.getPort)
       case _ => sslContext.createSSLEngine()
     }
     new Engine(sslEngine)

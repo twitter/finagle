@@ -100,8 +100,7 @@ private final class ConnectionBuilder(
         } else if (!channelF.channel.isOpen) {
           // Somehow the channel ended up closed before we got here, likely as
           // a result of `init` `ChannelInitializer` behavior.
-          transportP.setException(
-            Failure.rejected("Netty4 Channel was found in a closed state"))
+          transportP.setException(Failure.rejected("Netty4 Channel was found in a closed state"))
         } else {
           connectLatencyStat.add(latency)
           val ch = channelF.channel

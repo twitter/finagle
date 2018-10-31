@@ -15,39 +15,44 @@ private[http2] object H2StreamChannelInit {
   def initClient(params: Stack.Params): ChannelInitializer[Channel] =
     new H2Initializer(None, params, isServer = false)
 
-  def initServer(init: ChannelInitializer[Channel], params: Stack.Params): ChannelInitializer[Channel] =
+  def initServer(
+    init: ChannelInitializer[Channel],
+    params: Stack.Params
+  ): ChannelInitializer[Channel] =
     new H2Initializer(Some(init), params, isServer = true)
 
   private final class H2Initializer(
-      init: Option[ChannelInitializer[Channel]],
-      params: Stack.Params,
-      isServer: Boolean)
-    extends ChannelInitializer[Channel] {
-      def initChannel(ch: Channel): Unit = {
-        val alloc = params[Allocator].allocator
-        ch.config.setAllocator(alloc)
-        if (isServer) {
-          ch.pipeline.addLast(new Http2NackHandler)
-        }
+    init: Option[ChannelInitializer[Channel]],
+    params: Stack.Params,
+    isServer: Boolean
+  ) extends ChannelInitializer[Channel] {
+    def initChannel(ch: Channel): Unit = {
+      val alloc = params[Allocator].allocator
+      ch.config.setAllocator(alloc)
+      if (isServer) {
+        ch.pipeline.addLast(new Http2NackHandler)
+      }
 
-        ch.pipeline.addLast(new Http2StreamFrameToHttpObjectCodec(
+      ch.pipeline.addLast(
+        new Http2StreamFrameToHttpObjectCodec(
           isServer,
           false /* validateHeaders */
-        ))
-        ch.pipeline.addLast(StripHeadersHandler.HandlerName, StripHeadersHandler)
-        ch.pipeline.addLast(Http2StreamMessageHandler(isServer = isServer))
+        )
+      )
+      ch.pipeline.addLast(StripHeadersHandler.HandlerName, StripHeadersHandler)
+      ch.pipeline.addLast(Http2StreamMessageHandler(isServer = isServer))
 
-        if (isServer) {
-          http.initServer(params)(ch.pipeline)
-        } else {
-          http.initClient(params)(ch.pipeline)
-          ch.pipeline.addLast("event-mapper", Http2ClientEventMapper)
-        }
+      if (isServer) {
+        http.initServer(params)(ch.pipeline)
+      } else {
+        http.initClient(params)(ch.pipeline)
+        ch.pipeline.addLast("event-mapper", Http2ClientEventMapper)
+      }
 
-        init match {
-          case Some(init) => ch.pipeline.addLast(init)
-          case None => () // nop
-        }
+      init match {
+        case Some(init) => ch.pipeline.addLast(init)
+        case None => () // nop
       }
     }
+  }
 }

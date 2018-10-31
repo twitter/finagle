@@ -6,8 +6,10 @@ import com.twitter.logging.Level
 import org.scalatest.FunSuite
 
 class ReqRepFilterTest extends FunSuite {
-  test("Hydrate a mux failure from a message with encoded error codes, so that it preserves the" +
-    " flags and uses the right log level") {
+  test(
+    "Hydrate a mux failure from a message with encoded error codes, so that it preserves the" +
+      " flags and uses the right log level"
+  ) {
     val muxFailure = new MuxFailure(MuxFailure.NonRetryable | MuxFailure.Rejected)
     val contexts = muxFailure.contexts
     val msg = Message.RdispatchNack(1 /* tag */, contexts)

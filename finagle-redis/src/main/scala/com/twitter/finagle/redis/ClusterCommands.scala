@@ -27,7 +27,7 @@ private[redis] trait ClusterCommands { self: BaseClient with BasicServerCommands
       }
     }
 
-    readAll(Map(), ByteReader(buf)) 
+    readAll(Map(), ByteReader(buf))
   }
 
   private def toInt(entry: Reply): Int = entry match {
@@ -44,20 +44,15 @@ private[redis] trait ClusterCommands { self: BaseClient with BasicServerCommands
       throw new ClusterDecodeError(s"Could not extract a String from $msg")
   }
 
-
   private def toNode(entry: Reply): ClusterNode = entry match {
     // early versions only had name and port, new versions include an id
     case MBulkReply(name :: port :: opts) =>
-      ClusterNode(
-        host = toString(name),
-        port = toInt(port),
-        id = opts.headOption.map(toString))
+      ClusterNode(host = toString(name), port = toInt(port), id = opts.headOption.map(toString))
 
     case _ =>
       val msg = ReplyFormat.toString(List(entry))
       throw new ClusterDecodeError(s"Could not extract a Cluster Node from $msg")
   }
-
 
   private def toSlots(entries: List[Reply]): Seq[Slots] =
     entries.map {
@@ -66,7 +61,8 @@ private[redis] trait ClusterCommands { self: BaseClient with BasicServerCommands
           start = toInt(start),
           end = toInt(end),
           master = toNode(master),
-          replicas = replicas.map(toNode))
+          replicas = replicas.map(toNode)
+        )
 
       case _ =>
         val msg = ReplyFormat.toString(entries)
@@ -84,7 +80,12 @@ private[redis] trait ClusterCommands { self: BaseClient with BasicServerCommands
               val Array(host, portClusterPort) = hostPort.split(":")
               // support for 4.0 which has a different format: <host>:<port>@<cluster bus port>
               val port = portClusterPort.split("@").head
-              acc :+ ClusterNode(host, port.toInt, id = Some(nodeId), flags = flags.split(",").toSeq)
+              acc :+ ClusterNode(
+                host,
+                port.toInt,
+                id = Some(nodeId),
+                flags = flags.split(",").toSeq
+              )
             case _ => acc
           }
 

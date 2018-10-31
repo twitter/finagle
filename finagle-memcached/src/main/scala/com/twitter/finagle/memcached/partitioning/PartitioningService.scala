@@ -51,7 +51,10 @@ private[finagle] abstract class PartitioningService[Req, Rep] extends Service[Re
    */
   protected def mergeResponses(successes: Seq[Rep], failures: Map[Req, Throwable]): Rep
 
-  protected[this] def applyService(request: Req, service: Future[Service[Req, Rep]]): Future[Rep] = {
+  protected[this] def applyService(
+    request: Req,
+    service: Future[Service[Req, Rep]]
+  ): Future[Rep] = {
     service.transform {
       case Return(svc) => svc(request)
       case t @ Throw(_) => Future.const(t.cast[Rep])
@@ -84,16 +87,18 @@ private[finagle] abstract class PartitioningService[Req, Rep] extends Service[Re
       // single partition request (all keys belong to the same partition)
       applyService(request, getPartitionFor(request))
     } else {
-      Future.collect(
-        partitionRequest(request).map { case (pReq, service) =>
-          partitionRequestFn((pReq, service)).transform {
-            case Return(response) =>
-              Future.value(Right(response))
-            case Throw(exc) =>
-              Future.value(Left((pReq, exc)))
+      Future
+        .collect(
+          partitionRequest(request).map {
+            case (pReq, service) =>
+              partitionRequestFn((pReq, service)).transform {
+                case Return(response) =>
+                  Future.value(Right(response))
+                case Throw(exc) =>
+                  Future.value(Left((pReq, exc)))
+              }
           }
-        }
-      ).map(mergeResponsesFn)
+        ).map(mergeResponsesFn)
     }
   }
 }

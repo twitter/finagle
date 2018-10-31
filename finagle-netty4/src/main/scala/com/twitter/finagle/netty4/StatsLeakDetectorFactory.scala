@@ -7,9 +7,9 @@ import io.netty.util.{ResourceLeakDetector, ResourceLeakDetectorFactory}
  * `ResourceLeakDetectorFactory` which calls `leakFn` on each resource leak.
  */
 private[netty4] final class StatsLeakDetectorFactory(
-    underlying: ResourceLeakDetectorFactory,
-    leakFn: () => Unit
-  ) extends ResourceLeakDetectorFactory {
+  underlying: ResourceLeakDetectorFactory,
+  leakFn: () => Unit
+) extends ResourceLeakDetectorFactory {
 
   def newResourceLeakDetector[T](
     resource: Class[T],

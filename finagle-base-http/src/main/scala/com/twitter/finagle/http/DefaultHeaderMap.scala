@@ -91,15 +91,15 @@ private object DefaultHeaderMap {
       val c = s.charAt(i)
 
       if (c > 127) {
-        throw new IllegalArgumentException(
-          "Header name cannot contain non-ASCII characters: " + c)
+        throw new IllegalArgumentException("Header name cannot contain non-ASCII characters: " + c)
       }
 
       (c: @switch) match {
         case '\t' | '\n' | 0x0b | '\f' | '\r' | ' ' | ',' | ':' | ';' | '=' =>
           throw new IllegalArgumentException(
             "Header name cannot contain the following prohibited characters: " +
-              "=,;: \\t\\r\\n\\v\\f ")
+              "=,;: \\t\\r\\n\\v\\f "
+          )
         case _ =>
       }
 
@@ -124,10 +124,12 @@ private object DefaultHeaderMap {
       (c: @switch) match {
         case 0x0b =>
           throw new IllegalArgumentException(
-            "Header value contains a prohibited character '\\v': " + s)
+            "Header value contains a prohibited character '\\v': " + s
+          )
         case '\f' =>
           throw new IllegalArgumentException(
-            "Header value contains a prohibited character '\\f': " + s)
+            "Header value contains a prohibited character '\\f': " + s
+          )
         case _ =>
       }
 
@@ -140,7 +142,8 @@ private object DefaultHeaderMap {
           else throw new IllegalArgumentException("Only '\\n' is allowed after '\\r': " + s)
         case 2 =>
           if (c == '\t' || c == ' ') state = 0
-          else throw new IllegalArgumentException("Only ' ' and '\\t' are allowed after '\\n': " + s)
+          else
+            throw new IllegalArgumentException("Only ' ' and '\\t' are allowed after '\\n': " + s)
       }
 
       i += 1

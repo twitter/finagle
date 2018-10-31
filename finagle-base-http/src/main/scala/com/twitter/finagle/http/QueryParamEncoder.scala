@@ -34,7 +34,6 @@ private object QueryParamEncoder {
           }
         }
 
-
         loop() // We know that there is at least one element in the iterator
         replacePluses(sb.mkString)
       }
@@ -49,7 +48,6 @@ private object QueryParamEncoder {
     val encoded = URLEncoder.encode(s, charsetName)
     sb.append(encoded)
   }
-
 
   private[this] def replacePluses(s: String): String = {
     // TODO: we can do better than a regex

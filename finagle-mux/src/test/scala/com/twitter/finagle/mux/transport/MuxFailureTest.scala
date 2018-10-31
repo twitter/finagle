@@ -26,14 +26,22 @@ class MuxFailureTest extends FunSuite {
     flagTests.foreach {
       case (finagle, mux) =>
         assert(MuxFailure(mux).finagleFlags == finagle)
-        assert(MuxFailure.FromThrow.applyOrElse(
-          Failure(":(", finagle),
-          { _: Throwable => MuxFailure.Empty }
-        ).flags == mux)
-        assert(MuxFailure.FromThrow.applyOrElse(
-          new FlaggedClass(finagle),
-          { _: Throwable => MuxFailure.Empty }
-        ).flags == mux)
+        assert(
+          MuxFailure.FromThrow
+            .applyOrElse(
+              Failure(":(", finagle), { _: Throwable =>
+                MuxFailure.Empty
+              }
+            ).flags == mux
+        )
+        assert(
+          MuxFailure.FromThrow
+            .applyOrElse(
+              new FlaggedClass(finagle), { _: Throwable =>
+                MuxFailure.Empty
+              }
+            ).flags == mux
+        )
     }
   }
 

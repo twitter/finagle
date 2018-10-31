@@ -46,7 +46,8 @@ class ContextAmplificationTest extends FunSuite with OneInstancePerTest {
     val proxyClient: TestService[Future] = {
       val underlying = clientImpl.servicePerEndpoint[TestService.ServicePerEndpoint](
         Name.bound(Address(originServer.boundAddress.asInstanceOf[InetSocketAddress])),
-        "ProxyClient")
+        "ProxyClient"
+      )
       // This sets up the auto-forwarding of request headers
       ThriftMux.Client.methodPerEndpoint(underlying)
     }
@@ -55,15 +56,17 @@ class ContextAmplificationTest extends FunSuite with OneInstancePerTest {
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new TestService.ReqRepServicePerEndpoint {
 
-        def query: Service[Request[Query.Args], Response[String]] = Service.mk { req: Request[Query.Args] =>
-          val requestHeaders = req.headers.toBufSeq.length
-          proxyClient.query("").map { result =>
-            val transmittedHeaders = result.toInt
-            if (transmittedHeaders == requestHeaders) Response("success")
-            else Response(s"Unexpected number of headers transmitted: $transmittedHeaders")
-          }
+        def query: Service[Request[Query.Args], Response[String]] = Service.mk {
+          req: Request[Query.Args] =>
+            val requestHeaders = req.headers.toBufSeq.length
+            proxyClient.query("").map { result =>
+              val transmittedHeaders = result.toInt
+              if (transmittedHeaders == requestHeaders) Response("success")
+              else Response(s"Unexpected number of headers transmitted: $transmittedHeaders")
+            }
         }
-      }.toThriftService)
+      }.toThriftService
+    )
   }
 
   test("contexts/headers are not amplified between hops") {

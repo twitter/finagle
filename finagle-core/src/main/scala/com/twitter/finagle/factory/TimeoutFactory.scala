@@ -4,6 +4,7 @@ import com.twitter.finagle._
 import com.twitter.util.{Future, Duration, Timer}
 
 object TimeoutFactory {
+
   /**
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
    * [[com.twitter.finagle.factory.TimeoutFactory]].

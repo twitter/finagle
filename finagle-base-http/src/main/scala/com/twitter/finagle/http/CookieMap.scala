@@ -37,7 +37,7 @@ private[finagle] object CookieMap {
  * cookie is removed from the CookieMap, a header is automatically removed from
  * the ''message''
  */
-class CookieMap private[finagle](message: Message, cookieCodec: CookieCodec)
+class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
     extends mutable.Map[String, Cookie]
     with mutable.MapLike[String, Cookie, CookieMap] {
 
@@ -84,10 +84,9 @@ class CookieMap private[finagle](message: Message, cookieCodec: CookieCodec)
     } else {
       foreach {
         case (_, cookie) => {
-          message.headerMap.add(cookieHeaderName,
-            cookieCodec.encodeServer(cookie))
+          message.headerMap.add(cookieHeaderName, cookieCodec.encodeServer(cookie))
           if (!message.headerMap.toString.contains("SameSite")
-              && cookie.sameSite != SameSite.Unset) {
+            && cookie.sameSite != SameSite.Unset) {
             CookieMap.silentlyDroppedSameSitesCounter.incr()
           }
         }
@@ -203,8 +202,8 @@ class CookieMap private[finagle](message: Message, cookieCodec: CookieCodec)
     // Checks whether the SameSite attribute is set in the response but the
     // codec is disabled. This is undesirable behavior so we wish to report it.
     if (!CookieMap.includeSameSite
-        && message.isResponse
-        && cookieHeader.contains("SameSite")) {
+      && message.isResponse
+      && cookieHeader.contains("SameSite")) {
       CookieMap.flaglessSameSitesCounter.incr()
     }
     add(cookie)

@@ -37,27 +37,31 @@ object WindowedPercentileHistogram {
  * be full before being counted in `percentile`.
  */
 class WindowedPercentileHistogram(
-    numBuckets: Int,
-    bucketSize: Duration,
-    lowestDiscernibleValue: Int,
-    val highestTrackableValue: Int,
-    timer: Timer)
-  extends Closable {
+  numBuckets: Int,
+  bucketSize: Duration,
+  lowestDiscernibleValue: Int,
+  val highestTrackableValue: Int,
+  timer: Timer
+) extends Closable {
   import WindowedPercentileHistogram._
 
-  def this(numBuckets: Int, bucketSize: Duration, timer: Timer) = this(
-    numBuckets,
-    bucketSize,
-    WindowedPercentileHistogram.DefaultLowestDiscernibleValue,
-    WindowedPercentileHistogram.DefaultHighestTrackableValue,
-    timer)
+  def this(numBuckets: Int, bucketSize: Duration, timer: Timer) =
+    this(
+      numBuckets,
+      bucketSize,
+      WindowedPercentileHistogram.DefaultLowestDiscernibleValue,
+      WindowedPercentileHistogram.DefaultHighestTrackableValue,
+      timer
+    )
 
-  def this(timer: Timer) = this(
-    WindowedPercentileHistogram.DefaultNumBuckets,
-    WindowedPercentileHistogram.DefaultBucketSize,
-    WindowedPercentileHistogram.DefaultLowestDiscernibleValue,
-    WindowedPercentileHistogram.DefaultHighestTrackableValue,
-    timer)
+  def this(timer: Timer) =
+    this(
+      WindowedPercentileHistogram.DefaultNumBuckets,
+      WindowedPercentileHistogram.DefaultBucketSize,
+      WindowedPercentileHistogram.DefaultLowestDiscernibleValue,
+      WindowedPercentileHistogram.DefaultHighestTrackableValue,
+      timer
+    )
 
   // Provides stable interval Histogram samples from recorded values without
   // stalling recording. `recordValue` can be called concurrently.
@@ -79,7 +83,9 @@ class WindowedPercentileHistogram(
   // exposed for testing.
   private[util] def flushCurrentBucket(): Unit = synchronized {
     histograms(pos) = recorder.getIntervalHistogram(histograms(pos))
-    currentSnapshot = histograms.fold(newEmptyHistogram(lowestDiscernibleValue, highestTrackableValue))(addHistograms)
+    currentSnapshot = histograms.fold(
+      newEmptyHistogram(lowestDiscernibleValue, highestTrackableValue)
+    )(addHistograms)
     pos = (pos + 1) % numBuckets
   }
 
@@ -119,7 +125,7 @@ class WindowedPercentileHistogram(
  * Just for testing.  Stores only the last added value
  */
 private[finagle] class MockWindowedPercentileHistogram(timer: MockTimer)
-  extends WindowedPercentileHistogram(0, Duration.Top, 1, 2000, timer) {
+    extends WindowedPercentileHistogram(0, Duration.Top, 1, 2000, timer) {
 
   def this() = this(new MockTimer())
 

@@ -19,9 +19,10 @@ private object TrafficDistributor {
    * operates over, capable of being updated.
    */
   type BalancerEndpoints[Req, Rep] =
-    Var[Activity.State[Set[EndpointFactory[Req, Rep]]]] with Updatable[
-      Activity.State[Set[EndpointFactory[Req, Rep]]]
-    ]
+    Var[Activity.State[Set[EndpointFactory[Req, Rep]]]]
+      with Updatable[
+        Activity.State[Set[EndpointFactory[Req, Rep]]]
+      ]
 
   /**
    * Represents cache entries for load balancer instances. Stores both
@@ -263,9 +264,14 @@ private class TrafficDistributor[Req, Rep](
   private[this] def updateGauges(classes: Iterable[WeightClass[Req, Rep]]): Unit = {
     numWeightClasses = classes.size.toFloat
     val numEndpoints = classes.map(_.size).sum
-    meanWeight = if (numEndpoints == 0) 0.0F else {
-      classes.map { c => c.weight * c.size }.sum.toFloat / numEndpoints
-    }
+    meanWeight =
+      if (numEndpoints == 0) 0.0F
+      else {
+        classes
+          .map { c =>
+            c.weight * c.size
+          }.sum.toFloat / numEndpoints
+      }
   }
 
   // Translate the stream of weightClasses into a stream of underlying

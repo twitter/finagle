@@ -33,7 +33,12 @@ class SslServerVerificationHandlerTest extends FunSuite with MockitoSugar with O
   test("handler removes itself on successful verification") {
     val pipeline = channel.pipeline
     pipeline.addFirst(
-      new SslServerVerificationHandler(sslHandler, Address.failing, sslConfig, new TestVerifier(true))
+      new SslServerVerificationHandler(
+        sslHandler,
+        Address.failing,
+        sslConfig,
+        new TestVerifier(true)
+      )
     )
 
     val before = pipeline.get(classOf[SslServerVerificationHandler])
@@ -53,7 +58,12 @@ class SslServerVerificationHandlerTest extends FunSuite with MockitoSugar with O
   test("closes channel when verification fails") {
     val pipeline = channel.pipeline
     pipeline.addFirst(
-      new SslServerVerificationHandler(sslHandler, Address.failing, sslConfig, new TestVerifier(false))
+      new SslServerVerificationHandler(
+        sslHandler,
+        Address.failing,
+        sslConfig,
+        new TestVerifier(false)
+      )
     )
 
     pipeline.fireChannelActive()
@@ -86,7 +96,12 @@ class SslServerVerificationHandlerTest extends FunSuite with MockitoSugar with O
   test("closes channel when verification fails without channel active") {
     val pipeline = channel.pipeline
     pipeline.addFirst(
-      new SslServerVerificationHandler(sslHandler, Address.failing, sslConfig, new TestVerifier(false))
+      new SslServerVerificationHandler(
+        sslHandler,
+        Address.failing,
+        sslConfig,
+        new TestVerifier(false)
+      )
     )
 
     handshakePromise.setSuccess(channel)

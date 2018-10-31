@@ -11,7 +11,10 @@ import org.scalacheck.Gen
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
-class Http2StreamMessageHandlerTest extends FunSuite with MockitoSugar with GeneratorDrivenPropertyChecks {
+class Http2StreamMessageHandlerTest
+    extends FunSuite
+    with MockitoSugar
+    with GeneratorDrivenPropertyChecks {
   test("doesn't leak message written post-RST") {
     forAll { isServer: Boolean =>
       val em = new EmbeddedChannel(Http2StreamMessageHandler(isServer))
@@ -21,12 +24,13 @@ class Http2StreamMessageHandlerTest extends FunSuite with MockitoSugar with Gene
       rstFrame.stream(stream)
 
       if (isServer) em.writeInbound(rstFrame)
-      else intercept[RstException] {
-        // The client propagates an exception forward to close the pipeline
-        // and the EmbeddedChannel surfaces that by throwing an exception
-        // from the writeInbound call.
-        em.writeInbound(rstFrame)
-      }
+      else
+        intercept[RstException] {
+          // The client propagates an exception forward to close the pipeline
+          // and the EmbeddedChannel surfaces that by throwing an exception
+          // from the writeInbound call.
+          em.writeInbound(rstFrame)
+        }
 
       val msg = io.netty.buffer.Unpooled.buffer(10)
 
@@ -56,16 +60,17 @@ class Http2StreamMessageHandlerTest extends FunSuite with MockitoSugar with Gene
       badFrame <- Gen.oneOf(badFrames)
     } yield isServer -> badFrame
 
-    forAll(gen) { case (isServer, badFrame) =>
-      val em = new EmbeddedChannel(Http2StreamMessageHandler(isServer))
-      intercept[IllegalArgumentException] {
-        em.writeInbound(badFrame)
-      }
+    forAll(gen) {
+      case (isServer, badFrame) =>
+        val em = new EmbeddedChannel(Http2StreamMessageHandler(isServer))
+        intercept[IllegalArgumentException] {
+          em.writeInbound(badFrame)
+        }
 
-      badFrame match {
-        case r: ReferenceCounted => assert(r.refCnt == 0)
-        case _ => ()
-      }
+        badFrame match {
+          case r: ReferenceCounted => assert(r.refCnt == 0)
+          case _ => ()
+        }
     }
   }
 }

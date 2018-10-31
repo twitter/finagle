@@ -17,7 +17,10 @@ import org.scalatest.FunSuite
 class AdapterProxyChannelHandlerTest extends FunSuite {
   def moon = Unpooled.copiedBuffer("goodnight moon", StandardCharsets.UTF_8)
   def stars = Unpooled.copiedBuffer("goodnight stars", StandardCharsets.UTF_8)
-  def chunk() = Unpooled.wrappedBuffer("ref-counting on the jvm is a great idea".getBytes(StandardCharsets.UTF_8))
+  def chunk() =
+    Unpooled.wrappedBuffer(
+      "ref-counting on the jvm is a great idea".getBytes(StandardCharsets.UTF_8)
+    )
   def fullRequest = new DefaultFullHttpRequest(
     HttpVersion.HTTP_1_1,
     HttpMethod.GET,
@@ -122,8 +125,12 @@ class AdapterProxyChannelHandlerTest extends FunSuite {
     assert(validateObject(channel.readOutbound[Message](), 3, true, Some(moon)))
 
     // both streams see inbound responses + data
-    channel.writeInbound(Message(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK), 3))
-    channel.writeInbound(Message(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK), 5))
+    channel.writeInbound(
+      Message(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK), 3)
+    )
+    channel.writeInbound(
+      Message(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK), 5)
+    )
     channel.writeInbound(Message(new DefaultHttpContent(content3), 3))
     channel.writeInbound(Message(new DefaultHttpContent(content5), 5))
 
@@ -228,7 +235,10 @@ class AdapterProxyChannelHandlerTest extends FunSuite {
     val content = chunk()
     assert(content.refCnt() == 1)
     // reading registers a new stream with a partially aggregated payload
-    channel.pipeline().fireChannelRead(Message(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK), 3))
+    channel
+      .pipeline().fireChannelRead(
+        Message(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK), 3)
+      )
     channel.pipeline().fireChannelRead(Message(new DefaultHttpContent(content), 3))
 
     // session dies
@@ -243,7 +253,9 @@ class AdapterProxyChannelHandlerTest extends FunSuite {
     channel.pipeline.addLast(handler)
 
     val req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "twitter.com")
-    val repChunk = Unpooled.wrappedBuffer("ref-counting on the jvm is a great idea".getBytes(StandardCharsets.UTF_8))
+    val repChunk = Unpooled.wrappedBuffer(
+      "ref-counting on the jvm is a great idea".getBytes(StandardCharsets.UTF_8)
+    )
     assert(repChunk.refCnt() == 1)
     val rep = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
     val last = new DefaultLastHttpContent()
@@ -270,19 +282,27 @@ class AdapterProxyChannelHandlerTest extends FunSuite {
     val channelsGauge = stats.gauges(Seq("channels"))
     assert(channelsGauge() == 0.0)
 
-    channel.writeOutbound(Message(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "twitter.com"), 3))
+    channel.writeOutbound(
+      Message(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "twitter.com"), 3)
+    )
     channel.writeOutbound(Message(new DefaultLastHttpContent(), 3))
     assert(channelsGauge() == 1.0)
 
-    channel.writeOutbound(Message(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "twitter.com"), 5))
+    channel.writeOutbound(
+      Message(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "twitter.com"), 5)
+    )
     assert(channelsGauge() == 2.0)
 
     channel.writeOutbound(Message(new DefaultLastHttpContent(), 5))
-    channel.writeInbound(Message(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK), 3))
+    channel.writeInbound(
+      Message(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK), 3)
+    )
     channel.writeInbound(Message(new DefaultLastHttpContent(), 3))
     assert(channelsGauge() == 1.0)
 
-    channel.writeInbound(Message(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK), 5))
+    channel.writeInbound(
+      Message(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK), 5)
+    )
     channel.writeInbound(Message(new DefaultLastHttpContent(), 5))
     assert(channelsGauge() == 0.0)
   }

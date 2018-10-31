@@ -110,8 +110,8 @@ object DeadlineFilter {
       DeadlineFilter.RejectPeriod,
       DeadlineFilter.MaxRejectFraction,
       DeadlineFilter.Mode,
-      ServiceFactory[Req, Rep]]
-    {
+      ServiceFactory[Req, Rep]
+    ] {
       val role = new Stack.Role("DeadlineFilter")
       val description = "Reject requests when their deadline has passed"
 
@@ -141,19 +141,19 @@ object DeadlineFilter {
                       rejectPeriod = rejectPeriod,
                       maxRejectFraction = maxRejectFraction,
                       statsReceiver = scopedStatsReceiver,
-                      isDarkMode = darkMode)
-                      .andThen(service)
+                      isDarkMode = darkMode
+                    ).andThen(service)
 
                 override def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
-                // Create a DeadlineFilter per connection, so we don't share the state of the token
-                // bucket for rejecting requests.
+                  // Create a DeadlineFilter per connection, so we don't share the state of the token
+                  // bucket for rejecting requests.
                   next(conn).map(newDeadlineFilter)
               }
             }
 
           case _ =>
             next
-      }
+        }
     }
 
   class DeadlineExceededException private[DeadlineFilter] (
@@ -205,12 +205,7 @@ class DeadlineFilter[Req, Rep](
     statsReceiver: StatsReceiver,
     nowMillis: () => Long
   ) =
-    this(
-      rejectPeriod,
-      maxRejectFraction,
-      statsReceiver,
-      nowMillis,
-      false)
+    this(rejectPeriod, maxRejectFraction, statsReceiver, nowMillis, false)
 
   import DeadlineFilter.DeadlineExceededException
 

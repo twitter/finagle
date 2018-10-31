@@ -19,10 +19,10 @@ package object http {
     StandardToggleMap(LibraryName, DefaultStatsReceiver)
 
   object serverErrorsAsFailures
-    extends GlobalFlag(
-      true,
-      "Treat responses with status codes in " +
-        "the 500s as failures. See " +
-        "`com.twitter.finagle.http.service.HttpResponseClassifier.ServerErrorsAsFailures`"
-    )
+      extends GlobalFlag(
+        true,
+        "Treat responses with status codes in " +
+          "the 500s as failures. See " +
+          "`com.twitter.finagle.http.service.HttpResponseClassifier.ServerErrorsAsFailures`"
+      )
 }

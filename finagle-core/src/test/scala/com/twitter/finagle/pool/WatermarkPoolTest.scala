@@ -350,7 +350,7 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
       assert(pool_size() == 0)
     }
 
-    it("allows service reuse without messing up pool accounting"){
+    it("allows service reuse without messing up pool accounting") {
       val svcFac = new ServiceFactory[Int, Int] {
         def apply(conn: ClientConnection): Future[Service[Int, Int]] =
           Future.value(Service.mk[Int, Int](Future.value(_)))

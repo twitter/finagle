@@ -38,9 +38,10 @@ private object Http2ListenerTest {
       writer.write(Buf.Utf8(message))
 
     def read(): Future[Option[String]] =
-      reader.read().map(_.map {
-        case Buf.Utf8(message) => message
-      })
+      reader
+        .read().map(_.map {
+          case Buf.Utf8(message) => message
+        })
 
     def close(): Future[Unit] = {
       reader.discard()
@@ -52,7 +53,7 @@ private object Http2ListenerTest {
 class Http2ListenerTest extends FunSuite {
   import Http2ListenerTest._
 
-  test("Http2Listener should upgrade neatly") (new Ctx {
+  test("Http2Listener should upgrade neatly")(new Ctx {
     await(write("""GET http:/// HTTP/1.1
       |x-http2-stream-id: 1
       |upgrade: h2c

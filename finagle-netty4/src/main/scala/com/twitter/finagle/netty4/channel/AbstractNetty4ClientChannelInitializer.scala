@@ -39,7 +39,10 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(params: St
 
   private[this] val (sharedChannelRequestStats, sharedChannelStats) =
     if (!stats.isNull)
-      (Some(new ChannelRequestStatsHandler.SharedChannelRequestStats(stats)), Some(new ChannelStatsHandler.SharedChannelStats(stats)))
+      (
+        Some(new ChannelRequestStatsHandler.SharedChannelRequestStats(stats)),
+        Some(new ChannelStatsHandler.SharedChannelStats(stats))
+      )
     else
       (None, None)
 

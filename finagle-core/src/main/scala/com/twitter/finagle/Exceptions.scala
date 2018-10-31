@@ -134,8 +134,11 @@ class GlobalRequestTimeoutException(timeout: Duration)
  *
  * [1] https://twitter.github.io/finagle/guide/Names.html
  */
-class NoBrokersAvailableException(val name: String, val baseDtabFn: () => Dtab, val localDtabFn: () => Dtab)
-    extends RequestException
+class NoBrokersAvailableException(
+  val name: String,
+  val baseDtabFn: () => Dtab,
+  val localDtabFn: () => Dtab
+) extends RequestException
     with SourcedException {
 
   // backwards compatibility constructor
@@ -224,7 +227,7 @@ class FailedFastException(
 
   def this(message: String, cause: Throwable) = this(message, cause, FailureFlags.Empty)
 
-  def this(message: String) = this (message, null)
+  def this(message: String) = this(message, null)
 
   def this() = this(null, null)
 
@@ -343,11 +346,11 @@ class ConnectionFailedException(underlying: Option[Throwable], remoteAddress: Op
  * Indicates that a given channel was closed, for instance if the connection
  * was reset by a peer or a proxy.
  */
-class ChannelClosedException private[finagle](
+class ChannelClosedException private[finagle] (
   underlying: Option[Throwable],
   remoteAddress: Option[SocketAddress],
-  val flags: Long)
-    extends ChannelException(underlying, remoteAddress)
+  val flags: Long
+) extends ChannelException(underlying, remoteAddress)
     with FailureFlags[ChannelClosedException] {
 
   def this(underlying: Option[Throwable], remoteAddress: Option[SocketAddress]) =
@@ -370,8 +373,8 @@ class StreamClosedException(
   remoteAddress: Option[SocketAddress],
   streamId: String,
   whyFailed: String,
-  val flags: Long)
-    extends ChannelException(None, remoteAddress)
+  val flags: Long
+) extends ChannelException(None, remoteAddress)
     with FailureFlags[StreamClosedException]
     with NoStackTrace {
 
@@ -488,8 +491,9 @@ object ChannelWriteException {
  * Indicates that an SSL/TLS exception occurred.
  */
 class SslException(cause: Option[Throwable], remoteAddr: Option[SocketAddress])
-  extends ChannelException(cause, remoteAddr) {
-  def this(cause: JSSLException, remoteAddr: SocketAddress) = this(Option(cause), Option(remoteAddr))
+    extends ChannelException(cause, remoteAddr) {
+  def this(cause: JSSLException, remoteAddr: SocketAddress) =
+    this(Option(cause), Option(remoteAddr))
 }
 
 /**

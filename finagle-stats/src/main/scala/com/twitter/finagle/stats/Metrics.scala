@@ -55,7 +55,8 @@ object Metrics {
     def count: Long = adder.sum()
   }
 
-  private class StoreGaugeImpl(override val name: String, f: => Number) extends MetricsStore.StoreGauge {
+  private class StoreGaugeImpl(override val name: String, f: => Number)
+      extends MetricsStore.StoreGauge {
     override def read: Number = f
   }
 
@@ -106,7 +107,7 @@ private[stats] class MetricCollisionException(msg: String) extends IllegalArgume
  *       case of multiple [[StatsReceiver]]s, this avoids duplicate metrics. To use per-instance
  *       [[Metrics.MetricsMaps]], create the instance using `Metrics.createDetached`.
  */
-private[finagle] class Metrics private(
+private[finagle] class Metrics private (
   mkHistogram: (String, IndexedSeq[Double]) => MetricsHistogram,
   separator: String,
   metricsMaps: Metrics.MetricsMaps

@@ -128,7 +128,8 @@ class Netty4ClientEngineFactoryTest extends FunSuite {
   }
 
   test("config with TrustManagerFactory succeeds") {
-    val trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm)
+    val trustManagerFactory =
+      TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm)
     trustManagerFactory.init(null.asInstanceOf[KeyStore])
 
     val trustCredentials = TrustCredentials.TrustManagerFactory(trustManagerFactory)

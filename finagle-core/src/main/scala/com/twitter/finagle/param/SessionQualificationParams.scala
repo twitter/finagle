@@ -97,7 +97,8 @@ class SessionQualificationParams[A <: Stack.Parameterized[A]](self: Stack.Parame
       successRate,
       window,
       FailureAccrualFactory.jitteredBackoff,
-      FailureAccrualPolicy.DefaultMinimumRequestThreshold)
+      FailureAccrualPolicy.DefaultMinimumRequestThreshold
+    )
 
   /**
    * Sets a failure accrual policy that triggers when success rate drops under a given value
@@ -121,7 +122,8 @@ class SessionQualificationParams[A <: Stack.Parameterized[A]](self: Stack.Parame
       successRate,
       window,
       backoff,
-      FailureAccrualPolicy.DefaultMinimumRequestThreshold)
+      FailureAccrualPolicy.DefaultMinimumRequestThreshold
+    )
 
   /**
    * Sets a FailureAccrualPolicy that triggers after `nFailures` consecutive failures.

@@ -5,7 +5,7 @@ import com.twitter.logging.{HasLogLevel, Level}
 import java.net.SocketAddress
 
 private[http2] class DeadConnectionException(addr: SocketAddress, val flags: Long)
-  extends Exception(s"assigned an already dead connection to address $addr")
+    extends Exception(s"assigned an already dead connection to address $addr")
     with FailureFlags[DeadConnectionException]
     with HasLogLevel {
 

@@ -178,7 +178,8 @@ class VanillaThriftSessionTest extends FunSuite {
         assert(handle.pendingWrites.isEmpty)
         p.isInterrupted match {
           case Some(_: ClientDiscardedRequestException) => // nop OK
-          case other => fail(s"Expected the service to have interrupted dispatches. Instead found $other")
+          case other =>
+            fail(s"Expected the service to have interrupted dispatches. Instead found $other")
         }
         assert(session.status == Status.Closed)
       }
@@ -193,10 +194,12 @@ class VanillaThriftSessionTest extends FunSuite {
       header.setClient_id(new thrift.ClientId("clientId"))
 
       val protocolFactory = params[Thrift.param.ProtocolFactory].protocolFactory
-      val msg = Buf.ByteArray.Owned(ByteArrays.concat(
-        OutputBuffer.messageToArray(header, protocolFactory),
-        "body".getBytes(StandardCharsets.UTF_8)
-      ))
+      val msg = Buf.ByteArray.Owned(
+        ByteArrays.concat(
+          OutputBuffer.messageToArray(header, protocolFactory),
+          "body".getBytes(StandardCharsets.UTF_8)
+        )
+      )
 
       session.receive(ByteReader(msg))
       handle.serialExecutor.executeAll()

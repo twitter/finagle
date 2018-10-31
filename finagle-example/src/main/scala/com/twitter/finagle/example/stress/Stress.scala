@@ -46,14 +46,15 @@ object Stress {
 
     val requests = Future.parallel(concurrency) {
       Future.times(totalRequests / concurrency) {
-        client(request).onSuccess { response =>
-          responses.computeIfAbsent(response.status, makeAtomicLong).incrementAndGet()
-        }.handle {
-          case e =>
-            errors.incrementAndGet()
-        }.ensure {
-          completedRequests.incrementAndGet()
-        }
+        client(request)
+          .onSuccess { response =>
+            responses.computeIfAbsent(response.status, makeAtomicLong).incrementAndGet()
+          }.handle {
+            case e =>
+              errors.incrementAndGet()
+          }.ensure {
+            completedRequests.incrementAndGet()
+          }
       }
     }
 

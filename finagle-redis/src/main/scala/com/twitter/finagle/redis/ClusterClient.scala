@@ -4,6 +4,7 @@ import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.ServiceFactory
 
 private[redis] object ClusterClient {
+
   /**
    * Construct a client client from a single host.
    * @param host a String of host:port combination.

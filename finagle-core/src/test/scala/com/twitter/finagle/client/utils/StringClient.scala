@@ -6,7 +6,12 @@ import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.param.ProtocolLibrary
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.{Service, ServiceFactory, Stack}
-import io.netty.channel.{ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPipeline, ChannelPromise}
+import io.netty.channel.{
+  ChannelHandlerContext,
+  ChannelOutboundHandlerAdapter,
+  ChannelPipeline,
+  ChannelPromise
+}
 import io.netty.handler.codec.string.{StringDecoder, StringEncoder}
 import java.net.SocketAddress
 import java.nio.charset.StandardCharsets.UTF_8

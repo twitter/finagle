@@ -30,7 +30,7 @@ private[http2] abstract class Http2NegotiatingTransporter(
   underlyingHttp11: Transporter[Any, Any, TransportContext],
   fallbackToHttp11WhileNegotiating: Boolean
 ) extends Transporter[Any, Any, TransportContext]
-  with MultiplexTransporter {
+    with MultiplexTransporter {
 
   import Http2NegotiatingTransporter._
   private[this] val log = Logger.get()
@@ -41,7 +41,8 @@ private[http2] abstract class Http2NegotiatingTransporter(
   private[this] val statsReceiver = params[Stats].statsReceiver
 
   private[this] val cachedSessionClosed = statsReceiver.counter(Verbosity.Debug, "dead_session")
-  private[this] val childTransportClosed = statsReceiver.counter(Verbosity.Debug, "dead_child_transport")
+  private[this] val childTransportClosed =
+    statsReceiver.counter(Verbosity.Debug, "dead_child_transport")
 
   /** Attempt to upgrade to a multiplexed session */
   protected def attemptUpgrade(): (Future[Option[ClientSession]], Future[Transport[Any, Any]])
@@ -77,10 +78,11 @@ private[http2] abstract class Http2NegotiatingTransporter(
     // for business.
     val f = cachedConnection.get
     if (f == null) Status.Open
-    else f.poll match {
-      case Some(Return(Some(fac))) if fac.status == Status.Busy => Status.Busy
-      case _ => Status.Open
-    }
+    else
+      f.poll match {
+        case Some(Return(Some(fac))) if fac.status == Status.Busy => Status.Busy
+        case _ => Status.Open
+      }
   }
 
   // We want HTTP/1.x connections to get culled once we have a live HTTP/2 session so
@@ -88,14 +90,15 @@ private[http2] abstract class Http2NegotiatingTransporter(
   final protected def http1Status: Status = {
     val f = cachedConnection.get
     if (f == null || (f eq UpgradeRejectedFuture)) Status.Open
-    else f.poll match {
-      case Some(Return(Some(fac))) =>
-        fac.status match {
-          case Status.Open => Status.Closed
-          case status => status
-        }
-      case _ => Status.Open
-    }
+    else
+      f.poll match {
+        case Some(Return(Some(fac))) =>
+          fac.status match {
+            case Status.Open => Status.Closed
+            case status => status
+          }
+        case _ => Status.Open
+      }
   }
 
   @tailrec
@@ -111,7 +114,8 @@ private[http2] abstract class Http2NegotiatingTransporter(
         }
 
       case futureSession =>
-        if (!fallbackToHttp11WhileNegotiating || futureSession.isDefined) useExistingConnection(futureSession)
+        if (!fallbackToHttp11WhileNegotiating || futureSession.isDefined)
+          useExistingConnection(futureSession)
         else fallbackToHttp11() // fall back to http/1.1 while upgrading
 
     }

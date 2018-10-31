@@ -333,22 +333,36 @@ class MessageTest extends FunSuite {
 
     val timeGMT: Date = Date.from(ZonedDateTime.parse("2012-06-30T12:30:40Z[GMT]").toInstant)
     val timeUTC: Date = Date.from(ZonedDateTime.parse("2012-06-30T12:30:40Z[UTC]").toInstant)
-    val timeLASummer: Date = Date.from(ZonedDateTime.parse("2012-06-30T12:30:40-07:00[America/Los_Angeles]").toInstant)
-    val timeLAWinter: Date = Date.from(ZonedDateTime.parse("2012-12-30T12:30:40-07:00[America/Los_Angeles]").toInstant)
-    val timeSH: Date = Date.from(ZonedDateTime.parse("2012-06-03T12:30:40+08:00[Asia/Shanghai]").toInstant)
-    val timeEurope: Date = Date.from(ZonedDateTime.parse("2012-06-30T12:30:40+01:00[Europe/London]").toInstant)
+    val timeLASummer: Date =
+      Date.from(ZonedDateTime.parse("2012-06-30T12:30:40-07:00[America/Los_Angeles]").toInstant)
+    val timeLAWinter: Date =
+      Date.from(ZonedDateTime.parse("2012-12-30T12:30:40-07:00[America/Los_Angeles]").toInstant)
+    val timeSH: Date =
+      Date.from(ZonedDateTime.parse("2012-06-03T12:30:40+08:00[Asia/Shanghai]").toInstant)
+    val timeEurope: Date =
+      Date.from(ZonedDateTime.parse("2012-06-30T12:30:40+01:00[Europe/London]").toInstant)
 
     assert(Message.httpDateFormat(timeGMT) == "Sat, 30 Jun 2012 12:30:40 GMT")
-    assert(Message.httpDateFormat(timeGMT.toInstant.toEpochMilli) == "Sat, 30 Jun 2012 12:30:40 GMT")
+    assert(
+      Message.httpDateFormat(timeGMT.toInstant.toEpochMilli) == "Sat, 30 Jun 2012 12:30:40 GMT"
+    )
     assert(Message.httpDateFormat(timeUTC) == "Sat, 30 Jun 2012 12:30:40 GMT")
-    assert(Message.httpDateFormat(timeUTC.toInstant.toEpochMilli) == "Sat, 30 Jun 2012 12:30:40 GMT")
+    assert(
+      Message.httpDateFormat(timeUTC.toInstant.toEpochMilli) == "Sat, 30 Jun 2012 12:30:40 GMT"
+    )
     assert(Message.httpDateFormat(timeLASummer) == "Sat, 30 Jun 2012 19:30:40 GMT")
-    assert(Message.httpDateFormat(timeLASummer.toInstant.toEpochMilli) == "Sat, 30 Jun 2012 19:30:40 GMT")
+    assert(
+      Message.httpDateFormat(timeLASummer.toInstant.toEpochMilli) == "Sat, 30 Jun 2012 19:30:40 GMT"
+    )
     assert(Message.httpDateFormat(timeLAWinter) == "Sun, 30 Dec 2012 20:30:40 GMT")
-    assert(Message.httpDateFormat(timeLAWinter.toInstant.toEpochMilli) == "Sun, 30 Dec 2012 20:30:40 GMT")
+    assert(
+      Message.httpDateFormat(timeLAWinter.toInstant.toEpochMilli) == "Sun, 30 Dec 2012 20:30:40 GMT"
+    )
     assert(Message.httpDateFormat(timeSH) == "Sun, 03 Jun 2012 04:30:40 GMT")
     assert(Message.httpDateFormat(timeSH.toInstant.toEpochMilli) == "Sun, 03 Jun 2012 04:30:40 GMT")
     assert(Message.httpDateFormat(timeEurope) == "Sat, 30 Jun 2012 11:30:40 GMT")
-    assert(Message.httpDateFormat(timeEurope.toInstant.toEpochMilli) == "Sat, 30 Jun 2012 11:30:40 GMT")
+    assert(
+      Message.httpDateFormat(timeEurope.toInstant.toEpochMilli) == "Sat, 30 Jun 2012 11:30:40 GMT"
+    )
   }
 }

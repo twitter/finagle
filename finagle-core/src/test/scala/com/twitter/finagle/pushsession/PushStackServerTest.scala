@@ -4,7 +4,14 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.pushsession.utils.MockChannelHandle
 import com.twitter.finagle.server.StackServer
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{ClientConnection, ListeningServer, Service, ServiceFactory, Stack, Status}
+import com.twitter.finagle.{
+  ClientConnection,
+  ListeningServer,
+  Service,
+  ServiceFactory,
+  Stack,
+  Status
+}
 import com.twitter.util.registry.{Entry, GlobalRegistry}
 import com.twitter.util.{Await, Awaitable, Duration, Future, Promise, Time}
 import java.net.{InetSocketAddress, SocketAddress}
@@ -62,11 +69,9 @@ class PushStackServerTest extends FunSuite with MockitoSugar {
 
         def isReady(implicit permit: Awaitable.CanAwait): Boolean = true
 
-        def result(timeout: Duration)
-          (implicit permit: Awaitable.CanAwait): Unit = ()
+        def result(timeout: Duration)(implicit permit: Awaitable.CanAwait): Unit = ()
 
-        def ready(timeout: Duration)
-          (implicit permit: Awaitable.CanAwait): this.type = this
+        def ready(timeout: Duration)(implicit permit: Awaitable.CanAwait): this.type = this
       }
   }
 
@@ -101,8 +106,8 @@ class PushStackServerTest extends FunSuite with MockitoSugar {
   test("Close notifies the channel handle if the server is closing when it becomes ready") {
     val server = new TestStackServer()
     val service = Promise[Service[Unit, Unit]]
-    val listeningServer = server.serve(
-      new InetSocketAddress(0), ServiceFactory.apply(() => service))
+    val listeningServer =
+      server.serve(new InetSocketAddress(0), ServiceFactory.apply(() => service))
     val handle = new MockChannelHandle[Unit, Unit](null)
     val sessionF = server.mockListener.builder(handle)
     listeningServer.close(10.seconds)
@@ -143,8 +148,10 @@ class PushStackServerTest extends FunSuite with MockitoSugar {
 
   test("automatically closes handle on ServiceFactory failure") {
     val server = new TestStackServer()
-    server.serve(new InetSocketAddress(0),
-      ServiceFactory(() => Future.exception(new Exception("Sad face"))))
+    server.serve(
+      new InetSocketAddress(0),
+      ServiceFactory(() => Future.exception(new Exception("Sad face")))
+    )
 
     val handle = new MockChannelHandle[Unit, Unit](null)
     val session = await(server.mockListener.builder(handle))
@@ -182,8 +189,10 @@ class PushStackServerTest extends FunSuite with MockitoSugar {
     val server = new TestStackServer()
 
     // Should have registered itself
-    server.serve(new InetSocketAddress(0),
-      ServiceFactory(() => Future.exception(new Exception("Sad face"))))
+    server.serve(
+      new InetSocketAddress(0),
+      ServiceFactory(() => Future.exception(new Exception("Sad face")))
+    )
 
     val entries = GlobalRegistry.get.iterator.toList
     val foundEntry = entries.exists {

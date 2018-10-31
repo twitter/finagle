@@ -8,6 +8,7 @@ import com.twitter.util.Future
  * @see Client#session()
  */
 trait Session {
+
   /**
    * Discard the session. The connection will become unusable and will not be returned to the pool.
    * This can be used when an error is detected at the application level that signifies that the

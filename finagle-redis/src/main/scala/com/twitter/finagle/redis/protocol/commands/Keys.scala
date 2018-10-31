@@ -39,8 +39,14 @@ case class Migrate(addr: InetSocketAddress, keys: Seq[Buf], timeout: Duration) e
   override def body: Seq[Buf] = {
     val ip = Buf.Utf8(addr.getAddress.getHostAddress)
     val port = Buf.Utf8(addr.getPort.toString)
-    Seq(ip, port, Buf.Utf8(""), Buf.Utf8("0"),
-      Buf.Utf8(timeout.inMilliseconds.toString), Command.KEYS) ++ keys
+    Seq(
+      ip,
+      port,
+      Buf.Utf8(""),
+      Buf.Utf8("0"),
+      Buf.Utf8(timeout.inMilliseconds.toString),
+      Command.KEYS
+    ) ++ keys
   }
 }
 

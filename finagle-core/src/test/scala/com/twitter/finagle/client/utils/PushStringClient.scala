@@ -2,7 +2,12 @@ package com.twitter.finagle.client.utils
 
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.client.utils.StringClient.{NoDelimStringPipeline, StringClientPipeline}
-import com.twitter.finagle.pushsession.{PipeliningClientPushSession, PushChannelHandle, PushStackClient, PushTransporter}
+import com.twitter.finagle.pushsession.{
+  PipeliningClientPushSession,
+  PushChannelHandle,
+  PushStackClient,
+  PushTransporter
+}
 import com.twitter.finagle.netty4.pushsession.Netty4PushTransporter
 import com.twitter.finagle.param.ProtocolLibrary
 import com.twitter.finagle.stats.NullStatsReceiver

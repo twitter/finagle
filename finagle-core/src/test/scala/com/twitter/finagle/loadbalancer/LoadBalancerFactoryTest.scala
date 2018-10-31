@@ -283,7 +283,9 @@ class LoadBalancerFactoryTest extends FunSuite with Eventually with IntegrationP
         emptyException: NoBrokersAvailableException,
         params: Stack.Params
       ): ServiceFactory[Req, Rep] = {
-        eps = endpoints.sample().toSet.map { ep: EndpointFactory[_, _] => ep.address }
+        eps = endpoints.sample().toSet.map { ep: EndpointFactory[_, _] =>
+          ep.address
+        }
         ServiceFactory.const(Service.mk(_ => ???))
       }
     }

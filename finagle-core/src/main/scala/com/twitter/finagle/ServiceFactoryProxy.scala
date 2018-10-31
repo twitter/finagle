@@ -8,7 +8,7 @@ import com.twitter.util.{Future, Time}
  * an existing `ServiceFactory`.
  */
 abstract class ServiceFactoryProxy[-Req, +Rep](_self: ServiceFactory[Req, Rep])
-  extends ServiceFactory[Req, Rep]
+    extends ServiceFactory[Req, Rep]
     with Proxy {
   def self: ServiceFactory[Req, Rep] = _self
 

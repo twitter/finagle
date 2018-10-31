@@ -54,7 +54,10 @@ package object http {
   }
 
   /** Initialize the client pipeline accessories including decompression, dechunking, etc. */
-  private[finagle] def initClientFn(params: Stack.Params, fn: (String, ChannelHandler) => Unit): Unit = {
+  private[finagle] def initClientFn(
+    params: Stack.Params,
+    fn: (String, ChannelHandler) => Unit
+  ): Unit = {
     val maxResponseSize = params[MaxResponseSize].size
     val decompressionEnabled = params[Decompression].enabled
     val streaming = params[Streaming].enabled

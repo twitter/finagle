@@ -6,7 +6,12 @@ import com.twitter.finagle.netty4.http._
 import com.twitter.finagle.param.{Stats, Timer => TimerParam}
 import com.twitter.logging.Logger
 import io.netty.buffer.{ByteBuf, ByteBufUtil}
-import io.netty.channel.{Channel, ChannelHandlerContext, ChannelInboundHandlerAdapter, ChannelInitializer}
+import io.netty.channel.{
+  Channel,
+  ChannelHandlerContext,
+  ChannelInboundHandlerAdapter,
+  ChannelInitializer
+}
 import io.netty.handler.codec.http2.Http2CodecUtil.connectionPrefaceBuf
 
 /**

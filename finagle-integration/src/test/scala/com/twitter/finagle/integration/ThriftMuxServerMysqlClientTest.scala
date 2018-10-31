@@ -11,11 +11,12 @@ import java.net.{InetAddress, InetSocketAddress}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-class ThriftMuxServerMysqlClientTest extends FunSuite
-  with IntegrationClient
-  with Eventually
-  with IntegrationPatience
-  with BeforeAndAfter {
+class ThriftMuxServerMysqlClientTest
+    extends FunSuite
+    with IntegrationClient
+    with Eventually
+    with IntegrationPatience
+    with BeforeAndAfter {
 
   private def await[T](f: Future[T]): T = Await.result(f, 5.seconds)
 
@@ -55,15 +56,15 @@ class ThriftMuxServerMysqlClientTest extends FunSuite
         def query(x: String): Future[String] = {
           mysqlClient.transaction { mc =>
             mc.query("INSERT INTO txn_test (id) VALUES (1)").flatMap { _ =>
-              // wait for the client's timeout
-              // (can't use MockTimer/TimeControl as this happens on a diff "thread")
-              mysqlLatch
-            }.flatMap { _ =>
-              // run another query that should fail, given the prior timeout.
-              mc.query("SELECT id FROM txn_test").flatMap { _ =>
-                Future.value(x.toString)
+                // wait for the client's timeout
+                // (can't use MockTimer/TimeControl as this happens on a diff "thread")
+                mysqlLatch
+              }.flatMap { _ =>
+                // run another query that should fail, given the prior timeout.
+                mc.query("SELECT id FROM txn_test").flatMap { _ =>
+                  Future.value(x.toString)
+                }
               }
-            }
           }
         }
       }

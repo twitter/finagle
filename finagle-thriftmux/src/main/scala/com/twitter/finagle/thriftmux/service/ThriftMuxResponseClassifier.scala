@@ -144,36 +144,36 @@ object ThriftMuxResponseClassifier {
    */
   private[finagle] val DeserializeCtxOnly: ResponseClassifier =
     new ResponseClassifier {
-    override def toString: String = "DefaultThriftResponseClassifier"
+      override def toString: String = "DefaultThriftResponseClassifier"
 
-    // we want the side-effect of deserialization if it has not
-    // yet been done
-    private[this] def deserializeIfPossible(rep: Try[Any]): Unit = {
-      rep match {
-        case Return(rep: mux.Response) =>
-          val deserCtx = ClientDeserializeCtx.get
-          if (deserCtx ne ClientDeserializeCtx.nullDeserializeCtx) {
-            try {
-              val bytes = Buf.ByteArray.Owned.extract(rep.body)
-              deserCtx(bytes).response
-            } catch {
-              case _: Throwable =>
+      // we want the side-effect of deserialization if it has not
+      // yet been done
+      private[this] def deserializeIfPossible(rep: Try[Any]): Unit = {
+        rep match {
+          case Return(rep: mux.Response) =>
+            val deserCtx = ClientDeserializeCtx.get
+            if (deserCtx ne ClientDeserializeCtx.nullDeserializeCtx) {
+              try {
+                val bytes = Buf.ByteArray.Owned.extract(rep.body)
+                deserCtx(bytes).response
+              } catch {
+                case _: Throwable =>
+              }
             }
-          }
-        case _ =>
+          case _ =>
+        }
+      }
+
+      def isDefinedAt(reqRep: ReqRep): Boolean = {
+        deserializeIfPossible(reqRep.response)
+        ResponseClassifier.Default.isDefinedAt(reqRep)
+      }
+
+      def apply(reqRep: ReqRep): ResponseClass = {
+        deserializeIfPossible(reqRep.response)
+        ResponseClassifier.Default(reqRep)
       }
     }
-
-    def isDefinedAt(reqRep: ReqRep): Boolean = {
-      deserializeIfPossible(reqRep.response)
-      ResponseClassifier.Default.isDefinedAt(reqRep)
-    }
-
-    def apply(reqRep: ReqRep): ResponseClass = {
-      deserializeIfPossible(reqRep.response)
-      ResponseClassifier.Default(reqRep)
-    }
-  }
 
   /**
    * [[mux.Response mux Responses]] need to be in deserialized form in order to do

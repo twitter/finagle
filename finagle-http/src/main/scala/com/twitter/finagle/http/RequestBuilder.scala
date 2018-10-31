@@ -66,8 +66,7 @@ object RequestBuilder {
   )
   trait PostRequestEvidence[HasUrl, HasForm]
   private object PostRequestEvidence {
-    implicit object FullyConfigured
-      extends PostRequestEvidence[Valid, Valid]
+    implicit object FullyConfigured extends PostRequestEvidence[Valid, Valid]
   }
 
   type Complete = RequestBuilder[Valid, Nothing]
@@ -273,7 +272,7 @@ class RequestBuilder[HasUrl, HasForm] private[http] (
     implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[
       HasUrl,
       HasForm
-      ]
+    ]
   ): Request = {
     content match {
       case Some(ct) => withContent(method, ct)
@@ -288,7 +287,7 @@ class RequestBuilder[HasUrl, HasForm] private[http] (
     implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[
       HasUrl,
       HasForm
-      ]
+    ]
   ): Request = withoutContent(Method.Get)
 
   /**
@@ -298,7 +297,7 @@ class RequestBuilder[HasUrl, HasForm] private[http] (
     implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[
       HasUrl,
       HasForm
-      ]
+    ]
   ): Request = withoutContent(Method.Head)
 
   /**
@@ -308,7 +307,7 @@ class RequestBuilder[HasUrl, HasForm] private[http] (
     implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[
       HasUrl,
       HasForm
-      ]
+    ]
   ): Request = withoutContent(Method.Delete)
 
   /**
@@ -318,7 +317,7 @@ class RequestBuilder[HasUrl, HasForm] private[http] (
     implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[
       HasUrl,
       HasForm
-      ]
+    ]
   ): Request = withContent(Method.Post, content)
 
   /**
@@ -328,7 +327,7 @@ class RequestBuilder[HasUrl, HasForm] private[http] (
     implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[
       HasUrl,
       HasForm
-      ]
+    ]
   ): Request = withContent(Method.Put, content)
 
   /**
@@ -357,18 +356,21 @@ class RequestBuilder[HasUrl, HasForm] private[http] (
    */
   private[this] def hostString(uri: JURI, url: URL): String = {
     (if (uri.getHost == null) {
-      // fallback to URL
-      url.getHost
-    } else {
-      uri.getHost
-    }).toLowerCase
+       // fallback to URL
+       url.getHost
+     } else {
+       uri.getHost
+     }).toLowerCase
   }
 
   private[http] def withoutContent(method: Method): Request = {
     val req = Request(config.version, method, RequestConfig.resource(config))
 
-    config.headers.foreach { case (field, values) =>
-      values.foreach { v => req.headerMap.add(field, v) }
+    config.headers.foreach {
+      case (field, values) =>
+        values.foreach { v =>
+          req.headerMap.add(field, v)
+        }
     }
 
     req

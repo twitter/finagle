@@ -24,37 +24,42 @@ abstract class AbstractThriftSmuxTest extends FunSuite {
 
   private def serve(
     serverLevel: Option[OpportunisticTls.Level]
-  ): ListeningServer = (serverLevel match {
-    case None =>
-      serverImpl()
-    case Some(level) =>
-      serverImpl()
-        .withTransport.tls(mkConfig())
-        .withOpportunisticTls(level)
-  }).serveIface("localhost:*", concatIface)
+  ): ListeningServer =
+    (serverLevel match {
+      case None =>
+        serverImpl()
+      case Some(level) =>
+        serverImpl().withTransport
+          .tls(mkConfig())
+          .withOpportunisticTls(level)
+    }).serveIface("localhost:*", concatIface)
 
   private def newService(
     clientLevel: Option[OpportunisticTls.Level],
     record: ThriftMux.Client => ThriftMux.Client,
     stats: StatsReceiver,
     addr: InetSocketAddress
-  ): TestService.MethodPerEndpoint = record(
-    clientLevel match {
-      case None =>
-        clientImpl()
-          .withStatsReceiver(stats)
-      case Some(level) =>
-        clientImpl()
-          .withStatsReceiver(stats)
-          .withTransport.tlsWithoutValidation
-          .withOpportunisticTls(level)
-    }
-  ).build[TestService.MethodPerEndpoint](
-    Name.bound(Address(addr)),
-    "client"
-  )
+  ): TestService.MethodPerEndpoint =
+    record(
+      clientLevel match {
+        case None =>
+          clientImpl()
+            .withStatsReceiver(stats)
+        case Some(level) =>
+          clientImpl()
+            .withStatsReceiver(stats)
+            .withTransport.tlsWithoutValidation
+            .withOpportunisticTls(level)
+      }
+    ).build[TestService.MethodPerEndpoint](
+      Name.bound(Address(addr)),
+      "client"
+    )
 
-  def smuxTest(testCases: Seq[TlsPair], testFn: (Try[String], String, InMemoryStatsReceiver) => Unit): Unit = {
+  def smuxTest(
+    testCases: Seq[TlsPair],
+    testFn: (Try[String], String, InMemoryStatsReceiver) => Unit
+  ): Unit = {
     for {
       (clientLevel, serverLevel) <- testCases
     } {
@@ -75,26 +80,31 @@ abstract class AbstractThriftSmuxTest extends FunSuite {
 
   // tests
   test("thriftsmux: can talk to each other with opportunistic tls") {
-    smuxTest(compatibleEnabledLevels, { case (results, string, _) =>
-      assert(results.get == "." * 20)
-      // we check that it's non-empty to ensure that it was correctly installed
-      assert(!string.isEmpty)
-      // check that the payload isn't in cleartext over the wire
-      assert(!string.toString.contains("2e" * 10))
-    })
+    smuxTest(
+      compatibleEnabledLevels, {
+        case (results, string, _) =>
+          assert(results.get == "." * 20)
+          // we check that it's non-empty to ensure that it was correctly installed
+          assert(!string.isEmpty)
+          // check that the payload isn't in cleartext over the wire
+          assert(!string.toString.contains("2e" * 10))
+      }
+    )
   }
 
   test("thriftsmux: can talk to each other when both parties are off") {
-    smuxTest(compatibleUndesiredDisabledLevels, { case (results, string, _) =>
-      assert(results.get == "." * 20)
-      assert(string.isEmpty)
+    smuxTest(compatibleUndesiredDisabledLevels, {
+      case (results, string, _) =>
+        assert(results.get == "." * 20)
+        assert(string.isEmpty)
     })
   }
 
   test("thriftsmux: can talk to each other when one party is off") {
-    smuxTest(compatibleDesiredDisabledLevels, { case (results, string, _) =>
-      assert(results.get == "." * 20)
-      assert(string.isEmpty)
+    smuxTest(compatibleDesiredDisabledLevels, {
+      case (results, string, _) =>
+        assert(results.get == "." * 20)
+        assert(string.isEmpty)
     })
   }
 
@@ -104,11 +114,12 @@ abstract class AbstractThriftSmuxTest extends FunSuite {
         val client = clientImpl()
         intercept[IllegalStateException] {
           val addr = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-          client.withOpportunisticTls(level)
+          client
+            .withOpportunisticTls(level)
             .build[TestService.MethodPerEndpoint](
-            Name.bound(Address(addr)),
-            "client"
-          )
+              Name.bound(Address(addr)),
+              "client"
+            )
         }
       }
     }
@@ -127,16 +138,27 @@ abstract class AbstractThriftSmuxTest extends FunSuite {
   }
 
   test("thriftsmux: can't talk to each other with incompatible opportunistic tls") {
-    smuxTest(incompatibleLevels, { case (results, string, stats) =>
-      intercept[IncompatibleNegotiationException] {
-        results.get
+    smuxTest(
+      incompatibleLevels, {
+        case (results, string, stats) =>
+          intercept[IncompatibleNegotiationException] {
+            results.get
+          }
+          assert(string.isEmpty)
+          assert(stats.counters.get(Seq("client", "failures")) == None)
+          assert(stats.counters.get(Seq("client", "service_creation", "failures")) == Some(1))
+          assert(
+            stats.counters.get(
+              Seq(
+                "client",
+                "service_creation",
+                "failures",
+                "com.twitter.finagle.mux.transport.IncompatibleNegotiationException"
+              )
+            ) == Some(1)
+          )
       }
-      assert(string.isEmpty)
-      assert(stats.counters.get(Seq("client", "failures")) == None)
-      assert(stats.counters.get(Seq("client", "service_creation", "failures")) == Some(1))
-      assert(stats.counters.get(Seq("client", "service_creation", "failures",
-        "com.twitter.finagle.mux.transport.IncompatibleNegotiationException")) == Some(1))
-    })
+    )
   }
 }
 

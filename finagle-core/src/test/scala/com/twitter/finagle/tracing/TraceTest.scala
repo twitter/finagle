@@ -363,7 +363,14 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
   }
 
   test("trace ID serialization: valid ids (128-bit)") {
-    val traceId = TraceId(Some(SpanId(1L)), Some(SpanId(1L)), SpanId(2L), None, Flags(Flags.Debug), Some(SpanId(2L)))
+    val traceId = TraceId(
+      Some(SpanId(1L)),
+      Some(SpanId(1L)),
+      SpanId(2L),
+      None,
+      Flags(Flags.Debug),
+      Some(SpanId(2L))
+    )
 
     assert(Trace.idCtx.tryUnmarshal(Trace.idCtx.marshal(traceId)) == Return(traceId))
   }

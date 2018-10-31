@@ -91,10 +91,13 @@ object Transporter {
       // do not show the password for security reasons
       Seq(
         ("socketAddress", () => p.sa.toString),
-        ("credentials",
-          () => p.credentials
-            .map(c => s"username=${c._1}")
-            .toString)
+        (
+          "credentials",
+          () =>
+            p.credentials
+              .map(c => s"username=${c._1}")
+              .toString
+        )
       )
     }
   }
@@ -129,11 +132,14 @@ object Transporter {
       // do not show the password for security reasons
       Seq(
         ("host", () => p.hostAndCredentials.map(_._1).toString),
-        ("credentials",
-          () => p.hostAndCredentials
-            .flatMap(_._2)
-            .map(_.toStringNoPassword)
-            .toString)
+        (
+          "credentials",
+          () =>
+            p.hostAndCredentials
+              .flatMap(_._2)
+              .map(_.toStringNoPassword)
+              .toString
+        )
       )
     }
   }

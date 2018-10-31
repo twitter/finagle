@@ -67,9 +67,7 @@ private[finagle] object Netty4HttpCodec {
       assert(ch.inboundMessages.size == 1)
       val nettyReq = ch.readInbound[FullHttpRequest]()
 
-      Bijections.netty.fullRequestToFinagle(
-        nettyReq,
-        new InetSocketAddress(0))
+      Bijections.netty.fullRequestToFinagle(nettyReq, new InetSocketAddress(0))
     } finally {
       ch.finishAndReleaseAll()
     }

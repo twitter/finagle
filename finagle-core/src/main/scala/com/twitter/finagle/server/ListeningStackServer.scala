@@ -16,7 +16,7 @@ import java.net.SocketAddress
  *      transport + dispatcher pattern.
  */
 trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This]]
-  extends StackServer[Req, Rep]
+    extends StackServer[Req, Rep]
     with Stack.Parameterized[This]
     with Stack.Transformable[This]
     with CommonParams[This]
@@ -68,7 +68,7 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
               withEndpoint.transformed(RequestLogger.newStackTransformer(serverLabel))
             case RequestLogger.Param.Disabled =>
               withEndpoint
-        }
+          }
         StackServer.DefaultTransformer.transformers.foldLeft(
           transformed.withParams(serverParams)
         )((srv, transformer) => srv.transformed(transformer))

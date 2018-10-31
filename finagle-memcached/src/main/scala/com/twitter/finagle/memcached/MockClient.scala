@@ -197,7 +197,7 @@ class MockClient extends Client {
     Future.value(
       mm.synchronized {
         mm.get(key) match {
-          case Some(cached@Cached(value, exp, _)) if !isExpired(exp) =>
+          case Some(cached @ Cached(value, exp, _)) if !isExpired(exp) =>
             try {
               val Buf.Utf8(valStr) = value
               val newValue = math.max(valStr.toLong + delta, 0L)
@@ -236,7 +236,7 @@ class MockClient extends Client {
   /** Returns an immutable copy of the current cache with expired elements filtered out */
   def active: Map[String, Cached] =
     toMap.collect {
-      case (k, v@Cached(_, expiry, _)) if !isExpired(expiry) => k -> v
+      case (k, v @ Cached(_, expiry, _)) if !isExpired(expiry) => k -> v
     }
 
   /**

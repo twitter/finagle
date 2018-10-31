@@ -386,12 +386,13 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
     println("Test BRANGE Exclusive Start End succeeded")
   }
 
-  def testCacheMissOnCommands(client: Client,
-    dict: mutable.HashMap[String, mutable.HashMap[String, String]]): Unit =
-  {
+  def testCacheMissOnCommands(
+    client: Client,
+    dict: mutable.HashMap[String, mutable.HashMap[String, String]]
+  ): Unit = {
     val bufFoo = Buf.Utf8("foo")
     val bufBar = Buf.Utf8("bar")
-    
+
     var rangeResult = Await.result(client.bRange(bufFoo, 10, None, None), TIMEOUT)
     assert(rangeResult.isEmpty)
 

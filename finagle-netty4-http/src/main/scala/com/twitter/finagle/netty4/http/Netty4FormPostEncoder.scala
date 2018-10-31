@@ -5,7 +5,11 @@ import com.twitter.finagle.http.exp.FormPostEncoder
 import com.twitter.finagle.netty4.ByteBufConversion
 import com.twitter.io.{Buf, Reader}
 import io.netty.buffer.{ByteBufAllocator, PooledByteBufAllocator, UnpooledByteBufAllocator}
-import io.netty.handler.codec.http.multipart.{DefaultHttpDataFactory, HttpDataFactory, HttpPostRequestEncoder}
+import io.netty.handler.codec.http.multipart.{
+  DefaultHttpDataFactory,
+  HttpDataFactory,
+  HttpPostRequestEncoder
+}
 import io.netty.handler.codec.http.{DefaultHttpRequest, FullHttpRequest, HttpRequest, HttpUtil}
 import java.net.InetSocketAddress
 
@@ -24,21 +28,25 @@ private[finagle] object Netty4FormPostEncoder extends FormPostEncoder {
     val request = new DefaultHttpRequest(version, method, uri)
 
     // Copy the headers to the Netty request.
-    config.headers.foreach { case (field, values) =>
-      values.foreach { v => request.headers.add(field, v) }
+    config.headers.foreach {
+      case (field, values) =>
+        values.foreach { v =>
+          request.headers.add(field, v)
+        }
     }
     request
   }
 
   def encode(config: RequestConfig, multipart: Boolean): Request = {
-    val dataFactory = new DefaultHttpDataFactory(/*useDisk*/ false) // we don't use disk
+    val dataFactory = new DefaultHttpDataFactory( /*useDisk*/ false) // we don't use disk
 
     val netty4Request = makeNetty4Request(config)
     // This request should *not* be a FullHttpRequest.
     if (netty4Request.isInstanceOf[FullHttpRequest]) {
       throw new IllegalStateException(
         s"Unexpected state: Expected the generated request to NOT" +
-        s"be a full request: ${netty4Request.getClass.getSimpleName}")
+          s"be a full request: ${netty4Request.getClass.getSimpleName}"
+      )
     }
 
     val encoder = new HttpPostRequestEncoder(dataFactory, netty4Request, multipart)
@@ -53,7 +61,8 @@ private[finagle] object Netty4FormPostEncoder extends FormPostEncoder {
             filename = filename.getOrElse(""),
             content = content,
             contentType = contentType.orNull,
-            isText = false)
+            isText = false
+          )
 
         case SimpleElement(name, value) =>
           encoder.addBodyAttribute(name, value)
@@ -64,7 +73,7 @@ private[finagle] object Netty4FormPostEncoder extends FormPostEncoder {
       // We're not going to send anything Transfer-Encoding: chunked, so strip any headers
       if (HttpUtil.isTransferEncodingChunked(encodedReq)) {
         val encodings = encodedReq.headers.getAll(Fields.TransferEncoding)
-        if (encodings.contains("chunked") ) {
+        if (encodings.contains("chunked")) {
           if (encodings.size == 1) {
             // only chunked, so we can just remove the header
             encodedReq.headers.remove(Fields.TransferEncoding)
@@ -100,7 +109,10 @@ private[finagle] object Netty4FormPostEncoder extends FormPostEncoder {
 
   private[this] def chunkedReqToFinagle(nettyReq: HttpRequest, body: Buf): Request = {
     val req = Bijections.netty.chunkedRequestToFinagle(
-      nettyReq, Reader.fromBuf(body), new InetSocketAddress(0))
+      nettyReq,
+      Reader.fromBuf(body),
+      new InetSocketAddress(0)
+    )
 
     req.setChunked(false)
     req.content = body

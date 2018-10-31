@@ -124,7 +124,12 @@ private[twitter] object ThriftUtil {
           // handles ServiceB extends ServiceA, then using ServiceB$MethodPerEndpoint$MethodPerEndpointImpl
           .orElse(findRootWithSuffix(iface.getName, "$MethodPerEndpoint$MethodPerEndpointImpl"))
           // handles ServiceB extends ServiceA, then using ServiceB$ReqRepMethodPerEndpoint$ReqRepMethodPerEndpointImpl
-          .orElse(findRootWithSuffix(iface.getName, "$ReqRepMethodPerEndpoint$ReqRepMethodPerEndpointImpl"))
+          .orElse(
+            findRootWithSuffix(
+              iface.getName,
+              "$ReqRepMethodPerEndpoint$ReqRepMethodPerEndpointImpl"
+            )
+          )
           .orElse(Some(iface.getName))
         serviceCls <- findClass[BinaryService](baseName + "$FinagleService")
         baseClass <- findClass1(baseName)

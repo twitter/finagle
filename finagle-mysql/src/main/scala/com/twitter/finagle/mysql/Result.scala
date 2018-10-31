@@ -86,6 +86,7 @@ case class HandshakeInit(
 ) extends Result
 
 object OK extends Decoder[OK] {
+
   /**
    * @see [[http://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-OK_Packet]]
    */
@@ -97,8 +98,7 @@ object OK extends Decoder[OK] {
         br.readVariableLong(),
         br.readVariableLong(),
         br.readUnsignedShortLE(),
-        br.readUnsignedShortLE(),
-        {
+        br.readUnsignedShortLE(), {
           val remaining = br.remaining
           if (remaining == 0) ""
           else new String(br.take(remaining))
@@ -361,4 +361,3 @@ case class FetchResult(rowPackets: Seq[Packet], containsLastRow: Boolean) extend
   override def toString: String =
     s"FetchResult(rows=${rowPackets.size}, containsLastRow=$containsLastRow)"
 }
-

@@ -27,8 +27,8 @@ private[netty4] class Netty4FramedServerChannelInitializer(params: Stack.Params)
   private[this] val Stats(stats) = params[Stats]
   private[this] val Transport.Liveness(readTimeout, writeTimeout, _) = params[Transport.Liveness]
   private[this] val sharedChannelRequestStats =
-    if (!stats.isNull) Some(
-      new ChannelRequestStatsHandler.SharedChannelRequestStats(stats)) else None
+    if (!stats.isNull) Some(new ChannelRequestStatsHandler.SharedChannelRequestStats(stats))
+    else None
   private[this] val exceptionHandler = new ChannelExceptionHandler(stats, logger)
 
   override def initChannel(ch: Channel): Unit = {

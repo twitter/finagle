@@ -7,7 +7,6 @@ import org.jboss.netty.handler.codec.http.{CookieEncoder => NettyCookieEncoder}
 import org.jboss.netty.handler.codec.http.{Cookie => Netty3Cookie}
 import org.scalatest.FunSuite
 
-
 class SameSiteCodecTest extends FunSuite {
 
   test("encodeSameSite without sameSite") {

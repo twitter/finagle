@@ -87,9 +87,8 @@ final class WatermarkPool[Req, Rep](
     }
   }
 
-
   final private[this] class ServiceWrapper(underlying: Service[Req, Rep])
-    extends ServiceProxy[Req, Rep](underlying) {
+      extends ServiceProxy[Req, Rep](underlying) {
 
     private[this] val closed: Promise[Unit] = new Promise[Unit]
     private[this] val released: AtomicBoolean = new AtomicBoolean(false)
@@ -230,9 +229,10 @@ final class WatermarkPool[Req, Rep](
     // Drain the pool. All `queue` access first tests `isOpen` mediated by `thePool` lock
     // so we don't need to hold the lock while clearing it since we've flipped the `isOpen`
     // bit.
-    queue.asScala.foreach { svc => (new ServiceWrapper(svc)).close() }
+    queue.asScala.foreach { svc =>
+      (new ServiceWrapper(svc)).close()
+    }
     queue.clear()
-
 
     // Close the underlying factory.
     factory.close(deadline)

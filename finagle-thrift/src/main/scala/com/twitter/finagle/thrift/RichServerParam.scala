@@ -30,12 +30,20 @@ case class RichServerParam(
     maxThriftBufferSize: Int,
     serverStats: StatsReceiver,
     responseClassifier: ResponseClassifier
-  ) = this(protocolFactory, serviceName, maxThriftBufferSize, serverStats, responseClassifier, false)
+  ) =
+    this(protocolFactory, serviceName, maxThriftBufferSize, serverStats, responseClassifier, false)
 
   def this(
     protocolFactory: TProtocolFactory,
     maxThriftBufferSize: Int
-  ) = this(protocolFactory, "thrift", maxThriftBufferSize, LoadedStatsReceiver, ResponseClassifier.Default)
+  ) =
+    this(
+      protocolFactory,
+      "thrift",
+      maxThriftBufferSize,
+      LoadedStatsReceiver,
+      ResponseClassifier.Default
+    )
 
   def this(
     protocolFactory: TProtocolFactory
@@ -66,8 +74,13 @@ case class RichServerParam(
    * We keep other fields as user defined by doing reflection, alter the `stringLengthLimit_`
    * if the system property readLength is more restricted
    */
-  @deprecated("Use TBinaryProtocol.Factory(readLengthLimit, NoReadLimit) to set readLengthLimit", "2018-03-09")
-  private def restrictedTBinaryProtocolFactory(tbf: TBinaryProtocol.Factory): TBinaryProtocol.Factory = {
+  @deprecated(
+    "Use TBinaryProtocol.Factory(readLengthLimit, NoReadLimit) to set readLengthLimit",
+    "2018-03-09"
+  )
+  private def restrictedTBinaryProtocolFactory(
+    tbf: TBinaryProtocol.Factory
+  ): TBinaryProtocol.Factory = {
     try {
       val strictReadField = tbf.getClass.getDeclaredField("strictRead_")
       strictReadField.setAccessible(true)
@@ -102,8 +115,13 @@ case class RichServerParam(
    * We keep other fields as user defined by doing reflection, alter the `stringLengthLimit_`
    * if the system property readLength is more restricted
    */
-  @deprecated("Use TBinaryProtocol.Factory(readLengthLimit, NoReadLimit) to set readLengthLimit", "2018-03-09")
-  private def restrictedTCompactProtocolFactory(tcf: TCompactProtocol.Factory): TCompactProtocol.Factory = {
+  @deprecated(
+    "Use TBinaryProtocol.Factory(readLengthLimit, NoReadLimit) to set readLengthLimit",
+    "2018-03-09"
+  )
+  private def restrictedTCompactProtocolFactory(
+    tcf: TCompactProtocol.Factory
+  ): TCompactProtocol.Factory = {
     try {
       val stringLengthLimitField = tcf.getClass.getDeclaredField("stringLengthLimit_")
       stringLengthLimitField.setAccessible(true)

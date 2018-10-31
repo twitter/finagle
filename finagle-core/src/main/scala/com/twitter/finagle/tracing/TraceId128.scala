@@ -21,7 +21,8 @@ object TraceId128 {
         Some(SpanId(java.lang.Long.parseUnsignedLong(lower64Bits, 16)))
 
       val high =
-        if (length == 32) Some(SpanId(java.lang.Long.parseUnsignedLong(spanId.substring(0, 16), 16)))
+        if (length == 32)
+          Some(SpanId(java.lang.Long.parseUnsignedLong(spanId.substring(0, 16), 16)))
         else None
 
       TraceId128(low, high)

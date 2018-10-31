@@ -271,7 +271,8 @@ object Stack {
   }
 
   private case class Leaf[T](head: Stack.Head, t: T) extends Stack[T]
-  private case class Node[T](head: Stack.Head, mk: (Params, Stack[T]) => Stack[T], next: Stack[T]) extends Stack[T]
+  private case class Node[T](head: Stack.Head, mk: (Params, Stack[T]) => Stack[T], next: Stack[T])
+      extends Stack[T]
 
   /**
    * Nodes materialize by transforming the underlying stack in
@@ -327,8 +328,8 @@ object Stack {
     def default: P
 
     /**
-      * Compatibility method so the Param value is accessible from Java.
-      */
+     * Compatibility method so the Param value is accessible from Java.
+     */
     final def getDefault: P = default
 
     /**
@@ -645,6 +646,7 @@ abstract class StackTransformer extends Stack.Transformer {
  * `Stack.Params` forwarder to provide a clean Java API.
  */
 object StackParams {
+
   /**
    * Same as [[Stack.Params.empty]].
    */

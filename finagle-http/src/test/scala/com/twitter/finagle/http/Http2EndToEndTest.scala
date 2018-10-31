@@ -156,34 +156,43 @@ class Http2EndToEndTest extends AbstractHttp2EndToEndTest {
   }
 
   if (!sys.props.contains("SKIP_FLAKY_TRAVIS"))
-  test("The upgrade request is ineligible for flow control") {
-    val server = serverImpl()
-      .withMaxHeaderSize(1.kilobyte)
-      .serve("localhost:*", Service.mk[Request, Response] { _ =>
-        // we need to make this slow or else it'll race the window updating
-        Future.sleep(50.milliseconds)(DefaultTimer).map(_ => Response())
-      })
+    test("The upgrade request is ineligible for flow control") {
+      val server = serverImpl()
+        .withMaxHeaderSize(1.kilobyte)
+        .serve(
+          "localhost:*",
+          Service.mk[Request, Response] { _ =>
+            // we need to make this slow or else it'll race the window updating
+            Future.sleep(50.milliseconds)(DefaultTimer).map(_ => Response())
+          }
+        )
 
-    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-    val client = clientImpl()
-      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+      val client = clientImpl()
+        .newService(s"${addr.getHostName}:${addr.getPort}", "client")
 
-    val request = Request(Method.Post, "/")
-    // send a request that the client *should* have fragmented if it was
-    // sending an http/2 message
-    request.content = Buf.Utf8("*" * 70000)
+      val request = Request(Method.Post, "/")
+      // send a request that the client *should* have fragmented if it was
+      // sending an http/2 message
+      request.content = Buf.Utf8("*" * 70000)
 
-    // check that this doesn't throw an exception
-    val rep = await(client(request))
-    assert(rep.status == Status.Ok)
-  }
+      // check that this doesn't throw an exception
+      val rep = await(client(request))
+      assert(rep.status == Status.Ok)
+    }
 
   test("Upgrades to HTTP/2 only if both have the toggle on, and it's H2C, not H2") {
     for {
       clientUseHttp2 <- Seq(1D, 0D)
       serverUseHttp2 <- Seq(1D, 0D)
-      clientToggleName <- Seq("com.twitter.finagle.http.UseH2", "com.twitter.finagle.http.UseH2CClients")
-      serverToggleName <- Seq("com.twitter.finagle.http.UseH2", "com.twitter.finagle.http.UseH2CServers")
+      clientToggleName <- Seq(
+        "com.twitter.finagle.http.UseH2",
+        "com.twitter.finagle.http.UseH2CClients"
+      )
+      serverToggleName <- Seq(
+        "com.twitter.finagle.http.UseH2",
+        "com.twitter.finagle.http.UseH2CServers"
+      )
     } {
       val sr = new InMemoryStatsReceiver()
       val server = overrides.let(Map(serverToggleName -> serverUseHttp2)) {
@@ -200,16 +209,18 @@ class Http2EndToEndTest extends AbstractHttp2EndToEndTest {
       }
       val rep = client(Request("/"))
       await(rep)
-      if (
-        clientUseHttp2 == 1.0 &&
-          serverUseHttp2 == 1.0 &&
-          clientToggleName == "com.twitter.finagle.http.UseH2CClients" &&
-          serverToggleName == "com.twitter.finagle.http.UseH2CServers"
-      ) {
-        assert(sr.counters.get(Seq("client", "upgrade", "success")) == Some(1),
-          "Failed to upgrade when both parties were toggled on")
-        assert(sr.counters.get(Seq("server", "upgrade", "success")) == Some(1),
-          "Failed to upgrade when both parties were toggled on")
+      if (clientUseHttp2 == 1.0 &&
+        serverUseHttp2 == 1.0 &&
+        clientToggleName == "com.twitter.finagle.http.UseH2CClients" &&
+        serverToggleName == "com.twitter.finagle.http.UseH2CServers") {
+        assert(
+          sr.counters.get(Seq("client", "upgrade", "success")) == Some(1),
+          "Failed to upgrade when both parties were toggled on"
+        )
+        assert(
+          sr.counters.get(Seq("server", "upgrade", "success")) == Some(1),
+          "Failed to upgrade when both parties were toggled on"
+        )
       } else {
         val clientStatus = if (clientUseHttp2 == 1) "on" else "off"
         val serverStatus = if (serverUseHttp2 == 1) "on" else "off"
@@ -241,16 +252,20 @@ class Http2EndToEndTest extends AbstractHttp2EndToEndTest {
           .withStatsReceiver(sr)
 
         (if (clientUseHttp2 == 1.0) c.withNoHttp2
-        else c.withHttp2)
+         else c.withHttp2)
           .newService(s"${addr.getHostName}:${addr.getPort}", "client")
       }
       val rep = client(Request("/"))
       await(rep)
       if (clientUseHttp2 == 0.0) {
-        assert(sr.counters.get(Seq("client", "upgrade", "success")) == Some(1),
-          "Failed to upgrade when both parties were on")
-        assert(sr.counters.get(Seq("server", "upgrade", "success")) == Some(1),
-          "Failed to upgrade when both parties were on")
+        assert(
+          sr.counters.get(Seq("client", "upgrade", "success")) == Some(1),
+          "Failed to upgrade when both parties were on"
+        )
+        assert(
+          sr.counters.get(Seq("server", "upgrade", "success")) == Some(1),
+          "Failed to upgrade when both parties were on"
+        )
       } else {
         assert(!sr.counters.contains(Seq("client", "upgrade", "success")))
         val serverSuccess = sr.counters.get(Seq("server", "upgrade", "success"))
@@ -271,7 +286,7 @@ class Http2EndToEndTest extends AbstractHttp2EndToEndTest {
           .withLabel("server")
 
         (if (serverUseHttp2 == 1.0) s.withNoHttp2
-        else s.withHttp2)
+         else s.withHttp2)
           .serve("localhost:*", initService)
       }
       val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
@@ -281,10 +296,14 @@ class Http2EndToEndTest extends AbstractHttp2EndToEndTest {
       val rep = client(Request("/"))
       await(rep)
       if (serverUseHttp2 == 0.0) {
-        assert(sr.counters.get(Seq("client", "upgrade", "success")) == Some(1),
-          "Failed to upgrade when both parties were on")
-        assert(sr.counters.get(Seq("server", "upgrade", "success")) == Some(1),
-          "Failed to upgrade when both parties were on")
+        assert(
+          sr.counters.get(Seq("client", "upgrade", "success")) == Some(1),
+          "Failed to upgrade when both parties were on"
+        )
+        assert(
+          sr.counters.get(Seq("server", "upgrade", "success")) == Some(1),
+          "Failed to upgrade when both parties were on"
+        )
       } else {
         assert(sr.counters(Seq("client", "upgrade", "success")) == 0)
         assert(!sr.counters.contains(Seq("server", "upgrade", "success")))
@@ -320,8 +339,7 @@ class Http2EndToEndTest extends AbstractHttp2EndToEndTest {
 
     private[this] val _pending = new AtomicInteger
 
-    private[this] val _ls = finagle.Http.server
-      .withHttp2
+    private[this] val _ls = finagle.Http.server.withHttp2
       .withLabel("server")
       .serve("localhost:*", ref)
 
@@ -335,15 +353,13 @@ class Http2EndToEndTest extends AbstractHttp2EndToEndTest {
     }
   }
 
-
   test("draining servers process pending requests") {
     val srv = new Srv
 
-    val dest = s"${ srv.boundAddr.getHostName }:${ srv.boundAddr.getPort }"
+    val dest = s"${srv.boundAddr.getHostName}:${srv.boundAddr.getPort}"
 
     val client =
-      finagle.Http.client
-        .withHttp2
+      finagle.Http.client.withHttp2
         .withStatsReceiver(statsRecv)
         .newService(dest, "client")
 

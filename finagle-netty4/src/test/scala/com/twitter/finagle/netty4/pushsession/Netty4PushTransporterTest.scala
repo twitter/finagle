@@ -12,7 +12,13 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
 import com.twitter.util._
 import io.netty.buffer.{ByteBuf, Unpooled}
-import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter, ChannelOutboundHandlerAdapter, ChannelPipeline, ChannelPromise}
+import io.netty.channel.{
+  ChannelHandlerContext,
+  ChannelInboundHandlerAdapter,
+  ChannelOutboundHandlerAdapter,
+  ChannelPipeline,
+  ChannelPromise
+}
 import io.netty.handler.codec.MessageToMessageCodec
 import java.net.{InetAddress, InetSocketAddress, ServerSocket, Socket, SocketAddress}
 import java.nio.channels.UnresolvedAddressException
@@ -236,7 +242,9 @@ class Netty4PushTransporterTest extends FunSuite with Eventually with Integratio
       }
     ) {
 
-      override protected def makeSession(handle: PushChannelHandle[String, String]): Future[TestSession[String, String]] = {
+      override protected def makeSession(
+        handle: PushChannelHandle[String, String]
+      ): Future[TestSession[String, String]] = {
         val p = Promise[TestSession[String, String]]()
         // We don't resolve the session until the handle closes due to the exception
         handle.onClose.ensure {

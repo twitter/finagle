@@ -8,9 +8,7 @@ class ConnectPromiseDelayListenersTest extends FunSuite {
 
   import ConnectPromiseDelayListeners._
 
-  class Ctx
-      extends ChannelOutboundHandlerAdapter
-      with BufferingChannelOutboundHandler {
+  class Ctx extends ChannelOutboundHandlerAdapter with BufferingChannelOutboundHandler {
 
     val channel = new EmbeddedChannel(this)
 

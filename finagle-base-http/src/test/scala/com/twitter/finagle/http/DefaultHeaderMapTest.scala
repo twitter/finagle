@@ -10,40 +10,46 @@ class DefaultHeaderMapTest extends AbstractHeaderMapTest with GeneratorDrivenPro
   def genNonEmptyString: Gen[String] =
     Gen.nonEmptyListOf(Gen.choose('a', 'z')).map(s => new String(s.toArray))
 
-  def genValidHeader: Gen[(String, String)] = for {
-    k <- genNonEmptyString
-    v1 <- genNonEmptyString
-    x <- Gen.oneOf("\r\n ", "\r\n\t")
-    v2 <-  genNonEmptyString
-  } yield (k, v1 + x + v2)
+  def genValidHeader: Gen[(String, String)] =
+    for {
+      k <- genNonEmptyString
+      v1 <- genNonEmptyString
+      x <- Gen.oneOf("\r\n ", "\r\n\t")
+      v2 <- genNonEmptyString
+    } yield (k, v1 + x + v2)
 
-  def genInvalidHeaderName: Gen[(String, String)] = for {
-    (k, v) <- genValidHeader
-    c <- Gen.oneOf(Seq[Char]('\t', '\n', '\f', '\r', ' ', ',', ':', ';', '=', 0x0b))
-  } yield (k + c, v)
+  def genInvalidHeaderName: Gen[(String, String)] =
+    for {
+      (k, v) <- genValidHeader
+      c <- Gen.oneOf(Seq[Char]('\t', '\n', '\f', '\r', ' ', ',', ':', ';', '=', 0x0b))
+    } yield (k + c, v)
 
-  def genNonAsciiHeaderName: Gen[(String, String)] = for {
-    (k, v) <- genValidHeader
-    c <- Gen.choose[Char](128, Char.MaxValue)
-  } yield (k + c, v)
+  def genNonAsciiHeaderName: Gen[(String, String)] =
+    for {
+      (k, v) <- genValidHeader
+      c <- Gen.choose[Char](128, Char.MaxValue)
+    } yield (k + c, v)
 
-  def genInvalidHeaderValue: Gen[(String, String)] = for {
-    (k, v) <- genValidHeader
-    c <- Gen.oneOf(Seq[Char]('\f', 0x0b))
-  } yield (k, v + c)
+  def genInvalidHeaderValue: Gen[(String, String)] =
+    for {
+      (k, v) <- genValidHeader
+      c <- Gen.oneOf(Seq[Char]('\f', 0x0b))
+    } yield (k, v + c)
 
-  def genInvalidClrfHeaderValue: Gen[(String, String)] = for {
-    (k, v) <- genValidHeader
-    c <- Gen.oneOf("\rx", "\nx", "\r", "\n")
-  } yield (k, v + c)
+  def genInvalidClrfHeaderValue: Gen[(String, String)] =
+    for {
+      (k, v) <- genValidHeader
+      c <- Gen.oneOf("\rx", "\nx", "\r", "\n")
+    } yield (k, v + c)
 
   test("apply()") {
     assert(DefaultHeaderMap().isEmpty)
   }
 
   test("validates header names & values (success)") {
-    forAll(genValidHeader) { case (k, v) =>
-      assert(DefaultHeaderMap(k -> v).get(k).contains(v))
+    forAll(genValidHeader) {
+      case (k, v) =>
+        assert(DefaultHeaderMap(k -> v).get(k).contains(v))
     }
   }
 
@@ -95,9 +101,10 @@ class DefaultHeaderMapTest extends AbstractHeaderMapTest with GeneratorDrivenPro
   }
 
   test("getOrNull acts as get().orNull") {
-    forAll(genValidHeader) { case (k, v) =>
-      val h = DefaultHeaderMap(k -> v)
-      assert(h.getOrNull(k) == h.get(k).orNull)
+    forAll(genValidHeader) {
+      case (k, v) =>
+        val h = DefaultHeaderMap(k -> v)
+        assert(h.getOrNull(k) == h.get(k).orNull)
     }
 
     val empty = DefaultHeaderMap()

@@ -70,8 +70,9 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
     }
 
     val counterLines =
-      counterValues.map { case (k, v) =>
-        (variableName(k), v.get.toString)
+      counterValues.map {
+        case (k, v) =>
+          (variableName(k), v.get.toString)
       }.toSeq
     val statLines = statValues.map {
       case (k, xs) =>

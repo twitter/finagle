@@ -31,7 +31,8 @@ case class RichClientParam(
     maxThriftBufferSize: Int,
     responseClassifier: ResponseClassifier,
     clientStats: StatsReceiver
-  ) = this(protocolFactory, serviceName, maxThriftBufferSize, responseClassifier, clientStats, false)
+  ) =
+    this(protocolFactory, serviceName, maxThriftBufferSize, responseClassifier, clientStats, false)
 
   def this(
     protocolFactory: TProtocolFactory,
@@ -73,8 +74,13 @@ case class RichClientParam(
    * We keep other fields as user defined by doing reflection, alter the `stringLengthLimit_`
    * if the system property readLength is more restricted
    */
-  @deprecated("Use TBinaryProtocol.Factory(readLengthLimit, NoReadLimit) to set readLengthLimit", "2018-03-09")
-  private def restrictedTBinaryProtocolFactory(tbf: TBinaryProtocol.Factory): TBinaryProtocol.Factory = {
+  @deprecated(
+    "Use TBinaryProtocol.Factory(readLengthLimit, NoReadLimit) to set readLengthLimit",
+    "2018-03-09"
+  )
+  private def restrictedTBinaryProtocolFactory(
+    tbf: TBinaryProtocol.Factory
+  ): TBinaryProtocol.Factory = {
     try {
       val strictReadField = tbf.getClass.getDeclaredField("strictRead_")
       strictReadField.setAccessible(true)
@@ -109,8 +115,13 @@ case class RichClientParam(
    * We keep other fields as user defined by doing reflection, alter the `stringLengthLimit_`
    * if the system property readLength is more restricted
    */
-  @deprecated("Use TBinaryProtocol.Factory(readLengthLimit, NoReadLimit) to set readLengthLimit", "2018-03-09")
-  private def restrictedTCompactProtocolFactory(tcf: TCompactProtocol.Factory): TCompactProtocol.Factory = {
+  @deprecated(
+    "Use TBinaryProtocol.Factory(readLengthLimit, NoReadLimit) to set readLengthLimit",
+    "2018-03-09"
+  )
+  private def restrictedTCompactProtocolFactory(
+    tcf: TCompactProtocol.Factory
+  ): TCompactProtocol.Factory = {
     try {
       val stringLengthLimitField = tcf.getClass.getDeclaredField("stringLengthLimit_")
       stringLengthLimitField.setAccessible(true)

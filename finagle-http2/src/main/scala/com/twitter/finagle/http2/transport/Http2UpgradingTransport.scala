@@ -52,9 +52,14 @@ private[http2] final class Http2UpgradingTransport(
     p.updateIfEmpty(Throw(UpgradeIgnoredException))
   }
 
-  private[this] def upgradeSuccessful(session: ClientSession, firstStream: Transport[Any, Any]): Unit = {
+  private[this] def upgradeSuccessful(
+    session: ClientSession,
+    firstStream: Transport[Any, Any]
+  ): Unit = {
     // This removes us from the transport pathway
-    ref.update { _ => firstStream }
+    ref.update { _ =>
+      firstStream
+    }
 
     // Let the `Http2Transporter` know about the shiny new h2 session.
     // We need to do this *after* taking the first stream.
@@ -96,7 +101,9 @@ private[http2] object Http2UpgradingTransport {
    * The lambda carries the logic necessary to generate a `ClientSession` and the first `Transport`
    * that represents the stream of the upgrade request.
    */
-  case class UpgradeSuccessful(makeSession: Transport[Any, Any] => (ClientSession, Transport[Any, Any])) extends UpgradeResult
+  case class UpgradeSuccessful(
+    makeSession: Transport[Any, Any] => (ClientSession, Transport[Any, Any])
+  ) extends UpgradeResult
 
   /** Signals that the h2c upgrade was rejected or ignored by the peer. */
   case object UpgradeRejected extends UpgradeResult
@@ -114,7 +121,10 @@ private[http2] object Http2UpgradingTransport {
       new ClosedWhileUpgradingException(newFlags)
   }
 
-  object UpgradeIgnoredException extends Exception("Upgrade not attempted") with HasLogLevel with NoStackTrace {
+  object UpgradeIgnoredException
+      extends Exception("Upgrade not attempted")
+      with HasLogLevel
+      with NoStackTrace {
     override def logLevel: Level = Level.DEBUG
   }
 }

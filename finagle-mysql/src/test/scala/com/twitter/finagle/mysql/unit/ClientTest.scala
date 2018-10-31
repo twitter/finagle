@@ -62,8 +62,10 @@ class ClientTest extends FunSuite with MockitoSugar with MustMatchers {
     }
   }
 
-  test("WrappedChannelClosedException.unapply returns Some(outer exception) for CCEs nested one " +
-    "level down") {
+  test(
+    "WrappedChannelClosedException.unapply returns Some(outer exception) for CCEs nested one " +
+      "level down"
+  ) {
     val exceptionInner = new Exception("inner")
     val exceptionMiddle = new ChannelClosedException(exceptionInner, null)
     val exceptionOuter = new Exception("outer", exceptionMiddle)
@@ -74,8 +76,10 @@ class ClientTest extends FunSuite with MockitoSugar with MustMatchers {
     }
   }
 
-  test("WrappedChannelClosedException.unapply returns Some(outer exception) for CCEs nested two " +
-    "levels down") {
+  test(
+    "WrappedChannelClosedException.unapply returns Some(outer exception) for CCEs nested two " +
+      "levels down"
+  ) {
     val exceptionInner = new ChannelClosedException()
     val exceptionMiddle = new Exception("middle", exceptionInner)
     val exceptionOuter = new Exception("outer", exceptionMiddle)

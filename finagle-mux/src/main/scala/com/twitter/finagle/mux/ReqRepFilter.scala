@@ -13,7 +13,7 @@ private[finagle] object ReqRepFilter {
     case Message.RreqError(_, error) =>
       Throw(ServerApplicationError(error))
 
-    case r@ Message.RdispatchOk(_, _, rep) =>
+    case r @ Message.RdispatchOk(_, _, rep) =>
       Return(Response(ReqRepHeaders.responseHeaders(r), rep))
 
     case Message.RdispatchError(_, contexts, error) =>

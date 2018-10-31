@@ -14,15 +14,17 @@ class Netty3CookieMapTest extends CookieMapTest(Netty3CookieCodec, "netty 3") {
     } {
       test(s"$what with flag supportSameSiteCodec = $sameSiteCodec") {
         supportSameSiteCodec.let(sameSiteCodec) {
-            f
-          }
+          f
+        }
       }
     }
   }
 
   def testCookies(newMessage: () => Message, headerName: String, messageType: String): Unit = {
-    toggledTest(s"Adding a $messageType cookie header with attributes adds the cookie with the " +
-      "attributes") {
+    toggledTest(
+      s"Adding a $messageType cookie header with attributes adds the cookie with the " +
+        "attributes"
+    ) {
       val message = newMessage()
       lazy val cookieMap = new CookieMap(message, Netty3CookieCodec)
       message.headerMap.set(headerName, "name=value; Max-Age=23; Domain=.example.com; Path=/")
@@ -129,7 +131,8 @@ class Netty3CookieMapTest extends CookieMapTest(Netty3CookieCodec, "netty 3") {
       supportSameSiteCodec.let(true) {
         val response = Response()
 
-        response.headerMap.set("Set-Cookie", s"foo=bar; baz=qux;${sameSiteToString(sameSite)} quux=quuz")
+        response.headerMap
+          .set("Set-Cookie", s"foo=bar; baz=qux;${sameSiteToString(sameSite)} quux=quuz")
 
         val results = List(
           List("quux", "quuz", SameSite.Unset),

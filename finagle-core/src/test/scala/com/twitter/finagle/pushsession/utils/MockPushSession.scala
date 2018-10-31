@@ -5,7 +5,8 @@ import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession}
 import com.twitter.util.{Future, Time}
 import scala.collection.mutable
 
-class MockPushSession[In, Out](handle: PushChannelHandle[In, Out]) extends PushSession[In, Out](handle) {
+class MockPushSession[In, Out](handle: PushChannelHandle[In, Out])
+    extends PushSession[In, Out](handle) {
 
   val received: mutable.Queue[In] = mutable.Queue.empty[In]
 

@@ -147,7 +147,8 @@ final class PubSubClientIntegrationSuite2 extends RedisClientTest {
     // We want subscription updates to be atomic so access to these
     // two collections are mediated by the `lock`.
     private[this] val lock = new Object
-    private[this] val q = collection.mutable.HashMap[String, Promise[(String, String, Option[String])]]()
+    private[this] val q =
+      collection.mutable.HashMap[String, Promise[(String, String, Option[String])]]()
     private[this] val c = collection.mutable.HashMap[String, AtomicInteger]()
 
     def subscribe(channels: Seq[Buf]): Map[Buf, Throwable] = {
@@ -205,7 +206,8 @@ final class PubSubClientIntegrationSuite2 extends RedisClientTest {
       message
     }
 
-    def recvCount(message: String): Int = lock.synchronized(c.get(message)).map(_.get()).getOrElse(0)
+    def recvCount(message: String): Int =
+      lock.synchronized(c.get(message)).map(_.get()).getOrElse(0)
 
     private[this] def nextMessage: String = "message-" + i.incrementAndGet()
   }

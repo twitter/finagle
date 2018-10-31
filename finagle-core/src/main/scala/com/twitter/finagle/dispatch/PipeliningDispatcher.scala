@@ -117,7 +117,10 @@ object GenPipeliningDispatcher {
   private case class Pending[T, Rep](value: T, promise: Promise[Rep])
 
   private def stalledPipelineException(timeout: Duration) =
-    Failure(s"The connection pipeline could not make progress in $timeout", FailureFlags.Interrupted)
+    Failure(
+      s"The connection pipeline could not make progress in $timeout",
+      FailureFlags.Interrupted
+    )
 
   object Timeout {
     def unapply(t: Throwable): Option[Throwable] = t match {

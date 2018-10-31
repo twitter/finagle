@@ -24,13 +24,15 @@ import java.util.concurrent.atomic.AtomicReference
 private[http2] final class PriorKnowledgeTransporter(
   underlying: Transporter[Any, Any, TransportContext],
   params: Stack.Params
-) extends Transporter[Any, Any, TransportContext] with MultiplexTransporter { self =>
+) extends Transporter[Any, Any, TransportContext]
+    with MultiplexTransporter { self =>
 
   private[this] val log = Logger.get()
   private[this] val Stats(statsReceiver) = params[Stats]
   private[this] val upgradeCounter = statsReceiver.scope("upgrade").counter("success")
   private[this] val timer = params[TimerParam].timer
-  private[this] val cachedSession = new AtomicReference[Option[Future[StreamTransportFactory]]](None)
+  private[this] val cachedSession =
+    new AtomicReference[Option[Future[StreamTransportFactory]]](None)
 
   def remoteAddress: SocketAddress = underlying.remoteAddress
 

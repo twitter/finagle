@@ -23,8 +23,9 @@ private[mux] object ContextCodec {
   def encodedLength(iter: Iterator[(Buf, Buf)]): Int = {
     var n = 0
     while (iter.hasNext) {
-      iter.next() match { case (k, v) =>
-        n += 2 + k.length + 2 + v.length
+      iter.next() match {
+        case (k, v) =>
+          n += 2 + k.length + 2 + v.length
       }
     }
     n
@@ -55,7 +56,11 @@ private[mux] object ContextCodec {
     acc
   }
 
-  private def decodeToBuffer(br: ByteReader, maxContexts: Int, contexts: ArrayBuffer[(Buf, Buf)]): Unit =
+  private def decodeToBuffer(
+    br: ByteReader,
+    maxContexts: Int,
+    contexts: ArrayBuffer[(Buf, Buf)]
+  ): Unit =
     while (contexts.length < maxContexts && br.remaining > 0) {
       val k = br.readBytes(br.readShortBE())
       val v = br.readBytes(br.readShortBE())

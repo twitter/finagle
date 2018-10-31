@@ -21,7 +21,7 @@ private[http] object Netty3CookieCodec extends CookieCodec {
   private[this] val netty3Decoder = new NettyCookieDecoder
 
   def encodeClient(cookies: Iterable[Cookie]): String = {
-    val encoder = new NettyCookieEncoder(false /* encode client-style cookies */)
+    val encoder = new NettyCookieEncoder(false /* encode client-style cookies */ )
     cookies.foreach { cookie =>
       encoder.addCookie(Bijections.from[Cookie, Netty3Cookie](cookie))
     }
@@ -29,7 +29,7 @@ private[http] object Netty3CookieCodec extends CookieCodec {
   }
 
   def encodeServer(cookie: Cookie): String = {
-    val encoder = new NettyCookieEncoder(true /* encode server-style cookies */)
+    val encoder = new NettyCookieEncoder(true /* encode server-style cookies */ )
     encoder.addCookie(Bijections.from[Cookie, Netty3Cookie](cookie))
     val encoded = encoder.encode()
     if (CookieMap.includeSameSite) SameSiteCodec.encodeSameSite(cookie, encoded)

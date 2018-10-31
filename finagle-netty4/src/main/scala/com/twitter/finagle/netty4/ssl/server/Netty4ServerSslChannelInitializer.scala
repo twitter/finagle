@@ -3,7 +3,11 @@ package com.twitter.finagle.netty4.ssl.server
 import com.twitter.finagle.netty4.ssl.{Alpn, Netty4SslHandler}
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.ssl.{ApplicationProtocols, Engine}
-import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerEngineFactory, SslServerSessionVerifier}
+import com.twitter.finagle.ssl.server.{
+  SslServerConfiguration,
+  SslServerEngineFactory,
+  SslServerSessionVerifier
+}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Address, Stack}
 import io.netty.channel.{Channel, ChannelInitializer, ChannelPipeline}
@@ -81,7 +85,6 @@ final private[finagle] class Netty4ServerSslChannelInitializer(params: Stack.Par
       if (ch.remoteAddress == null || !ch.remoteAddress.isInstanceOf[InetSocketAddress])
         Address.failing
       else Address(ch.remoteAddress.asInstanceOf[InetSocketAddress])
-
 
     val Transport.ServerSsl(configuration) = params[Transport.ServerSsl]
 

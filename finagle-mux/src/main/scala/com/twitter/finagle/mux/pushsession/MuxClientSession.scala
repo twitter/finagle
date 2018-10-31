@@ -135,8 +135,9 @@ private[finagle] final class MuxClientSession(
       if (message != null && !isDrained) {
         handleProcessMessage(message)
       }
-    } catch { case NonFatal(t) =>
-      handleShutdown(Some(t))
+    } catch {
+      case NonFatal(t) =>
+        handleShutdown(Some(t))
     }
   }
 

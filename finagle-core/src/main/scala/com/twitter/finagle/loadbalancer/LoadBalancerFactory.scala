@@ -189,13 +189,15 @@ object LoadBalancerFactory {
 
       val _dest = params[Dest].va
       val count = params[ReplicateAddresses].count
-      val dest = if (count == 1) _dest else {
-        val f = ReplicateAddresses.replicateFunc(count)
-        _dest.map {
-          case bound@Addr.Bound(set, _) => bound.copy(addrs = set.flatMap(f))
-          case addr => addr
+      val dest =
+        if (count == 1) _dest
+        else {
+          val f = ReplicateAddresses.replicateFunc(count)
+          _dest.map {
+            case bound @ Addr.Bound(set, _) => bound.copy(addrs = set.flatMap(f))
+            case addr => addr
+          }
         }
-      }
 
       val Param(loadBalancerFactory) = params[Param]
       val EnableProbation(probationEnabled) = params[EnableProbation]

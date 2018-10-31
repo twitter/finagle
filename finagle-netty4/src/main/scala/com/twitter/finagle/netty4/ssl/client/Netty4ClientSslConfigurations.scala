@@ -34,7 +34,10 @@ private[finagle] object Netty4ClientSslConfigurations {
     // don't use NPN because https://github.com/netty/netty/issues/7346 breaks
     // web crawlers
     Netty4SslConfigurations.configureApplicationProtocols(
-      builder, applicationProtocols, Protocol.ALPN)
+      builder,
+      applicationProtocols,
+      Protocol.ALPN
+    )
   }
 
   /**
@@ -78,9 +81,8 @@ private[finagle] object Netty4ClientSslConfigurations {
     val builder = startClientWithKey(config.keyCredentials)
     val withProvider = Netty4SslConfigurations.configureProvider(builder, forceJdk)
     val withTrust = Netty4SslConfigurations.configureTrust(withProvider, config.trustCredentials)
-    val withAppProtocols = configureClientApplicationProtocols(
-      withTrust,
-      config.applicationProtocols)
+    val withAppProtocols =
+      configureClientApplicationProtocols(withTrust, config.applicationProtocols)
     withAppProtocols.build()
   }
 

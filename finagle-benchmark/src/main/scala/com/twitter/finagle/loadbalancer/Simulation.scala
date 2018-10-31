@@ -16,8 +16,16 @@ private object Simulation extends com.twitter.app.App {
 
   val coldStartBackend = flag("coldstart", false, "Add a cold starting backend")
   val slowMiddleBackend = flag("slowmiddle", false, "Adds a fast-then-slow-then-fast again backend")
-  val temporarilyFailedBackend = flag("temporaryfailure", false, "Adds an unhealthy backend that temporarily fails after 10 seconds for 15 seconds")
-  val permanentlyFailedBackend = flag("permanentfailure", false, "Adds an unhealthy backend that permanently fails after 10 seconds")
+  val temporarilyFailedBackend = flag(
+    "temporaryfailure",
+    false,
+    "Adds an unhealthy backend that temporarily fails after 10 seconds for 15 seconds"
+  )
+  val permanentlyFailedBackend = flag(
+    "permanentfailure",
+    false,
+    "Adds an unhealthy backend that permanently fails after 10 seconds"
+  )
 
   val showProgress = flag("showprogress", false, "Print stats each second")
   val showSummary = flag("showsummary", true, "Print a stats summary at the end of the test")

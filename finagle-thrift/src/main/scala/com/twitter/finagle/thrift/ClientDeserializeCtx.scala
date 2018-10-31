@@ -17,7 +17,7 @@ import com.twitter.util.Try
  * to code via `Contexts.local(ClientDeserializeCtx.Key)`.
  */
 class ClientDeserializeCtx[Rep](val request: Any, replyDeserializer: Array[Byte] => Try[Rep])
-  extends (Array[Byte] => ReqRep) {
+    extends (Array[Byte] => ReqRep) {
 
   // thread safety provided via synchronization on this
   private[this] var deserialized: Try[Rep] = null

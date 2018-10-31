@@ -645,9 +645,10 @@ protected class ConnectedClient(protected val service: Service[Command, Response
       case Return(Error(e)) => throw e
       case Return(ValuesAndErrors(values, errors)) =>
         val hits: Map[String, Value] = hitsFromValues(values)
-        val failures = errors.map { case (buf, e) =>
-          val Buf.Utf8(keyStr) = buf
-          (keyStr, e)
+        val failures = errors.map {
+          case (buf, e) =>
+            val Buf.Utf8(keyStr) = buf
+            (keyStr, e)
         }
         val misses = util.NotFound(keys, hits.keySet ++ failures.keySet)
         Future.value(GetResult(hits, misses, failures))

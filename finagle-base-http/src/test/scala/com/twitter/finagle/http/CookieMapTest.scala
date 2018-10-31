@@ -3,14 +3,13 @@ package com.twitter.finagle.http
 import com.twitter.conversions.time._
 import org.scalatest.FunSuite
 
-abstract class CookieMapTest(codec: CookieCodec, codecName: String)
-  extends FunSuite {
+abstract class CookieMapTest(codec: CookieCodec, codecName: String) extends FunSuite {
 
-    test("UseNetty4CookieCodec toggle is defined") {
-      // If the toggle were Toggle.Undefined (private val), this would throw an
-      // UsupportedOperationException
-      assert(CookieMap.UseNetty4CookieCodec(5) || !CookieMap.UseNetty4CookieCodec(5))
-    }
+  test("UseNetty4CookieCodec toggle is defined") {
+    // If the toggle were Toggle.Undefined (private val), this would throw an
+    // UsupportedOperationException
+    assert(CookieMap.UseNetty4CookieCodec(5) || !CookieMap.UseNetty4CookieCodec(5))
+  }
 
   private[this] def testCookies(
     newMessage: () => Message,
@@ -41,8 +40,10 @@ abstract class CookieMapTest(codec: CookieCodec, codecName: String)
       assert(message.headerMap(headerName) == "name=value")
     }
 
-    test(s"$codec: Adding the same cookie object to a CookieMap on a $messageType more than once " +
-      s"results in a $messageType with one cookie") {
+    test(
+      s"$codec: Adding the same cookie object to a CookieMap on a $messageType more than once " +
+        s"results in a $messageType with one cookie"
+    ) {
       val message = newMessage()
       lazy val cookieMap = new CookieMap(message, codec)
       val cookie = new Cookie("name", "value")
@@ -54,8 +55,10 @@ abstract class CookieMapTest(codec: CookieCodec, codecName: String)
       assert(message.headerMap(headerName) == "name=value")
     }
 
-    test(s"$codec: Adding different cookie objects with the same name to a CookieMap on a " +
-      s"$messageType more than once results in a CookieMap with one cookie") {
+    test(
+      s"$codec: Adding different cookie objects with the same name to a CookieMap on a " +
+        s"$messageType more than once results in a CookieMap with one cookie"
+    ) {
       val message = newMessage()
       val cookie = new Cookie("name", "value")
       val cookie2 = new Cookie("name", "value2")
@@ -69,8 +72,10 @@ abstract class CookieMapTest(codec: CookieCodec, codecName: String)
       assert(message.headerMap(headerName) == "name=value2")
     }
 
-    test(s"$codec Adding two cookies with the same name but different domain to a $messageType " +
-      "adds both cookies") {
+    test(
+      s"$codec Adding two cookies with the same name but different domain to a $messageType " +
+        "adds both cookies"
+    ) {
       val message = newMessage()
       val cookie = new Cookie("name", "value").domain(Some("foo"))
       val cookie2 = new Cookie("name", "value2").domain(Some("bar"))
@@ -115,8 +120,10 @@ abstract class CookieMapTest(codec: CookieCodec, codecName: String)
     assert(cookies == "name=value; name2=value2" || cookies == "name2=value2; name=value")
   }
 
-  test("Setting multiple cookies on a Request in a single header with the same name but " +
-    "different values adds all the cookies") {
+  test(
+    "Setting multiple cookies on a Request in a single header with the same name but " +
+      "different values adds all the cookies"
+  ) {
     val request = Request()
     request.headerMap.set("Cookie", "name=value2; name=value;")
 
@@ -188,8 +195,10 @@ abstract class CookieMapTest(codec: CookieCodec, codecName: String)
     assert(headers.contains("HTTPOnly"))
   }
 
-  test(s"$codec: Adding multiple Set-Cookie headers to a Response with the same name but " +
-    "different value adds only one Cookie") {
+  test(
+    s"$codec: Adding multiple Set-Cookie headers to a Response with the same name but " +
+      "different value adds only one Cookie"
+  ) {
     val response = Response()
     response.headerMap.add("Set-Cookie", "name=value")
     response.headerMap.add("Set-Cookie", "name=value2")
@@ -200,8 +209,10 @@ abstract class CookieMapTest(codec: CookieCodec, codecName: String)
     assert(cookies.contains(new Cookie("name", "value2")))
   }
 
-  test(s"$codec: Adding a cookie to a Response with an existing cookie adds it to the header " +
-    "and cookies") {
+  test(
+    s"$codec: Adding a cookie to a Response with an existing cookie adds it to the header " +
+      "and cookies"
+  ) {
     val response = Response()
     response.headerMap.set("Set-Cookie", "name=value")
     lazy val cookieMap = new CookieMap(response, codec)

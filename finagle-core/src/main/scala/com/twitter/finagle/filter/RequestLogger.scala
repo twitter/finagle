@@ -1,6 +1,13 @@
 package com.twitter.finagle.filter
 
-import com.twitter.finagle.{ClientConnection, Service, ServiceFactory, ServiceFactoryProxy, ServiceProxy, Stack}
+import com.twitter.finagle.{
+  ClientConnection,
+  Service,
+  ServiceFactory,
+  ServiceFactoryProxy,
+  ServiceProxy,
+  Stack
+}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.logging.{Level, Logger}
 import com.twitter.util.{Future, Stopwatch}
@@ -53,8 +60,7 @@ object RequestLogger {
               } else {
                 val startNanos = requestLogger.start()
                 try requestLogger.endAsync(startNanos, super.apply(request))
-                finally
-                  requestLogger.endSync(startNanos)
+                finally requestLogger.endSync(startNanos)
               }
             }
           }

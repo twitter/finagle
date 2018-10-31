@@ -23,7 +23,7 @@ class ServerAdmissionControlParams[A <: Stack.Parameterized[A]](self: Stack.Para
    */
   def concurrencyLimit(maxConcurrentRequests: Int): A =
     self.configured(PendingRequestFilter.Param(Some(maxConcurrentRequests)))
-  
+
   def concurrencyLimit(maxConcurrentRequests: Int, maxWaiters: Int): A =
     if (maxWaiters == 0) {
       // Don't need the overhead the a queue in AsyncSemaphore if maxWaiters is 0. Performance

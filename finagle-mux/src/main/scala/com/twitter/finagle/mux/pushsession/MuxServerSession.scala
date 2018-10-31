@@ -28,17 +28,18 @@ private[finagle] final class MuxServerSession(
   import MuxServerSession._
 
   // These are the locals we need to have set on each dispatch
-  private[this] val locals: () => Local.Context = () => Local.letClear {
-    val remoteAddressLocal = Contexts.local
-      .KeyValuePair(RemoteInfo.Upstream.AddressCtx, handle.remoteAddress)
-    val peerCertLocal = handle.peerCertificate.map(
-      Contexts.local.KeyValuePair(Transport.peerCertCtx, _))
+  private[this] val locals: () => Local.Context = () =>
+    Local.letClear {
+      val remoteAddressLocal = Contexts.local
+        .KeyValuePair(RemoteInfo.Upstream.AddressCtx, handle.remoteAddress)
+      val peerCertLocal =
+        handle.peerCertificate.map(Contexts.local.KeyValuePair(Transport.peerCertCtx, _))
 
-    Trace.letTracer(params[param.Tracer].tracer) {
-      Contexts.local.let(Seq(remoteAddressLocal) ++ peerCertLocal) {
-        Local.save()
+      Trace.letTracer(params[param.Tracer].tracer) {
+        Contexts.local.let(Seq(remoteAddressLocal) ++ peerCertLocal) {
+          Local.save()
+        }
       }
-    }
   }
 
   private[this] val exec = handle.serialExecutor
@@ -46,7 +47,14 @@ private[finagle] final class MuxServerSession(
   private[this] val statsReceiver = params[param.Stats].statsReceiver
   private[this] val h_pingManager = params[Mux.param.PingManager].builder(exec, h_messageWriter)
   private[this] val h_tracker = new ServerTracker(
-    exec, locals, service, h_messageWriter, lessor, statsReceiver, handle.remoteAddress)
+    exec,
+    locals,
+    service,
+    h_messageWriter,
+    lessor,
+    statsReceiver,
+    handle.remoteAddress
+  )
 
   // Must only be modified from within the session executor, but can be
   // observed concurrently via status.
@@ -68,8 +76,9 @@ private[finagle] final class MuxServerSession(
     try {
       val message = h_decoder.decode(reader)
       if (message != null) handleMessage(message)
-    } catch { case NonFatal(t) =>
-      handleShutdown(Throw(t))
+    } catch {
+      case NonFatal(t) =>
+        handleShutdown(Throw(t))
     }
   }
 
@@ -125,11 +134,14 @@ private[finagle] final class MuxServerSession(
         // We set a timer to make sure we've drained within the allotted amount of time
         h_tracker.drained.by(params[param.Timer].timer, deadline).respond {
           case Throw(_: TimeoutException) =>
-            exec.execute(new Runnable { def run(): Unit = {
-              val t = new TimeoutException(
-                s"Failed to drain within the deadline $deadline. Tracker state: ${h_tracker.currentState}")
-              handleShutdown(Throw(t))
-            } })
+            exec.execute(new Runnable {
+              def run(): Unit = {
+                val t = new TimeoutException(
+                  s"Failed to drain within the deadline $deadline. Tracker state: ${h_tracker.currentState}"
+                )
+                handleShutdown(Throw(t))
+              }
+            })
 
           case _ => // nop: didn't timeout, so it should have already been handled
         }

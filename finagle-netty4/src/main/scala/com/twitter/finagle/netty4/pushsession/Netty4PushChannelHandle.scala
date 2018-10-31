@@ -1,6 +1,11 @@
 package com.twitter.finagle.netty4.pushsession
 
-import com.twitter.finagle.{ChannelClosedException, ChannelException, Status, UnknownChannelException}
+import com.twitter.finagle.{
+  ChannelClosedException,
+  ChannelException,
+  Status,
+  UnknownChannelException
+}
 import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Logger
@@ -34,8 +39,10 @@ import scala.util.control.NonFatal
  * @see [[com.twitter.finagle.netty4.ssl.client.Netty4ClientSslChannelInitializer]] for the tools
  *     used to initialize TLS and delay the connect promise until negotiation is complete.
  */
-private final class Netty4PushChannelHandle[In, Out] private (ch: Channel, statsReceiver: StatsReceiver)
-    extends PushChannelHandle[In, Out] {
+private final class Netty4PushChannelHandle[In, Out] private (
+  ch: Channel,
+  statsReceiver: StatsReceiver
+) extends PushChannelHandle[In, Out] {
 
   import Netty4PushChannelHandle._
 
@@ -49,7 +56,10 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel, stats
       try tryRun()
       catch {
         case NonFatal(t) =>
-          log.error(t, "Unhandled exception detected in push-session serial executor. Shutting down.")
+          log.error(
+            t,
+            "Unhandled exception detected in push-session serial executor. Shutting down."
+          )
           statsReceiver.counter("push", "unhandled_exceptions", t.getClass.getName).incr()
           // This is happening in the channels event loop so we're thread safe.
           handleFail(Throw(t))
@@ -211,7 +221,6 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel, stats
     })
   }
 
-
   // Must be called from within the serialExecutor
   private def handleFail(cause: Try[Unit]): Unit = {
     if (!failed) {
@@ -219,7 +228,9 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel, stats
       // We trampoline the satisfaction of the close promise to make sure
       // users don't get inadvertent re-entrance due to the continuations
       // attached to the promise potentially being run right away.
-      safeExecutor.safeExecute(new SafeRunnable { def tryRun(): Unit = closePromise.updateIfEmpty(cause) })
+      safeExecutor.safeExecute(new SafeRunnable {
+        def tryRun(): Unit = closePromise.updateIfEmpty(cause)
+      })
 
       close()
     }
@@ -307,7 +318,7 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel, stats
         // This should never happen, so fail aggressively.
         val channelStateMsg =
           "DelayStage has been removed from the pipeline but not drained: " +
-          s"Channel(isOpen: ${ch.isOpen}, isActive: ${ch.isActive})"
+            s"Channel(isOpen: ${ch.isOpen}, isActive: ${ch.isActive})"
 
         val exc = new IllegalStateException(channelStateMsg)
         log.error(exc, channelStateMsg)
@@ -381,8 +392,9 @@ private object Netty4PushChannelHandle {
     if (!ch.eventLoop.inEventLoop) {
       throw new IllegalStateException(
         s"Expected to be called from within the `Channel`s " +
-        s"associated `EventLoop` (${ch.eventLoop}), instead called " +
-        s"from thread ${Thread.currentThread}")
+          s"associated `EventLoop` (${ch.eventLoop}), instead called " +
+          s"from thread ${Thread.currentThread}"
+      )
     }
 
     val p = Promise[T]

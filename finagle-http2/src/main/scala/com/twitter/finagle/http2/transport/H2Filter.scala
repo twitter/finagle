@@ -100,8 +100,10 @@ private[http2] final class H2Filter(timer: Timer) extends ChannelDuplexHandler {
             def run(): Unit = {
               // Write a second GOAWAY with the last observed stream and then
               // close up shop.
-              logger.info("Graceful draining period lapsed. " +
-                "Sending final GOAWAY and closing the connection.")
+              logger.info(
+                "Graceful draining period lapsed. " +
+                  "Sending final GOAWAY and closing the connection."
+              )
               ctx
                 .writeAndFlush(new DefaultHttp2GoAwayFrame(Http2Error.NO_ERROR))
                 .addListener(new ChannelFutureListener {

@@ -19,11 +19,14 @@ import java.util.concurrent.{Executor, Executors, ThreadFactory}
  * more granularly (e.g. [[com.twitter.util.FuturePool]] is a good tool for this).
  */
 case class WorkerPool(eventLoopGroup: EventLoopGroup) {
-  def this(executor: Executor, numWorkers: Int) = this(
-    if (useNativeEpoll() && Epoll.isAvailable) WorkerPool.mkEpollEventLoopGroup(numWorkers, executor)
-    else WorkerPool.mkNioEventLoopGroup(numWorkers, executor))
+  def this(executor: Executor, numWorkers: Int) =
+    this(
+      if (useNativeEpoll() && Epoll.isAvailable)
+        WorkerPool.mkEpollEventLoopGroup(numWorkers, executor)
+      else WorkerPool.mkNioEventLoopGroup(numWorkers, executor)
+    )
 
-  def mk() : (WorkerPool, Stack.Param[WorkerPool]) =
+  def mk(): (WorkerPool, Stack.Param[WorkerPool]) =
     (this, WorkerPool.workerPoolParam)
 }
 
@@ -40,7 +43,8 @@ object WorkerPool {
       /* poolName */ prefix,
       /* daemon */ true,
       /* priority */ Thread.NORM_PRIORITY,
-      /* threadGroup */ threadGroup)
+      /* threadGroup */ threadGroup
+    )
   }
 
   // Netty will create `numWorkers` children in the `EventLoopGroup`. Each `EventLoop` will
@@ -48,8 +52,11 @@ object WorkerPool {
   // Thus, with this configuration, we should not acquire more than `numWorkers`
   // threads from the `executor`.
   implicit val workerPoolParam: Stack.Param[WorkerPool] = Stack.Param(
-    new WorkerPool(Executors.newCachedThreadPool(
-      new BlockingTimeTrackingThreadFactory(mkNettyThreadFactory())), numWorkers()))
+    new WorkerPool(
+      Executors.newCachedThreadPool(new BlockingTimeTrackingThreadFactory(mkNettyThreadFactory())),
+      numWorkers()
+    )
+  )
 
   private[netty4] def mkEpollEventLoopGroup(numWorkers: Int, executor: Executor): EventLoopGroup =
     new EpollEventLoopGroup(numWorkers, executor)

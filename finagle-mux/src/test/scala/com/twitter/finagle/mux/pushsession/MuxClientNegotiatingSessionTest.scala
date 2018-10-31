@@ -66,8 +66,8 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
     params: Params
   ): (MockChannelHandle[ByteReader, Buf], MuxClientNegotiatingSession, InMemoryStatsReceiver) = {
     val handle = new MockChannelHandle[ByteReader, Buf](null)
-    val headers = Mux.Client.headers(
-      params[MaxFrameSize].size, params[OppTls].level.getOrElse(OpportunisticTls.Off))
+    val headers = Mux.Client
+      .headers(params[MaxFrameSize].size, params[OppTls].level.getOrElse(OpportunisticTls.Off))
     val stats = new InMemoryStatsReceiver
     val session = new MuxClientNegotiatingSession(
       handle = handle,
@@ -145,20 +145,21 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
 
     // Server only wants 100 byte chunks, so make the message at lest 150 bytes
     val decoder = new FragmentDecoder(Future.never, NullStatsReceiver)
-    val data = Buf.ByteArray((0 until 150).map(_.toByte):_*)
+    val data = Buf.ByteArray((0 until 150).map(_.toByte): _*)
 
     service.apply(Request(Path(), data))
     handle.serialExecutor.executeAll()
 
     // Chunk 1 shouldn't be a complete message
-    assert(decoder.decode(
-      ByteReader(handle.dequeAndCompleteWrite().foldLeft(Buf.Empty)(_.concat(_)))) == null)
+    assert(
+      decoder
+        .decode(ByteReader(handle.dequeAndCompleteWrite().foldLeft(Buf.Empty)(_.concat(_)))) == null
+    )
 
     handle.serialExecutor.executeAll()
 
     // Chunk 2 should be a complete message
-    decoder.decode(
-      ByteReader(handle.dequeAndCompleteWrite().foldLeft(Buf.Empty)(_.concat(_)))) match {
+    decoder.decode(ByteReader(handle.dequeAndCompleteWrite().foldLeft(Buf.Empty)(_.concat(_)))) match {
       case Tdispatch(_, _, Path(), _, req) => req == data
       case other => fail(s"unexpected message: $other")
     }
@@ -189,8 +190,8 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
   }
 
   test("Handle onClose failure cancels the handshake") {
-    val negotiate: Negotiator = (handle, hs) =>
-      Future.value(new Negotiation.Client(fragmentingParams).negotiate(handle, hs))
+    val negotiate: Negotiator =
+      (handle, hs) => Future.value(new Negotiation.Client(fragmentingParams).negotiate(handle, hs))
 
     val (handle, negotiatingSession, stats) = withMockHandle(negotiate, fragmentingParams)
     assert(stats.gauges(Seq("negotiating")).apply() == 0.0f)

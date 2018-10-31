@@ -242,7 +242,10 @@ class Netty3Listener[In, Out](pipelineFactory: ChannelPipelineFactory, params: S
     }
   }
 
-  private[this] def addFirstSnooperHandlers(pipeline: ChannelPipeline, params: Stack.Params): Unit = {
+  private[this] def addFirstSnooperHandlers(
+    pipeline: ChannelPipeline,
+    params: Stack.Params
+  ): Unit = {
     val channelSnooper = makeChannelSnooper(params)
     for (channelSnooper <- channelSnooper)
       pipeline.addFirst("channelLogger", channelSnooper)
@@ -257,7 +260,10 @@ class Netty3Listener[In, Out](pipelineFactory: ChannelPipelineFactory, params: S
       pipeline.addFirst("channelStatsHandler", channelStatsHandler(statsReceiver))
   }
 
-  private[this] def addLastTimeoutHandlers(pipeline: ChannelPipeline, params: Stack.Params): Unit = {
+  private[this] def addLastTimeoutHandlers(
+    pipeline: ChannelPipeline,
+    params: Stack.Params
+  ): Unit = {
     val Netty3Timer(nettyTimer) = params[Netty3Timer]
     val Transport.Liveness(channelReadTimeout, channelWriteCompletionTimeout, keepAlive) =
       params[Transport.Liveness]

@@ -120,7 +120,9 @@ class Netty4SslTest extends FunSuite with Eventually with IntegrationPatience {
     eventually { assertGaugeIsZero(serverStats, serverTlsConnections) }
   }
 
-  test("Multiple clients and server results in separate client TLS connections incremented and decremented") {
+  test(
+    "Multiple clients and server results in separate client TLS connections incremented and decremented"
+  ) {
     val client1Stats = new InMemoryStatsReceiver
     val client2Stats = new InMemoryStatsReceiver
 

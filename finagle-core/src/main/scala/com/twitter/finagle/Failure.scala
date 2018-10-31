@@ -148,7 +148,6 @@ object Failure {
       FailureFlags.Rejected | FailureFlags.NonRetryable
     )
 
-
   /**
    * Create a new failure with the given cause and flags.
    */

@@ -23,7 +23,7 @@ import scala.util.control.NonFatal
  * - `negotiation` will be called from within the `serialExecutor`
  * - `close` and `status` are safe to call from any thread.
  */
-private[finagle] class MuxServerNegotiator private(
+private[finagle] class MuxServerNegotiator private (
   refSession: RefPushSession[ByteReader, Buf],
   handle: MuxChannelHandle,
   service: Service[Request, Response],
@@ -78,8 +78,10 @@ private[finagle] class MuxServerNegotiator private(
 
     case message => // No negotiation: just init a basic session
       if (log.isLoggable(Level.DEBUG)) {
-        log.debug(s"Rerr prelude not detected (received ${message.getClass.getSimpleName}. " +
-          s"Skipping Init phase. $remoteAddressString")
+        log.debug(
+          s"Rerr prelude not detected (received ${message.getClass.getSimpleName}. " +
+            s"Skipping Init phase. $remoteAddressString"
+        )
       }
       noInit(message)
   }
@@ -95,7 +97,9 @@ private[finagle] class MuxServerNegotiator private(
         // that it will happen before handling inbound bytes.
 
         if (log.isLoggable(Level.TRACE)) {
-          log.trace(s"Server received client headers $headers; Server sending headers $localHeaders")
+          log.trace(
+            s"Server received client headers $headers; Server sending headers $localHeaders"
+          )
         }
 
         handle.sendNowAndForget(Message.encode(Message.Rinit(tag, Mux.LatestVersion, localHeaders)))
@@ -115,8 +119,10 @@ private[finagle] class MuxServerNegotiator private(
       negotiationFailure(tag, ex)
 
     case message =>
-      log.warning("Received Rerr init probe but didn't receive a follow up " +
-        s"Tinit (received a ${message.getClass.getSimpleName}). $remoteAddressString")
+      log.warning(
+        "Received Rerr init probe but didn't receive a follow up " +
+          s"Tinit (received a ${message.getClass.getSimpleName}). $remoteAddressString"
+      )
       noInit(message)
   }
 
@@ -161,8 +167,11 @@ private[finagle] class MuxServerNegotiator private(
     // This is not necessarily unexpected if the peer thinks the session is now open
     handshakePhase = { msg: Message =>
       if (log.isLoggable(Level.DEBUG)) {
-        log.debug(t, s"Session negotiation failed. Swallowing message " +
-          s"(${msg.getClass.getSimpleName}) that raced shutdown. $remoteAddressString")
+        log.debug(
+          t,
+          s"Session negotiation failed. Swallowing message " +
+            s"(${msg.getClass.getSimpleName}) that raced shutdown. $remoteAddressString"
+        )
       }
     }
 
@@ -186,7 +195,8 @@ private[finagle] object MuxServerNegotiator {
     negotiate: (Service[Request, Response], Option[Headers]) => PushSession[ByteReader, Buf],
     timer: Timer
   ): Unit = {
-    val negotiator = new MuxServerNegotiator(ref, handle, service, makeLocalHeaders, negotiate, timer)
+    val negotiator =
+      new MuxServerNegotiator(ref, handle, service, makeLocalHeaders, negotiate, timer)
     ref.updateRef(negotiator)
   }
 }

@@ -31,9 +31,7 @@ private object PreparedStatementTest {
 
 }
 
-class PreparedStatementTest extends FunSuite
-  with IntegrationClient
-  with BeforeAndAfter {
+class PreparedStatementTest extends FunSuite with IntegrationClient with BeforeAndAfter {
   import PreparedStatementTest._
 
   private[this] val c: Client = client.orNull

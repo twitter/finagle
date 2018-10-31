@@ -16,7 +16,10 @@ object RollbackFactory {
     new Stack.Module1[param.Stats, ServiceFactory[Request, Result]] {
       val role: Stack.Role = Role
       val description: String = "Installs a rollback factory in the stack"
-      def make(sr: param.Stats, next: ServiceFactory[Request, Result]): ServiceFactory[Request, Result] = {
+      def make(
+        sr: param.Stats,
+        next: ServiceFactory[Request, Result]
+      ): ServiceFactory[Request, Result] = {
         new RollbackFactory(next, sr.statsReceiver)
       }
     }
@@ -45,18 +48,24 @@ final class RollbackFactory(
           result match {
             case Return(_) => self.close(deadline)
             case Throw(t) =>
-              log.warning(t, "rollback failed when putting service back into pool, closing connection")
+              log.warning(
+                t,
+                "rollback failed when putting service back into pool, closing connection"
+              )
               // we want to close the connection if we can't issue a rollback
               // since we assume it isn't a "clean" connection to put back into
               // the pool.
-              self(PoisonConnectionRequest).transform { _ => self.close(deadline) }
+              self(PoisonConnectionRequest).transform { _ =>
+                self.close(deadline)
+              }
           }
         }
       }
     }
 
-  private[this] val wrapFn: Service[Request, Result] => Service[Request, Result] =
-    { svc => wrap(svc) }
+  private[this] val wrapFn: Service[Request, Result] => Service[Request, Result] = { svc =>
+    wrap(svc)
+  }
 
   override def apply(conn: ClientConnection): Future[Service[Request, Result]] =
     super.apply(conn).map(wrapFn)

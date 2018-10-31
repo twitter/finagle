@@ -32,7 +32,7 @@ private[thrift] object ThriftCodec {
                 Throw(
                   new TApplicationException(
                     TApplicationException.MISSING_RESULT,
-                    s"Thrift method '${ method.name }' failed: missing result"
+                    s"Thrift method '${method.name}' failed: missing result"
                   )
                 )
             }

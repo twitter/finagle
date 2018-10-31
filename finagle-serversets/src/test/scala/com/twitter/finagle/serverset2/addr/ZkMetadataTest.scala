@@ -58,7 +58,11 @@ class ZkMetadataTest extends FunSuite with GeneratorDrivenPropertyChecks {
     assert(heterogenous.sorted(shardHashOrdering) != heterogenous)
   }
 
-  private def buildAddress(address: String, port: Int, shardMetaData: Option[Option[Int]]): Address = {
+  private def buildAddress(
+    address: String,
+    port: Int,
+    shardMetaData: Option[Option[Int]]
+  ): Address = {
     val socketAddress = new InetSocketAddress(address, port)
     val metadata = shardMetaData match {
       case Some(v) => ZkMetadata.toAddrMetadata(ZkMetadata(v))
@@ -89,9 +93,7 @@ class ZkMetadataTest extends FunSuite with GeneratorDrivenPropertyChecks {
     }
 
     // property based tests
-    val addrGen = addressFromMetadata(Gen.oneOf(
-      Gen.const(None),
-      Gen.const(Some(None))))
+    val addrGen = addressFromMetadata(Gen.oneOf(Gen.const(None), Gen.const(Some(None))))
 
     val withShardId = buildAddress("1.2.3.3", 3, Some(Some(1)))
     forAll(addrGen) { addr =>
@@ -116,20 +118,20 @@ class ZkMetadataTest extends FunSuite with GeneratorDrivenPropertyChecks {
     }
 
     // property based tests
-    val withMetadata =addressFromMetadata(Gen.oneOf(
-      Gen.const(Some(Some(1))),
-      Gen.const(Some(None))))
+    val withMetadata =
+      addressFromMetadata(Gen.oneOf(Gen.const(Some(Some(1))), Gen.const(Some(None))))
 
-    val withoutMetadata =addressFromMetadata(Gen.const(None))
+    val withoutMetadata = addressFromMetadata(Gen.const(None))
 
     val toCompare = for {
       w <- withMetadata
       wo <- withoutMetadata
     } yield (w, wo)
 
-    forAll(toCompare) { case (w, wo) =>
-      assert(shardHashOrdering.compare(w, wo) < 0)
-      assert(shardHashOrdering.compare(wo, w) > 0)
+    forAll(toCompare) {
+      case (w, wo) =>
+        assert(shardHashOrdering.compare(w, wo) < 0)
+        assert(shardHashOrdering.compare(wo, w) > 0)
     }
   }
 
@@ -141,13 +143,15 @@ class ZkMetadataTest extends FunSuite with GeneratorDrivenPropertyChecks {
       buildAddress("1.2.3.5", 0, Some(Some(2)))
     )
 
-    assert(addrs.sorted(shardHashOrdering) ==
-      Seq(
-        buildAddress("1.2.3.5", 0, Some(Some(2))),
-        buildAddress("1.2.3.3", 0, Some(Some(2))), // Second based on hash of ip
-        buildAddress("1.2.3.4", 0, Some(None)),
-        buildAddress("1.2.3.4", 0, None)
-      ))
+    assert(
+      addrs.sorted(shardHashOrdering) ==
+        Seq(
+          buildAddress("1.2.3.5", 0, Some(Some(2))),
+          buildAddress("1.2.3.3", 0, Some(Some(2))), // Second based on hash of ip
+          buildAddress("1.2.3.4", 0, Some(None)),
+          buildAddress("1.2.3.4", 0, None)
+        )
+    )
   }
 
   test("transitivity: no blowups and ordering is unique") {
@@ -164,36 +168,36 @@ class ZkMetadataTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
     forAll(Gen.listOf(addrGen)) { addrs =>
       // There should be a unique ordering for addresses so shuffling shouldn't change that.
-      assert(addrs.sorted(shardHashOrdering) ==
-        Random.shuffle(addrs).sorted(shardHashOrdering))
+      assert(
+        addrs.sorted(shardHashOrdering) ==
+          Random.shuffle(addrs).sorted(shardHashOrdering)
+      )
     }
   }
 
-  private val possibleIdenticalMetaData = Seq(
-    None,
-    Some(None),
-    Some(Some(1)))
+  private val possibleIdenticalMetaData = Seq(None, Some(None), Some(Some(1)))
 
   test("addrs with the same metadata and ip are sorted deterministically by port") {
     // Note that the ports are hashed, so the order may not be
     // logical. Rather, the important property we care about is
     // determinism.
     possibleIdenticalMetaData.foreach { m =>
-      assert(shardHashOrdering.compare(
-        buildAddress("1.2.3.1", 1, m),
-        buildAddress("1.2.3.1", 2, m)) == 1)
+      assert(
+        shardHashOrdering.compare(buildAddress("1.2.3.1", 1, m), buildAddress("1.2.3.1", 2, m)) == 1
+      )
 
-      assert(shardHashOrdering.compare(
-        buildAddress("1.2.3.1", 2, m),
-        buildAddress("1.2.3.1", 1, m)) == -1)
+      assert(
+        shardHashOrdering
+          .compare(buildAddress("1.2.3.1", 2, m), buildAddress("1.2.3.1", 1, m)) == -1
+      )
     }
   }
 
   test("addrs with different ip's are not identical") {
     possibleIdenticalMetaData.foreach { m =>
-      assert(shardHashOrdering.compare(
-        buildAddress("1.2.3.1", 1, m),
-        buildAddress("1.2.3.2", 1, m)) != 0)
+      assert(
+        shardHashOrdering.compare(buildAddress("1.2.3.1", 1, m), buildAddress("1.2.3.2", 1, m)) != 0
+      )
     }
   }
 }

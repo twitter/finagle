@@ -74,8 +74,9 @@ private object RowBenchmark {
     val values: IndexedSeq[Value]
   ) extends Row {
     private[this] val indexMap: Map[String, Int] =
-      fields.zipWithIndex.map { case (field, i) =>
-        field.id -> i
+      fields.zipWithIndex.map {
+        case (field, i) =>
+          field.id -> i
       }.toMap
 
     def indexOf(columnName: String): Option[Int] = indexMap.get(columnName)

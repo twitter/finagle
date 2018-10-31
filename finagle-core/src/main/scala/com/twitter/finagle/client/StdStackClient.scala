@@ -7,7 +7,7 @@ import com.twitter.finagle.transport.{Transport, TransportContext}
 import java.net.{InetSocketAddress, SocketAddress}
 
 trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
-  extends EndpointerStackClient[Req, Rep, This] { self =>
+    extends EndpointerStackClient[Req, Rep, This] { self =>
 
   /**
    * The type we write into the transport.

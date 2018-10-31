@@ -7,10 +7,11 @@ import com.twitter.util.{Await, Future}
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 
-class TransactionTest extends FunSuite
-  with IntegrationClient
-  with Eventually
-  with IntegrationPatience {
+class TransactionTest
+    extends FunSuite
+    with IntegrationClient
+    with Eventually
+    with IntegrationPatience {
 
   private def await[T](f: Future[T]): T = Await.result(f, 5.seconds)
 

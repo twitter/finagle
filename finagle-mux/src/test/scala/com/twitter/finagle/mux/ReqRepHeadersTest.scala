@@ -9,7 +9,7 @@ class ReqRepHeadersTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   private val Header: Gen[(Buf, Buf)] = {
     val byte = Gen.choose[Byte](Byte.MinValue, Byte.MaxValue)
-    val token = Gen.listOf(byte).map(bs =>Buf.ByteArray(bs :_*))
+    val token = Gen.listOf(byte).map(bs => Buf.ByteArray(bs: _*))
     for {
       k <- token
       v <- token
@@ -31,9 +31,10 @@ class ReqRepHeadersTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   def truncate(headers: Iterable[(Buf, Buf)]): Iterable[(Buf, Buf)] = {
     var size = 0
-    headers.takeWhile { case (k, v) =>
-      size += 4 + k.length + v.length
-      size <= ReqRepHeaders.MaxEncodedLength
+    headers.takeWhile {
+      case (k, v) =>
+        size += 4 + k.length + v.length
+        size <= ReqRepHeaders.MaxEncodedLength
     }
   }
 

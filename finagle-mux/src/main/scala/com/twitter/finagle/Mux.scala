@@ -117,7 +117,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
     private[finagle] object PingManager {
       implicit val param = Stack.Param(PingManager { (_, writer) =>
-        ServerPingManager.default(writer) })
+        ServerPingManager.default(writer)
+      })
     }
   }
 
@@ -139,25 +140,31 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       param.TurnOnTlsFn(tlsEnable)
 
     private val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackClient.newStack
-      // We use a singleton pool to manage a multiplexed session. Because it's mux'd, we
-      // don't want arbitrary interrupts on individual dispatches to cancel outstanding service
-      // acquisitions, so we disable `allowInterrupts`.
-      .replace(StackClient.Role.pool,
-        SingletonPool.module[mux.Request, mux.Response](allowInterrupts = false))
+    // We use a singleton pool to manage a multiplexed session. Because it's mux'd, we
+    // don't want arbitrary interrupts on individual dispatches to cancel outstanding service
+    // acquisitions, so we disable `allowInterrupts`.
+      .replace(
+        StackClient.Role.pool,
+        SingletonPool.module[mux.Request, mux.Response](allowInterrupts = false)
+      )
       // As per the config above, we don't allow interrupts to propagate past the pool.
       // However, we need to provide a way to cancel service acquisitions which are taking
       // too long, so we "move" the [[TimeoutFactory]] below the pool.
       .remove(StackClient.Role.postNameResolutionTimeout)
-      .insertAfter(StackClient.Role.pool,
-        TimeoutFactory.module[mux.Request, mux.Response](Stack.Role("MuxSessionTimeout")))
+      .insertAfter(
+        StackClient.Role.pool,
+        TimeoutFactory.module[mux.Request, mux.Response](Stack.Role("MuxSessionTimeout"))
+      )
       .replace(BindingFactory.role, MuxBindingFactory)
       .prepend(PayloadSizeFilter.module(_.body.length, _.body.length))
       // Since NackAdmissionFilter should operate on all requests sent over
       // the wire including retries, it must be below `Retries`. Since it
       // aggregates the status of the entire cluster, it must be above
       // `LoadBalancerFactory` (not part of the endpoint stack).
-      .insertBefore(StackClient.Role.prepFactory,
-        NackAdmissionFilter.module[mux.Request, mux.Response])
+      .insertBefore(
+        StackClient.Role.prepFactory,
+        NackAdmissionFilter.module[mux.Request, mux.Response]
+      )
 
     /**
      * Returns the headers that a client sends to a server.
@@ -168,9 +175,11 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     private[finagle] def headers(
       maxFrameSize: StorageUnit,
       tlsLevel: OpportunisticTls.Level
-    ): Handshake.Headers = Seq(
-      MuxFramer.Header.KeyBuf -> MuxFramer.Header.encodeFrameSize(maxFrameSize.inBytes.toInt),
-      OpportunisticTls.Header.KeyBuf -> tlsLevel.buf)
+    ): Handshake.Headers =
+      Seq(
+        MuxFramer.Header.KeyBuf -> MuxFramer.Header.encodeFrameSize(maxFrameSize.inBytes.toInt),
+        OpportunisticTls.Header.KeyBuf -> tlsLevel.buf
+      )
 
     /**
      * Check the opportunistic TLS configuration to ensure it's in a consistent state
@@ -179,7 +188,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       if (param.OppTls.enabled(params) && params[ClientSsl].sslClientConfiguration.isEmpty) {
         val level = params[param.OppTls].level
         throw new IllegalStateException(
-          s"Client desired opportunistic TLS ($level) but ClientSsl param is empty.")
+          s"Client desired opportunistic TLS ($level) but ClientSsl param is empty."
+        )
       }
     }
   }
@@ -188,11 +198,10 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Mux.Client.stack,
     params: Stack.Params = Mux.Client.params
   ) extends PushStackClient[mux.Request, mux.Response, Client]
-    with WithDefaultLoadBalancer[Client]
-    with OpportunisticTlsParams[Client] {
+      with WithDefaultLoadBalancer[Client]
+      with OpportunisticTlsParams[Client] {
 
-    private[this] val scopedStatsParams = params + Stats(
-      params[Stats].statsReceiver.scope("mux"))
+    private[this] val scopedStatsParams = params + Stats(params[Stats].statsReceiver.scope("mux"))
 
     protected type SessionT = MuxClientNegotiatingSession
     protected type In = ByteReader
@@ -201,11 +210,11 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     protected def newSession(
       handle: PushChannelHandle[ByteReader, Buf]
     ): Future[MuxClientNegotiatingSession] = {
-      val negotiator: Option[Headers] => Future[MuxClientSession] = {
-        headers => new Negotiation.Client(scopedStatsParams).negotiateAsync(handle, headers)
+      val negotiator: Option[Headers] => Future[MuxClientSession] = { headers =>
+        new Negotiation.Client(scopedStatsParams).negotiateAsync(handle, headers)
       }
-      val headers = Mux.Client.headers(
-        params[MaxFrameSize].size, params[OppTls].level.getOrElse(OpportunisticTls.Off))
+      val headers = Mux.Client
+        .headers(params[MaxFrameSize].size, params[OppTls].level.getOrElse(OpportunisticTls.Off))
 
       Future.value(
         new MuxClientNegotiatingSession(
@@ -214,7 +223,9 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
           negotiator = negotiator,
           headers = headers,
           name = params[Label].label,
-          stats = scopedStatsParams[Stats].statsReceiver))
+          stats = scopedStatsParams[Stats].statsReceiver
+        )
+      )
     }
 
     override def newClient(
@@ -275,9 +286,10 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
   object Server {
 
-    private[finagle] val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackServer.newStack
-      .remove(TraceInitializerFilter.role)
-      .prepend(PayloadSizeFilter.module(_.body.length, _.body.length))
+    private[finagle] val stack: Stack[ServiceFactory[mux.Request, mux.Response]] =
+      StackServer.newStack
+        .remove(TraceInitializerFilter.role)
+        .prepend(PayloadSizeFilter.module(_.body.length, _.body.length))
 
     private[finagle] val tlsEnable: (Stack.Params, ChannelPipeline) => Unit = (params, pipeline) =>
       pipeline.addFirst("opportunisticSslInit", new Netty4ServerSslChannelInitializer(params))
@@ -288,26 +300,28 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
     type SessionF = (
       RefPushSession[ByteReader, Buf],
-        Stack.Params,
-        MuxChannelHandle,
-        Service[Request, Response]
-      ) => PushSession[ByteReader, Buf]
+      Stack.Params,
+      MuxChannelHandle,
+      Service[Request, Response]
+    ) => PushSession[ByteReader, Buf]
 
     val defaultSessionFactory: SessionF = (
-    ref: RefPushSession[ByteReader, Buf],
-    params: Stack.Params,
-    handle: MuxChannelHandle,
-    service: Service[Request, Response]
+      ref: RefPushSession[ByteReader, Buf],
+      params: Stack.Params,
+      handle: MuxChannelHandle,
+      service: Service[Request, Response]
     ) => {
-      val scopedStatsParams = params + Stats(
-        params[Stats].statsReceiver.scope("mux"))
+      val scopedStatsParams = params + Stats(params[Stats].statsReceiver.scope("mux"))
       MuxServerNegotiator.build(
         ref = ref,
         handle = handle,
         service = service,
         makeLocalHeaders = Mux.Server
-          .headers(_: Headers, params[MaxFrameSize].size,
-            params[OppTls].level.getOrElse(OpportunisticTls.Off)),
+          .headers(
+            _: Headers,
+            params[MaxFrameSize].size,
+            params[OppTls].level.getOrElse(OpportunisticTls.Off)
+          ),
         negotiate = (service, headers) =>
           new Negotiation.Server(scopedStatsParams, service).negotiate(handle, headers),
         timer = params[Timer].timer
@@ -328,9 +342,11 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       clientHeaders: Handshake.Headers,
       maxFrameSize: StorageUnit,
       tlsLevel: OpportunisticTls.Level
-    ): Handshake.Headers = Seq(
-      MuxFramer.Header.KeyBuf -> MuxFramer.Header.encodeFrameSize(maxFrameSize.inBytes.toInt),
-      OpportunisticTls.Header.KeyBuf -> tlsLevel.buf)
+    ): Handshake.Headers =
+      Seq(
+        MuxFramer.Header.KeyBuf -> MuxFramer.Header.encodeFrameSize(maxFrameSize.inBytes.toInt),
+        OpportunisticTls.Header.KeyBuf -> tlsLevel.buf
+      )
 
     /**
      * Check the opportunistic TLS configuration to ensure it's in a consistent state
@@ -340,7 +356,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       if (param.OppTls.enabled(params) && params[ServerSsl].sslServerConfiguration.isEmpty) {
         val level = params[param.OppTls].level
         throw new IllegalStateException(
-          s"Server desired opportunistic TLS ($level) but ServerSsl param is empty.")
+          s"Server desired opportunistic TLS ($level) but ServerSsl param is empty."
+        )
       }
     }
   }
@@ -350,7 +367,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     params: Stack.Params = Mux.Server.params,
     sessionFactory: Server.SessionF = Server.defaultSessionFactory
   ) extends PushStackServer[mux.Request, mux.Response, Server]
-    with OpportunisticTlsParams[Server] {
+      with OpportunisticTlsParams[Server] {
 
     protected type PipelineReq = ByteReader
     protected type PipelineRep = Buf
@@ -388,9 +405,9 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
       case other =>
         throw new IllegalStateException(
-          s"Expected to find a `MuxChannelHandle` but found ${other.getClass.getSimpleName}")
+          s"Expected to find a `MuxChannelHandle` but found ${other.getClass.getSimpleName}"
+        )
     }
-
 
     protected def copy1(
       stack: Stack[ServiceFactory[Request, Response]],

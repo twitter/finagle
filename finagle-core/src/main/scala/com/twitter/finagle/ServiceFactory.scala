@@ -3,8 +3,8 @@ package com.twitter.finagle
 import com.twitter.util.{Closable, Future, Return, Throw, Time}
 
 abstract class ServiceFactory[-Req, +Rep]
-  extends (ClientConnection => Future[Service[Req, Rep]])
-  with Closable { self =>
+    extends (ClientConnection => Future[Service[Req, Rep]])
+    with Closable { self =>
 
   /**
    * Reserve the use of the returned [[Service]] instance.
@@ -40,7 +40,7 @@ abstract class ServiceFactory[-Req, +Rep]
           f(service).respond {
             case Return(_) => ()
             case Throw(_) => service.close()
-          }
+        }
 
       def apply(conn: ClientConnection): Future[Service[Req1, Rep1]] =
         self(conn).flatMap(svcFn)

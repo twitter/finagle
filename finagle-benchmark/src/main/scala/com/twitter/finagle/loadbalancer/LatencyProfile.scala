@@ -16,7 +16,8 @@ private object LatencyProfile {
       Duration.fromNanoseconds((line.toDouble * 1000000).toLong)
     }
 
-    () =>  latencies(rng.nextInt(latencies.size))
+    () =>
+      latencies(rng.nextInt(latencies.size))
   }
 
   /**
@@ -68,7 +69,7 @@ private object LatencyProfile {
 }
 
 /**
- * Creates a profile to determine the latency for the next 
+ * Creates a profile to determine the latency for the next
  * incoming request.
  */
 private class LatencyProfile(stopWatch: () => Duration) {

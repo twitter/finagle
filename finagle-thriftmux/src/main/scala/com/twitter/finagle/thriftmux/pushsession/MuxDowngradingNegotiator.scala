@@ -1,6 +1,11 @@
 package com.twitter.finagle.thriftmux.pushsession
 
-import com.twitter.finagle.mux.pushsession.{MessageWriter, MuxChannelHandle, MuxMessageDecoder, Negotiation}
+import com.twitter.finagle.mux.pushsession.{
+  MessageWriter,
+  MuxChannelHandle,
+  MuxMessageDecoder,
+  Negotiation
+}
 import com.twitter.finagle._
 import com.twitter.finagle.mux.{Request, Response}
 import com.twitter.finagle.mux.transport.{BadMessageException, Message}
@@ -123,35 +128,38 @@ private[finagle] final class MuxDowngradingNegotiator(
 
     val ttwitterHeader =
       if (!isTTwitter) None
-      else Some {
-        Buf.ByteArray.Owned(OutputBuffer.messageToArray(new ResponseHeader, protocolFactory))
-      }
+      else
+        Some {
+          Buf.ByteArray.Owned(OutputBuffer.messageToArray(new ResponseHeader, protocolFactory))
+        }
 
     // We install our new session and then send it the first thrift dispatch
     try {
       val nextSession =
         new DowngradeNegotiatior(refSession, ttwitterHeader, params, service)
-        .negotiate(handle, None)
+          .negotiate(handle, None)
       // Register the new session and then give it the message
       refSession.updateRef(nextSession)
 
       // If we're TTwitter, the first message was an init and we need to ack it.
       // If we're not TTwitter, the first message was a dispatch and needs to be handled.
       if (!isTTwitter) refSession.receive(ByteReader(buf))
-      else handle.sendAndForget {
-        val buffer = new OutputBuffer(protocolFactory)
-        buffer().writeMessageBegin(
-          new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.REPLY, 0)
-        )
-        val upgradeReply = new UpgradeReply
-        upgradeReply.write(buffer())
-        buffer().writeMessageEnd()
-        Buf.ByteArray.Shared(buffer.toArray)
-      }
-    } catch { case NonFatal(t) =>
-      // Negotiation failed, so we need to cleanup and shutdown.
-      log.warning(t, s"Negotiation failed. Closing session. $remoteAddressString")
-      closeNow()
+      else
+        handle.sendAndForget {
+          val buffer = new OutputBuffer(protocolFactory)
+          buffer().writeMessageBegin(
+            new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.REPLY, 0)
+          )
+          val upgradeReply = new UpgradeReply
+          upgradeReply.write(buffer())
+          buffer().writeMessageEnd()
+          Buf.ByteArray.Shared(buffer.toArray)
+        }
+    } catch {
+      case NonFatal(t) =>
+        // Negotiation failed, so we need to cleanup and shutdown.
+        log.warning(t, s"Negotiation failed. Closing session. $remoteAddressString")
+        closeNow()
     }
   }
 
@@ -160,7 +168,7 @@ private[finagle] final class MuxDowngradingNegotiator(
       val buffer = new InputBuffer(Buf.ByteArray.Owned.extract(buf), protocolFactory)
       val msg = buffer().readMessageBegin()
       msg.`type` == TMessageType.CALL &&
-        msg.name == ThriftTracing.CanTraceMethodName
+      msg.name == ThriftTracing.CanTraceMethodName
     } catch {
       case NonFatal(_) => false
     }
@@ -184,11 +192,7 @@ private[finagle] object MuxDowngradingNegotiator {
       writer: MessageWriter,
       decoder: MuxMessageDecoder
     ): VanillaThriftSession = {
-      new VanillaThriftSession(
-        handle,
-        ttwitterHeader,
-        params,
-        service)
+      new VanillaThriftSession(handle, ttwitterHeader, params, service)
     }
   }
 
@@ -202,7 +206,8 @@ private[finagle] object MuxDowngradingNegotiator {
       refSession = ref,
       params = params,
       handle = handle,
-      service = service)
+      service = service
+    )
 
     ref.updateRef(negotiatingSession)
     ref

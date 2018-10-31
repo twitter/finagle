@@ -104,7 +104,7 @@ class StabilizerTest extends FunSuite {
 
     // we are pinned to the last bound addr so long
     // as we don't receive anymore updates.
-    (0 to 10).foreach {  _ =>
+    (0 to 10).foreach { _ =>
       pulse()
       addrEquals(Addr.Bound(addr1, addr2, addr3))
     }
@@ -427,7 +427,7 @@ class StabilizerTest extends FunSuite {
     (1 to initShards.size).foreach { n =>
       var oldShards = currentShards
       val newShard = newAddress(initShards.size + n, Some(n))
-      currentShards = currentShards.filter(!_.equals(initShards(n-1))) ++ Seq(newShard)
+      currentShards = currentShards.filter(!_.equals(initShards(n - 1))) ++ Seq(newShard)
       va() = Addr.Bound(currentShards.toSet)
       addrEquals(Addr.Bound(oldShards.toSet))
       pulse()
@@ -447,7 +447,7 @@ class StabilizerTest extends FunSuite {
     var currentShards = initShards
     (1 to initShards.size).foreach { n =>
       val newShard = newAddress(initShards.size + n, Some(n))
-      currentShards = currentShards.filter(!_.equals(initShards(n-1))) ++ Seq(newShard)
+      currentShards = currentShards.filter(!_.equals(initShards(n - 1))) ++ Seq(newShard)
       va() = Addr.Bound(currentShards.toSet)
       addrEquals(Addr.Bound(initShards.toSet))
     }

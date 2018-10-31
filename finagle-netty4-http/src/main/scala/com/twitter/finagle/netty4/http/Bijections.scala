@@ -73,7 +73,10 @@ private[finagle] object Bijections {
       }
     }
 
-    def chunkedResponseToFinagle(in: NettyHttp.HttpResponse, r: Reader[Buf]): FinagleHttp.Response = {
+    def chunkedResponseToFinagle(
+      in: NettyHttp.HttpResponse,
+      r: Reader[Buf]
+    ): FinagleHttp.Response = {
       val resp = FinagleHttp.Response(
         versionToFinagle(in.protocolVersion),
         statusToFinagle(in.status),

@@ -274,7 +274,9 @@ abstract class AbstractEndToEndTest
     await(server.close())
   }
 
-  test("thriftmux server + Finagle thrift client: 128 bit traceId should be passed from client to server") {
+  test(
+    "thriftmux server + Finagle thrift client: 128 bit traceId should be passed from client to server"
+  ) {
     @volatile var cltTraceId: Option[TraceId] = None
     @volatile var srvTraceId: Option[TraceId] = None
     val tracer = new Tracer {
@@ -302,9 +304,9 @@ abstract class AbstractEndToEndTest
         val client = Thrift.client
           .configured(PTracer(tracer))
           .build[TestService.MethodPerEndpoint](
-          Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-          "client"
-        )
+            Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+            "client"
+          )
 
         await(client.query("ok"))
 
@@ -609,7 +611,7 @@ abstract class AbstractEndToEndTest
       case ReqRep(_, Throw(_: InvalidQueryException)) =>
         ResponseClass.NonRetryableFailure
       case ReqRep(_, Throw(_: RequestTimeoutException)) |
-           ReqRep(_, Throw(_: java.util.concurrent.TimeoutException)) =>
+          ReqRep(_, Throw(_: java.util.concurrent.TimeoutException)) =>
         ResponseClass.Success
       case ReqRep(_, Return(_: String)) =>
         ResponseClass.NonRetryableFailure
@@ -837,11 +839,14 @@ abstract class AbstractEndToEndTest
   test("scala thriftmux stack server deserialized response classification with `serve`") {
     val sr = new InMemoryStatsReceiver()
 
-    val svc = new TestService.FinagledService(iface, RichServerParam(
-      serverStats = sr,
-      responseClassifier = scalaClassifier,
-      perEndpointStats = true
-    ))
+    val svc = new TestService.FinagledService(
+      iface,
+      RichServerParam(
+        serverStats = sr,
+        responseClassifier = scalaClassifier,
+        perEndpointStats = true
+      )
+    )
 
     val server = ThriftMux.server
       .withStatsReceiver(sr)
@@ -859,15 +864,20 @@ abstract class AbstractEndToEndTest
     server.close()
   }
 
-  test("scala thriftmux stack server deserialized response classification with " +
-    "`servicePerEndpoint[ServicePerEndpoint]`") {
+  test(
+    "scala thriftmux stack server deserialized response classification with " +
+      "`servicePerEndpoint[ServicePerEndpoint]`"
+  ) {
     val sr = new InMemoryStatsReceiver()
 
-    val svc = new TestService.FinagledService(iface, RichServerParam(
-      serverStats = sr,
-      responseClassifier = scalaClassifier,
-      perEndpointStats = true
-    ))
+    val svc = new TestService.FinagledService(
+      iface,
+      RichServerParam(
+        serverStats = sr,
+        responseClassifier = scalaClassifier,
+        perEndpointStats = true
+      )
+    )
 
     val server = ThriftMux.server
       .withStatsReceiver(sr)
@@ -929,15 +939,20 @@ abstract class AbstractEndToEndTest
     server.close()
   }
 
-  test("scala thriftmux stack server deserialized response classification with " +
-    "`servicePerEndpoint[ReqRepServicePerEndpoint]`") {
+  test(
+    "scala thriftmux stack server deserialized response classification with " +
+      "`servicePerEndpoint[ReqRepServicePerEndpoint]`"
+  ) {
     val sr = new InMemoryStatsReceiver()
 
-    val svc = new TestService.FinagledService(iface, RichServerParam(
-      serverStats = sr,
-      responseClassifier = scalaClassifier,
-      perEndpointStats = true
-    ))
+    val svc = new TestService.FinagledService(
+      iface,
+      RichServerParam(
+        serverStats = sr,
+        responseClassifier = scalaClassifier,
+        perEndpointStats = true
+      )
+    )
 
     val server = ThriftMux.server
       .withStatsReceiver(sr)
@@ -1050,10 +1065,14 @@ abstract class AbstractEndToEndTest
   test("scala thriftmux ServerBuilder deserialized response classification") {
     val sr = new InMemoryStatsReceiver()
 
-    val svc = new TestService.FinagledService(iface, RichServerParam(
-      serverStats = sr,
-      responseClassifier = scalaClassifier,
-      perEndpointStats = true))
+    val svc = new TestService.FinagledService(
+      iface,
+      RichServerParam(
+        serverStats = sr,
+        responseClassifier = scalaClassifier,
+        perEndpointStats = true
+      )
+    )
 
     val server = ServerBuilder()
       .stack(ThriftMux.server)
@@ -1621,13 +1640,14 @@ abstract class AbstractEndToEndTest
     )
 
     val client =
-        clientImpl
+      clientImpl
         .build[TestService.MethodPerEndpoint](
-        Name.bound(
-          Address(server1.boundAddress.asInstanceOf[InetSocketAddress]),
-          Address(server2.boundAddress.asInstanceOf[InetSocketAddress])),
-        "client"
-      )
+          Name.bound(
+            Address(server1.boundAddress.asInstanceOf[InetSocketAddress]),
+            Address(server2.boundAddress.asInstanceOf[InetSocketAddress])
+          ),
+          "client"
+        )
 
     val failure = intercept[Failure] {
       await(client.query("ok"))
@@ -1776,9 +1796,11 @@ abstract class AbstractEndToEndTest
   trait ThriftMuxFailSessionServer {
     val serverSr = new InMemoryStatsReceiver
 
-    def boundNames: Name.Bound = Name.bound(
-      Address(server1.boundAddress.asInstanceOf[InetSocketAddress]),
-      Address(server2.boundAddress.asInstanceOf[InetSocketAddress]))
+    def boundNames: Name.Bound =
+      Name.bound(
+        Address(server1.boundAddress.asInstanceOf[InetSocketAddress]),
+        Address(server2.boundAddress.asInstanceOf[InetSocketAddress])
+      )
 
     private val server1 =
       serverImpl
@@ -1821,11 +1843,11 @@ abstract class AbstractEndToEndTest
 
       val failure = intercept[Exception](await(client.query("ok")))
       assert(
-          // The server hadn't yet issued the drain command
+        // The server hadn't yet issued the drain command
         failure.getMessage == "The request was Nacked by the server" ||
           // the service was already closed due to draining when it got to the pool
-        failure.getMessage == "Returned unavailable service")
-
+          failure.getMessage == "Returned unavailable service"
+      )
 
       // Note: we don't check 'client/[requests|failures]' since the value is racy:
       // the server asks the client to drain immediately so we may never get a live
@@ -1894,7 +1916,10 @@ abstract class AbstractEndToEndTest
       await(shortTimeoutSvcPerEndpoint(TestService.Query.Args("shorty")))
     }
     // ReqRepServicePerEndpoint
-    val shortTimeoutReqRepSvcPerEndpoint: Service[scrooge.Request[TestService.Query.Args], scrooge.Response[TestService.Query.SuccessType]] =
+    val shortTimeoutReqRepSvcPerEndpoint
+      : Service[scrooge.Request[TestService.Query.Args], scrooge.Response[
+        TestService.Query.SuccessType
+      ]] =
       builder
         .withTimeoutPerRequest(5.millis)
         .servicePerEndpoint[TestService.ReqRepServicePerEndpoint]("fast")
@@ -1912,7 +1937,7 @@ abstract class AbstractEndToEndTest
         .servicePerEndpoint[TestService.ServicePerEndpoint]("slow")
         .query
 
-  var result = await(longTimeout(TestService.Query.Args("looong")))
+    var result = await(longTimeout(TestService.Query.Args("looong")))
     assert("looong" == result)
     eventually {
       assert(stats.counter("a_label", "slow", "logical", "requests")() == 1)
@@ -1936,7 +1961,9 @@ abstract class AbstractEndToEndTest
         .servicePerEndpoint[TestService.ReqRepServicePerEndpoint]("slow")
         .query
 
-    val response = await(longTimeoutReqRepSvcPerEndpoint(scrooge.Request(TestService.Query.Args("looong"))))
+    val response = await(
+      longTimeoutReqRepSvcPerEndpoint(scrooge.Request(TestService.Query.Args("looong")))
+    )
     assert("looong" == response.value)
 
     await(server.close())
@@ -2040,7 +2067,10 @@ abstract class AbstractEndToEndTest
       intercept[RequestTimeoutException] { await(req2) }
 
       // ReqRepServicePerEndpoint
-      val asIsReqRepSvcPerEndpoint: Service[scrooge.Request[TestService.Query.Args], scrooge.Response[TestService.Query.SuccessType]] =
+      val asIsReqRepSvcPerEndpoint
+        : Service[scrooge.Request[TestService.Query.Args], scrooge.Response[
+          TestService.Query.SuccessType
+        ]] =
         mb.servicePerEndpoint[TestService.ReqRepServicePerEndpoint]("as_is").query
       val req3 = asIsReqRepSvcPerEndpoint(scrooge.Request(TestService.Query.Args("nope")))
       control.advance(10.milliseconds)
@@ -2068,9 +2098,9 @@ abstract class AbstractEndToEndTest
         assert(stats.counter("a_label", "good", "logical", "success")() == 1)
       }
 
-
       // ServicePerEndpoint
-      val longTimeoutSvcPerEndpoint: Service[TestService.Query.Args, TestService.Query.SuccessType] =
+      val longTimeoutSvcPerEndpoint
+        : Service[TestService.Query.Args, TestService.Query.SuccessType] =
         mb.withTimeoutPerRequest(5.seconds)
           .withTimeoutTotal(5.seconds)
           .servicePerEndpoint[TestService.ServicePerEndpoint]("good")
@@ -2083,7 +2113,10 @@ abstract class AbstractEndToEndTest
       val result2 = await(req5)
       assert("yep" == result2)
       // ReqRepServicePerEndpoint
-      val longTimeoutReqRepSvcPerEndpoint: Service[scrooge.Request[TestService.Query.Args], scrooge.Response[TestService.Query.SuccessType]] =
+      val longTimeoutReqRepSvcPerEndpoint
+        : Service[scrooge.Request[TestService.Query.Args], scrooge.Response[
+          TestService.Query.SuccessType
+        ]] =
         mb.withTimeoutPerRequest(5.seconds)
           .withTimeoutTotal(5.seconds)
           .servicePerEndpoint[TestService.ReqRepServicePerEndpoint]("good")
@@ -2119,8 +2152,8 @@ abstract class AbstractEndToEndTest
       .configured(param.Timer(timer))
 
     val clientBuilder = ClientBuilder()
-      // set tight "default" timeouts that MB must override in
-      // order to get successful responses.
+    // set tight "default" timeouts that MB must override in
+    // order to get successful responses.
       .requestTimeout(1.milliseconds)
       .timeout(2.milliseconds)
       .reportTo(stats)
@@ -2145,7 +2178,7 @@ abstract class AbstractEndToEndTest
     // increase the timeouts via MB and tests should fail after tunable timeouts
     Time.withCurrentTimeFrozen { currentTime =>
       // ------------------ test total timeouts ------------------
-      perRequestTimeoutTunable.set(100.seconds)  // long timeout that does not trigger
+      perRequestTimeoutTunable.set(100.seconds) // long timeout that does not trigger
       totalTimeoutTunable.set(5.seconds)
       val result1 = tunableTimeoutSvc(TestService.Query.Args("yep"))
       assert(!result1.isDefined)
@@ -2234,7 +2267,10 @@ abstract class AbstractEndToEndTest
       await(retryInvalidSvcPerEndpoint(TestService.Query.Args("fail0")))
     }
     // ReqRepServicePerEndpoint
-    val retryInvalidReqRepSvcPerEndpoint: Service[scrooge.Request[TestService.Query.Args], scrooge.Response[TestService.Query.SuccessType]] =
+    val retryInvalidReqRepSvcPerEndpoint
+      : Service[scrooge.Request[TestService.Query.Args], scrooge.Response[
+        TestService.Query.SuccessType
+      ]] =
       builder
         .withRetryForClassifier {
           case ReqRep(_, Throw(InvalidQueryException(_))) =>
@@ -2279,7 +2315,8 @@ abstract class AbstractEndToEndTest
     }
 
     // ServicePerEndpoint
-    val errCode1SucceedsSvcPerEndpoint: Service[TestService.Query.Args, TestService.Query.SuccessType] =
+    val errCode1SucceedsSvcPerEndpoint
+      : Service[TestService.Query.Args, TestService.Query.SuccessType] =
       builder
         .withRetryForClassifier {
           case ReqRep(_, Throw(InvalidQueryException(errorCode))) if errorCode == 0 =>
@@ -2299,7 +2336,10 @@ abstract class AbstractEndToEndTest
       await(errCode1SucceedsSvcPerEndpoint(TestService.Query.Args("fail1")))
     }
     // ReqRepServicePerEndpoint
-    val errCode1SucceedsReqRepSvcPerEndpoint: Service[scrooge.Request[TestService.Query.Args], scrooge.Response[TestService.Query.SuccessType]] =
+    val errCode1SucceedsReqRepSvcPerEndpoint
+      : Service[scrooge.Request[TestService.Query.Args], scrooge.Response[
+        TestService.Query.SuccessType
+      ]] =
       builder
         .withRetryForClassifier {
           case ReqRep(_, Throw(InvalidQueryException(errorCode))) if errorCode == 0 =>

@@ -31,7 +31,8 @@ private[netty3] class SslServerConnectHandler(
         override def operationComplete(f: ChannelFuture): Unit = {
           val remoteAddress: Address =
             // guard against disconnected sessions and test environments with mock channels
-            if (ctx.getChannel.getRemoteAddress == null || !ctx.getChannel.getRemoteAddress.isInstanceOf[InetSocketAddress])
+            if (ctx.getChannel.getRemoteAddress == null || !ctx.getChannel.getRemoteAddress
+                .isInstanceOf[InetSocketAddress])
               Address.failing
             else Address(ctx.getChannel.getRemoteAddress.asInstanceOf[InetSocketAddress])
 

@@ -180,7 +180,10 @@ private[ssl] object SslConfigurations {
           engineFactoryName
         )
       case TrustCredentials.TrustManagerFactory(_) =>
-        throw SslConfigurationException.notSupported("TrustCredentials.TrustManagerFactory", engineFactoryName)
+        throw SslConfigurationException.notSupported(
+          "TrustCredentials.TrustManagerFactory",
+          engineFactoryName
+        )
     }
 
   /**

@@ -215,7 +215,8 @@ abstract class AbstractHttp1EndToEndTest extends AbstractEndToEndTest {
         } yield ()
 
         f.respond {
-          case Return(_) | Throw(_: ReaderDiscardedException) => writerFinished.set(true) // must finish
+          case Return(_) | Throw(_: ReaderDiscardedException) =>
+            writerFinished.set(true) // must finish
           case _ => ()
         }
 

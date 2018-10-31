@@ -79,4 +79,3 @@ private[finagle] class CommandToBuf extends AbstractCommandToBuf[Command] {
       encodeCommand(Seq(QUIT))
   }
 }
-

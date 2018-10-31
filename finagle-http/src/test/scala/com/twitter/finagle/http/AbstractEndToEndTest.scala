@@ -224,54 +224,54 @@ abstract class AbstractEndToEndTest
     }
 
     if (!sys.props.contains("SKIP_FLAKY_TRAVIS"))
-    test(implName + ": return 413s for fixed-length requests with too large payloads") {
-      val service = new HttpService {
-        def apply(request: Request) = Future.value(Response())
+      test(implName + ": return 413s for fixed-length requests with too large payloads") {
+        val service = new HttpService {
+          def apply(request: Request) = Future.value(Response())
+        }
+        val client = connect(service)
+
+        val tooBig = Request("/")
+        tooBig.content = Buf.ByteArray.Owned(new Array[Byte](300))
+
+        val justRight = Request("/")
+        justRight.content = Buf.ByteArray.Owned(new Array[Byte](200))
+
+        assert(await(client(tooBig)).status == Status.RequestEntityTooLarge)
+        assert(await(client(justRight)).status == Status.Ok)
+        await(client.close())
       }
-      val client = connect(service)
-
-      val tooBig = Request("/")
-      tooBig.content = Buf.ByteArray.Owned(new Array[Byte](300))
-
-      val justRight = Request("/")
-      justRight.content = Buf.ByteArray.Owned(new Array[Byte](200))
-
-      assert(await(client(tooBig)).status == Status.RequestEntityTooLarge)
-      assert(await(client(justRight)).status == Status.Ok)
-      await(client.close())
-    }
 
     if (!sys.props.contains("SKIP_FLAKY_TRAVIS"))
-    testIfImplemented(TooLongStream)(
-      implName +
-        ": return 413s for chunked requests which stream too much data"
-    ) {
-      val service = new HttpService {
-        def apply(request: Request) = Future.value(Response())
+      testIfImplemented(TooLongStream)(
+        implName +
+          ": return 413s for chunked requests which stream too much data"
+      ) {
+        val service = new HttpService {
+          def apply(request: Request) = Future.value(Response())
+        }
+        val client = connect(service)
+
+        val justRight = Request("/")
+        assert(await(client(justRight)).status == Status.Ok)
+
+        val tooMuch = Request("/")
+        tooMuch.setChunked(true)
+        val w = tooMuch.writer
+        w.write(buf("a" * 1000)).before(w.close)
+        val res = client(tooMuch)
+        Await.ready(res, 5.seconds)
+
+        res.poll.get match {
+          case Return(resp) =>
+            assert(resp.status == Status.RequestEntityTooLarge)
+          case Throw(_: ChannelClosedException) =>
+            ()
+          case t =>
+            fail(s"expected a 413 or a ChannelClosedException, saw $t")
+        }
+
+        await(client.close())
       }
-      val client = connect(service)
-
-      val justRight = Request("/")
-      assert(await(client(justRight)).status == Status.Ok)
-
-      val tooMuch = Request("/")
-      tooMuch.setChunked(true)
-      val w = tooMuch.writer
-      w.write(buf("a" * 1000)).before(w.close)
-      val res = client(tooMuch)
-      Await.ready(res, 5.seconds)
-
-      res.poll.get match {
-        case Return(resp) =>
-          assert(resp.status == Status.RequestEntityTooLarge)
-        case Throw(_: ChannelClosedException) =>
-          ()
-        case t =>
-          fail(s"expected a 413 or a ChannelClosedException, saw $t")
-      }
-
-      await(client.close())
-    }
   }
 
   def standardBehaviour(connect: HttpService => HttpService): Unit = {
@@ -907,32 +907,36 @@ abstract class AbstractEndToEndTest
   }
 
   if (!sys.props.contains("SKIP_FLAKY_TRAVIS"))
-  test(implName + ": Status.busy propagates along the Stack") {
-    val failService = new HttpService {
-      def apply(req: Request): Future[Response] =
-        Future.exception(Failure.rejected("unhappy"))
-    }
+    test(implName + ": Status.busy propagates along the Stack") {
+      val failService = new HttpService {
+        def apply(req: Request): Future[Response] =
+          Future.exception(Failure.rejected("unhappy"))
+      }
 
-    val clientName = "http"
-    val server = serverImpl().serve(new InetSocketAddress(0), failService)
-    val client = clientImpl()
-      .configured(FailureAccrualFactory.Param(failureAccrualFailures, () => 1.minute))
-      .withStatsReceiver(statsRecv)
-      .newService(
-        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-        clientName
+      val clientName = "http"
+      val server = serverImpl().serve(new InetSocketAddress(0), failService)
+      val client = clientImpl()
+        .configured(FailureAccrualFactory.Param(failureAccrualFailures, () => 1.minute))
+        .withStatsReceiver(statsRecv)
+        .newService(
+          Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+          clientName
+        )
+
+      val e = intercept[FailureFlags[_]] {
+        await(client(Request("/")))
+      }
+      assert(e.isFlagged(FailureFlags.Rejected))
+
+      assert(statsRecv.counters(Seq(clientName, "failure_accrual", "removals")) == 1)
+      assert(
+        statsRecv.counters(Seq(clientName, "retries", "requeues")) == failureAccrualFailures - 1
       )
-
-    val e = intercept[FailureFlags[_]] {
-      await(client(Request("/")))
+      assert(
+        statsRecv.counters(Seq(clientName, "failures", "restartable")) == failureAccrualFailures
+      )
+      await(Closable.all(client, server).close())
     }
-    assert(e.isFlagged(FailureFlags.Rejected))
-
-    assert(statsRecv.counters(Seq(clientName, "failure_accrual", "removals")) == 1)
-    assert(statsRecv.counters(Seq(clientName, "retries", "requeues")) == failureAccrualFailures - 1)
-    assert(statsRecv.counters(Seq(clientName, "failures", "restartable")) == failureAccrualFailures)
-    await(Closable.all(client, server).close())
-  }
 
   test(implName + ": nonretryable isn't retried") {
     val failService = new HttpService {
@@ -1442,64 +1446,64 @@ abstract class AbstractEndToEndTest
   }
 
   if (!sys.props.contains("SKIP_FLAKY_TRAVIS")) // Maybe netty4 http/2 only
-  test(implName + ": methodBuilder retries from Stack") {
-    val svc = new Service[Request, Response] {
-      def apply(req: Request): Future[Response] = {
-        val rep = Response()
-        rep.contentString = req.contentString
-        req.contentString match {
-          case "500" => rep.statusCode = 500
-          case "503" => rep.statusCode = 503
-          case _ => ()
+    test(implName + ": methodBuilder retries from Stack") {
+      val svc = new Service[Request, Response] {
+        def apply(req: Request): Future[Response] = {
+          val rep = Response()
+          rep.contentString = req.contentString
+          req.contentString match {
+            case "500" => rep.statusCode = 500
+            case "503" => rep.statusCode = 503
+            case _ => ()
+          }
+          Future.value(rep)
         }
-        Future.value(rep)
       }
+      val server = serverImpl()
+        .withStatsReceiver(NullStatsReceiver)
+        .serve("localhost:*", svc)
+
+      val stats = new InMemoryStatsReceiver()
+      val client = clientImpl()
+        .withStatsReceiver(stats)
+        .withLabel("a_label")
+
+      val name = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
+      val builder: MethodBuilder = client.methodBuilder(name)
+
+      testMethodBuilderRetries(stats, server, builder)
     }
-    val server = serverImpl()
-      .withStatsReceiver(NullStatsReceiver)
-      .serve("localhost:*", svc)
-
-    val stats = new InMemoryStatsReceiver()
-    val client = clientImpl()
-      .withStatsReceiver(stats)
-      .withLabel("a_label")
-
-    val name = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
-    val builder: MethodBuilder = client.methodBuilder(name)
-
-    testMethodBuilderRetries(stats, server, builder)
-  }
 
   if (!sys.props.contains("SKIP_FLAKY_TRAVIS")) // Maybe netty4 http/2 only
-  test(implName + ": methodBuilder retries from ClientBuilder") {
-    val svc = new Service[Request, Response] {
-      def apply(req: Request): Future[Response] = {
-        val rep = Response()
-        rep.contentString = req.contentString
-        req.contentString match {
-          case "500" => rep.statusCode = 500
-          case "503" => rep.statusCode = 503
-          case _ => ()
+    test(implName + ": methodBuilder retries from ClientBuilder") {
+      val svc = new Service[Request, Response] {
+        def apply(req: Request): Future[Response] = {
+          val rep = Response()
+          rep.contentString = req.contentString
+          req.contentString match {
+            case "500" => rep.statusCode = 500
+            case "503" => rep.statusCode = 503
+            case _ => ()
+          }
+          Future.value(rep)
         }
-        Future.value(rep)
       }
+      val server = serverImpl()
+        .withStatsReceiver(NullStatsReceiver)
+        .serve("localhost:*", svc)
+
+      val stats = new InMemoryStatsReceiver()
+      val client = clientImpl()
+      val clientBuilder = ClientBuilder()
+        .reportTo(stats)
+        .name("a_label")
+        .stack(client)
+        .dest(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])))
+
+      val builder: MethodBuilder = MethodBuilder.from(clientBuilder)
+
+      testMethodBuilderRetries(stats, server, builder)
     }
-    val server = serverImpl()
-      .withStatsReceiver(NullStatsReceiver)
-      .serve("localhost:*", svc)
-
-    val stats = new InMemoryStatsReceiver()
-    val client = clientImpl()
-    val clientBuilder = ClientBuilder()
-      .reportTo(stats)
-      .name("a_label")
-      .stack(client)
-      .dest(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])))
-
-    val builder: MethodBuilder = MethodBuilder.from(clientBuilder)
-
-    testMethodBuilderRetries(stats, server, builder)
-  }
 
   testIfImplemented(NoBodyMessage)(
     "response with status code {1xx, 204 and 304} must not have a message body nor Content-Length header field"
@@ -1641,89 +1645,89 @@ abstract class AbstractEndToEndTest
   }
 
   if (!sys.props.contains("SKIP_FLAKY"))
-  test("ServerAdmissionControl doesn't filter requests with a chunked body") {
-    val responseString = "a response"
-    val svc = Service.mk[Request, Response] { _ =>
-      val response = Response()
-      response.contentString = responseString
-      Future.value(response)
-    }
+    test("ServerAdmissionControl doesn't filter requests with a chunked body") {
+      val responseString = "a response"
+      val svc = Service.mk[Request, Response] { _ =>
+        val response = Response()
+        response.contentString = responseString
+        Future.value(response)
+      }
 
-    val nacked = new AtomicBoolean(false)
-    val filter = new Filter.TypeAgnostic {
-      override def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = new SimpleFilter[Req, Rep] {
-        // nacks them all
-        def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
-          if (nacked.compareAndSet(false, true)) Future.exception(Failure.rejected)
-          else service(request)
+      val nacked = new AtomicBoolean(false)
+      val filter = new Filter.TypeAgnostic {
+        override def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = new SimpleFilter[Req, Rep] {
+          // nacks them all
+          def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
+            if (nacked.compareAndSet(false, true)) Future.exception(Failure.rejected)
+            else service(request)
+          }
         }
       }
+
+      val server = serverImpl()
+        .configured(ServerAdmissionControl.Filters(Some(Seq(_ => filter))))
+        .serve("localhost:*", svc)
+
+      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+      val client = clientImpl()
+        .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+      // first, a request with a body
+      val reqWithBody = Request(Method.Post, "/")
+      reqWithBody.setChunked(true)
+      val writer = reqWithBody.writer
+      writer.write(Buf.Utf8("data")).before(writer.close())
+
+      // Shouldn't be nacked
+      assert(await(client(reqWithBody)).contentString == responseString)
+      assert(!nacked.get)
+
+      // Should be nacked the first time
+      val reqWithoutBody = Request(Method.Get, "/")
+      assert(await(client(reqWithoutBody)).contentString == responseString)
+      assert(nacked.get)
+
+      await(client.close())
+      await(server.close())
     }
-
-    val server = serverImpl()
-      .configured(ServerAdmissionControl.Filters(Some(Seq(_ => filter))))
-      .serve("localhost:*", svc)
-
-    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-    val client = clientImpl()
-      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
-
-    // first, a request with a body
-    val reqWithBody = Request(Method.Post, "/")
-    reqWithBody.setChunked(true)
-    val writer = reqWithBody.writer
-    writer.write(Buf.Utf8("data")).before(writer.close())
-
-    // Shouldn't be nacked
-    assert(await(client(reqWithBody)).contentString == responseString)
-    assert(!nacked.get)
-
-    // Should be nacked the first time
-    val reqWithoutBody = Request(Method.Get, "/")
-    assert(await(client(reqWithoutBody)).contentString == responseString)
-    assert(nacked.get)
-
-    await(client.close())
-    await(server.close())
-  }
 
   if (!sys.props.contains("SKIP_FLAKY"))
-  test("ServerAdmissionControl can filter requests with the magic header") {
-    val responseString = "a response"
-    val svc = Service.mk[Request, Response] { _ =>
-      val response = Response()
-      response.contentString = responseString
-      Future.value(response)
-    }
+    test("ServerAdmissionControl can filter requests with the magic header") {
+      val responseString = "a response"
+      val svc = Service.mk[Request, Response] { _ =>
+        val response = Response()
+        response.contentString = responseString
+        Future.value(response)
+      }
 
-    val nacked = new AtomicBoolean(false)
-    val filter = new Filter.TypeAgnostic {
-      override def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = new SimpleFilter[Req, Rep] {
-        // nacks them all
-        def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
-          if (nacked.compareAndSet(false, true)) Future.exception(Failure.rejected)
-          else service(request)
+      val nacked = new AtomicBoolean(false)
+      val filter = new Filter.TypeAgnostic {
+        override def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = new SimpleFilter[Req, Rep] {
+          // nacks them all
+          def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
+            if (nacked.compareAndSet(false, true)) Future.exception(Failure.rejected)
+            else service(request)
+          }
         }
       }
+
+      val server = serverImpl()
+        .configured(ServerAdmissionControl.Filters(Some(Seq(_ => filter))))
+        .serve("localhost:*", svc)
+
+      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+      val client = clientImpl()
+        .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+      // first, a request with a body
+      val reqWithBody = Request(Method.Post, "/")
+      reqWithBody.contentString = "not-empty"
+
+      // Header should be there so we can nack it
+      assert(await(client(reqWithBody)).contentString == responseString)
+      assert(nacked.get)
+
+      await(client.close())
+      await(server.close())
     }
-
-    val server = serverImpl()
-      .configured(ServerAdmissionControl.Filters(Some(Seq(_ => filter))))
-      .serve("localhost:*", svc)
-
-    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-    val client = clientImpl()
-      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
-
-    // first, a request with a body
-    val reqWithBody = Request(Method.Post, "/")
-    reqWithBody.contentString = "not-empty"
-
-    // Header should be there so we can nack it
-    assert(await(client(reqWithBody)).contentString == responseString)
-    assert(nacked.get)
-
-    await(client.close())
-    await(server.close())
-  }
 }

@@ -64,9 +64,9 @@ object Handshake {
   }
 
   /**
-    * A class eligible for configuring a mysql client's CLIENT_FOUND_ROWS flag
-    * during the Handshake phase.
-    */
+   * A class eligible for configuring a mysql client's CLIENT_FOUND_ROWS flag
+   * during the Handshake phase.
+   */
   case class FoundRows(enabled: Boolean)
   implicit object FoundRows extends Stack.Param[FoundRows] {
     val default: FoundRows = FoundRows(true)

@@ -42,7 +42,8 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver) extends SimpleChannelHan
   override def channelOpen(ctx: ChannelHandlerContext, e: ChannelStateEvent): Unit = {
     if (elapsed.getAndSet(Stopwatch.start()) != null) {
       log.warning(
-        "channelOpen() called when channel was already open, clobbering an existing timer")
+        "channelOpen() called when channel was already open, clobbering an existing timer"
+      )
     }
     ctx.setAttachment((new AtomicLong(0), new AtomicLong(0)))
     connects.incr()

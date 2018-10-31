@@ -10,4 +10,4 @@ package com.twitter.finagle.thrift.service
  */
 @deprecated("Use MethodPerEndpointBuilder", "2018-01-12")
 trait ReqRepThriftServiceBuilder[ReqRepServicePerEndpoint, ThriftService]
-  extends ThriftServiceBuilder[ReqRepServicePerEndpoint, ThriftService]
+    extends ThriftServiceBuilder[ReqRepServicePerEndpoint, ThriftService]

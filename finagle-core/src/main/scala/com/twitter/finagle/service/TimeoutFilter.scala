@@ -273,7 +273,8 @@ class TimeoutFilter[Req, Rep](
       () => timeout().getOrElse(TimeoutFilter.Param.Default),
       exceptionFn,
       timer,
-      TimeoutFilter.PropagateDeadlines.Default)
+      TimeoutFilter.PropagateDeadlines.Default
+    )
 
   def this(timeout: Duration, exception: RequestTimeoutException, timer: Timer) =
     this(() => timeout, _ => exception, timer, TimeoutFilter.PropagateDeadlines.Default)

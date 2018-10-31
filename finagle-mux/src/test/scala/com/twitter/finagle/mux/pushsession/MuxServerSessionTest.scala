@@ -19,7 +19,8 @@ class MuxServerSessionTest extends FunSuite {
 
     lazy val params: Stack.Params = Mux.server.params + (param.Timer(mockTimer))
 
-    lazy val decoder: MuxMessageDecoder = new FragmentDecoder(Future.never, params[param.Stats].statsReceiver)
+    lazy val decoder: MuxMessageDecoder =
+      new FragmentDecoder(Future.never, params[param.Stats].statsReceiver)
 
     lazy val messageWriter: MockMessageWriter = new MockMessageWriter
 
@@ -94,7 +95,6 @@ class MuxServerSessionTest extends FunSuite {
       override lazy val service = Service.constant(rep)
 
       Time.withCurrentTimeFrozen { control =>
-
         session.close(5.seconds)
         handle.serialExecutor.executeAll()
         assert(session.status == Status.Busy)
@@ -133,7 +133,6 @@ class MuxServerSessionTest extends FunSuite {
       override lazy val service = Service.constant(rep)
 
       Time.withCurrentTimeFrozen { control =>
-
         session.close(5.seconds)
         handle.serialExecutor.executeAll()
         assert(session.status == Status.Busy)
@@ -162,7 +161,6 @@ class MuxServerSessionTest extends FunSuite {
       override lazy val service = Service.constant(rep)
 
       Time.withCurrentTimeFrozen { control =>
-
         session.close(5.seconds)
         handle.serialExecutor.executeAll()
         assert(session.status == Status.Busy)
@@ -193,7 +191,6 @@ class MuxServerSessionTest extends FunSuite {
       override lazy val service = Service.constant(rep)
 
       Time.withCurrentTimeFrozen { control =>
-
         // need to put a dispatch in the queue
         sessionReceive(Tdispatch(2, Nil, Path.empty, Dtab.empty, data))
 

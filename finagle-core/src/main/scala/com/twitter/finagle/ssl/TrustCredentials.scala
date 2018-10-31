@@ -36,7 +36,6 @@ object TrustCredentials {
    */
   case class CertCollection(file: File) extends TrustCredentials
 
-
   /**
    * Indicates that the trust credentials from the [[ssl.TrustManagerFactory]]
    * should be used in verifying a remote peer's credentials.
@@ -44,6 +43,7 @@ object TrustCredentials {
    * @param trustManagerFactory the factory delivering the TrustManager for
    *                            validation
    */
-  case class TrustManagerFactory(trustManagerFactory: ssl.TrustManagerFactory) extends TrustCredentials
+  case class TrustManagerFactory(trustManagerFactory: ssl.TrustManagerFactory)
+      extends TrustCredentials
 
 }

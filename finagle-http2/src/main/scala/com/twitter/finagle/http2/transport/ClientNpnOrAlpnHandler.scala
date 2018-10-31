@@ -24,11 +24,14 @@ private[http2] class ClientNpnOrAlpnHandler(connectionHandler: ChannelHandler, p
         pipeline.addBefore(
           BufferingHandler.HandlerName,
           AdapterProxyChannelHandler.HandlerName,
-          new AdapterProxyChannelHandler({ p =>
-            p.addLast(SchemifyingHandler.HandlerName, new SchemifyingHandler("https"))
-            p.addLast(StripHeadersHandler.HandlerName, StripHeadersHandler)
-            initClient(params)(p)
-          }, statsReceiver.scope("adapter_proxy"))
+          new AdapterProxyChannelHandler(
+            { p =>
+              p.addLast(SchemifyingHandler.HandlerName, new SchemifyingHandler("https"))
+              p.addLast(StripHeadersHandler.HandlerName, StripHeadersHandler)
+              initClient(params)(p)
+            },
+            statsReceiver.scope("adapter_proxy")
+          )
         )
         pipeline.addBefore(AdapterProxyChannelHandler.HandlerName, HttpCodecName, connectionHandler)
         upgradeCounter.incr()

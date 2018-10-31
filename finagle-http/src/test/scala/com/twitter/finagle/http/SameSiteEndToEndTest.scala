@@ -14,24 +14,28 @@ class SameSiteEndToEndTest extends FunSuite {
       new Service[Request, Response] {
         def apply(req: Request): Future[Response] = {
           supportSameSiteCodec.let(true) {
-            flag.overrides.let(Map(
-              "com.twitter.finagle.http.UseNetty4CookieCodec" -> useNetty4CookieCodec
-            )) {
+            flag.overrides.let(
+              Map(
+                "com.twitter.finagle.http.UseNetty4CookieCodec" -> useNetty4CookieCodec
+              )
+            ) {
               val response = Response(Status.Ok)
               response.cookies += new Cookie("foo", "bar").sameSite(sameSite)
               Future.value(response)
             }
           }
         }
-    }
+      }
 
     def inspectCookieService(): Service[Request, Response] =
       new Service[Request, Response] {
         def apply(req: Request): Future[Response] = {
           supportSameSiteCodec.let(true) {
-            flag.overrides.let(Map(
-              "com.twitter.finagle.http.UseNetty4CookieCodec" -> useNetty4CookieCodec
-            )) {
+            flag.overrides.let(
+              Map(
+                "com.twitter.finagle.http.UseNetty4CookieCodec" -> useNetty4CookieCodec
+              )
+            ) {
               val cookie = req.cookies.get("setBy").get
               val header = req.headerMap.get("Cookie").get
               val response = Response(Status.Ok)
@@ -48,23 +52,27 @@ class SameSiteEndToEndTest extends FunSuite {
             }
           }
         }
-    }
+      }
 
     val request = Request("/")
     val laxRequest = Request("/")
     supportSameSiteCodec.let(true) {
-      flag.overrides.let(Map(
-        "com.twitter.finagle.http.UseNetty4CookieCodec" -> useNetty4CookieCodec
-      )) {
+      flag.overrides.let(
+        Map(
+          "com.twitter.finagle.http.UseNetty4CookieCodec" -> useNetty4CookieCodec
+        )
+      ) {
         val sameSiteCookie = new Cookie("setBy", "client").sameSite(SameSite.Lax)
         laxRequest.cookies += sameSiteCookie
       }
     }
     val strictRequest = Request("/")
     supportSameSiteCodec.let(true) {
-      flag.overrides.let(Map(
-        "com.twitter.finagle.http.UseNetty4CookieCodec" -> useNetty4CookieCodec
-      )) {
+      flag.overrides.let(
+        Map(
+          "com.twitter.finagle.http.UseNetty4CookieCodec" -> useNetty4CookieCodec
+        )
+      ) {
         val sameSiteCookie = new Cookie("setBy", "client").sameSite(SameSite.Strict)
         strictRequest.cookies += sameSiteCookie
       }
@@ -77,7 +85,9 @@ class SameSiteEndToEndTest extends FunSuite {
   for {
     useNetty4CookieCodec <- Seq(0.0, 1.0)
   } {
-    test(s"response should contain Lax if set in laxService, with useNetty4CookieCodec=$useNetty4CookieCodec") {
+    test(
+      s"response should contain Lax if set in laxService, with useNetty4CookieCodec=$useNetty4CookieCodec"
+    ) {
       supportSameSiteCodec.let(true) {
         new Ctx(useNetty4CookieCodec) {
           val server =
@@ -86,7 +96,7 @@ class SameSiteEndToEndTest extends FunSuite {
               .serve(new InetSocketAddress(0), setCookieservice(SameSite.Lax))
 
           val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-          val client = Http.client.newService(s":${ addr.getPort }", "http")
+          val client = Http.client.newService(s":${addr.getPort}", "http")
 
           val response: Response = await(client(request))
           assert(response.status == Status.Ok)
@@ -100,7 +110,9 @@ class SameSiteEndToEndTest extends FunSuite {
   for {
     useNetty4CookieCodec <- Seq(0.0, 1.0)
   } {
-    test(s"response should contain Strict if set in strictService, with useNetty4CookieCodec=$useNetty4CookieCodec") {
+    test(
+      s"response should contain Strict if set in strictService, with useNetty4CookieCodec=$useNetty4CookieCodec"
+    ) {
       supportSameSiteCodec.let(true) {
         new Ctx(useNetty4CookieCodec) {
           val server =
@@ -109,7 +121,7 @@ class SameSiteEndToEndTest extends FunSuite {
               .serve(new InetSocketAddress(0), setCookieservice(SameSite.Strict))
 
           val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-          val client = Http.client.newService(s":${ addr.getPort }", "http")
+          val client = Http.client.newService(s":${addr.getPort}", "http")
 
           val response: Response = await(client(request))
           assert(response.status == Status.Ok)
@@ -123,7 +135,9 @@ class SameSiteEndToEndTest extends FunSuite {
   for {
     useNetty4CookieCodec <- Seq(0.0, 1.0)
   } {
-    test(s"response should contain no SameSite attribute if set to None, with useNetty4CookieCodec=$useNetty4CookieCodec") {
+    test(
+      s"response should contain no SameSite attribute if set to None, with useNetty4CookieCodec=$useNetty4CookieCodec"
+    ) {
       new Ctx(useNetty4CookieCodec) {
         val server =
           Http.server
@@ -144,7 +158,9 @@ class SameSiteEndToEndTest extends FunSuite {
   for {
     useNetty4CookieCodec <- Seq(0.0, 1.0)
   } {
-    test(s"server should not see SameSite.Lax if set by client, with useNetty4CookieCodec=$useNetty4CookieCodec") {
+    test(
+      s"server should not see SameSite.Lax if set by client, with useNetty4CookieCodec=$useNetty4CookieCodec"
+    ) {
       // Note that this test also confirms that the client does not see the
       // SameSite attribute in the response. The reason is that the attribute
       // is specified for only Set-Cookie, i.e., only for the response path:
@@ -170,7 +186,9 @@ class SameSiteEndToEndTest extends FunSuite {
   for {
     useNetty4CookieCodec <- Seq(0.0, 1.0)
   } {
-    test(s"server should not see SameSite.Strict if set by client, with useNetty4CookieCodec=$useNetty4CookieCodec") {
+    test(
+      s"server should not see SameSite.Strict if set by client, with useNetty4CookieCodec=$useNetty4CookieCodec"
+    ) {
       // See comment in previous test.
       new Ctx(useNetty4CookieCodec) {
         val server =

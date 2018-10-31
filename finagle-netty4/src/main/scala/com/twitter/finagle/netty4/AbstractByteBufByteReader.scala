@@ -202,6 +202,7 @@ private[netty4] abstract class AbstractByteBufByteReader(bb: ByteBuf) extends By
 }
 
 private object AbstractByteBufByteReader {
+
   /**
    * Process `bb` 1-byte at a time using the given
    * [[Buf.Processor]], starting at index `from` of `bb` until

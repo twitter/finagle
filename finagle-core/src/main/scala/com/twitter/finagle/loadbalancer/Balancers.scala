@@ -148,7 +148,6 @@ object Balancers {
         sr,
         "p2c_peak_ewma",
         balancer
-
       )
     }
   }
@@ -173,7 +172,8 @@ object Balancers {
           params[param.Label].label,
           sr,
           "heap_least_loaded",
-          new HeapLeastLoaded(endpoints, sr, exc, rng))
+          new HeapLeastLoaded(endpoints, sr, exc, rng)
+        )
       }
     }
 

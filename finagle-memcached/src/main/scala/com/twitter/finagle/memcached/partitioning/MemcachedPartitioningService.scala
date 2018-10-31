@@ -113,11 +113,13 @@ private[finagle] class MemcachedPartitioningService(
           values
         case nonValue =>
           if (logger.isLoggable(Level.DEBUG))
-            logger.log(Level.DEBUG, s"UnsupportedResponse: Expected Values, instead found $nonValue")
+            logger
+              .log(Level.DEBUG, s"UnsupportedResponse: Expected Values, instead found $nonValue")
           throw new UnsupportedResponse(s"Expected Values, instead found $nonValue")
       },
-      failures.flatMap { case (command, t) =>
-        getPartitionKeys(command).map(_ -> t)
+      failures.flatMap {
+        case (command, t) =>
+          getPartitionKeys(command).map(_ -> t)
       }
     )
   }

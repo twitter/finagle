@@ -33,9 +33,8 @@ private[finagle] class CachingPool[Req, Rep](
   private[this] val sizeGauge =
     statsReceiver.addGauge("pool_cached") { cache.size }
 
-
   final private[this] class WrappedService(underlying: Service[Req, Rep])
-    extends ServiceProxy[Req, Rep](underlying) {
+      extends ServiceProxy[Req, Rep](underlying) {
 
     // access mediated by synchronizing on CachingPool.this
     private[this] var close: Future[Unit] = null

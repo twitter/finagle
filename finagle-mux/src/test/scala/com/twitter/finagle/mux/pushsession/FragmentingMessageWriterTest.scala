@@ -17,7 +17,7 @@ class FragmentingMessageWriterTest extends FunSuite {
   }
 
   private val Tag = 2
-  private val Data = Buf.ByteArray((0 until 1024).map(_.toByte):_*)
+  private val Data = Buf.ByteArray((0 until 1024).map(_.toByte): _*)
 
   private def concat(msgs: Iterable[Buf]): Buf = msgs.foldLeft(Buf.Empty)(_.concat(_))
 
@@ -50,7 +50,8 @@ class FragmentingMessageWriterTest extends FunSuite {
 
     val handle.SendOne(data2, _) = handle.pendingWrites.dequeue()
 
-    val fullMessage = data2.slice(0, 4).concat(data1.slice(4, Int.MaxValue)).concat(data2.slice(4, Int.MaxValue))
+    val fullMessage =
+      data2.slice(0, 4).concat(data1.slice(4, Int.MaxValue)).concat(data2.slice(4, Int.MaxValue))
 
     assert(Message.decode(fullMessage) == msg)
   }

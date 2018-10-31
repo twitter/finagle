@@ -6,9 +6,14 @@ import com.twitter.util.{Duration, Time}
 import io.netty.util.concurrent.EventExecutor
 import java.util.concurrent.{Callable, ScheduledFuture, ScheduledThreadPoolExecutor, TimeUnit}
 
-private[threading] class EventLoopGroupExecutionDelayTrackingRunnable(eventExecutor: EventExecutor,
-  injectionPeriod: Duration, delayStat: Stat, threadDumpThreshold:Duration,
-  dumpWatchThreadPool: Option[ScheduledThreadPoolExecutor], dumpLogger: Logger) extends Runnable {
+private[threading] class EventLoopGroupExecutionDelayTrackingRunnable(
+  eventExecutor: EventExecutor,
+  injectionPeriod: Duration,
+  delayStat: Stat,
+  threadDumpThreshold: Duration,
+  dumpWatchThreadPool: Option[ScheduledThreadPoolExecutor],
+  dumpLogger: Logger
+) extends Runnable {
 
   private[this] val threadDumpEnabled: Boolean = threadDumpThreshold.inMillis > 0
 
@@ -19,13 +24,13 @@ private[threading] class EventLoopGroupExecutionDelayTrackingRunnable(eventExecu
   private[this] val executorThread: Thread = {
     if (eventExecutor.inEventLoop()) {
       Thread.currentThread()
-    }
-    else {
-      eventExecutor.submit(new Callable[Thread] {
-        override def call(): Thread = {
-          Thread.currentThread()
-        }
-      }).await().get()
+    } else {
+      eventExecutor
+        .submit(new Callable[Thread] {
+          override def call(): Thread = {
+            Thread.currentThread()
+          }
+        }).await().get()
     }
   }
 
@@ -34,8 +39,12 @@ private[threading] class EventLoopGroupExecutionDelayTrackingRunnable(eventExecu
   private[this] var watchTask: Option[ScheduledFuture[_]] = None
 
   setWatchTask()
-  eventExecutor.scheduleWithFixedDelay(this, 0, injectionPeriod.inMillis,
-    java.util.concurrent.TimeUnit.MILLISECONDS)
+  eventExecutor.scheduleWithFixedDelay(
+    this,
+    0,
+    injectionPeriod.inMillis,
+    java.util.concurrent.TimeUnit.MILLISECONDS
+  )
 
   override def run(): Unit = {
 
@@ -45,9 +54,9 @@ private[threading] class EventLoopGroupExecutionDelayTrackingRunnable(eventExecu
 
     val executionDelay = Time.now - scheduledExecutionTime
     if (threadDumpEnabled && executionDelay.inMillis > threadDumpThreshold.inMillis) {
-      dumpLogger.warning(s"THREAD: $threadName EXECUTION DELAY is greater than ${
-        threadDumpThreshold.inMillis
-      }ms, was ${ executionDelay.inMillis }ms")
+      dumpLogger.warning(
+        s"THREAD: $threadName EXECUTION DELAY is greater than ${threadDumpThreshold.inMillis}ms, was ${executionDelay.inMillis}ms"
+      )
 
     }
 
@@ -58,18 +67,25 @@ private[threading] class EventLoopGroupExecutionDelayTrackingRunnable(eventExecu
 
   private[this] def setWatchTask(): Unit = {
     if (threadDumpEnabled) {
-      watchTask = Some(dumpWatchThreadPool.get.schedule(new Runnable {
-        override def run(): Unit = {
-          var builder = new StringBuilder()
-          builder
-            .append(s"THREAD: $threadName EXECUTION DELAY exceeded configured dump threshold. Thread stack trace:\n")
-          executorThread.getStackTrace.foreach { element =>
-            builder.append(s"    $element\n")
-          }
-          dumpLogger.warning(builder.toString())
-        }
-      }, (injectionPeriod + threadDumpThreshold).inMillis, TimeUnit.MILLISECONDS))
+      watchTask = Some(
+        dumpWatchThreadPool.get.schedule(
+          new Runnable {
+            override def run(): Unit = {
+              var builder = new StringBuilder()
+              builder
+                .append(
+                  s"THREAD: $threadName EXECUTION DELAY exceeded configured dump threshold. Thread stack trace:\n"
+                )
+              executorThread.getStackTrace.foreach { element =>
+                builder.append(s"    $element\n")
+              }
+              dumpLogger.warning(builder.toString())
+            }
+          },
+          (injectionPeriod + threadDumpThreshold).inMillis,
+          TimeUnit.MILLISECONDS
+        )
+      )
     }
   }
 }
-

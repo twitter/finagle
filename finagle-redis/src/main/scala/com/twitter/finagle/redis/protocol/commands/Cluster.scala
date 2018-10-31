@@ -9,18 +9,14 @@ object ClusterNode {
     new ClusterNode(new InetSocketAddress(host, port), id, flags)
 }
 
-case class ClusterNode(
-  addr: InetSocketAddress,
-  id: Option[String],
-  flags: Seq[String]) {
+case class ClusterNode(addr: InetSocketAddress, id: Option[String], flags: Seq[String]) {
   def isMyself: Boolean =
     flags.contains("myself")
 }
 
 case class Slots(start: Int, end: Int, master: ClusterNode, replicas: Seq[ClusterNode])
 
-case class AddSlots(slots: Seq[Int])
-  extends Cluster("ADDSLOTS", slots.map(_.toString))
+case class AddSlots(slots: Seq[Int]) extends Cluster("ADDSLOTS", slots.map(_.toString))
 
 sealed trait SetSlotState
 
@@ -32,20 +28,19 @@ object SetSlotState {
 }
 
 case class SetSlot(command: SetSlotState, slot: Int, nodeId: Option[String])
-  extends Cluster("SETSLOT", Seq(slot.toString, command.toString.toUpperCase) ++ nodeId)
+    extends Cluster("SETSLOT", Seq(slot.toString, command.toString.toUpperCase) ++ nodeId)
 
 case class ClusterInfo() extends Cluster("INFO")
 
 case class ClusterSlots() extends Cluster("SLOTS")
 
-case class Replicate(nodeId: String)
-  extends Cluster("REPLICATE", Seq(nodeId))
+case class Replicate(nodeId: String) extends Cluster("REPLICATE", Seq(nodeId))
 
 case class Meet(addr: InetSocketAddress)
-  extends Cluster("MEET", Seq(addr.getAddress.getHostAddress, addr.getPort.toString))
+    extends Cluster("MEET", Seq(addr.getAddress.getHostAddress, addr.getPort.toString))
 
 case class GetKeysInSlot(slot: Int, count: Int)
-  extends Cluster("GETKEYSINSLOT", Seq(slot.toString, count.toString))
+    extends Cluster("GETKEYSINSLOT", Seq(slot.toString, count.toString))
 
 case class Nodes() extends Cluster("NODES")
 

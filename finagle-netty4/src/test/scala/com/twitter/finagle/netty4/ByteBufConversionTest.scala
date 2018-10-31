@@ -17,7 +17,8 @@ class ByteBufConversionTest extends FunSuite with BeforeAndAfter {
   private[this] var buffer: ByteBuf = null
 
   before {
-    buffer = ByteBufConversion.bufAsByteBuf(Buf.ByteArray.Owned(Array.fill[Byte](Capacity)(0.toByte)))
+    buffer =
+      ByteBufConversion.bufAsByteBuf(Buf.ByteArray.Owned(Array.fill[Byte](Capacity)(0.toByte)))
     seed = System.currentTimeMillis()
     random = new Random(seed)
   }

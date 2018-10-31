@@ -136,7 +136,7 @@ private class ForkJoinScheduler(nthreads: Int, statsReceiver: StatsReceiver = Nu
       // Flush out our local scheduler before proceeding.
       flushLocalScheduler()
     case _ =>
-      // Nothing to do.
+    // Nothing to do.
   }
 
   // We can't provide useful/cheap implementations of these.

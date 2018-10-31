@@ -20,9 +20,13 @@ abstract class AbstractSmuxTest extends FunSuite {
 
   import AbstractSmuxTest._
 
-  type ServerT <: ListeningStackServer[mux.Request, mux.Response, ServerT] with OpportunisticTlsParams[ServerT]
+  type ServerT <: ListeningStackServer[mux.Request, mux.Response, ServerT] with OpportunisticTlsParams[
+    ServerT
+  ]
 
-  type ClientT <: EndpointerStackClient[mux.Request, mux.Response, ClientT] with OpportunisticTlsParams[ClientT]
+  type ClientT <: EndpointerStackClient[mux.Request, mux.Response, ClientT] with OpportunisticTlsParams[
+    ClientT
+  ]
 
   def serverImpl(): ServerT
 
@@ -30,31 +34,33 @@ abstract class AbstractSmuxTest extends FunSuite {
 
   private def serve(
     serverLevel: Option[OpportunisticTls.Level]
-  ): ListeningServer = (serverLevel match {
-    case None =>
-      serverImpl()
-    case Some(level) =>
-      serverImpl()
-        .withTransport.tls(mkConfig())
-        .withOpportunisticTls(level)
-  }).serve("localhost:*", concatService)
+  ): ListeningServer =
+    (serverLevel match {
+      case None =>
+        serverImpl()
+      case Some(level) =>
+        serverImpl().withTransport
+          .tls(mkConfig())
+          .withOpportunisticTls(level)
+    }).serve("localhost:*", concatService)
 
   private def newService(
     clientLevel: Option[OpportunisticTls.Level],
     record: ClientT => ClientT,
     stats: StatsReceiver,
     addr: InetSocketAddress
-  ): Service[mux.Request, mux.Response] = record(
-    clientLevel match {
-      case None =>
-        clientImpl().withStatsReceiver(stats)
-      case Some(level) =>
-        clientImpl()
-          .withStatsReceiver(stats)
-          .withTransport.tlsWithoutValidation
-          .withOpportunisticTls(level)
-    }
-  ).newService(Name.bound(Address(addr)), "client")
+  ): Service[mux.Request, mux.Response] =
+    record(
+      clientLevel match {
+        case None =>
+          clientImpl().withStatsReceiver(stats)
+        case Some(level) =>
+          clientImpl()
+            .withStatsReceiver(stats)
+            .withTransport.tlsWithoutValidation
+            .withOpportunisticTls(level)
+      }
+    ).newService(Name.bound(Address(addr)), "client")
 
   private def record(buffer: StringBuffer)(client: ClientT): ClientT = {
     val recordingPrinter: (Stack.Params, ChannelPipeline) => Unit = (params, pipeline) => {
@@ -67,7 +73,10 @@ abstract class AbstractSmuxTest extends FunSuite {
     client.configured(Mux.param.TurnOnTlsFn(recordingPrinter))
   }
 
-  private def smuxTest(testCases: Seq[TlsPair], testFn: (Try[Response], String, InMemoryStatsReceiver) => Unit): Unit = {
+  private def smuxTest(
+    testCases: Seq[TlsPair],
+    testFn: (Try[Response], String, InMemoryStatsReceiver) => Unit
+  ): Unit = {
     for {
       (clientLevel, serverLevel) <- testCases
     } {
@@ -86,29 +95,34 @@ abstract class AbstractSmuxTest extends FunSuite {
 
   // tests
   test("smux: can talk to each other with opportunistic tls") {
-    smuxTest(compatibleEnabledLevels, { case (results, string, _) =>
-      val Buf.Utf8(repString) = results.get.body
-      assert(repString == "." * 20)
-      // we check that it's non-empty to ensure that it was correctly installed
-      assert(!string.isEmpty)
-      // check that the payload isn't in cleartext over the wire
-      assert(!string.contains("2e" * 10))
-    })
+    smuxTest(
+      compatibleEnabledLevels, {
+        case (results, string, _) =>
+          val Buf.Utf8(repString) = results.get.body
+          assert(repString == "." * 20)
+          // we check that it's non-empty to ensure that it was correctly installed
+          assert(!string.isEmpty)
+          // check that the payload isn't in cleartext over the wire
+          assert(!string.contains("2e" * 10))
+      }
+    )
   }
 
   test("smux: can talk to each other when both parties are off") {
-    smuxTest(compatibleUndesiredDisabledLevels, { case (results, string, _) =>
-      val Buf.Utf8(repString) = results.get.body
-      assert(repString == "." * 20)
-      assert(string.isEmpty)
+    smuxTest(compatibleUndesiredDisabledLevels, {
+      case (results, string, _) =>
+        val Buf.Utf8(repString) = results.get.body
+        assert(repString == "." * 20)
+        assert(string.isEmpty)
     })
   }
 
   test("smux: can talk to each other when one party is off") {
-    smuxTest(compatibleDesiredDisabledLevels, { case (results, string, _) =>
-      val Buf.Utf8(repString) = results.get.body
-      assert(repString == "." * 20)
-      assert(string.isEmpty)
+    smuxTest(compatibleDesiredDisabledLevels, {
+      case (results, string, _) =>
+        val Buf.Utf8(repString) = results.get.body
+        assert(repString == "." * 20)
+        assert(string.isEmpty)
     })
   }
 
@@ -126,25 +140,36 @@ abstract class AbstractSmuxTest extends FunSuite {
       val server = serverImpl()
       intercept[IllegalStateException] {
         val addr = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-        server.withOpportunisticTls(level).serve(
-          addr, Service.const(Future.exception(new Exception())))
+        server
+          .withOpportunisticTls(level).serve(addr, Service.const(Future.exception(new Exception())))
       }
     }
   }
 
   test("smux: can't talk to each other with incompatible opportunistic tls") {
-    smuxTest(incompatibleLevels, { case (results, string, stats) =>
-      intercept[IncompatibleNegotiationException] {
-        results.get
+    smuxTest(
+      incompatibleLevels, {
+        case (results, string, stats) =>
+          intercept[IncompatibleNegotiationException] {
+            results.get
+          }
+          assert(string.isEmpty)
+
+          assert(stats.counters.get(Seq("client", "failures")) == None)
+          assert(stats.counters.get(Seq("client", "service_creation", "failures")) == Some(1))
+          assert(
+            stats.counters.get(
+              Seq(
+                "client",
+                "service_creation",
+                "failures",
+                "com.twitter.finagle.mux.transport.IncompatibleNegotiationException"
+              )
+            ) == Some(1)
+          )
+
       }
-      assert(string.isEmpty)
-
-      assert(stats.counters.get(Seq("client", "failures")) == None)
-      assert(stats.counters.get(Seq("client", "service_creation", "failures")) == Some(1))
-      assert(stats.counters.get(Seq("client", "service_creation", "failures",
-        "com.twitter.finagle.mux.transport.IncompatibleNegotiationException")) == Some(1))
-
-    })
+    )
   }
 
   test("smux: server which requires TLS will reject connections if negotiation doesn't happen") {

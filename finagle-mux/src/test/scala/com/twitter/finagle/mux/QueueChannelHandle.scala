@@ -11,8 +11,9 @@ import java.util.concurrent.Executor
 import scala.util.control.NonFatal
 
 /** A mocked channel handle useful for testing */
-private[mux] class QueueChannelHandle[In, Out](destinationQueue: AsyncQueue[Out]) extends PushChannelHandle[In, Out] {
-  private[this] val inLocalExecutor = new ThreadLocal[Boolean]{
+private[mux] class QueueChannelHandle[In, Out](destinationQueue: AsyncQueue[Out])
+    extends PushChannelHandle[In, Out] {
+  private[this] val inLocalExecutor = new ThreadLocal[Boolean] {
     override def initialValue(): Boolean = false
   }
 
@@ -32,12 +33,12 @@ private[mux] class QueueChannelHandle[In, Out](destinationQueue: AsyncQueue[Out]
   private[this] def inExecutor: Boolean = inLocalExecutor.get()
 
   /** Receive a message from the I/O engine */
-  def sessionReceive(msg: In): Unit = serialExecutor.execute(
-    new Runnable { def run(): Unit = currentSession.receive(msg) })
+  def sessionReceive(msg: In): Unit =
+    serialExecutor.execute(new Runnable { def run(): Unit = currentSession.receive(msg) })
 
   /** Fail the handle based on an I/O engine reason */
-  def failHandle(cause: Try[Unit]): Unit = serialExecutor.execute(
-      new Runnable { def run(): Unit = closed.updateIfEmpty(cause) })
+  def failHandle(cause: Try[Unit]): Unit =
+    serialExecutor.execute(new Runnable { def run(): Unit = closed.updateIfEmpty(cause) })
 
   val remoteAddress: SocketAddress = new SocketAddress {}
   val localAddress: SocketAddress = new SocketAddress {}
@@ -47,17 +48,20 @@ private[mux] class QueueChannelHandle[In, Out](destinationQueue: AsyncQueue[Out]
       protected def handle(elem: Runnable): Unit = {
         inLocalExecutor.set(true)
         try elem.run()
-        catch { case NonFatal(t) => closed.updateIfEmpty(Throw(t)) }
-        finally inLocalExecutor.set(false)
+        catch { case NonFatal(t) => closed.updateIfEmpty(Throw(t)) } finally inLocalExecutor.set(
+          false
+        )
       }
     }
 
-    new Executor {  def execute(command: Runnable): Unit = updater(command) }
+    new Executor { def execute(command: Runnable): Unit = updater(command) }
   }
 
   def registerSession(newSession: PushSession[In, Out]): Unit = {
     if (!inExecutor) {
-      val ex = new IllegalStateException("Attempted to register session outside the serial executor")
+      val ex = new IllegalStateException(
+        "Attempted to register session outside the serial executor"
+      )
       closed.updateIfEmpty(Throw(ex))
       throw ex
     } else {
@@ -66,7 +70,7 @@ private[mux] class QueueChannelHandle[In, Out](destinationQueue: AsyncQueue[Out]
   }
 
   def send(message: Out)(onComplete: Try[Unit] => Unit): Unit =
-    send(message::Nil)(onComplete)
+    send(message :: Nil)(onComplete)
 
   def send(messages: Iterable[Out])(onComplete: Try[Unit] => Unit): Unit = {
     serialExecutor.execute(new Runnable {
@@ -82,7 +86,7 @@ private[mux] class QueueChannelHandle[In, Out](destinationQueue: AsyncQueue[Out]
   }
 
   def sendAndForget(message: Out): Unit =
-    sendAndForget(message::Nil)
+    sendAndForget(message :: Nil)
 
   def sendAndForget(messages: Iterable[Out]): Unit = {
     serialExecutor.execute(new Runnable {
@@ -102,7 +106,7 @@ private[mux] class QueueChannelHandle[In, Out](destinationQueue: AsyncQueue[Out]
   def onClose: Future[Unit] = closed
 
   def close(deadline: Time): Future[Unit] = {
-    serialExecutor.execute( new Runnable { def run(): Unit = closed.setDone() })
+    serialExecutor.execute(new Runnable { def run(): Unit = closed.setDone() })
     onClose
   }
 }

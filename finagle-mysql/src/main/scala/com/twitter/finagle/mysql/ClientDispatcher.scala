@@ -121,15 +121,16 @@ private[finagle] class ClientDispatcher(
   import ClientDispatcher._
 
   override def apply(req: Request): Future[Result] =
-    connPhase.flatMap { _ =>
-      super.apply(req)
-    }.onFailure {
-      // a LostSyncException represents a fatal state between
-      // the client / server. The error is unrecoverable
-      // so we close the service.
-      case e @ LostSyncException(_) => close()
-      case _ =>
-    }
+    connPhase
+      .flatMap { _ =>
+        super.apply(req)
+      }.onFailure {
+        // a LostSyncException represents a fatal state between
+        // the client / server. The error is unrecoverable
+        // so we close the service.
+        case e @ LostSyncException(_) => close()
+        case _ =>
+      }
 
   override def close(deadline: Time): Future[Unit] =
     trans
@@ -144,17 +145,18 @@ private[finagle] class ClientDispatcher(
    * [[http://dev.mysql.com/doc/internals/en/connection-phase.html]]
    */
   private[this] val connPhase: Future[Result] =
-    trans.read().flatMap { packet =>
-      const(HandshakeInit(packet)).flatMap { init =>
-        const(handshake(init)).flatMap { req =>
-          val rep = new Promise[Result]
-          dispatch(req, rep)
-          rep
+    trans
+      .read().flatMap { packet =>
+        const(HandshakeInit(packet)).flatMap { init =>
+          const(handshake(init)).flatMap { req =>
+            val rep = new Promise[Result]
+            dispatch(req, rep)
+            rep
+          }
         }
+      }.onFailure { _ =>
+        close()
       }
-    }.onFailure { _ =>
-      close()
-    }
 
   /**
    * Returns a Future that represents the result of an exchange
@@ -200,12 +202,13 @@ private[finagle] class ClientDispatcher(
     MysqlBuf.peek(packet.body) match {
       case Some(Packet.OkByte) if cmd == Command.COM_STMT_FETCH =>
         // Not really an OK packet; 00 is the header for a row as well
-        readTx(req).flatMap {
-          case (rowPackets, eof) =>
-            const(FetchResult(packet +: rowPackets, eof))
-        }.ensure {
-          signal.setDone()
-        }
+        readTx(req)
+          .flatMap {
+            case (rowPackets, eof) =>
+              const(FetchResult(packet +: rowPackets, eof))
+          }.ensure {
+            signal.setDone()
+          }
 
       case Some(Packet.EofByte) if cmd == Command.COM_STMT_FETCH =>
         // synthesize an empty FetchResult

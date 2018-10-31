@@ -55,11 +55,16 @@ class Netty4PushTransporter[In, Out](
   protected def initSession[T <: PushSession[In, Out]](
     channel: Channel,
     protocolInit: ChannelPipeline => Unit,
-    sessionBuilder: PushChannelHandle[In, Out] => Future[T]): Future[T] = {
+    sessionBuilder: PushChannelHandle[In, Out] => Future[T]
+  ): Future[T] = {
     val statsReceiver = params[param.Stats].statsReceiver
     val (_, sessionF) =
       Netty4PushChannelHandle.install[In, Out, T](
-        channel, protocolInit, sessionBuilder, statsReceiver)
+        channel,
+        protocolInit,
+        sessionBuilder,
+        statsReceiver
+      )
     sessionF
   }
 

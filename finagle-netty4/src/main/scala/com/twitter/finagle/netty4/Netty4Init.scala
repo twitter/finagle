@@ -79,9 +79,7 @@ private final class Netty4Init extends FinagleInit {
       }
 
       ResourceLeakDetectorFactory.setResourceLeakDetectorFactory(
-        new StatsLeakDetectorFactory(
-          ResourceLeakDetectorFactory.instance(),
-          { () =>
+        new StatsLeakDetectorFactory(ResourceLeakDetectorFactory.instance(), { () =>
           referenceLeaks.incr()
           referenceLeakLintRule.leakDetected()
         })

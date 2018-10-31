@@ -3,11 +3,7 @@ package com.twitter.finagle.http2.transport
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader.Message
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.channel.{DefaultChannelPromise, ChannelHandlerContext}
-import io.netty.handler.codec.http.{
-  DefaultFullHttpRequest,
-  HttpMethod,
-  HttpVersion
-}
+import io.netty.handler.codec.http.{DefaultFullHttpRequest, HttpMethod, HttpVersion}
 import io.netty.handler.codec.http2.HttpConversionUtil.ExtensionHeaderNames
 import io.netty.handler.codec.http2._
 import org.junit.runner.RunWith

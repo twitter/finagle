@@ -12,7 +12,7 @@ import javax.net.ssl.SSLSession
  * @param session The `SSLSession` associated with the transport.
  */
 private[finagle] final class UsingSslTransportContext(val session: SSLSession)
-  extends SslTransportContext {
+    extends SslTransportContext {
 
   // This class should not be used with a `NullSslSession`. Use
   // `NoSslTransportContext` instead.

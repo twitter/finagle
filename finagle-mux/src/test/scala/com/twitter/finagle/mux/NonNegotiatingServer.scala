@@ -11,10 +11,10 @@ import com.twitter.io.{Buf, ByteReader}
 private object NonNegotiatingServer {
 
   private val NonNegotiatingSessionFactory: SessionF = (
-  ref: RefPushSession[ByteReader, Buf],
-  params: Stack.Params,
-  handle: MuxChannelHandle,
-  service: Service[Request, Response]
+    ref: RefPushSession[ByteReader, Buf],
+    params: Stack.Params,
+    handle: MuxChannelHandle,
+    service: Service[Request, Response]
   ) => {
     val statsReceiver = params.apply[fparam.Stats].statsReceiver.scope("mux")
     val framingStats = statsReceiver.scope("framer")

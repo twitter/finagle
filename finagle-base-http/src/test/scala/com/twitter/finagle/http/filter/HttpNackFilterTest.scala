@@ -49,7 +49,9 @@ class HttpNackFilterTest extends FunSuite {
     assert(!couldBeNacked.get)
   }
 
-  test("HttpNackFilter signals that a request may be nacked if it has a non-chunked body and the magic header") {
+  test(
+    "HttpNackFilter signals that a request may be nacked if it has a non-chunked body and the magic header"
+  ) {
     val stats = new NullStatsReceiver
     val service = new HttpNackFilter(stats) andThen Service.mk { req: Request =>
       // header should have been stripped

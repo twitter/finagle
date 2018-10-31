@@ -18,7 +18,11 @@ private[ssl] class IgnorantTrustManager extends X509ExtendedTrustManager {
     // Do Nothing.
   }
 
-  def checkClientTrusted(chain: Array[X509Certificate], authType: String, engine: SSLEngine): Unit = {
+  def checkClientTrusted(
+    chain: Array[X509Certificate],
+    authType: String,
+    engine: SSLEngine
+  ): Unit = {
     // Do Nothing.
   }
 
@@ -30,7 +34,11 @@ private[ssl] class IgnorantTrustManager extends X509ExtendedTrustManager {
     // Do Nothing.
   }
 
-  def checkServerTrusted(chain: Array[X509Certificate], authType: String, engine: SSLEngine): Unit = {
+  def checkServerTrusted(
+    chain: Array[X509Certificate],
+    authType: String,
+    engine: SSLEngine
+  ): Unit = {
     // Do Nothing.
   }
 }

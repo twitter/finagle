@@ -119,7 +119,9 @@ private[finagle] abstract class GenStreamingSerialServerDispatcher[Req, Rep, In,
         if (res.isThrow) {
           logger.trace(res.throwable, s"closing $trans due to read error")
         } else {
-          logger.trace(s"closing $trans due to status.cas failure,  state is ${state.get()}, expect Running")
+          logger.trace(
+            s"closing $trans due to status.cas failure,  state is ${state.get()}, expect Running"
+          )
         }
       }
 

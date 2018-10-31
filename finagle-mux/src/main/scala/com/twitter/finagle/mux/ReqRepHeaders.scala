@@ -36,8 +36,9 @@ private[mux] object ReqRepHeaders {
 
   private val ResponseBroadcastKey: Buf = Buf.Utf8("com.twitter.finagle.thrift.Response.headers")
 
-  private val appHeadersPredicate: ((Buf, Buf)) => Boolean = { case (k, _) =>
-    k == ReqRepHeaders.ResponseBroadcastKey
+  private val appHeadersPredicate: ((Buf, Buf)) => Boolean = {
+    case (k, _) =>
+      k == ReqRepHeaders.ResponseBroadcastKey
   }
 
   def responseHeaders(rep: RdispatchOk): Seq[(Buf, Buf)] = {
@@ -57,9 +58,10 @@ private[mux] object ReqRepHeaders {
       Contexts.broadcast.let(ReqRepHeaders.RequestBroadcastKey, req.contexts) {
         Contexts.broadcast.marshal()
       }
-    } else Contexts.broadcast.letClear(ReqRepHeaders.RequestBroadcastKey) {
-      Contexts.broadcast.marshal()
-    }
+    } else
+      Contexts.broadcast.letClear(ReqRepHeaders.RequestBroadcastKey) {
+        Contexts.broadcast.marshal()
+      }
   }
 
   /**
@@ -106,11 +108,13 @@ private[mux] object ReqRepHeaders {
       // we need to cull excess headers. We drop from the tail, arbitrarily.
       logger.warning(
         s"Application headers exceeded maximum length. Maximum: $MaxEncodedLength. " +
-        s"Observed: $allHeaderSize. Excess headers will be dropped.")
+          s"Observed: $allHeaderSize. Excess headers will be dropped."
+      )
       var size = 0
-      val iter = headers.iterator.takeWhile { case (k, v) =>
-        size += 4 + k.length + v.length // 4, 2 each for each of the length fields
-        size <= MaxEncodedLength
+      val iter = headers.iterator.takeWhile {
+        case (k, v) =>
+          size += 4 + k.length + v.length // 4, 2 each for each of the length fields
+          size <= MaxEncodedLength
       }
 
       val bw = BufByteWriter.dynamic()

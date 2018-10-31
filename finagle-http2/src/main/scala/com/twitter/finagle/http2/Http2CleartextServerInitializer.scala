@@ -8,8 +8,18 @@ import com.twitter.finagle.param.{Stats, Timer => TimerParam}
 import com.twitter.logging.Logger
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel._
-import io.netty.handler.codec.http.HttpServerUpgradeHandler.{SourceCodec, UpgradeCodec, UpgradeCodecFactory}
-import io.netty.handler.codec.http.{FullHttpRequest, HttpRequest, HttpServerUpgradeHandler, HttpUtil, HttpVersion}
+import io.netty.handler.codec.http.HttpServerUpgradeHandler.{
+  SourceCodec,
+  UpgradeCodec,
+  UpgradeCodecFactory
+}
+import io.netty.handler.codec.http.{
+  FullHttpRequest,
+  HttpRequest,
+  HttpServerUpgradeHandler,
+  HttpUtil,
+  HttpVersion
+}
 import io.netty.handler.codec.http2._
 import io.netty.util.AsciiString
 
@@ -35,7 +45,10 @@ final private[finagle] class Http2CleartextServerInitializer(
         MultiplexCodecBuilder.addStreamsGauge(statsReceiver, http2MultiplexCodec, channel)
 
         new Http2ServerUpgradeCodec(http2MultiplexCodec) {
-          override def upgradeTo(ctx: ChannelHandlerContext, upgradeRequest: FullHttpRequest): Unit = {
+          override def upgradeTo(
+            ctx: ChannelHandlerContext,
+            upgradeRequest: FullHttpRequest
+          ): Unit = {
             upgradedCounter.incr()
             // we turn off backpressure because Http2 only works with autoread on for now
             ctx.channel.config.setAutoRead(true)
@@ -77,7 +90,8 @@ final private[finagle] class Http2CleartextServerInitializer(
     p.addLast(init)
   }
 
-  private[this] final class MaybeUpgradeHandler(sourceCodec: SourceCodec) extends ChannelInboundHandlerAdapter {
+  private[this] final class MaybeUpgradeHandler(sourceCodec: SourceCodec)
+      extends ChannelInboundHandlerAdapter {
     override def channelRead(ctx: ChannelHandlerContext, msg: scala.Any): Unit = msg match {
       case req: HttpRequest if dontUpgrade(req) =>
         // We're going to skip the upgrade of requests that may have a body since
@@ -92,8 +106,11 @@ final private[finagle] class Http2CleartextServerInitializer(
 
       case _ =>
         // We reuse the same name if we decide to try an upgrade.
-        ctx.pipeline.replace(this, Name,
-          new HttpServerUpgradeHandler(sourceCodec, upgradeCodecFactory(ctx.channel)))
+        ctx.pipeline.replace(
+          this,
+          Name,
+          new HttpServerUpgradeHandler(sourceCodec, upgradeCodecFactory(ctx.channel))
+        )
         ctx.fireChannelRead(msg)
     }
   }
@@ -106,6 +123,6 @@ private object Http2CleartextServerInitializer {
   // transfer-encoding header, otherwise the server can't be sure when the message will end.
   private def dontUpgrade(req: HttpRequest): Boolean =
     req.protocolVersion != HttpVersion.HTTP_1_1 ||
-    (req.headers.contains(Fields.ContentLength) && HttpUtil.getContentLength(req) != 0) ||
+      (req.headers.contains(Fields.ContentLength) && HttpUtil.getContentLength(req) != 0) ||
       req.headers.contains(Fields.TransferEncoding)
 }

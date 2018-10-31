@@ -48,7 +48,11 @@ object StripHeadersHandler extends ChannelDuplexHandler {
 
     // Clobber all values of "te" (short for transfer-encoding) except for "trailers"
     // https://tools.ietf.org/html/rfc7540#section-8.1.2.2
-    if (headers.containsValue(HttpHeaderNames.TE, HttpHeaders.Values.TRAILERS, true /* ignoreCase */ ))
+    if (headers.containsValue(
+        HttpHeaderNames.TE,
+        HttpHeaders.Values.TRAILERS,
+        true /* ignoreCase */
+      ))
       headers.set(HttpHeaderNames.TE, HttpHeaders.Values.TRAILERS)
     else
       headers.remove(HttpHeaderNames.TE)

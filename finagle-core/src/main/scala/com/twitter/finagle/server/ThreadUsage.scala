@@ -43,7 +43,8 @@ private class ThreadUsage(
 
   private[this] val perThreadCounter = new ThreadLocal[Counter] {
     override def initialValue(): Counter =
-      statsReceiver.scope("per_thread")
+      statsReceiver
+        .scope("per_thread")
         .counter(Verbosity.Debug, Thread.currentThread.getName)
   }
 

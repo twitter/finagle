@@ -415,4 +415,3 @@ trait SentinelClientTest extends RedisTest with BeforeAndAfterAll {
     try { testCode(client) } finally { client.close() }
   }
 }
-

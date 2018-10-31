@@ -32,7 +32,11 @@ class Netty4PushListener[In, Out](
   protected def initializePushChannelHandle(ch: Channel, sessionFactory: SessionFactory): Unit = {
     val statsReceiver = params[param.Stats].statsReceiver
     Netty4PushChannelHandle.install[In, Out, PushSession[In, Out]](
-      ch, pipelineInit, sessionFactory, statsReceiver)
+      ch,
+      pipelineInit,
+      sessionFactory,
+      statsReceiver
+    )
   }
 
   private[this] class ChannelHandleInitializer(sessionFactory: SessionFactory)

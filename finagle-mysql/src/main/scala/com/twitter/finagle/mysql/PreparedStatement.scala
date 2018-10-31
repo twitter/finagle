@@ -74,8 +74,7 @@ trait PreparedStatement {
   def read(params: Parameter*): Future[ResultSet] =
     apply(params: _*).flatMap {
       case rs: ResultSet => Future.value(rs)
-      case r => Future.exception(
-        new IllegalStateException(s"Unsupported response to a read='$r'"))
+      case r => Future.exception(new IllegalStateException(s"Unsupported response to a read='$r'"))
     }
 
   /**
@@ -100,11 +99,11 @@ trait PreparedStatement {
    *
    * Java users, see [[asJava]] and use [[PreparedStatement.AsJava.modify]].
    */
-  def modify(params:  Parameter*): Future[OK] =
+  def modify(params: Parameter*): Future[OK] =
     apply(params: _*).flatMap {
       case ok: OK => Future.value(ok)
-      case r => Future.exception(
-        new IllegalStateException(s"Unsupported response to a modify='$r'"))
+      case r =>
+        Future.exception(new IllegalStateException(s"Unsupported response to a modify='$r'"))
     }
 
   /**

@@ -13,8 +13,10 @@ private[redis] class RedisLoggingFilter(stats: StatsReceiver) extends SimpleFilt
 
   override def apply(command: Command, service: Service[Command, Reply]): Future[Reply] = {
     service(command).respond {
-      case Return(StatusReply(_) | IntegerReply(_) | BulkReply(_) | EmptyBulkReply | MBulkReply(_) |
-          NilMBulkReply | EmptyMBulkReply) =>
+      case Return(
+          StatusReply(_) | IntegerReply(_) | BulkReply(_) | EmptyBulkReply | MBulkReply(_) |
+          NilMBulkReply | EmptyMBulkReply
+          ) =>
         succ.counter(BufToString(command.name)).incr()
       case Return(ErrorReply(message)) =>
         error.counter(BufToString(command.name)).incr()

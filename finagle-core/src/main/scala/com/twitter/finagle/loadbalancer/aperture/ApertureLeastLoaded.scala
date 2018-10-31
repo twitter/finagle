@@ -1,6 +1,11 @@
 package com.twitter.finagle.loadbalancer.aperture
 
-import com.twitter.finagle.loadbalancer.{EndpointFactory, FailingEndpointFactory, LeastLoaded, Updating}
+import com.twitter.finagle.loadbalancer.{
+  EndpointFactory,
+  FailingEndpointFactory,
+  LeastLoaded,
+  Updating
+}
 import com.twitter.finagle.stats.{Counter, StatsReceiver}
 import com.twitter.finagle.util.Rng
 import com.twitter.finagle.{NoBrokersAvailableException, ServiceFactoryProxy}

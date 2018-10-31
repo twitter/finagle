@@ -145,7 +145,11 @@ object ThriftServiceIface { // TODO: Rename ThriftServicePerEndpoint and move to
     stats: StatsReceiver,
     responseClassifier: ResponseClassifier
   ): Service[method.Args, method.SuccessType] = {
-    apply(method, thriftService, RichClientParam(pf, clientStats = stats, responseClassifier = responseClassifier))
+    apply(
+      method,
+      thriftService,
+      RichClientParam(pf, clientStats = stats, responseClassifier = responseClassifier)
+    )
   }
 
   def apply(

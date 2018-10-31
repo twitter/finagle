@@ -33,7 +33,8 @@ class PipeliningClientPushSessionTest extends FunSuite with MockitoSugar {
             new PipeliningClientPushSession[Unit, Unit](
               handle,
               NullStatsReceiver,
-              10.seconds, timer
+              10.seconds,
+              timer
             ).toService
           val f = session()
           f.raise(exc)
@@ -90,7 +91,6 @@ class PipeliningClientPushSessionTest extends FunSuite with MockitoSugar {
     val stallTimeout = 10.seconds
     val timer = new MockTimer
     Time.withCurrentTimeFrozen { ctl =>
-
       val handle = new PipeliningMockChannelHandle[Unit, Unit]()
       val session =
         new PipeliningClientPushSession[Unit, Unit](
@@ -135,7 +135,6 @@ class PipeliningClientPushSessionTest extends FunSuite with MockitoSugar {
 
     session.receive("resp")
     assert(session.getQueueSize == 2)
-
 
     session.receive("resp")
     assert(session.getQueueSize == 1)

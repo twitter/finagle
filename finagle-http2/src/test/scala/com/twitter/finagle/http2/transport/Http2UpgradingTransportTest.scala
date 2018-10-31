@@ -75,24 +75,24 @@ class Http2UpgradingTransportTest extends FunSuite with MockitoSugar {
     assert(await(readF) == fullResponse)
   }
 
-    test("honors aborted upgrade dispatches") {
-      val ctx = new Ctx
-      import ctx._
+  test("honors aborted upgrade dispatches") {
+    val ctx = new Ctx
+    import ctx._
 
-      val partialRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "twitter.com")
-      val partialF = upgradingTransport.write(partialRequest)
-      assert(await(writeq.poll) == partialRequest)
+    val partialRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "twitter.com")
+    val partialF = upgradingTransport.write(partialRequest)
+    assert(await(writeq.poll) == partialRequest)
 
-      val readF = upgradingTransport.read()
-      assert(!readF.isDefined)
-      assert(readq.offer(Http2UpgradingTransport.UpgradeAborted))
-      intercept[UpgradeIgnoredException.type] {
-        await(p)
-      }
-
-      assert(readq.offer(fullResponse))
-      assert(await(readF) == fullResponse)
+    val readF = upgradingTransport.read()
+    assert(!readF.isDefined)
+    assert(readq.offer(Http2UpgradingTransport.UpgradeAborted))
+    intercept[UpgradeIgnoredException.type] {
+      await(p)
     }
+
+    assert(readq.offer(fullResponse))
+    assert(await(readF) == fullResponse)
+  }
 
   test("honors the status if the upgrade is rejected") {
     var status: Status = Status.Open

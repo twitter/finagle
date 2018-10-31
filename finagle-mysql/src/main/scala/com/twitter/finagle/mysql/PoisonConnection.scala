@@ -29,14 +29,14 @@ private[finagle] object PoisonConnection {
     }
 
   private[finagle] final class PoisonableServiceFactory(underlying: ServiceFactory[Request, Result])
-    extends ServiceFactoryProxy(underlying) {
+      extends ServiceFactoryProxy(underlying) {
 
     override def apply(conn: ClientConnection): Future[Service[Request, Result]] =
       super.apply(conn).map(new PoisonableService(_))
   }
 
   class PoisonedConnectionException(val flags: Long)
-    extends Exception
+      extends Exception
       with FailureFlags[PoisonedConnectionException]
       with NoStackTrace {
 
@@ -51,7 +51,7 @@ private[finagle] object PoisonConnection {
   // want to expose ourselves to double closes on the underlying resource since the client
   // stack will attempt to close the service once it's status transitions to `Closed`.
   final class PoisonableService(svc: Service[Request, Result])
-    extends ServiceProxy[Request, Result](svc) {
+      extends ServiceProxy[Request, Result](svc) {
 
     @volatile private[this] var poisoned = false
 

@@ -15,6 +15,7 @@ trait WithServerTransport[A <: Stack.Parameterized[A]] { self: Stack.Parameteriz
    * `Transport` is a Finagle abstraction over the network connection (i.e., a TCP connection).
    */
   val withTransport: ServerTransportParams[A] = {
-    new ServerTransportParams(self)}
+    new ServerTransportParams(self)
+  }
 
 }

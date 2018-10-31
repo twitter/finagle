@@ -122,11 +122,12 @@ trait Row {
   def booleanOrFalse(columnName: String): Boolean =
     indexOfOrSentinel(columnName) match {
       case -1 => columnNotFound(columnName)
-      case n => values(n) match {
-        case ByteValue(v) => v != 0
-        case NullValue => false
-        case v => unsupportedValue(columnName, v)
-      }
+      case n =>
+        values(n) match {
+          case ByteValue(v) => v != 0
+          case NullValue => false
+          case v => unsupportedValue(columnName, v)
+        }
     }
 
   /**
@@ -145,13 +146,14 @@ trait Row {
   def getBoolean(columnName: String): Option[java.lang.Boolean] =
     indexOfOrSentinel(columnName) match {
       case -1 => columnNotFound(columnName)
-      case n => values(n) match {
-        case ByteValue(v) =>
-          if (v != 0) Row.SomeTrue
-          else Row.SomeFalse
-        case NullValue => None
-        case v => unsupportedValue(columnName, v)
-      }
+      case n =>
+        values(n) match {
+          case ByteValue(v) =>
+            if (v != 0) Row.SomeTrue
+            else Row.SomeFalse
+          case NullValue => None
+          case v => unsupportedValue(columnName, v)
+        }
     }
 
   /**
@@ -168,11 +170,12 @@ trait Row {
   def byteOrZero(columnName: String): Byte =
     indexOfOrSentinel(columnName) match {
       case -1 => columnNotFound(columnName)
-      case n => values(n) match {
-        case ByteValue(v) => v
-        case NullValue => 0
-        case v => unsupportedValue(columnName, v)
-      }
+      case n =>
+        values(n) match {
+          case ByteValue(v) => v
+          case NullValue => 0
+          case v => unsupportedValue(columnName, v)
+        }
     }
 
   /**
@@ -189,11 +192,12 @@ trait Row {
   def getByte(columnName: String): Option[java.lang.Byte] =
     indexOfOrSentinel(columnName) match {
       case -1 => columnNotFound(columnName)
-      case n => values(n) match {
-        case ByteValue(v) => Some(Byte.box(v))
-        case NullValue => None
-        case v => unsupportedValue(columnName, v)
-      }
+      case n =>
+        values(n) match {
+          case ByteValue(v) => Some(Byte.box(v))
+          case NullValue => None
+          case v => unsupportedValue(columnName, v)
+        }
     }
 
   /**
@@ -211,12 +215,13 @@ trait Row {
   def shortOrZero(columnName: String): Short =
     indexOfOrSentinel(columnName) match {
       case -1 => columnNotFound(columnName)
-      case n => values(n) match {
-        case ShortValue(v) => v
-        case ByteValue(v) => v.toShort
-        case NullValue => 0
-        case v => unsupportedValue(columnName, v)
-      }
+      case n =>
+        values(n) match {
+          case ShortValue(v) => v
+          case ByteValue(v) => v.toShort
+          case NullValue => 0
+          case v => unsupportedValue(columnName, v)
+        }
     }
 
   /**
@@ -234,12 +239,13 @@ trait Row {
   def getShort(columnName: String): Option[java.lang.Short] =
     indexOfOrSentinel(columnName) match {
       case -1 => columnNotFound(columnName)
-      case n => values(n) match {
-        case ShortValue(v) => Some(Short.box(v))
-        case ByteValue(v) => Some(Short.box(v.toShort))
-        case NullValue => None
-        case v => unsupportedValue(columnName, v)
-      }
+      case n =>
+        values(n) match {
+          case ShortValue(v) => Some(Short.box(v))
+          case ByteValue(v) => Some(Short.box(v.toShort))
+          case NullValue => None
+          case v => unsupportedValue(columnName, v)
+        }
     }
 
   /**
@@ -257,13 +263,14 @@ trait Row {
   def intOrZero(columnName: String): Int =
     indexOfOrSentinel(columnName) match {
       case -1 => columnNotFound(columnName)
-      case n => values(n) match {
-        case IntValue(v) => v
-        case ShortValue(v) => v.toInt
-        case ByteValue(v) => v.toInt
-        case NullValue => 0
-        case v => unsupportedValue(columnName, v)
-      }
+      case n =>
+        values(n) match {
+          case IntValue(v) => v
+          case ShortValue(v) => v.toInt
+          case ByteValue(v) => v.toInt
+          case NullValue => 0
+          case v => unsupportedValue(columnName, v)
+        }
     }
 
   /**
@@ -281,13 +288,14 @@ trait Row {
   def getInteger(columnName: String): Option[java.lang.Integer] =
     indexOfOrSentinel(columnName) match {
       case -1 => columnNotFound(columnName)
-      case n => values(n) match {
-        case IntValue(v) => Some(Int.box(v))
-        case ShortValue(v) => Some(Int.box(v.toInt))
-        case ByteValue(v) => Some(Int.box(v.toInt))
-        case NullValue => None
-        case v => unsupportedValue(columnName, v)
-      }
+      case n =>
+        values(n) match {
+          case IntValue(v) => Some(Int.box(v))
+          case ShortValue(v) => Some(Int.box(v.toInt))
+          case ByteValue(v) => Some(Int.box(v.toInt))
+          case NullValue => None
+          case v => unsupportedValue(columnName, v)
+        }
     }
 
   /**
@@ -305,14 +313,15 @@ trait Row {
   def longOrZero(columnName: String): Long =
     indexOfOrSentinel(columnName) match {
       case -1 => columnNotFound(columnName)
-      case n => values(n) match {
-        case LongValue(v) => v
-        case IntValue(v) => v.toLong
-        case ShortValue(v) => v.toLong
-        case ByteValue(v) => v.toLong
-        case NullValue => 0L
-        case v => unsupportedValue(columnName, v)
-      }
+      case n =>
+        values(n) match {
+          case LongValue(v) => v
+          case IntValue(v) => v.toLong
+          case ShortValue(v) => v.toLong
+          case ByteValue(v) => v.toLong
+          case NullValue => 0L
+          case v => unsupportedValue(columnName, v)
+        }
     }
 
   /**
@@ -330,14 +339,15 @@ trait Row {
   def getLong(columnName: String): Option[java.lang.Long] =
     indexOfOrSentinel(columnName) match {
       case -1 => columnNotFound(columnName)
-      case n => values(n) match {
-        case LongValue(v) => Some(Long.box(v))
-        case IntValue(v) => Some(Long.box(v.toLong))
-        case ShortValue(v) => Some(Long.box(v.toLong))
-        case ByteValue(v) => Some(Long.box(v.toLong))
-        case NullValue => None
-        case v => unsupportedValue(columnName, v)
-      }
+      case n =>
+        values(n) match {
+          case LongValue(v) => Some(Long.box(v))
+          case IntValue(v) => Some(Long.box(v.toLong))
+          case ShortValue(v) => Some(Long.box(v.toLong))
+          case ByteValue(v) => Some(Long.box(v.toLong))
+          case NullValue => None
+          case v => unsupportedValue(columnName, v)
+        }
     }
 
   /**
@@ -354,11 +364,12 @@ trait Row {
   def floatOrZero(columnName: String): Float =
     indexOfOrSentinel(columnName) match {
       case -1 => columnNotFound(columnName)
-      case n => values(n) match {
-        case FloatValue(v) => v
-        case NullValue => 0.0f
-        case v => unsupportedValue(columnName, v)
-      }
+      case n =>
+        values(n) match {
+          case FloatValue(v) => v
+          case NullValue => 0.0f
+          case v => unsupportedValue(columnName, v)
+        }
     }
 
   /**
@@ -375,11 +386,12 @@ trait Row {
   def getFloat(columnName: String): Option[java.lang.Float] =
     indexOfOrSentinel(columnName) match {
       case -1 => columnNotFound(columnName)
-      case n => values(n) match {
-        case FloatValue(v) => Some(Float.box(v))
-        case NullValue => None
-        case v => unsupportedValue(columnName, v)
-      }
+      case n =>
+        values(n) match {
+          case FloatValue(v) => Some(Float.box(v))
+          case NullValue => None
+          case v => unsupportedValue(columnName, v)
+        }
     }
 
   /**
@@ -397,12 +409,13 @@ trait Row {
   def doubleOrZero(columnName: String): Double =
     indexOfOrSentinel(columnName) match {
       case -1 => columnNotFound(columnName)
-      case n => values(n) match {
-        case DoubleValue(v) => v
-        case FloatValue(v) => v.toDouble
-        case NullValue => 0.0
-        case v => unsupportedValue(columnName, v)
-      }
+      case n =>
+        values(n) match {
+          case DoubleValue(v) => v
+          case FloatValue(v) => v.toDouble
+          case NullValue => 0.0
+          case v => unsupportedValue(columnName, v)
+        }
     }
 
   /**
@@ -420,12 +433,13 @@ trait Row {
   def getDouble(columnName: String): Option[java.lang.Double] =
     indexOfOrSentinel(columnName) match {
       case -1 => columnNotFound(columnName)
-      case n => values(n) match {
-        case DoubleValue(v) => Some(Double.box(v))
-        case FloatValue(v) => Some(Double.box(v.toDouble))
-        case NullValue => None
-        case v => unsupportedValue(columnName, v)
-      }
+      case n =>
+        values(n) match {
+          case DoubleValue(v) => Some(Double.box(v))
+          case FloatValue(v) => Some(Double.box(v.toDouble))
+          case NullValue => None
+          case v => unsupportedValue(columnName, v)
+        }
     }
 
   /**
@@ -444,12 +458,13 @@ trait Row {
   def stringOrNull(columnName: String): String = {
     indexOfOrSentinel(columnName) match {
       case -1 => columnNotFound(columnName)
-      case n => values(n) match {
-        case StringValue(v) => v
-        case EmptyValue => Row.EmptyString
-        case NullValue => null
-        case v => unsupportedValue(columnName, v)
-      }
+      case n =>
+        values(n) match {
+          case StringValue(v) => v
+          case EmptyValue => Row.EmptyString
+          case NullValue => null
+          case v => unsupportedValue(columnName, v)
+        }
     }
   }
 
@@ -484,15 +499,16 @@ trait Row {
   def bigIntOrNull(columnName: String): BigInt =
     indexOfOrSentinel(columnName) match {
       case -1 => columnNotFound(columnName)
-      case n => values(n) match {
-        case BigIntValue(v) => v
-        case ByteValue(v) => BigInt(v)
-        case ShortValue(v) => BigInt(v)
-        case IntValue(v) => BigInt(v)
-        case LongValue(v) => BigInt(v)
-        case NullValue => null
-        case v => unsupportedValue(columnName, v)
-      }
+      case n =>
+        values(n) match {
+          case BigIntValue(v) => v
+          case ByteValue(v) => BigInt(v)
+          case ShortValue(v) => BigInt(v)
+          case IntValue(v) => BigInt(v)
+          case LongValue(v) => BigInt(v)
+          case NullValue => null
+          case v => unsupportedValue(columnName, v)
+        }
     }
 
   /**
@@ -525,13 +541,14 @@ trait Row {
   def bigDecimalOrNull(columnName: String): BigDecimal =
     indexOfOrSentinel(columnName) match {
       case -1 => columnNotFound(columnName)
-      case n => values(n) match {
-        case BigDecimalValue(v) => v
-        case FloatValue(v) => BigDecimal.decimal(v)
-        case DoubleValue(v) => BigDecimal.decimal(v)
-        case NullValue => null
-        case v => unsupportedValue(columnName, v)
-      }
+      case n =>
+        values(n) match {
+          case BigDecimalValue(v) => v
+          case FloatValue(v) => BigDecimal.decimal(v)
+          case DoubleValue(v) => BigDecimal.decimal(v)
+          case NullValue => null
+          case v => unsupportedValue(columnName, v)
+        }
     }
 
   /**
@@ -564,12 +581,13 @@ trait Row {
   def bytesOrNull(columnName: String): Array[Byte] =
     indexOfOrSentinel(columnName) match {
       case -1 => columnNotFound(columnName)
-      case n => values(n) match {
-        case RawValue(typ, _, _, bytes) if Row.isBinary(typ) => bytes
-        case EmptyValue => Array.emptyByteArray
-        case NullValue => null
-        case v => unsupportedValue(columnName, v)
-      }
+      case n =>
+        values(n) match {
+          case RawValue(typ, _, _, bytes) if Row.isBinary(typ) => bytes
+          case EmptyValue => Array.emptyByteArray
+          case NullValue => null
+          case v => unsupportedValue(columnName, v)
+        }
     }
 
   /**
@@ -602,15 +620,16 @@ trait Row {
   def timestampOrNull(columnName: String, timeZone: TimeZone): Timestamp =
     indexOfOrSentinel(columnName) match {
       case -1 => columnNotFound(columnName)
-      case n => values(n) match {
-        case value if TimestampValue.isTimestamp(value) =>
-          TimestampValue.fromValue(value, timeZone) match {
-            case Some(timestamp) => timestamp
-            case None => unsupportedValue(columnName, value)
-          }
-        case NullValue => null
-        case v => unsupportedValue(columnName, v)
-      }
+      case n =>
+        values(n) match {
+          case value if TimestampValue.isTimestamp(value) =>
+            TimestampValue.fromValue(value, timeZone) match {
+              case Some(timestamp) => timestamp
+              case None => unsupportedValue(columnName, value)
+            }
+          case NullValue => null
+          case v => unsupportedValue(columnName, v)
+        }
     }
 
   /**
@@ -642,11 +661,12 @@ trait Row {
   def javaSqlDateOrNull(columnName: String): java.sql.Date =
     indexOfOrSentinel(columnName) match {
       case -1 => columnNotFound(columnName)
-      case n => values(n) match {
-        case DateValue(v) => v
-        case NullValue => null
-        case v => unsupportedValue(columnName, v)
-      }
+      case n =>
+        values(n) match {
+          case DateValue(v) => v
+          case NullValue => null
+          case v => unsupportedValue(columnName, v)
+        }
     }
 
   /**

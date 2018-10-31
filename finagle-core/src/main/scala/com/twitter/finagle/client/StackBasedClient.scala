@@ -10,6 +10,6 @@ import com.twitter.finagle.{Client, Stack}
  * specific `Req`, `Rep` types of its stack are not exposed.
  */
 trait StackBasedClient[Req, Rep]
-  extends Client[Req, Rep]
+    extends Client[Req, Rep]
     with Stack.Parameterized[StackBasedClient[Req, Rep]]
     with Stack.Transformable[StackBasedClient[Req, Rep]]

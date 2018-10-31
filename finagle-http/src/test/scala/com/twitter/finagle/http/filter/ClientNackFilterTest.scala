@@ -162,7 +162,8 @@ class ClientNackFilterTest extends FunSuite {
         Future.exception(Failure.rejected)
       } else {
         val resp = Response()
-        resp.contentString = req.headerMap.getAll(HttpNackFilter.RetryableRequestHeader).length.toString
+        resp.contentString =
+          req.headerMap.getAll(HttpNackFilter.RetryableRequestHeader).length.toString
         Future.value(resp)
       }
     })

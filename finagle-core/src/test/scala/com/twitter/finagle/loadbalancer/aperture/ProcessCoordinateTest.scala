@@ -47,14 +47,15 @@ class ProcessCoordinateTest extends FunSuite with GeneratorDrivenPropertyChecks 
     assert(sample.isDefined)
     assert(1.0 - sample.get.unitWidth <= 1e-6)
 
-    forAll(IdAndCount) { case (instanceId, numInstances) =>
-      ProcessCoordinate.setCoordinate(instanceId, numInstances)
-      val sample = ProcessCoordinate()
-      assert(sample.isDefined)
-      val offset = sample.get.offset
-      val width = sample.get.unitWidth
-      assert(offset >= 0 && offset < 1.0)
-      assert(width > 0 && width <= 1.0)
+    forAll(IdAndCount) {
+      case (instanceId, numInstances) =>
+        ProcessCoordinate.setCoordinate(instanceId, numInstances)
+        val sample = ProcessCoordinate()
+        assert(sample.isDefined)
+        val offset = sample.get.offset
+        val width = sample.get.unitWidth
+        assert(offset >= 0 && offset < 1.0)
+        assert(width > 0 && width <= 1.0)
     }
   }
 
@@ -68,6 +69,6 @@ class ProcessCoordinateTest extends FunSuite with GeneratorDrivenPropertyChecks 
     }
 
     // Cleanup global state
-    Closable.all(closables:_*).close()
+    Closable.all(closables: _*).close()
   }
 }

@@ -162,7 +162,7 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
 
       val persistResult = await(client.persist(bufFoo))
       assert(persistResult == 1)
-      val pttlResult  = await(client.pTtl(bufFoo))
+      val pttlResult = await(client.pTtl(bufFoo))
       assert(pttlResult != None && pttlResult.get == -1) // indicates key exists, but no ttl set.
 
       val persistResultNoKey = await(client.persist(bufBar))

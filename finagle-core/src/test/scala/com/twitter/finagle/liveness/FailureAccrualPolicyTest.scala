@@ -220,16 +220,17 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
     }
   }
 
-  def hybridPolicy = FailureAccrualPolicy
-    .consecutiveFailures(3, expBackoff)
-    .orElse(
-      FailureAccrualPolicy.successRateWithinDuration(
-        requiredSuccessRate = 0.8,
-        window = 30.seconds,
-        markDeadFor = expBackoff,
-        minRequestThreshold = 0
+  def hybridPolicy =
+    FailureAccrualPolicy
+      .consecutiveFailures(3, expBackoff)
+      .orElse(
+        FailureAccrualPolicy.successRateWithinDuration(
+          requiredSuccessRate = 0.8,
+          window = 30.seconds,
+          markDeadFor = expBackoff,
+          minRequestThreshold = 0
+        )
       )
-    )
 
   test("Hybrid policy: fail on nth attempt") {
     val policy = hybridPolicy

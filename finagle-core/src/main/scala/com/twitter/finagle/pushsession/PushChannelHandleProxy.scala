@@ -11,9 +11,8 @@ import java.util.concurrent.Executor
  *
  * Implementations should override methods as appropriate.
  */
-abstract class PushChannelHandleProxy[In, Out](
-    underlying: PushChannelHandle[In, Out])
-  extends PushChannelHandle[In, Out] {
+abstract class PushChannelHandleProxy[In, Out](underlying: PushChannelHandle[In, Out])
+    extends PushChannelHandle[In, Out] {
 
   def serialExecutor: Executor = underlying.serialExecutor
 

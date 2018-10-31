@@ -12,10 +12,10 @@ class HandlerEventTest extends FunSuite with MockitoSugar {
 
   // verify that custom channel handlers don't swallow pipeline events.
   val handlers = List(
-    new ChannelRequestStatsHandler(new
-        ChannelRequestStatsHandler.SharedChannelRequestStats(new InMemoryStatsReceiver)),
-    new ChannelStatsHandler(new
-        ChannelStatsHandler.SharedChannelStats(new InMemoryStatsReceiver)),
+    new ChannelRequestStatsHandler(
+      new ChannelRequestStatsHandler.SharedChannelRequestStats(new InMemoryStatsReceiver)
+    ),
+    new ChannelStatsHandler(new ChannelStatsHandler.SharedChannelStats(new InMemoryStatsReceiver)),
     new SimpleChannelSnooper("test"),
     new ByteBufSnooper("test")
   )
@@ -130,7 +130,11 @@ class HandlerEventTest extends FunSuite with MockitoSugar {
     }
 
     var writeFired = false
-    override def write(ctx: ChannelHandlerContext, msg: scala.Any, promise: ChannelPromise): Unit = {
+    override def write(
+      ctx: ChannelHandlerContext,
+      msg: scala.Any,
+      promise: ChannelPromise
+    ): Unit = {
       writeFired = true
       super.write(ctx, msg, promise)
     }

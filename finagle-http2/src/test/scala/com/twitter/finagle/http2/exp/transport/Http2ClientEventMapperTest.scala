@@ -22,13 +22,12 @@ class Http2ClientEventMapperTest extends FunSuite {
         msg: scala.Any,
         promise: ChannelPromise
       ): Unit = {
-        promise.setFailure(
-          Http2Exception.headerListSizeError(1, Http2Error.CANCEL, true, ""))
+        promise.setFailure(Http2Exception.headerListSizeError(1, Http2Error.CANCEL, true, ""))
       }
     })
 
-    val promise = ec.writeOneOutbound(
-      new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"))
+    val promise =
+      ec.writeOneOutbound(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"))
 
     val response = ec.readInbound[FullHttpResponse]()
 

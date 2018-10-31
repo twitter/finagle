@@ -5,7 +5,13 @@ import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.server.ListeningStackServer
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{
-  ClientConnection, ClientConnectionProxy, Failure, ListeningServer, Service, ServiceFactory}
+  ClientConnection,
+  ClientConnectionProxy,
+  Failure,
+  ListeningServer,
+  Service,
+  ServiceFactory
+}
 import com.twitter.util.{Future, Return, Throw}
 import java.net.SocketAddress
 
@@ -44,7 +50,10 @@ trait PushStackServer[Req, Rep, This <: PushStackServer[Req, Rep, This]]
     service: Service[Req, Rep]
   ): PushSession[PipelineReq, PipelineRep]
 
-  final protected def newListeningServer(serviceFactory: ServiceFactory[Req, Rep], addr: SocketAddress)(
+  final protected def newListeningServer(
+    serviceFactory: ServiceFactory[Req, Rep],
+    addr: SocketAddress
+  )(
     trackSession: ClientConnection => Unit
   ): ListeningServer = {
 

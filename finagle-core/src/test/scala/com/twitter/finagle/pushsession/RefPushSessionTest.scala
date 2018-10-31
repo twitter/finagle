@@ -9,12 +9,11 @@ class RefPushSessionTest extends FunSuite {
   private type StringSession = PushSession[String, String]
   private type StringRefSession = RefPushSession[String, String]
 
-
   test("Builds the initial session") {
     val handle = new MockChannelHandle[String, String]()
     val session = new MockPushSession[String, String](handle)
 
-    val refSession = new RefPushSession(handle,  session)
+    val refSession = new RefPushSession(handle, session)
 
     refSession.receive("foo")
     assert(session.received.dequeue() == "foo")
@@ -23,7 +22,7 @@ class RefPushSessionTest extends FunSuite {
   test("Replaces the session") {
     val handle = new MockChannelHandle[String, String]()
     val session1 = new MockPushSession[String, String](handle)
-    
+
     val refSession = new RefPushSession(handle, session1)
 
     refSession.receive("foo")

@@ -17,7 +17,13 @@ import com.twitter.finagle.ssl.client.{SslClientEngineFactory, SslClientSessionV
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.util.HashedWheelTimer
-import com.twitter.finagle.{CancelledConnectionException, ConnectionFailedException, Failure, FailureFlags, Stack}
+import com.twitter.finagle.{
+  CancelledConnectionException,
+  ConnectionFailedException,
+  Failure,
+  FailureFlags,
+  Stack
+}
 import com.twitter.logging.Level
 import com.twitter.util.{Future, Promise, Stopwatch}
 import java.net.{InetSocketAddress, SocketAddress}
@@ -378,7 +384,10 @@ private[netty3] class Netty3Transporter[In, Out](
     }
   }
 
-  private[this] def addFirstSnooperHandlers(pipeline: ChannelPipeline, params: Stack.Params): Unit = {
+  private[this] def addFirstSnooperHandlers(
+    pipeline: ChannelPipeline,
+    params: Stack.Params
+  ): Unit = {
     val channelSnooper = makeChannelSnooper(params)
     for (snooper <- channelSnooper)
       pipeline.addFirst("channelSnooper", snooper)

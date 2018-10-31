@@ -20,8 +20,31 @@ final class KeyCodecSuite extends RedisRequestTest {
     val k = Seq(Buf.Utf8("foo"))
     val ks = Seq(Buf.Utf8("foo"), Buf.Utf8("bar"))
     val d = Duration.fromMilliseconds(5000)
-    assert(encodeCommand(Migrate(a, k, d)) == Seq("MIGRATE", "127.0.0.1", "9999", "", "0", "5000", "KEYS", "foo"))
-    assert(encodeCommand(Migrate(a, ks, d)) == Seq("MIGRATE", "127.0.0.1", "9999", "", "0", "5000", "KEYS", "foo", "bar"))
+    assert(
+      encodeCommand(Migrate(a, k, d)) == Seq(
+        "MIGRATE",
+        "127.0.0.1",
+        "9999",
+        "",
+        "0",
+        "5000",
+        "KEYS",
+        "foo"
+      )
+    )
+    assert(
+      encodeCommand(Migrate(a, ks, d)) == Seq(
+        "MIGRATE",
+        "127.0.0.1",
+        "9999",
+        "",
+        "0",
+        "5000",
+        "KEYS",
+        "foo",
+        "bar"
+      )
+    )
   }
   test("MOVE", CodecTest) { checkSingleKeySingleVal("MOVE", Move.apply) }
   test("PERSIST", CodecTest) { checkSingleKey("PERSIST", Persist.apply) }

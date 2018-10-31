@@ -8,7 +8,9 @@ import scala.collection.mutable
 /**
  * @see [[MethodBuilderScaladoc]]
  */
-private[finagle] class MethodBuilderTimeout[Req, Rep] private[client] (mb: MethodBuilder[Req, Rep]) {
+private[finagle] class MethodBuilderTimeout[Req, Rep] private[client] (
+  mb: MethodBuilder[Req, Rep]
+) {
 
   /**
    * @see [[MethodBuilderScaladoc.withTimeoutTotal(Duration)]]
@@ -30,7 +32,8 @@ private[finagle] class MethodBuilderTimeout[Req, Rep] private[client] (mb: Metho
    * @see [[MethodBuilderScaladoc.withTimeoutPerRequest(Duration)]]
    */
   def perRequest(howLong: Duration): MethodBuilder[Req, Rep] = {
-    val timeouts = mb.config.timeout.copy(perRequest = mb.config.timeout.perRequest.copy(duration = howLong))
+    val timeouts =
+      mb.config.timeout.copy(perRequest = mb.config.timeout.perRequest.copy(duration = howLong))
     mb.withConfig(mb.config.copy(timeout = timeouts))
   }
 
@@ -38,15 +41,16 @@ private[finagle] class MethodBuilderTimeout[Req, Rep] private[client] (mb: Metho
    * @see [[MethodBuilderScaladoc.withTimeoutPerRequest(Tunable[Duration])]]
    */
   def perRequest(howLong: Tunable[Duration]): MethodBuilder[Req, Rep] = {
-    val timeouts = mb.config.timeout.copy(perRequest = mb.config.timeout.perRequest.copy(tunable = howLong))
+    val timeouts =
+      mb.config.timeout.copy(perRequest = mb.config.timeout.perRequest.copy(tunable = howLong))
     mb.withConfig(mb.config.copy(timeout = timeouts))
   }
 
   private[client] def totalFilter: Filter.TypeAgnostic = {
     val config = mb.config.timeout
     if (!config.total.isFinite &&
-        !config.total.isTunable &&
-        !config.stackTotalTimeoutDefined) {
+      !config.total.isTunable &&
+      !config.stackTotalTimeoutDefined) {
       Filter.TypeAgnostic.Identity
     } else {
       new Filter.TypeAgnostic {

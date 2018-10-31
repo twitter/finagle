@@ -10,8 +10,8 @@ import scala.util.control.NoStackTrace
  * This implies that the client issued a Tdiscarded message for a given tagged
  * request, as per [[com.twitter.finagle.mux]].
  */
-class ClientDiscardedRequestException private[mux](why: String, val flags: Long)
-  extends Exception(why)
+class ClientDiscardedRequestException private[mux] (why: String, val flags: Long)
+    extends Exception(why)
     with FailureFlags[ClientDiscardedRequestException]
     with HasLogLevel
     with NoStackTrace {
@@ -22,7 +22,6 @@ class ClientDiscardedRequestException private[mux](why: String, val flags: Long)
   def copyWithFlags(newFlags: Long): ClientDiscardedRequestException =
     new ClientDiscardedRequestException(why, newFlags)
 }
-
 
 /**
  * Indicates that the server failed to interpret or act on the request. This

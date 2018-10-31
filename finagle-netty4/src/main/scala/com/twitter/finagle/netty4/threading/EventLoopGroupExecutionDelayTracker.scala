@@ -27,17 +27,21 @@ object EventLoopGroupExecutionDelayTracker {
    * @param dumpThreadPoolName The name of the thread pool to be created for dumping thread stacks.
    * @param logger The logger to be used to log thread dumps.
    */
-  def track(nettyEventLoopGroup: EventLoopGroup, injectionPeriod: Duration,
-    dumpThreshold: Duration, statsReceiver: StatsReceiver, dumpThreadPoolName: String,
-    logger: Logger): Unit = synchronized {
+  def track(
+    nettyEventLoopGroup: EventLoopGroup,
+    injectionPeriod: Duration,
+    dumpThreshold: Duration,
+    statsReceiver: StatsReceiver,
+    dumpThreadPoolName: String,
+    logger: Logger
+  ): Unit = synchronized {
 
     if (!trackedEventLoopGroups.contains(nettyEventLoopGroup)) {
       val threadDumpEnabled = dumpThreshold.inMillis > 0
       val dumpThresholdExceededThreadPool: Option[ScheduledThreadPoolExecutor] = {
         if (threadDumpEnabled) {
           Some(new ScheduledThreadPoolExecutor(2, new NamedPoolThreadFactory(dumpThreadPoolName)))
-        }
-        else {
+        } else {
           None
         }
       }
@@ -46,9 +50,14 @@ object EventLoopGroupExecutionDelayTracker {
       val stat = statsReceiver.stat("workerpool", "deviation_ms")
       while (workerIter.hasNext) {
         val loop = workerIter.next()
-        new EventLoopGroupExecutionDelayTrackingRunnable(loop, injectionPeriod,
-          stat, dumpThreshold,
-          dumpThresholdExceededThreadPool, logger)
+        new EventLoopGroupExecutionDelayTrackingRunnable(
+          loop,
+          injectionPeriod,
+          stat,
+          dumpThreshold,
+          dumpThresholdExceededThreadPool,
+          logger
+        )
       }
 
       trackedEventLoopGroups.add(nettyEventLoopGroup)

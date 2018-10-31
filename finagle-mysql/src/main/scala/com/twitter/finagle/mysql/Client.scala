@@ -1,7 +1,13 @@
 package com.twitter.finagle.mysql
 
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.{ChannelClosedException, ClientConnection, Service, ServiceFactory, ServiceProxy}
+import com.twitter.finagle.{
+  ChannelClosedException,
+  ClientConnection,
+  Service,
+  ServiceFactory,
+  ServiceProxy
+}
 import com.twitter.logging.Logger
 import com.twitter.util._
 import scala.annotation.tailrec
@@ -43,14 +49,12 @@ object Client {
 
   private val ResultToResultSet: Result => Future[ResultSet] = {
     case rs: ResultSet => Future.value(rs)
-    case r => Future.exception(
-      new IllegalStateException(s"Unsupported response to a read='$r'"))
+    case r => Future.exception(new IllegalStateException(s"Unsupported response to a read='$r'"))
   }
 
   private val ResultToOK: Result => Future[OK] = {
     case ok: OK => Future.value(ok)
-    case r => Future.exception(
-      new IllegalStateException(s"Unsupported response to a modify='$r'"))
+    case r => Future.exception(new IllegalStateException(s"Unsupported response to a modify='$r'"))
   }
 }
 
@@ -321,12 +325,14 @@ private class StdClient(
 
   def prepare(sql: String): PreparedStatement = new PreparedStatement {
     def apply(ps: Parameter*): Future[Result] = factory().flatMap { svc =>
-      svc(PrepareRequest(sql)).flatMap {
-        case ok: PrepareOK => svc(ExecuteRequest(ok.id, ps.toIndexedSeq))
-        case r => Future.exception(new IllegalStateException(s"Unexpected result $r when preparing $sql"))
-      }.ensure {
-        svc.close()
-      }
+      svc(PrepareRequest(sql))
+        .flatMap {
+          case ok: PrepareOK => svc(ExecuteRequest(ok.id, ps.toIndexedSeq))
+          case r =>
+            Future.exception(new IllegalStateException(s"Unexpected result $r when preparing $sql"))
+        }.ensure {
+          svc.close()
+        }
     }
   }
 
@@ -348,7 +354,6 @@ private class StdClient(
   }
 
   private def session(): Future[Client with Transactions with Session] = factory().map { svc =>
-
     val singleton: ServiceFactory[Request, Result] = new ServiceFactory[Request, Result] {
       // Because the `singleton` is used in the context of a `FactoryToService` we override
       // `Service#close` to ensure that we can control the checkout lifetime of the `Service`.
@@ -363,7 +368,8 @@ private class StdClient(
       def close(deadline: Time): Future[Unit] = svc.close(deadline)
     }
 
-    val client = new StdClient(singleton, supportUnsigned, statsReceiver, rollbackQuery) with Session {
+    val client = new StdClient(singleton, supportUnsigned, statsReceiver, rollbackQuery)
+    with Session {
       def discard(): Future[Unit] = {
         singleton().flatMap { svc =>
           svc(PoisonConnectionRequest)
@@ -430,8 +436,11 @@ private class StdClient(
             case Throw(e @ WrappedChannelClosedException()) =>
               Future.exception(e)
             case Throw(rollbackEx) =>
-              log.info(rollbackEx, s"Rolled back due to $e. Failed during rollback, closing " +
-                "connection")
+              log.info(
+                rollbackEx,
+                s"Rolled back due to $e. Failed during rollback, closing " +
+                  "connection"
+              )
               // the rollback failed and we don't want any uncommitted state to leak
               // to the next usage of the connection. issue a "poisoned" request to close
               // the underlying connection. this is necessary due to the connection

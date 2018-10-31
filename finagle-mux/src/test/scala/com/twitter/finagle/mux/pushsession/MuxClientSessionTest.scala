@@ -48,12 +48,11 @@ class MuxClientSessionTest extends FunSuite {
       detectorConfig = FailureDetector.MockConfig(() => failureDetectorStatus),
       name = name,
       statsReceiver = statsReceiver,
-        timer = DefaultTimer
+      timer = DefaultTimer
     )
 
     val service: Service[Request, Response] = await(session.asService)
   }
-
 
   test("Propagates the lowest of the PushChannelHandle.status and the FailureDetector.status") {
     new Ctx {
@@ -97,7 +96,8 @@ class MuxClientSessionTest extends FunSuite {
         Message.decode(handle.pendingWrites.dequeue().msgs.foldLeft(Buf.Empty)(_.concat(_)))
 
       session.receive(encode(RdispatchOk(tag, Seq.empty, responseData)))
-      handle.serialExecutor.executeAll() // Because of the indirection on the first dispatch to check if we can Tdispatch or not
+      handle.serialExecutor
+        .executeAll() // Because of the indirection on the first dispatch to check if we can Tdispatch or not
 
       val resp = await(respFuture)
       assert(resp.body == responseData)
@@ -120,7 +120,6 @@ class MuxClientSessionTest extends FunSuite {
       // Because of the indirection on the first dispatch to check if we can Tdispatch or not
       // we end up making a second trip through the executor
       handle.serialExecutor.executeAll()
-
 
       val lastWrite = handle.pendingWrites.dequeue()
       lastWrite.completeSuccess()

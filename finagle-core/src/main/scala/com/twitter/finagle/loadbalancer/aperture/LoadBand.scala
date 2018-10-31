@@ -66,7 +66,9 @@ private[loadbalancer] trait LoadBand[Req, Rep] extends BalancerNode[Req, Rep] wi
   private[this] val widenCounter = sr.counter("widen")
   private[this] val narrowCounter = sr.counter("narrow")
 
-  private[this] val emaGauge = sr.addGauge("offered_load_ema") { monoTime.synchronized(offeredLoadEma).toFloat }
+  private[this] val emaGauge = sr.addGauge("offered_load_ema") {
+    monoTime.synchronized(offeredLoadEma).toFloat
+  }
 
   /**
    * Adjust `total` by `delta` in order to keep track of total load across all

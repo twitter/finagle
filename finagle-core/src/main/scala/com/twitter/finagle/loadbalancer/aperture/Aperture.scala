@@ -17,9 +17,11 @@ import scala.util.hashing.MurmurHash3
 // and should not be considered a standard configuration option. After it has been demonstrated
 // that not dynamically resizing the aperture is preferable for deterministic aperture, the default
 // will be changed to `true` and a short time after that the flag will be removed altogether.
-private object staticDetermisticApertureWidth extends GlobalFlag[Boolean](
-  default = true,
-  help = "Deterministic Aperture doesn't increase its aperture")
+private object staticDetermisticApertureWidth
+    extends GlobalFlag[Boolean](
+      default = true,
+      help = "Deterministic Aperture doesn't increase its aperture"
+    )
 
 private object Aperture {
   private[this] val log = Logger.get()
@@ -59,8 +61,10 @@ private object Aperture {
     val min = minDeterminsticAperture()
     if (1 < min) min
     else {
-      log.warning(s"Unexpectedly low minimum d-aperture encountered: $min. " +
-        s"Check your configuration. Defaulting to 12.")
+      log.warning(
+        s"Unexpectedly low minimum d-aperture encountered: $min. " +
+          s"Check your configuration. Defaulting to 12."
+      )
       12
     }
   }
@@ -216,9 +220,11 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
 
   private[this] def lbl = if (label.isEmpty) "<unlabelled>" else label
   // `pickLog` will log on the hot path so should be enabled judiciously.
-  private val pickLog = Logger.get(s"com.twitter.finagle.loadbalancer.aperture.Aperture.pick-log.$lbl")
+  private val pickLog =
+    Logger.get(s"com.twitter.finagle.loadbalancer.aperture.Aperture.pick-log.$lbl")
   // `rebuildLog` is used for rebuild level events which happen at a relatively low frequency.
-  private val rebuildLog = Logger.get(s"com.twitter.finagle.loadbalancer.aperture.Aperture.rebuild-log.$lbl")
+  private val rebuildLog =
+    Logger.get(s"com.twitter.finagle.loadbalancer.aperture.Aperture.rebuild-log.$lbl")
 
   protected type Distributor = BaseDist
 
@@ -289,17 +295,18 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     final def rebuild(vec: Vector[Node]): This = {
       updateVectorHash(vec)
       if (vec.isEmpty) new EmptyVector(initAperture)
-      else ProcessCoordinate() match {
-        case Some(coord) if dapertureActive =>
-          new DeterministicAperture(vec, initAperture, coord)
+      else
+        ProcessCoordinate() match {
+          case Some(coord) if dapertureActive =>
+            new DeterministicAperture(vec, initAperture, coord)
 
-        case None if dapertureActive =>
-          noCoordinate.incr()
-          new RandomAperture(vec, initAperture)
+          case None if dapertureActive =>
+            noCoordinate.incr()
+            new RandomAperture(vec, initAperture)
 
-        case _ =>
-          new RandomAperture(vec, initAperture)
-      }
+          case _ =>
+            new RandomAperture(vec, initAperture)
+        }
     }
 
     /**
@@ -316,14 +323,13 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    * A distributor which has an aperture size but an empty vector to select
    * from, so it always returns the `failingNode`.
    */
-  protected class EmptyVector(initAperture: Int)
-    extends BaseDist(Vector.empty, initAperture) {
-      require(vector.isEmpty, s"vector must be empty: $vector")
-      def indices: Set[Int] = Set.empty
-      def pick(): Node = failingNode(emptyException)
-      def needsRebuild: Boolean = false
-      def additionalMetadata: Map[String, Any] = Map.empty
-    }
+  protected class EmptyVector(initAperture: Int) extends BaseDist(Vector.empty, initAperture) {
+    require(vector.isEmpty, s"vector must be empty: $vector")
+    def indices: Set[Int] = Set.empty
+    def pick(): Node = failingNode(emptyException)
+    def needsRebuild: Boolean = false
+    def additionalMetadata: Map[String, Any] = Map.empty
+  }
 
   // these are lifted out of `RandomAperture` to avoid unnecessary allocations.
   private[this] val nodeToken: ApertureNode => Int = _.token
@@ -346,7 +352,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     vector: Vector[Node],
     initAperture: Int
   ) extends BaseDist(vector, initAperture)
-    with P2CPick[Node] {
+      with P2CPick[Node] {
     require(vector.nonEmpty, "vector must be non empty")
 
     /**
@@ -382,10 +388,11 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     protected def emptyNode: Node = failingNode(emptyException)
     protected def rng: Rng = self.rng
 
-    private[this] def vecAsString: String = vec
-      .take(logicalAperture)
-      .map(_.factory.address)
-      .mkString("[", ", ", "]")
+    private[this] def vecAsString: String =
+      vec
+        .take(logicalAperture)
+        .map(_.factory.address)
+        .mkString("[", ", ", "]")
 
     if (rebuildLog.isLoggable(Level.DEBUG)) {
       rebuildLog.debug(s"[RandomAperture.rebuild $lbl] nodes=$vecAsString")
@@ -465,7 +472,9 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     override def physicalAperture: Int = {
       val width = apertureWidth
       if (rebuildLog.isLoggable(Level.DEBUG)) {
-        rebuildLog.debug(f"[DeterministicApeture.physicalAperture $lbl] ringUnit=${ring.unitWidth}%1.6f coordUnit=${coord.unitWidth}%1.6f coordOffset=${coord.offset}%1.6f apertureWidth=$width%1.6f")
+        rebuildLog.debug(
+          f"[DeterministicApeture.physicalAperture $lbl] ringUnit=${ring.unitWidth}%1.6f coordUnit=${coord.unitWidth}%1.6f coordOffset=${coord.offset}%1.6f apertureWidth=$width%1.6f"
+        )
       }
       ring.range(coord.offset, width)
     }
@@ -492,9 +501,11 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
         val offset = coord.offset
         val width = apertureWidth
         val indices = ring.indices(offset, width)
-        nodes.map { case (i, weight, addr) =>
-          f"(index=$i, weight=$weight%1.6f, addr=$addr)"
-        }.mkString("[", ", ", "]")
+        nodes
+          .map {
+            case (i, weight, addr) =>
+              f"(index=$i, weight=$weight%1.6f, addr=$addr)"
+          }.mkString("[", ", ", "]")
       }
       rebuildLog.debug(s"[DeterministicApeture.rebuild $lbl] nodes=$apertureSlice")
 
@@ -539,7 +550,9 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       val picked = pick(nodeA, aw, nodeB, bw)
 
       if (pickLog.isLoggable(Level.TRACE)) {
-        pickLog.trace(f"[DeterministicApeture.pick] a=(index=$a, weight=$aw%1.6f, node=$nodeA) b=(index=$b, weight=$bw%1.6f, node=$nodeB) picked=$picked")
+        pickLog.trace(
+          f"[DeterministicApeture.pick] a=(index=$a, weight=$aw%1.6f, node=$nodeA) b=(index=$b, weight=$bw%1.6f, node=$nodeB) picked=$picked"
+        )
       }
 
       picked
@@ -554,12 +567,13 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       "peer_offset" -> coord.offset,
       "peer_unit_width" -> coord.unitWidth,
       "aperture_width" -> apertureWidth,
-      "nodes" -> nodes.map { case (i, weight, addr) =>
-        Map[String, Any](
-          "index" -> i,
-          "weight" -> weight,
-          "address" -> addr.toString
-        )
+      "nodes" -> nodes.map {
+        case (i, weight, addr) =>
+          Map[String, Any](
+            "index" -> i,
+            "weight" -> weight,
+            "address" -> addr.toString
+          )
       }
     )
   }

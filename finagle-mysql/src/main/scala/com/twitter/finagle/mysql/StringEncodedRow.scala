@@ -59,7 +59,7 @@ private class StringEncodedRow(
           case Type.Year =>
             ShortValue(bytesToLong(bytes).toShort)
           case Type.VarChar | Type.String | Type.VarString | Type.TinyBlob | Type.Blob |
-               Type.MediumBlob if !Charset.isBinary(charset) =>
+              Type.MediumBlob if !Charset.isBinary(charset) =>
             // Nonbinary strings as stored in the CHAR, VARCHAR, and TEXT data types
             StringValue(bytesToString(bytes, charset))
           case Type.LongBlob =>

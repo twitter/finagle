@@ -4,7 +4,12 @@ import com.twitter.finagle.{Mux, Service, ServiceFactory, Stack, mux, param}
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.mux.pushsession._
 import com.twitter.finagle.netty4.pushsession.Netty4PushTransporter
-import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession, PushStackClient, PushTransporter}
+import com.twitter.finagle.pushsession.{
+  PushChannelHandle,
+  PushSession,
+  PushStackClient,
+  PushTransporter
+}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.util.Future
@@ -20,7 +25,8 @@ final case class NonNegotiatingClient(
 ) extends PushStackClient[mux.Request, mux.Response, NonNegotiatingClient] {
 
   private[this] val scopedStatsParams = params + param.Stats(
-    params[param.Stats].statsReceiver.scope("mux"))
+    params[param.Stats].statsReceiver.scope("mux")
+  )
 
   protected type SessionT = MuxClientSession
   protected type In = ByteReader
@@ -42,7 +48,8 @@ final case class NonNegotiatingClient(
         name = params[param.Label].label,
         params[param.Stats].statsReceiver,
         params[param.Timer].timer
-      ))
+      )
+    )
   }
 
   protected def newPushTransporter(

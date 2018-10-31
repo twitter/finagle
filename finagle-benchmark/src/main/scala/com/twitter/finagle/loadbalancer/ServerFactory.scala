@@ -65,13 +65,14 @@ private object ServerFactory {
         numRequests.incr()
         _numRequests.incrementAndGet()
         Future.sleep(nextLatency())(DefaultTimer).before {
-            _load.decrementAndGet()
+          _load.decrementAndGet()
 
-            if (nextIsFailure()) failedResponse else {
-              _successes.incrementAndGet()
-              Future.Done
-            }
+          if (nextIsFailure()) failedResponse
+          else {
+            _successes.incrementAndGet()
+            Future.Done
           }
+        }
       }
     }
 

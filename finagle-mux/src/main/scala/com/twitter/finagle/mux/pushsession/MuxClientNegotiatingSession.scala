@@ -21,9 +21,11 @@ import scala.util.control.NonFatal
  * the more appropriate solution is to tune the service acquisition timeouts for the
  * respective client.
  */
-private object allowInterruptingClientNegotiation extends com.twitter.app.GlobalFlag[Boolean](
-  default = true,
-  help = "Allow interrupting the Mux client negotiation.")
+private object allowInterruptingClientNegotiation
+    extends com.twitter.app.GlobalFlag[Boolean](
+      default = true,
+      help = "Allow interrupting the Mux client negotiation."
+    )
 
 /**
  * Session implementation that attempts to negotiate configuration options with its peer.
@@ -48,8 +50,11 @@ private[finagle] final class MuxClientNegotiatingSession(
     // to the peer.
     negotiatedSession.setInterruptHandler {
       case ex =>
-        log.info(ex, "Mux client negotiation interrupted. "
-          + s"Client label: $name, remote address: ${handle.remoteAddress}")
+        log.info(
+          ex,
+          "Mux client negotiation interrupted. "
+            + s"Client label: $name, remote address: ${handle.remoteAddress}"
+        )
         failHandshake(Failure.retryable(ex))
     }
   }
@@ -115,8 +120,7 @@ private[finagle] final class MuxClientNegotiatingSession(
     try {
       val message = Message.decode(reader)
       if (!startNegotiation.get) {
-        log.warning(
-          "Received a message from %s before negotiation has started: %s", name, message)
+        log.warning("Received a message from %s before negotiation has started: %s", name, message)
       }
 
       phase(message)
@@ -174,8 +178,10 @@ private[finagle] final class MuxClientNegotiatingSession(
         def run(): Unit = result match {
           case Return(clientSession) =>
             if (!negotiatedSession.updateIfEmpty(Return(clientSession))) {
-              log.info(s"Finished negotiation with $name but handle already closed. "
-              + s"Remote address: ${handle.remoteAddress}")
+              log.info(
+                s"Finished negotiation with $name but handle already closed. "
+                  + s"Remote address: ${handle.remoteAddress}"
+              )
               q.drainAndClose()
             } else {
               q.drainAndRegister(clientSession)

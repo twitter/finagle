@@ -112,7 +112,8 @@ object ThriftReqRepServicePerEndpoint {
             responseClassifier,
             methodStats,
             request.args,
-            response.map(_.value))
+            response.map(_.value)
+          )
         }
       }
     }

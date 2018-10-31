@@ -173,8 +173,8 @@ class StackServerTest extends FunSuite with Eventually {
     val sr = new InMemoryStatsReceiver
     val factory = stack.make(
       StackServer.defaultParams +
-      RequestSemaphoreFilter.Param(Some(new AsyncSemaphore(initialPermits = 1, maxWaiters = 0))) +
-      Stats(sr)
+        RequestSemaphoreFilter.Param(Some(new AsyncSemaphore(initialPermits = 1, maxWaiters = 0))) +
+        Stats(sr)
     )
     val svc = Await.result(factory(), 5.seconds)
 
@@ -242,7 +242,7 @@ class StackServerTest extends FunSuite with Eventually {
         val name = "test"
         def apply[A, B](stack: Stack[ServiceFactory[A, B]]) =
           stack
-            // testModule contains the assertion for the "hello" param.
+          // testModule contains the assertion for the "hello" param.
             .prepend(testModule)
             .prepend(hello)
       }

@@ -119,7 +119,6 @@ class Http2TransporterTest extends FunSuite with MockitoSugar {
     val first = mock[Transport[Any, Any]]
     val read1 = new Object
     when(upgradingTransport.read()).thenReturn(Future.value(UpgradeSuccessful { _ =>
-
       when(first.read()).thenReturn(Future.value(read1))
       clientSession -> first
     }))
@@ -187,7 +186,7 @@ class Http2TransporterTest extends FunSuite with MockitoSugar {
 
     assert(http11Trans.status == Status.Open)
   }
-  
+
   test("Http2Transporter doesn't mark outstanding transports dead after a failed connect attempt") {
     val p = Promise[Transport[Any, Any]]()
     val t1 = mock[Transporter[Any, Any, TransportContext]]

@@ -9,8 +9,18 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{CancelledConnectionException, Failure, FailureFlags, Stack, Status}
 import com.twitter.logging.Level
 import com.twitter.util.{Future, Promise, Time}
-import io.netty.channel.{Channel, ChannelFuture, ChannelFutureListener, ChannelInitializer, ChannelOption}
-import io.netty.handler.codec.http2.{Http2MultiplexCodec, Http2StreamChannel, Http2StreamChannelBootstrap}
+import io.netty.channel.{
+  Channel,
+  ChannelFuture,
+  ChannelFutureListener,
+  ChannelInitializer,
+  ChannelOption
+}
+import io.netty.handler.codec.http2.{
+  Http2MultiplexCodec,
+  Http2StreamChannel,
+  Http2StreamChannelBootstrap
+}
 import io.netty.util
 import io.netty.util.concurrent.GenericFutureListener
 import java.lang.{Boolean => JBool}
@@ -23,10 +33,12 @@ private final class ClientSessionImpl(
 
   private type Trans = Transport[Any, Any]
 
-  private[this] final class ChildTransport(ch: Channel) extends ChannelTransport(
-    ch = ch,
-    readQueue = new AsyncQueue[Any],
-    omitStackTraceOnInactive = true) {
+  private[this] final class ChildTransport(ch: Channel)
+      extends ChannelTransport(
+        ch = ch,
+        readQueue = new AsyncQueue[Any],
+        omitStackTraceOnInactive = true
+      ) {
     override def status: Status = {
       Status.worst(ClientSessionImpl.this.status, super.status)
     }
@@ -36,7 +48,8 @@ private final class ClientSessionImpl(
     val codec = channel.pipeline.get(classOf[Http2MultiplexCodec])
     if (codec == null) {
       throw new IllegalStateException(
-        s"Parent Channel doesn't have an instance of ${classOf[Http2MultiplexCodec].getSimpleName}")
+        s"Parent Channel doesn't have an instance of ${classOf[Http2MultiplexCodec].getSimpleName}"
+      )
     }
     codec
   }
@@ -46,7 +59,6 @@ private final class ClientSessionImpl(
       .option(ChannelOption.ALLOCATOR, params[Allocator].allocator)
       .option[JBool](ChannelOption.AUTO_READ, false) // backpressure for streams
       .handler(initializer)
-
 
   // Thread safety provided by synchronization on `this`
   private[this] var closeInitiated: Boolean = false
@@ -66,12 +78,13 @@ private final class ClientSessionImpl(
     if (doClose) {
       if (!channel.isOpen) closeP.setDone()
       else {
-        channel.close().addListener(new ChannelFutureListener {
-          def operationComplete(future: ChannelFuture): Unit = {
-            if (future.isSuccess) closeP.setDone()
-            else closeP.setException(future.cause)
-          }
-        })
+        channel
+          .close().addListener(new ChannelFutureListener {
+            def operationComplete(future: ChannelFuture): Unit = {
+              if (future.isSuccess) closeP.setDone()
+              else closeP.setException(future.cause)
+            }
+          })
       }
     }
 
@@ -100,8 +113,10 @@ private final class ClientSessionImpl(
   def newChildTransport(): Future[Trans] = {
     if (status != Status.Closed) initNewNettyChildChannel()
     else {
-      val ex =new DeadConnectionException(
-        channel.remoteAddress, FailureFlags.Retryable | FailureFlags.Rejected)
+      val ex = new DeadConnectionException(
+        channel.remoteAddress,
+        FailureFlags.Retryable | FailureFlags.Rejected
+      )
       Future.exception(ex)
     }
   }
@@ -110,8 +125,9 @@ private final class ClientSessionImpl(
     val p = Promise[Transport[Any, Any]]
     val nettyFuture = bootstrap.open()
 
-    p.setInterruptHandler { case _ =>
-      nettyFuture.cancel(/*mayInterruptIfRunning*/ false)
+    p.setInterruptHandler {
+      case _ =>
+        nettyFuture.cancel( /*mayInterruptIfRunning*/ false)
     }
 
     // This is largely the same code as found in the ConnectionBuilder but doesn't
@@ -123,7 +139,8 @@ private final class ClientSessionImpl(
             Failure(
               cause = new CancelledConnectionException,
               flags = FailureFlags.Interrupted | FailureFlags.Retryable,
-              logLevel = Level.DEBUG)
+              logLevel = Level.DEBUG
+            )
           )
         } else if (!future.isSuccess) {
           p.setException(Failure.rejected(future.cause))

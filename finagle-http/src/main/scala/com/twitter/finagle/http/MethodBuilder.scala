@@ -227,10 +227,13 @@ class MethodBuilder private (mb: client.MethodBuilder[Request, Response])
    * This additionally causes any server error HTTP status codes (500s) to be retried.
    */
   def idempotent(maxExtraLoad: Double): MethodBuilder =
-    new MethodBuilder(mb.idempotent(
-      maxExtraLoad,
-      sendInterrupts = false,
-      HttpResponseClassifier.ServerErrorsAsFailures))
+    new MethodBuilder(
+      mb.idempotent(
+        maxExtraLoad,
+        sendInterrupts = false,
+        HttpResponseClassifier.ServerErrorsAsFailures
+      )
+    )
 
   /**
    * @inheritdoc
@@ -238,10 +241,13 @@ class MethodBuilder private (mb: client.MethodBuilder[Request, Response])
    * This additionally causes any server error HTTP status codes (500s) to be retried.
    */
   def idempotent(maxExtraLoad: Tunable[Double]): MethodBuilder =
-    new MethodBuilder(mb.idempotent(
-      maxExtraLoad,
-      sendInterrupts = false,
-      HttpResponseClassifier.ServerErrorsAsFailures))
+    new MethodBuilder(
+      mb.idempotent(
+        maxExtraLoad,
+        sendInterrupts = false,
+        HttpResponseClassifier.ServerErrorsAsFailures
+      )
+    )
 
   def nonIdempotent: MethodBuilder =
     new MethodBuilder(mb.nonIdempotent)
@@ -254,9 +260,9 @@ class MethodBuilder private (mb: client.MethodBuilder[Request, Response])
   def newService(methodName: String): Service[Request, Response] =
     mb.newService(methodName)
 
- /**
-  * Construct a [[Service]] to be used for the client.
-  */
+  /**
+   * Construct a [[Service]] to be used for the client.
+   */
   def newService: Service[Request, Response] =
     mb.newService
 

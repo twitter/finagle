@@ -109,4 +109,3 @@ object BroadcastTracer {
       tracers.exists { _.isActivelyTracing(traceId) }
   }
 }
-

@@ -2,7 +2,10 @@ package com.twitter.finagle.netty4
 
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle.{ListeningServer, Stack}
-import com.twitter.finagle.netty4.channel.{Netty4FramedServerChannelInitializer, Netty4RawServerChannelInitializer}
+import com.twitter.finagle.netty4.channel.{
+  Netty4FramedServerChannelInitializer,
+  Netty4RawServerChannelInitializer
+}
 import com.twitter.finagle.netty4.threading.EventLoopGroupExecutionDelayTracker
 import com.twitter.finagle.param.{Stats, Timer}
 import com.twitter.finagle.server.Listener
@@ -51,12 +54,14 @@ private class ListeningServerBuilder(
   private[ListeningServerBuilder] def mkEpollEventLoopGroup(): EventLoopGroup =
     new EpollEventLoopGroup(
       1 /*nThreads*/,
-      new NamedPoolThreadFactory("finagle/netty4/boss", makeDaemons = true))
+      new NamedPoolThreadFactory("finagle/netty4/boss", makeDaemons = true)
+    )
 
   private[ListeningServerBuilder] def mkNioEventLoopGroup(): EventLoopGroup =
     new NioEventLoopGroup(
       1 /*nThreads*/,
-      new NamedPoolThreadFactory("finagle/netty4/boss", makeDaemons = true))
+      new NamedPoolThreadFactory("finagle/netty4/boss", makeDaemons = true)
+    )
 
   /**
    * Listen for connections and apply the `serveTransport` callback on
@@ -195,13 +200,15 @@ private class ListeningServerBuilder(
 
       def boundAddress: SocketAddress = ch.localAddress()
 
-
-      private[this] val workerPoolExecutionDelayTrackingSettings = params[param.TrackWorkerPoolExecutionDelay]
+      private[this] val workerPoolExecutionDelayTrackingSettings =
+        params[param.TrackWorkerPoolExecutionDelay]
       if (workerPoolExecutionDelayTrackingSettings.enableTracking) {
-        EventLoopGroupExecutionDelayTracker.track(params[param.WorkerPool].eventLoopGroup,
+        EventLoopGroupExecutionDelayTracker.track(
+          params[param.WorkerPool].eventLoopGroup,
           workerPoolExecutionDelayTrackingSettings.trackingTaskPeriod,
           workerPoolExecutionDelayTrackingSettings.threadDumpThreshold,
-          params[Stats].statsReceiver, s"finagle/netty-4/delayTracking/${boundAddress}",
+          params[Stats].statsReceiver,
+          s"finagle/netty-4/delayTracking/${boundAddress}",
           Logger.get("com.twitter.finagle.netty4.Netty4Listener.threadDelay")
         )
       }

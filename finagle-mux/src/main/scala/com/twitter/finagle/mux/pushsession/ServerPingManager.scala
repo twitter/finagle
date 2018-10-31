@@ -3,7 +3,6 @@ package com.twitter.finagle.mux.pushsession
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.mux.transport.Message.Tags
 
-
 /**
  * Manage the ping behavior of the mux server session.
  *

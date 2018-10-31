@@ -9,7 +9,13 @@ import com.twitter.finagle.transport.{LegacyContext, QueueTransport, Transport, 
 import com.twitter.io.{Buf, ReaderDiscardedException}
 import com.twitter.util.{Await, Awaitable, Duration, Future, Promise, Return, Throw, Time}
 import io.netty.buffer.Unpooled
-import io.netty.handler.codec.http.{DefaultHttpContent, HttpContent, HttpRequest, HttpUtil, LastHttpContent}
+import io.netty.handler.codec.http.{
+  DefaultHttpContent,
+  HttpContent,
+  HttpRequest,
+  HttpUtil,
+  LastHttpContent
+}
 import java.nio.charset.StandardCharsets
 import org.mockito.Mockito.{spy, times, verify}
 import org.scalatest.FunSuite

@@ -66,7 +66,11 @@ private object QueryParamDecoder {
     params
   }
 
-  private[this] def addParam(params: JMap[String, JList[String]], name: String, value: String): Unit = {
+  private[this] def addParam(
+    params: JMap[String, JList[String]],
+    name: String,
+    value: String
+  ): Unit = {
     val values = params.get(name) match {
       case null =>
         val list = new ArrayList[String](1) // Often there's only 1 value.

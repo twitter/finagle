@@ -4,7 +4,11 @@ import com.twitter.finagle.Mux.param.OppTls
 import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession}
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.mux.Handshake.Headers
-import com.twitter.finagle.mux.transport.{IncompatibleNegotiationException, MuxFramer, OpportunisticTls}
+import com.twitter.finagle.mux.transport.{
+  IncompatibleNegotiationException,
+  MuxFramer,
+  OpportunisticTls
+}
 import com.twitter.finagle.mux.{Handshake, Request, Response}
 import com.twitter.finagle.{Service, Stack, param}
 import com.twitter.io.{Buf, ByteReader}
@@ -47,7 +51,8 @@ private[finagle] abstract class Negotiation(params: Stack.Params) {
         // Should never happen when building a true client
         throw new IllegalStateException(
           "Expected to find a MuxChannelHandle, instead found " +
-            s"$other. Couldn't turn on TLS. ${remoteAddressString(handle)}")
+            s"$other. Couldn't turn on TLS. ${remoteAddressString(handle)}"
+        )
     }
 
     val localEncryptLevel = params[OppTls].level.getOrElse(OpportunisticTls.Off)
@@ -55,16 +60,20 @@ private[finagle] abstract class Negotiation(params: Stack.Params) {
       .flatMap(Handshake.valueOf(OpportunisticTls.Header.KeyBuf, _)) match {
       case Some(buf) => OpportunisticTls.Header.decodeLevel(buf)
       case None =>
-        log.debug("Peer either didn't negotiate or didn't send an Opportunistic Tls preference: " +
-          s"defaulting to remote encryption level of Off. ${remoteAddressString(handle)}")
+        log.debug(
+          "Peer either didn't negotiate or didn't send an Opportunistic Tls preference: " +
+            s"defaulting to remote encryption level of Off. ${remoteAddressString(handle)}"
+        )
         OpportunisticTls.Off
     }
 
     try {
       val useTls = OpportunisticTls.negotiate(localEncryptLevel, remoteEncryptLevel)
       if (log.isLoggable(Level.DEBUG)) {
-        log.debug(s"Successfully negotiated TLS with remote peer. Using TLS: $useTls local level: " +
-          s"$localEncryptLevel, remote level: $remoteEncryptLevel. ${remoteAddressString(handle)}")
+        log.debug(
+          s"Successfully negotiated TLS with remote peer. Using TLS: $useTls local level: " +
+            s"$localEncryptLevel, remote level: $remoteEncryptLevel. ${remoteAddressString(handle)}"
+        )
       }
       if (useTls) {
         tlsSuccessCounter.incr()
@@ -188,7 +197,7 @@ private[finagle] object Negotiation {
   }
 
   final class Server(params: Stack.Params, service: Service[Request, Response])
-    extends Negotiation(params) {
+      extends Negotiation(params) {
     override type SessionT = MuxServerSession
 
     protected def builder(

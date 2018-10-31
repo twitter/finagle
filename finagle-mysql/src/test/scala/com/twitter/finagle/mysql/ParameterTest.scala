@@ -106,7 +106,6 @@ class ParameterTest extends FunSuite {
     assert(param.value == value)
   }
 
-
   test("Double") {
     val value = 3.0
     val param: Parameter = value

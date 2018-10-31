@@ -293,14 +293,16 @@ object CanBeParameter {
 
       def write(writer: MysqlBufWriter, param: java.util.Date): Unit = param match {
         case sqlDate: java.sql.Date => valueCanBeParameter.write(writer, DateValue(sqlDate))
-        case sqlTimestamp: java.sql.Timestamp => valueCanBeParameter.write(
-          writer,
-          TimestampValue(sqlTimestamp)
-        )
-        case javaDate => valueCanBeParameter.write(
-          writer,
-          TimestampValue(new java.sql.Timestamp(javaDate.getTime))
-        )
+        case sqlTimestamp: java.sql.Timestamp =>
+          valueCanBeParameter.write(
+            writer,
+            TimestampValue(sqlTimestamp)
+          )
+        case javaDate =>
+          valueCanBeParameter.write(
+            writer,
+            TimestampValue(new java.sql.Timestamp(javaDate.getTime))
+          )
       }
     }
   }

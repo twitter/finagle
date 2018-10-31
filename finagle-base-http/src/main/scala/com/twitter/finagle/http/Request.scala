@@ -420,7 +420,8 @@ object Request {
   private[finagle] final class Impl(
     val reader: Reader[Buf],
     val writer: Writer[Buf],
-    val remoteSocketAddress: InetSocketAddress) extends Request {
+    val remoteSocketAddress: InetSocketAddress
+  ) extends Request {
 
     private var _method: Method = Method.Get
     private var _uri: String = ""

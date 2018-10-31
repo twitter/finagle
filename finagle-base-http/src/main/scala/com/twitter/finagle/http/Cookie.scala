@@ -10,7 +10,8 @@ object Cookie {
 
   private[finagle] val DefaultMaxAge: Duration = Duration.Bottom
 
-  private[this] val IllegalNameChars: Set[Char] = Set('\t', '\n', '\u000b', '\f', '\r', ' ', ',', ';', '=')
+  private[this] val IllegalNameChars: Set[Char] =
+    Set('\t', '\n', '\u000b', '\f', '\r', ' ', ',', ';', '=')
   private[this] val IllegalValueChars: Set[Char] = Set('\n', '\u000b', '\f', '\r', ';')
 
   private[this] val IllegalNameCharsBitSet: JBitSet = {

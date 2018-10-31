@@ -1,11 +1,25 @@
 package com.twitter.finagle.http2
 
 import com.twitter.finagle.Stack
-import com.twitter.finagle.http2.param.{EncoderIgnoreMaxHeaderListSize, FrameLoggerNamePrefix, HeaderSensitivity}
+import com.twitter.finagle.http2.param.{
+  EncoderIgnoreMaxHeaderListSize,
+  FrameLoggerNamePrefix,
+  HeaderSensitivity
+}
 import com.twitter.finagle.stats.{Gauge, StatsReceiver}
 import io.netty.channel.ChannelHandler.Sharable
-import io.netty.channel.{Channel, ChannelFuture, ChannelFutureListener, ChannelHandler, ChannelInitializer}
-import io.netty.handler.codec.http2.{Http2HeadersEncoder, Http2MultiplexCodec, Http2MultiplexCodecBuilder}
+import io.netty.channel.{
+  Channel,
+  ChannelFuture,
+  ChannelFutureListener,
+  ChannelHandler,
+  ChannelInitializer
+}
+import io.netty.handler.codec.http2.{
+  Http2HeadersEncoder,
+  Http2MultiplexCodec,
+  Http2MultiplexCodecBuilder
+}
 import io.netty.util.AttributeKey
 
 /**
@@ -46,11 +60,17 @@ private object MultiplexCodecBuilder {
   }
 
   /** Construct a `Http2MultiplexCodec` for server pipelines */
-  def serverMultiplexCodec(params: Stack.Params, inboundInitializer: ChannelHandler): Http2MultiplexCodec =
+  def serverMultiplexCodec(
+    params: Stack.Params,
+    inboundInitializer: ChannelHandler
+  ): Http2MultiplexCodec =
     newMultiplexCodec(params, inboundInitializer, isServer = true).build()
 
   /** Construct a `Http2MultiplexCodec` for client pipelines */
-  def clientMultiplexCodec(params: Stack.Params, upgradeHandler: Option[ChannelHandler]): Http2MultiplexCodec = {
+  def clientMultiplexCodec(
+    params: Stack.Params,
+    upgradeHandler: Option[ChannelHandler]
+  ): Http2MultiplexCodec = {
     val builder = newMultiplexCodec(params, ClosePushedStreamsInitializer, isServer = false)
     upgradeHandler match {
       case Some(handler) => builder.withUpgradeStreamHandler(handler)
@@ -60,7 +80,11 @@ private object MultiplexCodecBuilder {
   }
 
   // Create a new MultiplexHttp2Codec from the supplied configuration
-  private def newMultiplexCodec(params: Stack.Params, inboundInitializer: ChannelHandler, isServer: Boolean): Http2MultiplexCodecBuilder = {
+  private def newMultiplexCodec(
+    params: Stack.Params,
+    inboundInitializer: ChannelHandler,
+    isServer: Boolean
+  ): Http2MultiplexCodecBuilder = {
     val logger = new LoggerPerFrameTypeLogger(params[FrameLoggerNamePrefix].loggerNamePrefix)
     val initialSettings = Settings.fromParams(params, isServer = isServer)
     val builder: Http2MultiplexCodecBuilder =
@@ -70,7 +94,9 @@ private object MultiplexCodecBuilder {
     builder
       .frameLogger(logger)
       .initialSettings(initialSettings)
-      .encoderIgnoreMaxHeaderListSize(params[EncoderIgnoreMaxHeaderListSize].ignoreMaxHeaderListSize)
+      .encoderIgnoreMaxHeaderListSize(
+        params[EncoderIgnoreMaxHeaderListSize].ignoreMaxHeaderListSize
+      )
       .headerSensitivityDetector(detector(params))
   }
 

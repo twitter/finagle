@@ -11,7 +11,11 @@ import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.mockito.MockitoSugar
 
-class Http2NegotiatingTransporterTest extends FunSuite with MockitoSugar with Eventually with IntegrationPatience {
+class Http2NegotiatingTransporterTest
+    extends FunSuite
+    with MockitoSugar
+    with Eventually
+    with IntegrationPatience {
   def await[T](f: Future[T], wait: Duration = 1.second) =
     Await.result(f, wait)
 
@@ -21,15 +25,19 @@ class Http2NegotiatingTransporterTest extends FunSuite with MockitoSugar with Ev
     params: Stack.Params,
     http1Transporter: Transporter[Any, Any, TransportContext],
     fallbackToHttp11WhileNegotiating: Boolean = true
-  ) extends Http2NegotiatingTransporter(params, http1Transporter, fallbackToHttp11WhileNegotiating) {
+  ) extends Http2NegotiatingTransporter(
+        params,
+        http1Transporter,
+        fallbackToHttp11WhileNegotiating
+      ) {
     final def cached: Boolean = connectionCached
   }
-
 
   test("caches transports") {
     val http1Transporter = mock[Transporter[Any, Any, TransportContext]]
     val transporter = new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter) {
-      protected def attemptUpgrade(): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
+      protected def attemptUpgrade()
+        : (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
         val clientSession = mock[ClientSession]
         val transport = mock[Transport[Any, Any]]
         Future.value(Some(clientSession)) -> Future.value(transport)
@@ -49,7 +57,8 @@ class Http2NegotiatingTransporterTest extends FunSuite with MockitoSugar with Ev
     }
 
     val transporter = new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter) {
-      protected def attemptUpgrade(): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
+      protected def attemptUpgrade()
+        : (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
         val transport = mock[Transport[Any, Any]]
         Future.value(Some(clientSession)) -> Future.value(transport)
       }
@@ -67,7 +76,8 @@ class Http2NegotiatingTransporterTest extends FunSuite with MockitoSugar with Ev
     val http1Transporter = mock[Transporter[Any, Any, TransportContext]]
     val p = Promise[Option[ClientSession]]()
     val transporter = new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter) {
-      protected def attemptUpgrade(): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
+      protected def attemptUpgrade()
+        : (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
         val transport = mock[Transport[Any, Any]]
         p -> Future.value(transport)
       }
@@ -83,18 +93,22 @@ class Http2NegotiatingTransporterTest extends FunSuite with MockitoSugar with Ev
     eventually { assert(p.isInterrupted.isDefined) }
   }
 
-  test("uses http11 for the second outstanding transport pre-upgrade if fallbackToHttp11WhileNegotiating=true") {
+  test(
+    "uses http11 for the second outstanding transport pre-upgrade if fallbackToHttp11WhileNegotiating=true"
+  ) {
     val http1Transporter = mock[Transporter[Any, Any, TransportContext]]
     val http1Transport = mock[Transport[Any, Any]]
     when(http1Transporter.apply()).thenReturn(Future.value(http1Transport))
     when(http1Transport.status).thenReturn(Status.Open)
 
     val transport = mock[Transport[Any, Any]]
-    val transporter = new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter, true) {
-      protected def attemptUpgrade(): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
-        Future.never-> Future.value(transport)
+    val transporter =
+      new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter, true) {
+        protected def attemptUpgrade()
+          : (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
+          Future.never -> Future.value(transport)
+        }
       }
-    }
 
     val tf = transporter()
     eventually { assert(transporter.cached) }
@@ -113,14 +127,16 @@ class Http2NegotiatingTransporterTest extends FunSuite with MockitoSugar with Ev
     val http1Transporter = mock[Transporter[Any, Any, TransportContext]]
 
     val singleton = Promise[Option[ClientSession]]()
-    val transporter = new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter, false) {
-      protected def attemptUpgrade(): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
-        singleton -> singleton.flatMap {
-          case Some(session) => session.newChildTransport()
-          case None => fail("Expected a ClientSession, found None.")
+    val transporter =
+      new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter, false) {
+        protected def attemptUpgrade()
+          : (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
+          singleton -> singleton.flatMap {
+            case Some(session) => session.newChildTransport()
+            case None => fail("Expected a ClientSession, found None.")
+          }
         }
       }
-    }
 
     transporter()
     eventually { assert(transporter.cached) }
@@ -146,7 +162,8 @@ class Http2NegotiatingTransporterTest extends FunSuite with MockitoSugar with Ev
     when(clientSession.newChildTransport()).thenReturn(Future.value(sessionTransporter))
     val transport = mock[Transport[Any, Any]]
     val transporter = new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter) {
-      protected def attemptUpgrade(): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
+      protected def attemptUpgrade()
+        : (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
         Future.value(Some(clientSession)) -> Future.value(transport)
       }
     }
@@ -166,7 +183,8 @@ class Http2NegotiatingTransporterTest extends FunSuite with MockitoSugar with Ev
     val firstTransport = mock[Transport[Any, Any]]
 
     val transporter = new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter) {
-      protected def attemptUpgrade(): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
+      protected def attemptUpgrade()
+        : (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
         Future.value(None) -> Future.value(firstTransport)
       }
     }
@@ -190,7 +208,8 @@ class Http2NegotiatingTransporterTest extends FunSuite with MockitoSugar with Ev
     val p = Promise[Option[ClientSession]]()
     val transport = mock[Transport[Any, Any]]
     val transporter = new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter) {
-      protected def attemptUpgrade(): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
+      protected def attemptUpgrade()
+        : (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
         p -> Future.value(transport)
       }
     }
@@ -217,7 +236,8 @@ class Http2NegotiatingTransporterTest extends FunSuite with MockitoSugar with Ev
     val p = Promise[Option[ClientSession]]()
     val transport = mock[Transport[Any, Any]]
     val transporter = new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter) {
-      protected def attemptUpgrade(): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
+      protected def attemptUpgrade()
+        : (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
         p -> Future.value(transport)
       }
     }
@@ -244,7 +264,8 @@ class Http2NegotiatingTransporterTest extends FunSuite with MockitoSugar with Ev
     val p = Promise[Option[ClientSession]]()
     val transport = mock[Transport[Any, Any]]
     val transporter = new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter) {
-      protected def attemptUpgrade(): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
+      protected def attemptUpgrade()
+        : (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
         p -> Future.value(transport)
       }
     }
@@ -271,7 +292,8 @@ class Http2NegotiatingTransporterTest extends FunSuite with MockitoSugar with Ev
 
     val upgradeCalls = new AtomicInteger(0)
     val transporter = new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter) {
-      protected def attemptUpgrade(): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
+      protected def attemptUpgrade()
+        : (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
         upgradeCalls.incrementAndGet()
         val clientSession = mock[ClientSession]
         when(clientSession.status).thenReturn(Status.Closed)
@@ -294,7 +316,8 @@ class Http2NegotiatingTransporterTest extends FunSuite with MockitoSugar with Ev
     when(clientSession.status).thenReturn(Status.Open)
 
     val transporter = new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter) {
-      protected def attemptUpgrade(): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
+      protected def attemptUpgrade()
+        : (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
         when(clientSession.newChildTransport()).thenReturn(Future.exception(new Exception()))
         Future.value(Some(clientSession)) -> Future.value(transport)
       }

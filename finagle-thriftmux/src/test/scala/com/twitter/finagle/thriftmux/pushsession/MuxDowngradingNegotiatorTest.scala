@@ -20,10 +20,11 @@ class MuxDowngradingNegotiatorTest extends FunSuite {
 
   private class Ctx {
     private class MockMuxChannelHandle
-      extends MuxChannelHandle(
-        underlying = handle,
-        ch = null, // only used in overridden method `sendAndForgetNow`
-        params = params) {
+        extends MuxChannelHandle(
+          underlying = handle,
+          ch = null, // only used in overridden method `sendAndForgetNow`
+          params = params
+        ) {
       override def sendNowAndForget(buf: Buf): Unit = sendAndForget(buf)
     }
 
@@ -39,7 +40,8 @@ class MuxDowngradingNegotiatorTest extends FunSuite {
       Future.value(Response(req.body))
     }
 
-    lazy val refSession: RefPushSession[ByteReader, Buf] = new RefPushSession[ByteReader, Buf](handle, null)
+    lazy val refSession: RefPushSession[ByteReader, Buf] =
+      new RefPushSession[ByteReader, Buf](handle, null)
 
     val negotiator: MuxDowngradingNegotiator = {
       val session = new MuxDowngradingNegotiator(
@@ -92,7 +94,9 @@ class MuxDowngradingNegotiatorTest extends FunSuite {
   test("fails to start a downgraded session if opportunistic TLS is required") {
     new Ctx {
       override lazy val params: Stack.Params =
-        ThriftMux.BaseServerParams + fparam.Stats(statsReceiver) + OppTls(Some(OpportunisticTls.Required))
+        ThriftMux.BaseServerParams + fparam.Stats(statsReceiver) + OppTls(
+          Some(OpportunisticTls.Required)
+        )
 
       val thriftMsg = {
         val buffer = new TMemoryBuffer(1)

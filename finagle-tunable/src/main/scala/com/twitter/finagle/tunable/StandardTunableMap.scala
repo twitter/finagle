@@ -66,18 +66,21 @@ object StandardTunableMap {
   private[twitter] def reloadAll(): Unit = {
     ServiceLoadedTunableMap.reloadAll()
     clientMaps.keys().asScala.toSeq.foreach { id =>
-      clientMaps.computeIfPresent(id, new BiFunction[String, TunableMap, TunableMap] {
-        def apply(
-          id: String,
-          curr: TunableMap
-        ): TunableMap = {
-          val mutable = collectFirstOrElse(
-            TunableMap.components(curr),
-            TunableMap.newMutable(s"Mutable($id)")
-          )
-          composeMap(mutable, ServerInfo(), id)
+      clientMaps.computeIfPresent(
+        id,
+        new BiFunction[String, TunableMap, TunableMap] {
+          def apply(
+            id: String,
+            curr: TunableMap
+          ): TunableMap = {
+            val mutable = collectFirstOrElse(
+              TunableMap.components(curr),
+              TunableMap.newMutable(s"Mutable($id)")
+            )
+            composeMap(mutable, ServerInfo(), id)
+          }
         }
-      })
+      )
     }
   }
 
@@ -85,9 +88,10 @@ object StandardTunableMap {
     elements: Seq[TunableMap],
     default: TunableMap.Mutable
   ): TunableMap.Mutable = {
-    elements.collectFirst {
-      case mutable: TunableMap.Mutable => mutable
-    }.getOrElse(default)
+    elements
+      .collectFirst {
+        case mutable: TunableMap.Mutable => mutable
+      }.getOrElse(default)
   }
 
   /**

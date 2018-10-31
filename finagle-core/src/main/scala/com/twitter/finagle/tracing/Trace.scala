@@ -7,18 +7,20 @@ import com.twitter.util._
 import java.net.InetSocketAddress
 import com.twitter.app.GlobalFlag
 
-object traceId128Bit extends GlobalFlag[Boolean](
-  false,
-  "When true, new root spans will have 128-bit trace IDs. Defaults to false (64-bit)."
-)
+object traceId128Bit
+    extends GlobalFlag[Boolean](
+      false,
+      "When true, new root spans will have 128-bit trace IDs. Defaults to false (64-bit)."
+    )
 
-object enabled extends GlobalFlag[Boolean](
-  true,
-    """
+object enabled
+    extends GlobalFlag[Boolean](
+      true,
+      """
       |When false, disables any tracing for this process (default: enabled). Note: it's never
       |recommended to disable tracing in production applications.
     """.stripMargin
-)
+    )
 
 /**
  * A singleton instance of [[Tracing]] (a facade-style API) that performs a number of [[Contexts]]
@@ -53,7 +55,6 @@ object Trace extends Tracing {
     def tryUnmarshal(body: Buf): Try[TraceId] =
       TraceId.deserialize(Buf.ByteArray.Owned.extract(body))
   }
-
 
   // It's ok to either write or read this value without synchronizing as long as we're not
   // doing read-modify-write concurrently (which we don't).
@@ -124,7 +125,6 @@ object Trace extends Tracing {
     if (ts.contains(tracer)) f
     else Contexts.local.let(tracersCtx, tracer :: ts)(f)
   }
-
 
   /**
    * Run computation `f` with the given tracer, and a derivative TraceId.

@@ -143,7 +143,11 @@ private[twitter] object ServerAdmissionControl {
             }
 
           // Add our predicate filter so we don't reject requests that can't be retried
-          val filter = new NonretryableFilter[Req, Rep](typeAgnosticFilters.toFilter, protoLib.name, stats.statsReceiver)
+          val filter = new NonretryableFilter[Req, Rep](
+            typeAgnosticFilters.toFilter,
+            protoLib.name,
+            stats.statsReceiver
+          )
 
           new ServiceFactoryProxy[Req, Rep](filter.andThen(next)) {
             override def close(deadline: Time): Future[Unit] = {
@@ -175,8 +179,8 @@ private[twitter] object ServerAdmissionControl {
     statsReceiver: StatsReceiver
   ) extends SimpleFilter[Req, Rep] {
 
-    private[this] val unRetryableCount = statsReceiver.counter(
-      Verbosity.Debug, "admission_control", protocolName, "nonretryable")
+    private[this] val unRetryableCount =
+      statsReceiver.counter(Verbosity.Debug, "admission_control", protocolName, "nonretryable")
 
     def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
       // If the marker context element exists we presume the client can't retry the request
@@ -195,4 +199,3 @@ private[twitter] object ServerAdmissionControl {
   }
 
 }
-

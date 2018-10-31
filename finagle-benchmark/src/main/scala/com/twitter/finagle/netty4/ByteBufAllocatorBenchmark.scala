@@ -14,7 +14,8 @@ class NettyThreadExecutorService(numThreads: Int, prefix: String)
       0,
       TimeUnit.MILLISECONDS,
       new LinkedBlockingQueue[Runnable],
-      new DefaultThreadFactory("benchmark", true)) { }
+      new DefaultThreadFactory("benchmark", true)
+    ) {}
 
 @State(Scope.Benchmark)
 @Warmup(iterations = 5)
@@ -41,9 +42,13 @@ class ByteBufAllocatorBenchmark {
   }
 
   @Benchmark
-  @Fork(value = 1, jvmArgsPrepend = Array(
-    "-Djmh.executor=CUSTOM",
-    "-Djmh.executor.class=com.twitter.finagle.netty4.NettyThreadExecutorService"))
+  @Fork(
+    value = 1,
+    jvmArgsPrepend = Array(
+      "-Djmh.executor=CUSTOM",
+      "-Djmh.executor.class=com.twitter.finagle.netty4.NettyThreadExecutorService"
+    )
+  )
   def allocationWithFastThreadLocal(bh: Blackhole): Unit = {
     val b = PooledByteBufAllocator.DEFAULT.heapBuffer(allocationSize, allocationSize)
     b.release()

@@ -37,8 +37,8 @@ private[serverset2] object ServiceDiscoverer {
       sessionState match {
         case SessionState.Unknown =>
           Unknown
-        case SessionState.Expired | SessionState.NoSyncConnected |
-            SessionState.AuthFailed | SessionState.Disconnected =>
+        case SessionState.Expired | SessionState.NoSyncConnected | SessionState.AuthFailed |
+            SessionState.Disconnected =>
           Unhealthy
         case SessionState.ConnectedReadOnly | SessionState.SaslAuthenticated |
             SessionState.SyncConnected =>

@@ -1,7 +1,12 @@
 package com.twitter.finagle.netty4.ssl.server
 
 import com.twitter.finagle.netty4.ssl.Netty4SslConfigurations
-import com.twitter.finagle.ssl.{ApplicationProtocols, Engine, KeyCredentials, SslConfigurationException}
+import com.twitter.finagle.ssl.{
+  ApplicationProtocols,
+  Engine,
+  KeyCredentials,
+  SslConfigurationException
+}
 import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerEngineFactory}
 import com.twitter.util.Return
 import com.twitter.util.security.{PrivateKeyFile, X509CertificateFile}

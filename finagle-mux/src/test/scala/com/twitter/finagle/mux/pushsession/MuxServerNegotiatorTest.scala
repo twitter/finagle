@@ -2,7 +2,12 @@ package com.twitter.finagle.mux.pushsession
 
 import com.twitter.finagle.pushsession.utils.MockChannelHandle
 import com.twitter.finagle.{Dtab, Mux, Path, Service, Status}
-import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession, RefPushSession, SentinelSession}
+import com.twitter.finagle.pushsession.{
+  PushChannelHandle,
+  PushSession,
+  RefPushSession,
+  SentinelSession
+}
 import com.twitter.finagle.mux.Handshake.Headers
 import com.twitter.finagle.mux.{Handshake, Request, Response}
 import com.twitter.finagle.mux.transport.Message
@@ -18,9 +23,9 @@ class MuxServerNegotiatorTest extends FunSuite with Eventually with IntegrationP
   private val data: Buf = Buf.ByteArray.Owned((0 until 1024).map(_.toByte).toArray)
 
   private class MockSession(
-      handle: PushChannelHandle[ByteReader, Buf],
-      val headers: Option[Headers])
-    extends PushSession[ByteReader, Buf](handle) {
+    handle: PushChannelHandle[ByteReader, Buf],
+    val headers: Option[Headers]
+  ) extends PushSession[ByteReader, Buf](handle) {
 
     val receivedMessages = new mutable.Queue[Message]()
 
@@ -37,10 +42,11 @@ class MuxServerNegotiatorTest extends FunSuite with Eventually with IntegrationP
 
   private abstract class Ctx {
     private class MockMuxChannelHandle(underlying: PushChannelHandle[ByteReader, Buf])
-      extends MuxChannelHandle(
-        underlying = underlying,
-        ch = null, // only used in overridden method `sendAndForgetNow`
-        params = params) {
+        extends MuxChannelHandle(
+          underlying = underlying,
+          ch = null, // only used in overridden method `sendAndForgetNow`
+          params = params
+        ) {
       override def sendNowAndForget(buf: Buf): Unit = sendAndForget(buf)
     }
 
@@ -48,7 +54,8 @@ class MuxServerNegotiatorTest extends FunSuite with Eventually with IntegrationP
 
     var resolvedSession: MockSession = null
 
-    lazy val localHeaders: Headers => Headers = hs => Seq(Buf.Utf8("local") -> Buf.Utf8("header")) ++ hs
+    lazy val localHeaders: Headers => Headers = hs =>
+      Seq(Buf.Utf8("local") -> Buf.Utf8("header")) ++ hs
 
     var serviceClosed = false
 
@@ -63,20 +70,25 @@ class MuxServerNegotiatorTest extends FunSuite with Eventually with IntegrationP
 
     lazy val handle: MockChannelHandle[ByteReader, Buf] = new MockChannelHandle[ByteReader, Buf]()
 
-    def negotiate(service: Service[Request, Response], headers: Option[Headers]): PushSession[ByteReader, Buf] = {
+    def negotiate(
+      service: Service[Request, Response],
+      headers: Option[Headers]
+    ): PushSession[ByteReader, Buf] = {
       resolvedSession = new MockSession(handle, headers)
       resolvedSession
     }
 
     private val muxHandle = new MockMuxChannelHandle(handle)
-    private val ref = new RefPushSession[ByteReader, Buf](muxHandle, SentinelSession[ByteReader, Buf](muxHandle))
+    private val ref =
+      new RefPushSession[ByteReader, Buf](muxHandle, SentinelSession[ByteReader, Buf](muxHandle))
     MuxServerNegotiator.build(
       ref = ref,
       handle = muxHandle,
       service = service,
       makeLocalHeaders = localHeaders,
       negotiate = negotiate,
-      timer = Timer.Nil)
+      timer = Timer.Nil
+    )
 
     // Alias with less refined type
     def session: PushSession[ByteReader, Buf] = ref
@@ -92,8 +104,6 @@ class MuxServerNegotiatorTest extends FunSuite with Eventually with IntegrationP
       Message.decode(message.msgs.foldLeft(Buf.Empty)(_ concat _))
     }
   }
-
-
 
   test("no handshake") {
     new Ctx {

@@ -11,7 +11,14 @@ import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.io.{Buf, Reader, ReaderDiscardedException}
 import com.twitter.util.{Await, Awaitable, Future, Promise}
 import io.netty.buffer.Unpooled
-import io.netty.handler.codec.http.{DefaultHttpContent, HttpContent, HttpRequest, HttpResponse, HttpResponseStatus, LastHttpContent}
+import io.netty.handler.codec.http.{
+  DefaultHttpContent,
+  HttpContent,
+  HttpRequest,
+  HttpResponse,
+  HttpResponseStatus,
+  LastHttpContent
+}
 import java.nio.charset.StandardCharsets
 import org.scalatest.FunSuite
 

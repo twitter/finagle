@@ -81,7 +81,6 @@ class NonReentrantReadWriteLockTest extends FunSuite with Eventually {
     }
   }
 
-
   test("Does not support multiple write locks (single threaded)") {
     val lock = new NonReentrantReadWriteLock()
     assert(lock.tryAcquire(1))

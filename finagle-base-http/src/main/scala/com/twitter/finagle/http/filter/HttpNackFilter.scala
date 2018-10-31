@@ -76,7 +76,9 @@ object HttpNackFilter {
 
   private[finagle] def isNack(rep: Response): Boolean =
     rep.status == ResponseStatus &&
-      (rep.headerMap.contains(RetryableNackHeader) || rep.headerMap.contains(NonRetryableNackHeader))
+      (rep.headerMap.contains(RetryableNackHeader) || rep.headerMap.contains(
+        NonRetryableNackHeader
+      ))
 
   private[finagle] def module: Stackable[ServiceFactory[Request, Response]] =
     new Stack.Module1[param.Stats, ServiceFactory[Request, Response]] {
@@ -108,7 +110,8 @@ object HttpNackFilter {
   }
 }
 
-private final class HttpNackFilter(statsReceiver: StatsReceiver) extends SimpleFilter[Request, Response] {
+private final class HttpNackFilter(statsReceiver: StatsReceiver)
+    extends SimpleFilter[Request, Response] {
   import HttpNackFilter._
 
   private[this] val nackCounts = statsReceiver.counter("nacks")

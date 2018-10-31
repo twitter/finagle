@@ -73,7 +73,8 @@ class ServerTrackerTest extends FunSuite {
       }
 
       tracker.dispatch(
-        Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data))
+        Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data)
+      )
 
       assert(dispatch.get.body == data)
 
@@ -90,7 +91,8 @@ class ServerTrackerTest extends FunSuite {
       override val service: Service[Request, Response] = Service.const(p)
 
       tracker.dispatch(
-        Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data))
+        Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data)
+      )
 
       executor.executeAll()
 
@@ -111,7 +113,8 @@ class ServerTrackerTest extends FunSuite {
       override val service: Service[Request, Response] = Service.const(p)
 
       tracker.dispatch(
-        Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data))
+        Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data)
+      )
 
       executor.executeAll()
 
@@ -142,7 +145,8 @@ class ServerTrackerTest extends FunSuite {
       override val service: Service[Request, Response] = Service.const(p)
 
       tracker.dispatch(
-        Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data))
+        Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data)
+      )
 
       executor.executeAll()
 
@@ -176,7 +180,8 @@ class ServerTrackerTest extends FunSuite {
       }
 
       tracker.dispatch(
-        Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data))
+        Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data)
+      )
 
       executor.executeAll()
 
@@ -196,7 +201,8 @@ class ServerTrackerTest extends FunSuite {
       }
 
       tracker.dispatch(
-        Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data))
+        Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data)
+      )
 
       executor.executeAll()
 
@@ -212,7 +218,8 @@ class ServerTrackerTest extends FunSuite {
   test("Discard dispatches that have been fully written") {
     new Ctx {
       tracker.dispatch(
-        Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data))
+        Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data)
+      )
 
       executor.executeAll()
       assert(tracker.lessee.npending == 0)
@@ -251,7 +258,8 @@ class ServerTrackerTest extends FunSuite {
         val Tlease(0, 0) = messageWriter.messages.dequeue()
 
         tracker.dispatch(
-          Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data))
+          Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data)
+        )
 
         executor.executeAll()
         assert(tracker.lessee.npending == 0)
@@ -273,7 +281,8 @@ class ServerTrackerTest extends FunSuite {
       }
 
       tracker.dispatch(
-        Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data))
+        Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data)
+      )
 
       executor.executeAll()
 
@@ -288,7 +297,8 @@ class ServerTrackerTest extends FunSuite {
 
       // Further requests are nacked
       tracker.dispatch(
-        Tdispatch(tag = 3, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data))
+        Tdispatch(tag = 3, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data)
+      )
 
       val RdispatchNack(3, _) = messageWriter.messages.dequeue()
 
@@ -319,7 +329,8 @@ class ServerTrackerTest extends FunSuite {
       }
 
       tracker.dispatch(
-        Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data))
+        Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data)
+      )
       tracker.discarded(2, "lolz") // cancel it, but the Future still remains
       assert(tracker.lessee.npending() == 0)
 
@@ -327,7 +338,8 @@ class ServerTrackerTest extends FunSuite {
 
       // Same tag, and now two outstanding promises for the same tag
       tracker.dispatch(
-        Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data))
+        Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data)
+      )
       assert(tracker.lessee.npending() == 1)
 
       val firstP = servicePs.dequeue()
@@ -359,12 +371,15 @@ class ServerTrackerTest extends FunSuite {
       }
 
       tracker.dispatch(
-        Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data))
+        Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data)
+      )
       tracker.dispatch(
-        Tdispatch(tag = 3, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data))
+        Tdispatch(tag = 3, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data)
+      )
       // colliding tag
       tracker.dispatch(
-        Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data))
+        Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data)
+      )
 
       executor.executeAll()
 
@@ -386,7 +401,8 @@ class ServerTrackerTest extends FunSuite {
 
       // Further requests are nacked
       tracker.dispatch(
-        Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data))
+        Tdispatch(tag = 2, contexts = Nil, dst = Path.empty, dtab = Dtab.empty, req = data)
+      )
 
       val RdispatchNack(2, _) = messageWriter.messages.dequeue()
 

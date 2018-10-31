@@ -84,7 +84,11 @@ private[redis] trait KeyCommands { self: BaseClient =>
    * @param timeout timeout before failing, defaults to 5 seconds
    * @return unit
    */
-  def migrate(destAddr: InetSocketAddress, keys: Seq[Buf], timeout: Duration = 5.seconds): Future[Unit] = {
+  def migrate(
+    destAddr: InetSocketAddress,
+    keys: Seq[Buf],
+    timeout: Duration = 5.seconds
+  ): Future[Unit] = {
     doRequest(Migrate(destAddr, keys, timeout)) {
       case StatusReply(_) => Future.Unit
       case ErrorReply(msg) => Future.exception(new ServerError(msg))
@@ -179,6 +183,6 @@ private[redis] trait KeyCommands { self: BaseClient =>
    */
   def persist(key: Buf): Future[JLong] =
     doRequest(Persist(key)) {
-      case IntegerReply(n) =>  Future.value(n)
+      case IntegerReply(n) => Future.value(n)
     }
 }

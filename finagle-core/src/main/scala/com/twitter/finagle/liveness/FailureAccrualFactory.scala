@@ -42,9 +42,12 @@ object FailureAccrualFactory {
               DefaultSuccessRateThreshold,
               DefaultSuccessRateWindow,
               jitteredBackoff,
-              DefaultMinimumRequestThreshold)
-            .orElse(FailureAccrualPolicy
-              .consecutiveFailures(DefaultConsecutiveFailures, jitteredBackoff))
+              DefaultMinimumRequestThreshold
+            )
+            .orElse(
+              FailureAccrualPolicy
+                .consecutiveFailures(DefaultConsecutiveFailures, jitteredBackoff)
+            )
 
         override def toString: String =
           "FailureAccrualPolicy" +

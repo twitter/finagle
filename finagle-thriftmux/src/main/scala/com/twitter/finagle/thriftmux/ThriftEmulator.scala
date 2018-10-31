@@ -255,7 +255,11 @@ private[finagle] object ThriftEmulator {
   /**
    * Returns a Mux.Tdispatch from a thrift dispatch message.
    */
-  def thriftToMux(ttwitter: Boolean, protocolFactory: TProtocolFactory, buf: Buf): Message.Tdispatch = {
+  def thriftToMux(
+    ttwitter: Boolean,
+    protocolFactory: TProtocolFactory,
+    buf: Buf
+  ): Message.Tdispatch = {
     // It's okay to use a static tag since we serialize messages into
     // the dispatcher so we are ensured no tag conflicts.
     val tag = Message.Tags.MinTag

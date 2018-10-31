@@ -480,7 +480,6 @@ abstract class MemcachedTest
     assertRead(newClient, keys2)
   }
 
-
   test("partial success") {
     val keys = writeKeys(client, 1000, 20)
     assertRead(client, keys)
@@ -505,8 +504,9 @@ abstract class MemcachedTest
 
       // assert the failures are set to the exception received from the failing partition
       assert(getResult.failures.nonEmpty)
-      getResult.failures.foreach { case (_, e) =>
-        assert(e.isInstanceOf[Failure])
+      getResult.failures.foreach {
+        case (_, e) =>
+          assert(e.isInstanceOf[Failure])
       }
       // there should be no misses as all keys are known
       assert(getResult.misses.isEmpty)
@@ -516,9 +516,10 @@ abstract class MemcachedTest
       // the failed partition. The accuracy of the responses are tested in other tests anyways.
       assert(getResult.values.nonEmpty)
       assert(getResult.values.size < keys.size)
-      getResult.values.foreach { case (keyStr, valueBuf) =>
-        val Buf.Utf8(valStr) = valueBuf
-        assert(valStr == s"$keyStr$ValueSuffix")
+      getResult.values.foreach {
+        case (keyStr, valueBuf) =>
+          val Buf.Utf8(valStr) = valueBuf
+          assert(valStr == s"$keyStr$ValueSuffix")
       }
     }
   }

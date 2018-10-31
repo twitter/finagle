@@ -16,7 +16,7 @@ class Netty4ListenerTest extends AbstractNetty4ListenerTest {
     service: Service[Req, Rep]
   ): ListeningServer = {
     val listener = Netty4Listener[Rep, Req](init, params)
-    listener.listen(address){ t: Transport[Rep, Req] =>
+    listener.listen(address) { t: Transport[Rep, Req] =>
       new SerialServerDispatcher[Req, Rep](t, service)
     }
   }

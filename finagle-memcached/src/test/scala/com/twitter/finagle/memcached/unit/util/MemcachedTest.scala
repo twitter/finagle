@@ -18,11 +18,7 @@ import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.mockito.MockitoSugar
 
-class MemcachedTest
-    extends FunSuite
-    with MockitoSugar
-    with Eventually
-    with IntegrationPatience {
+class MemcachedTest extends FunSuite with MockitoSugar with Eventually with IntegrationPatience {
 
   protected def baseClient: Memcached.Client = Memcached.client
 

@@ -106,8 +106,12 @@ private class ServerTracker(
         // We raise on the dispatch and immediately send back a Rdiscarded
         why match {
           case BackupRequestFilter.SupersededRequestFailureToString =>
-            dispatch.response.raise(new ClientDiscardedRequestException(why,
-              FailureFlags.Interrupted | FailureFlags.Ignorable))
+            dispatch.response.raise(
+              new ClientDiscardedRequestException(
+                why,
+                FailureFlags.Interrupted | FailureFlags.Ignorable
+              )
+            )
           case _ =>
             dispatch.response.raise(new ClientDiscardedRequestException(why))
         }
@@ -164,21 +168,22 @@ private class ServerTracker(
 
   private[this] def handleDispatch(m: Message): Unit = {
     if (h_dispatches.containsKey(m.tag)) handleDuplicateTagDetected(m.tag)
-    else Local.let(handleGetLocals()) {
-      lessor.observeArrival()
-      val responseF = ServerProcessor(m, service)
-      val elapsed = Stopwatch.start()
-      val dispatch = Dispatch(m.tag, responseF, elapsed)
-      h_dispatches.put(m.tag, dispatch)
+    else
+      Local.let(handleGetLocals()) {
+        lessor.observeArrival()
+        val responseF = ServerProcessor(m, service)
+        val elapsed = Stopwatch.start()
+        val dispatch = Dispatch(m.tag, responseF, elapsed)
+        h_dispatches.put(m.tag, dispatch)
 
-      // Concurrency is controlled by the serial executor so we must
-      // bounce the result through it.
-      responseF.respond { result =>
-        serialExecutor.execute(new Runnable {
-          def run(): Unit = handleRenderResponse(dispatch, result)
-        })
+        // Concurrency is controlled by the serial executor so we must
+        // bounce the result through it.
+        responseF.respond { result =>
+          serialExecutor.execute(new Runnable {
+            def run(): Unit = handleRenderResponse(dispatch, result)
+          })
+        }
       }
-    }
   }
 
   private[this] def handleRenderResponse(dispatch: Dispatch, response: Try[Message]): Unit = {

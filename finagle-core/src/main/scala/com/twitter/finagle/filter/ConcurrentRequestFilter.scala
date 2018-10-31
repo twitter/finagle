@@ -17,7 +17,12 @@ private[finagle] object ConcurrentRequestFilter {
    * takes precedence.
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module3[PendingRequestFilter.Param, RequestSemaphoreFilter.Param, param.Stats, ServiceFactory[Req, Rep]] {
+    new Stack.Module3[
+      PendingRequestFilter.Param,
+      RequestSemaphoreFilter.Param,
+      param.Stats,
+      ServiceFactory[Req, Rep]
+    ] {
       val role = ConcurrentRequestFilter.role
       val description = "Restrict number of concurrent requests"
       def make(
@@ -29,15 +34,19 @@ private[finagle] object ConcurrentRequestFilter {
         (_pendingRequestFilterParam, _requestSemaphoreFilterParam) match {
           case (PendingRequestFilter.Param(None), RequestSemaphoreFilter.Param(None)) =>
             next
-          case (PendingRequestFilter.Param(Some(maxConcurrentRequests)), _) if maxConcurrentRequests == Int.MaxValue =>
+          case (PendingRequestFilter.Param(Some(maxConcurrentRequests)), _)
+              if maxConcurrentRequests == Int.MaxValue =>
             next
           case (PendingRequestFilter.Param(None), RequestSemaphoreFilter.Param(Some(sem))) =>
             val stats = _stats.statsReceiver
             new RequestSemaphoreFilter[Req, Rep](sem, stats).andThen(next)
           case (PendingRequestFilter.Param(Some(maxConcurrentRequests)), _) =>
             val stats = _stats.statsReceiver
-            new PendingRequestFilter[Req, Rep](maxConcurrentRequests, stats, MaxWaitersExceededException)
-              .andThen(next)
+            new PendingRequestFilter[Req, Rep](
+              maxConcurrentRequests,
+              stats,
+              MaxWaitersExceededException
+            ).andThen(next)
         }
     }
 }

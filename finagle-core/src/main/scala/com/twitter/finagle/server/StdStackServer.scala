@@ -2,7 +2,13 @@ package com.twitter.finagle.server
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.{
-  ClientConnection, ClientConnectionProxy, Failure, ListeningServer, Service, ServiceFactory}
+  ClientConnection,
+  ClientConnectionProxy,
+  Failure,
+  ListeningServer,
+  Service,
+  ServiceFactory
+}
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.{Closable, Future, Return, Throw, Time}
@@ -19,7 +25,7 @@ import java.net.SocketAddress
  *      servers.
  */
 trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
-  extends ListeningStackServer[Req, Rep, This] { self: This =>
+    extends ListeningStackServer[Req, Rep, This] { self: This =>
 
   /**
    * The type we write into the transport.
@@ -70,8 +76,7 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
     addServerToRegistry(listener.toString)
 
     listener.listen(addr) { transport =>
-      val clientConnection = new ClientConnectionProxy(
-        new TransportClientConnection(transport))
+      val clientConnection = new ClientConnectionProxy(new TransportClientConnection(transport))
 
       val futureService = transport.peerCertificate match {
         case None => serviceFactory(clientConnection)
@@ -101,8 +106,8 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
           // away. This allows protocols that support graceful shutdown to
           // also gracefully deny new sessions.
           val svc = Service.const(
-              Future.exception(Failure.rejected("Terminating session and rejecting request", exc))
-            )
+            Future.exception(Failure.rejected("Terminating session and rejecting request", exc))
+          )
 
           // We give it a generous amount of time to shut down the session to
           // improve our chances of being able to do so gracefully.

@@ -45,8 +45,9 @@ private[finagle] object ByteBufConversion {
    */
   def byteBufAsBuf(buf: ByteBuf): Buf =
     if (buf.readableBytes == 0) Buf.Empty
-    else try {
-      if (buf.hasArray) heapToBuf(buf)
-      else copyByteBufToBuf(buf)
-    } finally buf.release()
+    else
+      try {
+        if (buf.hasArray) heapToBuf(buf)
+        else copyByteBufToBuf(buf)
+      } finally buf.release()
 }

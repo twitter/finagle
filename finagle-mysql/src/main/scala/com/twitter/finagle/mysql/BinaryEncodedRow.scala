@@ -46,36 +46,38 @@ private class BinaryEncodedRow(
     val vs = new Array[Value](fields.length)
     var idx = 0
     while (idx < fields.length) {
-      vs(idx) = if (isNull(idx)) NullValue else {
-        val field = fields(idx)
-        field.fieldType match {
-          case Type.Tiny if isSigned(field) => ByteValue(reader.readByte())
-          case Type.Tiny => ShortValue(reader.readUnsignedByte())
-          case Type.Short if isSigned(field) => ShortValue(reader.readShortLE())
-          case Type.Short => IntValue(reader.readUnsignedShortLE())
-          case Type.Int24 if isSigned(field) =>
-            IntValue(reader.readIntLE()) // transferred as an Int32
-          case Type.Int24 =>
-            // The unsigned Int24 should always fit into the first 3 bytes of signed Int32
-            IntValue(reader.readIntLE())
-          case Type.Long if isSigned(field) => IntValue(reader.readIntLE())
-          case Type.Long => LongValue(reader.readUnsignedIntLE())
-          case Type.LongLong if isSigned(field) => LongValue(reader.readLongLE())
-          case Type.LongLong => BigIntValue(reader.readUnsignedLongLE())
-          case Type.Float => FloatValue(reader.readFloatLE())
-          case Type.Double => DoubleValue(reader.readDoubleLE())
-          case Type.Year => ShortValue(reader.readShortLE())
-          // Nonbinary strings as stored in the CHAR, VARCHAR, and TEXT data types
-          case Type.VarChar | Type.String | Type.VarString | Type.TinyBlob | Type.Blob |
-               Type.MediumBlob
-            if !Charset.isBinary(field.charset) && Charset.isCompatible(field.charset) =>
-            StringValue(reader.readLengthCodedString(Charset(field.charset)))
+      vs(idx) =
+        if (isNull(idx)) NullValue
+        else {
+          val field = fields(idx)
+          field.fieldType match {
+            case Type.Tiny if isSigned(field) => ByteValue(reader.readByte())
+            case Type.Tiny => ShortValue(reader.readUnsignedByte())
+            case Type.Short if isSigned(field) => ShortValue(reader.readShortLE())
+            case Type.Short => IntValue(reader.readUnsignedShortLE())
+            case Type.Int24 if isSigned(field) =>
+              IntValue(reader.readIntLE()) // transferred as an Int32
+            case Type.Int24 =>
+              // The unsigned Int24 should always fit into the first 3 bytes of signed Int32
+              IntValue(reader.readIntLE())
+            case Type.Long if isSigned(field) => IntValue(reader.readIntLE())
+            case Type.Long => LongValue(reader.readUnsignedIntLE())
+            case Type.LongLong if isSigned(field) => LongValue(reader.readLongLE())
+            case Type.LongLong => BigIntValue(reader.readUnsignedLongLE())
+            case Type.Float => FloatValue(reader.readFloatLE())
+            case Type.Double => DoubleValue(reader.readDoubleLE())
+            case Type.Year => ShortValue(reader.readShortLE())
+            // Nonbinary strings as stored in the CHAR, VARCHAR, and TEXT data types
+            case Type.VarChar | Type.String | Type.VarString | Type.TinyBlob | Type.Blob |
+                Type.MediumBlob
+                if !Charset.isBinary(field.charset) && Charset.isCompatible(field.charset) =>
+              StringValue(reader.readLengthCodedString(Charset(field.charset)))
 
-          case Type.LongBlob =>
-            throw new UnsupportedOperationException("LongBlob is not supported!")
-          case typ => RawValue(typ, field.charset, isBinary = true, reader.readLengthCodedBytes())
+            case Type.LongBlob =>
+              throw new UnsupportedOperationException("LongBlob is not supported!")
+            case typ => RawValue(typ, field.charset, isBinary = true, reader.readLengthCodedBytes())
+          }
         }
-      }
       idx += 1
     }
     vs

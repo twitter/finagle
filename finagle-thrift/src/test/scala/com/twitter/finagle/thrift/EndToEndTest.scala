@@ -606,8 +606,10 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     server.close()
   }
 
-  test("scala thrift stack server using response classification with " +
-    "`servicePerEndpoint[ServicePerEndpoint]`") {
+  test(
+    "scala thrift stack server using response classification with " +
+      "`servicePerEndpoint[ServicePerEndpoint]`"
+  ) {
     val sr = new InMemoryStatsReceiver()
 
     val server = Thrift.server
@@ -663,8 +665,10 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     server.close()
   }
 
-  test("scala thrift stack server using response classification with " +
-    "`servicePerEndpoint[ReqRepServicePerEndpoint]`") {
+  test(
+    "scala thrift stack server using response classification with " +
+      "`servicePerEndpoint[ReqRepServicePerEndpoint]`"
+  ) {
     val sr = new InMemoryStatsReceiver()
 
     val server = Thrift.server
@@ -962,8 +966,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     val sr = new InMemoryStatsReceiver
     LoadedStatsReceiver.self = sr
 
-    val server = Thrift.server
-      .withPerEndpointStats
+    val server = Thrift.server.withPerEndpointStats
       .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), iface)
 
     val client = Thrift.client.build[Echo.MethodPerEndpoint](
@@ -1038,13 +1041,16 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     )
 
     assert(await(client.echo("hi"), 1.second) == "hi")
-    intercept[NoSuchElementException] {assert(sr.counters(Seq("thrift", "echo", "requests")) == 1)}
+    intercept[NoSuchElementException] {
+      assert(sr.counters(Seq("thrift", "echo", "requests")) == 1)
+    }
     assert(sr.counters(Seq("requests")) == 1)
 
     server.close()
   }
 
-  private[this] val servers: Seq[(String, (StatsReceiver, Echo.MethodPerEndpoint) => ListeningServer)] =
+  private[this] val servers
+    : Seq[(String, (StatsReceiver, Echo.MethodPerEndpoint) => ListeningServer)] =
     Seq(
       "Thrift.server" ->
         (
@@ -1072,34 +1078,35 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
         )
     )
 
-  private[this] val clients: Seq[(String, (StatsReceiver, Address) => Echo.MethodPerEndpoint)] = Seq(
-    "Thrift.client" ->
-      (
+  private[this] val clients: Seq[(String, (StatsReceiver, Address) => Echo.MethodPerEndpoint)] =
+    Seq(
+      "Thrift.client" ->
         (
-          sr,
-          addr
-        ) =>
-          Thrift.client
-            .withStatsReceiver(sr)
-            .build[Echo.MethodPerEndpoint](Name.bound(addr), "client")
-      ),
-    "ClientBuilder(stack)" ->
-      (
+          (
+            sr,
+            addr
+          ) =>
+            Thrift.client
+              .withStatsReceiver(sr)
+              .build[Echo.MethodPerEndpoint](Name.bound(addr), "client")
+        ),
+      "ClientBuilder(stack)" ->
         (
-          sr,
-          addr
-        ) =>
-          new Echo.FinagledClient(
-            ClientBuilder()
-              .stack(Thrift.client)
-              .name("client")
-              .hostConnectionLimit(1)
-              .reportTo(sr)
-              .dest(Name.bound(addr))
-              .build()
-          )
-      )
-  )
+          (
+            sr,
+            addr
+          ) =>
+            new Echo.FinagledClient(
+              ClientBuilder()
+                .stack(Thrift.client)
+                .name("client")
+                .hostConnectionLimit(1)
+                .reportTo(sr)
+                .dest(Name.bound(addr))
+                .build()
+            )
+        )
+    )
 
   for {
     (s, server) <- servers
@@ -1165,7 +1172,8 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     val clientParamTBF = RichClientParam(new TBinaryProtocol.Factory(false, false))
     val strictReadField = clientParamTBF.protocolFactory.getClass.getDeclaredField("strictRead_")
     val strictWriteField = clientParamTBF.protocolFactory.getClass.getDeclaredField("strictWrite_")
-    val readLimitField = clientParamTBF.protocolFactory.getClass.getDeclaredField("stringLengthLimit_")
+    val readLimitField =
+      clientParamTBF.protocolFactory.getClass.getDeclaredField("stringLengthLimit_")
 
     strictReadField.setAccessible(true)
     strictWriteField.setAccessible(true)
@@ -1180,9 +1188,12 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
 
     System.setProperty("org.apache.thrift.readLength", "1000")
     val clientParamSysProp = RichClientParam(new TBinaryProtocol.Factory(false, false))
-    val strictReadField = clientParamSysProp.protocolFactory.getClass.getDeclaredField("strictRead_")
-    val strictWriteField = clientParamSysProp.protocolFactory.getClass.getDeclaredField("strictWrite_")
-    val readLimitField = clientParamSysProp.protocolFactory.getClass.getDeclaredField("stringLengthLimit_")
+    val strictReadField =
+      clientParamSysProp.protocolFactory.getClass.getDeclaredField("strictRead_")
+    val strictWriteField =
+      clientParamSysProp.protocolFactory.getClass.getDeclaredField("strictWrite_")
+    val readLimitField =
+      clientParamSysProp.protocolFactory.getClass.getDeclaredField("stringLengthLimit_")
 
     strictReadField.setAccessible(true)
     strictWriteField.setAccessible(true)

@@ -1,7 +1,11 @@
 package com.twitter.finagle.http2.transport
 
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader.StreamMessage
-import com.twitter.finagle.http2.transport.Http2UpgradingTransport.{UpgradeAborted, UpgradeRejected, UpgradeSuccessful}
+import com.twitter.finagle.http2.transport.Http2UpgradingTransport.{
+  UpgradeAborted,
+  UpgradeRejected,
+  UpgradeSuccessful
+}
 import com.twitter.finagle.netty4.Netty4Listener.BackPressure
 import com.twitter.finagle.netty4.http.initClient
 import com.twitter.finagle.netty4.transport.{ChannelTransport, HasExecutor}
@@ -19,10 +23,10 @@ import scala.collection.JavaConverters.iterableAsScalaIterableConverter
  * expose it to finagle, and manipulates the pipeline to be fit for http/2.
  */
 private[http2] final class UpgradeRequestHandler(
-    params: Stack.Params,
-    httpClientCodec: HttpClientCodec,
-    connectionHandlerBuilder: RichHttpToHttp2ConnectionHandlerBuilder
-  ) extends ChannelDuplexHandler {
+  params: Stack.Params,
+  httpClientCodec: HttpClientCodec,
+  connectionHandlerBuilder: RichHttpToHttp2ConnectionHandlerBuilder
+) extends ChannelDuplexHandler {
 
   import UpgradeRequestHandler._
 
@@ -38,7 +42,7 @@ private[http2] final class UpgradeRequestHandler(
       Transport[StreamMessage, StreamMessage] {
         type Context = TransportContext with HasExecutor
       }
-      ]
+    ]
     val fac = new StreamTransportFactory(contextCasted, underlying.remoteAddress, params)
     fac -> fac.first()
   }
@@ -103,17 +107,20 @@ private[http2] final class UpgradeRequestHandler(
       .dropWhile(_.getKey != HandlerName)
       .tail
       .takeWhile(_.getKey != ChannelTransport.HandlerName)
-      .foreach {
-        entry => p.remove(entry.getValue)
+      .foreach { entry =>
+        p.remove(entry.getValue)
       }
     p.addBefore(
       ChannelTransport.HandlerName,
       AdapterProxyChannelHandler.HandlerName,
-      new AdapterProxyChannelHandler({ pipeline: ChannelPipeline =>
-        pipeline.addLast(SchemifyingHandler.HandlerName, new SchemifyingHandler("http"))
-        pipeline.addLast(StripHeadersHandler.HandlerName, StripHeadersHandler)
-        initClient(params)(pipeline)
-      }, statsReceiver.scope("adapter_proxy"))
+      new AdapterProxyChannelHandler(
+        { pipeline: ChannelPipeline =>
+          pipeline.addLast(SchemifyingHandler.HandlerName, new SchemifyingHandler("http"))
+          pipeline.addLast(StripHeadersHandler.HandlerName, StripHeadersHandler)
+          initClient(params)(pipeline)
+        },
+        statsReceiver.scope("adapter_proxy")
+      )
     )
     upgradeCounter.incr()
     // let the Http2UpgradingTransport know that this was an upgrade request

@@ -11,8 +11,7 @@ import com.twitter.util.{Return, Throw, Try}
  */
 case class Retries(attempt: Int)
 
-object Retries
-    extends Contexts.broadcast.Key[Retries]("com.twitter.finagle.Retries") {
+object Retries extends Contexts.broadcast.Key[Retries]("com.twitter.finagle.Retries") {
 
   def current: Option[Retries] =
     Contexts.broadcast.get(Retries)

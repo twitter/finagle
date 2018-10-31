@@ -10,10 +10,12 @@ import com.twitter.logging.Logger
 import com.twitter.util._
 import scala.collection.concurrent
 
-object zkConcurrentOperations extends GlobalFlag[Int](100,
-  "Number of concurrent operations allowed per ZkClient (default 100, max 1000). " +
-    "Ops exceeding this limit will be queued until existing operations complete."
-)
+object zkConcurrentOperations
+    extends GlobalFlag[Int](
+      100,
+      "Number of concurrent operations allowed per ZkClient (default 100, max 1000). " +
+        "Ops exceeding this limit will be queued until existing operations complete."
+    )
 
 /**
  * A representation of a ZooKeeper session based on asynchronous primitives such

@@ -37,8 +37,7 @@ private[netty4] class SslServerVerificationHandler(
       case NonFatal(e) =>
         ctx.close()
         val addr = Option(ctx.channel.remoteAddress)
-        onHandshakeComplete.updateIfEmpty(
-          Throw(new SslVerificationFailedException(Some(e), addr)))
+        onHandshakeComplete.updateIfEmpty(Throw(new SslVerificationFailedException(Some(e), addr)))
     }
   }
 
@@ -97,7 +96,6 @@ private[netty4] class HandshakeFailureException(
   exn: Throwable,
   val flags: Long = FailureFlags.Empty
 ) extends Exception("Failed to complete the TLS handshake.", exn)
-
     with FailureFlags[HandshakeFailureException]
     with HasLogLevel {
   def logLevel: Level = Level.WARNING

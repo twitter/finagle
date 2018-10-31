@@ -9,7 +9,7 @@ object Headers {
     def apply(headers: Seq[(Buf, Buf)]): Values = new Values(headers)
   }
 
-    /**
+  /**
    * A mutable container for "header" like value information.
    *
    * @note  This container is mutable because the information is carried across

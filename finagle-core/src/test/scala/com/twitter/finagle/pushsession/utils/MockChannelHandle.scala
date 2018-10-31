@@ -7,7 +7,8 @@ import java.net.{InetSocketAddress, SocketAddress}
 import java.security.cert.Certificate
 import scala.collection.mutable
 
-class MockChannelHandle[In, Out](var currentSession: PushSession[In, Out]) extends PushChannelHandle[In, Out] {
+class MockChannelHandle[In, Out](var currentSession: PushSession[In, Out])
+    extends PushChannelHandle[In, Out] {
   def this() = this(null)
 
   sealed trait SendCommand {
@@ -52,13 +53,11 @@ class MockChannelHandle[In, Out](var currentSession: PushSession[In, Out]) exten
     currentSession = newSession
   }
 
-  def send(messages: Iterable[Out])
-    (onComplete: (Try[Unit]) => Unit): Unit = {
+  def send(messages: Iterable[Out])(onComplete: (Try[Unit]) => Unit): Unit = {
     pendingWrites += SendMany(messages.toVector, onComplete)
   }
 
-  def send(message: Out)
-    (onComplete: (Try[Unit]) => Unit): Unit = {
+  def send(message: Out)(onComplete: (Try[Unit]) => Unit): Unit = {
     pendingWrites += SendOne(message, onComplete)
   }
 

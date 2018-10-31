@@ -18,7 +18,8 @@ sealed trait Request {
 
 object Request {
   private case class Impl(destination: Path, contexts: Seq[(Buf, Buf)], body: Buf) extends Request {
-    override def toString = s"mux.Request.Impl(dest=$destination, contexts=[${contexts.mkString(", ")}], body=$body)"
+    override def toString =
+      s"mux.Request.Impl(dest=$destination, contexts=[${contexts.mkString(", ")}], body=$body)"
   }
 
   val empty: Request = Impl(Path.empty, Nil, Buf.Empty)
@@ -34,5 +35,6 @@ object Requests {
 
   def make(dst: Path, payload: Buf): Request = make(dst, Nil, payload)
 
-  def make(dst: Path, contexts: Seq[(Buf, Buf)], payload: Buf): Request = Request(dst, contexts, payload)
+  def make(dst: Path, contexts: Seq[(Buf, Buf)], payload: Buf): Request =
+    Request(dst, contexts, payload)
 }

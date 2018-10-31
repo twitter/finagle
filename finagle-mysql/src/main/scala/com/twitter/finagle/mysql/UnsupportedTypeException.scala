@@ -12,8 +12,9 @@ class UnsupportedTypeException private[mysql] (
   value: Value,
   val flags: Long = FailureFlags.NonRetryable
 ) extends SQLNonTransientException(
-  s"For column name '$columnName', value type not supported: ${value.getClass.getName}"
-) with FailureFlags[UnsupportedTypeException] {
+      s"For column name '$columnName', value type not supported: ${value.getClass.getName}"
+    )
+    with FailureFlags[UnsupportedTypeException] {
 
   protected def copyWithFlags(flags: Long): UnsupportedTypeException =
     new UnsupportedTypeException(columnName, value, flags)

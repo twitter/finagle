@@ -2,7 +2,13 @@ package com.twitter.finagle.service
 
 import RetryPolicy._
 import com.twitter.conversions.time._
-import com.twitter.finagle.{ChannelClosedException, Failure, FailureFlags, TimeoutException, WriteException}
+import com.twitter.finagle.{
+  ChannelClosedException,
+  Failure,
+  FailureFlags,
+  TimeoutException,
+  WriteException
+}
 import com.twitter.util._
 import org.junit.runner.RunWith
 import org.scalatest.FunSpec

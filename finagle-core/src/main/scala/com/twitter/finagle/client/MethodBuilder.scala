@@ -87,8 +87,10 @@ private[finagle] object MethodBuilder {
         MethodBuilderRetry.Config(params[param.ResponseClassifier].responseClassifier),
         MethodBuilderTimeout.Config(
           stackTotalTimeoutDefined = originalStack.contains(TimeoutFilter.totalTimeoutRole),
-          total = TunableDuration(id = "total", duration = params[TimeoutFilter.TotalTimeout].timeout),
-          perRequest = TunableDuration(id = "perRequest", duration = params[TimeoutFilter.Param].timeout)
+          total =
+            TunableDuration(id = "total", duration = params[TimeoutFilter.TotalTimeout].timeout),
+          perRequest =
+            TunableDuration(id = "perRequest", duration = params[TimeoutFilter.Param].timeout)
         )
       )
     }
@@ -187,7 +189,6 @@ private[finagle] final class MethodBuilder[Req, Rep](
   def withTimeout: MethodBuilderTimeout[Req, Rep] =
     new MethodBuilderTimeout[Req, Rep](self)
 
-
   /**
    * Configure that requests are to be treated as idempotent. Because requests can be safely
    * retried, [[BackupRequestFilter]] is configured with the params `maxExtraLoad` and
@@ -248,7 +249,9 @@ private[finagle] final class MethodBuilder[Req, Rep](
     classifier: service.ResponseClassifier
   ): MethodBuilder[Req, Rep] = {
     addBackupRequestFilterParamAndClassifier(
-      BackupRequestFilter.Configured(maxExtraLoad, sendInterrupts), classifier)
+      BackupRequestFilter.Configured(maxExtraLoad, sendInterrupts),
+      classifier
+    )
   }
 
   private[this] def addBackupRequestFilterParamAndClassifier(
@@ -266,8 +269,8 @@ private[finagle] final class MethodBuilder[Req, Rep](
       // get a new instance of the default budget. Since we want them to share the same
       // client retry budget, insert the budget into the params.
       stackParams + brfParam + ResponseClassifier(combinedClassifier) + stackParams[Retries.Budget],
-      config))
-      .withRetry.forClassifier(combinedClassifier)
+      config
+    )).withRetry.forClassifier(combinedClassifier)
   }
 
   /**
@@ -282,8 +285,8 @@ private[finagle] final class MethodBuilder[Req, Rep](
       dest,
       stack,
       stackParams + BackupRequestFilter.Disabled,
-      config)
-    .withRetry.forClassifier(service.ResponseClassifier.Default)
+      config
+    ).withRetry.forClassifier(service.ResponseClassifier.Default)
   }
 
   //
@@ -334,7 +337,6 @@ private[finagle] final class MethodBuilder[Req, Rep](
       case None => clientScoped
     }
   }
-
 
   def filters(methodName: Option[String]): Filter.TypeAgnostic = {
     // Ordering of filters:
@@ -422,7 +424,9 @@ private[finagle] final class MethodBuilder[Req, Rep](
     refCounted.open()
 
     val underlying = BackupRequestFilter.filterService(
-      stackParams + param.Stats(statsReceiver(name)), refCounted.get)
+      stackParams + param.Stats(statsReceiver(name)),
+      refCounted.get
+    )
 
     new ServiceProxy[Req, Rep](underlying) {
       private[this] val isClosed = new AtomicBoolean(false)

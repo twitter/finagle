@@ -46,8 +46,10 @@ class ApertureTest extends FunSuite with ApertureSuite {
   }
 
   // Ensure the flag value is 12 since many of the tests depend on it.
-  override protected def test(testName: String,testTags: Tag*)(testFun: => Any)(implicit pos: Position): Unit =
-    super.test(testName, testTags:_*) {
+  override protected def test(testName: String, testTags: Tag*)(
+    testFun: => Any
+  )(implicit pos: Position): Unit =
+    super.test(testName, testTags: _*) {
       minDeterminsticAperture.let(12) {
         testFun
       }
@@ -74,20 +76,20 @@ class ApertureTest extends FunSuite with ApertureSuite {
 
   test("closing ApertureLeastLoaded removes the loadband ema gauge") {
     val stats = new InMemoryStatsReceiver
-      val aperture = new ApertureLeastLoaded[Unit, Unit](
-        endpoints = Activity.pending,
-        smoothWin = Duration.Bottom,
-        lowLoad = 0,
-        highLoad = 0,
-        minAperture = 10,
-        maxEffort = 0,
-        rng = Rng.threadLocal,
-        statsReceiver = stats,
-        label = "",
-        timer = new NullTimer,
-        emptyException = new NoBrokersAvailableException,
-        useDeterministicOrdering = None
-      )
+    val aperture = new ApertureLeastLoaded[Unit, Unit](
+      endpoints = Activity.pending,
+      smoothWin = Duration.Bottom,
+      lowLoad = 0,
+      highLoad = 0,
+      minAperture = 10,
+      maxEffort = 0,
+      rng = Rng.threadLocal,
+      statsReceiver = stats,
+      label = "",
+      timer = new NullTimer,
+      emptyException = new NoBrokersAvailableException,
+      useDeterministicOrdering = None
+    )
 
     assert(stats.gauges.contains(Seq("loadband", "offered_load_ema")))
     Await.result(aperture.close(), 10.seconds)
@@ -403,9 +405,10 @@ class ApertureTest extends FunSuite with ApertureSuite {
       override protected def statsReceiver = sr
     }
 
-    def updateWithIps(ips: Vector[String]): Unit = bal.update(ips.map { addr =>
-      new WithAddressFactory(addr.##, new InetSocketAddress(addr, 80))
-    })
+    def updateWithIps(ips: Vector[String]): Unit =
+      bal.update(ips.map { addr =>
+        new WithAddressFactory(addr.##, new InetSocketAddress(addr, 80))
+      })
 
     updateWithIps(Vector("1.1.1.1", "1.1.1.2"))
     val hash1 = getVectorHash

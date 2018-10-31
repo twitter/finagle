@@ -9,7 +9,7 @@ import java.net.InetSocketAddress
  * [[com.twitter.finagle.ServiceFactoryProxy]] used to trace the local addr and
  * server addr.
  */
-private[finagle]  class ServerDestTracingProxy[Req, Rep](self: ServiceFactory[Req, Rep])
+private[finagle] class ServerDestTracingProxy[Req, Rep](self: ServiceFactory[Req, Rep])
     extends ServiceFactoryProxy[Req, Rep](self) {
 
   override def apply(conn: ClientConnection): Future[Service[Req, Rep]] =

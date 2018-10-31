@@ -70,10 +70,7 @@ class WindowedPercentileHistogramTest extends FunSuite with Eventually with Inte
   test("Sliding window") {
     val timer = new MockTimer
     Time.withCurrentTimeFrozen { tc =>
-      val wp = new WindowedPercentileHistogram(
-        3,
-        10.seconds,
-        timer)
+      val wp = new WindowedPercentileHistogram(3, 10.seconds, timer)
 
       wp.add(1)
       wp.add(2)
@@ -103,7 +100,7 @@ class WindowedPercentileHistogramTest extends FunSuite with Eventually with Inte
       wp.add(10)
 
       tc.advance(10.seconds)
-      timer.tick()  // flush adds
+      timer.tick() // flush adds
 
       tc.advance(10.seconds) // first bucket (1, 2, 3) falls out of window
       timer.tick()
@@ -126,7 +123,8 @@ class WindowedPercentileHistogramTest extends FunSuite with Eventually with Inte
         10.seconds,
         WindowedPercentileHistogram.DefaultLowestDiscernibleValue,
         highestTrackable,
-        timer)
+        timer
+      )
 
       wp.add(highestTrackable + 10)
       tc.advance(10.seconds)
@@ -141,10 +139,7 @@ class WindowedPercentileHistogramTest extends FunSuite with Eventually with Inte
     val timer = new MockTimer
     1.until(WindowedPercentileHistogram.DefaultHighestTrackableValue / 1000).foreach { i =>
       Time.withCurrentTimeFrozen { tc =>
-        val wp = new WindowedPercentileHistogram(
-          3,
-          10.seconds,
-          timer)
+        val wp = new WindowedPercentileHistogram(3, 10.seconds, timer)
 
         wp.add(1000 * i)
         assert(wp.percentile(0.0) == 0)
@@ -153,7 +148,8 @@ class WindowedPercentileHistogramTest extends FunSuite with Eventually with Inte
         eventually {
           assert(
             wp.percentile(50.percent) >= ((1000 * i) - i) &&
-            wp.percentile(50.percent) <= ((1000 * i) + i))
+              wp.percentile(50.percent) <= ((1000 * i) + i)
+          )
         }
       }
     }

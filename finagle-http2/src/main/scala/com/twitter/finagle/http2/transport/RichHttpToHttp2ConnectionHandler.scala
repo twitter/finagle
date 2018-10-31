@@ -1,6 +1,12 @@
 package com.twitter.finagle.http2.transport
 
-import com.twitter.finagle.http2.transport.Http2ClientDowngrader.{GoAway, Message, Ping, Rst, StreamException}
+import com.twitter.finagle.http2.transport.Http2ClientDowngrader.{
+  GoAway,
+  Message,
+  Ping,
+  Rst,
+  StreamException
+}
 import com.twitter.logging.Logger
 import io.netty.buffer.Unpooled
 import io.netty.channel.{ChannelHandlerContext, ChannelPromise}

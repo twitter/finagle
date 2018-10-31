@@ -167,7 +167,8 @@ private class ChannelStatsHandler(sharedChannelStats: SharedChannelStats)
     val isWritable = ctx.channel.isWritable()
     if (isWritable != channelWasWritable) {
       val elapsed: Duration = channelWritableDuration()
-      val stat = if (channelWasWritable) sharedChannelStats.writable else sharedChannelStats.unwritable
+      val stat =
+        if (channelWasWritable) sharedChannelStats.writable else sharedChannelStats.unwritable
       stat.incr(elapsed.inMilliseconds.toInt)
 
       channelWasWritable = isWritable

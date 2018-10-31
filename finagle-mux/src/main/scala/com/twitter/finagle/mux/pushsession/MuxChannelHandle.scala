@@ -16,10 +16,10 @@ import java.util.concurrent.atomic.AtomicBoolean
  * we use the Netty4 TLS implementation.
  */
 private[finagle] class MuxChannelHandle(
-    underlying: PushChannelHandle[ByteReader, Buf],
-    ch: Channel,
-    params: Stack.Params)
-  extends PushChannelHandleProxy[ByteReader, Buf](underlying) {
+  underlying: PushChannelHandle[ByteReader, Buf],
+  ch: Channel,
+  params: Stack.Params
+) extends PushChannelHandleProxy[ByteReader, Buf](underlying) {
 
   private[this] val tlsGuard = new AtomicBoolean(false)
 

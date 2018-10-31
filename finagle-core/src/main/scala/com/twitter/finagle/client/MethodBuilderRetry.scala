@@ -131,11 +131,11 @@ private[client] object MethodBuilderRetry {
       }
 
   private[client] class LogFailuresFilter[Req, Rep](
-      logger: Logger,
-      label: String,
-      responseClassifier: ResponseClassifier,
-      nowMs: () => Long)
-    extends Filter[Req, Rep, Req, Rep] {
+    logger: Logger,
+    label: String,
+    responseClassifier: ResponseClassifier,
+    nowMs: () => Long
+  ) extends Filter[Req, Rep, Req, Rep] {
 
     def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
       val start = nowMs()

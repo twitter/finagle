@@ -199,5 +199,6 @@ final case class TraceId(
   override def hashCode(): Int =
     ids.hashCode()
 
-  override def toString = s"${if (traceIdHigh.isEmpty) "" else traceIdHigh.get}$traceId.$spanId<:$parentId"
+  override def toString =
+    s"${if (traceIdHigh.isEmpty) "" else traceIdHigh.get}$traceId.$spanId<:$parentId"
 }

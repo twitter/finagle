@@ -93,6 +93,7 @@ object CursoredStatement {
    * exposed for testing.
    */
   final class AsJava private[mysql] (underlying: CursoredStatement) {
+
     /**
      * Executes the cursored statement with the given `params` and lazily maps `f`
      * over the rows as they are streamed from the database.

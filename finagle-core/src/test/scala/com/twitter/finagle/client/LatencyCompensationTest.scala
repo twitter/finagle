@@ -100,7 +100,9 @@ class LatencyCompensationTest
      * N.B. connection timeout compensation is not tested
      * end-to-end-because it's tricky to cause connection latency.
      */
-    def whileConnected(echoClient: StringClient.Client)(f: Service[String, String] => Unit): Unit = {
+    def whileConnected(
+      echoClient: StringClient.Client
+    )(f: Service[String, String] => Unit): Unit = {
       val server = StringServer.server.serve("127.1:0", service)
       val ia = server.boundAddress.asInstanceOf[InetSocketAddress]
       val addr = Addr.Bound(Set[Address](Address(ia)), metadata)
@@ -225,34 +227,34 @@ class LatencyCompensationTest
       }
     }
 
-    test("Latency compensator doesn't always add compensation") {
-      new Ctx {
-        Time.withCurrentTimeFrozen { clock =>
-          whileConnected(compensatedEchoClient) { client =>
-            val nm = client("nm")
-            assert(!nm.isDefined)
-            assert(respond.interrupted.isEmpty)
+  test("Latency compensator doesn't always add compensation") {
+    new Ctx {
+      Time.withCurrentTimeFrozen { clock =>
+        whileConnected(compensatedEchoClient) { client =>
+          val nm = client("nm")
+          assert(!nm.isDefined)
+          assert(respond.interrupted.isEmpty)
 
-            awaitReceipt()
-            assert(!nm.isDefined)
-            assert(respond.interrupted.isEmpty)
+          awaitReceipt()
+          assert(!nm.isDefined)
+          assert(respond.interrupted.isEmpty)
 
-            clock.advance(2.seconds)
-            timer.tick() // triggers the timeout
+          clock.advance(2.seconds)
+          timer.tick() // triggers the timeout
 
-            eventually {
-              assert(nm.isDefined)
-            }
-            eventually {
-              assert(respond.interrupted.isDefined)
-            }
-            intercept[IndividualRequestTimeoutException] {
-              Await.result(nm, 10.seconds)
-            }
+          eventually {
+            assert(nm.isDefined)
+          }
+          eventually {
+            assert(respond.interrupted.isDefined)
+          }
+          intercept[IndividualRequestTimeoutException] {
+            Await.result(nm, 10.seconds)
           }
         }
       }
     }
+  }
 
   test("Latency compensator doesn't apply if there's no base timeout") {
     new Ctx {

@@ -578,8 +578,10 @@ class FilterTest extends FunSuite {
 
   test("OneTime passes name for toString") {
     val simple = new OTTypeAgnostic
-    assert(simple.andThen(new PassThruTypeAgnosticFilter).toString ==
-      "simple.andThen(com.twitter.finagle.FilterTest$PassThruTypeAgnosticFilter)")
+    assert(
+      simple.andThen(new PassThruTypeAgnosticFilter).toString ==
+        "simple.andThen(com.twitter.finagle.FilterTest$PassThruTypeAgnosticFilter)"
+    )
   }
 
 }

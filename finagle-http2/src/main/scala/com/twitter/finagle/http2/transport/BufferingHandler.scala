@@ -14,7 +14,9 @@ import java.net.SocketAddress
  * Buffers until `channelActive` so we can ensure the connection preface is
  * the first message we send.
  */
-private[http2] class BufferingHandler extends ChannelInboundHandlerAdapter with BufferingChannelOutboundHandler {
+private[http2] class BufferingHandler
+    extends ChannelInboundHandlerAdapter
+    with BufferingChannelOutboundHandler {
   self =>
 
   override def channelActive(ctx: ChannelHandlerContext): Unit = {

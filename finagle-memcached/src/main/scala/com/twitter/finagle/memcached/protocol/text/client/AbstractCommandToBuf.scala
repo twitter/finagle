@@ -11,7 +11,7 @@ private[finagle] object AbstractCommandToBuf {
     var size: Int = 1
     while (x > c) {
       size += 1
-      c = 10*c + 9
+      c = 10 * c + 9
     }
     size
   }
@@ -26,7 +26,6 @@ private[finagle] object AbstractCommandToBuf {
     bw.writeByte(ascii0 + (x % 10))
   }
 }
-
 
 /**
  * Class that can encode `Command`-type objects into `Buf`s. Used on the client side.

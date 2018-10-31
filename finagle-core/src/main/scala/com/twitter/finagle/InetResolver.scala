@@ -58,13 +58,18 @@ object InetResolver {
   def apply(unscopedStatsReceiver: StatsReceiver, resolvePool: FuturePool): Resolver =
     apply(unscopedStatsReceiver, Some(5.seconds), resolvePool)
 
-  def apply(unscopedStatsReceiver: StatsReceiver, pollIntervalOpt: Option[Duration], resolvePool: FuturePool) = {
+  def apply(
+    unscopedStatsReceiver: StatsReceiver,
+    pollIntervalOpt: Option[Duration],
+    resolvePool: FuturePool
+  ) = {
     val statsReceiver = unscopedStatsReceiver.scope("inet").scope("dns")
     new InetResolver(
       new DnsResolver(statsReceiver, resolvePool),
       statsReceiver,
       pollIntervalOpt,
-      resolvePool)
+      resolvePool
+    )
   }
 }
 

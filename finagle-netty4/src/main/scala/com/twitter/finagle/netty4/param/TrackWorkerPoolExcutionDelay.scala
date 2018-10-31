@@ -16,8 +16,12 @@ import com.twitter.util.Duration
  *                            more than the threshold. Thresholds of  < 10ms will not work as
  *                            expected as the underlying executors do not use high resolution timers.
  */
-case class TrackWorkerPoolExecutionDelay(enableTracking: Boolean, trackingTaskPeriod: Duration, threadDumpThreshold: Duration) {
-  def mk() : (TrackWorkerPoolExecutionDelay, Stack.Param[TrackWorkerPoolExecutionDelay]) =
+case class TrackWorkerPoolExecutionDelay(
+  enableTracking: Boolean,
+  trackingTaskPeriod: Duration,
+  threadDumpThreshold: Duration
+) {
+  def mk(): (TrackWorkerPoolExecutionDelay, Stack.Param[TrackWorkerPoolExecutionDelay]) =
     (this, TrackWorkerPoolExecutionDelay.trackWorkerPoolExecutionDelayParam)
 
 }
@@ -25,6 +29,11 @@ case class TrackWorkerPoolExecutionDelay(enableTracking: Boolean, trackingTaskPe
 object TrackWorkerPoolExecutionDelay {
   implicit val trackWorkerPoolExecutionDelayParam: Stack.Param[TrackWorkerPoolExecutionDelay] =
     Stack.Param[TrackWorkerPoolExecutionDelay](
-      TrackWorkerPoolExecutionDelay(false, Duration.fromMilliseconds(0), Duration.fromMilliseconds(0)))
+      TrackWorkerPoolExecutionDelay(
+        false,
+        Duration.fromMilliseconds(0),
+        Duration.fromMilliseconds(0)
+      )
+    )
 
 }

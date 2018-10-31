@@ -27,11 +27,12 @@ class SessionsTest extends FunSuite with MockitoSugar {
     }
 
     assert(await(result) == "success")
-    assert(service.requests ==
-      List(
-        sqlQuery,
-        sqlQuery
-      ).map(QueryRequest.apply _)
+    assert(
+      service.requests ==
+        List(
+          sqlQuery,
+          sqlQuery
+        ).map(QueryRequest.apply _)
     )
 
     verify(factory, times(1)).apply()
@@ -58,15 +59,16 @@ class SessionsTest extends FunSuite with MockitoSugar {
     }
 
     assert(await(result) == "success")
-    assert(service.requests ==
-      List(
-        "LOCK TABLES FOO WRITE",
-        "START TRANSACTION",
-        sqlQuery,
-        sqlQuery,
-        "COMMIT",
-        "UNLOCK TABLES"
-      ).map(QueryRequest(_))
+    assert(
+      service.requests ==
+        List(
+          "LOCK TABLES FOO WRITE",
+          "START TRANSACTION",
+          sqlQuery,
+          sqlQuery,
+          "COMMIT",
+          "UNLOCK TABLES"
+        ).map(QueryRequest(_))
     )
 
     verify(factory, times(1)).apply()
@@ -96,15 +98,16 @@ class SessionsTest extends FunSuite with MockitoSugar {
     }
 
     intercept[Exception] { await(result) }
-    assert(service.requests ==
-      List(
-        "LOCK TABLES FOO WRITE",
-        "START TRANSACTION",
-        sqlQuery,
-        sqlQuery,
-        "ROLLBACK"
-      ).map(QueryRequest(_)) :+
-      PoisonConnectionRequest
+    assert(
+      service.requests ==
+        List(
+          "LOCK TABLES FOO WRITE",
+          "START TRANSACTION",
+          sqlQuery,
+          sqlQuery,
+          "ROLLBACK"
+        ).map(QueryRequest(_)) :+
+          PoisonConnectionRequest
     )
 
     verify(factory, times(1)).apply()
@@ -131,7 +134,7 @@ class SessionsTest extends FunSuite with MockitoSugar {
     val factory = spy(new MockServiceFactory(service))
     val client = Client(factory, NullStatsReceiver, supportUnsigned = false)
 
-    client.session( _ => Future.value("foo"))
+    client.session(_ => Future.value("foo"))
 
     verify(factory, times(1)).apply()
     verify(factory, times(0)).close(any[Time])

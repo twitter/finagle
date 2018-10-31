@@ -53,20 +53,22 @@ private final class VanillaThriftSession(
   private[this] val respond: Try[Message] => Unit = {
     // Since it's stateless we can reuse the Runnable!
     val runnable = new Runnable { def run = handleResponseComplete() }
-    { _ => exec.execute(runnable) }
+    { _ =>
+      exec.execute(runnable)
+    }
   }
 
   // These are the locals we need to have set on each dispatch
   private[this] val locals: Local.Context =
     Local.letClear {
-      val peerCertLocal = handle.peerCertificate.map(
-        Contexts.local.KeyValuePair(Transport.peerCertCtx, _)).toList
+      val peerCertLocal =
+        handle.peerCertificate.map(Contexts.local.KeyValuePair(Transport.peerCertCtx, _)).toList
 
-      val remoteAddressLocal = Contexts.local.KeyValuePair(
-        RemoteInfo.Upstream.AddressCtx, handle.remoteAddress)
+      val remoteAddressLocal =
+        Contexts.local.KeyValuePair(RemoteInfo.Upstream.AddressCtx, handle.remoteAddress)
 
       Trace.letTracer(params[param.Tracer].tracer) {
-        Contexts.local.let(remoteAddressLocal::peerCertLocal) {
+        Contexts.local.let(remoteAddressLocal :: peerCertLocal) {
           Local.save()
         }
       }
@@ -103,7 +105,8 @@ private final class VanillaThriftSession(
       val head = pending.peek
       head.poll match {
         case Some(r) => // we have a complete response! What luck!
-          pending.poll() // remove the promise from the queue (`r` is its value, so we don't need it)
+          pending
+            .poll() // remove the promise from the queue (`r` is its value, so we don't need it)
           handleRenderResponse(r)
           handleResponseComplete() // now try it again since we may have more that can be written
         case None => // not finished, so we terminate the loop
@@ -177,7 +180,8 @@ private final class VanillaThriftSession(
 
       if (!pending.isEmpty) {
         val cause = new ClientDiscardedRequestException(
-          s"Session closed. Remote: ${handle.remoteAddress}")
+          s"Session closed. Remote: ${handle.remoteAddress}"
+        )
         while (!pending.isEmpty) {
           pending.poll().raise(cause)
         }

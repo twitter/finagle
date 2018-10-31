@@ -27,8 +27,8 @@ class RingTest extends FunSuite {
 
   test("pick2") {
     val ring = new Ring(10, rng)
-    val offset = 3/4D
-    val width = 1/2D
+    val offset = 3 / 4D
+    val width = 1 / 2D
 
     val histo0 = run {
       val (a, b) = ring.pick2(offset, width)
@@ -58,7 +58,7 @@ class RingTest extends FunSuite {
 
   test("pick2: no range") {
     val ring = new Ring(10, rng)
-    val (a, b) = ring.pick2(3/4D, 0D)
+    val (a, b) = ring.pick2(3 / 4D, 0D)
     assert(a == 7)
     assert(a == b)
 
@@ -91,7 +91,7 @@ class RingTest extends FunSuite {
     assert(r1.range(rng.nextDouble, Double.MinPositiveValue) == 1)
     assert(r1.range(rng.nextDouble, 0.000001) == 1)
     assert(r1.range(rng.nextDouble, .999999) == size)
-    assert(r1.range(rng.nextDouble, 1.0-Double.MinPositiveValue) == size)
+    assert(r1.range(rng.nextDouble, 1.0 - Double.MinPositiveValue) == size)
     assert(r1.range(rng.nextDouble, 1.0) == size)
   }
 
@@ -130,45 +130,47 @@ class RingTest extends FunSuite {
   test("pick2: wraps around and respects weights") {
     val ring = new Ring(10, rng)
     val histo = run {
-      val (a, b) = ring.pick2(3/4D, 1/2D)
+      val (a, b) = ring.pick2(3 / 4D, 1 / 2D)
       Seq(a, b)
     }
-    assert(ring.range(3/4D, 1/2D) == histo.keys.size)
+    assert(ring.range(3 / 4D, 1 / 2D) == histo.keys.size)
     assert(histo.keys == Set(7, 8, 9, 0, 1, 2))
     // 7 and 2 get a fraction of the traffic
-    val f: ((Int, Int)) => Boolean = { kv => kv._1 == 2 || kv._1 == 7 }
+    val f: ((Int, Int)) => Boolean = { kv =>
+      kv._1 == 2 || kv._1 == 7
+    }
     assertBalanced(histo.filter(f))
     assertBalanced(histo.filterNot(f))
     // We know that index 2 and 7 should get ~50% of picks relative
     // to the other indices.
     val a = histo(1).toDouble
     val b = histo(2).toDouble
-    assert(b/a - 0.5 < 1e-1)
+    assert(b / a - 0.5 < 1e-1)
   }
 
   test("indices") {
     val ring = new Ring(10, rng)
-    assert(ring.range(1/4D, 1/4D) == 3)
-    assert(ring.indices(1/4D, 1/4D) == Seq(2, 3, 4))
+    assert(ring.range(1 / 4D, 1 / 4D) == 3)
+    assert(ring.indices(1 / 4D, 1 / 4D) == Seq(2, 3, 4))
 
     // wrap around
-    assert(ring.range(3/4D, 1/2D) == 6)
-    assert(ring.indices(3/4D, 1/2D) == Seq(7, 8, 9, 0, 1, 2))
+    assert(ring.range(3 / 4D, 1 / 2D) == 6)
+    assert(ring.indices(3 / 4D, 1 / 2D) == Seq(7, 8, 9, 0, 1, 2))
 
     // walk the indices
     for (i <- 0 to 10) {
-      withClue(s"offset=${i/10D} width=${1/10D}") {
-        assert(ring.range(i/10D, 1/10D) == 1)
-        assert(ring.indices(i/10D, 1/10D) == Seq(i % 10))
+      withClue(s"offset=${i / 10D} width=${1 / 10D}") {
+        assert(ring.range(i / 10D, 1 / 10D) == 1)
+        assert(ring.indices(i / 10D, 1 / 10D) == Seq(i % 10))
       }
     }
   }
 
   test("weight") {
     val ring = new Ring(10, rng)
-    assert(1.0 - ring.weight(5, 1/2D, 1/10D) <= 1e-6)
-    assert(1.0 - ring.weight(5, 1/2D, 1.0) <= 1e-6)
+    assert(1.0 - ring.weight(5, 1 / 2D, 1 / 10D) <= 1e-6)
+    assert(1.0 - ring.weight(5, 1 / 2D, 1.0) <= 1e-6)
     // wrap around: intersection between [0.0, 0.1) and [0.75, 1.25)
-    assert(1.0 - ring.weight(0, 3/4D, 1/2D) <= 1e-6)
+    assert(1.0 - ring.weight(0, 3 / 4D, 1 / 2D) <= 1e-6)
   }
 }

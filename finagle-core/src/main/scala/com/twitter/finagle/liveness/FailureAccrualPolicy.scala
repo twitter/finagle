@@ -316,7 +316,8 @@ object FailureAccrualPolicy {
       requiredSuccessRate,
       window,
       markDeadFor,
-      DefaultMinimumRequestThreshold)
+      DefaultMinimumRequestThreshold
+    )
 
   /**
    * A policy based on a maximum number of consecutive failures. If `numFailures`

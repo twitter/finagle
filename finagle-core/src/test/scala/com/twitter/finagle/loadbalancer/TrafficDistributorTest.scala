@@ -407,52 +407,52 @@ class TrafficDistributorTest extends FunSuite {
   })
 
   if (!sys.props.contains("SKIP_FLAKY"))
-  test("increment weights on a shard") {
-    val server = StringServer.server.serve(":*", Service.mk { r: String =>
-      Future.value(r.reverse)
-    })
-    val sr = new CumulativeGaugeInMemoryStatsReceiver()
-    val addr = Address(server.boundAddress.asInstanceOf[InetSocketAddress])
-    val va = Var[Addr](Addr.Bound(addr))
-    val client = StringClient.client
-      .configured(param.Stats(sr))
-      .newClient(Name.Bound.singleton(va), "test")
-      .toService
+    test("increment weights on a shard") {
+      val server = StringServer.server.serve(":*", Service.mk { r: String =>
+        Future.value(r.reverse)
+      })
+      val sr = new CumulativeGaugeInMemoryStatsReceiver()
+      val addr = Address(server.boundAddress.asInstanceOf[InetSocketAddress])
+      val va = Var[Addr](Addr.Bound(addr))
+      val client = StringClient.client
+        .configured(param.Stats(sr))
+        .newClient(Name.Bound.singleton(va), "test")
+        .toService
 
-    // step this socket address through weight classes. Previous weight
-    // classes are closed during each step. This is similar to how we
-    // redline a shard.
-    val N = 5
-    for (i <- 1 to N) withClue(s"for i=$i:") {
-      val addr =
-        WeightedAddress(Address(server.boundAddress.asInstanceOf[InetSocketAddress]), i.toDouble)
-      va() = Addr.Bound(addr)
-      assert(Await.result(client("hello")) == "hello".reverse)
-      assert(sr.counters(Seq("test", "requests")) == i)
-      assert(sr.counters(Seq("test", "connects")) == 1)
-      // each WC gets a new balancer which adds the addr
-      assert(sr.counters(Seq("test", "loadbalancer", "adds")) == i)
-      assert(sr.counters(Seq("test", "loadbalancer", "removes")) == i - 1)
-      assert(sr.gauges(Seq("test", "loadbalancer", "meanweight"))() == i)
+      // step this socket address through weight classes. Previous weight
+      // classes are closed during each step. This is similar to how we
+      // redline a shard.
+      val N = 5
+      for (i <- 1 to N) withClue(s"for i=$i:") {
+        val addr =
+          WeightedAddress(Address(server.boundAddress.asInstanceOf[InetSocketAddress]), i.toDouble)
+        va() = Addr.Bound(addr)
+        assert(Await.result(client("hello")) == "hello".reverse)
+        assert(sr.counters(Seq("test", "requests")) == i)
+        assert(sr.counters(Seq("test", "connects")) == 1)
+        // each WC gets a new balancer which adds the addr
+        assert(sr.counters(Seq("test", "loadbalancer", "adds")) == i)
+        assert(sr.counters(Seq("test", "loadbalancer", "removes")) == i - 1)
+        assert(sr.gauges(Seq("test", "loadbalancer", "meanweight"))() == i)
+        assert(sr.numGauges(Seq("test", "loadbalancer", "meanweight")) == 1)
+        assert(sr.counters(Seq("test", "closes")) == 0)
+      }
+
+      va() = Addr.Bound(Set.empty[Address])
+      assert(sr.counters(Seq("test", "closes")) == 1)
+      assert(sr.counters(Seq("test", "loadbalancer", "adds")) == N)
+      assert(sr.counters(Seq("test", "loadbalancer", "removes")) == N)
+      assert(sr.gauges(Seq("test", "loadbalancer", "meanweight"))() == 0)
       assert(sr.numGauges(Seq("test", "loadbalancer", "meanweight")) == 1)
-      assert(sr.counters(Seq("test", "closes")) == 0)
-    }
 
-    va() = Addr.Bound(Set.empty[Address])
-    assert(sr.counters(Seq("test", "closes")) == 1)
-    assert(sr.counters(Seq("test", "loadbalancer", "adds")) == N)
-    assert(sr.counters(Seq("test", "loadbalancer", "removes")) == N)
-    assert(sr.gauges(Seq("test", "loadbalancer", "meanweight"))() == 0)
-    assert(sr.numGauges(Seq("test", "loadbalancer", "meanweight")) == 1)
-
-    // the TrafficDistributor /may/ close the cached Balancer which
-    // holds a reference to the gauge, thus allowing the gauge to be gc-ed.
-    sr.gauges.get(Seq("test", "loadbalancer", "size")) match {
-      case Some(gauge) => assert(gauge() == 0)
-      case None => // it was GC-ed, this is ok too
+      // the TrafficDistributor /may/ close the cached Balancer which
+      // holds a reference to the gauge, thus allowing the gauge to be gc-ed.
+      sr.gauges.get(Seq("test", "loadbalancer", "size")) match {
+        case Some(gauge) => assert(gauge() == 0)
+        case None => // it was GC-ed, this is ok too
+      }
+      assert(sr.numGauges(Seq("test", "loadbalancer", "size")) <= 1)
     }
-    assert(sr.numGauges(Seq("test", "loadbalancer", "size")) <= 1)
-  }
 
   test("close a client") {
     val server = StringServer.server.serve(":*", Service.mk { r: String =>

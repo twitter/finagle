@@ -13,7 +13,8 @@ abstract class HeaderMapBenchmark extends StdBenchAnnotations {
   // We supply 18 random strings of the length of 14 and build a 9-element
   // header map of them. The 10th element is foo -> bar so we can reliably
   // query it in the benchmark.
-  private val map = Iterator.fill(9 * 2)(Random.alphanumeric.take(14).mkString)
+  private val map = Iterator
+    .fill(9 * 2)(Random.alphanumeric.take(14).mkString)
     .grouped(2)
     .foldLeft(newMap())((map, h) => map.add(h.head, h.last))
     .add("Content-Length", "100")

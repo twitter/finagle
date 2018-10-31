@@ -15,6 +15,8 @@ private[finagle] object SslConfigurationException {
   def notSupported(featureName: String, engineFactoryName: String): SslConfigurationException =
     SslConfigurationException(
       new IllegalArgumentException(
-        s"$featureName is not supported at this time for $engineFactoryName"))
+        s"$featureName is not supported at this time for $engineFactoryName"
+      )
+    )
 
 }

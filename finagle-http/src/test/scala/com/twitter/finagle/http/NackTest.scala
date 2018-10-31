@@ -20,7 +20,9 @@ class NackTest extends FunSuite {
         if (n.get == -2) {
           Future.exception(new Exception)
         } else if (n.get == -1) {
-          Future.exception(response.unflagged(FailureFlags.Retryable).flagged(FailureFlags.NonRetryable))
+          Future.exception(
+            response.unflagged(FailureFlags.Retryable).flagged(FailureFlags.NonRetryable)
+          )
         } else if (n.getAndIncrement == 0) {
           Future.exception(response)
         } else {

@@ -94,13 +94,14 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
         Values(
           keys.flatMap { key =>
             map.lock(key) { data =>
-              data.get(key).filter { entry =>
-                if (!entry.valid)
-                  data.remove(key) // expired
-                entry.valid
-              }.map { entry =>
-                Value(key, entry.value)
-              }
+              data
+                .get(key).filter { entry =>
+                  if (!entry.valid)
+                    data.remove(key) // expired
+                  entry.valid
+                }.map { entry =>
+                  Value(key, entry.value)
+                }
             }
           }
         )

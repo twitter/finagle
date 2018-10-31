@@ -204,8 +204,10 @@ class BucketedHistogramTest extends FunSuite with GeneratorDrivenPropertyChecks 
       forAll(Gen.choose(0, Int.MaxValue)) { num =>
         val actual = h.findBucket(num)
         val expected = Math.abs(java.util.Arrays.binarySearch(limits, num) + 1)
-        assert(actual == expected,
-          s"we saw a misalignment between the approaches for num=$num and error=$error")
+        assert(
+          actual == expected,
+          s"we saw a misalignment between the approaches for num=$num and error=$error"
+        )
       }
     }
   }

@@ -97,7 +97,6 @@ object Bijections {
       new Cookie(nc)
   }
 
-
   // Request
 
   implicit val requestToNettyInjection = new Injection[Request, HttpRequest] {

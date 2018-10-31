@@ -61,14 +61,16 @@ abstract class AbstractMultipartDecoderTest(decoder: MultipartDecoder) extends F
     assert(decoder.decode(Request()).isEmpty)
     assert(decoder.decode(Request(Method.Post, "/")).isEmpty)
     assert(
-      decoder.decode(
-        {val r = Request(Method.Post, "/"); r.contentType = "application/json"; r}
-      ).isEmpty
+      decoder
+        .decode(
+          { val r = Request(Method.Post, "/"); r.contentType = "application/json"; r }
+        ).isEmpty
     )
     assert(
-      decoder.decode(
-        {val r = Request(Method.Put, "/"); r.contentType = "multipart/form-data"; r}
-      ).isEmpty
+      decoder
+        .decode(
+          { val r = Request(Method.Put, "/"); r.contentType = "multipart/form-data"; r }
+        ).isEmpty
     )
   }
 }

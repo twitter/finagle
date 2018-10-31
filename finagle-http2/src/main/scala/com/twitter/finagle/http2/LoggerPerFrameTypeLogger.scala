@@ -126,7 +126,6 @@ private[http2] class LoggerPerFrameTypeLogger(loggerNamePrefix: String)
     }
   }
 
-
   override def logPing(
     direction: Http2FrameLogger.Direction,
     ctx: ChannelHandlerContext,
@@ -135,7 +134,7 @@ private[http2] class LoggerPerFrameTypeLogger(loggerNamePrefix: String)
     if (pingLogger.isLoggable(Level.TRACE)) {
       pingLogger.log(
         Level.TRACE,
-        f"$direction ${ ctx.channel } PING: ack=false, data=$data"
+        f"$direction ${ctx.channel} PING: ack=false, data=$data"
       )
     }
   }

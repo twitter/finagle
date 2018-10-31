@@ -23,10 +23,7 @@ final class BalancerRegistry private[loadbalancer] {
     balancers.remove(balancer)
 
   def allMetadata: Seq[Metadata] =
-    balancers
-      .values
-      .asScala
-      .toSeq
+    balancers.values.asScala.toSeq
 
 }
 

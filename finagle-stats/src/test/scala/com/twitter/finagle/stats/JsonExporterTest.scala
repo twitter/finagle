@@ -271,8 +271,8 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
   }
 
   test("formatter flag") {
-    val registry = Metrics.createDetached(
-      mkHistogram = ImmediateMetricsHistogram.apply _, separator = "/")
+    val registry =
+      Metrics.createDetached(mkHistogram = ImmediateMetricsHistogram.apply _, separator = "/")
     val sr = new MetricsStatsReceiver(registry)
     val histo = sr.stat("anHisto")
     histo.add(555)

@@ -43,12 +43,14 @@ class TraceInfoTest extends FunSuite {
       TraceInfo.setClientRequestHeaders(req)
     }
 
-    assert(req.headerMap == HeaderMap(
-      "X-B3-TraceId" -> "0000000000000abc",
-      "X-B3-ParentSpanId" -> "0000000000000def",
-      "X-B3-SpanId" -> "0000000000000123",
-      "X-B3-Sampled" -> "false"
-    ))
+    assert(
+      req.headerMap == HeaderMap(
+        "X-B3-TraceId" -> "0000000000000abc",
+        "X-B3-ParentSpanId" -> "0000000000000def",
+        "X-B3-SpanId" -> "0000000000000123",
+        "X-B3-Sampled" -> "false"
+      )
+    )
   }
 
   // Particularly headers like parent ID need to be removed when a request is processed twice
@@ -63,20 +65,23 @@ class TraceInfoTest extends FunSuite {
     // clears and starts an unsampled trace
     TraceInfo.setClientRequestHeaders(req)
 
-    assert(req.headerMap.keys == Set( "X-B3-TraceId", "X-B3-SpanId"))
+    assert(req.headerMap.keys == Set("X-B3-TraceId", "X-B3-SpanId"))
   }
 
   test("setClientRequestHeaders writes 128-bit trace ID") {
     val req = Request(Method.Get, "/")
 
-    val traceContext = TraceId(Some(SpanId(0xb)), None, SpanId(0x1), None, Flags(), Some(SpanId(0xa)))
+    val traceContext =
+      TraceId(Some(SpanId(0xb)), None, SpanId(0x1), None, Flags(), Some(SpanId(0xa)))
     Trace.letId(traceContext) {
       TraceInfo.setClientRequestHeaders(req)
     }
 
-    assert(req.headerMap == HeaderMap(
-      "X-B3-TraceId" -> "000000000000000a000000000000000b",
-      "X-B3-SpanId" -> "0000000000000001"
-    ))
+    assert(
+      req.headerMap == HeaderMap(
+        "X-B3-TraceId" -> "000000000000000a000000000000000b",
+        "X-B3-SpanId" -> "0000000000000001"
+      )
+    )
   }
 }

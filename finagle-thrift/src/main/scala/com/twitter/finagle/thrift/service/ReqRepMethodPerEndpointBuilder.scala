@@ -9,4 +9,4 @@ package com.twitter.finagle.thrift.service
  * Scrooge generates implementations of this builder.
  */
 trait ReqRepMethodPerEndpointBuilder[ReqRepServicePerEndpoint, MethodPerEndpoint]
-  extends MethodPerEndpointBuilder[ReqRepServicePerEndpoint, MethodPerEndpoint]
+    extends MethodPerEndpointBuilder[ReqRepServicePerEndpoint, MethodPerEndpoint]

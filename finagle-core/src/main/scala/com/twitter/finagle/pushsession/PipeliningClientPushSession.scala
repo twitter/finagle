@@ -20,11 +20,11 @@ import com.twitter.util._
  * look like it will make progress. Use `stallTimeout` to configure this timeout.
  */
 final class PipeliningClientPushSession[In, Out](
-    handle: PushChannelHandle[In, Out],
-    statsReceiver: StatsReceiver,
-    stallTimeout: Duration,
-    timer: Timer)
-  extends PushSession[In, Out](handle) { self =>
+  handle: PushChannelHandle[In, Out],
+  statsReceiver: StatsReceiver,
+  stallTimeout: Duration,
+  timer: Timer
+) extends PushSession[In, Out](handle) { self =>
 
   private[this] val logger = Logger.get
 
@@ -33,7 +33,7 @@ final class PipeliningClientPushSession[In, Out](
   private[this] var h_stalled: Boolean = false
   // These are marked volatile because they are read outside of SerialExecutor but
   // are only modified from within the serial executor.
-  @volatile private[this] var h_queueSize: Int = 0  // avoids synchronization on `queue`
+  @volatile private[this] var h_queueSize: Int = 0 // avoids synchronization on `queue`
   @volatile private[this] var h_running: Boolean = true
 
   // exposed for testing
@@ -53,10 +53,11 @@ final class PipeliningClientPushSession[In, Out](
     if (p != null) {
       h_queueSize -= 1
       p.updateIfEmpty(Return(message))
-    }
-    else
+    } else
       handleShutdown(
-        Some(new IllegalStateException("Received response with no corresponding request: " + message))
+        Some(
+          new IllegalStateException("Received response with no corresponding request: " + message)
+        )
       )
   }
 
@@ -89,7 +90,7 @@ final class PipeliningClientPushSession[In, Out](
               }
             })
           }
-        }
+      }
       handle.serialExecutor.execute(new Runnable { def run(): Unit = handleDispatch(request, p) })
       p
     }
@@ -100,7 +101,10 @@ final class PipeliningClientPushSession[In, Out](
   }
 
   private[this] def stalledPipelineException(timeout: Duration) =
-    Failure(s"The connection pipeline could not make progress in $timeout", FailureFlags.Interrupted)
+    Failure(
+      s"The connection pipeline could not make progress in $timeout",
+      FailureFlags.Interrupted
+    )
 
   // All shutdown pathways should funnel through this method
   private[this] def handleShutdown(cause: Option[Throwable]): Unit =
@@ -113,7 +117,7 @@ final class PipeliningClientPushSession[In, Out](
       // Clear the queue.
       while (!h_queue.isEmpty) {
         h_queue.poll().updateIfEmpty(Throw(exc))
-        h_queueSize -=1
+        h_queueSize -= 1
       }
     }
 
@@ -121,7 +125,7 @@ final class PipeliningClientPushSession[In, Out](
     if (!h_running) p.setException(new ChannelClosedException(handle.remoteAddress))
     else {
       h_queue.offer(p)
-      h_queueSize +=1
+      h_queueSize += 1
       handle.sendAndForget(request)
     }
   }

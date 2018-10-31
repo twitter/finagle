@@ -37,5 +37,5 @@ private[http2] class SchemifyingHandler(defaultScheme: String) extends ChannelDu
 }
 
 private[http2] object SchemifyingHandler {
-  val HandlerName =  "schemifier"
+  val HandlerName = "schemifier"
 }

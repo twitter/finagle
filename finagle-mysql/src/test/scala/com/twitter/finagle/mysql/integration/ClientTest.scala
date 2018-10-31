@@ -70,10 +70,7 @@ object SwimmingRecord {
   )
 }
 
-class ClientTest extends FunSuite
-  with IntegrationClient
-  with BeforeAndAfterAll
-  with Eventually {
+class ClientTest extends FunSuite with IntegrationClient with BeforeAndAfterAll with Eventually {
   import SwimmingRecord._
 
   private[this] def await[T](f: Future[T]): T =
@@ -124,7 +121,7 @@ class ClientTest extends FunSuite
 
   test("query: insert values") {
     val insertSql =
-       """INSERT INTO `finagle-mysql-test` (`event`, `time`, `name`, `nationality`, `date`)
+      """INSERT INTO `finagle-mysql-test` (`event`, `time`, `name`, `nationality`, `date`)
        VALUES %s;""".format(allRecords.mkString(", "))
     val insertResult = await(c.query(insertSql))
     val ok = insertResult.asInstanceOf[OK]
@@ -364,7 +361,7 @@ class ClientTest extends FunSuite
       val nonRootErrorMsg = "Too many connections"
       assert(err.getMessage.contains(rootErrorMsg) || err.getMessage.contains(nonRootErrorMsg))
     } finally {
-      Closable.all(clients:_*).close()
+      Closable.all(clients: _*).close()
     }
   }
 

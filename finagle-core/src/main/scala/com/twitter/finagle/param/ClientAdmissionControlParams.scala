@@ -62,7 +62,7 @@ class ClientAdmissionControlParams[A <: Stack.Parameterized[A]](self: Stack.Para
    *
    * @param window Duration over which to average the ratio of nackd/non-nacked
    * responses.
-   * 
+   *
    * @param threshold The upper limit of the fraction of responses which are
    * nacks before the `NackAdmissionFilter` begins to drop requests.
    */

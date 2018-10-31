@@ -37,21 +37,22 @@ private[finagle] class HttpClientDispatcher(
     }
 
     // wait on these concurrently:
-    trans.write(req).joinWith(
-      // Drain the Transport into Response body.
-      trans.read().flatMap {
-        case Multi(res, readFinished) =>
-          p.updateIfEmpty(Return(res))
-          readFinished
-      } // we don't need to satisfy p when we fail because GenSerialClientDispatcher does already
-    )(unit).onFailure { t =>
-      // This Future represents the totality of the exchange;
-      // thus failure represents *any* failure that can happen
-      // during the exchange.
-      logger.debug(t, "Failed mid-stream. Terminating stream, closing connection")
-      failureReceiver.counter(Throwables.mkString(t): _*).incr()
-      req.reader.discard()
-      trans.close()
-    }
+    trans
+      .write(req).joinWith(
+        // Drain the Transport into Response body.
+        trans.read().flatMap {
+          case Multi(res, readFinished) =>
+            p.updateIfEmpty(Return(res))
+            readFinished
+        } // we don't need to satisfy p when we fail because GenSerialClientDispatcher does already
+      )(unit).onFailure { t =>
+        // This Future represents the totality of the exchange;
+        // thus failure represents *any* failure that can happen
+        // during the exchange.
+        logger.debug(t, "Failed mid-stream. Terminating stream, closing connection")
+        failureReceiver.counter(Throwables.mkString(t): _*).incr()
+        req.reader.discard()
+        trans.close()
+      }
   }
 }

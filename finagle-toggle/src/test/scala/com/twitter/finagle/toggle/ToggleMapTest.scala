@@ -456,7 +456,7 @@ class ToggleMapTest extends FunSuite with GeneratorDrivenPropertyChecks with Mat
 
     val t0 = map("com.toggle.t0")
     val t1 = map("com.toggle.t1")
-    
+
     // These inputs were found from observation
     assert(t0(602) && !t1(602))
     assert(!t0(1129) && t1(1129))

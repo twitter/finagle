@@ -42,35 +42,35 @@ class ClientTest extends FunSuite {
     }
 
   if (!sys.props.contains("SKIP_FLAKY_TRAVIS"))
-  test("report a closed connection when the server doesn't reply") {
-    withServer(failingFactory) { clientBuilder =>
-      counter = 0
-      val client = clientBuilder.build()
-      try {
-        // No failures have happened yet.
-        assert(client.isAvailable)
-        val future = client(Request(Version.Http11, Method.Get, "/"))
-        intercept[ChannelClosedException] {
-          Await.result(future, 1.second)
-        }
-      } finally client.close()
+    test("report a closed connection when the server doesn't reply") {
+      withServer(failingFactory) { clientBuilder =>
+        counter = 0
+        val client = clientBuilder.build()
+        try {
+          // No failures have happened yet.
+          assert(client.isAvailable)
+          val future = client(Request(Version.Http11, Method.Get, "/"))
+          intercept[ChannelClosedException] {
+            Await.result(future, 1.second)
+          }
+        } finally client.close()
+      }
     }
-  }
 
   if (!sys.props.contains("SKIP_FLAKY"))
-  test("report a closed connection when the server doesn't reply, without retrying") {
-    withServer(failingFactory) { clientBuilder =>
-      counter = 0
-      val client = clientBuilder
-        .retries(10)
-        .build()
-      try {
-        val future = client(Request(Version.Http11, Method.Get, "/"))
-        intercept[ChannelClosedException] {
-          Await.result(future, 1.second)
-        }
-        assert(counter == 1)
-      } finally client.close()
+    test("report a closed connection when the server doesn't reply, without retrying") {
+      withServer(failingFactory) { clientBuilder =>
+        counter = 0
+        val client = clientBuilder
+          .retries(10)
+          .build()
+        try {
+          val future = client(Request(Version.Http11, Method.Get, "/"))
+          intercept[ChannelClosedException] {
+            Await.result(future, 1.second)
+          }
+          assert(counter == 1)
+        } finally client.close()
+      }
     }
-  }
 }

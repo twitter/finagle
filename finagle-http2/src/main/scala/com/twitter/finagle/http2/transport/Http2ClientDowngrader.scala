@@ -70,27 +70,28 @@ private[http2] object Http2ClientDowngrader extends Http2EventAdapter {
     // 100-continue response is a special case where Http2HeadersFrame#isEndStream=false
     // but we need to decode it as a FullHttpResponse to play nice with HttpObjectAggregator.
     // (this workaround can go away once we move to the netty multipex client)
-    val msg = if (endOfStream || HttpResponseStatus.CONTINUE.codeAsText.contentEquals(headers.status)) {
-      HttpConversionUtil.toFullHttpResponse(
-        streamId,
-        headers,
-        ctx.alloc(),
-        false /* validateHttpHeaders */
-      )
-    } else {
-      // Unfortunately Netty doesn't have tools for converting to a non-full
-      // HttpResponse so we just do it ourselves: it's not that hard anyway.
-      val status = HttpConversionUtil.parseStatus(headers.status)
-      val msg = new DefaultHttpResponse(HttpVersion.HTTP_1_1, status, /*validateHeaders*/ false)
-      HttpConversionUtil.addHttp2ToHttpHeaders(
-        streamId,
-        headers,
-        msg.headers,
-        HttpVersion.HTTP_1_1,
-        /*isTrailer*/ false, /*isRequest*/ false
-      )
-      msg
-    }
+    val msg =
+      if (endOfStream || HttpResponseStatus.CONTINUE.codeAsText.contentEquals(headers.status)) {
+        HttpConversionUtil.toFullHttpResponse(
+          streamId,
+          headers,
+          ctx.alloc(),
+          false /* validateHttpHeaders */
+        )
+      } else {
+        // Unfortunately Netty doesn't have tools for converting to a non-full
+        // HttpResponse so we just do it ourselves: it's not that hard anyway.
+        val status = HttpConversionUtil.parseStatus(headers.status)
+        val msg = new DefaultHttpResponse(HttpVersion.HTTP_1_1, status, /*validateHeaders*/ false)
+        HttpConversionUtil.addHttp2ToHttpHeaders(
+          streamId,
+          headers,
+          msg.headers,
+          HttpVersion.HTTP_1_1,
+          /*isTrailer*/ false, /*isRequest*/ false
+        )
+        msg
+      }
     ctx.fireChannelRead(Message(msg, streamId))
   }
 

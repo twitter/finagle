@@ -195,8 +195,7 @@ class Zk2Resolver(
         // Finally we output `State`s, which are always nonpending
         // address coupled with metadata from the stabilization
         // process.
-        val addrWithMetadata = stabilizedServerSetAddr
-          .changes
+        val addrWithMetadata = stabilizedServerSetAddr.changes
           .joinLast(rawServerSetAddr.changes)
           .collect {
             case (stable, unstable) if stable != Addr.Pending =>
@@ -213,26 +212,25 @@ class Zk2Resolver(
           val finalAddr = discoverer.health.changes
             .joinLast(addrWithMetadata)
             .map {
-              case (clientHealth, state) => 
+              case (clientHealth, state) =>
+                if (chatty()) {
+                  logger.info(
+                    "New state for %s!%s: %s\n",
+                    path,
+                    endpointOption getOrElse "default",
+                    state
+                  )
+                }
 
-              if (chatty()) {
-                logger.info(
-                  "New state for %s!%s: %s\n",
-                  path,
-                  endpointOption getOrElse "default",
-                  state
-                )
-              }
+                // update gauges based on the metadata
+                val State(addr, _nlimbo, _size) = state
+                nlimbo = _nlimbo
+                size = _size
 
-              // update gauges based on the metadata
-              val State(addr, _nlimbo, _size) = state
-              nlimbo = _nlimbo
-              size = _size
-
-              if (clientHealth == ClientHealth.Unhealthy) {
-                logger.info("ZkResolver reports unhealthy. resolution moving to Addr.Pending")
-                Addr.Pending
-              } else addr
+                if (clientHealth == ClientHealth.Unhealthy) {
+                  logger.info("ZkResolver reports unhealthy. resolution moving to Addr.Pending")
+                  Addr.Pending
+                } else addr
             }
             .dedup // avoid updating if there is no change
             .register(Witness(u))

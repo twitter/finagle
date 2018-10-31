@@ -107,7 +107,10 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
     verify(trans).write("undefined")
   })
 
-  def getMockTrans(onClose: Promise[Throwable], writep: Promise[Unit]): Transport[String, String] = {
+  def getMockTrans(
+    onClose: Promise[Throwable],
+    writep: Promise[Unit]
+  ): Transport[String, String] = {
     val trans = mock[Transport[String, String]]
     when(trans.write(any[String])).thenReturn(writep)
     when(trans.onClose).thenReturn(onClose)

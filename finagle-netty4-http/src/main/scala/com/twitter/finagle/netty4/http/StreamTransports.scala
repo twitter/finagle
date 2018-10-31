@@ -80,7 +80,8 @@ private[http] object StreamTransports {
 
     case other =>
       throw new IllegalArgumentException(
-        "Expected a HttpContent, but read an instance of " + other.getClass.getSimpleName)
+        "Expected a HttpContent, but read an instance of " + other.getClass.getSimpleName
+      )
   }
 
   def chunkOfBuf(buf: Buf): NettyHttp.HttpContent =

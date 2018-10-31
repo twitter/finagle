@@ -35,7 +35,8 @@ class MultiplexedServiceTest extends FunSuite {
     val client = Thrift.client.multiplex(name, "client") { client =>
       new {
         val echo = client.build[Echo.MethodPerEndpoint]("echo")
-        val extendedEcho = client.servicePerEndpoint[ExtendedEcho.ServicePerEndpoint]("extendedEcho")
+        val extendedEcho =
+          client.servicePerEndpoint[ExtendedEcho.ServicePerEndpoint]("extendedEcho")
       }
     }
 

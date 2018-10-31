@@ -14,7 +14,10 @@ import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import scala.util.control.NonFatal
 
-abstract class AbstractNetty4ListenerTest extends FunSuite with Eventually with IntegrationPatience {
+abstract class AbstractNetty4ListenerTest
+    extends FunSuite
+    with Eventually
+    with IntegrationPatience {
 
   private val noopService: Service[Any, Nothing] = Service.const(Future.never)
 

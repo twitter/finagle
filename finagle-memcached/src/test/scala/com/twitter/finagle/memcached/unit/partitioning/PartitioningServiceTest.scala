@@ -151,22 +151,24 @@ class PartitioningServiceTest extends PartitioningServiceTestBase {
     assert(lastResponse == expectedException, responses.mkString(ResponseDelimiter))
 
     // check the rest of the responses as well
-    val responseMap = responses.dropRight(1).map { response =>
-      val portAndName = response.split(EchoDelimiter)
-      assert(portAndName.length == 2, response)
-      val port = portAndName(0)
-      val name = portAndName(1)
-      port -> name
-    }.toMap
+    val responseMap = responses
+      .dropRight(1).map { response =>
+        val portAndName = response.split(EchoDelimiter)
+        assert(portAndName.length == 2, response)
+        val port = portAndName(0)
+        val name = portAndName(1)
+        port -> name
+      }.toMap
     assert(responseMap.size == numServers - 1)
 
     // Remove the last server which we have already asserted for failure above.
-    servers.dropRight(1) foreach { case (_, _, port, index) =>
-      val respondedByShard = responseMap.getOrElse(
-        port.toString,
-        fail(s"Response for server#$index not found! ${responses.mkString(ResponseDelimiter)}")
-      )
-      assert(respondedByShard == s"server#$index")
+    servers.dropRight(1) foreach {
+      case (_, _, port, index) =>
+        val respondedByShard = responseMap.getOrElse(
+          port.toString,
+          fail(s"Response for server#$index not found! ${responses.mkString(ResponseDelimiter)}")
+        )
+        assert(respondedByShard == s"server#$index")
     }
   }
 }
@@ -271,7 +273,9 @@ private[this] class SimplePartitioningService(
     (trimmed, getPartitionFor(trimmed))
   }
 
-  override protected def partitionRequest(batchedRequest: String): Seq[(String, Future[Service[String, String]])] = {
+  override protected def partitionRequest(
+    batchedRequest: String
+  ): Seq[(String, Future[Service[String, String]])] = {
     // assuming all sub-requests are unique (one request per partition). If not the following code
     // will need to group requests by partition by using getPartitionFor method
     batchedRequest.split(RequestDelimiter).map(stringToTuple).toSeq

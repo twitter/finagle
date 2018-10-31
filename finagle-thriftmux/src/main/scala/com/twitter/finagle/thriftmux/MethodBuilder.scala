@@ -279,10 +279,10 @@ class MethodBuilder(
    * This additionally causes Thrift Exceptions to be retried.
    */
   def idempotent(maxExtraLoad: Double): MethodBuilder =
-    new MethodBuilder(rich, mb.idempotent(
-      maxExtraLoad,
-      sendInterrupts = true,
-      ResponseClassifier.RetryOnThrows))
+    new MethodBuilder(
+      rich,
+      mb.idempotent(maxExtraLoad, sendInterrupts = true, ResponseClassifier.RetryOnThrows)
+    )
 
   /**
    * @inheritdoc
@@ -290,10 +290,10 @@ class MethodBuilder(
    * This additionally causes Thrift Exceptions to be retried.
    */
   def idempotent(maxExtraLoad: Tunable[Double]): MethodBuilder =
-    new MethodBuilder(rich, mb.idempotent(
-      maxExtraLoad,
-      sendInterrupts = true,
-      ResponseClassifier.RetryOnThrows))
+    new MethodBuilder(
+      rich,
+      mb.idempotent(maxExtraLoad, sendInterrupts = true, ResponseClassifier.RetryOnThrows)
+    )
 
   def nonIdempotent: MethodBuilder =
     new MethodBuilder(rich, mb.nonIdempotent)

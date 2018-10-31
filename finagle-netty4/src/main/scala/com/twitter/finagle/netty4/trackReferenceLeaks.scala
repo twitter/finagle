@@ -11,7 +11,7 @@ import com.twitter.app.GlobalFlag
  *       see: https://netty.io/wiki/reference-counted-objects.html#wiki-h3-11
  */
 private object trackReferenceLeaks
-  extends GlobalFlag[Boolean](
-    true,
-    "Enable reference leak tracking in Netty and export a counter at finagle/netty4/reference_leaks"
-  )
+    extends GlobalFlag[Boolean](
+      true,
+      "Enable reference leak tracking in Netty and export a counter at finagle/netty4/reference_leaks"
+    )

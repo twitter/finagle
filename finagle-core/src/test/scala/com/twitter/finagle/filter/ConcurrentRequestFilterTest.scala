@@ -48,7 +48,7 @@ class ConcurrentRequestFilterTest extends FunSuite {
     val max = 10
 
     val params = Stack.Params.empty +
-      PendingRequestFilter.Param(Some(max))+
+      PendingRequestFilter.Param(Some(max)) +
       param.Stats(sr)
 
     val factory = stk.make(params)

@@ -75,13 +75,19 @@ class ServiceTest extends FunSuite with MockitoSugar {
 
   test("Service.toString") {
     val constSvc = new ConstantService[Int, Int](Future.value(2))
-    assert(constSvc.toString == "com.twitter.finagle.service.ConstantService(ConstFuture(Return(2)))")
+    assert(
+      constSvc.toString == "com.twitter.finagle.service.ConstantService(ConstFuture(Return(2)))"
+    )
 
     val constSvcFactory = ServiceFactory.const(constSvc)
-    assert(constSvcFactory.toString == "com.twitter.finagle.service.ConstantService(ConstFuture(Return(2)))")
+    assert(
+      constSvcFactory.toString == "com.twitter.finagle.service.ConstantService(ConstFuture(Return(2)))"
+    )
 
     val failedSvc = new FailedService(new Exception("test"))
-    assert(failedSvc.toString == "com.twitter.finagle.service.FailedService(java.lang.Exception: test)")
+    assert(
+      failedSvc.toString == "com.twitter.finagle.service.FailedService(java.lang.Exception: test)"
+    )
 
     assert(NilService.toString == "com.twitter.finagle.service.NilService$")
 
@@ -91,7 +97,9 @@ class ServiceTest extends FunSuite with MockitoSugar {
     assert(mkSvc.toString == "com.twitter.finagle.Service$$anon$2")
 
     val proxied = new ServiceProxy(constSvc) {}
-    assert(proxied.toString == "com.twitter.finagle.service.ConstantService(ConstFuture(Return(2)))")
+    assert(
+      proxied.toString == "com.twitter.finagle.service.ConstantService(ConstFuture(Return(2)))"
+    )
 
     val proxiedWithToString = new ServiceProxy(constSvc) {
       override def toString: String = "ProxiedService"

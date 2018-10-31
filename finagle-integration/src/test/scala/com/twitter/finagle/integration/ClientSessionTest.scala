@@ -73,7 +73,6 @@ class ClientSessionTest extends FunSuite with MockitoSugar {
         timer = mock[Timer]
       )
 
-
       () =>
         session.status
     }

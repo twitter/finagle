@@ -182,7 +182,8 @@ object Filter {
     override def toString: String = {
       val unrolled: Seq[String] = unroll(this)
       val unrolledTail: Seq[String] = unrolled.tail
-      s"${unrolled.head}${if (unrolledTail.nonEmpty) unrolledTail.mkString(".andThen(", ").andThen(", ")") else ""}"
+      s"${unrolled.head}${if (unrolledTail.nonEmpty) unrolledTail.mkString(".andThen(", ").andThen(", ")")
+      else ""}"
     }
   }
 
@@ -292,7 +293,8 @@ object Filter {
         }
       } else {
         throw new IllegalStateException(
-          "Each instance of a OneTime filter can only have toFilter called once")
+          "Each instance of a OneTime filter can only have toFilter called once"
+        )
       }
     }
   }

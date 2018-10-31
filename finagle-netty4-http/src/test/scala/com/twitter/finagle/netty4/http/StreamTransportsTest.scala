@@ -11,7 +11,12 @@ import com.twitter.io.{Buf, Pipe, Reader}
 import com.twitter.util._
 import io.netty.buffer.Unpooled
 import io.netty.channel.embedded.EmbeddedChannel
-import io.netty.handler.codec.http.{DefaultHttpContent, DefaultLastHttpContent, HttpContent, LastHttpContent}
+import io.netty.handler.codec.http.{
+  DefaultHttpContent,
+  DefaultLastHttpContent,
+  HttpContent,
+  LastHttpContent
+}
 import io.netty.handler.codec.{http => NettyHttp}
 import java.net.SocketAddress
 import java.nio.charset.StandardCharsets.UTF_8

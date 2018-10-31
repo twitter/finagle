@@ -43,6 +43,7 @@ private[finagle] object MessageWriter {
   /** Result of attempting to remove a tag from the `MessageWriter` */
   sealed trait DiscardResult
   object DiscardResult {
+
     /**
      * Indicates that message was not found for that tag. This happens if there was
      * no write or if the write completed.
@@ -70,10 +71,10 @@ private[finagle] object MessageWriter {
  *       a `PushSession`s serial `Executor`.
  */
 private[finagle] final class FragmentingMessageWriter(
-    handle: PushChannelHandle[_, Buf],
-    windowBytes: Int,
-    statsReceiver: StatsReceiver)
-  extends MessageWriter {
+  handle: PushChannelHandle[_, Buf],
+  windowBytes: Int,
+  statsReceiver: StatsReceiver
+) extends MessageWriter {
 
   import FragmentingMessageWriter._
 
@@ -81,12 +82,13 @@ private[finagle] final class FragmentingMessageWriter(
   private[this] val messageQueue = new util.ArrayDeque[Message]
 
   private[this] val writeStreamBytes = statsReceiver.stat(Verbosity.Debug, "write_stream_bytes")
-  private[this] val pendingWriteStreamsGuage = statsReceiver.addGauge(Verbosity.Debug, "pending_write_streams") {
-    // Note: this access is intrinsically racy since access is not explicitly synchronized,
-    // and therefore its possible to see invalid data, but this is expected to be rare enough
-    // to be tolerable for a debug metric.
-    messageQueue.size
-  }
+  private[this] val pendingWriteStreamsGuage =
+    statsReceiver.addGauge(Verbosity.Debug, "pending_write_streams") {
+      // Note: this access is intrinsically racy since access is not explicitly synchronized,
+      // and therefore its possible to see invalid data, but this is expected to be rare enough
+      // to be tolerable for a debug metric.
+      messageQueue.size
+    }
   // Make sure we remove the gauge when we're done
   handle.onClose.ensure(pendingWriteStreamsGuage.remove())
 

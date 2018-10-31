@@ -58,7 +58,8 @@ object Netty4SslTestComponents {
   ): Service[String, String] = {
     val clientConfig = SslClientConfiguration(
       keyCredentials = KeyCredentials.CertAndKey(clientCert, clientKey),
-      trustCredentials = TrustCredentials.CertCollection(chainCert))
+      trustCredentials = TrustCredentials.CertCollection(chainCert)
+    )
 
     // inject a handler which is called when the ssl handshake is complete.
     // Note, this isn't something which we expose outside of finagle and thus,
@@ -66,7 +67,8 @@ object Netty4SslTestComponents {
     val prms = StringClient.DefaultParams +
       Netty4ClientSslChannelInitializer.OnSslHandshakeComplete(onHandshakeComplete)
 
-    StringClient.Client(params = prms)
+    StringClient
+      .Client(params = prms)
       .withTransport.tls(clientConfig, sessionVerifier)
       .withStatsReceiver(statsReceiver)
       .newService("localhost:" + port, label)
@@ -81,10 +83,11 @@ object Netty4SslTestComponents {
     val serverConfig = SslServerConfiguration(
       keyCredentials = KeyCredentials.CertAndKey(serverCert, serverKey),
       trustCredentials = TrustCredentials.CertCollection(chainCert),
-      clientAuth = ClientAuth.Needed)
+      clientAuth = ClientAuth.Needed
+    )
 
-    StringServer.server
-      .withTransport.tls(serverConfig, sessionVerifier)
+    StringServer.server.withTransport
+      .tls(serverConfig, sessionVerifier)
       .withLabel(label)
       .withStatsReceiver(statsReceiver)
       .serve(":*", service)

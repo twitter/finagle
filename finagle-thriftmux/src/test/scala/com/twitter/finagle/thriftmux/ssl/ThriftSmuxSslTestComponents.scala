@@ -60,10 +60,11 @@ object ThriftSmuxSslTestComponents {
   ): TestService.MethodPerEndpoint = {
     val clientConfig = SslClientConfiguration(
       keyCredentials = KeyCredentials.CertAndKey(clientCert, clientKey),
-      trustCredentials = TrustCredentials.CertCollection(chainCert))
+      trustCredentials = TrustCredentials.CertCollection(chainCert)
+    )
 
-    ThriftMux.client
-      .withTransport.tls(clientConfig, sessionVerifier)
+    ThriftMux.client.withTransport
+      .tls(clientConfig, sessionVerifier)
       .withOpportunisticTls(OpportunisticTls.Required)
       .withStatsReceiver(statsReceiver)
       .withLabel(label)
@@ -78,10 +79,11 @@ object ThriftSmuxSslTestComponents {
     val serverConfig = SslServerConfiguration(
       keyCredentials = KeyCredentials.CertAndKey(serverCert, serverKey),
       trustCredentials = TrustCredentials.CertCollection(chainCert),
-      clientAuth = ClientAuth.Needed)
+      clientAuth = ClientAuth.Needed
+    )
 
-    ThriftMux.server
-      .withTransport.tls(serverConfig, sessionVerifier)
+    ThriftMux.server.withTransport
+      .tls(serverConfig, sessionVerifier)
       .withOpportunisticTls(OpportunisticTls.Required)
       .withStatsReceiver(statsReceiver)
       .withLabel(label)

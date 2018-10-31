@@ -10,7 +10,11 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import scala.collection.JavaConverters._
 
-class QueryParamCodecTest extends FunSuite with GeneratorDrivenPropertyChecks with Eventually with IntegrationPatience {
+class QueryParamCodecTest
+    extends FunSuite
+    with GeneratorDrivenPropertyChecks
+    with Eventually
+    with IntegrationPatience {
 
   private def encode(s: String): String = URLEncoder.encode(s, StandardCharsets.UTF_8.name)
 
@@ -20,18 +24,20 @@ class QueryParamCodecTest extends FunSuite with GeneratorDrivenPropertyChecks wi
   private def genToken: Gen[String] =
     Gen.listOf(Gen.choose('a', 'z')).map(s => new String(s.toArray))
 
-  private def genKeyValuePair: Gen[(String, String)] = for {
-    k <- genNonEmptyToken
-    v <- genToken
-  } yield k -> v
+  private def genKeyValuePair: Gen[(String, String)] =
+    for {
+      k <- genNonEmptyToken
+      v <- genToken
+    } yield k -> v
 
   private def genParams: Gen[Seq[(String, String)]] = Gen.listOf(genKeyValuePair).map(_.sorted)
 
   private def roundTrip(params: Seq[(String, String)]): Unit = {
     val queryString = QueryParamEncoder.encode(params)
     val result = QueryParamDecoder.decode(queryString)
-    val flattened = result.asScala.toSeq.flatMap { case (key, values) =>
-      values.asScala.map(key -> _)
+    val flattened = result.asScala.toSeq.flatMap {
+      case (key, values) =>
+        values.asScala.map(key -> _)
     }.sorted
 
     assert(flattened == params)
@@ -99,7 +105,7 @@ class QueryParamCodecTest extends FunSuite with GeneratorDrivenPropertyChecks wi
     // for a fixed n, all strings have the same hashCode
     def f(x: Int, n: Int): String = n match {
       case 0 => ""
-      case _ => equiv(x % 2) + f(x/2, n-1)
+      case _ => equiv(x % 2) + f(x / 2, n - 1)
     }
 
     (0 until num).toIterator.map(f(_, length))

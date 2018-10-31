@@ -100,7 +100,7 @@ class ExternalRedis(mode: RedisMode = RedisMode.Standalone) {
   }
 
   private[this] def findAddress(): Unit = {
-    var tries = possiblePorts.size-1
+    var tries = possiblePorts.size - 1
     while (address.isEmpty && tries >= 0) {
       val addr = new InetSocketAddress(possiblePorts(tries))
       val socket = new Socket
@@ -113,7 +113,7 @@ class ExternalRedis(mode: RedisMode = RedisMode.Standalone) {
         case exc: Exception =>
           address = None
           tries -= 1
-          Thread.sleep(5) 
+          Thread.sleep(5)
       } finally {
         socket.close()
       }

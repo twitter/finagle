@@ -117,18 +117,19 @@ private[http2] final class AdapterProxyChannelHandler(
   // after they're written to. For non-embedded write (RST/GOAWAY/PING), the default
   // flush() behavior is sufficient
 
-  private[this] def updateCompletionStatus(obj: HttpObject, streamId: Int, reading: Boolean): Unit = obj match {
-    case _: LastHttpContent =>
-      val completed = map(streamId)
-      if (reading) {
-        completed.finishedReading = true
-      } else {
-        completed.finishedWriting = true
-      }
-      if (completed.finishedWriting && completed.finishedReading)
-        rmStream(streamId)
-    case _ => // nop
-  }
+  private[this] def updateCompletionStatus(obj: HttpObject, streamId: Int, reading: Boolean): Unit =
+    obj match {
+      case _: LastHttpContent =>
+        val completed = map(streamId)
+        if (reading) {
+          completed.finishedReading = true
+        } else {
+          completed.finishedWriting = true
+        }
+        if (completed.finishedWriting && completed.finishedReading)
+          rmStream(streamId)
+      case _ => // nop
+    }
 
   // stop tracking a stream and allow the associated embedded handlers to cleanup.
   private def rmStream(streamId: Int): Unit = map.remove(streamId) match {
@@ -172,7 +173,7 @@ private[http2] final class AdapterProxyChannelHandler(
             getEmbeddedChannel(ctx, streamId) match {
               case null =>
                 promise.setFailure(new WriteToNackedStreamException(streamId))
-                // nop, we've received an rst, and won't be doing anything more to this stream id
+              // nop, we've received an rst, and won't be doing anything more to this stream id
               case embedded =>
                 // NB: We flush the channel here to avoid iterating through all EmbeddedChannels on each
                 // call to flush()

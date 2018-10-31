@@ -37,15 +37,13 @@ class Http2AlpnTest extends AbstractHttp2EndToEndTest {
 
   def implName: String = "alpn http/2"
   def clientImpl(): finagle.Http.Client =
-    finagle.Http.client
-      .withHttp2
+    finagle.Http.client.withHttp2
       .configured(FailureDetector.Param(FailureDetector.NullConfig))
       .configured(Transport.ClientSsl(Some(clientConfiguration())))
       .withStatsReceiver(statsRecv)
 
   def serverImpl(): finagle.Http.Server =
-    finagle.Http.server
-      .withHttp2
+    finagle.Http.server.withHttp2
       .configured(Transport.ServerSsl(Some(serverConfiguration())))
 
   def unimplementedFeatures: Set[Feature] = Set(
@@ -72,8 +70,14 @@ class Http2AlpnTest extends AbstractHttp2EndToEndTest {
     for {
       clientUseHttp2 <- Seq(1D, 0D)
       serverUseHttp2 <- Seq(1D, 0D)
-      clientToggleName <- Seq("com.twitter.finagle.http.UseH2", "com.twitter.finagle.http.UseH2CClients")
-      serverToggleName <- Seq("com.twitter.finagle.http.UseH2", "com.twitter.finagle.http.UseH2CServers")
+      clientToggleName <- Seq(
+        "com.twitter.finagle.http.UseH2",
+        "com.twitter.finagle.http.UseH2CClients"
+      )
+      serverToggleName <- Seq(
+        "com.twitter.finagle.http.UseH2",
+        "com.twitter.finagle.http.UseH2CServers"
+      )
     } {
       val sr = new InMemoryStatsReceiver()
       val server = overrides.let(Map(serverToggleName -> serverUseHttp2)) {
@@ -92,16 +96,18 @@ class Http2AlpnTest extends AbstractHttp2EndToEndTest {
       }
       val rep = client(Request("/"))
       await(rep)
-      if (
-        clientUseHttp2 == 1.0 &&
-          serverUseHttp2 == 1.0 &&
-          clientToggleName == "com.twitter.finagle.http.UseH2" &&
-          serverToggleName == "com.twitter.finagle.http.UseH2"
-      ) {
-        assert(sr.counters.get(Seq("client", "upgrade", "success")) == Some(1),
-          "Failed to upgrade when both parties were toggled on")
-        assert(sr.counters.get(Seq("server", "upgrade", "success")) == Some(1),
-          "Failed to upgrade when both parties were toggled on")
+      if (clientUseHttp2 == 1.0 &&
+        serverUseHttp2 == 1.0 &&
+        clientToggleName == "com.twitter.finagle.http.UseH2" &&
+        serverToggleName == "com.twitter.finagle.http.UseH2") {
+        assert(
+          sr.counters.get(Seq("client", "upgrade", "success")) == Some(1),
+          "Failed to upgrade when both parties were toggled on"
+        )
+        assert(
+          sr.counters.get(Seq("server", "upgrade", "success")) == Some(1),
+          "Failed to upgrade when both parties were toggled on"
+        )
       } else {
         val clientStatus = if (clientUseHttp2 == 1) "on" else "off"
         val serverStatus = if (serverUseHttp2 == 1) "on" else "off"

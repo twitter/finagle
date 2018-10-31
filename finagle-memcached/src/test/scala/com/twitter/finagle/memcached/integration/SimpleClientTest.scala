@@ -193,8 +193,11 @@ class SimpleClientTest extends FunSuite with BeforeAndAfter {
       val client = Memcached.client.newService(Name.bound(address), "memcache")
       client(Quit())
       val entries = simple.toSet
-      assert(entries.contains(
-        Entry(Seq("client", "memcached", "memcache", "Transporter"), "Netty4PushTransporter")))
+      assert(
+        entries.contains(
+          Entry(Seq("client", "memcached", "memcache", "Transporter"), "Netty4PushTransporter")
+        )
+      )
     }
   }
 }

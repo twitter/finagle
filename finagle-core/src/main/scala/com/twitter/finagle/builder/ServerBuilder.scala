@@ -6,7 +6,11 @@ import com.twitter.finagle.filter.{MaskCancelFilter, ServerAdmissionControl}
 import com.twitter.finagle.server.{Listener, StackBasedServer}
 import com.twitter.finagle.service.{ExpiringService, PendingRequestFilter, TimeoutFilter}
 import com.twitter.finagle.ssl.{ApplicationProtocols, CipherSuites, KeyCredentials}
-import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerEngineFactory, SslServerSessionVerifier}
+import com.twitter.finagle.ssl.server.{
+  SslServerConfiguration,
+  SslServerEngineFactory,
+  SslServerSessionVerifier
+}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._

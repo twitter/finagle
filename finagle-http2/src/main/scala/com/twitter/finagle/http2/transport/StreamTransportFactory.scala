@@ -114,14 +114,21 @@ final private[http2] class StreamTransportFactory(
   // this connection as closed, it gets torn down.
   detector.onClose.ensure(close())
 
-  private[this] def handleGoaway(addr: SocketAddress, obj: HttpObject, lastStreamId: Int, errorCode: Long): Unit = {
+  private[this] def handleGoaway(
+    addr: SocketAddress,
+    obj: HttpObject,
+    lastStreamId: Int,
+    errorCode: Long
+  ): Unit = {
     dead = true
     activeStreams.values.foreach { stream =>
       if (stream.curId > lastStreamId) {
 
         // Any streams beyond `lastStreamId` haven't been processed so we mark them
         // as retryable.
-        stream.handleCloseWith(new GoAwayException(errorCode, stream.curId, Some(addr), FailureFlags.Retryable))
+        stream.handleCloseWith(
+          new GoAwayException(errorCode, stream.curId, Some(addr), FailureFlags.Retryable)
+        )
       }
     }
   }
@@ -167,7 +174,11 @@ final private[http2] class StreamTransportFactory(
             )
             handleClose(
               Time.Bottom,
-              Some(new Http2ProtocolException(s"Message for streamId $streamId which doesn't exist yet"))
+              Some(
+                new Http2ProtocolException(
+                  s"Message for streamId $streamId which doesn't exist yet"
+                )
+              )
             )
           }
       }
@@ -567,7 +578,11 @@ final private[http2] class StreamTransportFactory(
       handleCloseWith(new StreamClosedException(Some(addr), _curId.toString, whyFailed), deadline)
     }
 
-    private[http2] def handleCloseWith(exn: Throwable, deadline: Time = Time.Bottom, canRst: Boolean = true): Unit = {
+    private[http2] def handleCloseWith(
+      exn: Throwable,
+      deadline: Time = Time.Bottom,
+      canRst: Boolean = true
+    ): Unit = {
       state match {
         case a: Active if (!a.finished) && canRst =>
           underlying
@@ -610,10 +625,10 @@ private[http2] object StreamTransportFactory {
    *
    * Note, these are immutable/persistent structs.
    */
-  final class Active private[StreamTransportFactory](
+  final class Active private[StreamTransportFactory] (
     val finishedReading: Boolean,
-    val finishedWriting: Boolean)
-  extends StreamState {
+    val finishedWriting: Boolean
+  ) extends StreamState {
     def finished: Boolean = finishedWriting && finishedReading
     override def toString: String = {
       if (finished)
@@ -670,7 +685,7 @@ private[http2] object StreamTransportFactory {
     id: Int,
     val flags: Long = FailureFlags.NonRetryable
   ) extends Exception(s"Stream $id in bad state: $msg")
-    with FailureFlags[BadStreamStateException] {
+      with FailureFlags[BadStreamStateException] {
 
     protected def copyWithFlags(newFlags: Long): BadStreamStateException =
       new BadStreamStateException(msg, id, newFlags)
@@ -680,8 +695,8 @@ private[http2] object StreamTransportFactory {
     addr: SocketAddress,
     val flags: Long = FailureFlags.Retryable
   ) extends Exception(s"ran out of stream ids for address $addr")
-    with FailureFlags[StreamIdOverflowException]
-    with HasLogLevel {
+      with FailureFlags[StreamIdOverflowException]
+      with HasLogLevel {
     def logLevel: Level = Level.INFO // this is normal behavior, so we should log gently
     protected def copyWithFlags(flags: Long): StreamIdOverflowException =
       new StreamIdOverflowException(addr, flags)
@@ -692,11 +707,11 @@ private[http2] object StreamTransportFactory {
     id: Int,
     val flags: Long = FailureFlags.Retryable
   ) extends Exception(
-    s"Found an invalid stream id $id on address $addr. "
-      + "The id was even, but client initiated stream ids must be odd."
-  )
-    with FailureFlags[IllegalStreamIdException]
-    with HasLogLevel {
+        s"Found an invalid stream id $id on address $addr. "
+          + "The id was even, but client initiated stream ids must be odd."
+      )
+      with FailureFlags[IllegalStreamIdException]
+      with HasLogLevel {
     def logLevel: Level = Level.ERROR
     protected def copyWithFlags(flags: Long): IllegalStreamIdException =
       new IllegalStreamIdException(addr, id, flags)

@@ -8,7 +8,11 @@ import com.twitter.util.{Await, Awaitable}
 import io.netty.buffer.Unpooled
 import io.netty.channel.{Channel, ChannelHandler, ChannelInitializer}
 import io.netty.channel.embedded.EmbeddedChannel
-import io.netty.handler.codec.http2.{Http2MultiplexCodec, Http2MultiplexCodecBuilder, Http2StreamFrameToHttpObjectCodec}
+import io.netty.handler.codec.http2.{
+  Http2MultiplexCodec,
+  Http2MultiplexCodecBuilder,
+  Http2StreamFrameToHttpObjectCodec
+}
 import org.scalatest.FunSuite
 
 class ClientSessionImplTest extends FunSuite {

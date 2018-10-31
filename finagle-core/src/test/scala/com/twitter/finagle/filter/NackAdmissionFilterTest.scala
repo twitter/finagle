@@ -134,7 +134,6 @@ class NackAdmissionFilterTest extends FunSuite {
   }
 
   testEnabled("Can be disabled by configuration param") { ctl =>
-
     val nackSvc = ServiceFactory.const[Int, Int](new FailedService(Failure.rejected("goaway")))
     val stats = new InMemoryStatsReceiver
 
@@ -157,7 +156,7 @@ class NackAdmissionFilterTest extends FunSuite {
 
     ctl.advance(10.milliseconds)
     // Decrease Ema to be below 1
-    for (_ <- 1 to 2*rpsThreshold) {
+    for (_ <- 1 to 2 * rpsThreshold) {
       testGetNack()
       // Need to update timestamp as well
       ctl.advance(10.milliseconds)
@@ -167,7 +166,7 @@ class NackAdmissionFilterTest extends FunSuite {
     ctl.advance(10.milliseconds)
 
     // Increment Ema
-      testGetSuccessfulResponse()
+    testGetSuccessfulResponse()
     assert(filter.emaValue > firstEmaValue)
   }
 
@@ -175,7 +174,7 @@ class NackAdmissionFilterTest extends FunSuite {
     val ctx = new Ctx
     import ctx._
     ctl.advance(10.milliseconds)
-    for (_ <- 1 to 2*rpsThreshold) {
+    for (_ <- 1 to 2 * rpsThreshold) {
       testGetNack()
       ctl.advance(10.milliseconds)
     }

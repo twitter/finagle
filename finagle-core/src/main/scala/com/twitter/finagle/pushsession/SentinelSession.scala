@@ -3,7 +3,6 @@ import com.twitter.finagle.Status
 import com.twitter.util.{Future, Time}
 import com.twitter.logging.Logger
 
-
 private[finagle] object SentinelSession {
 
   private[this] val log = Logger.get
@@ -18,13 +17,14 @@ private[finagle] object SentinelSession {
     new SentinelSession[In, Out](handle)
 
   // The implementation
-  private final class SentinelSession[In, Out](handle: PushChannelHandle[In, Out]) extends PushSession[In, Out](handle){
+  private final class SentinelSession[In, Out](handle: PushChannelHandle[In, Out])
+      extends PushSession[In, Out](handle) {
 
     // Should never be called if this is used correctly, but if it does, get loud and shut things down.
     def receive(message: In): Unit = {
       val msg = s"${this.getClass.getSimpleName} received unexpected message: " +
         s"${message.getClass.getSimpleName}. This is a bug and should be reported as we may be " +
-         "leaking resources!"
+        "leaking resources!"
 
       val ex = new IllegalStateException(msg)
       log.error(ex, msg)

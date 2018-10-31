@@ -61,7 +61,7 @@ private[mux] abstract class ClientServerTest
     val pingSends = new AtomicInteger(0)
     val pingReceives = new AtomicInteger(0)
 
-    {  // launch the read loops for each queue
+    { // launch the read loops for each queue
       def loop(source: AsyncQueue[Buf], dest: QueueChannelHandle[ByteReader, _]): Unit = {
         source.poll().respond {
           case Return(m) =>
@@ -104,11 +104,13 @@ private[mux] abstract class ClientServerTest
       val session = new MuxClientSession(
         handle = clientHandle,
         h_decoder = new FragmentDecoder(Future.never, NullStatsReceiver),
-        h_messageWriter = new FragmentingMessageWriter(clientHandle, Int.MaxValue, NullStatsReceiver),
+        h_messageWriter =
+          new FragmentingMessageWriter(clientHandle, Int.MaxValue, NullStatsReceiver),
         detectorConfig = config,
         name = "test",
         statsReceiver = NullStatsReceiver,
-        timer = DefaultTimer)
+        timer = DefaultTimer
+      )
       // Register ourselves
       clientHandle.serialExecutor.execute(new Runnable {
         def run(): Unit = clientHandle.registerSession(session)
@@ -120,9 +122,11 @@ private[mux] abstract class ClientServerTest
       val session = new MuxServerSession(
         params = Mux.server.params,
         h_decoder = new FragmentDecoder(Future.never, NullStatsReceiver),
-        h_messageWriter = new FragmentingMessageWriter(serverHandle, Int.MaxValue, NullStatsReceiver),
+        h_messageWriter =
+          new FragmentingMessageWriter(serverHandle, Int.MaxValue, NullStatsReceiver),
         handle = serverHandle,
-        service = service)
+        service = service
+      )
       serverHandle.serialExecutor.execute(new Runnable {
         def run(): Unit = serverHandle.registerSession(session)
       })

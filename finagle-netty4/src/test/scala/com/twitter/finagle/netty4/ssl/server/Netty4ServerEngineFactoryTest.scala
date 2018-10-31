@@ -19,7 +19,8 @@ class Netty4ServerEngineFactoryTest extends FunSuite {
 
   // deleteOnExit for these is handled by TempFile
   private[this] val certFile = TempFile.fromResourcePath("/ssl/certs/svc-test-server.cert.pem")
-  private[this] val expiredCertFile = TempFile.fromResourcePath("/ssl/certs/svc-test-server-expired.cert.pem")
+  private[this] val expiredCertFile =
+    TempFile.fromResourcePath("/ssl/certs/svc-test-server-expired.cert.pem")
   private[this] val keyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-server-pkcs8.key.pem")
 
   // This file contains multiple certificates
@@ -115,7 +116,8 @@ class Netty4ServerEngineFactoryTest extends FunSuite {
   }
 
   test("config with TrustManagerFactory and KeyManagerFactory succeeds") {
-    val trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm)
+    val trustManagerFactory =
+      TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm)
     trustManagerFactory.init(null.asInstanceOf[KeyStore])
 
     val trustCredentials = TrustCredentials.TrustManagerFactory(trustManagerFactory)
@@ -125,7 +127,8 @@ class Netty4ServerEngineFactoryTest extends FunSuite {
 
     val keyCredentials = KeyCredentials.KeyManagerFactory(keyManagerFactory)
 
-    val config = SslServerConfiguration(trustCredentials = trustCredentials, keyCredentials = keyCredentials)
+    val config =
+      SslServerConfiguration(trustCredentials = trustCredentials, keyCredentials = keyCredentials)
     val engine = factory(config)
     val sslEngine = engine.self
 
@@ -143,7 +146,6 @@ class Netty4ServerEngineFactoryTest extends FunSuite {
 
     assert(sslEngine != null)
   }
-
 
   test("config with good cipher suites succeeds") {
     val cipherSuites = CipherSuites.Enabled(Seq("TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"))

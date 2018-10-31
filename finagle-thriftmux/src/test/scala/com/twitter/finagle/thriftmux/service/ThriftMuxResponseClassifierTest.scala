@@ -31,9 +31,10 @@ class ThriftMuxResponseClassifierTest extends FunSuite {
     else Return(asString)
   }
 
-  private def getRep(in: String): Try[_] = if (in.startsWith("fail")){
-    Throw(new InvalidQueryException(in.length))
-  }  else Return(in)
+  private def getRep(in: String): Try[_] =
+    if (in.startsWith("fail")) {
+      Throw(new InvalidQueryException(in.length))
+    } else Return(in)
 
   test("usingDeserializeCtx basics for ClientDeserializeCtx") {
     def testApply(in: String, expectedClass: ResponseClass): Unit = {
