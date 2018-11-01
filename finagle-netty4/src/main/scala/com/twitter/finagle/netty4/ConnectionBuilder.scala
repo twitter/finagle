@@ -10,6 +10,7 @@ import com.twitter.finagle.{
 }
 import com.twitter.finagle.client.{LatencyCompensation, Transporter}
 import com.twitter.finagle.netty4.Netty4Transporter.Backpressure
+import com.twitter.finagle.netty4.channel.RawNetty4ClientChannelInitializer
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.transport.Transport
 import com.twitter.logging.Level
@@ -20,7 +21,8 @@ import io.netty.channel.{
   ChannelFuture,
   ChannelFutureListener,
   ChannelInitializer,
-  ChannelOption
+  ChannelOption,
+  ChannelPipeline
 }
 import io.netty.channel.epoll.{Epoll, EpollSocketChannel}
 import io.netty.channel.socket.nio.NioSocketChannel
@@ -37,7 +39,7 @@ import scala.util.control.NonFatal
  * @param addr Destination `SocketAddress` for new connections.
  * @param params Configuration parameters.
  */
-private final class ConnectionBuilder(
+private[finagle] final class ConnectionBuilder(
   init: ChannelInitializer[Channel],
   addr: SocketAddress,
   params: Stack.Params
@@ -132,7 +134,19 @@ private final class ConnectionBuilder(
   }
 }
 
-private object ConnectionBuilder {
+private[finagle] object ConnectionBuilder {
+
+  /** Build a raw form of the connection builder */
+  def rawClient(
+    init: ChannelPipeline => Unit,
+    addr: SocketAddress,
+    params: Stack.Params
+  ): ConnectionBuilder =
+    new ConnectionBuilder(
+      new RawNetty4ClientChannelInitializer(init, params),
+      addr,
+      params
+    )
 
   // Construct an appropriate `Bootstrap` from the provided params
   private def makeBootstrap(init: ChannelInitializer[Channel], params: Stack.Params): Bootstrap = {
