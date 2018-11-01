@@ -56,7 +56,7 @@ private[http2] class Http2Listener[In, Out](
     new HttpServerCodec(
       maxInitialLineSize.inBytes.toInt,
       maxHeaderSize.inBytes.toInt,
-      maxRequestSize.inBytes.toInt
+      Int.MaxValue /*maxChunkSize*/
     )
   }
 
