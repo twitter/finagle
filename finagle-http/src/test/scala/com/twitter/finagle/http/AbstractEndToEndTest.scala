@@ -150,14 +150,14 @@ abstract class AbstractEndToEndTest
   def streamingConnect(service: HttpService): HttpService = {
     val ref = new ServiceFactoryRef(ServiceFactory.const(initService))
     val server = serverImpl()
-      .withStreaming(true)
+      .withStreaming(enabled = true, fixedLengthStreamedAfter = 8.kilobytes)
       .withLabel("server")
       .withStatsReceiver(statsRecv)
       .serve("localhost:*", ref)
 
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
     val client = clientImpl()
-      .withStreaming(true)
+      .withStreaming(enabled = true, fixedLengthStreamedAfter = 8.kilobytes)
       .withStatsReceiver(statsRecv)
       .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
 

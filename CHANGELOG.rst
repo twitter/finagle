@@ -33,6 +33,10 @@ Runtime Behavior Changes
   emit all available data as a single chunk so we can put it into use quicker.
   ``PHAB_ID=D233538``
 
+* finagle-http: Streaming clients (`withStreaming(true)`) now aggregate inbound messages with known
+  `Content-Length` if their payloads are less than 5mb (8k before). Use `withStreaming(true, 32.kb)`
+  to override it with a different value. ``PHAB_ID=D234882``
+
 * finagle-http2: HTTP/2 servers perform a more graceful shutdown where an initial
   GOAWAY is sent with the maximum possible stream id and waits for either the client
   to hang up or for the close deadline, at which time a second GOAWAY is sent with

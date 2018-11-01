@@ -1,6 +1,5 @@
 package com.twitter.finagle.netty4
 
-import com.twitter.conversions.storage._
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.Stack
 import com.twitter.finagle.netty4.http.handler.{
@@ -61,15 +60,13 @@ package object http {
     val maxResponseSize = params[MaxResponseSize].size
     val decompressionEnabled = params[Decompression].enabled
     val streaming = params[Streaming].enabled
+    val fixedLengthStreamedAfter = params[FixedLengthStreamedAfter].size
 
     if (decompressionEnabled)
       fn("httpDecompressor", new HttpContentDecompressor)
 
     if (streaming) {
-      // 8 KB is the size of the maxChunkSize parameter used in netty3,
-      // which is where it stops attempting to aggregate messages that lack
-      // a 'Transfer-Encoding: chunked' header.
-      fn("fixedLenAggregator", new FixedLengthMessageAggregator(8.kilobytes))
+      fn("fixedLenAggregator", new FixedLengthMessageAggregator(fixedLengthStreamedAfter))
     } else {
       fn(
         "httpDechunker",
@@ -148,12 +145,11 @@ package object http {
         if (autoContinue)
           pipeline.addLast("expectContinue", new HttpServerExpectContinueHandler)
 
-        val fixedLengthBufferSize = fixedLengthStreamedAfter.min(maxRequestSize)
         // no need to handle expect headers in the fixedLenAggregator since we have the task
         // specific HttpServerExpectContinueHandler above.
         pipeline.addLast(
           "fixedLenAggregator",
-          new FixedLengthMessageAggregator(fixedLengthBufferSize, handleExpectContinue = false)
+          new FixedLengthMessageAggregator(fixedLengthStreamedAfter, handleExpectContinue = false)
         )
       } else
         pipeline.addLast(
