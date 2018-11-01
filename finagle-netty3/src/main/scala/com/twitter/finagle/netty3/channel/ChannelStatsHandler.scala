@@ -106,7 +106,7 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver) extends SimpleChannelHan
         case t: IOException => Level.DEBUG
         case _ => Level.WARNING
       }
-      log.log(level, "ChannelStatsHandler caught an exception", evt.getCause)
+      log.log(level, evt.getCause, "ChannelStatsHandler caught an exception")
     }
     super.exceptionCaught(ctx, evt)
   }
