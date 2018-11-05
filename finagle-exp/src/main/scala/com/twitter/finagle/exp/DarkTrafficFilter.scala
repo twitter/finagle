@@ -40,7 +40,7 @@ class DarkTrafficFilter[Req, Rep](
     }
   }
 
-  protected def handleFailedInvocation(t: Throwable): Unit = {
+  protected def handleFailedInvocation[R](request: R, t: Throwable): Unit = {
     val level = t match {
       case hll: HasLogLevel => hll.logLevel
       case _ => Level.WARNING

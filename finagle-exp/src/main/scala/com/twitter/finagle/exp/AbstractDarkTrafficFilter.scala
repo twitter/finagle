@@ -5,22 +5,27 @@ import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util.{Promise, Future}
 import scala.util.control.NonFatal
 
+object AbstractDarkTrafficFilter {
+  val StatsScope: String = "dark_traffic_filter"
+}
+
 trait AbstractDarkTrafficFilter {
+  import AbstractDarkTrafficFilter._
 
   /* Abstract Members */
   protected val statsReceiver: StatsReceiver
-  protected def handleFailedInvocation(t: Throwable): Unit
+  protected def handleFailedInvocation[Req](request: Req, t: Throwable): Unit
 
   /* Private  */
-  private[this] val scopedStatsReceiver = statsReceiver.scope("dark_traffic_filter")
+  private[this] val scopedStatsReceiver = statsReceiver.scope(StatsScope)
   private[this] val requestsForwardedCounter = scopedStatsReceiver.counter("forwarded")
   private[this] val requestsSkippedCounter = scopedStatsReceiver.counter("skipped")
   private[this] val failedCounter = scopedStatsReceiver.counter("failed")
 
-  private[this] val handleFailure: (Throwable) => Unit = { t: Throwable =>
+  private[this] def handleFailure[Req](request: Req, t: Throwable): Unit = {
     // This may not count if you're using a one-way service
     failedCounter.incr()
-    handleFailedInvocation(t)
+    handleFailedInvocation(request, t)
   }
 
   /* Protected */
@@ -54,7 +59,7 @@ trait AbstractDarkTrafficFilter {
     if (shouldInvoke(request)) {
       requestsForwardedCounter.incr()
       invokeDarkService(request)
-        .onFailure(handleFailure)
+        .onFailure(handleFailure(request, _))
         .unit
     } else {
       requestsSkippedCounter.incr()

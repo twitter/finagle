@@ -30,6 +30,9 @@ Breaking API Changes
 * finagle-http: `c.t.f.http.param.MaxChunkSize` has been removed. There is no good reason to
   configure it with anything but `Int.MaxValue` (unlimited). ``PHAB_ID=D233538``
 
+* finagle-exp: Update `DarkTrafficFilter#handleFailedInvocation` to accept the request type
+  for more fidelity in handling the failure. ``PHAB_ID=D237484``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
