@@ -58,6 +58,12 @@ ChannelStatsHandler
 **sent_bytes**
   A counter of the total number of sent bytes.
 
+**tcp_retransmits** `verbosity:debug`
+  A counter of the number of TCP retransmits that have occurred.
+
+**tcp_send_window_size** `verbosity:debug`
+  A histogram of the TCP send window size (in bytes) per channel.
+
 **writableDuration** `verbosity:debug`
   A gauge of the length of time the socket has been writable in the channel.
 

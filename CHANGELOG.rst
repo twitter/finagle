@@ -20,6 +20,10 @@ New Features
 * finagle-mysql: Introduce `session` to be able to perform multiple operations that require
   session state on a guaranteed single connection. ``PHAB_ID=D219322``
 
+* finagle-netty4: When using the native epoll transport, finagle now publishes the TCP window size
+  and number of retransmits based on the `tcpInfo` provided by from the channel.  These stats are
+  published with a debug verbosity level.  ``PHAB_ID=D218772``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
