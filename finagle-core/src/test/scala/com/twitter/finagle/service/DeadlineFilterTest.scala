@@ -15,45 +15,50 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
   import DeadlineFilter.DeadlineExceededException
 
   val promise = new Promise[String]
+  promise.setValue("polo")
+
   val service = new Service[String, String] {
     def apply(request: String) = promise
   }
   val statsReceiver = new InMemoryStatsReceiver
-  val deadlineFilter = new DeadlineFilter[String, String](
+  def mkDeadlineFilter(): DeadlineFilter[String, String] = new DeadlineFilter[String, String](
     rejectPeriod = 10.seconds,
     maxRejectFraction = 0.2,
     statsReceiver = statsReceiver,
     nowMillis = Stopwatch.timeMillis,
     isDarkMode = false
   )
+  def mkDeadlineService(): Service[String, String] = mkDeadlineFilter().andThen(service)
 
-  val deadlineService = deadlineFilter.andThen(service)
-  promise.setValue("polo")
+  def await[A](f: Future[A]): A = Await.result(f, 1.second)
 
   test("DeadlineFilter should service the request when no deadline is set") {
+    val deadlineService = mkDeadlineService()
     val res = deadlineService("marco")
     assert(statsReceiver.counters(List("exceeded")) == 0)
-    assert(Await.result(res, 1.second) == "polo")
+    assert(await(res) == "polo")
   }
 
   test("DeadlineFilter should record expired deadline for the request") {
     Time.withCurrentTimeFrozen { tc =>
+      val deadlineService = mkDeadlineService()
       Contexts.broadcast.let(Deadline, Deadline.ofTimeout(200.milliseconds)) {
         tc.advance(1.second)
         val res = deadlineService("marco")
         assert(statsReceiver.stats(Seq("expired_ms"))(0) == 800f)
-        assert(Await.result(res, 1.second) == "polo")
+        assert(await(res) == "polo")
       }
     }
   }
 
   test("DeadlineFilter should ignore non-expired deadline for the request") {
     Time.withCurrentTimeFrozen { tc =>
+      val deadlineService = mkDeadlineService()
       Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.second)) {
         tc.advance(200.milliseconds)
         val res = deadlineService("marco")
         assert(statsReceiver.stats(Seq("expired_ms")) == Nil)
-        assert(Await.result(res, 1.second) == "polo")
+        assert(await(res) == "polo")
       }
     }
   }
@@ -63,10 +68,11 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
       "DeadlineFilter should service the request and increment the exceeded stat"
   ) {
     Time.withCurrentTimeFrozen { tc =>
+      val deadlineService = mkDeadlineService()
       Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.seconds)) {
-        for (i <- 0 until 3) Await.result(deadlineService("marco"), 1.second)
+        for (i <- 0 until 3) await(deadlineService("marco"))
         tc.advance(2.seconds)
-        assert(Await.result(deadlineService("marco"), 1.second) == "polo")
+        assert(await(deadlineService("marco")) == "polo")
         assert(statsReceiver.counters.get(List("exceeded")) == Some(1))
         assert(statsReceiver.counters(List("rejected")) == 0)
       }
@@ -78,11 +84,12 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
       "DeadlineFilter should not service the request and increment the exceeded and rejected stats"
   ) {
     Time.withCurrentTimeFrozen { tc =>
+      val deadlineService = mkDeadlineService()
       Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.seconds)) {
-        for (i <- 0 until 5) Await.result(deadlineService("marco"), 1.second)
+        for (i <- 0 until 5) await(deadlineService("marco"))
         tc.advance(2.seconds)
         val f = intercept[DeadlineExceededException] {
-          Await.result(deadlineService("marco"), 1.second)
+          await(deadlineService("marco"))
         }
         assert(f.getMessage.contains("exceeded request deadline"))
         assert(statsReceiver.counters.get(List("exceeded")) == Some(1))
@@ -107,9 +114,9 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
 
     Time.withCurrentTimeFrozen { tc =>
       Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.seconds)) {
-        for (i <- 0 until 5) Await.result(darkModeService("marco"), 1.second)
+        for (i <- 0 until 5) await(darkModeService("marco"))
         tc.advance(2.seconds)
-        assert(Await.result(darkModeService("marco"), 1.second) == "polo")
+        assert(await(darkModeService("marco")) == "polo")
         assert(statsReceiver.counters.get(List("exceeded")) == Some(1))
         assert(statsReceiver.counters.get(List("rejected")) == Some(1))
       }
@@ -117,15 +124,16 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
   }
 
   test("tokens added to reject bucket on request without deadline") {
-    for (i <- 0 until 5) Await.result(deadlineService("marco"), 1.second)
-
     Time.withCurrentTimeFrozen { tc =>
+      val deadlineService = mkDeadlineService()
+      for (i <- 0 until 5) await(deadlineService("marco"))
+
       Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.seconds)) {
         tc.advance(2.seconds)
 
         // 5 tokens should have been added, so we should be able to reject
         val f = intercept[DeadlineExceededException] {
-          Await.result(deadlineService("marco"), 1.second)
+          await(deadlineService("marco"))
         }
         assert(f.isFlagged(FailureFlags.DeadlineExceeded))
         assert(statsReceiver.counters.get(List("rejected")) == Some(1))
@@ -138,16 +146,17 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
       "when there are too few tokens to reject it"
   ) {
     Time.withCurrentTimeFrozen { tc =>
+      val deadlineService = mkDeadlineService()
       Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.seconds)) {
         tc.advance(2.seconds)
-        for (i <- 0 until 5) Await.result(deadlineService("marco"), 1.second)
+        for (i <- 0 until 5) await(deadlineService("marco"))
 
         // 5 tokens should have been added, so we should be able to reject
         val f = intercept[DeadlineExceededException] {
-          Await.result(deadlineService("marco"), 1.second)
+          await(deadlineService("marco"))
         }
         assert(f.isFlagged(FailureFlags.DeadlineExceeded))
-        assert(Await.result(deadlineService("marco"), 1.second) == "polo")
+        assert(await(deadlineService("marco")) == "polo")
         assert(statsReceiver.counters.get(List("rejected")) == Some(1))
       }
     }
@@ -155,11 +164,12 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
 
   test("tokens not added to bucket when request is rejected") {
     Time.withCurrentTimeFrozen { tc =>
+      val deadlineService = mkDeadlineService()
       Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.seconds)) {
-        for (i <- 0 until 5) Await.result(deadlineService("marco"), 1.second)
+        for (i <- 0 until 5) await(deadlineService("marco"))
         tc.advance(2.seconds)
         val f = intercept[DeadlineExceededException] {
-          Await.result(deadlineService("marco"), 1.second)
+          await(deadlineService("marco"))
         }
         assert(f.isFlagged(FailureFlags.DeadlineExceeded))
         assert(statsReceiver.counters.get(List("rejected")) == Some(1))
@@ -167,9 +177,9 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
 
       // If we add 4 more tokens, should still not be able to reject again.
       Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.seconds)) {
-        for (i <- 0 until 4) Await.result(deadlineService("marco"), 1.second)
+        for (i <- 0 until 4) await(deadlineService("marco"))
         tc.advance(2.seconds)
-        Await.result(deadlineService("marco"), 1.second)
+        await(deadlineService("marco"))
         assert(statsReceiver.counters.get(List("rejected")) == Some(1))
       }
     }
@@ -177,13 +187,14 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
 
   test("tokens added to reject bucket expire") {
     Time.withCurrentTimeFrozen { tc =>
-      for (i <- 0 until 5) Await.result(deadlineService("marco"), 1.second)
+      val deadlineService = mkDeadlineService()
+      for (i <- 0 until 5) await(deadlineService("marco"))
       tc.advance(11.seconds)
 
       // tokens have expired so we should not be able to reject
       Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.seconds)) {
         tc.advance(2.seconds)
-        Await.result(deadlineService("marco"), 1.second)
+        await(deadlineService("marco"))
         assert(statsReceiver.counters(List("rejected")) == 0)
       }
     }
