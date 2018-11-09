@@ -53,7 +53,7 @@ public final class HttpServerTest {
             .withAdmissionControl().noDeadlines()
             .withAdmissionControl().darkModeDeadlines()
             .withCompressionLevel(2)
-            .withStreaming(true, StorageUnit.fromMegabytes(1))
+            .withStreaming(StorageUnit.fromMegabytes(1))
             .configured(new Label("test").mk())
             .withDecompression(true)
             .withHttp2();

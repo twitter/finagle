@@ -256,7 +256,7 @@ abstract class AbstractHttp1EndToEndTest extends AbstractEndToEndTest {
       }
 
       val server = serverImpl()
-        .withStreaming(true, fixedLengthStreamedAfter)
+        .withStreaming(fixedLengthStreamedAfter)
         .serve("localhost:*", svc)
 
       val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
@@ -288,7 +288,7 @@ abstract class AbstractHttp1EndToEndTest extends AbstractEndToEndTest {
     }
 
     val server = serverImpl()
-      .withStreaming(true, 1.gigabyte)
+      .withStreaming(1.gigabyte)
       .withMaxRequestSize(4.bytes)
       .serve("localhost:*", svc)
 

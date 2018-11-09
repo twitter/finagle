@@ -59,20 +59,24 @@ package object http {
   ): Unit = {
     val maxResponseSize = params[MaxResponseSize].size
     val decompressionEnabled = params[Decompression].enabled
-    val streaming = params[Streaming].enabled
-    val fixedLengthStreamedAfter = params[FixedLengthStreamedAfter].size
 
-    if (decompressionEnabled)
+    if (decompressionEnabled) {
       fn("httpDecompressor", new HttpContentDecompressor)
-
-    if (streaming) {
-      fn("fixedLenAggregator", new FixedLengthMessageAggregator(fixedLengthStreamedAfter))
-    } else {
-      fn(
-        "httpDechunker",
-        new HttpObjectAggregator(maxResponseSize.inBytes.toInt)
-      )
     }
+
+    params[Streaming] match {
+      case Streaming.Enabled(fixedLengthStreamedAfter) =>
+        fn(
+          "fixedLenAggregator",
+          new FixedLengthMessageAggregator(fixedLengthStreamedAfter)
+        )
+      case Streaming.Disabled =>
+        fn(
+          "httpDechunker",
+          new HttpObjectAggregator(maxResponseSize.inBytes.toInt)
+        )
+    }
+
     // Map some client related channel exceptions to something meaningful to finagle
     fn("clientExceptionMapper", ClientExceptionMapper)
 
@@ -118,8 +122,6 @@ package object http {
     val maxRequestSize = params[MaxRequestSize].size
     val decompressionEnabled = params[Decompression].enabled
     val compressionLevel = params[CompressionLevel].level
-    val streaming = params[Streaming].enabled
-    val fixedLengthStreamedAfter = params[FixedLengthStreamedAfter].size
     val log = params[Logger].log
 
     { pipeline: ChannelPipeline =>
@@ -140,25 +142,31 @@ package object http {
       // nb: Netty's http object aggregator handles 'expect: continue' headers
       // and oversize payloads but the base codec does not. Consequently we need to
       // install handlers to replicate this behavior when streaming.
-      if (streaming) {
-        pipeline.addLast("payloadSizeHandler", new PayloadSizeHandler(maxRequestSize, Some(log)))
-        if (autoContinue)
-          pipeline.addLast("expectContinue", new HttpServerExpectContinueHandler)
-
-        // no need to handle expect headers in the fixedLenAggregator since we have the task
-        // specific HttpServerExpectContinueHandler above.
-        pipeline.addLast(
-          "fixedLenAggregator",
-          new FixedLengthMessageAggregator(fixedLengthStreamedAfter, handleExpectContinue = false)
-        )
-      } else
-        pipeline.addLast(
-          "httpDechunker",
-          new FinagleHttpObjectAggregator(
-            maxRequestSize.inBytes.toInt,
-            handleExpectContinue = autoContinue
+      params[Streaming] match {
+        case Streaming.Enabled(fixedLengthStreamedAfter) =>
+          pipeline.addLast(
+            "payloadSizeHandler",
+            new PayloadSizeHandler(maxRequestSize, Some(log))
           )
-        )
+
+          if (autoContinue)
+            pipeline.addLast("expectContinue", new HttpServerExpectContinueHandler)
+
+          // no need to handle expect headers in the fixedLenAggregator since we have the task
+          // specific HttpServerExpectContinueHandler above.
+          pipeline.addLast(
+            "fixedLenAggregator",
+            new FixedLengthMessageAggregator(fixedLengthStreamedAfter, handleExpectContinue = false)
+          )
+        case Streaming.Disabled =>
+          pipeline.addLast(
+            "httpDechunker",
+            new FinagleHttpObjectAggregator(
+              maxRequestSize.inBytes.toInt,
+              handleExpectContinue = autoContinue
+            )
+          )
+      }
 
       // We need to handle bad requests as the dispatcher doesn't know how to handle them.
       pipeline.addLast("badRequestHandler", BadRequestHandler)

@@ -49,10 +49,30 @@ object MaxResponseSize {
     Stack.Param(MaxResponseSize(5.megabytes))
 }
 
-case class Streaming(enabled: Boolean)
+sealed abstract class Streaming private {
+  def enabled: Boolean
+  final def disabled: Boolean = !enabled
+}
 object Streaming {
-  implicit val maxResponseSizeParam: Stack.Param[Streaming] =
-    Stack.Param(Streaming(enabled = false))
+
+  private[finagle] case object Disabled extends Streaming {
+    def enabled: Boolean = false
+  }
+
+  private[finagle] final case class Enabled(fixedLengthStreamedAfter: StorageUnit)
+      extends Streaming {
+    def enabled: Boolean = true
+  }
+
+  implicit val streamingParam: Stack.Param[Streaming] =
+    Stack.Param(Disabled)
+
+  def apply(enabled: Boolean): Streaming =
+    if (enabled) Enabled(5.megabytes)
+    else Disabled
+
+  def apply(fixedLengthStreamedAfter: StorageUnit): Streaming =
+    Enabled(fixedLengthStreamedAfter)
 }
 
 case class FixedLengthStreamedAfter(size: StorageUnit)

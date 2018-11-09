@@ -138,7 +138,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
         stats: param.Stats,
         next: ServiceFactory[Request, Response]
       ): ServiceFactory[Request, Response] = {
-        if (!streaming.enabled)
+        if (streaming.disabled)
           new PayloadSizeFilter[Request, Response](
             stats.statsReceiver,
             _.content.length,
@@ -283,11 +283,9 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
      * Streaming allows applications to work with HTTP messages that have large
      * (or infinite) content bodies.
      *
-     * If `enabled` is set to `true`, the message content is available through a
-     * [[com.twitter.io.Reader]], which gives the application a handle to the byte stream.
-     *
-     * `fixedLengthStreamedAfter` disables streaming for sufficiently small messages of
-     * known fixed length.
+     * This method configures `fixedLengthStreamedAfter` limit, which effectively turns on
+     * streaming (think `withStreaming(true)`). The `fixedLengthStreamedAfter`, however, disables
+     * streaming for sufficiently small messages of known fixed length.
      *
      * If `Content-Length` of a message does not exceed `fixedLengthStreamedAfter` it is
      * buffered and its content is available through [[Request.content]] or
@@ -298,14 +296,9 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
      *
      * [[Response.isChunked]] should be used to determine whether a message is streamed
      * (`isChunked == true`) or buffered (`isChunked == false`).
-     *
-     * If `enabled` is set to `false`, the entire message content is buffered up to
-     * maximum allowed message size.
      */
-    def withStreaming(enabled: Boolean, fixedLengthStreamedAfter: StorageUnit): Client =
-      this
-        .withStreaming(enabled)
-        .configured(http.param.FixedLengthStreamedAfter(fixedLengthStreamedAfter))
+    def withStreaming(fixedLengthStreamedAfter: StorageUnit): Client =
+      configured(http.param.Streaming(fixedLengthStreamedAfter))
 
     /**
      * Enables decompression of http content bodies.
@@ -513,11 +506,9 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
      * Streaming allows applications to work with HTTP messages that have large
      * (or infinite) content bodies.
      *
-     * If `enabled` is set to `true`, the message content is available through a
-     * [[com.twitter.io.Reader]], which gives the application a handle to the byte stream.
-     *
-     * `fixedLengthStreamedAfter` disables streaming for sufficiently small messages of
-     * known fixed length.
+     * This method configures `fixedLengthStreamedAfter` limit, which effectively turns on
+     * streaming (think `withStreaming(true)`). The `fixedLengthStreamedAfter`, however, disables
+     * streaming for sufficiently small messages of known fixed length.
      *
      * If `Content-Length` of a message does not exceed `fixedLengthStreamedAfter` it is
      * buffered and its content is available through [[Request.content]] or
@@ -528,14 +519,9 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
      *
      * [[Request.isChunked]] should be used to determine whether a message is streamed
      * (`isChunked == true`) or buffered (`isChunked == false`).
-     *
-     * If `enabled` is set to `false`, the entire message content is buffered up to
-     * maximum allowed message size.
      */
-    def withStreaming(enabled: Boolean, fixedLengthStreamedAfter: StorageUnit): Server =
-      this
-        .withStreaming(enabled)
-        .configured(http.param.FixedLengthStreamedAfter(fixedLengthStreamedAfter))
+    def withStreaming(fixedLengthStreamedAfter: StorageUnit): Server =
+      configured(http.param.Streaming(fixedLengthStreamedAfter))
 
     /**
      * Enables decompression of http content bodies.

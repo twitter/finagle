@@ -24,6 +24,13 @@ New Features
   and number of retransmits based on the `tcpInfo` provided by from the channel.  These stats are
   published with a debug verbosity level.  ``PHAB_ID=D218772``
 
+* finagle-http: HTTP clients and servers now accept `fixedLengthStreamedAfter` param in their
+  `withStreaming` configuration (default: 5 MB when streaming is enabled). This new parameter
+  controls the limit after which Finagle will stop aggregating messages with known `Content-Length`
+  (payload will be available at `.content`) and switch into a streaming mode (payload will be
+  available at `.reader`). Note messages with `Transfer-Encoding: chunked` never aggregated.
+  ``PHAB_ID=D236573``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
