@@ -89,7 +89,7 @@ object Cors {
     protected[this] def setOriginAndCredentials(response: Response, origin: String): Response = {
       response.headerMap.add("Access-Control-Allow-Origin", origin)
       if (policy.supportsCredentials && origin != "*") {
-        response.headerMap.add("Access-Control-Allow-Credentials", "true")
+        response.headerMap.addUnsafe("Access-Control-Allow-Credentials", "true")
       }
       response
     }
@@ -162,7 +162,7 @@ object Cors {
      */
     protected[this] def setMaxAge(response: Response): Response = {
       policy.maxAge foreach { maxAge =>
-        response.headerMap.set("Access-Control-Max-Age", maxAge.inSeconds.toString)
+        response.headerMap.setUnsafe("Access-Control-Max-Age", maxAge.inSeconds.toString)
       }
       response
     }

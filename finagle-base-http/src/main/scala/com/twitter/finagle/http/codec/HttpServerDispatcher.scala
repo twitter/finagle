@@ -79,12 +79,12 @@ private[finagle] class HttpServerDispatcher(
     if (connectionHeaders.isEmpty || !connectionHeaders.exists("close".equalsIgnoreCase(_))) {
       rep.version match {
         case Version.Http10 if keepAlive =>
-          rep.headerMap.set(Fields.Connection, "keep-alive")
+          rep.headerMap.setUnsafe(Fields.Connection, "keep-alive")
 
-        case Version.Http11 if (!keepAlive) =>
+        case Version.Http11 if !keepAlive =>
           // The connection header may contain additional information, so add
           // rather than set.
-          rep.headerMap.add(Fields.Connection, "close")
+          rep.headerMap.addUnsafe(Fields.Connection, "close")
 
         case _ =>
       }

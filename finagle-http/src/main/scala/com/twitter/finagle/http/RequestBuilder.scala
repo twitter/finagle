@@ -380,7 +380,7 @@ class RequestBuilder[HasUrl, HasForm] private[http] (
     require(content != null)
     val req = withoutContent(method)
     req.content = content
-    req.headerMap.set(Fields.ContentLength, content.length.toString)
+    req.headerMap.setUnsafe(Fields.ContentLength, content.length.toString)
     req
   }
 }

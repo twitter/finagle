@@ -261,7 +261,7 @@ abstract class Message {
    * @see [[contentLength(Long)]] for Java users.
    */
   def contentLength_=(value: Long): Unit =
-    headerMap.set(Fields.ContentLength, value.toString)
+    headerMap.setUnsafe(Fields.ContentLength, value.toString)
 
   /**
    * Set Content-Length header.  Normally, this is automatically set by the
@@ -285,7 +285,7 @@ abstract class Message {
     headerMap.set(Fields.ContentType, mediaType + ";charset=" + charset)
 
   /** Set Content-Type header to application/json;charset=utf-8 */
-  def setContentTypeJson(): Unit = headerMap.set(Fields.ContentType, Message.ContentTypeJson)
+  def setContentTypeJson(): Unit = headerMap.setUnsafe(Fields.ContentType, Message.ContentTypeJson)
 
   /** Get Date header */
   def date: Option[String] = headerMap.get(Fields.Date)
@@ -555,12 +555,12 @@ abstract class Message {
   final def keepAlive(keepAlive: Boolean): this.type = {
     version match {
       case Version.Http10 =>
-        if (keepAlive) headerMap.set(Fields.Connection, "keep-alive")
+        if (keepAlive) headerMap.setUnsafe(Fields.Connection, "keep-alive")
         else headerMap.remove(Fields.Connection) // HTTP/1.0 defaults to close
 
       case _ =>
         if (keepAlive) headerMap.remove(Fields.Connection)
-        else headerMap.set(Fields.Connection, "close")
+        else headerMap.setUnsafe(Fields.Connection, "close")
     }
     this
   }

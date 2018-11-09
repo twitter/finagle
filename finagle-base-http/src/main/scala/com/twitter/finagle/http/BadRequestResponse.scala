@@ -23,7 +23,7 @@ private[finagle] object BadRequestResponse {
   private[this] def baseResponse(status: Status): Response = {
     val resp = Response(status = status, version = Version.Http10)
     resp.contentLength = 0
-    resp.headerMap.set(Fields.Connection, "close")
+    resp.headerMap.setUnsafe(Fields.Connection, "close")
     resp
   }
 }

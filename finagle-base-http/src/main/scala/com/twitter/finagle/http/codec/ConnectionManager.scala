@@ -56,7 +56,7 @@ private[finagle] class ConnectionManager {
     if (!isKeepAlive || mustCloseOnFinish(response) || !response.keepAlive) {
       // We are going to close the connection after this response so we ensure that
       // the 'Connection' header is set to 'close' in order to give the client notice.
-      response.headerMap.set(Fields.Connection, "close")
+      response.headerMap.setUnsafe(Fields.Connection, "close")
       isKeepAlive = false
     }
 

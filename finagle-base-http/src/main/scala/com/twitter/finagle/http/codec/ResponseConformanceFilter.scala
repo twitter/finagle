@@ -128,7 +128,7 @@ private[codec] object ResponseConformanceFilter extends SimpleFilter[Request, Re
     } else if (rep.headerMap.getAll(Fields.TransferEncoding).contains("chunked")) {
       rep.headerMap.remove(Fields.ContentLength)
     } else if (!rep.headerMap.contains(Fields.ContentLength)) {
-      rep.headerMap.add(Fields.TransferEncoding, "chunked")
+      rep.headerMap.addUnsafe(Fields.TransferEncoding, "chunked")
     }
   }
 

@@ -33,7 +33,7 @@ private[finagle] class HttpClientDispatcher(
       // Only set the content length if we are sure there is content. This
       // behavior complies with the specification that user agents should not
       // set the content length header for messages without a payload body.
-      if (len > 0) req.headerMap.set(Fields.ContentLength, len.toString)
+      if (len > 0) req.headerMap.setUnsafe(Fields.ContentLength, len.toString)
     }
 
     // wait on these concurrently:

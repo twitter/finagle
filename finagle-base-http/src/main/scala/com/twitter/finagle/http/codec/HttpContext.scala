@@ -85,13 +85,13 @@ object HttpContext {
   private[http] def write(msg: Message): Unit = {
     Deadline.current match {
       case Some(deadline) =>
-        msg.headerMap.set(DeadlineHeaderKey, marshalDeadline(deadline))
+        msg.headerMap.setUnsafe(DeadlineHeaderKey, marshalDeadline(deadline))
       case None =>
     }
 
     Retries.current match {
       case Some(retries) =>
-        msg.headerMap.set(RetriesHeaderKey, marshalRetries(retries))
+        msg.headerMap.setUnsafe(RetriesHeaderKey, marshalRetries(retries))
       case None =>
     }
   }

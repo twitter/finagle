@@ -31,7 +31,7 @@ private[http] final class ClientNackFilter extends SimpleFilter[Request, Respons
       if (!request.content.isEmpty) {
         // We add the `CanRetryWithBodyHeader` to signal to the server that we're able
         // to retry this request with a body.
-        request.headerMap.set(HttpNackFilter.RetryableRequestHeader, "")
+        request.headerMap.setUnsafe(HttpNackFilter.RetryableRequestHeader, "")
       }
       service(request).flatMap(convertNackFn)
     }

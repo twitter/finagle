@@ -72,22 +72,22 @@ private object TraceInfo {
     } else {
       traceId.traceIdHigh.get.toString + traceId.traceId.toString
     }
-    request.headerMap.add(Header.TraceId, traceIdString)
-    request.headerMap.add(Header.SpanId, traceId.spanId.toString)
+    request.headerMap.addUnsafe(Header.TraceId, traceIdString)
+    request.headerMap.addUnsafe(Header.SpanId, traceId.spanId.toString)
     // no parent id set means this is the root span
     traceId._parentId match {
       case Some(id) =>
-        request.headerMap.add(Header.ParentSpanId, id.toString)
+        request.headerMap.addUnsafe(Header.ParentSpanId, id.toString)
       case None => ()
     }
     // three states of sampled, yes, no or none (let the server decide)
     traceId.sampled match {
       case Some(sampled) =>
-        request.headerMap.add(Header.Sampled, sampled.toString)
+        request.headerMap.addUnsafe(Header.Sampled, sampled.toString)
       case None => ()
     }
     if (traceId.flags.toLong != 0L) {
-      request.headerMap.add(Header.Flags, JLong.toString(traceId.flags.toLong))
+      request.headerMap.addUnsafe(Header.Flags, JLong.toString(traceId.flags.toLong))
     }
     traceRpc(request)
   }
