@@ -17,6 +17,8 @@ private[finagle] case class ThriftServerPreparer(
   ): ServiceFactory[Array[Byte], Array[Byte]] = factory.map { service =>
     val payloadSize = new PayloadSizeFilter[Array[Byte], Array[Byte]](
       params[param.Stats].statsReceiver,
+      PayloadSizeFilter.ServerReqTraceKey,
+      PayloadSizeFilter.ServerRepTraceKey,
       _.length,
       _.length
     )

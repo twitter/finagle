@@ -236,6 +236,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
         .filter {
           // Skip spurious GC messages
           case Record(_, _, Annotation.Message(msg), _) => !msg.startsWith("Gc")
+          case Record(_, _, Annotation.BinaryAnnotation(k, _), _) => !k.contains("payload")
           case _ => true
         }
         .toSeq

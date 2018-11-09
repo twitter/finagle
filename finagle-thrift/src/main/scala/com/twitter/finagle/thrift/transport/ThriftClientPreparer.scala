@@ -27,6 +27,8 @@ private[finagle] case class ThriftClientPreparer(
   ): Future[Service[ThriftClientRequest, Array[Byte]]] = {
     val payloadSize = new PayloadSizeFilter[ThriftClientRequest, Array[Byte]](
       params[param.Stats].statsReceiver,
+      PayloadSizeFilter.ClientReqTraceKey,
+      PayloadSizeFilter.ClientRepTraceKey,
       _.message.length,
       _.length
     )

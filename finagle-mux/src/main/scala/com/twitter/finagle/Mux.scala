@@ -156,7 +156,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
         TimeoutFactory.module[mux.Request, mux.Response](Stack.Role("MuxSessionTimeout"))
       )
       .replace(BindingFactory.role, MuxBindingFactory)
-      .prepend(PayloadSizeFilter.module(_.body.length, _.body.length))
+      .prepend(PayloadSizeFilter.clientModule(_.body.length, _.body.length))
       // Since NackAdmissionFilter should operate on all requests sent over
       // the wire including retries, it must be below `Retries`. Since it
       // aggregates the status of the entire cluster, it must be above
@@ -289,7 +289,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     private[finagle] val stack: Stack[ServiceFactory[mux.Request, mux.Response]] =
       StackServer.newStack
         .remove(TraceInitializerFilter.role)
-        .prepend(PayloadSizeFilter.module(_.body.length, _.body.length))
+        .prepend(PayloadSizeFilter.serverModule(_.body.length, _.body.length))
 
     private[finagle] val tlsEnable: (Stack.Params, ChannelPipeline) => Unit = (params, pipeline) =>
       pipeline.addFirst("opportunisticSslInit", new Netty4ServerSslChannelInitializer(params))

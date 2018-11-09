@@ -128,7 +128,10 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
   }
 
   // Only record payload sizes when streaming is disabled.
-  private[finagle] val nonChunkedPayloadSize: Stackable[ServiceFactory[Request, Response]] =
+  private[finagle] def nonChunkedPayloadSize(
+    reqTraceKey: String,
+    repTraceKey: String
+  ): Stackable[ServiceFactory[Request, Response]] =
     new Stack.Module2[http.param.Streaming, param.Stats, ServiceFactory[Request, Response]] {
       override def role: Stack.Role = PayloadSizeFilter.Role
       override def description: String = PayloadSizeFilter.Description
@@ -141,6 +144,8 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
         if (streaming.disabled)
           new PayloadSizeFilter[Request, Response](
             stats.statsReceiver,
+            reqTraceKey,
+            repTraceKey,
             _.content.length,
             _.content.length
           ).andThen(next)
@@ -172,7 +177,12 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
         .replace(StackClient.Role.prepFactory, DelayedRelease.module)
         .replace(TraceInitializerFilter.role, new HttpClientTraceInitializer[Request, Response])
         .prepend(http.TlsFilter.module)
-        .prepend(nonChunkedPayloadSize)
+        .prepend(
+          nonChunkedPayloadSize(
+            PayloadSizeFilter.ClientReqTraceKey,
+            PayloadSizeFilter.ClientRepTraceKey
+          )
+        )
         .prepend(
           new Stack.NoOpModule(http.filter.StatsFilter.role, http.filter.StatsFilter.description)
         )
@@ -423,7 +433,12 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       StackServer.newStack
         .replace(TraceInitializerFilter.role, new HttpServerTraceInitializer[Request, Response])
         .replace(StackServer.Role.preparer, HttpNackFilter.module)
-        .prepend(nonChunkedPayloadSize)
+        .prepend(
+          nonChunkedPayloadSize(
+            PayloadSizeFilter.ServerReqTraceKey,
+            PayloadSizeFilter.ServerRepTraceKey
+          )
+        )
         .prepend(ServerDtabContextFilter.module)
         .prepend(ServerContextFilter.module)
         .prepend(
