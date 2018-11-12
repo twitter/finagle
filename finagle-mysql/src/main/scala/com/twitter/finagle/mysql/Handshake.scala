@@ -124,18 +124,17 @@ case class Handshake(
   enableFoundRows: Boolean = true,
   maxPacketSize: StorageUnit = 1.gigabyte
 ) extends (HandshakeInit => Try[HandshakeResponse]) {
-  import Capability._
   require(maxPacketSize <= 1.gigabyte, "max packet size can't exceed 1 gigabyte")
 
   private[this] val newClientCap = {
     val capDb = if (database.isDefined) {
-      clientCap + ConnectWithDB
+      clientCap + Capability.ConnectWithDB
     } else {
-      clientCap - ConnectWithDB
+      clientCap - Capability.ConnectWithDB
     }
 
-    if (enableFoundRows) capDb + FoundRows
-    else capDb - FoundRows
+    if (enableFoundRows) capDb + Capability.FoundRows
+    else capDb - Capability.FoundRows
   }
 
   private[this] def isCompatibleVersion(init: HandshakeInit) =

@@ -133,7 +133,6 @@ case class HandshakeResponse(
   charset: Short,
   maxPacketSize: Int
 ) extends Request {
-  import Capability._
   override val seq: Short = 1
 
   lazy val hashPassword: Array[Byte] = password match {
@@ -153,7 +152,7 @@ case class HandshakeResponse(
     bw.fill(23, 0.toByte) // 23 reserved bytes - zeroed out
     bw.writeNullTerminatedString(username.getOrElse(""))
     bw.writeLengthCodedBytes(hashPassword)
-    if (clientCap.has(ConnectWithDB) && serverCap.has(ConnectWithDB))
+    if (clientCap.has(Capability.ConnectWithDB) && serverCap.has(Capability.ConnectWithDB))
       bw.writeNullTerminatedString(database.get)
 
     Packet(seq, bw.owned())
