@@ -60,6 +60,12 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     private[this] val underlying: Toggle[Int] = Toggles("com.twitter.finagle.http.UseH2CServers")
     def apply(): Boolean = underlying(ServerInfo().id.hashCode)
   }
+  private[this] object useHttp2MultiplexCodecClient {
+    private[this] val underlying: Toggle[Int] = Toggles(
+      "com.twitter.finagle.http.UseHttp2MultiplexCodecClient"
+    )
+    def apply(): Boolean = underlying(ServerInfo().id.hashCode)
+  }
 
   /**
    * configure alternative http 1.1 implementations
@@ -84,6 +90,25 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     implicit val httpImplParam: Stack.Param[HttpImpl] = Stack.Param(Netty4Impl)
   }
 
+  case class H2ClientImpl(useMultiplexClient: Option[Boolean])
+
+  object H2ClientImpl {
+    implicit val useMultiplexClientParam: Stack.Param[H2ClientImpl] =
+      Stack.Param(H2ClientImpl(None))
+
+    def transporter(
+      params: Stack.Params
+    ): SocketAddress => Transporter[Any, Any, TransportContext] = {
+      params[H2ClientImpl].useMultiplexClient match {
+        case Some(true) => http2.exp.transport.Http2Transporter(params)
+        case Some(false) => Http2Transporter(params)
+        case None =>
+          if (useHttp2MultiplexCodecClient()) http2.exp.transport.Http2Transporter(params)
+          else Http2Transporter(params)
+      }
+    }
+  }
+
   val Netty4Impl: Http.HttpImpl = Http.HttpImpl(
     new Netty4ClientStreamTransport(_),
     new Netty4ServerStreamTransport(_),
@@ -96,7 +121,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     Http.HttpImpl(
       new Netty4ClientStreamTransport(_),
       new Netty4ServerStreamTransport(_),
-      Http2Transporter.apply _,
+      H2ClientImpl.transporter,
       Http2Listener.apply _,
       "Netty4"
     ) +

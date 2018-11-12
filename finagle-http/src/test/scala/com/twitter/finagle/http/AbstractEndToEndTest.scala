@@ -41,6 +41,7 @@ abstract class AbstractEndToEndTest
   object AutomaticContinue extends Feature
   object DisableAutomaticContinue extends Feature
   object SetsPooledAllocatorMaxOrder extends Feature
+  object MaxHeaderSize extends Feature
 
   var saveBase: Dtab = Dtab.empty
   var statsRecv: InMemoryStatsReceiver = new InMemoryStatsReceiver()
@@ -1083,7 +1084,7 @@ abstract class AbstractEndToEndTest
     assert(rep.status == Status.InternalServerError)
   }
 
-  test("client respects MaxHeaderSize in response") {
+  testIfImplemented(MaxHeaderSize)("client respects MaxHeaderSize in response") {
     val ref = new ServiceFactoryRef(ServiceFactory.const(initService))
 
     val server = serverImpl()

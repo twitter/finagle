@@ -3,7 +3,7 @@ package com.twitter.finagle.http
 import com.twitter.conversions.storage._
 import com.twitter.conversions.time._
 import com.twitter.finagle
-import com.twitter.finagle.{Service, ServiceFactory}
+import com.twitter.finagle.{Http, Service, ServiceFactory}
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.http2.RstException
 import com.twitter.finagle.stats.InMemoryStatsReceiver
@@ -17,9 +17,14 @@ import java.net.InetSocketAddress
 import java.util.concurrent.atomic.AtomicInteger
 import scala.collection.mutable.ArrayBuffer
 
-class Http2EndToEndTest extends AbstractHttp2EndToEndTest {
-  def implName: String = "netty4 http/2"
-  def clientImpl(): finagle.Http.Client = finagle.Http.client.withHttp2.withStatsReceiver(statsRecv)
+abstract class AbstractH2CEndToEndTest extends AbstractHttp2EndToEndTest {
+
+  def useMultiplexCodec: Boolean
+
+  def clientImpl(): finagle.Http.Client =
+    finagle.Http.client.withHttp2
+      .withStatsReceiver(statsRecv)
+      .configured(Http.H2ClientImpl(Some(useMultiplexCodec)))
 
   def serverImpl(): finagle.Http.Server = finagle.Http.server.withHttp2
 
@@ -144,8 +149,8 @@ class Http2EndToEndTest extends AbstractHttp2EndToEndTest {
     assert(rh.get("ok-header").get == ":)")
   }
 
-  test("The TE header is allowed iff its value is trailers") {
-    val client = nonStreamingConnect(Service.mk { req: Request =>
+  test("The TE header is allowed if its value is trailers") {
+    val client = nonStreamingConnect(Service.mk { _: Request =>
       val res = Response()
       res.headerMap.add("TE", "trailers")
       Future.value(res)
