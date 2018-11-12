@@ -283,9 +283,6 @@ private class TrafficDistributor[Req, Rep](
   // ServiceFactories that can service requests.
   private[this] val underlying: Event[ServiceFactory[Req, Rep]] =
     weightClasses.foldLeft(init) {
-      case (_, Activity.Ok(List(WeightClass(lb, _, _,sz)))) if sz == 0 =>
-        pending.updateIfEmpty(Return(lb))
-        lb
       case (_, Activity.Ok(wcs)) =>
         val dist = new Distributor(wcs, rng)
         updateGauges(wcs)
