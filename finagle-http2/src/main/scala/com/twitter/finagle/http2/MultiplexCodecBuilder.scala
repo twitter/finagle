@@ -6,6 +6,7 @@ import com.twitter.finagle.http2.param.{
   FrameLoggerNamePrefix,
   HeaderSensitivity
 }
+import com.twitter.finagle.param.Stats
 import com.twitter.finagle.stats.{Gauge, StatsReceiver}
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.{
@@ -63,8 +64,17 @@ private object MultiplexCodecBuilder {
   def serverMultiplexCodec(
     params: Stack.Params,
     inboundInitializer: ChannelHandler
-  ): Http2MultiplexCodec =
-    newMultiplexCodec(params, inboundInitializer, isServer = true).build()
+  ): Http2MultiplexCodec = {
+    val codec = newMultiplexCodec(params, inboundInitializer, isServer = true).build()
+    if (trackH2SessionExceptions()) {
+      // Add the listener so that we can count up different exceptions seen during the session.
+      val oldListener = codec.decoder.frameListener
+      val statsReceiver = params[Stats].statsReceiver
+      codec.decoder.frameListener(new ExceptionTrackingFrameListener(statsReceiver, oldListener))
+    }
+
+    codec
+  }
 
   /** Construct a `Http2MultiplexCodec` for client pipelines */
   def clientMultiplexCodec(
