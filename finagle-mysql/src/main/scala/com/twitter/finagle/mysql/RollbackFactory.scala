@@ -1,6 +1,7 @@
 package com.twitter.finagle.mysql
 
 import com.twitter.finagle._
+import com.twitter.finagle.param.Stats
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Logger
 import com.twitter.util.{Future, Return, Stopwatch, Throw, Time}
@@ -13,11 +14,11 @@ object RollbackFactory {
   val Role: Stack.Role = Stack.Role("RollbackFactory")
 
   private[finagle] def module: Stackable[ServiceFactory[Request, Result]] =
-    new Stack.Module1[param.Stats, ServiceFactory[Request, Result]] {
+    new Stack.Module1[Stats, ServiceFactory[Request, Result]] {
       val role: Stack.Role = Role
       val description: String = "Installs a rollback factory in the stack"
       def make(
-        sr: param.Stats,
+        sr: Stats,
         next: ServiceFactory[Request, Result]
       ): ServiceFactory[Request, Result] = {
         new RollbackFactory(next, sr.statsReceiver)
