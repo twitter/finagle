@@ -272,9 +272,9 @@ resources for using Finagle.
                         <a class="class" href="Decompression.html" title=""></a>
                         <a href="Decompression.html" title="">Decompression</a>
                       </li><li class="current-entities indented5">
-                        <a class="object" href="MaxChunkSize$.html" title=""></a>
-                        <a class="class" href="MaxChunkSize.html" title="the maximum size of a chunk."></a>
-                        <a href="MaxChunkSize.html" title="the maximum size of a chunk.">MaxChunkSize</a>
+                        <a class="object" href="FixedLengthStreamedAfter$.html" title=""></a>
+                        <a class="class" href="FixedLengthStreamedAfter.html" title=""></a>
+                        <a href="FixedLengthStreamedAfter.html" title="">FixedLengthStreamedAfter</a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="MaxHeaderSize$.html" title=""></a>
                         <a class="class" href="MaxHeaderSize.html" title="the maximum size of all headers."></a>
@@ -458,10 +458,10 @@ the 'Expect: 100-Continue' header. See longer note on
       </span>
       
       
-    </li><li name="com.twitter.finagle.http.param.MaxChunkSize" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="MaxChunkSizeextendsProductwithSerializable"></a><a id="MaxChunkSize:MaxChunkSize"></a>
+    </li><li name="com.twitter.finagle.http.param.FixedLengthStreamedAfter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="FixedLengthStreamedAfterextendsProductwithSerializable"></a><a id="FixedLengthStreamedAfter:FixedLengthStreamedAfter"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/http/param/index.html#MaxChunkSizeextendsProductwithSerializable" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/http/param/index.html#FixedLengthStreamedAfterextendsProductwithSerializable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -470,10 +470,10 @@ the 'Expect: 100-Continue' header. See longer note on
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="the maximum size of a chunk." href="MaxChunkSize.html"><span class="name">MaxChunkSize</span></a><span class="params">(<span name="size">size: <a href="https://twitter.github.io/util/docs/com/twitter/util/StorageUnit.html#com.twitter.util.StorageUnit" class="extype" name="com.twitter.util.StorageUnit">StorageUnit</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.7/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="FixedLengthStreamedAfter.html"><span class="name">FixedLengthStreamedAfter</span></a><span class="params">(<span name="size">size: <a href="https://twitter.github.io/util/docs/com/twitter/util/StorageUnit.html#com.twitter.util.StorageUnit" class="extype" name="com.twitter.util.StorageUnit">StorageUnit</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.7/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
-      <p class="shortcomment cmt">the maximum size of a chunk.</p>
+      
     </li><li name="com.twitter.finagle.http.param.MaxHeaderSize" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MaxHeaderSizeextendsProductwithSerializable"></a><a id="MaxHeaderSize:MaxHeaderSize"></a>
       <span class="permalink">
@@ -538,19 +538,19 @@ the 'Expect: 100-Continue' header. See longer note on
       </span>
       
       
-    </li><li name="com.twitter.finagle.http.param.Streaming" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="StreamingextendsProductwithSerializable"></a><a id="Streaming:Streaming"></a>
+    </li><li name="com.twitter.finagle.http.param.Streaming" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="StreamingextendsAnyRef"></a><a id="Streaming:Streaming"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/http/param/index.html#StreamingextendsProductwithSerializable" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/http/param/index.html#StreamingextendsAnyRef" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
+        <span class="modifier">sealed abstract </span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="" href="Streaming.html"><span class="name">Streaming</span></a><span class="params">(<span name="enabled">enabled: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.7/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="Streaming.html"><span class="name">Streaming</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       
@@ -610,10 +610,10 @@ the 'Expect: 100-Continue' header. See longer note on
       </span>
       
       
-    </li><li name="com.twitter.finagle.http.param.MaxChunkSize" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="MaxChunkSize"></a><a id="MaxChunkSize:MaxChunkSize"></a>
+    </li><li name="com.twitter.finagle.http.param.FixedLengthStreamedAfter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="FixedLengthStreamedAfter"></a><a id="FixedLengthStreamedAfter:FixedLengthStreamedAfter"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/http/param/index.html#MaxChunkSize" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/http/param/index.html#FixedLengthStreamedAfter" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -622,7 +622,7 @@ the 'Expect: 100-Continue' header. See longer note on
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="MaxChunkSize$.html"><span class="name">MaxChunkSize</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="FixedLengthStreamedAfter$.html"><span class="name">FixedLengthStreamedAfter</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -702,7 +702,7 @@ the 'Expect: 100-Continue' header. See longer note on
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="Streaming$.html"><span class="name">Streaming</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="Streaming$.html"><span class="name">Streaming</span></a>
       </span>
       
       

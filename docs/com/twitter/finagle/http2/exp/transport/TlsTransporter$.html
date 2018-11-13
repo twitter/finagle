@@ -197,8 +197,8 @@ resources for using Finagle.
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.http2.exp">exp</a></dd></dl></div>
     </li><li class="current-entities indented6">
                         <span class="separator"></span>
-                        <a class="object" href="" title="A Netty pipeline stage that converts events to fit the finagle client model"></a>
-                        <a href="" title="A Netty pipeline stage that converts events to fit the finagle client model">Http2ClientEventMapper</a>
+                        <a class="object" href="" title=""></a>
+                        <a href="" title="">TlsTransporter</a>
                       </li>
               </ul>
             </div>
@@ -208,8 +208,8 @@ resources for using Finagle.
       <div id="definition">
         <div class="big-circle object">o</div>
         <p id="owner"><a href="../../../../../index.html" class="extype" name="com">com</a>.<a href="../../../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../../../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../../index.html" class="extype" name="com.twitter.finagle.http2">http2</a>.<a href="../index.html" class="extype" name="com.twitter.finagle.http2.exp">exp</a>.<a href="index.html" class="extype" name="com.twitter.finagle.http2.exp.transport">transport</a></p>
-        <h1>Http2ClientEventMapper<span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html" title="Permalink">
+        <h1>TlsTransporter<span class="permalink">
+      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
@@ -222,22 +222,16 @@ resources for using Finagle.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">Http2ClientEventMapper</span><span class="result"> extends <span class="extype" name="io.netty.channel.ChannelInboundHandlerAdapter">ChannelInboundHandlerAdapter</span></span>
+        <span class="name">TlsTransporter</span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A Netty pipeline stage that converts events to fit the finagle client model</p><p>This stage translates certain exceptions and modifies the inbound response to
-trigger closing of the <code>Transport</code> since each request will get it's own Netty
-stream channel from the <code>Http2MultiplexCodec</code>.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@Sharable</span><span class="args">()</span>
-              
-        </dd></dl><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><span class="extype" name="io.netty.channel.ChannelInboundHandlerAdapter">ChannelInboundHandlerAdapter</span>, <span class="extype" name="io.netty.channel.ChannelInboundHandler">ChannelInboundHandler</span>, <span class="extype" name="io.netty.channel.ChannelHandlerAdapter">ChannelHandlerAdapter</span>, <span class="extype" name="io.netty.channel.ChannelHandler">ChannelHandler</span>, <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -263,7 +257,7 @@ stream channel from the <code>Http2MultiplexCodec</code>.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.http2.exp.transport.Http2ClientEventMapper"><span>Http2ClientEventMapper</span></li><li class="in" name="io.netty.channel.ChannelInboundHandlerAdapter"><span>ChannelInboundHandlerAdapter</span></li><li class="in" name="io.netty.channel.ChannelInboundHandler"><span>ChannelInboundHandler</span></li><li class="in" name="io.netty.channel.ChannelHandlerAdapter"><span>ChannelHandlerAdapter</span></li><li class="in" name="io.netty.channel.ChannelHandler"><span>ChannelHandler</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.http2.exp.transport.TlsTransporter"><span>TlsTransporter</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -293,7 +287,7 @@ stream channel from the <code>Http2MultiplexCodec</code>.
                 <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#!=(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html#!=(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -309,7 +303,7 @@ stream channel from the <code>Http2MultiplexCodec</code>.
     </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html###():Int" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html###():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -325,7 +319,7 @@ stream channel from the <code>Http2MultiplexCodec</code>.
     </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#==(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html#==(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -341,7 +335,7 @@ stream channel from the <code>Http2MultiplexCodec</code>.
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#asInstanceOf[T0]:T0" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html#asInstanceOf[T0]:T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -354,158 +348,10 @@ stream channel from the <code>Http2MultiplexCodec</code>.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="io.netty.channel.ChannelInboundHandlerAdapter#channelActive" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="channelActive(x$1:io.netty.channel.ChannelHandlerContext):Unit"></a><a id="channelActive(ChannelHandlerContext):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#channelActive(x$1:io.netty.channel.ChannelHandlerContext):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">channelActive</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ChannelInboundHandlerAdapter → ChannelInboundHandler</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">(<span>
-      
-      <span class="symbol">classOf[java.lang.Exception]</span>
-    </span>)</span>
-              
-        </dd></dl></div>
-    </li><li name="io.netty.channel.ChannelInboundHandlerAdapter#channelInactive" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="channelInactive(x$1:io.netty.channel.ChannelHandlerContext):Unit"></a><a id="channelInactive(ChannelHandlerContext):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#channelInactive(x$1:io.netty.channel.ChannelHandlerContext):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">channelInactive</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ChannelInboundHandlerAdapter → ChannelInboundHandler</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">(<span>
-      
-      <span class="symbol">classOf[java.lang.Exception]</span>
-    </span>)</span>
-              
-        </dd></dl></div>
-    </li><li name="com.twitter.finagle.http2.exp.transport.Http2ClientEventMapper#channelRead" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="channelRead(ctx:io.netty.channel.ChannelHandlerContext,msg:Any):Unit"></a><a id="channelRead(ChannelHandlerContext,Any):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#channelRead(ctx:io.netty.channel.ChannelHandlerContext,msg:Any):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">channelRead</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="msg">msg: <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http2.exp.transport.Http2ClientEventMapper">Http2ClientEventMapper</a> → ChannelInboundHandlerAdapter → ChannelInboundHandler</dd></dl></div>
-    </li><li name="io.netty.channel.ChannelInboundHandlerAdapter#channelReadComplete" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="channelReadComplete(x$1:io.netty.channel.ChannelHandlerContext):Unit"></a><a id="channelReadComplete(ChannelHandlerContext):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#channelReadComplete(x$1:io.netty.channel.ChannelHandlerContext):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">channelReadComplete</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ChannelInboundHandlerAdapter → ChannelInboundHandler</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">(<span>
-      
-      <span class="symbol">classOf[java.lang.Exception]</span>
-    </span>)</span>
-              
-        </dd></dl></div>
-    </li><li name="io.netty.channel.ChannelInboundHandlerAdapter#channelRegistered" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="channelRegistered(x$1:io.netty.channel.ChannelHandlerContext):Unit"></a><a id="channelRegistered(ChannelHandlerContext):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#channelRegistered(x$1:io.netty.channel.ChannelHandlerContext):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">channelRegistered</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ChannelInboundHandlerAdapter → ChannelInboundHandler</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">(<span>
-      
-      <span class="symbol">classOf[java.lang.Exception]</span>
-    </span>)</span>
-              
-        </dd></dl></div>
-    </li><li name="io.netty.channel.ChannelInboundHandlerAdapter#channelUnregistered" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="channelUnregistered(x$1:io.netty.channel.ChannelHandlerContext):Unit"></a><a id="channelUnregistered(ChannelHandlerContext):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#channelUnregistered(x$1:io.netty.channel.ChannelHandlerContext):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">channelUnregistered</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ChannelInboundHandlerAdapter → ChannelInboundHandler</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">(<span>
-      
-      <span class="symbol">classOf[java.lang.Exception]</span>
-    </span>)</span>
-              
-        </dd></dl></div>
-    </li><li name="io.netty.channel.ChannelInboundHandlerAdapter#channelWritabilityChanged" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="channelWritabilityChanged(x$1:io.netty.channel.ChannelHandlerContext):Unit"></a><a id="channelWritabilityChanged(ChannelHandlerContext):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#channelWritabilityChanged(x$1:io.netty.channel.ChannelHandlerContext):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">channelWritabilityChanged</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ChannelInboundHandlerAdapter → ChannelInboundHandler</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">(<span>
-      
-      <span class="symbol">classOf[java.lang.Exception]</span>
-    </span>)</span>
-              
-        </dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#clone():Object" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html#clone():Object" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -526,10 +372,10 @@ stream channel from the <code>Http2MultiplexCodec</code>.
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="io.netty.channel.ChannelHandlerAdapter#ensureNotSharable" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ensureNotSharable():Unit"></a>
+    </li><li name="com.twitter.finagle.http2.exp.transport.TlsTransporter#configureHttp1Pipeline" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="configureHttp1Pipeline(channel:io.netty.channel.Channel,params:com.twitter.finagle.Stack.Params):com.twitter.finagle.transport.Transport[Any,Any]"></a><a id="configureHttp1Pipeline(Channel,Params):Transport[Any,Any]"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#ensureNotSharable():Unit" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html#configureHttp1Pipeline(channel:io.netty.channel.Channel,params:com.twitter.finagle.Stack.Params):com.twitter.finagle.transport.Transport[Any,Any]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -538,14 +384,30 @@ stream channel from the <code>Http2MultiplexCodec</code>.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ensureNotSharable</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">configureHttp1Pipeline</span><span class="params">(<span name="channel">channel: <span class="extype" name="io.netty.channel.Channel">Channel</span></span>, <span name="params">params: <a href="../../../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span><span class="result">: <a href="../../../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../io/netty/channel/index.html" class="extype" name="io.netty.channel">io.netty.channel</a>] </dd><dt>Definition Classes</dt><dd>ChannelHandlerAdapter</dd></dl></div>
+      
+    </li><li name="com.twitter.finagle.http2.exp.transport.TlsTransporter#configureHttp2Pipeline" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="configureHttp2Pipeline(channel:io.netty.channel.Channel,params:com.twitter.finagle.Stack.Params):com.twitter.finagle.http2.transport.ClientSession"></a><a id="configureHttp2Pipeline(Channel,Params):ClientSession"></a>
+      <span class="permalink">
+      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html#configureHttp2Pipeline(channel:io.netty.channel.Channel,params:com.twitter.finagle.Stack.Params):com.twitter.finagle.http2.transport.ClientSession" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">configureHttp2Pipeline</span><span class="params">(<span name="channel">channel: <span class="extype" name="io.netty.channel.Channel">Channel</span></span>, <span name="params">params: <a href="../../../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.http2.transport.ClientSession">ClientSession</span></span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html#eq(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -561,7 +423,7 @@ stream channel from the <code>Http2MultiplexCodec</code>.
     </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#equals(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html#equals(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -574,26 +436,10 @@ stream channel from the <code>Http2MultiplexCodec</code>.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.http2.exp.transport.Http2ClientEventMapper#exceptionCaught" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="exceptionCaught(ctx:io.netty.channel.ChannelHandlerContext,cause:Throwable):Unit"></a><a id="exceptionCaught(ChannelHandlerContext,Throwable):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#exceptionCaught(ctx:io.netty.channel.ChannelHandlerContext,cause:Throwable):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">exceptionCaught</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="cause">cause: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http2.exp.transport.Http2ClientEventMapper">Http2ClientEventMapper</a> → ChannelInboundHandlerAdapter → ChannelInboundHandler → ChannelHandlerAdapter → ChannelHandler</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#finalize():Unit" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html#finalize():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -615,7 +461,7 @@ stream channel from the <code>Http2MultiplexCodec</code>.
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#getClass():Class[_]" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html#getClass():Class[_]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -631,54 +477,10 @@ stream channel from the <code>Http2MultiplexCodec</code>.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="io.netty.channel.ChannelHandlerAdapter#handlerAdded" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="handlerAdded(x$1:io.netty.channel.ChannelHandlerContext):Unit"></a><a id="handlerAdded(ChannelHandlerContext):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#handlerAdded(x$1:io.netty.channel.ChannelHandlerContext):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">handlerAdded</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ChannelHandlerAdapter → ChannelHandler</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">(<span>
-      
-      <span class="symbol">classOf[java.lang.Exception]</span>
-    </span>)</span>
-              
-        </dd></dl></div>
-    </li><li name="io.netty.channel.ChannelHandlerAdapter#handlerRemoved" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="handlerRemoved(x$1:io.netty.channel.ChannelHandlerContext):Unit"></a><a id="handlerRemoved(ChannelHandlerContext):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#handlerRemoved(x$1:io.netty.channel.ChannelHandlerContext):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">handlerRemoved</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ChannelHandlerAdapter → ChannelHandler</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">(<span>
-      
-      <span class="symbol">classOf[java.lang.Exception]</span>
-    </span>)</span>
-              
-        </dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#hashCode():Int" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html#hashCode():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -697,7 +499,7 @@ stream channel from the <code>Http2MultiplexCodec</code>.
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#isInstanceOf[T0]:Boolean" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html#isInstanceOf[T0]:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -710,10 +512,10 @@ stream channel from the <code>Http2MultiplexCodec</code>.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="io.netty.channel.ChannelHandlerAdapter#isSharable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="isSharable():Boolean"></a>
+    </li><li name="com.twitter.finagle.http2.exp.transport.TlsTransporter#make" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="make(addr:java.net.SocketAddress,params:com.twitter.finagle.Stack.Params):com.twitter.finagle.client.Transporter[Any,Any,com.twitter.finagle.transport.TransportContext]"></a><a id="make(SocketAddress,Params):Transporter[Any,Any,TransportContext]"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#isSharable():Boolean" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html#make(addr:java.net.SocketAddress,params:com.twitter.finagle.Stack.Params):com.twitter.finagle.client.Transporter[Any,Any,com.twitter.finagle.transport.TransportContext]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -722,14 +524,14 @@ stream channel from the <code>Http2MultiplexCodec</code>.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isSharable</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">make</span><span class="params">(<span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="params">params: <a href="../../../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span><span class="result">: <a href="../../../client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>, <a href="../../../transport/TransportContext.html" class="extype" name="com.twitter.finagle.transport.TransportContext">TransportContext</a>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ChannelHandlerAdapter</dd></dl></div>
+      
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html#ne(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -745,7 +547,7 @@ stream channel from the <code>Http2MultiplexCodec</code>.
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#notify():Unit" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html#notify():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -764,7 +566,7 @@ stream channel from the <code>Http2MultiplexCodec</code>.
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#notifyAll():Unit" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html#notifyAll():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -783,7 +585,7 @@ stream channel from the <code>Http2MultiplexCodec</code>.
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -799,7 +601,7 @@ stream channel from the <code>Http2MultiplexCodec</code>.
     </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#toString():String" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html#toString():String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -812,32 +614,10 @@ stream channel from the <code>Http2MultiplexCodec</code>.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="io.netty.channel.ChannelInboundHandlerAdapter#userEventTriggered" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="userEventTriggered(x$1:io.netty.channel.ChannelHandlerContext,x$2:Any):Unit"></a><a id="userEventTriggered(ChannelHandlerContext,Any):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#userEventTriggered(x$1:io.netty.channel.ChannelHandlerContext,x$2:Any):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">userEventTriggered</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ChannelInboundHandlerAdapter → ChannelInboundHandler</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">(<span>
-      
-      <span class="symbol">classOf[java.lang.Exception]</span>
-    </span>)</span>
-              
-        </dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#wait():Unit" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html#wait():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -859,7 +639,7 @@ stream channel from the <code>Http2MultiplexCodec</code>.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -881,7 +661,7 @@ stream channel from the <code>Http2MultiplexCodec</code>.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/Http2ClientEventMapper$.html#wait(x$1:Long):Unit" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html#wait(x$1:Long):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -912,15 +692,7 @@ stream channel from the <code>Http2MultiplexCodec</code>.
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="io.netty.channel.ChannelInboundHandlerAdapter">
-              <h3>Inherited from <span class="extype" name="io.netty.channel.ChannelInboundHandlerAdapter">ChannelInboundHandlerAdapter</span></h3>
-            </div><div class="parent" name="io.netty.channel.ChannelInboundHandler">
-              <h3>Inherited from <span class="extype" name="io.netty.channel.ChannelInboundHandler">ChannelInboundHandler</span></h3>
-            </div><div class="parent" name="io.netty.channel.ChannelHandlerAdapter">
-              <h3>Inherited from <span class="extype" name="io.netty.channel.ChannelHandlerAdapter">ChannelHandlerAdapter</span></h3>
-            </div><div class="parent" name="io.netty.channel.ChannelHandler">
-              <h3>Inherited from <span class="extype" name="io.netty.channel.ChannelHandler">ChannelHandler</span></h3>
-            </div><div class="parent" name="scala.AnyRef">
+        <div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>

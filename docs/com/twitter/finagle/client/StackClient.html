@@ -388,7 +388,7 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a> → <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.client.StackClient#withStack" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.client.StackClient#withStack" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="withStack(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]):com.twitter.finagle.client.StackClient[Req,Rep]"></a><a id="withStack(Stack[ServiceFactory[Req,Rep]]):StackClient[Req,Rep]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/client/StackClient.html#withStack(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]):com.twitter.finagle.client.StackClient[Req,Rep]" title="Permalink">
@@ -403,7 +403,9 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
         <span class="name">withStack</span><span class="params">(<span name="stack">stack: <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.StackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StackClient.Rep">Rep</span>]]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<span class="extype" name="com.twitter.finagle.client.StackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StackClient.Rep">Rep</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">A new StackClient with the provided stack.</p>
+      <p class="shortcomment cmt">A new <a href="" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a> with the provided <code>stack</code>.</p><div class="fullcomment"><div class="comment cmt"><p>A new <a href="" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a> with the provided <code>stack</code>.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><code>withStack</code> that takes a <code>Function1</code> for a more ergonomic
+    API when used with method chaining.</p></span></dd></dl></div>
     </li></ol>
             </div>
 
@@ -926,6 +928,33 @@ about its implementation at runtime.
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.client.StackClient#withStack" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withStack(fn:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]=&gt;com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]):com.twitter.finagle.client.StackClient[Req,Rep]"></a><a id="withStack((Stack[ServiceFactory[Req,Rep]])⇒Stack[ServiceFactory[Req,Rep]]):StackClient[Req,Rep]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/client/StackClient.html#withStack(fn:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]=&gt;com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]):com.twitter.finagle.client.StackClient[Req,Rep]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withStack</span><span class="params">(<span name="fn">fn: (<a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.StackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StackClient.Rep">Rep</span>]]) ⇒ <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.StackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StackClient.Rep">Rep</span>]]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<span class="extype" name="com.twitter.finagle.client.StackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StackClient.Rep">Rep</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A new <a href="" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a> using the function to create a new <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A new <a href="" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a> using the function to create a new <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>.</p><p>The input to <code>fn</code> is the <a href="#stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]" class="extmbr" name="com.twitter.finagle.client.StackClient#stack">client's current stack</a>.
+This API allows for easier usage when writing code that
+uses method chaining.
+</p></div><dl class="attributes block"> <div class="block">Example:
+               <ol><li class="cmt"><p>
+From Scala:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withStack(_.prepend(MyStackModule))</pre><p>From Java:</p><pre><span class="kw">import</span> com.twitter.finagle.Http;
+<span class="kw">import</span> static com.twitter.util.<span class="std">Function</span>.func;
+
+Http.client().withStack(func(stack -&gt; stack.prepend(MyStackModule)));</pre></li></ol>
+            </div><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="withStack(Stack)">withStack(Stack)</span></p></span></dd></dl></div>
     </li>
               </ol>
             </div>

@@ -401,6 +401,10 @@ resources for using Finagle.
                         <a href="ServerStatus.html" title="Represents the ServerStatus as represented in EOF packets">ServerStatus</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="trait" href="Session.html" title="Explicitly manage the lifecycle of a MySQL session."></a>
+                        <a href="Session.html" title="Explicitly manage the lifecycle of a MySQL session.">Session</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="class" href="ShortValue.html" title=""></a>
                         <a href="ShortValue.html" title="">ShortValue</a>
                       </li><li class="current-entities indented4">
@@ -659,6 +663,49 @@ returns an empty Seq.
     row.stringOrNull(<span class="lit">"name"</span>)
   }</pre></li></ol>
             </div><dt>See also</dt><dd><span class="cmt"><p><a href="#read(sql:String):com.twitter.util.Future[com.twitter.finagle.mysql.ResultSet]" class="extmbr" name="com.twitter.finagle.mysql.Client#read">read</a></p></span><span class="cmt"><p><a href="PreparedStatement.html#select[T](params:com.twitter.finagle.mysql.Parameter*)(f:com.twitter.finagle.mysql.Row=&gt;T):com.twitter.util.Future[Seq[T]]" class="extmbr" name="com.twitter.finagle.mysql.PreparedStatement#select">PreparedStatement.select</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.Client#session" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="session[T](f:com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactionswithcom.twitter.finagle.mysql.Session=&gt;com.twitter.util.Future[T]):com.twitter.util.Future[T]"></a><a id="session[T]((ClientwithTransactionswithSession)⇒Future[T]):Future[T]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/Client.html#session[T](f:com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactionswithcom.twitter.finagle.mysql.Session=&gt;com.twitter.util.Future[T]):com.twitter.util.Future[T]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">session</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="f">f: (<a href="" class="extype" name="com.twitter.finagle.mysql.Client">Client</a> with <a href="Transactions.html" class="extype" name="com.twitter.finagle.mysql.Transactions">Transactions</a> with <a href="Session.html" class="extype" name="com.twitter.finagle.mysql.Session">Session</a>) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.mysql.Client.session.T">T</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.mysql.Client.session.T">T</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Reserve a session for exclusive use.</p><div class="fullcomment"><div class="comment cmt"><p>Reserve a session for exclusive use. This can be useful when operations that require
+connection state are to be performed, for example: transactions, locks, or cursors.</p><p>A session's life cycle is managed through the completion of the provided Future. If a
+session is no longer usable it can be explicitly discarded.
+</p></div><dl class="attributes block"> <div class="block">Example:
+               <ol><li class="cmt"><p></p><pre><span class="kw">import</span> com.twitter.finagle.mysql.{Client, Transactions}
+<span class="kw">import</span> com.twitter.util.{Future, Throw}
+
+<span class="kw">case</span> <span class="kw">class</span> ReallyBadException() <span class="kw">extends</span> Exception
+
+<span class="kw">val</span> client: Client <span class="kw">with</span> Transactions = ???
+
+client.session { session <span class="kw">=&gt;</span>
+  <span class="kw">val</span> result = <span class="kw">for</span> {
+    _ <span class="kw">&lt;-</span> session.query(<span class="lit">"LOCK"</span>)
+    r <span class="kw">&lt;-</span> session.transaction { tx <span class="kw">=&gt;</span>
+      tx.query(<span class="lit">"..."</span>)
+    }
+    _ <span class="kw">&lt;-</span> session.query(<span class="lit">"UNLOCK"</span>)
+  } <span class="kw">yield</span> r
+
+  result.rescue {
+    <span class="kw">case</span> e: ReallyBadException <span class="kw">=&gt;</span>
+      session.discard().flatMap(_ <span class="kw">=&gt;</span>
+        Future.exception(e)
+      )
+  }
+}</pre></li></ol>
+            </div><dt>See also</dt><dd><span class="cmt"><p>Session</p></span></dd></dl></div>
     </li></ol>
             </div>
 

@@ -602,7 +602,7 @@ resources for using Finagle.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">CharsetUtf8</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+        <span class="name">CharsetUtf8</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
       
@@ -618,7 +618,7 @@ resources for using Finagle.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">ContentTypeJavascript</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+        <span class="name">ContentTypeJavascript</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
       
@@ -634,7 +634,7 @@ resources for using Finagle.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">ContentTypeJson</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+        <span class="name">ContentTypeJson</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
       
@@ -650,7 +650,7 @@ resources for using Finagle.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">ContentTypeJsonPatch</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+        <span class="name">ContentTypeJsonPatch</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
       
@@ -666,7 +666,7 @@ resources for using Finagle.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">ContentTypeWwwForm</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+        <span class="name">ContentTypeWwwForm</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
       
@@ -802,7 +802,24 @@ resources for using Finagle.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Message#httpDateFormat" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Message#httpDateFormat" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="httpDateFormat(millis:Long):String"></a><a id="httpDateFormat(Long):String"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/Message$.html#httpDateFormat(millis:Long):String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">httpDateFormat</span><span class="params">(<span name="millis">millis: <a href="http://www.scala-lang.org/api/2.12.7/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Convert epoch milliseconds into an RFC 7231 formatted String representation.</p><div class="fullcomment"><div class="comment cmt"><p>Convert epoch milliseconds into an RFC 7231 formatted String representation.
+</p></div><dl class="paramcmts block"><dt class="param">millis</dt><dd class="cmt"><p>the milliseconds to format.</p></dd><dt>returns</dt><dd class="cmt"><p>an RFC 7231 formatted String representation of the time represented by the given milliseconds.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="http://tools.ietf.org/html/rfc7231#section-7.1.1.1" target="_blank">RFC 7231 Section 7.1.1.1</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Message#httpDateFormat" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="httpDateFormat(date:java.util.Date):String"></a><a id="httpDateFormat(Date):String"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/Message$.html#httpDateFormat(date:java.util.Date):String" title="Permalink">
@@ -817,7 +834,8 @@ resources for using Finagle.
         <span class="name">httpDateFormat</span><span class="params">(<span name="date">date: <span class="extype" name="java.util.Date">Date</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Convert a <span class="extype" name="java.util.Date">java.util.Date</span> into an RFC 7231 formatted String representation.</p><div class="fullcomment"><div class="comment cmt"><p>Convert a <span class="extype" name="java.util.Date">java.util.Date</span> into an RFC 7231 formatted String representation.
+</p></div><dl class="paramcmts block"><dt class="param">date</dt><dd class="cmt"><p>the <span class="extype" name="java.util.Date">java.util.Date</span> to format.</p></dd><dt>returns</dt><dd class="cmt"><p>an RFC 7231 formatted String representation of the time represented by the given <span class="extype" name="java.util.Date">java.util.Date</span>.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="http://tools.ietf.org/html/rfc7231#section-7.1.1.1" target="_blank">RFC 7231 Section 7.1.1.1</a></p></span></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">

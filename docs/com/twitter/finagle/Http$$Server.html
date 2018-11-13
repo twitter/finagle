@@ -169,6 +169,10 @@ resources for using Finagle.
                         <a class="class" href="Http$$Client.html" title=""></a>
                         <a href="Http$$Client.html" title="">Client</a>
                       </li><li class="current-entities indented4">
+                        <a class="object" href="Http$$H2ClientImpl$.html" title=""></a>
+                        <a class="class" href="Http$$H2ClientImpl.html" title=""></a>
+                        <a href="Http$$H2ClientImpl.html" title="">H2ClientImpl</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="Http$$HttpImpl$.html" title=""></a>
                         <a class="class" href="Http$$HttpImpl.html" title="configure alternative http 1.1 implementations"></a>
                         <a href="Http$$HttpImpl.html" title="configure alternative http 1.1 implementations">HttpImpl</a>
@@ -1453,6 +1457,31 @@ timeouts on it.
 (default: <a href="stats/DefaultStatsReceiver$.html" class="extype" name="com.twitter.finagle.stats.DefaultStatsReceiver">stats.DefaultStatsReceiver</a>).
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a> → <a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Http.Server#withStreaming" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withStreaming(fixedLengthStreamedAfter:com.twitter.util.StorageUnit):com.twitter.finagle.Http.Server"></a><a id="withStreaming(StorageUnit):Server"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Http$$Server.html#withStreaming(fixedLengthStreamedAfter:com.twitter.util.StorageUnit):com.twitter.finagle.Http.Server" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withStreaming</span><span class="params">(<span name="fixedLengthStreamedAfter">fixedLengthStreamedAfter: <a href="https://twitter.github.io/util/docs/com/twitter/util/StorageUnit.html#com.twitter.util.StorageUnit" class="extype" name="com.twitter.util.StorageUnit">StorageUnit</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Streaming allows applications to work with HTTP messages that have large
+(or infinite) content bodies.</p><div class="fullcomment"><div class="comment cmt"><p>Streaming allows applications to work with HTTP messages that have large
+(or infinite) content bodies.</p><p>This method configures <code>fixedLengthStreamedAfter</code> limit, which effectively turns on
+streaming (think <code>withStreaming(true)</code>). The <code>fixedLengthStreamedAfter</code>, however, disables
+streaming for sufficiently small messages of known fixed length.</p><p>If <code>Content-Length</code> of a message does not exceed <code>fixedLengthStreamedAfter</code> it is
+buffered and its content is available through <span class="extype" name="Request.content">Request.content</span> or
+<span class="extype" name="Request.contentString">Request.contentString</span>.</p><p>Messages without <code>Content-Length</code> header are always streamed regardless of their
+actual content length and the <code>fixedLengthStreamedAfter</code> value.</p><p><span class="extype" name="Request.isChunked">Request.isChunked</span> should be used to determine whether a message is streamed
+(<code>isChunked == true</code>) or buffered (<code>isChunked == false</code>).
+</p></div></div>
+    </li><li name="com.twitter.finagle.Http.Server#withStreaming" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withStreaming(enabled:Boolean):com.twitter.finagle.Http.Server"></a><a id="withStreaming(Boolean):Server"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Http$$Server.html#withStreaming(enabled:Boolean):com.twitter.finagle.Http.Server" title="Permalink">
@@ -1469,10 +1498,9 @@ timeouts on it.
       
       <p class="shortcomment cmt">Streaming allows applications to work with HTTP messages that have large
 (or infinite) content bodies.</p><div class="fullcomment"><div class="comment cmt"><p>Streaming allows applications to work with HTTP messages that have large
-(or infinite) content bodies. When this set to <code>true</code>, the message content is
-available through a <a href="https://twitter.github.io/util/docs/com/twitter/io/Reader.html" class="extype" name="com.twitter.io.Reader">com.twitter.io.Reader</a>, which gives the application a
-handle to the byte stream. If <code>false</code>, the entire message content is buffered
-into a <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html" class="extype" name="com.twitter.io.Buf">com.twitter.io.Buf</a>.
+(or infinite) content bodies.</p><p>If <code>enabled</code> is set to <code>true</code>, the message content is available through a
+<a href="https://twitter.github.io/util/docs/com/twitter/io/Reader.html" class="extype" name="com.twitter.io.Reader">com.twitter.io.Reader</a>, which gives the application a handle to the byte stream.</p><p>If <code>enabled</code> is set to <code>false</code>, the entire message content is buffered up to
+maximum allowed message size.
 </p></div></div>
     </li><li name="com.twitter.finagle.Http.Server#withTracer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withTracer(tracer:com.twitter.finagle.tracing.Tracer):com.twitter.finagle.Http.Server"></a><a id="withTracer(Tracer):Server"></a>
