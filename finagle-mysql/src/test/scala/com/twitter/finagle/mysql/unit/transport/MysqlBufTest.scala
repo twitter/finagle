@@ -1,11 +1,8 @@
 package com.twitter.finagle.mysql.transport
 
 import com.twitter.finagle.mysql.Charset
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class BufferTest extends FunSuite {
   val testBytes = Array[Byte](0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x78)
 

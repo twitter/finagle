@@ -2,9 +2,7 @@ package com.twitter.finagle.mysql
 
 import com.twitter.finagle.mysql.transport.Packet
 import com.twitter.io.Buf
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
 trait HexDump {
   val hex: String
@@ -19,7 +17,6 @@ trait HexDump {
   }
 }
 
-@RunWith(classOf[JUnitRunner])
 class HandshakeInitTest extends FunSuite {
   val authPluginHex =
     test("decode protocol version 10")(new HexDump {
@@ -65,7 +62,6 @@ class HandshakeInitTest extends FunSuite {
   })
 }
 
-@RunWith(classOf[JUnitRunner])
 class OKTest extends FunSuite with HexDump {
   val hex = """07 00 00 02 00 00 00 02    00 00 00"""
   test("decode") {
@@ -79,7 +75,6 @@ class OKTest extends FunSuite with HexDump {
   }
 }
 
-@RunWith(classOf[JUnitRunner])
 class ErrorTest extends FunSuite with HexDump {
   val hex =
     """17 00 00 01 ff 48 04 23    48 59 30 30 30 4e 6f 20
@@ -94,7 +89,6 @@ class ErrorTest extends FunSuite with HexDump {
   }
 }
 
-@RunWith(classOf[JUnitRunner])
 class EofTest extends FunSuite with HexDump {
   val hex = """05 00 00 05 fe 00 00 02 00"""
   test("decode") {
@@ -105,7 +99,6 @@ class EofTest extends FunSuite with HexDump {
   }
 }
 
-@RunWith(classOf[JUnitRunner])
 class PrepareOKTest extends FunSuite with HexDump {
   // SELECT CONCAT(?, ?) AS col1:
   val hex =
@@ -149,7 +142,6 @@ class PrepareOKTest extends FunSuite with HexDump {
   }
 }
 
-@RunWith(classOf[JUnitRunner])
 class BinaryResultSetTest extends FunSuite with HexDump {
   // SELECT CONCAT(?, ?) AS col1
   // execute("foo", "bar")

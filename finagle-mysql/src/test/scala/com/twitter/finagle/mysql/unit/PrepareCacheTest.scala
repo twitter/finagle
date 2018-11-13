@@ -5,12 +5,9 @@ import com.twitter.finagle.Service
 import com.twitter.util.Future
 import java.util.concurrent.Executor
 import java.util.concurrent.LinkedBlockingQueue
-import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class PrepareCacheTest extends FunSuite with Eventually with IntegrationPatience {
 
   test("cache prepare requests") {

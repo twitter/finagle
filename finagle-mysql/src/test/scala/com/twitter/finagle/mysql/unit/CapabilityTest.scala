@@ -1,10 +1,7 @@
 package com.twitter.finagle.mysql
 
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
 
-@RunWith(classOf[JUnitRunner])
 class CapabilityTest extends FunSuite {
   val c = Capability(
     Capability.LongPassword,
