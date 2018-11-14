@@ -202,7 +202,10 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
         .replace(StackClient.Role.prepFactory, DelayedRelease.module)
         .replace(TraceInitializerFilter.role, new HttpClientTraceInitializer[Request, Response])
         .prepend(http.TlsFilter.module)
-        .prepend(
+        // Because the payload filter also traces the sizes, it's important that we do so
+        // after the tracing context is initialized.
+        .insertAfter(
+          TraceInitializerFilter.role,
           nonChunkedPayloadSize(
             PayloadSizeFilter.ClientReqTraceKey,
             PayloadSizeFilter.ClientRepTraceKey
@@ -456,14 +459,17 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
   object Server {
     private val stack: Stack[ServiceFactory[Request, Response]] =
       StackServer.newStack
-        .replace(TraceInitializerFilter.role, new HttpServerTraceInitializer[Request, Response])
-        .replace(StackServer.Role.preparer, HttpNackFilter.module)
-        .prepend(
+      // Because the payload filter also traces the sizes, it's important that we do so
+      // after the tracing context is initialized.
+        .insertAfter(
+          TraceInitializerFilter.role,
           nonChunkedPayloadSize(
             PayloadSizeFilter.ServerReqTraceKey,
             PayloadSizeFilter.ServerRepTraceKey
           )
         )
+        .replace(TraceInitializerFilter.role, new HttpServerTraceInitializer[Request, Response])
+        .replace(StackServer.Role.preparer, HttpNackFilter.module)
         .prepend(ServerDtabContextFilter.module)
         .prepend(ServerContextFilter.module)
         .prepend(

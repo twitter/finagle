@@ -156,7 +156,12 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
         TimeoutFactory.module[mux.Request, mux.Response](Stack.Role("MuxSessionTimeout"))
       )
       .replace(BindingFactory.role, MuxBindingFactory)
-      .prepend(PayloadSizeFilter.clientModule(_.body.length, _.body.length))
+      // Because the payload filter also traces the sizes, it's important that we do so
+      // after the tracing context is initialized.
+      .insertAfter(
+        TraceInitializerFilter.role,
+        PayloadSizeFilter.clientModule[mux.Request, mux.Response](_.body.length, _.body.length)
+      )
       // Since NackAdmissionFilter should operate on all requests sent over
       // the wire including retries, it must be below `Retries`. Since it
       // aggregates the status of the entire cluster, it must be above
@@ -288,7 +293,12 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
     private[finagle] val stack: Stack[ServiceFactory[mux.Request, mux.Response]] =
       StackServer.newStack
+      // We remove the trace init filter and don't replace it with anything because
+      // the mux codec initializes tracing.
         .remove(TraceInitializerFilter.role)
+        // Because tracing initialization happens in the mux codec, we know the service stack
+        // is dispatched with proper tracing context, so the ordering of this filter isn't
+        // relevant.
         .prepend(PayloadSizeFilter.serverModule(_.body.length, _.body.length))
 
     private[finagle] val tlsEnable: (Stack.Params, ChannelPipeline) => Unit = (params, pipeline) =>
