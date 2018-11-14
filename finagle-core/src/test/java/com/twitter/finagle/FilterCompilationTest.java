@@ -35,13 +35,13 @@ public class FilterCompilationTest {
     };
 
     passThruFilter.andThen(Filter.identity());
-    typeAgnosticPassThruFilter.andThen(Filter.TypeAgnostic$.MODULE$.Identity());
+    typeAgnosticPassThruFilter.andThen(Filter.typeAgnosticIdentity());
 
     passThruFilter.agnosticAndThen(typeAgnosticPassThruFilter);
     typeAgnosticPassThruFilter.andThen(passThruFilter);
 
     Filter.<Object, String>identity().andThen(passThruFilter);
-    Filter.TypeAgnostic$.MODULE$.Identity().andThen(typeAgnosticPassThruFilter);
+    Filter.typeAgnosticIdentity().andThen(typeAgnosticPassThruFilter);
 
     passThruFilter.andThen(constSvc);
     typeAgnosticPassThruFilter.andThen(constSvc);
@@ -96,7 +96,7 @@ public class FilterCompilationTest {
 
     assertEquals(
         "com.twitter.finagle.TypeAgnosticPassThruFilter",
-        typeAgnosticPassThruFilter.andThen(Filter.TypeAgnostic$.MODULE$.Identity()).toString());
+        typeAgnosticPassThruFilter.andThen(Filter.typeAgnosticIdentity()).toString());
 
     assertEquals(
         "com.twitter.finagle.PassThruFilter"
@@ -114,7 +114,7 @@ public class FilterCompilationTest {
 
     assertEquals(
         "com.twitter.finagle.TypeAgnosticPassThruFilter",
-        Filter.TypeAgnostic$.MODULE$.Identity().andThen(typeAgnosticPassThruFilter).toString());
+        Filter.typeAgnosticIdentity().andThen(typeAgnosticPassThruFilter).toString());
 
     assertEquals(
         "com.twitter.finagle.PassThruFilter"

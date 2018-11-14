@@ -300,9 +300,16 @@ object Filter {
   }
 
   object TypeAgnostic {
+
+    /**
+     * A pass-through [[TypeAgnostic]] that in turn uses a
+     * [[Filter.Identity]] for its implementation.
+     *
+     * @see [[Filter.typeAgnosticIdentity]] for Java compatibility.
+     */
     val Identity: TypeAgnostic =
       new TypeAgnostic {
-        def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = identity[Req, Rep]
+        def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = Filter.identity[Req, Rep]
 
         override def andThen(next: TypeAgnostic): TypeAgnostic = next
 
@@ -320,8 +327,19 @@ object Filter {
       }
   }
 
+  /**
+   * Returns a [[Filter]] that does nothing beyond passing inputs through
+   * to the [[Service]].
+   */
   def identity[Req, Rep]: SimpleFilter[Req, Rep] =
     Identity.asInstanceOf[SimpleFilter[Req, Rep]]
+
+  /**
+   * A pass-through [[TypeAgnostic]] that in turn uses a
+   * [[Filter.Identity]] for its implementation.
+   */
+  def typeAgnosticIdentity: TypeAgnostic =
+    TypeAgnostic.Identity
 
   def mk[ReqIn, RepOut, ReqOut, RepIn](
     f: (ReqIn, ReqOut => Future[RepIn]) => Future[RepOut]
@@ -341,7 +359,7 @@ object Filter {
   def choose[Req, Rep](
     pf: PartialFunction[Req, Filter[Req, Rep, Req, Rep]]
   ): Filter[Req, Rep, Req, Rep] = new Filter[Req, Rep, Req, Rep] {
-    private[this] val const: (Req => SimpleFilter[Req, Rep]) =
+    private[this] val const: Req => SimpleFilter[Req, Rep] =
       Function.const(Filter.identity[Req, Rep])
 
     def apply(request: Req, service: Service[Req, Rep]): Future[Rep] =
