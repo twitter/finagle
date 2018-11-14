@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 import java.util.Collections;
 
 import scala.collection.JavaConversions;
+import scala.runtime.AbstractFunction1;
 
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.junit.Rule;
@@ -26,21 +27,33 @@ import com.twitter.finagle.mux.Request;
 import com.twitter.finagle.mux.Response;
 import com.twitter.finagle.param.Label;
 import com.twitter.finagle.thrift.ClientId;
+import com.twitter.finagle.thrift.MethodMetadata;
 import com.twitter.finagle.thrift.RichServerParam;
 import com.twitter.finagle.thriftmux.thriftscala.TestService;
 import com.twitter.finagle.thriftmux.thriftscala.TestService$FinagleService;
 import com.twitter.util.Await;
 import com.twitter.util.Closable;
 import com.twitter.util.Closables;
+import com.twitter.util.Duration;
 import com.twitter.util.Future;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 
 public class EndToEndTest {
 
   public static class TestServiceImpl implements TestService.MethodPerEndpoint {
     @Override
     public Future<String> query(String x) {
+      assertTrue(MethodMetadata.current().exists(
+          new AbstractFunction1<MethodMetadata, Object>() {
+            @Override
+            public Object apply(MethodMetadata v1) {
+              return "query".equals(v1.methodName());
+            }
+          }
+        )
+      );
       return Future.value(x + x);
     }
 
@@ -50,22 +63,69 @@ public class EndToEndTest {
     }
   }
 
+  public static class TestJavaServiceImpl
+      implements com.twitter.finagle.thriftmux.thriftjava.TestService.ServiceIface {
+    @Override
+    public Future<String> query(String x) {
+      assertTrue(MethodMetadata.current().exists(
+          new AbstractFunction1<MethodMetadata, Object>() {
+            @Override
+            public Object apply(MethodMetadata v1) {
+              return "query".equals(v1.methodName());
+            }
+          }
+          )
+      );
+      return Future.value(x + x);
+    }
+  }
+
   /**
    * Tests interfaces.
    */
   @Test
   public void testInterfaces() throws Exception {
     ListeningServer server =
-      ThriftMux.server().serveIface("localhost:*", new TestServiceImpl());
+        ThriftMux.server().serveIface("localhost:*", new TestServiceImpl());
 
     TestService.FutureIface client =
-      ThriftMux.client().newIface(
-          Name$.MODULE$.bound(JavaConversions.asScalaBuffer(
-              Collections.singletonList(
-                Addresses.newInetAddress((InetSocketAddress) server.boundAddress())))),
-          "a_client",
-          TestService.FutureIface.class);
-    assertEquals(Await.result(client.query("ok")), "okok");
+        ThriftMux.client().newIface(
+            Name$.MODULE$.bound(JavaConversions.asScalaBuffer(
+                Collections.singletonList(
+                    Addresses.newInetAddress((InetSocketAddress) server.boundAddress())))),
+            "a_client",
+            TestService.FutureIface.class);
+    try {
+      assertEquals(Await.result(client.query("ok")), "okok");
+    } finally {
+      Await.result(client.asClosable().close(), Duration.fromSeconds(2));
+      Await.result(server.close(), Duration.fromSeconds(2));
+    }
+  }
+
+  /**
+   * Tests Java interfaces.
+   */
+  @Test
+  public void testJavaInterfaces() throws Exception {
+    ListeningServer server =
+        ThriftMux.server().serve(
+            "localhost:*",
+            new com.twitter.finagle.thriftmux.thriftjava.TestService.Service(
+                new TestJavaServiceImpl()));
+
+    com.twitter.finagle.thriftmux.thriftjava.TestService.ServiceIface client =
+        ThriftMux.client().newIface(
+            Name$.MODULE$.bound(JavaConversions.asScalaBuffer(
+                Collections.singletonList(
+                    Addresses.newInetAddress((InetSocketAddress) server.boundAddress())))),
+            "a_client",
+            com.twitter.finagle.thriftmux.thriftjava.TestService.ServiceIface.class);
+    try {
+      assertEquals(Await.result(client.query("ok")), "okok");
+    } finally {
+      Await.result(server.close(), Duration.fromSeconds(2));
+    }
   }
 
   /**
@@ -136,16 +196,64 @@ public class EndToEndTest {
       ThriftMux.server().serveIface(address, new TestServiceImpl());
 
     TestService.FutureIface client =
-      ThriftMux.client().filtered(filter).newIface(
-        Name$.MODULE$.bound(JavaConversions.asScalaBuffer(
-          Collections.singletonList(
-            Addresses.newInetAddress((InetSocketAddress) server.boundAddress())))),
-      "a_client",
-        TestService.FutureIface.class);
+        ThriftMux.client().filtered(filter).newIface(
+            Name$.MODULE$.bound(JavaConversions.asScalaBuffer(
+                Collections.singletonList(
+                    Addresses.newInetAddress((InetSocketAddress) server.boundAddress())))),
+            "a_client",
+            TestService.FutureIface.class);
+    try {
+      expectedEx.expectMessage("client unhappy");
+      Await.result(client.query("hi"));
+    } finally {
+      Await.result(client.asClosable().close(), Duration.fromSeconds(2));
+      Await.result(server.close(), Duration.fromSeconds(2));
+    }
+  }
 
+  /**
+   * Tests client with filtered over Java service
+   */
+  @Test
+  public void testFilteredClientWithJavaServer() throws Exception {
+    Filter<Request, Response, Request, Response> filter
+        = new SimpleFilter<Request, Response>() {
+      @Override
+      public Future<Response> apply(Request request, Service<Request, Response> service) {
+        return Future.exception(new FailedFastException("client unhappy"));
+      }
+    };
 
-    expectedEx.expectMessage("client unhappy");
-    Await.result(client.query("hi"));
+    InetSocketAddress address = new InetSocketAddress(InetAddress.getLoopbackAddress(), 0);
+    ListeningServer server =
+        ThriftMux.server().serveIface(address, new TestServiceImpl());
+
+    TestService.FutureIface scalaClient =
+        ThriftMux.client().filtered(filter).newIface(
+            Name$.MODULE$.bound(JavaConversions.asScalaBuffer(
+                Collections.singletonList(
+                    Addresses.newInetAddress((InetSocketAddress) server.boundAddress())))),
+            "a_client",
+            TestService.FutureIface.class);
+
+    try {
+      expectedEx.expectMessage("client unhappy");
+      Await.result(scalaClient.query("hi"));
+
+      com.twitter.finagle.thriftmux.thriftjava.TestService.ServiceIface javaClient =
+          ThriftMux.client().newIface(
+              Name$.MODULE$.bound(JavaConversions.asScalaBuffer(
+                  Collections.singletonList(
+                      Addresses.newInetAddress((InetSocketAddress) server.boundAddress())))),
+              "a_client",
+              com.twitter.finagle.thriftmux.thriftjava.TestService.ServiceIface.class);
+
+      expectedEx.expectMessage("client unhappy");
+      Await.result(javaClient.query("hi"));
+    } finally {
+      Await.result(scalaClient.asClosable().close(), Duration.fromSeconds(2));
+      Await.result(server.close(), Duration.fromSeconds(2));
+    }
   }
 
   /**
@@ -168,14 +276,56 @@ public class EndToEndTest {
         .serveIface(address, new TestServiceImpl());
 
     TestService.FutureIface client =
-      ThriftMux.client().newIface(
-        Name$.MODULE$.bound(JavaConversions.asScalaBuffer(
-          Collections.singletonList(
-            Addresses.newInetAddress((InetSocketAddress) server.boundAddress())))),
-      "a_client",
-        TestService.FutureIface.class);
+        ThriftMux.client().newIface(
+            Name$.MODULE$.bound(JavaConversions.asScalaBuffer(
+                Collections.singletonList(
+                    Addresses.newInetAddress((InetSocketAddress) server.boundAddress())))),
+            "a_client",
+            TestService.FutureIface.class);
+    try {
+      expectedEx.expectMessage("server unhappy");
+      Await.result(client.query("hi"));
+    } finally {
+      Await.result(client.asClosable().close(), Duration.fromSeconds(2));
+      Await.result(server.close(), Duration.fromSeconds(2));
+    }
+  }
 
-    expectedEx.expectMessage("server unhappy");
-    Await.result(client.query("hi"));
+  /**
+   * Tests Java server with filtered
+   */
+  @Test
+  public void testFilteredJavaServer() throws Exception {
+    Filter<Request, Response, Request, Response> filter
+        = new SimpleFilter<Request, Response>() {
+      @Override
+      public Future<Response> apply(Request request, Service<Request, Response> service) {
+        return Future.exception(new FailedFastException("server unhappy"));
+      }
+    };
+
+    InetSocketAddress address = new InetSocketAddress(InetAddress.getLoopbackAddress(), 0);
+    ListeningServer server =
+        ThriftMux.server()
+            .filtered(filter)
+            .serve(
+                address,
+                new com.twitter.finagle.thriftmux.thriftjava.TestService.Service(
+                    new TestJavaServiceImpl()));
+
+    TestService.FutureIface client =
+        ThriftMux.client().newIface(
+            Name$.MODULE$.bound(JavaConversions.asScalaBuffer(
+                Collections.singletonList(
+                    Addresses.newInetAddress((InetSocketAddress) server.boundAddress())))),
+            "a_client",
+            TestService.FutureIface.class);
+    try {
+      expectedEx.expectMessage("server unhappy");
+      Await.result(client.query("hi"));
+    } finally {
+      Await.result(client.asClosable().close(), Duration.fromSeconds(2));
+      Await.result(server.close(), Duration.fromSeconds(2));
+    }
   }
 }

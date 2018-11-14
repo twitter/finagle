@@ -10,7 +10,13 @@ import com.twitter.finagle.dispatch.PipeliningDispatcher
 import com.twitter.finagle.param.{Label, Stats, Tracer => PTracer}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats._
-import com.twitter.finagle.thrift.{ClientId, Protocols, RichServerParam, ThriftClientRequest}
+import com.twitter.finagle.thrift.{
+  ClientId,
+  MethodMetadata,
+  Protocols,
+  RichServerParam,
+  ThriftClientRequest
+}
 import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
 import com.twitter.finagle.thriftmux.thriftscala._
 import com.twitter.finagle.tracing.Annotation.{ClientSend, ServerRecv}
@@ -67,7 +73,16 @@ abstract class AbstractEndToEndTest
     val server = serverImpl.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new TestService.MethodPerEndpoint {
-        def query(x: String): Future[String] =
+        def query(x: String): Future[String] = {
+          assert(
+            MethodMetadata.current.exists {
+              methodMetadata =>
+                methodMetadata.methodName == TestService.Query.name &&
+                methodMetadata.serviceName == TestService.Query.serviceName &&
+                methodMetadata.argsClass.getName == TestService.Query.argsCodec.metaData.structClass.getName &&
+                methodMetadata.resultClass.getName == TestService.Query.responseCodec.metaData.structClass.getName
+            }
+          )
           (Contexts.broadcast.get(testContext), Dtab.local) match {
             case (None, Dtab.empty) =>
               Future.value(x + x)
@@ -79,6 +94,7 @@ abstract class AbstractEndToEndTest
             case (_, dtab) =>
               Future.value(dtab.show)
           }
+        }
       }
     )
   }

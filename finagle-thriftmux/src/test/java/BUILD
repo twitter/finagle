@@ -9,6 +9,7 @@ junit_tests(
         "finagle/finagle-thrift/src/main/java",
         "finagle/finagle-thrift/src/main/scala",
         "finagle/finagle-thriftmux",
+        "finagle/finagle-thriftmux/src/test/thrift:thrift-java",
         "finagle/finagle-thriftmux/src/test/thrift:thrift-scala",
         "scrooge/scrooge-core/src/main/scala",
         "util/util-core/src/main/java",
