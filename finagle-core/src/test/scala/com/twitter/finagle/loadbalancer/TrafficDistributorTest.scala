@@ -487,7 +487,7 @@ class TrafficDistributorTest extends FunSuite {
     assert(balancers.size == 2)
 
     dest() = Activity.Ok(Set.empty[Address])
-    val ex = intercept[Exception] {Await.result(dist())}
+    val ex = intercept[NoBrokersAvailableException] {Await.result(dist())}
     assert(balancers.size == 3)
   })
 
@@ -501,7 +501,7 @@ class TrafficDistributorTest extends FunSuite {
     assert(balancers.size == 2)
 
     dest() = Activity.Ok(Set.empty[Address])
-    val ex = intercept[Exception] {Await.result(dist())}
+    val ex = intercept[NoBrokersAvailableException] {Await.result(dist())}
     assert(balancers.size == 3)
 
     dest() = Activity.Ok(Set((1, 1.0)).map(x => WeightedAddress(Address(x._1), x._2)))

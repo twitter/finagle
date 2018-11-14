@@ -213,22 +213,22 @@ private class TrafficDistributor[Req, Rep](
           val lb = newBalancer(Activity(emptyEndpoints))
           balancers + (0.0 -> CachedBalancer(lb, emptyEndpoints, 0))
         } else {
-        weightedGroups.foldLeft(balancers) {
-          case (cache, (weight, factories)) =>
-            val unweighted = factories.map { case WeightedFactory(f, _) => f }
-            val newCacheEntry = if (cache.contains(weight)) {
-              // an update that contains an existing weight class updates
-              // the balancers backing collection.
-              val cached = cache(weight)
-              cached.endpoints.update(Activity.Ok(unweighted))
-              cached.copy(size = unweighted.size)
-            } else {
-              val endpoints: BalancerEndpoints[Req, Rep] = Var(Activity.Ok(unweighted))
-              val lb = newBalancer(Activity(endpoints))
-              CachedBalancer(lb, endpoints, unweighted.size)
-            }
-            cache + (weight -> newCacheEntry)
-        }
+          weightedGroups.foldLeft(balancers) {
+            case (cache, (weight, factories)) =>
+              val unweighted = factories.map { case WeightedFactory(f, _) => f }
+              val newCacheEntry = if (cache.contains(weight)) {
+                // an update that contains an existing weight class updates
+                // the balancers backing collection.
+                val cached = cache(weight)
+                cached.endpoints.update(Activity.Ok(unweighted))
+                cached.copy(size = unweighted.size)
+              } else {
+                val endpoints: BalancerEndpoints[Req, Rep] = Var(Activity.Ok(unweighted))
+                val lb = newBalancer(Activity(endpoints))
+                CachedBalancer(lb, endpoints, unweighted.size)
+              }
+              cache + (weight -> newCacheEntry)
+          }
         }
 
         // weight classes that no longer exist in the update are removed from
