@@ -70,8 +70,10 @@ private class BinaryEncodedRow(
             // Nonbinary strings as stored in the CHAR, VARCHAR, and TEXT data types
             case Type.VarChar | Type.String | Type.VarString | Type.TinyBlob | Type.Blob |
                 Type.MediumBlob
-                if !Charset.isBinary(field.charset) && Charset.isCompatible(field.charset) =>
-              StringValue(reader.readLengthCodedString(Charset(field.charset)))
+                if !MysqlCharset.isBinary(field.charset) && MysqlCharset.isCompatible(
+                  field.charset
+                ) =>
+              StringValue(reader.readLengthCodedString(MysqlCharset(field.charset)))
 
             case Type.LongBlob =>
               throw new UnsupportedOperationException("LongBlob is not supported!")

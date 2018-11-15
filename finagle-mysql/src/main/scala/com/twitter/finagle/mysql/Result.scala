@@ -63,7 +63,7 @@ object HandshakeInit extends Decoder[HandshakeInit] {
 
           HandshakeInit(
             protocol,
-            new String(bytesVersion, Charset(charset)),
+            new String(bytesVersion, MysqlCharset(charset)),
             threadId,
             Array.concat(salt1, salt2),
             serverCap,
@@ -201,7 +201,7 @@ object Field extends Decoder[Field] {
       val bytesOrigName = br.readLengthCodedBytes()
       br.readVariableLong() // length of the following fields (always 0x0c)
       val charset = br.readShortLE()
-      val jCharset = Charset(charset)
+      val jCharset = MysqlCharset(charset)
       val catalog = new String(bytesCatalog, jCharset)
       val db = new String(bytesDb, jCharset)
       val table = new String(bytesTable, jCharset)

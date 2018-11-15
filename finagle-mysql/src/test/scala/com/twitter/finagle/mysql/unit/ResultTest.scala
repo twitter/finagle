@@ -31,7 +31,7 @@ class HandshakeInitTest extends FunSuite {
       assert(h.version == "5.5.2-m2")
       assert(h.threadId == 11)
       assert(h.serverCap.mask == 0xf7ff)
-      assert(h.charset == Charset.Utf8_general_ci)
+      assert(h.charset == MysqlCharset.Utf8_general_ci)
       assert(h.status == 2)
       assert(h.salt.length == 20)
       assert(
@@ -53,7 +53,7 @@ class HandshakeInitTest extends FunSuite {
     assert(h.protocol == 10)
     assert(h.version == "5.6.4-m7-log")
     assert(h.threadId == 2646)
-    assert(Charset.isLatin1(h.charset))
+    assert(MysqlCharset.isLatin1(h.charset))
     assert(h.serverCap.has(Capability.Protocol41))
     assert(h.serverCap.has(Capability.PluginAuth))
     assert(h.serverCap.has(Capability.SecureConnection))
@@ -125,10 +125,10 @@ class PrepareOKTest extends FunSuite with HexDump {
     val p2 = params(1)
     assert(p1.name == "?")
     assert(p1.fieldType == Type.VarString)
-    assert(p1.charset == Charset.Binary)
+    assert(p1.charset == MysqlCharset.Binary)
     assert(p2.name == "?")
     assert(p2.fieldType == Type.VarString)
-    assert(p2.charset == Charset.Binary)
+    assert(p2.charset == MysqlCharset.Binary)
     assert(
       packets.size >= 1 + p.numOfParams + p.numOfCols,
       "expected %d column packets".format(p.numOfCols)

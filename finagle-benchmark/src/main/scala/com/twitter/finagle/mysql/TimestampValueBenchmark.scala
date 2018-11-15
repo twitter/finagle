@@ -14,7 +14,7 @@ class TimestampValueBenchmark extends StdBenchAnnotations {
   private def rawValue(dateString: String): RawValue =
     RawValue(
       Type.Timestamp,
-      Charset.Utf8_general_ci,
+      MysqlCharset.Utf8_general_ci,
       isBinary = false,
       dateString.getBytes("UTF-8")
     )

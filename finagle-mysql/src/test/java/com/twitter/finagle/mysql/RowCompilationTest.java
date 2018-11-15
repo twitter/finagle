@@ -93,13 +93,13 @@ public final class RowCompilationTest {
   private final Row bytesRow = new RowImpl(
       fields,
       Collections.singletonList(new RawValue(
-          Type.TinyBlob(), Charset.Binary(), true, new byte[] {0, 1, 2 }))
+          Type.TinyBlob(), MysqlCharset.Binary(), true, new byte[] {0, 1, 2 }))
   );
 
   private final Row timestampRow = new RowImpl(
       fields,
       Collections.singletonList(new RawValue(
-          Type.Timestamp(), Charset.Utf8_bin(), false,
+          Type.Timestamp(), MysqlCharset.Utf8_bin(), false,
           "2018-05-05 10:20:30".getBytes(StandardCharsets.UTF_8))
       )
   );

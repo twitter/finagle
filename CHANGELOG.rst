@@ -17,6 +17,12 @@ New Features
   for setting information about the current Thrift method and an accessor for retrieving
   the currently set value. ``PHAB_ID=D241295``
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-mysql: `c.t.f.m.Charset` has been renamed to `c.t.f.m.MysqlCharset` to resolve
+  any ambiguity between it and the `Charset` `Stack` parameter. ``PHAB_ID=D240965``
+
 18.11.0
 -------
 

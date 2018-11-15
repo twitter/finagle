@@ -1,6 +1,6 @@
 package com.twitter.finagle.mysql.transport
 
-import com.twitter.finagle.mysql.Charset
+import com.twitter.finagle.mysql.MysqlCharset
 import org.scalatest.FunSuite
 
 class BufferTest extends FunSuite {
@@ -16,7 +16,7 @@ class BufferTest extends FunSuite {
     val str = "test"
     val bytes = Array.concat(Array(str.size.toByte), str.getBytes)
     val br = MysqlBuf.reader(bytes)
-    assert(br.readLengthCodedString(Charset.defaultCharset) == str)
+    assert(br.readLengthCodedString(MysqlCharset.defaultCharset) == str)
   }
 
   def writerCtx() = new {
@@ -68,8 +68,8 @@ class BufferTest extends FunSuite {
     val ctx = writerCtx()
     import ctx._
     val str = "test"
-    bw.writeLengthCodedString(str, Charset.defaultCharset)
-    assert(br.readLengthCodedString(Charset.defaultCharset) == str)
+    bw.writeLengthCodedString(str, MysqlCharset.defaultCharset)
+    assert(br.readLengthCodedString(MysqlCharset.defaultCharset) == str)
   }
 
   test("fail to write a negative value as a length-encoded integer") {
@@ -92,19 +92,19 @@ class BufferTest extends FunSuite {
     val len = MysqlBuf.sizeOfLen(str.size) + str.size
     val strAsBytes = new Array[Byte](len)
     val bw = MysqlBuf.writer(strAsBytes)
-    bw.writeLengthCodedString(str, Charset.defaultCharset)
+    bw.writeLengthCodedString(str, MysqlCharset.defaultCharset)
 
     val br = MysqlBuf.reader(strAsBytes)
-    assert(br.readLengthCodedString(Charset.defaultCharset) == str)
+    assert(br.readLengthCodedString(MysqlCharset.defaultCharset) == str)
   }
 
   test("read/write coded string with non-ascii characters") {
     val str = "バイトルドットコム"
     val strAsBytes = new Array[Byte](100)
     val bw = MysqlBuf.writer(strAsBytes)
-    bw.writeLengthCodedString(str, Charset.defaultCharset)
+    bw.writeLengthCodedString(str, MysqlCharset.defaultCharset)
 
     val br = MysqlBuf.reader(strAsBytes)
-    assert(br.readLengthCodedString(Charset.defaultCharset) == str)
+    assert(br.readLengthCodedString(MysqlCharset.defaultCharset) == str)
   }
 }

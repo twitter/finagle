@@ -77,7 +77,7 @@ class ClientDispatcherTest extends FunSuite {
     bw.writeByte(0xff) // field count
     bw.writeShortLE(0x041b) //err no
     bw.writeBytes("#42S02".getBytes) // sqlstate
-    bw.writeBytes(message.getBytes(Charset.defaultCharset.displayName))
+    bw.writeBytes(message.getBytes(MysqlCharset.defaultCharset.displayName))
 
     val errpacket = Packet(1, bw.owned())
     val expectedError = Error.decode(errpacket)
@@ -126,7 +126,7 @@ class ClientDispatcherTest extends FunSuite {
 
     val bw = MysqlBuf.writer(new Array[Byte](sizeOfField))
 
-    def writeString(s: String) = bw.writeLengthCodedString(s, Charset.defaultCharset)
+    def writeString(s: String) = bw.writeLengthCodedString(s, MysqlCharset.defaultCharset)
 
     writeString(f.catalog)
     writeString(f.db)
@@ -155,7 +155,7 @@ class ClientDispatcherTest extends FunSuite {
     val bufferSize = numFields * valueSize
     val bw = MysqlBuf.writer(new Array[Byte](bufferSize))
     for (i <- 1 to numFields) {
-      bw.writeLengthCodedString("value" + i, Charset.defaultCharset)
+      bw.writeLengthCodedString("value" + i, MysqlCharset.defaultCharset)
     }
 
     Packet(0, bw.owned())

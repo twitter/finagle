@@ -39,13 +39,14 @@ class TimestampValueTest extends FunSuite {
   }
 
   test("decode binary timestamp with binary character set") {
-    val timestampValueLocal(ts) = RawValue(Type.Timestamp, Charset.Binary, true, timestampBinary)
+    val timestampValueLocal(ts) =
+      RawValue(Type.Timestamp, MysqlCharset.Binary, true, timestampBinary)
     assert(ts == Timestamp.valueOf("2015-01-02 03:04:05.678901"))
   }
 
   test("decode binary timestamp with utf8_general_ci character set") {
     val timestampValueLocal(ts) =
-      RawValue(Type.Timestamp, Charset.Utf8_general_ci, true, timestampBinary)
+      RawValue(Type.Timestamp, MysqlCharset.Utf8_general_ci, true, timestampBinary)
     assert(ts == Timestamp.valueOf("2015-01-02 03:04:05.678901"))
   }
 
@@ -53,7 +54,7 @@ class TimestampValueTest extends FunSuite {
     val str = "2015-01-02 03:04:05.67890"
 
     val timestampValueLocal(ts) =
-      RawValue(Type.Timestamp, Charset.Binary, false, str.getBytes(US_ASCII))
+      RawValue(Type.Timestamp, MysqlCharset.Binary, false, str.getBytes(US_ASCII))
     assert(ts == Timestamp.valueOf("2015-01-02 03:04:05.6789"))
   }
 
@@ -61,14 +62,14 @@ class TimestampValueTest extends FunSuite {
     val str = "2015-01-02 03:04:05.67890"
 
     val timestampValueLocal(ts) =
-      RawValue(Type.Timestamp, Charset.Utf8_general_ci, false, str.getBytes(UTF_8))
+      RawValue(Type.Timestamp, MysqlCharset.Utf8_general_ci, false, str.getBytes(UTF_8))
     assert(ts == Timestamp.valueOf("2015-01-02 03:04:05.6789"))
   }
 
   test("decode zero timestamp") {
     val str = "0000-00-00 00:00:00"
 
-    val timestampValueLocal(ts) = RawValue(Type.Timestamp, Charset.Binary, false, str.getBytes)
+    val timestampValueLocal(ts) = RawValue(Type.Timestamp, MysqlCharset.Binary, false, str.getBytes)
     assert(ts == new Timestamp(0))
   }
 }

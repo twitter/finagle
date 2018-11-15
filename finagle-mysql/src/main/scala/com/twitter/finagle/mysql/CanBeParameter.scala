@@ -29,13 +29,13 @@ object CanBeParameter {
   implicit val stringCanBeParameter: CanBeParameter[String] = {
     new CanBeParameter[String] {
       def sizeOf(param: String): Int = {
-        val bytes = param.getBytes(Charset.defaultCharset)
+        val bytes = param.getBytes(MysqlCharset.defaultCharset)
         arrayLength(bytes)
       }
 
       def typeCode(param: String): Short = Type.VarChar
       def write(writer: MysqlBufWriter, param: String): Unit =
-        writer.writeLengthCodedString(param, Charset.defaultCharset)
+        writer.writeLengthCodedString(param, MysqlCharset.defaultCharset)
     }
   }
 
@@ -192,7 +192,7 @@ object CanBeParameter {
   // https://dev.mysql.com/doc/internals/en/binary-protocol-value.html#packet-ProtocolBinary::MYSQL_TYPE_NEWDECIMAL
   implicit val bigDecimalCanBeParameter: CanBeParameter[BigDecimal] =
     new CanBeParameter[BigDecimal] {
-      private[this] val binaryCharset = Charset(Charset.Binary)
+      private[this] val binaryCharset = MysqlCharset(MysqlCharset.Binary)
 
       private[this] def asBytes(bd: BigDecimal): Array[Byte] =
         bd.toString.getBytes(binaryCharset)
@@ -228,7 +228,7 @@ object CanBeParameter {
       def sizeOf(param: Value): Int = param match {
         case RawValue(_, _, true, b) => arrayLength(b)
         case StringValue(s) =>
-          val bytes = s.getBytes(Charset.defaultCharset)
+          val bytes = s.getBytes(MysqlCharset.defaultCharset)
           arrayLength(bytes)
         case ByteValue(_) => 1
         case ShortValue(_) => 2
@@ -265,7 +265,7 @@ object CanBeParameter {
         case BigIntValue(b) => bigIntCanBeParameter.write(writer, b)
         case FloatValue(f) => writer.writeFloatLE(f)
         case DoubleValue(d) => writer.writeDoubleLE(d)
-        case StringValue(s) => writer.writeLengthCodedString(s, Charset.defaultCharset)
+        case StringValue(s) => writer.writeLengthCodedString(s, MysqlCharset.defaultCharset)
       }
     }
   }

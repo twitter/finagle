@@ -160,7 +160,7 @@ case class HandshakeResponse(
 
   private[this] def encryptPassword(password: String, salt: Array[Byte]) = {
     val md = MessageDigest.getInstance("SHA-1")
-    val hash1 = md.digest(password.getBytes(Charset(charset).displayName))
+    val hash1 = md.digest(password.getBytes(MysqlCharset(charset).displayName))
     md.reset()
     val hash2 = md.digest(hash1)
     md.reset()

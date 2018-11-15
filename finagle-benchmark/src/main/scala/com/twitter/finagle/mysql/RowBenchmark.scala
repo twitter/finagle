@@ -60,7 +60,7 @@ private object RowBenchmark {
       origTable = "table",
       name = columnName,
       origName = columnName,
-      charset = Charset.Utf8_general_ci,
+      charset = MysqlCharset.Utf8_general_ci,
       displayLength = 10,
       fieldType = fieldType,
       flags = 0.toShort,

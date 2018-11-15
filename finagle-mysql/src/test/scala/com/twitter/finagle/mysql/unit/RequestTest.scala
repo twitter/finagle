@@ -29,7 +29,7 @@ class HandshakeResponseTest extends FunSuite {
     Capability(0xfffff6ff),
     salt,
     Capability(0xf7ff),
-    Charset.Utf8_general_ci,
+    MysqlCharset.Utf8_general_ci,
     16777216
   )
   val br = MysqlBuf.reader(req.toPacket.body)
@@ -162,11 +162,11 @@ class ExecuteRequestTest extends FunSuite {
     }
 
     test("String") {
-      assert(br.readLengthCodedString(Charset.defaultCharset) == strVal)
+      assert(br.readLengthCodedString(MysqlCharset.defaultCharset) == strVal)
     }
 
     test("Non-Ascii String") {
-      assert(br.readLengthCodedString(Charset.defaultCharset) == nonAsciiStrVal)
+      assert(br.readLengthCodedString(MysqlCharset.defaultCharset) == nonAsciiStrVal)
     }
 
     test("Boolean") {
@@ -198,25 +198,25 @@ class ExecuteRequestTest extends FunSuite {
     }
 
     test("java.sql.Timestamp") {
-      val raw = RawValue(Type.Timestamp, Charset.Binary, true, br.readLengthCodedBytes())
+      val raw = RawValue(Type.Timestamp, MysqlCharset.Binary, true, br.readLengthCodedBytes())
       val TimestampValue(ts) = raw
       assert(ts == timestamp)
     }
 
     test("java.sql.Date") {
-      val raw = RawValue(Type.Date, Charset.Binary, true, br.readLengthCodedBytes())
+      val raw = RawValue(Type.Date, MysqlCharset.Binary, true, br.readLengthCodedBytes())
       val DateValue(d) = raw
       assert(d.toString == sqlDate.toString)
     }
 
     test("java.util.Date") {
-      val raw = RawValue(Type.DateTime, Charset.Binary, true, br.readLengthCodedBytes())
+      val raw = RawValue(Type.DateTime, MysqlCharset.Binary, true, br.readLengthCodedBytes())
       val TimestampValue(dt) = raw
       assert(dt.getTime == timestamp.getTime)
     }
 
     test("StringValue") {
-      assert(br.readLengthCodedString(Charset.defaultCharset) == strVal)
+      assert(br.readLengthCodedString(MysqlCharset.defaultCharset) == strVal)
     }
 
     test("ByteValue") {

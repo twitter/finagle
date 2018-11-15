@@ -24,7 +24,7 @@ class StringEncodedRowBenchmark extends StdBenchAnnotations {
     "table",
     id,
     id,
-    Charset.Utf8_general_ci,
+    MysqlCharset.Utf8_general_ci,
     100, // displayLength
     fieldType,
     0.toShort,

@@ -2,7 +2,7 @@ package com.twitter.finagle.mysql
 
 import com.twitter.conversions.storage._
 import com.twitter.finagle.Stack
-import com.twitter.finagle.mysql.Charset.Utf8_general_ci
+import com.twitter.finagle.mysql.MysqlCharset.Utf8_general_ci
 import com.twitter.util.{Return, StorageUnit, Throw, Try}
 
 /**
@@ -142,7 +142,7 @@ case class Handshake(
     else Throw(IncompatibleVersion)
 
   private[this] def isCompatibleCharset(init: HandshakeInit) =
-    if (Charset.isCompatible(init.charset)) Return.True
+    if (MysqlCharset.isCompatible(init.charset)) Return.True
     else Throw(IncompatibleCharset)
 
   def apply(init: HandshakeInit): Try[HandshakeResponse] = {
