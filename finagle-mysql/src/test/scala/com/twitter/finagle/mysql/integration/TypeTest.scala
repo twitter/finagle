@@ -2,6 +2,7 @@ package com.twitter.finagle.mysql.integration
 
 import com.twitter.finagle.Mysql
 import com.twitter.finagle.mysql._
+import com.twitter.finagle.mysql.param.UnsignedColumns
 import com.twitter.util.{Await, TwitterDateFormat}
 import java.sql.Timestamp
 import java.util.TimeZone
@@ -30,7 +31,7 @@ class NumericTypeTest extends FunSuite with IntegrationClient {
   ): Mysql.Client = {
     super
       .configureClient(username, password, db)
-      .configured(Mysql.param.UnsignedColumns(supported = true))
+      .configured(UnsignedColumns(supported = true))
   }
 
   for (c <- client) {

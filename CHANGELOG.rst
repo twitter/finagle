@@ -26,6 +26,10 @@ Breaking API Changes
 * finagle-mysql: `c.t.f.m.Charset` has been renamed to `c.t.f.m.MysqlCharset` to resolve
   any ambiguity between it and the `Charset` `Stack` parameter. ``PHAB_ID=D240965``
 
+* finagle-mysql: All `Stack` params (`Charset`, `Credentials`, `Database`, `FoundRows`,
+  `MaxConcurrentPrepareStatements`, `UnsignedColumns`) have been moved to the
+  `com.twitter.finagle.mysql.param` namespace. ``PHAB_ID=D242473``
+
 18.11.0
 -------
 

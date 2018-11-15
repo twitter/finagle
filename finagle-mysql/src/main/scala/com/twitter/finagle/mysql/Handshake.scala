@@ -3,6 +3,7 @@ package com.twitter.finagle.mysql
 import com.twitter.conversions.storage._
 import com.twitter.finagle.Stack
 import com.twitter.finagle.mysql.MysqlCharset.Utf8_general_ci
+import com.twitter.finagle.mysql.param.{Charset, Credentials, Database, FoundRows}
 import com.twitter.util.{Return, StorageUnit, Throw, Try}
 
 /**
@@ -30,47 +31,6 @@ case object IncompatibleCharset
     )
 
 object Handshake {
-
-  /**
-   * A class eligible for configuring a mysql client's credentials during
-   * the Handshake phase.
-   */
-  case class Credentials(username: Option[String], password: Option[String])
-  implicit object Credentials extends Stack.Param[Credentials] {
-    val default: Credentials = Credentials(None, None)
-
-    override def show(p: Credentials): Seq[(String, () => String)] = {
-      // do not show the password for security reasons
-      Seq(("username", () => p.username.getOrElse("")))
-    }
-  }
-
-  /**
-   * A class eligible for configuring a mysql client's database during
-   * the Handshake phase.
-   */
-  case class Database(db: Option[String])
-  implicit object Database extends Stack.Param[Database] {
-    val default: Database = Database(None)
-  }
-
-  /**
-   * A class eligible for configuring a mysql client's charset during
-   * the Handshake phase.
-   */
-  case class Charset(charset: Short)
-  implicit object Charset extends Stack.Param[Charset] {
-    val default: Charset = Charset(Utf8_general_ci)
-  }
-
-  /**
-   * A class eligible for configuring a mysql client's CLIENT_FOUND_ROWS flag
-   * during the Handshake phase.
-   */
-  case class FoundRows(enabled: Boolean)
-  implicit object FoundRows extends Stack.Param[FoundRows] {
-    val default: FoundRows = FoundRows(true)
-  }
 
   /**
    * Creates a Handshake from a collection of [[com.twitter.finagle.Stack.Params]].

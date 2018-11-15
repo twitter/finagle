@@ -3,6 +3,7 @@ package com.twitter.finagle
 import com.twitter.finagle.client.{DefaultPool, StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.decoder.LengthFieldFramer
 import com.twitter.finagle.mysql._
+import com.twitter.finagle.mysql.param._
 import com.twitter.finagle.mysql.transport.Packet
 import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.param.{
@@ -57,11 +58,11 @@ trait MysqlRichClient { self: com.twitter.finagle.Client[Request, Result] =>
 }
 
 object MySqlClientTracingFilter {
-  object Stackable extends Stack.Module1[param.Label, ServiceFactory[Request, Result]] {
+  object Stackable extends Stack.Module1[Label, ServiceFactory[Request, Result]] {
     val role: Stack.Role = ClientTracingFilter.role
     val description: String = "Add MySql client specific annotations to the trace"
     def make(
-      _label: param.Label,
+      _label: Label,
       next: ServiceFactory[Request, Result]
     ): ServiceFactory[Request, Result] = {
       // TODO(jeff): should be able to get this directly from ClientTracingFilter
@@ -102,46 +103,7 @@ object MySqlClientTracingFilter {
  */
 object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichClient {
 
-  protected val supportUnsigned: Boolean = param.UnsignedColumns.param.default.supported
-
-  object param {
-
-    /**
-     * A class eligible for configuring the maximum number of prepare
-     * statements.  After creating `num` prepare statements, we'll start purging
-     * old ones.
-     */
-    case class MaxConcurrentPrepareStatements(num: Int) {
-      assert(num <= Int.MaxValue, s"$num is not <= Int.MaxValue bytes")
-      assert(num > 0, s"$num must be positive")
-
-      def mk(): (MaxConcurrentPrepareStatements, Stack.Param[MaxConcurrentPrepareStatements]) =
-        (this, MaxConcurrentPrepareStatements.param)
-    }
-
-    object MaxConcurrentPrepareStatements {
-      implicit val param: Stack.Param[MaxConcurrentPrepareStatements] =
-        Stack.Param(MaxConcurrentPrepareStatements(20))
-    }
-
-    /**
-     * Configure whether to support unsigned integer fields when returning elements of a [[Row]].
-     * If not supported, unsigned fields will be decoded as if they were signed, potentially
-     * resulting in corruption in the case of overflowing the signed representation. Because
-     * Java doesn't support unsigned integer types widening may be necessary to support the
-     * unsigned variants. For example, an unsigned Int is represented as a Long.
-     *
-     * `Value` representations of unsigned columns which are widened when enabled:
-     * `ByteValue` -> `ShortValue``
-     * `ShortValue` -> IntValue`
-     * `LongValue` -> `LongLongValue`
-     * `LongLongValue` -> `BigIntValue`
-     */
-    case class UnsignedColumns(supported: Boolean)
-    object UnsignedColumns {
-      implicit val param: Stack.Param[UnsignedColumns] = Stack.Param(UnsignedColumns(false))
-    }
-  }
+  protected val supportUnsigned: Boolean = UnsignedColumns.param.default.supported
 
   object Client {
 
@@ -197,7 +159,7 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
       with WithDefaultLoadBalancer[Client]
       with MysqlRichClient {
 
-    protected val supportUnsigned: Boolean = params[param.UnsignedColumns].supported
+    protected val supportUnsigned: Boolean = params[UnsignedColumns].supported
 
     protected def copy1(
       stack: Stack[ServiceFactory[Request, Result]] = this.stack,
@@ -224,7 +186,7 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
     protected def newDispatcher(transport: Transport[Buf, Buf] {
       type Context <: Client.this.Context
     }): Service[Request, Result] = {
-      val param.MaxConcurrentPrepareStatements(num) = params[param.MaxConcurrentPrepareStatements]
+      val num = params[MaxConcurrentPrepareStatements].num
       mysql.ClientDispatcher(
         transport.map(_.toBuf, Packet.fromBuf),
         Handshake(params),
@@ -237,7 +199,7 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
      * The maximum number of concurrent prepare statements.
      */
     def withMaxConcurrentPrepareStatements(num: Int): Client =
-      configured(param.MaxConcurrentPrepareStatements(num))
+      configured(MaxConcurrentPrepareStatements(num))
 
     /**
      * The credentials to use when authenticating a new session.
@@ -245,19 +207,19 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
      * @param p if `null`, no password is used.
      */
     def withCredentials(u: String, p: String): Client =
-      configured(Handshake.Credentials(Option(u), Option(p)))
+      configured(Credentials(Option(u), Option(p)))
 
     /**
      * Database to use when this client establishes a new session.
      */
     def withDatabase(db: String): Client =
-      configured(Handshake.Database(Option(db)))
+      configured(Database(Option(db)))
 
     /**
      * The default character set used when establishing a new session.
      */
     def withCharset(charset: Short): Client =
-      configured(Handshake.Charset(charset))
+      configured(Charset(charset))
 
     /**
      * Don't set the CLIENT_FOUND_ROWS flag when establishing a new
@@ -267,7 +229,7 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
      * See https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_row-count
      */
     def withAffectedRows(): Client =
-      configured(Handshake.FoundRows(false))
+      configured(FoundRows(false))
 
     /**
      * Installs a module on the client which issues a ROLLBACK statement when a service is put
