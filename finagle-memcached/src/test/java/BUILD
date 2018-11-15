@@ -7,6 +7,7 @@ junit_tests(
         "finagle/finagle-core/src/main/scala",
         "finagle/finagle-memcached",
         "finagle/finagle-memcached/src/test/scala:external",
+        "util/util-core/src/main/java/com/twitter/io",
         "util/util-core/src/main/scala",
         "util/util-hashing/src/main/scala",
     ],

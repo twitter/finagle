@@ -12,7 +12,7 @@ public class NamerCompilationTest {
   private static class IdNamer extends AbstractNamer {
     public Activity<NameTree<Name>> lookup(Path path) {
       return Activities.newValueActivity(
-          (NameTree<Name>) new NameTree.Leaf<Name>(Name$.MODULE$.apply("/asdf")));
+          (NameTree<Name>) new NameTree.Leaf<Name>(Names.fromPath("/asdf")));
     }
   }
 
@@ -20,7 +20,7 @@ public class NamerCompilationTest {
   public void testIdNamerImplementation() {
     IdNamer idNamer = new IdNamer();
     Assert.assertEquals(
-        new NameTree.Leaf<Name>(Name$.MODULE$.apply("/asdf")),
+        new NameTree.Leaf<Name>(Names.fromPath("/asdf")),
         idNamer.lookup(Path.read("/asdf")).sample());
   }
 

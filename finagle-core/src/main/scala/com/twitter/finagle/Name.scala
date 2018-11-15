@@ -1,8 +1,9 @@
 package com.twitter.finagle
 
-import java.net.{InetSocketAddress, SocketAddress}
-import com.twitter.util.Var
 import com.twitter.finagle.util.Showable
+import com.twitter.util.Var
+import java.net.{InetSocketAddress, SocketAddress}
+import scala.annotation.varargs
 
 /**
  * Names identify network locations. They come in two varieties:
@@ -33,6 +34,9 @@ import com.twitter.finagle.util.Showable
  */
 sealed trait Name
 
+/**
+ * See [[Names]] for Java compatibility APIs.
+ */
 object Name {
 
   /**
@@ -42,13 +46,13 @@ object Name {
   case class Path(path: com.twitter.finagle.Path) extends Name
 
   /**
-   * Bound names comprise a changeable [[com.twitter.finagle.Addr
-   * Addr]] which carries a host list of internet addresses.
+   * Bound names comprise a changeable [[Addr]] which carries a host
+   * list of internet addresses.
    *
    * Equality of two Names is delegated to `id`. Two Bound instances
    * are equal whenever their `id`s are. `id` identifies the `addr`
-   * and not the `path`.  If the `id` is a [[com.twitter.finagle.Name.Path
-   * Path]], it should only contain *bound*--not residual--path components.
+   * and not the `path`.  If the `id` is a [[Name.Path]],
+   * it should only contain *bound*--not residual--path components.
    *
    * The `path` contains unbound residual path components that were not
    * processed during name resolution.
@@ -59,7 +63,7 @@ object Name {
     val path: com.twitter.finagle.Path
   ) extends Name
       with Proxy {
-    def self = id
+    def self: Any = id
 
     // Workaround for https://issues.scala-lang.org/browse/SI-4807
     def canEqual(that: Any) = true
@@ -88,7 +92,7 @@ object Name {
 
   // So that we can print NameTree[Name]
   implicit val showable: Showable[Name] = new Showable[Name] {
-    def show(name: Name) = name match {
+    def show(name: Name): String = name match {
       case Path(path) => path.show
       case bound @ Bound(_) =>
         bound.id match {
@@ -100,12 +104,14 @@ object Name {
 
   /**
    * Create a pre-bound address.
+   * @see [[Names.bound]] for Java compatibility.
    */
   def bound(addrs: Address*): Name.Bound =
     Name.Bound(Var.value(Addr.Bound(addrs: _*)), addrs.toSet)
 
   /**
    * An always-empty name.
+   * @see [[Names.empty]] for Java compatibility.
    */
   val empty: Name.Bound = bound()
 
@@ -151,6 +157,7 @@ object Name {
   /**
    * Create a path-based Name which is interpreted vis-à-vis
    * the current request-local delegation table.
+   * @see [[Names.fromPath]] for Java compatibility.
    */
   def apply(path: com.twitter.finagle.Path): Name =
     Name.Path(path)
@@ -158,6 +165,7 @@ object Name {
   /**
    * Create a path-based Name which is interpreted vis-à-vis
    * the current request-local delegation table.
+   * @see [[Names.fromPath]] for Java compatibility.
    */
   def apply(path: String): Name =
     Name.Path(com.twitter.finagle.Path.read(path))
@@ -173,7 +181,7 @@ object Name {
           val endpointAddrs = addrs.flatMap {
             case Addr.Bound(as, _) => as
             case _ => Set.empty[Address]
-          }.toSet
+          }
           Addr.Bound(endpointAddrs, Addr.Metadata.empty)
 
         case addrs if addrs.forall(_ == Addr.Neg) => Addr.Neg
@@ -186,4 +194,28 @@ object Name {
       val id = names map { case bound @ Name.Bound(_) => bound.id }
       Name.Bound(va, id)
     }
+}
+
+/**
+ * Java compatibility APIs for [[Name]].
+ */
+object Names {
+
+  /** See [[Name.bound]] */
+  @varargs
+  def bound(addrs: Address*): Name.Bound =
+    Name.bound(addrs: _*)
+
+  /** See [[Name.empty]] */
+  def empty: Name.Bound =
+    Name.empty
+
+  /** See [[Name.apply]] */
+  def fromPath(path: com.twitter.finagle.Path): Name =
+    Name(path)
+
+  /** See [[Name.apply]] */
+  def fromPath(path: String): Name =
+    Name(path)
+
 }

@@ -2,9 +2,7 @@ package com.twitter.finagle.thriftmux.javatest;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.Collections;
 
-import scala.collection.JavaConversions;
 import scala.runtime.AbstractFunction1;
 
 import org.apache.thrift.protocol.TBinaryProtocol;
@@ -16,7 +14,7 @@ import com.twitter.finagle.Addresses;
 import com.twitter.finagle.FailedFastException;
 import com.twitter.finagle.Filter;
 import com.twitter.finagle.ListeningServer;
-import com.twitter.finagle.Name$;
+import com.twitter.finagle.Names;
 import com.twitter.finagle.Service;
 import com.twitter.finagle.SimpleFilter;
 import com.twitter.finagle.Stack;
@@ -90,9 +88,7 @@ public class EndToEndTest {
 
     TestService.FutureIface client =
         ThriftMux.client().newIface(
-            Name$.MODULE$.bound(JavaConversions.asScalaBuffer(
-                Collections.singletonList(
-                    Addresses.newInetAddress((InetSocketAddress) server.boundAddress())))),
+            Names.bound(Addresses.newInetAddress((InetSocketAddress) server.boundAddress())),
             "a_client",
             TestService.FutureIface.class);
     try {
@@ -116,9 +112,7 @@ public class EndToEndTest {
 
     com.twitter.finagle.thriftmux.thriftjava.TestService.ServiceIface client =
         ThriftMux.client().newIface(
-            Name$.MODULE$.bound(JavaConversions.asScalaBuffer(
-                Collections.singletonList(
-                    Addresses.newInetAddress((InetSocketAddress) server.boundAddress())))),
+            Names.bound(Addresses.newInetAddress((InetSocketAddress) server.boundAddress())),
             "a_client",
             com.twitter.finagle.thriftmux.thriftjava.TestService.ServiceIface.class);
     try {
@@ -197,9 +191,7 @@ public class EndToEndTest {
 
     TestService.FutureIface client =
         ThriftMux.client().filtered(filter).newIface(
-            Name$.MODULE$.bound(JavaConversions.asScalaBuffer(
-                Collections.singletonList(
-                    Addresses.newInetAddress((InetSocketAddress) server.boundAddress())))),
+            Names.bound(Addresses.newInetAddress((InetSocketAddress) server.boundAddress())),
             "a_client",
             TestService.FutureIface.class);
     try {
@@ -230,9 +222,7 @@ public class EndToEndTest {
 
     TestService.FutureIface scalaClient =
         ThriftMux.client().filtered(filter).newIface(
-            Name$.MODULE$.bound(JavaConversions.asScalaBuffer(
-                Collections.singletonList(
-                    Addresses.newInetAddress((InetSocketAddress) server.boundAddress())))),
+            Names.bound(Addresses.newInetAddress((InetSocketAddress) server.boundAddress())),
             "a_client",
             TestService.FutureIface.class);
 
@@ -242,9 +232,7 @@ public class EndToEndTest {
 
       com.twitter.finagle.thriftmux.thriftjava.TestService.ServiceIface javaClient =
           ThriftMux.client().newIface(
-              Name$.MODULE$.bound(JavaConversions.asScalaBuffer(
-                  Collections.singletonList(
-                      Addresses.newInetAddress((InetSocketAddress) server.boundAddress())))),
+              Names.bound(Addresses.newInetAddress((InetSocketAddress) server.boundAddress())),
               "a_client",
               com.twitter.finagle.thriftmux.thriftjava.TestService.ServiceIface.class);
 
@@ -277,9 +265,7 @@ public class EndToEndTest {
 
     TestService.FutureIface client =
         ThriftMux.client().newIface(
-            Name$.MODULE$.bound(JavaConversions.asScalaBuffer(
-                Collections.singletonList(
-                    Addresses.newInetAddress((InetSocketAddress) server.boundAddress())))),
+            Names.bound(Addresses.newInetAddress((InetSocketAddress) server.boundAddress())),
             "a_client",
             TestService.FutureIface.class);
     try {
@@ -315,9 +301,7 @@ public class EndToEndTest {
 
     TestService.FutureIface client =
         ThriftMux.client().newIface(
-            Name$.MODULE$.bound(JavaConversions.asScalaBuffer(
-                Collections.singletonList(
-                    Addresses.newInetAddress((InetSocketAddress) server.boundAddress())))),
+            Names.bound(Addresses.newInetAddress((InetSocketAddress) server.boundAddress())),
             "a_client",
             TestService.FutureIface.class);
     try {

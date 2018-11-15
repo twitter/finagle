@@ -13,6 +13,9 @@ New Features
 * finagle-core: Add Java compatibility for `c.t.f.Filter.TypeAgnostic.Identity`
   via `c.t.f.Filter.typeAgnosticIdentity()`. ``PHAB_ID=D242006``
 
+* finagle-core: Add Java compatibility for `c.t.f.Name` through `Names`.
+  ``PHAB_ID=D242084``
+
 * finagle-thrift: Add `c.t.finagle.thrift.MethodMetadata` which provides a `LocalContext` Key
   for setting information about the current Thrift method and an accessor for retrieving
   the currently set value. ``PHAB_ID=D241295``
