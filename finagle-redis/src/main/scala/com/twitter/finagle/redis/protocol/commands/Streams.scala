@@ -163,10 +163,10 @@ case class XPendingRange(key: Buf, group: Buf, start: Buf, end: Buf, count: Long
 
   override protected def validate(): Unit = {
     super.validate()
-    RequireClientProtocol(group.length > 0, "Group cannot be empty!")
-    RequireClientProtocol(start.length > 0, "Start cannot be empty!")
-    RequireClientProtocol(end.length > 0, "End cannot be empty!")
-    if (consumer.isDefined) RequireClientProtocol(consumer.get.length > 0, "Consumer cannot be empty!")
+    RequireClientProtocol(group.length > 0, "Group cannot be empty")
+    RequireClientProtocol(start.length > 0, "Start cannot be empty")
+    RequireClientProtocol(end.length > 0, "End cannot be empty")
+    if (consumer.isDefined) RequireClientProtocol(consumer.get.length > 0, "Consumer cannot be empty")
   }
 }
 
@@ -200,10 +200,10 @@ case class XClaim(
 
   override protected def validate(): Unit = {
     super.validate()
-    RequireClientProtocol(group.length > 0, "Group cannot be empty!")
-    RequireClientProtocol(consumer.length > 0, "Consumer cannot be empty!")
-    RequireClientProtocol(ids.nonEmpty, "IDs cannot be empty!")
-    RequireClientProtocol(ids.forall(_.length > 0), "Found empty ID!")
+    RequireClientProtocol(group.length > 0, "Group cannot be empty")
+    RequireClientProtocol(consumer.length > 0, "Consumer cannot be empty")
+    RequireClientProtocol(ids.nonEmpty, "IDs cannot be empty")
+    RequireClientProtocol(ids.forall(_.length > 0), "Found empty ID")
   }
 }
 

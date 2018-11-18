@@ -6,7 +6,6 @@ import org.junit.runner.RunWith
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 final class StreamCodecSuite extends RedisRequestTest {
   test("XADD") {
     forAll { (key: Buf, a: Option[Buf], b: Map[Buf, Buf]) =>

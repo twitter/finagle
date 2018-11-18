@@ -11,9 +11,9 @@ private[redis] trait StreamCommands { self: BaseClient =>
    * Pushes the fields and values in `fv` onto the stream at `key`. If `id` is None
    * an ID will be generated for the message, otherwise the passed `id` will be used
    *
-   * @param key
-   * @param id
-   * @param fv
+   * @param key The key of the stream to add the key-pairs to
+   * @param id The ID to use for the new record. Pass "*" to make Redis generate a unique ID for the record
+   * @param fv A Map of key-value pairs representing the record
    * @return The ID for the message
    * @see https://redis.io/commands/xadd
    */
@@ -26,9 +26,10 @@ private[redis] trait StreamCommands { self: BaseClient =>
    * Trims the stream at `key` to a particular number of items indicated by `size`. If `exact`
    * is false, Redis will trim to approximately the indicated size (which is more efficient)
    *
-   * @param key
-   * @param size
-   * @param exact
+   * @param key The key of the stream to trim
+   * @param size The size to trim the stream to
+   * @param exact If true, trims the stream exactly. Otherwise, Redis internally approximates
+   *              the size and optionally trims based on the approximation
    * @return The number of items removed from the stream
    * @see https://redis.io/commands/xtrim
    */
@@ -40,8 +41,8 @@ private[redis] trait StreamCommands { self: BaseClient =>
   /**
    * Removes specified entries from the stream at `key`
    *
-   * @param key
-   * @param ids
+   * @param key The key of the stream to delete records from
+   * @param ids The keys to delete from the stream
    * @return The number of entries deleted
    * @see https://redis.io/commands/xdel
    */
@@ -54,14 +55,14 @@ private[redis] trait StreamCommands { self: BaseClient =>
    * Returns entries from the stream at `key` in the range of `start` to `end`. If `count` is specified no more than `count`
    * items will be returned
    *
-   * @param key
-   * @param start
-   * @param end
-   * @param count
+   * @param key The key of the stream to retrieve records from
+   * @param start The inclusive, minimum stream record ID to start retrieving records from
+   * @param end The inclusive, maximum stream record ID to start retrieving records from
+   * @param count The maximum number of entries to retrieve from the stream
    * @return A sequence of entries
    * @see https://redis.io/commands/xrange
    */
-  def xRange(key: Buf, start: Buf, end: Buf, count: Option[Long]): Future[Seq[(Buf, Seq[(Buf, Buf)])]] =
+  def xRange(key: Buf, start: Buf, end: Buf, count: Option[Long]): Future[Seq[StreamEntryReply]] =
     doRequest(XRange(key, start, end, count)) {
       case NilMBulkReply | EmptyMBulkReply => Future.value(Seq.empty)
       case MBulkReply(replies) => Future.value(handleRangeReply(replies))
@@ -70,23 +71,24 @@ private[redis] trait StreamCommands { self: BaseClient =>
   /**
    * Like XRANGE, but returns entries in reverse order
    *
-   * @param key
-   * @param start
-   * @param end
-   * @param count
+   * @param key The key of the stream to retrieve records from
+   * @param start The inclusive, maximum stream record ID to start retrieving records from
+   * @param end The inclusive, minimum stream record ID to start retrieving records from
+   * @param count The maximum number of entries to retrieve from the stream
    * @return A sequence of entries
    * @see https://redis.io/commands/xrevrange
    */
-  def xRevRange(key: Buf, start: Buf, end: Buf, count: Option[Long]): Future[Seq[(Buf, Seq[(Buf, Buf)])]] =
+  def xRevRange(key: Buf, start: Buf, end: Buf, count: Option[Long]): Future[Seq[StreamEntryReply]] =
     doRequest(XRevRange(key, start, end, count)) {
       case NilMBulkReply | EmptyMBulkReply => Future.value(Seq.empty)
       case MBulkReply(replies) => Future.value(handleRangeReply(replies))
     }
 
   /**
+   * Retrieve the length of a stream
    *
-   * @param key
-   * @return
+   * @param key The key of the stream to retrieve records from
+   * @return The number of entries in the stream
    * @see https://redis.io/commands/xlen
    */
   def xLen(key: Buf): Future[JLong] =
@@ -99,12 +101,12 @@ private[redis] trait StreamCommands { self: BaseClient =>
    *
    * @param count The maximum amount of messages to return per-stream
    * @param blockMs If no messages are available on the given streams, block for this many millis to awai entries
-   * @param keys
-   * @param ids
-   * @return
+   * @param keys The keys of the streams to retrieve records from
+   * @param ids The last ID retrieved for each stream. On the first call to XREAD, "$" should be passed as the first ID for each stream
+   * @return A sequence of streams each containing a sequence of read entries
    * @see https://redis.io/commands/xread
    */
-  def xRead(count: Option[Long], blockMs: Option[Long], keys: Seq[Buf], ids: Seq[Buf]): Future[Seq[(Buf, Seq[(Buf, Seq[(Buf, Buf)])])]] =
+  def xRead(count: Option[Long], blockMs: Option[Long], keys: Seq[Buf], ids: Seq[Buf]): Future[Seq[XReadStreamReply]] =
     doRequest(XRead(count, blockMs, keys, ids)) {
       case NilMBulkReply | EmptyMBulkReply => Future.value(Seq.empty)
       case MBulkReply(replies) => Future.value(handleReadReply(replies))
@@ -113,16 +115,16 @@ private[redis] trait StreamCommands { self: BaseClient =>
   /**
    * Reads from one or many streams within the context `group` for `consumer`.
    *
-   * @param group
-   * @param consumer
+   * @param group The group identifier that the consumer belongs to
+   * @param consumer The consumer ID to consume on behalf of
    * @param count The maximum amount of messages to return per-stream
    * @param blockMs If no messages are available on the given streams, block for this many millis to awai entries
-   * @param keys
-   * @param ids
-   * @return
+   * @param keys The keys of the streams to retrieve records from
+   * @param ids The last ID retrieved for each stream. On the first call to XREAD, "$" should be passed as the first ID for each stream
+   * @return A sequence of streams each containing a sequence of read entries
    * @see https://redis.io/commands/xreadgroup
    */
-  def xReadGroup(group: Buf, consumer: Buf, count: Option[Long], blockMs: Option[Long], keys: Seq[Buf], ids: Seq[Buf]): Future[Seq[(Buf, Seq[(Buf, Seq[(Buf, Buf)])])]] =
+  def xReadGroup(group: Buf, consumer: Buf, count: Option[Long], blockMs: Option[Long], keys: Seq[Buf], ids: Seq[Buf]): Future[Seq[XReadStreamReply]] =
     doRequest(XReadGroup(group, consumer, count, blockMs, keys, ids)) {
       case NilMBulkReply | EmptyMBulkReply => Future.value(Seq.empty)
       case MBulkReply(replies) => Future.value(handleReadReply(replies))
@@ -131,10 +133,10 @@ private[redis] trait StreamCommands { self: BaseClient =>
   /**
    * Creates a new consumer group named `groupName` for stream `key` starting at entry `id`
    *
-   * @param key
-   * @param groupName
-   * @param id
-   * @return
+   * @param key The stream key that the group will consume
+   * @param groupName The name of the new consumer group
+   * @param id The ID of the last delivered item from the stream, i.e. where the group begins consuming from
+   * @return Successful if the group is successfully created
    * @see https://redis.io/commands/xgroup
    */
   def xGroupCreate(key: Buf, groupName: Buf, id: Buf): Future[Unit] =
@@ -143,10 +145,11 @@ private[redis] trait StreamCommands { self: BaseClient =>
     }
 
   /**
+   * Sets the ID of the next item to deliver to consumers within a group
    *
-   * @param key
-   * @param id
-   * @return
+   * @param key The stream key the group consumes
+   * @param id The new ID that the consumer groups begins consuming from
+   * @return Successful if the ID is successfully changed
    * @see https://redis.io/commands/xgroup
    */
   def xGroupSetId(key: Buf, id: Buf): Future[Unit] =
@@ -155,10 +158,11 @@ private[redis] trait StreamCommands { self: BaseClient =>
     }
 
   /**
+   * Deletes a consumer group
    *
-   * @param key
-   * @param groupName
-   * @return
+   * @param key The stream the group consumes
+   * @param groupName The group to delete
+   * @return Successful if the group was deleted
    * @see https://redis.io/commands/xgroup
    */
   def xGroupDestroy(key: Buf, groupName: Buf): Future[Unit] =
@@ -167,11 +171,12 @@ private[redis] trait StreamCommands { self: BaseClient =>
     }
 
   /**
+   * Deletes a specific consumer within a consumer group
    *
-   * @param key
-   * @param groupName
-   * @param consumerName
-   * @return
+   * @param key The stream the group consumes
+   * @param groupName The group the consumer belongs to
+   * @param consumerName The consumer to delete
+   * @return Successful if the group was deleted
    * @see https://redis.io/commands/xgroup
    */
   def xGroupDelConsumer(key: Buf, groupName: Buf, consumerName: Buf): Future[Unit] =
@@ -182,9 +187,9 @@ private[redis] trait StreamCommands { self: BaseClient =>
   /**
    * Removes entries from the pending list with `ids` from the stream at `key` within the context of `group`
    *
-   * @param key
-   * @param group
-   * @param ids
+   * @param key The stream the entry belongs to
+   * @param group The consumer group to ACK the entries on behalf of
+   * @param ids The entry IDs to ACK
    * @return The number of messages acked
    * @see https://redis.io/commands/xack
    */
@@ -195,9 +200,10 @@ private[redis] trait StreamCommands { self: BaseClient =>
 
   /**
    * Retrieves all pending messages within the stream at `key` for `group`
-   * @param key
-   * @param group
-   * @return
+   *
+   * @param key The stream the group consumes
+   * @param group The consumer group consuming the stream
+   * @return A listing of pending entries for the particular consumer group
    * @see https://redis.io/commands/xpending
    */
   def xPending(key: Buf, group: Buf): Future[XPendingAllReply] =
@@ -214,15 +220,16 @@ private[redis] trait StreamCommands { self: BaseClient =>
     }
 
   /**
-   * Returns all pending messages within a range, optionally for a specific consumer
+   * Returns all pending messages within a range, optionally for a specific consumer. Includes additional details about the
+   * pending messages relatieve to XPENDING called without an ID-range.
    *
-   * @param key
-   * @param group
-   * @param start
-   * @param end
-   * @param count
-   * @param consumer
-   * @return
+   * @param key The stream the group consumes
+   * @param group The consumer group consuming the stream
+   * @param start The inclusive, minimum stream record ID to start retrieving records from
+   * @param end The inclusive, maximum stream record ID to start retrieving records from
+   * @param count The maximum number of pending entries to retrieve
+   * @param consumer If specified, retrieves only pending entries for a given consumer
+   * @return A sequence of pending entries which include details about the pending messages
    * @see https://redis.io/commands/xpending
    */
   def xPending(key: Buf, group: Buf, start: Buf, end: Buf, count: Long, consumer: Option[Buf]): Future[Seq[XPendingRangeReply]] =
@@ -242,15 +249,15 @@ private[redis] trait StreamCommands { self: BaseClient =>
    * Changes the ownership of pending entries to `consumer` with `ids` within the stream at `key` within the context
    * of `group`.
    *
-   * @param key
-   * @param group
-   * @param consumer
-   * @param minIdleTime
-   * @param ids
-   * @param idle
-   * @param retryCount
-   * @param force
-   * @param justId
+   * @param key The stream key the consumer group is consuming
+   * @param group The consumer group the consumer belongs to
+   * @param consumer The consumer that is claiming ownership of the entry
+   * @param minIdleTime The minimum idle time an entry must have to be claimed
+   * @param ids The entry IDs to "claim"
+   * @param idle Sets the idle time of the pending messages. Can be specified in milliseconds of millisecond-unix-time
+   * @param retryCount Sets the retry counter for the entries
+   * @param force If true, creates entries in the pending entry list for IDs that did not already exist in the list
+   * @param justId If true, returns just the pending message IDs in the response
    * @return If justId is true, a sequence of claimed IDs, otherwise claimed IDs and the contents of the entries
    * @see https://redis.io/commands/xclaim
    */
@@ -264,23 +271,25 @@ private[redis] trait StreamCommands { self: BaseClient =>
     retryCount: Option[Long],
     force: Boolean,
     justId: Boolean
-  ): Future[Seq[(Buf, Seq[(Buf, Buf)])]] = {
+  ): Future[Seq[StreamEntryReply]] = {
     doRequest(XClaim(key, group, consumer, minIdleTime, ids, idle, retryCount, force, justId)) {
-      case MBulkReply(replies) if justId => Future.value(handleRangeReply(replies))
-      case MBulkReply(replies) => Future.value(ReplyFormat.toBuf(replies).map(_ -> Seq.empty))
+      case MBulkReply(replies) if justId => Future.value(ReplyFormat.toBuf(replies).map(StreamEntryReply(_, Seq.empty)))
+      case MBulkReply(replies) => Future.value(handleRangeReply(replies))
       case NilMBulkReply | EmptyMBulkReply => Future.value(Seq.empty)
     }
   }
 
-  private[redis] def handleReadReply(replies: List[Reply]) = {
+  private[redis] def handleReadReply(replies: List[Reply]): Seq[XReadStreamReply] = {
     replies.collect {
-      case MBulkReply(BulkReply(stream) :: MBulkReply(entries) :: Nil) => stream -> handleRangeReply(entries)
+      case MBulkReply(BulkReply(stream) :: MBulkReply(entries) :: Nil) =>
+        XReadStreamReply(stream, handleRangeReply(entries))
     }
   }
 
-  private[redis] def handleRangeReply(replies: List[Reply]) = {
+  private[redis] def handleRangeReply(replies: List[Reply]): Seq[StreamEntryReply] = {
     replies.collect {
-      case MBulkReply(BulkReply(id) :: MBulkReply(fields) :: Nil) => id -> returnPairs(ReplyFormat.toBuf(fields))
+      case MBulkReply(BulkReply(id) :: MBulkReply(fields) :: Nil) =>
+        StreamEntryReply(id, returnPairs(ReplyFormat.toBuf(fields)))
     }
   }
 }
@@ -297,4 +306,14 @@ case class XPendingRangeReply(
   consumer: Buf,
   millisSinceLastDeliver: JLong,
   numDeliveries: JLong
+)
+
+case class XReadStreamReply(
+  stream: Buf,
+  entries: Seq[StreamEntryReply]
+)
+
+case class StreamEntryReply(
+  id: Buf,
+  fields: Seq[(Buf, Buf)]
 )
