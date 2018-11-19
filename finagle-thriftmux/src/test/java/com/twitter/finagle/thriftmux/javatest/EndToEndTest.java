@@ -54,6 +54,32 @@ public class EndToEndTest {
       );
       return Future.value(x + x);
     }
+    @Override
+    public Future<String> question(String y) {
+      assertTrue(MethodMetadata.current().exists(
+          new AbstractFunction1<MethodMetadata, Object>() {
+            @Override
+            public Object apply(MethodMetadata v1) {
+              return "question".equals(v1.methodName());
+            }
+          }
+          )
+      );
+      return Future.value(y + y);
+    }
+    @Override
+    public Future<String> inquiry(String z) {
+      assertTrue(MethodMetadata.current().exists(
+          new AbstractFunction1<MethodMetadata, Object>() {
+            @Override
+            public Object apply(MethodMetadata v1) {
+              return "inquiry".equals(v1.methodName());
+            }
+          }
+          )
+      );
+      return Future.value(z + z);
+    }
 
     @Override
     public Closable asClosable() {
@@ -75,6 +101,32 @@ public class EndToEndTest {
           )
       );
       return Future.value(x + x);
+    }
+    @Override
+    public Future<String> question(String y) {
+      assertTrue(MethodMetadata.current().exists(
+          new AbstractFunction1<MethodMetadata, Object>() {
+            @Override
+            public Object apply(MethodMetadata v1) {
+              return "question".equals(v1.methodName());
+            }
+          }
+          )
+      );
+      return Future.value(y + y);
+    }
+    @Override
+    public Future<String> inquiry(String z) {
+      assertTrue(MethodMetadata.current().exists(
+          new AbstractFunction1<MethodMetadata, Object>() {
+            @Override
+            public Object apply(MethodMetadata v1) {
+              return "inquiry".equals(v1.methodName());
+            }
+          }
+          )
+      );
+      return Future.value(z + z);
     }
   }
 

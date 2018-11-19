@@ -4,7 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.{Address, Name, Service, ThriftMux}
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.thriftmux.thriftscala.TestService
-import com.twitter.finagle.thriftmux.thriftscala.TestService.Query
+import com.twitter.finagle.thriftmux.thriftscala.TestService.{Inquiry, Query, Question}
 import com.twitter.io.Buf
 import com.twitter.scrooge.{Request, Response}
 import com.twitter.util.{Await, Awaitable, Duration, Future, Return, Try}
@@ -39,6 +39,8 @@ class ContextAmplificationTest extends FunSuite with OneInstancePerTest {
         Service.mk { req: Request[Query.Args] =>
           Future.value(Response(req.headers.toBufSeq.length.toString))
         }
+      def question: Service[Request[Question.Args], Response[String]] = ???
+      def inquiry: Service[Request[Inquiry.Args], Response[String]] = ???
     }.toThriftService
   )
 
@@ -65,6 +67,8 @@ class ContextAmplificationTest extends FunSuite with OneInstancePerTest {
               else Response(s"Unexpected number of headers transmitted: $transmittedHeaders")
             }
         }
+        def question: Service[Request[Question.Args], Response[String]] = ???
+        def inquiry: Service[Request[Inquiry.Args], Response[String]] = ???
       }.toThriftService
     )
   }

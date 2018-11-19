@@ -167,6 +167,8 @@ object AbstractThriftSmuxTest {
 
   val concatIface = new TestService.MethodPerEndpoint {
     def query(x: String): Future[String] = Future.value(x.concat(x))
+    def question(y: String): Future[String] = ???
+    def inquiry(y: String): Future[String] = ???
   }
 
   def await[A](f: Future[A]): A = Await.result(f, 10.seconds)

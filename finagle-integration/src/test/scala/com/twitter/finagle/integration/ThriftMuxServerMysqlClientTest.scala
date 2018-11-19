@@ -67,6 +67,8 @@ class ThriftMuxServerMysqlClientTest
               }
           }
         }
+        def question(y: String): Future[String] = ???
+        def inquiry(z: String): Future[String] = ???
       }
 
       // start a thriftmux server and client to talk to it.

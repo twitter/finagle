@@ -1,6 +1,7 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.thrift.MethodMetadata.Key
 import com.twitter.scrooge.ThriftMethod
 
 /**
@@ -17,6 +18,13 @@ class MethodMetadata private[thrift] (
   val argsClass: Class[_],
   val resultClass: Class[_]
 ) {
+
+  /**
+   * Executes the given function with this [[MethodMetadata]] set as the current
+   * [[MethodMetadata]]. The current [[MethodMetadata]] before executing this will be restored
+   * on completion.
+   */
+  def asCurrent[T](f: => T): T = Contexts.local.let(Key, this)(f)
 
   override def toString: String =
     s"MethodMetadata(methodName=$methodName, serviceName=$serviceName, " +

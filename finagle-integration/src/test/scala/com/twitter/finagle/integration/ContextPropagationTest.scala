@@ -26,10 +26,36 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
     val server = ThriftMux.server.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new TestService.FutureIface {
-        def query(x: String) =
+        def query(x: String): Future[String] =
           (Contexts.broadcast.get(testContext), Dtab.local) match {
             case (None, Dtab.empty) =>
               Future.value(x + x)
+
+            case (Some(TestContext(buf)), _) =>
+              val Buf.Utf8(str) = buf
+              Future.value(str)
+
+            case (_, dtab) =>
+              Future.value(dtab.show)
+          }
+
+        def question(y: String): Future[String] =
+          (Contexts.broadcast.get(testContext), Dtab.local) match {
+            case (None, Dtab.empty) =>
+              Future.value(y + y)
+
+            case (Some(TestContext(buf)), _) =>
+              val Buf.Utf8(str) = buf
+              Future.value(str)
+
+            case (_, dtab) =>
+              Future.value(dtab.show)
+          }
+
+        def inquiry(z: String): Future[String] =
+          (Contexts.broadcast.get(testContext), Dtab.local) match {
+            case (None, Dtab.empty) =>
+              Future.value(z + z)
 
             case (Some(TestContext(buf)), _) =>
               val Buf.Utf8(str) = buf
@@ -99,6 +125,8 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
   test("thriftmux server + thriftmux client: server sees Retries set by client") {
     val iface = new TestService.FutureIface {
       def query(x: String) = Future.value(x)
+      def question(y: String): Future[String] = Future.value(y)
+      def inquiry(z: String): Future[String] = Future.value(z)
     }
 
     val service = ThriftUtil.serverFromIface(
@@ -146,6 +174,8 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
 
     val ifaceB = new TestService.FutureIface {
       def query(x: String) = Future.value(x)
+      def question(y: String): Future[String] = Future.value(y)
+      def inquiry(z: String): Future[String] = Future.value(z)
     }
 
     val serviceB = ThriftUtil.serverFromIface(
@@ -171,6 +201,8 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
 
     val ifaceA = new TestService.FutureIface {
       def query(x: String) = clientB.query(x)
+      def question(y: String): Future[String] = clientB.question(y)
+      def inquiry(z: String): Future[String] = clientB.inquiry(z)
     }
 
     val serviceA = ThriftUtil.serverFromIface(

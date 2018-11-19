@@ -25,6 +25,7 @@ import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
 import com.twitter.scrooge
+import com.twitter.scrooge.ThriftMethod
 import com.twitter.util._
 import com.twitter.util.tunable.Tunable
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
@@ -95,6 +96,50 @@ abstract class AbstractEndToEndTest
               Future.value(dtab.show)
           }
         }
+        def question(y: String): Future[String] = {
+          assert(
+            MethodMetadata.current.exists {
+              methodMetadata =>
+                methodMetadata.methodName == TestService.Question.name &&
+                methodMetadata.serviceName == TestService.Question.serviceName &&
+                methodMetadata.argsClass.getName == TestService.Question.argsCodec.metaData.structClass.getName &&
+                methodMetadata.resultClass.getName == TestService.Question.responseCodec.metaData.structClass.getName
+            }
+          )
+          (Contexts.broadcast.get(testContext), Dtab.local) match {
+            case (None, Dtab.empty) =>
+              Future.value(y + y)
+
+            case (Some(TestContext(buf)), _) =>
+              val Buf.Utf8(str) = buf
+              Future.value(str)
+
+            case (_, dtab) =>
+              Future.value(dtab.show)
+          }
+        }
+        def inquiry(z: String): Future[String] = {
+          assert(
+            MethodMetadata.current.exists {
+              methodMetadata =>
+                methodMetadata.methodName == TestService.Inquiry.name &&
+                methodMetadata.serviceName == TestService.Inquiry.serviceName &&
+                methodMetadata.argsClass.getName == TestService.Inquiry.argsCodec.metaData.structClass.getName &&
+                methodMetadata.resultClass.getName == TestService.Inquiry.responseCodec.metaData.structClass.getName
+            }
+          )
+          (Contexts.broadcast.get(testContext), Dtab.local) match {
+            case (None, Dtab.empty) =>
+              Future.value(z + z)
+
+            case (Some(TestContext(buf)), _) =>
+              val Buf.Utf8(str) = buf
+              Future.value(str)
+
+            case (_, dtab) =>
+              Future.value(dtab.show)
+          }
+        }
       }
     )
   }
@@ -154,6 +199,12 @@ abstract class AbstractEndToEndTest
         def query(x: String): Future[String] =
           if (x.isEmpty) Future.value(ClientId.current.map(_.name).getOrElse(""))
           else Future.value(x + x)
+        def question(y: String): Future[String] =
+          if (y.isEmpty) Future.value(ClientId.current.map(_.name).getOrElse(""))
+          else Future.value(y + y)
+        def inquiry(z: String): Future[String] =
+          if (z.isEmpty) Future.value(ClientId.current.map(_.name).getOrElse(""))
+          else Future.value(z + z)
       }
 
       val pfSvc = new TestService$FinagleService(iface, pf)
@@ -234,6 +285,8 @@ abstract class AbstractEndToEndTest
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new TestService.MethodPerEndpoint {
         def query(x: String): Future[String] = throw new Exception("sad panda")
+        def question(y: String): Future[String] = throw new Exception("sad panda")
+        def inquiry(z: String): Future[String] = throw new Exception("sad panda")
       }
     )
     val client = Thrift.client.build[TestService.MethodPerEndpoint](
@@ -266,6 +319,8 @@ abstract class AbstractEndToEndTest
         new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
         new TestService.MethodPerEndpoint {
           def query(x: String): Future[String] = Future.value(x + x)
+          def question(y: String): Future[String] = Future.value(y + y)
+          def inquiry(z: String): Future[String] = Future.value(z + z)
         }
       )
 
@@ -314,6 +369,8 @@ abstract class AbstractEndToEndTest
             new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
             new TestService.MethodPerEndpoint {
               def query(x: String): Future[String] = Future.value(x + x)
+              def question(y: String): Future[String] = Future.value(y + y)
+              def inquiry(z: String): Future[String] = Future.value(z + z)
             }
           )
 
@@ -351,6 +408,10 @@ abstract class AbstractEndToEndTest
       new TestService.MethodPerEndpoint {
         def query(x: String): Future[String] =
           Future.value(ClientId.current.map(_.name).getOrElse("No ClientId"))
+        def question(y: String): Future[String] =
+          Future.value(ClientId.current.map(_.name).getOrElse("No ClientId"))
+        def inquiry(z: String): Future[String] =
+          Future.value(ClientId.current.map(_.name).getOrElse("No ClientId"))
       }
     )
 
@@ -374,6 +435,10 @@ abstract class AbstractEndToEndTest
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new TestService.MethodPerEndpoint {
         def query(x: String): Future[String] =
+          Future.value(ClientId.current.map(_.name).getOrElse("No ClientId"))
+        def question(y: String): Future[String] =
+          Future.value(ClientId.current.map(_.name).getOrElse("No ClientId"))
+        def inquiry(z: String): Future[String] =
           Future.value(ClientId.current.map(_.name).getOrElse("No ClientId"))
       }
     )
@@ -407,6 +472,16 @@ abstract class AbstractEndToEndTest
             assert(ClientId.current.contains(clientId))
             Future.value("cool").delayed(1.second)(DefaultTimer)
           }
+          def question(y: String): Future[String] = {
+            val clientId = ClientId("second_hop_clientId")
+            assert(ClientId.current.contains(clientId))
+            Future.value("cool").delayed(1.second)(DefaultTimer)
+          }
+          def inquiry(z: String): Future[String] = {
+            val clientId = ClientId("second_hop_clientId")
+            assert(ClientId.current.contains(clientId))
+            Future.value("cool").delayed(1.second)(DefaultTimer)
+          }
         }
       )
 
@@ -425,6 +500,16 @@ abstract class AbstractEndToEndTest
         new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
         new TestService.MethodPerEndpoint {
           def query(x: String): Future[String] = {
+            val clientId = ClientId("theClient_clientId")
+            assert(ClientId.current.contains(clientId))
+            slowClient.query(TestService.Query.Args("abc"))
+          }
+          def question(y: String): Future[String] = {
+            val clientId = ClientId("theClient_clientId")
+            assert(ClientId.current.contains(clientId))
+            slowClient.query(TestService.Query.Args("abc"))
+          }
+          def inquiry(z: String): Future[String] = {
             val clientId = ClientId("theClient_clientId")
             assert(ClientId.current.contains(clientId))
             slowClient.query(TestService.Query.Args("abc"))
@@ -482,6 +567,10 @@ abstract class AbstractEndToEndTest
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new TestService.MethodPerEndpoint {
         def query(x: String): Future[String] =
+          Future.value(ClientId.current.map(_.name).getOrElse(""))
+        def question(y: String): Future[String] =
+          Future.value(ClientId.current.map(_.name).getOrElse(""))
+        def inquiry(z: String): Future[String] =
           Future.value(ClientId.current.map(_.name).getOrElse(""))
       }
     )
@@ -551,6 +640,8 @@ abstract class AbstractEndToEndTest
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new TestService.MethodPerEndpoint {
         def query(x: String): Future[String] = throw new Exception("sad panda")
+        def question(y: String): Future[String] = throw new Exception("sad panda")
+        def inquiry(z: String): Future[String] = throw new Exception("sad panda")
       }
     )
     val client = OldPlainThriftClient.build[TestService.MethodPerEndpoint](
@@ -564,6 +655,8 @@ abstract class AbstractEndToEndTest
   test("thriftmux server should count exceptions as failures") {
     val iface = new TestService.MethodPerEndpoint {
       def query(x: String): Future[String] = Future.exception(new RuntimeException("lolol"))
+      def question(y: String): Future[String] = Future.exception(new RuntimeException("lolol"))
+      def inquiry(z: String): Future[String] = Future.exception(new RuntimeException("lolol"))
     }
     val svc = new TestService.FinagledService(iface, Protocols.binaryFactory())
 
@@ -591,6 +684,9 @@ abstract class AbstractEndToEndTest
   test("thriftmux client default failure classification") {
     val iface = new TestService.MethodPerEndpoint {
       def query(x: String): Future[String] = Future.exception(new InvalidQueryException(x.length))
+      def question(y: String): Future[String] =
+        Future.exception(new InvalidQueryException(y.length))
+      def inquiry(z: String): Future[String] = Future.exception(new InvalidQueryException(z.length))
     }
     val svc = new TestService.FinagledService(iface, Protocols.binaryFactory())
 
@@ -651,6 +747,20 @@ abstract class AbstractEndToEndTest
         Future.sleep(1.second)(DefaultTimer).before(Future.value("slow"))
       else
         Future.exception(new InvalidQueryException(x.length))
+    def question(y: String): Future[String] =
+      if (y == "safe")
+        Future.value("safe")
+      else if (y == "slow")
+        Future.sleep(1.second)(DefaultTimer).before(Future.value("slow"))
+      else
+        Future.exception(new InvalidQueryException(y.length))
+    def inquiry(z: String): Future[String] =
+      if (z == "safe")
+        Future.value("safe")
+      else if (z == "slow")
+        Future.sleep(1.second)(DefaultTimer).before(Future.value("slow"))
+      else
+        Future.exception(new InvalidQueryException(z.length))
   }
 
   private class TestServiceImpl extends thriftjava.TestService.ServiceIface {
@@ -661,6 +771,20 @@ abstract class AbstractEndToEndTest
         Future.sleep(1.second)(DefaultTimer).before(Future.value("slow"))
       else
         Future.exception(new thriftjava.InvalidQueryException(x.length))
+    def question(y: String): Future[String] =
+      if (y == "safe")
+        Future.value("safe")
+      else if (y == "slow")
+        Future.sleep(1.second)(DefaultTimer).before(Future.value("slow"))
+      else
+        Future.exception(new thriftjava.InvalidQueryException(y.length))
+    def inquiry(z: String): Future[String] =
+      if (z == "safe")
+        Future.value("safe")
+      else if (z == "slow")
+        Future.sleep(1.second)(DefaultTimer).before(Future.value("slow"))
+      else
+        Future.exception(new thriftjava.InvalidQueryException(z.length))
   }
 
   def serverForClassifier(): ListeningServer = {
@@ -1273,6 +1397,16 @@ abstract class AbstractEndToEndTest
         requestReceived(nReqReceived - 1).setValue(x)
         servicePromises(nReqReceived - 1)
       }
+      def question(y: String): Future[String] = synchronized {
+        nReqReceived += 1
+        requestReceived(nReqReceived - 1).setValue(y)
+        servicePromises(nReqReceived - 1)
+      }
+      def inquiry(z: String): Future[String] = synchronized {
+        nReqReceived += 1
+        requestReceived(nReqReceived - 1).setValue(z)
+        servicePromises(nReqReceived - 1)
+      }
     }
     val server = serverImpl
       .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), testService)
@@ -1315,6 +1449,10 @@ abstract class AbstractEndToEndTest
         def query(x: String): Future[String] = {
           Future.value(ClientId.current.map(_.name).getOrElse("No ClientId"))
         }
+        def question(y: String): Future[String] =
+          Future.value(ClientId.current.map(_.name).getOrElse("No ClientId"))
+        def inquiry(z: String): Future[String] =
+          Future.value(ClientId.current.map(_.name).getOrElse("No ClientId"))
       }
     )
 
@@ -1346,6 +1484,8 @@ abstract class AbstractEndToEndTest
   test("ThriftMux servers and clients should export protocol stats") {
     val iface = new TestService.MethodPerEndpoint {
       def query(x: String): Future[String] = Future.value(x + x)
+      def question(y: String): Future[String] = Future.value(y + y)
+      def inquiry(z: String): Future[String] = Future.value(z + z)
     }
     val mem = new InMemoryStatsReceiver
     val server = serverImpl
@@ -1420,6 +1560,8 @@ abstract class AbstractEndToEndTest
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new TestService.MethodPerEndpoint {
         def query(x: String): Future[String] = Future.value(x)
+        def question(y: String): Future[String] = Future.value(y)
+        def inquiry(z: String): Future[String] = Future.value(z)
       }
     )
 
@@ -1465,6 +1607,8 @@ abstract class AbstractEndToEndTest
         new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
         new TestService.MethodPerEndpoint {
           def query(x: String): Future[String] = Future.exception(Failure.rejected("unhappy"))
+          def question(y: String): Future[String] = Future.exception(Failure.rejected("unhappy"))
+          def inquiry(z: String): Future[String] = Future.exception(Failure.rejected("unhappy"))
         }
       )
 
@@ -1488,6 +1632,8 @@ abstract class AbstractEndToEndTest
         new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
         new TestService.MethodPerEndpoint {
           def query(x: String): Future[String] = Future.exception(Failure.rejected("unhappy"))
+          def question(y: String): Future[String] = Future.exception(Failure.rejected("unhappy"))
+          def inquiry(z: String): Future[String] = Future.exception(Failure.rejected("unhappy"))
         }
       )
 
@@ -1516,6 +1662,8 @@ abstract class AbstractEndToEndTest
         new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
         new TestService.MethodPerEndpoint {
           def query(x: String): Future[String] = Future.value(x + x)
+          def question(y: String): Future[String] = Future.value(y + y)
+          def inquiry(z: String): Future[String] = Future.value(z + z)
         }
       )
 
@@ -1539,6 +1687,8 @@ abstract class AbstractEndToEndTest
         new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
         new TestService.MethodPerEndpoint {
           def query(x: String): Future[String] = Future.value(x + x)
+          def question(y: String): Future[String] = Future.value(y + y)
+          def inquiry(z: String): Future[String] = Future.value(z + z)
         }
       )
 
@@ -1558,6 +1708,8 @@ abstract class AbstractEndToEndTest
         new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
         new TestService.MethodPerEndpoint {
           def query(x: String): Future[String] = Future.value(x + x)
+          def question(y: String): Future[String] = Future.value(y + y)
+          def inquiry(z: String): Future[String] = Future.value(z + z)
         }
       )
 
@@ -1575,6 +1727,8 @@ abstract class AbstractEndToEndTest
     test("ThriftMux client to Thrift server ") {
       val iface = new TestService.MethodPerEndpoint {
         def query(x: String): Future[String] = Future.value(x + x)
+        def question(y: String): Future[String] = Future.value(y + y)
+        def inquiry(z: String): Future[String] = Future.value(z + z)
       }
       val mem = new InMemoryStatsReceiver
       val server = Thrift.server
@@ -1602,6 +1756,14 @@ abstract class AbstractEndToEndTest
     val response = new Promise[String]()
     val iface = new TestService.MethodPerEndpoint {
       def query(x: String): Future[String] = {
+        latch.setDone
+        response
+      }
+      def question(y: String): Future[String] = {
+        latch.setDone
+        response
+      }
+      def inquiry(z: String): Future[String] = {
         latch.setDone
         response
       }
@@ -1688,6 +1850,8 @@ abstract class AbstractEndToEndTest
           new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
           new TestService.MethodPerEndpoint {
             def query(x: String): Future[String] = Future.exception(Failure.rejected("unhappy"))
+            def question(y: String): Future[String] = Future.exception(Failure.rejected("unhappy"))
+            def inquiry(z: String): Future[String] = Future.exception(Failure.rejected("unhappy"))
           }
         )
   }
@@ -1737,6 +1901,8 @@ abstract class AbstractEndToEndTest
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new TestService.MethodPerEndpoint {
         def query(s: String): Future[String] = Future.exception(failure)
+        def question(y: String): Future[String] = Future.exception(failure)
+        def inquiry(z: String): Future[String] = Future.exception(failure)
       }
     )
 
@@ -1991,6 +2157,12 @@ abstract class AbstractEndToEndTest
       def query(x: String): Future[String] = {
         Future.sleep(50.millis).before { Future.value(x) }
       }
+      def question(y: String): Future[String] = {
+        Future.sleep(50.millis).before { Future.value(y) }
+      }
+      def inquiry(z: String): Future[String] = {
+        Future.sleep(50.millis).before { Future.value(z) }
+      }
     }
     val server =
       serverImpl.serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), service)
@@ -2011,6 +2183,12 @@ abstract class AbstractEndToEndTest
     val service = new TestService.MethodPerEndpoint {
       def query(x: String): Future[String] = {
         Future.sleep(50.millis).before { Future.value(x) }
+      }
+      def question(y: String): Future[String] = {
+        Future.sleep(50.millis).before { Future.value(y) }
+      }
+      def inquiry(z: String): Future[String] = {
+        Future.sleep(50.millis).before { Future.value(z) }
       }
     }
     val server =
@@ -2036,6 +2214,12 @@ abstract class AbstractEndToEndTest
     val service = new TestService.MethodPerEndpoint {
       def query(x: String): Future[String] = {
         Future.sleep(sleepTime.get)(DefaultTimer).before { Future.value(x) }
+      }
+      def question(y: String): Future[String] = {
+        Future.sleep(sleepTime.get)(DefaultTimer).before { Future.value(y) }
+      }
+      def inquiry(z: String): Future[String] = {
+        Future.sleep(sleepTime.get)(DefaultTimer).before { Future.value(z) }
       }
     }
     val server =
@@ -2155,6 +2339,20 @@ abstract class AbstractEndToEndTest
       def query(x: String): Future[String] = {
         if (methodCalled.compareAndSet(false, true)) {
           Future.value(x)
+        } else {
+          Future.never
+        }
+      }
+      def question(y: String): Future[String] = {
+        if (methodCalled.compareAndSet(false, true)) {
+          Future.value(y)
+        } else {
+          Future.never
+        }
+      }
+      def inquiry(z: String): Future[String] = {
+        if (methodCalled.compareAndSet(false, true)) {
+          Future.value(z)
         } else {
           Future.never
         }
@@ -2385,6 +2583,16 @@ abstract class AbstractEndToEndTest
         case "fail1" => Future.exception(InvalidQueryException(1))
         case _ => Future.value(x)
       }
+      def question(y: String): Future[String] = y match {
+        case "fail0" => Future.exception(InvalidQueryException(0))
+        case "fail1" => Future.exception(InvalidQueryException(1))
+        case _ => Future.value(y)
+      }
+      def inquiry(z: String): Future[String] = z match {
+        case "fail0" => Future.exception(InvalidQueryException(0))
+        case "fail1" => Future.exception(InvalidQueryException(1))
+        case _ => Future.value(z)
+      }
     }
     val server =
       serverImpl.serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), service)
@@ -2405,6 +2613,16 @@ abstract class AbstractEndToEndTest
         case "fail1" => Future.exception(InvalidQueryException(1))
         case _ => Future.value(x)
       }
+      def question(y: String): Future[String] = y match {
+        case "fail0" => Future.exception(InvalidQueryException(0))
+        case "fail1" => Future.exception(InvalidQueryException(1))
+        case _ => Future.value(y)
+      }
+      def inquiry(z: String): Future[String] = z match {
+        case "fail0" => Future.exception(InvalidQueryException(0))
+        case "fail1" => Future.exception(InvalidQueryException(1))
+        case _ => Future.value(z)
+      }
     }
     val server =
       serverImpl.serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), service)
@@ -2424,6 +2642,16 @@ abstract class AbstractEndToEndTest
         case "fail0" => Future.exception(InvalidQueryException(0))
         case "fail1" => Future.exception(InvalidQueryException(1))
         case _ => Future.value(x)
+      }
+      def question(y: String): Future[String] = y match {
+        case "fail0" => Future.exception(InvalidQueryException(0))
+        case "fail1" => Future.exception(InvalidQueryException(1))
+        case _ => Future.value(y)
+      }
+      def inquiry(z: String): Future[String] = z match {
+        case "fail0" => Future.exception(InvalidQueryException(0))
+        case "fail1" => Future.exception(InvalidQueryException(1))
+        case _ => Future.value(z)
       }
     }
     val server =
@@ -2447,6 +2675,16 @@ abstract class AbstractEndToEndTest
         case "fail0" => Future.exception(InvalidQueryException(0))
         case "fail1" => Future.exception(InvalidQueryException(1))
         case _ => Future.value(x)
+      }
+      def question(y: String): Future[String] = y match {
+        case "fail0" => Future.exception(InvalidQueryException(0))
+        case "fail1" => Future.exception(InvalidQueryException(1))
+        case _ => Future.value(y)
+      }
+      def inquiry(z: String): Future[String] = z match {
+        case "fail0" => Future.exception(InvalidQueryException(0))
+        case "fail1" => Future.exception(InvalidQueryException(1))
+        case _ => Future.value(z)
       }
     }
     val server =
@@ -2491,6 +2729,8 @@ abstract class AbstractEndToEndTest
 
     val service = new TestService.MethodPerEndpoint {
       def query(x: String): Future[String] = Future.value(x)
+      def question(y: String): Future[String] = Future.value(y)
+      def inquiry(z: String): Future[String] = Future.value(z)
     }
 
     val server =
@@ -2523,6 +2763,37 @@ abstract class AbstractEndToEndTest
     }
 
     server.close()
+  }
+
+  test("MethodMetadata#asCurrent") {
+    def assertMethod(method: ThriftMethod): Unit = {
+      assert(MethodMetadata.current ne None)
+      val methodMetadata = MethodMetadata.current.get
+      assert(methodMetadata.methodName == method.name)
+      assert(methodMetadata.serviceName == method.serviceName)
+    }
+
+    val queryMethodMetadata = MethodMetadata(TestService.Query)
+    val questionMethodMetadata = MethodMetadata(TestService.Question)
+    val inquiryMethodMetadata = MethodMetadata(TestService.Inquiry)
+
+    queryMethodMetadata.asCurrent {
+      assertMethod(TestService.Query)
+
+      questionMethodMetadata.asCurrent {
+        assertMethod(TestService.Question)
+
+        inquiryMethodMetadata.asCurrent {
+          assertMethod(TestService.Inquiry)
+        }
+      }
+
+      assertMethod(TestService.Query)
+
+      inquiryMethodMetadata.asCurrent {
+        assertMethod(TestService.Inquiry)
+      }
+    }
   }
 
 }

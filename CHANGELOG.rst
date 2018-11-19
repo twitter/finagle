@@ -20,6 +20,10 @@ New Features
   for setting information about the current Thrift method and an accessor for retrieving
   the currently set value. ``PHAB_ID=D241295``
 
+* finagle-thrift: Update `c.t.finagle.thrift.MethodMetadata` to provide an
+  `asCurrent` method to set the current `c.t.finagle.thrift.MethodMetadata` in the 
+  `LocalContext`. ``PHAB_ID=D243625``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

@@ -16,6 +16,8 @@ object ThriftSmuxSslTestComponents {
 
   private val concatService = new TestService.MethodPerEndpoint {
     def query(x: String): Future[String] = Future.value(x.concat(x))
+    def question(y: String): Future[String] = Future.value(y.concat(y))
+    def inquiry(z: String): Future[String] = Future.value(z.concat(z))
   }
 
   private val chainCert = TempFile.fromResourcePath("/ssl/certs/svc-test-chain.cert.pem")
