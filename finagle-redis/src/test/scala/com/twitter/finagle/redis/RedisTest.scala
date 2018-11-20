@@ -217,7 +217,7 @@ trait RedisRequestTest extends RedisTest with GeneratorDrivenPropertyChecks with
 
   def checkSingleKey(c: String, f: Buf => Command): Unit = {
     forAll { key: Buf =>
-      assert(encodeCommand(f(key)) == c +: Seq(key.asString))
+      assert(encodeCommand(f(key)) == c.split(" ").toSeq ++ Seq(key.asString))
     }
 
     intercept[ClientError](f(Buf.Empty))
@@ -226,7 +226,7 @@ trait RedisRequestTest extends RedisTest with GeneratorDrivenPropertyChecks with
   def checkMultiKey(c: String, f: Seq[Buf] => Command): Unit = {
     forAll(Gen.nonEmptyListOf(genBuf)) { keys =>
       assert(
-        encodeCommand(f(keys)) == c +: keys.map(_.asString)
+        encodeCommand(f(keys)) == c.split(" ").toSeq ++ keys.map(_.asString)
       )
     }
 
@@ -237,7 +237,9 @@ trait RedisRequestTest extends RedisTest with GeneratorDrivenPropertyChecks with
   def checkSingleKeyMultiVal(c: String, f: (Buf, Seq[Buf]) => Command): Unit = {
     forAll(genBuf, Gen.nonEmptyListOf(genBuf)) { (key, vals) =>
       assert(
-        encodeCommand(f(key, vals)) == c +: key.asString +: vals.map(_.asString)
+        encodeCommand(f(key, vals)) == c.split(" ").toSeq ++ Seq(key.asString) ++ vals.map(
+          _.asString
+        )
       )
     }
 
@@ -248,12 +250,29 @@ trait RedisRequestTest extends RedisTest with GeneratorDrivenPropertyChecks with
   def checkSingleKeySingleVal(c: String, f: (Buf, Buf) => Command): Unit = {
     forAll { (key: Buf, value: Buf) =>
       assert(
-        encodeCommand(f(key, value)) == c +: Seq(key.asString, value.asString)
+        encodeCommand(f(key, value)) == c.split(" ").toSeq ++ Seq(key.asString, value.asString)
       )
     }
 
     intercept[ClientError](encodeCommand(f(Buf.Empty, Buf.Empty)))
     intercept[ClientError](encodeCommand(f(Buf.Utf8("x"), Buf.Empty)))
+  }
+
+  def checkSingleKeyDoubleVal(c: String, f: (Buf, Buf, Buf) => Command): Unit = {
+    forAll { (key: Buf, value: Buf, value2: Buf) =>
+      assert(
+        encodeCommand(f(key, value, value2)) == c.split(" ").toSeq ++ Seq(
+          key.asString,
+          value.asString,
+          value2.asString
+        )
+      )
+    }
+
+    intercept[ClientError](encodeCommand(f(Buf.Empty, Buf.Empty, Buf.Empty)))
+    intercept[ClientError](encodeCommand(f(Buf.Utf8("x"), Buf.Empty, Buf.Empty)))
+    intercept[ClientError](encodeCommand(f(Buf.Empty, Buf.Utf8("x"), Buf.Empty)))
+    intercept[ClientError](encodeCommand(f(Buf.Empty, Buf.Empty, Buf.Utf8("x"))))
   }
 
   def checkSingleKeyArbitraryVal[A: Arbitrary](c: String, f: (Buf, A) => Command): Unit = {

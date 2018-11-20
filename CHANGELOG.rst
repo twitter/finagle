@@ -10,6 +10,8 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
+* finagle-redis: Add support for the new stream API released in Redis 5.0. ``PHAB_ID=D244320``
+
 * finagle-core: Add Java compatibility for `c.t.f.Filter.TypeAgnostic.Identity`
   via `c.t.f.Filter.typeAgnosticIdentity()`. ``PHAB_ID=D242006``
 
@@ -21,7 +23,7 @@ New Features
   the currently set value. ``PHAB_ID=D241295``
 
 * finagle-thrift: Update `c.t.finagle.thrift.MethodMetadata` to provide an
-  `asCurrent` method to set the current `c.t.finagle.thrift.MethodMetadata` in the 
+  `asCurrent` method to set the current `c.t.finagle.thrift.MethodMetadata` in the
   `LocalContext`. ``PHAB_ID=D243625``
 
 Breaking API Changes

@@ -45,7 +45,8 @@ trait NormalCommands
     with PubSubCommands
     with ServerCommands
     with ScriptCommands
-    with ConnectionCommands { self: BaseClient =>
+    with ConnectionCommands
+    with StreamCommands { self: BaseClient =>
 }
 
 trait Transactions { self: Client =>

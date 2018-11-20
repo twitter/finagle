@@ -204,6 +204,21 @@ object Command {
   val COUNT = Buf.Utf8("COUNT")
   val MATCH = Buf.Utf8("MATCH")
 
+  // Streams
+  val XINFO = Buf.Utf8("XINFO")
+  val XADD = Buf.Utf8("XADD")
+  val XTRIM = Buf.Utf8("XTRIM")
+  val XDEL = Buf.Utf8("XDEL")
+  val XRANGE = Buf.Utf8("XRANGE")
+  val XREVRANGE = Buf.Utf8("XREVRANGE")
+  val XLEN = Buf.Utf8("XLEN")
+  val XREAD = Buf.Utf8("XREAD")
+  val XREADGROUP = Buf.Utf8("XREADGROUP")
+  val XGROUP = Buf.Utf8("XGROUP")
+  val XACK = Buf.Utf8("XACK")
+  val XCLAIM = Buf.Utf8("XCLAIM")
+  val XPENDING = Buf.Utf8("XPENDING")
+
   /**
    * Encodes a given [[Command]] as [[Buf]].
    */
