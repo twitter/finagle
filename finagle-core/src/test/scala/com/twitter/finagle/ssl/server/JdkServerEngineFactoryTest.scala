@@ -96,7 +96,7 @@ class JdkServerEngineFactoryTest extends FunSuite {
   }
 
   test("config with good cipher suites succeeds") {
-    val cipherSuites = CipherSuites.Enabled(Seq("TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"))
+    val cipherSuites = CipherSuites.Enabled(Seq("TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"))
     val config = SslServerConfiguration(cipherSuites = cipherSuites)
     val engine = JdkServerEngineFactory(config)
     val sslEngine = engine.self
@@ -104,7 +104,7 @@ class JdkServerEngineFactoryTest extends FunSuite {
     assert(sslEngine != null)
     val enabled = sslEngine.getEnabledCipherSuites()
     assert(enabled.length == 1)
-    assert(enabled(0) == "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384")
+    assert(enabled(0) == "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256")
   }
 
   test("config with bad cipher suites fails") {

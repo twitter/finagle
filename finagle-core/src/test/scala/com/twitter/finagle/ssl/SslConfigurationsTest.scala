@@ -22,12 +22,12 @@ class SslConfigurationsTest extends FunSuite {
 
   test("configureCipherSuites succeeds with good suites") {
     val sslEngine = createTestEngine()
-    val cipherSuites = CipherSuites.Enabled(Seq("TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"))
+    val cipherSuites = CipherSuites.Enabled(Seq("TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"))
     SslConfigurations.configureCipherSuites(sslEngine, cipherSuites)
 
     val enabled = sslEngine.getEnabledCipherSuites()
     assert(enabled.length == 1)
-    assert(enabled(0) == "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384")
+    assert(enabled(0) == "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256")
   }
 
   test("configureCipherSuites fails with bad suites") {
