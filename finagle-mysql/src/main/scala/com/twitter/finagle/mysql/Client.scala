@@ -1,6 +1,6 @@
 package com.twitter.finagle.mysql
 
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.{
   ChannelClosedException,
   ClientConnection,
@@ -13,17 +13,6 @@ import com.twitter.util._
 import scala.annotation.tailrec
 
 object Client {
-
-  /**
-   * Creates a new Client based on a ServiceFactory.
-   *
-   * @note the returned `Client` will *not* include support for unsigned integer types.
-   */
-  @deprecated("Use the three argument constructor instead.", "2017-08-11")
-  def apply(
-    factory: ServiceFactory[Request, Result],
-    statsReceiver: StatsReceiver = NullStatsReceiver
-  ): Client with Transactions = apply(factory, statsReceiver, supportUnsigned = false)
 
   /**
    * Creates a new Client based on a ServiceFactory.

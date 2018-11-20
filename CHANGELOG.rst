@@ -34,6 +34,9 @@ Breaking API Changes
   `MaxConcurrentPrepareStatements`, `UnsignedColumns`) have been moved to the
   `com.twitter.finagle.mysql.param` namespace. ``PHAB_ID=D242473``
 
+* finagle-mysql: The deprecated `c.t.f.m.Client.apply(factory, statsReceiver)` method
+  has been removed. ``PHAB_ID=D243038``
+
 18.11.0
 -------
 
