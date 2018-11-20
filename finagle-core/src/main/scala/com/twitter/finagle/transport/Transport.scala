@@ -100,20 +100,6 @@ trait Transport[In, Out] extends Closable { self =>
   def context: Context
 }
 
-private[finagle] abstract class ContextBasedTransport[In, Out, Ctx <: TransportContext](
-  val context: Ctx
-) extends Transport[In, Out] {
-  type Context = Ctx
-
-  def status: Status = context.status
-  def onClose: Future[Throwable] = context.onClose
-  def localAddress: SocketAddress = context.localAddress
-  def remoteAddress: SocketAddress = context.remoteAddress
-  def peerCertificate: Option[Certificate] = context.peerCertificate
-  def close(deadline: Time): Future[Unit] = context.close(deadline)
-  override def toString: String = context.toString
-}
-
 /**
  * A collection of [[com.twitter.finagle.Stack.Param]]'s useful for configuring
  * a [[com.twitter.finagle.transport.Transport]].
