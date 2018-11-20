@@ -48,14 +48,20 @@ private object TrafficDistributorTest {
   private case class Balancer(endpoints: Activity[Traversable[AddressFactory]])
       extends ServiceFactory[Int, Int] {
     var offeredLoad = 0
+    var balancerIsClosed = false
+    var numOfEndpoints = 0
     def apply(conn: ClientConnection): Future[Service[Int, Int]] = {
       offeredLoad += 1
       // new hotness in load balancing
       val nodes = endpoints.sample().toSeq
+      numOfEndpoints = nodes.size
       if (nodes.isEmpty) Future.exception(new NoBrokersAvailableException)
       else nodes((math.random * nodes.size).toInt)(conn)
     }
-    def close(deadline: Time): Future[Unit] = Future.Done
+    def close(deadline: Time): Future[Unit] = {
+      balancerIsClosed = true
+      Future.Done
+    }
     override def toString: String = s"Balancer($endpoints)"
   }
 
@@ -470,4 +476,43 @@ class TrafficDistributorTest extends FunSuite {
     Await.ready(client.close())
     intercept[ServiceClosedException] { Await.result(client("x")) }
   }
+
+  test("transition to empty balancer on empty address state")(new Ctx {
+    val init: Activity.State[Set[Address]] = Activity.Pending
+    val dest = Var(init)
+    val dist = newDist(dest)
+
+    dest() =
+      Activity.Ok(Set((1, 2.0), (2, 1.0), (3, 2.0)).map(x => WeightedAddress(Address(x._1), x._2)))
+    val bal0 = Await.result(dist())
+    assert(balancers.size == 2)
+
+    dest() = Activity.Ok(Set.empty[Address])
+    val ex = intercept[NoBrokersAvailableException] { Await.result(dist()) }
+    assert(balancers.size == 3)
+  })
+
+  test("ensure empty load balancer is closed after address set updates")(new Ctx {
+    val init: Activity.State[Set[Address]] = Activity.Pending
+    val dest = Var(init)
+    val dist = newDist(dest)
+
+    dest() =
+      Activity.Ok(Set((1, 2.0), (2, 1.0), (3, 2.0)).map(x => WeightedAddress(Address(x._1), x._2)))
+    val bal0 = Await.result(dist())
+    assert(balancers.size == 2)
+
+    dest() = Activity.Ok(Set.empty[Address])
+    val ex = intercept[NoBrokersAvailableException] { Await.result(dist()) }
+    assert(balancers.size == 3)
+
+    dest() = Activity.Ok(Set((1, 1.0)).map(x => WeightedAddress(Address(x._1), x._2)))
+    val bal2 = Await.result(dist())
+
+    val emptyBalancer = balancers.find(b => b.numOfEndpoints == 0)
+    emptyBalancer match {
+      case Some(bal) => assert(bal.balancerIsClosed)
+      case _ => fail("Empty balancer does not exist")
+    }
+  })
 }
