@@ -1,10 +1,12 @@
 package com.twitter.finagle.mysql
 
 import com.twitter.concurrent.AsyncQueue
+import com.twitter.finagle.Stack
+import com.twitter.finagle.mysql.param.Credentials
 import com.twitter.finagle.mysql.transport.{Packet, MysqlBuf}
 import com.twitter.finagle.transport.QueueTransport
-import com.twitter.util.Await
 import com.twitter.io.Buf
+import com.twitter.util.Await
 import org.scalatest.FunSuite
 
 class ClientDispatcherTest extends FunSuite {
@@ -16,14 +18,15 @@ class ClientDispatcherTest extends FunSuite {
   val initPacket = Packet(0, Buf.ByteArray.Owned(rawInit))
   val init = HandshakeInit.decode(initPacket)
 
-  val handshake = Handshake(Some("username"), Some("password"))
+  val params = Stack.Params.empty + Credentials(Some("username"), Some("password"))
+  val handshake = Handshake(params)
   val initReply = handshake(init)
 
   def newCtx = new {
     val clientq = new AsyncQueue[Packet]()
     val serverq = new AsyncQueue[Packet]()
     val trans = new QueueTransport[Packet, Packet](serverq, clientq)
-    val service = new ClientDispatcher(trans, handshake, supportUnsigned = false)
+    val service = new ClientDispatcher(trans, params)
     // authenticate
     clientq.offer(initPacket)
     val handshakeResponse = serverq.poll()
@@ -247,7 +250,7 @@ class ClientDispatcherTest extends FunSuite {
   test("Failure to auth closes the service") {
     val clientq = new AsyncQueue[Packet]()
     val trans = new QueueTransport[Packet, Packet](new AsyncQueue[Packet](), clientq)
-    val service = new ClientDispatcher(trans, handshake, supportUnsigned = false)
+    val service = new ClientDispatcher(trans, params)
     clientq.offer(Packet(0, Buf.ByteArray.Owned(Array[Byte]())))
     intercept[LostSyncException] { Await.result(service(PingRequest)) }
     assert(!service.isAvailable)

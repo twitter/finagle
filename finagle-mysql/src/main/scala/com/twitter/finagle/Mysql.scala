@@ -185,15 +185,8 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
 
     protected def newDispatcher(transport: Transport[Buf, Buf] {
       type Context <: Client.this.Context
-    }): Service[Request, Result] = {
-      val num = params[MaxConcurrentPrepareStatements].num
-      mysql.ClientDispatcher(
-        transport.map(_.toBuf, Packet.fromBuf),
-        Handshake(params),
-        num,
-        supportUnsigned
-      )
-    }
+    }): Service[Request, Result] =
+      mysql.ClientDispatcher(transport.map(_.toBuf, Packet.fromBuf), params)
 
     /**
      * The maximum number of concurrent prepare statements.

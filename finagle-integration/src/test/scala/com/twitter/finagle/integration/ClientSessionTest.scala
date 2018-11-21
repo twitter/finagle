@@ -10,6 +10,7 @@ import com.twitter.finagle.http.codec.HttpClientDispatcher
 import com.twitter.finagle.http.exp.IdentityStreamTransport
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.mux.pushsession.{MessageWriter, MuxMessageDecoder}
+import com.twitter.finagle.mysql.param.Credentials
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.finagle.util.DefaultTimer
@@ -129,8 +130,8 @@ class ClientSessionTest extends FunSuite with MockitoSugar {
 
   testSessionStatus(
     "mysql-dispatcher", { tr: Transport[mysql.transport.Packet, mysql.transport.Packet] =>
-      val handshake = mysql.Handshake(Some("username"), Some("password"))
-      val dispatcher = new mysql.ClientDispatcher(tr, handshake, false)
+      val params = Stack.Params.empty + Credentials(Some("username"), Some("password"))
+      val dispatcher = new mysql.ClientDispatcher(tr, params)
       () =>
         dispatcher.status
     }

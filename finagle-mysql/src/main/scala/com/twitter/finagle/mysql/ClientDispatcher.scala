@@ -4,10 +4,11 @@ import com.github.benmanes.caffeine.cache.{Caffeine, RemovalCause, RemovalListen
 import com.twitter.cache.caffeine.CaffeineCache
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher.wrapWriteException
+import com.twitter.finagle.mysql.param.{MaxConcurrentPrepareStatements, UnsignedColumns}
 import com.twitter.finagle.mysql.transport.{MysqlBuf, MysqlBufReader, Packet}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.{Service, ServiceProxy}
+import com.twitter.finagle.{Service, ServiceProxy, Stack}
 import com.twitter.util._
 
 /**
@@ -78,19 +79,15 @@ private[finagle] object ClientDispatcher {
   /**
    * Creates a mysql client dispatcher with write-through caches for optimization.
    * @param trans A transport that reads a writes logical mysql packets.
-   * @param handshake A function that is responsible for facilitating
-   * the connection phase given a HandshakeInit.
-   * @param maxConcurrentPrepareStatements The maximum number of prepare
-   * statements that the cache will keep track of.
+   * @param params A collection of `Stack.Params` useful for configuring a mysql client.
    */
   def apply(
     trans: Transport[Packet, Packet],
-    handshake: HandshakeInit => Try[HandshakeResponse],
-    maxConcurrentPrepareStatements: Int,
-    supportUnsigned: Boolean
+    params: Stack.Params
   ): Service[Request, Result] = {
+    val maxConcurrentPrepareStatements = params[MaxConcurrentPrepareStatements].num
     new PrepareCache(
-      new ClientDispatcher(trans, handshake, supportUnsigned),
+      new ClientDispatcher(trans, params),
       Caffeine.newBuilder().maximumSize(maxConcurrentPrepareStatements)
     )
   }
@@ -113,12 +110,14 @@ private[finagle] object ClientDispatcher {
  * Note, the mysql protocol does not support any form of multiplexing so
  * requests are dispatched serially and concurrent requests are queued.
  */
-private[finagle] class ClientDispatcher(
+private[finagle] final class ClientDispatcher(
   trans: Transport[Packet, Packet],
-  handshake: HandshakeInit => Try[HandshakeResponse],
-  supportUnsigned: Boolean
+  params: Stack.Params
 ) extends GenSerialClientDispatcher[Request, Result, Packet, Packet](trans) {
   import ClientDispatcher._
+
+  private[this] val handshake = Handshake(params)
+  private[this] val supportUnsigned: Boolean = params[UnsignedColumns].supported
 
   override def apply(req: Request): Future[Result] =
     connPhase
