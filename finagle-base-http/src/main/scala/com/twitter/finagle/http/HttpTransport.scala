@@ -36,6 +36,9 @@ private[finagle] class HttpTransport[A <: Message, B <: Message](
 
   def write(m: A): Future[Unit] =
     try {
+      // We have to use an intermediate `Promise` instead of the `Future` from
+      // the write call because `.observeMessage` may mutate the message, and
+      // thus we could write the wrong message in a race.
       val p = new Promise[Unit]
       manager.observeMessage(m, p)
       val f = self.write(m)
