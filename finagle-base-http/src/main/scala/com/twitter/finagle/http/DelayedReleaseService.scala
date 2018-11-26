@@ -4,7 +4,7 @@ import com.twitter.finagle
 import com.twitter.finagle._
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.util.AsyncLatch
-import com.twitter.io.{Buf, Reader}
+import com.twitter.io.{Buf, Reader, StreamTermination}
 import com.twitter.util.{Future, Promise, Return, Throw, Time}
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -58,6 +58,8 @@ private[finagle] class DelayedReleaseService[-Req <: Request](
           in.reader.discard()
           done()
         }
+
+        def onClose: Future[StreamTermination] = in.reader.onClose
       }
     }
   }

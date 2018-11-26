@@ -5,7 +5,7 @@ import com.twitter.finagle.http._
 import com.twitter.finagle.http.exp.{Multi, StreamTransportProxy}
 import com.twitter.finagle.netty4.ByteBufConversion
 import com.twitter.finagle.transport.Transport
-import com.twitter.io.{Buf, Pipe, Reader, ReaderDiscardedException, Writer}
+import com.twitter.io.{Buf, Pipe, Reader, ReaderDiscardedException, Writer, StreamTermination}
 import com.twitter.logging.Logger
 import com.twitter.util._
 import io.netty.handler.codec.{http => NettyHttp}
@@ -70,6 +70,8 @@ private[http] object StreamTransports {
       rw.discard()
       raise(new ReaderDiscardedException)
     }
+
+    def onClose: Future[StreamTermination] = rw.onClose
   }
 
   def readChunk(chunk: Any): Buf = chunk match {
