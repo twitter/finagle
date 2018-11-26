@@ -39,6 +39,11 @@ Breaking API Changes
 * finagle-mysql: The deprecated `c.t.f.m.Client.apply(factory, statsReceiver)` method
   has been removed. ``PHAB_ID=D243038``
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle: Upgrade to Netty 4.1.31.Final and netty-tcnative 2.0.19.Final. ``PHAB_ID=D235402``
+
 18.11.0
 -------
 
