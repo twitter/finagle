@@ -3,11 +3,23 @@ package com.twitter.finagle.redis.commands.streams
 import com.twitter.concurrent.ThreadPoolScheduler
 import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
 import com.twitter.finagle.redis._
+import com.twitter.finagle.redis.util.RedisTestHelper
 import com.twitter.io.Buf
 import com.twitter.util._
-import org.scalatest.Inside
+import org.scalactic.source.Position
+import org.scalatest.{Inside, Tag}
 
 final class StreamsClientIntegrationSuite extends RedisClientTest with Inside {
+
+  override protected def test(testName: String, testTags: Tag*)(
+    f: => Any
+  )(implicit pos: Position): Unit = {
+    RedisTestHelper.redisServerVersion match {
+      case Some((m, _, _)) if m >= 5 => super.test(testName, testTags: _*)(f)(pos)
+      case _ => ignore(testName)(f)(pos)
+    }
+  }
+
   test("Correctly perform stream create/add and read commands", RedisTest, ClientTest) {
     withRedisClient { client =>
       val messageId = result(client.xAdd(bufFoo, None, Map(bufBoo -> bufMoo)))

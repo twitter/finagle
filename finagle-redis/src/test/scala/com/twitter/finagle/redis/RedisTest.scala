@@ -305,7 +305,7 @@ trait RedisRequestTest extends RedisTest with GeneratorDrivenPropertyChecks with
 
 trait RedisClientTest extends RedisTest with BeforeAndAfterAll {
 
-  override def test(
+  override protected def test(
     testName: String,
     testTags: Tag*
   )(

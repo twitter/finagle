@@ -9,14 +9,29 @@ import scala.collection.JavaConverters._
 import scala.util.Random
 
 object RedisTestHelper {
-  def redisServerExists: Boolean = {
+  private val SemVerRegex = "(\\d+)\\.(\\d+)\\.(\\d+)".r
+
+  lazy val redisServerExists: Boolean = redisServerVersion.isDefined
+
+  lazy val redisServerVersion: Option[(Int, Int, Int)] = {
     try {
-      val p = new ProcessBuilder("redis-server", "--help").start()
+      val p = new ProcessBuilder("redis-server", "--version").start()
       p.waitFor(10, TimeUnit.SECONDS)
       val exitValue = p.exitValue()
-      exitValue == 0 || exitValue == 1
+      if (exitValue != 0 && exitValue != 1) None
+      else {
+        // An example output from redis 5.0.1:
+        // `Redis server v=5.0.1 sha=00000000:0 malloc=libc bits=64 build=c6d614f40d59bf0a`
+        val stdout = scala.io.Source.fromInputStream(p.getInputStream()).mkString
+        val version = stdout.split(" ")(2).substring(2)
+
+        version match {
+          case SemVerRegex(a, b, c) => Some((a.toInt, b.toInt, c.toInt))
+          case _ => None
+        }
+      }
     } catch {
-      case _: Exception => false
+      case _: Exception => None
     }
   }
 }
@@ -91,7 +106,6 @@ object RedisMode {
 class ExternalRedis(mode: RedisMode = RedisMode.Standalone) {
   private[this] val rand = new Random
   private[this] var process: Option[Process] = None
-  private[this] val forbiddenPorts = 6300.until(7300) ++ 55535.until(65535)
   private[this] val possiblePorts = 49152.until(55535)
   var address: Option[InetSocketAddress] = None
 
