@@ -39,6 +39,9 @@ Breaking API Changes
 * finagle-mysql: The deprecated `c.t.f.m.Client.apply(factory, statsReceiver)` method
   has been removed. ``PHAB_ID=D243038``
 
+* finagle-mysql: The `c.t.f.m.Handshake` class and companion object have been made
+  private. ``PHAB_ID=D244734``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

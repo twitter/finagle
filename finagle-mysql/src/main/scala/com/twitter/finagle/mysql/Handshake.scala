@@ -30,7 +30,7 @@ case object IncompatibleCharset
       "This client is only compatible with UTF-8 and Latin-1 charset encoding"
     )
 
-object Handshake {
+private[mysql] object Handshake {
 
   /**
    * Creates a Handshake from a collection of [[com.twitter.finagle.Stack.Params]].
@@ -75,7 +75,7 @@ object Handshake {
  * @return A Try[HandshakeResponse] that encodes incompatibility
  * with the server.
  */
-case class Handshake(
+private[mysql] case class Handshake(
   username: Option[String] = None,
   password: Option[String] = None,
   database: Option[String] = None,
