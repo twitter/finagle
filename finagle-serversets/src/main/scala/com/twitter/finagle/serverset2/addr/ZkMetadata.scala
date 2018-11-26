@@ -66,7 +66,7 @@ object ZkMetadata {
         addressHashOrder.compare(a0, a1)
     }
 
-    override def toString: String = "ZkMetadata.shardHashOrdering"
+    override def toString: String = s"ZkMetadata.shardHashOrdering($seed)"
   }
 
   /**

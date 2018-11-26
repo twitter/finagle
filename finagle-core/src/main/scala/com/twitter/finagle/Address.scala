@@ -44,8 +44,13 @@ object Address {
     }
     def compare(a0: Address, a1: Address): Int = (a0, a1) match {
       case (Address.Inet(inet0, _), Address.Inet(inet1, _)) =>
-        if (inet0.isUnresolved || inet1.isUnresolved) 0
-        else {
+        if (inet0.isUnresolved && inet1.isUnresolved) {
+          inet0.toString.compareTo(inet1.toString)
+        } else if (inet0.isUnresolved) {
+          -1
+        } else if (inet1.isUnresolved) {
+          1
+        } else {
           val ipHash0 = MurmurHash3.bytesHash(inet0.getAddress.getAddress, seed)
           val ipHash1 = MurmurHash3.bytesHash(inet1.getAddress.getAddress, seed)
           val ipCompare = Integer.compare(ipHash0, ipHash1)
@@ -59,7 +64,7 @@ object Address {
       case _ => 0
     }
 
-    override def toString: String = "HashOrdering"
+    override def toString: String = s"HashOrdering($seed)"
   }
 
   /**

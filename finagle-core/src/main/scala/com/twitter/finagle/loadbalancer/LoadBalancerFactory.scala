@@ -266,8 +266,13 @@ object LoadBalancerFactory {
           try set.toVector.sortBy(_.address)(ordering)
           catch {
             case NonFatal(exc) =>
-              log.log(Level.WARNING, "Unable to order endpoints via AddressOrdering", exc)
-              set.toVector
+              val res = set.toVector
+              log.log(
+                Level.WARNING,
+                s"Unable to order endpoints via ($ordering): \n${res.mkString("\n")}",
+                exc
+              )
+              res
           }
         }
 
