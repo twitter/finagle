@@ -71,6 +71,13 @@ New Features
   available at `.reader`). Note messages with `Transfer-Encoding: chunked` never aggregated.
   ``PHAB_ID=D236573``
 
+* finagle-thrift: `tracing.thrift` now has an optional timestamp field for a `Span`.
+  ``PHAB_ID=D242204``
+
+* finagle-zipkin-core: A Span now encodes a timestamp of when it was created as part
+  of its thrift serialization. ``PHAB_ID=D242204``
+
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

@@ -6,6 +6,7 @@ package com.twitter.finagle.zipkin.core
  */
 import com.twitter.finagle.thrift.thrift
 import com.twitter.finagle.tracing.TraceId
+import com.twitter.util.Time
 
 /**
  * The span itself is an immutable datastructure. Mutations are done
@@ -27,6 +28,16 @@ case class Span(
   bAnnotations: Seq[BinaryAnnotation],
   endpoint: Endpoint
 ) {
+  // We compute the timestamp of when the span was created
+  // which we serialize and send to the collector.
+  private[this] lazy val timestamp: Time = {
+    // If we have annotations which were created before
+    // the span, we synthesize the span creation time
+    // to match since it's illogical for the span to be
+    // created before annotations.
+    (Time.now +: annotations.map(_.timestamp)).min
+  }
+
   val serviceName = _serviceName getOrElse "Unknown"
   val name = _name getOrElse "Unknown"
 
@@ -45,6 +56,8 @@ case class Span(
 
   def toThrift: thrift.Span = {
     val span = new thrift.Span
+
+    span.setTimestamp(timestamp.inMicroseconds)
 
     span.setId(traceId.spanId.toLong)
     traceId._parentId match {

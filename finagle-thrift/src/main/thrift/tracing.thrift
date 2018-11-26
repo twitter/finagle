@@ -1,6 +1,6 @@
-/* 
-		CHANGING THIS FILE REQUIRES MANUAL REGENERATION 
-		
+/*
+		CHANGING THIS FILE REQUIRES MANUAL REGENERATION
+
 E.g.:
 
 thrift --gen java tracing.thrift
@@ -209,7 +209,8 @@ struct Span {
   5: optional i64 parent_id,                // parent span id
   6: list<Annotation> annotations, // list of all annotations/events that occurred, sorted by timestamp
   8: list<BinaryAnnotation> binary_annotations, // any binary annotations
-  9: bool debug                    // if true, we DEMAND that this span passes all samplers
+  9: bool debug,                  // if true, we DEMAND that this span passes all samplers
+  10: optional i64 timestamp      // the time at which the span was generated
 }
 
 
