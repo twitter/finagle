@@ -1,7 +1,7 @@
 package com.twitter.finagle.netty3.transport
 
 import com.twitter.finagle.Status
-import com.twitter.util.{Future, Time}
+import com.twitter.util.{Throw, Time}
 import java.net.InetSocketAddress
 import java.security.cert.{Certificate, X509Certificate}
 import javax.net.ssl.{SSLEngine, SSLSession}
@@ -23,7 +23,10 @@ class ChannelTransportContextTest extends FunSuite with MockitoSugar {
   test("onClose returns unimplemented future") {
     val ch = mock[Channel]
     val context = new ChannelTransportContext(ch)
-    assert(context.onClose == Future.???)
+    context.onClose.poll match {
+      case Some(Throw(_: NotImplementedError)) => () // okay
+      case other => fail(s"Unexpected result: $other")
+    }
   }
 
   test("localAddress returns channel's local address") {
@@ -80,7 +83,10 @@ class ChannelTransportContextTest extends FunSuite with MockitoSugar {
     when(ch.getCloseFuture).thenReturn(closeFuture)
     val context = new ChannelTransportContext(ch)
     val result = context.close(Time.now)
-    assert(result == Future.???)
+    result.poll match {
+      case Some(Throw(_: NotImplementedError)) => () // okay
+      case other => fail(s"Unexpected result: $other")
+    }
   }
 
 }
