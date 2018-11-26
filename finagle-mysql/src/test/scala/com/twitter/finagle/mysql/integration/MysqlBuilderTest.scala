@@ -1,12 +1,16 @@
 package com.twitter.finagle.mysql.integration
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.Mysql
 import com.twitter.finagle.param
 import com.twitter.finagle.tracing._
-import com.twitter.util.Await
+import com.twitter.util.{Await, Awaitable}
 import org.scalatest.FunSuite
 
 class MysqlBuilderTest extends FunSuite with IntegrationClient {
+
+  private[this] def ready[T](t: Awaitable[T]): Unit = Await.ready(t, 5.seconds)
+
   test("clients have granular tracing") {
     Trace.enable()
     var annotations: List[Annotation] = Nil
@@ -30,9 +34,9 @@ class MysqlBuilderTest extends FunSuite with IntegrationClient {
         .withDatabase(db)
         .newRichClient("localhost:3306")
 
-      Await.ready(client.query("SELECT 1"))
-      Await.ready(client.prepare("SELECT ?")(1))
-      Await.ready(client.ping())
+      ready(client.query("SELECT 1"))
+      ready(client.prepare("SELECT ?")(1))
+      ready(client.ping())
 
       val mysqlTraces = annotations.collect {
         case Annotation.BinaryAnnotation("mysql.query", "SELECT 1") => ()

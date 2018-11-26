@@ -1,9 +1,10 @@
 package com.twitter.finagle.mysql.integration
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.Mysql
 import com.twitter.finagle.mysql._
 import com.twitter.finagle.mysql.param.UnsignedColumns
-import com.twitter.util.{Await, TwitterDateFormat}
+import com.twitter.util.{Await, Awaitable, TwitterDateFormat}
 import java.sql.Timestamp
 import java.util.TimeZone
 import org.scalactic.{Equality, TolerantNumerics}
@@ -23,6 +24,9 @@ class NumericTypeTest extends FunSuite with IntegrationClient {
     }
   }
 
+  private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
+  private[this] def ready[T](t: Awaitable[T]): Unit = Await.ready(t, 5.seconds)
+
   // This test requires support for unsigned integers
   override protected def configureClient(
     username: String,
@@ -35,7 +39,7 @@ class NumericTypeTest extends FunSuite with IntegrationClient {
   }
 
   for (c <- client) {
-    Await.ready(c.query("""CREATE TEMPORARY TABLE IF NOT EXISTS `numeric` (
+    ready(c.query("""CREATE TEMPORARY TABLE IF NOT EXISTS `numeric` (
         `boolean` boolean NOT NULL,
         `tinyint` tinyint(4) NOT NULL,
         `tinyint_unsigned` tinyint(4) UNSIGNED NOT NULL,
@@ -54,7 +58,7 @@ class NumericTypeTest extends FunSuite with IntegrationClient {
         PRIMARY KEY (`smallint`)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8;"""))
 
-    Await.ready(c.query("""INSERT INTO `numeric` (
+    ready(c.query("""INSERT INTO `numeric` (
         `boolean`,
         `tinyint`, `tinyint_unsigned`,
         `smallint`, `smallint_unsigned`,
@@ -80,13 +84,13 @@ class NumericTypeTest extends FunSuite with IntegrationClient {
   }
 
   def runTest(c: Client, sql: String)(testFunc: Row => Unit): Unit = {
-    val textEncoded = Await.result(c.query(sql).map {
+    val textEncoded = await(c.query(sql).map {
       case rs: ResultSet if rs.rows.nonEmpty => rs.rows.head
       case v => fail("expected a ResultSet with 1 row but received: %s".format(v))
     })
 
     val ps = c.prepare(sql)
-    val binaryrows = Await.result(ps.select()(identity))
+    val binaryrows = await(ps.select()(identity))
     assert(binaryrows.size == 1)
     val binaryEncoded = binaryrows.head
 
@@ -273,8 +277,12 @@ class NumericTypeTest extends FunSuite with IntegrationClient {
 }
 
 class BlobTypeTest extends FunSuite with IntegrationClient {
+
+  private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
+  private[this] def ready[T](t: Awaitable[T]): Unit = Await.ready(t, 5.seconds)
+
   for (c <- client) {
-    Await.ready(c.query("""CREATE TEMPORARY TABLE `blobs` (
+    ready(c.query("""CREATE TEMPORARY TABLE `blobs` (
         `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
         `char` char(5) DEFAULT NULL,
         `varchar` varchar(10) DEFAULT NULL,
@@ -291,7 +299,7 @@ class BlobTypeTest extends FunSuite with IntegrationClient {
         PRIMARY KEY (`id`)
       ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;"""))
 
-    Await.ready(c.query("""INSERT INTO `blobs` (`id`, `char`,
+    ready(c.query("""INSERT INTO `blobs` (`id`, `char`,
         `varchar`, `tinytext`,
         `text`, `mediumtext`, `tinyblob`,
         `mediumblob`, `blob`, `binary`,
@@ -299,13 +307,13 @@ class BlobTypeTest extends FunSuite with IntegrationClient {
         VALUES (1, 'a', 'b', 'c', 'd', 'e', X'66',
         X'67', X'68', X'6970', X'6A', 'small', '1');"""))
 
-    val textEncoded = Await.result(c.query("SELECT * FROM `blobs`") map {
+    val textEncoded = await(c.query("SELECT * FROM `blobs`") map {
       case rs: ResultSet if rs.rows.nonEmpty => rs.rows.head
       case v => fail("expected a ResultSet with 1 row but received: %s".format(v))
     })
 
     val ps = c.prepare("SELECT * FROM `blobs`")
-    val binaryrows: Seq[Row] = Await.result(ps.select()(identity))
+    val binaryrows: Seq[Row] = await(ps.select()(identity))
     assert(binaryrows.size == 1)
     val binaryEncoded = binaryrows.head
 
@@ -427,8 +435,12 @@ class BlobTypeTest extends FunSuite with IntegrationClient {
 }
 
 class DateTimeTypeTest extends FunSuite with IntegrationClient {
+
+  private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
+  private[this] def ready[T](t: Awaitable[T]): Unit = Await.ready(t, 5.seconds)
+
   for (c <- client) {
-    Await.ready(
+    ready(
       c.query("""CREATE TEMPORARY TABLE `datetime` (
         `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
         `date` date NOT NULL,
@@ -440,18 +452,18 @@ class DateTimeTypeTest extends FunSuite with IntegrationClient {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8;""")
     )
 
-    Await.ready(c.query("""INSERT INTO `datetime`
+    ready(c.query("""INSERT INTO `datetime`
         (`id`, `date`, `datetime`, `timestamp`, `time`, `year`)
         VALUES (1, '2013-11-02', '2013-11-02 19:56:24',
         '2013-11-02 19:56:36', '19:56:32', '2013');"""))
 
-    val textEncoded = Await.result(c.query("SELECT * FROM `datetime`") map {
+    val textEncoded = await(c.query("SELECT * FROM `datetime`") map {
       case rs: ResultSet if rs.rows.nonEmpty => rs.rows.head
       case v => fail("expected a ResultSet with 1 row but received: %s".format(v))
     })
 
     val ps = c.prepare("SELECT * FROM `datetime`")
-    val binaryrows = Await.result(ps.select()(identity))
+    val binaryrows = await(ps.select()(identity))
     assert(binaryrows.size == 1)
     val binaryEncoded = binaryrows.head
 

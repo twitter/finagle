@@ -1,12 +1,13 @@
 package com.twitter.finagle.mysql
 
 import com.twitter.concurrent.AsyncQueue
+import com.twitter.conversions.time._
 import com.twitter.finagle.Stack
 import com.twitter.finagle.mysql.param.Credentials
 import com.twitter.finagle.mysql.transport.{Packet, MysqlBuf}
 import com.twitter.finagle.transport.QueueTransport
 import com.twitter.io.Buf
-import com.twitter.util.Await
+import com.twitter.util.{Await, Awaitable}
 import org.scalatest.FunSuite
 
 class ClientDispatcherTest extends FunSuite {
@@ -21,6 +22,8 @@ class ClientDispatcherTest extends FunSuite {
   val params = Stack.Params.empty + Credentials(Some("username"), Some("password"))
   val handshake = Handshake(params)
   val initReply = handshake(init)
+
+  private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 1.second)
 
   def newCtx = new {
     val clientq = new AsyncQueue[Packet]()
@@ -39,7 +42,7 @@ class ClientDispatcherTest extends FunSuite {
   test("handshaking") {
     val ctx = newCtx
     import ctx._
-    val packet = Await.result(handshakeResponse)
+    val packet = await(handshakeResponse)
     val br = MysqlBuf.reader(packet.body)
     assert(br.readIntLE() == initReply().clientCap.mask)
     assert(br.readIntLE() == initReply().maxPacketSize)
@@ -66,8 +69,8 @@ class ClientDispatcherTest extends FunSuite {
     import ctx._
     val r = service(PingRequest)
     clientq.offer(okPacket)
-    assert(Await.result(r).isInstanceOf[OK])
-    val okResult = Await.result(r).asInstanceOf[OK]
+    assert(await(r).isInstanceOf[OK])
+    val okResult = await(r).asInstanceOf[OK]
     assert(okResult == OK.decode(okPacket))
   }
 
@@ -88,7 +91,7 @@ class ClientDispatcherTest extends FunSuite {
     val r = service(QueryRequest("SELECT * FROM q"))
     clientq.offer(errpacket)
     intercept[ServerError] {
-      Await.result(r)
+      await(r)
     }
   }
 
@@ -175,8 +178,8 @@ class ClientDispatcherTest extends FunSuite {
     clientq.offer(eof)
     rowPackets foreach { clientq.offer(_) }
     clientq.offer(eof)
-    assert(Await.result(query).isInstanceOf[ResultSet])
-    val rs = Await.result(query).asInstanceOf[ResultSet]
+    assert(await(query).isInstanceOf[ResultSet])
+    val rs = await(query).asInstanceOf[ResultSet]
     assert(rs.fields.size == numFields)
     assert(rs.rows.size == numRows)
   }
@@ -197,8 +200,8 @@ class ClientDispatcherTest extends FunSuite {
     import ctx._
     val query = service(PrepareRequest(""))
     clientq.offer(makePreparedHeader(0, 0))
-    assert(Await.result(query).isInstanceOf[PrepareOK])
-    val res = Await.result(query).asInstanceOf[PrepareOK]
+    assert(await(query).isInstanceOf[PrepareOK])
+    val res = await(query).asInstanceOf[PrepareOK]
     assert(res.numOfCols == 0)
     assert(res.numOfParams == 0)
   }
@@ -215,8 +218,8 @@ class ClientDispatcherTest extends FunSuite {
     val colPackets = cols map { toPacket(_) }
     colPackets foreach { clientq.offer(_) }
     clientq.offer(eof)
-    assert(Await.result(query).isInstanceOf[PrepareOK])
-    val res = Await.result(query).asInstanceOf[PrepareOK]
+    assert(await(query).isInstanceOf[PrepareOK])
+    val res = await(query).asInstanceOf[PrepareOK]
     assert(res.numOfCols == 1)
     assert(res.numOfParams == numParams)
     assert(res.columns == cols.toList)
@@ -228,12 +231,12 @@ class ClientDispatcherTest extends FunSuite {
     import ctx._
     val stmtId = 5
     val query = service(CloseRequest(5))
-    val sent = Await.result(serverq.poll())
+    val sent = await(serverq.poll())
     val br = MysqlBuf.reader(sent.body)
     assert(br.readByte() == Command.COM_STMT_CLOSE)
     assert(br.readIntLE() == stmtId)
     // response should be synthesized
-    val resp = Await.result(query)
+    val resp = await(query)
     assert(resp.isInstanceOf[OK])
   }
 
@@ -242,7 +245,7 @@ class ClientDispatcherTest extends FunSuite {
     import ctx._
     // offer an ill-formed packet
     clientq.offer(Packet(0, Buf.ByteArray.Owned(Array[Byte]())))
-    intercept[LostSyncException] { Await.result(service(PingRequest)) }
+    intercept[LostSyncException] { await(service(PingRequest)) }
     assert(!service.isAvailable)
     assert(trans.onClose.isDefined)
   }
@@ -252,7 +255,7 @@ class ClientDispatcherTest extends FunSuite {
     val trans = new QueueTransport[Packet, Packet](new AsyncQueue[Packet](), clientq)
     val service = new ClientDispatcher(trans, params)
     clientq.offer(Packet(0, Buf.ByteArray.Owned(Array[Byte]())))
-    intercept[LostSyncException] { Await.result(service(PingRequest)) }
+    intercept[LostSyncException] { await(service(PingRequest)) }
     assert(!service.isAvailable)
     assert(trans.onClose.isDefined)
   }

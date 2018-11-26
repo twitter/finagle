@@ -2,7 +2,7 @@ package com.twitter.finagle.mysql
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.util.{Await, Time}
+import com.twitter.util.{Await, Awaitable, Time}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
@@ -13,6 +13,8 @@ import org.scalatest.{FunSuite, MustMatchers}
  */
 class TransactionTest extends FunSuite with MockitoSugar with MustMatchers {
   private val sqlQuery = "SELECT * FROM FOO"
+
+  private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 1.second)
 
   test("transaction test uses a single service repeatedly and closes it upon completion") {
     val service = new MockService()
@@ -26,7 +28,7 @@ class TransactionTest extends FunSuite with MockitoSugar with MustMatchers {
       } yield "success"
     }
 
-    Await.result(result) must equal("success")
+    await(result) must equal("success")
     service.requests must equal(
       List(
         "SET TRANSACTION ISOLATION LEVEL READ COMMITTED",
@@ -68,7 +70,7 @@ class TransactionTest extends FunSuite with MockitoSugar with MustMatchers {
     )
 
     intercept[RuntimeException] {
-      Await.result(res, 5.seconds)
+      await(res)
     }
 
     verify(factory, times(1)).apply()

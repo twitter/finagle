@@ -4,7 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.{IndividualRequestTimeoutException, Mysql, mysql}
 import com.twitter.finagle.mysql._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.{Await, Closable, Future}
+import com.twitter.util.{Await, Awaitable, Closable, Future}
 import java.sql.Date
 import org.scalatest.concurrent.Eventually
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
@@ -73,8 +73,7 @@ object SwimmingRecord {
 class ClientTest extends FunSuite with IntegrationClient with BeforeAndAfterAll with Eventually {
   import SwimmingRecord._
 
-  private[this] def await[T](f: Future[T]): T =
-    Await.result(f, 5.seconds)
+  private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
 
   private val c: Client with Transactions = client.orNull
 

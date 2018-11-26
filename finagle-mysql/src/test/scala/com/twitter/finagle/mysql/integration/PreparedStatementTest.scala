@@ -2,14 +2,13 @@ package com.twitter.finagle.mysql.integration
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.mysql.{Client, OK, ServerError}
-import com.twitter.util.{Await, Future}
+import com.twitter.util.{Await, Awaitable, Future}
 import java.sql.SQLException
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
 private object PreparedStatementTest {
 
-  private def await[T](f: Future[T]): T =
-    Await.result(f, 5.seconds)
+  private def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
 
   private val createTable =
     """

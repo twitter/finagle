@@ -3,7 +3,7 @@ package com.twitter.finagle.mysql.integration
 import com.twitter.conversions.time._
 import com.twitter.finagle.mysql.{IsolationLevel, LongValue, ServerError, StdClient}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.{Await, Future}
+import com.twitter.util.{Await, Awaitable}
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 
@@ -13,7 +13,7 @@ class TransactionTest
     with Eventually
     with IntegrationPatience {
 
-  private def await[T](f: Future[T]): T = Await.result(f, 5.seconds)
+  private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
 
   test("Simple transaction") {
     for (c <- client) {
