@@ -15,7 +15,7 @@ import scala.util.control.NonFatal
  * `TransportContext` for use with a Finagle Netty4
  * `ChannelTransport`.
  */
-private[finagle] final class ChannelTransportContext(ch: Channel)
+private[finagle] final class ChannelTransportContext(val ch: Channel)
     extends TransportContext
     with HasExecutor {
 
