@@ -1,11 +1,10 @@
 package com.twitter.finagle.netty3.transport
 
 import com.twitter.finagle.Status
-import com.twitter.util.{Throw, Time}
 import java.net.InetSocketAddress
 import java.security.cert.{Certificate, X509Certificate}
 import javax.net.ssl.{SSLEngine, SSLSession}
-import org.jboss.netty.channel.{Channel, ChannelFuture, ChannelPipeline}
+import org.jboss.netty.channel.{Channel, ChannelPipeline}
 import org.jboss.netty.handler.ssl.SslHandler
 import org.mockito.Mockito.when
 import org.scalatest.FunSuite
@@ -18,15 +17,6 @@ class ChannelTransportContextTest extends FunSuite with MockitoSugar {
     when(ch.isOpen).thenReturn(true)
     val context = new ChannelTransportContext(ch)
     assert(context.status == Status.Closed)
-  }
-
-  test("onClose returns unimplemented future") {
-    val ch = mock[Channel]
-    val context = new ChannelTransportContext(ch)
-    context.onClose.poll match {
-      case Some(Throw(_: NotImplementedError)) => () // okay
-      case other => fail(s"Unexpected result: $other")
-    }
   }
 
   test("localAddress returns channel's local address") {
@@ -72,21 +62,6 @@ class ChannelTransportContextTest extends FunSuite with MockitoSugar {
     when(pipeline.get(classOf[SslHandler])).thenReturn(sslHandler)
     val context = new ChannelTransportContext(ch)
     assert(context.peerCertificate.nonEmpty)
-  }
-
-  test("close returns unimplemented future") {
-    val ch = mock[Channel]
-    val pipeline = mock[ChannelPipeline]
-    val closeFuture = mock[ChannelFuture]
-    when(ch.isOpen).thenReturn(true)
-    when(ch.getPipeline).thenReturn(pipeline)
-    when(ch.getCloseFuture).thenReturn(closeFuture)
-    val context = new ChannelTransportContext(ch)
-    val result = context.close(Time.now)
-    result.poll match {
-      case Some(Throw(_: NotImplementedError)) => () // okay
-      case other => fail(s"Unexpected result: $other")
-    }
   }
 
 }

@@ -291,7 +291,7 @@ final private[http2] class StreamTransportFactory(
     p
   }
 
-  def onClose: Future[Throwable] = underlying.context.onClose
+  def onClose: Future[Throwable] = underlying.onClose
 
   private[this] def handleClose(
     deadline: Time,
@@ -313,7 +313,7 @@ final private[http2] class StreamTransportFactory(
     exec.execute(new Runnable {
       def run(): Unit = handleClose(deadline)
     })
-    underlying.context.onClose.unit
+    underlying.onClose.unit
   }
 
   // Ensure we report closed if closed has been called but the detector has not yet been triggered
@@ -558,7 +558,7 @@ final private[http2] class StreamTransportFactory(
       case Idle => parent.status
     }
 
-    def onClose: Future[Throwable] = _onClose.or(underlying.context.onClose)
+    def onClose: Future[Throwable] = _onClose.or(underlying.onClose)
 
     def localAddress: SocketAddress = underlying.context.localAddress
 

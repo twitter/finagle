@@ -29,6 +29,11 @@ New Features
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+* finagle-core: The `c.t.u.Closable` trait has been removed from
+  `c.t.f.t.TransportContext`, as well as the `close` and `onclose` methods. Uses of
+  these methods within `TransportContext` should be changed to use the corresponding
+  methods on `c.t.f.t.Transport` instead. ``PHAB_ID=D244742``
+
 * finagle-mysql: `c.t.f.m.Charset` has been renamed to `c.t.f.m.MysqlCharset` to resolve
   any ambiguity between it and the `Charset` `Stack` parameter. ``PHAB_ID=D240965``
 

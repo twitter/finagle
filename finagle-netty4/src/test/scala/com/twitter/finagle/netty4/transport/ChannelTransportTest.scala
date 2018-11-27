@@ -4,7 +4,7 @@ import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Await, Future, Return, Throw}
+import com.twitter.util.{Await, Future, Return, Time, Throw}
 import io.netty.channel.{ChannelException => _, _}
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.ssl.SslHandler
@@ -293,5 +293,22 @@ class ChannelTransportTest
     em.pipeline.fireChannelInactive()
 
     assert(em.isOpen)
+  }
+
+  test("calling close multiple times only closes the channel once") {
+    val ch = new EmbeddedChannel()
+    val transport = new ChannelTransport(ch)
+    assert(!transport.closed.isDefined)
+    assert(!transport.alreadyClosed.get)
+    transport.close(Time.now)
+    assert(!ch.isOpen)
+    assert(transport.closed.isDefined)
+    assert(transport.alreadyClosed.get)
+    transport.close(Time.now)
+    transport.close(Time.now)
+    assert(transport.closed.isDefined)
+    assert(transport.alreadyClosed.get)
+    // Nothing bad happened
+    succeed
   }
 }

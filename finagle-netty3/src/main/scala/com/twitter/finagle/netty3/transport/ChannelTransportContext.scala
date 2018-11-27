@@ -2,7 +2,6 @@ package com.twitter.finagle.netty3.transport
 
 import com.twitter.finagle.Status
 import com.twitter.finagle.transport.TransportContext
-import com.twitter.util.{Future, Time}
 import java.net.SocketAddress
 import java.security.cert.Certificate
 import org.jboss.netty.channel.Channel
@@ -31,10 +30,4 @@ final class ChannelTransportContext private[transport] (ch: Channel) extends Tra
 
   @deprecated("Please use ChannelTransport.status instead", "2018-09-27")
   def status: Status = Status.Closed
-
-  @deprecated("Please use ChannelTransport.onClose instead", "2018-09-27")
-  def onClose: Future[Throwable] = Future.???
-
-  @deprecated("Please use ChannelTransport.close instead", "2018-09-27")
-  def close(deadline: Time): Future[Unit] = Future.???
 }

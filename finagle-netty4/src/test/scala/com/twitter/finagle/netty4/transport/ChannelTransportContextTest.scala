@@ -1,7 +1,6 @@
 package com.twitter.finagle.netty4.transport
 
 import com.twitter.finagle.Status
-import com.twitter.util.{Return, Time}
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.ssl.SslHandler
 import java.security.cert.{Certificate, X509Certificate}
@@ -33,14 +32,6 @@ class ChannelTransportContextTest extends FunSuite with MockitoSugar {
     assert(context.status == Status.Closed)
   }
 
-  test("onClose returns closed promise") {
-    val ch = new EmbeddedChannel()
-    val context = new ChannelTransportContext(ch)
-    assert(!context.onClose.isDefined)
-    context.closed.updateIfEmpty(Return(new Exception("Hello")))
-    assert(context.onClose.isDefined)
-  }
-
   test("localAddress returns channel's local address") {
     val ch = new EmbeddedChannel()
     val context = new ChannelTransportContext(ch)
@@ -70,25 +61,6 @@ class ChannelTransportContextTest extends FunSuite with MockitoSugar {
     val ch = new EmbeddedChannel(sslHandler)
     val context = new ChannelTransportContext(ch)
     assert(context.peerCertificate.nonEmpty)
-  }
-
-  test("close closes the channel") {
-    val ch = new EmbeddedChannel()
-    val context = new ChannelTransportContext(ch)
-    context.close(Time.now)
-    assert(!ch.isOpen)
-  }
-
-  test("calling close multiple times only closes the channel once") {
-    val ch = new EmbeddedChannel()
-    val context = new ChannelTransportContext(ch)
-    context.close(Time.now)
-    assert(!ch.isOpen)
-    assert(context.alreadyClosed.get)
-    context.close(Time.now)
-    context.close(Time.now)
-    // Nothing bad happened
-    succeed
   }
 
   test("executor is the channel's event loop") {

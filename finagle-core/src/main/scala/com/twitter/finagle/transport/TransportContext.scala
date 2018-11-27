@@ -1,7 +1,7 @@
 package com.twitter.finagle.transport
 
 import com.twitter.finagle.Status
-import com.twitter.util.{Future, Closable, Time, Updatable}
+import com.twitter.util.Updatable
 import java.net.SocketAddress
 import java.security.cert.Certificate
 
@@ -9,7 +9,7 @@ import java.security.cert.Certificate
  * Exposes a way to control the transport, and read off properties from the
  * transport.
  */
-abstract class TransportContext extends Closable {
+abstract class TransportContext {
 
   /**
    * The status of this transport; see [[com.twitter.finagle.Status]] for
@@ -17,15 +17,6 @@ abstract class TransportContext extends Closable {
    */
   @deprecated("Please use Transport.status instead", "2018-09-27")
   def status: Status
-
-  /**
-   * The channel closed with the given exception. This is the
-   * same exception you would get if attempting to read or
-   * write on the Transport, but this allows clients to listen to
-   * close events.
-   */
-  @deprecated("Please use Transport.onClose instead", "2018-09-27")
-  def onClose: Future[Throwable]
 
   /**
    * The locally bound address of this transport.
@@ -51,8 +42,6 @@ abstract class TransportContext extends Closable {
  */
 private[finagle] class LegacyContext(underlying: Transport[_, _]) extends TransportContext {
   def status: Status = underlying.status
-  def close(deadline: Time): Future[Unit] = underlying.close(deadline)
-  def onClose: Future[Throwable] = underlying.onClose
   def localAddress: SocketAddress = underlying.localAddress
   def remoteAddress: SocketAddress = underlying.remoteAddress
   def peerCertificate: Option[Certificate] = underlying.peerCertificate
@@ -68,8 +57,6 @@ private[finagle] class UpdatableContext(first: TransportContext)
   }
 
   def status: Status = underlying.status
-  def close(deadline: Time): Future[Unit] = underlying.close(deadline)
-  def onClose: Future[Throwable] = underlying.onClose
   def localAddress: SocketAddress = underlying.localAddress
   def remoteAddress: SocketAddress = underlying.remoteAddress
   def peerCertificate: Option[Certificate] = underlying.peerCertificate

@@ -7,7 +7,7 @@ import com.twitter.util.{Future, Promise, Return, Time}
 import io.netty.{channel => nettyChan}
 import java.net.SocketAddress
 import java.security.cert.Certificate
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
 import scala.util.control.NoStackTrace
 
 /**
@@ -30,6 +30,10 @@ private[finagle] class ChannelTransport(
   type Context = ChannelTransportContext
 
   import ChannelTransport._
+
+  // Accessible for testing
+  private[transport] val closed = new Promise[Throwable]
+  private[transport] val alreadyClosed = new AtomicBoolean(false)
 
   private[this] val readInterruptHandler: PartialFunction[Throwable, Unit] = {
     case e =>
@@ -87,7 +91,7 @@ private[finagle] class ChannelTransport(
     // returned to netty potentially allowing subsequent offers to the queue,
     // which should be illegal after failure.
     close()
-    context.closed.updateIfEmpty(Return(exc))
+    closed.updateIfEmpty(Return(exc))
   }
 
   def write(msg: Any): Future[Unit] = {
@@ -130,14 +134,20 @@ private[finagle] class ChannelTransport(
   }
 
   def status: Status = context.status
-  def onClose: Future[Throwable] = context.onClose
+  def onClose: Future[Throwable] = closed
   def localAddress: SocketAddress = context.localAddress
   def remoteAddress: SocketAddress = context.remoteAddress
   def peerCertificate: Option[Certificate] = context.peerCertificate
 
-  def close(deadline: Time): Future[Unit] = context.close(deadline)
+  def close(deadline: Time): Future[Unit] = {
+    // we check if this has already been closed because of a netty bug
+    // https://github.com/netty/netty/issues/7638.  Remove this work-around once
+    // it's fixed.
+    if (alreadyClosed.compareAndSet(false, true) && ch.isOpen) ch.close()
+    closed.unit
+  }
 
-  override def toString = s"Transport<channel=$ch, onClose=${context.closed}>"
+  override def toString = s"Transport<channel=$ch, onClose=${closed}>"
 
   ch.pipeline.addLast(
     HandlerName,
@@ -165,7 +175,7 @@ private[finagle] class ChannelTransport(
       }
 
       override def channelInactive(ctx: nettyChan.ChannelHandlerContext): Unit = {
-        context.alreadyClosed.set(true)
+        alreadyClosed.set(true)
         if (omitStackTraceOnInactive) {
           fail(new ChannelClosedException(remoteAddress) with NoStackTrace)
         } else fail(new ChannelClosedException(remoteAddress))
