@@ -23,23 +23,21 @@ private final class DefaultHeaderMap extends HeaderMap {
   }
 
   // Validates key and value.
-  def add(k: String, v: String): HeaderMap = {
-    DefaultHeaderMap.validateName(k)
-    DefaultHeaderMap.validateValue(v)
-    addUnsafe(k, v)
+  def add(key: String, value: String): HeaderMap = {
+    DefaultHeaderMap.validateName(key)
+    addUnsafe(key, DefaultHeaderMap.foldReplacingValidateValue(value))
   }
 
   // Does not validate key and value.
-  def addUnsafe(k: String, v: String): HeaderMap = underlying.synchronized {
-    underlying.add(k, v)
+  def addUnsafe(key: String, value: String): HeaderMap = underlying.synchronized {
+    underlying.add(key, value)
     this
   }
 
   // Validates key and value.
   def set(key: String, value: String): HeaderMap = {
     DefaultHeaderMap.validateName(key)
-    DefaultHeaderMap.validateValue(value)
-    setUnsafe(key, value)
+    setUnsafe(key, DefaultHeaderMap.foldReplacingValidateValue(value))
   }
 
   // Does not validate key and value.
@@ -82,6 +80,10 @@ private final class DefaultHeaderMap extends HeaderMap {
 }
 
 private object DefaultHeaderMap {
+
+  // Exposed for testing
+  private[http] val ObsFoldRegex = "\r?\n[\t ]+".r
+
   // Adopted from Netty 3 HttpHeaders.
   private def validateName(s: String): Unit = {
     if (s == null) throw new NullPointerException("Header names cannot be null")
@@ -108,7 +110,7 @@ private object DefaultHeaderMap {
   }
 
   // Adopted from Netty 3 HttpHeaders.
-  private def validateValue(s: String): Unit = {
+  private def foldReplacingValidateValue(s: String): String = {
     if (s == null) throw new NullPointerException("Header values cannot be null")
 
     var i = 0
@@ -117,6 +119,7 @@ private object DefaultHeaderMap {
     // 1: The previous character was CR
     // 2: The previous character was LF
     var state = 0
+    var foldDetected = false
 
     while (i < s.length) {
       val c = s.charAt(i)
@@ -141,8 +144,10 @@ private object DefaultHeaderMap {
           if (c == '\n') state = 2
           else throw new IllegalArgumentException("Only '\\n' is allowed after '\\r': " + s)
         case 2 =>
-          if (c == '\t' || c == ' ') state = 0
-          else
+          if (c == '\t' || c == ' ') {
+            foldDetected = true // We are going to replace the folds later
+            state = 0
+          } else
             throw new IllegalArgumentException("Only ' ' and '\\t' are allowed after '\\n': " + s)
       }
 
@@ -150,7 +155,18 @@ private object DefaultHeaderMap {
     }
 
     if (state != 0) {
-      throw new IllegalArgumentException("Header value must not end with '\\r' or '\\n':" + s)
+      throw new IllegalArgumentException(
+        "Header value must not end with '\\r' or '\\n'. Observed: " +
+          (if (state == 1) "\\r" else "\\n")
+      )
+    } else if (foldDetected) {
+      // Per https://tools.ietf.org/html/rfc7230#section-3.2.4, an obs-fold is equivalent
+      // to a SP char and suggests that such header values should be 'fixed' before
+      // interpreting or forwarding the message.
+      ObsFoldRegex.replaceAllIn(s, " ")
+    } else {
+      // Valid and no modifications needed.
+      s
     }
   }
 

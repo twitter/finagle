@@ -10,13 +10,19 @@ class DefaultHeaderMapTest extends AbstractHeaderMapTest with GeneratorDrivenPro
   def genNonEmptyString: Gen[String] =
     Gen.nonEmptyListOf(Gen.choose('a', 'z')).map(s => new String(s.toArray))
 
-  def genValidHeader: Gen[(String, String)] =
+  def genValidFoldedHeader: Gen[(String, String)] =
     for {
       k <- genNonEmptyString
       v1 <- genNonEmptyString
-      x <- Gen.oneOf("\r\n ", "\r\n\t")
+      folds <- Gen.nonEmptyListOf(Gen.oneOf("\r\n ", "\r\n\t", "\n ", "\n\t"))
       v2 <- genNonEmptyString
-    } yield (k, v1 + x + v2)
+    } yield (k, v1 + folds.mkString(v2))
+
+  def genValidHeader: Gen[(String, String)] =
+    for {
+      k <- genNonEmptyString
+      v <- genNonEmptyString
+    } yield (k, v)
 
   def genInvalidHeaderName: Gen[(String, String)] =
     for {
@@ -50,6 +56,16 @@ class DefaultHeaderMapTest extends AbstractHeaderMapTest with GeneratorDrivenPro
     forAll(genValidHeader) {
       case (k, v) =>
         assert(DefaultHeaderMap(k -> v).get(k).contains(v))
+    }
+  }
+
+  test("validates header names & values with obs-folds (success)") {
+    forAll(genValidFoldedHeader) {
+      case (k, v) =>
+        val value = DefaultHeaderMap(k -> v).apply(k)
+        assert(value == DefaultHeaderMap.ObsFoldRegex.replaceAllIn(v, " "))
+        assert(v.contains("\n"))
+        assert(!value.contains("\n"))
     }
   }
 
