@@ -80,11 +80,11 @@ class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
 
     // Add cookies back again
     if (message.isRequest) {
-      message.headerMap.setUnsafe(cookieHeaderName, cookieCodec.encodeClient(values))
+      message.headerMap.set(cookieHeaderName, cookieCodec.encodeClient(values))
     } else {
       foreach {
         case (_, cookie) => {
-          message.headerMap.addUnsafe(cookieHeaderName, cookieCodec.encodeServer(cookie))
+          message.headerMap.add(cookieHeaderName, cookieCodec.encodeServer(cookie))
           if (!message.headerMap.toString.contains("SameSite")
             && cookie.sameSite != SameSite.Unset) {
             CookieMap.silentlyDroppedSameSitesCounter.incr()
