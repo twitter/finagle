@@ -24,11 +24,9 @@ class ChannelTransportTest
 
   val timeout = 10.seconds
 
-  val (transport, channel) = {
-    val ch = new EmbeddedChannel()
-    val tr = Transport.cast[String, String](new ChannelTransport(ch))
-    (tr, ch)
-  }
+  val channel = new EmbeddedChannel()
+  val channelTransport = new ChannelTransport(channel)
+  val transport = Transport.cast[String, String](channelTransport)
 
   def assertSeenWhatsWritten[A](written: Boolean, a: A, seen: Future[A]): Unit =
     assert(!written || (written && Await.result(seen, timeout) == a))
@@ -36,6 +34,21 @@ class ChannelTransportTest
   def assertFailedRead[A](seen: Future[A], e: Exception): Unit = {
     val thrown = intercept[Exception](Await.result(seen, timeout))
     assert(thrown == ChannelException(e, transport.remoteAddress))
+    assert(transport.status == Status.Closed)
+  }
+
+  test("ChannelTransport status is open when not failed and channel is not closed") {
+    assert(channel.isOpen)
+    assert(transport.status == Status.Open)
+  }
+
+  test("ChannelTransport status is closed when failed") {
+    channelTransport.failed.compareAndSet(false, true)
+    assert(transport.status == Status.Closed)
+  }
+
+  test("ChannelTransport status is closed when channel is closed") {
+    channel.close()
     assert(transport.status == Status.Closed)
   }
 

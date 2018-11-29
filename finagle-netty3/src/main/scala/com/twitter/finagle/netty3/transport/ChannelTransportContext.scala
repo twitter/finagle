@@ -1,6 +1,5 @@
 package com.twitter.finagle.netty3.transport
 
-import com.twitter.finagle.Status
 import com.twitter.finagle.transport.TransportContext
 import java.net.SocketAddress
 import java.security.cert.Certificate
@@ -28,6 +27,4 @@ final class ChannelTransportContext private[transport] (ch: Channel) extends Tra
         }
     }
 
-  @deprecated("Please use ChannelTransport.status instead", "2018-09-27")
-  def status: Status = Status.Closed
 }

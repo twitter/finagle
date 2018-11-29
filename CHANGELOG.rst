@@ -38,6 +38,10 @@ Breaking API Changes
   these methods within `TransportContext` should be changed to use the corresponding
   methods on `c.t.f.t.Transport` instead. ``PHAB_ID=D244742``
 
+* finagle-core: The deprecated `c.t.f.t.TransportContext.status` method has been removed
+  from `TransportContext`. Uses of this method should be changed to use
+  `c.t.f.t.Transport.status` instead. ``PHAB_ID=D247234``
+
 * finagle-mysql: `c.t.f.m.Charset` has been renamed to `c.t.f.m.MysqlCharset` to resolve
   any ambiguity between it and the `Charset` `Stack` parameter. ``PHAB_ID=D240965``
 

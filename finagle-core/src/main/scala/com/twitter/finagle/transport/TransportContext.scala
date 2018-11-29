@@ -1,6 +1,5 @@
 package com.twitter.finagle.transport
 
-import com.twitter.finagle.Status
 import com.twitter.util.Updatable
 import java.net.SocketAddress
 import java.security.cert.Certificate
@@ -10,13 +9,6 @@ import java.security.cert.Certificate
  * transport.
  */
 abstract class TransportContext {
-
-  /**
-   * The status of this transport; see [[com.twitter.finagle.Status]] for
-   * status definitions.
-   */
-  @deprecated("Please use Transport.status instead", "2018-09-27")
-  def status: Status
 
   /**
    * The locally bound address of this transport.
@@ -41,7 +33,6 @@ abstract class TransportContext {
  * directly.
  */
 private[finagle] class LegacyContext(underlying: Transport[_, _]) extends TransportContext {
-  def status: Status = underlying.status
   def localAddress: SocketAddress = underlying.localAddress
   def remoteAddress: SocketAddress = underlying.remoteAddress
   def peerCertificate: Option[Certificate] = underlying.peerCertificate
@@ -56,7 +47,6 @@ private[finagle] class UpdatableContext(first: TransportContext)
     underlying = context
   }
 
-  def status: Status = underlying.status
   def localAddress: SocketAddress = underlying.localAddress
   def remoteAddress: SocketAddress = underlying.remoteAddress
   def peerCertificate: Option[Certificate] = underlying.peerCertificate

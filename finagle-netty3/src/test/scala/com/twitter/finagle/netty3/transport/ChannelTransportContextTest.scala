@@ -1,6 +1,5 @@
 package com.twitter.finagle.netty3.transport
 
-import com.twitter.finagle.Status
 import java.net.InetSocketAddress
 import java.security.cert.{Certificate, X509Certificate}
 import javax.net.ssl.{SSLEngine, SSLSession}
@@ -11,13 +10,6 @@ import org.scalatest.FunSuite
 import org.scalatest.mockito.MockitoSugar
 
 class ChannelTransportContextTest extends FunSuite with MockitoSugar {
-
-  test("status always returns closed because the value shouldn't be used") {
-    val ch = mock[Channel]
-    when(ch.isOpen).thenReturn(true)
-    val context = new ChannelTransportContext(ch)
-    assert(context.status == Status.Closed)
-  }
 
   test("localAddress returns channel's local address") {
     val ch = mock[Channel]

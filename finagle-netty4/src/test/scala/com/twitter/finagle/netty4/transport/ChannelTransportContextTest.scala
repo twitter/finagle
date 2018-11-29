@@ -1,6 +1,5 @@
 package com.twitter.finagle.netty4.transport
 
-import com.twitter.finagle.Status
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.ssl.SslHandler
 import java.security.cert.{Certificate, X509Certificate}
@@ -10,27 +9,6 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatest.FunSuite
 
 class ChannelTransportContextTest extends FunSuite with MockitoSugar {
-
-  test("status is open when not failed and channel is not closed") {
-    val ch = new EmbeddedChannel()
-    assert(ch.isOpen)
-    val context = new ChannelTransportContext(ch)
-    assert(context.status == Status.Open)
-  }
-
-  test("status is closed when failed") {
-    val ch = new EmbeddedChannel()
-    val context = new ChannelTransportContext(ch)
-    context.failed.compareAndSet(false, true)
-    assert(context.status == Status.Closed)
-  }
-
-  test("status is closed when channel is closed") {
-    val ch = new EmbeddedChannel()
-    val context = new ChannelTransportContext(ch)
-    ch.close()
-    assert(context.status == Status.Closed)
-  }
 
   test("localAddress returns channel's local address") {
     val ch = new EmbeddedChannel()

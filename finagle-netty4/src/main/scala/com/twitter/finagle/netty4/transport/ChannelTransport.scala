@@ -34,6 +34,7 @@ private[finagle] class ChannelTransport(
   // Accessible for testing
   private[transport] val closed = new Promise[Throwable]
   private[transport] val alreadyClosed = new AtomicBoolean(false)
+  private[transport] val failed = new AtomicBoolean(false)
 
   private[this] val readInterruptHandler: PartialFunction[Throwable, Unit] = {
     case e =>
@@ -76,7 +77,7 @@ private[finagle] class ChannelTransport(
   }
 
   private[this] def fail(exc: Throwable): Unit = {
-    if (!context.failed.compareAndSet(false, true))
+    if (!failed.compareAndSet(false, true))
       return
 
     // We do have to fail the queue before fail exits, otherwise control is
@@ -133,11 +134,11 @@ private[finagle] class ChannelTransport(
     p
   }
 
-  def status: Status = context.status
+  def status: Status =
+    if (failed.get || !ch.isOpen) Status.Closed
+    else Status.Open
+
   def onClose: Future[Throwable] = closed
-  def localAddress: SocketAddress = context.localAddress
-  def remoteAddress: SocketAddress = context.remoteAddress
-  def peerCertificate: Option[Certificate] = context.peerCertificate
 
   def close(deadline: Time): Future[Unit] = {
     // we check if this has already been closed because of a netty bug
@@ -146,6 +147,10 @@ private[finagle] class ChannelTransport(
     if (alreadyClosed.compareAndSet(false, true) && ch.isOpen) ch.close()
     closed.unit
   }
+
+  def localAddress: SocketAddress = context.localAddress
+  def remoteAddress: SocketAddress = context.remoteAddress
+  def peerCertificate: Option[Certificate] = context.peerCertificate
 
   override def toString = s"Transport<channel=$ch, onClose=${closed}>"
 
