@@ -523,6 +523,12 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
 
     override def withStack(stack: Stack[ServiceFactory[Command, Response]]): Server =
       super.withStack(stack)
+
+    override def withStack(
+      fn: Stack[ServiceFactory[Command, Response]] => Stack[ServiceFactory[Command, Response]]
+    ): Server =
+      super.withStack(fn)
+
     override def configured[P](psp: (P, Stack.Param[P])): Server = super.configured(psp)
   }
 

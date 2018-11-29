@@ -147,6 +147,11 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
   def withStack(stack: Stack[ServiceFactory[Req, Rep]]): This =
     copy1(stack = stack)
 
+  override def withStack(
+    fn: Stack[ServiceFactory[Req, Rep]] => Stack[ServiceFactory[Req, Rep]]
+  ): This =
+    withStack(fn(stack))
+
   /**
    * A copy constructor in lieu of defining StackServer as a
    * case class.

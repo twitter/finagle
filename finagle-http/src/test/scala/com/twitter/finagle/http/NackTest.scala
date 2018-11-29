@@ -1,6 +1,6 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.{Address, Failure, FailureFlags, Name, Service, Http => FHttp}
+import com.twitter.finagle.{Address, Failure, FailureFlags, Name, Service, http, Http => FHttp}
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.http.filter.HttpNackFilter
 import com.twitter.finagle.param.{Label, Stats}
@@ -154,7 +154,7 @@ class NackTest extends FunSuite {
     new ClientCtx {
       val server =
         FHttp.server
-          .withStack(StackServer.newStack)
+          .withStack(StackServer.newStack[http.Request, http.Response])
           .configured(Stats(serverSr))
           .configured(Label("myservice"))
           .serve(new InetSocketAddress(0), flakyService)

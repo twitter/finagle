@@ -133,6 +133,9 @@ trait StackServer[Req, Rep]
     with Stack.Parameterized[StackServer[Req, Rep]]
     with Stack.Transformable[StackServer[Req, Rep]] {
 
+  /**
+   * @see [[withStack]]
+   */
   def transformed(t: Stack.Transformer): StackServer[Req, Rep] =
     withStack(t(stack))
 
@@ -142,8 +145,48 @@ trait StackServer[Req, Rep]
   /** The current parameter map used in this StackServer. */
   def params: Stack.Params
 
-  /** A new StackServer with the provided Stack. */
+  /**
+   *
+   * A new [[StackServer]] with the provided [[Stack]].
+   *
+   * @see `withStack` that takes a `Function1` for a more ergonomic
+   *     API when used with method chaining.
+   */
   def withStack(stack: Stack[ServiceFactory[Req, Rep]]): StackServer[Req, Rep]
+
+  /**
+   * A new [[StackServer]] using the function to create a new [[Stack]].
+   *
+   * The input to `fn` is the [[stack client's current stack]].
+   * This API allows for easier usage when writing code that
+   * uses method chaining.
+   *
+   * This method is similar to [[transformed]] while providing easier API
+   * ergonomics for one-off `Stack` changes.
+   *
+   * @example
+   * From Scala:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.server.withStack(_.prepend(MyStackModule))
+   * }}}
+   *
+   * From Java:
+   * {{{
+   * import com.twitter.finagle.Http;
+   * import static com.twitter.util.Function.func;
+   *
+   * Http.server().withStack(func(stack -> stack.prepend(MyStackModule)));
+   * }}}
+   *
+   * @see [[withStack(Stack)]]
+   * @see [[transformed]]
+   */
+  def withStack(
+    fn: Stack[ServiceFactory[Req, Rep]] => Stack[ServiceFactory[Req, Rep]]
+  ): StackServer[Req, Rep] =
+    withStack(fn(stack))
 
   def withParams(ps: Stack.Params): StackServer[Req, Rep]
 

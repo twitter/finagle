@@ -2,6 +2,7 @@ package com.twitter.finagle.server
 
 import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.conversions.time._
+import com.twitter.finagle.Stack.Module0
 import com.twitter.finagle._
 import com.twitter.finagle.context.{Contexts, Deadline}
 import com.twitter.finagle.filter.{RequestSemaphoreFilter, ServerAdmissionControl}
@@ -17,6 +18,25 @@ import org.scalatest.FunSuite
 import org.scalatest.concurrent.Eventually
 
 class StackServerTest extends FunSuite with Eventually {
+
+  test("withStack (Function1)") {
+    val module = new Module0[ServiceFactory[String, String]] {
+      def make(next: ServiceFactory[String, String]): ServiceFactory[String, String] = ???
+      def role: Stack.Role = Stack.Role("no-op")
+      def description: String = "no-op"
+    }
+
+    val init = StringServer.server.stack
+    assert(!init.contains(module.role))
+
+    val modified = StringServer.server.withStack(_.prepend(module)).stack
+    assert(modified.contains(module.role))
+
+    init.tails.map(_.head).foreach { stackHead =>
+      assert(modified.contains(stackHead.role))
+    }
+  }
+
   test("Deadline isn't changed until after it's recorded") {
     val echo = ServiceFactory.const(Service.mk[Unit, Deadline] { unit =>
       Future.value(Contexts.broadcast(Deadline))
@@ -117,7 +137,7 @@ class StackServerTest extends FunSuite with Eventually {
     }
 
     val csf = CanStackFrom.fromFun[ServiceFactory[String, String]]
-    val stackable = csf.toStackable(new Stack.Role("something"), fn)
+    val stackable = csf.toStackable(Stack.Role("something"), fn)
     val stk: Stack[ServiceFactory[String, String]] = StackServer.newStack.prepend(stackable)
     val factory = ServiceFactory.const(Service.const[String](Future.value("hi")))
 

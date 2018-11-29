@@ -654,6 +654,12 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
 
     override def withStack(stack: Stack[ServiceFactory[Request, Response]]): Server =
       super.withStack(stack)
+
+    override def withStack(
+      fn: Stack[ServiceFactory[Request, Response]] => Stack[ServiceFactory[Request, Response]]
+    ): Server =
+      super.withStack(fn)
+
     override def configured[P](psp: (P, Stack.Param[P])): Server = super.configured(psp)
     override def configuredParams(newParams: Stack.Params): Server =
       super.configuredParams(newParams)

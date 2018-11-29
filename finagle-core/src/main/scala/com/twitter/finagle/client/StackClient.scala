@@ -460,6 +460,9 @@ trait StackClient[Req, Rep]
    * This API allows for easier usage when writing code that
    * uses method chaining.
    *
+   * This method is similar to [[transformed]] while providing easier API
+   * ergonomics for one-off `Stack` changes.
+   *
    * @example
    * From Scala:
    * {{{
@@ -477,12 +480,16 @@ trait StackClient[Req, Rep]
    * }}}
    *
    * @see [[withStack(Stack)]]
+   * @see [[transformed]]
    */
   def withStack(
     fn: Stack[ServiceFactory[Req, Rep]] => Stack[ServiceFactory[Req, Rep]]
   ): StackClient[Req, Rep] =
     withStack(fn(stack))
 
+  /**
+   * @see [[withStack]]
+   */
   def transformed(t: Stack.Transformer): StackClient[Req, Rep] =
     withStack(t(stack))
 

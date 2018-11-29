@@ -538,6 +538,13 @@ object ThriftMux
     def withStack(stack: Stack[ServiceFactory[mux.Request, mux.Response]]): Server =
       this.copy(muxer = muxer.withStack(stack))
 
+    def withStack(
+      fn: Stack[ServiceFactory[mux.Request, mux.Response]] => Stack[
+        ServiceFactory[mux.Request, mux.Response]
+      ]
+    ): Server =
+      withStack(fn(stack))
+
     /**
      * Prepends `filter` to the top of the server. That is, after materializing
      * the server (newService) `filter` will be the first element which requests

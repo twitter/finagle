@@ -577,6 +577,14 @@ object Thrift
 
     override def withStack(stack: Stack[ServiceFactory[Array[Byte], Array[Byte]]]): Server =
       super.withStack(stack)
+
+    override def withStack(
+      fn: Stack[ServiceFactory[Array[Byte], Array[Byte]]] => Stack[
+        ServiceFactory[Array[Byte], Array[Byte]]
+      ]
+    ): Server =
+      super.withStack(fn)
+
     override def configured[P](psp: (P, Stack.Param[P])): Server = super.configured(psp)
   }
 

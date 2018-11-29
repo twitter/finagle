@@ -18,6 +18,10 @@ New Features
 * finagle-core: Add Java compatibility for `c.t.f.Name` through `Names`.
   ``PHAB_ID=D242084``
 
+* finagle-core: Introduce a `StackServer.withStack` overload that
+  makes modifying the existing `Stack` easier when using method chaining.
+  ``PHAB_ID=D246893``
+
 * finagle-thrift: Add `c.t.finagle.thrift.MethodMetadata` which provides a `LocalContext` Key
   for setting information about the current Thrift method and an accessor for retrieving
   the currently set value. ``PHAB_ID=D241295``
@@ -64,7 +68,7 @@ New Features
 * finagle-base-http: Add `Message.httpDateFormat(millis)` to format the epoch millis into
   an RFC 7231 formatted String representation. ``PHAB_ID=D234867``
 
-* finagle-core: Introduce an `StackClient.withStack` overload that
+* finagle-core: Introduce a `StackClient.withStack` overload that
   makes modifying the existing `Stack` easier when using method chaining.
   ``PHAB_ID=D234739``
 
