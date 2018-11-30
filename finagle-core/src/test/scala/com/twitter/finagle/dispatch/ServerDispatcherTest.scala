@@ -2,25 +2,31 @@ package com.twitter.finagle.dispatch
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.Service
-import com.twitter.util._
 import com.twitter.finagle.context.{Contexts, RemoteInfo}
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
+import com.twitter.util._
 import java.net.SocketAddress
 import java.security.cert.X509Certificate
-import org.junit.runner.RunWith
-import org.mockito.Mockito.{atLeastOnce, never, times, verify, when}
 import org.mockito.Matchers.any
+import org.mockito.Mockito
+import org.mockito.Mockito.{atLeastOnce, never, times, verify}
+import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 import scala.language.reflectiveCalls
 
-@RunWith(classOf[JUnitRunner])
 class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
 
+  // Don't let the Scala compiler get confused about which `thenReturn`
+  // method we want to use.
+  private[this] def when[T](o: T) =
+    Mockito.when(o).asInstanceOf[{ def thenReturn[RT](s: RT): OngoingStubbing[RT] }]
+
   trait Ctx {
+    val context = mock[TransportContext]
+    when(context.peerCertificate).thenReturn(None)
     val trans = mock[Transport[String, String]]
-    when(trans.peerCertificate).thenReturn(None)
+    when(trans.context).thenReturn(context)
     when(trans.onClose).thenReturn(Future.never)
     val readp = new Promise[String]
     when(trans.read()).thenReturn(readp)
@@ -57,7 +63,7 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
 
   test("Inject the transport certificate if present")(new Ctx {
     val mockCert = mock[X509Certificate]
-    when(trans.peerCertificate).thenReturn(Some(mockCert))
+    when(context.peerCertificate).thenReturn(Some(mockCert))
     val service = new Service[String, String] {
       override def apply(request: String): Future[String] = Future.value {
         if (Contexts.local.get(Transport.peerCertCtx) == Some(mockCert)) "ok" else "not ok"
@@ -112,11 +118,13 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
     writep: Promise[Unit]
   ): Transport[String, String] = {
     val trans = mock[Transport[String, String]]
+    val context = mock[TransportContext]
     when(trans.write(any[String])).thenReturn(writep)
     when(trans.onClose).thenReturn(onClose)
     when(trans.close).thenReturn(onClose.unit)
     when(trans.close(any[Time])).thenReturn(onClose.unit)
-    when(trans.peerCertificate).thenReturn(None)
+    when(context.peerCertificate).thenReturn(None)
+    when(trans.context).thenReturn(context)
     trans
   }
 

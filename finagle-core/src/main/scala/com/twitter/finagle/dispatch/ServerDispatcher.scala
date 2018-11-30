@@ -69,7 +69,7 @@ abstract class GenSerialServerDispatcher[Req, Rep, In, Out](trans: Transport[In,
       val save = Local.save()
       val dispatched = try {
         Contexts.local.let(RemoteInfo.Upstream.AddressCtx, trans.remoteAddress) {
-          trans.peerCertificate match {
+          trans.context.peerCertificate match {
             case None => dispatch(req, eos)
             case Some(cert) =>
               Contexts.local.let(Transport.peerCertCtx, cert) {

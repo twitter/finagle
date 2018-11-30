@@ -78,7 +78,7 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
     listener.listen(addr) { transport =>
       val clientConnection = new ClientConnectionProxy(new TransportClientConnection(transport))
 
-      val futureService = transport.peerCertificate match {
+      val futureService = transport.context.peerCertificate match {
         case None => serviceFactory(clientConnection)
         case Some(cert) =>
           Contexts.local.let(Transport.peerCertCtx, cert) {
