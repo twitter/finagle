@@ -6,10 +6,8 @@ import io.netty.buffer.Unpooled
 import io.netty.handler.codec.http.{Cookie => _, _}
 import java.net.{InetSocketAddress, URI}
 import java.nio.charset.StandardCharsets.UTF_8
-import org.junit.runner.RunWith
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import scala.collection.JavaConverters._
 import scala.util.Random
@@ -113,7 +111,6 @@ object BijectionsTest {
   }
 
   val arbNettyResponse = for {
-    method <- arbNettyMethod
     version <- arbNettyVersion
     status <- arbNettyStatus
     kvHeaders <- Gen.containerOf[Seq, (String, String)](arbHeader)
@@ -132,7 +129,6 @@ object BijectionsTest {
   }
 }
 
-@RunWith(classOf[JUnitRunner])
 class BijectionsTest extends FunSuite with GeneratorDrivenPropertyChecks {
   import BijectionsTest._
 
@@ -206,7 +202,7 @@ class BijectionsTest extends FunSuite with GeneratorDrivenPropertyChecks {
         }
 
         in.headerMap.foreach {
-          case (k, v) =>
+          case (k, _) =>
             assert(out.headers.getAll(k).asScala.toSet == in.headerMap.getAll(k).toSet)
         }
     }
@@ -229,5 +225,25 @@ class BijectionsTest extends FunSuite with GeneratorDrivenPropertyChecks {
     val out = Bijections.finagle.requestToNetty(in)
     assert(HttpUtil.isTransferEncodingChunked(out))
     assert(!out.headers.contains(Fields.ContentLength))
+  }
+
+  test("can enable Finagles validation of Netty headers") {
+    revalidateInboundHeaders.let(true) {
+      val out = HeaderMap()
+      val in = new DefaultHttpHeaders( /*validate*/ false)
+      in.add("foo:", "bar")
+      intercept[IllegalArgumentException](Bijections.netty.writeNettyHeadersToFinagle(in, out))
+
+      in.clear()
+      assert(out.isEmpty)
+      in.add("foo", "bar\f")
+      intercept[IllegalArgumentException](Bijections.netty.writeNettyHeadersToFinagle(in, out))
+
+      in.clear()
+      assert(out.isEmpty)
+      in.add("foo", "bar\r\n bar")
+      Bijections.netty.writeNettyHeadersToFinagle(in, out)
+      assert(out("foo") == "bar bar")
+    }
   }
 }

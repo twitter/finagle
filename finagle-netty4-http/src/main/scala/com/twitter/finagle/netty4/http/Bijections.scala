@@ -1,11 +1,18 @@
 package com.twitter.finagle.netty4.http
 
+import com.twitter.app.GlobalFlag
 import com.twitter.finagle.http.{Fields, HeaderMap, Request}
 import com.twitter.finagle.netty4.ByteBufConversion
 import com.twitter.finagle.{http => FinagleHttp}
 import com.twitter.io.{Buf, BufReader, Reader, Writer}
 import io.netty.handler.codec.{http => NettyHttp}
 import java.net.InetSocketAddress
+
+object revalidateInboundHeaders
+    extends GlobalFlag[Boolean](
+      default = false,
+      help = "Perform Finagle based validation of headers when converting from Netty `HeaderMap`s"
+    )
 
 private[finagle] object Bijections {
 
@@ -65,11 +72,14 @@ private[finagle] object Bijections {
       head: NettyHttp.HttpHeaders,
       out: HeaderMap
     ): Unit = {
+      val shouldValidate = revalidateInboundHeaders()
       val itr = head.iteratorAsString()
       while (itr.hasNext) {
         val entry = itr.next()
-        // addUnsafe because Netty already validates Headers for us.
-        out.addUnsafe(entry.getKey, entry.getValue)
+        // addUnsafe because Netty already validates Headers for us, but sometimes
+        // it's better to be double sure so enable opting into revalidation.
+        if (shouldValidate) out.add(entry.getKey, entry.getValue)
+        else out.addUnsafe(entry.getKey, entry.getValue)
       }
     }
 

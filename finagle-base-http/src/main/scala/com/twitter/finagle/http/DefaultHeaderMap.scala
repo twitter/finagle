@@ -1,5 +1,6 @@
 package com.twitter.finagle.http
 
+import com.twitter.logging.Logger
 import scala.annotation.{switch, tailrec}
 import scala.collection.mutable
 
@@ -81,6 +82,8 @@ private final class DefaultHeaderMap extends HeaderMap {
 
 private object DefaultHeaderMap {
 
+  private[this] val logger = Logger.get(classOf[DefaultHeaderMap])
+
   // Exposed for testing
   private[http] val ObsFoldRegex = "\r?\n[\t ]+".r
 
@@ -160,6 +163,7 @@ private object DefaultHeaderMap {
           (if (state == 1) "\\r" else "\\n")
       )
     } else if (foldDetected) {
+      logger.debug("`obs-fold` sequence replaced.")
       // Per https://tools.ietf.org/html/rfc7230#section-3.2.4, an obs-fold is equivalent
       // to a SP char and suggests that such header values should be 'fixed' before
       // interpreting or forwarding the message.
