@@ -192,7 +192,7 @@ abstract class AbstractH2CEndToEndTest extends AbstractHttp2EndToEndTest {
       serverUseHttp2 <- Seq(1D, 0D)
       clientToggleName <- Seq(
         "com.twitter.finagle.http.UseH2",
-        "com.twitter.finagle.http.UseH2CClients"
+        "com.twitter.finagle.http.UseH2CClients2"
       )
       serverToggleName <- Seq(
         "com.twitter.finagle.http.UseH2",
@@ -216,7 +216,7 @@ abstract class AbstractH2CEndToEndTest extends AbstractHttp2EndToEndTest {
       await(rep)
       if (clientUseHttp2 == 1.0 &&
         serverUseHttp2 == 1.0 &&
-        clientToggleName == "com.twitter.finagle.http.UseH2CClients" &&
+        clientToggleName == "com.twitter.finagle.http.UseH2CClients2" &&
         serverToggleName == "com.twitter.finagle.http.UseH2CServers") {
         assert(
           sr.counters.get(Seq("client", "upgrade", "success")) == Some(1),
@@ -252,7 +252,7 @@ abstract class AbstractH2CEndToEndTest extends AbstractHttp2EndToEndTest {
         .withLabel("server")
         .serve("localhost:*", initService)
       val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-      val client = overrides.let(Map("com.twitter.finagle.http.UseH2CClients" -> clientUseHttp2)) {
+      val client = overrides.let(Map("com.twitter.finagle.http.UseH2CClients2" -> clientUseHttp2)) {
         val c = finagle.Http.client
           .withStatsReceiver(sr)
 

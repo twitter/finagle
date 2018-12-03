@@ -75,7 +75,7 @@ abstract class AbstractHttp2AlpnTest extends AbstractHttp2EndToEndTest {
       serverUseHttp2 <- Seq(1D, 0D)
       clientToggleName <- Seq(
         "com.twitter.finagle.http.UseH2",
-        "com.twitter.finagle.http.UseH2CClients"
+        "com.twitter.finagle.http.UseH2CClients2"
       )
       serverToggleName <- Seq(
         "com.twitter.finagle.http.UseH2",

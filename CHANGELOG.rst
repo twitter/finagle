@@ -55,6 +55,9 @@ Breaking API Changes
 * finagle-mysql: The `c.t.f.m.Handshake` class and companion object have been made
   private. ``PHAB_ID=D244734``
 
+* finagle-http: Rename the toggle 'c.t.f.h.UseH2CClients' to 'c.t.f.h.UseH2CClients2'.
+  ``PHAB_ID=D247320``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

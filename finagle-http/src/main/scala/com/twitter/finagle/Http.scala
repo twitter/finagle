@@ -53,7 +53,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     def apply(): Boolean = underlying(ServerInfo().id.hashCode)
   }
   private[this] object useH2CClients {
-    private[this] val underlying: Toggle[Int] = Toggles("com.twitter.finagle.http.UseH2CClients")
+    private[this] val underlying: Toggle[Int] = Toggles("com.twitter.finagle.http.UseH2CClients2")
     def apply(): Boolean = underlying(ServerInfo().id.hashCode)
   }
   private[this] object useH2CServers {
