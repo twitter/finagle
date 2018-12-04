@@ -226,7 +226,8 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     params: Stack.Params = Client.params
   ) extends EndpointerStackClient[Request, Response, Client]
       with param.WithSessionPool[Client]
-      with param.WithDefaultLoadBalancer[Client] {
+      with param.WithDefaultLoadBalancer[Client]
+      with Stack.Transformable[Client] {
 
     protected type In = Any
     protected type Out = Any
@@ -446,6 +447,9 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
         else this
       client.superNewClient(dest, label0)
     }
+
+    override def transformed(t: Stack.Transformer): Client =
+      withStack(t(stack))
   }
 
   def client: Http.Client = Client()

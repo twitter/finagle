@@ -185,6 +185,7 @@ lazy val projectList = Seq[sbt.ProjectReference](
   finagleIntegration,
   finagleExp,
   finagleGrpcContext,
+  finagleOpenCensusTracing,
   finagleInit,
 
   // Protocols
@@ -625,6 +626,25 @@ lazy val finagleGrpcContext = Project(
     util("core"),
     "io.grpc" % "grpc-context" % "1.13.2"
   )
+)
+
+lazy val finagleOpenCensusTracing = Project(
+  id = "finagle-opencensus-tracing",
+  base = file("finagle-opencensus-tracing")
+).settings(
+  sharedSettings
+).settings(
+  name := "finagle-opencensus-tracing",
+  libraryDependencies ++= Seq(
+    "io.opencensus" % "opencensus-api" % "0.16.1",
+    "io.opencensus" % "opencensus-impl" % "0.16.1"
+  ) ++ scroogeLibs
+).dependsOn(
+  finagleCore,
+  finagleHttp,
+  finagleGrpcContext,
+  // needs the thruftmux test dependency for testing
+  finagleThriftMux % "compile->compile;test->test"
 )
 
 lazy val finagleExample = Project(

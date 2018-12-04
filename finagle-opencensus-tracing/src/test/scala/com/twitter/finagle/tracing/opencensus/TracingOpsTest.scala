@@ -1,0 +1,63 @@
+package com.twitter.finagle.tracing.opencensus
+
+import com.twitter.util.Future
+import io.opencensus.trace.{BlankSpan, EndSpanOptions, Span, SpanBuilder}
+import org.mockito.Matchers._
+import org.mockito.Mockito._
+import org.scalatest.FunSuite
+import org.scalatest.mockito.MockitoSugar
+
+class TracingOpsTest extends FunSuite with MockitoSugar {
+  import TracingOps._
+
+  test("Span.scopedAndEnd") {
+    val value = "ok"
+    val span = mock[Span]
+    val result = span.scopedAndEnd {
+      value
+    }
+    assert(result == value)
+    verify(span).end()
+  }
+
+  test("Span.scoped") {
+    val value = "ok"
+    val span = mock[Span]
+    val result = span.scoped {
+      value
+    }
+    assert(result == value)
+    verify(span, times(0)).end()
+  }
+
+  test("Span.scopedToFuture success") {
+    val value = Future.Done
+    val span = mock[Span]
+    val result = span.scopedToFutureAndEnd {
+      value
+    }
+    assert(result == value)
+    verify(span).end()
+  }
+
+  test("Span.scopedToFuture exception") {
+    val value = Future.exception(new RuntimeException())
+    val span = mock[Span]
+    val result = span.scopedToFutureAndEnd {
+      value
+    }
+    assert(result == value)
+    verify(span).end(any[EndSpanOptions])
+  }
+
+  test("SpanBuilder.runInScope") {
+    val value = "ok"
+    val spanBuilder = mock[SpanBuilder]
+    when(spanBuilder.startSpan()).thenReturn(BlankSpan.INSTANCE)
+    val result = spanBuilder.runInScope {
+      value
+    }
+    assert(result == value)
+    verify(spanBuilder).startScopedSpan()
+  }
+}

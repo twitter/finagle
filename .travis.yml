@@ -14,6 +14,7 @@ env:
     - PROJECT=finagle-core
     - PROJECT=finagle-exception
     - PROJECT=finagle-exp
+    - PROJECT=finagle-grpc-context
     - PROJECT=finagle-http
     - PROJECT=finagle-http2
     - PROJECT=finagle-integration
@@ -22,6 +23,7 @@ env:
     - PROJECT=finagle-netty4
     - PROJECT=finagle-netty4-http
     - PROJECT=finagle-netty3
+    - PROJECT=finagle-opencensus-tracing
     - PROJECT=finagle-redis
     - PROJECT=finagle-serversets
     - PROJECT=finagle-stats

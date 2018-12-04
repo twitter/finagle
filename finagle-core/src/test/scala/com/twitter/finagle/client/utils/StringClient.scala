@@ -52,7 +52,8 @@ object StringClient {
     stack: Stack[ServiceFactory[String, String]] = StackClient.newStack,
     params: Stack.Params = DefaultParams,
     appendDelimeter: Boolean = true
-  ) extends StdStackClient[String, String, Client] {
+  ) extends StdStackClient[String, String, Client]
+      with Stack.Transformable[Client] {
     protected def copy1(
       stack: Stack[ServiceFactory[String, String]] = this.stack,
       params: Stack.Params = this.params
@@ -80,6 +81,10 @@ object StringClient {
           (_: ServiceFactory[String, String]) => ServiceFactory.const(s)
         )
       )
+
+    override def transformed(t: Stack.Transformer): Client =
+      withStack(t(stack))
+
   }
 
   def client: Client = Client()
