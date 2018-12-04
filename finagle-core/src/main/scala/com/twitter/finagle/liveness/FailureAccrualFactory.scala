@@ -318,7 +318,7 @@ class FailureAccrualFactory[Req, Rep](
     }
   }
 
-  private[this] val onServiceAcquisitionFailure: Throwable => Unit = self.synchronized { _ =>
+  private[this] def onServiceAcquisitionFailure(): Unit = self.synchronized {
     stopProbing()
     didFail()
   }
@@ -430,19 +430,13 @@ class FailureAccrualFactory[Req, Rep](
 
   private[this] val applyService: Try[Service[Req, Rep]] => Future[Service[Req, Rep]] = {
     case Return(svc) => Future.value(makeService(svc))
-    case t @ Throw(_) => Future.const(t.cast[Service[Req, Rep]])
+    case t @ Throw(_) =>
+      onServiceAcquisitionFailure()
+      Future.const(t.cast[Service[Req, Rep]])
   }
 
-  private[this] val handleFailure: Try[Service[Req, Rep]] => Unit = {
-    case Throw(t) => onServiceAcquisitionFailure(t)
-    case _ =>
-  }
-
-  def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
-    underlying(conn)
-      .transform(applyService)
-      .respond(handleFailure)
-  }
+  def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
+    underlying(conn).transform(applyService)
 
   override def status: Status = state match {
     case Alive | ProbeOpen => underlying.status
