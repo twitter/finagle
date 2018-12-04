@@ -14,6 +14,13 @@ class ScribeRawZipkinTracerTest extends FunSuite {
 
   val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None, Flags().setDebug)
 
+  /**
+   * The ttl used to construct the DeadlineSpanMap in RawZipkinTracer. The value is not exposed in
+   * ScribeRawZipkinTracer, but needed here to ensure that time is advanced enough to guarantee that
+   *  the span is removed from the cache and logged.
+   */
+  val deadlineSpanMapTtl = 120.seconds
+
   class ScribeClient extends Scribe.FutureIface {
     var messages: Seq[LogEntry] = Seq.empty[LogEntry]
     var response: Future[ResultCode] = Future.value(ResultCode.Ok)
@@ -64,73 +71,89 @@ class ScribeRawZipkinTracerTest extends FunSuite {
   }
 
   test("send all traces to scribe") {
-    val scribe = new ScribeClient
-    val tracer = new ScribeRawZipkinTracer(scribe, NullStatsReceiver)
+    Time.withCurrentTimeFrozen { tc =>
+      val scribe = new ScribeClient
+      val timer = new MockTimer
+      val tracer = new ScribeRawZipkinTracer(scribe, NullStatsReceiver, timer = timer)
 
-    val localAddress = InetAddress.getByAddress(Array.fill(4) { 1 })
-    val remoteAddress = InetAddress.getByAddress(Array.fill(4) { 10 })
-    val port1 = 80 // never bound
-    val port2 = 53 // ditto
-    tracer.record(
-      Record(
-        traceId,
-        Time.fromSeconds(123),
-        Annotation.ClientAddr(new InetSocketAddress(localAddress, port1))
+      val localAddress = InetAddress.getByAddress(Array.fill(4) {
+        1
+      })
+      val remoteAddress = InetAddress.getByAddress(Array.fill(4) {
+        10
+      })
+      val port1 = 80 // never bound
+      val port2 = 53 // ditto
+      tracer.record(
+        Record(
+          traceId,
+          Time.now,
+          Annotation.ClientAddr(new InetSocketAddress(localAddress, port1))
+        )
       )
-    )
-    tracer.record(
-      Record(
-        traceId,
-        Time.fromSeconds(123),
-        Annotation.LocalAddr(new InetSocketAddress(localAddress, port1))
+      tracer.record(
+        Record(
+          traceId,
+          Time.now,
+          Annotation.LocalAddr(new InetSocketAddress(localAddress, port1))
+        )
       )
-    )
-    tracer.record(
-      Record(
-        traceId,
-        Time.fromSeconds(123),
-        Annotation.ServerAddr(new InetSocketAddress(remoteAddress, port2))
+      tracer.record(
+        Record(
+          traceId,
+          Time.now,
+          Annotation.ServerAddr(new InetSocketAddress(remoteAddress, port2))
+        )
       )
-    )
-    tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ServiceName("service")))
-    tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.Rpc("method")))
-    tracer.record(
-      Record(traceId, Time.fromSeconds(123), Annotation.BinaryAnnotation("i16", 16.toShort))
-    )
-    tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.BinaryAnnotation("i32", 32)))
-    tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.BinaryAnnotation("i64", 64L)))
-    tracer.record(
-      Record(traceId, Time.fromSeconds(123), Annotation.BinaryAnnotation("double", 123.3d))
-    )
-    tracer.record(
-      Record(traceId, Time.fromSeconds(123), Annotation.BinaryAnnotation("string", "woopie"))
-    )
-    tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.Message("boo")))
-    tracer.record(
-      Record(traceId, Time.fromSeconds(123), Annotation.Message("boohoo"), Some(1.second))
-    )
-    tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ClientSend))
-    tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ClientRecv))
+      tracer.record(Record(traceId, Time.now, Annotation.ServiceName("service")))
+      tracer.record(Record(traceId, Time.now, Annotation.Rpc("method")))
+      tracer.record(
+        Record(traceId, Time.now, Annotation.BinaryAnnotation("i16", 16.toShort))
+      )
+      tracer.record(Record(traceId, Time.now, Annotation.BinaryAnnotation("i32", 32)))
+      tracer.record(Record(traceId, Time.now, Annotation.BinaryAnnotation("i64", 64L)))
+      tracer.record(
+        Record(traceId, Time.now, Annotation.BinaryAnnotation("double", 123.3d))
+      )
+      tracer.record(
+        Record(traceId, Time.now, Annotation.BinaryAnnotation("string", "woopie"))
+      )
+      tracer.record(Record(traceId, Time.now, Annotation.Message("boo")))
+      tracer.record(
+        Record(traceId, Time.now, Annotation.Message("boohoo"), Some(1.second))
+      )
+      tracer.record(Record(traceId, Time.now, Annotation.ClientSend))
+      tracer.record(Record(traceId, Time.now, Annotation.ClientRecv))
 
-    // Note: Since ports are ephemeral, we can't hardcode expected message.
-    assert(scribe.messages.size == 1)
+      tc.advance(deadlineSpanMapTtl) // advance timer beyond the ttl to force DeadlineSpanMap flush
+      timer.tick()
+
+      // Note: Since ports are ephemeral, we can't hardcode expected message.
+      assert(scribe.messages.size == 1)
+    }
   }
 
   test("logSpan if a timeout occurs") {
-    val ann1 = Annotation.Message("some_message")
-    val ann2 = Annotation.ServiceName("some_service")
-    val ann3 = Annotation.Rpc("rpc_name")
-    val ann4 = Annotation.Message(TimeoutFilter.TimeoutAnnotation)
+    Time.withCurrentTimeFrozen { tc =>
+      val ann1 = Annotation.Message("some_message")
+      val ann2 = Annotation.ServiceName("some_service")
+      val ann3 = Annotation.Rpc("rpc_name")
+      val ann4 = Annotation.Message(TimeoutFilter.TimeoutAnnotation)
 
-    val scribe = new ScribeClient
-    val tracer = new ScribeRawZipkinTracer(scribe, NullStatsReceiver)
+      val scribe = new ScribeClient
+      val timer = new MockTimer
+      val tracer = new ScribeRawZipkinTracer(scribe, NullStatsReceiver, timer = timer)
 
-    tracer.record(Record(traceId, Time.fromSeconds(1), ann1))
-    tracer.record(Record(traceId, Time.fromSeconds(2), ann2))
-    tracer.record(Record(traceId, Time.fromSeconds(3), ann3))
-    tracer.record(Record(traceId, Time.fromSeconds(3), ann4))
+      tracer.record(Record(traceId, Time.fromSeconds(1), ann1))
+      tracer.record(Record(traceId, Time.fromSeconds(2), ann2))
+      tracer.record(Record(traceId, Time.fromSeconds(3), ann3))
+      tracer.record(Record(traceId, Time.fromSeconds(3), ann4))
 
-    // scribe Log method is in java
-    assert(scribe.messages.size == 1)
+      tc.advance(deadlineSpanMapTtl) // advance timer beyond the ttl to force DeadlineSpanMap flush
+      timer.tick()
+
+      // scribe Log method is in java
+      assert(scribe.messages.size == 1)
+    }
   }
 }
