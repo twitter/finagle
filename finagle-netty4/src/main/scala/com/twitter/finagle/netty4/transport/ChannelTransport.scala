@@ -33,7 +33,6 @@ private[finagle] class ChannelTransport(
 
   // Accessible for testing
   private[transport] val closed = new Promise[Throwable]
-  private[transport] val alreadyClosed = new AtomicBoolean(false)
   private[transport] val failed = new AtomicBoolean(false)
 
   private[this] val readInterruptHandler: PartialFunction[Throwable, Unit] = {
@@ -141,10 +140,7 @@ private[finagle] class ChannelTransport(
   def onClose: Future[Throwable] = closed
 
   def close(deadline: Time): Future[Unit] = {
-    // we check if this has already been closed because of a netty bug
-    // https://github.com/netty/netty/issues/7638.  Remove this work-around once
-    // it's fixed.
-    if (alreadyClosed.compareAndSet(false, true) && ch.isOpen) ch.close()
+    if (ch.isOpen) ch.close()
     closed.unit
   }
 
@@ -180,7 +176,6 @@ private[finagle] class ChannelTransport(
       }
 
       override def channelInactive(ctx: nettyChan.ChannelHandlerContext): Unit = {
-        alreadyClosed.set(true)
         if (omitStackTraceOnInactive) {
           fail(new ChannelClosedException(remoteAddress) with NoStackTrace)
         } else fail(new ChannelClosedException(remoteAddress))

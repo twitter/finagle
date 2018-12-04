@@ -300,27 +300,16 @@ class ChannelTransportTest
     assert(ct.status == Status.Closed)
   }
 
-  test("firing inactive doesn't trigger a close") {
-    val em = new EmbeddedChannel
-    val ct = new ChannelTransport(em, new AsyncQueue[Any](maxPendingOffers = 1))
-    em.pipeline.fireChannelInactive()
-
-    assert(em.isOpen)
-  }
-
   test("calling close multiple times only closes the channel once") {
     val ch = new EmbeddedChannel()
     val transport = new ChannelTransport(ch)
     assert(!transport.closed.isDefined)
-    assert(!transport.alreadyClosed.get)
     transport.close(Time.now)
     assert(!ch.isOpen)
     assert(transport.closed.isDefined)
-    assert(transport.alreadyClosed.get)
     transport.close(Time.now)
     transport.close(Time.now)
     assert(transport.closed.isDefined)
-    assert(transport.alreadyClosed.get)
     // Nothing bad happened
     succeed
   }
