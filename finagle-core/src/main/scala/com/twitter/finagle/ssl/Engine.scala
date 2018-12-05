@@ -5,5 +5,4 @@ import javax.net.ssl.SSLEngine
 case class Engine(
   self: SSLEngine,
   handlesRenegotiation: Boolean = false,
-  certId: String = "<unknown>"
-)
+  certId: String = "<unknown>")

@@ -230,8 +230,8 @@ object Thrift
    */
   case class Client(
     stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] = Client.stack,
-    params: Stack.Params = Client.params
-  ) extends StdStackClient[ThriftClientRequest, Array[Byte], Client]
+    params: Stack.Params = Client.params)
+      extends StdStackClient[ThriftClientRequest, Array[Byte], Client]
       with WithSessionPool[Client]
       with WithDefaultLoadBalancer[Client]
       with ThriftRichClient {
@@ -386,16 +386,10 @@ object Thrift
 
   def client: Thrift.Client = Client()
 
-  def newService(
-    dest: Name,
-    label: String
-  ): Service[ThriftClientRequest, Array[Byte]] =
+  def newService(dest: Name, label: String): Service[ThriftClientRequest, Array[Byte]] =
     client.newService(dest, label)
 
-  def newClient(
-    dest: Name,
-    label: String
-  ): ServiceFactory[ThriftClientRequest, Array[Byte]] =
+  def newClient(dest: Name, label: String): ServiceFactory[ThriftClientRequest, Array[Byte]] =
     client.newClient(dest, label)
 
   @deprecated("Use `Thrift.client.withProtocolFactory`", "6.22.0")
@@ -464,8 +458,8 @@ object Thrift
    */
   case class Server(
     stack: Stack[ServiceFactory[Array[Byte], Array[Byte]]] = Server.stack,
-    params: Stack.Params = Server.params
-  ) extends StdStackServer[Array[Byte], Array[Byte], Server]
+    params: Stack.Params = Server.params)
+      extends StdStackServer[Array[Byte], Array[Byte], Server]
       with ThriftRichServer {
     protected def copy1(
       stack: Stack[ServiceFactory[Array[Byte], Array[Byte]]] = this.stack,

@@ -21,29 +21,25 @@ private class HashedWheelTimer(underlying: netty.Timer) extends Timer {
     toTimerTask(timeout)
   }
 
-  protected def schedulePeriodically(
-    when: Time,
-    period: Duration
-  )(
-    f: => Unit
-  ): TimerTask = new TimerTask {
-    var isCancelled = false
-    var ref: TimerTask = schedule(when) { loop() }
+  protected def schedulePeriodically(when: Time, period: Duration)(f: => Unit): TimerTask =
+    new TimerTask {
+      var isCancelled = false
+      var ref: TimerTask = schedule(when) { loop() }
 
-    def loop(): Unit = {
-      f
-      synchronized {
-        if (!isCancelled) ref = schedule(period.fromNow) { loop() }
+      def loop(): Unit = {
+        f
+        synchronized {
+          if (!isCancelled) ref = schedule(period.fromNow) { loop() }
+        }
+      }
+
+      def cancel(): Unit = {
+        synchronized {
+          isCancelled = true
+          ref.cancel()
+        }
       }
     }
-
-    def cancel(): Unit = {
-      synchronized {
-        isCancelled = true
-        ref.cancel()
-      }
-    }
-  }
 
   def stop(): Unit = underlying.stop()
 

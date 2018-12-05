@@ -31,11 +31,7 @@ private[http2] class Http2NackHandler extends ChannelOutboundHandlerAdapter {
   // threaded.
   private[this] var continue: ChannelPromise = null
 
-  override def write(
-    ctx: ChannelHandlerContext,
-    msg: Object,
-    p: ChannelPromise
-  ): Unit =
+  override def write(ctx: ChannelHandlerContext, msg: Object, p: ChannelPromise): Unit =
     if (continue == null) {
       msg match {
         case frame: Http2HeadersFrame if frame.headers.contains(RetryableNackHeader) =>

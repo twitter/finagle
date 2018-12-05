@@ -72,8 +72,8 @@ object ClientConfig {
 
   private case class NilClient[Req, Rep](
     stack: Stack[ServiceFactory[Req, Rep]] = StackClient.newStack[Req, Rep],
-    params: Stack.Params = DefaultParams
-  ) extends StackBasedClient[Req, Rep] {
+    params: Stack.Params = DefaultParams)
+      extends StackBasedClient[Req, Rep] {
 
     def withParams(ps: Stack.Params): StackBasedClient[Req, Rep] = copy(params = ps)
     def transformed(t: Stack.Transformer): StackBasedClient[Req, Rep] = copy(stack = t(stack))
@@ -235,8 +235,7 @@ private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHos
  * client-construction APIs.
  */
 class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] private[finagle] (
-  private[finagle] val client: StackBasedClient[Req, Rep]
-) {
+  private[finagle] val client: StackBasedClient[Req, Rep]) {
   import ClientConfig._
   import com.twitter.finagle.param._
 
@@ -368,9 +367,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * }}}
    */
   @varargs
-  def addrs(
-    addrs: Address*
-  ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
+  def addrs(addrs: Address*): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
     dest(Name.bound(addrs: _*))
 
   /**
@@ -389,9 +386,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *   .newService(name)
    * }}}
    */
-  def dest(
-    addr: String
-  ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] = {
+  def dest(addr: String): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] = {
     Resolver.evalLabeled(addr) match {
       case (n, "") => dest(n)
       case (n, l) =>
@@ -418,9 +413,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Http.client.newService(name)
    * }}}
    */
-  def dest(
-    name: Name
-  ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
+  def dest(name: Name): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
     _configured(DestName(name))
 
   /**
@@ -878,10 +871,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Http.client.withTransport.tls(config, sessionVerifier)
    * }}}
    */
-  def tls(
-    config: SslClientConfiguration,
-    sessionVerifier: SslClientSessionVerifier
-  ): This =
+  def tls(config: SslClientConfiguration, sessionVerifier: SslClientSessionVerifier): This =
     configured(Transport.ClientSsl(Some(config)))
       .configured(SslClientSessionVerifier.Param(sessionVerifier))
 
@@ -1150,7 +1140,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Http.client.newClient(destination)
    * }}}
    */
-  def buildFactory()(
+  def buildFactory(
+  )(
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION: ClientConfigEvidence[
       HasCluster,
       HasCodec,
@@ -1173,7 +1164,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Http.client.newService(destination)
    * }}}
    */
-  def build()(
+  def build(
+  )(
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION: ClientConfigEvidence[
       HasCluster,
       HasCodec,
@@ -1278,10 +1270,7 @@ private[finagle] object ClientBuilderClient {
     val role: Stack.Role = Stack.Role("ClientBuilder ExceptionSourceFilter")
     val description: String = "Exception source filter"
 
-    def make(
-      labelP: Label,
-      next: ServiceFactory[Req, Rep]
-    ): ServiceFactory[Req, Rep] = {
+    def make(labelP: Label, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = {
       val Label(label) = labelP
 
       val exceptionSource = new ExceptionSourceFilter[Req, Rep](label)

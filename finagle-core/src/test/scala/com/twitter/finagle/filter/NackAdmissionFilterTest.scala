@@ -33,8 +33,7 @@ class NackAdmissionFilterTest extends FunSuite {
   class Ctx(
     random: Rng = Rng(0x5eeded),
     _window: Duration = DefaultWindow,
-    _nackRateThreshold: Double = DefaultNackRateThreshold
-  ) {
+    _nackRateThreshold: Double = DefaultNackRateThreshold) {
     val log: Logger = DefaultLogger
     val timer: MockTimer = new MockTimer
     val statsReceiver: InMemoryStatsReceiver = new InMemoryStatsReceiver()

@@ -28,10 +28,7 @@ object MethodBuilder {
    *
    * @see [[com.twitter.finagle.ThriftMux.Client.methodBuilder(String)]]
    */
-  def from(
-    dest: String,
-    thriftMuxClient: ThriftMux.Client
-  ): MethodBuilder =
+  def from(dest: String, thriftMuxClient: ThriftMux.Client): MethodBuilder =
     from(Resolver.eval(dest), thriftMuxClient)
 
   /**
@@ -50,10 +47,7 @@ object MethodBuilder {
    *
    * @see [[com.twitter.finagle.ThriftMux.Client.methodBuilder(Name)]]
    */
-  def from(
-    dest: Name,
-    thriftMuxClient: ThriftMux.Client
-  ): MethodBuilder = {
+  def from(dest: Name, thriftMuxClient: ThriftMux.Client): MethodBuilder = {
     val stack = modifiedStack(thriftMuxClient.stack)
     val params = thriftMuxClient.params
     val service: Service[ThriftClientRequest, Array[Byte]] = thriftMuxClient
@@ -243,8 +237,8 @@ object MethodBuilder {
  */
 class MethodBuilder(
   rich: ThriftRichClient,
-  mb: client.MethodBuilder[ThriftClientRequest, Array[Byte]]
-) extends client.MethodBuilderScaladoc[MethodBuilder] {
+  mb: client.MethodBuilder[ThriftClientRequest, Array[Byte]])
+    extends client.MethodBuilderScaladoc[MethodBuilder] {
 
   /**
    * Configured client label. The `label` is used to assign a label to the underlying Thrift client.
@@ -335,9 +329,8 @@ class MethodBuilder(
   // used to delay creation of the Service until the first request
   // as `mb.wrappedService` eagerly creates some metrics that are best
   // avoided until the first request.
-  final private class DelayedService(
-    methodName: Option[String]
-  ) extends Service[ThriftClientRequest, Array[Byte]] {
+  final private class DelayedService(methodName: Option[String])
+      extends Service[ThriftClientRequest, Array[Byte]] {
     private[this] lazy val svc: Service[ThriftClientRequest, Array[Byte]] =
       mb.wrappedService(methodName)
 
@@ -354,9 +347,8 @@ class MethodBuilder(
   // used to delay creation of the Filters until the first request
   // as `servicePerEndpoint.filtered` eagerly creates some metrics
   // that are best avoided until the first request.
-  final private class DelayedTypeAgnostic(
-    typeAgnostic: Filter.TypeAgnostic
-  ) extends Filter.TypeAgnostic {
+  final private class DelayedTypeAgnostic(typeAgnostic: Filter.TypeAgnostic)
+      extends Filter.TypeAgnostic {
     def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = new Filter[Req, Rep, Req, Rep] {
       private lazy val filter: Filter[Req, Rep, Req, Rep] =
         typeAgnostic.toFilter

@@ -24,8 +24,8 @@ private[http2] object H2StreamChannelInit {
   private final class H2Initializer(
     init: Option[ChannelInitializer[Channel]],
     params: Stack.Params,
-    isServer: Boolean
-  ) extends ChannelInitializer[Channel] {
+    isServer: Boolean)
+      extends ChannelInitializer[Channel] {
     def initChannel(ch: Channel): Unit = {
       val alloc = params[Allocator].allocator
       ch.config.setAllocator(alloc)

@@ -20,8 +20,8 @@ private[loadbalancer] class HeapLeastLoaded[Req, Rep](
   factories: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
   statsReceiver: StatsReceiver,
   emptyException: Throwable,
-  rng: Random
-) extends ServiceFactory[Req, Rep] {
+  rng: Random)
+    extends ServiceFactory[Req, Rep] {
 
   import HeapBalancer._
 
@@ -38,8 +38,7 @@ private[loadbalancer] class HeapLeastLoaded[Req, Rep](
     factory: ServiceFactory[Req, Rep],
     var load: Int,
     var index: Int,
-    var downq: Node = null
-  )
+    var downq: Node = null)
 
   // Linked list of downed nodes.
   private[this] var downq: Node = null

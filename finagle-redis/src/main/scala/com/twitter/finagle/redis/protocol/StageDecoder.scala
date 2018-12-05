@@ -12,8 +12,7 @@ private[redis] final class StageDecoder(init: Stage) {
   private[this] final class Acc(
     var n: Long,
     val replies: ListBuffer[Reply],
-    val finish: List[Reply] => Reply
-  )
+    val finish: List[Reply] => Reply)
 
   import Stage._
 

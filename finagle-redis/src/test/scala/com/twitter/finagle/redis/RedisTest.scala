@@ -308,8 +308,7 @@ trait RedisClientTest extends RedisTest with BeforeAndAfterAll {
   override protected def test(
     testName: String,
     testTags: Tag*
-  )(
-    f: => Any
+  )(f: => Any
   )(
     implicit pos: Position
   ): Unit = {
@@ -373,14 +372,7 @@ trait RedisClientTest extends RedisTest with BeforeAndAfterAll {
 
 trait SentinelClientTest extends RedisTest with BeforeAndAfterAll {
 
-  override def test(
-    testName: String,
-    testTags: Tag*
-  )(
-    f: => Any
-  )(
-    implicit pos: Position
-  ): Unit = {
+  override def test(testName: String, testTags: Tag*)(f: => Any)(implicit pos: Position): Unit = {
     if (RedisTestHelper.redisServerExists) {
       super.test(testName, testTags: _*)(f)(pos)
     } else {

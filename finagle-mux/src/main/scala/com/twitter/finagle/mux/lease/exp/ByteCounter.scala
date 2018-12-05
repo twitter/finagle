@@ -33,18 +33,14 @@ private[lease] trait ByteCounter {
  * running.
  */
 // It might be simpler to just make it an exponential moving average.
-private[lease] class WindowedByteCounter private[lease] (
-  val info: JvmInfo,
-  ctx: Context
-) extends Thread("WindowedByteClock")
+private[lease] class WindowedByteCounter private[lease] (val info: JvmInfo, ctx: Context)
+    extends Thread("WindowedByteClock")
     with ByteCounter
     with Closable {
 
   import WindowedByteCounter._
 
-  def this(
-    info: JvmInfo
-  ) = this(info, Local.Context.empty)
+  def this(info: JvmInfo) = this(info, Local.Context.empty)
 
   /*
    Should we be conservative wrt. count vs. usage?

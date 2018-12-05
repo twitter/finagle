@@ -16,8 +16,8 @@ private final class LoggingSlowProbeProxyTimer(
   underlying: Timer,
   statsReceiver: StatsReceiver,
   maxRuntime: Duration,
-  maxLogFrequency: Duration
-) extends SlowProbeProxyTimer(maxRuntime) {
+  maxLogFrequency: Duration)
+    extends SlowProbeProxyTimer(maxRuntime) {
 
   private[this] val log = Logger.get
   private[this] val slow = statsReceiver.counter("timer", "slow")

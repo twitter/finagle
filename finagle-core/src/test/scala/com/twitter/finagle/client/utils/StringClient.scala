@@ -51,8 +51,8 @@ object StringClient {
   case class Client(
     stack: Stack[ServiceFactory[String, String]] = StackClient.newStack,
     params: Stack.Params = DefaultParams,
-    appendDelimeter: Boolean = true
-  ) extends StdStackClient[String, String, Client]
+    appendDelimeter: Boolean = true)
+      extends StdStackClient[String, String, Client]
       with Stack.Transformable[Client] {
     protected def copy1(
       stack: Stack[ServiceFactory[String, String]] = this.stack,

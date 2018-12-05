@@ -89,9 +89,8 @@ private[twitter] object OpportunisticTls {
  * other party either indicated that it did not support encryption, or it
  * didn't support negotiating encryption at all.
  */
-class IncompatibleNegotiationException(
-  val flags: Long = FailureFlags.Empty
-) extends Exception("Could not negotiate whether to use TLS or not.")
+class IncompatibleNegotiationException(val flags: Long = FailureFlags.Empty)
+    extends Exception("Could not negotiate whether to use TLS or not.")
     with FailureFlags[IncompatibleNegotiationException]
     with HasLogLevel
     with SourcedException

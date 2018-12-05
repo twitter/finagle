@@ -17,10 +17,7 @@ object StackServer {
       extends Stack.Module1[param.Tracer, ServiceFactory[Req, Rep]] {
     def role: Stack.Role = Role.jvmTracing
     def description: String = "Server-side JVM tracing"
-    def make(
-      _tracer: param.Tracer,
-      next: ServiceFactory[Req, Rep]
-    ): ServiceFactory[Req, Rep] = {
+    def make(_tracer: param.Tracer, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = {
       val tracer = _tracer.tracer
       if (tracer.isNull) next
       else newJvmFilter[Req, Rep].andThen(next)

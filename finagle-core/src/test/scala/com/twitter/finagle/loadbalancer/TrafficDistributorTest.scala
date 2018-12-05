@@ -86,9 +86,7 @@ private object TrafficDistributorTest {
 
     var newBalancerCalls = 0
     var balancers: Set[Balancer] = Set.empty
-    def newBalancer(
-      eps: Activity[Set[EndpointFactory[Int, Int]]]
-    ): ServiceFactory[Int, Int] = {
+    def newBalancer(eps: Activity[Set[EndpointFactory[Int, Int]]]): ServiceFactory[Int, Int] = {
       newBalancerCalls += 1
       // eagerly establish the lazy endpoints and extract the
       // underlying `AddressFactory`
@@ -390,9 +388,7 @@ class TrafficDistributorTest extends FunSuite {
     val classes = weightClasses.flatMap(weightClass.tupled).toSet
     val dest = Var(Activity.Ok(classes))
 
-    def mkBalancer(
-      set: Activity[Set[EndpointFactory[Int, Int]]]
-    ): ServiceFactory[Int, Int] = {
+    def mkBalancer(set: Activity[Set[EndpointFactory[Int, Int]]]): ServiceFactory[Int, Int] = {
       defaultBalancerFactory.newBalancer(
         set.map(_.toVector),
         new NoBrokersAvailableException("test"),

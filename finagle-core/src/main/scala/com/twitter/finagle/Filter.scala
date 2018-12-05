@@ -146,8 +146,8 @@ object Filter {
   private case class AndThen[ReqIn, RepOut, ReqOut, RepIn](
     first: Filter[_, _, _, _],
     andNext: Filter[_, _, _, _],
-    build: Service[ReqOut, RepIn] => Service[ReqIn, RepOut]
-  ) extends Filter[ReqIn, RepOut, ReqOut, RepIn] {
+    build: Service[ReqOut, RepIn] => Service[ReqIn, RepOut])
+      extends Filter[ReqIn, RepOut, ReqOut, RepIn] {
     override def andThen[Req2, Rep2](
       next: Filter[ReqOut, RepIn, Req2, Rep2]
     ): Filter[ReqIn, RepOut, Req2, Rep2] =
@@ -162,9 +162,7 @@ object Filter {
       }
     }
 
-    override def andThen(
-      factory: ServiceFactory[ReqOut, RepIn]
-    ): ServiceFactory[ReqIn, RepOut] =
+    override def andThen(factory: ServiceFactory[ReqOut, RepIn]): ServiceFactory[ReqIn, RepOut] =
       new ServiceFactory[ReqIn, RepOut] {
         private val fn: Service[ReqOut, RepIn] => Service[ReqIn, RepOut] =
           svc => AndThen.this.andThen(svc)
@@ -200,8 +198,10 @@ object Filter {
     def apply(request: Any, service: Service[Any, Nothing]): Future[Nothing] = service(request)
   }
 
-  implicit def canStackFromSvc[Req, Rep]
-    : CanStackFrom[Filter[Req, Rep, Req, Rep], Service[Req, Rep]] =
+  implicit def canStackFromSvc[
+    Req,
+    Rep
+  ]: CanStackFrom[Filter[Req, Rep, Req, Rep], Service[Req, Rep]] =
     new CanStackFrom[Filter[Req, Rep, Req, Rep], Service[Req, Rep]] {
       def toStackable(
         _role: Stack.Role,
@@ -215,8 +215,10 @@ object Filter {
         }
     }
 
-  implicit def canStackFromFac[Req, Rep]
-    : CanStackFrom[Filter[Req, Rep, Req, Rep], ServiceFactory[Req, Rep]] =
+  implicit def canStackFromFac[
+    Req,
+    Rep
+  ]: CanStackFrom[Filter[Req, Rep, Req, Rep], ServiceFactory[Req, Rep]] =
     new CanStackFrom[Filter[Req, Rep, Req, Rep], ServiceFactory[Req, Rep]] {
       def toStackable(
         _role: Stack.Role,

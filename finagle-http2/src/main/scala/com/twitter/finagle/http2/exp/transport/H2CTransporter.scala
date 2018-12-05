@@ -38,8 +38,8 @@ import java.net.SocketAddress
 private class H2CTransporter(
   underlying: Transporter[Any, Any, TransportContext],
   underlyingHttp11: Transporter[Any, Any, TransportContext],
-  params: Stack.Params
-) extends Http2NegotiatingTransporter(
+  params: Stack.Params)
+    extends Http2NegotiatingTransporter(
       params,
       underlyingHttp11,
       fallbackToHttp11WhileNegotiating = true

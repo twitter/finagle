@@ -28,8 +28,8 @@ import scala.annotation.tailrec
 private[http2] abstract class Http2NegotiatingTransporter(
   params: Stack.Params,
   underlyingHttp11: Transporter[Any, Any, TransportContext],
-  fallbackToHttp11WhileNegotiating: Boolean
-) extends Transporter[Any, Any, TransportContext]
+  fallbackToHttp11WhileNegotiating: Boolean)
+    extends Transporter[Any, Any, TransportContext]
     with MultiplexTransporter {
 
   import Http2NegotiatingTransporter._

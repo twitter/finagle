@@ -79,8 +79,8 @@ object RetryBudget {
   private class TokenRetryBudget(
     tokenBucket: TokenBucket,
     depositAmount: Int,
-    withdrawalAmount: Int
-  ) extends RetryBudget {
+    withdrawalAmount: Int)
+      extends RetryBudget {
     def deposit(): Unit =
       tokenBucket.put(depositAmount)
 

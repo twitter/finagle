@@ -82,8 +82,8 @@ case class HandshakeInit(
   salt: Array[Byte],
   serverCap: Capability,
   charset: Short,
-  status: Short
-) extends Result
+  status: Short)
+    extends Result
 
 object OK extends Decoder[OK] {
 
@@ -127,8 +127,8 @@ case class OK(
   insertId: Long,
   serverStatus: Int,
   warningCount: Int,
-  message: String
-) extends Result
+  message: String)
+    extends Result
 
 /**
  * Represents the Error Packet received from the server and the data sent along with it.
@@ -240,8 +240,8 @@ case class Field(
   displayLength: Int,
   fieldType: Short,
   flags: Short,
-  decimals: Byte
-) extends Result {
+  decimals: Byte)
+    extends Result {
   def id: String = if (name.isEmpty) origName else name
   override def toString: String = s"Field($id)"
 
@@ -276,8 +276,8 @@ case class PrepareOK(
   numOfParams: Int,
   warningCount: Int,
   columns: Seq[Field] = Nil,
-  params: Seq[Field] = Nil
-) extends Result
+  params: Seq[Field] = Nil)
+    extends Result
 
 /**
  * Used internally to synthesize a response from
@@ -294,8 +294,10 @@ object CloseStatementOK extends OK(0, 0, 0, 0, "Internal Close OK")
  * [[http://dev.mysql.com/doc/internals/en/binary-protocol-resultset.html]]
  */
 private object ResultSetBuilder {
-  def apply(isBinaryEncoded: Boolean, supportUnsigned: Boolean)(
-    header: Packet,
+  def apply(
+    isBinaryEncoded: Boolean,
+    supportUnsigned: Boolean
+  )(header: Packet,
     fieldPackets: Seq[Packet],
     rowPackets: Seq[Packet]
   ): Try[ResultSet] =
@@ -304,7 +306,10 @@ private object ResultSetBuilder {
   def decode(
     isBinaryEncoded: Boolean,
     supportUnsigned: Boolean
-  )(header: Packet, fieldPackets: Seq[Packet], rowPackets: Seq[Packet]): ResultSet = {
+  )(header: Packet,
+    fieldPackets: Seq[Packet],
+    rowPackets: Seq[Packet]
+  ): ResultSet = {
     val fields = fieldPackets.map(Field.decode).toIndexedSeq
 
     decodeRows(isBinaryEncoded, supportUnsigned, rowPackets, fields)
@@ -340,19 +345,14 @@ case class ResultSet(fields: Seq[Field], rows: Seq[Row]) extends Result {
 }
 
 object FetchResult {
-  def apply(
-    rowPackets: Seq[Packet],
-    eofPacket: EOF
-  ): Try[FetchResult] = {
+  def apply(rowPackets: Seq[Packet], eofPacket: EOF): Try[FetchResult] = {
     Try {
       val containsLastRow: Boolean = eofPacket.serverStatus.has(ServerStatus.LastRowSent)
       FetchResult(rowPackets, containsLastRow)
     }
   }
 
-  def apply(
-    err: Error
-  ): Try[FetchResult] = {
+  def apply(err: Error): Try[FetchResult] = {
     Return(FetchResult(Seq(), containsLastRow = true))
   }
 }

@@ -14,8 +14,8 @@ class Netty4PushListenerTest extends AbstractNetty4ListenerTest {
   // for the benefit of the "notices when the client cuts the connection" test.
   private class SimpleSession[Req, Rep](
     handle: PushChannelHandle[Req, Rep],
-    service: Service[Req, Rep]
-  ) extends PushSession[Req, Rep](handle) {
+    service: Service[Req, Rep])
+      extends PushSession[Req, Rep](handle) {
 
     @volatile
     private[this] var currentDispatch: Future[Rep] = Future.never

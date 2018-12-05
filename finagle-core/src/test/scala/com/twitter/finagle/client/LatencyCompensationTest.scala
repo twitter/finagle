@@ -102,7 +102,8 @@ class LatencyCompensationTest
      */
     def whileConnected(
       echoClient: StringClient.Client
-    )(f: Service[String, String] => Unit): Unit = {
+    )(f: Service[String, String] => Unit
+    ): Unit = {
       val server = StringServer.server.serve("127.1:0", service)
       val ia = server.boundAddress.asInstanceOf[InetSocketAddress]
       val addr = Addr.Bound(Set[Address](Address(ia)), metadata)

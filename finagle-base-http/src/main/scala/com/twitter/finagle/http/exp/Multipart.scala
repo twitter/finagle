@@ -15,8 +15,7 @@ import java.io.File
  **/
 case class Multipart(
   attributes: Map[String, Seq[String]],
-  files: Map[String, Seq[Multipart.FileUpload]]
-)
+  files: Map[String, Seq[Multipart.FileUpload]])
 
 /**
  * A set of utility classes and methods for decoding HTTP POST requests with
@@ -58,8 +57,8 @@ object Multipart {
     content: Buf,
     contentType: String,
     fileName: String,
-    contentTransferEncoding: String
-  ) extends FileUpload
+    contentTransferEncoding: String)
+      extends FileUpload
 
   /**
    * A variant of [[FileUpload]] that is stored on disk and represented as [[File]].
@@ -68,6 +67,6 @@ object Multipart {
     content: File,
     contentType: String,
     fileName: String,
-    contentTransferEncoding: String
-  ) extends FileUpload
+    contentTransferEncoding: String)
+      extends FileUpload
 }

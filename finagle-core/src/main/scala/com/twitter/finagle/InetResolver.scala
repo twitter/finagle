@@ -77,8 +77,8 @@ private[finagle] class InetResolver(
   resolveHost: String => Future[Seq[InetAddress]],
   statsReceiver: StatsReceiver,
   pollIntervalOpt: Option[Duration],
-  resolvePool: FuturePool
-) extends Resolver {
+  resolvePool: FuturePool)
+    extends Resolver {
   import InetSocketAddressUtil._
 
   type HostPortMetadata = (String, Int, Addr.Metadata)
@@ -268,8 +268,8 @@ object FixedInetResolver {
  */
 private[finagle] class FixedInetResolver(
   cache: LoadingCache[String, Future[Seq[InetAddress]]],
-  statsReceiver: StatsReceiver
-) extends InetResolver(
+  statsReceiver: StatsReceiver)
+    extends InetResolver(
       CaffeineCache.fromLoadingCache(cache),
       statsReceiver,
       None,

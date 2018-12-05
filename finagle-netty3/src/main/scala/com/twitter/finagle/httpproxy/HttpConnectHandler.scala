@@ -48,8 +48,8 @@ class HttpConnectHandler(
   proxyAddr: SocketAddress,
   addr: InetSocketAddress,
   clientCodec: HttpClientCodec,
-  proxyCredentials: Option[Credentials]
-) extends SimpleChannelHandler {
+  proxyCredentials: Option[Credentials])
+    extends SimpleChannelHandler {
 
   private[this] val connectFuture = new AtomicReference[ChannelFuture](null)
 

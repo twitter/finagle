@@ -10,10 +10,7 @@ import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
  */
 @Sharable
 private[netty4] object ThriftByteBufToArrayDecoder extends ChannelInboundHandlerAdapter {
-  override def channelRead(
-    ctx: ChannelHandlerContext,
-    msg: scala.Any
-  ): Unit = msg match {
+  override def channelRead(ctx: ChannelHandlerContext, msg: scala.Any): Unit = msg match {
     case buffer: ByteBuf =>
       // toArray takes ownership of the buffer
       val array = toArray(buffer)

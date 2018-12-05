@@ -9,8 +9,7 @@ import scala.collection.mutable
  * @see [[MethodBuilderScaladoc]]
  */
 private[finagle] class MethodBuilderTimeout[Req, Rep] private[client] (
-  mb: MethodBuilder[Req, Rep]
-) {
+  mb: MethodBuilder[Req, Rep]) {
 
   /**
    * @see [[MethodBuilderScaladoc.withTimeoutTotal(Duration)]]
@@ -116,14 +115,12 @@ private[client] object MethodBuilderTimeout {
   case class Config(
     stackTotalTimeoutDefined: Boolean,
     total: TunableDuration = TunableDuration("total"),
-    perRequest: TunableDuration = TunableDuration("perRequest")
-  )
+    perRequest: TunableDuration = TunableDuration("perRequest"))
 
   case class TunableDuration(
     id: String,
     duration: Duration = Duration.Undefined,
-    tunable: Tunable[Duration] = Tunable.none
-  ) {
+    tunable: Tunable[Duration] = Tunable.none) {
     def isFinite: Boolean = duration.isFinite
     def isTunable: Boolean = tunable != Tunable.none
 

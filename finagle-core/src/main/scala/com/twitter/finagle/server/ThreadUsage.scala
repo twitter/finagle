@@ -25,10 +25,7 @@ import scala.collection.mutable
  *
  * @param statsReceiver normally will be scoped to "srv/$server_name/thread_usage/requests"
  */
-private class ThreadUsage(
-  statsReceiver: StatsReceiver,
-  timer: Timer
-) extends Closable { self =>
+private class ThreadUsage(statsReceiver: StatsReceiver, timer: Timer) extends Closable { self =>
 
   // all thread's current counts.
   //
@@ -124,9 +121,8 @@ object ThreadUsage {
 
   val role: Stack.Role = Stack.Role("ThreadUsage")
 
-  private class ThreadUsageFilter[Req, Rep](
-    threadUsage: ThreadUsage
-  ) extends Filter[Req, Rep, Req, Rep] {
+  private class ThreadUsageFilter[Req, Rep](threadUsage: ThreadUsage)
+      extends Filter[Req, Rep, Req, Rep] {
 
     def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
       threadUsage.increment()

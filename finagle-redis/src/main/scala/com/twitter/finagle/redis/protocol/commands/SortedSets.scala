@@ -49,8 +49,8 @@ case class ZInterStore(
   numkeys: Int,
   keys: Seq[Buf],
   weights: Option[Weights] = None,
-  aggregate: Option[Aggregate] = None
-) extends ZStore {
+  aggregate: Option[Aggregate] = None)
+    extends ZStore {
 
   validate()
 
@@ -58,11 +58,8 @@ case class ZInterStore(
 }
 
 object ZInterStore {
-  def apply(
-    destination: Buf,
-    keysBuf: Seq[Buf],
-    weights: Weights
-  ): ZInterStore = ZInterStore(destination, keysBuf.size, keysBuf, Some(weights), None)
+  def apply(destination: Buf, keysBuf: Seq[Buf], weights: Weights): ZInterStore =
+    ZInterStore(destination, keysBuf.size, keysBuf, Some(weights), None)
 
   def apply(destination: Buf, keysBuf: Seq[Buf]): ZInterStore =
     ZInterStore(destination, keysBuf.size, keysBuf, None, None)
@@ -92,8 +89,8 @@ case class ZRangeByScore(
   min: ZInterval,
   max: ZInterval,
   withScores: Option[CommandArgument] = None,
-  limit: Option[Limit] = None
-) extends ZScoredRange {
+  limit: Option[Limit] = None)
+    extends ZScoredRange {
 
   validate()
 
@@ -144,8 +141,8 @@ case class ZRevRangeByScore(
   max: ZInterval,
   min: ZInterval,
   withScores: Option[CommandArgument] = None,
-  limit: Option[Limit] = None
-) extends ZScoredRange {
+  limit: Option[Limit] = None)
+    extends ZScoredRange {
 
   validate()
 
@@ -170,8 +167,8 @@ case class ZUnionStore(
   numkeys: Int,
   keys: Seq[Buf],
   weights: Option[Weights] = None,
-  aggregate: Option[Aggregate] = None
-) extends ZStore {
+  aggregate: Option[Aggregate] = None)
+    extends ZStore {
 
   validate()
 

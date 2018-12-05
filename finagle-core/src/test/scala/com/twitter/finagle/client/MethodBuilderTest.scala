@@ -39,8 +39,8 @@ private object MethodBuilderTest {
 
   case class TestStackClient(
     override val stack: Stack[ServiceFactory[Int, Int]],
-    override val params: Params
-  ) extends StackClient[Int, Int] { self =>
+    override val params: Params)
+      extends StackClient[Int, Int] { self =>
 
     def withStack(stack: Stack[ServiceFactory[Int, Int]]): StackClient[Int, Int] =
       TestStackClient(stack, self.params)

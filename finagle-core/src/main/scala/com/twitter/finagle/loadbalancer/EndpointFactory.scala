@@ -77,8 +77,8 @@ private object LazyEndpointFactory {
  */
 private final class LazyEndpointFactory[Req, Rep](
   mk: () => ServiceFactory[Req, Rep],
-  val address: Address
-) extends EndpointFactory[Req, Rep] {
+  val address: Address)
+    extends EndpointFactory[Req, Rep] {
   import LazyEndpointFactory._
 
   private[this] val state = new AtomicReference[State[Req, Rep]](Init)

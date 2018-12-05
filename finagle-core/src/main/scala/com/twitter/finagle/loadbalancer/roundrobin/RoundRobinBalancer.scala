@@ -15,8 +15,8 @@ private[loadbalancer] final class RoundRobinBalancer[Req, Rep](
   protected val endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
   protected val statsReceiver: StatsReceiver,
   protected val emptyException: NoBrokersAvailableException,
-  protected val maxEffort: Int = 5
-) extends ServiceFactory[Req, Rep]
+  protected val maxEffort: Int = 5)
+    extends ServiceFactory[Req, Rep]
     with Balancer[Req, Rep]
     with Updating[Req, Rep] {
 

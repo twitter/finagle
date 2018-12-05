@@ -258,9 +258,7 @@ private[finagle] trait MethodBuilderScaladoc[T] {
    *      [[https://twitter.github.io/finagle/guide/MethodBuilder.html#idempotency user guide]]
    *      for further details.
    */
-  def idempotent(
-    maxExtraLoad: Double
-  ): T
+  def idempotent(maxExtraLoad: Double): T
 
   /**
    * Configure that requests are to be treated as idempotent. Because requests can be safely
@@ -275,9 +273,7 @@ private[finagle] trait MethodBuilderScaladoc[T] {
    *      [[https://twitter.github.io/finagle/guide/MethodBuilder.html#idempotency user guide]]
    *      for further details.
    */
-  def idempotent(
-    maxExtraLoad: Tunable[Double]
-  ): T
+  def idempotent(maxExtraLoad: Tunable[Double]): T
 
   /**
    * Configure that requests are to be treated as non-idempotent. [[BackupRequestFilter]] is

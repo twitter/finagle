@@ -23,8 +23,7 @@ private[finagle] class Cache[A](
   cacheSize: Int,
   ttl: Duration,
   timer: com.twitter.util.Timer,
-  evictor: Option[A => Unit] = None
-) {
+  evictor: Option[A => Unit] = None) {
   require(cacheSize > 0)
 
   // We assume monotonically increasing time.  Thus the items at the

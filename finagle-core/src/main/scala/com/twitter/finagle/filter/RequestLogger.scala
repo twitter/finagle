@@ -78,9 +78,7 @@ object RequestLogger {
     nowNanos: () => Long = Stopwatch.systemNanos
   ): Stack.Transformer =
     new Stack.Transformer {
-      def apply[Req, Rep](
-        stack: Stack[ServiceFactory[Req, Rep]]
-      ): Stack[ServiceFactory[Req, Rep]] =
+      def apply[Req, Rep](stack: Stack[ServiceFactory[Req, Rep]]): Stack[ServiceFactory[Req, Rep]] =
         stack.map((hd, sf) => withLogging(label, nowNanos, hd.role, sf))
     }
 
@@ -99,11 +97,7 @@ object RequestLogger {
  * @note logs are done at `TRACE` level in the "com.twitter.finagle.request.Logger"
  *       `Logger`.
  */
-private class RequestLogger(
-  label: String,
-  name: String,
-  nowNanos: () => Long
-) {
+private class RequestLogger(label: String, name: String, nowNanos: () => Long) {
   import RequestLogger._
 
   def shouldTrace: Boolean =
@@ -116,10 +110,7 @@ private class RequestLogger(
     start
   }
 
-  def endAsync[T](
-    startNanos: Long,
-    future: Future[T]
-  ): Future[T] = {
+  def endAsync[T](startNanos: Long, future: Future[T]): Future[T] = {
     future.ensure {
       val traceId = Trace.id
       val elapsedUs = elapsedMicros(startNanos)

@@ -82,8 +82,8 @@ private[mysql] case class Handshake(
   clientCap: Capability = Capability.baseCap,
   charset: Short = Utf8_general_ci,
   enableFoundRows: Boolean = true,
-  maxPacketSize: StorageUnit = 1.gigabyte
-) extends (HandshakeInit => Try[HandshakeResponse]) {
+  maxPacketSize: StorageUnit = 1.gigabyte)
+    extends (HandshakeInit => Try[HandshakeResponse]) {
   require(maxPacketSize <= 1.gigabyte, "max packet size can't exceed 1 gigabyte")
 
   private[this] val newClientCap = {

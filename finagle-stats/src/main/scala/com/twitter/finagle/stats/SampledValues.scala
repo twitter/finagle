@@ -9,5 +9,4 @@ import scala.collection.Map
 private[finagle] case class SampledValues(
   gauges: Map[String, Number],
   counters: Map[String, Number],
-  histograms: Map[String, Snapshot]
-)
+  histograms: Map[String, Snapshot])

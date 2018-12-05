@@ -7,10 +7,7 @@ import java.util.logging.Logger
 import scala.collection.JavaConverters._
 import scala.collection.mutable.Buffer
 
-private[lease] class Coordinator(
-  val counter: ByteCounter,
-  verbose: Boolean = false
-) {
+private[lease] class Coordinator(val counter: ByteCounter, verbose: Boolean = false) {
 
   /**
    * Wait until at least 80% of the committed space is

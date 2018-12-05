@@ -32,9 +32,7 @@ abstract class AbstractSmuxTest extends FunSuite {
 
   def clientImpl(): ClientT
 
-  private def serve(
-    serverLevel: Option[OpportunisticTls.Level]
-  ): ListeningServer =
+  private def serve(serverLevel: Option[OpportunisticTls.Level]): ListeningServer =
     (serverLevel match {
       case None =>
         serverImpl()

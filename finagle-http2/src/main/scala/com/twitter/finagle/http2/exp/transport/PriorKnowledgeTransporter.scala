@@ -29,8 +29,8 @@ import java.net.SocketAddress
  */
 private final class PriorKnowledgeTransporter private (
   remoteAddress: SocketAddress,
-  params: Stack.Params
-) extends Http2NegotiatingTransporter(
+  params: Stack.Params)
+    extends Http2NegotiatingTransporter(
       params,
       new InnertHttp1Transporter(remoteAddress),
       fallbackToHttp11WhileNegotiating = false

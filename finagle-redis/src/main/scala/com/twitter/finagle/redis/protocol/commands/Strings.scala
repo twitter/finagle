@@ -149,8 +149,8 @@ case class Set(
   value: Buf,
   ttl: Option[TimeToLive] = None,
   nx: Boolean = false,
-  xx: Boolean = false
-) extends StrictKeyCommand
+  xx: Boolean = false)
+    extends StrictKeyCommand
     with StrictValueCommand {
 
   def name: Buf = Command.SET

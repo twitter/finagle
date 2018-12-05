@@ -22,8 +22,7 @@ case class RichClientParam(
   maxThriftBufferSize: Int = Thrift.param.maxThriftBufferSize,
   responseClassifier: ResponseClassifier = ResponseClassifier.Default,
   clientStats: StatsReceiver = ClientStatsReceiver,
-  perEndpointStats: Boolean = false
-) {
+  perEndpointStats: Boolean = false) {
 
   def this(
     protocolFactory: TProtocolFactory,
@@ -40,14 +39,10 @@ case class RichClientParam(
     responseClassifier: ResponseClassifier
   ) = this(protocolFactory, "", maxThriftBufferSize, responseClassifier, ClientStatsReceiver)
 
-  def this(
-    protocolFactory: TProtocolFactory,
-    responseClassifier: ResponseClassifier
-  ) = this(protocolFactory, Thrift.param.maxThriftBufferSize, responseClassifier)
+  def this(protocolFactory: TProtocolFactory, responseClassifier: ResponseClassifier) =
+    this(protocolFactory, Thrift.param.maxThriftBufferSize, responseClassifier)
 
-  def this(
-    protocolFactory: TProtocolFactory
-  ) = this(protocolFactory, ResponseClassifier.Default)
+  def this(protocolFactory: TProtocolFactory) = this(protocolFactory, ResponseClassifier.Default)
 
   def this() = this(Thrift.param.protocolFactory)
 

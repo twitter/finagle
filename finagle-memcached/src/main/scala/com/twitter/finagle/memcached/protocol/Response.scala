@@ -23,8 +23,8 @@ case class Values(values: Seq[Value]) extends Response
 // to retry only the failed keys instead of the entire batch.
 case class ValuesAndErrors(
   values: Seq[Value], // successful results
-  errors: Map[Buf, Throwable] // keys that error'ed out (eligible for retries)
-) extends Response
+  errors: Map[Buf, Throwable]) // keys that error'ed out (eligible for retries)
+    extends Response
 
 case class Number(value: Long) extends Response
 

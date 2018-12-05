@@ -35,8 +35,7 @@ private class DeadlineSpanMap(
   ttl: Duration,
   statsReceiver: StatsReceiver,
   timer: Timer,
-  hold: Duration = 500.milliseconds
-) {
+  hold: Duration = 500.milliseconds) {
 
   private[this] val spanMap = new ConcurrentHashMap[TraceId, MutableSpan](64)
 

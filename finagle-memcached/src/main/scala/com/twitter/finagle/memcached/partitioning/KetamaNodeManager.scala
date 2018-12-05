@@ -22,8 +22,7 @@ import scala.collection.{breakOut, mutable}
 private[partitioning] class KetamaNodeManager[Req, Rep, Key](
   underlying: Stack[ServiceFactory[Req, Rep]],
   params: Stack.Params,
-  numReps: Int = KetamaPartitioningService.DefaultNumReps
-) { self =>
+  numReps: Int = KetamaPartitioningService.DefaultNumReps) { self =>
 
   private[this] val statsReceiver = {
     val param.Stats(stats) = params[param.Stats]
@@ -80,10 +79,7 @@ private[partitioning] class KetamaNodeManager[Req, Rep, Key](
   }
 
   // Node represents backend partition
-  private[this] case class Node(
-    node: KetamaNode[Future[Service[Req, Rep]]],
-    var state: NodeState
-  )
+  private[this] case class Node(node: KetamaNode[Future[Service[Req, Rep]]], var state: NodeState)
 
   private[this] val ketamaNodesChanges: Event[Set[KetamaKeyAndNode]] = {
 

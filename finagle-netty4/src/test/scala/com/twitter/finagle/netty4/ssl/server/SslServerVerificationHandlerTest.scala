@@ -14,11 +14,8 @@ import org.scalatest.mockito.MockitoSugar
 class SslServerVerificationHandlerTest extends FunSuite with MockitoSugar with OneInstancePerTest {
 
   class TestVerifier(result: => Boolean) extends SslServerSessionVerifier {
-    def apply(
-      address: Address,
-      config: SslServerConfiguration,
-      session: SSLSession
-    ): Boolean = result
+    def apply(address: Address, config: SslServerConfiguration, session: SSLSession): Boolean =
+      result
   }
 
   val channel = new EmbeddedChannel()

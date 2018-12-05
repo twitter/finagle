@@ -46,8 +46,8 @@ private[loadbalancer] final class P2CPeakEwma[Req, Rep](
   protected val maxEffort: Int,
   protected val rng: Rng,
   protected val statsReceiver: StatsReceiver,
-  protected val emptyException: NoBrokersAvailableException
-) extends Balancer[Req, Rep]
+  protected val emptyException: NoBrokersAvailableException)
+    extends Balancer[Req, Rep]
     with PeakEwma[Req, Rep]
     with P2C[Req, Rep]
     with Updating[Req, Rep] {

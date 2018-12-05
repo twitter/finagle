@@ -20,7 +20,8 @@ private[redis] trait SortedSetCommands { self: BaseClient =>
 
   private[this] def withScoresHelper(
     withScores: JBoolean
-  )(messages: List[Reply]): Either[ZRangeResults, Seq[Buf]] = {
+  )(messages: List[Reply]
+  ): Either[ZRangeResults, Seq[Buf]] = {
     val chanBufs = ReplyFormat.toBuf(messages)
     if (withScores)
       Left(ZRangeResults(returnPairs(chanBufs)))
@@ -207,12 +208,7 @@ private[redis] trait SortedSetCommands { self: BaseClient =>
   /**
    * Returns keys in given set `key`, starting at `cursor`.
    */
-  def zScan(
-    key: Buf,
-    cursor: JLong,
-    count: Option[JLong],
-    pattern: Option[Buf]
-  ): Future[Seq[Buf]] =
+  def zScan(key: Buf, cursor: JLong, count: Option[JLong], pattern: Option[Buf]): Future[Seq[Buf]] =
     doRequest(ZScan(key, cursor, count, pattern)) {
       case MBulkReply(messages) => Future.value(ReplyFormat.toBuf(messages))
       case EmptyMBulkReply => Future.Nil

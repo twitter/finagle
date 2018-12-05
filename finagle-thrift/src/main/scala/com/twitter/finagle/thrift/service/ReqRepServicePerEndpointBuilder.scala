@@ -5,6 +5,7 @@ package com.twitter.finagle.thrift.service
  *
  * Scrooge generates implementations of this builder.
  */
-trait ReqRepServicePerEndpointBuilder[ReqRepServicePerEndpoint <: Filterable[
-  ReqRepServicePerEndpoint
-]] extends ServicePerEndpointBuilder[ReqRepServicePerEndpoint]
+trait ReqRepServicePerEndpointBuilder[
+  ReqRepServicePerEndpoint <: Filterable[
+    ReqRepServicePerEndpoint
+  ]] extends ServicePerEndpointBuilder[ReqRepServicePerEndpoint]

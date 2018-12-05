@@ -25,8 +25,7 @@ private[lease] class RequestSnooper(
   percentile: Int,
   lr: LogsReceiver = NullLogsReceiver,
   now: () => Long = Stopwatch.systemMillis,
-  timer: Timer = DefaultTimer
-) {
+  timer: Timer = DefaultTimer) {
   import RequestSnooper._
 
   private[this] val histogram = new WindowedPercentileHistogram(

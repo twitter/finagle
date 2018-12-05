@@ -123,8 +123,8 @@ case class DefaultPool[Req, Rep](
   bufferSize: Int = 0,
   idleTime: Duration = Duration.Top,
   maxWaiters: Int = Int.MaxValue,
-  timer: Timer = DefaultTimer
-) extends (StatsReceiver => Transformer[Req, Rep]) {
+  timer: Timer = DefaultTimer)
+    extends (StatsReceiver => Transformer[Req, Rep]) {
   def apply(statsReceiver: StatsReceiver) = inputFactory => {
     val factory =
       if (idleTime <= 0.seconds || high <= low) inputFactory

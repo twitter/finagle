@@ -49,8 +49,8 @@ final private[http2] class StreamTransportFactory(
     type Context = TransportContext with HasExecutor
   },
   addr: SocketAddress,
-  params: Stack.Params
-) extends ClientSession { parent =>
+  params: Stack.Params)
+    extends ClientSession { parent =>
   import StreamTransportFactory._
 
   private[this] val exec = underlying.context.executor
@@ -293,10 +293,7 @@ final private[http2] class StreamTransportFactory(
 
   def onClose: Future[Throwable] = underlying.onClose
 
-  private[this] def handleClose(
-    deadline: Time,
-    streamExn: Option[Throwable] = None
-  ): Unit = {
+  private[this] def handleClose(deadline: Time, streamExn: Option[Throwable] = None): Unit = {
     dead = true
     activeStreams.values.foreach { stream =>
       streamExn match {
@@ -627,8 +624,8 @@ private[http2] object StreamTransportFactory {
    */
   final class Active private[StreamTransportFactory] (
     val finishedReading: Boolean,
-    val finishedWriting: Boolean
-  ) extends StreamState {
+    val finishedWriting: Boolean)
+      extends StreamState {
     def finished: Boolean = finishedWriting && finishedReading
     override def toString: String = {
       if (finished)
@@ -680,21 +677,16 @@ private[http2] object StreamTransportFactory {
 
   class Http2ProtocolException(msg: String) extends Exception(s"HTTP/2 Protocol error: $msg")
 
-  class BadStreamStateException(
-    msg: String,
-    id: Int,
-    val flags: Long = FailureFlags.NonRetryable
-  ) extends Exception(s"Stream $id in bad state: $msg")
+  class BadStreamStateException(msg: String, id: Int, val flags: Long = FailureFlags.NonRetryable)
+      extends Exception(s"Stream $id in bad state: $msg")
       with FailureFlags[BadStreamStateException] {
 
     protected def copyWithFlags(newFlags: Long): BadStreamStateException =
       new BadStreamStateException(msg, id, newFlags)
   }
 
-  class StreamIdOverflowException(
-    addr: SocketAddress,
-    val flags: Long = FailureFlags.Retryable
-  ) extends Exception(s"ran out of stream ids for address $addr")
+  class StreamIdOverflowException(addr: SocketAddress, val flags: Long = FailureFlags.Retryable)
+      extends Exception(s"ran out of stream ids for address $addr")
       with FailureFlags[StreamIdOverflowException]
       with HasLogLevel {
     def logLevel: Level = Level.INFO // this is normal behavior, so we should log gently
@@ -705,8 +697,8 @@ private[http2] object StreamTransportFactory {
   class IllegalStreamIdException(
     addr: SocketAddress,
     id: Int,
-    val flags: Long = FailureFlags.Retryable
-  ) extends Exception(
+    val flags: Long = FailureFlags.Retryable)
+      extends Exception(
         s"Found an invalid stream id $id on address $addr. "
           + "The id was even, but client initiated stream ids must be odd."
       )

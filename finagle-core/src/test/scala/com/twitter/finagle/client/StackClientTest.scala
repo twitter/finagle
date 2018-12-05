@@ -30,8 +30,8 @@ private object StackClientTest {
   case class LocalCheckingStringClient(
     localKey: Contexts.local.Key[String],
     stack: Stack[ServiceFactory[String, String]] = StackClient.newStack,
-    params: Stack.Params = Stack.Params.empty
-  ) extends StdStackClient[String, String, LocalCheckingStringClient] {
+    params: Stack.Params = Stack.Params.empty)
+      extends StdStackClient[String, String, LocalCheckingStringClient] {
 
     protected def copy1(
       stack: Stack[ServiceFactory[String, String]] = this.stack,
@@ -703,14 +703,10 @@ abstract class AbstractStackClientTest
       val role = Stack.Role("Throws")
       val description = "Throws Exception"
 
-      def make(
-        next: ServiceFactory[String, String]
-      ): ServiceFactory[String, String] =
+      def make(next: ServiceFactory[String, String]): ServiceFactory[String, String] =
         new SimpleFilter[String, String] {
-          def apply(
-            request: String,
-            service: Service[String, String]
-          ): Future[String] = Future.exception(new Failure("boom!"))
+          def apply(request: String, service: Service[String, String]): Future[String] =
+            Future.exception(new Failure("boom!"))
         }.andThen(next)
     }
 

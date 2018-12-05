@@ -6,8 +6,7 @@ import org.apache.thrift.protocol.TProtocolFactory
 
 private[finagle] case class ThriftServerPreparer(
   protocolFactory: TProtocolFactory,
-  serviceName: String
-) {
+  serviceName: String) {
   private[this] val uncaughtExceptionsFilter =
     new UncaughtAppExceptionFilter(protocolFactory)
 

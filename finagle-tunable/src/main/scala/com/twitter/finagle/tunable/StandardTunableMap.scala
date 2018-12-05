@@ -48,11 +48,7 @@ object StandardTunableMap {
     apply(id, ServerInfo(), TunableMap.newMutable(s"Mutable($id)"))
 
   // Exposed for testing
-  private[tunable] def apply(
-    id: String,
-    serverInfo: ServerInfo,
-    mutable: TunableMap
-  ): TunableMap =
+  private[tunable] def apply(id: String, serverInfo: ServerInfo, mutable: TunableMap): TunableMap =
     clientMaps.computeIfAbsent(id, new JFunction[String, TunableMap] {
       def apply(ID: String): TunableMap = composeMap(mutable, serverInfo, id)
     })
@@ -69,10 +65,7 @@ object StandardTunableMap {
       clientMaps.computeIfPresent(
         id,
         new BiFunction[String, TunableMap, TunableMap] {
-          def apply(
-            id: String,
-            curr: TunableMap
-          ): TunableMap = {
+          def apply(id: String, curr: TunableMap): TunableMap = {
             val mutable = collectFirstOrElse(
               TunableMap.components(curr),
               TunableMap.newMutable(s"Mutable($id)")

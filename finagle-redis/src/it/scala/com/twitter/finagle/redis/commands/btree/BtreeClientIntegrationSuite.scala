@@ -406,11 +406,7 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
     assert(getResult == None)
   }
 
-  def validate(
-    outerKey: String,
-    exp: List[(String, String)],
-    got: Seq[(Buf, Buf)]
-  ) {
+  def validate(outerKey: String, exp: List[(String, String)], got: Seq[(Buf, Buf)]) {
     assert(
       got.size == exp.size,
       "BRANGE failed for " + outerKey + " expected size " + exp.size + " got size " + got.size

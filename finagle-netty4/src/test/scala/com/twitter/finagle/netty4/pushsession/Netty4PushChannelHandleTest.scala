@@ -43,8 +43,9 @@ class Netty4PushChannelHandleTest extends FunSuite {
     }
   }
 
-  private def nettyChannel[In, Out](transportHandlers: (String, ChannelHandler)*)(
-    f: PushChannelHandle[In, Out] => Future[PushSession[In, Out]]
+  private def nettyChannel[In, Out](
+    transportHandlers: (String, ChannelHandler)*
+  )(f: PushChannelHandle[In, Out] => Future[PushSession[In, Out]]
   ): (EmbeddedChannel, Netty4PushChannelHandle[In, Out]) = {
     val ch = new EmbeddedChannel()
     transportHandlers.foreach { case (name, handler) => ch.pipeline.addLast(name, handler) }

@@ -26,8 +26,7 @@ class KetamaFailureAccrualFactoryTest extends FunSuite with MockitoSugar {
   class Helper(
     ejectFailedHost: Boolean,
     serviceRep: Future[Int] = Future.exception(new Exception),
-    underlyingStatus: Status = Status.Open
-  ) {
+    underlyingStatus: Status = Status.Open) {
     val underlyingService = mock[Service[Int, Int]]
     when(underlyingService.close(any[Time])) thenReturn Future.Done
     when(underlyingService.status) thenReturn underlyingStatus

@@ -58,10 +58,7 @@ private object LatencyProfile {
    * Creates a function that applies the probability distribution in
    * `dist` over the latency functions in `latencies`.
    */
-  def apply(
-    dist: Seq[Double],
-    latencies: IndexedSeq[() => Duration]
-  ): () => Duration = {
+  def apply(dist: Seq[Double], latencies: IndexedSeq[() => Duration]): () => Duration = {
     val drv = Drv(dist)
     () =>
       latencies(drv(rng))()

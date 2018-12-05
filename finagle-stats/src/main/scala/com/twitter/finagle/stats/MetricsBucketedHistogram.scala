@@ -19,8 +19,8 @@ import java.util.concurrent.atomic.AtomicReference
 class MetricsBucketedHistogram(
   name: String,
   percentiles: IndexedSeq[Double] = BucketedHistogram.DefaultQuantiles,
-  latchPeriod: Duration = MetricsBucketedHistogram.DefaultLatchPeriod
-) extends MetricsHistogram {
+  latchPeriod: Duration = MetricsBucketedHistogram.DefaultLatchPeriod)
+    extends MetricsHistogram {
   import MetricsBucketedHistogram.HistogramCountsSnapshot
   assert(name.length > 0)
 

@@ -32,10 +32,7 @@ class DefaultMonitorTest extends FunSuite with Matchers with MockitoSugar with B
     monitor = new DefaultMonitor(log, "n/a", "n/a")
   }
 
-  private def verifyPublished(
-    expectedLevel: Level,
-    expectedThrown: Throwable
-  ): Unit = {
+  private def verifyPublished(expectedLevel: Level, expectedThrown: Throwable): Unit = {
     val capture =
       ArgumentCaptor.forClass(classOf[java.util.logging.LogRecord])
     verify(handler).publish(capture.capture())
@@ -46,8 +43,8 @@ class DefaultMonitorTest extends FunSuite with Matchers with MockitoSugar with B
 
   private[this] class MyTimeoutException(
     protected val timeout: Duration,
-    protected val explanation: String
-  ) extends TimeoutException
+    protected val explanation: String)
+      extends TimeoutException
 
   test("Failures with low log levels are handled") {
     val f = Failure("debug handled").withLogLevel(Level.DEBUG)

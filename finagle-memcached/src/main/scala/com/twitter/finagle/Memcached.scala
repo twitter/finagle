@@ -280,10 +280,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
 
   }
 
-  private[finagle] def registerClient(
-    label: String,
-    hasher: String
-  ): Unit = {
+  private[finagle] def registerClient(label: String, hasher: String): Unit = {
     GlobalRegistry.get.put(
       Seq(ClientRegistry.registryName, Client.ProtocolLibraryName, label, "key_hasher"),
       hasher
@@ -296,8 +293,8 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
    */
   case class Client(
     stack: Stack[ServiceFactory[Command, Response]] = Client.stack,
-    params: Stack.Params = Client.params
-  ) extends PushStackClient[Command, Response, Client]
+    params: Stack.Params = Client.params)
+      extends PushStackClient[Command, Response, Client]
       with MemcachedRichClient {
 
     protected type In = Response
@@ -483,8 +480,8 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
    */
   case class Server(
     stack: Stack[ServiceFactory[Command, Response]] = StackServer.newStack,
-    params: Stack.Params = Server.params
-  ) extends StdStackServer[Command, Response, Server] {
+    params: Stack.Params = Server.params)
+      extends StdStackServer[Command, Response, Server] {
 
     protected def copy1(
       stack: Stack[ServiceFactory[Command, Response]] = this.stack,

@@ -367,16 +367,10 @@ object ThriftMux
   protected val Thrift.param.ProtocolFactory(protocolFactory) =
     client.params[Thrift.param.ProtocolFactory]
 
-  def newClient(
-    dest: Name,
-    label: String
-  ): ServiceFactory[ThriftClientRequest, Array[Byte]] =
+  def newClient(dest: Name, label: String): ServiceFactory[ThriftClientRequest, Array[Byte]] =
     client.newClient(dest, label)
 
-  def newService(
-    dest: Name,
-    label: String
-  ): Service[ThriftClientRequest, Array[Byte]] =
+  def newService(dest: Name, label: String): Service[ThriftClientRequest, Array[Byte]] =
     client.newService(dest, label)
 
   @deprecated("Use Server.defaultMuxer instead", "2018-02-01")

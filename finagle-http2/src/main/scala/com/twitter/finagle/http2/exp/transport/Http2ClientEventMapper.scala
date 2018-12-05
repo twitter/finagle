@@ -23,19 +23,13 @@ import io.netty.handler.codec.http2.Http2Exception.HeaderListSizeException
 @Sharable
 private[http2] object Http2ClientEventMapper extends ChannelDuplexHandler {
 
-  override def write(
-    ctx: ChannelHandlerContext,
-    msg: scala.Any,
-    promise: ChannelPromise
-  ): Unit = msg match {
-    case headers: HttpRequest => super.write(ctx, headers, mapWriteExceptions(ctx, promise))
-    case _ => super.write(ctx, msg, promise)
-  }
+  override def write(ctx: ChannelHandlerContext, msg: scala.Any, promise: ChannelPromise): Unit =
+    msg match {
+      case headers: HttpRequest => super.write(ctx, headers, mapWriteExceptions(ctx, promise))
+      case _ => super.write(ctx, msg, promise)
+    }
 
-  override def channelRead(
-    ctx: ChannelHandlerContext,
-    msg: scala.Any
-  ): Unit = {
+  override def channelRead(ctx: ChannelHandlerContext, msg: scala.Any): Unit = {
     msg match {
       // We don't reuse streams, so we need to alert the dispatcher that we're closed.
       case resp: HttpResponse =>

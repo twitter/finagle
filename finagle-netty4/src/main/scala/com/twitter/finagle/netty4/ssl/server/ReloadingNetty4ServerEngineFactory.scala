@@ -18,8 +18,8 @@ final private[finagle] class ReloadingNetty4ServerEngineFactory(
   config: SslServerConfiguration,
   allocator: ByteBufAllocator,
   forceJdk: Boolean,
-  reloadPeriod: Duration = 1.minute
-) extends SslServerEngineFactory {
+  reloadPeriod: Duration = 1.minute)
+    extends SslServerEngineFactory {
 
   private[this] val reloader = new ContextReloader(
     Netty4ServerSslConfigurations.createServerContext(config, forceJdk),

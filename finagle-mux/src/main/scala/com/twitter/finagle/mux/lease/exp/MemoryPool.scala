@@ -24,8 +24,8 @@ private[lease] class FakeMemoryPool(original: MemoryPoolInfo) extends MemoryPool
 
 private[lease] class FakeGarbageCollectorMXBean(
   @volatile var getCollectionCount: Long,
-  @volatile var getCollectionTime: Long
-) extends GarbageCollectorMXBean {
+  @volatile var getCollectionTime: Long)
+    extends GarbageCollectorMXBean {
   private[this] def ??? = throw new UnsupportedOperationException("not supported")
 
   def getMemoryPoolNames(): Array[String] = ???

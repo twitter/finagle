@@ -33,8 +33,10 @@ trait AbstractDarkTrafficFilter {
   // We separate the argument list to allow the compiler
   // to provide better type hints for the second list which contains
   // the shouldInvoke function which allows [Req] to be a higher-kinded type.
-  protected def serviceConcurrently[Req, Rep](service: Service[Req, Rep], request: Req)(
-    shouldInvoke: Req => Boolean,
+  protected def serviceConcurrently[Req, Rep](
+    service: Service[Req, Rep],
+    request: Req
+  )(shouldInvoke: Req => Boolean,
     invokeDarkService: Req => Future[_]
   ): Future[Rep] = {
 
@@ -51,8 +53,9 @@ trait AbstractDarkTrafficFilter {
     p
   }
 
-  protected def sendDarkRequest[Req](request: Req)(
-    shouldInvoke: Req => Boolean,
+  protected def sendDarkRequest[Req](
+    request: Req
+  )(shouldInvoke: Req => Boolean,
     invokeDarkService: Req => Future[_]
   ): Future[_] = {
 

@@ -23,8 +23,8 @@ private[netty4] class SslClientVerificationHandler(
   sslHandler: SslHandler,
   address: Address,
   config: SslClientConfiguration,
-  sessionVerifier: SslClientSessionVerifier
-) extends ChannelOutboundHandlerAdapter
+  sessionVerifier: SslClientSessionVerifier)
+    extends ChannelOutboundHandlerAdapter
     with BufferingChannelOutboundHandler { self =>
 
   private[this] val onHandshakeComplete = Promise[Unit]()
@@ -40,10 +40,7 @@ private[netty4] class SslClientVerificationHandler(
     failPendingWrites(t)
   }
 
-  private[this] def verifySession(
-    session: SSLSession,
-    ctx: ChannelHandlerContext
-  ): Unit = {
+  private[this] def verifySession(session: SSLSession, ctx: ChannelHandlerContext): Unit = {
     try {
       if (!sessionVerifier(address, config, session)) {
         fail(

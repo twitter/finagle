@@ -6,10 +6,7 @@ import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
 
 @Sharable
 private[finagle] object CopyingByteReaderDecoder extends ChannelInboundHandlerAdapter {
-  override def channelRead(
-    ctx: ChannelHandlerContext,
-    msg: scala.Any
-  ): Unit = msg match {
+  override def channelRead(ctx: ChannelHandlerContext, msg: scala.Any): Unit = msg match {
     case bb: ByteBuf =>
       ctx.fireChannelRead(new CopyingByteBufByteReader(bb))
 

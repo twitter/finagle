@@ -39,10 +39,7 @@ trait MysqlRichClient { self: com.twitter.finagle.Client[Request, Result] =>
    * destination described by `dest` with the assigned
    * `label`. The `label` is used to scope client stats.
    */
-  def newRichClient(
-    dest: Name,
-    label: String
-  ): mysql.Client with mysql.Transactions =
+  def newRichClient(dest: Name, label: String): mysql.Client with mysql.Transactions =
     mysql.Client(newClient(dest, label), richClientStatsReceiver, supportUnsigned)
 
   /**
@@ -153,8 +150,8 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
    */
   case class Client(
     stack: Stack[ServiceFactory[Request, Result]] = Client.stack,
-    params: Stack.Params = Client.params
-  ) extends StdStackClient[Request, Result, Client]
+    params: Stack.Params = Client.params)
+      extends StdStackClient[Request, Result, Client]
       with WithSessionPool[Client]
       with WithDefaultLoadBalancer[Client]
       with MysqlRichClient {
@@ -183,9 +180,11 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
       Netty4Transporter.framedBuf(Some(framerFactory), addr, params)
     }
 
-    protected def newDispatcher(transport: Transport[Buf, Buf] {
-      type Context <: Client.this.Context
-    }): Service[Request, Result] =
+    protected def newDispatcher(
+      transport: Transport[Buf, Buf] {
+        type Context <: Client.this.Context
+      }
+    ): Service[Request, Result] =
       mysql.ClientDispatcher(transport.map(_.toBuf, Packet.fromBuf), params)
 
     /**

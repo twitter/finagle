@@ -17,8 +17,8 @@ object FailFastFactory {
     since: Time,
     task: TimerTask,
     ntries: Int,
-    backoffs: Stream[Duration]
-  ) extends State
+    backoffs: Stream[Duration])
+      extends State
 
   private val url =
     "https://twitter.github.io/finagle/guide/FAQ.html#why-do-clients-see-com-twitter-finagle-failedfastexception-s"
@@ -126,8 +126,8 @@ private[finagle] class FailFastFactory[Req, Rep](
   label: String,
   logger: Logger = DefaultLogger,
   endpoint: Address = Address.failing,
-  backoffs: Stream[Duration] = FailFastFactory.defaultBackoffs
-) extends ServiceFactoryProxy(underlying) {
+  backoffs: Stream[Duration] = FailFastFactory.defaultBackoffs)
+    extends ServiceFactoryProxy(underlying) {
   import FailFastFactory._
 
   @volatile private[this] var state: State = Ok

@@ -71,14 +71,7 @@ trait IntegrationClient extends FunSuiteLike {
     None
   }
 
-  override def test(
-    testName: String,
-    testTags: Tag*
-  )(
-    f: => Any
-  )(
-    implicit pos: Position
-  ): Unit = {
+  override def test(testName: String, testTags: Tag*)(f: => Any)(implicit pos: Position): Unit = {
     if (isAvailable) {
       super.test(testName, testTags: _*)(f)(pos)
     } else {

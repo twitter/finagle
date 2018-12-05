@@ -26,8 +26,8 @@ import scala.collection.mutable.HashMap
  */
 private[http2] final class AdapterProxyChannelHandler(
   setupFn: ChannelPipeline => Unit,
-  statsReceiver: StatsReceiver = NullStatsReceiver
-) extends ChannelDuplexHandler {
+  statsReceiver: StatsReceiver = NullStatsReceiver)
+    extends ChannelDuplexHandler {
 
   import AdapterProxyChannelHandler._
 
@@ -54,10 +54,7 @@ private[http2] final class AdapterProxyChannelHandler(
   }
 
   // this may return a null.
-  private[this] def getEmbeddedChannel(
-    ctx: ChannelHandlerContext,
-    streamId: Int
-  ): EmbeddedChannel =
+  private[this] def getEmbeddedChannel(ctx: ChannelHandlerContext, streamId: Int): EmbeddedChannel =
     map.get(streamId) match {
       case Some(completingChannel) =>
         completingChannel.embedded
@@ -283,10 +280,8 @@ private[http2] object AdapterProxyChannelHandler {
 
   // this is non-retryable because we know this message is mid-stream, so we've
   // already written stuff to the wire.
-  class WriteToNackedStreamException(
-    id: Int,
-    val flags: Long = FailureFlags.NonRetryable
-  ) extends Exception(s"Tried to write to already nacked stream id $id.")
+  class WriteToNackedStreamException(id: Int, val flags: Long = FailureFlags.NonRetryable)
+      extends Exception(s"Tried to write to already nacked stream id $id.")
       with FailureFlags[WriteToNackedStreamException]
       with HasLogLevel {
     def logLevel: Level = Level.DEBUG

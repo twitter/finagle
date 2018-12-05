@@ -23,8 +23,8 @@ final class PipeliningClientPushSession[In, Out](
   handle: PushChannelHandle[In, Out],
   statsReceiver: StatsReceiver,
   stallTimeout: Duration,
-  timer: Timer
-) extends PushSession[In, Out](handle) { self =>
+  timer: Timer)
+    extends PushSession[In, Out](handle) { self =>
 
   private[this] val logger = Logger.get
 

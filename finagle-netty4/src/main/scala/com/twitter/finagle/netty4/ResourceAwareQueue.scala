@@ -33,8 +33,8 @@ private object ResourceAwareQueue {
  */
 private[finagle] class ResourceAwareQueue[T](
   maxPendingOffers: Int,
-  releaseFn: PartialFunction[T, T]
-) extends AsyncQueue[T](maxPendingOffers) {
+  releaseFn: PartialFunction[T, T])
+    extends AsyncQueue[T](maxPendingOffers) {
   import ResourceAwareQueue.log
 
   private[this] val id = identity[T] _

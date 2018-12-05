@@ -19,8 +19,8 @@ final private[finagle] class ReloadingNetty4ClientEngineFactory(
   config: SslClientConfiguration,
   allocator: ByteBufAllocator,
   forceJdk: Boolean,
-  reloadPeriod: Duration = 1.minute
-) extends SslClientEngineFactory {
+  reloadPeriod: Duration = 1.minute)
+    extends SslClientEngineFactory {
 
   private[this] val reloader = new ContextReloader(
     Netty4ClientSslConfigurations.createClientContext(config, forceJdk),
@@ -31,10 +31,7 @@ final private[finagle] class ReloadingNetty4ClientEngineFactory(
   def this(config: SslClientConfiguration) =
     this(config, Allocator.allocatorParam.default.allocator, !OpenSsl.isAvailable)
 
-  def apply(
-    address: Address,
-    config: SslClientConfiguration
-  ): Engine =
+  def apply(address: Address, config: SslClientConfiguration): Engine =
     Netty4ClientSslConfigurations.createClientEngine(
       address,
       config,

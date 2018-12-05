@@ -19,8 +19,7 @@ import com.twitter.util.Duration
 case class TrackWorkerPoolExecutionDelay(
   enableTracking: Boolean,
   trackingTaskPeriod: Duration,
-  threadDumpThreshold: Duration
-) {
+  threadDumpThreshold: Duration) {
   def mk(): (TrackWorkerPoolExecutionDelay, Stack.Param[TrackWorkerPoolExecutionDelay]) =
     (this, TrackWorkerPoolExecutionDelay.trackWorkerPoolExecutionDelayParam)
 

@@ -24,7 +24,10 @@ private[finagle] object Http2Listener {
 
   def apply[In, Out](
     params: Stack.Params
-  )(implicit mIn: Manifest[In], mOut: Manifest[Out]): Listener[In, Out, TransportContext] = {
+  )(
+    implicit mIn: Manifest[In],
+    mOut: Manifest[Out]
+  ): Listener[In, Out, TransportContext] = {
     val configuration = params[Transport.ServerSsl].sslServerConfiguration
 
     val initializer =
@@ -43,8 +46,8 @@ private[http2] class Http2Listener[In, Out](
   params: Stack.Params,
   setupMarshalling: ChannelInitializer[Channel] => ChannelHandler,
   implicit val mIn: Manifest[In],
-  implicit val mOut: Manifest[Out]
-) extends Listener[In, Out, TransportContext] {
+  implicit val mOut: Manifest[Out])
+    extends Listener[In, Out, TransportContext] {
 
   private[this] val channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE)
 
@@ -91,9 +94,12 @@ private[http2] class Http2Listener[In, Out](
     }
   }
 
-  def listen(addr: SocketAddress)(serveTransport: Transport[In, Out] {
-    type Context <: TransportContext
-  } => Unit): ListeningServer = {
+  def listen(
+    addr: SocketAddress
+  )(serveTransport: Transport[In, Out] {
+      type Context <: TransportContext
+    } => Unit
+  ): ListeningServer = {
     val underlying = underlyingListener.listen(addr)(serveTransport)
     new Http2ListeningServer(underlying, propagateDeadline)
   }
@@ -101,8 +107,8 @@ private[http2] class Http2Listener[In, Out](
 
 private[http2] class Http2ListeningServer(
   underlying: ListeningServer,
-  propagateDeadline: Time => Unit
-) extends ListeningServer {
+  propagateDeadline: Time => Unit)
+    extends ListeningServer {
 
   // we override announcement so that we delegate the announcement to the underlying listening
   // server and don't double announce.

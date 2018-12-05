@@ -36,17 +36,11 @@ class Netty4PushTransporterTest extends FunSuite with Eventually with Integratio
   // converts to string frames of 4 bytes/chars each (we're using ASCII chars for tests which are 1 byte each)
   private def withStringFramer(pipeline: ChannelPipeline): Unit = {
     class BufToStringCodec extends MessageToMessageCodec[Buf, String] {
-      def encode(
-        ctx: ChannelHandlerContext,
-        msg: String,
-        out: util.List[AnyRef]
-      ): Unit = out.add(Buf.Utf8(msg))
+      def encode(ctx: ChannelHandlerContext, msg: String, out: util.List[AnyRef]): Unit =
+        out.add(Buf.Utf8(msg))
 
-      def decode(
-        ctx: ChannelHandlerContext,
-        msg: Buf,
-        out: util.List[AnyRef]
-      ): Unit = out.add(Buf.Utf8.unapply(msg).getOrElse("???"))
+      def decode(ctx: ChannelHandlerContext, msg: Buf, out: util.List[AnyRef]): Unit =
+        out.add(Buf.Utf8.unapply(msg).getOrElse("???"))
     }
 
     pipeline.addLast(BufCodecKey, BufCodec)
@@ -80,8 +74,7 @@ class Netty4PushTransporterTest extends FunSuite with Eventually with Integratio
   }
 
   private[this] class Ctx[In, Out](
-    transporterFn: (SocketAddress, Params) => PushTransporter[In, Out]
-  ) {
+    transporterFn: (SocketAddress, Params) => PushTransporter[In, Out]) {
 
     var clientsideTransport: TestSession[In, Out] = null
     var server: ServerSocket = null

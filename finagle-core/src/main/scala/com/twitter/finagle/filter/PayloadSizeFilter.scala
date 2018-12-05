@@ -18,8 +18,8 @@ private[finagle] class PayloadSizeFilter[Req, Rep](
   reqTraceKey: String,
   repTraceKey: String,
   reqSize: Req => Int,
-  repSize: Rep => Int
-) extends SimpleFilter[Req, Rep] {
+  repSize: Rep => Int)
+    extends SimpleFilter[Req, Rep] {
 
   private[this] val requestBytes = statsReceiver.stat(Verbosity.Debug, "request_payload_bytes")
   private[this] val responseBytes = statsReceiver.stat(Verbosity.Debug, "response_payload_bytes")

@@ -36,10 +36,8 @@ private object NameTreeFactory {
       def close(deadline: Time) = Future.Done
     }
 
-    case class Weighted(
-      drv: Drv,
-      factories: Seq[ServiceFactory[Req, Rep]]
-    ) extends ServiceFactory[Req, Rep] {
+    case class Weighted(drv: Drv, factories: Seq[ServiceFactory[Req, Rep]])
+        extends ServiceFactory[Req, Rep] {
       def apply(conn: ClientConnection) = factories(drv(rng)).apply(conn)
 
       override def status = Status.worstOf[ServiceFactory[Req, Rep]](factories, _.status)

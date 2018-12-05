@@ -25,8 +25,8 @@ object Client {
 
 class Client(
   override val factory: ServiceFactory[Command, Reply],
-  private[redis] val timer: Timer = DefaultTimer
-) extends BaseClient(factory)
+  private[redis] val timer: Timer = DefaultTimer)
+    extends BaseClient(factory)
     with NormalCommands
     with SubscribeCommands
     with Transactions
@@ -97,7 +97,8 @@ abstract class BaseClient(protected val factory: ServiceFactory[Command, Reply])
    */
   private[redis] def doRequest[T](
     cmd: Command
-  )(handler: PartialFunction[Reply, Future[T]]): Future[T] = {
+  )(handler: PartialFunction[Reply, Future[T]]
+  ): Future[T] = {
     factory.toService
       .apply(cmd)
       .flatMap(handler orElse {

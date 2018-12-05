@@ -25,16 +25,10 @@ class ThriftRichClientTest extends FunSuite with MockitoSugar with OneInstancePe
 
     protected def params: Stack.Params = Stack.Params.empty
 
-    def newService(
-      dest: Name,
-      label: String
-    ): Service[ThriftClientRequest, Array[Byte]] =
+    def newService(dest: Name, label: String): Service[ThriftClientRequest, Array[Byte]] =
       mock[Service[ThriftClientRequest, Array[Byte]]]
 
-    def newClient(
-      dest: Name,
-      label: String
-    ): ServiceFactory[ThriftClientRequest, Array[Byte]] =
+    def newClient(dest: Name, label: String): ServiceFactory[ThriftClientRequest, Array[Byte]] =
       mock[ServiceFactory[ThriftClientRequest, Array[Byte]]]
   }
 

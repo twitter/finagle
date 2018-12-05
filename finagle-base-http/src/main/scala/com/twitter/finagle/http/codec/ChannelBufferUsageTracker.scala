@@ -12,8 +12,7 @@ import com.twitter.util.StorageUnit
  */
 private[finagle] class ChannelBufferUsageTracker(
   limit: StorageUnit,
-  statsReceiver: StatsReceiver = NullStatsReceiver
-) {
+  statsReceiver: StatsReceiver = NullStatsReceiver) {
   private[this] object state {
     var currentUsage = 0L
     var maxUsage = 0L

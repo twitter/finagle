@@ -74,8 +74,8 @@ abstract class XRangeCommand(
   start: Buf,
   end: Buf,
   count: Option[Long],
-  reversed: Boolean = false
-) extends StrictKeyCommand {
+  reversed: Boolean = false)
+    extends StrictKeyCommand {
   override def name: Buf = if (reversed) Command.XREVRANGE else Command.XRANGE
 
   override def body: Seq[Buf] = {
@@ -122,8 +122,8 @@ case class XReadGroup(
   count: Option[Long],
   blockMs: Option[Long],
   keys: Seq[Buf],
-  ids: Seq[Buf]
-) extends Command {
+  ids: Seq[Buf])
+    extends Command {
   RequireClientProtocol(keys.nonEmpty, "Empty stream keys")
   RequireClientProtocol(ids.nonEmpty, "Empty stream Ids")
   RequireClientProtocol(keys.size == ids.size, "Must have same number of stream keys and IDs")
@@ -187,8 +187,8 @@ case class XPendingRange(
   start: Buf,
   end: Buf,
   count: Long,
-  consumer: Option[Buf]
-) extends StrictKeyCommand {
+  consumer: Option[Buf])
+    extends StrictKeyCommand {
   override def name: Buf = Command.XPENDING
 
   override def body: Seq[Buf] =
@@ -213,8 +213,8 @@ case class XClaim(
   idle: Option[XClaimMillisOrUnixTs],
   retryCount: Option[Long],
   force: Boolean,
-  justId: Boolean
-) extends StrictKeyCommand {
+  justId: Boolean)
+    extends StrictKeyCommand {
   override def name: Buf = Command.XCLAIM
 
   override def body: Seq[Buf] = {

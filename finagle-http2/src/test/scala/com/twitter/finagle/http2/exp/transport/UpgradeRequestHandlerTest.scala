@@ -27,10 +27,8 @@ class UpgradeRequestHandlerTest extends FunSuite {
 
     val events = new mutable.Queue[Any]
     val eventCatcher = new ChannelInboundHandlerAdapter {
-      override def userEventTriggered(
-        ctx: ChannelHandlerContext,
-        evt: scala.Any
-      ): Unit = events += evt
+      override def userEventTriggered(ctx: ChannelHandlerContext, evt: scala.Any): Unit =
+        events += evt
     }
 
     val channel = new EmbeddedChannel(clientCodec, upgradeRequestHandler, eventCatcher)

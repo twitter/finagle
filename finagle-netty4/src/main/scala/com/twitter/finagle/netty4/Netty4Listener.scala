@@ -31,7 +31,10 @@ object Netty4Listener {
     pipelineInit: ChannelPipeline => Unit,
     params: Stack.Params,
     setupMarshalling: ChannelInitializer[Channel] => ChannelHandler
-  )(implicit mIn: Manifest[In], mOut: Manifest[Out]): Netty4Listener[In, Out, TransportContext] =
+  )(
+    implicit mIn: Manifest[In],
+    mOut: Manifest[Out]
+  ): Netty4Listener[In, Out, TransportContext] =
     Netty4Listener[In, Out, TransportContext](
       pipelineInit,
       params,
@@ -42,7 +45,10 @@ object Netty4Listener {
   def apply[In, Out](
     pipelineInit: ChannelPipeline => Unit,
     params: Stack.Params
-  )(implicit mIn: Manifest[In], mOut: Manifest[Out]): Netty4Listener[In, Out, TransportContext] =
+  )(
+    implicit mIn: Manifest[In],
+    mOut: Manifest[Out]
+  ): Netty4Listener[In, Out, TransportContext] =
     Netty4Listener[In, Out, TransportContext](
       pipelineInit,
       params,
@@ -67,7 +73,9 @@ case class Netty4Listener[In, Out, Ctx <: TransportContext](
   transportFactory: Channel => Transport[Any, Any] {
     type Context <: Ctx
   }
-)(implicit mIn: Manifest[In], mOut: Manifest[Out])
+)(
+  implicit mIn: Manifest[In],
+  mOut: Manifest[Out])
     extends Listener[In, Out, Ctx] {
 
   private[this] val listeningServerBuilder =
@@ -85,7 +93,8 @@ case class Netty4Listener[In, Out, Ctx <: TransportContext](
    */
   def listen(
     addr: SocketAddress
-  )(serveTransport: Transport[In, Out] { type Context <: Ctx } => Unit): ListeningServer = {
+  )(serveTransport: Transport[In, Out] { type Context <: Ctx } => Unit
+  ): ListeningServer = {
     val mkTrans = transportFactory
       .andThen(Transport.cast[In, Out])
       .asInstanceOf[Channel => Transport[In, Out] { type Context <: Ctx }]

@@ -24,8 +24,8 @@ private[http2] final class Http2UpgradingTransport(
   ref: RefTransport[Any, Any],
   p: Promise[Option[ClientSession]],
   params: Stack.Params,
-  http1Status: () => Status
-) extends TransportProxy[Any, Any](underlying) {
+  http1Status: () => Status)
+    extends TransportProxy[Any, Any](underlying) {
 
   import Http2UpgradingTransport._
 
@@ -102,8 +102,8 @@ private[http2] object Http2UpgradingTransport {
    * that represents the stream of the upgrade request.
    */
   case class UpgradeSuccessful(
-    makeSession: Transport[Any, Any] => (ClientSession, Transport[Any, Any])
-  ) extends UpgradeResult
+    makeSession: Transport[Any, Any] => (ClientSession, Transport[Any, Any]))
+      extends UpgradeResult
 
   /** Signals that the h2c upgrade was rejected or ignored by the peer. */
   case object UpgradeRejected extends UpgradeResult

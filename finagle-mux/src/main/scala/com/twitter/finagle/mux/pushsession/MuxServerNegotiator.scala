@@ -29,8 +29,8 @@ private[finagle] class MuxServerNegotiator private (
   service: Service[Request, Response],
   makeLocalHeaders: Headers => Headers,
   negotiate: (Service[Request, Response], Option[Headers]) => PushSession[ByteReader, Buf],
-  timer: Timer
-) extends PushSession[ByteReader, Buf](handle) {
+  timer: Timer)
+    extends PushSession[ByteReader, Buf](handle) {
   import MuxServerNegotiator.log
 
   private[this] type Phase = Message => Unit

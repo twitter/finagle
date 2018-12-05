@@ -18,8 +18,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 private[finagle] class MuxChannelHandle(
   underlying: PushChannelHandle[ByteReader, Buf],
   ch: Channel,
-  params: Stack.Params
-) extends PushChannelHandleProxy[ByteReader, Buf](underlying) {
+  params: Stack.Params)
+    extends PushChannelHandleProxy[ByteReader, Buf](underlying) {
 
   private[this] val tlsGuard = new AtomicBoolean(false)
 

@@ -32,20 +32,17 @@ class DirectBufferLifecycleTest extends FunSuite {
   /**
    * @tparam T the framed protocol type
    */
-  def testDirect[T](
-    protocol: String,
-    msg: Buf,
-    pipelineInit: (ChannelPipeline => Unit)
-  ) = test(s"$protocol framer releases inbound direct byte bufs") {
-    val e = new EmbeddedChannel()
-    pipelineInit(e.pipeline)
-    val direct = Unpooled.directBuffer()
-    direct.writeBytes(Buf.ByteArray.Owned.extract(msg))
-    assert(direct.refCnt() == 1)
-    e.writeInbound(direct)
-    assert(direct.refCnt() == 0)
-    val framed: T = e.readInbound[T]()
-  }
+  def testDirect[T](protocol: String, msg: Buf, pipelineInit: (ChannelPipeline => Unit)) =
+    test(s"$protocol framer releases inbound direct byte bufs") {
+      val e = new EmbeddedChannel()
+      pipelineInit(e.pipeline)
+      val direct = Unpooled.directBuffer()
+      direct.writeBytes(Buf.ByteArray.Owned.extract(msg))
+      assert(direct.refCnt() == 1)
+      e.writeInbound(direct)
+      assert(direct.refCnt() == 0)
+      val framed: T = e.readInbound[T]()
+    }
 
   testDirect[Buf](
     protocol = "memcached server",

@@ -15,11 +15,7 @@ import com.twitter.util._
  * A catch-all exception class for errors returned from the upstream
  * MySQL server.
  */
-case class ServerError(
-  code: Short,
-  sqlState: String,
-  message: String
-) extends Exception(message)
+case class ServerError(code: Short, sqlState: String, message: String) extends Exception(message)
 
 case class LostSyncException(underlying: Throwable) extends RuntimeException(underlying) {
   override def getMessage: String = underlying.toString
@@ -32,10 +28,8 @@ case class LostSyncException(underlying: Throwable) extends RuntimeException(und
  * the chances of leaking prepared statements and can simplify the
  * implementation of prepared statements in the presence of a connection pool.
  */
-private[mysql] class PrepareCache(
-  svc: Service[Request, Result],
-  cache: Caffeine[Object, Object]
-) extends ServiceProxy[Request, Result](svc) {
+private[mysql] class PrepareCache(svc: Service[Request, Result], cache: Caffeine[Object, Object])
+    extends ServiceProxy[Request, Result](svc) {
 
   def closable(num: Int): Closable = Closable.make { _ =>
     svc(CloseRequest(num)).unit
@@ -81,10 +75,7 @@ private[finagle] object ClientDispatcher {
    * @param trans A transport that reads a writes logical mysql packets.
    * @param params A collection of `Stack.Params` useful for configuring a mysql client.
    */
-  def apply(
-    trans: Transport[Packet, Packet],
-    params: Stack.Params
-  ): Service[Request, Result] = {
+  def apply(trans: Transport[Packet, Packet], params: Stack.Params): Service[Request, Result] = {
     val maxConcurrentPrepareStatements = params[MaxConcurrentPrepareStatements].num
     new PrepareCache(
       new ClientDispatcher(trans, params),
@@ -112,8 +103,8 @@ private[finagle] object ClientDispatcher {
  */
 private[finagle] final class ClientDispatcher(
   trans: Transport[Packet, Packet],
-  params: Stack.Params
-) extends GenSerialClientDispatcher[Request, Result, Packet, Packet](trans) {
+  params: Stack.Params)
+    extends GenSerialClientDispatcher[Request, Result, Packet, Packet](trans) {
   import ClientDispatcher._
 
   private[this] val handshake = Handshake(params)
@@ -299,10 +290,7 @@ private[finagle] final class ClientDispatcher(
    * number of reads exceeds the limit before an EOF packet is reached
    * a Future encoded LostSyncException is returned.
    */
-  private[this] def readTx(
-    req: Request,
-    limit: Int = Int.MaxValue
-  ): Future[(Seq[Packet], EOF)] = {
+  private[this] def readTx(req: Request, limit: Int = Int.MaxValue): Future[(Seq[Packet], EOF)] = {
     def aux(numRead: Int, xs: List[Packet]): Future[(List[Packet], EOF)] = {
       if (numRead > limit) Future.exception(lostSyncExc)
       else

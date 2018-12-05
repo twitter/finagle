@@ -26,8 +26,7 @@ case class Span(
   _name: Option[String],
   annotations: Seq[ZipkinAnnotation],
   bAnnotations: Seq[BinaryAnnotation],
-  endpoint: Endpoint
-) {
+  endpoint: Endpoint) {
   // We compute the timestamp of when the span was created
   // which we serialize and send to the collector.
   private[this] lazy val timestamp: Time = {

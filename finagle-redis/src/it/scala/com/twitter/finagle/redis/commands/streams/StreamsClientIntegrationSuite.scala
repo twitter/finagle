@@ -11,9 +11,13 @@ import org.scalatest.{Inside, Tag}
 
 final class StreamsClientIntegrationSuite extends RedisClientTest with Inside {
 
-  override protected def test(testName: String, testTags: Tag*)(
-    f: => Any
-  )(implicit pos: Position): Unit = {
+  override protected def test(
+    testName: String,
+    testTags: Tag*
+  )(f: => Any
+  )(
+    implicit pos: Position
+  ): Unit = {
     RedisTestHelper.redisServerVersion match {
       case Some((m, _, _)) if m >= 5 => super.test(testName, testTags: _*)(f)(pos)
       case _ => ignore(testName)(f)(pos)

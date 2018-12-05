@@ -16,8 +16,8 @@ import java.net.InetSocketAddress
  */
 class EndpointerModule[Req, Rep](
   extraParams: Seq[Stack.Param[_]],
-  fn: (Stack.Params, InetSocketAddress) => ServiceFactory[Req, Rep]
-) extends Stack.Module[ServiceFactory[Req, Rep]] {
+  fn: (Stack.Params, InetSocketAddress) => ServiceFactory[Req, Rep])
+    extends Stack.Module[ServiceFactory[Req, Rep]] {
 
   val role = Endpoint
   val description = "Send requests over the wire"

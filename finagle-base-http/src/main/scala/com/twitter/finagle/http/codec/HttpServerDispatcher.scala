@@ -20,8 +20,8 @@ private[http] object HttpServerDispatcher {
 private[finagle] class HttpServerDispatcher(
   trans: StreamTransport[Response, Request],
   underlying: Service[Request, Response],
-  stats: StatsReceiver
-) extends GenStreamingSerialServerDispatcher[Request, Response, Response, Request](trans) {
+  stats: StatsReceiver)
+    extends GenStreamingSerialServerDispatcher[Request, Response, Response, Request](trans) {
   import HttpServerDispatcher._
 
   private[this] val logger = Logger.get(this.getClass.getName)

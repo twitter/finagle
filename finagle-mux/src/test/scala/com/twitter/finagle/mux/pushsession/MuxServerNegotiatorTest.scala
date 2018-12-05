@@ -24,8 +24,8 @@ class MuxServerNegotiatorTest extends FunSuite with Eventually with IntegrationP
 
   private class MockSession(
     handle: PushChannelHandle[ByteReader, Buf],
-    val headers: Option[Headers]
-  ) extends PushSession[ByteReader, Buf](handle) {
+    val headers: Option[Headers])
+      extends PushSession[ByteReader, Buf](handle) {
 
     val receivedMessages = new mutable.Queue[Message]()
 

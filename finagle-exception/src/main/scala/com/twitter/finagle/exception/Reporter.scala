@@ -101,8 +101,8 @@ sealed case class Reporter(
   serviceName: String,
   statsReceiver: StatsReceiver = NullStatsReceiver,
   private val sourceAddress: Option[String] = Some(InetAddress.getLoopbackAddress.getHostName),
-  private val clientAddress: Option[String] = None
-) extends Monitor {
+  private val clientAddress: Option[String] = None)
+    extends Monitor {
 
   private[this] val okCounter = statsReceiver.counter("report_exception_ok")
   private[this] val tryLaterCounter = statsReceiver.counter("report_exception_ok")

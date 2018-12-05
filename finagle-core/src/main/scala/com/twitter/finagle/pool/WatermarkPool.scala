@@ -37,8 +37,8 @@ final class WatermarkPool[Req, Rep](
   lowWatermark: Int,
   highWatermark: Int = Int.MaxValue,
   statsReceiver: StatsReceiver = NullStatsReceiver,
-  maxWaiters: Int = Int.MaxValue
-) extends ServiceFactory[Req, Rep] { thePool => // note: avoids `self` as an alias because ServiceProxy has a `self`
+  maxWaiters: Int = Int.MaxValue)
+    extends ServiceFactory[Req, Rep] { thePool => // note: avoids `self` as an alias because ServiceProxy has a `self`
 
   // `queue` contains unwrapped `Service` instances, which *must* be wrapped by a `ServiceWrapper` before
   // returning to the application.

@@ -27,8 +27,8 @@ private object timerTickDuration
 private class HashedWheelTimer(
   statsReceiver: StatsReceiver,
   tickDuration: Duration,
-  ticksPerWheel: Int
-) extends io.netty.util.HashedWheelTimer(
+  ticksPerWheel: Int)
+    extends io.netty.util.HashedWheelTimer(
       new NamedPoolThreadFactory("Netty 4 Timer", /*daemon = */ true),
       tickDuration.inMilliseconds,
       TimeUnit.MILLISECONDS,

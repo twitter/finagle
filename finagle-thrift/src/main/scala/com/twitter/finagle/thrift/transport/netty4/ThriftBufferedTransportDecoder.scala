@@ -11,9 +11,8 @@ import org.apache.thrift.transport.{TTransport, TTransportException}
  * Frames Thrift messages by attempting to fast-forward through the message stream
  * and measuring the number of bytes that composed the message
  */
-private[netty4] class ThriftBufferedTransportDecoder(
-  protocolFactory: TProtocolFactory
-) extends ReplayingDecoder[java.lang.Void] {
+private[netty4] class ThriftBufferedTransportDecoder(protocolFactory: TProtocolFactory)
+    extends ReplayingDecoder[java.lang.Void] {
 
   /**
    * Adapts a single Netty ByteBuf to a Thrift TTransport
@@ -34,11 +33,7 @@ private[netty4] class ThriftBufferedTransportDecoder(
     }
   }
 
-  override def decode(
-    ctx: ChannelHandlerContext,
-    buffer: ByteBuf,
-    out: util.List[AnyRef]
-  ): Unit = {
+  override def decode(ctx: ChannelHandlerContext, buffer: ByteBuf, out: util.List[AnyRef]): Unit = {
     val transport = new ByteBufToTransport(buffer)
     val iprot = protocolFactory.getProtocol(transport)
 

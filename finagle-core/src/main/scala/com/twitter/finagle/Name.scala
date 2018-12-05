@@ -57,11 +57,8 @@ object Name {
    * The `path` contains unbound residual path components that were not
    * processed during name resolution.
    */
-  class Bound private (
-    val addr: Var[Addr],
-    val id: Any,
-    val path: com.twitter.finagle.Path
-  ) extends Name
+  class Bound private (val addr: Var[Addr], val id: Any, val path: com.twitter.finagle.Path)
+      extends Name
       with Proxy {
     def self: Any = id
 

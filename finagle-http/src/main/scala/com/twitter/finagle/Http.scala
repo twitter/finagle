@@ -80,8 +80,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     serverTransport: Transport[Any, Any] => StreamTransport[Response, Request],
     transporter: Stack.Params => SocketAddress => Transporter[Any, Any, TransportContext],
     listener: Stack.Params => Listener[Any, Any, TransportContext],
-    implName: String
-  ) {
+    implName: String) {
 
     def mk(): (HttpImpl, Stack.Param[HttpImpl]) = (this, HttpImpl.httpImplParam)
   }
@@ -134,13 +133,11 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
 
   /** exposed for testing */
   private[finagle] val responseClassifierParam: param.ResponseClassifier = {
-    def filtered[A, B](
-      predicate: () => Boolean,
-      pf: PartialFunction[A, B]
-    ): PartialFunction[A, B] = new PartialFunction[A, B] {
-      def isDefinedAt(a: A): Boolean = predicate() && pf.isDefinedAt(a)
-      def apply(a: A): B = pf(a)
-    }
+    def filtered[A, B](predicate: () => Boolean, pf: PartialFunction[A, B]): PartialFunction[A, B] =
+      new PartialFunction[A, B] {
+        def isDefinedAt(a: A): Boolean = predicate() && pf.isDefinedAt(a)
+        def apply(a: A): B = pf(a)
+      }
 
     val srvErrsAsFailures =
       filtered(() => treatServerErrorsAsFailures, HttpResponseClassifier.ServerErrorsAsFailures)
@@ -223,8 +220,8 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
 
   case class Client(
     stack: Stack[ServiceFactory[Request, Response]] = Client.stack,
-    params: Stack.Params = Client.params
-  ) extends EndpointerStackClient[Request, Response, Client]
+    params: Stack.Params = Client.params)
+      extends EndpointerStackClient[Request, Response, Client]
       with param.WithSessionPool[Client]
       with param.WithDefaultLoadBalancer[Client]
       with Stack.Transformable[Client] {
@@ -487,8 +484,8 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
 
   case class Server(
     stack: Stack[ServiceFactory[Request, Response]] = Server.stack,
-    params: Stack.Params = Server.params
-  ) extends StdStackServer[Request, Response, Server] {
+    params: Stack.Params = Server.params)
+      extends StdStackServer[Request, Response, Server] {
 
     protected type In = Any
     protected type Out = Any

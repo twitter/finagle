@@ -69,10 +69,7 @@ private object RowBenchmark {
 
   // In order to avoid decoding the mysql row we replicate the essence of
   // StringEncodedRow and BinaryEncodedRow
-  class SimpleRow(
-    val fields: IndexedSeq[Field],
-    val values: IndexedSeq[Value]
-  ) extends Row {
+  class SimpleRow(val fields: IndexedSeq[Field], val values: IndexedSeq[Value]) extends Row {
     private[this] val indexMap: Map[String, Int] =
       fields.zipWithIndex.map {
         case (field, i) =>

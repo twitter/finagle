@@ -38,8 +38,8 @@ private[finagle] class ClockedDrainer(
   log: Logger,
   lr: LogsReceiver = NullLogsReceiver,
   statsReceiver: StatsReceiver = NullStatsReceiver,
-  verbose: Boolean = false
-) extends Thread("GcDrainer")
+  verbose: Boolean = false)
+    extends Thread("GcDrainer")
     with Lessor {
 
   private[this] val lessees =
@@ -198,7 +198,10 @@ private[finagle] class ClockedDrainer(
 
   // GC
   // loop until the gc is acknowledged
-  private[lease] def gc(generation: Long, init: () => Duration): Unit = { // private[lease] for testing
+  private[lease] def gc(
+    generation: Long,
+    init: () => Duration
+  ): Unit = { // private[lease] for testing
     val elapsedGc = Stopwatch.start()
 
     forcedGc = 0

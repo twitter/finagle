@@ -25,10 +25,7 @@ private[finagle] object MethodBuilder {
    *             See the [[https://twitter.github.io/finagle/guide/Names.html user guide]]
    *             for details on destination names.
    */
-  def from[Req, Rep](
-    dest: String,
-    stackClient: StackClient[Req, Rep]
-  ): MethodBuilder[Req, Rep] =
+  def from[Req, Rep](dest: String, stackClient: StackClient[Req, Rep]): MethodBuilder[Req, Rep] =
     from(Resolver.eval(dest), stackClient)
 
   /**
@@ -43,10 +40,7 @@ private[finagle] object MethodBuilder {
    *             See the [[https://twitter.github.io/finagle/guide/Names.html user guide]]
    *             for details on destination names.
    */
-  def from[Req, Rep](
-    dest: Name,
-    stackClient: StackClient[Req, Rep]
-  ): MethodBuilder[Req, Rep] = {
+  def from[Req, Rep](dest: Name, stackClient: StackClient[Req, Rep]): MethodBuilder[Req, Rep] = {
     val stack = modifiedStack(stackClient.stack)
     val service: Service[Req, Rep] = stackClient
       .withStack(stack)
@@ -79,10 +73,7 @@ private[finagle] object MethodBuilder {
     /**
      * @param originalStack the `Stack` before [[modifiedStack]] was called.
      */
-    def create(
-      originalStack: Stack[_],
-      params: Stack.Params
-    ): Config = {
+    def create(originalStack: Stack[_], params: Stack.Params): Config = {
       Config(
         MethodBuilderRetry.Config(params[param.ResponseClassifier].responseClassifier),
         MethodBuilderTimeout.Config(
@@ -118,8 +109,7 @@ private[finagle] final class MethodBuilder[Req, Rep](
   dest: Name,
   stack: Stack[_],
   stackParams: Stack.Params,
-  private[client] val config: MethodBuilder.Config
-) { self =>
+  private[client] val config: MethodBuilder.Config) { self =>
   import MethodBuilder._
 
   //

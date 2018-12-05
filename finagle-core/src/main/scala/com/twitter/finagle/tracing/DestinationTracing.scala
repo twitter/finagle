@@ -16,9 +16,8 @@ private[finagle] class ServerDestTracingProxy[Req, Rep](self: ServiceFactory[Req
     self(conn).map(sf => new ServerDestTracingFilter[Req, Rep](conn).andThen(sf))
 }
 
-private final class ServerDestTracingFilter[Req, Rep](
-  conn: ClientConnection
-) extends SimpleFilter[Req, Rep] {
+private final class ServerDestTracingFilter[Req, Rep](conn: ClientConnection)
+    extends SimpleFilter[Req, Rep] {
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val trace = Trace()

@@ -41,10 +41,9 @@ abstract class PushStackClient[Req, Rep, This <: PushStackClient[Req, Rep, This]
    */
   protected type SessionT <: PushSession[In, Out]
 
-  override protected def copy1(
-    stack: Stack[ServiceFactory[Req, Rep]],
-    params: Stack.Params
-  ): This { type In = self.In; type Out = self.Out; type SessionT = self.SessionT }
+  override protected def copy1(stack: Stack[ServiceFactory[Req, Rep]], params: Stack.Params): This {
+    type In = self.In; type Out = self.Out; type SessionT = self.SessionT
+  }
 
   /**
    * Construct a new [[PushTransporter]] with the appropriately configured pipeline.

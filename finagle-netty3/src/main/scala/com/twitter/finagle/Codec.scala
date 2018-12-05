@@ -39,9 +39,7 @@ trait Codec[Req, Rep] {
    * Prepare a factory for usage with the codec. Used to allow codec
    * modifications to the service at the top of the network stack.
    */
-  def prepareServiceFactory(
-    underlying: ServiceFactory[Req, Rep]
-  ): ServiceFactory[Req, Rep] =
+  def prepareServiceFactory(underlying: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] =
     underlying
 
   /**
@@ -80,10 +78,7 @@ trait Codec[Req, Rep] {
     )
   }
 
-  def newServerDispatcher(
-    transport: Transport[Any, Any],
-    service: Service[Req, Rep]
-  ): Closable = {
+  def newServerDispatcher(transport: Transport[Any, Any], service: Service[Req, Rep]): Closable = {
     // In order to not break the Netty 3 API, we provide some 'alternative facts'
     // and continue without our dynamic check
     val clazz = classOf[Any].asInstanceOf[Class[Req]]
@@ -190,8 +185,8 @@ trait CodecFactory[Req, Rep] {
 private case class CodecClient[Req, Rep](
   codecFactory: CodecFactory[Req, Rep]#Client,
   stack: Stack[ServiceFactory[Req, Rep]] = StackClient.newStack[Req, Rep],
-  params: Stack.Params = Stack.Params.empty
-) extends StackClient[Req, Rep] {
+  params: Stack.Params = Stack.Params.empty)
+    extends StackClient[Req, Rep] {
 
   import com.twitter.finagle.param._
 
@@ -236,8 +231,8 @@ private case class CodecClient[Req, Rep](
 
     case class Underlying(
       stack: Stack[ServiceFactory[Req, Rep]] = clientStack,
-      params: Stack.Params = params
-    ) extends StdStackClient[Req, Rep, Underlying] {
+      params: Stack.Params = params)
+        extends StdStackClient[Req, Rep, Underlying] {
 
       protected def copy1(
         stack: Stack[ServiceFactory[Req, Rep]] = this.stack,
@@ -258,8 +253,9 @@ private case class CodecClient[Req, Rep](
         )
       }
 
-      protected def newDispatcher(transport: Transport[In, Out] { type Context <: TransportContext })
-        : Service[Req, Rep] =
+      protected def newDispatcher(
+        transport: Transport[In, Out] { type Context <: TransportContext }
+      ): Service[Req, Rep] =
         codec.newClientDispatcher(transport, params)
     }
 
@@ -282,8 +278,8 @@ private case class CodecClient[Req, Rep](
 private case class CodecServer[Req, Rep](
   codecFactory: CodecFactory[Req, Rep]#Server,
   stack: Stack[ServiceFactory[Req, Rep]] = StackServer.newStack[Req, Rep],
-  params: Stack.Params = Stack.Params.empty
-) extends StackServer[Req, Rep] {
+  params: Stack.Params = Stack.Params.empty)
+    extends StackServer[Req, Rep] {
 
   def withStack(stack: Stack[ServiceFactory[Req, Rep]]): StackServer[Req, Rep] = copy(stack = stack)
   def withParams(ps: Stack.Params): StackServer[Req, Rep] = copy(params = ps)
@@ -309,8 +305,8 @@ private case class CodecServer[Req, Rep](
 
     case class Underlying(
       stack: Stack[ServiceFactory[Req, Rep]] = serverStack,
-      params: Stack.Params = serverParams
-    ) extends StdStackServer[Req, Rep, Underlying] {
+      params: Stack.Params = serverParams)
+        extends StdStackServer[Req, Rep, Underlying] {
 
       protected type In = Any
       protected type Out = Any

@@ -86,8 +86,8 @@ private[finagle] object SingletonPool {
 class SingletonPool[Req, Rep](
   underlying: ServiceFactory[Req, Rep],
   allowInterrupts: Boolean,
-  statsReceiver: StatsReceiver
-) extends ServiceFactory[Req, Rep] {
+  statsReceiver: StatsReceiver)
+    extends ServiceFactory[Req, Rep] {
   import SingletonPool._
 
   private[this] val scoped = statsReceiver.scope("connects")

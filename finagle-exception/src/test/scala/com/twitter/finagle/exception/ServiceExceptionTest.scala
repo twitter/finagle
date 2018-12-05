@@ -17,8 +17,7 @@ private[exception] class TestServiceException(
   traceId: Option[Long] = None,
   clientAddress: Option[String] = None,
   sourceAddress: Option[String] = Some(InetAddress.getLoopbackAddress.getHostName),
-  cardinality: Option[Int] = None
-) {
+  cardinality: Option[Int] = None) {
 
   private val ste = new javaSTE("badclass", "badmethod", "badfile", 42)
   val throwable = new Throwable(exceptionMessage)

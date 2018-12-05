@@ -13,10 +13,7 @@ package com.twitter.finagle.loadbalancer
  * @see [[BalancerRegistry]]
  * @see TwitterServer's "/admin/balancers.json" admin endpoint.
  */
-final class Metadata private[loadbalancer] (
-  val label: String,
-  balancer: Balancer[_, _]
-) {
+final class Metadata private[loadbalancer] (val label: String, balancer: Balancer[_, _]) {
 
   override def toString: String = s"${getClass.getName}($label)"
 

@@ -34,8 +34,7 @@ class Netty4TransporterTest extends FunSuite with Eventually with IntegrationPat
   private[this] class Ctx[A, B](
     transporterFn: (SocketAddress, Params) => Transporter[Buf, Buf, TransportContext],
     dec: Buf => B,
-    enc: A => Buf
-  ) {
+    enc: A => Buf) {
     var clientsideTransport: Transport[A, B] = null
     var server: ServerSocket = null
     var acceptedSocket: Socket = null

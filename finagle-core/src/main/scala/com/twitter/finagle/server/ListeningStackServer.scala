@@ -29,8 +29,10 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
    * Each new session is passed to the `trackSession` function exactly once
    * to facilitate connection resource management.
    */
-  protected def newListeningServer(serviceFactory: ServiceFactory[Req, Rep], addr: SocketAddress)(
-    trackSession: ClientConnection => Unit
+  protected def newListeningServer(
+    serviceFactory: ServiceFactory[Req, Rep],
+    addr: SocketAddress
+  )(trackSession: ClientConnection => Unit
   ): ListeningServer
 
   def serve(addr: SocketAddress, factory: ServiceFactory[Req, Rep]): ListeningServer =

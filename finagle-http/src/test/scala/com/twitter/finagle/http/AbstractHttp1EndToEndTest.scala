@@ -112,8 +112,10 @@ abstract class AbstractHttp1EndToEndTest extends AbstractEndToEndTest {
     }
   }
 
-  private def connectionCloseTest(request: Request, service: HttpService)(
-    connect: HttpService => HttpService
+  private def connectionCloseTest(
+    request: Request,
+    service: HttpService
+  )(connect: HttpService => HttpService
   ): Unit = {
     val client = connect(service)
     val response = await(client(request))

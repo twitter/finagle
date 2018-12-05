@@ -15,8 +15,8 @@ import java.net.InetSocketAddress
  */
 abstract class GenSerialClientDispatcher[Req, Rep, In, Out](
   trans: Transport[In, Out],
-  statsReceiver: StatsReceiver
-) extends Service[Req, Rep] {
+  statsReceiver: StatsReceiver)
+    extends Service[Req, Rep] {
 
   def this(trans: Transport[In, Out]) =
     this(trans, NullStatsReceiver)

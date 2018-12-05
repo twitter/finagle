@@ -61,8 +61,8 @@ private[finagle] class EndpointRecorder[Req, Rep](
   client: String,
   dtab: Dtab,
   path: String,
-  endpoints: Var[Addr]
-) extends ServiceFactoryProxy[Req, Rep](underlying) {
+  endpoints: Var[Addr])
+    extends ServiceFactoryProxy[Req, Rep](underlying) {
 
   registry.addObservation(client, dtab, path, endpoints)
 

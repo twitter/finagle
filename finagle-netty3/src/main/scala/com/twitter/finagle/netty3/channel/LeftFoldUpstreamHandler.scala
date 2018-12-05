@@ -12,18 +12,12 @@ import com.twitter.concurrent.Serialized
 class LeftFoldUpstreamHandler {
   def channelHandler = new LeftFoldHandlerToChannelHandler(this)
 
-  def channelBound(
-    ctx: ChannelHandlerContext,
-    e: ChannelStateEvent
-  ): LeftFoldUpstreamHandler = {
+  def channelBound(ctx: ChannelHandlerContext, e: ChannelStateEvent): LeftFoldUpstreamHandler = {
     ctx.sendUpstream(e)
     this
   }
 
-  def channelClosed(
-    ctx: ChannelHandlerContext,
-    e: ChannelStateEvent
-  ): LeftFoldUpstreamHandler = {
+  def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent): LeftFoldUpstreamHandler = {
     ctx.sendUpstream(e)
     this
   }
@@ -52,18 +46,12 @@ class LeftFoldUpstreamHandler {
     this
   }
 
-  def channelOpen(
-    ctx: ChannelHandlerContext,
-    e: ChannelStateEvent
-  ): LeftFoldUpstreamHandler = {
+  def channelOpen(ctx: ChannelHandlerContext, e: ChannelStateEvent): LeftFoldUpstreamHandler = {
     ctx.sendUpstream(e)
     this
   }
 
-  def channelUnbound(
-    ctx: ChannelHandlerContext,
-    e: ChannelStateEvent
-  ): LeftFoldUpstreamHandler = {
+  def channelUnbound(ctx: ChannelHandlerContext, e: ChannelStateEvent): LeftFoldUpstreamHandler = {
     ctx.sendUpstream(e)
     this
   }
@@ -84,18 +72,12 @@ class LeftFoldUpstreamHandler {
     this
   }
 
-  def exceptionCaught(
-    ctx: ChannelHandlerContext,
-    e: ExceptionEvent
-  ): LeftFoldUpstreamHandler = {
+  def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent): LeftFoldUpstreamHandler = {
     ctx.sendUpstream(e)
     this
   }
 
-  def messageReceived(
-    ctx: ChannelHandlerContext,
-    e: MessageEvent
-  ): LeftFoldUpstreamHandler = {
+  def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent): LeftFoldUpstreamHandler = {
     ctx.sendUpstream(e)
     this
   }

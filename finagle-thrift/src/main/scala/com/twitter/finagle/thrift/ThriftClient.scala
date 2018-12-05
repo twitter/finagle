@@ -16,7 +16,9 @@ trait ThriftClient {
     "Use com.twitter.finagle.ThriftClient#methodPerEndpoint[ServicePerEndpoint, MethodPerEndpoint]",
     "2017-11-13"
   )
-  def newMethodIface[ServiceIface, FutureIface](serviceIface: ServiceIface)(
+  def newMethodIface[ServiceIface, FutureIface](
+    serviceIface: ServiceIface
+  )(
     implicit builder: MethodIfaceBuilder[ServiceIface, FutureIface]
   ): FutureIface = builder.newMethodIface(serviceIface)
 
@@ -35,7 +37,9 @@ trait ThriftClient {
    * method interface (`MethodPerEndpoint`).
    */
   @deprecated("Use methodPerEndpoint", "2018-01-12")
-  def thriftService[ServicePerEndpoint, ThriftServiceType](servicePerEndpoint: ServicePerEndpoint)(
+  def thriftService[ServicePerEndpoint, ThriftServiceType](
+    servicePerEndpoint: ServicePerEndpoint
+  )(
     implicit builder: ThriftServiceBuilder[ServicePerEndpoint, ThriftServiceType]
   ): ThriftServiceType = builder.build(servicePerEndpoint)
 }

@@ -6,10 +6,8 @@ import java.util.{logging => javalog}
 /**
  * A logging Handler that sends log information via tracing
  */
-class TracingLogHandler(
-  formatter: Formatter = BareFormatter,
-  level: Option[Level] = None
-) extends Handler(formatter, level) {
+class TracingLogHandler(formatter: Formatter = BareFormatter, level: Option[Level] = None)
+    extends Handler(formatter, level) {
 
   def flush(): Unit = {}
   def close(): Unit = {}

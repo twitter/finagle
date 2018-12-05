@@ -137,8 +137,8 @@ private[http2] class Http2Transporter(
   underlyingHttp11: Transporter[Any, Any, TransportContext],
   alpnUpgrade: Boolean,
   params: Stack.Params,
-  implicit val timer: Timer
-) extends Http2NegotiatingTransporter(
+  implicit val timer: Timer)
+    extends Http2NegotiatingTransporter(
       params,
       underlyingHttp11,
       fallbackToHttp11WhileNegotiating = !alpnUpgrade

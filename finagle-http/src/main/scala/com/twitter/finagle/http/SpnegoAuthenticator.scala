@@ -237,8 +237,8 @@ object SpnegoAuthenticator {
     class JAASClientSource(
       val loginContext: String,
       _serverPrincipal: String,
-      _serverPrincipalType: Oid = JAAS.Krb5PrincipalType
-    ) extends ClientSource
+      _serverPrincipalType: Oid = JAAS.Krb5PrincipalType)
+        extends ClientSource
         with JAAS {
       val serverPrincipal = manager.createName(_serverPrincipal, _serverPrincipalType)
 

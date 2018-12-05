@@ -24,8 +24,8 @@ import scala.util.control.NoStackTrace
 private[finagle] class ChannelTransport(
   ch: nettyChan.Channel,
   readQueue: AsyncQueue[Any] = new AsyncQueue[Any],
-  omitStackTraceOnInactive: Boolean = false
-) extends Transport[Any, Any] {
+  omitStackTraceOnInactive: Boolean = false)
+    extends Transport[Any, Any] {
 
   type Context = ChannelTransportContext
 

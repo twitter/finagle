@@ -137,8 +137,8 @@ class GlobalRequestTimeoutException(timeout: Duration)
 class NoBrokersAvailableException(
   val name: String,
   val baseDtabFn: () => Dtab,
-  val localDtabFn: () => Dtab
-) extends RequestException
+  val localDtabFn: () => Dtab)
+    extends RequestException
     with SourcedException {
 
   // backwards compatibility constructor
@@ -216,11 +216,8 @@ class CancelledConnectionException(cause: Throwable)
  * @see The [[https://twitter.github.io/finagle/guide/FAQ.html#why-do-clients-see-com-twitter-finagle-failedfastexception-s user guide]]
  *      for additional details.
  */
-class FailedFastException(
-  message: String,
-  cause: Throwable,
-  val flags: Long = FailureFlags.Empty
-) extends RequestException(message, cause)
+class FailedFastException(message: String, cause: Throwable, val flags: Long = FailureFlags.Empty)
+    extends RequestException(message, cause)
     with WriteException
     with HasLogLevel
     with FailureFlags[FailedFastException] {
@@ -319,8 +316,8 @@ class ChannelException(underlying: Option[Throwable], remoteAddr: Option[SocketA
 class ProxyConnectException(
   message: String,
   remoteAddress: SocketAddress,
-  val flags: Long = FailureFlags.NonRetryable
-) extends Exception(message)
+  val flags: Long = FailureFlags.NonRetryable)
+    extends Exception(message)
     with NoStackTrace
     with FailureFlags[ProxyConnectException] {
 
@@ -349,8 +346,8 @@ class ConnectionFailedException(underlying: Option[Throwable], remoteAddress: Op
 class ChannelClosedException private[finagle] (
   underlying: Option[Throwable],
   remoteAddress: Option[SocketAddress],
-  val flags: Long
-) extends ChannelException(underlying, remoteAddress)
+  val flags: Long)
+    extends ChannelException(underlying, remoteAddress)
     with FailureFlags[ChannelClosedException] {
 
   def this(underlying: Option[Throwable], remoteAddress: Option[SocketAddress]) =
@@ -373,8 +370,8 @@ class StreamClosedException(
   remoteAddress: Option[SocketAddress],
   streamId: String,
   whyFailed: String,
-  val flags: Long
-) extends ChannelException(None, remoteAddress)
+  val flags: Long)
+    extends ChannelException(None, remoteAddress)
     with FailureFlags[StreamClosedException]
     with NoStackTrace {
 

@@ -10,8 +10,8 @@ import io.netty.handler.codec.http.{HttpMessage, HttpObjectAggregator}
  */
 private[netty4] class FinagleHttpObjectAggregator(
   maxContentLength: Int,
-  handleExpectContinue: Boolean
-) extends HttpObjectAggregator(maxContentLength) {
+  handleExpectContinue: Boolean)
+    extends HttpObjectAggregator(maxContentLength) {
 
   override def newContinueResponse(
     start: HttpMessage,

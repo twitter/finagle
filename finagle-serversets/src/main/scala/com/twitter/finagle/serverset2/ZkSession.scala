@@ -30,7 +30,8 @@ private[serverset2] class ZkSession(
   retryStream: RetryStream,
   watchedZk: Watched[ZooKeeperReader],
   statsReceiver: StatsReceiver
-)(implicit timer: Timer) {
+)(
+  implicit timer: Timer) {
   import ZkSession.logger
 
   /** The dynamic `WatchState` of this `ZkSession` instance. */
@@ -304,7 +305,9 @@ private[serverset2] object ZkSession {
     hosts: String,
     sessionTimeout: Duration = DefaultSessionTimeout,
     statsReceiver: StatsReceiver
-  )(implicit timer: Timer): ZkSession =
+  )(
+    implicit timer: Timer
+  ): ZkSession =
     new ZkSession(
       retryStream,
       ClientBuilder()
@@ -324,7 +327,9 @@ private[serverset2] object ZkSession {
   def retrying(
     backoff: RetryStream,
     newZkSession: () => ZkSession
-  )(implicit timer: Timer): Var[ZkSession] = {
+  )(
+    implicit timer: Timer
+  ): Var[ZkSession] = {
     val v = Var(ZkSession.nil)
 
     @volatile var closing = false

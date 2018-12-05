@@ -87,21 +87,19 @@ object Balancers {
    * Randomized Load Balancing. IEEE Trans. Parallel Distrib. Syst. 12,
    * 10 (October 2001), 1094-1104.
    */
-  def p2c(
-    maxEffort: Int = MaxEffort,
-    rng: Rng = Rng.threadLocal
-  ): LoadBalancerFactory = new LoadBalancerFactory {
-    override def toString: String = "P2CLeastLoaded"
-    def newBalancer[Req, Rep](
-      endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
-      exc: NoBrokersAvailableException,
-      params: Stack.Params
-    ): ServiceFactory[Req, Rep] = {
-      val sr = params[param.Stats].statsReceiver
-      val balancer = new P2CLeastLoaded(endpoints, maxEffort, rng, sr, exc)
-      newScopedBal(params[param.Label].label, sr, "p2c_least_loaded", balancer)
+  def p2c(maxEffort: Int = MaxEffort, rng: Rng = Rng.threadLocal): LoadBalancerFactory =
+    new LoadBalancerFactory {
+      override def toString: String = "P2CLeastLoaded"
+      def newBalancer[Req, Rep](
+        endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
+        exc: NoBrokersAvailableException,
+        params: Stack.Params
+      ): ServiceFactory[Req, Rep] = {
+        val sr = params[param.Stats].statsReceiver
+        val balancer = new P2CLeastLoaded(endpoints, maxEffort, rng, sr, exc)
+        newScopedBal(params[param.Label].label, sr, "p2c_least_loaded", balancer)
+      }
     }
-  }
 
   /**
    * Like [[p2c]] but using the Peak EWMA (exponentially weight moving average)
@@ -381,9 +379,7 @@ object Balancers {
    * if an unavailable node (Status != Open) is returned from the underlying pick.
    * See the constant [[MaxEffort]] for more details on how we pick the default.
    */
-  def roundRobin(
-    maxEffort: Int = MaxEffort
-  ): LoadBalancerFactory = new LoadBalancerFactory {
+  def roundRobin(maxEffort: Int = MaxEffort): LoadBalancerFactory = new LoadBalancerFactory {
     override def toString: String = "RoundRobin"
     def newBalancer[Req, Rep](
       endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],

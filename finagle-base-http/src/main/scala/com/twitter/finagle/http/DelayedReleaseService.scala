@@ -24,9 +24,8 @@ private[finagle] object DelayedRelease {
 /**
  * Delay release of the connection until all chunks have been received.
  */
-private[finagle] class DelayedReleaseService[-Req <: Request](
-  service: Service[Req, Response]
-) extends ServiceProxy[Req, Response](service) {
+private[finagle] class DelayedReleaseService[-Req <: Request](service: Service[Req, Response])
+    extends ServiceProxy[Req, Response](service) {
 
   protected[this] val latch = new AsyncLatch
 

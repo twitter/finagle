@@ -333,22 +333,14 @@ case class XPendingAllReply(
   count: JLong,
   start: Option[Buf],
   end: Option[Buf],
-  pendingByConsumer: Seq[(Buf, Buf)]
-)
+  pendingByConsumer: Seq[(Buf, Buf)])
 
 case class XPendingRangeReply(
   id: Buf,
   consumer: Buf,
   millisSinceLastDeliver: JLong,
-  numDeliveries: JLong
-)
+  numDeliveries: JLong)
 
-case class XReadStreamReply(
-  stream: Buf,
-  entries: Seq[StreamEntryReply]
-)
+case class XReadStreamReply(stream: Buf, entries: Seq[StreamEntryReply])
 
-case class StreamEntryReply(
-  id: Buf,
-  fields: Seq[(Buf, Buf)]
-)
+case class StreamEntryReply(id: Buf, fields: Seq[(Buf, Buf)])

@@ -18,11 +18,7 @@ abstract class SslServerSessionVerifier {
    * @note Throwing an exception is ok, and will be treated
    * similarly to a response of false.
    */
-  def apply(
-    address: Address,
-    config: SslServerConfiguration,
-    session: SSLSession
-  ): Boolean
+  def apply(address: Address, config: SslServerConfiguration, session: SSLSession): Boolean
 }
 
 object SslServerSessionVerifier {
@@ -49,11 +45,7 @@ object SslServerSessionVerifier {
    * verifies every given session.
    */
   val AlwaysValid: SslServerSessionVerifier = new SslServerSessionVerifier {
-    def apply(
-      address: Address,
-      config: SslServerConfiguration,
-      session: SSLSession
-    ): Boolean = true
+    def apply(address: Address, config: SslServerConfiguration, session: SSLSession): Boolean = true
   }
 
 }

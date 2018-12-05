@@ -108,15 +108,11 @@ object JsonToggleMap {
     @JsonProperty(required = true) id: String,
     @JsonProperty(required = true) fraction: Double,
     description: Option[String],
-    comment: Option[String]
-  )
+    comment: Option[String])
 
   private[this] case class JsonToggles(@JsonProperty(required = true) toggles: Seq[JsonToggle]) {
 
-    def toToggleMap(
-      source: String,
-      descriptionMode: DescriptionMode
-    ): ToggleMap = {
+    def toToggleMap(source: String, descriptionMode: DescriptionMode): ToggleMap = {
       val invalid = toggles.find { md =>
         descriptionMode match {
           case DescriptionRequired => md.description.isEmpty
@@ -185,8 +181,7 @@ object JsonToggleMap {
     id: String,
     fraction: Double,
     lastValue: Option[Boolean],
-    description: Option[String]
-  )
+    description: Option[String])
 
   private val factory = new MappingJsonFactory()
   factory.disable(JsonFactory.Feature.USE_THREAD_LOCAL_FOR_BUFFER_RECYCLING)

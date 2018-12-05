@@ -34,10 +34,8 @@ object Trace extends Tracing {
    * Captures both tracers and the trace id in this simple wrapper so we don't look up them
    * multiple times.
    */
-  private final class Capture(
-    val tracers: List[Tracer],
-    val idOption: Option[TraceId]
-  ) extends Tracing
+  private final class Capture(val tracers: List[Tracer], val idOption: Option[TraceId])
+      extends Tracing
 
   private[this] val tracersCtx = new Contexts.local.Key[List[Tracer]]
 
@@ -186,8 +184,7 @@ object Trace extends Tracing {
     service: String,
     rpc: String,
     hostOpt: Option[InetSocketAddress] = None
-  )(
-    f: => T
+  )(f: => T
   ): T = Trace.letId(Trace.nextId) {
     val trace = Trace()
     if (trace.isActivelyTracing) {

@@ -39,15 +39,13 @@ class ZkAnnouncer(factory: ZkClientFactory) extends Announcer { self =>
     serverSet: ServerSet,
     var status: Option[EndpointStatus] = None,
     var addr: Option[InetSocketAddress] = None,
-    endpoints: mutable.Map[String, InetSocketAddress] = mutable.Map.empty[String, InetSocketAddress]
-  )
+    endpoints: mutable.Map[String, InetSocketAddress] = mutable.Map.empty[String, InetSocketAddress])
 
   private[this] case class Mutation(
     conf: ServerSetConf,
     addr: Option[InetSocketAddress],
     endpoints: Map[String, InetSocketAddress],
-    onComplete: Promise[Unit]
-  )
+    onComplete: Promise[Unit])
 
   private[this] var serverSets = Set.empty[ServerSetConf]
   private[this] val q = new LinkedBlockingQueue[Mutation]()

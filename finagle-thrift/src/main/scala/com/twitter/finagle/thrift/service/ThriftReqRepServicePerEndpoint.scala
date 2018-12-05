@@ -120,7 +120,11 @@ object ThriftReqRepServicePerEndpoint {
   }
 
   private def reqRepFilter(method: ThriftMethod) =
-    new Filter[scrooge.Request[method.Args], scrooge.Response[method.SuccessType], method.Args, method.SuccessType] {
+    new Filter[
+      scrooge.Request[method.Args],
+      scrooge.Response[method.SuccessType],
+      method.Args,
+      method.SuccessType] {
       def apply(
         request: scrooge.Request[method.Args],
         service: Service[method.Args, method.SuccessType]

@@ -31,8 +31,8 @@ private final class VanillaThriftSession(
   handle: PushChannelHandle[ByteReader, Buf],
   ttwitterHeader: Option[Buf],
   params: Stack.Params,
-  service: Service[mux.Request, mux.Response]
-) extends PushSession[ByteReader, Buf](handle) {
+  service: Service[mux.Request, mux.Response])
+    extends PushSession[ByteReader, Buf](handle) {
   import VanillaThriftSession._
 
   private[this] def exec = handle.serialExecutor

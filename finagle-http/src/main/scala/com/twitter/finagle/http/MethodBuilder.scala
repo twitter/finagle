@@ -27,10 +27,7 @@ object MethodBuilder {
    *
    * @see [[com.twitter.finagle.Http.Client.methodBuilder(String)]]
    */
-  def from(
-    dest: String,
-    stackClient: StackClient[Request, Response]
-  ): MethodBuilder =
+  def from(dest: String, stackClient: StackClient[Request, Response]): MethodBuilder =
     from(Resolver.eval(dest), stackClient)
 
   /**
@@ -49,10 +46,7 @@ object MethodBuilder {
    *
    * @see [[com.twitter.finagle.Http.Client.methodBuilder(Name)]]
    */
-  def from(
-    dest: Name,
-    stackClient: StackClient[Request, Response]
-  ): MethodBuilder = {
+  def from(dest: Name, stackClient: StackClient[Request, Response]): MethodBuilder = {
     val mb = client.MethodBuilder.from(dest, stackClient)
     new MethodBuilder(mb)
   }

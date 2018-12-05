@@ -49,8 +49,8 @@ object RemoteInfo {
     upstreamId: Option[String],
     downstreamAddr: Option[SocketAddress],
     downstreamLabel: Option[String],
-    traceId: TraceId
-  ) extends RemoteInfo {
+    traceId: TraceId)
+      extends RemoteInfo {
     private[this] def addr(a: Option[SocketAddress]): String = a match {
       case Some(adr) => adr.toString
       case None => NotAvailableStr

@@ -38,9 +38,11 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
    *
    * @see [[com.twitter.finagle.dispatch.GenSerialServerDispatcher]]
    */
-  protected def newDispatcher(transport: Transport[In, Out] {
-    type Context <: self.Context
-  }): Service[Req, Rep]
+  protected def newDispatcher(
+    transport: Transport[In, Out] {
+      type Context <: self.Context
+    }
+  ): Service[Req, Rep]
 
   /**
    * A copy constructor in lieu of defining StackClient as a

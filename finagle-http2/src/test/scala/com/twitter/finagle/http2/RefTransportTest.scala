@@ -15,12 +15,11 @@ class RefTransportTest extends FunSuite with MockitoSugar {
 
   // wrapping the transport in a thin proxy provides a correct map
   // implementation
-  private[this] def wrap(
-    trans: Transport[Int, Int]
-  ): Transport[Int, Int] = new TransportProxy(trans) {
-    override def write(in: Int): Future[Unit] = trans.write(in)
-    override def read(): Future[Int] = trans.read()
-  }
+  private[this] def wrap(trans: Transport[Int, Int]): Transport[Int, Int] =
+    new TransportProxy(trans) {
+      override def write(in: Int): Future[Unit] = trans.write(in)
+      override def read(): Future[Int] = trans.read()
+    }
 
   // returns None if it updates and hasn't been closed yet
   // return Some[Boolean] if it has already been closed.  the boolean indicates whether

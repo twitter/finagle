@@ -33,8 +33,8 @@ private[finagle] final class MuxDowngradingNegotiator(
   refSession: RefPushSession[ByteReader, Buf],
   params: Stack.Params,
   handle: MuxChannelHandle,
-  service: Service[Request, Response]
-) extends PushSession[ByteReader, Buf](handle) {
+  service: Service[Request, Response])
+    extends PushSession[ByteReader, Buf](handle) {
   import MuxDowngradingNegotiator._
 
   private[this] val handshakeDone = Promise[Unit]
@@ -94,8 +94,8 @@ private[finagle] final class MuxDowngradingNegotiator(
       // Rerr corresponds to (tag=0x010001).
       //
       // The hazards of protocol multiplexing.
-      case Throw(Failure(Some(_: BadMessageException))) | Return(Message.Rerr(65537, _)) |
-          Return(Message.Rerr(65540, _)) =>
+      case Throw(Failure(Some(_: BadMessageException))) | Return(Message.Rerr(65537, _)) | Return(
+            Message.Rerr(65540, _)) =>
         initThriftDowngrade(buf)
         handshakeDone.setDone()
 
@@ -183,8 +183,8 @@ private[finagle] object MuxDowngradingNegotiator {
     ref: RefPushSession[ByteReader, Buf],
     ttwitterHeader: Option[Buf],
     params: Stack.Params,
-    service: Service[Request, Response]
-  ) extends Negotiation(params) {
+    service: Service[Request, Response])
+      extends Negotiation(params) {
     override type SessionT = VanillaThriftSession
 
     override protected def builder(

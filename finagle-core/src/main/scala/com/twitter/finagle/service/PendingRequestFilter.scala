@@ -70,8 +70,8 @@ object PendingRequestFilter {
 private[finagle] final class PendingRequestFilter[Req, Rep](
   limit: Int,
   stats: StatsReceiver,
-  pendingRequestLimitExceededException: Throwable
-) extends SimpleFilter[Req, Rep] {
+  pendingRequestLimitExceededException: Throwable)
+    extends SimpleFilter[Req, Rep] {
 
   if (limit < 1)
     throw new IllegalArgumentException(s"request limit must be greater than zero, saw $limit")

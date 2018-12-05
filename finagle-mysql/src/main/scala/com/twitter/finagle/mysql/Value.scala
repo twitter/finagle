@@ -33,12 +33,7 @@ case object NullValue extends Value
  * @param isBinary Disambiguates between the text and binary protocol.
  * @param bytes The raw bytes for this value.
  */
-case class RawValue(
-  typ: Short,
-  charset: Short,
-  isBinary: Boolean,
-  bytes: Array[Byte]
-) extends Value
+case class RawValue(typ: Short, charset: Short, isBinary: Boolean, bytes: Array[Byte]) extends Value
 
 /**
  * A type class used for injecting values of a domain type `A` into

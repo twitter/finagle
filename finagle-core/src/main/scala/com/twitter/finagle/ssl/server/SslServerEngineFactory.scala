@@ -41,10 +41,7 @@ object SslServerEngineFactory {
     implicit val param = Stack.Param(Param(JdkServerEngineFactory))
   }
 
-  def configureClientAuth(
-    sslEngine: SSLEngine,
-    clientAuth: ClientAuth
-  ): Unit = clientAuth match {
+  def configureClientAuth(sslEngine: SSLEngine, clientAuth: ClientAuth): Unit = clientAuth match {
     case ClientAuth.Unspecified => // Do Nothing
     case ClientAuth.Off => sslEngine.setWantClientAuth(false)
     case ClientAuth.Wanted => sslEngine.setWantClientAuth(true)

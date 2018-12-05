@@ -108,8 +108,8 @@ abstract class ExpiringService[Req, Rep](
   maxIdleTime: Option[Duration],
   maxLifeTime: Option[Duration],
   timer: Timer,
-  stats: StatsReceiver
-) extends ServiceProxy[Req, Rep](self) {
+  stats: StatsReceiver)
+    extends ServiceProxy[Req, Rep](self) {
   private[this] var active = true
   private[this] val latch = new AsyncLatch
 

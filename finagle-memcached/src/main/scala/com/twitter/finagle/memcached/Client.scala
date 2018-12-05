@@ -37,8 +37,7 @@ object Client {
 case class GetResult private[memcached] (
   hits: Map[String, Value] = Map.empty,
   misses: immutable.Set[String] = immutable.Set.empty,
-  failures: Map[String, Throwable] = Map.empty
-) {
+  failures: Map[String, Throwable] = Map.empty) {
   lazy val values: Map[String, Buf] = hits.mapValues { _.value }
 
   lazy val valuesWithFlags: Map[String, (Buf, Buf)] = hits.mapValues { v =>
@@ -852,7 +851,8 @@ trait PartitionedClient extends Client {
 
   private[this] def withKeysGroupedByClient[A](
     keys: Iterable[String]
-  )(f: (Client, Iterable[String]) => Future[A]): Future[Seq[A]] = {
+  )(f: (Client, Iterable[String]) => Future[A]
+  ): Future[Seq[A]] = {
     Future.collect(
       keys.groupBy(clientOf).map(Function.tupled(f))(breakOut)
     )
@@ -1016,8 +1016,8 @@ private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
   key: KetamaClientKey,
   healthBroker: Broker[NodeHealth],
   ejectFailedHost: Boolean,
-  label: String
-) extends FailureAccrualFactory[Req, Rep](
+  label: String)
+    extends FailureAccrualFactory[Req, Rep](
       underlying,
       policy,
       responseClassifier,
@@ -1106,8 +1106,8 @@ private[finagle] class KetamaPartitionedClient(
   statsReceiver: StatsReceiver = NullStatsReceiver,
   keyHasher: KeyHasher = KeyHasher.KETAMA,
   numReps: Int = KetamaPartitionedClient.DefaultNumReps,
-  oldLibMemcachedVersionComplianceMode: Boolean = false
-) extends PartitionedClient { self =>
+  oldLibMemcachedVersionComplianceMode: Boolean = false)
+    extends PartitionedClient { self =>
 
   import KetamaPartitionedClient._
 
@@ -1125,8 +1125,8 @@ private[finagle] class KetamaPartitionedClient(
 
   private[this] val nodes = mutable.Map[KetamaClientKey, Node]()
 
-  private[this] val ketamaNodesChanges
-    : Event[immutable.Set[(KetamaClientKey, KetamaNode[Client])]] = {
+  private[this] val ketamaNodesChanges: Event[
+    immutable.Set[(KetamaClientKey, KetamaNode[Client])]] = {
 
     // Addresses in the current serverset that have been processed and have associated cache nodes.
     // Access synchronized on `self`
@@ -1332,8 +1332,7 @@ class RubyMemCacheClient(clients: Seq[Client]) extends PartitionedClient {
  */
 case class RubyMemCacheClientBuilder(
   _nodes: Seq[(String, Int, Int)],
-  _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]]
-) {
+  _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]]) {
 
   def this() = this(
     Nil, // nodes
@@ -1386,8 +1385,7 @@ class PHPMemCacheClient(clients: Array[Client], keyHasher: KeyHasher) extends Pa
 case class PHPMemCacheClientBuilder(
   _nodes: Seq[(String, Int, Int)],
   _hashName: Option[String],
-  _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]]
-) {
+  _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]]) {
 
   def nodes(nodes: Seq[(String, Int, Int)]): PHPMemCacheClientBuilder =
     copy(_nodes = nodes)

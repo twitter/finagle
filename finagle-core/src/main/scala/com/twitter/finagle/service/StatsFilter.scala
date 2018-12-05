@@ -117,8 +117,8 @@ class StatsFilter[Req, Rep](
   statsReceiver: StatsReceiver,
   responseClassifier: ResponseClassifier,
   exceptionStatsHandler: ExceptionStatsHandler,
-  timeUnit: TimeUnit
-) extends SimpleFilter[Req, Rep] {
+  timeUnit: TimeUnit)
+    extends SimpleFilter[Req, Rep] {
   import StatsFilter.SyntheticException
 
   def this(

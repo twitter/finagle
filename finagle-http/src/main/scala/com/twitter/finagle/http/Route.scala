@@ -17,8 +17,7 @@ import com.twitter.finagle.http.Method.{Get, Post}
 case class Route(
   pattern: String,
   handler: Service[Request, Response],
-  index: Option[RouteIndex] = None
-)
+  index: Option[RouteIndex] = None)
 
 /**
  * Contains the route UI information.
@@ -42,7 +41,6 @@ case class RouteIndex(
   alias: String,
   group: String,
   path: Option[String] = None,
-  method: Method = Get
-) {
+  method: Method = Get) {
   assert(method == Get || method == Post, s"Unsupported method: $method")
 }

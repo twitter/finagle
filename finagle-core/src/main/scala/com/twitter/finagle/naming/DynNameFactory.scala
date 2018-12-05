@@ -14,15 +14,15 @@ import scala.collection.immutable
 private class DynNameFactory[Req, Rep](
   name: Activity[NameTree[Name.Bound]],
   cache: ServiceFactoryCache[NameTree[Name.Bound], Req, Rep],
-  statsReceiver: StatsReceiver = NullStatsReceiver
-) extends ServiceFactory[Req, Rep] {
+  statsReceiver: StatsReceiver = NullStatsReceiver)
+    extends ServiceFactory[Req, Rep] {
 
   val latencyStat = statsReceiver.stat("bind_latency_us")
 
   private sealed trait State
   private case class Pending(
-    q: immutable.Queue[(ClientConnection, Promise[Service[Req, Rep]], Stopwatch.Elapsed)]
-  ) extends State
+    q: immutable.Queue[(ClientConnection, Promise[Service[Req, Rep]], Stopwatch.Elapsed)])
+      extends State
   private case class Named(name: NameTree[Name.Bound]) extends State
   private case class Failed(exc: Throwable) extends State
   private case class Closed() extends State

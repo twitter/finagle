@@ -51,8 +51,8 @@ private[finagle] class BindingFactory[Req, Rep](
   maxNameCacheSize: Int = 8,
   maxNameTreeCacheSize: Int = 8,
   maxNamerCacheSize: Int = 4,
-  cacheTti: Duration = 10.minutes
-) extends ServiceFactory[Req, Rep] {
+  cacheTti: Duration = 10.minutes)
+    extends ServiceFactory[Req, Rep] {
 
   private[this] val nameCache =
     new ServiceFactoryCache[Name.Bound, Req, Rep](

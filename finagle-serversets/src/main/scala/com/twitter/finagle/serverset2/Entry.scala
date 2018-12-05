@@ -33,8 +33,8 @@ case class Endpoint(
   port: Int,
   shard: Int,
   status: Endpoint.Status.Value,
-  memberId: String
-) extends Entry {
+  memberId: String)
+    extends Entry {
 
   override def equals(that: Any) =
     that match {

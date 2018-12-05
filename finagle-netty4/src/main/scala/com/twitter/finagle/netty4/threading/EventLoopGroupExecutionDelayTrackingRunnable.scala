@@ -12,8 +12,8 @@ private[threading] class EventLoopGroupExecutionDelayTrackingRunnable(
   delayStat: Stat,
   threadDumpThreshold: Duration,
   dumpWatchThreadPool: Option[ScheduledThreadPoolExecutor],
-  dumpLogger: Logger
-) extends Runnable {
+  dumpLogger: Logger)
+    extends Runnable {
 
   private[this] val threadDumpEnabled: Boolean = threadDumpThreshold.inMillis > 0
 

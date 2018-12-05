@@ -109,12 +109,7 @@ private[redis] trait SetCommands { self: BaseClient =>
   /**
    * Returns keys in given set `key`, starting at `cursor`.
    */
-  def sScan(
-    key: Buf,
-    cursor: JLong,
-    count: Option[JLong],
-    pattern: Option[Buf]
-  ): Future[Seq[Buf]] =
+  def sScan(key: Buf, cursor: JLong, count: Option[JLong], pattern: Option[Buf]): Future[Seq[Buf]] =
     doRequest(SScan(key, cursor, count, pattern)) {
       case MBulkReply(messages) => Future.value(ReplyFormat.toBuf(messages))
       case EmptyMBulkReply => Future.Nil

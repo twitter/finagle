@@ -18,8 +18,8 @@ private[netty4] class SslServerVerificationHandler(
   sslHandler: SslHandler,
   remoteAddress: Address,
   config: SslServerConfiguration,
-  sessionVerifier: SslServerSessionVerifier
-) extends ChannelInboundHandlerAdapter { self =>
+  sessionVerifier: SslServerSessionVerifier)
+    extends ChannelInboundHandlerAdapter { self =>
 
   private[this] val onHandshakeComplete = Promise[Unit]()
 
@@ -78,9 +78,8 @@ private[netty4] class SslServerVerificationHandler(
 /**
  * Indicates that the SslHandler was interrupted while it was trying to complete the TLS handshake.
  */
-private[netty4] class InterruptedSslException(
-  val flags: Long = FailureFlags.Empty
-) extends SslException(None, None)
+private[netty4] class InterruptedSslException(val flags: Long = FailureFlags.Empty)
+    extends SslException(None, None)
     with FailureFlags[InterruptedSslException]
     with HasLogLevel {
 
@@ -94,8 +93,8 @@ private[netty4] class InterruptedSslException(
 
 private[netty4] class HandshakeFailureException(
   exn: Throwable,
-  val flags: Long = FailureFlags.Empty
-) extends Exception("Failed to complete the TLS handshake.", exn)
+  val flags: Long = FailureFlags.Empty)
+    extends Exception("Failed to complete the TLS handshake.", exn)
     with FailureFlags[HandshakeFailureException]
     with HasLogLevel {
   def logLevel: Level = Level.WARNING

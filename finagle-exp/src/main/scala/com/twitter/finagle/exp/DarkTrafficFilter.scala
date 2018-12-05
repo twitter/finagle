@@ -18,8 +18,8 @@ class DarkTrafficFilter[Req, Rep](
   darkService: Service[Req, Rep],
   enableSampling: Req => Boolean,
   override val statsReceiver: StatsReceiver,
-  forwardAfterService: Boolean
-) extends SimpleFilter[Req, Rep]
+  forwardAfterService: Boolean)
+    extends SimpleFilter[Req, Rep]
     with AbstractDarkTrafficFilter {
 
   import DarkTrafficFilter.log

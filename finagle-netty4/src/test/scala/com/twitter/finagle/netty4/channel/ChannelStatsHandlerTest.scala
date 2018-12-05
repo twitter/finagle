@@ -47,9 +47,7 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
     }
   }
 
-  private class TestContext(
-    sharedStats: SharedChannelStats
-  ) {
+  private class TestContext(sharedStats: SharedChannelStats) {
     val ctx = mock[ChannelHandlerContext]
     val channelStatsHandler = new ChannelStatsHandler(sharedStats)
     private val chan = new EmbeddedChannel()

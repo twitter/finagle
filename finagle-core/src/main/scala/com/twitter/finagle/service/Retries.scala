@@ -53,8 +53,7 @@ object Retries {
    */
   case class Budget(
     retryBudget: RetryBudget,
-    requeueBackoffs: Stream[Duration] = Budget.emptyBackoffSchedule
-  ) {
+    requeueBackoffs: Stream[Duration] = Budget.emptyBackoffSchedule) {
     def this(retryBudget: RetryBudget) =
       this(retryBudget, Budget.emptyBackoffSchedule)
 

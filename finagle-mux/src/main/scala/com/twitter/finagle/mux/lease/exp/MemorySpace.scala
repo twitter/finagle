@@ -16,8 +16,7 @@ private[lease] class MemorySpace(
   maxDiscount: StorageUnit,
   rSnooper: RequestSnooper,
   lr: LogsReceiver,
-  rnd: GenerationalRandom
-) {
+  rnd: GenerationalRandom) {
   def this(
     info: JvmInfo,
     minDiscount: StorageUnit,

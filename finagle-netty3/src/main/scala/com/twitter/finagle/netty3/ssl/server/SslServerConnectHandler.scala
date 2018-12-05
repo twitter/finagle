@@ -20,8 +20,8 @@ private[netty3] class SslServerConnectHandler(
   sslHandler: SslHandler,
   config: SslServerConfiguration,
   sessionVerifier: SslServerSessionVerifier,
-  onShutdown: () => Unit = () => Unit
-) extends SimpleChannelUpstreamHandler {
+  onShutdown: () => Unit = () => Unit)
+    extends SimpleChannelUpstreamHandler {
 
   // delay propagating connection upstream until we've completed the handshake
   override def channelConnected(ctx: ChannelHandlerContext, e: ChannelStateEvent): Unit = {

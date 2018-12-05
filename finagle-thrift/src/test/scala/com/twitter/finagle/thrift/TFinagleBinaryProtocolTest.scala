@@ -13,19 +13,13 @@ class TFinagleBinaryProtocolTest extends FunSuite with BeforeAndAfter with Match
 
   private val NullCounter = NullStatsReceiver.counter("")
 
-  private def assertSerializedBytes(
-    expectedBytes: Array[Byte],
-    trans: TMemoryBuffer
-  ): Unit = {
+  private def assertSerializedBytes(expectedBytes: Array[Byte], trans: TMemoryBuffer): Unit = {
     // 4 bytes for the string length
     trans.length() should be(expectedBytes.length + 4)
     trans.getArray().drop(4).take(expectedBytes.length) should be(expectedBytes)
   }
 
-  private def assertSerializedBytes(
-    expected: String,
-    trans: TMemoryBuffer
-  ): Unit = {
+  private def assertSerializedBytes(expected: String, trans: TMemoryBuffer): Unit = {
     val expectedBytes = expected.getBytes(StandardCharsets.UTF_8)
     assertSerializedBytes(expectedBytes, trans)
   }

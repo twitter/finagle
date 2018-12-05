@@ -145,8 +145,8 @@ private class StdCursorResult[T](
   rowsPerFetch: Int,
   params: Seq[Parameter],
   f: (Row) => T,
-  supportUnsigned: Boolean
-) extends CursorResult[T] { self =>
+  supportUnsigned: Boolean)
+    extends CursorResult[T] { self =>
   import StdCursorResult._
 
   // We store the stream state outside of an AsyncStream instance to avoid storing the

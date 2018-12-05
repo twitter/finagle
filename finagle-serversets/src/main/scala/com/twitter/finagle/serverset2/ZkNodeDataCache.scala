@@ -54,8 +54,7 @@ import scala.collection.JavaConverters._
 private[serverset2] abstract class ZkNodeDataCache[Entity](
   clusterPath: String,
   entityType: String,
-  statsReceiver: StatsReceiver
-) {
+  statsReceiver: StatsReceiver) {
   private[this] val logger = Logger(getClass)
 
   /** zkSession needs to be set via setSession before the cache is used */

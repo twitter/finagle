@@ -42,8 +42,8 @@ private[finagle] class RequeueFilter[Req, Rep](
   statsReceiver: StatsReceiver,
   canRetry: () => Boolean,
   maxRetriesPerReq: Double,
-  timer: Timer
-) extends SimpleFilter[Req, Rep] {
+  timer: Timer)
+    extends SimpleFilter[Req, Rep] {
   import RequeueFilter.Requeueable
 
   require(maxRetriesPerReq >= 0, s"maxRetriesPerReq must be non-negative: $maxRetriesPerReq")
@@ -54,10 +54,7 @@ private[finagle] class RequeueFilter[Req, Rep](
   private[this] val requeueStat = statsReceiver.stat("requeues_per_request")
   private[this] val canNotRetryCounter = statsReceiver.counter("cannot_retry")
 
-  private[this] def responseFuture(
-    attempt: Int,
-    t: Try[Rep]
-  ): Future[Rep] = {
+  private[this] def responseFuture(attempt: Int, t: Try[Rep]): Future[Rep] = {
     requeueStat.add(attempt)
     Future.const(t)
   }

@@ -110,8 +110,8 @@ object FailureAccrualPolicy {
   private[this] abstract class SuccessRateFailureAccrualPolicy(
     requiredSuccessRate: Double,
     window: Long,
-    markDeadFor: Stream[Duration]
-  ) extends FailureAccrualPolicy {
+    markDeadFor: Stream[Duration])
+      extends FailureAccrualPolicy {
     assert(
       requiredSuccessRate >= 0.0 && requiredSuccessRate <= 1.0,
       s"requiredSuccessRate must be [0, 1]: $requiredSuccessRate"
@@ -329,40 +329,38 @@ object FailureAccrualPolicy {
    * @param markDeadFor stream of durations to use for the next duration
    * returned from `markDeadOnFailure()`
    */
-  def consecutiveFailures(
-    numFailures: Int,
-    markDeadFor: Stream[Duration]
-  ): FailureAccrualPolicy = new FailureAccrualPolicy {
+  def consecutiveFailures(numFailures: Int, markDeadFor: Stream[Duration]): FailureAccrualPolicy =
+    new FailureAccrualPolicy {
 
-    // Pad the back of the stream to mark dead for a constant amount (300 seconds)
-    // when the stream runs out.
-    private[this] val freshMarkDeadFor = markDeadFor ++ constantBackoff
+      // Pad the back of the stream to mark dead for a constant amount (300 seconds)
+      // when the stream runs out.
+      private[this] val freshMarkDeadFor = markDeadFor ++ constantBackoff
 
-    // The head of `nextMarkDeadFor` is the next duration that will be returned
-    // from `markDeadOnFailure()` if the required success rate is not met.
-    // The tail is the remainder of the durations.
-    private[this] var nextMarkDeadFor = freshMarkDeadFor
+      // The head of `nextMarkDeadFor` is the next duration that will be returned
+      // from `markDeadOnFailure()` if the required success rate is not met.
+      // The tail is the remainder of the durations.
+      private[this] var nextMarkDeadFor = freshMarkDeadFor
 
-    private[this] var consecutiveFailures = 0L
+      private[this] var consecutiveFailures = 0L
 
-    def recordSuccess(): Unit = synchronized {
-      consecutiveFailures = 0
-    }
+      def recordSuccess(): Unit = synchronized {
+        consecutiveFailures = 0
+      }
 
-    def markDeadOnFailure(): Option[Duration] = synchronized {
-      consecutiveFailures += 1
-      if (consecutiveFailures >= numFailures) {
-        val duration = nextMarkDeadFor.head
-        nextMarkDeadFor = nextMarkDeadFor.tail
-        Some(duration)
-      } else {
-        None
+      def markDeadOnFailure(): Option[Duration] = synchronized {
+        consecutiveFailures += 1
+        if (consecutiveFailures >= numFailures) {
+          val duration = nextMarkDeadFor.head
+          nextMarkDeadFor = nextMarkDeadFor.tail
+          Some(duration)
+        } else {
+          None
+        }
+      }
+
+      def revived(): Unit = synchronized {
+        consecutiveFailures = 0
+        nextMarkDeadFor = freshMarkDeadFor
       }
     }
-
-    def revived(): Unit = synchronized {
-      consecutiveFailures = 0
-      nextMarkDeadFor = freshMarkDeadFor
-    }
-  }
 }

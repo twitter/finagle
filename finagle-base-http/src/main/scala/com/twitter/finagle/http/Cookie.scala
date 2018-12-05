@@ -78,8 +78,7 @@ final class Cookie private (
   private[this] val _maxAge: Option[Duration],
   val secure: Boolean,
   val httpOnly: Boolean,
-  val sameSite: SameSite
-) { self =>
+  val sameSite: SameSite) { self =>
 
   /**
    * Create a cookie.
@@ -104,10 +103,7 @@ final class Cookie private (
     sameSite = sameSite
   )
 
-  def this(
-    name: String,
-    value: String
-  ) = this(
+  def this(name: String, value: String) = this(
     name,
     value,
     None,

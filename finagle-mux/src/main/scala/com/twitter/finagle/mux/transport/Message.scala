@@ -115,10 +115,7 @@ private[finagle] object Message {
   sealed trait Fragmentable extends Message
 
   private object Init {
-    def encode(
-      version: Short,
-      headers: Seq[(Buf, Buf)]
-    ): Buf = {
+    def encode(version: Short, headers: Seq[(Buf, Buf)]): Buf = {
       var size = 2 // 2 bytes for version
       var iter = headers.iterator
       while (iter.hasNext) {

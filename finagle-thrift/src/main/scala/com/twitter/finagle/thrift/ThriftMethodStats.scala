@@ -17,5 +17,4 @@ case class ThriftMethodStats(
   requestsCounter: Counter,
   successCounter: Counter,
   failuresCounter: Counter,
-  failuresScope: StatsReceiver
-)
+  failuresScope: StatsReceiver)

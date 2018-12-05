@@ -7,8 +7,9 @@ import com.twitter.util.{Throw, Throwables, Try}
 
 private[thrift] object ThriftMethodStatsHandler {
 
-  def apply(method: ThriftMethod)(
-    responseClassifier: ResponseClassifier,
+  def apply(
+    method: ThriftMethod
+  )(responseClassifier: ResponseClassifier,
     thriftMethodStats: ThriftMethodStats,
     args: method.Args,
     response: Try[method.SuccessType]

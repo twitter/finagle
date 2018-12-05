@@ -40,8 +40,8 @@ class RetryFilter[Req, Rep](
   retryPolicy: RetryPolicy[(Req, Try[Rep])],
   timer: Timer,
   statsReceiver: StatsReceiver,
-  retryBudget: RetryBudget
-) extends Filter[Req, Rep, Req, Rep] {
+  retryBudget: RetryBudget)
+    extends Filter[Req, Rep, Req, Rep] {
 
   /**
    * A [[com.twitter.finagle.Filter]] that coordinates retries of subsequent
@@ -52,16 +52,13 @@ class RetryFilter[Req, Rep](
    * @note consider using a [[Timer]] with high resolution so that there is
    * less correlation between retries. For example [[HighResTimer.Default]].
    */
-  def this(
-    retryPolicy: RetryPolicy[(Req, Try[Rep])],
-    timer: Timer,
-    statsReceiver: StatsReceiver
-  ) = this(
-    retryPolicy,
-    timer,
-    statsReceiver,
-    RetryBudget()
-  )
+  def this(retryPolicy: RetryPolicy[(Req, Try[Rep])], timer: Timer, statsReceiver: StatsReceiver) =
+    this(
+      retryPolicy,
+      timer,
+      statsReceiver,
+      RetryBudget()
+    )
 
   // Respect non-retryablity regardless of which filter is used
   private[this] val filteredPolicy: RetryPolicy[(Req, Try[Rep])] = retryPolicy.filterEach {
@@ -129,8 +126,7 @@ object RetryFilter {
   def apply[Req, Rep](
     backoffs: Stream[Duration],
     statsReceiver: StatsReceiver = NullStatsReceiver
-  )(
-    shouldRetry: PartialFunction[(Req, Try[Rep]), Boolean]
+  )(shouldRetry: PartialFunction[(Req, Try[Rep]), Boolean]
   )(
     implicit timer: Timer
   ): RetryFilter[Req, Rep] =
@@ -157,8 +153,8 @@ final class RetryExceptionsFilter[Req, Rep](
   retryPolicy: RetryPolicy[Try[Nothing]],
   timer: Timer,
   statsReceiver: StatsReceiver,
-  retryBudget: RetryBudget
-) extends RetryFilter[Req, Rep](
+  retryBudget: RetryBudget)
+    extends RetryFilter[Req, Rep](
       RetryPolicy.convertExceptionPolicy(retryPolicy),
       timer,
       statsReceiver,
@@ -200,8 +196,7 @@ object RetryExceptionsFilter {
   def apply[Req, Rep](
     backoffs: Stream[Duration],
     statsReceiver: StatsReceiver = NullStatsReceiver
-  )(
-    shouldRetry: PartialFunction[Try[Nothing], Boolean]
+  )(shouldRetry: PartialFunction[Try[Nothing], Boolean]
   )(
     implicit timer: Timer
   ): RetryExceptionsFilter[Req, Rep] =

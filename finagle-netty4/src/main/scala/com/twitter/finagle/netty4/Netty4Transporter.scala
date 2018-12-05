@@ -34,7 +34,9 @@ object Netty4Transporter {
     transportFactory: Channel => Transport[Any, Any] {
       type Context <: Ctx
     }
-  )(implicit mOut: Manifest[Out]): Transporter[In, Out, Ctx] = new Transporter[In, Out, Ctx] {
+  )(
+    implicit mOut: Manifest[Out]
+  ): Transporter[In, Out, Ctx] = new Transporter[In, Out, Ctx] {
 
     private[this] val factory = new ConnectionBuilder(init, addr, params)
 
@@ -65,7 +67,9 @@ object Netty4Transporter {
     transportFactory: Channel => Transport[Any, Any] {
       type Context <: Ctx
     }
-  )(implicit mOut: Manifest[Out]): Transporter[In, Out, Ctx] = {
+  )(
+    implicit mOut: Manifest[Out]
+  ): Transporter[In, Out, Ctx] = {
     val init = new RawNetty4ClientChannelInitializer(pipelineInit, params)
 
     build[In, Out, Ctx](init, addr, params, transportFactory)
@@ -82,7 +86,9 @@ object Netty4Transporter {
     pipelineInit: ChannelPipeline => Unit,
     addr: SocketAddress,
     params: Stack.Params
-  )(implicit mOut: Manifest[Out]): Transporter[In, Out, TransportContext] = {
+  )(
+    implicit mOut: Manifest[Out]
+  ): Transporter[In, Out, TransportContext] = {
     val init = new RawNetty4ClientChannelInitializer(pipelineInit, params)
 
     build[In, Out, TransportContext](init, addr, params, new ChannelTransport(_))

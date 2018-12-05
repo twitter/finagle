@@ -16,8 +16,8 @@ final class Failure private[finagle] (
   val cause: Option[Throwable] = None,
   val flags: Long = FailureFlags.Empty,
   protected val sources: Map[Failure.Source.Value, Object] = Map.empty,
-  val logLevel: Level = Level.WARNING
-) extends Exception(why, cause.orNull)
+  val logLevel: Level = Level.WARNING)
+    extends Exception(why, cause.orNull)
     with NoStackTrace
     with HasLogLevel
     with FailureFlags[Failure] {

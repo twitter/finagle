@@ -17,8 +17,9 @@ trait Listener[In, Out, Ctx <: TransportContext] {
   def listen(
     addr: SocketAddress
   )(serveTransport: Transport[In, Out] {
-    type Context <: Ctx
-  } => Unit): ListeningServer
+      type Context <: Ctx
+    } => Unit
+  ): ListeningServer
 }
 
 /**
@@ -28,8 +29,9 @@ object NullListener extends Listener[Any, Any, TransportContext] {
   def listen(
     addr: SocketAddress
   )(serveTransport: Transport[Any, Any] {
-    type Context <: TransportContext
-  } => Unit) = NullServer
+      type Context <: TransportContext
+    } => Unit
+  ) = NullServer
 }
 
 /**

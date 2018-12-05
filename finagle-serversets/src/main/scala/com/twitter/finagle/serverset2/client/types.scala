@@ -27,8 +27,8 @@ private[serverset2] sealed trait Node {
 private[serverset2] object Node {
   case class ACL(
     acl: Seq[com.twitter.finagle.serverset2.client.Data.ACL],
-    stat: com.twitter.finagle.serverset2.client.Data.Stat
-  ) extends Node
+    stat: com.twitter.finagle.serverset2.client.Data.Stat)
+      extends Node
 
   case class Children(children: Seq[String], stat: com.twitter.finagle.serverset2.client.Data.Stat)
       extends Node

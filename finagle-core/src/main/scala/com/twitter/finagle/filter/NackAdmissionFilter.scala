@@ -178,8 +178,8 @@ class NackAdmissionFilter[Req, Rep](
   nackRateThreshold: Double,
   random: Rng,
   statsReceiver: StatsReceiver,
-  monoTime: Ema.Monotime = new Ema.Monotime
-) extends SimpleFilter[Req, Rep] {
+  monoTime: Ema.Monotime = new Ema.Monotime)
+    extends SimpleFilter[Req, Rep] {
   import NackAdmissionFilter._
 
   require(window > Duration.Zero, s"window size must be positive: $window")

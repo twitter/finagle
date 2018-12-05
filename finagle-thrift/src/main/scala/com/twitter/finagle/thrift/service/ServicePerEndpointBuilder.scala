@@ -7,9 +7,10 @@ import com.twitter.finagle.thrift.{RichClientParam, ThriftClientRequest, ThriftS
  * Typeclass ServicePerEndpointBuilder[T] creates T-typed interfaces from thrift clients.
  * Scrooge generates implementations of this builder.
  */
-trait ServicePerEndpointBuilder[ServicePerEndpoint <: ThriftServiceIface.Filterable[
-  ServicePerEndpoint
-]] {
+trait ServicePerEndpointBuilder[
+  ServicePerEndpoint <: ThriftServiceIface.Filterable[
+    ServicePerEndpoint
+  ]] {
 
   /**
    * Build a client ServicePerEndpoint wrapping a binary thrift service.

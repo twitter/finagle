@@ -23,8 +23,8 @@ private[finagle] final class MuxServerSession(
   h_decoder: MuxMessageDecoder,
   h_messageWriter: MessageWriter,
   handle: PushChannelHandle[ByteReader, Buf], // Maybe we should refine into a PushClientConnection...
-  service: Service[Request, Response]
-) extends PushSession[ByteReader, Buf](handle) {
+  service: Service[Request, Response])
+    extends PushSession[ByteReader, Buf](handle) {
   import MuxServerSession._
 
   // These are the locals we need to have set on each dispatch

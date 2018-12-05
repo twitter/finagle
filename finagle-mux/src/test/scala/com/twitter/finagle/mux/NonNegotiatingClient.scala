@@ -21,8 +21,8 @@ import java.net.InetSocketAddress
 
 final case class NonNegotiatingClient(
   stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Mux.Client().stack,
-  params: Stack.Params = Mux.Client.params
-) extends PushStackClient[mux.Request, mux.Response, NonNegotiatingClient] {
+  params: Stack.Params = Mux.Client.params)
+    extends PushStackClient[mux.Request, mux.Response, NonNegotiatingClient] {
 
   private[this] val scopedStatsParams = params + param.Stats(
     params[param.Stats].statsReceiver.scope("mux")
@@ -32,9 +32,7 @@ final case class NonNegotiatingClient(
   protected type In = ByteReader
   protected type Out = Buf
 
-  protected def newSession(
-    handle: PushChannelHandle[ByteReader, Buf]
-  ): Future[MuxClientSession] = {
+  protected def newSession(handle: PushChannelHandle[ByteReader, Buf]): Future[MuxClientSession] = {
 
     val statsReceiver: StatsReceiver = params[param.Stats].statsReceiver
     val framerStats = statsReceiver.scope("framer")

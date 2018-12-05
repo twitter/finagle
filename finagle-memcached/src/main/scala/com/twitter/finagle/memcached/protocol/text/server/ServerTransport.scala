@@ -12,9 +12,8 @@ import java.security.cert.Certificate
 /**
  * A Transport that handles encoding Responses to Bufs and decoding framed Bufs to Commands.
  */
-private[finagle] class ServerTransport(
-  underlying: Transport[Buf, Buf]
-) extends Transport[Response, Command] {
+private[finagle] class ServerTransport(underlying: Transport[Buf, Buf])
+    extends Transport[Response, Command] {
 
   type Context = TransportContext
 

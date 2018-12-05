@@ -286,8 +286,8 @@ private class StdClient(
   factory: ServiceFactory[Request, Result],
   supportUnsigned: Boolean,
   statsReceiver: StatsReceiver,
-  rollbackQuery: String
-) extends Client
+  rollbackQuery: String)
+    extends Client
     with Transactions {
 
   import StdClient._
@@ -330,8 +330,10 @@ private class StdClient(
 
       private[this] val cursorStats = new CursorStats(statsReceiver)
 
-      def apply[T](rowsPerFetch: Int, params: Parameter*)(
-        f: (Row) => T
+      def apply[T](
+        rowsPerFetch: Int,
+        params: Parameter*
+      )(f: (Row) => T
       ): Future[CursorResult[T]] = {
         assert(rowsPerFetch > 0, s"rowsPerFetch must be positive: $rowsPerFetch")
 
@@ -380,7 +382,8 @@ private class StdClient(
 
   def transactionWithIsolation[T](
     isolationLevel: IsolationLevel
-  )(f: Client => Future[T]): Future[T] = {
+  )(f: Client => Future[T]
+  ): Future[T] = {
     transact(Some(isolationLevel), f)
   }
 

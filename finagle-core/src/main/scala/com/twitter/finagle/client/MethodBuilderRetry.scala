@@ -16,9 +16,7 @@ private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (mb: MethodB
   /**
    * @see [[MethodBuilderScaladoc.withRetryForClassifier]]
    */
-  def forClassifier(
-    classifier: ResponseClassifier
-  ): MethodBuilder[Req, Rep] =
+  def forClassifier(classifier: ResponseClassifier): MethodBuilder[Req, Rep] =
     mb.withConfig(mb.config.copy(retry = Config(classifier)))
 
   /**
@@ -27,9 +25,7 @@ private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (mb: MethodB
   def disabled: MethodBuilder[Req, Rep] =
     forClassifier(Disabled)
 
-  private[client] def filter(
-    scopedStats: StatsReceiver
-  ): Filter.TypeAgnostic = {
+  private[client] def filter(scopedStats: StatsReceiver): Filter.TypeAgnostic = {
     val classifier = mb.config.retry.responseClassifier
     if (classifier eq Disabled)
       Filter.TypeAgnostic.Identity
@@ -134,8 +130,8 @@ private[client] object MethodBuilderRetry {
     logger: Logger,
     label: String,
     responseClassifier: ResponseClassifier,
-    nowMs: () => Long
-  ) extends Filter[Req, Rep, Req, Rep] {
+    nowMs: () => Long)
+      extends Filter[Req, Rep, Req, Rep] {
 
     def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
       val start = nowMs()

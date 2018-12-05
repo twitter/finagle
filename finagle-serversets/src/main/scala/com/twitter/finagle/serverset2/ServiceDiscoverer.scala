@@ -67,8 +67,7 @@ private[serverset2] class ServiceDiscoverer(
   varZkSession: Var[ZkSession],
   val statsReceiver: StatsReceiver,
   healthStabilizationEpoch: Epoch,
-  timer: Timer
-) {
+  timer: Timer) {
   import ServiceDiscoverer._
 
   private[this] val zkEntriesReadStat = statsReceiver.scope("entries").stat("read_ms")

@@ -36,8 +36,8 @@ private[finagle] final class MuxClientNegotiatingSession(
   negotiator: Option[Headers] => Future[MuxClientSession],
   headers: Handshake.Headers,
   name: String,
-  stats: StatsReceiver
-) extends PushSession[ByteReader, Buf](handle) {
+  stats: StatsReceiver)
+    extends PushSession[ByteReader, Buf](handle) {
 
   import MuxClientNegotiatingSession.PushSessionQueue
 
@@ -214,10 +214,8 @@ private[finagle] object MuxClientNegotiatingSession {
   /**
    * A [[PushSession]] which queues inbound messages until `drainAndRegister` is called.
    */
-  final class PushSessionQueue(
-    handle: PushChannelHandle[ByteReader, Buf],
-    stats: StatsReceiver
-  ) extends PushSession[ByteReader, Buf](handle) {
+  final class PushSessionQueue(handle: PushChannelHandle[ByteReader, Buf], stats: StatsReceiver)
+      extends PushSession[ByteReader, Buf](handle) {
 
     // Based on the usage of this class, we will queue a small amount
     // of elements to close a race window, so we likely don't need to start

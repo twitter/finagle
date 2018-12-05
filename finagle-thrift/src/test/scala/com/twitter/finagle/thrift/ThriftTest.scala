@@ -27,8 +27,7 @@ trait ThriftTest { self: FunSuite =>
   case class ThriftTestDefinition(
     label: String,
     clientIdOpt: Option[ClientId],
-    testFunction: ((Iface, BufferingTracer) => Unit)
-  )
+    testFunction: ((Iface, BufferingTracer) => Unit))
 
   private val thriftTests = mutable.ListBuffer[ThriftTestDefinition]()
 
@@ -40,14 +39,16 @@ trait ThriftTest { self: FunSuite =>
   def testThrift(
     label: String,
     clientIdOpt: Option[ClientId] = None
-  )(theTest: (Iface, BufferingTracer) => Unit): Unit = {
+  )(theTest: (Iface, BufferingTracer) => Unit
+  ): Unit = {
     thriftTests += ThriftTestDefinition(label, clientIdOpt, theTest)
   }
 
   def skipTestThrift(
     label: String,
     clientIdOpt: Option[ClientId] = None
-  )(theTest: (Iface, BufferingTracer) => Unit): Unit = {
+  )(theTest: (Iface, BufferingTracer) => Unit
+  ): Unit = {
     () // noop
   }
 

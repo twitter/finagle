@@ -38,8 +38,8 @@ import java.net.SocketAddress
 private[http2] class TlsTransporter(
   connectionBuilder: ConnectionBuilder,
   params: Stack.Params,
-  underlyingHttp11: Transporter[Any, Any, TransportContext]
-) extends Http2NegotiatingTransporter(
+  underlyingHttp11: Transporter[Any, Any, TransportContext])
+    extends Http2NegotiatingTransporter(
       params,
       underlyingHttp11,
       fallbackToHttp11WhileNegotiating = false

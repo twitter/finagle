@@ -518,8 +518,7 @@ object StreamingTest {
     new Listener[Any, Any, TransportContext] {
       def listen(
         addr: SocketAddress
-      )(
-        serveTransport: Transport[Any, Any] { type Context <: TransportContext } => Unit
+      )(serveTransport: Transport[Any, Any] { type Context <: TransportContext } => Unit
       ): ListeningServer = underlying.listen(addr)(mod.andThen(serveTransport))
     }
   }

@@ -26,8 +26,8 @@ import io.netty.handler.codec.http2.Http2CodecUtil.connectionPrefaceBuf
  */
 final private[http2] class PriorKnowledgeHandler(
   initializer: ChannelInitializer[Channel],
-  params: Stack.Params
-) extends ChannelInboundHandlerAdapter {
+  params: Stack.Params)
+    extends ChannelInboundHandlerAdapter {
 
   val prefaceToRead: ByteBuf = connectionPrefaceBuf
   var bytesConsumed: Integer = 0

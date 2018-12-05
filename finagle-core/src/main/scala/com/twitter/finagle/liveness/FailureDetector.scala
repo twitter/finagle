@@ -108,10 +108,8 @@ object FailureDetector {
    * a networking issue, so that it can choose an alternative networking path instead.
    * The default 4 seconds is pretty conservative regarding normal ping RTT.
    */
-  case class ThresholdConfig(
-    minPeriod: Duration = 5.seconds,
-    closeTimeout: Duration = 4.seconds
-  ) extends Config
+  case class ThresholdConfig(minPeriod: Duration = 5.seconds, closeTimeout: Duration = 4.seconds)
+      extends Config
 
   /**
    * Helper class for configuring a [[FailureDetector]] within a

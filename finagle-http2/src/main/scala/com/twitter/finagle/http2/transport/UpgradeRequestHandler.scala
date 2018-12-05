@@ -25,8 +25,8 @@ import scala.collection.JavaConverters.iterableAsScalaIterableConverter
 private[http2] final class UpgradeRequestHandler(
   params: Stack.Params,
   httpClientCodec: HttpClientCodec,
-  connectionHandlerBuilder: RichHttpToHttp2ConnectionHandlerBuilder
-) extends ChannelDuplexHandler {
+  connectionHandlerBuilder: RichHttpToHttp2ConnectionHandlerBuilder)
+    extends ChannelDuplexHandler {
 
   import UpgradeRequestHandler._
 

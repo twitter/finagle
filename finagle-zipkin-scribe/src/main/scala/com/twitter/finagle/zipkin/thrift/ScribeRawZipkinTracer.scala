@@ -179,8 +179,8 @@ private[thrift] class ScribeRawZipkinTracer(
   timer: Timer = DefaultTimer,
   poolSize: Int = 10,
   initialBufferSize: StorageUnit = 512.bytes,
-  maxBufferSize: StorageUnit = 1.megabyte
-) extends RawZipkinTracer(statsReceiver, timer) {
+  maxBufferSize: StorageUnit = 1.megabyte)
+    extends RawZipkinTracer(statsReceiver, timer) {
   private[this] val scopedReceiver = statsReceiver.scope("log_span")
   private[this] val okCounter = scopedReceiver.counter("ok")
   private[this] val tryLaterCounter = scopedReceiver.counter("try_later")
@@ -189,10 +189,8 @@ private[thrift] class ScribeRawZipkinTracer(
   private[this] val initialSizeInBytes = initialBufferSize.inBytes.toInt
   private[this] val maxSizeInBytes = maxBufferSize.inBytes.toInt
 
-  private class LimitedSizeByteArrayOutputStream(
-    initSize: Int,
-    maxSize: Int
-  ) extends TByteArrayOutputStream(initSize) {
+  private class LimitedSizeByteArrayOutputStream(initSize: Int, maxSize: Int)
+      extends TByteArrayOutputStream(initSize) {
 
     override def reset(): Unit = synchronized {
       if (buf.length > maxSize) {

@@ -19,11 +19,11 @@ private[finagle] case class ThriftClientPreparer(
   protocolFactory: TProtocolFactory,
   serviceName: String = "unknown",
   clientId: Option[ClientId] = None,
-  useCallerSeqIds: Boolean = false
-) {
+  useCallerSeqIds: Boolean = false) {
 
-  private def prepareService(params: Stack.Params)(
-    service: Service[ThriftClientRequest, Array[Byte]]
+  private def prepareService(
+    params: Stack.Params
+  )(service: Service[ThriftClientRequest, Array[Byte]]
   ): Future[Service[ThriftClientRequest, Array[Byte]]] = {
     val payloadSize = new PayloadSizeFilter[ThriftClientRequest, Array[Byte]](
       params[param.Stats].statsReceiver,

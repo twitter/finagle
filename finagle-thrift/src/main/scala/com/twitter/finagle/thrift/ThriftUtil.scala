@@ -95,10 +95,7 @@ private[twitter] object ThriftUtil {
    * Construct a binary [[com.twitter.finagle.Service]] for a given Thrift
    * interface using whichever Thrift code-generation toolchain is available.
    */
-  def serverFromIface(
-    impl: AnyRef,
-    serverParam: RichServerParam
-  ): BinaryService = {
+  def serverFromIface(impl: AnyRef, serverParam: RichServerParam): BinaryService = {
     // This is used with Scrooge's Java generated code.
     // The class passed in should be ServiceName$ServiceIface.
     // Will try to create a ServiceName$Service instance.

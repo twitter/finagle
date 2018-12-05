@@ -346,12 +346,7 @@ object Request {
    * }
    * }}}
    */
-  def apply(
-    version: Version,
-    method: Method,
-    uri: String,
-    reader: Reader[Buf]
-  ): Request = {
+  def apply(version: Version, method: Method, uri: String, reader: Reader[Buf]): Request = {
     val req = new Request.Impl(reader, Writer.FailingWriter, new InetSocketAddress(0))
 
     req.setChunked(true)
@@ -420,8 +415,8 @@ object Request {
   private[finagle] final class Impl(
     val reader: Reader[Buf],
     val writer: Writer[Buf],
-    val remoteSocketAddress: InetSocketAddress
-  ) extends Request {
+    val remoteSocketAddress: InetSocketAddress)
+      extends Request {
 
     private var _method: Method = Method.Get
     private var _uri: String = ""

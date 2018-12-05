@@ -52,12 +52,7 @@ private[twitter] class EndpointRegistry {
    * @param path Path to observe endpoints for
    * @param endpoints Collection of endpoints for this serverset
    */
-  def addObservation(
-    client: String,
-    dtab: Dtab,
-    path: String,
-    endpoints: Var[Addr]
-  ): Unit = {
+  def addObservation(client: String, dtab: Dtab, path: String, endpoints: Var[Addr]): Unit = {
     val ar: AtomicReference[Addr] = new AtomicReference()
     val closable = endpoints.changes.register(Witness(ar))
     val observation = (ar, closable)

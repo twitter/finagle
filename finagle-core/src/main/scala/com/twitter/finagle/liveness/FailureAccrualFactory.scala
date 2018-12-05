@@ -288,8 +288,8 @@ class FailureAccrualFactory[Req, Rep](
   policy: FailureAccrualPolicy,
   responseClassifier: ResponseClassifier,
   timer: Timer,
-  statsReceiver: StatsReceiver
-) extends ServiceFactory[Req, Rep] { self =>
+  statsReceiver: StatsReceiver)
+    extends ServiceFactory[Req, Rep] { self =>
   import FailureAccrualFactory._
 
   // writes to `state` and `reviveTimerTask` are synchronized on `self`

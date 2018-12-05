@@ -78,8 +78,8 @@ class PushStackServerTest extends FunSuite with MockitoSugar {
   // Note: only intended to listen to one address at a time due to mutating copy1 method
   case class TestStackServer(
     var stack: Stack[ServiceFactory[Unit, Unit]] = StackServer.newStack,
-    var params: Stack.Params = StackServer.defaultParams
-  ) extends PushStackServer[Unit, Unit, TestStackServer] {
+    var params: Stack.Params = StackServer.defaultParams)
+      extends PushStackServer[Unit, Unit, TestStackServer] {
     protected type PipelineRep = Unit
     protected type PipelineReq = Unit
 

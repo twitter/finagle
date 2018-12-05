@@ -22,8 +22,8 @@ class StdStackServerTest extends FunSuite with MockitoSugar {
   val mockCert = mock[X509Certificate]
   private case class Server(
     stack: Stack[ServiceFactory[Unit, Unit]] = StackServer.newStack,
-    params: Params = StackServer.defaultParams
-  ) extends StdStackServer[Unit, Unit, Server] {
+    params: Params = StackServer.defaultParams)
+      extends StdStackServer[Unit, Unit, Server] {
 
     protected type In = Unit
     protected type Out = Unit
@@ -33,8 +33,7 @@ class StdStackServerTest extends FunSuite with MockitoSugar {
       new Listener[Unit, Unit, TransportContext] {
         override def listen(
           addr: SocketAddress
-        )(
-          serveTransport: (Transport[Unit, Unit] { type Context <: Server.this.Context }) => Unit
+        )(serveTransport: (Transport[Unit, Unit] { type Context <: Server.this.Context }) => Unit
         ): ListeningServer = {
           val trans = mock[Transport[Unit, Unit]]
           val context = mock[TransportContext]

@@ -82,8 +82,8 @@ private object ChannelStatsHandler {
    */
   private final class TcpStatsUpdater(
     sharedChannelStats: SharedChannelStats,
-    channel: EpollSocketChannel
-  ) extends Runnable {
+    channel: EpollSocketChannel)
+      extends Runnable {
     private[this] val tcpInfo: EpollTcpInfo = new EpollTcpInfo
     private[this] var lastRetransmits: Long = 0
     private[this] var cancelled = false

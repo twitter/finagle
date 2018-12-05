@@ -73,8 +73,8 @@ private[finagle] object MessageWriter {
 private[finagle] final class FragmentingMessageWriter(
   handle: PushChannelHandle[_, Buf],
   windowBytes: Int,
-  statsReceiver: StatsReceiver
-) extends MessageWriter {
+  statsReceiver: StatsReceiver)
+    extends MessageWriter {
 
   import FragmentingMessageWriter._
 

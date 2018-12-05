@@ -48,6 +48,5 @@ private[serverset2] object Data {
     ephemeralOwner: Long, // Owner ID if ephemeral, 0 otherwise
     dataLength: Int, // Length of the data field in bytes
     numChildren: Int, // Number of children of this node
-    pzxid: Long
-  ) // ZXID that last modified children of this node
+    pzxid: Long) // ZXID that last modified children of this node
 }

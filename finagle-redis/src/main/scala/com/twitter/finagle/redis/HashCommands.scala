@@ -106,12 +106,7 @@ private[redis] trait HashCommands { self: BaseClient =>
   /**
    * Returns keys in given hash `key`, starting at `cursor`.
    */
-  def hScan(
-    key: Buf,
-    cursor: JLong,
-    count: Option[JLong],
-    pattern: Option[Buf]
-  ): Future[Seq[Buf]] =
+  def hScan(key: Buf, cursor: JLong, count: Option[JLong], pattern: Option[Buf]): Future[Seq[Buf]] =
     doRequest(HScan(key, cursor, count, pattern)) {
       case MBulkReply(messages) => Future.value(ReplyFormat.toBuf(messages))
       case EmptyMBulkReply => Future.Nil

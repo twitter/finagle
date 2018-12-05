@@ -141,10 +141,7 @@ object BackupRequestFilter {
    * Users should only use this method for filtering generic services; otherwise,
    * usage through the `idempotent` method on [[MethodBuilder]] implementations is preferred.
    */
-  def filterService[Req, Rep](
-    params: Stack.Params,
-    service: Service[Req, Rep]
-  ): Service[Req, Rep] =
+  def filterService[Req, Rep](params: Stack.Params, service: Service[Req, Rep]): Service[Req, Rep] =
     params[BackupRequestFilter.Param] match {
       case BackupRequestFilter.Param.Configured(maxExtraLoad, sendInterrupts) =>
         val brf = mkFilterFromParams[Req, Rep](maxExtraLoad, sendInterrupts, params)
@@ -185,8 +182,8 @@ object BackupRequestFilter {
 
 private[client] class BackupRequestFactory[Req, Rep](
   underlying: ServiceFactory[Req, Rep],
-  filter: BackupRequestFilter[Req, Rep]
-) extends ServiceFactoryProxy[Req, Rep](underlying) {
+  filter: BackupRequestFilter[Req, Rep])
+    extends ServiceFactoryProxy[Req, Rep](underlying) {
 
   private[this] val applyBrf: Service[Req, Rep] => Service[Req, Rep] = svc => filter.andThen(svc)
 
@@ -236,8 +233,8 @@ private[finagle] class BackupRequestFilter[Req, Rep](
   nowMs: () => Long,
   statsReceiver: StatsReceiver,
   timer: Timer,
-  windowedPercentileHistogramFac: () => WindowedPercentileHistogram
-) extends SimpleFilter[Req, Rep]
+  windowedPercentileHistogramFac: () => WindowedPercentileHistogram)
+    extends SimpleFilter[Req, Rep]
     with Closable {
   import BackupRequestFilter._
 

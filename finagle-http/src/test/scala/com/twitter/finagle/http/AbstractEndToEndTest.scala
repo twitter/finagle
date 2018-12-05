@@ -103,9 +103,13 @@ abstract class AbstractEndToEndTest
     }
   }
 
-  override def test(testName: String, testTags: Tag*)(
-    testFun: => Any
-  )(implicit pos: Position): Unit = {
+  override def test(
+    testName: String,
+    testTags: Tag*
+  )(testFun: => Any
+  )(
+    implicit pos: Position
+  ): Unit = {
     if (skipWholeTest)
       ignore(testName)(testFun)
     else

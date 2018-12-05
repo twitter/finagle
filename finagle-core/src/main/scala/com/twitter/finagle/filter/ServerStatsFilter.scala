@@ -35,8 +35,8 @@ private[finagle] object ServerStatsFilter {
  */
 private[finagle] class ServerStatsFilter[Req, Rep](
   statsReceiver: StatsReceiver,
-  nowNanos: () => Long
-) extends SimpleFilter[Req, Rep] {
+  nowNanos: () => Long)
+    extends SimpleFilter[Req, Rep] {
   def this(statsReceiver: StatsReceiver) = this(statsReceiver, Stopwatch.systemNanos)
 
   private[this] val handletime = statsReceiver.stat("handletime_us")

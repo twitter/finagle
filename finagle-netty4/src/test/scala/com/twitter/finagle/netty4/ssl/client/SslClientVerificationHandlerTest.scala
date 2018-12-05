@@ -22,11 +22,8 @@ class SslClientVerificationHandlerTest extends FunSuite with MockitoSugar with O
   val config = SslClientConfiguration()
 
   class TestVerifier(result: => Boolean) extends SslClientSessionVerifier {
-    def apply(
-      address: Address,
-      config: SslClientConfiguration,
-      session: SSLSession
-    ): Boolean = result
+    def apply(address: Address, config: SslClientConfiguration, session: SSLSession): Boolean =
+      result
   }
 
   val (channel, sslHandler, handshakePromise) = {

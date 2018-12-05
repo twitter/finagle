@@ -41,8 +41,8 @@ import scala.util.control.NonFatal
  */
 private final class Netty4PushChannelHandle[In, Out] private (
   ch: Channel,
-  statsReceiver: StatsReceiver
-) extends PushChannelHandle[In, Out] {
+  statsReceiver: StatsReceiver)
+    extends PushChannelHandle[In, Out] {
 
   import Netty4PushChannelHandle._
 
@@ -192,10 +192,7 @@ private final class Netty4PushChannelHandle[In, Out] private (
   // the serial executor which means that it was run 'later' from whatever action on
   // the Netty4PushTransport scheduled it since scheduling shouldn't result in the
   // task being run before the `.execute` method returns.
-  private[this] def handleWriteAndFlush(
-    message: Out,
-    continuation: Try[Unit] => Unit
-  ): Unit = {
+  private[this] def handleWriteAndFlush(message: Out, continuation: Try[Unit] => Unit): Unit = {
     val op = ch.writeAndFlush(message)
     if (op.isSuccess) continuation(Return.Unit)
     else

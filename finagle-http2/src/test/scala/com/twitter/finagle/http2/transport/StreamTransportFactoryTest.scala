@@ -37,9 +37,10 @@ class StreamTransportFactoryTest extends FunSuite {
 
   test("StreamTransportFactory streams should kill themselves when given a bad stream id") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
-      type Context = TransportContext with HasExecutor
-    }]
+    val transport =
+      new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+        type Context = TransportContext with HasExecutor
+      }]
     val addr = new SocketAddress {}
     val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
     streamFac.setStreamId(Int.MaxValue)
@@ -61,9 +62,10 @@ class StreamTransportFactoryTest extends FunSuite {
 
   test("StreamTransportFactory streams should kill themselves when they grow to a bad stream id") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
-      type Context = TransportContext with HasExecutor
-    }]
+    val transport =
+      new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+        type Context = TransportContext with HasExecutor
+      }]
     val addr = new SocketAddress {}
     val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
     streamFac.setStreamId(Int.MaxValue)
@@ -87,9 +89,10 @@ class StreamTransportFactoryTest extends FunSuite {
 
   test("StreamTransportFactory streams should disappear when they die") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
-      type Context = TransportContext with HasExecutor
-    }]
+    val transport =
+      new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+        type Context = TransportContext with HasExecutor
+      }]
     val addr = new SocketAddress {}
     val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
 
@@ -106,9 +109,10 @@ class StreamTransportFactoryTest extends FunSuite {
 
   test("StreamTransportFactory streams can't even") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
-      type Context = TransportContext with HasExecutor
-    }]
+    val transport =
+      new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+        type Context = TransportContext with HasExecutor
+      }]
     val addr = new SocketAddress {}
     val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
     streamFac.setStreamId(2)
@@ -127,9 +131,10 @@ class StreamTransportFactoryTest extends FunSuite {
 
   test("StreamTransportFactory dies if it runs out of stream IDs") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
-      type Context = TransportContext with HasExecutor
-    }]
+    val transport =
+      new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+        type Context = TransportContext with HasExecutor
+      }]
     val addr = new SocketAddress {}
     val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
     streamFac.setStreamId(2147483647)
@@ -152,12 +157,12 @@ class StreamTransportFactoryTest extends FunSuite {
     assert(streamFac.status == Status.Closed)
   }
 
-
   test("StreamTransportFactory forbids new streams on GOAWAY") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
-      type Context = TransportContext with HasExecutor
-    }]
+    val transport =
+      new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+        type Context = TransportContext with HasExecutor
+      }]
     val addr = new SocketAddress {}
     val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
 
@@ -172,9 +177,10 @@ class StreamTransportFactoryTest extends FunSuite {
 
   test("StreamTransportFactory respects last stream ID on GOAWAY & closes streams") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
-      type Context = TransportContext with HasExecutor
-    }]
+    val transport =
+      new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+        type Context = TransportContext with HasExecutor
+      }]
     val addr = new SocketAddress {}
     val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
 
@@ -212,9 +218,10 @@ class StreamTransportFactoryTest extends FunSuite {
 
   test("StreamTransportFactory reflects detector status") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
-      type Context = TransportContext with HasExecutor
-    }]
+    val transport =
+      new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+        type Context = TransportContext with HasExecutor
+      }]
     val addr = new SocketAddress {}
     var cur: Status = Status.Open
     val params = Stack.Params.empty + FailureDetector.Param(
@@ -230,9 +237,10 @@ class StreamTransportFactoryTest extends FunSuite {
 
   test("StreamTransportFactory call to first() provides stream with streamId == 1") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
-      type Context = TransportContext with HasExecutor
-    }]
+    val transport =
+      new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+        type Context = TransportContext with HasExecutor
+      }]
     val addr = new SocketAddress {}
     val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
     assert(streamFac.firstStreamTransport().curId == 1)
@@ -240,9 +248,10 @@ class StreamTransportFactoryTest extends FunSuite {
 
   test("StreamTransportFactory streams increment stream ID only on write") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
-      type Context = TransportContext with HasExecutor
-    }]
+    val transport =
+      new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+        type Context = TransportContext with HasExecutor
+      }]
     val addr = new SocketAddress {}
     val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
 
@@ -258,9 +267,10 @@ class StreamTransportFactoryTest extends FunSuite {
 
   test("Idle streams kill themselves when read") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
-      type Context = TransportContext with HasExecutor
-    }]
+    val transport =
+      new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+        type Context = TransportContext with HasExecutor
+      }]
     val addr = new SocketAddress {}
     val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
 
@@ -277,9 +287,10 @@ class StreamTransportFactoryTest extends FunSuite {
 
   test("Children can be closed streamFacple times, but keep the first reason") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
-      type Context = TransportContext with HasExecutor
-    }]
+    val transport =
+      new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+        type Context = TransportContext with HasExecutor
+      }]
     val addr = new SocketAddress {}
     val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
 
@@ -301,9 +312,10 @@ class StreamTransportFactoryTest extends FunSuite {
 
   test("RST is sent when a message is received for a closed stream") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
-      type Context = TransportContext with HasExecutor
-    }]
+    val transport =
+      new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+        type Context = TransportContext with HasExecutor
+      }]
     val addr = new SocketAddress {}
     var cur: Status = Status.Open
     val params = Stack.Params.empty + FailureDetector.Param(
@@ -322,9 +334,10 @@ class StreamTransportFactoryTest extends FunSuite {
 
   test("GOAWAY w/ PROTOCOL_ERROR is sent when a message is received for an idle stream") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
-      type Context = TransportContext with HasExecutor
-    }]
+    val transport =
+      new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+        type Context = TransportContext with HasExecutor
+      }]
     val addr = new SocketAddress {}
     var cur: Status = Status.Open
     val params = Stack.Params.empty + FailureDetector.Param(
@@ -345,9 +358,10 @@ class StreamTransportFactoryTest extends FunSuite {
 
   test("RST is not sent when RST is received for a nonexistent stream") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
-      type Context = TransportContext with HasExecutor
-    }]
+    val transport =
+      new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+        type Context = TransportContext with HasExecutor
+      }]
     val addr = new SocketAddress {}
     var cur: Status = Status.Open
     val params = Stack.Params.empty + FailureDetector.Param(
@@ -365,9 +379,10 @@ class StreamTransportFactoryTest extends FunSuite {
 
   test("RST is not sent when RST is received for an existent stream") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
-      type Context = TransportContext with HasExecutor
-    }]
+    val transport =
+      new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+        type Context = TransportContext with HasExecutor
+      }]
     val addr = new SocketAddress {}
     var cur: Status = Status.Open
     val params = Stack.Params.empty + FailureDetector.Param(
@@ -392,9 +407,10 @@ class StreamTransportFactoryTest extends FunSuite {
 
   test("PINGs receive replies every time") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
-      type Context = TransportContext with HasExecutor
-    }]
+    val transport =
+      new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+        type Context = TransportContext with HasExecutor
+      }]
     val addr = new SocketAddress {}
     var cur: Status = Status.Open
     val params = Stack.Params.empty + FailureDetector.Param(
@@ -411,9 +427,10 @@ class StreamTransportFactoryTest extends FunSuite {
 
   test("reading a StreamException fails that stream") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
-      type Context = TransportContext with HasExecutor
-    }]
+    val transport =
+      new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+        type Context = TransportContext with HasExecutor
+      }]
 
     val error = Http2Error.PROTOCOL_ERROR
     val hlsExn = headerListSizeError(3, error, true /* onDecode */, "too big") match {
@@ -438,9 +455,10 @@ class StreamTransportFactoryTest extends FunSuite {
 
   test("stream transports enter Dead state if the StreamTransportFactory loses track of them") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
-      type Context = TransportContext with HasExecutor
-    }]
+    val transport =
+      new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+        type Context = TransportContext with HasExecutor
+      }]
     val addr = new SocketAddress {}
 
     val streamFac = new StreamTransportFactory(transport, addr, Stack.Params.empty)
@@ -456,13 +474,15 @@ class StreamTransportFactoryTest extends FunSuite {
 
   def isFlagged(rstCode: Long, finagleFlag: Long): Boolean = {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
-    type Context = TransportContext with HasExecutor
-  }]
+    val transport =
+      new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+        type Context = TransportContext with HasExecutor
+      }]
 
     val noFD = FailureDetector.Param(FailureDetector.NullConfig)
-    val streamFac = new StreamTransportFactory(transport, new SocketAddress {}, Stack.Params.empty + noFD)
-    val stream= await(streamFac.newChildTransport())
+    val streamFac =
+      new StreamTransportFactory(transport, new SocketAddress {}, Stack.Params.empty + noFD)
+    val stream = await(streamFac.newChildTransport())
 
     stream.write(H1Req)
     val streamFut = stream.read()
@@ -474,21 +494,29 @@ class StreamTransportFactoryTest extends FunSuite {
   }
 
   val retryableResetCodes =
-    Http2Error.values.map(_ -> false).toMap[Http2Error, Boolean].updated(Http2Error.REFUSED_STREAM, true)
+    Http2Error.values
+      .map(_ -> false).toMap[Http2Error, Boolean].updated(Http2Error.REFUSED_STREAM, true)
 
-  retryableResetCodes.foreach { case (error, retryable) =>
-    if (retryable) test(s"streams are retryable on RST(${error.toString})") { assert(isFlagged(error.code, FailureFlags.Retryable)) }
-    else test(s"streams are NOT retryable on RST(${error.toString})")  { assert(!isFlagged(error.code, FailureFlags.Retryable)) }
+  retryableResetCodes.foreach {
+    case (error, retryable) =>
+      if (retryable) test(s"streams are retryable on RST(${error.toString})") {
+        assert(isFlagged(error.code, FailureFlags.Retryable))
+      } else
+        test(s"streams are NOT retryable on RST(${error.toString})") {
+          assert(!isFlagged(error.code, FailureFlags.Retryable))
+        }
   }
 
   test("unprocessed streams are retryable on all goaways") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
-      type Context = TransportContext with HasExecutor
-    }]
+    val transport =
+      new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+        type Context = TransportContext with HasExecutor
+      }]
 
     val noFD = FailureDetector.Param(FailureDetector.NullConfig)
-    val streamFac = new StreamTransportFactory(transport, new SocketAddress {}, Stack.Params.empty + noFD)
+    val streamFac =
+      new StreamTransportFactory(transport, new SocketAddress {}, Stack.Params.empty + noFD)
     val a, b, c, d = await(streamFac.newChildTransport())
 
     a.write(H1Req); b.write(H1Req); c.write(H1Req); d.write(H1Req)
@@ -501,7 +529,6 @@ class StreamTransportFactoryTest extends FunSuite {
     // these streams are actively being processed so the StreamTransportFactory doesn't fail them
     assert(!aFut.isDefined)
     assert(!bFut.isDefined)
-
 
     // c + d haven't been processed so they should be retryable on another connection
     val restartable = List(cFut, dFut).map(f => intercept[GoAwayException](await(f)))

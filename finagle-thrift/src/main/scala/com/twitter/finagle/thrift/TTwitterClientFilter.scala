@@ -25,8 +25,8 @@ private[thrift] class TTwitterClientFilter(
   serviceName: String,
   isUpgraded: Boolean,
   clientId: Option[ClientId],
-  protocolFactory: TProtocolFactory
-) extends SimpleFilter[ThriftClientRequest, Array[Byte]] {
+  protocolFactory: TProtocolFactory)
+    extends SimpleFilter[ThriftClientRequest, Array[Byte]] {
   private[this] val clientIdBuf = clientId map { id =>
     Buf.Utf8(id.name)
   }

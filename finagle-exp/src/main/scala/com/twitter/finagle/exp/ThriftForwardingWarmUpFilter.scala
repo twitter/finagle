@@ -19,8 +19,8 @@ class ThriftForwardingWarmUpFilter(
   warmupPeriod: Duration,
   forwardTo: Service[ThriftClientRequest, Array[Byte]],
   statsReceiver: StatsReceiver = DefaultStatsReceiver,
-  isBypassClient: ClientId => Boolean = _ => true
-) extends ForwardingWarmUpFilter[Array[Byte], Array[Byte]](
+  isBypassClient: ClientId => Boolean = _ => true)
+    extends ForwardingWarmUpFilter[Array[Byte], Array[Byte]](
       warmupPeriod,
       thriftForwardingWarmupFilter andThen forwardTo,
       statsReceiver

@@ -25,8 +25,7 @@ private[client] case class ClientConfig(
   val readOnlyOK: Boolean,
   val sessionId: Option[Long],
   val password: Option[Buf],
-  val timer: Timer
-) {
+  val timer: Timer) {
   def toMap: Map[String, Any] = Map(
     "hosts" -> hosts,
     "sessionTimeout" -> sessionTimeout,

@@ -42,14 +42,13 @@ private[netty4] object ConnectPromiseDelayListeners {
    * Creates a new [[GenericFutureListener]] that fails a given `promise` when the
    * [[NettyFuture]] it's listening on is failed.
    */
-  def proxyFailuresTo(
-    promise: ChannelPromise
-  ): GenericFutureListener[NettyFuture[Any]] = new GenericFutureListener[NettyFuture[Any]] {
-    override def operationComplete(f: NettyFuture[Any]): Unit =
-      // We filter cancellation here since we assume it was proxied from the old promise and
-      // is already being handled in `cancelPromiseWhenCancelled`.
-      if (!f.isSuccess && !f.isCancelled) {
-        promise.setFailure(f.cause)
-      }
-  }
+  def proxyFailuresTo(promise: ChannelPromise): GenericFutureListener[NettyFuture[Any]] =
+    new GenericFutureListener[NettyFuture[Any]] {
+      override def operationComplete(f: NettyFuture[Any]): Unit =
+        // We filter cancellation here since we assume it was proxied from the old promise and
+        // is already being handled in `cancelPromiseWhenCancelled`.
+        if (!f.isSuccess && !f.isCancelled) {
+          promise.setFailure(f.cause)
+        }
+    }
 }

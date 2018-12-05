@@ -18,8 +18,8 @@ final class GoAwayException private[http2] (
   val errorCode: Long,
   streamId: Long,
   remoteAddress: Option[SocketAddress],
-  flags: Long
-) extends StreamClosedException(
+  flags: Long)
+    extends StreamClosedException(
       remoteAddress,
       streamId.toString,
       s"GOAWAY(${Http2StreamClosedException.errorToString(errorCode)}, $streamId)",
@@ -33,8 +33,8 @@ final class RstException private[http2] (
   val errorCode: Long,
   streamId: Long,
   remoteAddress: Option[SocketAddress],
-  flags: Long
-) extends StreamClosedException(
+  flags: Long)
+    extends StreamClosedException(
       remoteAddress,
       streamId.toString,
       s"RST(${Http2StreamClosedException.errorToString(errorCode)})",

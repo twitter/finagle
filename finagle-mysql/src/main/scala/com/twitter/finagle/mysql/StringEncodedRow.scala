@@ -12,8 +12,8 @@ private class StringEncodedRow(
   rawRow: Buf,
   val fields: IndexedSeq[Field],
   indexMap: Map[String, Int],
-  ignoreUnsigned: Boolean
-) extends Row {
+  ignoreUnsigned: Boolean)
+    extends Row {
 
   /**
    * Convert the string representation of each value

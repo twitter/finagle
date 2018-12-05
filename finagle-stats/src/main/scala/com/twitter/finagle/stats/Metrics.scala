@@ -79,8 +79,7 @@ object Metrics {
   private case class MetricsMaps(
     countersMap: ConcurrentHashMap[Seq[String], MetricsStore.StoreCounter],
     statsMap: ConcurrentHashMap[Seq[String], MetricsStore.StoreStat],
-    gaugesMap: ConcurrentHashMap[Seq[String], MetricsStore.StoreGauge]
-  )
+    gaugesMap: ConcurrentHashMap[Seq[String], MetricsStore.StoreGauge])
 }
 
 /**
@@ -110,16 +109,14 @@ private[stats] class MetricCollisionException(msg: String) extends IllegalArgume
 private[finagle] class Metrics private (
   mkHistogram: (String, IndexedSeq[Double]) => MetricsHistogram,
   separator: String,
-  metricsMaps: Metrics.MetricsMaps
-) extends MetricsStore
+  metricsMaps: Metrics.MetricsMaps)
+    extends MetricsStore
     with MetricsView {
 
   def this() = this(Metrics.defaultHistogramFactory, scopeSeparator(), Metrics.DefaultMetricsMaps)
 
-  def this(
-    mkHistogram: (String, IndexedSeq[Double]) => MetricsHistogram,
-    separator: String
-  ) = this(mkHistogram, separator, Metrics.DefaultMetricsMaps)
+  def this(mkHistogram: (String, IndexedSeq[Double]) => MetricsHistogram, separator: String) =
+    this(mkHistogram, separator, Metrics.DefaultMetricsMaps)
 
   import Metrics._
 

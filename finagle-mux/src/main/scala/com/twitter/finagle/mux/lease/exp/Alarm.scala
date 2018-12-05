@@ -62,9 +62,8 @@ private[lease] class DurationAlarm(dur: Duration) extends Alarm {
   def finished: Boolean = elapsed() >= dur
 }
 
-private[lease] class GenerationAlarm(
-  ctr: ByteCounter
-) extends PredicateAlarm({
+private[lease] class GenerationAlarm(ctr: ByteCounter)
+    extends PredicateAlarm({
       val generation = ctr.info.generation()
       () =>
         generation != ctr.info.generation()

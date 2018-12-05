@@ -21,8 +21,8 @@ class ExpiringServiceTest extends FunSuite with MockitoSugar {
     maxIdleTime: Option[Duration],
     maxLifeTime: Option[Duration],
     timer: Timer,
-    stats: StatsReceiver
-  ) extends ExpiringService[Req, Rep](self, maxIdleTime, maxLifeTime, timer, stats) {
+    stats: StatsReceiver)
+      extends ExpiringService[Req, Rep](self, maxIdleTime, maxLifeTime, timer, stats) {
     def onExpire(): Unit = { self.close() }
   }
 

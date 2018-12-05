@@ -34,10 +34,7 @@ class DynamicTimeoutTest extends FunSuite with Matchers with Eventually with Int
 
   private val totalExn = classOf[GlobalRequestTimeoutException]
 
-  private def perReqParams(
-    timeout: Duration,
-    compensation: Duration
-  ): Stack.Params = {
+  private def perReqParams(timeout: Duration, compensation: Duration): Stack.Params = {
     Stack.Params.empty +
       TimeoutFilter.Param(timeout) +
       param.Timer(timer) +
@@ -45,10 +42,7 @@ class DynamicTimeoutTest extends FunSuite with Matchers with Eventually with Int
       param.Stats(NullStatsReceiver)
   }
 
-  private def perReqParams(
-    timeout: Tunable[Duration],
-    compensation: Duration
-  ): Stack.Params = {
+  private def perReqParams(timeout: Tunable[Duration], compensation: Duration): Stack.Params = {
     Stack.Params.empty +
       TimeoutFilter.Param(timeout) +
       param.Timer(timer) +

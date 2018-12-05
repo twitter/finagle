@@ -23,8 +23,8 @@ import java.util.concurrent.atomic.AtomicReference
  */
 private[http2] final class PriorKnowledgeTransporter(
   underlying: Transporter[Any, Any, TransportContext],
-  params: Stack.Params
-) extends Transporter[Any, Any, TransportContext]
+  params: Stack.Params)
+    extends Transporter[Any, Any, TransportContext]
     with MultiplexTransporter { self =>
 
   private[this] val log = Logger.get()

@@ -37,16 +37,13 @@ import io.opencensus.trace.propagation.TextFormat
  */
 object StackClientOps {
 
-  implicit final class ThriftMuxOpenCensusTracing(
-    private val client: ThriftMux.Client
-  ) extends AnyVal {
+  implicit final class ThriftMuxOpenCensusTracing(private val client: ThriftMux.Client)
+      extends AnyVal {
     def withOpenCensusTracing: ThriftMux.Client =
       client.withStack(_.prepend(ClientTraceContextFilter.module))
   }
 
-  implicit final class HttpOpenCensusTracing(
-    private val client: Http.Client
-  ) extends AnyVal {
+  implicit final class HttpOpenCensusTracing(private val client: Http.Client) extends AnyVal {
     def withOpenCensusTracing: Http.Client =
       client.withStack { stack =>
         // serialization must happen after we attach the OpenCensus span

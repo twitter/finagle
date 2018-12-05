@@ -332,9 +332,12 @@ class Netty3Listener[In, Out](pipelineFactory: ChannelPipelineFactory, params: S
       }
     }
 
-  def listen(addr: SocketAddress)(serveTransport: Transport[In, Out] {
-    type Context <: TransportContext
-  } => Unit): ListeningServer =
+  def listen(
+    addr: SocketAddress
+  )(serveTransport: Transport[In, Out] {
+      type Context <: TransportContext
+    } => Unit
+  ): ListeningServer =
     new ListeningServer with CloseAwaitably {
       val serverLabel = ServerRegistry.nameOf(addr) getOrElse name
       val scopedStatsReceiver = paramStatsReceiver match {
@@ -374,8 +377,8 @@ private[netty3] class ServerBridge[In, Out](
   serveTransport: Transport[In, Out] => Unit,
   log: java.util.logging.Logger,
   statsReceiver: StatsReceiver,
-  channels: ChannelGroup
-) extends SimpleChannelHandler {
+  channels: ChannelGroup)
+    extends SimpleChannelHandler {
 
   private[this] val readTimeoutCounter = statsReceiver.counter("read_timeout")
   private[this] val writeTimeoutCounter = statsReceiver.counter("write_timeout")

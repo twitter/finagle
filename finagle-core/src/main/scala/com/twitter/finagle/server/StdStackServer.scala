@@ -59,14 +59,18 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
    * @note The dispatcher must be prepared to handle the situation where it
    *       receives an already-closed transport.
    */
-  protected def newDispatcher(transport: Transport[In, Out] {
-    type Context <: self.Context
-  }, service: Service[Req, Rep]): Closable
+  protected def newDispatcher(
+    transport: Transport[In, Out] {
+      type Context <: self.Context
+    },
+    service: Service[Req, Rep]
+  ): Closable
 
   final protected def newListeningServer(
     serviceFactory: ServiceFactory[Req, Rep],
     addr: SocketAddress
-  )(trackSession: ClientConnection => Unit): ListeningServer = {
+  )(trackSession: ClientConnection => Unit
+  ): ListeningServer = {
 
     // Listen over `addr` and serve traffic from incoming transports to
     // `serviceFactory` via `newDispatcher`.
@@ -116,9 +120,10 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
     }
   }
 
-  private class TransportClientConnection(t: Transport[In, Out] {
-    type Context <: self.Context
-  }) extends ClientConnection {
+  private class TransportClientConnection(
+    t: Transport[In, Out] {
+      type Context <: self.Context
+    }) extends ClientConnection {
 
     override def remoteAddress: SocketAddress = t.remoteAddress
     override def localAddress: SocketAddress = t.localAddress

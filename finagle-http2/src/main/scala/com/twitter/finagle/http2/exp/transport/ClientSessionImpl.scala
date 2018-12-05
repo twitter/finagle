@@ -28,8 +28,8 @@ import java.lang.{Boolean => JBool}
 private final class ClientSessionImpl(
   params: Stack.Params,
   initializer: ChannelInitializer[Channel],
-  channel: Channel
-) extends ClientSession {
+  channel: Channel)
+    extends ClientSession {
 
   private type Trans = Transport[Any, Any]
 

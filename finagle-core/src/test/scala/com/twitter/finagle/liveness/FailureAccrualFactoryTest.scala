@@ -26,9 +26,8 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
 
   def consecutiveFailures = FailureAccrualPolicy.consecutiveFailures(3, markDeadFor)
 
-  class ExceptionWithFailureFlags(
-    val flags: Long = FailureFlags.Empty
-  ) extends FailureFlags[ExceptionWithFailureFlags] {
+  class ExceptionWithFailureFlags(val flags: Long = FailureFlags.Empty)
+      extends FailureFlags[ExceptionWithFailureFlags] {
 
     def copyWithFlags(newFlags: Long): ExceptionWithFailureFlags =
       new ExceptionWithFailureFlags(newFlags)
@@ -771,8 +770,8 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       underlying: ServiceFactory[Int, Int],
       failureAccrualPolicy: FailureAccrualPolicy,
       responseClassifier: ResponseClassifier,
-      timer: Timer
-    ) extends FailureAccrualFactory[Int, Int](
+      timer: Timer)
+        extends FailureAccrualFactory[Int, Int](
           underlying,
           failureAccrualPolicy,
           responseClassifier,

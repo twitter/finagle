@@ -9,8 +9,8 @@ import com.twitter.util.{Future, Throw, Try}
 class StatsTransport[In, Out](
   underlying: Transport[In, Out],
   exceptionRecorder: ExceptionStatsHandler,
-  statsReceiver: StatsReceiver
-) extends TransportProxy(underlying) {
+  statsReceiver: StatsReceiver)
+    extends TransportProxy(underlying) {
   private[this] val writeScoped = statsReceiver.scope("write")
   private[this] val readScoped = statsReceiver.scope("read")
 

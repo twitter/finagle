@@ -26,10 +26,7 @@ private[finagle] object PipelineInit extends Netty4Framer {
 
   @Sharable
   private[this] object OutboundBufEncoder extends ChannelOutboundHandlerAdapter {
-    override def write(
-      ctx: ChannelHandlerContext,
-      msg: scala.Any,
-      promise: ChannelPromise
-    ): Unit = BufCodec.write(ctx, msg, promise)
+    override def write(ctx: ChannelHandlerContext, msg: scala.Any, promise: ChannelPromise): Unit =
+      BufCodec.write(ctx, msg, promise)
   }
 }

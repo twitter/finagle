@@ -254,8 +254,8 @@ class TimeoutFilter[Req, Rep](
   timeoutFn: () => Duration,
   exceptionFn: Duration => RequestTimeoutException,
   timer: Timer,
-  propagateDeadlines: Boolean
-) extends SimpleFilter[Req, Rep] {
+  propagateDeadlines: Boolean)
+    extends SimpleFilter[Req, Rep] {
 
   def this(
     timeoutFn: () => Duration,

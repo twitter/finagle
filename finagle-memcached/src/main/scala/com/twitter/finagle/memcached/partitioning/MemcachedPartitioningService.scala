@@ -45,8 +45,8 @@ private[finagle] class MemcachedPartitioningService(
   underlying: Stack[ServiceFactory[Command, Response]],
   params: Stack.Params,
   keyHasher: KeyHasher = KeyHasher.KETAMA,
-  numReps: Int = KetamaPartitioningService.DefaultNumReps
-) extends KetamaPartitioningService[Command, Response, Buf](
+  numReps: Int = KetamaPartitioningService.DefaultNumReps)
+    extends KetamaPartitioningService[Command, Response, Buf](
       underlying,
       params,
       keyHasher,

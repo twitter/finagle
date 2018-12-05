@@ -15,8 +15,8 @@ import com.twitter.util.Future
  * }
  */
 class RoutingService[REQUEST <: Request](
-  val routes: PartialFunction[Request, Service[REQUEST, Response]]
-) extends Service[REQUEST, Response] {
+  val routes: PartialFunction[Request, Service[REQUEST, Response]])
+    extends Service[REQUEST, Response] {
 
   // Try routes, fall back to 404 Not Found
   protected[this] val notFoundService = new NotFoundService[REQUEST]

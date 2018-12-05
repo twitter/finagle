@@ -11,10 +11,7 @@ object ClientTraceContextFilter {
 
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module1[param.Label, ServiceFactory[Req, Rep]] {
-      def make(
-        label: param.Label,
-        next: ServiceFactory[Req, Rep]
-      ): ServiceFactory[Req, Rep] =
+      def make(label: param.Label, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] =
         new ClientTraceContextFilter(label.label).andThen(next)
 
       def role: Stack.Role = ClientTraceContextFilter.role

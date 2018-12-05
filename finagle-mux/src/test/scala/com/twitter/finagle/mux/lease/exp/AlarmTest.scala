@@ -10,9 +10,13 @@ class AlarmTest extends FunSuite with LocalConductors {
 
   val skipWholeTest: Boolean = sys.props.contains("SKIP_FLAKY")
 
-  override def test(testName: String, testTags: Tag*)(
-    testFun: => Any
-  )(implicit pos: Position): Unit = {
+  override def test(
+    testName: String,
+    testTags: Tag*
+  )(testFun: => Any
+  )(
+    implicit pos: Position
+  ): Unit = {
     if (skipWholeTest)
       ignore(testName)(testFun)
     else

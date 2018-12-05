@@ -29,8 +29,8 @@ import java.net.{InetSocketAddress, SocketAddress}
  */
 private[netty4] class Netty4ProxyConnectHandler(
   proxyHandler: ProxyHandler,
-  bypassLocalhostConnections: Boolean = false
-) extends ChannelOutboundHandlerAdapter { self =>
+  bypassLocalhostConnections: Boolean = false)
+    extends ChannelOutboundHandlerAdapter { self =>
 
   private[this] final val proxyCodecKey: String = "netty4ProxyCodec"
 

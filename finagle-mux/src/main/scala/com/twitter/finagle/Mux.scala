@@ -201,8 +201,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
   final case class Client(
     stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Mux.Client.stack,
-    params: Stack.Params = Mux.Client.params
-  ) extends PushStackClient[mux.Request, mux.Response, Client]
+    params: Stack.Params = Mux.Client.params)
+      extends PushStackClient[mux.Request, mux.Response, Client]
       with WithDefaultLoadBalancer[Client]
       with OpportunisticTlsParams[Client] {
 
@@ -233,10 +233,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       )
     }
 
-    override def newClient(
-      dest: Name,
-      label0: String
-    ): ServiceFactory[Request, Response] = {
+    override def newClient(dest: Name, label0: String): ServiceFactory[Request, Response] = {
       // We want to fail fast if the client's TLS configuration is inconsistent
       Mux.Client.validateTlsParamConsistency(params)
       super.newClient(dest, label0)
@@ -375,8 +372,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
   final case class Server(
     stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Mux.Server.stack,
     params: Stack.Params = Mux.Server.params,
-    sessionFactory: Server.SessionF = Server.defaultSessionFactory
-  ) extends PushStackServer[mux.Request, mux.Response, Server]
+    sessionFactory: Server.SessionF = Server.defaultSessionFactory)
+      extends PushStackServer[mux.Request, mux.Response, Server]
       with OpportunisticTlsParams[Server] {
 
     protected type PipelineReq = ByteReader

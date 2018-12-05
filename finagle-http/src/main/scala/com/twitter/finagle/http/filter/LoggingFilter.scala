@@ -129,8 +129,8 @@ class CommonLogFormatter extends LogFormatter {
  */
 class LoggingFilter[REQUEST <: Request](
   val log: Logger,
-  val formatter: CoreLogFormatter[REQUEST, Response]
-) extends CoreLoggingFilter[REQUEST, Response] {
+  val formatter: CoreLogFormatter[REQUEST, Response])
+    extends CoreLoggingFilter[REQUEST, Response] {
 
   // Treat exceptions as empty 500 errors
   override protected def logException(

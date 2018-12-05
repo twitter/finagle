@@ -13,8 +13,8 @@ import java.net.SocketAddress
 class Netty4PushListener[In, Out](
   pipelineInit: ChannelPipeline => Unit,
   params: Stack.Params,
-  setupMarshalling: ChannelInitializer[Channel] => ChannelHandler
-) extends PushListener[In, Out] {
+  setupMarshalling: ChannelInitializer[Channel] => ChannelHandler)
+    extends PushListener[In, Out] {
 
   final protected type SessionFactory = (PushChannelHandle[In, Out]) => Future[PushSession[In, Out]]
 

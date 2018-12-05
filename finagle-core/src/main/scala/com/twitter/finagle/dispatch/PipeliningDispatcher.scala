@@ -29,8 +29,8 @@ abstract class GenPipeliningDispatcher[Req, Rep, In, Out, T](
   trans: Transport[In, Out],
   statsReceiver: StatsReceiver,
   stallTimeout: Duration,
-  timer: Timer
-) extends GenSerialClientDispatcher[Req, Rep, In, Out](trans, statsReceiver) { self =>
+  timer: Timer)
+    extends GenSerialClientDispatcher[Req, Rep, In, Out](trans, statsReceiver) { self =>
   import GenPipeliningDispatcher._
 
   // thread-safety provided by synchronization on this
@@ -148,8 +148,8 @@ class PipeliningDispatcher[Req, Rep](
   trans: Transport[Req, Rep],
   statsReceiver: StatsReceiver,
   stallTimeout: Duration,
-  timer: Timer
-) extends GenPipeliningDispatcher[Req, Rep, Req, Rep, Unit](
+  timer: Timer)
+    extends GenPipeliningDispatcher[Req, Rep, Req, Rep, Unit](
       trans,
       statsReceiver,
       stallTimeout,

@@ -135,10 +135,7 @@ class SessionQualificationParams[A <: Stack.Parameterized[A]](self: Stack.Parame
    * @param nFailures The number of failures to trigger on
    * @param backoff The backoff that should be applied to revival attempts
    */
-  def consecutiveFailuresFailureAccrual(
-    nFailures: Int,
-    backoff: Stream[Duration]
-  ): A = {
+  def consecutiveFailuresFailureAccrual(nFailures: Int, backoff: Stream[Duration]): A = {
     self.configured(
       FailureAccrualFactory.Param(
         () => FailureAccrualPolicy.consecutiveFailures(nFailures, backoff)

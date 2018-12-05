@@ -39,11 +39,7 @@ private[redis] trait ListCommands { self: BaseClient =>
    * @return `Some` of the new length of the list. `None` if the pivot is not
    *        found, or the list is empty.
    */
-  def lInsertAfter(
-    key: Buf,
-    pivot: Buf,
-    value: Buf
-  ): Future[Option[JLong]] =
+  def lInsertAfter(key: Buf, pivot: Buf, value: Buf): Future[Option[JLong]] =
     doRequest(LInsert(key, "AFTER", pivot, value)) {
       case IntegerReply(n) => Future.value(if (n == -1) None else Some(n))
     }
@@ -55,11 +51,7 @@ private[redis] trait ListCommands { self: BaseClient =>
    * @return `Some` of the new length of the list, or `None` if the pivot is
    *        not found, or the list is empty.
    */
-  def lInsertBefore(
-    key: Buf,
-    pivot: Buf,
-    value: Buf
-  ): Future[Option[JLong]] =
+  def lInsertBefore(key: Buf, pivot: Buf, value: Buf): Future[Option[JLong]] =
     doRequest(LInsert(key, "BEFORE", pivot, value)) {
       case IntegerReply(n) => Future.value(if (n == -1) None else Some(n))
     }

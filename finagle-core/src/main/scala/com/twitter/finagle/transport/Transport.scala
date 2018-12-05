@@ -146,11 +146,7 @@ object Transport {
    * @param keepAlive An option indicating if the keepAlive is on or off.
    * If None, the implementation default is used.
    */
-  case class Liveness(
-    readTimeout: Duration,
-    writeTimeout: Duration,
-    keepAlive: Option[Boolean]
-  ) {
+  case class Liveness(readTimeout: Duration, writeTimeout: Duration, keepAlive: Option[Boolean]) {
     def mk(): (Liveness, Stack.Param[Liveness]) =
       (this, Liveness.param)
   }
@@ -248,8 +244,7 @@ object Transport {
   private[finagle] def copyToWriter[A](
     trans: Transport[_, A],
     w: Writer[Buf]
-  )(
-    f: A => Future[Option[Buf]]
+  )(f: A => Future[Option[Buf]]
   ): Future[Unit] = {
     trans.read().flatMap(f).flatMap {
       case None => Future.Done
@@ -311,7 +306,9 @@ object Transport {
    */
   def cast[In1, Out1](
     trans: Transport[Any, Any]
-  )(implicit m: Manifest[Out1]): Transport[In1, Out1] = {
+  )(
+    implicit m: Manifest[Out1]
+  ): Transport[In1, Out1] = {
     val cls = m.runtimeClass.asInstanceOf[Class[Out1]]
     cast[In1, Out1](cls, trans)
   }
@@ -324,10 +321,7 @@ object Transport {
    *
    * @see [[Transport.cast(trans)]] for Scala users.
    */
-  def cast[In1, Out1](
-    cls: Class[Out1],
-    trans: Transport[Any, Any]
-  ): Transport[In1, Out1] = {
+  def cast[In1, Out1](cls: Class[Out1], trans: Transport[Any, Any]): Transport[In1, Out1] = {
 
     if (cls.isAssignableFrom(classOf[Any])) {
       // No need to do any dynamic type checks on Any!

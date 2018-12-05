@@ -204,8 +204,8 @@ object Protocols {
     stringLengthLimit: Long = -1,
     containerLengthLimit: Long = -1,
     strictRead: Boolean = false,
-    strictWrite: Boolean = true
-  ) extends TBinaryProtocol(
+    strictWrite: Boolean = true)
+      extends TBinaryProtocol(
         trans,
         stringLengthLimit,
         containerLengthLimit,

@@ -139,9 +139,7 @@ object DynamicTimeout {
    * @see [[TimeoutFilter]]
    * @see [[LatencyCompensation]]
    */
-  private[client] def totalFilter(
-    params: Stack.Params
-  ): Filter.TypeAgnostic = {
+  private[client] def totalFilter(params: Stack.Params): Filter.TypeAgnostic = {
     val tunableTimeout = params[TimeoutFilter.TotalTimeout].tunableTimeout
     // tunableTimeout() should always produce a value, but we fall back on the default if not
     val defaultTimeout = TimeoutFilter.TotalTimeout.Default

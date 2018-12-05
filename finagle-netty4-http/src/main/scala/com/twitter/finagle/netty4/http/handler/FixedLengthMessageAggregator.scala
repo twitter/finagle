@@ -27,8 +27,8 @@ import io.netty.handler.codec.http._
  */
 private[http] class FixedLengthMessageAggregator(
   maxContentLength: StorageUnit,
-  handleExpectContinue: Boolean = true
-) extends FinagleHttpObjectAggregator(maxContentLength.inBytes.toInt, handleExpectContinue) {
+  handleExpectContinue: Boolean = true)
+    extends FinagleHttpObjectAggregator(maxContentLength.inBytes.toInt, handleExpectContinue) {
   require(maxContentLength.bytes >= 0)
 
   private[this] var decoding = false

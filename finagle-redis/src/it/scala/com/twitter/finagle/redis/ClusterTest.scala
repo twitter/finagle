@@ -11,14 +11,7 @@ import org.scalatest.{BeforeAndAfterAll, Tag}
 
 trait ClusterClientTest extends RedisTest with BeforeAndAfterAll {
 
-  override def test(
-    testName: String,
-    testTags: Tag*
-  )(
-    f: => Any
-  )(
-    implicit pos: Position
-  ): Unit = {
+  override def test(testName: String, testTags: Tag*)(f: => Any)(implicit pos: Position): Unit = {
     if (RedisTestHelper.redisServerExists) {
       super.test(testName, testTags: _*)(f)(pos)
     } else {
@@ -52,8 +45,10 @@ trait ClusterClientTest extends RedisTest with BeforeAndAfterAll {
     assert(orderedSlots == expected)
   }
 
-  protected def assertEqualInfo(clients: Seq[ClusterClient], expected: Seq[(String, String)])(
-    f: ClusterClient => Future[Map[String, String]]
+  protected def assertEqualInfo(
+    clients: Seq[ClusterClient],
+    expected: Seq[(String, String)]
+  )(f: ClusterClient => Future[Map[String, String]]
   ): Unit = {
     for (client <- clients) {
       val info = Await.result(f(client))
@@ -159,8 +154,12 @@ trait ClusterClientTest extends RedisTest with BeforeAndAfterAll {
 
   }
 
-  private def reshardSingle(a: ClusterClient, aId: String, b: ClusterClient, bNode: ClusterNode)(
-    slot: Int
+  private def reshardSingle(
+    a: ClusterClient,
+    aId: String,
+    b: ClusterClient,
+    bNode: ClusterNode
+  )(slot: Int
   ): Future[Unit] =
     for {
       // The protocol has four steps:

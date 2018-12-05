@@ -14,8 +14,8 @@ import com.twitter.util.{Future, Promise, Return, Throwables}
  */
 private[finagle] class HttpClientDispatcher(
   trans: StreamTransport[Request, Response],
-  statsReceiver: StatsReceiver
-) extends GenSerialClientDispatcher[Request, Response, Request, Multi[Response]](
+  statsReceiver: StatsReceiver)
+    extends GenSerialClientDispatcher[Request, Response, Request, Multi[Response]](
       trans,
       statsReceiver
     ) {

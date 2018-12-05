@@ -8,8 +8,7 @@ private[finagle] final case class RequestConfig(
   headers: Map[String, Seq[String]] = Map.empty,
   formElements: Seq[FormElement] = Nil,
   version: Version = Version.Http11,
-  proxied: Boolean = false
-)
+  proxied: Boolean = false)
 
 private[finagle] object RequestConfig {
   // absoluteURI if proxied, otherwise relativeURI

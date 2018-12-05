@@ -63,8 +63,8 @@ class Zk2Resolver(
   stabilizerWindow: Duration,
   unhealthyWindow: Duration,
   inetResolver: InetResolver,
-  timer: Timer
-) extends Resolver {
+  timer: Timer)
+    extends Resolver {
   import Zk2Resolver._
 
   def this(
@@ -86,11 +86,7 @@ class Zk2Resolver(
       timer
     )
 
-  def this(
-    statsReceiver: StatsReceiver,
-    stabilizerWindow: Duration,
-    unhealthyWindow: Duration
-  ) =
+  def this(statsReceiver: StatsReceiver, stabilizerWindow: Duration, unhealthyWindow: Duration) =
     this(statsReceiver, stabilizerWindow, unhealthyWindow, DefaultTimer)
 
   def this(statsReceiver: StatsReceiver) =

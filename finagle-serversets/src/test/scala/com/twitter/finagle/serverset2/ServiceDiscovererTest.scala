@@ -31,8 +31,8 @@ class ServiceDiscovererTest
   class ServiceDiscovererWithExposedCache(
     varZkSession: Var[ZkSession],
     statsReceiver: StatsReceiver,
-    timer: Timer = DefaultTimer
-  ) extends ServiceDiscoverer(varZkSession, statsReceiver, ForeverEpoch, timer) {
+    timer: Timer = DefaultTimer)
+      extends ServiceDiscoverer(varZkSession, statsReceiver, ForeverEpoch, timer) {
     val cache = new ZkEntryCache("/foo/bar", NullStatsReceiver)
     cache.setSession(varZkSession.sample)
     override val entriesOf = Memoize { path: String =>

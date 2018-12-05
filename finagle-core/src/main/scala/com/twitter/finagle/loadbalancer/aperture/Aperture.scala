@@ -247,10 +247,8 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    *
    * @param initAperture The initial aperture to use.
    */
-  protected abstract class BaseDist(
-    vector: Vector[Node],
-    initAperture: Int
-  ) extends DistributorT[Node](vector) {
+  protected abstract class BaseDist(vector: Vector[Node], initAperture: Int)
+      extends DistributorT[Node](vector) {
     type This = BaseDist
 
     /**
@@ -348,10 +346,8 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    *
    * @param initAperture The initial aperture to use.
    */
-  protected final class RandomAperture(
-    vector: Vector[Node],
-    initAperture: Int
-  ) extends BaseDist(vector, initAperture)
+  protected final class RandomAperture(vector: Vector[Node], initAperture: Int)
+      extends BaseDist(vector, initAperture)
       with P2CPick[Node] {
     require(vector.nonEmpty, "vector must be non empty")
 
@@ -425,11 +421,8 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    * @param coord The [[ProcessCoordinate]] for this process which is used to narrow
    * the range of `pick2`.
    */
-  protected final class DeterministicAperture(
-    vector: Vector[Node],
-    initAperture: Int,
-    coord: Coord
-  ) extends BaseDist(vector, initAperture) {
+  protected final class DeterministicAperture(vector: Vector[Node], initAperture: Int, coord: Coord)
+      extends BaseDist(vector, initAperture) {
     require(vector.nonEmpty, "vector must be non empty")
 
     private[this] val ring = new Ring(vector.size, rng)

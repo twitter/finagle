@@ -196,11 +196,7 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
   }
 
   // package protected for testing
-  private[stats] def readBooleanParam(
-    params: ParamMap,
-    name: String,
-    default: Boolean
-  ): Boolean = {
+  private[stats] def readBooleanParam(params: ParamMap, name: String, default: Boolean): Boolean = {
     val vals = params.getAll(name)
     if (vals.nonEmpty)
       vals.exists { v =>
@@ -223,11 +219,7 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
     }
   }
 
-  def json(
-    pretty: Boolean,
-    filtered: Boolean,
-    counterDeltasOn: Boolean = false
-  ): String = {
+  def json(pretty: Boolean, filtered: Boolean, counterDeltasOn: Boolean = false): String = {
     val gauges = try metrics.gauges.asScala
     catch {
       case NonFatal(e) =>

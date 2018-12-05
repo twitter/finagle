@@ -259,10 +259,7 @@ object RetryPolicy extends JavaSingleton {
    *   criteria of `shouldRetry`.
    * @param shouldRetry which `A`-typed values are considered retryable.
    */
-  def tries[A](
-    numTries: Int,
-    shouldRetry: PartialFunction[A, Boolean]
-  ): RetryPolicy[A] = {
+  def tries[A](numTries: Int, shouldRetry: PartialFunction[A, Boolean]): RetryPolicy[A] = {
     val backoffs = Backoff.decorrelatedJittered(5.millis, 200.millis)
     backoff[A](backoffs.take(numTries - 1))(shouldRetry)
   }
@@ -292,7 +289,8 @@ object RetryPolicy extends JavaSingleton {
    */
   def backoff[A](
     backoffs: Stream[Duration]
-  )(shouldRetry: PartialFunction[A, Boolean]): RetryPolicy[A] = {
+  )(shouldRetry: PartialFunction[A, Boolean]
+  ): RetryPolicy[A] = {
     RetryPolicy { e =>
       if (shouldRetry.applyOrElse(e, AlwaysFalse)) {
         backoffs match {

@@ -177,8 +177,7 @@ private[builder] final class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName
  */
 class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
   val params: Stack.Params,
-  mk: Stack.Params => FinagleServer[Req, Rep]
-) {
+  mk: Stack.Params => FinagleServer[Req, Rep]) {
   import ServerConfig._
   import com.twitter.finagle.param._
 
@@ -698,7 +697,9 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
   /**
    * Construct the Server, given the provided Service.
    */
-  def build(service: Service[Req, Rep])(
+  def build(
+    service: Service[Req, Rep]
+  )(
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: ServerConfigEvidence[
       HasCodec,
       HasBindTo,
@@ -720,7 +721,9 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
    * Construct the Server, given the provided Service factory.
    */
   @deprecated("Use the ServiceFactory variant instead", "5.0.1")
-  final def build(serviceFactory: () => Service[Req, Rep])(
+  final def build(
+    serviceFactory: () => Service[Req, Rep]
+  )(
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: ThisConfig =:= FullySpecifiedConfig
   ): Server =
     build((_: ClientConnection) => serviceFactory())(
@@ -733,7 +736,9 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
    * or supports transactions).
    */
   @deprecated("Use the ServiceFactory variant instead", "5.0.1")
-  final def build(serviceFactory: (ClientConnection) => Service[Req, Rep])(
+  final def build(
+    serviceFactory: (ClientConnection) => Service[Req, Rep]
+  )(
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: ThisConfig =:= FullySpecifiedConfig
   ): Server =
     build(
@@ -749,7 +754,9 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
    * is useful if the protocol is stateful (e.g., requires authentication
    * or supports transactions).
    */
-  def build(serviceFactory: ServiceFactory[Req, Rep])(
+  def build(
+    serviceFactory: ServiceFactory[Req, Rep]
+  )(
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: ServerConfigEvidence[
       HasCodec,
       HasBindTo,

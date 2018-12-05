@@ -28,8 +28,8 @@ import io.netty.util.AsciiString
  */
 final private[finagle] class Http2CleartextServerInitializer(
   init: ChannelInitializer[Channel],
-  params: Stack.Params
-) extends ChannelInitializer[SocketChannel] {
+  params: Stack.Params)
+    extends ChannelInitializer[SocketChannel] {
   import Http2CleartextServerInitializer._
 
   private[this] val initializer = H2StreamChannelInit.initServer(init, params)

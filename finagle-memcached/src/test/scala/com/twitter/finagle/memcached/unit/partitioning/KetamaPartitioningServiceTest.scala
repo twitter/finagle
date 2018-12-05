@@ -302,8 +302,8 @@ private[this] class TestKetamaPartitioningService(
   params: Stack.Params,
   keyHasher: KeyHasher = KeyHasher.KETAMA,
   numReps: Int = KetamaPartitioningService.DefaultNumReps,
-  oldLibMemcachedVersionComplianceMode: Boolean = false
-) extends KetamaPartitioningService[String, String, String](
+  oldLibMemcachedVersionComplianceMode: Boolean = false)
+    extends KetamaPartitioningService[String, String, String](
       underlying,
       params,
       keyHasher,

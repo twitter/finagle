@@ -27,8 +27,7 @@ private object JsonGenerator {
  * TraceId is from Zipkin.
  */
 sealed private[exception] case class ServiceException private[ServiceException] (
-  private val jsonValue: Map[String, Any]
-) {
+  private val jsonValue: Map[String, Any]) {
 
   /**
    * Create a map with all of the elements required by a chickadee service.

@@ -41,8 +41,8 @@ private[finagle] final class MuxClientSession(
   detectorConfig: FailureDetector.Config,
   name: String,
   statsReceiver: StatsReceiver,
-  timer: Timer
-) extends PushSession[ByteReader, Buf](handle) {
+  timer: Timer)
+    extends PushSession[ByteReader, Buf](handle) {
   import MuxClientSession._
 
   // Volatile only to ensure prompt visibility from the synchronous

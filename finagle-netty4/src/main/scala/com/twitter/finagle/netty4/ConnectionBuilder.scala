@@ -42,8 +42,7 @@ import scala.util.control.NonFatal
 private[finagle] final class ConnectionBuilder(
   init: ChannelInitializer[Channel],
   addr: SocketAddress,
-  params: Stack.Params
-) {
+  params: Stack.Params) {
 
   private[this] val statsReceiver = params[Stats].statsReceiver
   private[this] val connectLatencyStat = statsReceiver.stat("connect_latency_ms")

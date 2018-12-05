@@ -107,8 +107,10 @@ package object http {
       }
   }
 
-  private[finagle] val Netty4HttpTransporter
-    : Stack.Params => SocketAddress => Transporter[Any, Any, TransportContext] =
+  private[finagle] val Netty4HttpTransporter: Stack.Params => SocketAddress => Transporter[
+    Any,
+    Any,
+    TransportContext] =
     (params: Stack.Params) =>
       (addr: SocketAddress) =>
         Netty4Transporter.raw(

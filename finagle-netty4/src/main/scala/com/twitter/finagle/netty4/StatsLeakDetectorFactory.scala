@@ -8,8 +8,8 @@ import io.netty.util.{ResourceLeakDetector, ResourceLeakDetectorFactory}
  */
 private[netty4] final class StatsLeakDetectorFactory(
   underlying: ResourceLeakDetectorFactory,
-  leakFn: () => Unit
-) extends ResourceLeakDetectorFactory {
+  leakFn: () => Unit)
+    extends ResourceLeakDetectorFactory {
 
   def newResourceLeakDetector[T](
     resource: Class[T],
@@ -26,8 +26,8 @@ private[netty4] final class StatsLeakDetectorFactory(
   private[this] class LeakDetectorStatsImpl[T](
     leakFn: () => Unit,
     samplingInterval: Int,
-    maxActive: Long
-  ) extends ResourceLeakDetector[T](classOf[ByteBuf], samplingInterval, maxActive) {
+    maxActive: Long)
+      extends ResourceLeakDetector[T](classOf[ByteBuf], samplingInterval, maxActive) {
 
     protected[this] override def reportTracedLeak(resourceType: String, records: String): Unit = {
       leakFn()

@@ -44,8 +44,8 @@ import scala.util.control.NonFatal
 private[netty3] class ChannelConnector[In, Out](
   newChannel: () => Channel,
   newTransport: Channel => Transport[In, Out],
-  statsReceiver: StatsReceiver
-) extends (SocketAddress => Future[Transport[In, Out]]) {
+  statsReceiver: StatsReceiver)
+    extends (SocketAddress => Future[Transport[In, Out]]) {
   private[this] val connectLatencyStat = statsReceiver.stat("connect_latency_ms")
   private[this] val failedConnectLatencyStat = statsReceiver.stat("failed_connect_latency_ms")
   private[this] val cancelledConnects = statsReceiver.counter("cancelled_connects")
@@ -215,8 +215,8 @@ private[netty3] object FireChannelClosedLater extends ChannelFutureListener {
 private[netty3] class Netty3Transporter[In, Out](
   val pipelineFactory: ChannelPipelineFactory,
   val remoteAddress: SocketAddress,
-  val params: Stack.Params = Stack.Params.empty
-) extends (StatsReceiver => Future[Transport[In, Out]]) {
+  val params: Stack.Params = Stack.Params.empty)
+    extends (StatsReceiver => Future[Transport[In, Out]]) {
 
   private[this] val statsHandlers = new IdentityHashMap[StatsReceiver, ChannelHandler]
   private[this] val newTransport = makeNewTransport(params)
@@ -316,10 +316,7 @@ private[netty3] class Netty3Transporter[In, Out](
     }
   }
 
-  private[this] def addFirstTlsHandlers(
-    pipeline: ChannelPipeline,
-    params: Stack.Params
-  ): Unit = {
+  private[this] def addFirstTlsHandlers(pipeline: ChannelPipeline, params: Stack.Params): Unit = {
     val SslClientEngineFactory.Param(clientEngine) = params[SslClientEngineFactory.Param]
     val SslClientSessionVerifier.Param(sessionVerifier) = params[SslClientSessionVerifier.Param]
     val Transport.ClientSsl(clientConfig) = params[Transport.ClientSsl]
@@ -393,9 +390,7 @@ private[netty3] class Netty3Transporter[In, Out](
       pipeline.addFirst("channelSnooper", snooper)
   }
 
-  private[netty3] def newPipeline(
-    statsReceiver: StatsReceiver
-  ): ChannelPipeline = {
+  private[netty3] def newPipeline(statsReceiver: StatsReceiver): ChannelPipeline = {
     val pipeline = pipelineFactory.getPipeline()
 
     addFirstStatsHandlers(pipeline, statsReceiver)

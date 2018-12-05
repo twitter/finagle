@@ -50,8 +50,8 @@ private[finagle] abstract class KetamaPartitioningService[Req, Rep, Key](
   underlying: Stack[ServiceFactory[Req, Rep]],
   params: Stack.Params,
   keyHasher: KeyHasher = KeyHasher.KETAMA,
-  numReps: Int = KetamaPartitioningService.DefaultNumReps
-) extends PartitioningService[Req, Rep] {
+  numReps: Int = KetamaPartitioningService.DefaultNumReps)
+    extends PartitioningService[Req, Rep] {
 
   import KetamaPartitioningService._
 

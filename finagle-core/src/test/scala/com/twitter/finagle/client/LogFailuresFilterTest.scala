@@ -19,14 +19,13 @@ class LogFailuresFilterTest extends FunSuite with BeforeAndAfter {
     logger.addHandler(handler)
   }
 
-  private[this] def filter(
-    classifier: ResponseClassifier
-  ) = new MethodBuilderRetry.LogFailuresFilter[String, String](
-    logger,
-    "CoolClient/MopeyMethod",
-    classifier,
-    Stopwatch.timeMillis
-  )
+  private[this] def filter(classifier: ResponseClassifier) =
+    new MethodBuilderRetry.LogFailuresFilter[String, String](
+      logger,
+      "CoolClient/MopeyMethod",
+      classifier,
+      Stopwatch.timeMillis
+    )
 
   test("does not log successful responses") {
     val alwaysReturn = Service.const(Future.value("ok"))

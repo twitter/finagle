@@ -36,17 +36,14 @@ import io.opencensus.trace.propagation.TextFormat
  */
 object StackServerOps {
 
-  implicit final class ThriftMuxOpenCensusTracing(
-    private val server: ThriftMux.Server
-  ) extends AnyVal {
+  implicit final class ThriftMuxOpenCensusTracing(private val server: ThriftMux.Server)
+      extends AnyVal {
     def withOpenCensusTracing: ThriftMux.Server = {
       server.withStack(_.prepend(ServerTraceContextFilter.module))
     }
   }
 
-  implicit final class HttpOpenCensusTracing(
-    private val server: Http.Server
-  ) extends AnyVal {
+  implicit final class HttpOpenCensusTracing(private val server: Http.Server) extends AnyVal {
     def withOpenCensusTracing: Http.Server = {
       server.withStack { stack =>
         stack

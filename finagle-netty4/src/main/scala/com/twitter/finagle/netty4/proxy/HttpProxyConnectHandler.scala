@@ -41,8 +41,7 @@ import java.net.SocketAddress
 private[netty4] class HttpProxyConnectHandler(
   host: String,
   credentialsOption: Option[Transporter.Credentials],
-  httpClientCodec: ChannelHandler = new HttpClientCodec()
-) // exposed for testing
+  httpClientCodec: ChannelHandler = new HttpClientCodec()) // exposed for testing
     extends ChannelDuplexHandler
     with BufferingChannelOutboundHandler { self =>
 

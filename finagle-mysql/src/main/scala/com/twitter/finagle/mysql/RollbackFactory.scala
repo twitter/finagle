@@ -32,10 +32,8 @@ object RollbackFactory {
  *
  * @see https://dev.mysql.com/doc/en/implicit-commit.html
  */
-final class RollbackFactory(
-  client: ServiceFactory[Request, Result],
-  statsReceiver: StatsReceiver
-) extends ServiceFactoryProxy(client) {
+final class RollbackFactory(client: ServiceFactory[Request, Result], statsReceiver: StatsReceiver)
+    extends ServiceFactoryProxy(client) {
   import RollbackFactory._
 
   private[this] val rollbackLatencyStat = statsReceiver.stat(s"rollback_latency_ms")

@@ -26,8 +26,8 @@ object trackH2SessionExceptions
  */
 private class ExceptionTrackingFrameListener(
   statsReceiver: StatsReceiver,
-  underlying: Http2FrameListener
-) extends Http2FrameListenerDecorator(underlying) {
+  underlying: Http2FrameListener)
+    extends Http2FrameListenerDecorator(underlying) {
 
   private[this] def http2Exception(ex: Http2Exception): Nothing = {
     val scope = ex match {
@@ -105,11 +105,7 @@ private class ExceptionTrackingFrameListener(
     try super.onPriorityRead(ctx, streamId, streamDependency, weight, exclusive)
     catch { case e: Http2Exception => http2Exception(e) }
 
-  override def onRstStreamRead(
-    ctx: ChannelHandlerContext,
-    streamId: Int,
-    errorCode: Long
-  ): Unit =
+  override def onRstStreamRead(ctx: ChannelHandlerContext, streamId: Int, errorCode: Long): Unit =
     try super.onRstStreamRead(ctx, streamId, errorCode)
     catch { case e: Http2Exception => http2Exception(e) }
 

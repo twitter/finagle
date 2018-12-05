@@ -25,7 +25,9 @@ private[http] object StreamTransports {
   def copyToWriter[A](
     trans: Transport[_, A],
     writer: Writer[Buf]
-  )(eos: A => Boolean)(chunkOfA: A => Buf): Future[Unit] =
+  )(eos: A => Boolean
+  )(chunkOfA: A => Buf
+  ): Future[Unit] =
     trans.read().flatMap { a: A =>
       val chunk = chunkOfA(a)
       val writeF =
@@ -44,10 +46,8 @@ private[http] object StreamTransports {
    * @ note This implementation differentiates itself from [[Transport.collate]]
    *        by allowing EOS messages to carry data.
    */
-  def collate[A](
-    trans: Transport[_, A],
-    chunkOfA: A => Buf
-  )(eos: A => Boolean): Reader[Buf] with Future[Unit] = new Promise[Unit] with Reader[Buf] {
+  def collate[A](trans: Transport[_, A], chunkOfA: A => Buf)(eos: A => Boolean): Reader[Buf]
+    with Future[Unit] = new Promise[Unit] with Reader[Buf] {
     private[this] val rw = new Pipe[Buf]
 
     // Ensure that collate's future is satisfied _before_ its reader
@@ -92,10 +92,7 @@ private[http] object StreamTransports {
   /**
    * Drain a [[Reader]] into a [[Transport]]. The inverse of collation.
    */
-  def streamChunks(
-    trans: Transport[Any, Any],
-    r: Reader[Buf]
-  ): Future[Unit] = {
+  def streamChunks(trans: Transport[Any, Any], r: Reader[Buf]): Future[Unit] = {
     r.read().flatMap {
       case None =>
         trans.write(NettyHttp.LastHttpContent.EMPTY_LAST_CONTENT)

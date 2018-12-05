@@ -10,8 +10,8 @@ import io.netty.channel.socket.SocketChannel
  */
 private[http2] class Http2TlsServerInitializer(
   init: ChannelInitializer[Channel],
-  params: Stack.Params
-) extends ChannelInitializer[SocketChannel] {
+  params: Stack.Params)
+    extends ChannelInitializer[SocketChannel] {
 
   def initChannel(ch: SocketChannel): Unit = {
     val p = ch.pipeline()

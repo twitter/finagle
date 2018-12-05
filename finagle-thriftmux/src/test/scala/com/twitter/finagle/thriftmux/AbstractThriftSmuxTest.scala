@@ -22,9 +22,7 @@ abstract class AbstractThriftSmuxTest extends FunSuite {
 
   protected def clientImpl(): ThriftMux.Client
 
-  private def serve(
-    serverLevel: Option[OpportunisticTls.Level]
-  ): ListeningServer =
+  private def serve(serverLevel: Option[OpportunisticTls.Level]): ListeningServer =
     (serverLevel match {
       case None =>
         serverImpl()

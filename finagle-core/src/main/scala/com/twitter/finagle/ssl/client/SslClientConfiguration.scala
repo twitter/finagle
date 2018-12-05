@@ -34,5 +34,4 @@ case class SslClientConfiguration(
   trustCredentials: TrustCredentials = TrustCredentials.Unspecified,
   cipherSuites: CipherSuites = CipherSuites.Unspecified,
   protocols: Protocols = Protocols.Unspecified,
-  applicationProtocols: ApplicationProtocols = ApplicationProtocols.Unspecified
-)
+  applicationProtocols: ApplicationProtocols = ApplicationProtocols.Unspecified)

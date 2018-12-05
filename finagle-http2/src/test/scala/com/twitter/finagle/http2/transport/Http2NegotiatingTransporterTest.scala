@@ -24,8 +24,8 @@ class Http2NegotiatingTransporterTest
   private abstract class TestableNegotiatingTransporter(
     params: Stack.Params,
     http1Transporter: Transporter[Any, Any, TransportContext],
-    fallbackToHttp11WhileNegotiating: Boolean = true
-  ) extends Http2NegotiatingTransporter(
+    fallbackToHttp11WhileNegotiating: Boolean = true)
+      extends Http2NegotiatingTransporter(
         params,
         http1Transporter,
         fallbackToHttp11WhileNegotiating
@@ -36,8 +36,8 @@ class Http2NegotiatingTransporterTest
   test("caches transports") {
     val http1Transporter = mock[Transporter[Any, Any, TransportContext]]
     val transporter = new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter) {
-      protected def attemptUpgrade()
-        : (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
+      protected def attemptUpgrade(
+      ): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
         val clientSession = mock[ClientSession]
         val transport = mock[Transport[Any, Any]]
         Future.value(Some(clientSession)) -> Future.value(transport)
@@ -57,8 +57,8 @@ class Http2NegotiatingTransporterTest
     }
 
     val transporter = new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter) {
-      protected def attemptUpgrade()
-        : (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
+      protected def attemptUpgrade(
+      ): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
         val transport = mock[Transport[Any, Any]]
         Future.value(Some(clientSession)) -> Future.value(transport)
       }
@@ -76,8 +76,8 @@ class Http2NegotiatingTransporterTest
     val http1Transporter = mock[Transporter[Any, Any, TransportContext]]
     val p = Promise[Option[ClientSession]]()
     val transporter = new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter) {
-      protected def attemptUpgrade()
-        : (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
+      protected def attemptUpgrade(
+      ): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
         val transport = mock[Transport[Any, Any]]
         p -> Future.value(transport)
       }
@@ -104,8 +104,8 @@ class Http2NegotiatingTransporterTest
     val transport = mock[Transport[Any, Any]]
     val transporter =
       new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter, true) {
-        protected def attemptUpgrade()
-          : (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
+        protected def attemptUpgrade(
+        ): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
           Future.never -> Future.value(transport)
         }
       }
@@ -129,8 +129,8 @@ class Http2NegotiatingTransporterTest
     val singleton = Promise[Option[ClientSession]]()
     val transporter =
       new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter, false) {
-        protected def attemptUpgrade()
-          : (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
+        protected def attemptUpgrade(
+        ): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
           singleton -> singleton.flatMap {
             case Some(session) => session.newChildTransport()
             case None => fail("Expected a ClientSession, found None.")
@@ -162,8 +162,8 @@ class Http2NegotiatingTransporterTest
     when(clientSession.newChildTransport()).thenReturn(Future.value(sessionTransporter))
     val transport = mock[Transport[Any, Any]]
     val transporter = new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter) {
-      protected def attemptUpgrade()
-        : (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
+      protected def attemptUpgrade(
+      ): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
         Future.value(Some(clientSession)) -> Future.value(transport)
       }
     }
@@ -183,8 +183,8 @@ class Http2NegotiatingTransporterTest
     val firstTransport = mock[Transport[Any, Any]]
 
     val transporter = new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter) {
-      protected def attemptUpgrade()
-        : (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
+      protected def attemptUpgrade(
+      ): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
         Future.value(None) -> Future.value(firstTransport)
       }
     }
@@ -208,8 +208,8 @@ class Http2NegotiatingTransporterTest
     val p = Promise[Option[ClientSession]]()
     val transport = mock[Transport[Any, Any]]
     val transporter = new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter) {
-      protected def attemptUpgrade()
-        : (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
+      protected def attemptUpgrade(
+      ): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
         p -> Future.value(transport)
       }
     }
@@ -236,8 +236,8 @@ class Http2NegotiatingTransporterTest
     val p = Promise[Option[ClientSession]]()
     val transport = mock[Transport[Any, Any]]
     val transporter = new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter) {
-      protected def attemptUpgrade()
-        : (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
+      protected def attemptUpgrade(
+      ): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
         p -> Future.value(transport)
       }
     }
@@ -264,8 +264,8 @@ class Http2NegotiatingTransporterTest
     val p = Promise[Option[ClientSession]]()
     val transport = mock[Transport[Any, Any]]
     val transporter = new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter) {
-      protected def attemptUpgrade()
-        : (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
+      protected def attemptUpgrade(
+      ): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
         p -> Future.value(transport)
       }
     }
@@ -292,8 +292,8 @@ class Http2NegotiatingTransporterTest
 
     val upgradeCalls = new AtomicInteger(0)
     val transporter = new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter) {
-      protected def attemptUpgrade()
-        : (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
+      protected def attemptUpgrade(
+      ): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
         upgradeCalls.incrementAndGet()
         val clientSession = mock[ClientSession]
         when(clientSession.status).thenReturn(Status.Closed)
@@ -316,8 +316,8 @@ class Http2NegotiatingTransporterTest
     when(clientSession.status).thenReturn(Status.Open)
 
     val transporter = new TestableNegotiatingTransporter(Stack.Params.empty, http1Transporter) {
-      protected def attemptUpgrade()
-        : (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
+      protected def attemptUpgrade(
+      ): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
         when(clientSession.newChildTransport()).thenReturn(Future.exception(new Exception()))
         Future.value(Some(clientSession)) -> Future.value(transport)
       }

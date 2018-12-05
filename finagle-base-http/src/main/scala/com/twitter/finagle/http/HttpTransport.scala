@@ -14,8 +14,8 @@ import scala.util.control.NonFatal
  */
 private[finagle] class HttpTransport[A <: Message, B <: Message](
   self: StreamTransport[A, B],
-  manager: ConnectionManager
-) extends StreamTransportProxy[A, B](self)
+  manager: ConnectionManager)
+    extends StreamTransportProxy[A, B](self)
     with (Try[Multi[B]] => Unit) {
 
   def this(self: StreamTransport[A, B]) =

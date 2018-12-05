@@ -61,8 +61,7 @@ object GeoCommands {
     member: String,
     coord: Option[(Double, Double)] = None,
     dist: Option[Double] = None,
-    hash: Option[Int] = None
-  )
+    hash: Option[Int] = None)
 
   case class GeoMember(longitude: Double, latitute: Double, member: Buf)
 
@@ -130,8 +129,8 @@ object GeoCommands {
     count: Option[Int] = None,
     sort: Option[Sort] = None,
     store: Option[Buf] = None,
-    storeDist: Option[Buf] = None
-  ) extends StrictKeyCommand
+    storeDist: Option[Buf] = None)
+      extends StrictKeyCommand
       with GeoRadiusBase {
     override def name: Buf = Command.GEORADIUS
 
@@ -151,8 +150,8 @@ object GeoCommands {
     count: Option[Int] = None,
     sort: Option[Sort] = None,
     store: Option[Buf] = None,
-    storeDist: Option[Buf] = None
-  ) extends StrictKeyCommand
+    storeDist: Option[Buf] = None)
+      extends StrictKeyCommand
       with StrictMemberCommand
       with GeoRadiusBase {
     override def name: Buf = Command.GEORADIUSBYMEMBER
@@ -167,12 +166,8 @@ object GeoCommands {
     override def body: Seq[Buf] = key +: members
   }
 
-  case class GeoDistance(
-    key: Buf,
-    fromMember: Buf,
-    toMember: Buf,
-    distanceUnit: GeoUnit
-  ) extends StrictKeyCommand {
+  case class GeoDistance(key: Buf, fromMember: Buf, toMember: Buf, distanceUnit: GeoUnit)
+      extends StrictKeyCommand {
     def name: Buf = Command.GEODIST
 
     override def body: Seq[Buf] = Seq(key, fromMember, toMember, distanceUnit.toBuf)

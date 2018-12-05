@@ -36,8 +36,8 @@ object ReadableBufProcessorTest {
 
 abstract class ReadableBufProcessorTest(
   processable: String,
-  newProcessable: (Array[Byte] => ReadableBufProcessorTest.CanProcess)
-) extends FunSuite
+  newProcessable: (Array[Byte] => ReadableBufProcessorTest.CanProcess))
+    extends FunSuite
     with GeneratorDrivenPropertyChecks {
   import ReadableBufProcessorTest._
 

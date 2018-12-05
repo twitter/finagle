@@ -176,8 +176,8 @@ private[twitter] object ServerAdmissionControl {
   private final class NonretryableFilter[Req, Rep](
     serverACFilter: Filter[Req, Rep, Req, Rep],
     protocolName: String,
-    statsReceiver: StatsReceiver
-  ) extends SimpleFilter[Req, Rep] {
+    statsReceiver: StatsReceiver)
+      extends SimpleFilter[Req, Rep] {
 
     private[this] val unRetryableCount =
       statsReceiver.counter(Verbosity.Debug, "admission_control", protocolName, "nonretryable")

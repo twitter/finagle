@@ -16,10 +16,8 @@ import scala.collection.JavaConverters.iterableAsScalaIterableConverter
  * Takes the upgrade result and marks it as something read off the wire to
  * expose it to finagle, and manipulates the pipeline to be fit for http/2.
  */
-private final class UpgradeRequestHandler(
-  params: Stack.Params,
-  httpClientCodec: HttpClientCodec
-) extends ChannelDuplexHandler {
+private final class UpgradeRequestHandler(params: Stack.Params, httpClientCodec: HttpClientCodec)
+    extends ChannelDuplexHandler {
 
   import UpgradeRequestHandler._
 

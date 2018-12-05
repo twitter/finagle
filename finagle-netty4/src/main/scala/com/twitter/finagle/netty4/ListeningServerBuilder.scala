@@ -33,8 +33,7 @@ import java.util.concurrent.TimeUnit
 private class ListeningServerBuilder(
   pipelineInit: ChannelPipeline => Unit,
   params: Stack.Params,
-  setupMarshalling: ChannelInitializer[Channel] => ChannelHandler
-) {
+  setupMarshalling: ChannelInitializer[Channel] => ChannelHandler) {
   import Netty4Listener.BackPressure
 
   private[this] val Timer(timer) = params[Timer]

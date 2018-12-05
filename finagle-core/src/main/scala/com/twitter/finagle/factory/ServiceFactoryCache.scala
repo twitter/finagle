@@ -75,8 +75,8 @@ class ServiceFactoryCache[Key, Req, Rep](
   timer: Timer,
   statsReceiver: StatsReceiver = NullStatsReceiver,
   maxCacheSize: Int = 8,
-  tti: Duration = 10.minutes
-) extends Closable {
+  tti: Duration = 10.minutes)
+    extends Closable {
   assert(maxCacheSize > 0)
 
   private[this] val cache = new util.HashMap[Key, IdlingFactory[Req, Rep]]()

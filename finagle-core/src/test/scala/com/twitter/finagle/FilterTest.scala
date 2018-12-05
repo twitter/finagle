@@ -17,10 +17,7 @@ class FilterTest extends FunSuite {
 
   class PassThruTypeAgnosticFilter extends Filter.TypeAgnostic {
     def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = new Filter[Req, Rep, Req, Rep] {
-      def apply(
-        request: Req,
-        service: Service[Req, Rep]
-      ): Future[Rep] = service(request)
+      def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = service(request)
     }
   }
 
@@ -33,28 +30,19 @@ class FilterTest extends FunSuite {
   val constSvcFactory = ServiceFactory.const(constSvc)
 
   class FilterPlus1 extends Filter[Int, Int, Int, Int] {
-    def apply(
-      request: Int,
-      service: Service[Int, Int]
-    ): Future[Int] = Future.value(request + 1)
+    def apply(request: Int, service: Service[Int, Int]): Future[Int] = Future.value(request + 1)
 
     override def toString: String = "plus1"
   }
 
   class FilterTimes2 extends Filter[Int, Int, Int, Int] {
-    def apply(
-      request: Int,
-      service: Service[Int, Int]
-    ): Future[Int] = Future.value(request * 2)
+    def apply(request: Int, service: Service[Int, Int]): Future[Int] = Future.value(request * 2)
 
     override def toString: String = "times2"
   }
 
   class FilterMinus1 extends Filter[Int, Int, Int, Int] {
-    def apply(
-      request: Int,
-      service: Service[Int, Int]
-    ): Future[Int] = Future.value(request - 1)
+    def apply(request: Int, service: Service[Int, Int]): Future[Int] = Future.value(request - 1)
 
     override def toString: String = "minus1"
   }
@@ -62,10 +50,7 @@ class FilterTest extends FunSuite {
   class AgnosticFilter1 extends Filter.TypeAgnostic { self =>
     override def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = {
       new Filter[Req, Rep, Req, Rep] {
-        def apply(
-          request: Req,
-          service: Service[Req, Rep]
-        ): Future[Rep] = ???
+        def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = ???
         override def toString: String = self.toString
       }
     }
@@ -76,10 +61,7 @@ class FilterTest extends FunSuite {
   class AgnosticFilter2 extends Filter.TypeAgnostic { self =>
     override def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = {
       new Filter[Req, Rep, Req, Rep] {
-        def apply(
-          request: Req,
-          service: Service[Req, Rep]
-        ): Future[Rep] = ???
+        def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = ???
         override def toString: String = self.toString
       }
     }
@@ -88,10 +70,7 @@ class FilterTest extends FunSuite {
   class AgnosticFilter3 extends Filter.TypeAgnostic { self =>
     override def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = {
       new Filter[Req, Rep, Req, Rep] {
-        def apply(
-          request: Req,
-          service: Service[Req, Rep]
-        ): Future[Rep] = ???
+        def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = ???
         override def toString: String = self.toString
       }
     }

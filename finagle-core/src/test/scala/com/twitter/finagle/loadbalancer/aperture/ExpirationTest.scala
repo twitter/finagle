@@ -18,8 +18,8 @@ class ExpirationTest extends FunSuite with ApertureSuite {
   private class ExpiryBal(
     val idleTime: Duration = 1.minute,
     val mockTimer: MockTimer = new MockTimer,
-    val stats: InMemoryStatsReceiver = new InMemoryStatsReceiver
-  ) extends TestBal
+    val stats: InMemoryStatsReceiver = new InMemoryStatsReceiver)
+      extends TestBal
       with Expiration[Unit, Unit] {
 
     def expired: Long = stats.counters(Seq("expired"))

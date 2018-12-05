@@ -36,8 +36,8 @@ private class ThresholdFailureDetector(
   closeTimeout: Duration = 4.seconds,
   nanoTime: () => Long = System.nanoTime,
   statsReceiver: StatsReceiver = NullStatsReceiver,
-  implicit val timer: Timer = DefaultTimer
-) extends FailureDetector {
+  implicit val timer: Timer = DefaultTimer)
+    extends FailureDetector {
   private[this] val failureHandler = new MultiCategorizingExceptionStatsHandler()
   private[this] val pingLatencyStat = statsReceiver.stat(Verbosity.Debug, "ping_latency_us")
   private[this] val closeCounter = statsReceiver.counter("close")

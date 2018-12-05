@@ -20,8 +20,8 @@ import scala.util.control.NonFatal
  */
 final class RefPushSession[In, Out](
   handle: PushChannelHandle[In, Out],
-  initial: PushSession[In, Out]
-) extends PushSession[In, Out](handle) {
+  initial: PushSession[In, Out])
+    extends PushSession[In, Out](handle) {
 
   @volatile
   private[this] var underlying: PushSession[In, Out] = initial

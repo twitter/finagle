@@ -1050,8 +1050,9 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     server.close()
   }
 
-  private[this] val servers
-    : Seq[(String, (StatsReceiver, Echo.MethodPerEndpoint) => ListeningServer)] =
+  private[this] val servers: Seq[(
+    String,
+    (StatsReceiver, Echo.MethodPerEndpoint) => ListeningServer)] =
     Seq(
       "Thrift.server" ->
         (

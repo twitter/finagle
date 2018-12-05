@@ -103,8 +103,8 @@ package exp {
      */
     case class ServiceFactory[Req, Rep](
       factory: com.twitter.finagle.ServiceFactory[Req, Rep],
-      metadata: Addr.Metadata
-    ) extends Address
+      metadata: Addr.Metadata)
+        extends Address
   }
 }
 

@@ -77,8 +77,8 @@ private[finagle] object ThriftEmulator {
     underlying: Transport[Buf, Buf],
     transportP: Promise[Transport[Buf, Buf]],
     protocolFactory: TProtocolFactory,
-    sr: StatsReceiver
-  ) extends TransportProxy[Buf, Buf](underlying) {
+    sr: StatsReceiver)
+      extends TransportProxy[Buf, Buf](underlying) {
     private[this] val thriftmuxConnects = sr.counter("connects")
     private[this] val downgradedConnects = sr.counter("downgraded_connects")
 
@@ -159,8 +159,8 @@ private[finagle] object ThriftEmulator {
   private class Emulator(
     underlying: Transport[Buf, Buf],
     protocolFactory: TProtocolFactory,
-    init: Buf
-  ) extends TransportProxy[Buf, Buf](underlying) {
+    init: Buf)
+      extends TransportProxy[Buf, Buf](underlying) {
     // A boolean which indicates if we are speaking twitter upgraded thrift.
     private[this] val ttwitter: Boolean = {
       try {

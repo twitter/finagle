@@ -6,10 +6,8 @@ import com.twitter.util.{Future, Time}
 import java.net.SocketAddress
 import java.security.cert.Certificate
 
-private[http2] final class DeadTransport(
-  exn: Throwable,
-  val remoteAddress: SocketAddress
-) extends Transport[Any, Any] {
+private[http2] final class DeadTransport(exn: Throwable, val remoteAddress: SocketAddress)
+    extends Transport[Any, Any] {
   override type Context = TransportContext
 
   private[this] lazy val opsResult = Future.exception(exn)

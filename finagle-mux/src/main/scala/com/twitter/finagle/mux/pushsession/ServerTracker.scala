@@ -29,8 +29,7 @@ private class ServerTracker(
   h_messageWriter: MessageWriter,
   lessor: Lessor,
   statsReceiver: StatsReceiver,
-  remoteAddress: SocketAddress
-) {
+  remoteAddress: SocketAddress) {
 
   // We use the netty type because it results in less allocations, but this could
   // just as well be a java Map if we wanted.
@@ -258,11 +257,7 @@ private object ServerTracker {
 
   private val log = Logger.get()
 
-  private case class Dispatch(
-    tag: Int,
-    response: Future[Message],
-    timer: Stopwatch.Elapsed
-  )
+  private case class Dispatch(tag: Int, response: Future[Message], timer: Stopwatch.Elapsed)
 
   // Representation of the draining state of the session
   sealed abstract class DrainState(override val toString: String)

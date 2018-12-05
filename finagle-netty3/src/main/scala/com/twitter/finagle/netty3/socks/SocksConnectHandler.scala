@@ -68,8 +68,8 @@ object SocksConnectHandler {
 class SocksConnectHandler(
   proxyAddr: SocketAddress,
   addr: InetSocketAddress,
-  authenticationSettings: Seq[AuthenticationSetting] = Seq(Unauthenticated)
-) extends SimpleChannelHandler {
+  authenticationSettings: Seq[AuthenticationSetting] = Seq(Unauthenticated))
+    extends SimpleChannelHandler {
 
   import SocksConnectHandler._
 

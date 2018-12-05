@@ -39,8 +39,7 @@ object Cors {
     allowsHeaders: Seq[String] => Option[Seq[String]],
     exposedHeaders: Seq[String] = Nil,
     supportsCredentials: Boolean = false,
-    maxAge: Option[Duration] = None
-  )
+    maxAge: Option[Duration] = None)
 
   /** A CORS policy that lets you do whatever you want.  Don't use this in production. */
   val UnsafePermissivePolicy: Policy = Policy(allowsOrigin = { origin =>

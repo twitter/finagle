@@ -62,8 +62,8 @@ private object ZkOp {
 private class OpqueueZkReader(
   val sessionId: Long,
   val sessionPasswd: Buf,
-  val sessionTimeout: Duration
-) extends ZooKeeperReader {
+  val sessionTimeout: Duration)
+    extends ZooKeeperReader {
 
   import ZkOp._
 

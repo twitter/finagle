@@ -30,7 +30,8 @@ private[text] object Decoder {
     frame: Buf,
     needsData: Seq[Buf] => Int,
     awaitData: (Seq[Buf], Int) => Unit
-  )(continue: Seq[Buf] => Decoding): Decoding = {
+  )(continue: Seq[Buf] => Decoding
+  ): Decoding = {
     val tokens = ParserUtils.splitOnWhitespace(frame)
 
     val bytesNeeded = if (tokens.nonEmpty) needsData(tokens) else -1

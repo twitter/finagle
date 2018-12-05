@@ -12,8 +12,8 @@ private class BinaryEncodedRow(
   rawRow: Buf,
   val fields: IndexedSeq[Field],
   indexMap: Map[String, Int],
-  ignoreUnsigned: Boolean
-) extends Row {
+  ignoreUnsigned: Boolean)
+    extends Row {
   private val reader: MysqlBufReader = MysqlBuf.reader(rawRow)
   reader.skip(1)
 

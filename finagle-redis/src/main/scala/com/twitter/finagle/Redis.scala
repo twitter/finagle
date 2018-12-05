@@ -61,8 +61,8 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
 
   case class Client(
     stack: Stack[ServiceFactory[Command, Reply]] = Client.stack,
-    params: Stack.Params = Client.params
-  ) extends StdStackClient[Command, Reply, Client]
+    params: Stack.Params = Client.params)
+      extends StdStackClient[Command, Reply, Client]
       with WithDefaultLoadBalancer[Client]
       with RedisRichClient {
 
@@ -78,9 +78,11 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
     protected def newTransporter(addr: SocketAddress): Transporter[In, Out, Context] =
       Netty4Transporter.framedBuf(None /* no Framer */, addr, params)
 
-    protected def newDispatcher(transport: Transport[In, Out] {
-      type Context <: Client.this.Context
-    }): Service[Command, Reply] =
+    protected def newDispatcher(
+      transport: Transport[In, Out] {
+        type Context <: Client.this.Context
+      }
+    ): Service[Command, Reply] =
       RedisPool.newDispatcher(
         new StageTransport(transport),
         params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope),

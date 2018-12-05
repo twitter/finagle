@@ -45,10 +45,7 @@ private[finagle] class UncaughtAppExceptionFilter(protocolFactory: TProtocolFact
     extends SimpleFilter[Array[Byte], Array[Byte]] {
   import UncaughtAppExceptionFilter.writeExceptionMessage
 
-  def apply(
-    request: Array[Byte],
-    service: Service[Array[Byte], Array[Byte]]
-  ): Future[Array[Byte]] =
+  def apply(request: Array[Byte], service: Service[Array[Byte], Array[Byte]]): Future[Array[Byte]] =
     service(request).handle {
       case e if !e.isInstanceOf[TException] =>
         val buf = Buf.ByteArray.Owned(request)

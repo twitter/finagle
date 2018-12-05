@@ -126,8 +126,8 @@ private[http2] object Http2StreamMessageHandler {
 
 class ClientDiscardedRequestException private[transport] (
   errorCode: Long,
-  val flags: Long = FailureFlags.NonRetryable
-) extends Exception(
+  val flags: Long = FailureFlags.NonRetryable)
+    extends Exception(
       s"Attempted to write to a stream after receiving an RST with error code $errorCode"
     )
     with FailureFlags[ClientDiscardedRequestException]

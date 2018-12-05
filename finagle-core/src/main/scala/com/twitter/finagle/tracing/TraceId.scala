@@ -141,8 +141,7 @@ final case class TraceId(
   _sampled: Option[Boolean],
   flags: Flags,
   traceIdHigh: Option[SpanId] = None,
-  terminal: Boolean = false
-) {
+  terminal: Boolean = false) {
 
   def this(
     _traceId: Option[SpanId],

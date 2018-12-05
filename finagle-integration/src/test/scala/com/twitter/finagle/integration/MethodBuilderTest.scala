@@ -21,9 +21,7 @@ class MethodBuilderTest extends FunSuite {
   private implicit val timer = HashedWheelTimer.Default
   private val serviceSleep = 50.milliseconds
 
-  private[this] def mkService[Req, Rep](
-    rep: Rep
-  ): Service[Req, Rep] = {
+  private[this] def mkService[Req, Rep](rep: Rep): Service[Req, Rep] = {
     new Service[Req, Rep] {
       def apply(req: Req): Future[Rep] =
         Future.sleep(serviceSleep).before { Future.value(rep) }

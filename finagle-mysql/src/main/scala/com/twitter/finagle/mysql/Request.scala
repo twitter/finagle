@@ -29,8 +29,7 @@ object Command {
   val COM_BINLOG_DUMP: Byte = 0x12.toByte // sent by slave IO thread to req a binlog
   val COM_TABLE_DUMP: Byte = 0x13.toByte // deprecated
   val COM_CONNECT_OUT: Byte = 0x14.toByte // internal thread state
-  val COM_REGISTER_SLAVE
-    : Byte = 0x15.toByte // sent by the slave to register with the master (optional)
+  val COM_REGISTER_SLAVE: Byte = 0x15.toByte // sent by the slave to register with the master (optional)
   val COM_STMT_PREPARE: Byte = 0x16.toByte // mysql_stmt_prepare
   val COM_STMT_EXECUTE: Byte = 0x17.toByte // mysql_stmt_execute
   val COM_STMT_SEND_LONG_DATA: Byte = 0x18.toByte // mysql_stmt_send_long_data
@@ -131,8 +130,8 @@ case class HandshakeResponse(
   salt: Array[Byte],
   serverCap: Capability,
   charset: Short,
-  maxPacketSize: Int
-) extends Request {
+  maxPacketSize: Int)
+    extends Request {
   override val seq: Short = 1
 
   lazy val hashPassword: Array[Byte] = password match {
@@ -198,8 +197,8 @@ class ExecuteRequest(
   val stmtId: Int,
   val params: IndexedSeq[Parameter],
   val hasNewParams: Boolean,
-  val flags: Byte
-) extends CommandRequest(Command.COM_STMT_EXECUTE) {
+  val flags: Byte)
+    extends CommandRequest(Command.COM_STMT_EXECUTE) {
   private[this] val log = Logger.getLogger("finagle-mysql")
 
   private[this] def makeNullBitmap(parameters: IndexedSeq[Parameter]): Array[Byte] = {

@@ -214,8 +214,8 @@ private[this] object SimplePartitioningService {
 private[this] class SimplePartitioningService(
   underlying: Stack[ServiceFactory[String, String]],
   params: Stack.Params,
-  dest: Var[Addr]
-) extends PartitioningService[String, String] {
+  dest: Var[Addr])
+    extends PartitioningService[String, String] {
 
   import PartitioningServiceTestBase._
 

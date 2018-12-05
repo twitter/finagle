@@ -28,8 +28,8 @@ private[finagle] object GenStreamingSerialServerDispatcher {
  * allowing the implementor to furnish custom dispatchers & handlers.
  */
 private[finagle] abstract class GenStreamingSerialServerDispatcher[Req, Rep, In, Out](
-  trans: StreamTransport[In, Out]
-) extends Closable {
+  trans: StreamTransport[In, Out])
+    extends Closable {
 
   def this(trans: Transport[In, Out]) = this(new IdentityStreamTransport(trans))
 

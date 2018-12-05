@@ -76,12 +76,8 @@ case class HMergeEx(key: Buf, fv: Map[Buf, Buf], milliseconds: Long) extends Str
   }
 }
 
-case class HScan(
-  key: Buf,
-  cursor: Long,
-  count: Option[JLong] = None,
-  pattern: Option[Buf] = None
-) extends Command {
+case class HScan(key: Buf, cursor: Long, count: Option[JLong] = None, pattern: Option[Buf] = None)
+    extends Command {
   def name: Buf = Command.HSCAN
   override def body: Seq[Buf] = {
     val bufs = Seq(key, Buf.Utf8(cursor.toString))

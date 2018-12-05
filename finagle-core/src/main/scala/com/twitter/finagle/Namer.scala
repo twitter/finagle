@@ -213,8 +213,11 @@ object Namer {
   }
 
   // values of the returned activity are simplified and contain no Alt nodes
-  private def bind(lookup: Path => Activity[NameTree[Name]], depth: Int, weight: Option[Double])(
-    tree: NameTree[Name]
+  private def bind(
+    lookup: Path => Activity[NameTree[Name]],
+    depth: Int,
+    weight: Option[Double]
+  )(tree: NameTree[Name]
   ): Activity[NameTree[Name.Bound]] =
     if (depth > MaxDepth)
       Activity.exception(new IllegalArgumentException("Max recursion level reached."))

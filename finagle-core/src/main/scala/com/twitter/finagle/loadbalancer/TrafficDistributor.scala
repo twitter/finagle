@@ -32,8 +32,7 @@ private object TrafficDistributor {
   case class CachedBalancer[Req, Rep](
     balancer: ServiceFactory[Req, Rep],
     endpoints: BalancerEndpoints[Req, Rep],
-    size: Int
-  )
+    size: Int)
 
   /**
    * A load balancer and its associated weight. Size refers to the
@@ -44,8 +43,7 @@ private object TrafficDistributor {
     balancer: ServiceFactory[Req, Rep],
     endpoints: BalancerEndpoints[Req, Rep],
     weight: Double,
-    size: Int
-  )
+    size: Int)
 
   /**
    * Folds and accumulates over an [[Activity]] based event `stream` while biasing
@@ -58,7 +56,8 @@ private object TrafficDistributor {
   private def safelyScanLeft[T, U](
     init: U,
     stream: Event[Activity.State[T]]
-  )(f: (U, T) => U): Event[Activity.State[U]] = {
+  )(f: (U, T) => U
+  ): Event[Activity.State[U]] = {
     val initState: Activity.State[U] = Activity.Ok(init)
     stream.foldLeft(initState) {
       case (Activity.Pending, Activity.Ok(update)) => Activity.Ok(f(init, update))
@@ -76,8 +75,8 @@ private object TrafficDistributor {
    */
   private class Distributor[Req, Rep](
     classes: Iterable[WeightClass[Req, Rep]],
-    rng: Rng = Rng.threadLocal
-  ) extends ServiceFactory[Req, Rep] {
+    rng: Rng = Rng.threadLocal)
+      extends ServiceFactory[Req, Rep] {
 
     private[this] val (balancers, drv): (IndexedSeq[ServiceFactory[Req, Rep]], Drv) = {
       val tupled = classes.map {
@@ -139,8 +138,8 @@ private class TrafficDistributor[Req, Rep](
   newBalancer: Activity[Set[EndpointFactory[Req, Rep]]] => ServiceFactory[Req, Rep],
   eagerEviction: Boolean,
   rng: Rng = Rng.threadLocal,
-  statsReceiver: StatsReceiver = NullStatsReceiver
-) extends ServiceFactory[Req, Rep] {
+  statsReceiver: StatsReceiver = NullStatsReceiver)
+    extends ServiceFactory[Req, Rep] {
   import TrafficDistributor._
 
   /**

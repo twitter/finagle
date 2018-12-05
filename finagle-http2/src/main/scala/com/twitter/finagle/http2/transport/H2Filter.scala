@@ -47,10 +47,7 @@ private[http2] final class H2Filter(timer: Timer) extends ChannelDuplexHandler {
       super.channelRead(ctx, msg)
   }
 
-  override def exceptionCaught(
-    ctx: ChannelHandlerContext,
-    cause: Throwable
-  ): Unit = {
+  override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable): Unit = {
     // Swallowed so as to not bork the parent pipeline. This includes
     // GOAWAY messages.
     ()

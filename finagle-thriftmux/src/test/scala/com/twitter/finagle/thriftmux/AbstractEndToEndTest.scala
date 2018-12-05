@@ -1412,9 +1412,11 @@ abstract class AbstractEndToEndTest
       .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), testService)
 
     object OldPlainPipeliningThriftClient extends Thrift.Client(stack = StackClient.newStack) {
-      override protected def newDispatcher(transport: Transport[ThriftClientRequest, Array[Byte]] {
-        type Context <: TransportContext
-      }) =
+      override protected def newDispatcher(
+        transport: Transport[ThriftClientRequest, Array[Byte]] {
+          type Context <: TransportContext
+        }
+      ) =
         new PipeliningDispatcher(transport, NullStatsReceiver, 10.seconds, new MockTimer)
     }
 
@@ -2098,8 +2100,9 @@ abstract class AbstractEndToEndTest
       await(shortTimeoutSvcPerEndpoint(TestService.Query.Args("shorty")))
     }
     // ReqRepServicePerEndpoint
-    val shortTimeoutReqRepSvcPerEndpoint
-      : Service[scrooge.Request[TestService.Query.Args], scrooge.Response[
+    val shortTimeoutReqRepSvcPerEndpoint: Service[
+      scrooge.Request[TestService.Query.Args],
+      scrooge.Response[
         TestService.Query.SuccessType
       ]] =
       builder
@@ -2267,8 +2270,9 @@ abstract class AbstractEndToEndTest
       intercept[RequestTimeoutException] { await(req2) }
 
       // ReqRepServicePerEndpoint
-      val asIsReqRepSvcPerEndpoint
-        : Service[scrooge.Request[TestService.Query.Args], scrooge.Response[
+      val asIsReqRepSvcPerEndpoint: Service[
+        scrooge.Request[TestService.Query.Args],
+        scrooge.Response[
           TestService.Query.SuccessType
         ]] =
         mb.servicePerEndpoint[TestService.ReqRepServicePerEndpoint]("as_is").query
@@ -2299,8 +2303,9 @@ abstract class AbstractEndToEndTest
       }
 
       // ServicePerEndpoint
-      val longTimeoutSvcPerEndpoint
-        : Service[TestService.Query.Args, TestService.Query.SuccessType] =
+      val longTimeoutSvcPerEndpoint: Service[
+        TestService.Query.Args,
+        TestService.Query.SuccessType] =
         mb.withTimeoutPerRequest(5.seconds)
           .withTimeoutTotal(5.seconds)
           .servicePerEndpoint[TestService.ServicePerEndpoint]("good")
@@ -2313,8 +2318,9 @@ abstract class AbstractEndToEndTest
       val result2 = await(req5)
       assert("yep" == result2)
       // ReqRepServicePerEndpoint
-      val longTimeoutReqRepSvcPerEndpoint
-        : Service[scrooge.Request[TestService.Query.Args], scrooge.Response[
+      val longTimeoutReqRepSvcPerEndpoint: Service[
+        scrooge.Request[TestService.Query.Args],
+        scrooge.Response[
           TestService.Query.SuccessType
         ]] =
         mb.withTimeoutPerRequest(5.seconds)
@@ -2481,8 +2487,9 @@ abstract class AbstractEndToEndTest
       await(retryInvalidSvcPerEndpoint(TestService.Query.Args("fail0")))
     }
     // ReqRepServicePerEndpoint
-    val retryInvalidReqRepSvcPerEndpoint
-      : Service[scrooge.Request[TestService.Query.Args], scrooge.Response[
+    val retryInvalidReqRepSvcPerEndpoint: Service[
+      scrooge.Request[TestService.Query.Args],
+      scrooge.Response[
         TestService.Query.SuccessType
       ]] =
       builder
@@ -2529,8 +2536,9 @@ abstract class AbstractEndToEndTest
     }
 
     // ServicePerEndpoint
-    val errCode1SucceedsSvcPerEndpoint
-      : Service[TestService.Query.Args, TestService.Query.SuccessType] =
+    val errCode1SucceedsSvcPerEndpoint: Service[
+      TestService.Query.Args,
+      TestService.Query.SuccessType] =
       builder
         .withRetryForClassifier {
           case ReqRep(_, Throw(InvalidQueryException(errorCode))) if errorCode == 0 =>
@@ -2550,8 +2558,9 @@ abstract class AbstractEndToEndTest
       await(errCode1SucceedsSvcPerEndpoint(TestService.Query.Args("fail1")))
     }
     // ReqRepServicePerEndpoint
-    val errCode1SucceedsReqRepSvcPerEndpoint
-      : Service[scrooge.Request[TestService.Query.Args], scrooge.Response[
+    val errCode1SucceedsReqRepSvcPerEndpoint: Service[
+      scrooge.Request[TestService.Query.Args],
+      scrooge.Response[
         TestService.Query.SuccessType
       ]] =
       builder
@@ -2707,9 +2716,7 @@ abstract class AbstractEndToEndTest
     // was eager about creating counters and stats that have not been used.
     // see CSL-6751
     val metrics = new ConcurrentHashMap[String, Unit]()
-    class CaptureStatsReceiver(
-      protected val self: StatsReceiver
-    ) extends StatsReceiverProxy {
+    class CaptureStatsReceiver(protected val self: StatsReceiver) extends StatsReceiverProxy {
       override def counter(verbosity: Verbosity, names: String*): Counter = {
         metrics.put(names.mkString("/"), ())
         super.counter(verbosity, names: _*)

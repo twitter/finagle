@@ -13,8 +13,8 @@ import scala.language.reflectiveCalls
 class BalancerTest extends FunSuite with Conductors with GeneratorDrivenPropertyChecks {
 
   private class TestBalancer(
-    protected val statsReceiver: InMemoryStatsReceiver = new InMemoryStatsReceiver
-  ) extends Balancer[Unit, Unit] {
+    protected val statsReceiver: InMemoryStatsReceiver = new InMemoryStatsReceiver)
+      extends Balancer[Unit, Unit] {
 
     def maxEffort: Int = 5
     def emptyException: Throwable = ???

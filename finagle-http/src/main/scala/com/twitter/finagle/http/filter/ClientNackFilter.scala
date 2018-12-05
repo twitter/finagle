@@ -15,10 +15,7 @@ import com.twitter.util.{Future, Try}
 private[http] final class ClientNackFilter extends SimpleFilter[Request, Response] {
   import ClientNackFilter._
 
-  def apply(
-    request: Request,
-    service: Service[Request, Response]
-  ): Future[Response] = {
+  def apply(request: Request, service: Service[Request, Response]): Future[Response] = {
     // If the request was chunked, we likely consume some of the body during an initial
     // dispatch so it's not generally safe to retry even if the server says it is.
     if (request.isChunked) {

@@ -53,8 +53,8 @@ private[twitter] class LengthFieldFramer(
   lengthFieldLength: Int,
   lengthAdjust: Int,
   maxFrameLength: Int,
-  bigEndian: Boolean
-) extends Framer {
+  bigEndian: Boolean)
+    extends Framer {
   import LengthFieldFramer._
 
   private[this] var accum = Buf.Empty

@@ -32,20 +32,19 @@ object HttpResponseClassifier {
    * Converts from the more natural `(http.Request, http.Response)` types
    * to a [[ResponseClassifier]].
    */
-  def apply(
-    underlying: PartialFunction[(Request, Response), ResponseClass]
-  ): ResponseClassifier = new ResponseClassifier {
-    override def toString: String =
-      s"HttpResponseClassifier($underlying)"
+  def apply(underlying: PartialFunction[(Request, Response), ResponseClass]): ResponseClassifier =
+    new ResponseClassifier {
+      override def toString: String =
+        s"HttpResponseClassifier($underlying)"
 
-    def isDefinedAt(x: ReqRep): Boolean = x match {
-      case ReqRep(req: Request, Return(rep: Response)) => underlying.isDefinedAt((req, rep))
-      case _ => false
-    }
+      def isDefinedAt(x: ReqRep): Boolean = x match {
+        case ReqRep(req: Request, Return(rep: Response)) => underlying.isDefinedAt((req, rep))
+        case _ => false
+      }
 
-    def apply(x: ReqRep): ResponseClass = x match {
-      case ReqRep(req: Request, Return(rep: Response)) => underlying((req, rep))
-      case _ => throw new AssertionError(s"$this applied to $x")
+      def apply(x: ReqRep): ResponseClass = x match {
+        case ReqRep(req: Request, Return(rep: Response)) => underlying((req, rep))
+        case _ => throw new AssertionError(s"$this applied to $x")
+      }
     }
-  }
 }

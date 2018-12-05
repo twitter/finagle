@@ -25,8 +25,8 @@ private[netty3] class SslClientConnectHandler(
   sslHandler: SslHandler,
   address: Address,
   config: SslClientConfiguration,
-  sessionVerifier: SslClientSessionVerifier
-) extends SimpleChannelHandler {
+  sessionVerifier: SslClientSessionVerifier)
+    extends SimpleChannelHandler {
 
   private[this] val connectFuture = new AtomicReference[ChannelFuture](null)
 

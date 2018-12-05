@@ -39,10 +39,7 @@ object Addr {
    * from access since we want to add partially resolved addresses
    * in the future. At this point, the API will be fixed.
    */
-  case class Bound(
-    addrs: immutable.Set[Address],
-    metadata: Metadata
-  ) extends Addr
+  case class Bound(addrs: immutable.Set[Address], metadata: Metadata) extends Addr
 
   /**
    * The address is failed: binding failed with

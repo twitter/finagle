@@ -15,8 +15,7 @@ case class Record(
   traceId: TraceId,
   timestamp: Time,
   annotation: Annotation,
-  duration: Option[Duration]
-) {
+  duration: Option[Duration]) {
   override def toString: String = s"${Record.timeFormat.format(timestamp)} $traceId] $annotation"
 }
 

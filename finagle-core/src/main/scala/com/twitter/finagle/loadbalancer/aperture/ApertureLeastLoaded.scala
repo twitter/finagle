@@ -27,8 +27,8 @@ private[loadbalancer] final class ApertureLeastLoaded[Req, Rep](
   protected val label: String,
   protected val timer: Timer,
   protected val emptyException: NoBrokersAvailableException,
-  protected val useDeterministicOrdering: Option[Boolean]
-) extends Aperture[Req, Rep]
+  protected val useDeterministicOrdering: Option[Boolean])
+    extends Aperture[Req, Rep]
     with LeastLoaded[Req, Rep]
     with LoadBand[Req, Rep]
     with Expiration[Req, Rep]

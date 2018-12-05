@@ -25,10 +25,8 @@ object RequestSemaphoreFilter {
  * unable to acquire a permit are failed immediately with a [[com.twitter.finagle.Failure]]
  * that signals a restartable or idempotent process.
  */
-class RequestSemaphoreFilter[Req, Rep](
-  sem: AsyncSemaphore,
-  stats: StatsReceiver
-) extends SimpleFilter[Req, Rep] {
+class RequestSemaphoreFilter[Req, Rep](sem: AsyncSemaphore, stats: StatsReceiver)
+    extends SimpleFilter[Req, Rep] {
 
   def this(sem: AsyncSemaphore) =
     this(sem, NullStatsReceiver)

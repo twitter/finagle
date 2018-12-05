@@ -15,8 +15,7 @@ private[twitter] case class ServersetPath(
   zkHosts: String,
   zkPath: Path,
   endpoint: Option[String],
-  shardId: Option[Int]
-)
+  shardId: Option[Int])
 
 /**
  * Parse serverset paths of the form:

@@ -16,8 +16,7 @@ class MethodMetadata private[thrift] (
   val methodName: String,
   val serviceName: String,
   val argsClass: Class[_],
-  val resultClass: Class[_]
-) {
+  val resultClass: Class[_]) {
 
   /**
    * Executes the given function with this [[MethodMetadata]] set as the current
