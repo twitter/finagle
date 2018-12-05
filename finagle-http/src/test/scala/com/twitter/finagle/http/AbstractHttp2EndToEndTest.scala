@@ -22,8 +22,9 @@ abstract class AbstractHttp2EndToEndTest extends AbstractEndToEndTest {
     // For some reason the upgrading client closes a bunch of times which makes
     // the counter kind of meaningless quantitatively but we need to close at
     // least one time.
-    assert(statsRecv.counters(Seq("client", "closes")) > 0)
-
+    eventually {
+      assert(statsRecv.counters(Seq("client", "closes")) > 0)
+    }
     await(server.close())
   }
 }
