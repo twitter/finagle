@@ -410,8 +410,9 @@ class QueueTransport[In, Out](writeq: AsyncQueue[In], readq: AsyncQueue[Out])
   }
 
   val onClose: Future[Throwable] = closep
-  val localAddress: SocketAddress = new SocketAddress {}
-  val remoteAddress: SocketAddress = new SocketAddress {}
-  def peerCertificate: Option[Certificate] = None
-  val context: TransportContext = new LegacyContext(this)
+  def localAddress: SocketAddress = context.localAddress
+  def remoteAddress: SocketAddress = context.remoteAddress
+  def peerCertificate: Option[Certificate] = context.peerCertificate
+  val context: TransportContext =
+    new SimpleTransportContext(new SocketAddress {}, new SocketAddress {}, None)
 }

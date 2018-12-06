@@ -7,7 +7,7 @@ import com.twitter.finagle.http2.RefTransport
 import com.twitter.finagle.http2.SerialExecutor
 import com.twitter.finagle.http2.transport.Http2UpgradingTransport.UpgradeIgnoredException
 import com.twitter.finagle.netty4.transport.HasExecutor
-import com.twitter.finagle.transport.{LegacyContext, QueueTransport, TransportContext}
+import com.twitter.finagle.transport.{QueueTransport, SimpleTransportContext, TransportContext}
 import com.twitter.util.{Await, Future, Promise}
 import java.util.concurrent.Executor
 import io.netty.handler.codec.http._
@@ -18,7 +18,7 @@ class Http2UpgradingTransportTest extends FunSuite with MockitoSugar {
   class Ctx {
     val (writeq, readq) = (new AsyncQueue[Any](), new AsyncQueue[Any]())
     val transport = new QueueTransport[Any, Any](writeq, readq) {
-      override val context: TransportContext = new LegacyContext(this) with HasExecutor {
+      override val context: TransportContext = new SimpleTransportContext with HasExecutor {
         private[finagle] override val executor: Executor = new SerialExecutor
       }
     }

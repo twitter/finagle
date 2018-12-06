@@ -3,7 +3,7 @@ package com.twitter.finagle.memcached.protocol.text.server
 import com.twitter.finagle.Status
 import com.twitter.finagle.memcached.protocol.{Command, Response}
 import com.twitter.finagle.memcached.protocol.StorageCommand.StorageCommands
-import com.twitter.finagle.transport.{Transport, TransportContext, LegacyContext}
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.io.Buf
 import com.twitter.util.{Future, Time}
 import java.net.SocketAddress
@@ -40,17 +40,17 @@ private[finagle] class ServerTransport(underlying: Transport[Buf, Buf])
     underlying.write(buf)
   }
 
-  def remoteAddress: SocketAddress = underlying.remoteAddress
+  def localAddress: SocketAddress = context.localAddress
 
-  def peerCertificate: Option[Certificate] = underlying.peerCertificate
+  def remoteAddress: SocketAddress = context.remoteAddress
+
+  def peerCertificate: Option[Certificate] = context.peerCertificate
 
   def onClose: Future[Throwable] = underlying.onClose
-
-  def localAddress: SocketAddress = underlying.localAddress
 
   def status: Status = underlying.status
 
   def close(deadline: Time): Future[Unit] = underlying.close(deadline)
 
-  val context: TransportContext = new LegacyContext(this)
+  val context: TransportContext = underlying.context
 }

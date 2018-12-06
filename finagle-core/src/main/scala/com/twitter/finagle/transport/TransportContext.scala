@@ -26,17 +26,11 @@ abstract class TransportContext {
   def peerCertificate: Option[Certificate]
 }
 
-/**
- * A TransportContext that can derive its methods from an underlying transport.
- *
- * Useful as a stopgap before implementing the methods on TransportContext
- * directly.
- */
-private[finagle] class LegacyContext(underlying: Transport[_, _]) extends TransportContext {
-  def localAddress: SocketAddress = underlying.localAddress
-  def remoteAddress: SocketAddress = underlying.remoteAddress
-  def peerCertificate: Option[Certificate] = underlying.peerCertificate
-}
+private[finagle] class SimpleTransportContext(
+  val localAddress: SocketAddress = new SocketAddress {},
+  val remoteAddress: SocketAddress = new SocketAddress {},
+  val peerCertificate: Option[Certificate] = None)
+    extends TransportContext
 
 private[finagle] class UpdatableContext(first: TransportContext)
     extends TransportContext

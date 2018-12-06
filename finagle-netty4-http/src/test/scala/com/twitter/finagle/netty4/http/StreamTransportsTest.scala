@@ -5,7 +5,12 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.Status
 import com.twitter.finagle.netty4.ByteBufConversion
 import com.twitter.finagle.netty4.transport.ChannelTransport
-import com.twitter.finagle.transport.{LegacyContext, QueueTransport, Transport, TransportContext}
+import com.twitter.finagle.transport.{
+  QueueTransport,
+  SimpleTransportContext,
+  Transport,
+  TransportContext
+}
 import com.twitter.io.ReaderDiscardedException
 import com.twitter.io.{Buf, Pipe, Reader}
 import com.twitter.util._
@@ -134,11 +139,11 @@ class StreamTransportsTest extends FunSuite {
 
     def write(req: Any): Future[Unit] = Future.exception(new Exception("nop"))
 
-    def remoteAddress: SocketAddress = ???
+    def remoteAddress: SocketAddress = context.remoteAddress
 
-    def peerCertificate: Option[Certificate] = ???
+    def peerCertificate: Option[Certificate] = context.peerCertificate
 
-    def localAddress: SocketAddress = ???
+    def localAddress: SocketAddress = context.localAddress
 
     def status: Status = ???
 
@@ -148,7 +153,7 @@ class StreamTransportsTest extends FunSuite {
 
     def close(deadline: Time): Future[Unit] = ???
 
-    def context: TransportContext = new LegacyContext(this)
+    val context: TransportContext = new SimpleTransportContext()
   }
 
   test("streamChunks: discard reader on transport write failure") {
@@ -219,11 +224,11 @@ class StreamTransportsTest extends FunSuite {
       def read() = p
       def status = ???
       val onClose = Future.never
-      def localAddress = ???
-      def remoteAddress = ???
-      def peerCertificate = ???
+      def localAddress = context.localAddress
+      def remoteAddress = context.remoteAddress
+      def peerCertificate = context.peerCertificate
       def close(deadline: Time) = ???
-      val context: TransportContext = new LegacyContext(this)
+      val context: TransportContext = new SimpleTransportContext()
     }
 
     val coll1 = collate[String](trans1, read)(_ == "eof")

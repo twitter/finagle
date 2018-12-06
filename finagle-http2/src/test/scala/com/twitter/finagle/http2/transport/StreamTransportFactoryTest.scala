@@ -8,7 +8,12 @@ import com.twitter.finagle.http2.transport.Http2ClientDowngrader._
 import com.twitter.finagle.http2.transport.StreamTransportFactory._
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.netty4.transport.HasExecutor
-import com.twitter.finagle.transport.{LegacyContext, QueueTransport, Transport, TransportContext}
+import com.twitter.finagle.transport.{
+  QueueTransport,
+  SimpleTransportContext,
+  Transport,
+  TransportContext
+}
 import com.twitter.finagle.{FailureFlags, Stack, Status, StreamClosedException}
 import com.twitter.util.{Await, Awaitable, Future, TimeoutException}
 import io.netty.buffer._
@@ -28,7 +33,7 @@ class StreamTransportFactoryTest extends FunSuite {
   class SlowClosingQueue(left: AsyncQueue[StreamMessage], right: AsyncQueue[StreamMessage])
       extends QueueTransport[StreamMessage, StreamMessage](left, right) {
     override val onClose: Future[Throwable] = Future.never
-    override val context: TransportContext = new LegacyContext(this) with HasExecutor {
+    override val context: TransportContext = new SimpleTransportContext with HasExecutor {
       private[finagle] override val executor: Executor = new SerialExecutor
     }
   }

@@ -5,14 +5,10 @@ import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.Status
 import com.twitter.io.{Buf, Pipe, Reader, ReaderDiscardedException}
 import com.twitter.util.{Await, Future, Promise, Return, Throw, Time}
-import java.net.SocketAddress
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import scala.language.reflectiveCalls
 
-@RunWith(classOf[JUnitRunner])
 class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   private def awaitResult[T](f: Future[T]): T = {
@@ -107,11 +103,11 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
     }
     val status = Status.Open
     val onClose = new Promise[Throwable]
-    val localAddress = new SocketAddress {}
-    val remoteAddress = new SocketAddress {}
-    val peerCertificate = None
+    def localAddress = context.localAddress
+    def remoteAddress = context.remoteAddress
+    def peerCertificate = context.peerCertificate
     def close(deadline: Time) = Future.exception(new Exception)
-    def context: TransportContext = new LegacyContext(this)
+    val context: TransportContext = new SimpleTransportContext()
   }
 
   class Failed extends Transport[Any, Any] {
@@ -120,11 +116,11 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
     def read(): Future[Any] = Future.exception(new Exception)
     val onClose = new Promise[Throwable]
     val status = Status.Closed
-    val localAddress = new SocketAddress {}
-    val remoteAddress = new SocketAddress {}
-    val peerCertificate = None
+    def localAddress = context.localAddress
+    def remoteAddress = context.remoteAddress
+    def peerCertificate = context.peerCertificate
     def close(deadline: Time) = Future.exception(new Exception)
-    def context: TransportContext = new LegacyContext(this)
+    val context: TransportContext = new SimpleTransportContext()
   }
 
   test("Transport.copyToWriter - discard while writing") {
@@ -246,11 +242,11 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
       def read() = p
       def status = ???
       val onClose = Future.never
-      def localAddress = ???
-      def remoteAddress = ???
-      def peerCertificate = ???
+      def localAddress = context.localAddress
+      def remoteAddress = context.remoteAddress
+      def peerCertificate = context.peerCertificate
       def close(deadline: Time) = ???
-      def context: TransportContext = new LegacyContext(this)
+      val context: TransportContext = new SimpleTransportContext()
     }
 
     val coll1 = Transport.collate(trans1, read)

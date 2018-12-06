@@ -5,7 +5,12 @@ import com.twitter.finagle.Status
 import com.twitter.finagle.http.{Request, Response, Version, Status => HttpStatus}
 import com.twitter.finagle.netty4.http.{Bijections, Netty4ClientStreamTransport}
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.finagle.transport.{LegacyContext, QueueTransport, Transport, TransportContext}
+import com.twitter.finagle.transport.{
+  QueueTransport,
+  SimpleTransportContext,
+  Transport,
+  TransportContext
+}
 import com.twitter.io.{Buf, ReaderDiscardedException}
 import com.twitter.util.{Await, Awaitable, Duration, Future, Promise, Return, Throw, Time}
 import io.netty.buffer.Unpooled
@@ -71,10 +76,10 @@ class OpTransport[In, Out](var ops: List[OpTransport.Op[In, Out]]) extends Trans
 
   var status: Status = Status.Open
   val onClose = new Promise[Throwable]
-  def localAddress = new java.net.SocketAddress {}
-  def remoteAddress = new java.net.SocketAddress {}
-  val peerCertificate = None
-  val context = new LegacyContext(this)
+  def localAddress = context.localAddress
+  def remoteAddress = context.remoteAddress
+  def peerCertificate = context.peerCertificate
+  val context = new SimpleTransportContext()
 }
 
 // Note: We need a concrete impl to test it so the finagle-http package is most

@@ -8,7 +8,7 @@ import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.netty4.transport.HasExecutor
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.stats.{Verbosity, VerbosityAdjustingStatsReceiver}
-import com.twitter.finagle.transport.{LegacyContext, Transport, TransportContext}
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Failure, FailureFlags, Stack, Status, StreamClosedException}
 import com.twitter.logging.{HasLogLevel, Level, Logger}
@@ -557,11 +557,11 @@ final private[http2] class StreamTransportFactory(
 
     def onClose: Future[Throwable] = _onClose.or(underlying.onClose)
 
-    def localAddress: SocketAddress = underlying.context.localAddress
+    def localAddress: SocketAddress = context.localAddress
 
-    def remoteAddress: SocketAddress = underlying.context.remoteAddress
+    def remoteAddress: SocketAddress = context.remoteAddress
 
-    def peerCertificate: Option[Certificate] = underlying.context.peerCertificate
+    def peerCertificate: Option[Certificate] = context.peerCertificate
 
     def close(deadline: Time): Future[Unit] = {
       wasClosed = true
@@ -597,7 +597,7 @@ final private[http2] class StreamTransportFactory(
       _onClose.updateIfEmpty(Return(exn))
     }
 
-    val context: TransportContext = new LegacyContext(stream)
+    val context: TransportContext = underlying.context
   }
 }
 
