@@ -14,13 +14,6 @@ class ScribeRawZipkinTracerTest extends FunSuite {
 
   val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None, Flags().setDebug)
 
-  /**
-   * The ttl used to construct the DeadlineSpanMap in RawZipkinTracer. The value is not exposed in
-   * ScribeRawZipkinTracer, but needed here to ensure that time is advanced enough to guarantee that
-   *  the span is removed from the cache and logged.
-   */
-  val deadlineSpanMapTtl = 120.seconds
-
   class ScribeClient extends Scribe.FutureIface {
     var messages: Seq[LogEntry] = Seq.empty[LogEntry]
     var response: Future[ResultCode] = Future.value(ResultCode.Ok)
@@ -125,11 +118,11 @@ class ScribeRawZipkinTracerTest extends FunSuite {
       tracer.record(Record(traceId, Time.now, Annotation.ClientSend))
       tracer.record(Record(traceId, Time.now, Annotation.ClientRecv))
 
-      tc.advance(deadlineSpanMapTtl) // advance timer beyond the ttl to force DeadlineSpanMap flush
+      tc.set(Time.Top) // advance timer enough to guarantee spans are logged
       timer.tick()
 
       // Note: Since ports are ephemeral, we can't hardcode expected message.
-      assert(scribe.messages.size == 1)
+      assert(scribe.messages.size >= 1)
     }
   }
 
@@ -149,11 +142,11 @@ class ScribeRawZipkinTracerTest extends FunSuite {
       tracer.record(Record(traceId, Time.fromSeconds(3), ann3))
       tracer.record(Record(traceId, Time.fromSeconds(3), ann4))
 
-      tc.advance(deadlineSpanMapTtl) // advance timer beyond the ttl to force DeadlineSpanMap flush
+      tc.set(Time.Top) // advance timer enough to guarantee spans are logged
       timer.tick()
 
       // scribe Log method is in java
-      assert(scribe.messages.size == 1)
+      assert(scribe.messages.size >= 1)
     }
   }
 }

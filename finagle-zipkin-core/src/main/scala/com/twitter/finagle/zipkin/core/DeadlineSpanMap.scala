@@ -14,21 +14,20 @@ import scala.collection.mutable.ArrayBuffer
  * is not removed from the map it will expire after the deadline is reached
  * and sent off to scribe despite being incomplete.
  *
- * Spans in the map can follow four different sequences of state transitions:
- *   (i)   live -> on hold -> complete -> logged
- *   (ii)  live -> on hold -> complete -> flushed -> logged
- *   (iii) live -> on hold -> flushed -> logged
- *   (iv)  live -> flushed -> logged
+ * Spans in the map can follow three different sequences of state transitions:
+ *   (i)   live -> on hold -> logged
+ *   (ii)  live -> on hold -> flushed -> logged
+ *   (iii) live -> flushed -> logged
  *
- * (i) and (ii) should be the most common behavior: on adding a designated trigger annotation
- * (ClientReceive or ServerSend), the hold timer is set. Its expiry causes the span to transition
- * to the complete state. The span is then logged either from the update() function, or when the
- * ttl expires in flush().
+ * (i) should be the most common behavior: on adding a designated trigger annotation (ClientReceive
+ * or ServerSend), the hold timer is set. Its expiry causes the span to be logged immediately.
  *
- * (iii) occurs when the ttl timer expires before the hold timer. If annotations arrive after the
+ * (ii) occurs when the ttl timer expires before the hold timer. If annotations arrive after the
  * span has been logged, the span will be logged a second time with the new annotations.
  *
- * (iv) occurs when no trigger annotation arrives before the ttl expires.
+ * If the ttl and hold timer expire together, the span may be logged twice.
+ *
+ * (iii) occurs when no trigger annotation arrives before the ttl expires.
  */
 private class DeadlineSpanMap(
   logSpans: Seq[Span] => Future[Unit],
@@ -47,10 +46,8 @@ private class DeadlineSpanMap(
    * This will create a new MutableSpan if one does not exist otherwise the existing
    * span will be provided.
    *
-   * If the span is deemed complete it will be removed from the map and sent to `logSpans`
-   *
    * If the span is on hold (almost complete), wait a short time for any more locally
-   * generated annotations before marking the span complete.
+   * generated annotations before removing from the map and sending to `logSpans`.
    */
   def update(traceId: TraceId)(f: MutableSpan => Unit): Unit = {
     val span: MutableSpan = {
@@ -66,11 +63,8 @@ private class DeadlineSpanMap(
 
     f(span)
 
-    if (span.isComplete) {
-      spanMap.remove(traceId, span)
-      logSpans(Seq(span.toSpan))
-    } else if (span.isOnHold) {
-      timer.doLater(hold) { markComplete(span) }
+    if (span.isOnHold) {
+      timer.doLater(hold) { complete(traceId, span) }
     }
   }
 
@@ -98,12 +92,14 @@ private class DeadlineSpanMap(
   }
 
   /**
-   * Mark the span complete, i.e. ready to be removed and logged.
+   * Remove and log the span.
    * @param span
    * @return Future indicating done.
    */
-  def markComplete(span: MutableSpan): Future[Unit] = {
-    span.setComplete()
+  def complete(traceId: TraceId, span: MutableSpan): Future[Unit] = {
+    val removed = spanMap.remove(traceId, span)
+    if (removed)
+      logSpans(Seq(span.toSpan))
     Future.Done
   }
 
@@ -117,7 +113,6 @@ private class DeadlineSpanMap(
 }
 
 private final class MutableSpan(val traceId: TraceId, val started: Time) {
-  private[this] var _isComplete: Boolean = false
   private[this] var _name: Option[String] = None
   private[this] var _service: Option[String] = None
   private[this] var _endpoint: Endpoint = Endpoint.Unknown
@@ -148,11 +143,9 @@ private final class MutableSpan(val traceId: TraceId, val started: Time) {
    * get dropped at the collector.
    */
   def addAnnotation(ann: ZipkinAnnotation): MutableSpan = synchronized {
-    if (!_isComplete && (
-        ann.value.equals(Constants.CLIENT_RECV) ||
-        ann.value.equals(Constants.SERVER_SEND) ||
-        ann.value.equals(TimeoutFilter.TimeoutAnnotation)
-      )) {
+    if (ann.value.equals(Constants.CLIENT_RECV) ||
+      ann.value.equals(Constants.SERVER_SEND) ||
+      ann.value.equals(TimeoutFilter.TimeoutAnnotation)) {
       _onHold = true
     }
 
@@ -179,9 +172,6 @@ private final class MutableSpan(val traceId: TraceId, val started: Time) {
   def toSpan: Span = synchronized {
     Span(traceId, _service, _name, annotations, binaryAnnotations, _endpoint)
   }
-
-  def isComplete: Boolean = synchronized { _isComplete }
-  def setComplete() = synchronized { _isComplete = true }
 
   def isOnHold: Boolean = synchronized { _onHold }
 }
