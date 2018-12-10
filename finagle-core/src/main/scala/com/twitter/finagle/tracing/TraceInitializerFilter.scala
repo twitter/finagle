@@ -99,12 +99,17 @@ sealed class AnnotatingTracingFilter[Req, Rep](
 
   private[this] val finagleVersionKey = s"$prefix/finagle.version"
   private[this] val dtabLocalKey = s"$prefix/dtab.local"
+  private[this] val labelKey = s"$prefix/finagle.label"
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val trace = Trace()
     if (trace.isActivelyTracing) {
       if (traceMetaData) {
-        trace.recordServiceName(label)
+        trace.recordServiceName(TraceServiceName() match {
+          case Some(l) => l
+          case None => label
+        })
+        trace.recordBinary(labelKey, label)
         trace.recordBinary(finagleVersionKey, finagleVersion())
         // Trace dtab propagation on all requests that have them.
         if (Dtab.local.nonEmpty) {

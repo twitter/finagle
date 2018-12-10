@@ -113,4 +113,51 @@ class DefaultTracingTest extends FunSuite with Eventually with IntegrationPatien
       (client, finalizer)
     }
   }
+
+  test("TraceServiceName overrides local client/server names") {
+    val serverTracer = new BufferingTracer
+    val clientTracer = new BufferingTracer
+
+    def assertServiceNames(server: String, client: String): Unit = {
+      eventually(
+        assert(serverTracer.toSeq.map(_.annotation).contains(Annotation.ServiceName(server)))
+      )
+      assert(clientTracer.toSeq.map(_.annotation).contains(Annotation.ServiceName(client)))
+    }
+
+    val server = StringServer.server
+      .configured(fparam.Tracer(serverTracer))
+      .configured(fparam.Label("theServer"))
+      .serve("localhost:*", Svc)
+
+    val client = StringClient.client
+      .configured(fparam.Tracer(clientTracer))
+      .newService(
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+        "theClient"
+      )
+
+    Await.result(client("foo"), 1.second)
+    assertServiceNames("theServer", "theClient")
+
+    val saved = TraceServiceName()
+    try {
+      TraceServiceName.set(Some("/p/fqn"))
+      Await.result(client("foo"), 1.second)
+
+      assertServiceNames("/p/fqn", "/p/fqn")
+      assert(
+        clientTracer.toSeq
+          .map(_.annotation).contains(
+            Annotation.BinaryAnnotation("clnt/finagle.label", "theClient")
+          )
+      )
+      assert(
+        serverTracer.toSeq
+          .map(_.annotation).contains(Annotation.BinaryAnnotation("srv/finagle.label", "theServer"))
+      )
+    } finally {
+      TraceServiceName.set(saved)
+    }
+  }
 }
