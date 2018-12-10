@@ -12,7 +12,6 @@ import com.twitter.io.Buf
 import com.twitter.logging.Level
 import com.twitter.util.{Future, Try, Return, Promise, Throw, Updatable, Time}
 import java.net.SocketAddress
-import java.security.cert.Certificate
 import java.util.logging.Logger
 import org.apache.thrift.protocol.{TProtocolFactory, TMessage, TMessageType}
 import scala.collection.mutable
@@ -48,7 +47,6 @@ private[finagle] object ThriftEmulator {
     def onClose: Future[Throwable] = cur.onClose
     def localAddress: SocketAddress = cur.localAddress
     def remoteAddress: SocketAddress = cur.remoteAddress
-    def peerCertificate: Option[Certificate] = cur.peerCertificate
     def close(deadline: Time): Future[Unit] = cur.close(deadline)
     val context: UpdatableContext = new UpdatableContext(init.context)
     override def toString: String = cur.toString

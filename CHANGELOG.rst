@@ -38,6 +38,11 @@ Breaking API Changes
   these methods within `TransportContext` should be changed to use the corresponding
   methods on `c.t.f.t.Transport` instead. ``PHAB_ID=D244742``
 
+* finagle-core: The deprecated `c.t.f.t.Transport.peerCertificate` method on the `Transport` class
+  (not the `Transport.peerCertificate` Finagle context) has been removed. Uses of this
+  method should be changed to use `c.t.f.t.TransportContext.peerCertificate` instead.
+  ``PHAB_ID=D250027``
+
 * finagle-core: The deprecated `c.t.f.t.TransportContext.status` method has been removed
   from `TransportContext`. Uses of this method should be changed to use
   `c.t.f.t.Transport.status` instead. ``PHAB_ID=D247234``

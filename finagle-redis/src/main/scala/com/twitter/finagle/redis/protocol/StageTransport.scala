@@ -5,7 +5,6 @@ import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.io.Buf
 import com.twitter.util.{Future, Time}
 import java.net.SocketAddress
-import java.security.cert.Certificate
 
 /**
  * A [[Transport]] implementation that uses [[StageDecoder]] to decode replies.
@@ -35,6 +34,5 @@ private[finagle] final class StageTransport(underlying: Transport[Buf, Buf])
   override def onClose: Future[Throwable] = underlying.onClose
   override def localAddress: SocketAddress = context.localAddress
   override def remoteAddress: SocketAddress = context.remoteAddress
-  override def peerCertificate: Option[Certificate] = context.peerCertificate
   val context: TransportContext = underlying.context
 }

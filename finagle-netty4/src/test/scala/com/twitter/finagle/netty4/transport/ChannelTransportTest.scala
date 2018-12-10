@@ -7,14 +7,11 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Await, Future, Return, Time, Throw}
 import io.netty.channel.{ChannelException => _, _}
 import io.netty.channel.embedded.EmbeddedChannel
-import io.netty.handler.ssl.SslHandler
 import org.scalatest.{FunSuite, OneInstancePerTest}
 import org.scalatest.concurrent.Eventually._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.mockito.Mockito._
-import java.security.cert.Certificate
-import javax.net.ssl.{SSLEngine, SSLSession}
 
 class ChannelTransportTest
     extends FunSuite
@@ -152,18 +149,6 @@ class ChannelTransportTest
       throw t
     }
     assert(transport.status == Status.Closed)
-  }
-
-  test("peerCertificate") {
-    val engine = mock[SSLEngine]
-    val session = mock[SSLSession]
-    val cert = mock[Certificate]
-    when(engine.getSession).thenReturn(session)
-    when(session.getPeerCertificates).thenReturn(Array(cert))
-    val ch = new EmbeddedChannel(new SslHandler(engine))
-    val tr = Transport.cast[String, String](new ChannelTransport(ch))
-
-    assert(tr.peerCertificate == Some(cert))
   }
 
   test("ChannelTransport drains the offer queue before reading from the channel") {

@@ -105,7 +105,6 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
     val onClose = new Promise[Throwable]
     def localAddress = context.localAddress
     def remoteAddress = context.remoteAddress
-    def peerCertificate = context.peerCertificate
     def close(deadline: Time) = Future.exception(new Exception)
     val context: TransportContext = new SimpleTransportContext()
   }
@@ -118,7 +117,6 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
     val status = Status.Closed
     def localAddress = context.localAddress
     def remoteAddress = context.remoteAddress
-    def peerCertificate = context.peerCertificate
     def close(deadline: Time) = Future.exception(new Exception)
     val context: TransportContext = new SimpleTransportContext()
   }
@@ -244,7 +242,6 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
       val onClose = Future.never
       def localAddress = context.localAddress
       def remoteAddress = context.remoteAddress
-      def peerCertificate = context.peerCertificate
       def close(deadline: Time) = ???
       val context: TransportContext = new SimpleTransportContext()
     }

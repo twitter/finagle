@@ -59,12 +59,6 @@ trait Transport[In, Out] extends Closable { self =>
   def remoteAddress: SocketAddress
 
   /**
-   * The peer certificate if a TLS session is established.
-   */
-  @deprecated("Please use Transport.context.peerCertificate instead", "2017-08-21")
-  def peerCertificate: Option[Certificate]
-
-  /**
    * Maps this transport to `Transport[In1, Out2]`. Note, exceptions
    * in `f` and `g` are lifted to a [[com.twitter.util.Future]].
    *
@@ -88,7 +82,6 @@ trait Transport[In, Out] extends Closable { self =>
       def onClose: Future[Throwable] = self.onClose
       def localAddress: SocketAddress = self.localAddress
       def remoteAddress: SocketAddress = self.remoteAddress
-      def peerCertificate: Option[Certificate] = self.peerCertificate
       def close(deadline: Time): Future[Unit] = self.close(deadline)
       def context: Context = self.context
       override def toString: String = self.toString
@@ -336,7 +329,6 @@ object Transport {
         def onClose: Future[Throwable] = trans.onClose
         def localAddress: SocketAddress = trans.localAddress
         def remoteAddress: SocketAddress = trans.remoteAddress
-        def peerCertificate: Option[Certificate] = trans.peerCertificate
         def close(deadline: Time): Future[Unit] = trans.close(deadline)
         def context: Context = trans.context.asInstanceOf[Context]
         override def toString: String = trans.toString
@@ -375,7 +367,6 @@ abstract class TransportProxy[In, Out](_self: Transport[In, Out]) extends Transp
   def onClose: Future[Throwable] = self.onClose
   def localAddress: SocketAddress = self.localAddress
   def remoteAddress: SocketAddress = self.remoteAddress
-  def peerCertificate: Option[Certificate] = self.peerCertificate
   def close(deadline: Time): Future[Unit] = self.close(deadline)
   def context: Context = self.context
   override def toString: String = self.toString
@@ -412,7 +403,6 @@ class QueueTransport[In, Out](writeq: AsyncQueue[In], readq: AsyncQueue[Out])
   val onClose: Future[Throwable] = closep
   def localAddress: SocketAddress = context.localAddress
   def remoteAddress: SocketAddress = context.remoteAddress
-  def peerCertificate: Option[Certificate] = context.peerCertificate
   val context: TransportContext =
     new SimpleTransportContext(new SocketAddress {}, new SocketAddress {}, None)
 }

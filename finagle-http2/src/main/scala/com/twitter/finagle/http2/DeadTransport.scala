@@ -4,7 +4,6 @@ import com.twitter.finagle.Status
 import com.twitter.finagle.transport.{SimpleTransportContext, Transport, TransportContext}
 import com.twitter.util.{Future, Time}
 import java.net.SocketAddress
-import java.security.cert.Certificate
 
 private[http2] final class DeadTransport(exn: Throwable, remote: SocketAddress)
     extends Transport[Any, Any] {
@@ -17,7 +16,6 @@ private[http2] final class DeadTransport(exn: Throwable, remote: SocketAddress)
   val context: TransportContext = new SimpleTransportContext(remoteAddress = remote)
   def localAddress: SocketAddress = context.localAddress
   def remoteAddress: SocketAddress = context.remoteAddress
-  def peerCertificate: Option[Certificate] = None
 
   def write(req: Any): Future[Unit] = opsResult
   def read(): Future[Any] = opsResult

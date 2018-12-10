@@ -16,7 +16,6 @@ import com.twitter.util.{Future, Promise, Return, Throw, Time, Try}
 import io.netty.handler.codec.http.{HttpObject, HttpRequest, LastHttpContent}
 import io.netty.handler.codec.http2.Http2Error
 import java.net.SocketAddress
-import java.security.cert.Certificate
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
 import scala.collection.mutable.{HashMap => MutableHashMap}
 
@@ -560,8 +559,6 @@ final private[http2] class StreamTransportFactory(
     def localAddress: SocketAddress = context.localAddress
 
     def remoteAddress: SocketAddress = context.remoteAddress
-
-    def peerCertificate: Option[Certificate] = context.peerCertificate
 
     def close(deadline: Time): Future[Unit] = {
       wasClosed = true
