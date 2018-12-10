@@ -54,75 +54,82 @@ private[http2] final class H2Filter(timer: Timer) extends ChannelDuplexHandler {
   }
 
   override def close(ctx: ChannelHandlerContext, promise: ChannelPromise): Unit = {
-    val deadline = closeDeadline
-    val now = Time.now
+    val connectionHandler = ctx.pipeline.get(classOf[Http2ConnectionHandler])
 
-    if (ctx.pipeline.get(classOf[Http2ConnectionHandler]) == null) {
+    if (connectionHandler == null) {
       // Illegal state.
       val message = s"Found H2Filter in a pipeline without a Http2ConnectionHandler. " +
         s"Pipeline: ${ctx.pipeline}"
       val ex = new IllegalStateException(message)
       logger.error(ex, message)
       ctx.close(promise)
-    } else if (deadline <= now) {
-      logger.info(s"Deadline already passed ($deadline <= $now). Closing now.")
-      super.close(ctx, promise)
     } else {
-      logger.info(s"Closing h2 session with deadline $deadline")
-      // Send a GOAWAY frame and set a timer to forcefully close the channel.
-      val goawayFrame = new DefaultHttp2GoAwayFrame(Http2Error.NO_ERROR)
-      // This is gaming the system. Netty wants you to specify how many bonus racy streams
-      // you're willing to handle and you can't just say the last stream id. So, what you do
-      // is just say that you'll take more values than could possible be done and let Netty
-      // cap it to Int.MaxValue for you. Not pretty, but effective.
-      goawayFrame.setExtraStreamIds(Int.MaxValue)
+      val deadline = closeDeadline
+      val now = Time.now
 
-      // We need to make sure we only utilize our promise once.
-      val promiseOnce = new AtomicBoolean()
+      if (deadline <= now) {
+        // Since we're not sending our own GOAWAY we need to make sure that we set the
+        // deadline in `Http2ConnectionHandler` since it try to do the non-graceful shutdown.
+        connectionHandler.gracefulShutdownTimeoutMillis(0)
+        logger.debug(s"Deadline already passed ($deadline <= $now). Closing now.")
+        super.close(ctx, promise)
+      } else {
+        logger.info(s"Closing h2 session with deadline $deadline")
+        // Send a GOAWAY frame and set a timer to forcefully close the channel.
+        val goawayFrame = new DefaultHttp2GoAwayFrame(Http2Error.NO_ERROR)
+        // This is gaming the system. Netty wants you to specify how many bonus racy streams
+        // you're willing to handle and you can't just say the last stream id. So, what you do
+        // is just say that you'll take more values than could possible be done and let Netty
+        // cap it to Int.MaxValue for you. Not pretty, but effective.
+        goawayFrame.setExtraStreamIds(Int.MaxValue)
 
-      // If we fail to write the frame we do a 'hard close' to make sure the channel goes down.
-      ctx
-        .writeAndFlush(goawayFrame).addListener(new ChannelFutureListener {
-          def operationComplete(future: ChannelFuture): Unit =
-            if (!future.isSuccess && promiseOnce.compareAndSet(false, true)) {
-              ctx.close(promise)
-            }
-        })
+        // We need to make sure we only utilize our promise once.
+        val promiseOnce = new AtomicBoolean()
 
-      // Now that we've sent our GOAWAY, lets set a timer to force the thing closed by
-      // the deadline if the other peer doesn't hang up on us first.
-      val closeTask = timer.schedule(deadline) {
-        if (promiseOnce.compareAndSet(false, true)) {
-          ctx.channel.eventLoop.execute(new Runnable {
-            def run(): Unit = {
-              // Write a second GOAWAY with the last observed stream and then
-              // close up shop.
-              logger.info(
-                "Graceful draining period lapsed. " +
-                  "Sending final GOAWAY and closing the connection."
-              )
-              ctx
-                .writeAndFlush(new DefaultHttp2GoAwayFrame(Http2Error.NO_ERROR))
-                .addListener(new ChannelFutureListener {
-                  def operationComplete(future: ChannelFuture): Unit = ctx.close(promise)
-                })
-
-            }
+        // If we fail to write the frame we do a 'hard close' to make sure the channel goes down.
+        ctx
+          .writeAndFlush(goawayFrame).addListener(new ChannelFutureListener {
+            def operationComplete(future: ChannelFuture): Unit =
+              if (!future.isSuccess && promiseOnce.compareAndSet(false, true)) {
+                ctx.close(promise)
+              }
           })
 
-        }
-      }
-
-      // Don't leave stuff laying around in the common case where the peer hangs up.
-      ctx.channel.closeFuture.addListener(new ChannelFutureListener {
-        def operationComplete(future: ChannelFuture): Unit = {
-          closeTask.cancel()
+        // Now that we've sent our GOAWAY, lets set a timer to force the thing closed by
+        // the deadline if the other peer doesn't hang up on us first.
+        val closeTask = timer.schedule(deadline) {
           if (promiseOnce.compareAndSet(false, true)) {
-            logger.info("Channel closed, session terminated.")
-            promise.setSuccess()
+            ctx.channel.eventLoop.execute(new Runnable {
+              def run(): Unit = {
+                // Write a second GOAWAY with the last observed stream and then
+                // close up shop.
+                logger.info(
+                  "Graceful draining period lapsed. " +
+                    "Sending final GOAWAY and closing the connection."
+                )
+                ctx
+                  .writeAndFlush(new DefaultHttp2GoAwayFrame(Http2Error.NO_ERROR))
+                  .addListener(new ChannelFutureListener {
+                    def operationComplete(future: ChannelFuture): Unit = ctx.close(promise)
+                  })
+
+              }
+            })
+
           }
         }
-      })
+
+        // Don't leave stuff laying around in the common case where the peer hangs up.
+        ctx.channel.closeFuture.addListener(new ChannelFutureListener {
+          def operationComplete(future: ChannelFuture): Unit = {
+            closeTask.cancel()
+            if (promiseOnce.compareAndSet(false, true)) {
+              logger.info("Channel closed, session terminated.")
+              promise.setSuccess()
+            }
+          }
+        })
+      }
     }
   }
 }
