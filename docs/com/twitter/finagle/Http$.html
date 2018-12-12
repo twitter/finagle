@@ -1171,7 +1171,7 @@ generator.
                         <a class="trait" href="MysqlRichClient.html" title="Supplements a com.twitter.finagle.Client with convenient builder methods for constructing a mysql client."></a>
                         <a href="MysqlRichClient.html" title="Supplements a com.twitter.finagle.Client with convenient builder methods for constructing a mysql client.">MysqlRichClient</a>
                       </li><li class="current-entities indented3">
-                        <a class="object" href="Name$.html" title=""></a>
+                        <a class="object" href="Name$.html" title="See Names for Java compatibility APIs."></a>
                         <a class="trait" href="Name.html" title="Names identify network locations."></a>
                         <a href="Name.html" title="Names identify network locations.">Name</a>
                       </li><li class="current-entities indented3">
@@ -1182,6 +1182,10 @@ generator.
                         <a class="object" href="Namer$.html" title=""></a>
                         <a class="class" href="Namer.html" title="A namer is a context in which a NameTree is bound."></a>
                         <a href="Namer.html" title="A namer is a context in which a NameTree is bound.">Namer</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="object" href="Names$.html" title="Java compatibility APIs for Name."></a>
+                        <a href="Names$.html" title="Java compatibility APIs for Name.">Names</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="object" href="NegResolver$.html" title=""></a>
@@ -1488,9 +1492,9 @@ generator.
         <div id="types" class="types members">
               <h3>Type Members</h3>
               <ol><li name="com.twitter.finagle.Http.Client" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ClientextendsEndpointerStackClient[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response,com.twitter.finagle.Http.Client]withWithSessionPool[com.twitter.finagle.Http.Client]withWithDefaultLoadBalancer[com.twitter.finagle.Http.Client]withProductwithSerializable"></a><a id="Client:Client"></a>
+      <a id="ClientextendsEndpointerStackClient[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response,com.twitter.finagle.Http.Client]withWithSessionPool[com.twitter.finagle.Http.Client]withWithDefaultLoadBalancer[com.twitter.finagle.Http.Client]withStack.Transformable[com.twitter.finagle.Http.Client]withProductwithSerializable"></a><a id="Client:Client"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/Http$.html#ClientextendsEndpointerStackClient[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response,com.twitter.finagle.Http.Client]withWithSessionPool[com.twitter.finagle.Http.Client]withWithDefaultLoadBalancer[com.twitter.finagle.Http.Client]withProductwithSerializable" title="Permalink">
+      <a href="../../../com/twitter/finagle/Http$.html#ClientextendsEndpointerStackClient[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response,com.twitter.finagle.Http.Client]withWithSessionPool[com.twitter.finagle.Http.Client]withWithDefaultLoadBalancer[com.twitter.finagle.Http.Client]withStack.Transformable[com.twitter.finagle.Http.Client]withProductwithSerializable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1499,7 +1503,7 @@ generator.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="" href="Http$$Client.html"><span class="name">Client</span></a><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]] = <span class="symbol"><span class="name"><a href="Http$$Client$.html">Client.stack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol"><span class="name"><a href="Http$$Client$.html">Client.params</a></span></span></span>)</span><span class="result"> extends <a href="client/EndpointerStackClient.html" class="extype" name="com.twitter.finagle.client.EndpointerStackClient">EndpointerStackClient</a>[<a href="http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>, <a href="Http$$Client.html" class="extype" name="com.twitter.finagle.Http.Client">Client</a>] with <a href="param/WithSessionPool.html" class="extype" name="com.twitter.finagle.param.WithSessionPool">WithSessionPool</a>[<a href="Http$$Client.html" class="extype" name="com.twitter.finagle.Http.Client">Client</a>] with <a href="param/WithDefaultLoadBalancer.html" class="extype" name="com.twitter.finagle.param.WithDefaultLoadBalancer">WithDefaultLoadBalancer</a>[<a href="Http$$Client.html" class="extype" name="com.twitter.finagle.Http.Client">Client</a>] with <a href="http://www.scala-lang.org/api/2.12.7/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.7/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="Http$$Client.html"><span class="name">Client</span></a><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]] = <span class="symbol"><span class="name"><a href="Http$$Client$.html">Client.stack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol"><span class="name"><a href="Http$$Client$.html">Client.params</a></span></span></span>)</span><span class="result"> extends <a href="client/EndpointerStackClient.html" class="extype" name="com.twitter.finagle.client.EndpointerStackClient">EndpointerStackClient</a>[<a href="http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>, <a href="Http$$Client.html" class="extype" name="com.twitter.finagle.Http.Client">Client</a>] with <a href="param/WithSessionPool.html" class="extype" name="com.twitter.finagle.param.WithSessionPool">WithSessionPool</a>[<a href="Http$$Client.html" class="extype" name="com.twitter.finagle.Http.Client">Client</a>] with <a href="param/WithDefaultLoadBalancer.html" class="extype" name="com.twitter.finagle.param.WithDefaultLoadBalancer">WithDefaultLoadBalancer</a>[<a href="Http$$Client.html" class="extype" name="com.twitter.finagle.Http.Client">Client</a>] with <a href="Stack$$Transformable.html" class="extype" name="com.twitter.finagle.Stack.Transformable">Transformable</a>[<a href="Http$$Client.html" class="extype" name="com.twitter.finagle.Http.Client">Client</a>] with <a href="http://www.scala-lang.org/api/2.12.7/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.7/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       

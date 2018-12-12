@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Extending Finagle &#8212; Finagle 18.11.0 documentation</title>
+    <title>Extending Finagle &#8212; Finagle 18.12.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '18.11.0',
+        VERSION:     '18.12.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="top" title="Finagle 18.11.0 documentation" href="../index.html" />
+    <link rel="top" title="Finagle 18.12.0 documentation" href="../index.html" />
     <link rel="next" title="Twitter Futures" href="Futures.html" />
     <link rel="prev" title="Glossary of Terms" href="../Glossary.html" />
    
@@ -354,10 +354,8 @@ closing a <code class="docutils literal"><span class="pre">Transport</span></cod
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">service</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Service</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="o">{</span>
   <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="k">=</span> <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="n">request</span><span class="o">)</span>
 <span class="o">}</span>
-<span class="k">val</span> <span class="n">serveTransport</span> <span class="k">=</span> <span class="o">(</span><span class="n">t</span><span class="k">:</span> <span class="kt">Transport</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">])</span> <span class="k">=&gt;</span>
-  <span class="k">new</span> <span class="nc">SerialServerDispatcher</span><span class="o">(</span><span class="n">t</span><span class="o">,</span> <span class="n">service</span><span class="o">)</span>
-<span class="k">val</span> <span class="n">listener</span> <span class="k">=</span> <span class="nc">Netty4Listener</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">](</span>
-  <span class="nc">StringServerPipeline</span><span class="o">,</span> <span class="nc">StackServer</span><span class="o">.</span><span class="n">defaultParams</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">serveTransport</span> <span class="k">=</span> <span class="o">(</span><span class="n">t</span><span class="k">:</span> <span class="kt">Transport</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">])</span> <span class="k">=&gt;</span> <span class="k">new</span> <span class="nc">SerialServerDispatcher</span><span class="o">(</span><span class="n">t</span><span class="o">,</span> <span class="n">service</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">listener</span> <span class="k">=</span> <span class="nc">Netty4Listener</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">](</span><span class="nc">StringServerPipeline</span><span class="o">,</span> <span class="nc">StackServer</span><span class="o">.</span><span class="n">defaultParams</span><span class="o">)</span>
 <span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="n">listener</span><span class="o">.</span><span class="n">listen</span><span class="o">(</span><span class="n">address</span><span class="o">)</span> <span class="o">{</span> <span class="n">serveTransport</span><span class="o">(</span><span class="k">_</span><span class="o">)</span> <span class="o">}</span>
 </pre></div>
 </div>
@@ -383,8 +381,8 @@ processing is done in the <code class="docutils literal"><span class="pre">Dispa
 <p>We&#8217;ll create a server that uses Netty 4:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">case</span> <span class="k">class</span> <span class="nc">Server</span><span class="o">(</span>
   <span class="n">stack</span><span class="k">:</span> <span class="kt">Stack</span><span class="o">[</span><span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]]</span> <span class="k">=</span> <span class="nc">StackServer</span><span class="o">.</span><span class="n">newStack</span><span class="o">,</span>
-  <span class="n">params</span><span class="k">:</span> <span class="kt">Stack.Params</span> <span class="o">=</span> <span class="nc">StackServer</span><span class="o">.</span><span class="n">defaultParams</span>
-<span class="o">)</span> <span class="k">extends</span> <span class="nc">StdStackServer</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span>, <span class="kt">Server</span><span class="o">]</span> <span class="o">{</span>
+  <span class="n">params</span><span class="k">:</span> <span class="kt">Stack.Params</span> <span class="o">=</span> <span class="nc">StackServer</span><span class="o">.</span><span class="n">defaultParams</span><span class="o">)</span>
+    <span class="k">extends</span> <span class="nc">StdStackServer</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span>, <span class="kt">Server</span><span class="o">]</span> <span class="o">{</span>
   <span class="k">protected</span> <span class="k">type</span> <span class="kt">In</span> <span class="o">=</span> <span class="nc">String</span>
   <span class="k">protected</span> <span class="k">type</span> <span class="kt">Out</span> <span class="o">=</span> <span class="nc">String</span>
 
@@ -397,8 +395,9 @@ processing is done in the <code class="docutils literal"><span class="pre">Dispa
     <span class="nc">Netty4Listener</span><span class="o">(</span><span class="nc">StringServerPipeline</span><span class="o">,</span> <span class="n">params</span><span class="o">)</span>
 
   <span class="k">protected</span> <span class="k">def</span> <span class="n">newDispatcher</span><span class="o">(</span>
-      <span class="n">transport</span><span class="k">:</span> <span class="kt">Transport</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">],</span>
-      <span class="n">service</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">])</span> <span class="k">=</span>
+    <span class="n">transport</span><span class="k">:</span> <span class="kt">Transport</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">],</span>
+    <span class="n">service</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span>
+  <span class="o">)</span> <span class="k">=</span>
     <span class="k">new</span> <span class="nc">SerialServerDispatcher</span><span class="o">(</span><span class="n">transport</span><span class="o">,</span> <span class="n">service</span><span class="o">)</span>
 <span class="o">}</span>
 </pre></div>
@@ -513,8 +512,8 @@ defines a custom dispatcher.</td></tr>
 <p>Given a defined transporter and request dispatching strategy, we can compose the
 two and create a client. We&#8217;ll create a client that uses Netty 4:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">addr</span> <span class="k">=</span> <span class="k">new</span> <span class="n">java</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="nc">InetSocketAddress</span><span class="o">(</span><span class="s">&quot;localhost&quot;</span><span class="o">,</span> <span class="mi">8080</span><span class="o">)</span>
-<span class="k">val</span> <span class="n">transporter</span> <span class="k">=</span> <span class="nc">Netty4Transporter</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">](</span>
-  <span class="nc">StringClientPipeline</span><span class="o">,</span> <span class="n">addr</span><span class="o">,</span> <span class="nc">StackClient</span><span class="o">.</span><span class="n">defaultParams</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">transporter</span> <span class="k">=</span>
+  <span class="nc">Netty4Transporter</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">](</span><span class="nc">StringClientPipeline</span><span class="o">,</span> <span class="n">addr</span><span class="o">,</span> <span class="nc">StackClient</span><span class="o">.</span><span class="n">defaultParams</span><span class="o">)</span>
 
 <span class="k">val</span> <span class="n">bridge</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Service</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]]</span> <span class="k">=</span>
   <span class="n">transporter</span><span class="o">(</span><span class="n">addr</span><span class="o">)</span> <span class="n">map</span> <span class="o">{</span> <span class="n">transport</span> <span class="k">=&gt;</span>
@@ -563,8 +562,8 @@ filters:</p>
 the composable components used throughout finagle.</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">newClient</span> <span class="k">=</span>
   <span class="n">retry</span> <span class="n">andThen</span>
-  <span class="n">timeout</span> <span class="n">andThen</span>
-  <span class="n">maskCancel</span> <span class="n">andThen</span> <span class="n">client</span>
+    <span class="n">timeout</span> <span class="n">andThen</span>
+    <span class="n">maskCancel</span> <span class="n">andThen</span> <span class="n">client</span>
 
 <span class="k">val</span> <span class="n">result</span> <span class="k">=</span> <span class="n">newClient</span><span class="o">(</span><span class="s">&quot;hello&quot;</span><span class="o">)</span>
 <span class="n">println</span><span class="o">(</span><span class="nc">Await</span><span class="o">.</span><span class="n">result</span><span class="o">(</span><span class="n">result</span><span class="o">))</span>
@@ -598,21 +597,21 @@ on <a class="reference internal" href="../Clients.html#client-modules"><span cla
 <p>Putting together a <code class="docutils literal"><span class="pre">StdStackClient</span></code> is simple:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">case</span> <span class="k">class</span> <span class="nc">Client</span><span class="o">(</span>
   <span class="n">stack</span><span class="k">:</span> <span class="kt">Stack</span><span class="o">[</span><span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]]</span> <span class="k">=</span> <span class="nc">StackClient</span><span class="o">.</span><span class="n">newStack</span><span class="o">,</span>
-  <span class="n">params</span><span class="k">:</span> <span class="kt">Stack.Params</span> <span class="o">=</span> <span class="nc">StackClient</span><span class="o">.</span><span class="n">defaultParams</span>
-<span class="o">)</span> <span class="k">extends</span> <span class="nc">StdStackClient</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span>, <span class="kt">Client</span><span class="o">]</span> <span class="o">{</span>
+  <span class="n">params</span><span class="k">:</span> <span class="kt">Stack.Params</span> <span class="o">=</span> <span class="nc">StackClient</span><span class="o">.</span><span class="n">defaultParams</span><span class="o">)</span>
+    <span class="k">extends</span> <span class="nc">StdStackClient</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span>, <span class="kt">Client</span><span class="o">]</span> <span class="o">{</span>
   <span class="k">protected</span> <span class="k">type</span> <span class="kt">In</span> <span class="o">=</span> <span class="nc">String</span>
   <span class="k">protected</span> <span class="k">type</span> <span class="kt">Out</span> <span class="o">=</span> <span class="nc">String</span>
 
   <span class="k">protected</span> <span class="k">def</span> <span class="n">copy1</span><span class="o">(</span>
-      <span class="n">stack</span><span class="k">:</span> <span class="kt">Stack</span><span class="o">[</span><span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]],</span>
-      <span class="n">params</span><span class="k">:</span> <span class="kt">Stack.Params</span><span class="o">)</span><span class="k">:</span> <span class="kt">Client</span> <span class="o">=</span>
+    <span class="n">stack</span><span class="k">:</span> <span class="kt">Stack</span><span class="o">[</span><span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]],</span>
+    <span class="n">params</span><span class="k">:</span> <span class="kt">Stack.Params</span>
+  <span class="o">)</span><span class="k">:</span> <span class="kt">Client</span> <span class="o">=</span>
     <span class="n">copy</span><span class="o">(</span><span class="n">stack</span><span class="o">,</span> <span class="n">params</span><span class="o">)</span>
 
   <span class="k">protected</span> <span class="k">def</span> <span class="n">newTransporter</span><span class="o">(</span><span class="n">addr</span><span class="k">:</span> <span class="kt">SocketAddress</span><span class="o">)</span><span class="k">:</span> <span class="kt">Transporter</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="k">=</span>
     <span class="nc">Netty4Transporter</span><span class="o">.</span><span class="n">rawTransporter</span><span class="o">(</span><span class="nc">StringClientPipeline</span><span class="o">,</span> <span class="n">addr</span><span class="o">,</span> <span class="n">params</span><span class="o">)</span>
 
-  <span class="k">protected</span> <span class="k">def</span> <span class="n">newDispatcher</span><span class="o">(</span>
-      <span class="n">transport</span><span class="k">:</span> <span class="kt">Transport</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">])</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="k">=</span>
+  <span class="k">protected</span> <span class="k">def</span> <span class="n">newDispatcher</span><span class="o">(</span><span class="n">transport</span><span class="k">:</span> <span class="kt">Transport</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">])</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="k">=</span>
     <span class="k">new</span> <span class="nc">SerialClientDispatcher</span><span class="o">(</span><span class="n">transport</span><span class="o">)</span>
 <span class="o">}</span>
 </pre></div>

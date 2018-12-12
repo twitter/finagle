@@ -763,6 +763,10 @@ finagle clients and servers.
                         <a class="class" href="ServerError.html" title=""></a>
                         <a href="ServerError.html" title="">ServerError</a>
                       </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="StreamEntryReply.html" title=""></a>
+                        <a href="StreamEntryReply.html" title="">StreamEntryReply</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="TransactionalClient$.html" title=""></a>
                         <a class="class" href="TransactionalClient.html" title="Client connected over a single connection to a single redis instance, supporting transactions"></a>
                         <a href="TransactionalClient.html" title="Client connected over a single connection to a single redis instance, supporting transactions">TransactionalClient</a>
@@ -770,6 +774,18 @@ finagle clients and servers.
                         <span class="separator"></span>
                         <a class="trait" href="Transactions.html" title=""></a>
                         <a href="Transactions.html" title="">Transactions</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="XPendingAllReply.html" title=""></a>
+                        <a href="XPendingAllReply.html" title="">XPendingAllReply</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="XPendingRangeReply.html" title=""></a>
+                        <a href="XPendingRangeReply.html" title="">XPendingRangeReply</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="XReadStreamReply.html" title=""></a>
+                        <a href="XReadStreamReply.html" title="">XReadStreamReply</a>
                       </li><li name="com.twitter.finagle.server" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="server"></a><a id="server:server"></a>
       <span class="permalink">
@@ -1174,9 +1190,9 @@ generator.
       
       
     </li><li name="com.twitter.finagle.redis.NormalCommands" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="NormalCommandsextendsKeyCommandswithStringCommandswithHashCommandswithSortedSetCommandswithListCommandswithSetCommandswithBtreeSortedSetCommandswithTopologyCommandswithHyperLogLogCommandswithGeoCommandswithPubSubCommandswithServerCommandswithScriptCommandswithConnectionCommands"></a><a id="NormalCommands:NormalCommands"></a>
+      <a id="NormalCommandsextendsKeyCommandswithStringCommandswithHashCommandswithSortedSetCommandswithListCommandswithSetCommandswithBtreeSortedSetCommandswithTopologyCommandswithHyperLogLogCommandswithGeoCommandswithPubSubCommandswithServerCommandswithScriptCommandswithConnectionCommandswithStreamCommands"></a><a id="NormalCommands:NormalCommands"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/redis/index.html#NormalCommandsextendsKeyCommandswithStringCommandswithHashCommandswithSortedSetCommandswithListCommandswithSetCommandswithBtreeSortedSetCommandswithTopologyCommandswithHyperLogLogCommandswithGeoCommandswithPubSubCommandswithServerCommandswithScriptCommandswithConnectionCommands" title="Permalink">
+      <a href="../../../../com/twitter/finagle/redis/index.html#NormalCommandsextendsKeyCommandswithStringCommandswithHashCommandswithSortedSetCommandswithListCommandswithSetCommandswithBtreeSortedSetCommandswithTopologyCommandswithHyperLogLogCommandswithGeoCommandswithPubSubCommandswithServerCommandswithScriptCommandswithConnectionCommandswithStreamCommands" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1185,7 +1201,7 @@ generator.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="" href="NormalCommands.html"><span class="name">NormalCommands</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.redis.KeyCommands">KeyCommands</span> with <span class="extype" name="com.twitter.finagle.redis.StringCommands">StringCommands</span> with <span class="extype" name="com.twitter.finagle.redis.HashCommands">HashCommands</span> with <span class="extype" name="com.twitter.finagle.redis.SortedSetCommands">SortedSetCommands</span> with <span class="extype" name="com.twitter.finagle.redis.ListCommands">ListCommands</span> with <span class="extype" name="com.twitter.finagle.redis.SetCommands">SetCommands</span> with <span class="extype" name="com.twitter.finagle.redis.BtreeSortedSetCommands">BtreeSortedSetCommands</span> with <span class="extype" name="com.twitter.finagle.redis.TopologyCommands">TopologyCommands</span> with <span class="extype" name="com.twitter.finagle.redis.HyperLogLogCommands">HyperLogLogCommands</span> with <span class="extype" name="com.twitter.finagle.redis.GeoCommands">GeoCommands</span> with <span class="extype" name="com.twitter.finagle.redis.PubSubCommands">PubSubCommands</span> with <a href="ServerCommands.html" class="extype" name="com.twitter.finagle.redis.ServerCommands">ServerCommands</a> with <span class="extype" name="com.twitter.finagle.redis.ScriptCommands">ScriptCommands</span> with <a href="ConnectionCommands.html" class="extype" name="com.twitter.finagle.redis.ConnectionCommands">ConnectionCommands</a></span>
+        <a title="" href="NormalCommands.html"><span class="name">NormalCommands</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.redis.KeyCommands">KeyCommands</span> with <span class="extype" name="com.twitter.finagle.redis.StringCommands">StringCommands</span> with <span class="extype" name="com.twitter.finagle.redis.HashCommands">HashCommands</span> with <span class="extype" name="com.twitter.finagle.redis.SortedSetCommands">SortedSetCommands</span> with <span class="extype" name="com.twitter.finagle.redis.ListCommands">ListCommands</span> with <span class="extype" name="com.twitter.finagle.redis.SetCommands">SetCommands</span> with <span class="extype" name="com.twitter.finagle.redis.BtreeSortedSetCommands">BtreeSortedSetCommands</span> with <span class="extype" name="com.twitter.finagle.redis.TopologyCommands">TopologyCommands</span> with <span class="extype" name="com.twitter.finagle.redis.HyperLogLogCommands">HyperLogLogCommands</span> with <span class="extype" name="com.twitter.finagle.redis.GeoCommands">GeoCommands</span> with <span class="extype" name="com.twitter.finagle.redis.PubSubCommands">PubSubCommands</span> with <a href="ServerCommands.html" class="extype" name="com.twitter.finagle.redis.ServerCommands">ServerCommands</a> with <span class="extype" name="com.twitter.finagle.redis.ScriptCommands">ScriptCommands</span> with <a href="ConnectionCommands.html" class="extype" name="com.twitter.finagle.redis.ConnectionCommands">ConnectionCommands</a> with <span class="extype" name="com.twitter.finagle.redis.StreamCommands">StreamCommands</span></span>
       </span>
       
       
@@ -1254,6 +1270,22 @@ generator.
       </span>
       
       
+    </li><li name="com.twitter.finagle.redis.StreamEntryReply" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="StreamEntryReplyextendsProductwithSerializable"></a><a id="StreamEntryReply:StreamEntryReply"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/redis/index.html#StreamEntryReplyextendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="StreamEntryReply.html"><span class="name">StreamEntryReply</span></a><span class="params">(<span name="id">id: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>, <span name="fields">fields: <span class="extype" name="scala.Seq">Seq</span>[(<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>, <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>)]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.7/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.redis.TransactionalClient" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="TransactionalClientextendsBaseClientwithNormalCommands"></a><a id="TransactionalClient:TransactionalClient"></a>
       <span class="permalink">
@@ -1285,6 +1317,54 @@ single redis instance, supporting transactions
       </span>
       <span class="symbol">
         <a title="" href="Transactions.html"><span class="name">Transactions</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.redis.XPendingAllReply" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="XPendingAllReplyextendsProductwithSerializable"></a><a id="XPendingAllReply:XPendingAllReply"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/redis/index.html#XPendingAllReplyextendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="XPendingAllReply.html"><span class="name">XPendingAllReply</span></a><span class="params">(<span name="count">count: <span class="extype" name="java.lang.Long">Long</span></span>, <span name="start">start: <a href="http://www.scala-lang.org/api/2.12.7/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>]</span>, <span name="end">end: <a href="http://www.scala-lang.org/api/2.12.7/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>]</span>, <span name="pendingByConsumer">pendingByConsumer: <span class="extype" name="scala.Seq">Seq</span>[(<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>, <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>)]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.7/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.redis.XPendingRangeReply" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="XPendingRangeReplyextendsProductwithSerializable"></a><a id="XPendingRangeReply:XPendingRangeReply"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/redis/index.html#XPendingRangeReplyextendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="XPendingRangeReply.html"><span class="name">XPendingRangeReply</span></a><span class="params">(<span name="id">id: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>, <span name="consumer">consumer: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>, <span name="millisSinceLastDeliver">millisSinceLastDeliver: <span class="extype" name="java.lang.Long">Long</span></span>, <span name="numDeliveries">numDeliveries: <span class="extype" name="java.lang.Long">Long</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.7/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.redis.XReadStreamReply" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="XReadStreamReplyextendsProductwithSerializable"></a><a id="XReadStreamReply:XReadStreamReply"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/redis/index.html#XReadStreamReplyextendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="XReadStreamReply.html"><span class="name">XReadStreamReply</span></a><span class="params">(<span name="stream">stream: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>, <span name="entries">entries: <span class="extype" name="scala.Seq">Seq</span>[<a href="StreamEntryReply.html" class="extype" name="com.twitter.finagle.redis.StreamEntryReply">StreamEntryReply</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.7/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       

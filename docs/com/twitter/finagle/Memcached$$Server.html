@@ -943,8 +943,7 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
         <span class="name">transformed</span><span class="params">(<span name="t">t: <a href="Stack$$Transformer.html" class="extype" name="com.twitter.finagle.Stack.Transformer">Transformer</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a></span>
       </span>
       
-      <p class="shortcomment cmt">Transform the stack using the given <code>Transformer</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Transform the stack using the given <code>Transformer</code>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="server/ListeningStackServer.html" class="extype" name="com.twitter.finagle.server.ListeningStackServer">ListeningStackServer</a> → <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a> → <a href="Stack$$Transformable.html" class="extype" name="com.twitter.finagle.Stack.Transformable">Transformable</a></dd></dl></div>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="server/ListeningStackServer.html" class="extype" name="com.twitter.finagle.server.ListeningStackServer">ListeningStackServer</a> → <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a> → <a href="Stack$$Transformable.html" class="extype" name="com.twitter.finagle.Stack.Transformable">Transformable</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="server/ListeningStackServer.html#withStack(fn:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]=&gt;com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]):This" class="extmbr" name="com.twitter.finagle.server.ListeningStackServer#withStack">withStack</a></p></span></dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
@@ -1208,6 +1207,34 @@ draining, and many more.</p><p>The default setup for a Finagle client's sessions
 timeouts on it.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a> → <a href="param/WithServerSession.html" class="extype" name="com.twitter.finagle.param.WithServerSession">WithServerSession</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Memcached.Server#withStack" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withStack(fn:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.memcached.protocol.Command,com.twitter.finagle.memcached.protocol.Response]]=&gt;com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.memcached.protocol.Command,com.twitter.finagle.memcached.protocol.Response]]):com.twitter.finagle.Memcached.Server"></a><a id="withStack((Stack[ServiceFactory[Command,Response]])⇒Stack[ServiceFactory[Command,Response]]):Server"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Memcached$$Server.html#withStack(fn:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.memcached.protocol.Command,com.twitter.finagle.memcached.protocol.Response]]=&gt;com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.memcached.protocol.Command,com.twitter.finagle.memcached.protocol.Response]]):com.twitter.finagle.Memcached.Server" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withStack</span><span class="params">(<span name="fn">fn: (<a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]]) ⇒ <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A new <span class="extype" name="StackServer">StackServer</span> using the function to create a new <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A new <span class="extype" name="StackServer">StackServer</span> using the function to create a new <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>.</p><p>The input to <code>fn</code> is the <a href="#stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.memcached.protocol.Command,com.twitter.finagle.memcached.protocol.Response]]" class="extmbr" name="com.twitter.finagle.Memcached.Server#stack">client's current stack</a>.
+This API allows for easier usage when writing code that
+uses method chaining.</p><p>This method is similar to <a href="#transformed(t:com.twitter.finagle.Stack.Transformer):This" class="extmbr" name="com.twitter.finagle.Memcached.Server#transformed">transformed</a> while providing easier API
+ergonomics for one-off <code>Stack</code> changes.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a> → <a href="server/ListeningStackServer.html" class="extype" name="com.twitter.finagle.server.ListeningStackServer">ListeningStackServer</a> → <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a></dd><div class="block">Example:
+               <ol><li class="cmt"><p>
+From Scala:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.server.withStack(_.prepend(MyStackModule))</pre><p>From Java:</p><pre><span class="kw">import</span> com.twitter.finagle.Http;
+<span class="kw">import</span> static com.twitter.util.<span class="std">Function</span>.func;
+
+Http.server().withStack(func(stack -&gt; stack.prepend(MyStackModule)));</pre></li></ol>
+            </div><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="withStack(Stack)">withStack(Stack)</span></p></span><span class="cmt"><p><a href="#transformed(t:com.twitter.finagle.Stack.Transformer):This" class="extmbr" name="com.twitter.finagle.Memcached.Server#transformed">transformed</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.Memcached.Server#withStack" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withStack(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.memcached.protocol.Command,com.twitter.finagle.memcached.protocol.Response]]):com.twitter.finagle.Memcached.Server"></a><a id="withStack(Stack[ServiceFactory[Command,Response]]):Server"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Memcached$$Server.html#withStack(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.memcached.protocol.Command,com.twitter.finagle.memcached.protocol.Response]]):com.twitter.finagle.Memcached.Server" title="Permalink">
@@ -1222,7 +1249,9 @@ timeouts on it.
         <span class="name">withStack</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a></span>
       </span>
       
-      <p class="shortcomment cmt">A new StackServer with the provided Stack.</p><div class="fullcomment"><div class="comment cmt"><p>A new StackServer with the provided Stack.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a> → <a href="server/ListeningStackServer.html" class="extype" name="com.twitter.finagle.server.ListeningStackServer">ListeningStackServer</a> → <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a></dd></dl></div>
+      <p class="shortcomment cmt">A new <span class="extype" name="StackServer">StackServer</span> with the provided <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A new <span class="extype" name="StackServer">StackServer</span> with the provided <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a> → <a href="server/ListeningStackServer.html" class="extype" name="com.twitter.finagle.server.ListeningStackServer">ListeningStackServer</a> → <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a></dd><dt>See also</dt><dd><span class="cmt"><p><code>withStack</code> that takes a <code>Function1</code> for a more ergonomic
+    API when used with method chaining.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.Memcached.Server#withStatsReceiver" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withStatsReceiver(statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.Memcached.Server"></a><a id="withStatsReceiver(StatsReceiver):Server"></a>
       <span class="permalink">

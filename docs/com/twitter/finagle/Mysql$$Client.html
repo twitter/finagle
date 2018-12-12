@@ -172,10 +172,6 @@ resources for using Finagle.
                         <a class="object" href="Mysql$$Client$.html" title=""></a>
                         <a class="class" href="" title="Implements a mysql client in terms of a com.twitter.finagle.client.StackClient."></a>
                         <a href="" title="Implements a mysql client in terms of a com.twitter.finagle.client.StackClient.">Client</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="object" href="Mysql$$param$.html" title=""></a>
-                        <a href="Mysql$$param$.html" title="">param</a>
                       </li>
               </ul>
             </div>
@@ -995,8 +991,7 @@ about its implementation at runtime.
         <span class="name">transformed</span><span class="params">(<span name="t">t: <a href="Stack$$Transformer.html" class="extype" name="com.twitter.finagle.Stack.Transformer">Transformer</a></span>)</span><span class="result">: <a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.mysql.Result">Result</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">Transform the stack using the given <code>Transformer</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Transform the stack using the given <code>Transformer</code>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a> → <a href="Stack$$Transformable.html" class="extype" name="com.twitter.finagle.Stack.Transformable">Transformable</a></dd></dl></div>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a> → <a href="Stack$$Transformable.html" class="extype" name="com.twitter.finagle.Stack.Transformable">Transformable</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="client/StackClient.html#withStack(fn:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]=&gt;com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]):com.twitter.finagle.client.StackClient[Req,Rep]" class="extmbr" name="com.twitter.finagle.client.StackClient#withStack">withStack</a></p></span></dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
@@ -1504,7 +1499,8 @@ to offer more available connections connections.
       
       <p class="shortcomment cmt">A new <span class="extype" name="StackClient">StackClient</span> using the function to create a new <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A new <span class="extype" name="StackClient">StackClient</span> using the function to create a new <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>.</p><p>The input to <code>fn</code> is the <a href="#stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.mysql.Request,com.twitter.finagle.mysql.Result]]" class="extmbr" name="com.twitter.finagle.Mysql.Client#stack">client's current stack</a>.
 This API allows for easier usage when writing code that
-uses method chaining.
+uses method chaining.</p><p>This method is similar to <a href="#transformed(t:com.twitter.finagle.Stack.Transformer):com.twitter.finagle.client.StackClient[Req,Rep]" class="extmbr" name="com.twitter.finagle.Mysql.Client#transformed">transformed</a> while providing easier API
+ergonomics for one-off <code>Stack</code> changes.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a> → <a href="client/EndpointerStackClient.html" class="extype" name="com.twitter.finagle.client.EndpointerStackClient">EndpointerStackClient</a> → <a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a></dd><div class="block">Example:
                <ol><li class="cmt"><p>
 From Scala:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
@@ -1513,7 +1509,7 @@ Http.client.withStack(_.prepend(MyStackModule))</pre><p>From Java:</p><pre><span
 <span class="kw">import</span> static com.twitter.util.<span class="std">Function</span>.func;
 
 Http.client().withStack(func(stack -&gt; stack.prepend(MyStackModule)));</pre></li></ol>
-            </div><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="withStack(Stack)">withStack(Stack)</span></p></span></dd></dl></div>
+            </div><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="withStack(Stack)">withStack(Stack)</span></p></span><span class="cmt"><p><a href="#transformed(t:com.twitter.finagle.Stack.Transformer):com.twitter.finagle.client.StackClient[Req,Rep]" class="extmbr" name="com.twitter.finagle.Mysql.Client#transformed">transformed</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.Mysql.Client#withStack" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withStack(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.mysql.Request,com.twitter.finagle.mysql.Result]]):com.twitter.finagle.Mysql.Client"></a><a id="withStack(Stack[ServiceFactory[Request,Result]]):Client"></a>
       <span class="permalink">

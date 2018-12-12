@@ -526,6 +526,22 @@ use.</p><p> Flag          Value     Meaning
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.param" visbl="pub" class="indented5 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="param"></a><a id="param:param"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/index.html#param" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="param/index.html"><span class="name">param</span></a>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.mysql.transport" visbl="pub" class="indented5 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="transport"></a><a id="transport:transport"></a>
       <span class="permalink">
@@ -566,10 +582,6 @@ use.</p><p> Flag          Value     Meaning
                         <a class="object" href="Capability$.html" title=""></a>
                         <a class="class" href="Capability.html" title=""></a>
                         <a href="Capability.html" title="">Capability</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="object" href="Charset$.html" title=""></a>
-                        <a href="Charset$.html" title="">Charset</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="Client$.html" title=""></a>
                         <a class="trait" href="Client.html" title="A MySQL client that is not Service-based like com.twitter.finagle.Mysql.Client is, making it easier to use for most cases."></a>
@@ -651,10 +663,6 @@ use.</p><p> Flag          Value     Meaning
                         <a class="class" href="FloatValue.html" title=""></a>
                         <a href="FloatValue.html" title="">FloatValue</a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="Handshake$.html" title=""></a>
-                        <a class="class" href="Handshake.html" title="Bridges a server handshake (HandshakeInit) with a client handshake (HandshakeResponse) using the given parameters."></a>
-                        <a href="Handshake.html" title="Bridges a server handshake (HandshakeInit) with a client handshake (HandshakeResponse) using the given parameters.">Handshake</a>
-                      </li><li class="current-entities indented4">
                         <a class="object" href="HandshakeInit$.html" title="First result received from the server as part of the connection phase."></a>
                         <a class="class" href="HandshakeInit.html" title=""></a>
                         <a href="HandshakeInit.html" title="">HandshakeInit</a>
@@ -690,6 +698,10 @@ use.</p><p> Flag          Value     Meaning
                         <span class="separator"></span>
                         <a class="class" href="LostSyncException.html" title=""></a>
                         <a href="LostSyncException.html" title="">LostSyncException</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="MysqlCharset$.html" title=""></a>
+                        <a href="MysqlCharset$.html" title="">MysqlCharset</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="NullValue$.html" title=""></a>
@@ -1635,34 +1647,6 @@ a prepared statement.
       </span>
       
       
-    </li><li name="com.twitter.finagle.mysql.Handshake" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Handshakeextendscom.twitter.finagle.mysql.HandshakeInit=&gt;com.twitter.util.Try[com.twitter.finagle.mysql.HandshakeResponse]withProductwithSerializable"></a><a id="Handshake:Handshake"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mysql/index.html#Handshakeextendscom.twitter.finagle.mysql.HandshakeInit=&gt;com.twitter.util.Try[com.twitter.finagle.mysql.HandshakeResponse]withProductwithSerializable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="Bridges a server handshake (HandshakeInit) with a client handshake (HandshakeResponse) using the given parameters." href="Handshake.html"><span class="name">Handshake</span></a><span class="params">(<span name="username">username: <a href="http://www.scala-lang.org/api/2.12.7/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="password">password: <a href="http://www.scala-lang.org/api/2.12.7/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="database">database: <a href="http://www.scala-lang.org/api/2.12.7/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="clientCap">clientCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.mysql.Capability">Capability</a> = <span class="symbol"><span class="name"><a href="Capability$.html">Capability.baseCap</a></span></span></span>, <span name="charset">charset: <a href="http://www.scala-lang.org/api/2.12.7/scala/Short.html#scala.Short" class="extype" name="scala.Short">Short</a> = <span class="symbol"><span class="name"><a href="../../../index.html">Utf8_general_ci</a></span></span></span>, <span name="enableFoundRows">enableFoundRows: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">true</span></span>, <span name="maxPacketSize">maxPacketSize: <a href="https://twitter.github.io/util/docs/com/twitter/util/StorageUnit.html#com.twitter.util.StorageUnit" class="extype" name="com.twitter.util.StorageUnit">StorageUnit</a> = <span class="symbol"><span class="name"><a href="../../../index.html">1.gigabyte</a></span></span></span>)</span><span class="result"> extends (<a href="HandshakeInit.html" class="extype" name="com.twitter.finagle.mysql.HandshakeInit">HandshakeInit</a>) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Try.html#com.twitter.util.Try" class="extype" name="com.twitter.util.Try">Try</a>[<a href="HandshakeResponse.html" class="extype" name="com.twitter.finagle.mysql.HandshakeResponse">HandshakeResponse</a>] with <a href="http://www.scala-lang.org/api/2.12.7/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.7/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Bridges a server handshake (HandshakeInit) with a
-client handshake (HandshakeResponse) using the given
-parameters.</p><div class="fullcomment"><div class="comment cmt"><p>Bridges a server handshake (HandshakeInit) with a
-client handshake (HandshakeResponse) using the given
-parameters. This facilitates the connection phase of
-the mysql protocol.
-</p></div><dl class="paramcmts block"><dt class="param">username</dt><dd class="cmt"><p>MySQL username used to login.</p></dd><dt class="param">password</dt><dd class="cmt"><p>MySQL password used to login.</p></dd><dt class="param">database</dt><dd class="cmt"><p>initial database to use for the session.</p></dd><dt class="param">clientCap</dt><dd class="cmt"><p>The capability this client has.</p></dd><dt class="param">charset</dt><dd class="cmt"><p>default character established with the server.</p></dd><dt class="param">enableFoundRows</dt><dd class="cmt"><p>if the server should return the number
-of found (matched) rows, not the number of changed rows for
-UPDATE and INSERT ... ON DUPLICATE KEY UPDATE statements.</p></dd><dt class="param">maxPacketSize</dt><dd class="cmt"><p>max size of a command packet that the
-client intends to send to the server. The largest possible
-packet that can be transmitted to or from a MySQL 5.5 server or
-client is 1GB.</p></dd><dt>returns</dt><dd class="cmt"><p>A Try[HandshakeResponse] that encodes incompatibility
-with the server.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.mysql.HandshakeInit" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="HandshakeInitextendsResultwithProductwithSerializable"></a><a id="HandshakeInit:HandshakeInit"></a>
       <span class="permalink">
@@ -1925,7 +1909,7 @@ a value and enough meta data to decode the
 bytes.</p><div class="fullcomment"><div class="comment cmt"><p>A RawValue contains the raw bytes that represent
 a value and enough meta data to decode the
 bytes.
-</p></div><dl class="paramcmts block"><dt class="param">typ</dt><dd class="cmt"><p>The MySQL <a href="Type$.html" class="extype" name="com.twitter.finagle.mysql.Type">type</a> code for this value.</p></dd><dt class="param">charset</dt><dd class="cmt"><p>The <a href="Charset$.html" class="extype" name="com.twitter.finagle.mysql.Charset">charset</a> encoding of the bytes.</p></dd><dt class="param">isBinary</dt><dd class="cmt"><p>Disambiguates between the text and binary protocol.</p></dd><dt class="param">bytes</dt><dd class="cmt"><p>The raw bytes for this value.</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">typ</dt><dd class="cmt"><p>The MySQL <a href="Type$.html" class="extype" name="com.twitter.finagle.mysql.Type">type</a> code for this value.</p></dd><dt class="param">charset</dt><dd class="cmt"><p>The <a href="MysqlCharset$.html" class="extype" name="com.twitter.finagle.mysql.MysqlCharset">charset</a> encoding of the bytes.</p></dd><dt class="param">isBinary</dt><dd class="cmt"><p>Disambiguates between the text and binary protocol.</p></dd><dt class="param">bytes</dt><dd class="cmt"><p>The raw bytes for this value.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.mysql.Request" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="RequestextendsAnyRef"></a><a id="Request:Request"></a>
       <span class="permalink">
@@ -2293,22 +2277,6 @@ explicitly added to <a href="Parameter$.html#unsafeWrap(value:Any):com.twitter.f
       </span>
       
       
-    </li><li name="com.twitter.finagle.mysql.Charset" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Charset"></a><a id="Charset:Charset"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mysql/index.html#Charset" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="Charset$.html"><span class="name">Charset</span></a>
-      </span>
-      
-      
     </li><li name="com.twitter.finagle.mysql.Client" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Client"></a><a id="Client:Client"></a>
       <span class="permalink">
@@ -2518,22 +2486,6 @@ is set for the field.</p><div class="fullcomment"><div class="comment cmt"><p>Th
 is set for the field. Link to source code from mysql is below.
 <a href="https://github.com/mysql/mysql-server/blob/5.7/include/mysql_com.h" target="_blank">https://github.com/mysql/mysql-server/blob/5.7/include/mysql_com.h</a>
 </p></div></div>
-    </li><li name="com.twitter.finagle.mysql.Handshake" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Handshake"></a><a id="Handshake:Handshake"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mysql/index.html#Handshake" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="Handshake$.html"><span class="name">Handshake</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
-      </span>
-      
-      
     </li><li name="com.twitter.finagle.mysql.HandshakeInit" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="HandshakeInit"></a><a id="HandshakeInit:HandshakeInit"></a>
       <span class="permalink">
@@ -2604,6 +2556,22 @@ a version of MySQL that the client is incompatible with.</p>
       <p class="shortcomment cmt">MySQL Isolation Levels.</p><div class="fullcomment"><div class="comment cmt"><p>MySQL Isolation Levels. Used to override the SESSION or GLOBAL isolation level when
 executing transactions.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="Transactions.html" class="extype" name="com.twitter.finagle.mysql.Transactions">com.twitter.finagle.mysql.Transactions</a></p></span><span class="cmt"><p><a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-transaction-isolation-levels.html" target="_blank">https://dev.mysql.com/doc/refman/5.7/en/innodb-transaction-isolation-levels.html</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.MysqlCharset" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MysqlCharset"></a><a id="MysqlCharset:MysqlCharset"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/index.html#MysqlCharset" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="MysqlCharset$.html"><span class="name">MysqlCharset</span></a>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.mysql.NullValue" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="NullValue"></a><a id="NullValue:NullValue"></a>
       <span class="permalink">

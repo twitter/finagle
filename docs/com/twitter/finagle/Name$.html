@@ -1171,7 +1171,7 @@ generator.
                         <a class="trait" href="MysqlRichClient.html" title="Supplements a com.twitter.finagle.Client with convenient builder methods for constructing a mysql client."></a>
                         <a href="MysqlRichClient.html" title="Supplements a com.twitter.finagle.Client with convenient builder methods for constructing a mysql client.">MysqlRichClient</a>
                       </li><li class="current-entities indented3">
-                        <a class="object" href="" title=""></a>
+                        <a class="object" href="" title="See Names for Java compatibility APIs."></a>
                         <a class="trait" href="Name.html" title="Names identify network locations."></a>
                         <a href="Name.html" title="Names identify network locations.">Name</a>
                       </li><li class="current-entities indented3">
@@ -1182,6 +1182,10 @@ generator.
                         <a class="object" href="Namer$.html" title=""></a>
                         <a class="class" href="Namer.html" title="A namer is a context in which a NameTree is bound."></a>
                         <a href="Namer.html" title="A namer is a context in which a NameTree is bound.">Namer</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="object" href="Names$.html" title="Java compatibility APIs for Name."></a>
+                        <a href="Names$.html" title="Java compatibility APIs for Name.">Names</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="object" href="NegResolver$.html" title=""></a>
@@ -1436,7 +1440,8 @@ generator.
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>See <a href="Names$.html" class="extype" name="com.twitter.finagle.Names">Names</a> for Java compatibility APIs.
+</p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -1503,9 +1508,12 @@ generator.
         <a title="Bound names comprise a changeable Addr which carries a host list of internet addresses." href="Name$$Bound.html"><span class="name">Bound</span></a><span class="result"> extends <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a> with <span class="extype" name="scala.Proxy">Proxy</span></span>
       </span>
       
-      <p class="shortcomment cmt">Bound names comprise a changeable <a href="Addr.html" class="extype" name="com.twitter.finagle.Addr">Addr</a> which carries a host list of internet addresses.</p><div class="fullcomment"><div class="comment cmt"><p>Bound names comprise a changeable <a href="Addr.html" class="extype" name="com.twitter.finagle.Addr">Addr</a> which carries a host list of internet addresses.</p><p>Equality of two Names is delegated to <code>id</code>. Two Bound instances
+      <p class="shortcomment cmt">Bound names comprise a changeable <a href="Addr.html" class="extype" name="com.twitter.finagle.Addr">Addr</a> which carries a host
+list of internet addresses.</p><div class="fullcomment"><div class="comment cmt"><p>Bound names comprise a changeable <a href="Addr.html" class="extype" name="com.twitter.finagle.Addr">Addr</a> which carries a host
+list of internet addresses.</p><p>Equality of two Names is delegated to <code>id</code>. Two Bound instances
 are equal whenever their <code>id</code>s are. <code>id</code> identifies the <code>addr</code>
-and not the <code>path</code>.  If the <code>id</code> is a <a href="Name$$Path.html" class="extype" name="com.twitter.finagle.Name.Path">Path</a>, it should only contain *bound*--not residual--path components.</p><p>The <code>path</code> contains unbound residual path components that were not
+and not the <code>path</code>.  If the <code>id</code> is a <a href="Name$$Path.html" class="extype" name="com.twitter.finagle.Name.Path">Name.Path</a>,
+it should only contain *bound*--not residual--path components.</p><p>The <code>path</code> contains unbound residual path components that were not
 processed during name resolution.
 </p></div></div>
     </li><li name="com.twitter.finagle.Name.Path" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
@@ -1581,7 +1589,7 @@ network location.</p>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.Name#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.Name#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="apply(path:String):com.twitter.finagle.Name"></a><a id="apply(String):Name"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Name$.html#apply(path:String):com.twitter.finagle.Name" title="Permalink">
@@ -1597,8 +1605,9 @@ network location.</p>
       </span>
       
       <p class="shortcomment cmt">Create a path-based Name which is interpreted vis-à-vis
-the current request-local delegation table.</p>
-    </li><li name="com.twitter.finagle.Name#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+the current request-local delegation table.</p><div class="fullcomment"><div class="comment cmt"><p>Create a path-based Name which is interpreted vis-à-vis
+the current request-local delegation table.</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="Names$.html#fromPath(path:String):com.twitter.finagle.Name" class="extmbr" name="com.twitter.finagle.Names#fromPath">Names.fromPath</a> for Java compatibility.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.Name#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="apply(path:com.twitter.finagle.Path):com.twitter.finagle.Name"></a><a id="apply(finagle.Path):Name"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Name$.html#apply(path:com.twitter.finagle.Path):com.twitter.finagle.Name" title="Permalink">
@@ -1614,7 +1623,8 @@ the current request-local delegation table.</p>
       </span>
       
       <p class="shortcomment cmt">Create a path-based Name which is interpreted vis-à-vis
-the current request-local delegation table.</p>
+the current request-local delegation table.</p><div class="fullcomment"><div class="comment cmt"><p>Create a path-based Name which is interpreted vis-à-vis
+the current request-local delegation table.</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="Names$.html#fromPath(path:String):com.twitter.finagle.Name" class="extmbr" name="com.twitter.finagle.Names#fromPath">Names.fromPath</a> for Java compatibility.</p></span></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -1631,7 +1641,7 @@ the current request-local delegation table.</p>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.Name#bound" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.Name#bound" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="bound(addrs:com.twitter.finagle.Address*):com.twitter.finagle.Name.Bound"></a><a id="bound(Address*):Bound"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Name$.html#bound(addrs:com.twitter.finagle.Address*):com.twitter.finagle.Name.Bound" title="Permalink">
@@ -1646,7 +1656,7 @@ the current request-local delegation table.</p>
         <span class="name">bound</span><span class="params">(<span name="addrs">addrs: <a href="Address.html" class="extype" name="com.twitter.finagle.Address">Address</a>*</span>)</span><span class="result">: <a href="Name$$Bound.html" class="extype" name="com.twitter.finagle.Name.Bound">Bound</a></span>
       </span>
       
-      <p class="shortcomment cmt">Create a pre-bound address.</p>
+      <p class="shortcomment cmt">Create a pre-bound address.</p><div class="fullcomment"><div class="comment cmt"><p>Create a pre-bound address.</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="Names$.html#bound(addrs:com.twitter.finagle.Address*):com.twitter.finagle.Name.Bound" class="extmbr" name="com.twitter.finagle.Names#bound">Names.bound</a> for Java compatibility.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
@@ -1671,7 +1681,7 @@ the current request-local delegation table.</p>
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.Name#empty" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.Name#empty" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="empty:com.twitter.finagle.Name.Bound"></a><a id="empty:Bound"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Name$.html#empty:com.twitter.finagle.Name.Bound" title="Permalink">
@@ -1686,7 +1696,7 @@ the current request-local delegation table.</p>
         <span class="name">empty</span><span class="result">: <a href="Name$$Bound.html" class="extype" name="com.twitter.finagle.Name.Bound">Bound</a></span>
       </span>
       
-      <p class="shortcomment cmt">An always-empty name.</p>
+      <p class="shortcomment cmt">An always-empty name.</p><div class="fullcomment"><div class="comment cmt"><p>An always-empty name.</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="Names$.html#empty:com.twitter.finagle.Name.Bound" class="extmbr" name="com.twitter.finagle.Names#empty">Names.empty</a> for Java compatibility.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">

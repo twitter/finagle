@@ -73,6 +73,9 @@ Netty 4
   When available, use Linux's native epoll transport directly instead of bouncing through JDK
   (default: `true`).
 
+**com.twitter.finagle.netty4.http.revalidateInboundHeaders** `bool`
+  Validate headers when converting from Netty to Finagle. (default: `false`).
+
 Stats
 -----
 

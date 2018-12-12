@@ -762,7 +762,7 @@ Client/Server protocol. This is identical to a length coded
 string except the bytes are returned raw.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Array[Byte] if length is non-null, or null otherwise.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.mysql.transport.MysqlBufReader#readLengthCodedString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="readLengthCodedString(charset:java.nio.charset.Charset):String"></a><a id="readLengthCodedString(java.nio.charset.Charset):String"></a>
+      <a id="readLengthCodedString(charset:java.nio.charset.Charset):String"></a><a id="readLengthCodedString(Charset):String"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readLengthCodedString(charset:java.nio.charset.Charset):String" title="Permalink">
         <i class="material-icons"></i>
@@ -773,7 +773,7 @@ string except the bytes are returned raw.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">readLengthCodedString</span><span class="params">(<span name="charset">charset: <span class="extype" name="java.nio.charset.Charset">java.nio.charset.Charset</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+        <span class="name">readLengthCodedString</span><span class="params">(<span name="charset">charset: <span class="extype" name="java.nio.charset.Charset">Charset</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
       <p class="shortcomment cmt">Reads a length encoded string according to the MySQL
@@ -913,7 +913,7 @@ offset.</p></dd></dl></div>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
     </li><li name="com.twitter.io.ProxyByteReader#readString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="readString(bytes:Int,charset:java.nio.charset.Charset):String"></a><a id="readString(Int,java.nio.charset.Charset):String"></a>
+      <a id="readString(bytes:Int,charset:java.nio.charset.Charset):String"></a><a id="readString(Int,Charset):String"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readString(bytes:Int,charset:java.nio.charset.Charset):String" title="Permalink">
         <i class="material-icons"></i>
@@ -924,7 +924,7 @@ offset.</p></dd></dl></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">readString</span><span class="params">(<span name="bytes">bytes: <a href="http://www.scala-lang.org/api/2.12.7/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="charset">charset: <span class="extype" name="java.nio.charset.Charset">java.nio.charset.Charset</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+        <span class="name">readString</span><span class="params">(<span name="bytes">bytes: <a href="http://www.scala-lang.org/api/2.12.7/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="charset">charset: <span class="extype" name="java.nio.charset.Charset">Charset</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
