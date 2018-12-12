@@ -27,6 +27,7 @@ env:
     - PROJECT=finagle-redis
     - PROJECT=finagle-serversets
     - PROJECT=finagle-stats
+    - PROJECT=finagle-stats-core
     - PROJECT=finagle-thrift
     - PROJECT=finagle-thriftmux
     - PROJECT=finagle-toggle

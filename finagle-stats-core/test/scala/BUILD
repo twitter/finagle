@@ -6,7 +6,7 @@ junit_tests(
         "3rdparty/jvm/org/scalacheck",
         "3rdparty/jvm/org/scalatest",
         "finagle/finagle-http/src/main/scala",
-        "finagle/finagle-stats/src/main/scala",
+        "finagle/finagle-stats-core/src/main/scala",
         "util/util-app/src/main/scala",
         "util/util-core/src/main/scala",
         "util/util-stats/src/main/scala",

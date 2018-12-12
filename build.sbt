@@ -177,6 +177,7 @@ lazy val projectList = Seq[sbt.ProjectReference](
   finagleNetty4,
   finagleNetty3,
   finagleStats,
+  finagleStatsCore,
   finagleZipkinCore,
   finagleZipkinScribe,
   finagleServersets,
@@ -339,13 +340,13 @@ lazy val finagleNetty3 = Project(
   )
 ).dependsOn(finagleCore)
 
-lazy val finagleStats = Project(
-  id = "finagle-stats",
-  base = file("finagle-stats")
+lazy val finagleStatsCore = Project(
+  id = "finagle-stats-core",
+  base = file("finagle-stats-core")
 ).settings(
   sharedSettings
 ).settings(
-  name := "finagle-stats",
+  name := "finagle-stats-core",
   libraryDependencies ++= Seq(
     util("app"),
     util("core"),
@@ -361,6 +362,17 @@ lazy val finagleStats = Project(
   finagleHttp,
   finagleToggle,
   finagleTunable
+)
+
+lazy val finagleStats = Project(
+  id = "finagle-stats",
+  base = file("finagle-stats")
+).settings(
+  sharedSettings
+).settings(
+  name := "finagle-stats"
+).dependsOn(
+  finagleStatsCore
 )
 
 lazy val finagleZipkinCore = Project(
