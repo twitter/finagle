@@ -13,7 +13,7 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
-* finagle-redis: Add support for the new stream API released in Redis 5.0. ``PHAB_ID=D244320``
+* finagle-redis: Add support for the new stream API released in Redis 5.0. ``PHAB_ID=D244329``
 
 * finagle-core: Add Java compatibility for `c.t.f.Filter.TypeAgnostic.Identity`
   via `c.t.f.Filter.typeAgnosticIdentity()`. ``PHAB_ID=D242006``
