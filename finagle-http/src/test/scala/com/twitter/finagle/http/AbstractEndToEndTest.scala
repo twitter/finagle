@@ -1174,6 +1174,29 @@ abstract class AbstractEndToEndTest
     await(server.close())
   }
 
+  test("removing the compressor works") {
+    val svc = new Service[Request, Response] {
+      def apply(request: Request) = {
+        val response = Response()
+        response.contentString = "raw content"
+        Future.value(response)
+      }
+    }
+    val server = serverImpl()
+      .withCompressionLevel(0)
+      .serve("localhost:*", svc)
+
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+    val req = Request("/")
+    val rep = await(client(req))
+    assert(rep.contentString == "raw content")
+    await(client.close())
+    await(server.close())
+  }
+
   test("request remote address") {
     val svc = new Service[Request, Response] {
       def apply(request: Request) = {

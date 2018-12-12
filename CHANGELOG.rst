@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Bug Fixes
+~~~~~~~~~
+
+* finagle-http: Compression level of 0 was failing on the server-side when speaking h2c.
+  Updated so that it can handle a request properly. ``PHAB_ID=D251320``
+
 18.12.0
 -------
 

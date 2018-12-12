@@ -44,7 +44,7 @@ final private[finagle] class Http2CleartextServerInitializer(
         val http2MultiplexCodec = MultiplexCodecBuilder.serverMultiplexCodec(params, initializer)
         MultiplexCodecBuilder.addStreamsGauge(statsReceiver, http2MultiplexCodec, channel)
 
-        new Http2ServerUpgradeCodec(http2MultiplexCodec) {
+        new Http2ServerUpgradeCodec(MultiplexCodecName, http2MultiplexCodec) {
           override def upgradeTo(
             ctx: ChannelHandlerContext,
             upgradeRequest: FullHttpRequest
@@ -54,10 +54,11 @@ final private[finagle] class Http2CleartextServerInitializer(
             ctx.channel.config.setAutoRead(true)
             super.upgradeTo(ctx, upgradeRequest)
 
-            // httpCompressor is the beginning of the h1 pipeline, so we make sure that no h2
-            // messages reach it.
+            // we insert immediately after the Http2MultiplexCodec#0, which we know is the
+            // last Http2 frames before they're converted to Http/1.1
             val timer = params[TimerParam].timer
-            ctx.pipeline.addBefore("httpCompressor", H2Filter.HandlerName, new H2Filter(timer))
+            ctx.pipeline
+              .addAfter(MultiplexCodecName, H2Filter.HandlerName, new H2Filter(timer))
           }
         }
       } else null
@@ -118,6 +119,7 @@ final private[finagle] class Http2CleartextServerInitializer(
 
 private object Http2CleartextServerInitializer {
   val Name: String = "upgradeHandler"
+  val MultiplexCodecName: String = "multiplexCodec"
 
   // For an HTTP/1.x request to have a body it must have either a content-length or a
   // transfer-encoding header, otherwise the server can't be sure when the message will end.
