@@ -1,9 +1,9 @@
 package com.twitter.finagle.builder
 
 import com.twitter.util
-import com.twitter.finagle.{Server => FinagleServer, _}
+import com.twitter.finagle._
 import com.twitter.finagle.filter.{MaskCancelFilter, ServerAdmissionControl}
-import com.twitter.finagle.server.{Listener, StackBasedServer}
+import com.twitter.finagle.server.{Listener, StackBasedServer, StackServer}
 import com.twitter.finagle.service.{ExpiringService, PendingRequestFilter, TimeoutFilter}
 import com.twitter.finagle.ssl.{ApplicationProtocols, CipherSuites, KeyCredentials}
 import com.twitter.finagle.ssl.server.{
@@ -66,10 +66,17 @@ object ServerConfig {
   sealed trait Yes
   type FullySpecified[Req, Rep] = ServerConfig[Req, Rep, Yes, Yes, Yes]
 
-  def nilServer[Req, Rep]: FinagleServer[Req, Rep] = new FinagleServer[Req, Rep] {
-    def serve(addr: SocketAddress, service: ServiceFactory[Req, Rep]): ListeningServer =
-      NullServer
+  private case class NilServer[Req, Rep](
+    stack: Stack[ServiceFactory[Req, Rep]] = StackServer.newStack[Req, Rep],
+    params: Stack.Params = Stack.Params.empty)
+      extends StackBasedServer[Req, Rep] {
+
+    def withParams(ps: Stack.Params): StackBasedServer[Req, Rep] = copy(params = ps)
+
+    def serve(addr: SocketAddress, service: ServiceFactory[Req, Rep]): ListeningServer = NullServer
   }
+
+  def nilServer[Req, Rep]: StackBasedServer[Req, Rep] = NilServer[Req, Rep]()
 
   // params specific to ServerBuilder
   private[builder] case class BindTo(addr: SocketAddress) {
@@ -176,8 +183,7 @@ private[builder] final class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName
  *      for information on the preferred `with`-style APIs insead.
  */
 class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
-  val params: Stack.Params,
-  mk: Stack.Params => FinagleServer[Req, Rep]) {
+  private[finagle] val server: StackBasedServer[Req, Rep]) {
   import ServerConfig._
   import com.twitter.finagle.param._
 
@@ -186,22 +192,21 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
   type ThisConfig = ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName]
   type This = ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName]
 
-  private[builder] def this() = this(Stack.Params.empty, Function.const(ServerConfig.nilServer) _)
+  private[builder] def this() = this(ServerConfig.nilServer)
 
   override def toString: String = "ServerBuilder(%s)".format(params)
 
-  protected def copy[Req1, Rep1, HasCodec1, HasBindTo1, HasName1](
-    ps: Stack.Params,
-    newServer: Stack.Params => FinagleServer[Req1, Rep1]
+  private def copy[Req1, Rep1, HasCodec1, HasBindTo1, HasName1](
+    server: StackBasedServer[Req1, Rep1]
   ): ServerBuilder[Req1, Rep1, HasCodec1, HasBindTo1, HasName1] =
-    new ServerBuilder(ps, newServer)
+    new ServerBuilder(server)
 
   private def _configured[P, HasCodec1, HasBindTo1, HasName1](
     param: P
   )(
     implicit stackParam: Stack.Param[P]
   ): ServerBuilder[Req, Rep, HasCodec1, HasBindTo1, HasName1] =
-    copy(params + param, mk)
+    copy(server.configured(param))
 
   /**
    * Configure the underlying [[Stack.Param Params]].
@@ -211,7 +216,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
    * Java users may find it easier to use the `Tuple2` version below.
    */
   def configured[P](param: P)(implicit stackParam: Stack.Param[P]): This =
-    copy(params + param, mk)
+    copy(server.configured(param))
 
   /**
    * Java friendly API for configuring the underlying [[Stack.Param Params]].
@@ -225,7 +230,12 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
    * as an example).
    */
   def configured[P](paramAndStackParam: (P, Stack.Param[P])): This =
-    copy(params.+(paramAndStackParam._1)(paramAndStackParam._2), mk)
+    copy(server.configured(paramAndStackParam._1)(paramAndStackParam._2))
+
+  /**
+   * The underlying [[Stack.Param Params]] used for configuration.
+   */
+  def params: Stack.Params = server.params
 
   /**
    * Overrides the stack and [[com.twitter.finagle.Server]] that will be used
@@ -239,12 +249,8 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
    */
   def stack[Req1, Rep1](
     server: StackBasedServer[Req1, Rep1]
-  ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] = {
-    val withParams: Stack.Params => FinagleServer[Req1, Rep1] = { ps =>
-      server.withParams(server.params ++ ps)
-    }
-    copy(server.params ++ params, withParams)
-  }
+  ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
+    copy(server.withParams(server.params ++ params))
 
   /**
    * To migrate to the Stack-based APIs, use `CommonParams.withStatsReceiver`.
@@ -763,7 +769,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
       Monitor(monitor) +
       Reporter(NullReporterFactory)
 
-    val listeningServer = mk(serverParams).serve(addr, serviceFactory)
+    val listeningServer = server.withParams(serverParams).serve(addr, serviceFactory)
 
     new Server with CloseAwaitably {
 

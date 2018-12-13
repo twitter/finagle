@@ -7,6 +7,19 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: The deprecated `c.t.f.b.ServerBuilder.stack` method which takes a function
+  has been removed. Uses of this method should be changed to use the `c.t.f.b.ServerBuilder.stack`
+  method which takes a `c.t.f.s.StackBasedServer` instead. ``PHAB_ID=D251975``
+
+* finagle-core: The type of `c.t.f.b.ServerConfig.nilServer` has been changed from
+  `Server[Req, Rep]` to `StackBasedServer[Req, Rep]`. ``PHAB_ID=D252142``
+
+* finagle-core: The access level of the `c.t.f.b.ServerBuilder.copy` method has changed
+  from protected to private. ``PHAB_ID=D252142``
+
 Bug Fixes
 ~~~~~~~~~
 
@@ -53,10 +66,6 @@ Breaking API Changes
   `c.t.f.t.TransportContext`, as well as the `close` and `onclose` methods. Uses of
   these methods within `TransportContext` should be changed to use the corresponding
   methods on `c.t.f.t.Transport` instead. ``PHAB_ID=D244742``
-
-* finagle-core: The deprecated `c.t.f.b.ServerBuilder.stack` method which takes a function
-  has been removed. Uses of this method should be changed to use the `c.t.f.b.ServerBuilder.stack`
-  method which takes a `c.t.f.s.StackBasedServer` instead. ``PHAB_ID=D251975``
 
 * finagle-core: The deprecated `c.t.f.t.Transport.peerCertificate` method on the `Transport` class
   (not the `Transport.peerCertificate` Finagle context) has been removed. Uses of this
