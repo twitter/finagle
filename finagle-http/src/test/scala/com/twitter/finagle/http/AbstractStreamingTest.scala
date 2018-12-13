@@ -7,7 +7,7 @@ import com.twitter.finagle.server.Listener
 import com.twitter.finagle.service.ConstantService
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.io.{Buf, Pipe, Reader, ReaderDiscardedException, Writer}
-import com.twitter.util.{Await, Closable, Future, Promise, Return, Throw}
+import com.twitter.util._
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
 import org.scalatest.FunSuite
@@ -47,10 +47,11 @@ abstract class AbstractStreamingTest extends FunSuite {
     val failure = new Promise[Unit]
 
     val server = startServer(echo, identity)
-    val client = connect(server.boundAddress, transport => {
-      if (shouldFail) failure.ensure { transport.close() }
-      transport
-    }, singletonPool = singletonPool)
+    val client = connectWithModifier(server.boundAddress, singletonPool = singletonPool) {
+      transport =>
+        if (shouldFail) failure.ensure { transport.close() }
+        transport
+    }
 
     val buf = Buf.Utf8(".")
     val req = get("/")
@@ -109,37 +110,40 @@ abstract class AbstractStreamingTest extends FunSuite {
 
   test("client: server disconnect on pending response should fail request") {
     val failure = new Promise[Unit]
-    val (mod, closable) = closingTransport(failure)
+    val mod = closingTransport(failure)
     val server = startServer(neverRespond, mod)
-    val client = connect(server.boundAddress, identity)
+    val client = connect(server.boundAddress)
 
     val resF = client(get("/"))
 
     failure.setDone()
-    intercept[ChannelException] { await(resF) }
+    intercept[Exception] { await(resF) } match {
+      case _: ChannelException => () // ok
+      case _: ReaderDiscardedException =>
+        () // ok? This seems to be from a race in the dispatch mechanism where writing fails.
+      case other => throw other
+    }
 
-    await(closable.close())
     await(client.close())
     await(server.close())
   }
 
   test("client: client closes transport after server disconnects") {
     val serverClose, clientClosed = new Promise[Unit]
-    val service = Service.mk[Request, Response] { req =>
+    val service = Service.mk[Request, Response] { _ =>
       Future.value(Response())
     }
-    val (mod, closable) = closingTransport(serverClose)
+    val mod = closingTransport(serverClose)
     val server = startServer(service, mod)
-    val client = connect(server.boundAddress, transport => {
+    val client = connectWithModifier(server.boundAddress) { transport =>
       clientClosed.become(transport.onClose.unit)
       transport
-    })
+    }
 
     val res = await(client(get("/")))
     assert(await(res.reader.read()) == None)
     serverClose.setDone()
     await(clientClosed)
-    await(closable.close())
   }
 
   test("client: fail request writer")(new ClientCtx(singletonPool = true) {
@@ -169,7 +173,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     val service = new Service[Request, Response] {
       def apply(req: Request) = n.getAndIncrement() match {
         case 0 =>
-          req.reader.read().unit proxyTo readp
+          req.reader.read().unit.proxyTo(readp)
           Future.value(ok(writer))
         case _ =>
           val writer = new Pipe[Buf]()
@@ -178,10 +182,10 @@ abstract class AbstractStreamingTest extends FunSuite {
       }
     }
 
-    val (mod, closable) = closingOnceTransport(failure)
+    val mod = closingOnceTransport(failure)
     val server = startServer(service, mod)
-    val client1 = connect(server.boundAddress, identity, "client1")
-    val client2 = connect(server.boundAddress, identity, "client2")
+    val client1 = connect(server.boundAddress, "client1")
+    val client2 = connect(server.boundAddress, "client2")
 
     val req1 = get("/")
     val req2 = get("abc")
@@ -204,7 +208,7 @@ abstract class AbstractStreamingTest extends FunSuite {
 
     val res2 = await(f2)
     await(Reader.readAll(res2.reader))
-    Closable.all(server, client1, client2, closable).close()
+    Closable.all(server, client1, client2).close()
   }
 
   test("server: response stream fails write") {
@@ -228,10 +232,10 @@ abstract class AbstractStreamingTest extends FunSuite {
       }
     }
 
-    val (mod, closable) = closingOnceTransport(failure)
+    val mod = closingOnceTransport(failure)
     val server = startServer(service, mod)
-    val client1 = connect(server.boundAddress, identity, "client1")
-    val client2 = connect(server.boundAddress, identity, "client2")
+    val client1 = connect(server.boundAddress, "client1")
+    val client2 = connect(server.boundAddress, "client2")
 
     val req1 = get("/")
     val req2 = get("abc")
@@ -248,12 +252,15 @@ abstract class AbstractStreamingTest extends FunSuite {
     failure.setDone()
     intercept[ReaderDiscardedException] { await(writep) }
     intercept[ChannelClosedException] { await(readp) }
-    intercept[ChannelException] { await(res.reader.read()) }
+    intercept[ChannelException] {
+      val start = Time.now
+      while ((Time.now - start) < 30.seconds) await(res.reader.read())
+    }
     intercept[ReaderDiscardedException] { await(writeLots(req1.writer, buf)) }
 
     val res2 = await(f2)
     await(Reader.readAll(res2.reader))
-    Closable.all(server, client1, client2, closable).close()
+    Closable.all(server, client1, client2).close()
   }
 
   test("server: fail response writer") {
@@ -275,8 +282,8 @@ abstract class AbstractStreamingTest extends FunSuite {
     }
 
     val server = startServer(service, identity)
-    val client1 = connect(server.boundAddress, identity, "client1")
-    val client2 = connect(server.boundAddress, identity, "client2")
+    val client1 = connect(server.boundAddress, "client1")
+    val client2 = connect(server.boundAddress, "client2")
 
     val req1 = get("/")
     val req2 = get("abc")
@@ -318,8 +325,8 @@ abstract class AbstractStreamingTest extends FunSuite {
     }
 
     val server = startServer(service, identity)
-    val client1 = connect(server.boundAddress, identity, "client1")
-    val client2 = connect(server.boundAddress, identity, "client2")
+    val client1 = connect(server.boundAddress, "client1")
+    val client2 = connect(server.boundAddress, "client2")
 
     val req1 = get("/")
     val req2 = get("abc")
@@ -342,7 +349,7 @@ abstract class AbstractStreamingTest extends FunSuite {
   test("server: empty buf doesn't close response stream") {
     val service = const(Seq(Buf.Utf8("hello"), Buf.Empty, Buf.Utf8("world")))
     val server = startServer(service, identity)
-    val client = connect(server.boundAddress, identity, "client")
+    val client = connect(server.boundAddress, "client")
     val body = await(client(get("/")).flatMap(res => Reader.readAll(res.reader)))
     assert(body == Buf.Utf8("helloworld"))
     Closable.all(server, client).close()
@@ -350,7 +357,7 @@ abstract class AbstractStreamingTest extends FunSuite {
 
   test("client: empty buf doesn't close request stream") {
     val server = startServer(echo, identity)
-    val client = connect(server.boundAddress, identity, "client")
+    val client = connect(server.boundAddress, "client")
     val req = get("/")
     val res = await(client(req))
     await(for {
@@ -376,7 +383,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     req.headerMap.put("Content-Length", "5")
     req.setChunked(true)
 
-    val client = connect(server.boundAddress, identity, "client")
+    val client = connect(server.boundAddress, "client")
     val res = client(req)
     await(writer.write(Buf.Utf8("hello")))
     writer.close()
@@ -391,7 +398,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     }
     val server = startServer(service, identity)
     val addr = server.boundAddress
-    val client = connect(addr, identity)
+    val client = connect(addr)
     try {
       val req0 = Request("/0")
       val rep0 = await(client(req0))
@@ -419,9 +426,15 @@ abstract class AbstractStreamingTest extends FunSuite {
 
   def connect(
     addr: SocketAddress,
-    mod: Modifier,
     name: String = "client",
     singletonPool: Boolean = false
+  ): Service[Request, Response] = connectWithModifier(addr, name, singletonPool)(identity)
+
+  def connectWithModifier(
+    addr: SocketAddress,
+    name: String = "client",
+    singletonPool: Boolean = false
+  )(mod: Modifier
   ): Service[Request, Response] = {
     val poolSize = if (singletonPool) 1 else Int.MaxValue
     val modifiedImpl = impl.copy(transporter = modifiedTransporterFn(mod, impl.transporter))
@@ -432,30 +445,27 @@ abstract class AbstractStreamingTest extends FunSuite {
       .newService(Name.bound(Address(addr.asInstanceOf[InetSocketAddress])), name)
   }
 
-  def closingTransport(closed: Future[Unit]): (Modifier, Closable) = {
-    (
-      (transport: Transport[Any, Any]) => {
-        closed.ensure { transport.close() }
-        transport
-      },
-      Closable.nop
-    )
+  private def closingTransport(closed: Future[Unit]): Modifier = { transport: Transport[Any, Any] =>
+    closed.ensure { transport.close() }
+    transport
   }
 
-  def closingOnceTransport(closed: Future[Unit]): (Modifier, Closable) = {
+  def closingOnceTransport(closed: Future[Unit]): Modifier = {
     val setFail = new AtomicBoolean(false)
 
-    (
-      (transport: Transport[Any, Any]) => {
-        if (!setFail.getAndSet(true)) closed.ensure { transport.close() }
-        transport
-      },
-      Closable.nop
-    )
+    val mod: Modifier = { transport: Transport[Any, Any] =>
+      if (!setFail.getAndSet(true)) closed.ensure {
+        transport.close()
+      }
+      transport
+    }
+    mod
   }
 }
 
 object StreamingTest {
+
+  type Modifier = Transport[Any, Any] => Transport[Any, Any]
 
   def await[A](f: Future[A]): A = Await.result(f, 30.seconds)
 
@@ -490,8 +500,6 @@ object StreamingTest {
     res.headerMap.set("Connection", "close")
     res
   }
-
-  type Modifier = Transport[Any, Any] => Transport[Any, Any]
 
   def modifiedTransporterFn(
     mod: Modifier,
