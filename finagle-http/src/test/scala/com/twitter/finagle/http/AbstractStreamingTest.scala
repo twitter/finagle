@@ -1,12 +1,13 @@
 package com.twitter.finagle.http
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
+import com.twitter.conversions.StorageUnitOps._
 import com.twitter.finagle.{Http => FinagleHttp, _}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.service.ConstantService
 import com.twitter.finagle.transport.{Transport, TransportContext}
-import com.twitter.io.{Buf, Pipe, Reader, ReaderDiscardedException, Writer}
+import com.twitter.io.{Buf, Pipe, Reader, ReaderDiscardedException, StreamTermination, Writer}
 import com.twitter.util._
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
@@ -415,10 +416,96 @@ abstract class AbstractStreamingTest extends FunSuite {
     }
   }
 
+  test("server: inbound stream (reader) propagates closures initiated remotely") {
+    val termination = new Promise[StreamTermination]
+    val service = Service.mk[Request, Response] { req =>
+      termination.become(req.reader.onClose)
+      Future.never // never responds
+    }
+    val server = startServer(service, identity)
+    val addr = server.boundAddress
+    val client = connect(addr)
+    try {
+      val req = Request("/")
+      req.setChunked(true)
+
+      client(req)
+      req.writer.fail(new Exception())
+
+      assert(await(termination.liftToTry).isThrow)
+    } finally {
+      Closable.all(client, server).close()
+    }
+  }
+
+  test("server: outbound stream (writer) propagates closures initiated remotely") {
+    val termination = new Promise[StreamTermination]
+    val service = Service.mk[Request, Response] { _ =>
+      val rep = Response()
+      rep.setChunked(true)
+      termination.become(rep.writer.onClose)
+      Future.value(rep)
+    }
+
+    val server = startServer(service, identity)
+    val addr = server.boundAddress
+    val client = connect(addr)
+    try {
+      val rep = await(client(Request("/")))
+      rep.reader.discard()
+
+      assert(!await(termination).isFullyRead)
+    } finally {
+      Closable.all(client, server).close()
+    }
+  }
+
+  test("client: inbound stream (reader) propagates closures initiated remotely") {
+    val stream = new Promise[Writer[Buf]]
+    val service = Service.mk[Request, Response] { req =>
+      val rep = Response()
+      rep.setChunked(true)
+      stream.setValue(rep.writer)
+      Future.value(rep)
+    }
+    val server = startServer(service, identity)
+    val addr = server.boundAddress
+    val client = connect(addr)
+    try {
+      val rep = await(client(Request("/")))
+      await(stream).fail(new Exception())
+
+      assert(await(rep.reader.onClose.liftToTry).isThrow)
+    } finally {
+      Closable.all(client, server).close()
+    }
+  }
+
+  test("client: outbound stream (writer) propagates closures initiated remotely") {
+    val stream = new Promise[Writer[Buf]]
+    val service = Service.mk[Request, Response] { req =>
+      req.reader.discard()
+      Future.never
+    }
+
+    val server = startServer(service, identity)
+    val addr = server.boundAddress
+    val client = connect(addr)
+    try {
+      val req = Request("/")
+      req.setChunked(true)
+      client(req)
+
+      assert(!await(req.writer.onClose).isFullyRead)
+    } finally {
+      Closable.all(client, server).close()
+    }
+  }
+
   def startServer(service: Service[Request, Response], mod: Modifier): ListeningServer = {
     val modifiedImpl = impl.copy(listener = modifiedListenerFn(mod, impl.listener))
     configureServer(FinagleHttp.server)
-      .withStreaming(true)
+      .withStreaming(0.bytes) // no aggregation
       .configured(modifiedImpl)
       .withLabel("server")
       .serve(new InetSocketAddress(0), service)
@@ -440,7 +527,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     val modifiedImpl = impl.copy(transporter = modifiedTransporterFn(mod, impl.transporter))
     configureClient(FinagleHttp.client).withSessionPool
       .maxSize(poolSize)
-      .withStreaming(true)
+      .withStreaming(0.bytes) // no aggregation
       .configured(modifiedImpl)
       .newService(Name.bound(Address(addr.asInstanceOf[InetSocketAddress])), name)
   }
