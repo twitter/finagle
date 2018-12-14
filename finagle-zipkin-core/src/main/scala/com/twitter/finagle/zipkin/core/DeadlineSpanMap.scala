@@ -170,7 +170,7 @@ private final class MutableSpan(val traceId: TraceId, val started: Time) {
   }
 
   def toSpan: Span = synchronized {
-    Span(traceId, _service, _name, annotations, binaryAnnotations, _endpoint)
+    Span(traceId, _service, _name, annotations, binaryAnnotations, _endpoint, started)
   }
 
   def isOnHold: Boolean = synchronized { _onHold }

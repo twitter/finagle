@@ -19,6 +19,7 @@ import com.twitter.util.Time
  * @param annotations  A sequence of annotations made in this span
  * @param bAnnotations Key-Value annotations, used to attach non timestamped data
  * @param endpoint     This is the local endpoint the span was created on.
+ * @param created      Optional span creation time.
  */
 case class Span(
   traceId: TraceId,
@@ -26,15 +27,26 @@ case class Span(
   _name: Option[String],
   annotations: Seq[ZipkinAnnotation],
   bAnnotations: Seq[BinaryAnnotation],
-  endpoint: Endpoint) {
-  // We compute the timestamp of when the span was created
+  endpoint: Endpoint,
+  created: Time) {
+
+  def this(
+    traceId: TraceId,
+    _serviceName: Option[String],
+    _name: Option[String],
+    annotations: Seq[ZipkinAnnotation],
+    bAnnotations: Seq[BinaryAnnotation],
+    endpoint: Endpoint
+  ) = this(traceId, _serviceName, _name, annotations, bAnnotations, endpoint, created = Time.now)
+
+  // If necessary, we compute the timestamp of when the span was created
   // which we serialize and send to the collector.
   private[this] lazy val timestamp: Time = {
     // If we have annotations which were created before
     // the span, we synthesize the span creation time
     // to match since it's illogical for the span to be
     // created before annotations.
-    (Time.now +: annotations.map(_.timestamp)).min
+    (created +: annotations.map(_.timestamp)).min
   }
 
   val serviceName = _serviceName getOrElse "Unknown"
@@ -89,5 +101,16 @@ case class Span(
 }
 
 object Span {
-  def apply(traceId: TraceId): Span = Span(traceId, None, None, Nil, Nil, Endpoint.Unknown)
+  def apply(traceId: TraceId): Span =
+    Span(traceId, None, None, Nil, Nil, Endpoint.Unknown, Time.now)
+
+  def apply(
+    traceId: TraceId,
+    _serviceName: Option[String],
+    _name: Option[String],
+    annotations: Seq[ZipkinAnnotation],
+    bAnnotations: Seq[BinaryAnnotation],
+    endpoint: Endpoint
+  ): Span =
+    Span(traceId, _serviceName, _name, annotations, bAnnotations, endpoint, Time.now)
 }
