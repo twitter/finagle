@@ -83,7 +83,7 @@ sealed class AnnotatingTracingFilter[Req, Rep](
   after: Annotation,
   afterFailure: String => Annotation,
   finagleVersion: () => String = () => Init.finagleVersion,
-  traceMetaData: Boolean = true)
+  traceMetadata: Boolean = true)
     extends SimpleFilter[Req, Rep] {
   def this(
     label: String,
@@ -104,7 +104,7 @@ sealed class AnnotatingTracingFilter[Req, Rep](
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val trace = Trace()
     if (trace.isActivelyTracing) {
-      if (traceMetaData) {
+      if (traceMetadata) {
         trace.recordServiceName(TraceServiceName() match {
           case Some(l) => l
           case None => label
@@ -153,7 +153,8 @@ object ServerTracingFilter {
         Annotation.ServerRecv,
         Annotation.ServerSend,
         Annotation.ServerSendError(_),
-        finagleVersion
+        finagleVersion,
+        traceMetadata = false
       )
 
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
@@ -220,18 +221,27 @@ private[finagle] object WireTracingFilter {
 
   case class TracingFilter[Req, Rep](
     label: String,
+    prefix: String,
+    before: Annotation,
+    after: Annotation,
+    traceMetadata: Boolean,
     finagleVersion: () => String = () => Init.finagleVersion)
       extends AnnotatingTracingFilter[Req, Rep](
         label,
-        "clnt",
-        Annotation.WireSend,
-        Annotation.WireRecv,
+        prefix,
+        before,
+        after,
         Annotation.WireRecvError(_),
         finagleVersion,
-        false
+        traceMetadata
       )
 
-  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+  private def module[Req, Rep](
+    prefix: String,
+    before: Annotation,
+    after: Annotation,
+    traceMetadata: Boolean
+  ): Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module2[param.Label, param.Tracer, ServiceFactory[Req, Rep]] {
       val role: Stack.Role = WireTracingFilter.role
       val description = "Report finagle information and wire send/recv events"
@@ -244,8 +254,22 @@ private[finagle] object WireTracingFilter {
         if (tracer.isNull) next
         else {
           val param.Label(label) = _label
-          TracingFilter[Req, Rep](label).andThen(next)
+          TracingFilter[Req, Rep](label, prefix, before, after, traceMetadata).andThen(next)
         }
       }
     }
+
+  def clientModule[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] = module(
+    "clnt",
+    Annotation.WireSend,
+    Annotation.WireRecv,
+    traceMetadata = false
+  )
+
+  def serverModule[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] = module(
+    "srv",
+    Annotation.WireRecv,
+    Annotation.WireSend,
+    traceMetadata = true
+  )
 }

@@ -111,7 +111,18 @@ class TracingFilterTest
    * Client tracing
    */
 
-  def mkClient(v: String = "") = ClientTracingFilter.TracingFilter[Int, Int](serviceName, () => v)
+  def mkClient(v: String = "") =
+    ClientTracingFilter
+      .TracingFilter[Int, Int](serviceName, () => v).andThen(
+        WireTracingFilter.TracingFilter[Int, Int](
+          serviceName,
+          "srv",
+          Annotation.WireRecv,
+          Annotation.WireSend,
+          traceMetadata = false,
+          () => v
+        )
+      )
 
   testAnnotatingTracingFilter("clnt", mkClient)
 
@@ -142,7 +153,18 @@ class TracingFilterTest
    * Server tracing
    */
 
-  def mkServer(v: String = "") = ServerTracingFilter.TracingFilter[Int, Int](serviceName, () => v)
+  def mkServer(v: String = "") =
+    ServerTracingFilter
+      .TracingFilter[Int, Int](serviceName, () => v).andThen(
+        WireTracingFilter.TracingFilter[Int, Int](
+          serviceName,
+          "srv",
+          Annotation.WireRecv,
+          Annotation.WireSend,
+          traceMetadata = true,
+          () => v
+        )
+      )
 
   testAnnotatingTracingFilter("srv", mkServer)
 

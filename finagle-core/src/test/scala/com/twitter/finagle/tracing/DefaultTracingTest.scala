@@ -43,6 +43,8 @@ class DefaultTracingTest extends FunSuite with Eventually with IntegrationPatien
       Seq(
         Annotation.ServiceName("theClient"),
         Annotation.ClientSend,
+        Annotation.WireSend,
+        Annotation.WireRecv,
         Annotation.ClientRecv
       )
     )
@@ -55,8 +57,10 @@ class DefaultTracingTest extends FunSuite with Eventually with IntegrationPatien
         serverTracer.toSeq,
         Seq(
           Annotation.ServiceName("theServer"),
+          Annotation.WireRecv,
           Annotation.ServerRecv,
-          Annotation.ServerSend
+          Annotation.ServerSend,
+          Annotation.WireSend
         )
       )
     }

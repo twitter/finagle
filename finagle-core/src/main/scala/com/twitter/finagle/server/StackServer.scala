@@ -52,9 +52,12 @@ object StackServer {
    * @see [[com.twitter.finagle.tracing.TraceInitializerFilter]]
    * @see [[com.twitter.finagle.filter.MonitorFilter]]
    * @see [[com.twitter.finagle.filter.ServerStatsFilter]]
+   * @see [[com.twitter.finagle.tracing.WireTracingFilter]]
    */
   def newStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] = {
     val stk = new StackBuilder[ServiceFactory[Req, Rep]](stack.nilStack[Req, Rep])
+
+    stk.push(ServerTracingFilter.module)
 
     // this goes near the listener so it is close to where the handling happens.
     stk.push(ThreadUsage.module)
@@ -89,7 +92,14 @@ object StackServer {
     stk.push(new JvmTracing)
     stk.push(ServerStatsFilter.module)
     stk.push(Role.protoTracing, identity[ServiceFactory[Req, Rep]](_))
-    stk.push(ServerTracingFilter.module)
+    // `WriteTracingFilter` annotates traced requests. Annotations are timestamped
+    // so this should be low in the stack to accurately delineate between wire time
+    // and handling time. Ideally this would live closer to the "wire" in the netty
+    // pipeline but we do not have the appropriate hooks to do so with a properly
+    // initialized context. Actually having these annotations still has value in
+    // allowing us to provide a complimentary annotation to the Client WR/WS as well
+    // as measure queueing within the server via ConcurrentRequestFilter.
+    stk.push(WireTracingFilter.serverModule)
     stk.push(Role.preparer, identity[ServiceFactory[Req, Rep]](_))
     // The TraceInitializerFilter must be pushed after most other modules so that
     // any Tracing produced by those modules is enclosed in the appropriate

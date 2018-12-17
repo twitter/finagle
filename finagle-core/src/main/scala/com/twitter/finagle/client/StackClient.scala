@@ -109,7 +109,7 @@ object StackClient {
      * so this should be low in the stack to accurately delineate between wire time
      * and handling time.
      */
-    stk.push(WireTracingFilter.module)
+    stk.push(WireTracingFilter.clientModule)
 
     /**
      * `ExpiringService` enforces an idle timeout and total ttl for connections.
