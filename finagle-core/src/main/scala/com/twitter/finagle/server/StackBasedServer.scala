@@ -6,3 +6,4 @@ import com.twitter.finagle.{Server, Stack}
 trait StackBasedServer[Req, Rep]
     extends Server[Req, Rep]
     with Stack.Parameterized[StackBasedServer[Req, Rep]]
+    with Stack.Transformable[StackBasedServer[Req, Rep]]

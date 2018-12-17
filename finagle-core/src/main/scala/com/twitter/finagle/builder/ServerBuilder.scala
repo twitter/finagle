@@ -72,6 +72,7 @@ object ServerConfig {
       extends StackBasedServer[Req, Rep] {
 
     def withParams(ps: Stack.Params): StackBasedServer[Req, Rep] = copy(params = ps)
+    def transformed(t: Stack.Transformer): StackBasedServer[Req, Rep] = copy(stack = t(stack))
 
     def serve(addr: SocketAddress, service: ServiceFactory[Req, Rep]): ListeningServer = NullServer
   }

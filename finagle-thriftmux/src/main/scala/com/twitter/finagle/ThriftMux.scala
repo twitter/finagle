@@ -571,6 +571,9 @@ object ThriftMux
     def withParams(ps: Stack.Params): Server =
       copy(muxer = muxer.withParams(ps))
 
+    def transformed(t: Stack.Transformer): Server =
+      copy(muxer = muxer.transformed(t))
+
     private[this] def withDeserializingClassifier: StackServer[mux.Request, mux.Response] = {
       // Note: what type of deserializer used is important if none is specified
       // so that we keep the prior behavior of Thrift exceptions

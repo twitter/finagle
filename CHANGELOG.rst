@@ -7,6 +7,14 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+* finagle-core: `c.t.f.s.StackBasedServer` has been changed to extend the
+  `c.t.f.Stack.Transformable` trait. This brings `StackBasedServer` into parity
+  with `c.t.f.c.StackBasedClient`, which already extends the
+  `Stack.Transformable` trait. ``PHAB_ID=D253542``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
