@@ -26,7 +26,7 @@ private final class DefaultHeaderMap extends HeaderMap {
   // Validates key and value.
   def add(key: String, value: String): HeaderMap = {
     DefaultHeaderMap.validateName(key)
-    addUnsafe(key, DefaultHeaderMap.foldReplacingValidateValue(value))
+    addUnsafe(key, DefaultHeaderMap.foldReplacingValidateValue(key, value))
   }
 
   // Does not validate key and value.
@@ -38,7 +38,7 @@ private final class DefaultHeaderMap extends HeaderMap {
   // Validates key and value.
   def set(key: String, value: String): HeaderMap = {
     DefaultHeaderMap.validateName(key)
-    setUnsafe(key, DefaultHeaderMap.foldReplacingValidateValue(value))
+    setUnsafe(key, DefaultHeaderMap.foldReplacingValidateValue(key, value))
   }
 
   // Does not validate key and value.
@@ -96,13 +96,14 @@ private object DefaultHeaderMap {
       val c = s.charAt(i)
 
       if (c > 127) {
-        throw new IllegalArgumentException("Header name cannot contain non-ASCII characters: " + c)
+        throw new IllegalArgumentException(
+          s"Header '$s': name cannot contain non-ASCII characters: $c")
       }
 
       (c: @switch) match {
         case '\t' | '\n' | 0x0b | '\f' | '\r' | ' ' | ',' | ':' | ';' | '=' =>
           throw new IllegalArgumentException(
-            "Header name cannot contain the following prohibited characters: " +
+            s"Header '$s': name cannot contain the following prohibited characters: " +
               "=,;: \\t\\r\\n\\v\\f "
           )
         case _ =>
@@ -113,8 +114,8 @@ private object DefaultHeaderMap {
   }
 
   // Adopted from Netty 3 HttpHeaders.
-  private def foldReplacingValidateValue(s: String): String = {
-    if (s == null) throw new NullPointerException("Header values cannot be null")
+  private def foldReplacingValidateValue(name: String, value: String): String = {
+    if (value == null) throw new NullPointerException("Header values cannot be null")
 
     var i = 0
 
@@ -124,17 +125,17 @@ private object DefaultHeaderMap {
     var state = 0
     var foldDetected = false
 
-    while (i < s.length) {
-      val c = s.charAt(i)
+    while (i < value.length) {
+      val c = value.charAt(i)
 
       (c: @switch) match {
         case 0x0b =>
           throw new IllegalArgumentException(
-            "Header value contains a prohibited character '\\v': " + s
+            s"Header '$name': value contains a prohibited character '\\v'"
           )
         case '\f' =>
           throw new IllegalArgumentException(
-            "Header value contains a prohibited character '\\f': " + s
+            s"Header '$name': value contains a prohibited character '\\f'"
           )
         case _ =>
       }
@@ -145,13 +146,16 @@ private object DefaultHeaderMap {
           else if (c == '\n') state = 2
         case 1 =>
           if (c == '\n') state = 2
-          else throw new IllegalArgumentException("Only '\\n' is allowed after '\\r': " + s)
+          else
+            throw new IllegalArgumentException(
+              s"Header '$name': only '\\n' is allowed after '\\r' in value")
         case 2 =>
           if (c == '\t' || c == ' ') {
             foldDetected = true // We are going to replace the folds later
             state = 0
           } else
-            throw new IllegalArgumentException("Only ' ' and '\\t' are allowed after '\\n': " + s)
+            throw new IllegalArgumentException(
+              s"Header '$name': only ' ' and '\\t' are allowed after '\\n' in value")
       }
 
       i += 1
@@ -159,7 +163,7 @@ private object DefaultHeaderMap {
 
     if (state != 0) {
       throw new IllegalArgumentException(
-        "Header value must not end with '\\r' or '\\n'. Observed: " +
+        s"Header '$name': value must not end with '\\r' or '\\n'. Observed: " +
           (if (state == 1) "\\r" else "\\n")
       )
     } else if (foldDetected) {
@@ -167,10 +171,10 @@ private object DefaultHeaderMap {
       // Per https://tools.ietf.org/html/rfc7230#section-3.2.4, an obs-fold is equivalent
       // to a SP char and suggests that such header values should be 'fixed' before
       // interpreting or forwarding the message.
-      ObsFoldRegex.replaceAllIn(s, " ")
+      ObsFoldRegex.replaceAllIn(value, " ")
     } else {
       // Valid and no modifications needed.
-      s
+      value
     }
   }
 
