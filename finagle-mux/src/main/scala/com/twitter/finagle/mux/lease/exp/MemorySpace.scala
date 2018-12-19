@@ -1,6 +1,6 @@
 package com.twitter.finagle.mux.lease.exp
 
-import com.twitter.conversions.storage.longToStorageUnitableWholeNumber
+import com.twitter.conversions.StorageUnitOps._
 import com.twitter.util.StorageUnit
 
 /**

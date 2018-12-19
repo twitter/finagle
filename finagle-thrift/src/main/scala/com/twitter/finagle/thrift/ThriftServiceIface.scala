@@ -1,7 +1,7 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.app.GlobalFlag
-import com.twitter.conversions.storage._
+import com.twitter.conversions.StorageUnitOps._
 import com.twitter.finagle._
 import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}

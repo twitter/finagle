@@ -1,6 +1,6 @@
 package com.twitter.finagle.util
 
-import com.twitter.conversions.percent._
+import com.twitter.conversions.PercentOps._
 import com.twitter.conversions.time._
 import com.twitter.util.{MockTimer, Time}
 import org.scalatest.FunSuite

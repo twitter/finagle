@@ -1,6 +1,6 @@
 package com.twitter.finagle.http2.param
 
-import com.twitter.conversions.storage._
+import com.twitter.conversions.StorageUnitOps._
 import com.twitter.finagle.Stack
 import com.twitter.util.StorageUnit
 import io.netty.handler.codec.http2.Http2MultiplexCodec

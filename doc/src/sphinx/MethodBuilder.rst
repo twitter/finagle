@@ -37,7 +37,7 @@ Turning the example into code, first in Scala:
 
 .. code-block:: scala
 
-  import com.twitter.conversions.percent._
+  import com.twitter.conversions.PercentOps._
   import com.twitter.conversions.time._
   import com.twitter.finagle.{http, Http, Service}
   import com.twitter.finagle.service.{ReqRep, ResponseClass}
@@ -190,7 +190,7 @@ and disable them for another, first in Scala:
 
 .. code-block:: scala
 
-  import com.twitter.conversions.percent._
+  import com.twitter.conversions.PercentOps._
   import com.twitter.finagle.{http, Http, Service}
 
   val builder = Http.client.methodBuilder("inet!localhost:8080")
@@ -269,7 +269,7 @@ For example:
 
 .. code-block:: scala
 
-  import com.twitter.conversions.percent._
+  import com.twitter.conversions.PercentOps._
   import com.twitter.finagle.Http
 
   val builder = Http.client

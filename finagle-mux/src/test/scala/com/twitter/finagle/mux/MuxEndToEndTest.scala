@@ -1,7 +1,7 @@
 package com.twitter.finagle.mux
 
 import com.twitter.finagle.Mux.param.MaxFrameSize
-import com.twitter.conversions.storage._
+import com.twitter.conversions.StorageUnitOps._
 import com.twitter.finagle.Mux
 
 class PushToPushMuxEndToEndTest extends AbstractEndToEndTest {

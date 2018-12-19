@@ -1,6 +1,6 @@
 package com.twitter.finagle.zipkin.thrift
 
-import com.twitter.conversions.storage._
+import com.twitter.conversions.StorageUnitOps._
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Service, SimpleFilter, Thrift}
 import com.twitter.finagle.builder.ClientBuilder

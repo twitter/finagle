@@ -1,6 +1,6 @@
 package com.twitter.finagle.netty4.http.handler
 
-import com.twitter.conversions.storage._
+import com.twitter.conversions.StorageUnitOps._
 import com.twitter.util.StorageUnit.zero
 import io.netty.buffer.Unpooled
 import io.netty.channel.embedded.EmbeddedChannel

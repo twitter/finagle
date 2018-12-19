@@ -1,6 +1,6 @@
 package com.twitter.finagle.http.codec
 
-import com.twitter.conversions.storage._
+import com.twitter.conversions.StorageUnitOps._
 import com.twitter.finagle.ChannelBufferUsageException
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.util.StorageUnit

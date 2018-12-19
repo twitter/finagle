@@ -1,6 +1,6 @@
 package com.twitter.finagle.mysql
 
-import com.twitter.conversions.storage._
+import com.twitter.conversions.StorageUnitOps._
 import com.twitter.finagle.Stack
 import com.twitter.finagle.mysql.MysqlCharset.Utf8_general_ci
 import com.twitter.finagle.mysql.param.{Charset, Credentials, Database, FoundRows}

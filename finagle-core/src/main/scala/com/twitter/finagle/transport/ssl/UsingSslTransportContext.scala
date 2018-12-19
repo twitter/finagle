@@ -1,6 +1,6 @@
 package com.twitter.finagle.transport.ssl
 
-import com.twitter.conversions.string._
+import com.twitter.conversions.StringOps._
 import com.twitter.util.security.NullSslSession
 import java.security.cert.X509Certificate
 import javax.net.ssl.SSLSession

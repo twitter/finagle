@@ -1,6 +1,6 @@
 package com.twitter.finagle.mux
 
-import com.twitter.conversions.percent._
+import com.twitter.conversions.PercentOps._
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.client.{EndpointerStackClient, BackupRequestFilter}

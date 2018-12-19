@@ -1,6 +1,6 @@
 package com.twitter.finagle.http.exp
 
-import com.twitter.conversions.storage._
+import com.twitter.conversions.StorageUnitOps._
 import com.twitter.io.Buf
 import com.twitter.util.StorageUnit
 import java.io.File

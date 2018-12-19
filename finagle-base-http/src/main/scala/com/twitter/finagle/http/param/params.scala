@@ -1,6 +1,6 @@
 package com.twitter.finagle.http.param
 
-import com.twitter.conversions.storage._
+import com.twitter.conversions.StorageUnitOps._
 import com.twitter.finagle.Stack
 import com.twitter.util.StorageUnit
 

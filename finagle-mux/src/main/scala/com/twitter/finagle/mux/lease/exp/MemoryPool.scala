@@ -2,7 +2,7 @@ package com.twitter.finagle.mux.lease.exp
 
 import java.lang.management.{GarbageCollectorMXBean, MemoryPoolMXBean, MemoryUsage}
 import javax.management.ObjectName
-import com.twitter.conversions.storage.longToStorageUnitableWholeNumber
+import com.twitter.conversions.StorageUnitOps._
 import com.twitter.util.StorageUnit
 
 private[lease] trait MemoryPool {

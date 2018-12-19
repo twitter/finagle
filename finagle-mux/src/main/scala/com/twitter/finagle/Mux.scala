@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.conversions.storage._
+import com.twitter.conversions.StorageUnitOps._
 import com.twitter.finagle.Mux.param.{MaxFrameSize, OppTls}
 import com.twitter.finagle.client._
 import com.twitter.finagle.factory.TimeoutFactory

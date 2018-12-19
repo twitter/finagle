@@ -1,6 +1,6 @@
 package com.twitter.finagle.netty4.http
 
-import com.twitter.conversions.storage._
+import com.twitter.conversions.StorageUnitOps._
 import com.twitter.finagle.ChannelBufferUsageException
 import com.twitter.finagle.http.codec.ChannelBufferUsageTracker
 import io.netty.buffer.Unpooled

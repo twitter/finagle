@@ -1,6 +1,6 @@
 package com.twitter.finagle.http
 
-import com.twitter.conversions.storage._
+import com.twitter.conversions.StorageUnitOps._
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.{ListeningServer, Service}
 import com.twitter.io.{Buf, Reader, ReaderDiscardedException}
