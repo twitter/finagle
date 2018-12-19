@@ -1,4 +1,4 @@
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.client.{StackClient, Transporter, StdStackClient}
 import com.twitter.finagle.dispatch.{SerialClientDispatcher, SerialServerDispatcher}

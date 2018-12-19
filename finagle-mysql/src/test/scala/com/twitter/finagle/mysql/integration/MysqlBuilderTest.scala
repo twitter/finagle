@@ -1,6 +1,6 @@
 package com.twitter.finagle.mysql.integration
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Mysql
 import com.twitter.finagle.param
 import com.twitter.finagle.tracing._

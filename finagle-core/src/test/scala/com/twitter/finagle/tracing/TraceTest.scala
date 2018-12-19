@@ -1,6 +1,6 @@
 package com.twitter.finagle.tracing
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.io.Buf
 import com.twitter.util.Time
 import com.twitter.util.{Return, Throw}

@@ -1,6 +1,6 @@
 package com.twitter.finagle.netty4
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.util.{Await, Awaitable}
 import org.scalatest.FunSuite
 

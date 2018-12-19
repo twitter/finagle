@@ -1,6 +1,6 @@
 package com.twitter.finagle.integration
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.service.Retries

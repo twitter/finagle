@@ -1,6 +1,6 @@
 package com.twitter.finagle.server
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.util.{Await, Awaitable, Closable, Future, Promise, Time}
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}

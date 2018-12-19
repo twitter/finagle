@@ -1,6 +1,6 @@
 package com.twitter.finagle.util
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.context.RemoteInfo.Upstream
 import com.twitter.finagle.{Failure, TimeoutException}

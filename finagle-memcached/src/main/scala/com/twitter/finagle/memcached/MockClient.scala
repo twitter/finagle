@@ -1,7 +1,7 @@
 package com.twitter.finagle.memcached
 
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.memcached.protocol.{ClientError, Value}
 import com.twitter.io.Buf
 import com.twitter.util.{Future, Time}

@@ -2,7 +2,7 @@ package com.twitter.finagle.service
 
 import com.twitter.finagle.{ChannelClosedException, Failure, FailureFlags, TimeoutException}
 import com.twitter.finagle.service.ResponseClass._
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.util.{Duration, Return, Throw}
 import org.scalatest.FunSuite
 

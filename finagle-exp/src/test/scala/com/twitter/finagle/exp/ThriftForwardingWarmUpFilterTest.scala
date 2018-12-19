@@ -1,6 +1,6 @@
 package com.twitter.finagle.exp
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
 import com.twitter.finagle.thrift.{ClientId, ThriftClientRequest}
 import com.twitter.util.{Future, Time}

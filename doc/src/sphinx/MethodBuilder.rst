@@ -38,7 +38,7 @@ Turning the example into code, first in Scala:
 .. code-block:: scala
 
   import com.twitter.conversions.PercentOps._
-  import com.twitter.conversions.time._
+  import com.twitter.conversions.DurationOps._
   import com.twitter.finagle.{http, Http, Service}
   import com.twitter.finagle.service.{ReqRep, ResponseClass}
   import com.twitter.util.Return
@@ -318,7 +318,7 @@ customizations to be shared across endpoints:
 
 .. code-block:: scala
 
-  import com.twitter.conversions.time._
+  import com.twitter.conversions.DurationOps._
   import com.twitter.finagle.{http, Http, Service}
   import com.twitter.finagle.service.{ReqRep, ResponseClass}
   import com.twitter.util.Return
@@ -431,7 +431,7 @@ Service-per-method, ``ServicePerEndpoint``.
 
 .. code-block:: scala
 
-  import com.twitter.conversions.time._
+  import com.twitter.conversions.DurationOps._
   import com.twitter.finagle.{Service, ThriftMux}
   import com.twitter.finagle.example.graph._
   import com.twitter.finagle.service.{ReqRep, ResponseClass}
@@ -469,7 +469,7 @@ with a ``MethodPerEndpoint``.
 
 .. code-block:: scala
 
-  import com.twitter.conversions.time._
+  import com.twitter.conversions.DurationOps._
   import com.twitter.finagle.{Filter, ThriftMux}
   import com.twitter.finagle.example.graph._
   import com.twitter.util.Future

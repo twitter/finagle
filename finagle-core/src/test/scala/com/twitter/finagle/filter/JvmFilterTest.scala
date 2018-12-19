@@ -1,6 +1,6 @@
 package com.twitter.finagle.filter
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
 import com.twitter.finagle.tracing.{Trace, Record, BufferingTracer, Annotation}
 import com.twitter.jvm.{Jvm, Gc}

@@ -118,7 +118,7 @@ object MethodBuilder {
  *
  * A client that has timeouts and retries on a 418 status code.
  * {{{
- * import com.twitter.conversions.time._
+ * import com.twitter.conversions.DurationOps._
  * import com.twitter.finagle.Http
  * import com.twitter.finagle.service.{ReqRep, ResponseClass}
  * import com.twitter.util.Return
@@ -140,7 +140,7 @@ object MethodBuilder {
  * An example of setting a per-request timeout of 50 milliseconds and a total
  * timeout of 100 milliseconds:
  * {{{
- * import com.twitter.conversions.time._
+ * import com.twitter.conversions.DurationOps._
  * import com.twitter.finagle.Http
  * import com.twitter.finagle.http.MethodBuilder
  *

@@ -1,6 +1,6 @@
 package com.twitter.finagle.thrift
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{Status, Service, WriteException}
 import com.twitter.util.{Await, Future, Promise, Return, Throw}
 import org.apache.thrift.TApplicationException

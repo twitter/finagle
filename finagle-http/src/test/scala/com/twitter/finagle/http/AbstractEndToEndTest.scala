@@ -1,7 +1,7 @@
 package com.twitter.finagle.http
 
 import com.twitter.conversions.StorageUnitOps._
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle
 import com.twitter.finagle._
 import com.twitter.finagle.builder.ClientBuilder
@@ -404,7 +404,7 @@ abstract class AbstractEndToEndTest
 
     if (!sys.props.contains("SKIP_FLAKY"))
       testIfImplemented(ClientAbort)(implName + ": client abort") {
-        import com.twitter.conversions.time._
+        import com.twitter.conversions.DurationOps._
         val timer = new JavaTimer
         val promise = new Promise[Response]
         val service = new HttpService {

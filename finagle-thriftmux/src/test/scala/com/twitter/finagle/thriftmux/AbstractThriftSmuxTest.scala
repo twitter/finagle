@@ -1,6 +1,6 @@
 package com.twitter.finagle.thriftmux
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.mux.transport.{IncompatibleNegotiationException, OpportunisticTls}
 import com.twitter.finagle.netty4.channel.ChannelSnooper
 import com.twitter.finagle.ssl.server.SslServerConfiguration

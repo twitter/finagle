@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{Service, Status}
 import com.twitter.finagle.http.{Fields, Request, Response, Version, Status => HttpStatus}
 import com.twitter.finagle.http.exp.StreamTransport

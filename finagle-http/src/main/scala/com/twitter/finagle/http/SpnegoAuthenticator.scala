@@ -1,6 +1,6 @@
 package com.twitter.finagle.http
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{Filter, Service}
 import com.twitter.util.{Base64StringEncoder, Duration, Future, FuturePool, Return, Time}
 import com.twitter.logging.Logger

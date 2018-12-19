@@ -4,7 +4,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.context.{Deadline, Contexts}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util._
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import org.junit.runner.RunWith
 import org.scalatest.{OneInstancePerTest, FunSuite}
 import org.scalatest.junit.JUnitRunner

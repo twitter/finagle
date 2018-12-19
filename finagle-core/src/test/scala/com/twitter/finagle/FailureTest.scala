@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.logging.{HasLogLevel, Level}
 import com.twitter.util.{Await, Future}
 import org.scalacheck.Gen

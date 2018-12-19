@@ -1,6 +1,6 @@
 package com.twitter.finagle.mux.pushsession
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{CancelledRequestException, FailureFlags}
 import com.twitter.finagle.client.BackupRequestFilter
 import com.twitter.finagle.pushsession.utils.DeferredExecutor

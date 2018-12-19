@@ -1,6 +1,6 @@
 package com.twitter.finagle.builder
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.ChannelClosedException
 import com.twitter.finagle.Service
 import com.twitter.finagle.client.utils.StringClient

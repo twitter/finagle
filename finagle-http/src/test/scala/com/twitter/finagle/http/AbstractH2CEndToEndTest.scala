@@ -1,7 +1,7 @@
 package com.twitter.finagle.http
 
 import com.twitter.conversions.StorageUnitOps._
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle
 import com.twitter.finagle.{Http, Service, ServiceFactory}
 import com.twitter.finagle.context.Contexts

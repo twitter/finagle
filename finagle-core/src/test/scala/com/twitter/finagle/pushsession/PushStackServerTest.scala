@@ -1,6 +1,6 @@
 package com.twitter.finagle.pushsession
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.pushsession.utils.MockChannelHandle
 import com.twitter.finagle.server.StackServer
 import com.twitter.finagle.transport.Transport

@@ -1,6 +1,6 @@
 package com.twitter.finagle.http
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.http.cookie.SameSite
 import org.jboss.netty.handler.codec.http.DefaultCookie
 import org.scalatest.FunSuite

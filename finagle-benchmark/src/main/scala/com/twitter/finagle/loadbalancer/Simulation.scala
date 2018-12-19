@@ -1,6 +1,6 @@
 package com.twitter.finagle.loadbalancer
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{param, Stack}
 import com.twitter.finagle.stats.SummarizingStatsReceiver
 import com.twitter.finagle.NoBrokersAvailableException

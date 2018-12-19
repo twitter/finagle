@@ -1,6 +1,6 @@
 package com.twitter.finagle.mux
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.client.EndpointerStackClient
 import com.twitter.finagle.mux.transport.{IncompatibleNegotiationException, OpportunisticTls}

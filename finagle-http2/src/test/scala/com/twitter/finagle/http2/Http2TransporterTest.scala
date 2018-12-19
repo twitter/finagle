@@ -1,6 +1,6 @@
 package com.twitter.finagle.http2
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{Stack, Status}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.http2.transport.{ClientSession, Http2UpgradingTransport}

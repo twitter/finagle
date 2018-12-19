@@ -1,6 +1,6 @@
 package com.twitter.finagle.http
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.io.Buf
 import java.time.ZonedDateTime
 import java.util.Date

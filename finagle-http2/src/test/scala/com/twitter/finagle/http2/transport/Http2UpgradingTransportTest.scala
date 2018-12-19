@@ -1,7 +1,7 @@
 package com.twitter.finagle.http2.transport
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{Stack, Status}
 import com.twitter.finagle.http2.RefTransport
 import com.twitter.finagle.http2.SerialExecutor

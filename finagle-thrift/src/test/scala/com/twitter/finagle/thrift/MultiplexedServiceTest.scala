@@ -1,6 +1,6 @@
 package com.twitter.finagle.thrift
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.thrift.thriftscala.{Echo, ExtendedEcho}
 import com.twitter.finagle.{Address, Name, Thrift}
 import com.twitter.util.{Await, Future}

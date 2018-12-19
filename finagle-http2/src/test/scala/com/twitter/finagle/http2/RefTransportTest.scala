@@ -1,6 +1,6 @@
 package com.twitter.finagle.http2
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.transport.{Transport, TransportProxy}
 import com.twitter.util.{Await, Future, Time}
 import org.junit.runner.RunWith

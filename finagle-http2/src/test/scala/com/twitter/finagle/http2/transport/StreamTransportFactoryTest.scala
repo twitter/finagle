@@ -1,7 +1,7 @@
 package com.twitter.finagle.http2.transport
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.http.TooLongMessageException
 import com.twitter.finagle.http2.{DeadConnectionException, GoAwayException, SerialExecutor}
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader._

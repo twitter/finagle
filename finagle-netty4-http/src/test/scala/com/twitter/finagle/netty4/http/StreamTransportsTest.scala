@@ -1,7 +1,7 @@
 package com.twitter.finagle.netty4.http
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Status
 import com.twitter.finagle.netty4.ByteBufConversion
 import com.twitter.finagle.netty4.transport.ChannelTransport

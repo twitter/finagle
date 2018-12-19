@@ -1,6 +1,6 @@
 package com.twitter.finagle.client
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.client.LatencyCompensation.Compensator
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stack.nilStack

@@ -163,7 +163,7 @@ it can be configured [#example]_.
 
 .. code-block:: scala
 
-  import com.twitter.conversions.time._
+  import com.twitter.conversions.DurationOps._
   import com.twitter.finagle.Http
 
   val twitter = Http.server

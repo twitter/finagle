@@ -1,7 +1,7 @@
 package com.twitter.finagle.zipkin.core
 
 import collection.JavaConverters._
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.util.{TimeoutException, Future, Await}
 import java.util.concurrent.ConcurrentHashMap
 

@@ -1,6 +1,6 @@
 package com.twitter.finagle.netty4.ssl.client
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Address
 import com.twitter.finagle.netty4.param.Allocator
 import com.twitter.finagle.netty4.ssl.ContextReloader

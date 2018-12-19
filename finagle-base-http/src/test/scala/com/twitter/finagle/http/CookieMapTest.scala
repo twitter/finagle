@@ -1,6 +1,6 @@
 package com.twitter.finagle.http
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import org.scalatest.FunSuite
 
 abstract class CookieMapTest(codec: CookieCodec, codecName: String) extends FunSuite {

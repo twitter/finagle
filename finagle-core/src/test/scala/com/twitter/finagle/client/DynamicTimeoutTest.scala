@@ -1,6 +1,6 @@
 package com.twitter.finagle.client
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.param.HighResTimer
 import com.twitter.finagle.service.{Retries, RetryPolicy, TimeoutFilter}

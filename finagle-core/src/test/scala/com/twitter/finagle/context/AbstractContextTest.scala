@@ -1,6 +1,6 @@
 package com.twitter.finagle.context
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.util.{Await, Future, Promise, Return}
 import org.scalatest.FunSuite
 import org.scalatest.junit.AssertionsForJUnit

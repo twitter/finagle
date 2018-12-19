@@ -1,6 +1,6 @@
 package com.twitter.finagle.mysql
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats._
 import com.twitter.util.{Await, Awaitable, Future}
 import java.util.concurrent.atomic.LongAdder

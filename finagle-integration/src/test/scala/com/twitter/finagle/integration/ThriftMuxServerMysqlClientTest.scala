@@ -1,6 +1,6 @@
 package com.twitter.finagle.integration
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.mysql.OK
 import com.twitter.finagle.mysql.integration.IntegrationClient
 import com.twitter.finagle.thriftmux.thriftscala.TestService

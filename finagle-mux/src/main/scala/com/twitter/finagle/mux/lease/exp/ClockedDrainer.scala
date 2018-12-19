@@ -1,8 +1,8 @@
 package com.twitter.finagle.mux.lease.exp
 
 import com.twitter.app.GlobalFlag
-import com.twitter.conversions.storage.intToStorageUnitableWholeNumber
-import com.twitter.conversions.time._
+import com.twitter.conversions.StorageUnitOps._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver, DefaultStatsReceiver}
 import com.twitter.util.{Duration, Stopwatch, StorageUnit, NilStopwatch}
 import java.util.Collections

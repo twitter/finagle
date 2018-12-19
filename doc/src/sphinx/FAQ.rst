@@ -232,7 +232,7 @@ As an example, given this stack module with the name "slow-down-module":
 
 .. code-block:: scala
 
-  import com.twitter.conversions.time._
+  import com.twitter.conversions.DurationOps._
   import com.twitter.finagle.Filter
   import com.twitter.finagle.util.DefaultTimer
 

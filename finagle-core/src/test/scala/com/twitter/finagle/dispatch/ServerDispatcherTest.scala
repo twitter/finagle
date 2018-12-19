@@ -1,6 +1,6 @@
 package com.twitter.finagle.dispatch
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
 import com.twitter.finagle.context.{Contexts, RemoteInfo}
 import com.twitter.finagle.transport.{Transport, TransportContext}

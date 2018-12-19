@@ -1,6 +1,6 @@
 package com.twitter.finagle.loadbalancer
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.util.{Await, Future, Time}
 import java.net.InetSocketAddress

@@ -1,6 +1,6 @@
 package com.twitter.finagle.serverset2.client.apache
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.io.Buf
 import com.twitter.logging.Logger

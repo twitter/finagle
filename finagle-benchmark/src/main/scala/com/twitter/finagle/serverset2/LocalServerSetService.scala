@@ -1,7 +1,7 @@
 package com.twitter.finagle.serverset2
 
 import com.twitter.app.App
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.logging.Logger
 import com.twitter.util.{Await, Future}

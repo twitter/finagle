@@ -1,7 +1,7 @@
 package com.twitter.finagle.mux.lease.exp
 
-import com.twitter.conversions.storage.intToStorageUnitableWholeNumber
-import com.twitter.conversions.time._
+import com.twitter.conversions.StorageUnitOps._
+import com.twitter.conversions.DurationOps._
 import com.twitter.util.{Duration, Time}
 import java.lang.management.{GarbageCollectorMXBean, MemoryPoolMXBean}
 import java.util.logging.Logger

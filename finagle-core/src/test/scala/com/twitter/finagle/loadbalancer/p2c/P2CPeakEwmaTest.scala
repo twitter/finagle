@@ -1,6 +1,6 @@
 package com.twitter.finagle.loadbalancer.p2c
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.Rng
 import com.twitter.finagle.{ClientConnection, Service, ServiceFactory, Status}

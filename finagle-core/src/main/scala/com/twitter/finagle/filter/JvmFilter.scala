@@ -4,7 +4,7 @@ import com.twitter.util.{Time, Future}
 import com.twitter.jvm.Jvm
 import com.twitter.finagle.{Service, SimpleFilter}
 import com.twitter.finagle.tracing.{Trace, Record, Annotation}
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 
 /**
  * Given a Jvm, create filters to record GCs (and other JVM events in

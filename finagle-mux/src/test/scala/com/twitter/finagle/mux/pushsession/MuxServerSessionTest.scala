@@ -1,6 +1,6 @@
 package com.twitter.finagle.mux.pushsession
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.mux.transport.Message._
 import com.twitter.finagle._

@@ -1,7 +1,7 @@
 package com.twitter.finagle.util
 
 import com.twitter.app.GlobalFlag
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.FinagleStatsReceiver
 import com.twitter.logging.Logger
 import com.twitter.util.{JavaTimer, ProxyTimer, Timer}

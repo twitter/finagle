@@ -1,6 +1,6 @@
 package com.twitter.finagle.netty4.ssl
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.util.{FuturePool, MockTimer, Time}
 import io.netty.handler.ssl.SslContext
 import java.util.concurrent.atomic.AtomicInteger

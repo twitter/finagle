@@ -1,6 +1,6 @@
 package com.twitter.finagle.http.netty3
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.http.Cookie
 import com.twitter.finagle.http.netty3.Bijections._
 import org.jboss.netty.handler.codec.http.{DefaultCookie, Cookie => NettyCookie}

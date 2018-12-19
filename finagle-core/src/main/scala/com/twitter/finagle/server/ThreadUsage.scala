@@ -1,7 +1,7 @@
 package com.twitter.finagle.server
 
 import com.github.benmanes.caffeine.cache.{Cache, Caffeine}
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.{Counter, Gauge, StatsReceiver, Verbosity}
 import com.twitter.finagle.{
   Filter,

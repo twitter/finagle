@@ -19,8 +19,8 @@ is available within ``Timer`` functions:
 
 .. code-block:: scala
 
-  scala> import com.twitter.conversions.time._, com.twitter.finagle.thrift.ClientId, com.twitter.finagle.util.HashedWheelTimer, com.twitter.util.{Await, Future}
-  import com.twitter.conversions.time._
+  scala> import com.twitter.conversions.DurationOps._, com.twitter.finagle.thrift.ClientId, com.twitter.finagle.util.HashedWheelTimer, com.twitter.util.{Await, Future}
+  import com.twitter.conversions.DurationOps._
   import com.twitter.finagle.thrift.ClientId
   import com.twitter.finagle.util.HashedWheelTimer
   import com.twitter.util.{Await, Future}

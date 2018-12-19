@@ -1,6 +1,6 @@
 package com.twitter.finagle.redis.exp
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{Service, ServiceClosedException}
 import com.twitter.finagle.redis.Client
 import com.twitter.finagle.redis.protocol._

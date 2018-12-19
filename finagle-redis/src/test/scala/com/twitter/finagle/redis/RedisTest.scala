@@ -1,6 +1,6 @@
 package com.twitter.finagle.redis
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util._
 import com.twitter.finagle.Redis

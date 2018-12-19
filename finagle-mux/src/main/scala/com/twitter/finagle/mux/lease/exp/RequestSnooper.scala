@@ -2,7 +2,7 @@ package com.twitter.finagle.mux.lease.exp
 
 import com.twitter.conversions.PercentOps._
 import com.twitter.conversions.StorageUnitOps._
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.util.{DefaultTimer, WindowedPercentileHistogram}
 import com.twitter.util.{Duration, Stopwatch, StorageUnit, Time, Timer}
 

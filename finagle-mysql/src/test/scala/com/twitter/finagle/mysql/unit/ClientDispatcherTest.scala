@@ -1,7 +1,7 @@
 package com.twitter.finagle.mysql
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Stack
 import com.twitter.finagle.mysql.param.Credentials
 import com.twitter.finagle.mysql.transport.{Packet, MysqlBuf}

@@ -1,6 +1,6 @@
 package com.twitter.finagle.thriftmux
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{Address, Name, Service, ThriftMux}
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.thriftmux.thriftscala.TestService

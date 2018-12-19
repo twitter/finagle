@@ -1,6 +1,6 @@
 package com.twitter.finagle.mux.lease.exp
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.util._
 import com.twitter.util.Local.Context
 

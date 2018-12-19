@@ -1,7 +1,7 @@
 package com.twitter.finagle.serverset2
 
 import com.twitter.app.GlobalFlag
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.serverset2.ServiceDiscoverer.ClientHealth
 import com.twitter.finagle.serverset2.addr.ZkMetadata

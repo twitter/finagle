@@ -1,6 +1,6 @@
 package com.twitter.finagle.service
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.{FailedFastException, Failure, FailureFlags, Service, WriteException}
 import com.twitter.util._

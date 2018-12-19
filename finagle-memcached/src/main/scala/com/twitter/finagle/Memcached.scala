@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.concurrent.Broker
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.{
   GenSerialClientDispatcher,

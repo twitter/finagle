@@ -1,6 +1,6 @@
 package com.twitter.finagle.http2.exp.transport
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.http.Request
 import com.twitter.finagle.netty4.http.Bijections
 import com.twitter.finagle.{Stack, Status}

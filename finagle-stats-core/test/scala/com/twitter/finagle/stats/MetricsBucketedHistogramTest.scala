@@ -1,6 +1,6 @@
 package com.twitter.finagle.stats
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.util.{Duration, Time, TimeControl}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite

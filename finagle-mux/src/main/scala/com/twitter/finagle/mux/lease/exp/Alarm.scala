@@ -1,7 +1,7 @@
 package com.twitter.finagle.mux.lease.exp
 
 import com.twitter.util.{Duration, Stopwatch, StorageUnit, Time}
-import com.twitter.conversions.time.longToTimeableNumber
+import com.twitter.conversions.DurationOps._
 
 /**
  * `Alarm` describes whether a thread is ready to wake up, and if it's not

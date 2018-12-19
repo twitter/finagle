@@ -253,7 +253,7 @@ To override this default use the following code snippet.
 
 .. code-block:: scala
 
-  import com.twitter.conversions.time._
+  import com.twitter.conversions.DurationOps._
   import com.twitter.finagle.Http
   import com.twitter.finagle.service.{Backoff, RetryBudget}
 
@@ -269,7 +269,7 @@ construct a new instance of ``RetryBudget`` backed by *leaky token bucket*.
 
 .. code-block:: scala
 
-  import com.twitter.conversions.time._
+  import com.twitter.conversions.DurationOps._
   import com.twitter.finagle.service.RetryBudget
 
   val budget: RetryBudget = RetryBudget(
@@ -291,7 +291,7 @@ exceptions from the remote server should be applied explicitly.
 
 .. code-block:: scala
 
-  import com.twitter.conversions.time._
+  import com.twitter.conversions.DurationOps._
   import com.twitter.finagle.Http
   import com.twitter.finagle.util.DefaultTimer
   import com.twitter.finagle.service.{RetryBudget, RetryFilter, RetryPolicy}
@@ -324,7 +324,7 @@ The following example [#example]_ constructs an instance of ``RetryPolicy`` usin
   import com.twitter.finagle.http.{Response, Status}
   import com.twitter.finagle.service.{Backoff, RetryPolicy}
   import com.twitter.util.{Try, Return, Throw}
-  import com.twitter.conversions.time._
+  import com.twitter.conversions.DurationOps._
 
   val policy: RetryPolicy[Try[Response]] =
     RetryPolicy.backoff(Backoff.equalJittered(10.milliseconds, 10.seconds)) {
@@ -354,7 +354,7 @@ stack params [#example]_.
 
 .. code-block:: scala
 
-  import com.twitter.conversions.time._
+  import com.twitter.conversions.DurationOps._
   import com.twitter.finagle.Http
 
   val twitter = Http.client
@@ -378,7 +378,7 @@ Here is an example [#example]_ of how to override that default.
 
 .. code-block:: scala
 
-  import com.twitter.conversions.time._
+  import com.twitter.conversions.DurationOps._
   import com.twitter.finagle.Http
 
   val twitter = Http.client
@@ -405,7 +405,7 @@ it can be configured [#example]_.
 
 .. code-block:: scala
 
-  import com.twitter.conversions.time._
+  import com.twitter.conversions.DurationOps._
   import com.twitter.finagle.Http
 
   val twitter = Http.client
@@ -426,7 +426,7 @@ Finally, timeouts can be enforced outside of these modules on a per-request leve
 
 .. code-block:: scala
 
-  import com.twitter.conversions.time._
+  import com.twitter.conversions.DurationOps._
   import com.twitter.finagle.http.{Request, Response}
   import com.twitter.util.Future
 
@@ -548,7 +548,7 @@ Use ``Balancers.p2cPeakEwma`` to construct an instance of ``LoadBalancerFactory`
 
 .. code-block:: scala
 
-  import com.twitter.conversions.time._
+  import com.twitter.conversions.DurationOps._
   import com.twitter.finagle.loadbalancer.{Balancers, LoadBalancerFactory}
 
   val balancer: LoadBalancerFactory =
@@ -583,7 +583,7 @@ Use ``Balancers.aperture`` to construct an instance of ``LoadBalancerFactory`` [
 
 .. code-block:: scala
 
-  import com.twitter.conversions.time._
+  import com.twitter.conversions.DurationOps._
   import com.twitter.finagle.loadbalancer.{Balancers, LoadBalancerFactory}
 
   val balancer: LoadBalancerFactory =
@@ -731,7 +731,7 @@ success rate [#example]_.
 
 .. code-block:: scala
 
-  import com.twitter.conversions.time._
+  import com.twitter.conversions.DurationOps._
   import com.twitter.finagle.Http
   import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
   import com.twitter.finagle.service.Backoff
@@ -756,7 +756,7 @@ following snippet [#example]_.
 
 .. code-block:: scala
 
-  import com.twitter.conversions.time._
+  import com.twitter.conversions.DurationOps._
   import com.twitter.finagle.Http
   import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
   import com.twitter.finagle.service.Backoff
@@ -815,7 +815,7 @@ example [#example]_.
 
 .. code-block:: scala
 
-  import com.twitter.conversions.time._
+  import com.twitter.conversions.DurationOps._
   import com.twitter.finagle.Http
 
   val twitter = Http.client

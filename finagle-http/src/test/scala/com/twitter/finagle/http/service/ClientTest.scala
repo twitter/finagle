@@ -1,6 +1,6 @@
 package com.twitter.finagle.http.service
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.http.{Method, Request, Response, Version}
 import com.twitter.finagle.service.FailingFactory

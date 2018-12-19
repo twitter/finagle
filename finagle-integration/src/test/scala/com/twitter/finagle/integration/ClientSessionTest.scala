@@ -16,7 +16,7 @@ import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.util._
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import org.mockito.Mockito.when
 import org.scalatest.FunSuite
 import org.scalatest.mockito.MockitoSugar

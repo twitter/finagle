@@ -1,7 +1,7 @@
 package com.twitter.finagle.netty4.pushsession
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle._
 import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession, PushTransporter}

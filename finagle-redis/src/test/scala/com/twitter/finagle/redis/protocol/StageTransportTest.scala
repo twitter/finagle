@@ -1,6 +1,6 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.redis.RedisResponseTest
 import com.twitter.finagle.transport.QueueTransport

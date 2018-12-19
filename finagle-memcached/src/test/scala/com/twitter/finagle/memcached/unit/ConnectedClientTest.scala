@@ -1,6 +1,6 @@
 package com.twitter.finagle.memcached.unit
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.io.Buf
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.protocol._

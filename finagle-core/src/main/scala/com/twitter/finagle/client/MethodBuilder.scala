@@ -158,7 +158,7 @@ private[finagle] final class MethodBuilder[Req, Rep](
    *
    * @example A total timeout of 200 milliseconds:
    * {{{
-   * import com.twitter.conversions.time._
+   * import com.twitter.conversions.DurationOps._
    * import com.twitter.finagle.client.MethodBuilder
    *
    * val builder: MethodBuilder[Int, Int] = ???
@@ -167,7 +167,7 @@ private[finagle] final class MethodBuilder[Req, Rep](
    *
    * @example A per-request timeout of 50 milliseconds:
    * {{{
-   * import com.twitter.conversions.time._
+   * import com.twitter.conversions.DurationOps._
    * import com.twitter.finagle.client.MethodBuilder
    *
    * val builder: MethodBuilder[Int, Int] = ???

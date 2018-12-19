@@ -3,7 +3,7 @@ package com.twitter.finagle
 import com.github.benmanes.caffeine.cache.{CacheLoader, Caffeine, LoadingCache}
 import com.twitter.cache.caffeine.CaffeineCache
 import com.twitter.concurrent.AsyncSemaphore
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.{DefaultTimer, InetSocketAddressUtil, Updater}
 import com.twitter.logging.Logger

@@ -1,6 +1,6 @@
 package com.twitter.finagle.zookeeper
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.io.TempDirectory.create
 import com.twitter.finagle.common.zookeeper.ZooKeeperClient
 import com.twitter.zk.ServerCnxnFactory

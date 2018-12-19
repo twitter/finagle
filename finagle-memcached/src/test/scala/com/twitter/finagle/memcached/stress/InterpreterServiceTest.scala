@@ -1,6 +1,6 @@
 package com.twitter.finagle.memcached.stress
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Address
 import com.twitter.finagle.Memcached
 import com.twitter.finagle.Name

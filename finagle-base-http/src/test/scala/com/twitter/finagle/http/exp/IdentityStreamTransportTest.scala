@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.exp
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.transport.QueueTransport
 import com.twitter.util.{Await, Future}
 import org.scalatest.FunSuite

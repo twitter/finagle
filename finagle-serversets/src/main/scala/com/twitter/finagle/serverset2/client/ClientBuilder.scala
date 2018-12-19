@@ -1,6 +1,6 @@
 package com.twitter.finagle.serverset2.client
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.util.{Duration, Timer}
 import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
 import com.twitter.io.Buf

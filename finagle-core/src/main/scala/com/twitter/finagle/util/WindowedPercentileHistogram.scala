@@ -1,6 +1,6 @@
 package com.twitter.finagle.util
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.util.{Closable, Duration, Future, Time, Timer, MockTimer}
 import org.HdrHistogram.{Histogram, Recorder}
 import scala.collection.mutable

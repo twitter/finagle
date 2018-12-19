@@ -1,6 +1,6 @@
 package com.twitter.finagle.mysql.integration
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.mysql.{Client, OK, ServerError}
 import com.twitter.util.{Await, Awaitable, Future}
 import java.sql.SQLException

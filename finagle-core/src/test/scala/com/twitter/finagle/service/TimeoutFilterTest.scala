@@ -4,7 +4,7 @@ import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
 import com.twitter.finagle.context.{Contexts, Deadline}
 import com.twitter.finagle.service.TimeoutFilterTest.TunableTimeoutHelper
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.util._
 import com.twitter.util.tunable.Tunable
 import java.util.concurrent.atomic.AtomicReference

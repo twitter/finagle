@@ -1,6 +1,6 @@
 package com.twitter.finagle.client
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{param, ServiceFactory, Stack, Stackable, StackBuilder}
 import com.twitter.finagle.pool.{WatermarkPool, CachingPool, BufferingPool}
 import com.twitter.finagle.stats.StatsReceiver

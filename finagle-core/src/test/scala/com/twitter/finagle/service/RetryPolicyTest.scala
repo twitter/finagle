@@ -1,7 +1,7 @@
 package com.twitter.finagle.service
 
 import RetryPolicy._
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{
   ChannelClosedException,
   Failure,

@@ -1,6 +1,6 @@
 package com.twitter.finagle.netty4
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle.netty4.Netty4Listener.BackPressure
 import com.twitter.finagle.netty4.Netty4ListenerHelpers._

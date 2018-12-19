@@ -1,6 +1,6 @@
 package com.twitter.finagle.mysql
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.{ClientConnection, Service, ServiceFactory}
 import com.twitter.util.{Await, Awaitable, Future, Time}

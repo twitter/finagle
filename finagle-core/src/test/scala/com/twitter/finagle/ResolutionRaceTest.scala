@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.server.utils.StringServer
 import com.twitter.util._

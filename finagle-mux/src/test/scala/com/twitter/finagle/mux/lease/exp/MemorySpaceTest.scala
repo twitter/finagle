@@ -1,6 +1,6 @@
 package com.twitter.finagle.mux.lease.exp
 
-import com.twitter.conversions.storage.intToStorageUnitableWholeNumber
+import com.twitter.conversions.StorageUnitOps._
 import com.twitter.util.StorageUnit
 import org.mockito.Mockito.{when, verify}
 import org.junit.runner.RunWith

@@ -1,6 +1,6 @@
 package com.twitter.finagle.liveness
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.service.Backoff
 import com.twitter.finagle.util.Ema
 import com.twitter.util.{Duration, Stopwatch, WindowedAdder}

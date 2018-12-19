@@ -1,6 +1,6 @@
 package com.twitter.finagle.http.netty4
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.http.{Cookie, CookieCodec, CookieMap}
 import com.twitter.finagle.http.cookie.SameSiteCodec
 import io.netty.handler.codec.http.cookie.{

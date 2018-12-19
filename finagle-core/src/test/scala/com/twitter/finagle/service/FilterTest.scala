@@ -3,7 +3,7 @@ package com.twitter.finagle.service
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{Service, Filter}
 import com.twitter.util.{Throw, Try, Await, Future}
 

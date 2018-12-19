@@ -1,6 +1,6 @@
 package com.twitter.finagle.memcached.unit.protocol.text.server
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.memcached.protocol.StorageCommand.StorageCommands
 import com.twitter.finagle.memcached.protocol.text.server.MemcachedServerDecoder
 import com.twitter.finagle.memcached.protocol.{Set, Stats}

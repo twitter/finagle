@@ -10,7 +10,7 @@ import org.jboss.netty.channel._
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 
 import com.twitter.util.CountDownLatch
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 
 @RunWith(classOf[JUnitRunner])
 class Netty3AssumptionsTest extends FunSuite {

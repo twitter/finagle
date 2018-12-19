@@ -1,6 +1,6 @@
 package com.twitter.finagle.thriftmux.pushsession
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.pushsession.utils.MockChannelHandle
 import com.twitter.finagle.{Service, Stack, Status, Thrift, ThriftMux, mux, param => fparam}
 import com.twitter.finagle.mux.{ClientDiscardedRequestException, Request, Response}

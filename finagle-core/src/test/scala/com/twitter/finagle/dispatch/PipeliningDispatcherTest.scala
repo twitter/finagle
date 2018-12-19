@@ -1,6 +1,6 @@
 package com.twitter.finagle.dispatch
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{IndividualRequestTimeoutException => FinagleTimeoutException}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.transport.Transport

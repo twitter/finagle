@@ -1,7 +1,7 @@
 package com.twitter.finagle.dispatch
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{Failure, FailureFlags, Stack}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport

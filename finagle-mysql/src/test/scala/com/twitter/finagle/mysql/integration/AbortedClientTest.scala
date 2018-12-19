@@ -1,6 +1,6 @@
 package com.twitter.finagle.mysql.integration
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.client.DefaultPool
 import com.twitter.util.{Await, Awaitable}
 import org.scalatest.FunSuite

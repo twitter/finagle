@@ -1,6 +1,6 @@
 package com.twitter.finagle.http.codec
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Fields, Method, Request, Response, Status, Version}
 import com.twitter.finagle.http.Status._

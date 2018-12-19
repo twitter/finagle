@@ -1,7 +1,7 @@
 package com.twitter.finagle.netty4
 
 import com.twitter.app.GlobalFlag
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle.netty4.util.Netty4Timer
 import com.twitter.finagle.stats.{FinagleStatsReceiver, StatsReceiver, Verbosity}

@@ -1,6 +1,6 @@
 package com.twitter.finagle.zipkin.core
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.tracing._
 import com.twitter.util._

@@ -1,7 +1,7 @@
 package com.twitter.finagle.addr
 
 import com.twitter.concurrent.Broker
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{Addr, Address}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{MockTimer, Time}

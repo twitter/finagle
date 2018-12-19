@@ -1,7 +1,7 @@
 package com.twitter.finagle.mux
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.client.BackupRequestFilter
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.liveness.FailureDetector

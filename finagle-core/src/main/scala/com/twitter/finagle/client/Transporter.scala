@@ -33,7 +33,7 @@ trait Transporter[In, Out, Ctx <: TransportContext] {
  * @define $param a [[com.twitter.finagle.Stack.Param]] used to configure
  */
 object Transporter {
-  import com.twitter.conversions.time._
+  import com.twitter.conversions.DurationOps._
 
   /**
    * $param a `SocketAddress` that a `Transporter` connects to.

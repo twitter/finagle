@@ -1,7 +1,7 @@
 package com.twitter.finagle.client
 
 import com.twitter.conversions.PercentOps._
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Stack.{NoOpModule, Params}
 import com.twitter.finagle._
 import com.twitter.finagle.service._

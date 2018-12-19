@@ -1,6 +1,6 @@
 package com.twitter.finagle.service
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.{Counter, StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.{Service, Status}
 import com.twitter.util.{Future, Time, MockTimer, Promise, Return, Duration, Timer}

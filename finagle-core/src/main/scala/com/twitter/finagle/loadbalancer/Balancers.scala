@@ -1,6 +1,6 @@
 package com.twitter.finagle.loadbalancer
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.loadbalancer.aperture.{ApertureLeastLoaded, AperturePeakEwma}
 import com.twitter.finagle.loadbalancer.heap.HeapLeastLoaded
 import com.twitter.finagle.loadbalancer.p2c.{P2CLeastLoaded, P2CPeakEwma}

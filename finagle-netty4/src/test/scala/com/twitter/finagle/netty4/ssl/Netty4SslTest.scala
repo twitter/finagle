@@ -1,6 +1,6 @@
 package com.twitter.finagle.netty4.ssl
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.netty4.ssl.Netty4SslTestComponents._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.transport.Transport

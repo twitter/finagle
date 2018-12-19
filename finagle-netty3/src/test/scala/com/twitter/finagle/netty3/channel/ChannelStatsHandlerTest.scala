@@ -2,7 +2,7 @@ package com.twitter.finagle.netty3.channel
 
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.Time
-import com.twitter.conversions.time.intToTimeableNumber
+import com.twitter.conversions.DurationOps._
 import java.util.concurrent.atomic.AtomicLong
 import org.jboss.netty.channel._
 import org.mockito.Mockito.when

@@ -1,6 +1,6 @@
 package com.twitter.finagle.http
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
 import com.twitter.finagle.tracing.{Flags, SpanId, Trace, TraceId}
 import com.twitter.util.{Await, Future}

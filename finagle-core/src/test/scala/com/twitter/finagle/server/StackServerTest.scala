@@ -1,7 +1,7 @@
 package com.twitter.finagle.server
 
 import com.twitter.concurrent.AsyncSemaphore
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Stack.Module0
 import com.twitter.finagle._
 import com.twitter.finagle.context.{Contexts, Deadline}

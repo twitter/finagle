@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Namer.AddrWeightKey
 import com.twitter.util._
 import org.junit.runner.RunWith

@@ -1,6 +1,6 @@
 package com.twitter.finagle.http
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.http.cookie.SameSite
 import com.twitter.util.Duration
 import java.util.{BitSet => JBitSet}

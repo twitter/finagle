@@ -1,6 +1,6 @@
 package com.twitter.finagle.filter
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{Failure, FailureFlags, Service, ServiceFactory, Stack, param}
 import com.twitter.finagle.service.FailedService
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}

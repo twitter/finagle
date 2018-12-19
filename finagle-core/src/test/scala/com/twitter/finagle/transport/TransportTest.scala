@@ -1,6 +1,6 @@
 package com.twitter.finagle.transport
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.Status
 import com.twitter.io.{Buf, Pipe, Reader, ReaderDiscardedException}

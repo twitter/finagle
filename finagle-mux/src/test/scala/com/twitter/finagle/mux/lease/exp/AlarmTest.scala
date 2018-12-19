@@ -1,8 +1,8 @@
 package com.twitter.finagle.mux.lease.exp
 
 import com.twitter.util.{StorageUnit, Time}
-import com.twitter.conversions.time._
-import com.twitter.conversions.storage.intToStorageUnitableWholeNumber
+import com.twitter.conversions.DurationOps._
+import com.twitter.conversions.StorageUnitOps._
 import org.scalactic.source.Position
 import org.scalatest.{FunSuite, Tag}
 

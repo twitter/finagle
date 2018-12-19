@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.service.{ConstantService, NilService}
 import com.twitter.util.{Await, Future, Promise, Time}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}

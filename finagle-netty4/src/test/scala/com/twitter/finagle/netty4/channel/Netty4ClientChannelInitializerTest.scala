@@ -1,6 +1,6 @@
 package com.twitter.finagle.netty4.channel
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Stack
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle.client.Transporter

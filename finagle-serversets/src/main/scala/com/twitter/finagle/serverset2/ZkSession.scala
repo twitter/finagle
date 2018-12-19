@@ -2,7 +2,7 @@ package com.twitter.finagle.serverset2
 
 import com.twitter.app.GlobalFlag
 import com.twitter.concurrent.AsyncSemaphore
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.serverset2.client._
 import com.twitter.finagle.stats._
 import com.twitter.io.Buf

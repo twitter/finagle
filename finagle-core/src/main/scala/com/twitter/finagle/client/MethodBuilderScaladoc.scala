@@ -22,7 +22,7 @@ private[finagle] trait MethodBuilderScaladoc[T] {
    * @example
    * For example, a total timeout of 200 milliseconds:
    * {{{
-   * import com.twitter.conversions.time._
+   * import com.twitter.conversions.DurationOps._
    * import com.twitter.finagle.http.Http
    * import com.twitter.util.Duration
    *
@@ -58,7 +58,7 @@ private[finagle] trait MethodBuilderScaladoc[T] {
    * @example
    * For example, a total timeout of 200 milliseconds:
    * {{{
-   * import com.twitter.conversions.time._
+   * import com.twitter.conversions.DurationOps._
    * import com.twitter.finagle.http.Http
    * import com.twitter.util.Duration
    * import com.twitter.util.tunable.Tunable
@@ -101,7 +101,7 @@ private[finagle] trait MethodBuilderScaladoc[T] {
    * @example
    * For example, a per-request timeout of 50 milliseconds:
    * {{{
-   * import com.twitter.conversions.time._
+   * import com.twitter.conversions.DurationOps._
    * import com.twitter.finagle.http.Http
    * import com.twitter.util.Duration
    *
@@ -142,7 +142,7 @@ private[finagle] trait MethodBuilderScaladoc[T] {
    * @example
    * For example, a per-request timeout of 50 milliseconds:
    * {{{
-   * import com.twitter.conversions.time._
+   * import com.twitter.conversions.DurationOps._
    * import com.twitter.finagle.http.Http
    * import com.twitter.util.Duration
    * import com.twitter.util.tunable.Tunable
@@ -182,7 +182,7 @@ private[finagle] trait MethodBuilderScaladoc[T] {
    * @example
    * For example, retrying on a 418 status code:
    * {{{
-   * import com.twitter.conversions.time._
+   * import com.twitter.conversions.DurationOps._
    * import com.twitter.finagle.http.Http
    * import com.twitter.finagle.service.{ReqRep, ResponseClass}
    * import com.twitter.util.Return

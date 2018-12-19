@@ -1,6 +1,6 @@
 package com.twitter.finagle.zookeeper
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{Announcer, Addr, Address}
 import com.twitter.util.{Await, Duration, Var}
 import java.io.{InputStreamReader, BufferedReader}

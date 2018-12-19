@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.benchmark.StdBenchAnnotations
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Await, Var}

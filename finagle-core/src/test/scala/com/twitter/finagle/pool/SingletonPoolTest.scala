@@ -1,7 +1,7 @@
 package com.twitter.finagle.pool
 
 import com.twitter.finagle._
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.util.{Await, Awaitable, Future, Promise, Return, Throw, Time}
 import org.mockito.Matchers.any

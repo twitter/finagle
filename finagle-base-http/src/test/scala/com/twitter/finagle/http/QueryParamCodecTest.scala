@@ -1,6 +1,6 @@
 package com.twitter.finagle.http
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.util.Stopwatch
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets

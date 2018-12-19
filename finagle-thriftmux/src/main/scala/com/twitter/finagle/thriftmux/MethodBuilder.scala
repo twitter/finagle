@@ -147,7 +147,7 @@ object MethodBuilder {
  * This gives you a `Service` that has timeouts and retries on
  * `AnException` when the `errorCode` is `0`:
  * {{{
- * import com.twitter.conversions.time._
+ * import com.twitter.conversions.DurationOps._
  * import com.twitter.finagle.ThriftMux
  * import com.twitter.finagle.service.{ReqRep, ResponseClass}
  * import com.twitter.util.Throw
@@ -172,7 +172,7 @@ object MethodBuilder {
  * An example of setting a per-request timeout of 50 milliseconds and a total
  * timeout of 100 milliseconds:
  * {{{
- * import com.twitter.conversions.time._
+ * import com.twitter.conversions.DurationOps._
  * import com.twitter.finagle.thriftmux.MethodBuilder
  *
  * val builder: MethodBuilder = ???

@@ -1,7 +1,7 @@
 package com.twitter.finagle.memcached
 
 import com.twitter.concurrent.Broker
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.common.zookeeper.ZooKeeperClient
 import com.twitter.finagle.service.Backoff
 import com.twitter.finagle.stats.StatsReceiver

@@ -1,6 +1,6 @@
 package com.twitter.finagle.http2.transport
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util.{MockTimer, Time}
 import io.netty.channel.embedded.EmbeddedChannel

@@ -1,6 +1,6 @@
 package com.twitter.finagle.mysql.integration
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{IndividualRequestTimeoutException, Mysql, mysql}
 import com.twitter.finagle.mysql._
 import com.twitter.finagle.stats.InMemoryStatsReceiver

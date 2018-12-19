@@ -1,7 +1,7 @@
 package com.twitter.finagle.exception
 
 import com.twitter.app.GlobalFlag
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Thrift
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.exception.thriftscala.{

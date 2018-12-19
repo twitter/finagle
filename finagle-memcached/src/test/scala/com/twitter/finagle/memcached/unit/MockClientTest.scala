@@ -1,6 +1,6 @@
 package com.twitter.finagle.memcached.unit
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.memcached.MockClient.Cached
 import com.twitter.finagle.memcached.protocol.ClientError
 import com.twitter.finagle.memcached.{GetResult, MockClient}

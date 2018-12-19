@@ -1,6 +1,6 @@
 package com.twitter.finagle.netty3
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{Address, Stack}
 import com.twitter.finagle.client.Transporter.Credentials
 import com.twitter.finagle.client.{LatencyCompensation, Transporter}

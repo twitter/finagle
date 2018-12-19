@@ -1,7 +1,7 @@
 package com.twitter.finagle.http
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{Status => CoreStatus}
 import com.twitter.finagle.http.codec.ConnectionManager
 import com.twitter.finagle.http.exp.{IdentityStreamTransport, Multi, StreamTransportProxy}

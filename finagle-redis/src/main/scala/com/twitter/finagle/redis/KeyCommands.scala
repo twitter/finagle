@@ -8,7 +8,7 @@ import com.twitter.io.Buf
 import com.twitter.util.{Duration, Future, Time}
 
 private[redis] trait KeyCommands { self: BaseClient =>
-  import com.twitter.conversions.time._
+  import com.twitter.conversions.DurationOps._
 
   /**
    * Removes keys

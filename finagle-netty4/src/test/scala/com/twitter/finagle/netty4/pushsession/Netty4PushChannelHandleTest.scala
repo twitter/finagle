@@ -1,6 +1,6 @@
 package com.twitter.finagle.netty4.pushsession
 
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{ChannelException, Status, UnknownChannelException}
 import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession}
 import com.twitter.finagle.stats.NullStatsReceiver
