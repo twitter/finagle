@@ -57,8 +57,6 @@ New Features
   makes modifying the existing `Stack` easier when using method chaining.
   ``PHAB_ID=D246893``
 
-* finagle-redis: Add support for the new stream API released in Redis 5.0. ``PHAB_ID=D244320``
-
 * finagle-stats: Split the implementation and `ServiceLoading` into separate modules.
   The implementation is in `finagle-stats-core`. This is backwards compatible
   for existing users of `finagle-stats` while allowing new usages built on top.
