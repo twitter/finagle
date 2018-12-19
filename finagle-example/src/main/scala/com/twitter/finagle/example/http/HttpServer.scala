@@ -1,8 +1,8 @@
 package com.twitter.finagle.example.http
 
-import com.twitter.finagle.builder.{Server, ServerBuilder}
-import com.twitter.finagle.{Http, Service, SimpleFilter}
+import com.twitter.finagle.builder.ServerBuilder
 import com.twitter.finagle.http.{Request, Response, Status, Version, Fields}
+import com.twitter.finagle.{Http, ListeningServer, Service, SimpleFilter}
 import com.twitter.util.Future
 import java.net.InetSocketAddress
 
@@ -71,7 +71,7 @@ object HttpServer {
     // compose the Filters and Service together:
     val myService: Service[Request, Response] = handleExceptions andThen authorize andThen respond
 
-    val server: Server = ServerBuilder()
+    val server: ListeningServer = ServerBuilder()
       .stack(Http.server)
       .bindTo(new InetSocketAddress(8080))
       .name("httpserver")

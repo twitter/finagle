@@ -20,20 +20,6 @@ import java.net.SocketAddress
 import scala.annotation.implicitNotFound
 
 /**
- * A listening server. This is for compatibility with older code that is
- * using builder.Server. New code should use the ListeningServer trait.
- */
-trait Server extends ListeningServer {
-
-  /**
-   * When a server is bound to an ephemeral port, gets back the address
-   * with concrete listening port picked.
-   */
-  @deprecated("Use boundAddress", "2014-12-19")
-  final def localAddress: SocketAddress = boundAddress
-}
-
-/**
  * Factory for [[com.twitter.finagle.builder.ServerBuilder]] instances
  */
 object ServerBuilder {
@@ -49,7 +35,10 @@ object ServerBuilder {
   /**
    * Provides a typesafe `build` for Java.
    */
-  def safeBuild[Req, Rep](service: Service[Req, Rep], builder: Complete[Req, Rep]): Server =
+  def safeBuild[Req, Rep](
+    service: Service[Req, Rep],
+    builder: Complete[Req, Rep]
+  ): ListeningServer =
     builder.build(service)(ServerConfigEvidence.FullyConfigured)
 
   /**
@@ -58,7 +47,7 @@ object ServerBuilder {
   def safeBuild[Req, Rep](
     serviceFactory: ServiceFactory[Req, Rep],
     builder: Complete[Req, Rep]
-  ): Server =
+  ): ListeningServer =
     builder.build(serviceFactory)(ServerConfigEvidence.FullyConfigured)
 }
 
@@ -696,13 +685,13 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
       HasBindTo,
       HasName
     ]
-  ): Server = build(ServiceFactory.const(service))
+  ): ListeningServer = build(ServiceFactory.const(service))
 
   @deprecated("Used for ABI compat", "5.0.1")
   final def build(
     service: Service[Req, Rep],
     THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: ThisConfig =:= FullySpecifiedConfig
-  ): Server =
+  ): ListeningServer =
     build(
       ServiceFactory.const(service),
       THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION
@@ -716,7 +705,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
     serviceFactory: () => Service[Req, Rep]
   )(
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: ThisConfig =:= FullySpecifiedConfig
-  ): Server =
+  ): ListeningServer =
     build((_: ClientConnection) => serviceFactory())(
       THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION
     )
@@ -731,7 +720,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
     serviceFactory: (ClientConnection) => Service[Req, Rep]
   )(
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: ThisConfig =:= FullySpecifiedConfig
-  ): Server =
+  ): ListeningServer =
     build(
       new ServiceFactory[Req, Rep] {
         def apply(conn: ClientConnection) = Future.value(serviceFactory(conn))
@@ -753,7 +742,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
       HasBindTo,
       HasName
     ]
-  ): Server = {
+  ): ListeningServer = {
 
     val Label(lbl) = params[Label]
     val label = if (lbl == "") "server" else lbl
@@ -772,7 +761,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
 
     val listeningServer = server.withParams(serverParams).serve(addr, serviceFactory)
 
-    new Server with CloseAwaitably {
+    new ListeningServer with CloseAwaitably {
 
       val exitGuard = if (!daemon) Some(ExitGuard.guard(s"server for '$label'")) else None
 
@@ -790,13 +779,14 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
   final def build(
     serviceFactory: ServiceFactory[Req, Rep],
     THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: ThisConfig =:= FullySpecifiedConfig
-  ): Server = build(serviceFactory)(new ServerConfigEvidence[HasCodec, HasBindTo, HasName] {})
+  ): ListeningServer =
+    build(serviceFactory)(new ServerConfigEvidence[HasCodec, HasBindTo, HasName] {})
 
   /**
    * Construct a Service, with runtime checks for builder
    * completeness.
    */
-  def unsafeBuild(service: Service[Req, Rep]): Server = {
+  def unsafeBuild(service: Service[Req, Rep]): ListeningServer = {
     if (!params.contains[BindTo])
       throw new IncompleteSpecification("No bindTo was specified")
 

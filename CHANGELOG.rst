@@ -28,6 +28,11 @@ Breaking API Changes
 * finagle-core: The access level of the `c.t.f.b.ServerBuilder.copy` method has changed
   from protected to private. ``PHAB_ID=D252142``
 
+* finagle-core: The bridge type `c.t.f.b.Server` has been removed. Users should
+  change to use `c.t.f.ListeningServer` instead. Uses of the previously
+  deprecated `Server.localAddress` should use `ListeningServer.boundAddress`
+  instead. ``PHAB_ID=D254339``
+
 Bug Fixes
 ~~~~~~~~~
 
