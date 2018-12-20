@@ -75,7 +75,7 @@ class SslClientVerificationHandlerTest extends FunSuite with MockitoSugar with O
           sslHandler,
           address,
           config,
-          new TestVerifier(Future.value(false))
+          new TestVerifier(Future.False)
         )
       )
     val connectPromise = channel.connect(fakeAddress)
@@ -173,7 +173,7 @@ class SslClientVerificationHandlerTest extends FunSuite with MockitoSugar with O
           sslHandler,
           address,
           config,
-          new TestVerifier(Future.value(false))
+          new TestVerifier(Future.False)
         )
       )
 
