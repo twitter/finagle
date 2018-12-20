@@ -52,6 +52,32 @@ class DefaultHeaderMapTest extends AbstractHeaderMapTest with GeneratorDrivenPro
     assert(DefaultHeaderMap().isEmpty)
   }
 
+  test("reject out-of-bound characters in name") {
+    forAll(Gen.choose[Char](128, Char.MaxValue)) { c =>
+      val headerMap = DefaultHeaderMap()
+      intercept[IllegalArgumentException] {
+        headerMap.set(c.toString, "valid")
+      }
+      intercept[IllegalArgumentException] {
+        headerMap.add(c.toString, "valid")
+      }
+      assert(headerMap.isEmpty)
+    }
+  }
+
+  test("reject out-of-bound characters in value") {
+    forAll(Gen.choose[Char](256, Char.MaxValue)) { c =>
+      val headerMap = DefaultHeaderMap()
+      intercept[IllegalArgumentException] {
+        headerMap.set("valid", c.toString)
+      }
+      intercept[IllegalArgumentException] {
+        headerMap.add("valid", c.toString)
+      }
+      assert(headerMap.isEmpty)
+    }
+  }
+
   test("validates header names & values (success)") {
     forAll(genValidHeader) {
       case (k, v) =>

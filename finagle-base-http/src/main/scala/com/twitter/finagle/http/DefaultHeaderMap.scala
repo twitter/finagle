@@ -87,6 +87,8 @@ private object DefaultHeaderMap {
   // Exposed for testing
   private[http] val ObsFoldRegex = "\r?\n[\t ]+".r
 
+  private[this] final def MaxValueChar: Char = 255
+
   // Adopted from Netty 3 HttpHeaders.
   private def validateName(s: String): Unit = {
     if (s == null) throw new NullPointerException("Header names cannot be null")
@@ -127,6 +129,11 @@ private object DefaultHeaderMap {
 
     while (i < value.length) {
       val c = value.charAt(i)
+
+      if (c > MaxValueChar)
+        throw new IllegalArgumentException(
+          s"Header '$name': value contains illegal character '$c'"
+        )
 
       (c: @switch) match {
         case 0x0b =>

@@ -116,8 +116,8 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
 
   test("X-Dtab: Invalid: non-ASCII encoding") {
     val m = newMsg()
-    m.headerMap.set("X-Dtab-01-A", "☺")
-    m.headerMap.set("X-Dtab-01-B", "☹")
+    m.headerMap.setUnsafe("X-Dtab-01-A", "☺")
+    m.headerMap.setUnsafe("X-Dtab-01-B", "☹")
     val result = HttpDtab.read(m)
     val failure = intercept[Failure] { result.get() }
     assert(failure.why == "Value not b64-encoded: ☺")
