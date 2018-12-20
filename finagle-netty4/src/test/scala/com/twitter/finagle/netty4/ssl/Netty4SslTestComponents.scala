@@ -31,13 +31,21 @@ object Netty4SslTestComponents {
   // deleteOnExit is handled by TempFile
 
   val NeverValidServerSide = new SslServerSessionVerifier {
-    def apply(address: Address, config: SslServerConfiguration, session: SSLSession): Future[Boolean] =
-      Future.value(false)
+    def apply(
+      address: Address,
+      config: SslServerConfiguration,
+      session: SSLSession
+    ): Future[Boolean] =
+      Future.False
   }
 
   val NeverValidClientSide = new SslClientSessionVerifier {
-    def apply(address: Address, config: SslClientConfiguration, session: SSLSession): Future[Boolean] =
-      Future.value(false)
+    def apply(
+      address: Address,
+      config: SslClientConfiguration,
+      session: SSLSession
+    ): Future[Boolean] =
+      Future.False
   }
 
   def getPort(server: ListeningServer): Int =

@@ -22,8 +22,12 @@ class ServerTransportParamsTest extends FunSuite with MockitoSugar {
     def apply(config: SslServerConfiguration): Engine = engine
   }
   private val sessionVerifier = new SslServerSessionVerifier {
-    def apply(address: Address, config: SslServerConfiguration, session: SSLSession): Future[Boolean] =
-      Future.value(true)
+    def apply(
+      address: Address,
+      config: SslServerConfiguration,
+      session: SSLSession
+    ): Future[Boolean] =
+      Future.True
   }
 
   test("withTransport.tls sets SSL/TLS configuration") {

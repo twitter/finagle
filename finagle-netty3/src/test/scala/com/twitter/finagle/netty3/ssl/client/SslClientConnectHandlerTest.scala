@@ -41,7 +41,7 @@ class SslClientConnectHandlerTest extends FunSuite with MockitoSugar {
     val address = mock[Address]
     val config = mock[SslClientConfiguration]
     val sessionVerifier = mock[SslClientSessionVerifier]
-    when(sessionVerifier.apply(any[Address], any[SslClientConfiguration], any[SSLSession])) thenReturn Future.value(true)
+    when(sessionVerifier.apply(any[Address], any[SslClientConfiguration], any[SSLSession])) thenReturn Future.True
 
     val connectFuture = Channels.future(channel, true)
     val connectRequested =
@@ -169,7 +169,7 @@ class SslClientConnectHandlerTest extends FunSuite with MockitoSugar {
     val h = new helper2
     import h._
 
-    when(sessionVerifier(any[Address], any[SslClientConfiguration], any[SSLSession])) thenReturn Future.value(false)
+    when(sessionVerifier(any[Address], any[SslClientConfiguration], any[SSLSession])) thenReturn Future.False
     handshakeFuture.setSuccess()
     assert(connectFuture.isDone)
     assert(connectFuture.getCause.isInstanceOf[SslVerificationFailedException])

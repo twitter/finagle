@@ -15,7 +15,11 @@ import org.scalatest.mockito.MockitoSugar
 class SslServerVerificationHandlerTest extends FunSuite with MockitoSugar with OneInstancePerTest {
 
   class TestVerifier(result: => Future[Boolean]) extends SslServerSessionVerifier {
-    def apply(address: Address, config: SslServerConfiguration, session: SSLSession): Future[Boolean] =
+    def apply(
+      address: Address,
+      config: SslServerConfiguration,
+      session: SSLSession
+    ): Future[Boolean] =
       result
   }
 

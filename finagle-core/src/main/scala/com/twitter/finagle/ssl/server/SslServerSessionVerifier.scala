@@ -46,7 +46,11 @@ object SslServerSessionVerifier {
    * verifies every given session.
    */
   val AlwaysValid: SslServerSessionVerifier = new SslServerSessionVerifier {
-    def apply(address: Address, config: SslServerConfiguration, session: SSLSession): Future[Boolean] =
+    def apply(
+      address: Address,
+      config: SslServerConfiguration,
+      session: SSLSession
+    ): Future[Boolean] =
       Future.value(true)
   }
 

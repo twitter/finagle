@@ -1,14 +1,11 @@
 package com.twitter.finagle.netty3.ssl.client
 
-import com.twitter.finagle.{
-  Address,
-  ChannelClosedException,
-  InconsistentStateException,
-  SslVerificationFailedException
-}
+import com.twitter.finagle.{Address, ChannelClosedException, InconsistentStateException, SslVerificationFailedException}
 import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientSessionVerifier}
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicReference
+
+import com.twitter.util.{Return, Throw}
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.ssl.SslHandler
 
@@ -112,8 +109,8 @@ private[netty3] class SslClientConnectHandler(
                 )
               )
             } else {
-              sessionVerifier(address, config, engine.getSession)
-                .onSuccess { verifierResult =>
+              sessionVerifier(address, config, engine.getSession).respond {
+                case Return(verifierResult) =>
                   if (verifierResult) {
                     connectFuture.get.setSuccess()
                     SslClientConnectHandler.super.channelConnected(ctx, e)
@@ -126,13 +123,12 @@ private[netty3] class SslClientConnectHandler(
                       )
                     )
                   }
-                }
-                .onFailure { e =>
+                case Throw(ex) =>
                   fail(
                     ctx.getChannel,
-                    new SslVerificationFailedException(e, ctx.getChannel.getRemoteAddress)
+                    new SslVerificationFailedException(ex, ctx.getChannel.getRemoteAddress)
                   )
-                }
+              }
             }
           } else if (f.isCancelled) {
             fail(ctx.getChannel, new InconsistentStateException(_))

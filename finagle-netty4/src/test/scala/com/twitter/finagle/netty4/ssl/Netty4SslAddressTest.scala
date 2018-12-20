@@ -18,12 +18,14 @@ class Netty4SslAddressTest extends FunSuite {
   }
 
   private[this] val hasAddressSessionVerifier = new SslServerSessionVerifier {
-    def apply(address: Address, config: SslServerConfiguration, session: SSLSession): Future[Boolean] =
-      Future.value {
-        address match {
-          case Address.Inet(isa, _) => !isa.isUnresolved
-          case _ => false
-        }
+    def apply(
+      address: Address,
+      config: SslServerConfiguration,
+      session: SSLSession
+    ): Future[Boolean] =
+      address match {
+        case Address.Inet(isa, _) if !isa.isUnresolved => Future.True
+        case _ => Future.False
       }
   }
 

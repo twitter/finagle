@@ -3,6 +3,8 @@ package com.twitter.finagle.netty3.ssl.server
 import com.twitter.finagle.Address
 import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerSessionVerifier}
 import java.net.InetSocketAddress
+
+import com.twitter.util.{Return, Throw}
 import javax.net.ssl.SSLException
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.ssl.SslHandler
@@ -36,17 +38,16 @@ private[netty3] class SslServerConnectHandler(
             else Address(ctx.getChannel.getRemoteAddress.asInstanceOf[InetSocketAddress])
 
           if (f.isSuccess) {
-            sessionVerifier(remoteAddress, config, sslHandler.getEngine.getSession)
-              .onSuccess { verifierResult =>
+            sessionVerifier(remoteAddress, config, sslHandler.getEngine.getSession).respond {
+              case Return(verifierResult) =>
                 if (verifierResult) {
                   SslServerConnectHandler.super.channelConnected(ctx, e)
                 } else {
                   Channels.close(ctx.getChannel)
                 }
-              }
-              .onFailure { _ =>
+              case Throw(_) =>
                 Channels.close(ctx.getChannel)
-              }
+            }
           } else {
             Channels.close(ctx.getChannel)
           }

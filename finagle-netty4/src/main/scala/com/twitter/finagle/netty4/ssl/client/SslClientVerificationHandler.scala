@@ -39,9 +39,9 @@ private[netty4] class SslClientVerificationHandler(
     failPendingWrites(t)
   }
 
-  private[this] def verifySession(session: SSLSession, ctx: ChannelHandlerContext): Unit = {
-    sessionVerifier(address, config, session)
-      .onSuccess { verifierResult =>
+  private[this] def verifySession(session: SSLSession, ctx: ChannelHandlerContext): Future[Boolean] = {
+    sessionVerifier(address, config, session).respond {
+      case Return(verifierResult) =>
         if (!verifierResult) {
           fail(
             SslVerificationFailedException(
@@ -51,10 +51,9 @@ private[netty4] class SslClientVerificationHandler(
           )
           ctx.close()
         } // if verification is successful, do nothing here
-      }
-      .onFailure { e =>
+      case Throw(e) =>
         fail(SslVerificationFailedException(Some(e), inet))
-      }
+    }
   }
 
   override def handlerAdded(ctx: ChannelHandlerContext): Unit = {
@@ -74,14 +73,14 @@ private[netty4] class SslClientVerificationHandler(
               )
             } else {
               val session = sslHandler.engine().getSession
-              verifySession(session, ctx)
-
-              if (onHandshakeComplete.setDone()) {
-                // If the original promise has not yet been satisfied, it can now be marked as successful,
-                // and the `SslClientVerificationHandler` can be removed from the pipeline. If the promise is
-                // already satisfied, the connection was failed and the failure has already been
-                // propagated to the dispatcher so we don't need to worry about cleaning up the pipeline.
-                ctx.pipeline.remove(self) // drains pending writes when removed
+              verifySession(session, ctx).onSuccess { _ =>
+                if (onHandshakeComplete.setDone()) {
+                  // If the original promise has not yet been satisfied, it can now be marked as successful,
+                  // and the `SslClientVerificationHandler` can be removed from the pipeline. If the promise is
+                  // already satisfied, the connection was failed and the failure has already been
+                  // propagated to the dispatcher so we don't need to worry about cleaning up the pipeline.
+                  ctx.pipeline.remove(self) // drains pending writes when removed
+                }
               }
             }
           } else {

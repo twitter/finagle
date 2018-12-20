@@ -16,8 +16,7 @@ abstract class SslClientSessionVerifier {
    * Verifies the established `SSLSession`.
    *
    * @return true if the session is verified, false if not.
-   * @note Throwing an exception is ok, and will be treated
-   * similarly to a response of false.
+   * @note Avoid throwing an exception; use `Future.exception` to return one.
    */
   def apply(address: Address, config: SslClientConfiguration, session: SSLSession): Future[Boolean]
 }
@@ -46,8 +45,12 @@ object SslClientSessionVerifier {
    * verifies every given session.
    */
   val AlwaysValid: SslClientSessionVerifier = new SslClientSessionVerifier {
-    def apply(address: Address, config: SslClientConfiguration, session: SSLSession): Future[Boolean] =
-      Future.value(true)
+    def apply(
+      address: Address,
+      config: SslClientConfiguration,
+      session: SSLSession
+    ): Future[Boolean] =
+      Future.True
   }
 
 }
