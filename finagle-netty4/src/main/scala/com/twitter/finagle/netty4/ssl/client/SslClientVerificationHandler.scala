@@ -39,7 +39,10 @@ private[netty4] class SslClientVerificationHandler(
     failPendingWrites(t)
   }
 
-  private[this] def verifySession(session: SSLSession, ctx: ChannelHandlerContext): Future[Boolean] = {
+  private[this] def verifySession(
+    session: SSLSession,
+    ctx: ChannelHandlerContext
+  ): Future[Boolean] = {
     sessionVerifier(address, config, session).respond {
       case Return(verifierResult) =>
         if (!verifierResult) {

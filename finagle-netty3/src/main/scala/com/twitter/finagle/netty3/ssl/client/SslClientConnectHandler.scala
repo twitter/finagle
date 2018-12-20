@@ -1,11 +1,15 @@
 package com.twitter.finagle.netty3.ssl.client
 
-import com.twitter.finagle.{Address, ChannelClosedException, InconsistentStateException, SslVerificationFailedException}
+import com.twitter.finagle.{
+  Address,
+  ChannelClosedException,
+  InconsistentStateException,
+  SslVerificationFailedException
+}
 import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientSessionVerifier}
+import com.twitter.util.{Return, Throw}
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicReference
-
-import com.twitter.util.{Return, Throw}
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.ssl.SslHandler
 

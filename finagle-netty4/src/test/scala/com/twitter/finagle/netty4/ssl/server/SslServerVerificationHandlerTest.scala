@@ -39,7 +39,7 @@ class SslServerVerificationHandlerTest extends FunSuite with MockitoSugar with O
         sslHandler,
         Address.failing,
         sslConfig,
-        new TestVerifier(Future.value(true))
+        new TestVerifier(Future.True)
       )
     )
 
@@ -64,7 +64,7 @@ class SslServerVerificationHandlerTest extends FunSuite with MockitoSugar with O
         sslHandler,
         Address.failing,
         sslConfig,
-        new TestVerifier(Future.value(false))
+        new TestVerifier(Future.False)
       )
     )
 
@@ -102,7 +102,7 @@ class SslServerVerificationHandlerTest extends FunSuite with MockitoSugar with O
         sslHandler,
         Address.failing,
         sslConfig,
-        new TestVerifier(Future.value(false))
+        new TestVerifier(Future.False)
       )
     )
 

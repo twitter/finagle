@@ -22,7 +22,10 @@ private[netty4] class SslServerVerificationHandler(
 
   private[this] val onHandshakeComplete = Promise[Unit]()
 
-  private[this] def verifySession(session: SSLSession, ctx: ChannelHandlerContext): Future[Boolean] = {
+  private[this] def verifySession(
+    session: SSLSession,
+    ctx: ChannelHandlerContext
+  ): Future[Boolean] = {
     sessionVerifier(remoteAddress, config, session).respond {
       case Return(verifierResult) =>
         if (verifierResult) {
