@@ -62,7 +62,7 @@ class SslServerConnectHandlerTest extends FunSuite with MockitoSugar {
     val h = new SslServerConnectHandlerHelper
     import h._
 
-    when(verifier.apply(Address.failing, config, sslSession)) thenReturn Future.value(true)
+    when(verifier.apply(Address.failing, config, sslSession)) thenReturn Future.True
 
     verify(sslHandler, times(1)).handshake()
     verify(ctx, times(0)).sendUpstream(any[ChannelEvent])
@@ -74,7 +74,7 @@ class SslServerConnectHandlerTest extends FunSuite with MockitoSugar {
     val h = new SslServerConnectHandlerHelper
     import h._
 
-    when(verifier.apply(Address.failing, config, sslSession)) thenReturn Future.value(false)
+    when(verifier.apply(Address.failing, config, sslSession)) thenReturn Future.False
 
     verify(sslHandler, times(1)).handshake()
     verify(ctx, times(0)).sendUpstream(any[ChannelEvent])
