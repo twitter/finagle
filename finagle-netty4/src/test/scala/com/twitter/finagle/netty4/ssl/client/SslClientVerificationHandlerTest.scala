@@ -2,13 +2,12 @@ package com.twitter.finagle.netty4.ssl.client
 
 import com.twitter.finagle.{Address, SslVerificationFailedException}
 import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientSessionVerifier}
+import com.twitter.util.Future
 import io.netty.channel.Channel
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.ssl.SslHandler
 import io.netty.util.concurrent.DefaultPromise
 import java.net.InetSocketAddress
-
-import com.twitter.util.Future
 import javax.net.ssl.{SSLEngine, SSLSession}
 import org.junit.runner.RunWith
 import org.mockito.Mockito._

@@ -11,7 +11,6 @@ import com.twitter.finagle.{Address, ListeningServer, Service}
 import com.twitter.io.TempFile
 import com.twitter.util.{Future, Try}
 import java.net.InetSocketAddress
-
 import javax.net.ssl.SSLSession
 
 object Netty4SslTestComponents {

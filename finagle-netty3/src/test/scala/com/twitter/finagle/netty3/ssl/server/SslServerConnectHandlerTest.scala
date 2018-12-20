@@ -2,10 +2,9 @@ package com.twitter.finagle.netty3.ssl.server
 
 import com.twitter.finagle.Address
 import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerSessionVerifier}
+import com.twitter.util.Future
 import java.net.SocketAddress
 import java.security.cert.Certificate
-
-import com.twitter.util.Future
 import javax.net.ssl.{SSLEngine, SSLSession}
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.ssl.SslHandler
