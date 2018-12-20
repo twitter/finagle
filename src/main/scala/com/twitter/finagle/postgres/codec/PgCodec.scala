@@ -8,7 +8,7 @@ import com.twitter.finagle.postgres.ResultSet
 import com.twitter.finagle.postgres.connection.{AuthenticationRequired, Connection, RequestingSsl, WrongStateForEvent}
 import com.twitter.finagle.postgres.messages._
 import com.twitter.finagle.postgres.values.Md5Encryptor
-import com.twitter.finagle.ssl.client.{ HostnameVerifier, SslClientConfiguration, SslClientEngineFactory, SslClientSessionVerifier }
+import com.twitter.finagle.ssl.client.{ SslClientConfiguration, SslClientEngineFactory, SslClientSessionVerifier }
 import com.twitter.logging.Logger
 import com.twitter.util.{ Future, Try }
 import javax.net.ssl.{SSLContext, SSLEngine, SSLSession, TrustManagerFactory}
@@ -21,7 +21,6 @@ import org.jboss.netty.handler.ssl.{SslContext, SslHandler}
 import scala.collection.mutable
 
 import com.sun.corba.se.impl.protocol.RequestCanceledException
-import com.twitter.finagle.ssl.Ssl
 import com.twitter.finagle.transport.Transport
 
 /*
@@ -193,7 +192,7 @@ class PgClientChannelHandler(
     if (useSsl) {
       new Connection(startState = RequestingSsl)
     } else {
-      new Connection(startState = AuthenticationRequired)
+      new Connection(startState = AuthenticationRequired) 
     }
   }
 
@@ -212,33 +211,35 @@ class PgClientChannelHandler(
 
         val pipeline = ctx.getPipeline
 
-        val (engine, verifier) = ctx.getChannel.getRemoteAddress match {
+        ctx.getChannel.getRemoteAddress match {
           case i: InetSocketAddress =>
             val address = Address(i)
             val config = sslConfig.getOrElse(SslClientConfiguration(hostname = Some(i.getHostString)))
-            (sslEngineFactory(address, config).self, (s: SSLSession) => sessionVerifier(address, config, s))
-          case _ =>
-            (Ssl.client().self, (_: SSLSession) => true)
-        }
+            val verifier = (s: SSLSession) => sessionVerifier(address, config, s)
 
-        engine.setUseClientMode(true)
+            val engine = sslEngineFactory(address, config).self
+            engine.setUseClientMode(true)
 
-        val sslHandler = new SslHandler(engine)
-        pipeline.addFirst("ssl", sslHandler)
+            val sslHandler = new SslHandler(engine)
+            pipeline.addFirst("ssl", sslHandler)
 
-        sslHandler.handshake().addListener(new ChannelFutureListener {
-          override def operationComplete(f: ChannelFuture) = {
-            if (!Try(verifier(engine.getSession)).onFailure { err =>
-              logger.error(err, "Exception thrown during SSL session verification")
-            }.getOrElse(false)) {
-              logger.error("SSL session verification failed")
-              Channels.close(ctx.getChannel)
+            sslHandler.handshake().addListener(new ChannelFutureListener {
+              def operationComplete(f: ChannelFuture) = {
+                if (!Try(verifier(engine.getSession)).onFailure { err =>
+                  logger.error(err, "Exception thrown during SSL session verification")
+                }.getOrElse(false)) {
+                  logger.error("SSL session verification failed")
+                  Channels.close(ctx.getChannel)
+                }
+              }
+            })
+
+            connection.receive(SwitchToSsl).foreach {
+              Channels.fireMessageReceived(ctx, _)
             }
-          }
-        })
 
-        connection.receive(SwitchToSsl).foreach {
-          Channels.fireMessageReceived(ctx, _)
+          case _ =>
+            Channels.fireExceptionCaught(ctx, new Exception("Unsupported socket address for SSL"))
         }
       case msg: BackendMessage =>
         try {
