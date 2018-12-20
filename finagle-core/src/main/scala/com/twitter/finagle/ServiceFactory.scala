@@ -91,7 +91,7 @@ object ServiceFactory {
       })
 
       def apply(conn: ClientConnection): Future[Service[Req, Rep]] = noRelease
-      def close(deadline: Time): Future[Unit] = Future.Done
+      def close(deadline: Time): Future[Unit] = service.close(deadline)
 
       override def toString: String = service.toString
     }

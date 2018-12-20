@@ -15,6 +15,9 @@ New Features
   with `c.t.f.c.StackBasedClient`, which already extends the
   `Stack.Transformable` trait. ``PHAB_ID=D253542``
 
+* finagle-http: HttpMuxer propagates the close signal to the underlying handlers.
+  ``PHAB_ID=D254656``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -38,6 +41,12 @@ Bug Fixes
 
 * finagle-http: Compression level of 0 was failing on the server-side when speaking h2c.
   Updated so that it can handle a request properly. ``PHAB_ID=D251320``
+
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: `ServiceFactory.const` propagates the close from the `ServiceFactory`
+  to the underlying service, instead of ignoring it. ``PHAB_ID=D254656``
 
 18.12.0
 -------

@@ -2,7 +2,7 @@ package com.twitter.finagle.http
 
 import com.twitter.finagle.util.LoadService
 import com.twitter.finagle.Service
-import com.twitter.util.Future
+import com.twitter.util.{Future, Time, Closable}
 import java.util.logging.Logger
 
 /**
@@ -88,6 +88,9 @@ class HttpMuxer(_routes: Seq[Route]) extends Service[Request, Response] {
     val p = path.split("/").filterNot(_.isEmpty).mkString("/")
     if (p == "") suffix else "/" + p + suffix
   }
+
+  override def close(deadline: Time): Future[Unit] =
+    Closable.all(routes.map(_.handler): _*).close(deadline)
 }
 
 /**
@@ -133,6 +136,8 @@ object HttpMuxer extends HttpMuxer {
   override def patterns: Seq[String] = underlying.patterns
 
   override def withHandler(route: Route): HttpMuxer = underlying.withHandler(route)
+
+  override def close(deadline: Time): Future[Unit] = underlying.close(deadline)
 }
 
 /**

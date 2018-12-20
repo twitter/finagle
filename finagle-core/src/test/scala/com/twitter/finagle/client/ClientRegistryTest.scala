@@ -166,6 +166,7 @@ class ClientRegistryTest
   def newStack(): Stack[ServiceFactory[Int, Int]] = {
     val mockSvc = mock[Service[Int, Int]]
     when(mockSvc.apply(anyObject[Int])).thenReturn(Future.value(10))
+    when(mockSvc.close(anyObject[Time])).thenReturn(Future.Done)
 
     val factory = ServiceFactory.const(mockSvc)
 
