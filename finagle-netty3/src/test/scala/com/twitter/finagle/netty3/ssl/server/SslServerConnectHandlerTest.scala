@@ -4,6 +4,8 @@ import com.twitter.finagle.Address
 import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerSessionVerifier}
 import java.net.SocketAddress
 import java.security.cert.Certificate
+
+import com.twitter.util.Future
 import javax.net.ssl.{SSLEngine, SSLSession}
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.ssl.SslHandler
@@ -61,7 +63,7 @@ class SslServerConnectHandlerTest extends FunSuite with MockitoSugar {
     val h = new SslServerConnectHandlerHelper
     import h._
 
-    when(verifier.apply(Address.failing, config, sslSession)) thenReturn true
+    when(verifier.apply(Address.failing, config, sslSession)) thenReturn Future.value(true)
 
     verify(sslHandler, times(1)).handshake()
     verify(ctx, times(0)).sendUpstream(any[ChannelEvent])
@@ -73,7 +75,7 @@ class SslServerConnectHandlerTest extends FunSuite with MockitoSugar {
     val h = new SslServerConnectHandlerHelper
     import h._
 
-    when(verifier.apply(Address.failing, config, sslSession)) thenReturn false
+    when(verifier.apply(Address.failing, config, sslSession)) thenReturn Future.value(false)
 
     verify(sslHandler, times(1)).handshake()
     verify(ctx, times(0)).sendUpstream(any[ChannelEvent])
@@ -85,9 +87,8 @@ class SslServerConnectHandlerTest extends FunSuite with MockitoSugar {
     val h = new SslServerConnectHandlerHelper
     import h._
 
-    when(verifier.apply(Address.failing, config, sslSession)) thenThrow new RuntimeException(
-      "Failed verification"
-    )
+    val e = new RuntimeException("Failed verification")
+    when(verifier.apply(Address.failing, config, sslSession)) thenReturn Future.exception(e)
     verify(sslHandler, times(1)).handshake()
     verify(ctx, times(0)).sendUpstream(any[ChannelEvent])
     handshakeFuture.setSuccess()

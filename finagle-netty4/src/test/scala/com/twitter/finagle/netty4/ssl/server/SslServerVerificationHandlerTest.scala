@@ -2,6 +2,7 @@ package com.twitter.finagle.netty4.ssl.server
 
 import com.twitter.finagle.Address
 import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerSessionVerifier}
+import com.twitter.util.Future
 import io.netty.channel.Channel
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.ssl.SslHandler
@@ -13,8 +14,8 @@ import org.scalatest.mockito.MockitoSugar
 
 class SslServerVerificationHandlerTest extends FunSuite with MockitoSugar with OneInstancePerTest {
 
-  class TestVerifier(result: => Boolean) extends SslServerSessionVerifier {
-    def apply(address: Address, config: SslServerConfiguration, session: SSLSession): Boolean =
+  class TestVerifier(result: => Future[Boolean]) extends SslServerSessionVerifier {
+    def apply(address: Address, config: SslServerConfiguration, session: SSLSession): Future[Boolean] =
       result
   }
 
@@ -34,7 +35,7 @@ class SslServerVerificationHandlerTest extends FunSuite with MockitoSugar with O
         sslHandler,
         Address.failing,
         sslConfig,
-        new TestVerifier(true)
+        new TestVerifier(Future.value(true))
       )
     )
 
@@ -59,7 +60,7 @@ class SslServerVerificationHandlerTest extends FunSuite with MockitoSugar with O
         sslHandler,
         Address.failing,
         sslConfig,
-        new TestVerifier(false)
+        new TestVerifier(Future.value(false))
       )
     )
 
@@ -78,7 +79,7 @@ class SslServerVerificationHandlerTest extends FunSuite with MockitoSugar with O
         sslHandler,
         Address.failing,
         sslConfig,
-        new TestVerifier(throw new Exception("failed verification"))
+        new TestVerifier(Future.exception(new Exception("failed verification")))
       )
     )
 
@@ -97,7 +98,7 @@ class SslServerVerificationHandlerTest extends FunSuite with MockitoSugar with O
         sslHandler,
         Address.failing,
         sslConfig,
-        new TestVerifier(false)
+        new TestVerifier(Future.value(false))
       )
     )
 

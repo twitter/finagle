@@ -7,6 +7,8 @@ import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.ssl.SslHandler
 import io.netty.util.concurrent.DefaultPromise
 import java.net.InetSocketAddress
+
+import com.twitter.util.Future
 import javax.net.ssl.{SSLEngine, SSLSession}
 import org.junit.runner.RunWith
 import org.mockito.Mockito._
@@ -21,8 +23,8 @@ class SslClientVerificationHandlerTest extends FunSuite with MockitoSugar with O
   val address = Address.Inet(fakeAddress, Map.empty)
   val config = SslClientConfiguration()
 
-  class TestVerifier(result: => Boolean) extends SslClientSessionVerifier {
-    def apply(address: Address, config: SslClientConfiguration, session: SSLSession): Boolean =
+  class TestVerifier(result: => Future[Boolean]) extends SslClientSessionVerifier {
+    def apply(address: Address, config: SslClientConfiguration, session: SSLSession): Future[Boolean] =
       result
   }
 
@@ -70,7 +72,7 @@ class SslClientVerificationHandlerTest extends FunSuite with MockitoSugar with O
           sslHandler,
           address,
           config,
-          new TestVerifier(false)
+          new TestVerifier(Future.value(false))
         )
       )
     val connectPromise = channel.connect(fakeAddress)
@@ -97,7 +99,7 @@ class SslClientVerificationHandlerTest extends FunSuite with MockitoSugar with O
           sslHandler,
           address,
           config,
-          new TestVerifier(throw e)
+          new TestVerifier(Future.exception(e))
         )
       )
     val connectPromise = channel.connect(fakeAddress)
@@ -168,7 +170,7 @@ class SslClientVerificationHandlerTest extends FunSuite with MockitoSugar with O
           sslHandler,
           address,
           config,
-          new TestVerifier(false)
+          new TestVerifier(Future.value(false))
         )
       )
 

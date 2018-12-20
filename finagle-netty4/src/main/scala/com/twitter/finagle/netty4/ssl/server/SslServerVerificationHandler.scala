@@ -8,7 +8,6 @@ import io.netty.channel.{Channel, ChannelHandlerContext, ChannelInboundHandlerAd
 import io.netty.handler.ssl.SslHandler
 import io.netty.util.concurrent.{GenericFutureListener, Future => NettyFuture}
 import javax.net.ssl.SSLSession
-import scala.util.control.NonFatal
 
 /**
  * Delays `channelActive` event until the TLS handshake is successfully finished
@@ -24,21 +23,22 @@ private[netty4] class SslServerVerificationHandler(
   private[this] val onHandshakeComplete = Promise[Unit]()
 
   private[this] def verifySession(session: SSLSession, ctx: ChannelHandlerContext): Unit = {
-    try {
-      if (sessionVerifier(remoteAddress, config, session)) {
-        ctx.pipeline.remove(self)
-        onHandshakeComplete.setDone()
-      } else {
-        val addr = Option(ctx.channel.remoteAddress)
-        ctx.close()
-        onHandshakeComplete.updateIfEmpty(Throw(new SslVerificationFailedException(None, addr)))
+    sessionVerifier(remoteAddress, config, session)
+      .onSuccess { verifierResult =>
+        if (verifierResult) {
+          ctx.pipeline().remove(self)
+          onHandshakeComplete.setDone()
+        } else {
+          val addr = Option(ctx.channel.remoteAddress)
+          ctx.close()
+          onHandshakeComplete.updateIfEmpty(Throw(SslVerificationFailedException(None, addr)))
+        }
       }
-    } catch {
-      case NonFatal(e) =>
+      .onFailure { e =>
         ctx.close()
         val addr = Option(ctx.channel.remoteAddress)
-        onHandshakeComplete.updateIfEmpty(Throw(new SslVerificationFailedException(Some(e), addr)))
-    }
+        onHandshakeComplete.updateIfEmpty(Throw(SslVerificationFailedException(Some(e), addr)))
+      }
   }
 
   override def channelActive(ctx: ChannelHandlerContext): Unit = {

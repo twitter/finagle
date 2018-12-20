@@ -11,7 +11,6 @@ import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicReference
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.ssl.SslHandler
-import scala.util.control.NonFatal
 
 /**
  * Handle client-side SSL connections:
@@ -113,26 +112,27 @@ private[netty3] class SslClientConnectHandler(
                 )
               )
             } else {
-              try {
-                if (sessionVerifier(address, config, engine.getSession)) {
-                  connectFuture.get.setSuccess()
-                  SslClientConnectHandler.super.channelConnected(ctx, e)
-                } else {
-                  fail(
-                    ctx.getChannel,
-                    new SslVerificationFailedException(
-                      new Exception("Failed client verification"),
-                      ctx.getChannel.getRemoteAddress
+              sessionVerifier(address, config, engine.getSession)
+                .onSuccess { verifierResult =>
+                  if (verifierResult) {
+                    connectFuture.get.setSuccess()
+                    SslClientConnectHandler.super.channelConnected(ctx, e)
+                  } else {
+                    fail(
+                      ctx.getChannel,
+                      new SslVerificationFailedException(
+                        new Exception("Failed client verification"),
+                        ctx.getChannel.getRemoteAddress
+                      )
                     )
-                  )
+                  }
                 }
-              } catch {
-                case NonFatal(e) =>
+                .onFailure { e =>
                   fail(
                     ctx.getChannel,
                     new SslVerificationFailedException(e, ctx.getChannel.getRemoteAddress)
                   )
-              }
+                }
             }
           } else if (f.isCancelled) {
             fail(ctx.getChannel, new InconsistentStateException(_))

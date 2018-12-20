@@ -10,7 +10,6 @@ import io.netty.handler.ssl.SslHandler
 import io.netty.util.concurrent.{GenericFutureListener, Future => NettyFuture}
 import java.net.SocketAddress
 import javax.net.ssl.SSLSession
-import scala.util.control.NonFatal
 
 /**
  * Delays the connect promise satisfaction (i.e., `ChannelTransport` creation) until the SSL/TLS
@@ -41,20 +40,21 @@ private[netty4] class SslClientVerificationHandler(
   }
 
   private[this] def verifySession(session: SSLSession, ctx: ChannelHandlerContext): Unit = {
-    try {
-      if (!sessionVerifier(address, config, session)) {
-        fail(
-          new SslVerificationFailedException(
-            Some(new Exception("Failed client verification")),
-            inet
+    sessionVerifier(address, config, session)
+      .onSuccess { verifierResult =>
+        if (!verifierResult) {
+          fail(
+            SslVerificationFailedException(
+              Some(new Exception("Failed client verification")),
+              inet
+            )
           )
-        )
-        ctx.close()
-      } // if verification is successful, do nothing here
-    } catch {
-      case NonFatal(e) =>
-        fail(new SslVerificationFailedException(Some(e), inet))
-    }
+          ctx.close()
+        } // if verification is successful, do nothing here
+      }
+      .onFailure { e =>
+        fail(SslVerificationFailedException(Some(e), inet))
+      }
   }
 
   override def handlerAdded(ctx: ChannelHandlerContext): Unit = {

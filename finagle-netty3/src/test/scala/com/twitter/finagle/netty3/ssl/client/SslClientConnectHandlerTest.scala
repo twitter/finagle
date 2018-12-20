@@ -4,6 +4,8 @@ import com.twitter.finagle.{Address, SslVerificationFailedException}
 import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientSessionVerifier}
 import java.net.SocketAddress
 import java.security.cert.Certificate
+
+import com.twitter.util.Future
 import javax.net.ssl.{SSLEngine, SSLSession}
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.ssl.SslHandler
@@ -40,7 +42,7 @@ class SslClientConnectHandlerTest extends FunSuite with MockitoSugar {
     val address = mock[Address]
     val config = mock[SslClientConfiguration]
     val sessionVerifier = mock[SslClientSessionVerifier]
-    when(sessionVerifier.apply(any[Address], any[SslClientConfiguration], any[SSLSession])) thenReturn true
+    when(sessionVerifier.apply(any[Address], any[SslClientConfiguration], any[SSLSession])) thenReturn Future.value(true)
 
     val connectFuture = Channels.future(channel, true)
     val connectRequested =
@@ -168,7 +170,7 @@ class SslClientConnectHandlerTest extends FunSuite with MockitoSugar {
     val h = new helper2
     import h._
 
-    when(sessionVerifier(any[Address], any[SslClientConfiguration], any[SSLSession])) thenReturn false
+    when(sessionVerifier(any[Address], any[SslClientConfiguration], any[SSLSession])) thenReturn Future.value(false)
     handshakeFuture.setSuccess()
     assert(connectFuture.isDone)
     assert(connectFuture.getCause.isInstanceOf[SslVerificationFailedException])
@@ -180,7 +182,7 @@ class SslClientConnectHandlerTest extends FunSuite with MockitoSugar {
     import h._
 
     val e = new RuntimeException("Failed verification")
-    when(sessionVerifier(any[Address], any[SslClientConfiguration], any[SSLSession])) thenThrow e
+    when(sessionVerifier(any[Address], any[SslClientConfiguration], any[SSLSession])) thenReturn Future.exception(e)
     handshakeFuture.setSuccess()
     assert(connectFuture.isDone)
     assert(connectFuture.getCause.getMessage.startsWith("Failed verification"))

@@ -6,7 +6,6 @@ import java.net.InetSocketAddress
 import javax.net.ssl.SSLException
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.ssl.SslHandler
-import scala.util.control.NonFatal
 
 /**
  * Handle server-side SSL Connections:
@@ -37,15 +36,17 @@ private[netty3] class SslServerConnectHandler(
             else Address(ctx.getChannel.getRemoteAddress.asInstanceOf[InetSocketAddress])
 
           if (f.isSuccess) {
-            try {
-              if (sessionVerifier(remoteAddress, config, sslHandler.getEngine.getSession)) {
-                SslServerConnectHandler.super.channelConnected(ctx, e)
-              } else {
+            sessionVerifier(remoteAddress, config, sslHandler.getEngine.getSession)
+              .onSuccess { verifierResult =>
+                if (verifierResult) {
+                  SslServerConnectHandler.super.channelConnected(ctx, e)
+                } else {
+                  Channels.close(ctx.getChannel)
+                }
+              }
+              .onFailure { _ =>
                 Channels.close(ctx.getChannel)
               }
-            } catch {
-              case NonFatal(_) => Channels.close(ctx.getChannel)
-            }
           } else {
             Channels.close(ctx.getChannel)
           }

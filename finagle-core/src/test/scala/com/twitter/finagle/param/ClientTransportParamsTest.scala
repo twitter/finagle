@@ -3,12 +3,9 @@ package com.twitter.finagle.param
 import com.twitter.finagle.Address
 import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.ssl.Engine
-import com.twitter.finagle.ssl.client.{
-  SslClientConfiguration,
-  SslClientEngineFactory,
-  SslClientSessionVerifier
-}
+import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientEngineFactory, SslClientSessionVerifier}
 import com.twitter.finagle.transport.Transport
+import com.twitter.util.Future
 import javax.net.ssl.SSLSession
 import org.scalatest.FunSuite
 import org.scalatest.mockito.MockitoSugar
@@ -21,7 +18,8 @@ class ClientTransportParamsTest extends FunSuite with MockitoSugar {
     def apply(address: Address, config: SslClientConfiguration): Engine = engine
   }
   private val sessionVerifier = new SslClientSessionVerifier {
-    def apply(address: Address, config: SslClientConfiguration, session: SSLSession): Boolean = true
+    def apply(address: Address, config: SslClientConfiguration, session: SSLSession): Future[Boolean] =
+      Future.value(true)
   }
 
   test("withTransport.tls sets SSL/TLS configuration") {

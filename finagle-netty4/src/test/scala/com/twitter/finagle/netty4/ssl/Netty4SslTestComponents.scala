@@ -9,8 +9,9 @@ import com.twitter.finagle.ssl.{ClientAuth, KeyCredentials, TrustCredentials}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.{Address, ListeningServer, Service}
 import com.twitter.io.TempFile
-import com.twitter.util.Try
+import com.twitter.util.{Future, Try}
 import java.net.InetSocketAddress
+
 import javax.net.ssl.SSLSession
 
 object Netty4SslTestComponents {
@@ -31,13 +32,13 @@ object Netty4SslTestComponents {
   // deleteOnExit is handled by TempFile
 
   val NeverValidServerSide = new SslServerSessionVerifier {
-    def apply(address: Address, config: SslServerConfiguration, session: SSLSession): Boolean =
-      false
+    def apply(address: Address, config: SslServerConfiguration, session: SSLSession): Future[Boolean] =
+      Future.value(false)
   }
 
   val NeverValidClientSide = new SslClientSessionVerifier {
-    def apply(address: Address, config: SslClientConfiguration, session: SSLSession): Boolean =
-      false
+    def apply(address: Address, config: SslClientConfiguration, session: SSLSession): Future[Boolean] =
+      Future.value(false)
   }
 
   def getPort(server: ListeningServer): Int =
