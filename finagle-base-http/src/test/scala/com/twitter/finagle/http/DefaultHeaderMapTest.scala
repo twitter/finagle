@@ -5,18 +5,31 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 class DefaultHeaderMapTest extends AbstractHeaderMapTest with GeneratorDrivenPropertyChecks {
 
-  final def newHeaderMap(headers: (String, String)*): HeaderMap = DefaultHeaderMap(headers: _*)
-
-  def genNonEmptyString: Gen[String] =
-    Gen.nonEmptyListOf(Gen.choose('a', 'z')).map(s => new String(s.toArray))
+  import Rfc7230HeaderValidationTest._
 
   def genValidFoldedHeader: Gen[(String, String)] =
     for {
       k <- genNonEmptyString
-      v1 <- genNonEmptyString
-      folds <- Gen.nonEmptyListOf(Gen.oneOf("\r\n ", "\r\n\t", "\n ", "\n\t"))
-      v2 <- genNonEmptyString
-    } yield (k, v1 + folds.mkString(v2))
+      v <- genFoldedValue
+    } yield (k, v)
+
+  def genInvalidHeaderNameHeader: Gen[(String, String)] =
+    for {
+      (k, v) <- genValidHeader
+      c <- Gen.oneOf(Seq[Char]('\t', '\n', '\f', '\r', ' ', ',', ':', ';', '=', 0x0b))
+    } yield (k + c, v)
+
+  def genNonAsciiHeaderNameHeader: Gen[(String, String)] =
+    for {
+      k <- genNonAsciiHeaderName
+      v <- genNonEmptyString
+    } yield (k, v)
+
+  def genInvalidHeaderValueHeader: Gen[(String, String)] =
+    for {
+      (k, v) <- genValidHeader
+      c <- Gen.oneOf(Seq[Char]('\f', 0x0b))
+    } yield (k, v + c)
 
   def genValidHeader: Gen[(String, String)] =
     for {
@@ -24,29 +37,7 @@ class DefaultHeaderMapTest extends AbstractHeaderMapTest with GeneratorDrivenPro
       v <- genNonEmptyString
     } yield (k, v)
 
-  def genInvalidHeaderName: Gen[(String, String)] =
-    for {
-      (k, v) <- genValidHeader
-      c <- Gen.oneOf(Seq[Char]('\t', '\n', '\f', '\r', ' ', ',', ':', ';', '=', 0x0b))
-    } yield (k + c, v)
-
-  def genNonAsciiHeaderName: Gen[(String, String)] =
-    for {
-      (k, v) <- genValidHeader
-      c <- Gen.choose[Char](128, Char.MaxValue)
-    } yield (k + c, v)
-
-  def genInvalidHeaderValue: Gen[(String, String)] =
-    for {
-      (k, v) <- genValidHeader
-      c <- Gen.oneOf(Seq[Char]('\f', 0x0b))
-    } yield (k, v + c)
-
-  def genInvalidClrfHeaderValue: Gen[(String, String)] =
-    for {
-      (k, v) <- genValidHeader
-      c <- Gen.oneOf("\rx", "\nx", "\r", "\n")
-    } yield (k, v + c)
+  final def newHeaderMap(headers: (String, String)*): HeaderMap = DefaultHeaderMap(headers: _*)
 
   test("apply()") {
     assert(DefaultHeaderMap().isEmpty)
@@ -96,36 +87,36 @@ class DefaultHeaderMapTest extends AbstractHeaderMapTest with GeneratorDrivenPro
   }
 
   test("validates header names (failure)") {
-    forAll(genInvalidHeaderName) { h =>
+    forAll(genInvalidHeaderNameHeader) { h =>
       val e = intercept[IllegalArgumentException](DefaultHeaderMap(h))
       assert(e.getMessage.contains("prohibited characters"))
     }
 
-    forAll(genNonAsciiHeaderName) { h =>
+    forAll(genNonAsciiHeaderNameHeader) { h =>
       val e = intercept[IllegalArgumentException](DefaultHeaderMap(h))
       assert(e.getMessage.contains("non-ASCII characters"))
     }
   }
 
   test("validates header values (failure)") {
-    forAll(genInvalidHeaderValue) { h =>
+    forAll(genInvalidHeaderValueHeader) { h =>
       val e = intercept[IllegalArgumentException](DefaultHeaderMap(h))
       assert(e.getMessage.contains("prohibited character"))
     }
 
     forAll(genInvalidClrfHeaderValue) { h =>
-      intercept[IllegalArgumentException](DefaultHeaderMap(h))
+      intercept[IllegalArgumentException](DefaultHeaderMap("foo" -> h))
     }
   }
 
   test("does not validate header names or values with addUnsafe") {
     val headerMap = newHeaderMap()
 
-    forAll(genInvalidHeaderName) { h =>
+    forAll(genInvalidHeaderNameHeader) { h =>
       headerMap.addUnsafe(h._1, h._2)
     }
 
-    forAll(genInvalidHeaderValue) { h =>
+    forAll(genInvalidHeaderValueHeader) { h =>
       headerMap.addUnsafe(h._1, h._2)
     }
   }
@@ -133,11 +124,11 @@ class DefaultHeaderMapTest extends AbstractHeaderMapTest with GeneratorDrivenPro
   test("does not validate header names or values with setUnsafe") {
     val headerMap = newHeaderMap()
 
-    forAll(genInvalidHeaderName) { h =>
+    forAll(genInvalidHeaderNameHeader) { h =>
       headerMap.setUnsafe(h._1, h._2)
     }
 
-    forAll(genInvalidHeaderValue) { h =>
+    forAll(genInvalidHeaderValueHeader) { h =>
       headerMap.setUnsafe(h._1, h._2)
     }
   }
