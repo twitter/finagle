@@ -7,9 +7,19 @@ import java.util.BitSet
  *
  * Methods that provide RFC-7230 (https://tools.ietf.org/html/rfc7230) header
  * validation. Invalid names or values will result in throwing an
- * `IllegalArgumentException`.
+ * `HeaderValidationException`.
  */
 private object Rfc7230HeaderValidation {
+
+  /** Exception that represents header validation failure */
+  sealed abstract class HeaderValidationException(details: String)
+      extends IllegalArgumentException(details)
+
+  /** Invalid header name */
+  final class NameValidationException(details: String) extends HeaderValidationException(details)
+
+  /** Invalid header value */
+  final class ValueValidationException(details: String) extends HeaderValidationException(details)
 
   private[this] def validHeaderNameChars: Iterable[Int] = {
     // https://tools.ietf.org/html/rfc7230#section-3.2.6
@@ -58,17 +68,17 @@ private object Rfc7230HeaderValidation {
   /**
    * Validate the provided header name.
    * @param name the header name to be validated.
-   * @throws IllegalArgumentException if the header name is not compliant.
+   * @throws NameValidationException if the header name is not compliant.
    */
   def validateName(name: CharSequence): Unit = {
     if (name == null) throw new NullPointerException("Header names cannot be null")
-    if (name.length == 0) throw new IllegalArgumentException("Header name cannot be empty")
+    if (name.length == 0) throw new NameValidationException("Header name cannot be empty")
 
     var i = 0
     while (i < name.length) {
       val c = name.charAt(i)
       if (!validHeaderNameChar(c))
-        throw new IllegalArgumentException(
+        throw new NameValidationException(
           s"Header '$name': name cannot contain the prohibited character '0x${Integer.toHexString(c)}': " + c
         )
 
@@ -87,7 +97,7 @@ private object Rfc7230HeaderValidation {
    * @param name the header name. Only used for exception messages and is not validated.
    * @param value the header value to be validated.
    * @return true if the header value contained an obs-fold sequence, false otherwise.
-   * @throws IllegalArgumentException if the header value is not compliant.
+   * @throws ValueValidationException if the header value is not compliant.
    */
   def validateValue(name: CharSequence, value: CharSequence): Boolean = {
     if (value == null) throw new NullPointerException("Header values cannot be null")
@@ -103,7 +113,7 @@ private object Rfc7230HeaderValidation {
       val c = value.charAt(i)
 
       if (!validHeaderValueChar(c))
-        throw new IllegalArgumentException(
+        throw new ValueValidationException(
           s"Header '$name': value contains a prohibited character '0x${Integer.toHexString(c)}': $c"
         )
 
@@ -114,14 +124,14 @@ private object Rfc7230HeaderValidation {
         case CR =>
           if (c == '\n') state = LF
           else
-            throw new IllegalArgumentException(
+            throw new ValueValidationException(
               s"Header '$name': only '\\n' is allowed after '\\r' in value")
         case LF =>
           if (c == '\t' || c == ' ') {
             foldDetected = true
             state = NonFold
           } else
-            throw new IllegalArgumentException(
+            throw new ValueValidationException(
               s"Header '$name': only ' ' and '\\t' are allowed after '\\n' in value")
       }
 
@@ -129,7 +139,7 @@ private object Rfc7230HeaderValidation {
     }
 
     if (state != NonFold) {
-      throw new IllegalArgumentException(
+      throw new ValueValidationException(
         s"Header '$name': value must not end with '\\r' or '\\n'. Observed: " +
           (if (state == CR) "\\r" else "\\n")
       )
