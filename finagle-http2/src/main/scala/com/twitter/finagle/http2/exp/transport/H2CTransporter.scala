@@ -8,12 +8,16 @@ import com.twitter.finagle.http2.transport.{
   Http2UpgradingTransport
 }
 import com.twitter.finagle.netty4.Netty4Transporter
-import com.twitter.finagle.netty4.http.{HttpCodecName, Netty4HttpTransporter, initClient}
+import com.twitter.finagle.netty4.http.{
+  HttpCodecName,
+  Netty4HttpTransporter,
+  initClient,
+  newHttpClientCodec
+}
 import com.twitter.finagle.transport.{Transport, TransportContext}
-import com.twitter.finagle.{Stack, Status, http}
+import com.twitter.finagle.{Stack, Status}
 import com.twitter.util._
 import io.netty.channel.ChannelPipeline
-import io.netty.handler.codec.http.HttpClientCodec
 import java.net.SocketAddress
 
 /**
@@ -72,7 +76,6 @@ private class H2CTransporter(
 private[http2] object H2CTransporter {
 
   def make(addr: SocketAddress, params: Stack.Params): Transporter[Any, Any, TransportContext] = {
-
     // current http2 client implementation doesn't support
     // netty-style backpressure
     // https://github.com/netty/netty/issues/3667#issue-69640214
@@ -88,14 +91,7 @@ private[http2] object H2CTransporter {
 
   private def init(params: Stack.Params)(pipeline: ChannelPipeline): Unit = {
     // h2c pipeline
-    val maxHeaderSize = params[http.param.MaxHeaderSize].size
-    val maxInitialLineSize = params[http.param.MaxInitialLineSize].size
-
-    val sourceCodec = new HttpClientCodec(
-      maxInitialLineSize.inBytes.toInt,
-      maxHeaderSize.inBytes.toInt,
-      /*maxChunkSize*/ Int.MaxValue
-    )
+    val sourceCodec = newHttpClientCodec(params)
 
     pipeline.addLast(HttpCodecName, sourceCodec)
     pipeline.addLast(

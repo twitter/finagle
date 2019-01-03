@@ -13,16 +13,16 @@ import com.twitter.finagle.netty4.http.{
   Http2CodecName,
   HttpCodecName,
   Netty4HttpTransporter,
-  initClient
+  initClient,
+  newHttpClientCodec
 }
 import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.netty4.{ConnectionBuilder, Netty4Transporter}
 import com.twitter.finagle.param.{Stats, Timer}
 import com.twitter.finagle.transport.{Transport, TransportContext}
-import com.twitter.finagle.{Stack, http}
+import com.twitter.finagle.Stack
 import com.twitter.util.Future
 import io.netty.channel.{Channel, ChannelPipeline}
-import io.netty.handler.codec.http.HttpClientCodec
 import io.netty.handler.ssl.{ApplicationProtocolNames, SslHandler}
 import java.net.SocketAddress
 
@@ -125,15 +125,8 @@ object TlsTransporter {
   }
 
   def configureHttp1Pipeline(channel: Channel, params: Stack.Params): Transport[Any, Any] = {
-    val maxHeaderSize = params[http.param.MaxHeaderSize].size
-    val maxInitialLineSize = params[http.param.MaxInitialLineSize].size
-    val sourceCodec = new HttpClientCodec(
-      maxInitialLineSize.inBytes.toInt,
-      maxHeaderSize.inBytes.toInt,
-      /*maxChunkSize*/ Int.MaxValue
-    )
     val pipeline = channel.pipeline
-    pipeline.addLast(HttpCodecName, sourceCodec)
+    pipeline.addLast(HttpCodecName, newHttpClientCodec(params))
     initClient(params)(pipeline)
     pipeline.channel.config.setAutoRead(false)
     // This is a traditional channel, so we want to keep the stack traces.

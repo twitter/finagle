@@ -1,11 +1,15 @@
 package com.twitter.finagle.http2
 
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.http
 import com.twitter.finagle.http2.param._
 import com.twitter.finagle.http2.transport._
 import com.twitter.finagle.netty4.Netty4Transporter
-import com.twitter.finagle.netty4.http.{HttpCodecName, Netty4HttpTransporter, initClient}
+import com.twitter.finagle.netty4.http.{
+  HttpCodecName,
+  Netty4HttpTransporter,
+  initClient,
+  newHttpClientCodec
+}
 import com.twitter.finagle.param.{Timer => TimerParam}
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.Stack
@@ -15,7 +19,6 @@ import com.twitter.logging.Logger
 import com.twitter.util._
 import io.netty.channel.ChannelPipeline
 import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
-import io.netty.handler.codec.http._
 import io.netty.handler.codec.http2._
 import java.net.SocketAddress
 
@@ -68,17 +71,6 @@ private[finagle] object Http2Transporter {
       val Transport.ClientSsl(config) = params[Transport.ClientSsl]
       val tlsEnabled = config.isDefined
 
-      // We unset the limit for maxChunkSize (8k by default) so Netty emits entire available
-      // payload as a single chunk instead of splitting it. This way we put the data into use
-      // quicker, as soon as it's available.
-      val maxHeaderSize = params[http.param.MaxHeaderSize].size
-      val maxInitialLineSize = params[http.param.MaxInitialLineSize].size
-      val sourceCodec = new HttpClientCodec(
-        maxInitialLineSize.inBytes.toInt,
-        maxHeaderSize.inBytes.toInt,
-        Int.MaxValue /*maxChunkSize*/
-      )
-
       if (tlsEnabled) {
         val p = Promise[Unit]()
         val buffer = BufferingHandler.alpn()
@@ -103,6 +95,7 @@ private[finagle] object Http2Transporter {
           })
         )
       } else {
+        val sourceCodec = newHttpClientCodec(params)
         pipeline.addLast(HttpCodecName, sourceCodec)
         pipeline.addLast(
           UpgradeRequestHandler.HandlerName,

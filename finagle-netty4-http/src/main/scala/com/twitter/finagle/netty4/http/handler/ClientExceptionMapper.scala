@@ -18,7 +18,7 @@ private[http] object ClientExceptionMapper extends ChannelInboundHandlerAdapter 
 
   private[this] def toFinagle(ctx: ChannelHandlerContext, t: Throwable): Throwable = t match {
     case e: TooLongFrameException =>
-      TooLongMessageException(e, ctx.channel().remoteAddress())
+      TooLongMessageException(e, ctx.channel.remoteAddress)
 
     case _ => t
   }
@@ -26,9 +26,9 @@ private[http] object ClientExceptionMapper extends ChannelInboundHandlerAdapter 
   override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit = msg match {
     // NOTE: HttpObjectDecoder sets the DecoderResult on an inbound HTTP message when either
     // headers or initial line exceed a desired limit.
-    case o: HttpObject if o.decoderResult().isFailure =>
+    case o: HttpObject if o.decoderResult.isFailure =>
       ReferenceCountUtil.release(o)
-      ctx.fireExceptionCaught(toFinagle(ctx, o.decoderResult().cause()))
+      ctx.fireExceptionCaught(toFinagle(ctx, o.decoderResult.cause))
 
     case _ => ctx.fireChannelRead(msg)
   }

@@ -2,16 +2,15 @@ package com.twitter.finagle.http2
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.http2.transport.H2Filter
-import com.twitter.finagle.{Announcement, ListeningServer, Stack, http}
+import com.twitter.finagle.{Announcement, ListeningServer, Stack}
 import com.twitter.finagle.netty4.Netty4Listener
-import com.twitter.finagle.netty4.http.{HttpCodecName, initServer}
+import com.twitter.finagle.netty4.http.{HttpCodecName, initServer, newHttpServerCodec}
 import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.Awaitable.CanAwait
 import com.twitter.util.{Duration, Future, Time}
 import io.netty.channel.{Channel, ChannelHandler, ChannelInitializer, ChannelPipeline}
-import io.netty.handler.codec.http.HttpServerCodec
 import io.netty.channel.group.DefaultChannelGroup
 import io.netty.util.concurrent.GlobalEventExecutor
 import java.net.SocketAddress
@@ -51,22 +50,10 @@ private[http2] class Http2Listener[In, Out](
 
   private[this] val channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE)
 
-  private[this] def sourceCodec(params: Stack.Params) = {
-    val maxInitialLineSize = params[http.param.MaxInitialLineSize].size
-    val maxHeaderSize = params[http.param.MaxHeaderSize].size
-    val maxRequestSize = params[http.param.MaxRequestSize].size
-
-    new HttpServerCodec(
-      maxInitialLineSize.inBytes.toInt,
-      maxHeaderSize.inBytes.toInt,
-      Int.MaxValue /*maxChunkSize*/
-    )
-  }
-
   private[this] val underlyingListener = Netty4Listener[In, Out, TransportContext](
     pipelineInit = { pipeline: ChannelPipeline =>
       channels.add(pipeline.channel)
-      pipeline.addLast(HttpCodecName, sourceCodec(params))
+      pipeline.addLast(HttpCodecName, newHttpServerCodec(params))
       initServer(params)(pipeline)
     },
     params = params,

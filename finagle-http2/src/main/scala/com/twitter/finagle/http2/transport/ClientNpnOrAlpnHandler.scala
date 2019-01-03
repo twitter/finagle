@@ -1,13 +1,16 @@
 package com.twitter.finagle.http2.transport
 
-import com.twitter.finagle.http
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.Stack
-import com.twitter.finagle.netty4.http.{HttpCodecName, initClient, initClientBefore}
+import com.twitter.finagle.netty4.http.{
+  HttpCodecName,
+  initClient,
+  initClientBefore,
+  newHttpClientCodec
+}
 import com.twitter.finagle.netty4.transport.ChannelTransport
 import io.netty.channel.ChannelHandler
 import io.netty.channel.ChannelHandlerContext
-import io.netty.handler.codec.http.HttpClientCodec
 import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
 import io.netty.handler.ssl.{ApplicationProtocolNames, ApplicationProtocolNegotiationHandler}
 
@@ -38,18 +41,10 @@ private[http2] class ClientNpnOrAlpnHandler(connectionHandler: ChannelHandler, p
         ctx.fireChannelRead(UpgradeEvent.UPGRADE_SUCCESSFUL)
 
       case ApplicationProtocolNames.HTTP_1_1 =>
-        val maxHeaderSize = params[http.param.MaxHeaderSize].size
-        val maxInitialLineSize = params[http.param.MaxInitialLineSize].size
-
         // We unset the limit for maxChunkSize (8k by default) so Netty emits entire available
         // payload as a single chunk instead of splitting it. This way we put the data into use
         // quicker, as soon as it's available.
-        val sourceCodec = new HttpClientCodec(
-          maxInitialLineSize.inBytes.toInt,
-          maxHeaderSize.inBytes.toInt,
-          Int.MaxValue /*maxChunkSize*/
-        )
-        pipeline.addBefore(ChannelTransport.HandlerName, HttpCodecName, sourceCodec)
+        pipeline.addBefore(ChannelTransport.HandlerName, HttpCodecName, newHttpClientCodec(params))
         pipeline.remove(BufferingHandler.HandlerName)
         initClientBefore(ChannelTransport.HandlerName, params)(pipeline)
         ctx.channel.config.setAutoRead(false)
