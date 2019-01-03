@@ -50,9 +50,7 @@ abstract class AbstractHttp2AlpnTest extends AbstractHttp2EndToEndTest {
       .configured(Transport.ServerSsl(Some(serverConfiguration())))
 
   private def unimplementedFeatures: Set[Feature] = Set(
-    ClientAbort,
-    HeaderFields,
-    ReaderClose
+    ClientAbort
   )
 
   def featureImplemented(feature: Feature): Boolean = !unimplementedFeatures(feature)

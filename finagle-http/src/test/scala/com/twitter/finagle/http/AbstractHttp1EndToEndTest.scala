@@ -134,9 +134,8 @@ abstract class AbstractHttp1EndToEndTest extends AbstractEndToEndTest {
     val streamS = if (streaming) "streaming" else "non-streaming"
     val continueS = if (autoContinueEnabled) "enabled" else "disabled"
     val label = s"$streamS server handles expect continue header when autoContinue is $continueS"
-    val feature = if (autoContinueEnabled) AutomaticContinue else DisableAutomaticContinue
 
-    testIfImplemented(feature)(label) {
+    test(label) {
       val sawExpectHeaderP = new Promise[Boolean]
 
       val svc = new HttpService {

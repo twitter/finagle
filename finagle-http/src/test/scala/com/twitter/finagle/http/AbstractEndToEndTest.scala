@@ -33,14 +33,8 @@ abstract class AbstractEndToEndTest
     with OneInstancePerTest {
 
   sealed trait Feature
-  object TooLongStream extends Feature
   object ClientAbort extends Feature
-  object HeaderFields extends Feature
-  object ReaderClose extends Feature
   object NoBodyMessage extends Feature
-  object AutomaticContinue extends Feature
-  object DisableAutomaticContinue extends Feature
-  object SetsPooledAllocatorMaxOrder extends Feature
   object MaxHeaderSize extends Feature
 
   var saveBase: Dtab = Dtab.empty
@@ -175,7 +169,7 @@ abstract class AbstractEndToEndTest
   }
 
   def standardErrors(connect: HttpService => HttpService): Unit = {
-    testIfImplemented(HeaderFields)(implName + ": request header fields too large") {
+    test(implName + ": request header fields too large") {
       val service = new HttpService {
         def apply(request: Request) = Future.value(Response())
       }
@@ -247,7 +241,7 @@ abstract class AbstractEndToEndTest
       }
 
     if (!sys.props.contains("SKIP_FLAKY_TRAVIS"))
-      testIfImplemented(TooLongStream)(
+      test(
         implName +
           ": return 413s for chunked requests which stream too much data"
       ) {
@@ -677,7 +671,7 @@ abstract class AbstractEndToEndTest
       assert(res.contentString == "hello")
     }
 
-    testIfImplemented(ReaderClose)(
+    test(
       s"$implName (streaming): transport closure propagates to request stream reader"
     ) {
       val p = new Promise[Buf]
@@ -879,7 +873,7 @@ abstract class AbstractEndToEndTest
 
   run(streaming)(streamingConnect(_))
 
-  testIfImplemented(SetsPooledAllocatorMaxOrder)(
+  test(
     implName + ": PooledByteBufAllocator maxOrder " +
       "is 7 for servers"
   ) {
@@ -892,7 +886,7 @@ abstract class AbstractEndToEndTest
     await(server.close())
   }
 
-  testIfImplemented(SetsPooledAllocatorMaxOrder)(
+  test(
     implName + ": PooledByteBufAllocator maxOrder " +
       "is 7 for clients"
   ) {
