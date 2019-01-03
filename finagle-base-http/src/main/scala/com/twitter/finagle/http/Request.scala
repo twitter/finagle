@@ -1,6 +1,7 @@
 package com.twitter.finagle.http
 
 import com.twitter.collection.RecordSchema
+import com.twitter.finagle.http.util.FailingWriter
 import com.twitter.io.{Buf, Pipe, Reader, Writer}
 import java.net.{InetAddress, InetSocketAddress}
 import java.util.{AbstractMap, List => JList, Map => JMap, Set => JSet}
@@ -347,7 +348,7 @@ object Request {
    * }}}
    */
   def apply(version: Version, method: Method, uri: String, reader: Reader[Buf]): Request = {
-    val req = new Request.Impl(reader, Writer.FailingWriter, new InetSocketAddress(0))
+    val req = new Request.Impl(reader, FailingWriter, new InetSocketAddress(0))
 
     req.setChunked(true)
     req.version = version

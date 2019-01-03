@@ -1,6 +1,7 @@
 package com.twitter.finagle.http
 
 import com.twitter.collection.RecordSchema
+import com.twitter.finagle.http.util.FailingWriter
 import com.twitter.io.{Buf, Pipe, Reader, Writer}
 
 /**
@@ -117,7 +118,7 @@ object Response {
   }
 
   private[finagle] def chunked(version: Version, status: Status, reader: Reader[Buf]): Response = {
-    val resp = new Impl(reader, Writer.FailingWriter)
+    val resp = new Impl(reader, FailingWriter)
     resp.version = version
     resp.status = status
     resp.setChunked(true)

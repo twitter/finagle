@@ -1,10 +1,11 @@
 package com.twitter.finagle.netty4.http
 
 import com.twitter.app.GlobalFlag
+import com.twitter.finagle.http.util.FailingWriter
 import com.twitter.finagle.http.{Fields, HeaderMap, Request}
 import com.twitter.finagle.netty4.ByteBufConversion
 import com.twitter.finagle.{http => FinagleHttp}
-import com.twitter.io.{Buf, BufReader, Reader, Writer}
+import com.twitter.io.{Buf, BufReader, Reader}
 import io.netty.handler.codec.{http => NettyHttp}
 import java.net.InetSocketAddress
 
@@ -37,7 +38,7 @@ private[finagle] object Bijections {
     ): Request = {
       val result = new Request.Impl(
         reader = r,
-        writer = Writer.FailingWriter,
+        writer = FailingWriter,
         remoteSocketAddress = remoteAddr
       )
 
