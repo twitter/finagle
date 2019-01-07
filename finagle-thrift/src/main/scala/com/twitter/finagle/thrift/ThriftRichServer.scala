@@ -4,7 +4,6 @@ import com.twitter.finagle.param.Stats
 import com.twitter.finagle.stats._
 import com.twitter.finagle.{ListeningServer, Server, Stack, Thrift}
 import java.net.SocketAddress
-import org.apache.thrift.protocol.TProtocolFactory
 
 /**
  * A mixin trait to provide a rich Thrift server API.
@@ -70,8 +69,6 @@ trait ThriftRichServer { self: Server[Array[Byte], Array[Byte]] =>
   import ThriftUtil._
 
   protected def serverParam: RichServerParam
-
-  protected def protocolFactory: TProtocolFactory
 
   protected def maxThriftBufferSize: Int = Thrift.param.maxThriftBufferSize
 

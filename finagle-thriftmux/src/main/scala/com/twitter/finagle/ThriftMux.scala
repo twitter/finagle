@@ -183,9 +183,6 @@ object ThriftMux
       perEndpointStats = params[Thrift.param.PerEndpointStats].enabled
     )
 
-    @deprecated("Use clientParam.protocolFactory", "2017-08-16")
-    protected def protocolFactory: TProtocolFactory = clientParam.protocolFactory
-
     @deprecated("Use clientParam.clientStats", "2017-08-16")
     override protected def stats: StatsReceiver = clientParam.clientStats
 
@@ -520,9 +517,6 @@ object ThriftMux
     override protected def serverStats: StatsReceiver = serverParam.serverStats
 
     def params: Stack.Params = muxer.params
-
-    @deprecated("Use serverParam.protocolFactory", "2017-08-16")
-    protected def protocolFactory: TProtocolFactory = serverParam.protocolFactory
 
     @deprecated("Use serverParam.maxThriftBufferSize", "2017-08-16")
     override protected def maxThriftBufferSize: Int = serverParam.maxThriftBufferSize

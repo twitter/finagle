@@ -115,8 +115,6 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
 
   protected val clientParam: RichClientParam
 
-  protected def protocolFactory: TProtocolFactory
-
   /** The client name used when group isn't named. */
   protected val defaultClientName: String
   protected def stats: StatsReceiver = ClientStatsReceiver

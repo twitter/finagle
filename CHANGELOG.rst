@@ -41,6 +41,13 @@ Breaking API Changes
   be extended. Users should migrate to the respective `c.t.f.t.TransportContext`
   methods. ``PHAB_ID=D256257``
 
+* finagle-thrift: The `c.t.f.t.ThriftRichClient.protocolFactory` and
+  `c.t.f.t.ThriftRichServer.protocolFactory` methods have been removed. Users should
+  switch to using `ThriftRichClient.clientParam.protocolFactory` and
+  `ThriftRichServer.serverParam.protocolFactory` instead. In addition, implementations
+  of the `protocolFactory` method have been removed from the concrete `c.t.f.Thrift`
+  and `c.t.f.ThriftMux` client and server. ``PHAB_ID=D256217``
+
 Bug Fixes
 ~~~~~~~~~
 
