@@ -51,6 +51,9 @@ Bug Fixes
 * finagle-http: Compression level of 0 was failing on the server-side when speaking h2c.
   Updated so that it can handle a request properly. ``PHAB_ID=D251320``
 
+* finagle-thriftmux: A Java compatibility issue for users trying to call `withOpportunisticTls`
+  on `ThriftMux` clients and servers has been fixed. ``PHAB_ID=D256027``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

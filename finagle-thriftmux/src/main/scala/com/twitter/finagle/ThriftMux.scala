@@ -9,7 +9,7 @@ import com.twitter.finagle.client.{
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.context.RemoteInfo.Upstream
 import com.twitter.finagle.mux.OpportunisticTlsParams
-import com.twitter.finagle.mux.transport.MuxFailure
+import com.twitter.finagle.mux.transport.{MuxFailure, OpportunisticTls}
 import com.twitter.finagle.param.{
   ExceptionStatsHandler => _,
   Monitor => _,
@@ -201,6 +201,14 @@ object ThriftMux
      */
     def withClientId(clientId: ClientId): Client =
       configured(Thrift.param.ClientId(Some(clientId)))
+
+    // overridden for better Java compatibility
+    override def withOpportunisticTls(level: OpportunisticTls.Level): Client =
+      super.withOpportunisticTls(level)
+
+    // overridden for better Java compatibility
+    override def withNoOpportunisticTls: Client =
+      super.withNoOpportunisticTls
 
     /**
      * Produce a [[com.twitter.finagle.ThriftMux.Client]] using the provided
@@ -573,6 +581,14 @@ object ThriftMux
 
     def transformed(t: Stack.Transformer): Server =
       copy(muxer = muxer.transformed(t))
+
+    // overridden for better Java compatibility
+    override def withOpportunisticTls(level: OpportunisticTls.Level): Server =
+      super.withOpportunisticTls(level)
+
+    // overridden for better Java compatibility
+    override def withNoOpportunisticTls: Server =
+      super.withNoOpportunisticTls
 
     private[this] def withDeserializingClassifier: StackServer[mux.Request, mux.Response] = {
       // Note: what type of deserializer used is important if none is specified
