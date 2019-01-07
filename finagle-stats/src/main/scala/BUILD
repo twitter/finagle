@@ -1,5 +1,7 @@
 scala_library(
-    sources = rglobs("*.scala"),
+    # the reason we don't move this BUILD file to the stats directory and make this
+    # an aggregator BUILD file is to avoid https://github.com/pantsbuild/pants/issues/6678
+    sources = ["com/twitter/finagle/stats/stats.scala"],
     compiler_option_sets = {"fatal_warnings"},
     provides = scala_artifact(
         org = "com.twitter",
