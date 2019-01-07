@@ -137,7 +137,7 @@ class MapParamMap(underlying: Map[String, Seq[String]], val isValid: Boolean = t
 }
 
 object MapParamMap {
-  def apply(params: Tuple2[String, String]*): MapParamMap =
+  def apply(params: (String, String)*): MapParamMap =
     new MapParamMap(MapParamMap.tuplesToMultiMap(params))
 
   def apply(map: Map[String, String]): MapParamMap =
@@ -145,9 +145,7 @@ object MapParamMap {
       Seq(value)
     })
 
-  private[http] def tuplesToMultiMap(
-    tuples: Seq[Tuple2[String, String]]
-  ): Map[String, Seq[String]] = {
+  private[http] def tuplesToMultiMap(tuples: Seq[(String, String)]): Map[String, Seq[String]] = {
     tuples
       .groupBy { case (k, v) => k }
       .mapValues { values =>
@@ -257,7 +255,7 @@ class RequestParamMap(val request: Request) extends ParamMap {
 object ParamMap {
 
   /** Create ParamMap from parameter list. */
-  def apply(params: Tuple2[String, String]*): ParamMap =
+  def apply(params: (String, String)*): ParamMap =
     MapParamMap(params: _*)
 
   /** Create ParamMap from a map. */

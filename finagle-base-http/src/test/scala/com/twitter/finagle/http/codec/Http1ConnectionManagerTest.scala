@@ -10,7 +10,7 @@ import org.mockito.Mockito._
 import org.scalatest.FunSuite
 import org.scalatest.mockito.MockitoSugar
 
-class ConnectionManagerTest extends FunSuite with MockitoSugar {
+class Http1ConnectionManagerTest extends FunSuite with MockitoSugar {
   // > further tests
   //   - malformed requests/responses
   //   - methods other than GET
@@ -35,96 +35,96 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
   }
 
   test("shouldClose returns false when initialized") {
-    val manager = new ConnectionManager()
-    assert(!manager.shouldClose())
+    val manager = new Http1ConnectionManager()
+    assert(!manager.shouldClose)
   }
 
   test("not terminate when response is standard") {
-    val manager = new ConnectionManager()
-    manager.observeRequest(makeRequest(Version.Http11), Future.Done)
-    assert(!manager.shouldClose())
+    val manager = new Http1ConnectionManager()
+    manager.observeMessage(makeRequest(Version.Http11), Future.Done)
+    assert(!manager.shouldClose)
     val rep = makeResponse(Version.Http11, Fields.ContentLength -> "1")
-    manager.observeResponse(rep, Future.Done)
+    manager.observeMessage(rep, Future.Done)
     assert(rep.headerMap.get(Fields.Connection) != Some("close"))
-    assert(!manager.shouldClose())
+    assert(!manager.shouldClose)
   }
 
   test("terminate when response doesn't have content length") {
-    val manager = new ConnectionManager()
-    manager.observeRequest(makeRequest(Version.Http11), Future.Done)
-    assert(!manager.shouldClose())
+    val manager = new Http1ConnectionManager()
+    manager.observeMessage(makeRequest(Version.Http11), Future.Done)
+    assert(!manager.shouldClose)
     val rep = makeResponse(Version.Http11)
-    manager.observeResponse(rep, Future.Done)
-    assert(manager.shouldClose())
+    manager.observeMessage(rep, Future.Done)
+    assert(manager.shouldClose)
     assert(rep.headerMap.get(Fields.Connection) == Some("close"))
   }
 
   test("terminate when request has Connection: close") {
-    val manager = new ConnectionManager()
-    manager.observeRequest(makeRequest(Version.Http11, "Connection" -> "close"), Future.Done)
-    assert(!manager.shouldClose())
+    val manager = new Http1ConnectionManager()
+    manager.observeMessage(makeRequest(Version.Http11, "Connection" -> "close"), Future.Done)
+    assert(!manager.shouldClose)
     val rep = makeResponse(Version.Http11, Fields.ContentLength -> "1")
-    manager.observeResponse(rep, Future.Done)
-    assert(manager.shouldClose())
+    manager.observeMessage(rep, Future.Done)
+    assert(manager.shouldClose)
     // the header is copied to the response
     assert(rep.headerMap.get(Fields.Connection) == Some("close"))
   }
 
   test("terminate after streaming request has Connection: close") {
-    val manager = new ConnectionManager()
+    val manager = new Http1ConnectionManager()
 
     val req = makeRequest(Version.Http11, "Connection" -> "close")
     req.setChunked(true)
     val reqP = new Promise[Unit]
-    manager.observeRequest(req, reqP)
+    manager.observeMessage(req, reqP)
     reqP.setDone()
-    assert(!manager.shouldClose())
+    assert(!manager.shouldClose)
 
     val rep = makeResponse(Version.Http11, "Connection" -> "close")
     rep.setChunked(true)
     val repP = new Promise[Unit]
-    manager.observeResponse(rep, repP)
-    assert(!manager.shouldClose())
+    manager.observeMessage(rep, repP)
+    assert(!manager.shouldClose)
     repP.setDone()
-    assert(manager.shouldClose())
+    assert(manager.shouldClose)
   }
 
   test("terminate after response, even if request hasn't finished streaming") {
-    val manager = new ConnectionManager()
+    val manager = new Http1ConnectionManager()
     val p = Promise[Unit]
     val req = makeRequest(Version.Http11)
     req.setChunked(true)
-    manager.observeRequest(req, p)
-    assert(!manager.shouldClose())
-    manager.observeResponse(
+    manager.observeMessage(req, p)
+    assert(!manager.shouldClose)
+    manager.observeMessage(
       makeResponse(Version.Http11, Fields.ContentLength -> "1", "Connection" -> "close"),
       Future.Done
     )
-    assert(manager.shouldClose())
+    assert(manager.shouldClose)
   }
 
   test("terminate after response has finished streaming") {
-    val manager = new ConnectionManager()
-    manager.observeRequest(makeRequest(Version.Http11), Future.Done)
-    assert(!manager.shouldClose())
+    val manager = new Http1ConnectionManager()
+    manager.observeMessage(makeRequest(Version.Http11), Future.Done)
+    assert(!manager.shouldClose)
     val p = Promise[Unit]
     val rep = makeResponse(Version.Http11, "Connection" -> "close")
     rep.setChunked(true)
-    manager.observeResponse(rep, p)
-    assert(!manager.shouldClose())
+    manager.observeMessage(rep, p)
+    assert(!manager.shouldClose)
     p.setDone()
-    assert(manager.shouldClose())
+    assert(manager.shouldClose)
   }
 
   test("terminate http/1.0 after response") {
-    val manager = new ConnectionManager()
+    val manager = new Http1ConnectionManager()
 
-    manager.observeRequest(makeRequest(Version.Http10), Future.Done)
-    assert(!manager.shouldClose())
+    manager.observeMessage(makeRequest(Version.Http10), Future.Done)
+    assert(!manager.shouldClose)
 
     val rep = makeResponse(Version.Http10)
-    manager.observeResponse(rep, Future.Unit)
-    assert(manager.shouldClose())
+    manager.observeMessage(rep, Future.Unit)
+    assert(manager.shouldClose)
     assert(rep.headerMap.get(Fields.Connection) == Some("close"))
   }
 
@@ -141,13 +141,13 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
       assert(rep.contentLength == None) // sanity checks
       assert(!rep.isChunked)
 
-      val manager = new ConnectionManager()
+      val manager = new Http1ConnectionManager()
 
-      manager.observeRequest(makeRequest(Version.Http11), Future.Done)
-      assert(!manager.shouldClose())
+      manager.observeMessage(makeRequest(Version.Http11), Future.Done)
+      assert(!manager.shouldClose)
 
-      manager.observeResponse(rep, Future.Done)
-      assert(!manager.shouldClose())
+      manager.observeMessage(rep, Future.Done)
+      assert(!manager.shouldClose)
       assert(rep.headerMap.get(Fields.Connection) == None)
     }
   }

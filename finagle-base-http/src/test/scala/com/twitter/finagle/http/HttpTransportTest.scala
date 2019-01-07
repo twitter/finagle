@@ -2,10 +2,10 @@ package com.twitter.finagle.http
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.{Status => CoreStatus}
-import com.twitter.finagle.http.codec.ConnectionManager
+import com.twitter.finagle.http.codec.Http1ConnectionManager
 import com.twitter.finagle.http.exp.{IdentityStreamTransport, Multi, StreamTransportProxy}
 import com.twitter.finagle.transport.QueueTransport
+import com.twitter.finagle.{Status => CoreStatus}
 import com.twitter.io.{Buf, Pipe}
 import com.twitter.util.{Await, Future, Promise, Throw, Time}
 import org.scalatest.FunSuite
@@ -16,9 +16,17 @@ class HttpTransportTest extends FunSuite {
     val exc = new IllegalArgumentException("boo")
     val underlying = new QueueTransport(new AsyncQueue[Request], new AsyncQueue[Response])
     val noop = new IdentityStreamTransport(underlying)
-    val trans = new HttpTransport(noop, new ConnectionManager {
-      override def observeRequest(message: Request, onFinish: Future[Unit]) = throw exc
-    })
+    val trans = new HttpTransport(
+      noop,
+      new Http1ConnectionManager {
+
+        override def observeMessage(message: Message, onFinish: Future[Unit]): Unit =
+          message match {
+            case _: Request => throw exc
+            case _ => super.observeMessage(message, onFinish)
+          }
+      }
+    )
     val f = trans.write(Request("google.com"))
     assert(f.isDefined)
     assert(f.poll == Some(Throw(exc)))
@@ -30,7 +38,7 @@ class HttpTransportTest extends FunSuite {
     @volatile var closed = false
     val repDone = Promise[Unit]
 
-    val manager = new ConnectionManager
+    val manager = new Http1ConnectionManager
     val underlying = {
       val qTrans = new QueueTransport[Response, Request](repq, reqq)
       new StreamTransportProxy[Response, Request](qTrans) {

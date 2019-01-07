@@ -2,14 +2,12 @@ package com.twitter.finagle.http.filter
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.http.codec.HttpDtab
-import com.twitter.finagle.http.{Status, Response, Request}
-import com.twitter.finagle.{Service, Dtab}
+import com.twitter.finagle.http.{Request, Response, Status}
+import com.twitter.finagle.{Dtab, Service}
 import com.twitter.util.{Await, Future}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
+import org.scalatest.junit.AssertionsForJUnit
 
-@RunWith(classOf[JUnitRunner])
 class DtabFilterTest extends FunSuite with AssertionsForJUnit {
 
   private val timeout = 2.seconds

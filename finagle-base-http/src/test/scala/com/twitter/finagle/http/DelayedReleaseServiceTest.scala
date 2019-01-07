@@ -3,14 +3,11 @@ package com.twitter.finagle.http
 import com.twitter.finagle.Service
 import com.twitter.io.Reader
 import com.twitter.util.Future
-import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, stub, verify}
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class DelayedReleaseServiceTest extends FunSuite with MockitoSugar {
 
   test("close closes underlying") {
@@ -32,7 +29,7 @@ class DelayedReleaseServiceTest extends FunSuite with MockitoSugar {
 
     val proxy = new DelayedReleaseService(service)
 
-    val f = proxy(request) flatMap { response =>
+    proxy(request) flatMap { response =>
       proxy.close()
       verify(service, never).close()
       Reader.readAll(response.reader)
