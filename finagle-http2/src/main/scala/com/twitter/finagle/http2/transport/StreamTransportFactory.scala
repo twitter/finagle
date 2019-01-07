@@ -556,10 +556,6 @@ final private[http2] class StreamTransportFactory(
 
     def onClose: Future[Throwable] = _onClose.or(underlying.onClose)
 
-    def localAddress: SocketAddress = context.localAddress
-
-    def remoteAddress: SocketAddress = context.remoteAddress
-
     def close(deadline: Time): Future[Unit] = {
       wasClosed = true
       exec.execute(new Runnable {

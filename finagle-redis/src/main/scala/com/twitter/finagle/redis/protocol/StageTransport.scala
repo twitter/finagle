@@ -32,7 +32,5 @@ private[finagle] final class StageTransport(underlying: Transport[Buf, Buf])
 
   override def status: Status = underlying.status
   override def onClose: Future[Throwable] = underlying.onClose
-  override def localAddress: SocketAddress = context.localAddress
-  override def remoteAddress: SocketAddress = context.remoteAddress
   val context: TransportContext = underlying.context
 }

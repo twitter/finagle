@@ -5,7 +5,6 @@ import com.twitter.finagle.{ChannelClosedException, ChannelException, Failure, S
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Future, Promise, Return, Time}
 import io.netty.{channel => nettyChan}
-import java.net.SocketAddress
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
 import scala.util.control.NoStackTrace
 
@@ -142,9 +141,6 @@ private[finagle] class ChannelTransport(
     if (ch.isOpen) ch.close()
     closed.unit
   }
-
-  def localAddress: SocketAddress = context.localAddress
-  def remoteAddress: SocketAddress = context.remoteAddress
 
   override def toString = s"Transport<channel=$ch, onClose=${closed}>"
 

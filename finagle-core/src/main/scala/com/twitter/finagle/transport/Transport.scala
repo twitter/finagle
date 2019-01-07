@@ -50,13 +50,13 @@ trait Transport[In, Out] extends Closable { self =>
    * The locally bound address of this transport.
    */
   @deprecated("Please use Transport.context.localAddress instead", "2017-08-21")
-  def localAddress: SocketAddress
+  final def localAddress: SocketAddress = context.localAddress
 
   /**
    * The remote address to which the transport is connected.
    */
   @deprecated("Please use Transport.context.remoteAddress instead", "2017-08-21")
-  def remoteAddress: SocketAddress
+  final def remoteAddress: SocketAddress = context.remoteAddress
 
   /**
    * Maps this transport to `Transport[In1, Out2]`. Note, exceptions
@@ -80,8 +80,6 @@ trait Transport[In, Out] extends Closable { self =>
       def read(): Future[Out1] = self.read().map(g)
       def status: Status = self.status
       def onClose: Future[Throwable] = self.onClose
-      def localAddress: SocketAddress = self.localAddress
-      def remoteAddress: SocketAddress = self.remoteAddress
       def close(deadline: Time): Future[Unit] = self.close(deadline)
       def context: Context = self.context
       override def toString: String = self.toString
@@ -327,8 +325,6 @@ object Transport {
         def read(): Future[Out1] = trans.read().flatMap(readFn)
         def status: Status = trans.status
         def onClose: Future[Throwable] = trans.onClose
-        def localAddress: SocketAddress = trans.localAddress
-        def remoteAddress: SocketAddress = trans.remoteAddress
         def close(deadline: Time): Future[Unit] = trans.close(deadline)
         def context: Context = trans.context.asInstanceOf[Context]
         override def toString: String = trans.toString
@@ -365,8 +361,6 @@ abstract class TransportProxy[In, Out](_self: Transport[In, Out]) extends Transp
   val self: Transport[In, Out] = _self
   def status: Status = self.status
   def onClose: Future[Throwable] = self.onClose
-  def localAddress: SocketAddress = self.localAddress
-  def remoteAddress: SocketAddress = self.remoteAddress
   def close(deadline: Time): Future[Unit] = self.close(deadline)
   def context: Context = self.context
   override def toString: String = self.toString
@@ -401,8 +395,6 @@ class QueueTransport[In, Out](writeq: AsyncQueue[In], readq: AsyncQueue[Out])
   }
 
   val onClose: Future[Throwable] = closep
-  def localAddress: SocketAddress = context.localAddress
-  def remoteAddress: SocketAddress = context.remoteAddress
   val context: TransportContext =
     new SimpleTransportContext(new SocketAddress {}, new SocketAddress {}, None)
 }

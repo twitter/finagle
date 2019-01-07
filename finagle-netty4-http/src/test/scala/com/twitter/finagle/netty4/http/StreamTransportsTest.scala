@@ -23,9 +23,7 @@ import io.netty.handler.codec.http.{
   LastHttpContent
 }
 import io.netty.handler.codec.{http => NettyHttp}
-import java.net.SocketAddress
 import java.nio.charset.StandardCharsets.UTF_8
-import java.security.cert.Certificate
 import org.scalatest.FunSuite
 import scala.language.reflectiveCalls
 
@@ -139,12 +137,6 @@ class StreamTransportsTest extends FunSuite {
 
     def write(req: Any): Future[Unit] = Future.exception(new Exception("nop"))
 
-    def remoteAddress: SocketAddress = context.remoteAddress
-
-    def peerCertificate: Option[Certificate] = context.peerCertificate
-
-    def localAddress: SocketAddress = context.localAddress
-
     def status: Status = ???
 
     def read(): Future[Any] = ???
@@ -224,9 +216,6 @@ class StreamTransportsTest extends FunSuite {
       def read() = p
       def status = ???
       val onClose = Future.never
-      def localAddress = context.localAddress
-      def remoteAddress = context.remoteAddress
-      def peerCertificate = context.peerCertificate
       def close(deadline: Time) = ???
       val context: TransportContext = new SimpleTransportContext()
     }

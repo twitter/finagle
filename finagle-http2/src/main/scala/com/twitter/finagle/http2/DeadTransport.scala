@@ -14,8 +14,6 @@ private[http2] final class DeadTransport(exn: Throwable, remote: SocketAddress)
   lazy val onClose: Future[Throwable] = Future.value(exn)
 
   val context: TransportContext = new SimpleTransportContext(remoteAddress = remote)
-  def localAddress: SocketAddress = context.localAddress
-  def remoteAddress: SocketAddress = context.remoteAddress
 
   def write(req: Any): Future[Unit] = opsResult
   def read(): Future[Any] = opsResult

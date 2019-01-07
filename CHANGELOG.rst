@@ -36,6 +36,11 @@ Breaking API Changes
   deprecated `Server.localAddress` should use `ListeningServer.boundAddress`
   instead. ``PHAB_ID=D254339``
 
+* finagle-core: The deprecated `c.t.f.t.Transport.localAddress` and
+  `c.t.f.t.Transport.remoteAddress` methods are now final and can no longer
+  be extended. Users should migrate to the respective `c.t.f.t.TransportContext`
+  methods. ``PHAB_ID=D256257``
+
 Bug Fixes
 ~~~~~~~~~
 

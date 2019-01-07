@@ -11,7 +11,6 @@ import com.twitter.finagle.{Failure, Path, Dtab, Status}
 import com.twitter.io.Buf
 import com.twitter.logging.Level
 import com.twitter.util.{Future, Try, Return, Promise, Throw, Updatable, Time}
-import java.net.SocketAddress
 import java.util.logging.Logger
 import org.apache.thrift.protocol.{TProtocolFactory, TMessage, TMessageType}
 import scala.collection.mutable
@@ -45,8 +44,6 @@ private[finagle] object ThriftEmulator {
     }
     def status: Status = cur.status
     def onClose: Future[Throwable] = cur.onClose
-    def localAddress: SocketAddress = cur.localAddress
-    def remoteAddress: SocketAddress = cur.remoteAddress
     def close(deadline: Time): Future[Unit] = cur.close(deadline)
     val context: UpdatableContext = new UpdatableContext(init.context)
     override def toString: String = cur.toString

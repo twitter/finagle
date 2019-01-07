@@ -6,8 +6,6 @@ import com.twitter.finagle.memcached.protocol.StorageCommand.StorageCommands
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.io.Buf
 import com.twitter.util.{Future, Time}
-import java.net.SocketAddress
-import java.security.cert.Certificate
 
 /**
  * A Transport that handles encoding Responses to Bufs and decoding framed Bufs to Commands.
@@ -39,12 +37,6 @@ private[finagle] class ServerTransport(underlying: Transport[Buf, Buf])
     val buf: Buf = ResponseToBuf.encode(response)
     underlying.write(buf)
   }
-
-  def localAddress: SocketAddress = context.localAddress
-
-  def remoteAddress: SocketAddress = context.remoteAddress
-
-  def peerCertificate: Option[Certificate] = context.peerCertificate
 
   def onClose: Future[Throwable] = underlying.onClose
 

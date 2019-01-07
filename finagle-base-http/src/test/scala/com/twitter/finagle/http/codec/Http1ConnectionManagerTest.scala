@@ -3,18 +3,24 @@ package com.twitter.finagle.http.codec
 import com.twitter.finagle.http._
 import com.twitter.finagle.http.exp.IdentityStreamTransport
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.{Future, Promise, Return, Time}
 import org.mockito.Matchers._
-import org.mockito.Mockito._
+import org.mockito.Mockito
+import org.mockito.Mockito.{times, verify}
+import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.FunSuite
 import org.scalatest.mockito.MockitoSugar
+import scala.language.reflectiveCalls
 
 class Http1ConnectionManagerTest extends FunSuite with MockitoSugar {
   // > further tests
   //   - malformed requests/responses
   //   - methods other than GET
   //   - 100/continue
+
+  def when[T](o: T) =
+    Mockito.when(o).asInstanceOf[{ def thenReturn[RT](s: RT): OngoingStubbing[RT] }]
 
   def makeRequest(version: Version, headers: (String, String)*) = {
     val request = Request(version, Method.Get, "/")
@@ -157,8 +163,10 @@ class Http1ConnectionManagerTest extends FunSuite with MockitoSugar {
   def perform(request: Request, response: Response, shouldMarkDead: Boolean): Unit = {
     val closeP = new Promise[Throwable]
     val trans = mock[Transport[Request, Response]]
+    val context = mock[TransportContext]
     when(trans.close(any[Time])).thenReturn(Future.Done)
     when(trans.onClose).thenReturn(closeP)
+    when(trans.context).thenReturn(context)
 
     val disp = new HttpClientDispatcher(
       new HttpTransport(new IdentityStreamTransport(trans)),

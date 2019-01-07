@@ -76,9 +76,6 @@ class OpTransport[In, Out](var ops: List[OpTransport.Op[In, Out]]) extends Trans
 
   var status: Status = Status.Open
   val onClose = new Promise[Throwable]
-  def localAddress = context.localAddress
-  def remoteAddress = context.remoteAddress
-  def peerCertificate = context.peerCertificate
   val context = new SimpleTransportContext()
 }
 

@@ -4,7 +4,6 @@ import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{ChannelClosedException, ChannelException, Status}
 import com.twitter.util.{Future, Promise, Return, Time}
-import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
 import org.jboss.netty.channel._
 
@@ -153,9 +152,6 @@ class ChannelTransport[In, Out](ch: Channel)
       Channels.close(ch)
     closep.unit
   }
-
-  def localAddress: SocketAddress = context.localAddress
-  def remoteAddress: SocketAddress = context.remoteAddress
 
   override def toString = s"Transport<channel=$ch, onClose=$closep>"
 
