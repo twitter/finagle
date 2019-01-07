@@ -39,6 +39,10 @@ Breaking API Changes
 Bug Fixes
 ~~~~~~~~~
 
+* finagle-core: Failed writes on Linux due to a remote peer disconnecting should now
+  be properly seen as a `c.t.f.ChannelClosedException` instead of a
+  `c.t.f.UnknownChannelException`. ``PHAB_ID=D256007``
+
 * finagle-http: Compression level of 0 was failing on the server-side when speaking h2c.
   Updated so that it can handle a request properly. ``PHAB_ID=D251320``
 
