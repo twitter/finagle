@@ -80,7 +80,7 @@ class DefaultHeaderMapTest extends AbstractHeaderMapTest with GeneratorDrivenPro
     forAll(genValidFoldedHeader) {
       case (k, v) =>
         val value = DefaultHeaderMap(k -> v).apply(k)
-        assert(value == DefaultHeaderMap.ObsFoldRegex.replaceAllIn(v, " "))
+        assert(value == Rfc7230HeaderValidation.replaceObsFold(v))
         assert(v.contains("\n"))
         assert(!value.contains("\n"))
     }

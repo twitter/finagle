@@ -9,7 +9,7 @@ import java.util.BitSet
  * validation. Invalid names or values will result in throwing an
  * `HeaderValidationException`.
  */
-private object Rfc7230HeaderValidation {
+private[finagle] object Rfc7230HeaderValidation {
 
   /** Exception that represents header validation failure */
   sealed abstract class HeaderValidationException(details: String)
@@ -20,6 +20,23 @@ private object Rfc7230HeaderValidation {
 
   /** Invalid header value */
   final class ValueValidationException(details: String) extends HeaderValidationException(details)
+
+  /** Validation result for header names */
+  sealed trait NameValidationResult
+
+  /** Validation result for header values */
+  sealed trait ValueValidationResult
+
+  /** Successful validation */
+  case object ValidationSuccess extends NameValidationResult with ValueValidationResult
+
+  /** Successful value validation with the detection of an obs-fold sequence */
+  case object ObsFoldDetected extends ValueValidationResult
+
+  /** Validation failed with the provided cause */
+  case class ValidationFailure(ex: HeaderValidationException)
+      extends NameValidationResult
+      with ValueValidationResult
 
   private[this] def validHeaderNameChars: Iterable[Int] = {
     // https://tools.ietf.org/html/rfc7230#section-3.2.6
@@ -51,6 +68,8 @@ private object Rfc7230HeaderValidation {
       "\r\n \t".map(_.toInt) // Valid whitespace and obs-fold chars
   }
 
+  private[this] val ObsFoldRegex = "\r?\n[\t ]+".r
+
   private[this] val validHeaderNameCharSet: java.util.BitSet = toBitSet(validHeaderNameChars)
 
   private[this] val validHeaderValueCharSet: java.util.BitSet = toBitSet(validHeaderValueChars)
@@ -65,24 +84,31 @@ private object Rfc7230HeaderValidation {
 
   private[this] def validHeaderValueChar(c: Char): Boolean = validHeaderValueCharSet.get(c)
 
+  /** Replace obs-fold sequences in the value with whitespace */
+  def replaceObsFold(value: CharSequence): String = ObsFoldRegex.replaceAllIn(value, " ")
+
   /**
    * Validate the provided header name.
    * @param name the header name to be validated.
-   * @throws NameValidationException if the header name is not compliant.
    */
-  def validateName(name: CharSequence): Unit = {
+  def validateName(name: CharSequence): NameValidationResult = {
     if (name == null) throw new NullPointerException("Header names cannot be null")
-    if (name.length == 0) throw new NameValidationException("Header name cannot be empty")
-
-    var i = 0
-    while (i < name.length) {
-      val c = name.charAt(i)
-      if (!validHeaderNameChar(c))
-        throw new NameValidationException(
-          s"Header '$name': name cannot contain the prohibited character '0x${Integer.toHexString(c)}': " + c
-        )
-
-      i += 1
+    else if (name.length == 0)
+      ValidationFailure(new NameValidationException("Header name cannot be empty"))
+    else {
+      var i = 0
+      while (i < name.length) {
+        val c = name.charAt(i)
+        if (!validHeaderNameChar(c))
+          return ValidationFailure(
+            new NameValidationException(
+              s"Header '$name': name cannot contain the prohibited character '0x${Integer
+                .toHexString(c)}': " + c
+            ))
+        i += 1
+      }
+      // If we made it here everything was fine.
+      ValidationSuccess
     }
   }
 
@@ -96,10 +122,8 @@ private object Rfc7230HeaderValidation {
    *
    * @param name the header name. Only used for exception messages and is not validated.
    * @param value the header value to be validated.
-   * @return true if the header value contained an obs-fold sequence, false otherwise.
-   * @throws ValueValidationException if the header value is not compliant.
    */
-  def validateValue(name: CharSequence, value: CharSequence): Boolean = {
+  def validateValue(name: CharSequence, value: CharSequence): ValueValidationResult = {
     if (value == null) throw new NullPointerException("Header values cannot be null")
 
     var i = 0
@@ -113,9 +137,9 @@ private object Rfc7230HeaderValidation {
       val c = value.charAt(i)
 
       if (!validHeaderValueChar(c))
-        throw new ValueValidationException(
+        return ValidationFailure(new ValueValidationException(
           s"Header '$name': value contains a prohibited character '0x${Integer.toHexString(c)}': $c"
-        )
+        ))
 
       state match {
         case NonFold =>
@@ -124,26 +148,31 @@ private object Rfc7230HeaderValidation {
         case CR =>
           if (c == '\n') state = LF
           else
-            throw new ValueValidationException(
-              s"Header '$name': only '\\n' is allowed after '\\r' in value")
+            return ValidationFailure(
+              new ValueValidationException(
+                s"Header '$name': only '\\n' is allowed after '\\r' in value"))
         case LF =>
           if (c == '\t' || c == ' ') {
             foldDetected = true
             state = NonFold
           } else
-            throw new ValueValidationException(
-              s"Header '$name': only ' ' and '\\t' are allowed after '\\n' in value")
+            return ValidationFailure(
+              new ValueValidationException(
+                s"Header '$name': only ' ' and '\\t' are allowed after '\\n' in value"))
       }
 
       i += 1
     }
 
     if (state != NonFold) {
-      throw new ValueValidationException(
-        s"Header '$name': value must not end with '\\r' or '\\n'. Observed: " +
-          (if (state == CR) "\\r" else "\\n")
-      )
+      ValidationFailure(
+        new ValueValidationException(
+          s"Header '$name': value must not end with '\\r' or '\\n'. Observed: " +
+            (if (state == CR) "\\r" else "\\n")))
+    } else if (foldDetected) {
+      ObsFoldDetected
+    } else {
+      ValidationSuccess
     }
-    foldDetected
   }
 }

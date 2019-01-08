@@ -84,9 +84,6 @@ private object DefaultHeaderMap {
 
   private[this] val logger = Logger.get(classOf[DefaultHeaderMap])
 
-  // Exposed for testing
-  private[http] val ObsFoldRegex = "\r?\n[\t ]+".r
-
   private[this] final def MaxValueChar: Char = 255
 
   // Adopted from Netty 3 HttpHeaders.
@@ -178,7 +175,7 @@ private object DefaultHeaderMap {
       // Per https://tools.ietf.org/html/rfc7230#section-3.2.4, an obs-fold is equivalent
       // to a SP char and suggests that such header values should be 'fixed' before
       // interpreting or forwarding the message.
-      ObsFoldRegex.replaceAllIn(value, " ")
+      Rfc7230HeaderValidation.replaceObsFold(value)
     } else {
       // Valid and no modifications needed.
       value

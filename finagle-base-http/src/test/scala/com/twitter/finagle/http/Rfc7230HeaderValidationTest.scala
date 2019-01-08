@@ -1,9 +1,6 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.http.Rfc7230HeaderValidation.{
-  NameValidationException,
-  ValueValidationException
-}
+import com.twitter.finagle.http.Rfc7230HeaderValidation.{ObsFoldDetected, ValidationFailure}
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
@@ -78,52 +75,53 @@ private object Rfc7230HeaderValidationTest {
 class Rfc7230HeaderValidationTest extends FunSuite with GeneratorDrivenPropertyChecks {
   import Rfc7230HeaderValidationTest._
 
+  private[this] def assertFailure(expectedMsgFragment: String)(f: => Any): Unit = {
+    f match {
+      case ValidationFailure(e) =>
+        assert(e.getMessage.contains(expectedMsgFragment))
+
+      case other => fail(s"Unexpected result: $other")
+    }
+  }
+
+  private[this] def assertProhibited(f: Any): Unit =
+    assertFailure("prohibited character")(f)
+
   test("reject out-of-bound characters in name") {
     forAll(Gen.choose[Char](128, Char.MaxValue)) { c =>
-      val e = intercept[NameValidationException] {
-        Rfc7230HeaderValidation.validateName(c.toString)
-      }
-      assert(e.getMessage.contains("prohibited character"))
+      assertProhibited(Rfc7230HeaderValidation.validateName(c.toString))
     }
   }
 
   test("reject out-of-bound characters in value") {
     forAll(Gen.choose[Char](256, Char.MaxValue)) { c =>
-      val e = intercept[ValueValidationException] {
-        Rfc7230HeaderValidation.validateValue("foo", c.toString)
-      }
-      assert(e.getMessage.contains("prohibited character"))
+      assertProhibited(Rfc7230HeaderValidation.validateValue("foo", c.toString))
     }
   }
 
   test("detects values with obs-folds (success)") {
     forAll(genFoldedValue) { v =>
-      assert(Rfc7230HeaderValidation.validateValue("foo", v))
+      assert(Rfc7230HeaderValidation.validateValue("foo", v) == ObsFoldDetected)
     }
   }
 
   test("validates header names (failure)") {
     forAll(genInvalidHeaderName) { h =>
-      val e = intercept[NameValidationException](Rfc7230HeaderValidation.validateName(h))
-      assert(e.getMessage.contains("prohibited character"))
+      assertProhibited(Rfc7230HeaderValidation.validateName(h))
     }
 
     forAll(genNonAsciiHeaderName) { h =>
-      val e = intercept[NameValidationException](Rfc7230HeaderValidation.validateName(h))
-      assert(e.getMessage.contains("prohibited character"))
+      assertProhibited(Rfc7230HeaderValidation.validateName(h))
     }
   }
 
   test("validates header values (failure)") {
     forAll(genInvalidHeaderValue) { h =>
-      val e = intercept[ValueValidationException](Rfc7230HeaderValidation.validateValue("foo", h))
-      assert(e.getMessage.contains("prohibited character"))
+      assertProhibited(Rfc7230HeaderValidation.validateValue("foo", h))
     }
 
     forAll(genInvalidClrfHeaderValue) { h =>
-      val e = intercept[ValueValidationException](Rfc7230HeaderValidation.validateValue("foo", h))
-      assert(
-        e.getMessage.contains("value must not end with") || e.getMessage.contains("allowed after"))
+      assertFailure("")(Rfc7230HeaderValidation.validateValue("foo", h))
     }
   }
 
@@ -135,21 +133,18 @@ class Rfc7230HeaderValidationTest extends FunSuite with GeneratorDrivenPropertyC
     } yield (first + sep + second)
 
     invalid.foreach { key =>
-      val e = intercept[NameValidationException](Rfc7230HeaderValidation.validateName(key))
-      assert(e.getMessage.contains("prohibited character"))
+      assertProhibited(Rfc7230HeaderValidation.validateName(key))
     }
   }
 
   // The following two tests are non-RFC compliant but we see them enough
   // and they are benign enough that we accept them.
   test("null char (0x0) is considered invalid in names") {
-    val e = intercept[NameValidationException](Rfc7230HeaderValidation.validateName("\u0000foo"))
-    assert(e.getMessage.contains("prohibited character"))
+    assertProhibited(Rfc7230HeaderValidation.validateName("\u0000foo"))
   }
 
   test("null char (0x0) is considered invalid in values") {
     val e =
-      intercept[ValueValidationException](Rfc7230HeaderValidation.validateValue("foo", "\u0000bar"))
-    assert(e.getMessage.contains("prohibited character"))
+      assertProhibited(Rfc7230HeaderValidation.validateValue("foo", "\u0000bar"))
   }
 }
