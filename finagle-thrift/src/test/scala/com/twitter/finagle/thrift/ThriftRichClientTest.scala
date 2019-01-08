@@ -44,10 +44,10 @@ class ThriftRichClientTest extends FunSuite with MockitoSugar with OneInstancePe
     val mockBuilder = mock[ServicePerEndpointBuilder[SvcIface]]
     doReturn(svcIface).when(mockBuilder).servicePerEndpoint(any(), captor.capture())
     val client = spy(ThriftRichClientMock)
-    client.servicePerEndpoint("/s/tweetypie/tweetypie", "tweetypie_client")(builder = mockBuilder)
+    client.servicePerEndpoint("dest_string", "client")(builder = mockBuilder)
 
-    assert(captor.getValue.clientStats.toString == "NullStatsReceiver/clnt/tweetypie_client")
-    verify(client).newService("/s/tweetypie/tweetypie", "tweetypie_client")
+    assert(captor.getValue.clientStats.toString == "NullStatsReceiver/clnt/client")
+    verify(client).newService("dest_string", "client")
   }
 
   test("ThriftRichClientTest servicePerEndpoint takes dest Name and stats scoping label arguments") {
@@ -57,9 +57,9 @@ class ThriftRichClientTest extends FunSuite with MockitoSugar with OneInstancePe
 
     val name = Name.empty
     val client = spy(ThriftRichClientMock)
-    client.servicePerEndpoint(name, "tweetypie_client")(builder = mockBuilder)
+    client.servicePerEndpoint(name, "client")(builder = mockBuilder)
 
-    assert(captor.getValue.clientStats.toString == "NullStatsReceiver/clnt/tweetypie_client")
-    verify(client).newService(name, "tweetypie_client")
+    assert(captor.getValue.clientStats.toString == "NullStatsReceiver/clnt/client")
+    verify(client).newService(name, "client")
   }
 }
