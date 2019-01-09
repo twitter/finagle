@@ -28,10 +28,10 @@ private[netty4] class Netty4RawServerChannelInitializer(params: Stack.Params)
   private[this] val Stats(stats) = params[Stats]
 
   private[this] val sharedChannelStats =
-    if (!stats.isNull)
-      Some(new ChannelStatsHandler.SharedChannelStats(stats))
-    else
-      None
+    if (!stats.isNull) {
+      val sharedChannelStatsFn = params[SharedChannelStats.Param].fn
+      Some(sharedChannelStatsFn(params))
+    } else None
 
   private[this] val channelSnooper =
     if (params[Transport.Verbose].enabled)

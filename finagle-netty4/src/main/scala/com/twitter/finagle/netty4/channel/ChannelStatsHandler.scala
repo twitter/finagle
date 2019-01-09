@@ -1,8 +1,6 @@
 package com.twitter.finagle.netty4.channel
 
 import com.twitter.finagle.Failure
-import com.twitter.finagle.netty4.channel.ChannelStatsHandler.SharedChannelStats
-import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
 import com.twitter.util.{Duration, Monitor, Stopwatch}
 import io.netty.buffer.ByteBuf
 import io.netty.channel.epoll.{EpollSocketChannel, EpollTcpInfo}
@@ -17,55 +15,11 @@ import io.netty.handler.timeout.TimeoutException
 import io.netty.util.concurrent.ScheduledFuture
 import java.io.IOException
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.LongAdder
 import java.util.logging.{Level, Logger}
 import scala.util.control.NonFatal
 
 private object ChannelStatsHandler {
   private val log = Logger.getLogger(getClass.getName)
-
-  /**
-   * Stores all stats that are aggregated across all channels for the client
-   * or server.
-   */
-  class SharedChannelStats(statsReceiver: StatsReceiver) {
-    private val connectionCount = new LongAdder()
-    def connectionCountIncrement(): Unit = connectionCount.increment()
-    def connectionCountDecrement(): Unit = connectionCount.decrement()
-
-    private val tlsConnectionCount = new LongAdder()
-    def tlsConnectionCountIncrement(): Unit = tlsConnectionCount.increment()
-    def tlsConnectionCountDecrement(): Unit = tlsConnectionCount.decrement()
-
-    val connects = statsReceiver.counter("connects")
-
-    val connectionDuration =
-      statsReceiver.stat(Verbosity.Debug, "connection_duration")
-    val connectionReceivedBytes =
-      statsReceiver.stat(Verbosity.Debug, "connection_received_bytes")
-    val connectionSentBytes =
-      statsReceiver.stat(Verbosity.Debug, "connection_sent_bytes")
-    val writable =
-      statsReceiver.counter(Verbosity.Debug, "socket_writable_ms")
-    val unwritable =
-      statsReceiver.counter(Verbosity.Debug, "socket_unwritable_ms")
-    val retransmits =
-      statsReceiver.counter(Verbosity.Debug, name = "tcp_retransmits")
-    val tcpSendWindowSize =
-      statsReceiver.stat(Verbosity.Debug, name = "tcp_send_window_size")
-
-    val receivedBytes = statsReceiver.counter("received_bytes")
-    val sentBytes = statsReceiver.counter("sent_bytes")
-    val exceptions = statsReceiver.scope("exn")
-    val closesCount = statsReceiver.counter("closes")
-
-    private val connections = statsReceiver.addGauge("connections") {
-      connectionCount.sum()
-    }
-    private val tlsConnections = statsReceiver.addGauge("tls", "connections") {
-      tlsConnectionCount.sum()
-    }
-  }
 
   /**
    * How often to update TCP stats

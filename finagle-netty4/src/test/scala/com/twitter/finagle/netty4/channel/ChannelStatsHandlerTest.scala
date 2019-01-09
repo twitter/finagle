@@ -1,8 +1,9 @@
 package com.twitter.finagle.netty4.channel
 
-import com.twitter.finagle.netty4.channel.ChannelStatsHandler.SharedChannelStats
-import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.conversions.DurationOps._
+import com.twitter.finagle.Stack
+import com.twitter.finagle.param.Stats
+import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Duration, Time}
 import io.netty.buffer.Unpooled.wrappedBuffer
 import io.netty.channel._
@@ -24,7 +25,8 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
 
   private trait InMemoryStatsTest extends SocketTest {
     val sr = new InMemoryStatsReceiver()
-    val handler = new ChannelStatsHandler(new ChannelStatsHandler.SharedChannelStats(sr))
+    val params = Stack.Params.empty + Stats(sr)
+    val handler = new ChannelStatsHandler(new SharedChannelStats(params))
     handler.handlerAdded(ctx)
   }
 
@@ -62,7 +64,8 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
 
   test("ChannelStatsHandler counts connections") {
     val sr = new InMemoryStatsReceiver
-    val sharedStats = new SharedChannelStats(sr)
+    val params = Stack.Params.empty + Stats(sr)
+    val sharedStats = new SharedChannelStats(params)
     val ctx1 = new TestContext(sharedStats)
     val ctx2 = new TestContext(sharedStats)
     val handler1 = ctx1.channelStatsHandler
@@ -85,7 +88,8 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
 
   test("ChannelStatsHandler handles multiple channelInactive calls") {
     val sr = new InMemoryStatsReceiver
-    val sharedStats = new SharedChannelStats(sr)
+    val params = Stack.Params.empty + Stats(sr)
+    val sharedStats = new SharedChannelStats(params)
     val ctx1 = new TestContext(sharedStats)
     val handler = ctx1.channelStatsHandler
 
@@ -106,7 +110,8 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
     f: (ChannelDuplexHandler, ChannelHandlerContext) => Unit
   ) = test(s"ChannelStatsHandler counts $counterName") {
     val sr = new InMemoryStatsReceiver
-    val sharedStats = new SharedChannelStats(sr)
+    val params = Stack.Params.empty + Stats(sr)
+    val sharedStats = new SharedChannelStats(params)
     val ctx = new TestContext(sharedStats)
     val handler = ctx.channelStatsHandler
 
@@ -128,7 +133,8 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
   test("ChannelStatsHandler records connection duration") {
     Time.withCurrentTimeFrozen { control =>
       val sr = new InMemoryStatsReceiver
-      val sharedStats = new SharedChannelStats(sr)
+      val params = Stack.Params.empty + Stats(sr)
+      val sharedStats = new SharedChannelStats(params)
       val ctx1 = new TestContext(sharedStats)
       val ctx2 = new TestContext(sharedStats)
 
@@ -148,7 +154,8 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
 
   test("ChannelStatsHandler counts exceptions") {
     val sr = new InMemoryStatsReceiver
-    val sharedStats = new SharedChannelStats(sr)
+    val params = Stack.Params.empty + Stats(sr)
+    val sharedStats = new SharedChannelStats(params)
     val ctx = new TestContext(sharedStats)
     val handler = ctx.channelStatsHandler
 
@@ -162,7 +169,8 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
 
   test("ChannelStatsHandler counts sent and received bytes") {
     val sr = new InMemoryStatsReceiver
-    val sharedStats = new SharedChannelStats(sr)
+    val params = Stack.Params.empty + Stats(sr)
+    val sharedStats = new SharedChannelStats(params)
     val ctx1 = new TestContext(sharedStats)
     val handler1 = ctx1.channelStatsHandler
 

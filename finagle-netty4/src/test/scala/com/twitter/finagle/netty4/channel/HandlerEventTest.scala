@@ -1,5 +1,7 @@
 package com.twitter.finagle.netty4.channel
 
+import com.twitter.finagle.Stack
+import com.twitter.finagle.param.Stats
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import io.netty.channel._
 import io.netty.channel.embedded.EmbeddedChannel
@@ -15,7 +17,9 @@ class HandlerEventTest extends FunSuite with MockitoSugar {
     new ChannelRequestStatsHandler(
       new ChannelRequestStatsHandler.SharedChannelRequestStats(new InMemoryStatsReceiver)
     ),
-    new ChannelStatsHandler(new ChannelStatsHandler.SharedChannelStats(new InMemoryStatsReceiver)),
+    new ChannelStatsHandler(
+      new SharedChannelStats(Stack.Params.empty + Stats(new InMemoryStatsReceiver))
+    ),
     new SimpleChannelSnooper("test"),
     new ByteBufSnooper("test")
   )

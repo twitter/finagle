@@ -37,14 +37,15 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(params: St
     else
       None
 
-  private[this] val (sharedChannelRequestStats, sharedChannelStats) =
-    if (!stats.isNull)
-      (
-        Some(new ChannelRequestStatsHandler.SharedChannelRequestStats(stats)),
-        Some(new ChannelStatsHandler.SharedChannelStats(stats))
-      )
-    else
-      (None, None)
+  private[this] val sharedChannelRequestStats =
+    if (!stats.isNull) Some(new ChannelRequestStatsHandler.SharedChannelRequestStats(stats))
+    else None
+
+  private[this] val sharedChannelStats =
+    if (!stats.isNull) {
+      val sharedChannelStatsFn = params[SharedChannelStats.Param].fn
+      Some(sharedChannelStatsFn(params))
+    } else None
 
   private[this] val exceptionHandler = new ChannelExceptionHandler(stats, logger)
 
