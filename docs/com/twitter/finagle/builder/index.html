@@ -196,10 +196,6 @@ resources for using Finagle.
                         <a class="class" href="IncompleteSpecification.html" title="Used by builder to throw exceptions if the specification is incomplete."></a>
                         <a href="IncompleteSpecification.html" title="Used by builder to throw exceptions if the specification is incomplete.">IncompleteSpecification</a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="trait" href="Server.html" title="A listening server."></a>
-                        <a href="Server.html" title="A listening server.">Server</a>
-                      </li><li class="current-entities indented4">
                         <a class="object" href="ServerBuilder$.html" title="Factory for com.twitter.finagle.builder.ServerBuilder instances"></a>
                         <a class="class" href="ServerBuilder.html" title="A handy Builder for constructing Servers (i.e., binding Services to a port)."></a>
                         <a href="ServerBuilder.html" title="A handy Builder for constructing Servers (i.e., binding Services to a port).">ServerBuilder</a>
@@ -1122,24 +1118,6 @@ client-construction APIs.</p></span></dd></dl></div>
       
       <p class="shortcomment cmt">Used by builder to throw exceptions if the specification is incomplete.</p><div class="fullcomment"><div class="comment cmt"><p>Used by builder to throw exceptions if the specification is incomplete.</p><pre><span class="kw">if</span> (!_codec.isDefined)
   <span class="kw">throw</span> <span class="kw">new</span> IncompleteSpecification(<span class="lit">"No codec was specified"</span>)</pre></div></div>
-    </li><li name="com.twitter.finagle.builder.Server" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="ServerextendsListeningServer"></a><a id="Server:Server"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/index.html#ServerextendsListeningServer" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a title="A listening server." href="Server.html"><span class="name">Server</span></a><span class="result"> extends <a href="../ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">A listening server.</p><div class="fullcomment"><div class="comment cmt"><p>A listening server. This is for compatibility with older code that is
-using builder.Server. New code should use the ListeningServer trait.
-</p></div></div>
     </li><li name="com.twitter.finagle.builder.ServerBuilder" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]extendsAnyRef"></a><a id="ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]:ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]"></a>
       <span class="permalink">

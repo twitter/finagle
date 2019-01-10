@@ -1316,10 +1316,10 @@ The default max size is 16Kb.
 (default: <span class="extype" name="com.twitter.finagle.util.DefaultMonitor">com.twitter.finagle.util.DefaultMonitor</span>).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <a href="https://twitter.github.io/util/docs/com/twitter/util/Monitor.html" class="extype" name="com.twitter.util.Monitor">util.Monitor</a>
 (default: <span class="extype" name="com.twitter.finagle.util.DefaultMonitor">com.twitter.finagle.util.DefaultMonitor</span>).
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftMux.Client">Client</a> → <a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.mux.OpportunisticTlsParams#withNoOpportunisticTls" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="withNoOpportunisticTls:A"></a><a id="withNoOpportunisticTls:Client"></a>
+    </li><li name="com.twitter.finagle.ThriftMux.Client#withNoOpportunisticTls" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withNoOpportunisticTls:com.twitter.finagle.ThriftMux.Client"></a><a id="withNoOpportunisticTls:Client"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/ThriftMux$$Client.html#withNoOpportunisticTls:A" title="Permalink">
+      <a href="../../../com/twitter/finagle/ThriftMux$$Client.html#withNoOpportunisticTls:com.twitter.finagle.ThriftMux.Client" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1333,11 +1333,11 @@ The default max size is 16Kb.
       
       <p class="shortcomment cmt">Disables opportunistic TLS.</p><div class="fullcomment"><div class="comment cmt"><p>Disables opportunistic TLS.</p><p>If this is still TLS configured, it will speak mux over TLS.  To instead
 configure this to be <code>Off</code>, use <code>withOpportunisticTls(OpportunisticTls.Off)</code>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="mux/OpportunisticTlsParams.html" class="extype" name="com.twitter.finagle.mux.OpportunisticTlsParams">OpportunisticTlsParams</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.mux.OpportunisticTlsParams#withOpportunisticTls" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="withOpportunisticTls(level:com.twitter.finagle.mux.transport.OpportunisticTls.Level):A"></a><a id="withOpportunisticTls(Level):Client"></a>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftMux.Client">Client</a> → <a href="mux/OpportunisticTlsParams.html" class="extype" name="com.twitter.finagle.mux.OpportunisticTlsParams">OpportunisticTlsParams</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.ThriftMux.Client#withOpportunisticTls" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withOpportunisticTls(level:com.twitter.finagle.mux.transport.OpportunisticTls.Level):com.twitter.finagle.ThriftMux.Client"></a><a id="withOpportunisticTls(Level):Client"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/ThriftMux$$Client.html#withOpportunisticTls(level:com.twitter.finagle.mux.transport.OpportunisticTls.Level):A" title="Permalink">
+      <a href="../../../com/twitter/finagle/ThriftMux$$Client.html#withOpportunisticTls(level:com.twitter.finagle.mux.transport.OpportunisticTls.Level):com.twitter.finagle.ThriftMux.Client" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1355,7 +1355,7 @@ Desired, which indicates it may speak TLS, but may also not speak TLS,
 and Required, which indicates it must speak TLS.</p><p>Peers that are configured with level <code>Required</code> cannot speak to peers that are
 configured with level <code>Off</code>.</p><p>Note that opportunistic TLS is negotiated in a cleartext handshake, and is
 incompatible with mux over TLS.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="mux/OpportunisticTlsParams.html" class="extype" name="com.twitter.finagle.mux.OpportunisticTlsParams">OpportunisticTlsParams</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftMux.Client">Client</a> → <a href="mux/OpportunisticTlsParams.html" class="extype" name="com.twitter.finagle.mux.OpportunisticTlsParams">OpportunisticTlsParams</a></dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftMux.Client#withParams" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withParams(ps:com.twitter.finagle.Stack.Params):com.twitter.finagle.ThriftMux.Client"></a><a id="withParams(Params):Client"></a>
       <span class="permalink">
@@ -1887,25 +1887,6 @@ either <code>ServiceName$FutureIface</code> or <code>ServiceName[Future]</code>.
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-11-13)</i> Use com.twitter.finagle.ThriftRichClient#servicePerEndpoint[ServicePerEndpoint]</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.ThriftMux.Client#protocolFactory" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="protocolFactory:org.apache.thrift.protocol.TProtocolFactory"></a><a id="protocolFactory:TProtocolFactory"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/ThriftMux$$Client.html#protocolFactory:org.apache.thrift.protocol.TProtocolFactory" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2017-08-16) Use clientParam.protocolFactory">protocolFactory</span><span class="result">: <span class="extype" name="org.apache.thrift.protocol.TProtocolFactory">TProtocolFactory</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftMux.Client">Client</a> → <a href="thrift/ThriftRichClient.html" class="extype" name="com.twitter.finagle.thrift.ThriftRichClient">ThriftRichClient</a></dd><dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-08-16)</i> Use clientParam.protocolFactory</p></dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftMux.Client#stats" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="stats:com.twitter.finagle.stats.StatsReceiver"></a><a id="stats:StatsReceiver"></a>
       <span class="permalink">

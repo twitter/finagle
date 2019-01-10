@@ -180,10 +180,6 @@ resources for using Finagle.
                         <a class="class" href="IncompleteSpecification.html" title="Used by builder to throw exceptions if the specification is incomplete."></a>
                         <a href="IncompleteSpecification.html" title="Used by builder to throw exceptions if the specification is incomplete.">IncompleteSpecification</a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="trait" href="Server.html" title="A listening server."></a>
-                        <a href="Server.html" title="A listening server.">Server</a>
-                      </li><li class="current-entities indented4">
                         <a class="object" href="ServerBuilder$.html" title="Factory for com.twitter.finagle.builder.ServerBuilder instances"></a>
                         <a class="class" href="" title="A handy Builder for constructing Servers (i.e., binding Services to a port)."></a>
                         <a href="" title="A handy Builder for constructing Servers (i.e., binding Services to a port).">ServerBuilder</a>
@@ -473,9 +469,9 @@ For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
 <span class="kw">val</span> service: Service[Req, Rep] = ???
 Http.server.serve(address, service)</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ServerBuilder#build" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="build(serviceFactory:com.twitter.finagle.ServiceFactory[Req,Rep])(implicitTHE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:com.twitter.finagle.builder.ServerConfigEvidence[HasCodec,HasBindTo,HasName]):com.twitter.finagle.builder.Server"></a><a id="build(ServiceFactory[Req,Rep])(ServerConfigEvidence[HasCodec,HasBindTo,HasName]):Server"></a>
+      <a id="build(serviceFactory:com.twitter.finagle.ServiceFactory[Req,Rep])(implicitTHE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:com.twitter.finagle.builder.ServerConfigEvidence[HasCodec,HasBindTo,HasName]):com.twitter.finagle.ListeningServer"></a><a id="build(ServiceFactory[Req,Rep])(ServerConfigEvidence[HasCodec,HasBindTo,HasName]):ListeningServer"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#build(serviceFactory:com.twitter.finagle.ServiceFactory[Req,Rep])(implicitTHE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:com.twitter.finagle.builder.ServerConfigEvidence[HasCodec,HasBindTo,HasName]):com.twitter.finagle.builder.Server" title="Permalink">
+      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#build(serviceFactory:com.twitter.finagle.ServiceFactory[Req,Rep])(implicitTHE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:com.twitter.finagle.builder.ServerConfigEvidence[HasCodec,HasBindTo,HasName]):com.twitter.finagle.ListeningServer" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -484,7 +480,7 @@ Http.server.serve(address, service)</pre></div></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">build</span><span class="params">(<span name="serviceFactory">serviceFactory: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Rep">Rep</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: <a href="ServerConfigEvidence.html" class="extype" name="com.twitter.finagle.builder.ServerConfigEvidence">ServerConfigEvidence</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.HasCodec">HasCodec</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.HasBindTo">HasBindTo</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.HasName">HasName</span>]</span>)</span><span class="result">: <a href="Server.html" class="extype" name="com.twitter.finagle.builder.Server">Server</a></span>
+        <span class="name">build</span><span class="params">(<span name="serviceFactory">serviceFactory: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Rep">Rep</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: <a href="ServerConfigEvidence.html" class="extype" name="com.twitter.finagle.builder.ServerConfigEvidence">ServerConfigEvidence</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.HasCodec">HasCodec</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.HasBindTo">HasBindTo</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.HasName">HasName</span>]</span>)</span><span class="result">: <a href="../ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
       
       <p class="shortcomment cmt">Construct the Server, given the provided ServiceFactory.</p><div class="fullcomment"><div class="comment cmt"><p>Construct the Server, given the provided ServiceFactory. This
@@ -492,9 +488,9 @@ is useful if the protocol is stateful (e.g., requires authentication
 or supports transactions).
 </p></div></div>
     </li><li name="com.twitter.finagle.builder.ServerBuilder#build" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="build(service:com.twitter.finagle.Service[Req,Rep])(implicitTHE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:com.twitter.finagle.builder.ServerConfigEvidence[HasCodec,HasBindTo,HasName]):com.twitter.finagle.builder.Server"></a><a id="build(Service[Req,Rep])(ServerConfigEvidence[HasCodec,HasBindTo,HasName]):Server"></a>
+      <a id="build(service:com.twitter.finagle.Service[Req,Rep])(implicitTHE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:com.twitter.finagle.builder.ServerConfigEvidence[HasCodec,HasBindTo,HasName]):com.twitter.finagle.ListeningServer"></a><a id="build(Service[Req,Rep])(ServerConfigEvidence[HasCodec,HasBindTo,HasName]):ListeningServer"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#build(service:com.twitter.finagle.Service[Req,Rep])(implicitTHE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:com.twitter.finagle.builder.ServerConfigEvidence[HasCodec,HasBindTo,HasName]):com.twitter.finagle.builder.Server" title="Permalink">
+      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#build(service:com.twitter.finagle.Service[Req,Rep])(implicitTHE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:com.twitter.finagle.builder.ServerConfigEvidence[HasCodec,HasBindTo,HasName]):com.twitter.finagle.ListeningServer" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -503,7 +499,7 @@ or supports transactions).
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">build</span><span class="params">(<span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Rep">Rep</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: <a href="ServerConfigEvidence.html" class="extype" name="com.twitter.finagle.builder.ServerConfigEvidence">ServerConfigEvidence</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.HasCodec">HasCodec</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.HasBindTo">HasBindTo</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.HasName">HasName</span>]</span>)</span><span class="result">: <a href="Server.html" class="extype" name="com.twitter.finagle.builder.Server">Server</a></span>
+        <span class="name">build</span><span class="params">(<span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Rep">Rep</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: <a href="ServerConfigEvidence.html" class="extype" name="com.twitter.finagle.builder.ServerConfigEvidence">ServerConfigEvidence</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.HasCodec">HasCodec</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.HasBindTo">HasBindTo</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.HasName">HasName</span>]</span>)</span><span class="result">: <a href="../ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
       
       <p class="shortcomment cmt">Construct the Server, given the provided Service.</p>
@@ -592,22 +588,6 @@ as an example).</p></dd></dl></div>
       <p class="shortcomment cmt">Configure the underlying <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Params</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Configure the underlying <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Params</a>.
 </p></div><dl class="paramcmts block"><dt class="param">param</dt><dd class="cmt"><p>Configures the server with a given <code>param</code>
 Java users may find it easier to use the <code>Tuple2</code> version below.</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ServerBuilder#copy" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="copy[Req1,Rep1,HasCodec1,HasBindTo1,HasName1](ps:com.twitter.finagle.Stack.Params,newServer:com.twitter.finagle.Stack.Params=&gt;com.twitter.finagle.Server[Req1,Rep1]):com.twitter.finagle.builder.ServerBuilder[Req1,Rep1,HasCodec1,HasBindTo1,HasName1]"></a><a id="copy[Req1,Rep1,HasCodec1,HasBindTo1,HasName1](Params,(Params)⇒finagle.Server[Req1,Rep1]):ServerBuilder[Req1,Rep1,HasCodec1,HasBindTo1,HasName1]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#copy[Req1,Rep1,HasCodec1,HasBindTo1,HasName1](ps:com.twitter.finagle.Stack.Params,newServer:com.twitter.finagle.Stack.Params=&gt;com.twitter.finagle.Server[Req1,Rep1]):com.twitter.finagle.builder.ServerBuilder[Req1,Rep1,HasCodec1,HasBindTo1,HasName1]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">copy</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>, <span name="HasCodec1">HasCodec1</span>, <span name="HasBindTo1">HasBindTo1</span>, <span name="HasName1">HasName1</span>]</span><span class="params">(<span name="ps">ps: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>, <span name="newServer">newServer: (<a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ <a href="../Server.html" class="extype" name="com.twitter.finagle.Server">finagle.Server</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.copy.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.copy.Rep1">Rep1</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ServerBuilder">ServerBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.copy.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.copy.Rep1">Rep1</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.copy.HasCodec1">HasCodec1</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.copy.HasBindTo1">HasBindTo1</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.copy.HasName1">HasName1</span>]</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ServerBuilder#daemon" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="daemon(daemonize:Boolean):ServerBuilder.this.This"></a><a id="daemon(Boolean):This"></a>
       <span class="permalink">
@@ -995,13 +975,13 @@ Http.server.withLabel(<span class="lit">"my_server"</span>)</pre></div></div>
     </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">params</span><span class="result">: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>
       </span>
       
-      
+      <p class="shortcomment cmt">The underlying <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Params</a> used for configuration.</p>
     </li><li name="com.twitter.finagle.builder.ServerBuilder#readTimeout" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readTimeout(howlong:com.twitter.util.Duration):ServerBuilder.this.This"></a><a id="readTimeout(Duration):This"></a>
       <span class="permalink">
@@ -1340,9 +1320,9 @@ For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
 
 Http.server.configured(Listener.TrafficClass(value))</pre></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="Listener.TrafficClass">Listener.TrafficClass</span></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ServerBuilder#unsafeBuild" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="unsafeBuild(service:com.twitter.finagle.Service[Req,Rep]):com.twitter.finagle.builder.Server"></a><a id="unsafeBuild(Service[Req,Rep]):Server"></a>
+      <a id="unsafeBuild(service:com.twitter.finagle.Service[Req,Rep]):com.twitter.finagle.ListeningServer"></a><a id="unsafeBuild(Service[Req,Rep]):ListeningServer"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#unsafeBuild(service:com.twitter.finagle.Service[Req,Rep]):com.twitter.finagle.builder.Server" title="Permalink">
+      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#unsafeBuild(service:com.twitter.finagle.Service[Req,Rep]):com.twitter.finagle.ListeningServer" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1351,7 +1331,7 @@ Http.server.configured(Listener.TrafficClass(value))</pre></div><dl class="attri
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">unsafeBuild</span><span class="params">(<span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Rep">Rep</span>]</span>)</span><span class="result">: <a href="Server.html" class="extype" name="com.twitter.finagle.builder.Server">Server</a></span>
+        <span class="name">unsafeBuild</span><span class="params">(<span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Rep">Rep</span>]</span>)</span><span class="result">: <a href="../ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
       
       <p class="shortcomment cmt">Construct a Service, with runtime checks for builder
@@ -1452,9 +1432,9 @@ Http.server.withTransport.writeTimeout(howlong)</pre></div></div>
         <div class="values members">
               <h3>Deprecated Value Members</h3>
               <ol><li name="com.twitter.finagle.builder.ServerBuilder#build" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="build(serviceFactory:com.twitter.finagle.ServiceFactory[Req,Rep],THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:ServerBuilder.this.ThisConfig=:=ServerBuilder.this.FullySpecifiedConfig):com.twitter.finagle.builder.Server"></a><a id="build(ServiceFactory[Req,Rep],=:=[ThisConfig,FullySpecifiedConfig]):Server"></a>
+      <a id="build(serviceFactory:com.twitter.finagle.ServiceFactory[Req,Rep],THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:ServerBuilder.this.ThisConfig=:=ServerBuilder.this.FullySpecifiedConfig):com.twitter.finagle.ListeningServer"></a><a id="build(ServiceFactory[Req,Rep],=:=[ThisConfig,FullySpecifiedConfig]):ListeningServer"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#build(serviceFactory:com.twitter.finagle.ServiceFactory[Req,Rep],THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:ServerBuilder.this.ThisConfig=:=ServerBuilder.this.FullySpecifiedConfig):com.twitter.finagle.builder.Server" title="Permalink">
+      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#build(serviceFactory:com.twitter.finagle.ServiceFactory[Req,Rep],THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:ServerBuilder.this.ThisConfig=:=ServerBuilder.this.FullySpecifiedConfig):com.twitter.finagle.ListeningServer" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1463,7 +1443,7 @@ Http.server.withTransport.writeTimeout(howlong)</pre></div></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 5.0.1) Used for ABI compat">build</span><span class="params">(<span name="serviceFactory">serviceFactory: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Rep">Rep</span>]</span>, <span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: <span class="extype" name="scala.Predef.=:=">=:=</span>[<a href="#ThisConfig=com.twitter.finagle.builder.ServerConfig[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.ThisConfig">ThisConfig</a>, <a href="#FullySpecifiedConfig=com.twitter.finagle.builder.ServerConfig.FullySpecified[Req,Rep]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.FullySpecifiedConfig">FullySpecifiedConfig</a>]</span>)</span><span class="result">: <a href="Server.html" class="extype" name="com.twitter.finagle.builder.Server">Server</a></span>
+        <span class="name deprecated" title="Deprecated: (Since version 5.0.1) Used for ABI compat">build</span><span class="params">(<span name="serviceFactory">serviceFactory: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Rep">Rep</span>]</span>, <span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: <span class="extype" name="scala.Predef.=:=">=:=</span>[<a href="#ThisConfig=com.twitter.finagle.builder.ServerConfig[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.ThisConfig">ThisConfig</a>, <a href="#FullySpecifiedConfig=com.twitter.finagle.builder.ServerConfig.FullySpecified[Req,Rep]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.FullySpecifiedConfig">FullySpecifiedConfig</a>]</span>)</span><span class="result">: <a href="../ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
@@ -1471,9 +1451,9 @@ Http.server.withTransport.writeTimeout(howlong)</pre></div></div>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.0.1)</i> Used for ABI compat</p></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ServerBuilder#build" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="build(serviceFactory:com.twitter.finagle.ClientConnection=&gt;com.twitter.finagle.Service[Req,Rep])(implicitTHE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:ServerBuilder.this.ThisConfig=:=ServerBuilder.this.FullySpecifiedConfig):com.twitter.finagle.builder.Server"></a><a id="build((ClientConnection)⇒Service[Req,Rep])(=:=[ThisConfig,FullySpecifiedConfig]):Server"></a>
+      <a id="build(serviceFactory:com.twitter.finagle.ClientConnection=&gt;com.twitter.finagle.Service[Req,Rep])(implicitTHE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:ServerBuilder.this.ThisConfig=:=ServerBuilder.this.FullySpecifiedConfig):com.twitter.finagle.ListeningServer"></a><a id="build((ClientConnection)⇒Service[Req,Rep])(=:=[ThisConfig,FullySpecifiedConfig]):ListeningServer"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#build(serviceFactory:com.twitter.finagle.ClientConnection=&gt;com.twitter.finagle.Service[Req,Rep])(implicitTHE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:ServerBuilder.this.ThisConfig=:=ServerBuilder.this.FullySpecifiedConfig):com.twitter.finagle.builder.Server" title="Permalink">
+      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#build(serviceFactory:com.twitter.finagle.ClientConnection=&gt;com.twitter.finagle.Service[Req,Rep])(implicitTHE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:ServerBuilder.this.ThisConfig=:=ServerBuilder.this.FullySpecifiedConfig):com.twitter.finagle.ListeningServer" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1482,7 +1462,7 @@ Http.server.withTransport.writeTimeout(howlong)</pre></div></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 5.0.1) Use the ServiceFactory variant instead">build</span><span class="params">(<span name="serviceFactory">serviceFactory: (<a href="../ClientConnection.html" class="extype" name="com.twitter.finagle.ClientConnection">ClientConnection</a>) ⇒ <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Rep">Rep</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: <span class="extype" name="scala.Predef.=:=">=:=</span>[<a href="#ThisConfig=com.twitter.finagle.builder.ServerConfig[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.ThisConfig">ThisConfig</a>, <a href="#FullySpecifiedConfig=com.twitter.finagle.builder.ServerConfig.FullySpecified[Req,Rep]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.FullySpecifiedConfig">FullySpecifiedConfig</a>]</span>)</span><span class="result">: <a href="Server.html" class="extype" name="com.twitter.finagle.builder.Server">Server</a></span>
+        <span class="name deprecated" title="Deprecated: (Since version 5.0.1) Use the ServiceFactory variant instead">build</span><span class="params">(<span name="serviceFactory">serviceFactory: (<a href="../ClientConnection.html" class="extype" name="com.twitter.finagle.ClientConnection">ClientConnection</a>) ⇒ <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Rep">Rep</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: <span class="extype" name="scala.Predef.=:=">=:=</span>[<a href="#ThisConfig=com.twitter.finagle.builder.ServerConfig[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.ThisConfig">ThisConfig</a>, <a href="#FullySpecifiedConfig=com.twitter.finagle.builder.ServerConfig.FullySpecified[Req,Rep]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.FullySpecifiedConfig">FullySpecifiedConfig</a>]</span>)</span><span class="result">: <a href="../ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
       
       <p class="shortcomment cmt">Construct the Server, given the provided ServiceFactory.</p><div class="fullcomment"><div class="comment cmt"><p>Construct the Server, given the provided ServiceFactory. This
@@ -1493,9 +1473,9 @@ or supports transactions).
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.0.1)</i> Use the ServiceFactory variant instead</p></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ServerBuilder#build" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="build(serviceFactory:()=&gt;com.twitter.finagle.Service[Req,Rep])(implicitTHE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:ServerBuilder.this.ThisConfig=:=ServerBuilder.this.FullySpecifiedConfig):com.twitter.finagle.builder.Server"></a><a id="build(()⇒Service[Req,Rep])(=:=[ThisConfig,FullySpecifiedConfig]):Server"></a>
+      <a id="build(serviceFactory:()=&gt;com.twitter.finagle.Service[Req,Rep])(implicitTHE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:ServerBuilder.this.ThisConfig=:=ServerBuilder.this.FullySpecifiedConfig):com.twitter.finagle.ListeningServer"></a><a id="build(()⇒Service[Req,Rep])(=:=[ThisConfig,FullySpecifiedConfig]):ListeningServer"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#build(serviceFactory:()=&gt;com.twitter.finagle.Service[Req,Rep])(implicitTHE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:ServerBuilder.this.ThisConfig=:=ServerBuilder.this.FullySpecifiedConfig):com.twitter.finagle.builder.Server" title="Permalink">
+      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#build(serviceFactory:()=&gt;com.twitter.finagle.Service[Req,Rep])(implicitTHE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:ServerBuilder.this.ThisConfig=:=ServerBuilder.this.FullySpecifiedConfig):com.twitter.finagle.ListeningServer" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1504,7 +1484,7 @@ or supports transactions).
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 5.0.1) Use the ServiceFactory variant instead">build</span><span class="params">(<span name="serviceFactory">serviceFactory: () ⇒ <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Rep">Rep</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: <span class="extype" name="scala.Predef.=:=">=:=</span>[<a href="#ThisConfig=com.twitter.finagle.builder.ServerConfig[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.ThisConfig">ThisConfig</a>, <a href="#FullySpecifiedConfig=com.twitter.finagle.builder.ServerConfig.FullySpecified[Req,Rep]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.FullySpecifiedConfig">FullySpecifiedConfig</a>]</span>)</span><span class="result">: <a href="Server.html" class="extype" name="com.twitter.finagle.builder.Server">Server</a></span>
+        <span class="name deprecated" title="Deprecated: (Since version 5.0.1) Use the ServiceFactory variant instead">build</span><span class="params">(<span name="serviceFactory">serviceFactory: () ⇒ <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Rep">Rep</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: <span class="extype" name="scala.Predef.=:=">=:=</span>[<a href="#ThisConfig=com.twitter.finagle.builder.ServerConfig[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.ThisConfig">ThisConfig</a>, <a href="#FullySpecifiedConfig=com.twitter.finagle.builder.ServerConfig.FullySpecified[Req,Rep]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.FullySpecifiedConfig">FullySpecifiedConfig</a>]</span>)</span><span class="result">: <a href="../ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
       
       <p class="shortcomment cmt">Construct the Server, given the provided Service factory.</p><div class="fullcomment"><div class="comment cmt"><p>Construct the Server, given the provided Service factory.
@@ -1513,9 +1493,9 @@ or supports transactions).
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.0.1)</i> Use the ServiceFactory variant instead</p></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ServerBuilder#build" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="build(service:com.twitter.finagle.Service[Req,Rep],THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:ServerBuilder.this.ThisConfig=:=ServerBuilder.this.FullySpecifiedConfig):com.twitter.finagle.builder.Server"></a><a id="build(Service[Req,Rep],=:=[ThisConfig,FullySpecifiedConfig]):Server"></a>
+      <a id="build(service:com.twitter.finagle.Service[Req,Rep],THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:ServerBuilder.this.ThisConfig=:=ServerBuilder.this.FullySpecifiedConfig):com.twitter.finagle.ListeningServer"></a><a id="build(Service[Req,Rep],=:=[ThisConfig,FullySpecifiedConfig]):ListeningServer"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#build(service:com.twitter.finagle.Service[Req,Rep],THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:ServerBuilder.this.ThisConfig=:=ServerBuilder.this.FullySpecifiedConfig):com.twitter.finagle.builder.Server" title="Permalink">
+      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#build(service:com.twitter.finagle.Service[Req,Rep],THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION:ServerBuilder.this.ThisConfig=:=ServerBuilder.this.FullySpecifiedConfig):com.twitter.finagle.ListeningServer" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1524,39 +1504,13 @@ or supports transactions).
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 5.0.1) Used for ABI compat">build</span><span class="params">(<span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Rep">Rep</span>]</span>, <span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: <span class="extype" name="scala.Predef.=:=">=:=</span>[<a href="#ThisConfig=com.twitter.finagle.builder.ServerConfig[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.ThisConfig">ThisConfig</a>, <a href="#FullySpecifiedConfig=com.twitter.finagle.builder.ServerConfig.FullySpecified[Req,Rep]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.FullySpecifiedConfig">FullySpecifiedConfig</a>]</span>)</span><span class="result">: <a href="Server.html" class="extype" name="com.twitter.finagle.builder.Server">Server</a></span>
+        <span class="name deprecated" title="Deprecated: (Since version 5.0.1) Used for ABI compat">build</span><span class="params">(<span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.Rep">Rep</span>]</span>, <span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: <span class="extype" name="scala.Predef.=:=">=:=</span>[<a href="#ThisConfig=com.twitter.finagle.builder.ServerConfig[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.ThisConfig">ThisConfig</a>, <a href="#FullySpecifiedConfig=com.twitter.finagle.builder.ServerConfig.FullySpecified[Req,Rep]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.FullySpecifiedConfig">FullySpecifiedConfig</a>]</span>)</span><span class="result">: <a href="../ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.0.1)</i> Used for ABI compat</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ServerBuilder#stack" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="stack[Req1,Rep1](mk:com.twitter.finagle.Stack.Params=&gt;com.twitter.finagle.Server[Req1,Rep1]):com.twitter.finagle.builder.ServerBuilder[Req1,Rep1,com.twitter.finagle.builder.ServerConfig.Yes,HasBindTo,HasName]"></a><a id="stack[Req1,Rep1]((Params)⇒finagle.Server[Req1,Rep1]):ServerBuilder[Req1,Rep1,Yes,HasBindTo,HasName]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#stack[Req1,Rep1](mk:com.twitter.finagle.Stack.Params=&gt;com.twitter.finagle.Server[Req1,Rep1]):com.twitter.finagle.builder.ServerBuilder[Req1,Rep1,com.twitter.finagle.builder.ServerConfig.Yes,HasBindTo,HasName]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use stack(server: StackBasedServer)">stack</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span><span class="params">(<span name="mk">mk: (<a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ <a href="../Server.html" class="extype" name="com.twitter.finagle.Server">finagle.Server</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.stack.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.stack.Rep1">Rep1</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ServerBuilder">ServerBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.stack.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.stack.Rep1">Rep1</span>, <a href="ServerConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ServerConfig.Yes">Yes</a>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.HasBindTo">HasBindTo</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.HasName">HasName</span>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">Overrides the stack and <a href="../Server.html" class="extype" name="com.twitter.finagle.Server">com.twitter.finagle.Server</a> that will be used
-by this builder.</p><div class="fullcomment"><div class="comment cmt"><p>Overrides the stack and <a href="../Server.html" class="extype" name="com.twitter.finagle.Server">com.twitter.finagle.Server</a> that will be used
-by this builder.
-</p></div><dl class="paramcmts block"><dt class="param">mk</dt><dd class="cmt"><p>A function that materializes a <code>Server</code> from a set of <code>Params</code>.
-<code>mk</code> is passed the state of configuration when <code>build</code> is called. There is
-no guarantee that all the builder parameters will be used by the server
-created by <code>mk</code>; it is up to the discretion of the server and protocol
-implementation.</p></dd></dl><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> Use stack(server: StackBasedServer)</p></dd></dl></div>
     </li></ol>
             </div>
         </div>

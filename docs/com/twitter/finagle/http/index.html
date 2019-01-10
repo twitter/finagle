@@ -1512,7 +1512,7 @@ distribution while the <code>POST</code> is not idempotent and has a wide latenc
 distribution. If users want different configurations, without <code>MethodBuilder</code>
 they must create separate Finagle clients for each grouping. While long-lived
 clients in Finagle are not expensive, they are not free. They create
-duplicate metrics and waste heap, file descriptors, and CPU.</p><h3> Example </h3><p>A client that has timeouts and retries on a 418 status code.</p><pre><span class="kw">import</span> com.twitter.conversions.time._
+duplicate metrics and waste heap, file descriptors, and CPU.</p><h3> Example </h3><p>A client that has timeouts and retries on a 418 status code.</p><pre><span class="kw">import</span> com.twitter.conversions.DurationOps._
 <span class="kw">import</span> com.twitter.finagle.Http
 <span class="kw">import</span> com.twitter.finagle.service.{ReqRep, ResponseClass}
 <span class="kw">import</span> com.twitter.util.Return
@@ -1525,7 +1525,7 @@ client.methodBuilder(<span class="lit">"inet!example.com:80"</span>)
     <span class="kw">case</span> ReqRep(_, Return(rep)) <span class="kw">if</span> rep.statusCode == <span class="num">418</span> <span class="kw">=&gt;</span> ResponseClass.RetryableFailure
   }
   .newService(<span class="lit">"an_endpoint_name"</span>)</pre><h3> Timeouts </h3><p>Defaults to using the StackClient's configuration.</p><p>An example of setting a per-request timeout of 50 milliseconds and a total
-timeout of 100 milliseconds:</p><pre><span class="kw">import</span> com.twitter.conversions.time._
+timeout of 100 milliseconds:</p><pre><span class="kw">import</span> com.twitter.conversions.DurationOps._
 <span class="kw">import</span> com.twitter.finagle.Http
 <span class="kw">import</span> com.twitter.finagle.http.MethodBuilder
 

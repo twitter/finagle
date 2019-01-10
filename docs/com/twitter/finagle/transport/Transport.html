@@ -401,46 +401,6 @@ status definitions.</p>
       
       <p class="shortcomment cmt">Write <code>req</code> to this transport; the returned future
 acknowledges write completion.</p>
-    </li><li name="com.twitter.finagle.transport.Transport#localAddress" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="localAddress:java.net.SocketAddress"></a><a id="localAddress:SocketAddress"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/transport/Transport.html#localAddress:java.net.SocketAddress" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2017-08-21) Please use Transport.context.localAddress instead">localAddress</span><span class="result">: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">The locally bound address of this transport.</p><div class="fullcomment"><div class="comment cmt"><p>The locally bound address of this transport.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-08-21)</i> Please use Transport.context.localAddress instead</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.transport.Transport#remoteAddress" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="remoteAddress:java.net.SocketAddress"></a><a id="remoteAddress:SocketAddress"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/transport/Transport.html#remoteAddress:java.net.SocketAddress" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2017-08-21) Please use Transport.context.remoteAddress instead">remoteAddress</span><span class="result">: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">The remote address to which the transport is connected.</p><div class="fullcomment"><div class="comment cmt"><p>The remote address to which the transport is connected.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-08-21)</i> Please use Transport.context.remoteAddress instead</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -853,7 +813,50 @@ in <code>f</code> and <code>g</code> are lifted to a <a href="https://twitter.gi
 
         
 
-        
+        <div class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="com.twitter.finagle.transport.Transport#localAddress" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="localAddress:java.net.SocketAddress"></a><a id="localAddress:SocketAddress"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/transport/Transport.html#localAddress:java.net.SocketAddress" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2017-08-21) Please use Transport.context.localAddress instead">localAddress</span><span class="result">: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">The locally bound address of this transport.</p><div class="fullcomment"><div class="comment cmt"><p>The locally bound address of this transport.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-08-21)</i> Please use Transport.context.localAddress instead</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.transport.Transport#remoteAddress" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="remoteAddress:java.net.SocketAddress"></a><a id="remoteAddress:SocketAddress"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/transport/Transport.html#remoteAddress:java.net.SocketAddress" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2017-08-21) Please use Transport.context.remoteAddress instead">remoteAddress</span><span class="result">: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">The remote address to which the transport is connected.</p><div class="fullcomment"><div class="comment cmt"><p>The remote address to which the transport is connected.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-08-21)</i> Please use Transport.context.remoteAddress instead</p></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">

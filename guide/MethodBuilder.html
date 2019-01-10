@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>MethodBuilder &#8212; Finagle 18.12.0 documentation</title>
+    <title>MethodBuilder &#8212; Finagle 19.1.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '18.12.0',
+        VERSION:     '19.1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 18.12.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.1.0 documentation" href="index.html" />
    
   
   <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
@@ -92,8 +92,8 @@ file descriptors, and CPU.</p>
 <p><code class="docutils literal"><span class="pre">MethodBuilder</span></code> can also be used without scoping to a <code class="docutils literal"><span class="pre">methodName</span></code>, allowing users to wrap
 an entire client with <code class="docutils literal"><span class="pre">MethodBuilder</span></code>, as with <code class="docutils literal"><span class="pre">totalService</span></code> in the example below.</p>
 <p id="mb-example-http">Turning the example into code, first in Scala:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.percent._</span>
-<span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.PercentOps._</span>
+<span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="n">http</span><span class="o">,</span> <span class="nc">Http</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">ReqRep</span><span class="o">,</span> <span class="nc">ResponseClass</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.Return</span>
@@ -223,7 +223,7 @@ latencies to come in towards the p99 latency. For <cite>0.05</cite>, those laten
 towards your p95 latency. You should also ensure that your backend can tolerate the increased load.</p>
 <p>Here&#8217;s an example of how to send backup requests for one endpoint
 and disable them for another, first in Scala:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.percent._</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.PercentOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="n">http</span><span class="o">,</span> <span class="nc">Http</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
 
 <span class="k">val</span> <span class="n">builder</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">methodBuilder</span><span class="o">(</span><span class="s">&quot;inet!localhost:8080&quot;</span><span class="o">)</span>
@@ -316,7 +316,7 @@ retry budget was exhausted, preventing a backup from being sent. Present only if
 configured.</li>
 </ul>
 <p>For example:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.percent._</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.PercentOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 
 <span class="k">val</span> <span class="n">builder</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
@@ -358,7 +358,7 @@ clients to talk to different physical locations.</p>
 <p>Because <code class="docutils literal"><span class="pre">MethodBuilder</span></code> is immutable, its methods chain together, and create
 new instances backed by the original underlying client. This allows for common
 customizations to be shared across endpoints:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="n">http</span><span class="o">,</span> <span class="nc">Http</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">ReqRep</span><span class="o">,</span> <span class="nc">ResponseClass</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.Return</span>
@@ -462,7 +462,7 @@ Service-per-method, <code class="docutils literal"><span class="pre">ServicePerE
 <p class="last">Scrooge does not yet generate <code class="docutils literal"><span class="pre">ServicePerEndpoint</span></code> for Java users,
 so this is limited to Scala.</p>
 </div>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Service</span><span class="o">,</span> <span class="nc">ThriftMux</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.example.graph._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">ReqRep</span><span class="o">,</span> <span class="nc">ResponseClass</span><span class="o">}</span>
@@ -498,7 +498,7 @@ so this is limited to Scala.</p>
 <p>If you are working with code that prefers Scrooge&#8217;s <code class="docutils literal"><span class="pre">MethodPerEndpoint</span></code>
 or <code class="docutils literal"><span class="pre">FutureIface</span></code> you can convert from a <code class="docutils literal"><span class="pre">ServicePerEndpoint</span></code> by wrapping it
 with a <code class="docutils literal"><span class="pre">MethodPerEndpoint</span></code>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Filter</span><span class="o">,</span> <span class="nc">ThriftMux</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.example.graph._</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
@@ -595,7 +595,7 @@ both the initial attempt and the retry.</p>
       </div>
       <div class="clearer"></div>
     </div>
-  <div class="footer">&copy; Copyright 2018 Twitter, Inc.</div>
+  <div class="footer">&copy; Copyright 2019 Twitter, Inc.</div>
   
   </body>
 </html>

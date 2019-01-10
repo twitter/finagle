@@ -235,7 +235,7 @@ service SomeService {
     <span class="num">1</span>: AnException ex1,
   )
 }</pre><p>This gives you a <code>Service</code> that has timeouts and retries on
-<code>AnException</code> when the <code>errorCode</code> is <code>0</code>:</p><pre><span class="kw">import</span> com.twitter.conversions.time._
+<code>AnException</code> when the <code>errorCode</code> is <code>0</code>:</p><pre><span class="kw">import</span> com.twitter.conversions.DurationOps._
 <span class="kw">import</span> com.twitter.finagle.ThriftMux
 <span class="kw">import</span> com.twitter.finagle.service.{ReqRep, ResponseClass}
 <span class="kw">import</span> com.twitter.util.Throw
@@ -251,7 +251,7 @@ service SomeService {
     }
     .newServiceIface(<span class="lit">"the_method"</span>)
     .theMethod</pre><h3> Timeouts </h3><p>Defaults to using the StackClient's configuration.</p><p>An example of setting a per-request timeout of 50 milliseconds and a total
-timeout of 100 milliseconds:</p><pre><span class="kw">import</span> com.twitter.conversions.time._
+timeout of 100 milliseconds:</p><pre><span class="kw">import</span> com.twitter.conversions.DurationOps._
 <span class="kw">import</span> com.twitter.finagle.thriftmux.MethodBuilder
 
 <span class="kw">val</span> builder: MethodBuilder = ???
@@ -884,7 +884,7 @@ logging unsuccessful requests at debug level.
                   request will be retried. This is often a
                   <code>ResponseClass.RetryableFailure</code>.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thriftmux.MethodBuilder">MethodBuilder</a> → MethodBuilderScaladoc</dd><div class="block">Example:
                <ol><li class="cmt"><p>
-For example, retrying on a 418 status code:</p><pre><span class="kw">import</span> com.twitter.conversions.time._
+For example, retrying on a 418 status code:</p><pre><span class="kw">import</span> com.twitter.conversions.DurationOps._
 <span class="kw">import</span> com.twitter.finagle.http.Http
 <span class="kw">import</span> com.twitter.finagle.service.{ReqRep, ResponseClass}
 <span class="kw">import</span> com.twitter.util.Return
@@ -924,7 +924,7 @@ which is typically set via
                If it is not finite (e.g. <code>Duration.Top</code>),
                no method specific timeout will be applied.</p></dd><dt>returns</dt><dd class="cmt"><p>a new instance with all other settings copied</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thriftmux.MethodBuilder">MethodBuilder</a> → MethodBuilderScaladoc</dd><div class="block">Example:
                <ol><li class="cmt"><p>
-For example, a per-request timeout of 50 milliseconds:</p><pre><span class="kw">import</span> com.twitter.conversions.time._
+For example, a per-request timeout of 50 milliseconds:</p><pre><span class="kw">import</span> com.twitter.conversions.DurationOps._
 <span class="kw">import</span> com.twitter.finagle.http.Http
 <span class="kw">import</span> com.twitter.util.Duration
 <span class="kw">import</span> com.twitter.util.tunable.Tunable
@@ -962,7 +962,7 @@ which is typically set via
                If it is not finite (e.g. <code>Duration.Top</code>),
                no method specific timeout will be applied.</p></dd><dt>returns</dt><dd class="cmt"><p>a new instance with all other settings copied</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thriftmux.MethodBuilder">MethodBuilder</a> → MethodBuilderScaladoc</dd><div class="block">Example:
                <ol><li class="cmt"><p>
-For example, a per-request timeout of 50 milliseconds:</p><pre><span class="kw">import</span> com.twitter.conversions.time._
+For example, a per-request timeout of 50 milliseconds:</p><pre><span class="kw">import</span> com.twitter.conversions.DurationOps._
 <span class="kw">import</span> com.twitter.finagle.http.Http
 <span class="kw">import</span> com.twitter.util.Duration
 
@@ -995,7 +995,7 @@ will be satisfied with a <a href="../GlobalRequestTimeoutException.html" class="
                If it is not finite (e.g. <code>Duration.Top</code>),
                no method specific timeout will be applied.</p></dd><dt>returns</dt><dd class="cmt"><p>a new instance with all other settings copied</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thriftmux.MethodBuilder">MethodBuilder</a> → MethodBuilderScaladoc</dd><div class="block">Example:
                <ol><li class="cmt"><p>
-For example, a total timeout of 200 milliseconds:</p><pre><span class="kw">import</span> com.twitter.conversions.time._
+For example, a total timeout of 200 milliseconds:</p><pre><span class="kw">import</span> com.twitter.conversions.DurationOps._
 <span class="kw">import</span> com.twitter.finagle.http.Http
 <span class="kw">import</span> com.twitter.util.Duration
 <span class="kw">import</span> com.twitter.util.tunable.Tunable
@@ -1030,7 +1030,7 @@ will be satisfied with a <a href="../GlobalRequestTimeoutException.html" class="
                If it is not finite (e.g. <code>Duration.Top</code>),
                no method specific timeout will be applied.</p></dd><dt>returns</dt><dd class="cmt"><p>a new instance with all other settings copied</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thriftmux.MethodBuilder">MethodBuilder</a> → MethodBuilderScaladoc</dd><div class="block">Example:
                <ol><li class="cmt"><p>
-For example, a total timeout of 200 milliseconds:</p><pre><span class="kw">import</span> com.twitter.conversions.time._
+For example, a total timeout of 200 milliseconds:</p><pre><span class="kw">import</span> com.twitter.conversions.DurationOps._
 <span class="kw">import</span> com.twitter.finagle.http.Http
 <span class="kw">import</span> com.twitter.util.Duration
 

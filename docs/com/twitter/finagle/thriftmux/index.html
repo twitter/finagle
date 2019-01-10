@@ -1069,7 +1069,7 @@ service SomeService {
     <span class="num">1</span>: AnException ex1,
   )
 }</pre><p>This gives you a <code>Service</code> that has timeouts and retries on
-<code>AnException</code> when the <code>errorCode</code> is <code>0</code>:</p><pre><span class="kw">import</span> com.twitter.conversions.time._
+<code>AnException</code> when the <code>errorCode</code> is <code>0</code>:</p><pre><span class="kw">import</span> com.twitter.conversions.DurationOps._
 <span class="kw">import</span> com.twitter.finagle.ThriftMux
 <span class="kw">import</span> com.twitter.finagle.service.{ReqRep, ResponseClass}
 <span class="kw">import</span> com.twitter.util.Throw
@@ -1085,7 +1085,7 @@ service SomeService {
     }
     .newServiceIface(<span class="lit">"the_method"</span>)
     .theMethod</pre><h3> Timeouts </h3><p>Defaults to using the StackClient's configuration.</p><p>An example of setting a per-request timeout of 50 milliseconds and a total
-timeout of 100 milliseconds:</p><pre><span class="kw">import</span> com.twitter.conversions.time._
+timeout of 100 milliseconds:</p><pre><span class="kw">import</span> com.twitter.conversions.DurationOps._
 <span class="kw">import</span> com.twitter.finagle.thriftmux.MethodBuilder
 
 <span class="kw">val</span> builder: MethodBuilder = ???

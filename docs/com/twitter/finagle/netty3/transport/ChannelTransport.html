@@ -595,23 +595,6 @@ package netty3 can move into its own package, so that only the
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.netty3.transport.ChannelTransport#localAddress" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="localAddress:java.net.SocketAddress"></a><a id="localAddress:SocketAddress"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/netty3/transport/ChannelTransport.html#localAddress:java.net.SocketAddress" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">localAddress</span><span class="result">: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">The locally bound address of this transport.</p><div class="fullcomment"><div class="comment cmt"><p>The locally bound address of this transport.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.netty3.transport.ChannelTransport">ChannelTransport</a> → <a href="../../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a></dd></dl></div>
     </li><li name="com.twitter.finagle.transport.Transport#map" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="map[In1,Out1](f:In1=&gt;In,g:Out=&gt;Out1):com.twitter.finagle.transport.Transport[In1,Out1]"></a><a id="map[In1,Out1]((In1)⇒In,(Out)⇒Out1):Transport[In1,Out1]"></a>
       <span class="permalink">
@@ -720,23 +703,6 @@ close events.
       </span>
       
       <p class="shortcomment cmt">Read a message from the transport.</p><div class="fullcomment"><div class="comment cmt"><p>Read a message from the transport.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.netty3.transport.ChannelTransport">ChannelTransport</a> → <a href="../../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.netty3.transport.ChannelTransport#remoteAddress" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="remoteAddress:java.net.SocketAddress"></a><a id="remoteAddress:SocketAddress"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/netty3/transport/ChannelTransport.html#remoteAddress:java.net.SocketAddress" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">remoteAddress</span><span class="result">: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">The remote address to which the transport is connected.</p><div class="fullcomment"><div class="comment cmt"><p>The remote address to which the transport is connected.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.netty3.transport.ChannelTransport">ChannelTransport</a> → <a href="../../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a></dd></dl></div>
     </li><li name="com.twitter.finagle.netty3.transport.ChannelTransport#status" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="status:com.twitter.finagle.Status"></a><a id="status:Status"></a>
@@ -882,7 +848,50 @@ acknowledges write completion.
 
         
 
-        
+        <div class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="com.twitter.finagle.transport.Transport#localAddress" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="localAddress:java.net.SocketAddress"></a><a id="localAddress:SocketAddress"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/netty3/transport/ChannelTransport.html#localAddress:java.net.SocketAddress" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2017-08-21) Please use Transport.context.localAddress instead">localAddress</span><span class="result">: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">The locally bound address of this transport.</p><div class="fullcomment"><div class="comment cmt"><p>The locally bound address of this transport.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a></dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-08-21)</i> Please use Transport.context.localAddress instead</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.transport.Transport#remoteAddress" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="remoteAddress:java.net.SocketAddress"></a><a id="remoteAddress:SocketAddress"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/netty3/transport/ChannelTransport.html#remoteAddress:java.net.SocketAddress" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2017-08-21) Please use Transport.context.remoteAddress instead">remoteAddress</span><span class="result">: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">The remote address to which the transport is connected.</p><div class="fullcomment"><div class="comment cmt"><p>The remote address to which the transport is connected.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a></dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-08-21)</i> Please use Transport.context.remoteAddress instead</p></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">

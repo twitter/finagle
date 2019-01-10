@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Clients &#8212; Finagle 18.12.0 documentation</title>
+    <title>Clients &#8212; Finagle 19.1.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '18.12.0',
+        VERSION:     '19.1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 18.12.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.1.0 documentation" href="index.html" />
     <link rel="next" title="Contexts" href="Contexts.html" />
     <link rel="prev" title="Servers" href="Servers.html" />
    
@@ -272,7 +272,7 @@ when creating retry filters of their own.</p>
 retried on top of 10 retries per second in order to accommodate clients that have just started issuing
 requests or clients that have a low rate of requests per second.</p>
 <p>To override this default use the following code snippet.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">Backoff</span><span class="o">,</span> <span class="nc">RetryBudget</span><span class="o">}</span>
 
@@ -286,7 +286,7 @@ requests or clients that have a low rate of requests per second.</p>
 </div>
 <p>The following example <a class="footnote-reference" href="#example" id="id3">[3]</a> shows how to use a factory method <code class="docutils literal"><span class="pre">RetryBudget.apply</span></code> in order to
 construct a new instance of <code class="docutils literal"><span class="pre">RetryBudget</span></code> backed by <em>leaky token bucket</em>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.service.RetryBudget</span>
 
 <span class="k">val</span> <span class="n">budget</span><span class="k">:</span> <span class="kt">RetryBudget</span> <span class="o">=</span> <span class="nc">RetryBudget</span><span class="o">(</span>
@@ -306,7 +306,7 @@ construct a new instance of <code class="docutils literal"><span class="pre">Ret
 is inserted into every client&#8217;s stack by default so all the failures from the underlying modules will be
 retried, the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/RetryFilter.scala">RetryFilter</a> handling application level
 exceptions from the remote server should be applied explicitly.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.util.DefaultTimer</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">RetryBudget</span><span class="o">,</span> <span class="nc">RetryFilter</span><span class="o">,</span> <span class="nc">RetryPolicy</span><span class="o">}</span>
@@ -337,7 +337,7 @@ of maximum attempts</li>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Response</span><span class="o">,</span> <span class="nc">Status</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">Backoff</span><span class="o">,</span> <span class="nc">RetryPolicy</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.</span><span class="o">{</span><span class="nc">Try</span><span class="o">,</span> <span class="nc">Return</span><span class="o">,</span> <span class="nc">Throw</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 
 <span class="k">val</span> <span class="n">policy</span><span class="k">:</span> <span class="kt">RetryPolicy</span><span class="o">[</span><span class="kt">Try</span><span class="o">[</span><span class="kt">Response</span><span class="o">]]</span> <span class="k">=</span>
   <span class="nc">RetryPolicy</span><span class="o">.</span><span class="n">backoff</span><span class="o">(</span><span class="nc">Backoff</span><span class="o">.</span><span class="n">equalJittered</span><span class="o">(</span><span class="mf">10.</span><span class="n">milliseconds</span><span class="o">,</span> <span class="mf">10.</span><span class="n">seconds</span><span class="o">))</span> <span class="o">{</span>
@@ -362,7 +362,7 @@ implemented by the <a class="reference external" href="https://github.com/twitte
 <p>The default timeout value for the <cite>Session Timeout</cite> module is unbounded (i.e., <code class="docutils literal"><span class="pre">Duration.Top</span></code>),
 which simply means it&#8217;s disabled. Although, it&#8217;s possible to override the default setting with
 stack params <a class="footnote-reference" href="#example" id="id7">[3]</a>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 
 <span class="k">val</span> <span class="n">twitter</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
@@ -380,7 +380,7 @@ Note that HTTP/2 and Mux both have first-class support for request cancellation 
 needing to tear down the connection.</p>
 <p>The default timeout for the <cite>Request Timeout</cite> module is unbounded (i.e., <code class="docutils literal"><span class="pre">Duration.Top</span></code>).
 Here is an example <a class="footnote-reference" href="#example" id="id8">[3]</a> of how to override that default.</p>
-<div class="highlight-scala" id="configuring-timeouts"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<div class="highlight-scala" id="configuring-timeouts"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 
 <span class="k">val</span> <span class="n">twitter</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
@@ -403,7 +403,7 @@ after a certain amount of idle time. The module is implemented by
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/ExpiringService.scala">ExpiringService</a>.</p>
 <p>The default setting for the <cite>Expiration</cite> module is to never expire a session. Here is how
 it can be configured <a class="footnote-reference" href="#example" id="id9">[3]</a>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 
 <span class="k">val</span> <span class="n">twitter</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
@@ -421,7 +421,7 @@ it can be configured <a class="footnote-reference" href="#example" id="id9">[3]<
 <p>See <a class="reference internal" href="Metrics.html#idle-apoptosis-stats"><span class="std std-ref">Expiration metrics</span></a> for more details.</p>
 <p>Finally, timeouts can be enforced outside of these modules on a per-request level using
 <code class="docutils literal"><span class="pre">Future#within</span></code> or <code class="docutils literal"><span class="pre">Future#raiseWithin</span></code>.  <a class="footnote-reference" href="#raise" id="id10">[4]</a>:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
 
@@ -521,7 +521,7 @@ the assumption that a loaded endpoint takes time to recover and so it is general
 advertised load to incorporate an endpoint&#8217;s history. However, this assumption breaks down in the
 presence of long polling clients.</p>
 <p>Use <code class="docutils literal"><span class="pre">Balancers.p2cPeakEwma</span></code> to construct an instance of <code class="docutils literal"><span class="pre">LoadBalancerFactory</span></code> <a class="footnote-reference" href="#example" id="id17">[3]</a>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.loadbalancer.</span><span class="o">{</span><span class="nc">Balancers</span><span class="o">,</span> <span class="nc">LoadBalancerFactory</span><span class="o">}</span>
 
 <span class="k">val</span> <span class="n">balancer</span><span class="k">:</span> <span class="kt">LoadBalancerFactory</span> <span class="o">=</span>
@@ -554,7 +554,7 @@ clients pay the penalty of session establishment less frequently.</li>
 work well, requires concurrent load.</li>
 </ol>
 <p>Use <code class="docutils literal"><span class="pre">Balancers.aperture</span></code> to construct an instance of <code class="docutils literal"><span class="pre">LoadBalancerFactory</span></code> <a class="footnote-reference" href="#example" id="id19">[3]</a>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.loadbalancer.</span><span class="o">{</span><span class="nc">Balancers</span><span class="o">,</span> <span class="nc">LoadBalancerFactory</span><span class="o">}</span>
 
 <span class="k">val</span> <span class="n">balancer</span><span class="k">:</span> <span class="kt">LoadBalancerFactory</span> <span class="o">=</span>
@@ -679,7 +679,7 @@ number of consecutive failures (default is 5) accompanied by equal jittered back
 durations for which an endpoint is marked dead.</p>
 <p>Use <code class="docutils literal"><span class="pre">FailureAccrualFactory.Param</span></code> <a class="footnote-reference" href="#experimental" id="id23">[2]</a> to configure Failure Accrual` based on requests
 success rate <a class="footnote-reference" href="#example" id="id24">[3]</a>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.liveness.</span><span class="o">{</span><span class="nc">FailureAccrualFactory</span><span class="o">,</span> <span class="nc">FailureAccrualPolicy</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.service.Backoff</span>
@@ -702,7 +702,7 @@ dead for</li>
 </ol>
 <p>To configure <cite>Failure Accrual</cite> based on a number of consecutive failures <a class="footnote-reference" href="#experimental" id="id25">[2]</a>, use the
 following snippet <a class="footnote-reference" href="#example" id="id26">[3]</a>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.liveness.</span><span class="o">{</span><span class="nc">FailureAccrualFactory</span><span class="o">,</span> <span class="nc">FailureAccrualPolicy</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.service.Backoff</span>
@@ -754,7 +754,7 @@ watermark (i.e., <code class="docutils literal"><span class="pre">Int.MaxValue</
 that are between [low, high].</p>
 <p>The override the default settings for connection pooling in a Finagle client, use the following
 example <a class="footnote-reference" href="#example" id="id27">[3]</a>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.DurationOps._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 
 <span class="k">val</span> <span class="n">twitter</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
@@ -1148,7 +1148,7 @@ Alvaro Videla&#8217;s <a class="reference external" href="http://videlalvaro.git
       </div>
       <div class="clearer"></div>
     </div>
-  <div class="footer">&copy; Copyright 2018 Twitter, Inc.</div>
+  <div class="footer">&copy; Copyright 2019 Twitter, Inc.</div>
   
   </body>
 </html>
