@@ -827,6 +827,38 @@ abstract class AbstractEndToEndTest
       assert(!resp.content.isEmpty)
       assert(resp.contentLength == Some(8 * 1024 - 1))
     }
+
+    test(implName + ": streaming requests can't be retried") {
+      val failService = new HttpService {
+        def apply(req: Request): Future[Response] =
+          req.reader.read().flatMap { _ =>
+            Future.exception(Failure("try again", FailureFlags.Retryable | FailureFlags.Rejected))
+          }
+      }
+
+      val client = connect(failService)
+
+      val e = intercept[FailureFlags[_]] {
+        val out = new Pipe[Buf]
+        val req = Request(Version.Http11, Method.Post, "/", out)
+        val rep = client(req)
+
+        await(out.write(Buf.Utf8("foo")))
+        await(rep)
+      }
+
+      assert(e.isFlagged(FailureFlags.Rejected))
+
+      eventually {
+        assert(
+          !statsRecv.counters.contains(Seq("client", "retries", "requeues")) ||
+            statsRecv.counters(Seq("client", "retries", "requeues")) == 0)
+        assert(statsRecv.counters(Seq("client", "failures")) == 1)
+        assert(statsRecv.counters(Seq("client", "requests")) == 1)
+      }
+
+      await(client.close())
+    }
   }
 
   def tracing(connect: HttpService => HttpService): Unit = {

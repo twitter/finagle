@@ -1,10 +1,10 @@
 package com.twitter.finagle.http.filter
 
-import com.twitter.finagle.{Failure, Service, ServiceFactory, SimpleFilter, Stack, Stackable}
+import com.twitter.finagle._
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.io.{Buf, Reader}
 import com.twitter.logging.Logger
-import com.twitter.util.{Future, Try}
+import com.twitter.util.{Future, Return, Throw, Try}
 
 /**
  * Filter for converting the HTTP nack representation to a [[Failure]]
@@ -23,7 +23,7 @@ private[http] final class ClientNackFilter extends SimpleFilter[Request, Respons
       // could happen if, for example, the same request gets reused but with a different
       // body representation.
       request.headerMap.remove(HttpNackFilter.RetryableRequestHeader)
-      service(request).flatMap(convertChunkedReqNackFn)
+      service(request).transform(convertChunkedReqNackFn)
     } else {
       if (!request.content.isEmpty) {
         // We add the `CanRetryWithBodyHeader` to signal to the server that we're able
@@ -62,12 +62,18 @@ object ClientNackFilter {
 
   // It's likely unsafe to retry this request based on request body being chunked so
   // we don't mark it retryable even if the server thinks it's safe.
-  private val convertChunkedReqNackFn: Response => Future[Response] = {
-    case res if HttpNackFilter.isNack(res) =>
+  private val convertChunkedReqNackFn: Try[Response] => Future[Response] = {
+    case Return(res) if HttpNackFilter.isNack(res) =>
       swallowNackResponse(res).transform(respondNonRetryableFailure)
 
     // Clean responses pass through
-    case res => Future.value(res)
+    case Return(res) => Future.value(res)
+
+    case Throw(ex: FailureFlags[_]) =>
+      Future.exception(ex.asNonRetryable)
+
+    case t @ Throw(_) =>
+      Future.const(t)
   }
 
   /**

@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Bug Fixes
+~~~~~~~~~
+
+* finagle-http: Fix for a bug where HTTP/2 clients could retry requests that had a chunked
+  body even if the request body was consumed. ``PHAB_ID=D258719``
+
 19.1.0
 -------
 
