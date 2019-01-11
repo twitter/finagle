@@ -561,6 +561,13 @@ The ``p2cPeakEwma`` factory method takes two arguments:
 
 Aperture + Least Loaded [#experimental]_
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. note::
+
+  The aperture load balancers can be more challenging to reason about than the P2C family of
+  balancers. See :ref:`Aperture Load Balancers <aperture_load_balancers>` section for more
+  information.
+
 All the previously mentioned configurations operate optimally under high load. That is, without
 sufficient concurrent load, the previous distributors can degrade to random selection. The Aperture
 distributor aims to remedy this among other things. By employing a simple feedback controller based
