@@ -2,7 +2,9 @@ package com.twitter.finagle.stats
 
 import com.twitter.app.GlobalFlag
 import com.twitter.finagle.http.{HttpMuxHandler, Route, RouteIndex}
+import com.twitter.finagle.util.DefaultTimer
 import com.twitter.logging.{Level, Logger}
+import com.twitter.util.{Future, FuturePool, Time}
 import com.twitter.util.lint.{Category, GlobalRules, Issue, Rule}
 import java.util.concurrent.atomic.LongAdder
 import scala.collection.JavaConverters._
@@ -137,12 +139,23 @@ class MetricsStatsReceiver(val registry: Metrics)
   override def metricsCollisionsLinterRule: Rule = registry.metricsCollisionsLinterRule
 }
 
-class MetricsExporter(val registry: Metrics)
+private object MetricsExporter {
+  val defaultLogger = Logger.get()
+}
+
+class MetricsExporter(val registry: Metrics, val logger: Logger)
     extends JsonExporter(registry)
     with HttpMuxHandler
     with MetricsRegistry {
-  def this() = this(MetricsStatsReceiver.defaultRegistry)
+
+  def this(registry: Metrics) = this(registry, MetricsExporter.defaultLogger)
+
+  def this(logger: Logger) = this(MetricsStatsReceiver.defaultRegistry, logger)
+
+  def this() = this(MetricsExporter.defaultLogger)
+
   val pattern = "/admin/metrics.json"
+
   def route: Route =
     Route(
       pattern = pattern,
@@ -155,4 +168,19 @@ class MetricsExporter(val registry: Metrics)
         )
       )
     )
+
+  override def close(deadline: Time): Future[Unit] = {
+    val f: Future[Unit] = logOnShutdown() match {
+      case true =>
+        //Use a FuturePool to ensure the task is completed asynchronously and allow for enforcing
+        //the deadline Time.
+        FuturePool
+          .unboundedPool {
+            logger.error(json(false, false))
+          }.by(deadline)(DefaultTimer)
+      case _ => Future.Done
+    }
+    f.flatMap(_ => super.close(deadline)) //ensure parent's close is honored
+  }
+
 }

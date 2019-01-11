@@ -27,6 +27,9 @@ New Features
 * finagle-http: HttpMuxer propagates the close signal to the underlying handlers.
   ``PHAB_ID=D254656``
 
+* finagle-stats-core: introduce flag to allow logging metrics on service shutdown.
+  ``PHAB_ID=D253590``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
