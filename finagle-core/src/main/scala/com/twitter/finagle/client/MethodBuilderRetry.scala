@@ -17,7 +17,7 @@ private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (mb: MethodB
    * @see [[MethodBuilderScaladoc.withRetryForClassifier]]
    */
   def forClassifier(classifier: ResponseClassifier): MethodBuilder[Req, Rep] =
-    mb.withConfig(mb.config.copy(retry = Config(classifier)))
+    mb.withConfig(mb.config.copy(retry = Config(Some(classifier))))
 
   /**
    * @see [[MethodBuilderScaladoc.withRetryDisabled]]
@@ -184,6 +184,11 @@ private[client] object MethodBuilderRetry {
    * @see [[MethodBuilderRetry.forClassifier]] for details on how the
    *     classifier is used.
    */
-  case class Config(responseClassifier: ResponseClassifier)
+  case class Config(underlyingClassifier: Option[ResponseClassifier]) {
+    def responseClassifier: ResponseClassifier = underlyingClassifier match {
+      case Some(classifier) => classifier
+      case None => ResponseClassifier.Default
+    }
+  }
 
 }

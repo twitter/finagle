@@ -125,20 +125,27 @@ used to determine which requests are successful. This is the basis for measuring
 the :ref:`logical <mb_logical_req>` success metrics of the method and for logging_
 unsuccessful requests.
 
+Since setting the response classifier overrides how retries are handled, setting
+``withRetryForClassifier`` may clobber the way that the ``idempotent``, described below,
+handles retries, rendering them non-idempotent.  If you want to reclassify failures as
+successes or successes as failures as well as mark the endpoint as idempotent, set
+``withRetryForClassifier`` before setting ``idempotent``.
+
 .. _mb_idempotency:
 
 Idempotency
 -----------
 
 ``MethodBuilder`` provides ``idempotent`` and ``nonIdemptotent`` methods for a client to signal
-whether it's safe to resend requests that have already been sent. 
+whether it's safe to resend requests that have already been sent.
 
 If a client is configured with ``idempotent``, a protocol-dependent
 :src:`ResponseClassifier <com/twitter/finagle/service/ResponseClassifier.scala>` is combined with
-any existing classifier to also reissue requests on failure (Thrift exceptions for ThriftMux
-clients, and 500s for HTTP clients). The parameter to ``idempotent``, ``maxExtraLoad``, is used to
-configure :ref:`backup requests <mb_backup_requests>` and may be useful in reducing tail latency.
-Backup requests can be disabled by setting ``maxExtraLoad`` to `0.0`.
+any existing classifier, in particular what's set by ``withRetryForClassifier`` to also reissue
+requests on failure (Thrift exceptions for ThriftMux clients, and 500s for HTTP clients). The
+parameter to ``idempotent``, ``maxExtraLoad``, is used to configure
+:ref:`backup requests <mb_backup_requests>` and may be useful in reducing tail latency. Backup
+requests can be disabled by setting ``maxExtraLoad`` to `0.0`.
 
 If a client is configured with ``nonIdempotent``, any existing configured
 :src:`ResponseClassifier <com/twitter/finagle/service/ResponseClassifier.scala>` is removed

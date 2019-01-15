@@ -2,8 +2,8 @@ package com.twitter.finagle.client
 
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle.client.MethodBuilderTimeout.TunableDuration
-import com.twitter.finagle.param.ResponseClassifier
-import com.twitter.finagle.service.{Retries, TimeoutFilter}
+import com.twitter.finagle.param
+import com.twitter.finagle.service.{Retries, TimeoutFilter, ResponseClassifier, ResponseClass}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.{Showable, StackRegistry}
 import com.twitter.finagle.{Filter, Name, Service, ServiceFactory, Stack, param, _}
@@ -75,7 +75,11 @@ private[finagle] object MethodBuilder {
      */
     def create(originalStack: Stack[_], params: Stack.Params): Config = {
       Config(
-        MethodBuilderRetry.Config(params[param.ResponseClassifier].responseClassifier),
+        MethodBuilderRetry.Config(
+          if (params.contains[param.ResponseClassifier]) {
+            Some(params[param.ResponseClassifier].responseClassifier)
+          } else None
+        ),
         MethodBuilderTimeout.Config(
           stackTotalTimeoutDefined = originalStack.contains(TimeoutFilter.totalTimeoutRole),
           total =
@@ -192,7 +196,7 @@ private[finagle] final class MethodBuilder[Req, Rep](
    *                       interrupts, this should be "false" to avoid connection churn.
    * @param classifier [[ResponseClassifier]] (combined (via [[ResponseClassifier.orElse]])
    *                   with any existing classifier in the stack params), used for determining
-   *                   whether or not requests have succeeded and should be retries.
+   *                   whether or not requests have succeeded and should be retried.
    *                   These determinations are also reflected in stats, and used by
    *                   [[FailureAccrualFactory]].
    *
@@ -229,7 +233,7 @@ private[finagle] final class MethodBuilder[Req, Rep](
    *                       interrupts, this should be "false" to avoid connection churn.
    * @param classifier [[ResponseClassifier]] (combined (via [[ResponseClassifier.orElse]])
    *                   with any existing classifier in the stack params), used for determining
-   *                   whether or not requests have succeeded and should be retries.
+   *                   whether or not requests have succeeded and should be retried.
    *                   These determinations are also reflected in stats, and used by
    *                   [[FailureAccrualFactory]].
    */
@@ -244,13 +248,34 @@ private[finagle] final class MethodBuilder[Req, Rep](
     )
   }
 
+  private[this] def idempotentify(
+    applicationClassifier: Option[ResponseClassifier],
+    protocolClassifier: ResponseClassifier
+  ): ResponseClassifier = {
+    val combined = applicationClassifier match {
+      case Some(classifier) => classifier.orElse(protocolClassifier)
+      case None => protocolClassifier
+    }
+    ResponseClassifier.named(s"Idempotent($combined)") {
+      case reqrep if combined.isDefinedAt(reqrep) =>
+        val result = combined(reqrep)
+        if (result == ResponseClass.NonRetryableFailure) ResponseClass.RetryableFailure
+        else result
+    }
+  }
+
   private[this] def addBackupRequestFilterParamAndClassifier(
     brfParam: BackupRequestFilter.Param,
     classifier: service.ResponseClassifier
   ): MethodBuilder[Req, Rep] = {
-    val combinedClassifier =
-      if (!params.contains[ResponseClassifier]) classifier
-      else (params[ResponseClassifier].responseClassifier).orElse(classifier)
+    val stackClassifier =
+      if (!params.contains[param.ResponseClassifier]) None
+      else Some(params[param.ResponseClassifier].responseClassifier)
+    val idempotentedStackClassifier = idempotentify(stackClassifier, classifier)
+
+    val configClassifier = config.retry.underlyingClassifier
+    val idempotentedConfigClassifier = idempotentify(configClassifier, classifier)
+
     (new MethodBuilder[Req, Rep](
       refCounted,
       dest,
@@ -258,9 +283,29 @@ private[finagle] final class MethodBuilder[Req, Rep](
       // If the RetryBudget is not configured, BackupRequestFilter and RetryFilter will each
       // get a new instance of the default budget. Since we want them to share the same
       // client retry budget, insert the budget into the params.
-      stackParams + brfParam + ResponseClassifier(combinedClassifier) + stackParams[Retries.Budget],
+      stackParams
+        + brfParam
+        + param.ResponseClassifier(idempotentedStackClassifier)
+        + stackParams[Retries.Budget],
       config
-    )).withRetry.forClassifier(combinedClassifier)
+    )).withRetry.forClassifier(idempotentedConfigClassifier)
+  }
+
+  private[this] def nonidempotentify(
+    applicationClassifier: Option[ResponseClassifier]
+  ): ResponseClassifier = {
+    applicationClassifier match {
+      case Some(classifier) =>
+        ResponseClassifier.RetryOnWriteExceptions.orElse(
+          ResponseClassifier.named(s"NonIdempotent($classifier)") {
+            case reqrep if classifier.isDefinedAt(reqrep) =>
+              val result = classifier(reqrep)
+              if (result == ResponseClass.RetryableFailure) ResponseClass.NonRetryableFailure
+              else result
+          }
+        )
+      case None => ResponseClassifier.RetryOnWriteExceptions
+    }
   }
 
   /**
@@ -270,13 +315,18 @@ private[finagle] final class MethodBuilder[Req, Rep](
    * retries are removed.
    */
   def nonIdempotent: MethodBuilder[Req, Rep] = {
+    val configClassifier =
+      if (config.retry.responseClassifier == ResponseClassifier.Default) None
+      else Some(config.retry.responseClassifier)
+    val nonidempotentedConfigClassifier = nonidempotentify(configClassifier)
+
     new MethodBuilder[Req, Rep](
       refCounted,
       dest,
       stack,
       stackParams + BackupRequestFilter.Disabled,
       config
-    ).withRetry.forClassifier(service.ResponseClassifier.Default)
+    ).withRetry.forClassifier(nonidempotentedConfigClassifier)
   }
 
   //

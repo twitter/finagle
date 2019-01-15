@@ -58,6 +58,16 @@ object ResponseClassifier {
   }
 
   /**
+   * Implementation for the [[ResponseClassifier]] that retries requests on write exceptions.
+   *
+   * These are always safe to retry, so this is safe even in non-idempotent cases.
+   */
+  val RetryOnWriteExceptions: ResponseClassifier =
+    named("RetryOnWriteExceptionsResponseClassifier") {
+      case ReqRep(_, Throw(RetryableWriteException(_))) => ResponseClass.RetryableFailure
+    }
+
+  /**
    *  Implementation for the [[ResponseClassifier]] that retries requests on all timeout
    *  exceptions.
    *

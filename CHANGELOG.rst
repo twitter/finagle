@@ -151,6 +151,9 @@ Runtime Behavior Changes
 * finagle-base-http: The `DefaultHeaderMap` will replace `obs-fold` ( CRLF 1*(SP/HTAB) ) in
   inserted header values. ``PHAB_ID=D245928``
 
+* finagle-core: `MethodBuilder#idempotent` and `MethodBuilder#nonIdempotent` will no longer
+  clobber `MethodBuilder.withRetries.withClassifier`. ``PHAB_ID=D255275``
+
 18.11.0
 -------
 
