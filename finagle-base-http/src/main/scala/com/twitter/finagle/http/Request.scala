@@ -419,6 +419,9 @@ object Request {
     val remoteSocketAddress: InetSocketAddress)
       extends Request {
 
+    def this(reader: Reader[Buf], remoteSocketAddress: InetSocketAddress) =
+      this(reader, FailingWriter, remoteSocketAddress)
+
     private var _method: Method = Method.Get
     private var _uri: String = ""
 

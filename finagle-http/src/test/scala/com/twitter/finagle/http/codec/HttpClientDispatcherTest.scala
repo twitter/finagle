@@ -112,7 +112,7 @@ class HttpClientDispatcherTest extends FunSuite {
     // discard the request immediately
     out.read()
 
-    val r = Bijections.finagle.responseHeadersToNetty(Response())
+    val r = Bijections.finagle.chunkedResponseToNetty(Response())
     HttpUtil.setTransferEncodingChunked(r, true)
     out.write(r)
     val res = await(f)
@@ -166,7 +166,7 @@ class HttpClientDispatcherTest extends FunSuite {
   test("chunked") {
     val (in, out) = mkPair()
     val disp = new HttpClientDispatcher(in, NullStatsReceiver)
-    val httpRes = Bijections.finagle.responseHeadersToNetty(Response())
+    val httpRes = Bijections.finagle.chunkedResponseToNetty(Response())
     HttpUtil.setTransferEncodingChunked(httpRes, true)
 
     val f = disp(Request())
@@ -189,7 +189,7 @@ class HttpClientDispatcherTest extends FunSuite {
     val (in, out) = mkPair()
     val inSpy = spy(in)
     val disp = new HttpClientDispatcher(inSpy, NullStatsReceiver)
-    val httpRes = Bijections.finagle.responseHeadersToNetty(Response())
+    val httpRes = Bijections.finagle.chunkedResponseToNetty(Response())
     HttpUtil.setTransferEncodingChunked(httpRes, true)
 
     val f = disp(Request())

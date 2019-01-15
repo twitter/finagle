@@ -128,7 +128,11 @@ object Response {
   /** Create 200 Response with the same HTTP version as the provided Request */
   def apply(request: Request): Response = apply(request.version, Status.Ok)
 
-  final private class Impl(val reader: Reader[Buf], val writer: Writer[Buf]) extends Response {
+  private[finagle] final class Impl(val reader: Reader[Buf], val writer: Writer[Buf])
+      extends Response {
+
+    def this(reader: Reader[Buf]) = this(reader, FailingWriter)
+
     private[this] var _status: Status = Status.Ok
     val headerMap: HeaderMap = HeaderMap()
     val ctx: Response.Schema.Record = Response.Schema.newRecord()

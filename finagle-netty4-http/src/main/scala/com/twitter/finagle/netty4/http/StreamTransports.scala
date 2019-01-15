@@ -119,7 +119,7 @@ private[finagle] class Netty4ServerStreamTransport(rawTransport: Transport[Any, 
   def write(in: Response): Future[Unit] = {
     val nettyRep =
       if (in.isChunked)
-        Bijections.finagle.responseHeadersToNetty(in)
+        Bijections.finagle.chunkedResponseToNetty(in)
       else
         Bijections.finagle.fullResponseToNetty(in)
 

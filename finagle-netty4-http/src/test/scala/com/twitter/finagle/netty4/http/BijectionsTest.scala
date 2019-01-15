@@ -175,7 +175,7 @@ class BijectionsTest extends FunSuite with GeneratorDrivenPropertyChecks {
               assert(out.headers.getAll(k).asScala.toSet == in.headerMap.getAll(k).toSet)
           }
         } else {
-          val out = Bijections.finagle.responseHeadersToNetty(in)
+          val out = Bijections.finagle.chunkedResponseToNetty(in)
           assert(HttpUtil.isTransferEncodingChunked(out) == false)
           assert(out.protocolVersion == Bijections.finagle.versionToNetty(in.version))
           assert(out.asInstanceOf[FullHttpResponse].content.toString(UTF_8) == body)
