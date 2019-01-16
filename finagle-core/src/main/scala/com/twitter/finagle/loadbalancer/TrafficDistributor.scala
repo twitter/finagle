@@ -5,9 +5,12 @@ import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.service.{DelayedFactory, FailingFactory, ServiceFactoryRef}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver, Verbosity}
 import com.twitter.finagle.util.{Drv, Rng}
+import com.twitter.logging.Logger
 import com.twitter.util._
+import scala.util.control.NonFatal
 
 private object TrafficDistributor {
+  val log = Logger.get()
 
   /**
    * A [[ServiceFactory]] and its associated weight.
@@ -181,7 +184,10 @@ private class TrafficDistributor[Req, Rep](
           case (cache, addr) =>
             cache.get(addr) match {
               case Some(WeightedFactory(f, _)) if eagerEviction || f.status != Status.Open =>
-                f.close()
+                try f.close()
+                catch {
+                  case NonFatal(t) => log.warning(t, s"unable to close endpoint $addr")
+                }
                 cache - addr
               case _ => cache
             }
@@ -238,7 +244,10 @@ private class TrafficDistributor[Req, Rep](
           case (cache, weight) =>
             cache.get(weight) match {
               case Some(CachedBalancer(bal, _, _)) =>
-                bal.close()
+                try bal.close()
+                catch {
+                  case NonFatal(t) => log.warning(t, "unable to close balancer")
+                }
                 cache - weight
               case _ => cache
             }

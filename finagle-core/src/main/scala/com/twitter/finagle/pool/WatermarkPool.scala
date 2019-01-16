@@ -215,8 +215,10 @@ final class WatermarkPool[Req, Rep](
 
       // nb: we can't lean on the `isOpen` bit flip protecting us as we
       // can with the `queue` drain which follows because of the interrupt
-      // handler above which accesses `waiters`.
-      val res = waiters.asScala.toSeq
+      // handler above which accesses `waiters`. Also, note the significant
+      // call to `toArray` which copies waiters to a new collection instead
+      // of proxying to the underlying one.
+      val res = waiters.toArray(new Array[Promise[Service[Req, Rep]]](waiters.size))
       waiters.clear()
       res
     }
