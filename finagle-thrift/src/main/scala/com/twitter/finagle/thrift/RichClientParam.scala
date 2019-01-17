@@ -14,7 +14,9 @@ import org.apache.thrift.protocol.{TBinaryProtocol, TCompactProtocol, TProtocolF
  * @param maxThriftBufferSize The max size of a reusable buffer for the thrift response
  * @param responseClassifier See [[com.twitter.finagle.service.ResponseClassifier]]
  * @param clientStats StatsReceiver for recording metrics
- * @param perEndpointStats Whether to record per-endpoint stats, (default: false)
+ * @param perEndpointStats Whether to record per-endpoint stats, (default: false).
+ *                         By enabling this, the specific Thrift Exceptions can be recorded.
+ * See [[http://twitter.github.io/finagle/guide/Metrics.html#perendpoint-statsfilter PerEndpoint StatsFilter]]
  */
 case class RichClientParam(
   protocolFactory: TProtocolFactory = Thrift.param.protocolFactory,

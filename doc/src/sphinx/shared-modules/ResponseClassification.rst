@@ -116,13 +116,18 @@ One possible classifier would be:
     // #3
     case ReqRep(SocialGraph.Follow.Args(a, b), _) if a <= 0 =>
       ResponseClass.NonRetryableFailure
+
+    // #4
+    case ReqRep(_, Throw(_: InvalidQueryException)) =>
+      ResponseClass.Success
   }
 
 If you examine that classifier you'll note a few things. First (#1), the
-deserialized ``NotFoundException`` can be treated as a failure. Next (#2), a
+deserialized ``NotFoundException`` can be treated as a failure. Second (#2), a
 "successful" response can be examined to enable services using status codes to
-classify errors. Lastly (#3), the request can be introspected to make the
-decision.
+classify errors. Next (#3), the request can be introspected to make the
+decision. Lastly (#4), the deserialized ``InvalidQueryException`` can be treated
+as a successful response.
 
 Other Details
 ~~~~~~~~~~~~~

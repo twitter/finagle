@@ -187,7 +187,7 @@ object ThriftResponseClassifier {
     new ResponseClassifier {
 
       override def toString: String =
-        s"Thrift.usingDeserializeCtx(${classifier.toString})"
+        s"Thrift.usingReqRepCtx(${classifier.toString})"
 
       def isDefinedAt(reqRep: ReqRep): Boolean = {
         val deserCtx = ServerToReqRep.get
