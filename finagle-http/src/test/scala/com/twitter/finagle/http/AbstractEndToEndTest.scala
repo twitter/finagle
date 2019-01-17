@@ -19,7 +19,7 @@ import com.twitter.util._
 import io.netty.buffer.PooledByteBufAllocator
 import java.io.{PrintWriter, StringWriter}
 import java.net.{InetAddress, InetSocketAddress}
-import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
 import org.scalactic.source.Position
 import org.scalatest.{BeforeAndAfter, FunSuite, OneInstancePerTest, Tag}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
@@ -1090,6 +1090,76 @@ abstract class AbstractEndToEndTest
 
     await(client.close())
     await(server.close())
+  }
+
+  test("server rejects illegal headers with a 400") {
+    val illegalHeaders = for {
+      k <- Seq("FgR", "a\fb")
+      v <- Seq("a\u000bb", "a\fb") // vtab
+    } yield k -> v
+
+    val service = nonStreamingConnect(Service.mk(_ => Future.value(Response())))
+
+    illegalHeaders.foreach {
+      case (k, v) =>
+        val badRequest = Request()
+        badRequest.headerMap.addUnsafe(k, v)
+        val resp = await(service(badRequest))
+        assert(resp.status == Status.BadRequest)
+    }
+
+    await(service.close())
+  }
+
+  test("client rejects illegal headers with an exception") {
+    val illegalHeaders = for {
+      k <- Seq("FgR", "a\fb")
+      v <- Seq("a\u000bb", "a\fb")
+    } yield k -> v
+
+    val current = new AtomicReference("a" -> "b")
+    val service = nonStreamingConnect(Service.mk { _ =>
+      val resp = Response()
+      val (k, v) = current.get
+      resp.headerMap.addUnsafe(k, v)
+      Future.value(resp)
+    })
+
+    illegalHeaders.foreach {
+      case kv =>
+        current.set(kv)
+        intercept[Exception](await(service(Request())))
+    }
+
+    await(service.close())
+  }
+
+  test("obs-fold sequences are 'fixed' when received by clients") {
+    val service = nonStreamingConnect(Service.mk { _ =>
+      val resp = Response()
+      resp.headerMap.addUnsafe("foo", "biz\r\n baz")
+      Future.value(resp)
+    })
+
+    val resp = await(service(Request()))
+    assert(resp.headerMap.get("foo") == Some("biz baz"))
+    await(service.close())
+  }
+
+  test("obs-fold sequences are 'fixed' when received by servers") {
+    val service = nonStreamingConnect(Service.mk { req =>
+      val resp = Response()
+      req.headerMap.get("foo").foreach { v =>
+        resp.contentString = v
+      }
+      Future.value(resp)
+    })
+
+    val req = Request()
+    req.headerMap.addUnsafe("foo", "biz\r\n baz")
+    val resp = await(service(req))
+    assert(resp.contentString == "biz baz")
+    await(service.close())
   }
 
   test("server responds 500 if an invalid header is being served") {

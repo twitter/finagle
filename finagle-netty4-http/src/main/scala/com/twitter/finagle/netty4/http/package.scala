@@ -6,6 +6,7 @@ import com.twitter.finagle.netty4.http.handler.{
   BadRequestHandler,
   ClientExceptionMapper,
   FixedLengthMessageAggregator,
+  HeaderValidatorHandler,
   PayloadSizeHandler,
   UnpoolHttpHandler
 }
@@ -42,7 +43,9 @@ package object http {
     new HttpClientCodec(
       maxInitialLineSize.inBytes.toInt,
       maxHeaderSize.inBytes.toInt,
-      Int.MaxValue /*maxChunkSize*/
+      Int.MaxValue, /* maxChunkSize */
+      false, /* failOnMissingResponse */
+      false /* validateHeaders, we validate in HeaderValidatorHandler */
     )
   }
 
@@ -56,7 +59,8 @@ package object http {
     new HttpServerCodec(
       maxInitialLineSize.inBytes.toInt,
       maxHeaderSize.inBytes.toInt,
-      Int.MaxValue /*maxChunkSize*/
+      Int.MaxValue, /* maxChunkSize */
+      false /* validateHeaders, we validate in HeaderValidatorHandler */
     )
   }
 
@@ -104,6 +108,9 @@ package object http {
           new HttpObjectAggregator(maxResponseSize.inBytes.toInt)
         )
     }
+
+    // We're going to validate our headers right before the bad request handler.
+    fn(HeaderValidatorHandler.HandlerName, HeaderValidatorHandler)
 
     // Map some client related channel exceptions to something meaningful to finagle
     fn("clientExceptionMapper", ClientExceptionMapper)
@@ -184,6 +191,9 @@ package object http {
             )
           )
       }
+
+      // We're going to validate our headers right before the bad request handler.
+      pipeline.addLast(HeaderValidatorHandler.HandlerName, HeaderValidatorHandler)
 
       // We need to handle bad requests as the dispatcher doesn't know how to handle them.
       pipeline.addLast("badRequestHandler", BadRequestHandler)
