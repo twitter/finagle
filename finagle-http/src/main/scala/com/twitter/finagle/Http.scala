@@ -344,16 +344,6 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       configured(http.param.Decompression(enabled))
 
     /**
-     * The compression level to use. If passed the default value (-1) then it will use
-     * [[com.twitter.finagle.http.codec.TextualContentCompressor TextualContentCompressor]]
-     * which will compress text-like content-types with the default compression level (6).
-     * Otherwise, use Netty `HttpContentCompressor` for all content-types with specified
-     * compression level.
-     */
-    def withCompressionLevel(level: Int): Client =
-      configured(http.param.CompressionLevel(level))
-
-    /**
      * Enable the collection of HTTP specific metrics. See [[http.filter.StatsFilter]].
      */
     def withHttpStats: Client =
