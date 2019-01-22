@@ -7,18 +7,23 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
-Bug Fixes
-~~~~~~~~~
-
-* finagle-http: Fix for a bug where HTTP/2 clients could retry requests that had a chunked
-  body even if the request body was consumed. ``PHAB_ID=D258719``
-
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
 * finagle-http: Removed `Http.Client.withCompressionLevel` because it wasn't doing anything.
   To migrate your client, simply remove the configuration--it had absolutely no effect.
   ``PHAB_ID=D260077``
+
+Bug Fixes
+~~~~~~~~~
+
+* finagle-http: Fix for a bug where HTTP/2 clients could retry requests that had a chunked
+  body even if the request body was consumed. ``PHAB_ID=D258719``
+
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-http: Disabling Netty3 cookies in favor of Netty4 cookies. ``PHAB_ID=D262776``
 
 19.1.0
 -------

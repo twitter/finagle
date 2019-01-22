@@ -18,7 +18,7 @@
     {
       "id": "com.twitter.finagle.http.UseNetty4CookieCodec",
       "description": "Use the N4 cookie encoder and decoder",
-      "fraction": 0.0
+      "fraction": 1.0
     },
     {
       "id": "com.twitter.finagle.http.UseHttp2MultiplexCodecClient",
