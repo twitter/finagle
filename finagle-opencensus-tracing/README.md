@@ -1,15 +1,12 @@
-OpenCensus Tracing
-==================
+# OpenCensus Tracing
 
 This module integrates Finagle with [OpenCensus](https://opencensus.io/) tracing.
 
-Current State
--------------
+## Current State
 
-This library is an experimental state.
+This library is in an experimental state.
 
-Details
--------
+## Details
 
 This lets Finagle [clients](https://twitter.github.io/finagle/guide/Clients.html)
 and [servers](https://twitter.github.io/finagle/guide/Servers.html) participate
@@ -25,8 +22,7 @@ Notes:
  - This is not an implementation of Finagle's tracing APIs (`c.t.f.tracing.Tracer`)
  - HTTP and ThriftMux are the supported protocols
 
-Exporters
-~~~~~~~~~
+### Exporters
 
 This module does not specify an OpenCensus
 [exporter](https://opencensus.io/core-concepts/exporters/). As such, your
