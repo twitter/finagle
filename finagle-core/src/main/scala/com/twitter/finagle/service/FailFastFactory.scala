@@ -151,6 +151,12 @@ private[finagle] class FailFastFactory[Req, Rep](
         case r: Retrying => r.ntries
         case _ => 0
       }
+    },
+    statsReceiver.addGauge("is_marked_dead") {
+      state match {
+        case _: Retrying => 1
+        case _ => 0
+      }
     }
   )
 

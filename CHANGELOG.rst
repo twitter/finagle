@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+* finagle-core: Added gauge `is_marked_dead` as an indicator of whether the host is marked
+  as dead(1) or not(0) in `FailFastFactory`. ``PHAB_ID=D263552``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

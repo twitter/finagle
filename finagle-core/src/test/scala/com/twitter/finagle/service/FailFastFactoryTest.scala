@@ -63,6 +63,7 @@ class FailFastFactoryTest
       assert(failfast().poll.map(_.throwable.getCause).contains(e))
       assert(!failfast.isAvailable)
       assert(stats.counters.get(Seq("marked_dead")).contains(1))
+      assert(stats.gauges(Seq("is_marked_dead"))() == 1)
     }
   }
 
@@ -89,6 +90,8 @@ class FailFastFactoryTest
       tc.set(timer.tasks(0).when)
       when(underlying()).thenReturn(q)
       verify(underlying).apply()
+      assert(stats.counters.get(Seq("marked_dead")).contains(1))
+      assert(stats.gauges(Seq("is_marked_dead"))() == 1)
       timer.tick()
       verify(underlying, times(2)).apply()
       assert(timer.tasks.isEmpty)
@@ -96,6 +99,7 @@ class FailFastFactoryTest
       assert(timer.tasks.isEmpty)
       assert(failfast.isAvailable)
       assert(stats.counters.get(Seq("marked_available")) == Some(1))
+      assert(stats.gauges(Seq("is_marked_dead"))() == 0)
     }
   }
 
