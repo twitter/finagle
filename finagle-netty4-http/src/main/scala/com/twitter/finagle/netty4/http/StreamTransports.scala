@@ -67,8 +67,12 @@ private[http] object StreamTransports {
     def read(): Future[Option[Buf]] = rw.read()
 
     def discard(): Unit = {
-      rw.discard()
+      // The order in which these two are running matters. We want to fail the underlying transport
+      // before we discard the user-facing reader, thereby releasing the connection in the stack.
+      // If we do these in the reverse order, the connection that's about to get failed, becomes
+      // available for reuse.
       raise(new ReaderDiscardedException)
+      rw.discard()
     }
 
     def onClose: Future[StreamTermination] = rw.onClose

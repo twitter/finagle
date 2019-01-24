@@ -1,21 +1,19 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle
 import com.twitter.finagle._
-import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.util.AsyncLatch
-import com.twitter.io.{Buf, Reader, StreamTermination}
-import com.twitter.util.{Future, Promise, Return, Throw, Time}
-import java.util.concurrent.atomic.AtomicBoolean
+import com.twitter.util.{Future, Promise, Return, Time}
 
 private[finagle] object DelayedRelease {
-  val role = StackClient.Role.prepFactory
-  val description = "Prevents an HTTP service from being closed until its response completes"
-  val module: Stackable[ServiceFactory[Request, Response]] =
+  def module(r: Stack.Role): Stackable[ServiceFactory[Request, Response]] =
     new Stack.Module1[FactoryToService.Enabled, ServiceFactory[Request, Response]] {
-      val role = DelayedRelease.role
-      val description = DelayedRelease.description
-      def make(_enabled: FactoryToService.Enabled, next: ServiceFactory[Request, Response]) =
+      final def role: Stack.Role = r
+      final def description =
+        "Prevents an HTTP service from being closed until its response completes"
+      final def make(
+        _enabled: FactoryToService.Enabled,
+        next: ServiceFactory[Request, Response]
+      ): ServiceFactory[Request, Response] =
         if (_enabled.enabled) next.map(new DelayedReleaseService(_))
         else next
     }
@@ -27,50 +25,17 @@ private[finagle] object DelayedRelease {
 private[finagle] class DelayedReleaseService[-Req <: Request](service: Service[Req, Response])
     extends ServiceProxy[Req, Response](service) {
 
-  protected[this] val latch = new AsyncLatch
+  private val latch = new AsyncLatch
 
-  private[this] def proxy(in: Response): Response = {
-    val released = new AtomicBoolean(false)
-    def done(): Unit = {
-      if (released.compareAndSet(false, true)) {
-        latch.decr()
-      }
-    }
-
-    new finagle.http.Response.Proxy {
-
-      def response: Response = in
-
-      override def reader: Reader[Buf] = new Reader[Buf] {
-        def read(): Future[Option[Buf]] = in.reader.read() respond {
-          case Return(None) => done()
-          case Throw(_) => done()
-          case _ =>
-        }
-
-        def discard(): Unit = {
-          // Note: Discarding the underlying reader terminates the session and
-          // marks the service as unavailable. It's important that we discard
-          // before releasing the service (by invoking `done`), to ensure that
-          // the service wrapper in the pool will create a new service instead
-          // of reusing this one whose transport is closing.
-          in.reader.discard()
-          done()
-        }
-
-        def onClose: Future[StreamTermination] = in.reader.onClose
-      }
-    }
-  }
-
-  override def apply(request: Req): Future[Response] = {
+  override def apply(req: Req): Future[Response] = {
     latch.incr()
-    service(request) transform {
-      case Return(r) if r.isChunked =>
-        Future.value(proxy(r))
-      case t =>
+    service(req).transform {
+      case r @ Return(rep) if rep.isChunked =>
+        rep.reader.onClose.ensure { latch.decr() }
+        Future.const(r)
+      case r =>
         latch.decr()
-        Future.const(t)
+        Future.const(r)
     }
   }
 
@@ -79,5 +44,4 @@ private[finagle] class DelayedReleaseService[-Req <: Request](service: Service[R
     latch.await { p.become(service.close(deadline)) }
     p
   }
-
 }

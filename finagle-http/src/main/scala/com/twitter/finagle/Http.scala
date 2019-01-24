@@ -194,10 +194,10 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
         )
         // We add a DelayedRelease module at the bottom of the stack to ensure
         // that the pooling levels above don't discard an active session.
-        .replace(StackClient.Role.prepConn, DelayedRelease.module)
+        .replace(StackClient.Role.prepConn, DelayedRelease.module(StackClient.Role.prepConn))
         // Ensure that FactoryToService doesn't release the connection to the layers
         // below when the response body hasn't been fully consumed.
-        .replace(StackClient.Role.prepFactory, DelayedRelease.module)
+        .replace(StackClient.Role.prepFactory, DelayedRelease.module(StackClient.Role.prepFactory))
         .replace(TraceInitializerFilter.role, new HttpClientTraceInitializer[Request, Response])
         .prepend(http.TlsFilter.module)
         // Because the payload filter also traces the sizes, it's important that we do so
