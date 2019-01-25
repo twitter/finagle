@@ -6,11 +6,8 @@ import com.twitter.io.TempFile
 import java.io.File
 import java.security.KeyStore
 import javax.net.ssl.{KeyManagerFactory, TrustManagerFactory}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class Netty4ServerEngineFactoryTest extends FunSuite {
 
   // Force JDK version for tests, because the native engine could fail to load in different
@@ -23,7 +20,9 @@ class Netty4ServerEngineFactoryTest extends FunSuite {
     TempFile.fromResourcePath("/ssl/certs/svc-test-server-expired.cert.pem")
   private[this] val keyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-server-pkcs8.key.pem")
 
-  // This file contains multiple certificates
+  // These files contains multiple certificates
+  private[this] val certsFile =
+    TempFile.fromResourcePath("/ssl/certs/svc-test-server-full-chain.cert.pem")
   private[this] val chainFile = TempFile.fromResourcePath("/ssl/certs/svc-test-chain.cert.pem")
 
   private[this] val goodKeyCredentials = KeyCredentials.CertAndKey(certFile, keyFile)
@@ -34,7 +33,7 @@ class Netty4ServerEngineFactoryTest extends FunSuite {
     val config = SslServerConfiguration()
 
     intercept[SslConfigurationException] {
-      val engine = factory(config)
+      factory(config)
     }
   }
 
@@ -54,12 +53,34 @@ class Netty4ServerEngineFactoryTest extends FunSuite {
     val config = SslServerConfiguration(keyCredentials = keyCredentials)
 
     intercept[SslConfigurationException] {
-      val engine = factory(config)
+      factory(config)
     }
   }
 
   test("config with expired cert and valid key credential fails") {
     val keyCredentials = KeyCredentials.CertAndKey(expiredCertFile, keyFile)
+    val config = SslServerConfiguration(keyCredentials = keyCredentials)
+
+    intercept[SslConfigurationException] {
+      factory(config)
+    }
+  }
+
+  test("config with good cert chain and key credentials succeeds") {
+    val keyCredentials = KeyCredentials.CertsAndKey(certsFile, keyFile)
+    val config = SslServerConfiguration(keyCredentials = keyCredentials)
+
+    val engine = factory(config)
+    val sslEngine = engine.self
+
+    assert(sslEngine != null)
+  }
+
+  test("config with bad cert chain or key credential fails") {
+    val tempCertFile = File.createTempFile("test", "crt")
+    tempCertFile.deleteOnExit()
+
+    val keyCredentials = KeyCredentials.CertsAndKey(tempCertFile, keyFile)
     val config = SslServerConfiguration(keyCredentials = keyCredentials)
 
     intercept[SslConfigurationException] {
@@ -111,7 +132,7 @@ class Netty4ServerEngineFactoryTest extends FunSuite {
     )
 
     intercept[IllegalArgumentException] {
-      val engine = factory(config)
+      factory(config)
     }
   }
 
@@ -166,7 +187,7 @@ class Netty4ServerEngineFactoryTest extends FunSuite {
       SslServerConfiguration(keyCredentials = goodKeyCredentials, cipherSuites = cipherSuites)
 
     intercept[IllegalArgumentException] {
-      val engine = factory(config)
+      factory(config)
     }
   }
 
@@ -187,7 +208,7 @@ class Netty4ServerEngineFactoryTest extends FunSuite {
     val config = SslServerConfiguration(keyCredentials = goodKeyCredentials, protocols = protocols)
 
     intercept[IllegalArgumentException] {
-      val engine = factory(config)
+      factory(config)
     }
   }
 
@@ -202,7 +223,7 @@ class Netty4ServerEngineFactoryTest extends FunSuite {
     )
 
     intercept[UnsupportedOperationException] {
-      val engine = factory(config)
+      factory(config)
     }
   }
 

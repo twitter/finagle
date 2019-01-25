@@ -3,11 +3,8 @@ package com.twitter.finagle.ssl.server
 import com.twitter.finagle.ssl._
 import com.twitter.io.TempFile
 import javax.net.ssl.SSLContext
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class SslContextServerEngineFactoryTest extends FunSuite {
 
   private[this] val sslContext: SSLContext = {
@@ -37,8 +34,24 @@ class SslContextServerEngineFactoryTest extends FunSuite {
     val config = SslServerConfiguration(keyCredentials = keyCredentials)
 
     intercept[SslConfigurationException] {
-      val engine = factory(config)
+      factory(config)
     }
+  }
+
+  test("config with certs and key fails") {
+    val tempCertsFile = TempFile.fromResourcePath("/ssl/certs/test-rsa-full-cert-chain.crt")
+    // deleteOnExit is handled by TempFile
+
+    val tempKeyFile = TempFile.fromResourcePath("/ssl/keys/test-pkcs8.key")
+    // deleteOnExit is handled by TempFile
+
+    val keyCredentials = KeyCredentials.CertsAndKey(tempCertsFile, tempKeyFile)
+    val config = SslServerConfiguration(keyCredentials = keyCredentials)
+
+    intercept[SslConfigurationException] {
+      factory(config)
+    }
+
   }
 
   test("config with cert, key, and chain fails") {
@@ -52,7 +65,7 @@ class SslContextServerEngineFactoryTest extends FunSuite {
     val config = SslServerConfiguration(keyCredentials = keyCredentials)
 
     intercept[SslConfigurationException] {
-      val engine = factory(config)
+      factory(config)
     }
   }
 
@@ -60,7 +73,7 @@ class SslContextServerEngineFactoryTest extends FunSuite {
     val config = SslServerConfiguration(trustCredentials = TrustCredentials.Insecure)
 
     intercept[SslConfigurationException] {
-      val engine = factory(config)
+      factory(config)
     }
   }
 
@@ -72,7 +85,7 @@ class SslContextServerEngineFactoryTest extends FunSuite {
     val config = SslServerConfiguration(trustCredentials = trustCredentials)
 
     intercept[SslConfigurationException] {
-      val engine = factory(config)
+      factory(config)
     }
   }
 
@@ -93,7 +106,7 @@ class SslContextServerEngineFactoryTest extends FunSuite {
     val config = SslServerConfiguration(cipherSuites = cipherSuites)
 
     intercept[IllegalArgumentException] {
-      val engine = factory(config)
+      factory(config)
     }
   }
 
@@ -114,7 +127,7 @@ class SslContextServerEngineFactoryTest extends FunSuite {
     val config = SslServerConfiguration(protocols = protocols)
 
     intercept[IllegalArgumentException] {
-      val engine = factory(config)
+      factory(config)
     }
   }
 
@@ -123,7 +136,7 @@ class SslContextServerEngineFactoryTest extends FunSuite {
     val config = SslServerConfiguration(applicationProtocols = appProtocols)
 
     intercept[SslConfigurationException] {
-      val engine = factory(config)
+      factory(config)
     }
   }
 

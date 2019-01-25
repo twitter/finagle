@@ -3,11 +3,8 @@ package com.twitter.finagle.ssl.server
 import com.twitter.finagle.ssl._
 import com.twitter.io.TempFile
 import java.io.File
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class JdkServerEngineFactoryTest extends FunSuite {
 
   test("default config succeeds") {
@@ -33,7 +30,7 @@ class JdkServerEngineFactoryTest extends FunSuite {
     assert(sslEngine != null)
   }
 
-  test("config with bad cert of key credential fails") {
+  test("config with bad cert or key credential fails") {
     val tempCertFile = File.createTempFile("test", "crt")
     tempCertFile.deleteOnExit()
 
@@ -44,10 +41,39 @@ class JdkServerEngineFactoryTest extends FunSuite {
     val config = SslServerConfiguration(keyCredentials = keyCredentials)
 
     intercept[SslConfigurationException] {
-      val engine = JdkServerEngineFactory(config)
+      JdkServerEngineFactory(config)
     }
   }
 
+  test("config with good cert chain and key credentials succeeds") {
+    val tempCertFile = TempFile.fromResourcePath("/ssl/certs/test-rsa-full-cert-chain.crt")
+    // deleteOnExit is handled by TempFile
+
+    val tempKeyFile = TempFile.fromResourcePath("/ssl/keys/test-pkcs8.key")
+    // deleteOnExit is handled by TempFile
+
+    val keyCredentials = KeyCredentials.CertsAndKey(tempCertFile, tempKeyFile)
+    val config = SslServerConfiguration(keyCredentials = keyCredentials)
+    val engine = JdkServerEngineFactory(config)
+    val sslEngine = engine.self
+
+    assert(sslEngine != null)
+  }
+
+  test("config with bad cert chain or key credential fails") {
+    val tempCertFile = File.createTempFile("test", "crt")
+    tempCertFile.deleteOnExit()
+
+    val tempKeyFile = TempFile.fromResourcePath("/ssl/keys/test-pkcs8.key")
+    // deleteOnExit is handled by TempFile
+
+    val keyCredentials = KeyCredentials.CertsAndKey(tempCertFile, tempKeyFile)
+    val config = SslServerConfiguration(keyCredentials = keyCredentials)
+
+    intercept[SslConfigurationException] {
+      JdkServerEngineFactory(config)
+    }
+  }
   test("config with cert, key, and chain fails") {
     val tempCertFile = TempFile.fromResourcePath("/ssl/certs/test-rsa.crt")
     // deleteOnExit is handled by TempFile
@@ -59,7 +85,7 @@ class JdkServerEngineFactoryTest extends FunSuite {
     val config = SslServerConfiguration(keyCredentials = keyCredentials)
 
     intercept[SslConfigurationException] {
-      val engine = JdkServerEngineFactory(config)
+      JdkServerEngineFactory(config)
     }
   }
 
@@ -91,7 +117,7 @@ class JdkServerEngineFactoryTest extends FunSuite {
     val config = SslServerConfiguration(trustCredentials = trustCredentials)
 
     intercept[SslConfigurationException] {
-      val engine = JdkServerEngineFactory(config)
+      JdkServerEngineFactory(config)
     }
   }
 
@@ -112,7 +138,7 @@ class JdkServerEngineFactoryTest extends FunSuite {
     val config = SslServerConfiguration(cipherSuites = cipherSuites)
 
     intercept[IllegalArgumentException] {
-      val engine = JdkServerEngineFactory(config)
+      JdkServerEngineFactory(config)
     }
   }
 
@@ -133,7 +159,7 @@ class JdkServerEngineFactoryTest extends FunSuite {
     val config = SslServerConfiguration(protocols = protocols)
 
     intercept[IllegalArgumentException] {
-      val engine = JdkServerEngineFactory(config)
+      JdkServerEngineFactory(config)
     }
   }
 
@@ -142,7 +168,7 @@ class JdkServerEngineFactoryTest extends FunSuite {
     val config = SslServerConfiguration(applicationProtocols = appProtocols)
 
     intercept[SslConfigurationException] {
-      val engine = JdkServerEngineFactory(config)
+      JdkServerEngineFactory(config)
     }
   }
 

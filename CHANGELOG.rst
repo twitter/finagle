@@ -13,6 +13,10 @@ New Features
 * finagle-core: Added gauge `is_marked_dead` as an indicator of whether the host is marked
   as dead(1) or not(0) in `FailFastFactory`. ``PHAB_ID=D263552``
 
+* finagle-core: `KeyCredentials.CertsAndKey` has been added as an option for
+  `c.t.f.ssl.KeyCredentials` for when the certificate and certificate chain are
+  contained within the same file. ``PHAB_ID=D264325``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

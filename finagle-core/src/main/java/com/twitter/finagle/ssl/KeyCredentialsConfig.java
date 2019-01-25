@@ -27,6 +27,14 @@ public final class KeyCredentialsConfig {
   }
 
   /**
+   * See {@link KeyCredentials.CertsAndKey}
+   */
+  public static KeyCredentials certsAndKey(
+      File certificatesFile, File keyFile) {
+    return new KeyCredentials.CertsAndKey(certificatesFile, keyFile);
+  }
+
+  /**
    * See {@link KeyCredentials.CertKeyAndChain}
    */
   public static KeyCredentials certKeyAndChain(

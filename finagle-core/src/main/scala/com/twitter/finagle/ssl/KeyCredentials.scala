@@ -35,6 +35,18 @@ object KeyCredentials {
   case class CertAndKey(certificateFile: File, keyFile: File) extends KeyCredentials
 
   /**
+   * Indicates that this certificate chain and key should be used by the
+   * engine factory.
+   *
+   * @param certificatesFile A file containing multiple X.509 certificates in
+   * PEM format that are part of the same certificate chain.
+   *
+   * @param keyFile A file containing a PKCS #8 private key in PEM format.
+   * It should not require a password.
+   */
+  case class CertsAndKey(certificatesFile: File, keyFile: File) extends KeyCredentials
+
+  /**
    * Indicates that this certificate, key, and certificate chain
    * should be used by the engine factory.
    *

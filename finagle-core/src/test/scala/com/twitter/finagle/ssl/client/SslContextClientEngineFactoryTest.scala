@@ -54,7 +54,7 @@ class SslContextClientEngineFactoryTest extends FunSuite {
     val config = SslClientConfiguration(keyCredentials = keyCredentials)
 
     intercept[SslConfigurationException] {
-      val engine = factory(address, config)
+      factory(address, config)
     }
   }
 
@@ -62,7 +62,7 @@ class SslContextClientEngineFactoryTest extends FunSuite {
     val config = SslClientConfiguration(trustCredentials = TrustCredentials.Insecure)
 
     intercept[SslConfigurationException] {
-      val engine = factory(address, config)
+      factory(address, config)
     }
   }
 
@@ -74,7 +74,7 @@ class SslContextClientEngineFactoryTest extends FunSuite {
       SslClientConfiguration(trustCredentials = TrustCredentials.CertCollection(tempCertFile))
 
     intercept[SslConfigurationException] {
-      val engine = factory(address, config)
+      factory(address, config)
     }
   }
 
@@ -95,7 +95,7 @@ class SslContextClientEngineFactoryTest extends FunSuite {
     val config = SslClientConfiguration(cipherSuites = cipherSuites)
 
     intercept[IllegalArgumentException] {
-      val engine = factory(address, config)
+      factory(address, config)
     }
   }
 
@@ -116,7 +116,7 @@ class SslContextClientEngineFactoryTest extends FunSuite {
     val config = SslClientConfiguration(protocols = protocols)
 
     intercept[IllegalArgumentException] {
-      val engine = factory(address, config)
+      factory(address, config)
     }
   }
 
@@ -125,7 +125,7 @@ class SslContextClientEngineFactoryTest extends FunSuite {
     val config = SslClientConfiguration(applicationProtocols = appProtocols)
 
     intercept[SslConfigurationException] {
-      val engine = factory(address, config)
+      factory(address, config)
     }
   }
 

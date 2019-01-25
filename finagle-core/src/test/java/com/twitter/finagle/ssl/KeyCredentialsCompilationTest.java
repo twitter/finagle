@@ -18,6 +18,12 @@ public class KeyCredentialsCompilationTest {
   }
 
   @Test
+  public void testCertsAndKey() {
+    File file = null;
+    KeyCredentials keyCredentials = KeyCredentialsConfig.certsAndKey(file, file);
+  }
+
+  @Test
   public void testCertKeyAndChain() {
     File file = null;
     KeyCredentials keyCredentials = KeyCredentialsConfig.certKeyAndChain(file, file, file);

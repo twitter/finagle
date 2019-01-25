@@ -5,11 +5,8 @@ import com.twitter.finagle.ssl._
 import com.twitter.io.TempFile
 import java.io.File
 import java.net.InetSocketAddress
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class JdkClientEngineFactoryTest extends FunSuite {
 
   private[this] val address: Address = Address(new InetSocketAddress("localhost", 12345))
@@ -61,7 +58,37 @@ class JdkClientEngineFactoryTest extends FunSuite {
     val config = SslClientConfiguration(keyCredentials = keyCredentials)
 
     intercept[SslConfigurationException] {
-      val engine = JdkClientEngineFactory(address, config)
+      JdkClientEngineFactory(address, config)
+    }
+  }
+
+  test("config with good cert chain and key credentials succeeds") {
+    val tempCertFile = TempFile.fromResourcePath("/ssl/certs/test-rsa-full-cert-chain.crt")
+    // deleteOnExit is handled by TempFile
+
+    val tempKeyFile = TempFile.fromResourcePath("/ssl/keys/test-pkcs8.key")
+    // deleteOnExit is handled by TempFile
+
+    val keyCredentials = KeyCredentials.CertsAndKey(tempCertFile, tempKeyFile)
+    val config = SslClientConfiguration(keyCredentials = keyCredentials)
+    val engine = JdkClientEngineFactory(address, config)
+    val sslEngine = engine.self
+
+    assert(sslEngine != null)
+  }
+
+  test("config with bad cert chain or key credential fails") {
+    val tempCertFile = File.createTempFile("test", "crt")
+    tempCertFile.deleteOnExit()
+
+    val tempKeyFile = TempFile.fromResourcePath("/ssl/keys/test-pkcs8.key")
+    // deleteOnExit is handled by TempFile
+
+    val keyCredentials = KeyCredentials.CertsAndKey(tempCertFile, tempKeyFile)
+    val config = SslClientConfiguration(keyCredentials = keyCredentials)
+
+    intercept[SslConfigurationException] {
+      JdkClientEngineFactory(address, config)
     }
   }
 
@@ -76,7 +103,7 @@ class JdkClientEngineFactoryTest extends FunSuite {
     val config = SslClientConfiguration(keyCredentials = keyCredentials)
 
     intercept[SslConfigurationException] {
-      val engine = JdkClientEngineFactory(address, config)
+      JdkClientEngineFactory(address, config)
     }
   }
 
@@ -108,7 +135,7 @@ class JdkClientEngineFactoryTest extends FunSuite {
     val config = SslClientConfiguration(trustCredentials = trustCredentials)
 
     intercept[SslConfigurationException] {
-      val engine = JdkClientEngineFactory(address, config)
+      JdkClientEngineFactory(address, config)
     }
   }
 
@@ -129,7 +156,7 @@ class JdkClientEngineFactoryTest extends FunSuite {
     val config = SslClientConfiguration(cipherSuites = cipherSuites)
 
     intercept[IllegalArgumentException] {
-      val engine = JdkClientEngineFactory(address, config)
+      JdkClientEngineFactory(address, config)
     }
   }
 
@@ -150,7 +177,7 @@ class JdkClientEngineFactoryTest extends FunSuite {
     val config = SslClientConfiguration(protocols = protocols)
 
     intercept[IllegalArgumentException] {
-      val engine = JdkClientEngineFactory(address, config)
+      JdkClientEngineFactory(address, config)
     }
   }
 
@@ -159,7 +186,7 @@ class JdkClientEngineFactoryTest extends FunSuite {
     val config = SslClientConfiguration(applicationProtocols = appProtocols)
 
     intercept[SslConfigurationException] {
-      val engine = JdkClientEngineFactory(address, config)
+      JdkClientEngineFactory(address, config)
     }
   }
 

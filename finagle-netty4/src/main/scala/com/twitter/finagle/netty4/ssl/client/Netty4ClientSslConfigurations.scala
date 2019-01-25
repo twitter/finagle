@@ -48,7 +48,8 @@ private[finagle] object Netty4ClientSslConfigurations {
    *
    * @note Will not validate the validity for certificates when configured
    *       with [[KeyCredentials.KeyManagerFactory]] in contrast to when
-   *       configured with [[KeyCredentials.CertAndKey]] or [[KeyCredentials.CertKeyAndChain]].
+   *       configured with [[KeyCredentials.CertAndKey]], [[KeyCredentials.CertsAndKey]],
+   *       or [[KeyCredentials.CertKeyAndChain]].
    */
   private def startClientWithKey(keyCredentials: KeyCredentials): SslContextBuilder = {
     val builder: SslContextBuilder = SslContextBuilder.forClient()
@@ -60,6 +61,11 @@ private[finagle] object Netty4ClientSslConfigurations {
           key <- new PrivateKeyFile(keyFile).readPrivateKey()
           cert <- new X509CertificateFile(certFile).readX509Certificate()
         } yield builder.keyManager(key, cert)
+      case KeyCredentials.CertsAndKey(certsFile, keyFile) =>
+        for {
+          key <- new PrivateKeyFile(keyFile).readPrivateKey()
+          certs <- new X509CertificateFile(certsFile).readX509Certificates()
+        } yield builder.keyManager(key, certs: _*)
       case KeyCredentials.CertKeyAndChain(certFile, keyFile, chainFile) =>
         for {
           key <- new PrivateKeyFile(keyFile).readPrivateKey()

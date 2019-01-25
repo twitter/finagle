@@ -2,9 +2,19 @@ package com.twitter.finagle.ssl
 
 import com.twitter.util.security.{Pkcs8KeyManagerFactory, X509TrustManagerFactory}
 import com.twitter.util.{Return, Throw}
+import java.io.File
 import javax.net.ssl.{KeyManager, SSLContext, SSLEngine, TrustManager}
 
 private[ssl] object SslConfigurations {
+
+  private def filesToKeyManagers(certsFile: File, keyFile: File): Array[KeyManager] = {
+    val factory = new Pkcs8KeyManagerFactory(certsFile, keyFile)
+    val tryKms = factory.getKeyManagers()
+    tryKms match {
+      case Return(kms) => kms
+      case Throw(ex) => throw SslConfigurationException(ex)
+    }
+  }
 
   /**
    * Creates an optional array of `javax.net.ssl.KeyManager` based on the [[KeyCredentials]]
@@ -22,12 +32,9 @@ private[ssl] object SslConfigurations {
     keyCredentials match {
       case KeyCredentials.Unspecified => None
       case KeyCredentials.CertAndKey(certFile, keyFile) =>
-        val factory = new Pkcs8KeyManagerFactory(certFile, keyFile)
-        val tryKms = factory.getKeyManagers()
-        tryKms match {
-          case Return(kms) => Some(kms)
-          case Throw(ex) => throw SslConfigurationException(ex)
-        }
+        Some(filesToKeyManagers(certFile, keyFile))
+      case KeyCredentials.CertsAndKey(certsFile, keyFile) =>
+        Some(filesToKeyManagers(certsFile, keyFile))
       case _: KeyCredentials.CertKeyAndChain =>
         throw SslConfigurationException.notSupported(
           "KeyCredentials.CertKeyAndChain",
@@ -142,6 +149,11 @@ private[ssl] object SslConfigurations {
       case KeyCredentials.Unspecified => // Do Nothing
       case KeyCredentials.CertAndKey(_, _) =>
         throw SslConfigurationException.notSupported("KeyCredentials.CertAndKey", engineFactoryName)
+      case KeyCredentials.CertsAndKey(_, _) =>
+        throw SslConfigurationException.notSupported(
+          "KeyCredentials.CertsAndKey",
+          engineFactoryName
+        )
       case KeyCredentials.CertKeyAndChain(_, _, _) =>
         throw SslConfigurationException.notSupported(
           "KeyCredentials.CertKeyAndChain",
