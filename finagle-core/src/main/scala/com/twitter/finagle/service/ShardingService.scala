@@ -45,8 +45,8 @@ private[service] object ShardingService {
 }
 
 case class KetamaShardingServiceBuilder[Req, Rep](
-  _nodes: Option[Seq[KetamaNode[Service[Req, Rep]]]] = None,
-  _hash: Option[Req => Option[Long]] = None,
+  _nodes: Option[Seq[KetamaNode[Service[Req, Rep]]]] = None: None.type,
+  _hash: Option[Req => Option[Long]] = None: None.type,
   _numReps: Int = 160) {
 
   def nodesAndWeights(nodes: Seq[(String, Int, Service[Req, Rep])]) = {

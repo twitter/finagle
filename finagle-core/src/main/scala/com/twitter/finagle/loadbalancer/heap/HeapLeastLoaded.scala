@@ -43,7 +43,7 @@ private[loadbalancer] class HeapLeastLoaded[Req, Rep](
   // Linked list of downed nodes.
   private[this] var downq: Node = null
 
-  private[this] val HeapOps = Heap[Node](
+  private[this] val HeapOps: Heap[Node] = Heap[Node](
     Ordering.by(_.load),
     new Heap.Indexer[Node] {
       def apply(node: Node, i: Int): Unit = {

@@ -67,7 +67,7 @@ private[twitter] object ServerAdmissionControl {
    * This is primarily useful for testing.
    */
   private[finagle] case class Filters(overrides: Option[Seq[ServerParams => TypeAgnostic]])
-  object Filters {
+  private[finagle] object Filters {
     implicit val param: Stack.Param[Filters] = Stack.Param(Filters(None))
   }
 

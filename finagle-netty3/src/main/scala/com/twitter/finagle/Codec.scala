@@ -183,7 +183,7 @@ trait CodecFactory[Req, Rep] {
  * A [[StackClient]] based on a [[Codec]].
  */
 private case class CodecClient[Req, Rep](
-  codecFactory: CodecFactory[Req, Rep]#Client,
+  codecFactory: ClientCodecConfig => Codec[Req, Rep],
   stack: Stack[ServiceFactory[Req, Rep]] = StackClient.newStack[Req, Rep],
   params: Stack.Params = Stack.Params.empty)
     extends StackClient[Req, Rep] {
@@ -276,7 +276,7 @@ private case class CodecClient[Req, Rep](
 }
 
 private case class CodecServer[Req, Rep](
-  codecFactory: CodecFactory[Req, Rep]#Server,
+  codecFactory: ServerCodecConfig => Codec[Req, Rep],
   stack: Stack[ServiceFactory[Req, Rep]] = StackServer.newStack[Req, Rep],
   params: Stack.Params = Stack.Params.empty)
     extends StackServer[Req, Rep] {

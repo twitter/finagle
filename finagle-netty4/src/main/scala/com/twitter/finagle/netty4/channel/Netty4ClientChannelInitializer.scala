@@ -25,7 +25,7 @@ private[netty4] object Netty4ClientChannelInitializer {
  */
 final private[netty4] class Netty4ClientChannelInitializer[T](
   params: Stack.Params,
-  decoderFactory: Option[() => Decoder[T]] = None)
+  decoderFactory: Option[() => Decoder[T]] = None: None.type)
     extends AbstractNetty4ClientChannelInitializer(params) {
   import Netty4ClientChannelInitializer._
 

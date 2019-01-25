@@ -31,8 +31,6 @@ private final class ClientSessionImpl(
   channel: Channel)
     extends ClientSession {
 
-  private type Trans = Transport[Any, Any]
-
   private[this] final class ChildTransport(ch: Channel)
       extends ChannelTransport(
         ch = ch,
@@ -110,7 +108,7 @@ private final class ClientSessionImpl(
   def newChildTransport(streamChannel: Channel): Transport[Any, Any] =
     new ChildTransport(streamChannel)
 
-  def newChildTransport(): Future[Trans] = {
+  def newChildTransport(): Future[Transport[Any, Any]] = {
     if (status != Status.Closed) initNewNettyChildChannel()
     else {
       val ex = new DeadConnectionException(
@@ -121,7 +119,7 @@ private final class ClientSessionImpl(
     }
   }
 
-  private[this] def initNewNettyChildChannel(): Future[Trans] = {
+  private[this] def initNewNettyChildChannel(): Future[Transport[Any, Any]] = {
     val p = Promise[Transport[Any, Any]]
     val nettyFuture = bootstrap.open()
 

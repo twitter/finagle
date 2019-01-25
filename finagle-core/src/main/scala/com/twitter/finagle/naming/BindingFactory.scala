@@ -131,7 +131,7 @@ private[finagle] class BindingFactory[Req, Rep](
   override def status = dtabCache.status((baseDtab(), Dtab.local))
 }
 
-object BindingFactory {
+private[finagle] object BindingFactory {
   val role = Stack.Role("Binding")
 
   /**
