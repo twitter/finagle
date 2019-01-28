@@ -407,6 +407,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
    * Http.server.withTransport.tls(...)
    * }}}
    */
+  @deprecated("Use tls(SslServerConfiguration) instead", "2019-01-28")
   def tls(
     certificatePath: String,
     keyPath: String,

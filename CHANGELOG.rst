@@ -39,6 +39,13 @@ Runtime Behavior Changes
 
 * finagle-http: Disabling Netty3 cookies in favor of Netty4 cookies. ``PHAB_ID=D262776``
 
+Deprecations
+~~~~~~~~~~~~
+
+* finagle-core: Multi-param legacy `tls` methods have been deprecated in
+  `c.t.f.param.ServerTransportParams` and `c.t.f.builder.ServerBuilder`. Users should migrate
+  to using the `tls(SslServerConfiguration)` method instead. ``PHAB_ID=D265844``
+
 19.1.0
 -------
 

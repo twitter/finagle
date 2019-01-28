@@ -73,6 +73,7 @@ class ServerTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
    * @param nextProtocols the comma-delimited list of protocols used to perform APN
    *                      (Application Protocol Negotiation)
    */
+  @deprecated("Use tls(SslServerConfiguration) instead", "2019-01-28")
   def tls(
     certificatePath: String,
     keyPath: String,
