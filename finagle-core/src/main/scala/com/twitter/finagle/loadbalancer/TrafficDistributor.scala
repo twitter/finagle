@@ -73,12 +73,6 @@ private object TrafficDistributor {
     }
   }
 
-  private val nothingEndpoints: BalancerEndpoints[Nothing, Nothing] =
-    Var(Activity.Ok(Set.empty[EndpointFactory[Nothing, Nothing]]))
-
-  def emptyEndpoints[Req, Rep]: BalancerEndpoints[Req, Rep] =
-    nothingEndpoints.asInstanceOf[BalancerEndpoints[Req, Rep]]
-
   /**
    * Distributes requests to `classes` according to their weight and size.
    */
@@ -215,52 +209,49 @@ private class TrafficDistributor[Req, Rep](
     // Cache entries are balancer instances together with their backing collection
     // which is updatable. The entries are keyed by weight class.
     val init = Map.empty[Double, CachedBalancer[Req, Rep]]
-
-    safelyScanLeft(init, endpoints) { (balancers, activeSet) =>
-      // Group factories so we can retrieve sets of them by weight.
-      val factories = activeSet.groupBy(_.weight)
-
-      // Everything is indexed by weight, so we add or update balancers that
-      // have corresponding factories, and remove balancers that don't.
-      val removals = balancers.keySet -- factories.keySet
-      val additions = factories.keySet -- balancers.keySet
-      val updates = factories.keySet & balancers.keySet
-
-      // Close balancers that don't correspond to new endpoints.
-      removals.foreach { weight =>
-        try balancers(weight).balancer.close()
-        catch {
-          case NonFatal(t) => log.warning(t, "unable to close balancer")
+    safelyScanLeft(init, endpoints) {
+      case (balancers, activeSet) =>
+        val weightedGroups: Map[Double, Set[WeightedFactory[Req, Rep]]] =
+          activeSet.groupBy(_.weight)
+        val merged = if (weightedGroups.isEmpty) {
+          val emptyEndpoints: BalancerEndpoints[Req, Rep] =
+            Var(Activity.Ok(Set.empty[EndpointFactory[Req, Rep]]))
+          val lb = newBalancer(Activity(emptyEndpoints))
+          balancers + (0.0 -> CachedBalancer(lb, emptyEndpoints, 0))
+        } else {
+          weightedGroups.foldLeft(balancers) {
+            case (cache, (weight, factories)) =>
+              val unweighted = factories.map { case WeightedFactory(f, _) => f }
+              val newCacheEntry = if (cache.contains(weight)) {
+                // an update that contains an existing weight class updates
+                // the balancers backing collection.
+                val cached = cache(weight)
+                cached.endpoints.update(Activity.Ok(unweighted))
+                cached.copy(size = unweighted.size)
+              } else {
+                val endpoints: BalancerEndpoints[Req, Rep] = Var(Activity.Ok(unweighted))
+                val lb = newBalancer(Activity(endpoints))
+                CachedBalancer(lb, endpoints, unweighted.size)
+              }
+              cache + (weight -> newCacheEntry)
+          }
         }
-      }
 
-      // Construct new balancers from new endpoints.
-      val addedBalancers = additions.map { weight =>
-        val group = factories(weight).map(_.factory)
-        val endpoints: BalancerEndpoints[Req, Rep] = Var(Activity.Ok(group))
-        val bal = newBalancer(Activity(endpoints))
-        (weight -> CachedBalancer(bal, endpoints, group.size))
-      }.toMap
-
-      // Update existing balancers with new endpoints.
-      val updatedBalancers = updates.map { weight =>
-        val group = factories(weight).map(_.factory)
-        val bal = balancers(weight)
-        bal.endpoints.update(Activity.Ok(group))
-        (weight -> bal.copy(size = group.size))
-      }.toMap
-
-      val result = addedBalancers ++ updatedBalancers
-
-      // Intercept the empty balancer set and replace it with a single balancer
-      // that has an empty set of endpoints.
-      if (result.nonEmpty) result else {
-        // It's important that we construct the balancer within the scanLeft,
-        // so a subsequent iteration has a chance to close it. This way,
-        // scanLeft is responsible for creating and managing the resource.
-        val bal = newBalancer(Activity(emptyEndpoints[Req, Rep]))
-        Map(1.0 -> CachedBalancer(bal, emptyEndpoints[Req, Rep], 0))
-      }
+        // weight classes that no longer exist in the update are removed from
+        // the cache and the associated balancer instances are closed.
+        val removed = balancers.keySet -- weightedGroups.keySet
+        removed.foldLeft(merged) {
+          case (cache, weight) =>
+            cache.get(weight) match {
+              case Some(CachedBalancer(bal, _, _)) =>
+                try bal.close()
+                catch {
+                  case NonFatal(t) => log.warning(t, "unable to close balancer")
+                }
+                cache - weight
+              case _ => cache
+            }
+        }
     }.map {
       case Activity.Ok(cache) =>
         Activity.Ok(cache.map {

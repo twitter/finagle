@@ -1,7 +1,10 @@
 package com.twitter.finagle.util
 
+import org.junit.runner.RunWith
 import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class DrvTest extends FunSuite {
   val N = 100000
 
@@ -35,13 +38,5 @@ class DrvTest extends FunSuite {
   test("Drv.newVose(all zeros)") {
     val Drv.Aliased(_, prob) = Drv.newVose(Seq(0, 0, 0))
     assert(prob forall (_ == 1))
-  }
-
-  test("Drv.fromWeights(nil)") {
-    intercept[IllegalArgumentException] { Drv.fromWeights(Nil) }
-  }
-
-  test("Drv.apply(nil)") {
-    intercept[IllegalArgumentException] { Drv(Nil) }
   }
 }

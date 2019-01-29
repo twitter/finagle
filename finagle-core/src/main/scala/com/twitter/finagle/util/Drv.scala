@@ -28,10 +28,8 @@ object Drv {
    * Math. Softw. 3, 3 (September 1977), 253-256.
    * DOI=10.1145/355744.355749
    * http://doi.acm.org/10.1145/355744.355749
-   *
-   * Package private for testing.
    */
-  private[util] case class Aliased(alias: IndexedSeq[Int], prob: IndexedSeq[Double]) extends Drv {
+  case class Aliased(alias: IndexedSeq[Int], prob: IndexedSeq[Double]) extends Drv {
     require(prob.size == alias.size)
     private[this] val N = alias.size
 
@@ -53,11 +51,11 @@ object Drv {
    * Numbers with a Given Distribution. IEEE Trans. Softw. Eng. 17, 9
    * (September 1991), 972-975. DOI=10.1109/32.92917
    * http://dx.doi.org/10.1109/32.92917
-   *
-   * Package private for testing.
    */
-  private[util] def newVose(dist: Seq[Double]): Drv = {
+  def newVose(dist: Seq[Double]): Aliased = {
     val N = dist.size
+    if (N == 0)
+      return Aliased(Vector.empty, Vector.empty)
 
     val alias = new Array[Int](N)
     val prob = new Array[Double](N)
@@ -99,10 +97,8 @@ object Drv {
    * operating on the honor's system.
    */
   def apply(dist: Seq[Double]): Drv = {
-    require(dist.nonEmpty)
     val sum = dist.sum
-    if (!(sum < 1 + ε && sum > 1 - ε))
-      throw new AssertionError("Bad sum %.001f".format(sum))
+    assert(dist.size == 0 || (sum < 1 + ε && sum > 1 - ε), "Bad sum %0.001f".format(sum))
     newVose(dist)
   }
 
@@ -111,11 +107,10 @@ object Drv {
    * (ratios).
    */
   def fromWeights(weights: Seq[Double]): Drv = {
-    require(weights.nonEmpty)
     val sum = weights.sum
     if (sum == 0)
       Drv(Seq.fill(weights.size) { 1D / weights.size })
     else
-      Drv(weights.map(_ / sum))
+      Drv(weights map (_ / sum))
   }
 }

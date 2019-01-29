@@ -24,10 +24,6 @@ Breaking API Changes
   To migrate your client, simply remove the configuration--it had absolutely no effect.
   ``PHAB_ID=D260077``
 
-* finagle-core: `Drv.Aliased` and `Drv.newVose` are now private, please
-  construct a `Drv` instance using `Drv.apply` or `Drv.fromWeights`.
-  ``PHAB_ID=D262960``
-
 Bug Fixes
 ~~~~~~~~~
 
