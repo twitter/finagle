@@ -35,6 +35,9 @@ Runtime Behavior Changes
 
 * finagle-http: Disabling Netty3 cookies in favor of Netty4 cookies. ``PHAB_ID=D262776``
 
+* finagle-http: Removed the debug metrics `http/cookie/dropped_samesites` and
+  `http/cookie/flagless_samesites`. ``PHAB_ID=D267239``
+
 Deprecations
 ~~~~~~~~~~~~
 

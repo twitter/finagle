@@ -1,10 +1,9 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.http.cookie.{SameSite, supportSameSiteCodec}
+import com.twitter.finagle.http.cookie.supportSameSiteCodec
 import com.twitter.finagle.http.netty3.Netty3CookieCodec
 import com.twitter.finagle.http.netty4.Netty4CookieCodec
 import com.twitter.finagle.server.ServerInfo
-import com.twitter.finagle.stats.{LoadedStatsReceiver, Verbosity}
 import org.jboss.netty.handler.codec.http.HttpHeaders
 import scala.collection.mutable
 
@@ -22,10 +21,6 @@ private[finagle] object CookieMap {
   // Note that this is a def to allow it to be toggled for unit tests.
   private[finagle] def includeSameSite: Boolean = supportSameSiteCodec()
 
-  private[finagle] val flaglessSameSitesCounter =
-    LoadedStatsReceiver.scope("http").scope("cookie").counter(Verbosity.Debug, "flagless_samesites")
-  private[finagle] val silentlyDroppedSameSitesCounter =
-    LoadedStatsReceiver.scope("http").scope("cookie").counter(Verbosity.Debug, "dropped_samesites")
 }
 
 /**
@@ -52,7 +47,7 @@ class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
   /**
    * Checks if there was a parse error. Invalid cookies are ignored.
    */
-  def isValid = _isValid
+  def isValid: Boolean = _isValid
   private[this] var _isValid = true
 
   private[this] val cookieHeaderName =
@@ -83,13 +78,8 @@ class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
       message.headerMap.set(cookieHeaderName, cookieCodec.encodeClient(values))
     } else {
       foreach {
-        case (_, cookie) => {
+        case (_, cookie) =>
           message.headerMap.add(cookieHeaderName, cookieCodec.encodeServer(cookie))
-          if (!message.headerMap.toString.contains("SameSite")
-            && cookie.sameSite != SameSite.Unset) {
-            CookieMap.silentlyDroppedSameSitesCounter.incr()
-          }
-        }
       }
     }
   }
@@ -199,13 +189,6 @@ class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
     cookieHeader <- message.headerMap.getAll(cookieHeaderName)
     cookie <- decodeCookies(cookieHeader)
   } {
-    // Checks whether the SameSite attribute is set in the response but the
-    // codec is disabled. This is undesirable behavior so we wish to report it.
-    if (!CookieMap.includeSameSite
-      && message.isResponse
-      && cookieHeader.contains("SameSite")) {
-      CookieMap.flaglessSameSitesCounter.incr()
-    }
     add(cookie)
   }
 }
