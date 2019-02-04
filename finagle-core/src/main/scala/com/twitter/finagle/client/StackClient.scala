@@ -288,10 +288,7 @@ object StackClient {
      *    acquisition.
      *
      *  * `Role.prepFactory` is a hook used to inject codec-specific
-     *    behavior; it is used in the HTTP codec to avoid closing a
-     *    service while a chunked response is being read. It must
-     *    appear below `FactoryToService` so that services are not
-     *    prematurely closed by `FactoryToService`.
+     *    behavior that needs to run for each session before it's been acquired.
      *
      *  * `FactoryToService` acquires a new endpoint service from the
      *    load balancer on each request (and closes it after the

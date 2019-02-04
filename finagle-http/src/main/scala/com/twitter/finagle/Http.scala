@@ -184,20 +184,22 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
         // We insert the ClientNackFilter close to the bottom of the stack to
         // eagerly transform the HTTP nack representation to a `Failure`.
         .insertBefore(StackClient.Role.prepConn, ClientNackFilter.module)
+        // We add a DelayedRelease module at the bottom of the stack to ensure
+        // that the pooling levels above don't discard an active session.
+        .replace(StackClient.Role.prepConn, DelayedRelease.module(StackClient.Role.prepConn))
         // Since NackAdmissionFilter should operate on all requests sent over
         // the wire including retries, it must be below `Retries`. Since it
         // aggregates the status of the entire cluster, it must be above
         // `LoadBalancerFactory` (not part of the endpoint stack).
-        .insertBefore(
+        .replace(
           StackClient.Role.prepFactory,
           NackAdmissionFilter.module[http.Request, http.Response]
         )
-        // We add a DelayedRelease module at the bottom of the stack to ensure
-        // that the pooling levels above don't discard an active session.
-        .replace(StackClient.Role.prepConn, DelayedRelease.module(StackClient.Role.prepConn))
         // Ensure that FactoryToService doesn't release the connection to the layers
         // below when the response body hasn't been fully consumed.
-        .replace(StackClient.Role.prepFactory, DelayedRelease.module(StackClient.Role.prepFactory))
+        .replace(
+          StackClient.Role.requestDraining,
+          DelayedRelease.module(StackClient.Role.requestDraining))
         .replace(TraceInitializerFilter.role, new HttpClientTraceInitializer[Request, Response])
         .prepend(http.TlsFilter.module)
         // Because the payload filter also traces the sizes, it's important that we do so
