@@ -49,7 +49,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     val server = startServer(echo)
     val client = connectWithModifier(server.boundAddress, singletonPool = singletonPool) {
       transport =>
-        if (shouldFail) failure.ensure { transport.close() }
+        if (shouldFail) failure.ensure { await(transport.close()) }
         transport
     }
 
@@ -68,15 +68,17 @@ abstract class AbstractStreamingTest extends FunSuite {
 
     // Assert previously queued request is now processed, and not interrupted
     // midstream.
-    def assertSecondRequestOk() = {
-      await(res2.liftToTry) match {
-        case Return(rsp) =>
-          val reader = rsp.reader
-          await(req2.writer.close())
-          await(Reader.readAll(reader))
-          await(Closable.all(server, client).close())
-        case Throw(e) =>
-          fail(s"second request failed: $e")
+    def assertSecondRequestOk(): Unit = {
+      try {
+        await(res2.liftToTry) match {
+          case Return(rsp) =>
+            await(req2.writer.close())
+            await(Reader.readAll(rsp.reader))
+          case Throw(e) =>
+            fail(s"second request failed: $e")
+        }
+      } finally {
+        await(Closable.all(server, client).close())
       }
     }
   }
@@ -142,21 +144,16 @@ abstract class AbstractStreamingTest extends FunSuite {
   }
 
   test("client: fail request writer")(new ClientCtx(singletonPool = true) {
-    assert(res2.poll == None)
-    val exc = new Exception
-    req.writer.fail(exc)
-
-    res.reader.discard()
-
+    assert(res2.poll.isEmpty)
+    req.writer.fail(new Exception)
     assertSecondRequestOk()
   })
 
-  if (!sys.props.contains("SKIP_FLAKY_TRAVIS"))
-    test("client: discard respond reader")(new ClientCtx(singletonPool = true) {
-      assert(res2.poll == None)
-      res.reader.discard()
-      assertSecondRequestOk()
-    })
+  test("client: discard respond reader")(new ClientCtx(singletonPool = true) {
+    assert(res2.poll.isEmpty)
+    res.reader.discard()
+    assertSecondRequestOk()
+  })
 
   test("server: request stream fails read") {
     val buf = Buf.Utf8(".")
@@ -203,7 +200,7 @@ abstract class AbstractStreamingTest extends FunSuite {
 
     val res2 = await(f2)
     await(Reader.readAll(res2.reader))
-    Closable.all(server, client1, client2).close()
+    await(Closable.all(server, client1, client2).close())
   }
 
   test("server: response stream fails write") {
@@ -256,7 +253,7 @@ abstract class AbstractStreamingTest extends FunSuite {
 
     val res2 = await(f2)
     await(Reader.readAll(res2.reader))
-    Closable.all(client1, client2).close()
+    await(Closable.all(client1, client2).close())
   }
 
   test("server: fail response writer") {
@@ -296,7 +293,7 @@ abstract class AbstractStreamingTest extends FunSuite {
 
     val res2 = await(f2)
     await(Reader.readAll(res2.reader))
-    Closable.all(server, client1, client2).close()
+    await(Closable.all(server, client1, client2).close())
   }
 
   test("server: fail request reader") {
@@ -339,7 +336,7 @@ abstract class AbstractStreamingTest extends FunSuite {
 
     val res2 = await(f2)
     await(Reader.readAll(res2.reader))
-    Closable.all(server, client1, client2).close()
+    await(Closable.all(server, client1, client2).close())
   }
 
   test("server: empty buf doesn't close response stream") {
@@ -348,7 +345,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     val client = connect(server.boundAddress, "client")
     val body = await(client(get("/")).flatMap(res => Reader.readAll(res.reader)))
     assert(body == Buf.Utf8("helloworld"))
-    Closable.all(server, client).close()
+    await(Closable.all(server, client).close())
   }
 
   test("client: empty buf doesn't close request stream") {
@@ -360,10 +357,11 @@ abstract class AbstractStreamingTest extends FunSuite {
       _ <- req.writer.write(Buf.Utf8("hello"))
       _ <- req.writer.write(Buf.Empty)
       _ <- req.writer.write(Buf.Utf8("world"))
-    } yield req.writer.close())
+      _ <- req.writer.close()
+    } yield ())
     val body = await(Reader.readAll(res.reader))
     assert(body == Buf.Utf8("helloworld"))
-    Closable.all(server, client).close()
+    await(Closable.all(server, client).close())
   }
 
   test("end-to-end: server gets content for chunked request made to client with content length") {
@@ -384,7 +382,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     await(writer.write(Buf.Utf8("hello")))
     writer.close()
     await(res)
-    Closable.all(server, client).close()
+    await(Closable.all(server, client).close())
   }
 
   test("end-to-end: client may process multiple streaming requests simultaneously") {
@@ -406,8 +404,7 @@ abstract class AbstractStreamingTest extends FunSuite {
       assert(rep1.status == Status.Ok)
       assert(rep1.isChunked)
     } finally {
-      client.close()
-      server.close()
+      await(Closable.all(client, server).close())
     }
   }
 
@@ -429,7 +426,7 @@ abstract class AbstractStreamingTest extends FunSuite {
 
       assert(await(termination.liftToTry).isThrow)
     } finally {
-      Closable.all(client, server).close()
+      await(Closable.all(client, server).close())
     }
   }
 
@@ -451,7 +448,7 @@ abstract class AbstractStreamingTest extends FunSuite {
 
       assert(!await(termination).isFullyRead)
     } finally {
-      Closable.all(client, server).close()
+      await(Closable.all(client, server).close())
     }
   }
 
@@ -472,7 +469,7 @@ abstract class AbstractStreamingTest extends FunSuite {
 
       assert(await(rep.reader.onClose.liftToTry).isThrow)
     } finally {
-      Closable.all(client, server).close()
+      await(Closable.all(client, server).close())
     }
   }
 
@@ -492,7 +489,7 @@ abstract class AbstractStreamingTest extends FunSuite {
 
       assert(!await(req.writer.onClose).isFullyRead)
     } finally {
-      Closable.all(client, server).close()
+      await(Closable.all(client, server).close())
     }
   }
 
@@ -535,7 +532,7 @@ abstract class AbstractStreamingTest extends FunSuite {
 
     val mod: Modifier = { transport: Transport[Any, Any] =>
       if (!setFail.getAndSet(true)) closed.ensure {
-        transport.close()
+        await(transport.close())
       }
       transport
     }

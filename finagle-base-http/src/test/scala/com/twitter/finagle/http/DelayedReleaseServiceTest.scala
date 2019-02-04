@@ -1,14 +1,15 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.Service
-import com.twitter.io.Reader
-import com.twitter.util.Future
+import com.twitter.util.{Await, Duration, Future}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, stub, verify}
 import org.scalatest.FunSuite
 import org.scalatest.mockito.MockitoSugar
 
 class DelayedReleaseServiceTest extends FunSuite with MockitoSugar {
+
+  def await[A](f: Future[A]): A = Await.result(f, Duration.fromSeconds(30))
 
   test("close closes underlying") {
     val service = mock[Service[Request, Response]]
@@ -20,21 +21,74 @@ class DelayedReleaseServiceTest extends FunSuite with MockitoSugar {
   }
 
   test("close waits for response completion") {
-    val request = Request()
-    request.response.setChunked(true)
+    val response = Response()
+    response.setChunked(true)
+    response.writer.close()
 
     val service = mock[Service[Request, Response]]
     stub(service.close()).toReturn(Future.Done)
-    stub(service.apply(any[Request])).toReturn(Future.value(request.response))
+    stub(service.apply(any[Request])).toReturn(Future.value(response))
 
     val proxy = new DelayedReleaseService(service)
 
-    proxy(request) flatMap { response =>
+    val result = proxy(Request()).flatMap { _ =>
       proxy.close()
       verify(service, never).close()
-      Reader.readAll(response.reader)
+      response.reader.read()
     }
-    request.response.close() // EOF
+
+    assert(await(result).isEmpty)
+    verify(service).close()
+  }
+
+  test("close waits for request completion") {
+    val request = Request()
+    request.setChunked(true)
+    request.writer.close()
+
+    val service = mock[Service[Request, Response]]
+    stub(service.close()).toReturn(Future.Done)
+    stub(service.apply(any[Request])).toReturn(Future.value(Response()))
+
+    val proxy = new DelayedReleaseService(service)
+
+    val result = proxy(request).flatMap { _ =>
+      proxy.close()
+      verify(service, never).close()
+      request.reader.read()
+    }
+
+    assert(await(result).isEmpty)
+    verify(service).close()
+  }
+
+  test("close waits for request & response completion") {
+    val request = Request()
+    request.setChunked(true)
+    request.writer.close()
+
+    val response = Response()
+    response.setChunked(true)
+    response.writer.close()
+
+    val service = mock[Service[Request, Response]]
+    stub(service.close()).toReturn(Future.Done)
+    stub(service.apply(any[Request])).toReturn(Future.value(response))
+
+    val proxy = new DelayedReleaseService(service)
+
+    val result = proxy(request).flatMap { _ =>
+      proxy.close()
+      verify(service, never).close()
+
+      request.reader.read().flatMap { _ =>
+        verify(service, never).close()
+
+        response.reader.read()
+      }
+    }
+
+    assert(await(result).isEmpty)
     verify(service).close()
   }
 

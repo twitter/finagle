@@ -30,6 +30,9 @@ Bug Fixes
 * finagle-http: Fix for a bug where HTTP/2 clients could retry requests that had a chunked
   body even if the request body was consumed. ``PHAB_ID=D258719``
 
+* finagle-http: Fix for a bug where HTTP clients could assume connections are reusable, despite
+  having streaming requests in flight. ``PHAB_ID=D264985``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

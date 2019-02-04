@@ -29,10 +29,26 @@ private[finagle] class DelayedReleaseService[-Req <: Request](service: Service[R
 
   override def apply(req: Req): Future[Response] = {
     latch.incr()
+
     service(req).transform {
+      // Streaming Req and Rep.
+      case r @ Return(rep) if req.isChunked && rep.isChunked =>
+        req.reader.onClose.ensure {
+          rep.reader.onClose.ensure { latch.decr() }
+        }
+        Future.const(r)
+
+      // Streaming Rep.
       case r @ Return(rep) if rep.isChunked =>
         rep.reader.onClose.ensure { latch.decr() }
         Future.const(r)
+
+      // Streaming Req.
+      case r if req.isChunked =>
+        req.reader.onClose.ensure { latch.decr() }
+        Future.const(r)
+
+      // Non-streaming.
       case r =>
         latch.decr()
         Future.const(r)
