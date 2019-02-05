@@ -24,6 +24,9 @@ Breaking API Changes
   To migrate your client, simply remove the configuration--it had absolutely no effect.
   ``PHAB_ID=D260077``
 
+* finagle-http: `c.t.f.dispatch.ExpiringServerDispatcher` was dead code. We removed it.
+  `PHAB_ID=D269331`
+
 Bug Fixes
 ~~~~~~~~~
 
