@@ -27,6 +27,12 @@ Breaking API Changes
 * finagle-http: `c.t.f.dispatch.ExpiringServerDispatcher` was dead code. We removed it.
   `PHAB_ID=D269331`
 
+* finagle-thriftmux: `ThriftMux.Client.pushMuxer` is removed. Use `ThriftMux.Client.standardMuxer`
+  instead. ``PHAB_ID=D269373``
+
+* finagle-thriftmux: `ThriftMux.serverMuxer` is removed. Use `ThriftMux.Server.defaultMuxer`
+  instead. ``PHAB_ID=D269373``
+
 Bug Fixes
 ~~~~~~~~~
 

@@ -136,11 +136,6 @@ object ThriftMux
         .withLabel("thrift")
         .withStatsReceiver(ClientStatsReceiver)
 
-    def pushMuxer: StackClient[mux.Request, mux.Response] =
-      Mux.client
-        .copy(stack = BaseClientStack)
-        .configured(ProtocolLibrary("thriftmux"))
-
     def standardMuxer: StackClient[mux.Request, mux.Response] =
       Mux.client
         .copy(stack = BaseClientStack)
@@ -154,7 +149,7 @@ object ThriftMux
    * @see [[https://twitter.github.io/finagle/guide/Protocols.html#thrift Thrift]] documentation
    * @see [[https://twitter.github.io/finagle/guide/Protocols.html#mux Mux]] documentation
    */
-  case class Client(muxer: StackClient[mux.Request, mux.Response] = Client.pushMuxer)
+  case class Client(muxer: StackClient[mux.Request, mux.Response] = Client.standardMuxer)
       extends StackBasedClient[ThriftClientRequest, Array[Byte]]
       with Stack.Parameterized[Client]
       with Stack.Transformable[Client]
@@ -378,16 +373,9 @@ object ThriftMux
   def newService(dest: Name, label: String): Service[ThriftClientRequest, Array[Byte]] =
     client.newService(dest, label)
 
-  @deprecated("Use Server.defaultMuxer instead", "2018-02-01")
-  def serverMuxer: StackServer[mux.Request, mux.Response] = Server.defaultMuxer
-
   object Server {
 
-    /** The default underlying muxer for ThriftMux servers */
-    def defaultMuxer: StackServer[mux.Request, mux.Response] = pushMuxer
-
-    /** Push-based ThriftMux server implementation. */
-    private[finagle] def pushMuxer: StackServer[mux.Request, mux.Response] = {
+    def defaultMuxer: StackServer[mux.Request, mux.Response] = {
       Mux.server
         .copy(
           stack = BaseServerStack,

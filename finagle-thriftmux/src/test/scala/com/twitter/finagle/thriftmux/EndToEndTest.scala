@@ -40,7 +40,7 @@ import org.scalatest.{FunSuite, Tag}
 import scala.collection.JavaConverters._
 import scala.language.reflectiveCalls
 
-abstract class AbstractEndToEndTest
+class EndToEndTest
     extends FunSuite
     with AssertionsForJUnit
     with Eventually
@@ -56,9 +56,15 @@ abstract class AbstractEndToEndTest
     }
   }
 
-  protected def clientImpl: ThriftMux.Client
+  def clientImpl: ThriftMux.Client =
+    ThriftMux.client.copy(muxer = ThriftMux.Client.standardMuxer)
 
-  protected def serverImpl: ThriftMux.Server
+  def serverImpl: ThriftMux.Server = {
+    // need to copy the params since the `.server` call sets the Label to "thrift" into
+    // the current muxers params
+    val serverParams = ThriftMux.server.params
+    ThriftMux.server.copy(muxer = ThriftMux.Server.defaultMuxer.withParams(serverParams))
+  }
 
   // Used for testing ThriftMux's Context functionality. Duplicated from the
   // finagle-mux package as a workaround because you can't easily depend on a

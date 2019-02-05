@@ -17,13 +17,13 @@ class ContextAmplificationTest extends FunSuite with OneInstancePerTest {
     Await.result(a, d)
 
   protected def clientImpl: ThriftMux.Client =
-    ThriftMux.client.copy(muxer = ThriftMux.Client.pushMuxer)
+    ThriftMux.client.copy(muxer = ThriftMux.Client.standardMuxer)
 
   protected def serverImpl: ThriftMux.Server = {
     // need to copy the params since the `.server` call sets the Label to "thrift" into
     // the current muxers params
     val serverParams = ThriftMux.server.params
-    ThriftMux.server.copy(muxer = ThriftMux.Server.pushMuxer.withParams(serverParams))
+    ThriftMux.server.copy(muxer = ThriftMux.Server.defaultMuxer.withParams(serverParams))
   }
 
   case class TestContext(buf: Buf)
