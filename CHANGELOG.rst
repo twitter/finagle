@@ -36,6 +36,11 @@ Bug Fixes
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+* finagle-core: Faster `Filters`. Removes unnecessary `Service.rescue` proxies from
+  the intermediate `andThen`-ed `Filters`. Previously in rare cases you might have seen
+  a raw `Exception` not wrapped in a `Future` if the `Filter` threw. These will now
+  consistently be lifted into a `Future.exception`. ``PHAB_ID=D269003``
+
 * finagle-http: Disabling Netty3 cookies in favor of Netty4 cookies. ``PHAB_ID=D262776``
 
 * finagle-http: Removed the debug metrics `http/cookie/dropped_samesites` and

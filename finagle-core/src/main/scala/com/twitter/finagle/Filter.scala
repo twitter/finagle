@@ -2,6 +2,7 @@ package com.twitter.finagle
 
 import com.twitter.util.{Future, Time}
 import java.util.concurrent.atomic.AtomicBoolean
+import scala.util.control.NonFatal
 
 /**
  * A [[Filter]] acts as a decorator/transformer of a [[Service service]].
@@ -55,10 +56,13 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
   def andThen[Req2, Rep2](
     next: Filter[ReqOut, RepIn, Req2, Rep2]
   ): Filter[ReqIn, RepOut, Req2, Rep2] =
-    if (next eq Filter.identity) this.asInstanceOf[Filter[ReqIn, RepOut, Req2, Rep2]]
-    // Rewrites Filter composition via `andThen` with AndThen's composition
-    // which is just function composition.
-    else AndThen(this, next, service => andThen(next.andThen(service)))
+    if (next eq Filter.identity) {
+      this.asInstanceOf[Filter[ReqIn, RepOut, Req2, Rep2]]
+    } else {
+      // Rewrites Filter composition via `andThen` with AndThen's composition
+      // which is just function composition.
+      AndThen(this, next, service => andThenService(next.andThenService(service)))
+    }
 
   /**
    * Convert the [[Filter.TypeAgnostic]] filter to a Filter and chain it with
@@ -76,9 +80,21 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
    * @param service a service that takes the output request type and the input response type.
    */
   def andThen(service: Service[ReqOut, RepIn]): Service[ReqIn, RepOut] = {
-    val svc = Service.rescue(service)
+    // wrap user-supplied Services such that NonFatal exceptions thrown synchronously
+    // in their `Service.apply` method are lifted into a `Future.exception`.
+    val rescued = Service.rescue(service)
+    andThenService(rescued)
+  }
+
+  private def andThenService(service: Service[ReqOut, RepIn]): Service[ReqIn, RepOut] = {
     new Service[ReqIn, RepOut] {
-      def apply(request: ReqIn): Future[RepOut] = Filter.this.apply(request, svc)
+      def apply(request: ReqIn): Future[RepOut] = {
+        // wrap the user-supplied `Filter.apply`, lifting synchronous exceptions into Futures.
+        try Filter.this.apply(request, service)
+        catch {
+          case NonFatal(e) => Future.exception(e)
+        }
+      }
       override def close(deadline: Time): Future[Unit] = service.close(deadline)
       override def status: Status = service.status
       override def toString: String = {
@@ -148,14 +164,20 @@ object Filter {
     andNext: Filter[_, _, _, _],
     build: Service[ReqOut, RepIn] => Service[ReqIn, RepOut])
       extends Filter[ReqIn, RepOut, ReqOut, RepIn] {
+
     override def andThen[Req2, Rep2](
       next: Filter[ReqOut, RepIn, Req2, Rep2]
-    ): Filter[ReqIn, RepOut, Req2, Rep2] =
-      if (next eq Filter.identity) this.asInstanceOf[Filter[ReqIn, RepOut, Req2, Rep2]]
-      else AndThen(this, next, service => build(next.andThen(service)))
+    ): Filter[ReqIn, RepOut, Req2, Rep2] = {
+      if (next eq Filter.identity) {
+        this.asInstanceOf[Filter[ReqIn, RepOut, Req2, Rep2]]
+      } else {
+        AndThen(this, next, service => build(next.andThenService(service)))
+      }
+    }
 
     override def andThen(underlying: Service[ReqOut, RepIn]): Service[ReqIn, RepOut] = {
-      val svc: Service[ReqIn, RepOut] = build(underlying)
+      val rescued = Service.rescue(underlying)
+      val svc: Service[ReqIn, RepOut] = build(rescued)
       new ServiceProxy[ReqIn, RepOut](svc) {
         override def toString: String =
           s"${AndThen.this.toString}.andThen(${underlying.toString})"
@@ -174,8 +196,11 @@ object Filter {
           s"${AndThen.this.toString}.andThen(${factory.toString})"
       }
 
-    def apply(request: ReqIn, service: Service[ReqOut, RepIn]): Future[RepOut] =
-      build(service)(request)
+    def apply(request: ReqIn, service: Service[ReqOut, RepIn]): Future[RepOut] = {
+      val rescued = Service.rescue(service)
+      val svc = build(rescued)
+      svc(request)
+    }
 
     override def toString: String = {
       val unrolled: Seq[String] = unroll(this)
