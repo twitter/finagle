@@ -12,6 +12,7 @@ import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Address, _}
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}
+import java.util.concurrent.CountDownLatch
 import org.scalatest.concurrent.Eventually
 import org.scalatest.{BeforeAndAfterEach, FunSuite}
 import scala.collection.mutable

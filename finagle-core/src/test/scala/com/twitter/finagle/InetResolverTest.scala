@@ -4,7 +4,7 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.{DefaultStatsReceiver, InMemoryStatsReceiver}
 import com.twitter.util._
 import java.net.{InetAddress, UnknownHostException}
-
+import java.util.concurrent.{CountDownLatch, TimeUnit}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -110,6 +110,6 @@ class InetResolverTest extends FunSuite {
     }
 
     // Should be completed immediately
-    assert(latch.await(maxWaitTimeout))
+    assert(latch.await(maxWaitTimeout.inMilliseconds, TimeUnit.MILLISECONDS))
   }
 }

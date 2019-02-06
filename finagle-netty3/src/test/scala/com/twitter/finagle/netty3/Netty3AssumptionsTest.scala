@@ -1,16 +1,13 @@
 package com.twitter.finagle.netty3
 
-import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 import java.net.{InetSocketAddress, InetAddress}
-import java.util.concurrent.Executors
+import java.util.concurrent.{Executors, CountDownLatch, TimeUnit}
 import org.jboss.netty.bootstrap.{ServerBootstrap, ClientBootstrap}
 import org.jboss.netty.channel._
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
-
-import com.twitter.util.CountDownLatch
-import com.twitter.conversions.DurationOps._
+import org.junit.runner.RunWith
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class Netty3AssumptionsTest extends FunSuite {
@@ -65,7 +62,7 @@ class Netty3AssumptionsTest extends FunSuite {
           }
       })
 
-    assert(latch.await(1.second))
+    assert(latch.await(1, TimeUnit.SECONDS))
 
     ch.close().awaitUninterruptibly()
   }

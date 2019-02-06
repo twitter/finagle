@@ -7,7 +7,7 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.{Address, _}
 import com.twitter.util._
 import java.net.InetSocketAddress
-import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.{ConcurrentHashMap, CountDownLatch}
 
 class PartitioningServiceTest extends PartitioningServiceTestBase {
 

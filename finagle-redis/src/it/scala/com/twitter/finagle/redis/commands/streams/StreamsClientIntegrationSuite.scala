@@ -6,6 +6,7 @@ import com.twitter.finagle.redis._
 import com.twitter.finagle.redis.util.RedisTestHelper
 import com.twitter.io.Buf
 import com.twitter.util._
+import java.util.concurrent.CountDownLatch
 import org.scalactic.source.Position
 import org.scalatest.{Inside, Tag}
 
