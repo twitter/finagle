@@ -17,6 +17,9 @@ New Features
   `c.t.f.ssl.KeyCredentials` for when the certificate and certificate chain are
   contained within the same file. ``PHAB_ID=D264325``
 
+* finagle-thriftmux: The RPC method name is now included in the trace when using
+   Scrooge generated Thrift bindings. ``PHAB_ID=D269383``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

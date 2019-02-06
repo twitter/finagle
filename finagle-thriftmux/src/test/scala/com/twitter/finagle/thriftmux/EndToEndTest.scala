@@ -408,6 +408,46 @@ class EndToEndTest
     }
   }
 
+  test("client + server: rpc name should be included in trace") {
+    def tracer(rpcName: AtomicReference[String]): Tracer = new Tracer {
+      def record(record: Record): Unit = {
+        record match {
+          case Record(_, _, Annotation.Rpc(name), _) =>
+            rpcName.compareAndSet(null, name)
+          case _ =>
+        }
+      }
+      def sampleTrace(traceId: TraceId): Option[Boolean] = Tracer.SomeTrue
+    }
+
+    val serverRpc = new AtomicReference[String]()
+    val server = serverImpl
+      .withTracer(tracer(serverRpc))
+      .serveIface(
+        new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+        new TestService.MethodPerEndpoint {
+          def query(x: String): Future[String] = Future.value(x)
+          def question(y: String): Future[String] = ???
+          def inquiry(z: String): Future[String] = ???
+        }
+      )
+
+    val clientRpc = new AtomicReference[String]()
+    val client = clientImpl
+      .withTracer(tracer(clientRpc))
+      .build[TestService.MethodPerEndpoint](
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+        "client"
+      )
+
+    await(client.query("ok"))
+
+    assert("query" == serverRpc.get)
+    assert("query" == clientRpc.get)
+
+    await(server.close())
+  }
+
   test("thriftmux server + Finagle thrift client: clientId should be passed from client to server") {
     val server = serverImpl.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),

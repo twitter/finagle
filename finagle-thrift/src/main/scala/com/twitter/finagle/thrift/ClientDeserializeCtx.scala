@@ -6,8 +6,12 @@ import com.twitter.util.Try
 
 /**
  * Used by Thrift and ThriftMux Client to facilitate giving
- * the Finagle stack access to the deserialized forms of
- * Thrift requests and responses.
+ * the Finagle stack access to various data that are computed
+ * outside of Finagle's stack.
+ *
+ * This includes:
+ *  - the deserialized forms of Thrift requests and responses.
+ *  - the name of the rpc
  *
  * While this is thread-safe, it should only be used for the life
  * of a single request/response pair.
@@ -15,12 +19,18 @@ import com.twitter.util.Try
  * When using [[https://twitter.github.io/scrooge/ Scrooge]] for code
  * generation, a proper `ClientDeserializeCtx` will be available
  * to code via `Contexts.local(ClientDeserializeCtx.Key)`.
+ *
+ * @note this class has evolved and it's name is now a bit too specific
+ *       for its more expanded role.
  */
 class ClientDeserializeCtx[Rep](val request: Any, replyDeserializer: Array[Byte] => Try[Rep])
     extends (Array[Byte] => ReqRep) {
 
   // thread safety provided via synchronization on this
   private[this] var deserialized: Try[Rep] = null
+
+  // thread safety provided via synchronization on this
+  private[this] var _rpcName: Option[String] = None
 
   /**
    * Deserialize the given bytes.
@@ -38,6 +48,24 @@ class ClientDeserializeCtx[Rep](val request: Any, replyDeserializer: Array[Byte]
   def apply(responseBytes: Array[Byte]): ReqRep = {
     ReqRep(request, deserialize(responseBytes))
   }
+
+  /**
+   * Sets the name of the the rpc method.
+   */
+  def rpcName(name: String): Unit = {
+    val asOption = Option(name)
+    synchronized {
+      _rpcName = asOption
+    }
+  }
+
+  /**
+   * Gets the rpc method's name, if set.
+   */
+  def rpcName: Option[String] = synchronized {
+    _rpcName
+  }
+
 }
 
 object ClientDeserializeCtx {

@@ -28,7 +28,7 @@ import com.twitter.finagle.stats.{
 import com.twitter.finagle.thrift._
 import com.twitter.finagle.thriftmux.pushsession.MuxDowngradingNegotiator
 import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
-import com.twitter.finagle.tracing.Tracer
+import com.twitter.finagle.tracing.{TraceInitializerFilter, Tracer}
 import com.twitter.io.Buf
 import com.twitter.util._
 import java.net.SocketAddress
@@ -107,8 +107,15 @@ object ThriftMux
   /**
    * Base [[com.twitter.finagle.Stack]] for ThriftMux clients.
    */
-  val BaseClientStack: Stack[ServiceFactory[mux.Request, mux.Response]] =
-    ThriftMuxUtil.protocolRecorder +: Mux.client.stack
+  val BaseClientStack: Stack[ServiceFactory[mux.Request, mux.Response]] = {
+    val stack = ThriftMuxUtil.protocolRecorder +: Mux.client.stack
+    // this module does Tracing and as such it's important to be added
+    // after the tracing context is initialized.
+    stack.insertAfter(
+      TraceInitializerFilter.role,
+      thriftmux.service.ClientTraceAnnotationsFilter.module
+    )
+  }
 
   /**
    * Base [[com.twitter.finagle.Stack]] for ThriftMux servers.
