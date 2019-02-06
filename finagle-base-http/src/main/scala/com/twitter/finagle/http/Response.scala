@@ -76,14 +76,6 @@ abstract class Response private extends Message {
 object Response {
 
   /**
-   * Utility class to make it possible to mock/spy a Response.
-   */
-  @deprecated("Use Response or Response.Proxy", "2017-04-28")
-  class Ok extends Proxy {
-    val response = Response()
-  }
-
-  /**
    * [[com.twitter.collection.RecordSchema RecordSchema]] declaration, used
    * to generate [[com.twitter.collection.RecordSchema.Record Record]] instances
    * for Response.ctx.

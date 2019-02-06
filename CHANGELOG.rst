@@ -39,6 +39,9 @@ Breaking API Changes
 * finagle-base-http: Removed the `c.t.f.http.Statuses` java helper, which was deprecated two years
   ago in favor of using `c.t.f.http.Status` directly. ``PHAB_ID=D269207``
 
+* finagle-http: `c.t.f.http.Response.Ok` was removed. Use just `Response()` or `Response.Proxy`
+  if you need to mock it. ``PHAB_ID=D269737``
+
 Bug Fixes
 ~~~~~~~~~
 
