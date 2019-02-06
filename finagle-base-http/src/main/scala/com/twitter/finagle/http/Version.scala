@@ -2,8 +2,6 @@ package com.twitter.finagle.http
 
 /**
  * Represents the HTTP version.
- *
- * For Java-friendly enums, see [[com.twitter.finagle.http.Versions]].
  */
 final case class Version private (major: Int, minor: Int) {
 

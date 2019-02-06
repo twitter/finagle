@@ -36,6 +36,9 @@ Breaking API Changes
 * finagle-thriftmux: `ThriftMux.serverMuxer` is removed. Use `ThriftMux.Server.defaultMuxer`
   instead. ``PHAB_ID=D269373``
 
+* finagle-base-http: Removed the `c.t.f.http.Statuses` java helper, which was deprecated two years
+  ago in favor of using `c.t.f.http.Status` directly. ``PHAB_ID=D269207``
+
 Bug Fixes
 ~~~~~~~~~
 
