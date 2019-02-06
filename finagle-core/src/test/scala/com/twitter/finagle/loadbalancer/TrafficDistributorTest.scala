@@ -45,7 +45,9 @@ private object TrafficDistributorTest {
       }
   }
 
-  private case class Balancer(endpoints: Activity[Traversable[AddressFactory]])
+  private case class Balancer(
+    endpoints: Activity[Traversable[AddressFactory]],
+    onClose: scala.Function0[Unit] = () => ())
       extends ServiceFactory[Int, Int] {
     var offeredLoad = 0
     var balancerIsClosed = false
@@ -60,6 +62,7 @@ private object TrafficDistributorTest {
     }
     def close(deadline: Time): Future[Unit] = {
       balancerIsClosed = true
+      onClose()
       Future.Done
     }
     override def toString: String = s"Balancer($endpoints)"
@@ -84,6 +87,10 @@ private object TrafficDistributorTest {
       AddressFactory(addr)
     }
 
+    def numWeightClasses(sr: InMemoryStatsReceiver): Float =
+      sr.gauges(Seq("num_weight_classes"))()
+
+    var closeBalancerCalls = 0
     var newBalancerCalls = 0
     var balancers: Set[Balancer] = Set.empty
     def newBalancer(eps: Activity[Set[EndpointFactory[Int, Int]]]): ServiceFactory[Int, Int] = {
@@ -96,7 +103,7 @@ private object TrafficDistributorTest {
           epsf.asInstanceOf[LazyEndpointFactory[Int, Int]].self.get.asInstanceOf[AddressFactory]
         }
       }
-      val b = Balancer(addressFactories)
+      val b = Balancer(addressFactories, () => closeBalancerCalls += 1)
       balancers += b
       b
     }
@@ -170,7 +177,7 @@ class TrafficDistributorTest extends FunSuite {
 
     val R = 50
     for (_ <- 0 until R) dist()
-    assert(balancers.size == 1)
+    assert(numWeightClasses(sr) == 1)
     assert(balancers.head.offeredLoad == R)
     assert(sr.gauges(Seq("meanweight"))() == 5.0)
   })
@@ -228,12 +235,12 @@ class TrafficDistributorTest extends FunSuite {
   test("memoize calls to newEndpoint and newBalancer")(new Ctx {
     val init: Set[Address] = (1 to 5).map(Address(_)).toSet
     val dest = Var(Activity.Ok(init))
-
-    newDist(dest, autoPrime = true)
+    val sr = new InMemoryStatsReceiver
+    newDist(dest, statsReceiver = sr, autoPrime = true)
 
     assert(newEndpointCalls == init.size)
     assert(newBalancerCalls == 1)
-    assert(balancers.size == 1)
+    assert(numWeightClasses(sr) == 1)
     assert(balancers.head.endpoints.sample() == init.map(AddressFactory))
 
     val update: Set[Address] = (3 to 10).map(Address(_)).toSet
@@ -249,11 +256,11 @@ class TrafficDistributorTest extends FunSuite {
       WeightedAddress(Address(i), i)
     }.toSet
     val dest = Var(Activity.Ok(init))
-
-    newDist(dest, autoPrime = true)
+    val sr = new InMemoryStatsReceiver
+    newDist(dest, statsReceiver = sr, autoPrime = true)
 
     assert(newBalancerCalls == init.size)
-    assert(balancers.size == init.size)
+    assert(numWeightClasses(sr) == init.size)
     assert(newEndpointCalls == init.size)
 
     // insert new endpoints on existing weight classes
@@ -476,31 +483,41 @@ class TrafficDistributorTest extends FunSuite {
   test("transition to empty balancer on empty address state")(new Ctx {
     val init: Activity.State[Set[Address]] = Activity.Pending
     val dest = Var(init)
-    val dist = newDist(dest)
+    val sr = new InMemoryStatsReceiver
+    val dist = newDist(dest, statsReceiver = sr)
 
     dest() =
-      Activity.Ok(Set((1, 2.0), (2, 1.0), (3, 2.0)).map(x => WeightedAddress(Address(x._1), x._2)))
+      Activity.Ok(Set((1, 2.0), (2, 3.0), (3, 2.0)).map(x => WeightedAddress(Address(x._1), x._2)))
     val bal0 = Await.result(dist())
-    assert(balancers.size == 2)
+    assert(numWeightClasses(sr) == 2)
 
     dest() = Activity.Ok(Set.empty[Address])
     val ex = intercept[NoBrokersAvailableException] { Await.result(dist()) }
-    assert(balancers.size == 3)
+    assert(numWeightClasses(sr) == 1)
+    assert(closeBalancerCalls == 2)
+
+    // Update 1.0 which is the "empty" balancer index. An update means that we
+    // reused the "empty" balancer, tested by the closeBalancerCalls assertion.
+    dest() = Activity.Ok(weightClass(1.0, 10))
+    val bal1 = Await.result(dist())
+    assert(numWeightClasses(sr) == 1)
+    assert(closeBalancerCalls == 2)
   })
 
   test("ensure empty load balancer is closed after address set updates")(new Ctx {
     val init: Activity.State[Set[Address]] = Activity.Pending
     val dest = Var(init)
-    val dist = newDist(dest)
+    val sr = new InMemoryStatsReceiver
+    val dist = newDist(dest, statsReceiver = sr)
 
     dest() =
       Activity.Ok(Set((1, 2.0), (2, 1.0), (3, 2.0)).map(x => WeightedAddress(Address(x._1), x._2)))
     val bal0 = Await.result(dist())
-    assert(balancers.size == 2)
+    assert(numWeightClasses(sr) == 2)
 
     dest() = Activity.Ok(Set.empty[Address])
     val ex = intercept[NoBrokersAvailableException] { Await.result(dist()) }
-    assert(balancers.size == 3)
+    assert(numWeightClasses(sr) == 1)
 
     dest() = Activity.Ok(Set((1, 1.0)).map(x => WeightedAddress(Address(x._1), x._2)))
     val bal2 = Await.result(dist())
@@ -511,4 +528,35 @@ class TrafficDistributorTest extends FunSuite {
       case _ => fail("Empty balancer does not exist")
     }
   })
+
+  test("stream of empty updates returns empty exception")(new Ctx {
+    val init: Activity.State[Set[Address]] = Activity.Pending
+    val dest = Var(init)
+    val sr = new InMemoryStatsReceiver
+    val dist = newDist(dest, statsReceiver = sr)
+    for (i <- 0 to 2) {
+      dest() = Activity.Ok(Set.empty[Address])
+      intercept[NoBrokersAvailableException] { Await.result(dist()) }
+    }
+    // numWeightClasses is the number of balancers emitted by the partition.
+    assert(numWeightClasses(sr) == 1.toFloat)
+
+    // New balancer created for each update with an empty endpoint set. Each
+    // time we create a new balancer, we close the previous balancer. The
+    // assert on closeBalancerCalls would fail if we created the "empty"
+    // balancer outside of the scanLeft.
+    assert(newBalancerCalls == 3)
+    assert(closeBalancerCalls == 2)
+
+    // Finally, we give the distributor an endpoint.
+    dest() = Activity.Ok(weightClass(2.0, 100))
+    Await.result(dist())
+
+    // Verify that there's still one balancer in the distribution, because we
+    // close the "empty" balancer.
+    assert(numWeightClasses(sr) == 1.toFloat)
+    assert(newBalancerCalls == 4)
+    assert(closeBalancerCalls == 3)
+  })
+
 }

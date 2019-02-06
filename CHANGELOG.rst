@@ -45,6 +45,10 @@ Breaking API Changes
 * finagle-http: `c.t.f.http.Response.Ok` was removed. Use just `Response()` or `Response.Proxy`
   if you need to mock it. ``PHAB_ID=D269737``
 
+* finagle-core: `Drv.Aliased` and `Drv.newVose` are now private, please
+  construct a `Drv` instance using `Drv.apply` or `Drv.fromWeights`.
+  ``PHAB_ID=D262960``
+
 Bug Fixes
 ~~~~~~~~~
 
