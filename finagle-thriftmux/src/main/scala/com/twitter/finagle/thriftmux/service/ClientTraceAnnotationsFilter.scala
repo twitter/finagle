@@ -22,13 +22,18 @@ private[finagle] object ClientTraceAnnotationsFilter {
           service(request).ensure {
             val deserCtx = ClientDeserializeCtx.get
             if (deserCtx ne ClientDeserializeCtx.nullDeserializeCtx) {
-
-              deserCtx.rpcName match {
-                case Some(name) =>
-                  val trace = Trace()
-                  if (trace.isActivelyTracing)
-                    trace.recordRpc(name)
-                case _ =>
+              val trace = Trace()
+              if (trace.isActivelyTracing) {
+                deserCtx.rpcName match {
+                  case Some(name) => trace.recordRpc(name)
+                  case _ =>
+                }
+                val serNs = deserCtx.serializationTime
+                if (serNs >= 0L)
+                  trace.recordBinary("clnt/request_serialization_ns", serNs)
+                val deserNs = deserCtx.deserializationTime
+                if (deserNs >= 0L)
+                  trace.recordBinary("clnt/response_deserialization_ns", deserNs)
               }
             }
           }

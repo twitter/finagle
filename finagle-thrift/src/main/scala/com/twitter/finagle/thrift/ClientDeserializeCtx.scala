@@ -11,7 +11,9 @@ import com.twitter.util.Try
  *
  * This includes:
  *  - the deserialized forms of Thrift requests and responses.
- *  - the name of the rpc
+ *  - the name of the rpc.
+ *  - the elapsed time to serialize the request.
+ *  - the elapsed time to deserialize the response.
  *
  * While this is thread-safe, it should only be used for the life
  * of a single request/response pair.
@@ -26,11 +28,15 @@ import com.twitter.util.Try
 class ClientDeserializeCtx[Rep](val request: Any, replyDeserializer: Array[Byte] => Try[Rep])
     extends (Array[Byte] => ReqRep) {
 
-  // thread safety provided via synchronization on this
+  // Thread safety provided via synchronization on `this`.
+  //   Note that coarse grained synchronization suffices here as
+  //   there should be no contention between threads, though reads
+  //   and writes are likely to happen on different threads.
   private[this] var deserialized: Try[Rep] = null
-
-  // thread safety provided via synchronization on this
   private[this] var _rpcName: Option[String] = None
+  // `Durations` are not used for these, to avoid object allocations.
+  private[this] var serializationNanos: Long = Long.MinValue
+  private[this] var deserializationNanos: Long = Long.MinValue
 
   /**
    * Deserialize the given bytes.
@@ -40,8 +46,11 @@ class ClientDeserializeCtx[Rep](val request: Any, replyDeserializer: Array[Byte]
    * return the first deserialized result.
    */
   def deserialize(responseBytes: Array[Byte]): Try[Rep] = synchronized {
-    if (deserialized == null)
+    if (deserialized == null) {
+      val start = System.nanoTime
       deserialized = replyDeserializer(responseBytes)
+      deserializationNanos = System.nanoTime - start
+    }
     deserialized
   }
 
@@ -66,6 +75,36 @@ class ClientDeserializeCtx[Rep](val request: Any, replyDeserializer: Array[Byte]
     _rpcName
   }
 
+  /**
+   * Sets how long, in nanoseconds, it took for the client to
+   * serialize the request into Thrift format.
+   */
+  def serializationTime(nanos: Long): Unit = synchronized {
+    serializationNanos = nanos
+  }
+
+  /**
+   * Gets how long, in nanoseconds, it took for the client to
+   * serialize the request into Thrift format.
+   *
+   * Negative values indicate that this was not recorded and
+   * as such, should be ignored.
+   */
+  def serializationTime: Long = synchronized {
+    serializationNanos
+  }
+
+  /**
+   * Gets how long, in nanoseconds, it took for the client to
+   * [[deserialize]] the response from Thrift format.
+   *
+   * Negative values indicate that this was not recorded and
+   * as such, should be ignored.
+   */
+  def deserializationTime: Long = synchronized {
+    deserializationNanos
+  }
+
 }
 
 object ClientDeserializeCtx {
@@ -78,5 +117,8 @@ object ClientDeserializeCtx {
   def get: ClientDeserializeCtx[_] = Contexts.local.getOrElse(Key, NullDeserializeFn)
 
   val nullDeserializeCtx: ClientDeserializeCtx[Nothing] =
-    new ClientDeserializeCtx[Nothing](null, null)
+    new ClientDeserializeCtx[Nothing](null, null) {
+      override def rpcName(name: String): Unit = ()
+      override def serializationTime(nanos: Long): Unit = ()
+    }
 }

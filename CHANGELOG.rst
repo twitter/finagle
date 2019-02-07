@@ -17,8 +17,13 @@ New Features
   `c.t.f.ssl.KeyCredentials` for when the certificate and certificate chain are
   contained within the same file. ``PHAB_ID=D264325``
 
-* finagle-thriftmux: The RPC method name is now included in the trace when using
-   Scrooge generated Thrift bindings. ``PHAB_ID=D269383``
+* finagle-thriftmux: Additional information is now annotated in traces for clients
+  using Scrooge generated Thrift bindings. ``PHAB_ID=D269383``, ``PHAB_ID=D270597``
+  This includes:
+
+  - RPC method name
+  - Request serialization time, in nanoseconds
+  - Response deserialization time, in nanoseconds
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~

@@ -448,6 +448,52 @@ class EndToEndTest
     await(server.close())
   }
 
+  test("client + server: serialization time should be included in trace") {
+    val server = serverImpl
+      .serveIface(
+        new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+        new TestService.MethodPerEndpoint {
+          def query(x: String): Future[String] = Future.value(x)
+          def question(y: String): Future[String] = ???
+          def inquiry(z: String): Future[String] = ???
+        }
+      )
+
+    val reqSer = new AtomicBoolean(false)
+    val resDeser = new AtomicBoolean(false)
+    val tracer: Tracer = new Tracer {
+      def record(record: Record): Unit = {
+        record match {
+          case Record(_, _, Annotation.BinaryAnnotation("clnt/request_serialization_ns", _), _) =>
+            reqSer.set(true)
+          case Record(
+              _,
+              _,
+              Annotation.BinaryAnnotation("clnt/response_deserialization_ns", _),
+              _) =>
+            resDeser.set(true)
+          case _ =>
+        }
+      }
+      def sampleTrace(traceId: TraceId): Option[Boolean] = Tracer.SomeTrue
+    }
+
+    val client = clientImpl
+      .withTracer(tracer)
+      .build[TestService.MethodPerEndpoint](
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+        "client"
+      )
+
+    await(client.query("ok"))
+
+    eventually {
+      assert(reqSer.get)
+      assert(resDeser.get)
+    }
+    await(server.close())
+  }
+
   test("thriftmux server + Finagle thrift client: clientId should be passed from client to server") {
     val server = serverImpl.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
