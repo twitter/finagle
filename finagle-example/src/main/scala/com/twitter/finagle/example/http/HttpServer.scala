@@ -1,6 +1,5 @@
 package com.twitter.finagle.example.http
 
-import com.twitter.finagle.builder.ServerBuilder
 import com.twitter.finagle.http.{Request, Response, Status, Version, Fields}
 import com.twitter.finagle.{Http, ListeningServer, Service, SimpleFilter}
 import com.twitter.util.Future
@@ -71,10 +70,7 @@ object HttpServer {
     // compose the Filters and Service together:
     val myService: Service[Request, Response] = handleExceptions andThen authorize andThen respond
 
-    val server: ListeningServer = ServerBuilder()
-      .stack(Http.server)
-      .bindTo(new InetSocketAddress(8080))
-      .name("httpserver")
-      .build(myService)
+    val server: ListeningServer =
+      Http.server.withLabel("httpserver").serve(new InetSocketAddress(8080), myService)
   }
 }
