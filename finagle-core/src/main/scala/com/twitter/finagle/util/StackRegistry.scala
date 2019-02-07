@@ -5,7 +5,6 @@ import com.twitter.finagle.param.{Label, ProtocolLibrary}
 import com.twitter.util.registry.GlobalRegistry
 import java.util.concurrent.atomic.AtomicInteger
 import scala.collection.breakOut
-import scala.language.existentials
 
 object StackRegistry {
 

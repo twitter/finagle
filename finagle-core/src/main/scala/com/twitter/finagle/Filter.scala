@@ -150,8 +150,6 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
 abstract class SimpleFilter[Req, Rep] extends Filter[Req, Rep, Req, Rep]
 
 object Filter {
-  import scala.language.existentials
-
   private def unroll(filter: Filter[_, _, _, _]): Seq[String] = filter match {
     case AndThen(left, right, _) => unroll(left) ++ unroll(right)
     case _ => Seq(filter.toString)
