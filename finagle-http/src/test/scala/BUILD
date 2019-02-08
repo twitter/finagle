@@ -24,7 +24,6 @@ junit_tests(
             "util/util-app",
             scope = "forced",
         ),
-        "util/util-collection",
         "util/util-logging",
         "util/util-stats",
     ],

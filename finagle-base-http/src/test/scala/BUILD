@@ -12,6 +12,5 @@ junit_tests(
         "finagle/finagle-base-http",
         "finagle/finagle-core/src/main/scala",
         "finagle/finagle-toggle/src/main/scala",
-        "util/util-collection/src/main/scala",
     ],
 )

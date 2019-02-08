@@ -21,7 +21,6 @@ scala_library(
             scope = "forced",
         ),
         "util/util-codec",
-        "util/util-collection",
         "util/util-core",
         "util/util-logging",
         "util/util-stats",

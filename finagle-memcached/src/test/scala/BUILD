@@ -14,7 +14,6 @@ scala_library(
     dependencies = [
         "finagle/finagle-core/src/main/scala",
         "finagle/finagle-memcached/src/main/scala",
-        "util/util-collection",
         "util/util-core/src/main/scala",
     ],
 )
@@ -40,7 +39,6 @@ junit_tests(
         "finagle/finagle-memcached/src/test/resources",
         "finagle/finagle-serversets",
         "finagle/finagle-toggle/src/main/scala",
-        "util/util-collection/src/main/scala",
         "util/util-core/src/main/scala",
         "util/util-hashing",
         "util/util-registry/src/main/scala",

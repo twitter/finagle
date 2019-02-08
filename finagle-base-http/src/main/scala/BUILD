@@ -18,13 +18,11 @@ scala_library(
         "finagle/finagle-toggle/src/main/scala",
         "util/util-app",
         "util/util-codec",
-        "util/util-collection",
         "util/util-core",
         "util/util-stats",
     ],
     exports = [
         "3rdparty/jvm/io/netty",
-        "util/util-collection",
         "util/util-core",
     ],
 )

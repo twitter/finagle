@@ -31,7 +31,6 @@ scala_library(
         "finagle/finagle-serversets/src/main/thrift:thrift-java",
         "finagle/finagle-toggle/src/main/scala",
         "util/util-app/src/main/scala",
-        "util/util-collection/src/main/scala",
         "util/util-core/src/main/scala",
         "util/util-function/src/main/java",
         "util/util-hashing",

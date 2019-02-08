@@ -1,6 +1,6 @@
 package com.twitter.finagle.http
 
-import com.twitter.collection.RecordSchema
+import com.twitter.finagle.http.collection.RecordSchema
 import com.twitter.finagle.http.util.FailingWriter
 import com.twitter.io.{Buf, Pipe, Reader, Writer}
 
@@ -11,7 +11,7 @@ abstract class Response private extends Message {
 
   /**
    * Arbitrary user-defined context associated with this response object.
-   * [[com.twitter.collection.RecordSchema.Record RecordSchema.Record]] is
+   * [[com.twitter.finagle.http.collection.RecordSchema.Record RecordSchema.Record]] is
    * used here, rather than [[com.twitter.finagle.context.Context]] or similar
    * out-of-band mechanisms, to make the connection between the response and its
    * associated context explicit.
@@ -76,8 +76,8 @@ abstract class Response private extends Message {
 object Response {
 
   /**
-   * [[com.twitter.collection.RecordSchema RecordSchema]] declaration, used
-   * to generate [[com.twitter.collection.RecordSchema.Record Record]] instances
+   * [[com.twitter.finagle.http.collection.RecordSchema RecordSchema]] declaration, used
+   * to generate [[com.twitter.finagle.http.collection.RecordSchema.Record Record]] instances
    * for Response.ctx.
    */
   val Schema: RecordSchema = new RecordSchema
