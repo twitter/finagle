@@ -13,10 +13,10 @@ import org.scalatest.Matchers._
 final class PubSubClientIntegrationSuite2 extends RedisClientTest {
 
   lazy val master: ExternalRedis = RedisCluster.start().head
-  lazy val slave: ExternalRedis = RedisCluster.start().head
+  lazy val replica: ExternalRedis = RedisCluster.start().head
 
   override def beforeAll(): Unit = {
-    ensureMasterSlave()
+    ensureMasterReplica()
   }
 
   override def afterAll(): Unit = RedisCluster.stopAll()
@@ -59,12 +59,12 @@ final class PubSubClientIntegrationSuite2 extends RedisClientTest {
   test("Recover from network failures") {
     runTest { implicit ctx =>
       master.stop()
-      slave.stop()
+      replica.stop()
       the[Exception] thrownBy subscribeAndAssert(bufFoo, bufBar)
       the[Exception] thrownBy pSubscribeAndAssert(bufBaz, bufBoo)
       master.start()
-      slave.start()
-      ensureMasterSlave()
+      replica.start()
+      ensureMasterReplica()
       waitUntilAsserted("recover from network failure") { assertSubscribed(bufFoo, bufBar) }
       waitUntilAsserted("recover from network failure") { assertPSubscribed(bufBaz, bufBoo) }
     }
@@ -110,13 +110,13 @@ final class PubSubClientIntegrationSuite2 extends RedisClientTest {
     }
   }
 
-  def ensureMasterSlave() {
-    slave.withClient { client =>
+  def ensureMasterReplica() {
+    replica.withClient { client =>
       val masterAddr = master.address.get
       result(
         client.slaveOf(Buf.Utf8(masterAddr.getHostString), Buf.Utf8(masterAddr.getPort.toString))
       )
-      waitUntil("master-slave replication") {
+      waitUntil("master-replica replication") {
         val status = b2s(result(client.info(Buf.Utf8("replication"))).get)
           .split("\n")
           .map(_.trim)
@@ -129,19 +129,19 @@ final class PubSubClientIntegrationSuite2 extends RedisClientTest {
 
   def runTest(test: TestContext => Unit) {
     master.withClient { masterClnt =>
-      slave.withClient { slaveClnt =>
-        val dest = Seq(master, slave)
+      replica.withClient { replicaClnt =>
+        val dest = Seq(master, replica)
           .map(node => s"127.0.0.1:${node.address.get.getPort}")
           .mkString(",")
         val subscribeClnt = Redis.newRichClient(dest)
-        val ctx = new TestContext(masterClnt, slaveClnt, subscribeClnt)
+        val ctx = new TestContext(masterClnt, replicaClnt, subscribeClnt)
         try test(ctx)
         finally subscribeClnt.close()
       }
     }
   }
 
-  class TestContext(val masterClnt: Client, val slaveClnt: Client, val clusterClnt: Client) {
+  class TestContext(val masterClnt: Client, val replicaClnt: Client, val clusterClnt: Client) {
 
     private[this] val i = new AtomicInteger(0)
     // We want subscription updates to be atomic so access to these
@@ -190,11 +190,11 @@ final class PubSubClientIntegrationSuite2 extends RedisClientTest {
     }
 
     def pubSubNumSub(channel: Buf): Long = {
-      List(masterClnt, slaveClnt).map(pubSubNumSub(_, channel)).sum
+      List(masterClnt, replicaClnt).map(pubSubNumSub(_, channel)).sum
     }
 
     def pubSubNumPat(): Long = {
-      List(masterClnt, slaveClnt).map(clnt => result(clnt.pubSubNumPat())).sum
+      List(masterClnt, replicaClnt).map(clnt => result(clnt.pubSubNumPat())).sum
     }
 
     def publish(channel: String, pattern: Option[String] = None): String = {

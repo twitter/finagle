@@ -24,7 +24,7 @@ import scala.util.matching.Regex
 import scala.util.control.NonFatal
 
 /**
- * Blacklist of regex, comma-separated. Comma is a reserved character and
+ * Denylist of regex, comma-separated. Comma is a reserved character and
  * cannot be used. Used with regexes from statsFilterFile.
  *
  * See http://www.scala-lang.org/api/current/#scala.util.matching.Regex
@@ -36,7 +36,7 @@ object statsFilter
     )
 
 /**
- * Comma-separated blacklist of files. Each file may have multiple filters,
+ * Comma-separated denylist of files. Each file may have multiple filters,
  * separated by new lines. Used with regexes from statsFilter.
  *
  * See http://www.scala-lang.org/api/current/#scala.util.matching.Regex
@@ -123,7 +123,7 @@ object JsonExporter {
  * in a JSON format.
  *
  * This service respects metrics [[Verbosity verbosity levels]]: it doesn't export "debug"
- * (i.e., [[Verbosity.Debug]]) metrics unless they are whitelisted via the comma-separated
+ * (i.e., [[Verbosity.Debug]]) metrics unless they are allowlisted via the comma-separated
  * `verbose`.
  */
 class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
@@ -239,12 +239,12 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
     // Converting a *-wildcard expression into a regular expression so we can match on it.
     val verbosePatten = verbose().flatMap(commaSeparatedGlob)
 
-    // We have to blacklist debug metrics before we apply formatting, which may change
+    // We have to denylist debug metrics before we apply formatting, which may change
     // the names.
     val values = SampledValues(
-      blacklistDebugSample(gauges, verbosePatten),
-      blacklistDebugSample(counters, verbosePatten),
-      blacklistDebugSample(histos, verbosePatten)
+      denylistDebugSample(gauges, verbosePatten),
+      denylistDebugSample(counters, verbosePatten),
+      denylistDebugSample(histos, verbosePatten)
     )
 
     val formatted = StatsFormatter.default(values)
@@ -266,7 +266,7 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
       case None => sample
     }
 
-  private final def blacklistDebugSample[A](
+  private final def denylistDebugSample[A](
     sample: collection.Map[String, A],
     verbose: Option[Pattern]
   ): collection.Map[String, A] = verbose match {

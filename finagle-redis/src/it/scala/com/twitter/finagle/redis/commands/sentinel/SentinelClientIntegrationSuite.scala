@@ -15,8 +15,8 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
 
   val sentinelCount = 3
   val masterCount = 2
-  val slavesPerMaster = 2
-  val count = masterCount * (slavesPerMaster + 1)
+  val replicasPerMaster = 2
+  val count = masterCount * (replicasPerMaster + 1)
   val master0 = masterName(0)
   val master1 = masterName(1)
   val noSuchMaster = masterName(999)
@@ -34,7 +34,7 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
     super.beforeAll()
     for {
       i <- 0 until masterCount
-      j <- 1 to slavesPerMaster
+      j <- 1 to replicasPerMaster
     } withRedisClient(i + masterCount * j) { client =>
       val (host, port) = hostAndPort(redisAddress(i))
       ready(client.slaveOf(Buf.Utf8("127.0.0.1"), Buf.Utf8(port.toString)))
@@ -136,22 +136,22 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
       assert(result(client.slaves(noSuchMaster).liftToTry).isThrow)
 
       val expected = (0 until masterCount).map { i =>
-        masterName(i) -> (1 to slavesPerMaster).map { j =>
+        masterName(i) -> (1 to replicasPerMaster).map { j =>
           redisAddress(i + masterCount * j).getPort
         }.toSet
       }.toMap
 
-      def slaves() =
+      def replicas() =
         expected.keys.map { name =>
           name -> result(client.slaves(name))
             .map(s => s.port)
             .toSet
         }.toMap
 
-      // Sentinel PINGs masters every 10 seconds to get the latest slave list.
-      // We keep checking the slave lists periodically, until it is updated
+      // Sentinel PINGs masters every 10 seconds to get the latest replica list.
+      // We keep checking the replica lists periodically, until it is updated
       // to the latest.
-      waitUntil("Waiting the slave list to be updated ...")(slaves == expected)
+      waitUntil("Waiting the replica list to be updated ...")(replicas == expected)
     }
   }
 
@@ -160,12 +160,12 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
       // Errors should be throw for unknown names
       assert(result(client.reset(noSuchMaster).liftToTry).isThrow)
 
-      def numberOfSlaves = result(client.master(master1)).numSlaves
+      def numberOfReplicas = result(client.master(master1)).numSlaves
 
-      assert(numberOfSlaves == 2)
+      assert(numberOfReplicas == 2)
       stopRedis(count + sentinelCount - 1)
       ready(client.reset(master1))
-      waitUntil("Waiting the master to be reset ...")(numberOfSlaves == 1)
+      waitUntil("Waiting the master to be reset ...")(numberOfReplicas == 1)
     }
   }
 

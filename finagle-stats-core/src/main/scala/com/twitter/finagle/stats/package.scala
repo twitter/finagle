@@ -11,7 +11,7 @@ package object stats {
   private[stats] val Tunables: TunableMap = StandardTunableMap("finagle")
 
   /**
-   * Comma-separated list of *-wildcard expressions to whitelist debug metrics (not exported by
+   * Comma-separated list of *-wildcard expressions to allowlist debug metrics (not exported by
    * default).
    *
    * Example:

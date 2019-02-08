@@ -177,17 +177,19 @@ final class StreamsClientIntegrationSuite extends RedisClientTest with Inside {
       val zero = new java.lang.Long(0)
       val one = new java.lang.Long(1)
 
-      // Must create stream before adding read group
+      // Must create stream before adding to the group
       result(client.xAdd(stream, None, Map(bufFoo -> bufBar)))
-
       result(client.xGroupCreate(stream, group, Buf.Utf8("0")))
 
+      // It ignores anything that existed before the group was created, so seed it now
+      result(client.xAdd(stream, None, Map(bufFoo -> bufBar)))
+
       val read =
-        result(client.xReadGroup(group, consumer, Some(1), None, Seq(stream), Seq(Buf.Utf8("0"))))
+        result(client.xReadGroup(group, consumer, Some(1), None, Seq(stream), Seq(Buf.Utf8(">"))))
 
       read match {
         case Seq(XReadStreamReply(`stream`, Seq(StreamEntryReply(_, Seq((`bufFoo`, `bufBar`)))))) =>
-        case _ => fail()
+        case other => fail(other.toString)
       }
 
       val pendingId = read.head.entries.head.id
@@ -233,7 +235,7 @@ final class StreamsClientIntegrationSuite extends RedisClientTest with Inside {
 
       read match {
         case Seq(XReadStreamReply(`stream`, Seq(StreamEntryReply(_, Seq((`bufFoo`, `bufBar`)))))) =>
-        case _ => fail()
+        case other => fail(other.toString)
       }
 
       val pendingId = read.head.entries.head.id

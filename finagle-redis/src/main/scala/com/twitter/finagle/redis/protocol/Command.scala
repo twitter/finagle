@@ -109,6 +109,7 @@ object Command {
   val INFO = Buf.Utf8("INFO")
   val QUIT = Buf.Utf8("QUIT")
   val SLAVEOF = Buf.Utf8("SLAVEOF")
+  val REPLICAOF = Buf.Utf8("REPLICAOF")
   val CONFIG = Buf.Utf8("CONFIG")
   val SENTINEL = Buf.Utf8("SENTINEL")
   val CLUSTER = Buf.Utf8("CLUSTER")

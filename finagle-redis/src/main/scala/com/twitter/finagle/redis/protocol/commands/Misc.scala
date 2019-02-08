@@ -52,3 +52,8 @@ case class SlaveOf(host: Buf, port: Buf) extends Command {
   def name: Buf = Command.SLAVEOF
   override def body: Seq[Buf] = Seq(host, port)
 }
+
+case class ReplicaOf(host: Buf, port: Buf) extends Command {
+  def name: Buf = Command.REPLICAOF
+  override def body: Seq[Buf] = Seq(host, port)
+}

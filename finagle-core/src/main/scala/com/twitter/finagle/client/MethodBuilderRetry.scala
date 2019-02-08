@@ -48,7 +48,7 @@ private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (mb: MethodB
 
   private[client] def logicalStatsFilter(stats: StatsReceiver): Filter.TypeAgnostic =
     StatsFilter.typeAgnostic(
-      new DenylistStatsReceiver(stats.scope(LogicalScope), LogicalStatsBlacklistFn),
+      new DenylistStatsReceiver(stats.scope(LogicalScope), LogicalStatsDenylistFn),
       mb.config.retry.responseClassifier,
       mb.params[param.ExceptionStatsHandler].categorizer,
       mb.params[StatsFilter.Param].unit
@@ -166,7 +166,7 @@ private[client] object MethodBuilderRetry {
 
   // the `StatsReceiver` used is already scoped to `$clientName/$methodName/logical`.
   // this omits the pending gauge as well as sourcedfailures details.
-  private val LogicalStatsBlacklistFn: Seq[String] => Boolean = { segments =>
+  private val LogicalStatsDenylistFn: Seq[String] => Boolean = { segments =>
     val head = segments.head
     if (head == "pending" || head == "sourcedfailures") {
       true

@@ -270,7 +270,7 @@ private[finagle] class Metrics private (
       "Identifies metrics with ambiguous names that collide with other metrics. " +
         """Metrics recorded in a scope Seq("foo", "bar") can collide with Seq("foo/bar") when """ +
         s"exporting the metrics to JSON. To fix, never use the separator character $separator " +
-        "in metrics names.\nThis linter does not account for blacklisted metrics, verbosity, " +
+        "in metrics names.\nThis linter does not account for denylisted metrics, verbosity, " +
         "or collisions between Stats and Counters/Gauges."
     ) {
       def toIssue(kind: String, collisions: Iterable[Seq[String]]) =

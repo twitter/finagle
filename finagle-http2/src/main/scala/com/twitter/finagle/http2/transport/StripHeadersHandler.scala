@@ -6,7 +6,7 @@ import io.netty.handler.codec.http.{HttpMessage, HttpHeaders, HttpHeaderNames}
 import io.netty.handler.codec.http2.Http2CodecUtil
 
 /**
- * Netty uses a blacklist containing common connection-related headers that
+ * Netty uses a denylist containing common connection-related headers that
  * should be removed from h2 messages. However, a few cases need to be handled
  * separately:
  *   1) All headers mentioned in the "connection" header must be stripped

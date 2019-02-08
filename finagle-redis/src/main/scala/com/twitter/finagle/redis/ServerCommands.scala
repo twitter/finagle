@@ -91,6 +91,11 @@ trait ServerCommands extends BasicServerCommands { self: BaseClient =>
 
   // TODO: MONITOR
 
+  def replicaOf(host: Buf, port: Buf): Future[Unit] =
+    doRequest(ReplicaOf(host, port)) {
+      case StatusReply(message) => Future.Unit
+    }
+
   // TODO: SAVE
 
   def slaveOf(host: Buf, port: Buf): Future[Unit] =

@@ -41,7 +41,7 @@ private[redis] trait SentinelCommands { self: BaseClient =>
     }
 
   /**
-   * Show a list of slaves for this master, and their state.
+   * Show a list of replicas for this master, and their state.
    */
   def slaves(name: String): Future[List[SlaveNode]] =
     doRequest(SentinelSlaves(name)) {
@@ -69,7 +69,7 @@ private[redis] trait SentinelCommands { self: BaseClient =>
   /**
    * Return the ip and port number of the master with that name. If a failover
    * is in progress or terminated successfully for this master it returns the
-   * address and port of the promoted slave.
+   * address and port of the promoted replica.
    */
   def getMasterAddrByName(name: String): Future[Option[InetSocketAddress]] =
     doRequest(SentinelGetMasterAddrByName(name)) {

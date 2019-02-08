@@ -48,7 +48,7 @@ import scala.collection.JavaConverters._
  */
 object RequestBuilder {
 
-  private val SchemeWhitelist = Seq("http", "https")
+  private val SchemeAllowlist = Seq("http", "https")
 
   /** Evidence type that signifies that a property has been satisfied */
   sealed trait Valid
@@ -141,7 +141,7 @@ class RequestBuilder[HasUrl, HasForm] private[http] (
    * the Authorization header using the authority portion of the URL.
    */
   def url(u: URL): RequestBuilder[Valid, HasForm] = {
-    require(SchemeWhitelist.contains(u.getProtocol), s"url must be http(s), was ${u.getProtocol}")
+    require(SchemeAllowlist.contains(u.getProtocol), s"url must be http(s), was ${u.getProtocol}")
     val uri = u.toURI
     val host = hostString(uri, u)
     val hostValue =
