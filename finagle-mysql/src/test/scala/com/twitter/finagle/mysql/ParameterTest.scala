@@ -1,6 +1,7 @@
 package com.twitter.finagle.mysql
 
 import com.twitter.finagle.mysql.Parameter._
+import com.twitter.finagle.mysql.transport.MysqlBuf
 import org.scalatest.FunSuite
 
 class ParameterTest extends FunSuite {
@@ -187,5 +188,36 @@ class ParameterTest extends FunSuite {
     val value: Option[String] = None
     val param: Parameter = value
     assert(param.value == null)
+  }
+
+  test("size of unsupported types throws errors") {
+    val emptyParam: Parameter = EmptyValue
+    assertThrows[IllegalArgumentException] {
+      emptyParam.size
+    }
+
+    val emptyRawParam: Parameter = RawValue(0, 0, isBinary = false, Array())
+    assertThrows[IllegalArgumentException] {
+      emptyRawParam.size
+    }
+  }
+
+  test("write of unsupported types throws errors") {
+    val bufWriter = MysqlBuf.writer(Array())
+
+    val emptyParam: Parameter = EmptyValue
+    assertThrows[IllegalArgumentException] {
+      emptyParam.writeTo(bufWriter)
+    }
+
+    val nullParam: Parameter = NullValue
+    assertThrows[IllegalArgumentException] {
+      nullParam.writeTo(bufWriter)
+    }
+
+    val emptyRawParam: Parameter = RawValue(0, 0, isBinary = false, Array())
+    assertThrows[IllegalArgumentException] {
+      emptyRawParam.writeTo(bufWriter)
+    }
   }
 }

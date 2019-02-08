@@ -238,6 +238,7 @@ object CanBeParameter {
         case FloatValue(_) => 4
         case DoubleValue(_) => 8
         case NullValue => 0
+        case _ => throw new IllegalArgumentException(s"Cannot determine size of $param.")
       }
 
       def typeCode(param: Value): Short = param match {
@@ -266,6 +267,8 @@ object CanBeParameter {
         case FloatValue(f) => writer.writeFloatLE(f)
         case DoubleValue(d) => writer.writeDoubleLE(d)
         case StringValue(s) => writer.writeLengthCodedString(s, MysqlCharset.defaultCharset)
+        case _ =>
+          throw new IllegalArgumentException(s"Type $param is not supported, cannot write value.")
       }
     }
   }
