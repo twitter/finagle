@@ -466,7 +466,6 @@ lazy val finagleHttp = Project(
   name := "finagle-http",
   libraryDependencies ++= Seq(
     util("codec"),
-    util("collection"),
     util("logging"),
     netty4StaticSsl
   )
@@ -480,7 +479,6 @@ lazy val finagleBaseHttp = Project(
 ).settings(
   name := "finagle-base-http",
   libraryDependencies ++= Seq(
-    util("collection"),
     util("logging"),
     netty4Http
   ) ++ netty4Libs
