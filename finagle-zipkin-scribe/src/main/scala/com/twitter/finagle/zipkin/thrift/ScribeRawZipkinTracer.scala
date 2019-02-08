@@ -5,7 +5,7 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{Service, SimpleFilter, Thrift}
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.stats.{
-  BlacklistStatsReceiver,
+  DenylistStatsReceiver,
   ClientStatsReceiver,
   NullStatsReceiver,
   StatsReceiver
@@ -33,7 +33,7 @@ object ScribeRawZipkinTracer {
    * Only report `requests`, `success`, and `failures` (including underlying counters for
    * individual exceptions).
    */
-  private val statsReceiver: StatsReceiver = new BlacklistStatsReceiver(
+  private val statsReceiver: StatsReceiver = new DenylistStatsReceiver(
     ClientStatsReceiver, {
       case Seq(_, "requests") => false
       case Seq(_, "success") => false

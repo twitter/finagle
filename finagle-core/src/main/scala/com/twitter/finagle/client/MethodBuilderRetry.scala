@@ -2,7 +2,7 @@ package com.twitter.finagle.client
 
 import com.twitter.finagle.{Filter, Service, param}
 import com.twitter.finagle.service.{RequeueFilter, _}
-import com.twitter.finagle.stats.{BlacklistStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{DenylistStatsReceiver, StatsReceiver}
 import com.twitter.logging.{Level, Logger}
 import com.twitter.util.{Future, Stopwatch, Throw, Try}
 
@@ -48,7 +48,7 @@ private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (mb: MethodB
 
   private[client] def logicalStatsFilter(stats: StatsReceiver): Filter.TypeAgnostic =
     StatsFilter.typeAgnostic(
-      new BlacklistStatsReceiver(stats.scope(LogicalScope), LogicalStatsBlacklistFn),
+      new DenylistStatsReceiver(stats.scope(LogicalScope), LogicalStatsBlacklistFn),
       mb.config.retry.responseClassifier,
       mb.params[param.ExceptionStatsHandler].categorizer,
       mb.params[StatsFilter.Param].unit
