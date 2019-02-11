@@ -220,6 +220,8 @@ class MethodBuilderTest
         // 2 "actual" requests
         assert(stats.counter(clientLabel, methodName, "logical", "requests")() == 1)
         assert(stats.counter(clientLabel, methodName, "logical", "success")() == 1)
+        // and zero logical failures
+        assert(stats.counter(clientLabel, methodName, "logical", "failures")() == 0)
         val latencies = stats.stat(clientLabel, methodName, "logical", "request_latency_ms")()
         assert(latencies.size == 1)
         assert(latencies.head <= (perReqTimeout + delta).inMillis)
@@ -237,6 +239,49 @@ class MethodBuilderTest
         // the logical stats should be separate per-"method"
         assert(stats.counter(clientLabel, otherMethod, "logical", "requests")() == 1)
       }
+    }
+  }
+
+  test("logical failure stats") {
+    val stats = new InMemoryStatsReceiver()
+    val clientLabel = "the_client"
+    val params =
+      Stack.Params.empty +
+        param.Label(clientLabel) +
+        param.Stats(stats)
+
+    val failure = Failure("some reason", new RuntimeException("welp"))
+      .withSource(Failure.Source.Service, "test_service")
+    val svc: Service[Int, Int] = new FailedService(failure)
+
+    val stack = Stack.leaf(Stack.Role("test"), ServiceFactory.const(svc))
+    val stackClient = TestStackClient(stack, params)
+
+    val methodBuilder = MethodBuilder.from("destination", stackClient)
+
+    // without method scope
+    val client = methodBuilder.newService
+
+    // issue a failing request
+    intercept[Failure] {
+      Await.result(client(1), 5.seconds)
+    }
+
+    eventually {
+      assert(1 == stats.counters(Seq(clientLabel, "logical", "failures")))
+    }
+
+    // and with method scope
+    val methodName = "a_method"
+    val aMethodClient = methodBuilder.newService(methodName)
+
+    // issue a failing request
+    intercept[Failure] {
+      Await.result(aMethodClient(1), 5.seconds)
+    }
+
+    eventually {
+      assert(1 == stats.counters(Seq(clientLabel, methodName, "logical", "failures")))
     }
   }
 
@@ -355,8 +400,6 @@ class MethodBuilderTest
 
     val methodBuilder = MethodBuilder.from("destination", stackClient)
 
-    // the first attempts will hit the per-request timeout and will be
-    // retried. then the retry should succeed.
     val methodName = "a_method"
     val client = methodBuilder.newService(methodName)
 
@@ -388,10 +431,6 @@ class MethodBuilderTest
         names.containsSlice(Seq(clientLabel, methodName, "logical", "sourcedfailures"))
     }
     assert(!sourcedFailures)
-    val failures = stats.counters.contains(
-      Seq(clientLabel, methodName, "logical", "failures")
-    )
-    assert(!failures)
   }
 
   test("stats are not filtered with methodName if it does not exist") {
@@ -411,8 +450,6 @@ class MethodBuilderTest
 
     val methodBuilder = MethodBuilder.from("destination", stackClient)
 
-    // the first attempts will hit the per-request timeout and will be
-    // retried. then the retry should succeed.
     val client = methodBuilder.newService
 
     // issue a failing request
@@ -443,10 +480,6 @@ class MethodBuilderTest
         names.containsSlice(Seq(clientLabel, "logical", "sourcedfailures"))
     }
     assert(!sourcedFailures)
-    val failures = stats.counters.contains(
-      Seq(clientLabel, "logical", "failures")
-    )
-    assert(!failures)
   }
 
   test("underlying service is reference counted") {

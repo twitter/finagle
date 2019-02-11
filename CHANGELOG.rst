@@ -71,6 +71,9 @@ Runtime Behavior Changes
   a raw `Exception` not wrapped in a `Future` if the `Filter` threw. These will now
   consistently be lifted into a `Future.exception`. ``PHAB_ID=D269003``
 
+* finagle-core: MethodBuilder metrics filtering updated to now report rolled-up
+  logical failures. ``PHAB_ID=D271195``
+
 * finagle-http: Disabling Netty3 cookies in favor of Netty4 cookies. ``PHAB_ID=D262776``
 
 * finagle-http: Removed the debug metrics `http/cookie/dropped_samesites` and

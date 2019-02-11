@@ -289,6 +289,7 @@ Will produce the following metrics:
 
 - `clnt/example_client/get_statuses/logical/requests`
 - `clnt/example_client/get_statuses/logical/success`
+- `clnt/example_client/get_statuses/logical/failures`
 - `clnt/example_client/get_statuses/logical/failures/exception_name`
 - `clnt/example_client/get_statuses/logical/request_latency_ms`
 - `clnt/example_client/get_statuses/retries`
@@ -306,7 +307,7 @@ for introspection of runtime configuration via TwitterServer's `/admin/registry.
 Logging
 -------
 
-Unsuccessful request, as determined by the :ref:`classifier <response_classification>`
+Unsuccessful requests, as determined by the :ref:`classifier <response_classification>`
 set by ``withRetryForClassifier``, are logged at ``com.twitter.logging.Level.DEBUG``
 level. Further details, including the request and response, are available at ``TRACE``
 level. There is a ``Logger`` per method, named with the format

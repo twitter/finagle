@@ -170,11 +170,6 @@ private[client] object MethodBuilderRetry {
     val head = segments.head
     if (head == "pending" || head == "sourcedfailures") {
       true
-    } else if (head == "failures" && segments.size == 1) {
-      // only filter out the failures rollup while keeping the exception
-      // details that are scoped via `ExceptionStatsHandler` to
-      // $clientName/$methodName/logical/failures/<exception_name>
-      true
     } else {
       false
     }
