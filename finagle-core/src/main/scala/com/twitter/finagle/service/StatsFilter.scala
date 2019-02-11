@@ -152,8 +152,6 @@ class StatsFilter[Req, Rep](
   private[this] def isIgnorableResponse(rep: Try[Rep]): Boolean = rep match {
     case Throw(f: FailureFlags[_]) if f.isFlagged(FailureFlags.Ignorable) =>
       true
-    case Throw(BackupRequestLost) | Throw(WriteException(BackupRequestLost)) =>
-      true
     case _ =>
       false
   }

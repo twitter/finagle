@@ -54,6 +54,9 @@ Breaking API Changes
   construct a `Drv` instance using `Drv.apply` or `Drv.fromWeights`.
   ``PHAB_ID=D262960``
 
+* finagle-core: `c.t.f.BackupRequestLost` is now removed. Please use `c.t.f.Failure.ignorable`
+  instead. ``PHAB_ID=D270833``
+
 Bug Fixes
 ~~~~~~~~~
 

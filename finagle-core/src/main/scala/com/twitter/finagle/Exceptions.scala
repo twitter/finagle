@@ -615,13 +615,3 @@ class TooManyConcurrentRequestsException extends ApiException
  * usage in public APIs.
  */
 class ChannelBufferUsageException(description: String) extends Exception(description)
-
-/**
- * An exception that is raised on requests that are discarded because
- * their corresponding backup requests succeeded first. See
- * `com.twitter.finagle.exp.BackupRequestFilter` for details.
- */
-@deprecated("Use Failure flagged FailureFlags.Ignorable", "2017-11-20")
-object BackupRequestLost extends Exception with NoStackTrace with HasLogLevel {
-  def logLevel: Level = Level.TRACE
-}

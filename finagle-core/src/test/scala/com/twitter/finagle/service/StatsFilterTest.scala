@@ -111,22 +111,6 @@ class StatsFilterTest extends FunSuite {
     assert(unsourced(Seq("failures", classOf[Failure].getName())) == 1)
   }
 
-  test("don't report BackupRequestLost exceptions") {
-    for (exc <- Seq(BackupRequestLost, WriteException(BackupRequestLost))) {
-      val (promise, receiver, statsService) = getService()
-
-      assert(receiver.counters(Seq("requests")) == 0)
-      assert(!receiver.counters.keys.exists(_.contains("failure")))
-      statsService("foo")
-      assert(receiver.gauges(Seq("pending"))() == 1.0)
-      promise.setException(BackupRequestLost)
-      assert(!receiver.counters.keys.exists(_.contains("failure")))
-      assert(receiver.counters(Seq("requests")) == 0)
-      assert(receiver.counters(Seq("success")) == 0)
-      assert(receiver.gauges(Seq("pending"))() == 0.0)
-    }
-  }
-
   test("don't report failures flagged FailureFlags.Ignorable") {
     val (promise, receiver, statsService) = getService()
 
