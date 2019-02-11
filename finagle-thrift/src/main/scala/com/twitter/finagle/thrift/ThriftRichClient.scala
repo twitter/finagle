@@ -420,25 +420,6 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
 
     private[this] val service = newService(dest, label)
 
-    @deprecated(
-      "Use com.twitter.finagle.ThriftRichClient.MultiplexedThriftClient.build",
-      "2017-11-20"
-    )
-    def newIface[Iface: ClassTag](serviceName: String): Iface = {
-      val cls = implicitly[ClassTag[Iface]].runtimeClass
-      newIface[Iface](serviceName, cls)
-    }
-
-    @deprecated(
-      "Use com.twitter.finagle.ThriftRichClient.MultiplexedThriftClient.build",
-      "2017-11-20"
-    )
-    def newIface[Iface](serviceName: String, cls: Class[_]): Iface = {
-      val multiplexedProtocol = Protocols.multiplex(serviceName, clientParam.protocolFactory)
-      val clientConfigMultiplexed = clientParam.copy(protocolFactory = multiplexedProtocol)
-      ThriftRichClient.this.newIface(dest, label, cls, clientConfigMultiplexed, service)
-    }
-
     // NB: ThriftServiceType is used to avoid a naming collision with c.t.f.thrift.GeneratedThriftService
     def build[ThriftServiceType: ClassTag](serviceName: String): ThriftServiceType = {
       val cls = implicitly[ClassTag[ThriftServiceType]].runtimeClass
@@ -449,24 +430,6 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
       val multiplexedProtocol = Protocols.multiplex(serviceName, clientParam.protocolFactory)
       val clientConfigMultiplexed = clientParam.copy(protocolFactory = multiplexedProtocol)
       ThriftRichClient.this.build(dest, label, cls, clientConfigMultiplexed, service)
-    }
-
-    @deprecated(
-      "Use com.twitter.finagle.ThriftRichClient.MultiplexedThriftClient#servicePerEndpoint",
-      "2017-11-13"
-    )
-    def newServiceIface[ServiceIface <: Filterable[ServiceIface]](
-      serviceName: String
-    )(
-      implicit builder: ServiceIfaceBuilder[ServiceIface]
-    ): ServiceIface = {
-      val multiplexedProtocol = Protocols.multiplex(serviceName, clientParam.protocolFactory)
-      val statsLabel = if (label.isEmpty) defaultClientName else label
-      val clientConfigMultiplexedScoped = clientParam.copy(
-        protocolFactory = multiplexedProtocol,
-        clientStats = clientParam.clientStats.scope(statsLabel)
-      )
-      builder.newServiceIface(service, clientConfigMultiplexedScoped)
     }
 
     def servicePerEndpoint[ServicePerEndpoint <: Filterable[ServicePerEndpoint]](

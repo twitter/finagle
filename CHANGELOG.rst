@@ -33,7 +33,11 @@ Breaking API Changes
   ``PHAB_ID=D260077``
 
 * finagle-http: `c.t.f.dispatch.ExpiringServerDispatcher` was dead code. We removed it.
-  `PHAB_ID=D269331`
+  ``PHAB_ID=D269331``
+
+* finagle-thrift: Removed `newIface` and `newServiceIface` methods from
+  `c.t.f.thrift.ThriftRichClient.MultiplexedThriftClient`, which are deprecated in November 2017.
+  ``PHAB_ID=D271774``
 
 * finagle-thriftmux: `ThriftMux.Client.pushMuxer` is removed. Use `ThriftMux.Client.standardMuxer`
   instead. ``PHAB_ID=D269373``
