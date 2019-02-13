@@ -2,7 +2,7 @@ package com.twitter.finagle.mux.pushsession
 
 import com.twitter.finagle.{CancelledRequestException, Mux, Service, Stack, Status, param}
 import com.twitter.finagle.context.{Contexts, RemoteInfo}
-import com.twitter.finagle.mux.{Request, Response, gracefulShutdownEnabled}
+import com.twitter.finagle.mux.{Request, Response}
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession}
@@ -124,27 +124,24 @@ private[finagle] final class MuxServerSession(
     if (h_dispatchState == State.Open) {
       h_dispatchState = State.Draining
 
-      if (!gracefulShutdownEnabled()) handleShutdown(Return.Unit)
-      else {
-        log.debug("Draining session")
-        statsReceiver.counter("draining").incr()
+      log.debug("Draining session")
+      statsReceiver.counter("draining").incr()
 
-        h_messageWriter.write(Message.Tdrain(Tags.ControlTag))
+      h_messageWriter.write(Message.Tdrain(Tags.ControlTag))
 
-        // We set a timer to make sure we've drained within the allotted amount of time
-        h_tracker.drained.by(params[param.Timer].timer, deadline).respond {
-          case Throw(_: TimeoutException) =>
-            exec.execute(new Runnable {
-              def run(): Unit = {
-                val t = new TimeoutException(
-                  s"Failed to drain within the deadline $deadline. Tracker state: ${h_tracker.currentState}"
-                )
-                handleShutdown(Throw(t))
-              }
-            })
+      // We set a timer to make sure we've drained within the allotted amount of time
+      h_tracker.drained.by(params[param.Timer].timer, deadline).respond {
+        case Throw(_: TimeoutException) =>
+          exec.execute(new Runnable {
+            def run(): Unit = {
+              val t = new TimeoutException(
+                s"Failed to drain within the deadline $deadline. Tracker state: ${h_tracker.currentState}"
+              )
+              handleShutdown(Throw(t))
+            }
+          })
 
-          case _ => // nop: didn't timeout, so it should have already been handled
-        }
+        case _ => // nop: didn't timeout, so it should have already been handled
       }
     }
   }
