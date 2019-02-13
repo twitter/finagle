@@ -449,7 +449,22 @@ class EndToEndTest
   }
 
   test("client + server: serialization time should be included in trace") {
+    val reqDeser = new AtomicBoolean(false)
+    val resSer = new AtomicBoolean(false)
+    val serverTracer: Tracer = new Tracer {
+      def record(record: Record): Unit = {
+        record match {
+          case Record(_, _, Annotation.BinaryAnnotation("srv/request_deserialization_ns", _), _) =>
+            reqDeser.set(true)
+          case Record(_, _, Annotation.BinaryAnnotation("srv/response_serialization_ns", _), _) =>
+            resSer.set(true)
+          case _ =>
+        }
+      }
+      def sampleTrace(traceId: TraceId): Option[Boolean] = Tracer.SomeTrue
+    }
     val server = serverImpl
+      .withTracer(serverTracer)
       .serveIface(
         new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
         new TestService.MethodPerEndpoint {
@@ -461,7 +476,7 @@ class EndToEndTest
 
     val reqSer = new AtomicBoolean(false)
     val resDeser = new AtomicBoolean(false)
-    val tracer: Tracer = new Tracer {
+    val clientTracer: Tracer = new Tracer {
       def record(record: Record): Unit = {
         record match {
           case Record(_, _, Annotation.BinaryAnnotation("clnt/request_serialization_ns", _), _) =>
@@ -479,7 +494,7 @@ class EndToEndTest
     }
 
     val client = clientImpl
-      .withTracer(tracer)
+      .withTracer(clientTracer)
       .build[TestService.MethodPerEndpoint](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
         "client"
@@ -488,8 +503,10 @@ class EndToEndTest
     await(client.query("ok"))
 
     eventually {
-      assert(reqSer.get)
-      assert(resDeser.get)
+      assert(reqSer.get) // client sends req
+      assert(reqDeser.get) // server receives req
+      assert(resSer.get) // server sends response
+      assert(resDeser.get) // client receives response
     }
     await(server.close())
   }

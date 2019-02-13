@@ -18,11 +18,14 @@ New Features
   contained within the same file. ``PHAB_ID=D264325``
 
 * finagle-thriftmux: Additional information is now annotated in traces for clients
-  using Scrooge generated Thrift bindings. ``PHAB_ID=D269383``, ``PHAB_ID=D270597``
+  using Scrooge generated Thrift bindings. ``PHAB_ID=D269383``, ``PHAB_ID=D270597``,
+  ``PHAB_ID=D272934``.
   This includes:
 
   - RPC method name
   - Request serialization time, in nanoseconds
+  - Request deserialization time, in nanoseconds
+  - Response serialization time, in nanoseconds
   - Response deserialization time, in nanoseconds
 
 Breaking API Changes
