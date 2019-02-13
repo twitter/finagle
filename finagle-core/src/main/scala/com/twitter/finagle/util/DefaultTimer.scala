@@ -55,7 +55,7 @@ private[finagle] trait ServiceLoadedTimer extends Timer
  * Use `DefaultTimer.Implicit` to import an implicit instance of this timer into the scope.
  *
  * {{{
- *  scala> import com.twitter.util.Future, com.twitter.conversions.time._
+ *  scala> import com.twitter.util.Future, com.twitter.conversions.DurationOps._
  *  scala> import com.twitter.finagle.util.DefaultTimer.Implicit
  *
  *  scala> val f = Future.sleep(10.seconds)
