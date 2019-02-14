@@ -33,6 +33,41 @@ trait CommonParams[A <: Stack.Parameterized[A]] { self: Stack.Parameterized[A] =
   /**
    * Configures this server or client with given [[util.Monitor]]
    * (default: [[com.twitter.finagle.util.DefaultMonitor]]).
+   *
+   * Monitors are Finagle's out-of-band exception reporters. Whenever an exception is thrown
+   * on a request path, it's reported to the monitor. The default monitor implementation,
+   * [[com.twitter.finagle.util.DefaultMonitor]], logs these exceptions.
+   *
+   * Monitors are wired into the server or client stacks via
+   * [[com.twitter.finagle.filter.MonitorFilter]] and are appl are applied to the following kinds
+   * of exceptions:
+   *
+   *  - Synchronous exceptions thrown on request path, `Service.apply(request)`
+   *  - Asynchronous exceptions (failed futures) thrown on request path, `Service.apply(request)`
+   *  - Exceptions thrown from `respond`, `onSuccess`, `onFailure` future callbacks
+   *  - Fatal exceptions thrown from `map`, `flatMap`, `transform` future continuations
+   *
+   * Put it this way, we apply `Monitor.handle` to an exception if we would otherwise "lose" it,
+   * i.e. when it's not connected to the `Future`, nor is it connected to the call stack.
+   *
+   * You can compose multiple monitors if you want to extend or override the standard behavior,
+   * defined in `DefaultMonitor`.
+   *
+   * {{{
+   *   import com.twitter.util.Monitor
+   *
+   *   val consoleMonitor = new Monitor {
+   *     def handle(exc: Throwable): Boolean = {
+   *       Console.err.println(exc.toString)
+   *       false // continue handling with the next monitor (usually DefaultMonitor)
+   *      }
+   *   }
+   *
+   *   $.withMonitor(consoleMonitor)
+   * }}}
+   *
+   * Returning `true` form within a monitor effectively terminates the monitor chain so no
+   * exceptions are propagated down to the next monitor.
    */
   def withMonitor(monitor: util.Monitor): A =
     self.configured(Monitor(monitor))
