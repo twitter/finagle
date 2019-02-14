@@ -96,6 +96,9 @@ Deprecations
   `c.t.f.param.ServerTransportParams` and `c.t.f.builder.ServerBuilder`. Users should migrate
   to using the `tls(SslServerConfiguration)` method instead. ``PHAB_ID=D265844``
 
+* finagle-serversets: `c.t.f.zookeeper.ZkResolver` has been deprecated in favor
+  of `c.t.f.serverset2.Zk2Resolver`. ``PHAB_ID=D273608``
+
 19.1.0
 -------
 

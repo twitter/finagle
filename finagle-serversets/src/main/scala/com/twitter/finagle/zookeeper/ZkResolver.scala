@@ -18,6 +18,7 @@ import scala.collection.mutable
  * Indicates that a failure occurred while attempting to resolve a cluster
  * using a [[com.twitter.finagle.zookeeper.ZkAnnouncer]].
  */
+@deprecated("Prefer com.twitter.finagle.serverset2.Zk2Resolver", "2019-02-13")
 class ZkResolverException(msg: String) extends Exception(msg)
 
 // Note: this is still used by finagle-memcached.
@@ -72,6 +73,7 @@ private class ZkOffer(serverSet: ServerSet, path: String)
   def prepare() = inbound.recv.prepare()
 }
 
+@deprecated("Prefer com.twitter.finagle.serverset2.Zk2Resolver", "2019-02-13")
 class ZkResolver(factory: ZkClientFactory) extends Resolver {
   val scheme = "zk"
 
