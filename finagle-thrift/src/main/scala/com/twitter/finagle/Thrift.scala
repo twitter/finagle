@@ -255,9 +255,6 @@ object Thrift
     protected type Out = Array[Byte]
     protected type Context = TransportContext
 
-    @deprecated("Use clientParam.clientStats", "2017-08-16")
-    override protected def stats: StatsReceiver = clientParam.clientStats
-
     protected def newTransporter(addr: SocketAddress): Transporter[In, Out, Context] =
       Netty4Transport.Client(params)(addr)
 
@@ -389,14 +386,6 @@ object Thrift
   def newClient(dest: Name, label: String): ServiceFactory[ThriftClientRequest, Array[Byte]] =
     client.newClient(dest, label)
 
-  @deprecated("Use `Thrift.client.withProtocolFactory`", "6.22.0")
-  def withProtocolFactory(protocolFactory: TProtocolFactory): Client =
-    client.withProtocolFactory(protocolFactory)
-
-  @deprecated("Use `Thrift.client.withClientId`", "6.22.0")
-  def withClientId(clientId: thrift.ClientId): Client =
-    client.withClientId(clientId)
-
   object Server {
     private val preparer =
       new Stack.ModuleParams[ServiceFactory[Array[Byte], Array[Byte]]] {
@@ -474,15 +463,6 @@ object Thrift
       responseClassifier = params[com.twitter.finagle.param.ResponseClassifier].responseClassifier,
       perEndpointStats = params[Thrift.param.PerEndpointStats].enabled
     )
-
-    @deprecated("Use serverParam.serviceName", "2017-08-16")
-    override protected def serverLabel: String = serverParam.serviceName
-
-    @deprecated("Use serverParam.serverStats", "2017-08-16")
-    override protected def serverStats: StatsReceiver = serverParam.serverStats
-
-    @deprecated("Use serverParam.maxThriftBufferSize", "2017-08-16")
-    override protected def maxThriftBufferSize: Int = serverParam.maxThriftBufferSize
 
     private[this] def withDeserializingClassifier: Server = {
       // Note: what type of deserializer used is important if none is specified

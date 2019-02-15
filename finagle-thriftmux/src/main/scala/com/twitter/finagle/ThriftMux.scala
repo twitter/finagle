@@ -185,9 +185,6 @@ object ThriftMux
       perEndpointStats = params[Thrift.param.PerEndpointStats].enabled
     )
 
-    @deprecated("Use clientParam.clientStats", "2017-08-16")
-    override protected def stats: StatsReceiver = clientParam.clientStats
-
     def withParams(ps: Stack.Params): Client =
       copy(muxer = muxer.withParams(ps))
 
@@ -505,16 +502,7 @@ object ThriftMux
       perEndpointStats = params[Thrift.param.PerEndpointStats].enabled
     )
 
-    @deprecated("Use serverParam.serviceName", "2017-08-16")
-    override protected def serverLabel: String = serverParam.serviceName
-
-    @deprecated("Use serverParam.serverStats", "2017-08-16")
-    override protected def serverStats: StatsReceiver = serverParam.serverStats
-
     def params: Stack.Params = muxer.params
-
-    @deprecated("Use serverParam.maxThriftBufferSize", "2017-08-16")
-    override protected def maxThriftBufferSize: Int = serverParam.maxThriftBufferSize
 
     /**
      * Produce a [[com.twitter.finagle.ThriftMux.Server]] using the provided
