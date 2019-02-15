@@ -1,7 +1,10 @@
 package com.twitter.finagle
 
+import com.twitter.app.GlobalFlag
 import com.twitter.finagle.stats.DefaultStatsReceiver
 import com.twitter.finagle.toggle.{StandardToggleMap, ToggleMap}
+import com.twitter.util.StorageUnit
+import com.twitter.conversions.StorageUnitOps._
 
 /**
  * =Deprecation=
@@ -44,6 +47,12 @@ import com.twitter.finagle.toggle.{StandardToggleMap, ToggleMap}
  * generator.
  */
 package object thrift {
+
+  object maxReusableBufferSize
+      extends GlobalFlag[StorageUnit](
+        16.kilobytes,
+        "Max size (bytes) for ThriftServicePerEndpoint reusable transport buffer"
+      )
 
   /**
    * The name of the finagle-thrift [[ToggleMap]].

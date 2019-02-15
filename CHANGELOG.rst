@@ -57,6 +57,12 @@ Breaking API Changes
       => use c.t.f.Thrift.Server.serverParam.maxThriftBufferSize
   ``PHAB_ID=D272811``
 
+* finagle-thrift: `c.t.f.thrift.ThriftServiceIface.Filterable` is removed, use
+  `c.t.f.thrift.service.Filterable` instead. ``PHAB_ID=D272427``
+
+* finagle-thrift: `c.t.f.thrift.ThriftServiceIface` is removed, use
+  `c.t.f.thrift.service.ThriftServicePerEndpoint` instead. ``PHAB_ID=D272427``
+
 * finagle-thriftmux: Removed deprecated APIs located in ThriftMux.scala:
     1. c.t.f.ThriftMux.Client.stats
       => use c.t.f.ThriftMux.Clien.clientParam.clientStats
@@ -67,7 +73,7 @@ Breaking API Changes
     4. c.t.f.ThriftMux.Server.maxThriftBufferSize
       => use c.t.f.ThriftMux.Server.serverParam.maxThriftBufferSize
   ``PHAB_ID=D272811``
-
+  
 * finagle-thriftmux: `ThriftMux.Client.pushMuxer` is removed. Use `ThriftMux.Client.standardMuxer`
   instead. ``PHAB_ID=D269373``
 

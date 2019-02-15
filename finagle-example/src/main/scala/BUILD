@@ -59,4 +59,4 @@ binary("thrift-client", "com.twitter.finagle.example.thrift.ThriftClient")
 
 binary("thrift-server", "com.twitter.finagle.example.thrift.ThriftServer")
 
-binary("thrift-service-iface", "com.twitter.finagle.example.thrift.ThriftServiceIfaceExample")
+binary("thrift-service-iface", "com.twitter.finagle.example.thrift.ThriftServicePerEndpointExample")
