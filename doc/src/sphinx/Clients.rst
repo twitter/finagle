@@ -50,7 +50,7 @@ Transport Security
 ------------------
 
 Finagle has robust support for TLS. The most common options such as server validation are accessible
-directly via the `tls` members of :src:`ClientTransportParams <com/twitter/finagle/param/ClientTransportParams.scala>` 
+directly via the `tls` members of :src:`ClientTransportParams <com/twitter/finagle/param/ClientTransportParams.scala>`
 as follows:
 
 
@@ -77,13 +77,13 @@ secured environments.
   import com.twitter.finagle.http.{Request, Response}
   import com.twitter.finagle.http.SpnegoAuthenticator.ClientFilter
   import com.twitter.finagle.http.SpnegoAuthenticator.Credentials.{ClientSource, JAASClientSource}
-  
+
   val jaas: ClientSource = new JAASClientSource(
-    loginContext = "com.sun.security.jgss.krb5.initiate", 
+    loginContext = "com.sun.security.jgss.krb5.initiate",
     _serverPrincipal = "HTTP/SOME_HOST@SOME_DOMAIN"
   )
-  
-  val client: Service[Request, Response] = 
+
+  val client: Service[Request, Response] =
     new ClientFilter(jaas).andThen(Http.client.newService("host:port"))
 
 
@@ -660,12 +660,12 @@ The following modules aim to preemptively disable sessions that will likely fail
 From the perspective of the load balancer, they act as circuit breakers which, when
 triggered, temporarily suspend the use of a particular endpoint.
 
-There are at least two modules in the client stacks that might be viewed as circuit breakers:
+There are at least two modules in the client stacks that might be viewed as `circuit breakers <http://martinfowler.com/bliki/CircuitBreaker.html>`_:
 
 1. `Fail Fast` - a session-driven circuit breaker
-2. `Failure Accrual` - a `request-driven circuit breaker <http://martinfowler.com/bliki/CircuitBreaker.html>`_
+2. `Failure Accrual` - a request-driven circuit breaker
 
-In addition to `Fail Fast` and `Failure Accrual`, some of the protocols (i.e., `Mux`) in
+In addition to `Fail Fast` and `Failure Accrual`, some of the protocols (i.e., `Mux`, `HTTP/2`) in
 Finagle support `Ping-based Failure Detectors` [#failure_detectors]_
 (i.e., :src:`ThresholdFailureDetector <com/twitter/finagle/liveness/ThresholdFailureDetector.scala>`).
 
@@ -682,8 +682,9 @@ During the time that a host is marked down, the factory is marked unavailable (a
 the load balancer above it will avoid its use). The factory becomes available
 again on success or when the back-off schedule runs out.
 
-See the FAQ to :ref:`better understand <faq_failedfastexception>` why clients
-might be seeing ``com.twitter.finagle.FailedFastException``'s.
+This module fails closed and returns an exception when it detects a failure. See the
+FAQ to :ref:`better understand <faq_failedfastexception>` why clients might be
+seeing ``com.twitter.finagle.FailedFastException``'s.
 
 .. _disabling_fail_fast:
 
@@ -701,8 +702,9 @@ particular client.
 
 .. note::
 
-  It's important to disable `Fail Fast` when only have one host in the replica set because
-  Finagle doesn't have any other path to choose.
+  Because this module fails closed, it is advised to disable `Fail Fast` when only one host
+  is present in the replica set. For example, when configuring your client to communicate to
+  a VIP or any other destination which resolves to a single entity.
 
 :ref:`Related stats <fail_fast_stats>`
 
@@ -711,18 +713,17 @@ particular client.
 Failure Accrual
 ^^^^^^^^^^^^^^^
 
-The `Failure Accrual` module marks itself as unavailable based on the number of observed
-failures. The module remains unavailable for a predefined duration. Recall
-that the availability is propagated through the stack. Thus the load balancer
-will avoid using an endpoint where the failure accrual module is unavailable.
-The module is implemented by :src:`FailureAccrualFactory <com/twitter/finagle/liveness/FailureAccrualFactory.scala>`.
+The `Failure Accrual` module marks itself as unavailable per-endpoint based on a configurable :src:`policy <com/twitter/finagle/liveness/FailureAccrualPolicy.scala>`.
+Unlike `Fail Fast`, this module fails open. That is, even if it transitions into an unavailable state, requests
+will still be allowed to flow through it. However, recall that the availability is propagated through the stack,
+so the load balancer will avoid using an endpoint where the failure accrual module is unavailable.
 
-See :ref:`Failure Accrual Stats <failure_accrual_stats>` for stats exported from the
-``Failure Accrual`` module.
+When transitioning from an unavailable to an available state, the module is conservative and only
+allows for a probe request. If the probe fails, it goes back to unavailable regardless of the policy.
+Put differently, at least one request must succeed before the module starts to apply the policy
+again.
 
-The ``FailureAccrualFactory`` is configurable in terms of used policy to determine whether to mark
-an endpoint dead upon a request failure. At this point, there are two setups available out of
-the box.
+There are two available policies out of the box:
 
 1. A policy based on the requests success rate meaning (i.e, an endpoint marked dead if its success rate
    goes bellow the given threshold)
@@ -796,6 +797,10 @@ client.
   val twitter = Http.client
     .withSessionQualifier.noFailureAccrual
     .newService("twitter.com")
+
+The module is implemented by :src:`FailureAccrualFactory <com/twitter/finagle/liveness/FailureAccrualFactory.scala>`.
+See :ref:`Failure Accrual Stats <failure_accrual_stats>` for stats exported from the
+``Failure Accrual`` module.
 
 Pooling
 ~~~~~~~

@@ -244,8 +244,8 @@ object FailureAccrualFactory {
     }
 
   // The FailureAccrualFactory transitions between Alive, Dead, ProbeOpen,
-  // and ProbeClosed. The factory starts in the Alive state. After numFailures
-  // failures, the factory transitions to Dead. When it is revived,
+  // and ProbeClosed. The factory starts in the Alive state. After the failure policy is
+  // triggered, the factory transitions to Dead. When it is revived,
   // it transitions to ProbeOpen. After a request is received,
   // it transitions to ProbeClosed and cannot accept any further requests until
   // the initial request is satisfied. If the request is successful, it
@@ -268,14 +268,16 @@ object FailureAccrualFactory {
 
 /**
  * A [[com.twitter.finagle.ServiceFactory]] that accrues failures, marking
- * itself unavailable when deemed unhealthy according to its configuration.
+ * itself unavailable when deemed unhealthy according to the configured `policy`.
  *
  * This acts as a request driven
  * [[http://martinfowler.com/bliki/CircuitBreaker.html circuit breaker]].
  *
- * When used in a typical Finagle client, there is one instance per node
- * and as such, the load balancer will avoid nodes that are marked down
- * via failure accrual.
+ * Note this module fails open – that is,  even if it transitions into a
+ * closed state, requests will still be allowed to flow through it. Although,
+ * when used in a typical Finagle client, there is one instance of this module
+ * per node and as such, the load balancer will avoid nodes where the status is
+ * not open.
  *
  * @param responseClassifier used to determine which request/response pairs
  * are successful or not.
