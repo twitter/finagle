@@ -8,7 +8,6 @@ package com.twitter.finagle.http
  *
  * @param name case sensitive `String` representation of the HTTP method.
  *
- * @see For Java-friendly enums, see [[com.twitter.finagle.http.Methods]].
  * @see https://tools.ietf.org/html/rfc7230#section-3.1.1
  */
 final class Method private (val name: String) {
