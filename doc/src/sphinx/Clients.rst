@@ -435,8 +435,8 @@ Finally, timeouts can be enforced outside of these modules on a per-request leve
 Request Draining
 ~~~~~~~~~~~~~~~~
 
-The `Drain` module guarantees that the client delays closure until all
-outstanding requests have been completed. It wraps each produced service with
+The `RequestDraining` module guarantees that the client delays closure until all
+outstanding requests have been completed. It wraps each produced `Service` with
 a :src:`RefCountedService <com/twitter/finagle/service/RefcountedService.scala>`.
 
 Load Balancing
