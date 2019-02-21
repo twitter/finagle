@@ -7,6 +7,9 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+19.2.0
+-------
+
 New Features
 ~~~~~~~~~~~~
 
@@ -73,7 +76,7 @@ Breaking API Changes
     4. c.t.f.ThriftMux.Server.maxThriftBufferSize
       => use c.t.f.ThriftMux.Server.serverParam.maxThriftBufferSize
   ``PHAB_ID=D272811``
-  
+
 * finagle-thriftmux: `ThriftMux.Client.pushMuxer` is removed. Use `ThriftMux.Client.standardMuxer`
   instead. ``PHAB_ID=D269373``
 
