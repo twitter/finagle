@@ -3,6 +3,7 @@ package com.twitter.finagle.thriftmux.service
 import com.twitter.finagle.Stack.Role
 import com.twitter.finagle.{Service, ServiceFactory, SimpleFilter, Stack, Stackable, mux}
 import com.twitter.finagle.thrift.ClientDeserializeCtx
+import com.twitter.finagle.thriftmux.service.ClientTraceAnnotationFilter.RequestSerializationMissing
 import com.twitter.finagle.tracing.Trace
 import com.twitter.util.Future
 
@@ -31,9 +32,17 @@ private[finagle] object ClientTraceAnnotationsFilter {
                 val serNs = deserCtx.serializationTime
                 if (serNs >= 0L)
                   trace.recordBinary("clnt/request_serialization_ns", serNs)
+
                 val deserNs = deserCtx.deserializationTime
-                if (deserNs >= 0L)
+                if (deserNs >= 0L) {
                   trace.recordBinary("clnt/response_deserialization_ns", deserNs)
+                  // There are specific cases where serialization is negative and deserialization
+                  // is positive that we cannot explain. "Log" these instances so we can debug them.
+                  if (serNs == RequestSerializationMissing)
+                    trace.recordBinary("clnt/request_serialization_missing", 1)
+                  else if (serNs < 0)
+                    trace.recordBinary("clnt/request_serialization_measurement_error", serNs)
+                }
               }
             }
           }
@@ -47,4 +56,8 @@ private[finagle] object ClientTraceAnnotationsFilter {
         recordFilter.andThen(next)
     }
   }
+}
+
+private[finagle] object ClientTraceAnnotationFilter {
+  val RequestSerializationMissing: Long = Long.MinValue
 }
