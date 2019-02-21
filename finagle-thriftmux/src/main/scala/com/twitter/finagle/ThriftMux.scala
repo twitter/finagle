@@ -596,8 +596,8 @@ object ThriftMux
     // See https://issues.scala-lang.org/browse/SI-8905
     override val withTransport: ServerTransportParams[Server] =
       new ServerTransportParams(this)
-    override val withSession: SessionParams[Server] =
-      new SessionParams(this)
+    override val withSession: ServerSessionParams[Server] =
+      new ServerSessionParams(this)
     override val withAdmissionControl: ServerAdmissionControlParams[Server] =
       new ServerAdmissionControlParams(this)
 

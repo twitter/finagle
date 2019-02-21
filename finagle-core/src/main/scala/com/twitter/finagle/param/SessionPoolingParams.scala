@@ -2,6 +2,7 @@ package com.twitter.finagle.param
 
 import com.twitter.finagle.Stack
 import com.twitter.finagle.client.DefaultPool
+import com.twitter.util.Duration
 
 /**
  * A collection of methods for configuring the Pooling module of Finagle clients.
@@ -13,9 +14,8 @@ import com.twitter.finagle.client.DefaultPool
 class SessionPoolingParams[A <: Stack.Parameterized[A]](self: Stack.Parameterized[A]) {
 
   /**
-   * Configures the total number of temporary (may be closed and reestablished, depending
-   * on the [[SessionParams.maxLifeTime session lifetime]]) and persistent (remain
-   * open during the lifetime of a given client/pool per-host sessions of this client's
+   * Configures the total number of temporary (may be closed and reestablished) and persistent
+   * (remain open during the lifetime of a given client/pool per-host sessions of this client's
    * pool (default: unbounded).
    *
    * @note The session pool will not have more active sessions than `sessionsPerHost`.
@@ -46,4 +46,15 @@ class SessionPoolingParams[A <: Stack.Parameterized[A]](self: Stack.Parameterize
    */
   def maxWaiters(maxWaitersPerHost: Int): A =
     self.configured(self.params[DefaultPool.Param].copy(maxWaiters = maxWaitersPerHost))
+
+  /**
+   * Configures the session pool TTL timeout, the maximum amount of time
+   * a given _temporary_ session is allowed to be cached in a pool (default: unbounded).
+   *
+   * @note TTL does not apply to permanent sessions (up to `minSize`).
+   *
+   * @see [[https://twitter.github.io/finagle/guide/Clients.html#pooling]]
+   */
+  def ttl(timeout: Duration): A =
+    self.configured(self.params[DefaultPool.Param].copy(idleTime = timeout))
 }

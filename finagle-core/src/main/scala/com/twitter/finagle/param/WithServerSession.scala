@@ -17,8 +17,8 @@ trait WithServerSession[A <: Stack.Parameterized[A]] { self: Stack.Parameterized
    * lifecycle. Sessions are used in Finagle to maintain liveness, requests cancellation,
    * draining, and many more.
    *
-   * The default setup for a Finagle client's sessions is to not put any
+   * The default setup for a Finagle server's sessions is to not put any
    * timeouts on it.
    */
-  val withSession: SessionParams[A] = new SessionParams(self)
+  val withSession: ServerSessionParams[A] = new ServerSessionParams(self)
 }

@@ -631,9 +631,9 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     override val withAdmissionControl: param.ServerAdmissionControlParams[Server] =
       new param.ServerAdmissionControlParams(this)
     override val withTransport: param.ServerTransportParams[Server] =
-      new param.ServerTransportParams[Server](this)
-    override val withSession: param.SessionParams[Server] =
-      new param.SessionParams(this)
+      new param.ServerTransportParams(this)
+    override val withSession: param.ServerSessionParams[Server] =
+      new param.ServerSessionParams(this)
 
     override def withResponseClassifier(responseClassifier: service.ResponseClassifier): Server =
       super.withResponseClassifier(responseClassifier)
