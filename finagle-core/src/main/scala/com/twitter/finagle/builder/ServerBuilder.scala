@@ -5,7 +5,6 @@ import com.twitter.finagle._
 import com.twitter.finagle.filter.{MaskCancelFilter, ServerAdmissionControl}
 import com.twitter.finagle.server.{Listener, StackBasedServer, StackServer}
 import com.twitter.finagle.service.{ExpiringService, PendingRequestFilter, TimeoutFilter}
-import com.twitter.finagle.ssl.{ApplicationProtocols, CipherSuites, KeyCredentials}
 import com.twitter.finagle.ssl.server.{
   SslServerConfiguration,
   SslServerEngineFactory,
@@ -15,7 +14,6 @@ import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
 import com.twitter.util.{CloseAwaitably, Duration, Future, NullMonitor, Time}
-import java.io.File
 import java.net.SocketAddress
 import scala.annotation.implicitNotFound
 
@@ -395,54 +393,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
     configured(Transport.ServerSsl(Some(config)))
       .configured(SslServerEngineFactory.Param(engineFactory))
       .configured(SslServerSessionVerifier.Param(sessionVerifier))
-
-  /**
-   * Encrypt the connection with SSL/TLS.
-   *
-   * To migrate to the Stack-based APIs, use `ServerTransportParams.tls`.
-   * For example:
-   * {{{
-   * import com.twitter.finagle.Http
-   *
-   * Http.server.withTransport.tls(...)
-   * }}}
-   */
-  @deprecated("Use tls(SslServerConfiguration) instead", "2019-01-28")
-  def tls(
-    certificatePath: String,
-    keyPath: String,
-    caCertificatePath: String = null,
-    ciphers: String = null,
-    nextProtos: String = null
-  ): This = {
-    val keyCredentials = if (caCertificatePath == null) {
-      KeyCredentials.CertAndKey(new File(certificatePath), new File(keyPath))
-    } else {
-      KeyCredentials.CertKeyAndChain(
-        new File(certificatePath),
-        new File(keyPath),
-        new File(caCertificatePath)
-      )
-    }
-    val cipherSuites =
-      if (ciphers == null) CipherSuites.Unspecified
-      else CipherSuites.fromString(ciphers)
-    val applicationProtocols =
-      if (nextProtos == null) ApplicationProtocols.Unspecified
-      else ApplicationProtocols.fromString(nextProtos)
-
-    configured(
-      Transport.ServerSsl(
-        Some(
-          SslServerConfiguration(
-            keyCredentials = keyCredentials,
-            cipherSuites = cipherSuites,
-            applicationProtocols = applicationProtocols
-          )
-        )
-      )
-    )
-  }
 
   /**
    * Configures the maximum concurrent requests that are admitted

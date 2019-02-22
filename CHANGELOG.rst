@@ -7,6 +7,13 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: Deprecated multi-param legacy `tls` methods have been removed in
+  `c.t.f.param.ServerTransportParams` and `c.t.f.builder.ServerBuilder`. Users should migrate
+  to using the `tls(SslServerConfiguration)` method instead. ``PHAB_ID=D277045``
+
 19.2.0
 -------
 
