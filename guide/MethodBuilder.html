@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>MethodBuilder &#8212; Finagle 19.1.0 documentation</title>
+    <title>MethodBuilder &#8212; Finagle 19.2.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.1.0',
+        VERSION:     '19.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.1.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.2.0 documentation" href="index.html" />
    
   
   <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
@@ -174,6 +174,11 @@ This includes <code class="docutils literal"><span class="pre">com.twitter.finag
 used to determine which requests are successful. This is the basis for measuring
 the <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> success metrics of the method and for <a class="reference internal" href="#logging">logging</a>
 unsuccessful requests.</p>
+<p>Since setting the response classifier overrides how retries are handled, setting
+<code class="docutils literal"><span class="pre">withRetryForClassifier</span></code> may clobber the way that the <code class="docutils literal"><span class="pre">idempotent</span></code>, described below,
+handles retries, rendering them non-idempotent.  If you want to reclassify failures as
+successes or successes as failures as well as mark the endpoint as idempotent, set
+<code class="docutils literal"><span class="pre">withRetryForClassifier</span></code> before setting <code class="docutils literal"><span class="pre">idempotent</span></code>.</p>
 </div>
 <div class="section" id="mb-idempotency">
 <span id="idempotency"></span><h2>Idempotency<a class="headerlink" href="#mb-idempotency" title="Permalink to this headline">¶</a></h2>
@@ -181,10 +186,11 @@ unsuccessful requests.</p>
 whether it&#8217;s safe to resend requests that have already been sent.</p>
 <p>If a client is configured with <code class="docutils literal"><span class="pre">idempotent</span></code>, a protocol-dependent
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/ResponseClassifier.scala">ResponseClassifier</a> is combined with
-any existing classifier to also reissue requests on failure (Thrift exceptions for ThriftMux
-clients, and 500s for HTTP clients). The parameter to <code class="docutils literal"><span class="pre">idempotent</span></code>, <code class="docutils literal"><span class="pre">maxExtraLoad</span></code>, is used to
-configure <a class="reference internal" href="#mb-backup-requests"><span class="std std-ref">backup requests</span></a> and may be useful in reducing tail latency.
-Backup requests can be disabled by setting <code class="docutils literal"><span class="pre">maxExtraLoad</span></code> to <cite>0.0</cite>.</p>
+any existing classifier, in particular what&#8217;s set by <code class="docutils literal"><span class="pre">withRetryForClassifier</span></code> to also reissue
+requests on failure (Thrift exceptions for ThriftMux clients, and 500s for HTTP clients). The
+parameter to <code class="docutils literal"><span class="pre">idempotent</span></code>, <code class="docutils literal"><span class="pre">maxExtraLoad</span></code>, is used to configure
+<a class="reference internal" href="#mb-backup-requests"><span class="std std-ref">backup requests</span></a> and may be useful in reducing tail latency. Backup
+requests can be disabled by setting <code class="docutils literal"><span class="pre">maxExtraLoad</span></code> to <cite>0.0</cite>.</p>
 <p>If a client is configured with <code class="docutils literal"><span class="pre">nonIdempotent</span></code>, any existing configured
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/ResponseClassifier.scala">ResponseClassifier</a> is removed
 and replaced with the default
@@ -290,27 +296,49 @@ the <code class="docutils literal"><span class="pre">MethodBuilder</span></code>
 <div class="section" id="metrics">
 <h2>Metrics<a class="headerlink" href="#metrics" title="Permalink to this headline">¶</a></h2>
 <p>Metrics are scoped to your client&#8217;s label and method name.</p>
+<p>The logical success and failure stats that are exported by the MethodBuilder are
+distinguished from the wire stats (<cite>clnt/&lt;client_label&gt;/requests</cite>) by being
+per-endpoint, but also by measuring different things.  They&#8217;re both provided by
+a <cite>StatsFilter</cite>, but at completely different layers of the finagle stack, so they
+measure quite different things.  In particular, logical stats represent the
+actual result you see when using the MethodBuilder client.  When you send a
+request and receive a response, you will always see a single logical request.
+However, the wire stats represent every time a message was sent over the wire,
+so it will also include things like retries.  Logical requests also include
+connection attempts, so in the opposite direction, a failed connection attempt
+won&#8217;t be listed under wire requests, but will be seen under logical requests.
+This is very similar to what was previously captured by the &#8220;tries&#8221;-scoped
+<cite>StatsFilter</cite> when using <cite>ClientBuilder</cite>.</p>
+<p>This image shows what might happen during a single logical request, which has
+three tries under the hood.  In the first try, there was a successful
+service acquisition (a connection establishment) and then a request which failed.
+Then there&#8217;s another try, which is a failed service acquisition,
+followed by the last try, where there&#8217;s a successful service acquisition,
+and a successful request:</p>
+<img alt="_images/logicalstats.png" src="_images/logicalstats.png" />
 <ul class="simple">
-<li><cite>clnt/your_client_label/method_name/logical/requests</cite> — A counter of the total
+<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/logical/requests</cite> — A counter of the total
 number of <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> successes and failures.
 This does not include any retries.</li>
-<li><cite>clnt/your_client_label/method_name/logical/success</cite> — A counter of the total
+<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/logical/success</cite> — A counter of the total
 number of <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> successes.</li>
-<li><cite>clnt/your_client_label/method_name/logical/failures/exception_name</cite> — A counter of the
+<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/logical/failures</cite> — A counter of the total
+number of <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> failures.</li>
+<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/logical/failures/&lt;exception_name&gt;</cite> — A counter of the
 number of times a specific exception has caused a <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> failure.</li>
-<li><cite>clnt/your_client_label/method_name/logical/request_latency_ms</cite> — A stat of
+<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/logical/request_latency_ms</cite> — A histogram of
 the latency of the <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> requests, in milliseconds.</li>
-<li><cite>clnt/your_client_label/method_name/retries</cite> — A stat of the number of times
+<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/retries</cite> — A histogram of the number of times
 requests are retried.</li>
-<li><cite>clnt/your_client_label/method_name/backups/send_backup_after_ms</cite> - A stat of the time,
+<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/backups/send_backup_after_ms</cite> - A histogram of the time,
 in  milliseconds, after which a request will be re-issued (backup sent) if it has not yet
 completed. Present only if <cite>idempotent</cite> is configured.</li>
-<li><cite>clnt/your_client_label/method_name/backups/backups_sent</cite> - A counter of the number of backup
+<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/backups/backups_sent</cite> - A counter of the number of backup
 requests sent. Present only if <cite>idempotent</cite> is configured.</li>
-<li><cite>clnt/your_client_label/method_name/backups/backups_won</cite> - A counter of the number of backup
+<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/backups/backups_won</cite> - A counter of the number of backup
 requests that completed before the original, regardless of whether they succeeded. Present only
 if <cite>idempotent</cite> is configured.</li>
-<li><cite>clnt/your_client_label/method_name/backups/budget_exhausted</cite> - A counter of the number of times
+<li><cite>clnt/&lt;client_label&gt;/&lt;method_name&gt;/backups/budget_exhausted</cite> - A counter of the number of times
 the backup request budget (computed using the current value of the <cite>maxExtraLoad</cite> param) or client
 retry budget was exhausted, preventing a backup from being sent. Present only if <cite>idempotent</cite> is
 configured.</li>
@@ -330,6 +358,7 @@ configured.</li>
 <ul class="simple">
 <li><cite>clnt/example_client/get_statuses/logical/requests</cite></li>
 <li><cite>clnt/example_client/get_statuses/logical/success</cite></li>
+<li><cite>clnt/example_client/get_statuses/logical/failures</cite></li>
 <li><cite>clnt/example_client/get_statuses/logical/failures/exception_name</cite></li>
 <li><cite>clnt/example_client/get_statuses/logical/request_latency_ms</cite></li>
 <li><cite>clnt/example_client/get_statuses/retries</cite></li>
@@ -344,7 +373,7 @@ for introspection of runtime configuration via TwitterServer&#8217;s <cite>/admi
 </div>
 <div class="section" id="logging">
 <span id="id2"></span><h2>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h2>
-<p>Unsuccessful request, as determined by the <a class="reference internal" href="Clients.html#response-classification"><span class="std std-ref">classifier</span></a>
+<p>Unsuccessful requests, as determined by the <a class="reference internal" href="Clients.html#response-classification"><span class="std std-ref">classifier</span></a>
 set by <code class="docutils literal"><span class="pre">withRetryForClassifier</span></code>, are logged at <code class="docutils literal"><span class="pre">com.twitter.logging.Level.DEBUG</span></code>
 level. Further details, including the request and response, are available at <code class="docutils literal"><span class="pre">TRACE</span></code>
 level. There is a <code class="docutils literal"><span class="pre">Logger</span></code> per method, named with the format

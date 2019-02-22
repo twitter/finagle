@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Deterministic Aperture &#8212; Finagle 19.2.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/finagle.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '19.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="top" title="Finagle 19.2.0 documentation" href="../index.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="../_static/small_flask.css" type= "text/css" rel="stylesheet" />
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-39101739-4', 'twitter.github.io');
+    ga('send', 'pageview');
+
+  </script>
+
+  </head>
+  <body role="document">
+  
+  
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Finagle</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="deterministic-aperture">
+<h1>Deterministic Aperture<a class="headerlink" href="#deterministic-aperture" title="Permalink to this headline">¶</a></h1>
+<p>Deterministic aperture is a refinement of random aperture that has better load
+distribution and connection count properties. Like random aperture, deterministic
+aperture reduces the overhead of clients for both clients and the servers they talk to
+by only talking to a subset of service instances, unlike P2C which lets the client pick
+from any replica in the serverset. However, unlike the classic aperture implementation,
+it does so using a deterministic algorithm which distributes load evenly across service
+instances, reducing the phenomena of load banding which is inherent to the statistical
+approach employed by random aperture. This facilitates a further reduction in necessary
+connections and manual configuration. Deterministic Aperture is the default load balancer
+at Twitter.</p>
+<p><em>Service B RPS during a rolling restart of service A which changed the load balancer from random
+aperture to determinstic aperture</em></p>
+<div class="figure align-center" id="id1">
+<img alt="../_images/t-to-g-daperturerolloutrps.png" src="../_images/t-to-g-daperturerolloutrps.png" />
+<p class="caption"><span class="caption-text">The variance in requests per second (RPS) is significantly diminished after the service A deploy
+due to the deterministic load distribution.</span></p>
+</div>
+<p><em>Connections from service A to service B during a rolling restart of service A which changed the
+load balancer from random aperture to determinstic aperture</em></p>
+<div class="figure align-center" id="id2">
+<img alt="../_images/t-to-g-daperturerolloutconnections.png" src="../_images/t-to-g-daperturerolloutconnections.png" />
+<p class="caption"><span class="caption-text">The total number of connections from A to B was significantly reduced.</span></p>
+</div>
+<div class="section" id="deterministic-subsetting">
+<h2>Deterministic Subsetting<a class="headerlink" href="#deterministic-subsetting" title="Permalink to this headline">¶</a></h2>
+<p>Deterministic aperture combines information about both the backend cluster as well as the
+cluster information for the service at hand and partitions connections to backends in a
+way that favors equal load and minimal connections (with a lower bound of 12 to satisfy
+common concurrency and redundancy needs). It does this by letting each member of a cluster
+compute a subset of weighted backends to talk to based on information about each cluster.
+This can be visually represented as a pair of overlapping rings: The outer ring, or &#8220;peer ring&#8221;,
+represents the cluster of peers (Service A) which are acting in concert to offer load to the
+&#8220;destination ring&#8221; which represents the cluster of backends (Service B).</p>
+<div class="figure align-center" id="id3">
+<img alt="../_images/daperture-ringdiagram1.png" src="../_images/daperture-ringdiagram1.png" />
+<p class="caption"><span class="caption-text">Each instance of Service A determines which &#8220;slice&#8221; of the backend ring to talk to and
+directs its traffic to those specific instances.</span></p>
+</div>
+<div class="figure align-center" id="id4">
+<img alt="../_images/daperture-ringdiagram2.png" src="../_images/daperture-ringdiagram2.png" />
+<p class="caption"><span class="caption-text">Since each client instance is doing the same thing, except picking the slice that belongs
+to them, we can evenly load the backend cluster (Service B).
+Note that this requires the load balancer to respect the continuous ring representation
+since peer slices may cover fractional portions of the destination ring.</span></p>
+</div>
+</div>
+<div class="section" id="traffic-patterns">
+<h2>Traffic Patterns<a class="headerlink" href="#traffic-patterns" title="Permalink to this headline">¶</a></h2>
+<p>The deterministic aperture model, and subsetting models in general, works well when the
+traffic pattern between service A and B is &#8220;smooth&#8221; meaning that for each instance of
+Service A the request pattern doesn&#8217;t consists of significant bursts with respect to the
+average request rate and that requests are roughly equal cost, both in resource usage of
+the backend and in terms of latency. If the traffic pattern is characterized by
+large bursts of traffic, say invalidation of a cache based on a timer, then small chunks
+of the ring will end up extremely loaded for the duration of the burst while other slices
+may be essentially idle. Under those conditions the P2C load balancer may be more
+appropriate so the entire backend cluster can absorb the large bursts coming from instances
+of Service A.</p>
+</div>
+<div class="section" id="peer-information">
+<h2>Peer Information<a class="headerlink" href="#peer-information" title="Permalink to this headline">¶</a></h2>
+<p>In order for deterministic aperture to be deterministic it needs to know some additional
+information. This is important for computing the &#8220;slice&#8221; of backends that the load balancer
+will utilize. To know how large of slice to use the client needs information about both the
+backends, or the serverset, and it needs to know some information about its peers, also
+known as the peerset. The peerset is the only new information needed since knowing about
+the backends is a requirement for any client side load balancer. In regard to the peerset
+we need two different pieces of information:</p>
+<ul class="simple">
+<li>How many replicas are there in the peerset. This is used to compute how large each clients
+slice of the backends will be.</li>
+<li>What is the position of this instance in the peerset. This is required to compute which
+slice that this client should take.</li>
+</ul>
+<p>This information can be configured in the <a class="reference external" href="https://github.com/twitter/finagle/blob/develop/finagle-core/src/main/scala/com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate.scala">ProcessCoordinate</a>
+object by setting the processes instance number and the total number of instances. The current
+implementation requires that all instances in the cluster have unique and contiguous instance id&#8217;s
+starting at 0.</p>
+</div>
+<div class="section" id="key-metrics">
+<h2>Key Metrics<a class="headerlink" href="#key-metrics" title="Permalink to this headline">¶</a></h2>
+<p>Success rates and exceptions should not be affected by the new load balancer. Other
+important metrics to consider are request latency and connection count.</p>
+<div class="highlight-text"><div class="highlight"><pre><span></span>$clientName/request_latency_ms.p*
+
+$clientName/connections
+
+$clientName/loadbalancer/vector_hash
+
+finagle/aperture/coordinate
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><p class="logo"><a href="../index.html">
+  <img class="logo" src="../_static/logo_small.png" alt="Logo"/>
+</a></p><a href="index.html"><h3>Finagle</h3></a>
+<p>
+  Finagle is a network stack for distributed systems.
+</p>
+
+<h3>Useful Links</h3>
+<ul>
+  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+</ul>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Deterministic Aperture</a><ul>
+<li><a class="reference internal" href="#deterministic-subsetting">Deterministic Subsetting</a></li>
+<li><a class="reference internal" href="#traffic-patterns">Traffic Patterns</a></li>
+<li><a class="reference internal" href="#peer-information">Peer Information</a></li>
+<li><a class="reference internal" href="#key-metrics">Key Metrics</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Search the contents of this site.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">&copy; Copyright 2019 Twitter, Inc.</div>
+  
+  </body>
+</html>

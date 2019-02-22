@@ -233,8 +233,8 @@ generator.
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.thrift">thrift</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <a class="object" href="ClientDeserializeCtx$.html" title=""></a>
-                        <a class="class" href="ClientDeserializeCtx.html" title="Used by Thrift and ThriftMux Client to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses."></a>
-                        <a href="ClientDeserializeCtx.html" title="Used by Thrift and ThriftMux Client to facilitate giving the Finagle stack access to the deserialized forms of Thrift requests and responses.">ClientDeserializeCtx</a>
+                        <a class="class" href="ClientDeserializeCtx.html" title="Used by Thrift and ThriftMux Client to facilitate giving the Finagle stack access to various data that are computed outside of Finagle's stack."></a>
+                        <a href="ClientDeserializeCtx.html" title="Used by Thrift and ThriftMux Client to facilitate giving the Finagle stack access to various data that are computed outside of Finagle's stack.">ClientDeserializeCtx</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="ClientId$.html" title="ClientId provides the client identification of the incoming request if available."></a>
                         <a class="class" href="ClientId.html" title=""></a>
@@ -329,10 +329,6 @@ generator.
                         <a href="ThriftService.html" title="A marker trait that signifies that this is a thrift service that can be served by Finagle">ThriftService</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="ThriftServiceIface$.html" title="Construct Service interface for a Thrift method."></a>
-                        <a href="ThriftServiceIface$.html" title="Construct Service interface for a Thrift method.">ThriftServiceIface</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="trait" href="ToThriftService.html" title="A trait that signifies a ThriftService can be created from this"></a>
                         <a href="ToThriftService.html" title="A trait that signifies a ThriftService can be created from this">ToThriftService</a>
                       </li><li class="current-entities indented4">
@@ -341,8 +337,8 @@ generator.
                         <a href="ValidateThriftService.html" title="A filter that invalidates a connection if it suffers from an irrecoverable application exception.">ValidateThriftService</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="maxReusableBufferSize$.html" title=""></a>
-                        <a href="maxReusableBufferSize$.html" title="">maxReusableBufferSize</a>
+                        <a class="object" href="package$$maxReusableBufferSize$.html" title=""></a>
+                        <a href="package$$maxReusableBufferSize$.html" title="">maxReusableBufferSize</a>
                       </li>
               </ul>
             </div>
@@ -368,7 +364,7 @@ generator.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">SeqIdFilter</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>
+        <span class="name">SeqIdFilter</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>
       </span>
       </h4>
 
@@ -381,7 +377,7 @@ failing any requests that do not.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]], <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>], <a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]], (<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]], <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]], <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>], <a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]], (<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]], <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -465,7 +461,7 @@ failing any requests that do not.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -481,7 +477,7 @@ failing any requests that do not.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -497,7 +493,7 @@ failing any requests that do not.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -513,7 +509,7 @@ failing any requests that do not.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">agnosticAndThen</span><span class="params">(<span name="next">next: <a href="../Filter$$TypeAgnostic.html" class="extype" name="com.twitter.finagle.Filter.TypeAgnostic">TypeAgnostic</a></span>)</span><span class="result">: <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>], <a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>
+        <span class="name">agnosticAndThen</span><span class="params">(<span name="next">next: <a href="../Filter$$TypeAgnostic.html" class="extype" name="com.twitter.finagle.Filter.TypeAgnostic">TypeAgnostic</a></span>)</span><span class="result">: <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>], <a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>
       </span>
       
       <p class="shortcomment cmt">Convert the <a href="../Filter$$TypeAgnostic.html" class="extype" name="com.twitter.finagle.Filter.TypeAgnostic">Filter.TypeAgnostic</a> filter to a Filter and chain it with
@@ -532,7 +528,7 @@ failing any requests that do not.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">andThen</span><span class="params">(<span name="factory">factory: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>)</span><span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>
+        <span class="name">andThen</span><span class="params">(<span name="factory">factory: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>)</span><span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>
       </span>
       
       <p class="shortcomment cmt">Terminates a filter chain in a <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Terminates a filter chain in a <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>. For example,</p><pre>myFilter.andThen(myServiceFactory)</pre></div><dl class="paramcmts block"><dt class="param">factory</dt><dd class="cmt"><p>a service factory that takes the output request type and
@@ -549,7 +545,7 @@ failing any requests that do not.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">andThen</span><span class="params">(<span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>)</span><span class="result">: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>
+        <span class="name">andThen</span><span class="params">(<span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>)</span><span class="result">: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>
       </span>
       
       <p class="shortcomment cmt">Terminates a filter chain in a <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Terminates a filter chain in a <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>. For example,</p><pre>myFilter.andThen(myService)</pre></div><dl class="paramcmts block"><dt class="param">service</dt><dd class="cmt"><p>a service that takes the output request type and the input response type.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd></dl></div>
@@ -565,7 +561,7 @@ failing any requests that do not.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">andThen</span><span class="tparams">[<span name="Req2">Req2</span>, <span name="Rep2">Rep2</span>]</span><span class="params">(<span name="next">next: <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>], <span class="extype" name="com.twitter.finagle.Filter.andThen.Req2">Req2</span>, <span class="extype" name="com.twitter.finagle.Filter.andThen.Rep2">Rep2</span>]</span>)</span><span class="result">: <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>], <span class="extype" name="com.twitter.finagle.Filter.andThen.Req2">Req2</span>, <span class="extype" name="com.twitter.finagle.Filter.andThen.Rep2">Rep2</span>]</span>
+        <span class="name">andThen</span><span class="tparams">[<span name="Req2">Req2</span>, <span name="Rep2">Rep2</span>]</span><span class="params">(<span name="next">next: <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>], <span class="extype" name="com.twitter.finagle.Filter.andThen.Req2">Req2</span>, <span class="extype" name="com.twitter.finagle.Filter.andThen.Rep2">Rep2</span>]</span>)</span><span class="result">: <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>], <span class="extype" name="com.twitter.finagle.Filter.andThen.Req2">Req2</span>, <span class="extype" name="com.twitter.finagle.Filter.andThen.Rep2">Rep2</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Chains a series of filters together:</p><div class="fullcomment"><div class="comment cmt"><p>Chains a series of filters together:</p><pre>myModularService = handleExceptions.andThen(thrift2Pojo.andThen(parseString))</pre></div><dl class="paramcmts block"><dt class="param">next</dt><dd class="cmt"><p>another filter to follow after this one</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd><dt>Note</dt><dd><span class="cmt"><p>synchronously thrown exceptions in the underlying service are automatically
@@ -582,7 +578,7 @@ lifted into Future.exception.</p></span></dd></dl></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">andThenIf</span><span class="tparams">[<span name="Req2">Req2 &gt;: <a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a></span>, <span name="Rep2">Rep2 &lt;: <a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]</span>]</span><span class="params">(<span name="condAndFilter">condAndFilter: (<a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>, <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>], <span class="extype" name="com.twitter.finagle.Filter.andThenIf.Req2">Req2</span>, <span class="extype" name="com.twitter.finagle.Filter.andThenIf.Rep2">Rep2</span>])</span>)</span><span class="result">: <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>], <span class="extype" name="com.twitter.finagle.Filter.andThenIf.Req2">Req2</span>, <span class="extype" name="com.twitter.finagle.Filter.andThenIf.Rep2">Rep2</span>]</span>
+        <span class="name">andThenIf</span><span class="tparams">[<span name="Req2">Req2 &gt;: <a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a></span>, <span name="Rep2">Rep2 &lt;: <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]</span>]</span><span class="params">(<span name="condAndFilter">condAndFilter: (<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>, <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>], <span class="extype" name="com.twitter.finagle.Filter.andThenIf.Req2">Req2</span>, <span class="extype" name="com.twitter.finagle.Filter.andThenIf.Rep2">Rep2</span>])</span>)</span><span class="result">: <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>], <span class="extype" name="com.twitter.finagle.Filter.andThenIf.Req2">Req2</span>, <span class="extype" name="com.twitter.finagle.Filter.andThenIf.Rep2">Rep2</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Conditionally propagates requests down the filter chain.</p><div class="fullcomment"><div class="comment cmt"><p>Conditionally propagates requests down the filter chain. This may
@@ -601,7 +597,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="req">req: <a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a></span>, <span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>
+        <span class="name">apply</span><span class="params">(<span name="req">req: <a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a></span>, <span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>
       </span>
       
       <p class="shortcomment cmt">This is the method to override/implement to create your own Filter.</p><div class="fullcomment"><div class="comment cmt"><p>This is the method to override/implement to create your own Filter.
@@ -634,7 +630,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java/lang/index.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -658,7 +654,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">curried</span><span class="result">: (<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>) ⇒ (<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>
+        <span class="name">curried</span><span class="result">: (<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>) ⇒ (<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function2</dd><dt>Annotations</dt><dd>
@@ -677,7 +673,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -693,7 +689,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -709,7 +705,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java/lang/index.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -750,7 +746,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd><dt>Annotations</dt><dd>
@@ -769,7 +765,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
@@ -785,7 +781,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -801,7 +797,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -820,7 +816,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -871,7 +867,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">tupled</span><span class="result">: ((<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]])) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>
+        <span class="name">tupled</span><span class="result">: ((<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]])) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function2</dd><dt>Annotations</dt><dd>
@@ -890,7 +886,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -912,7 +908,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.12.7/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -934,7 +930,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -957,15 +953,15 @@ on a configuration file, for instance.
 
         <div id="inheritedMembers">
         <div class="parent" name="com.twitter.finagle.SimpleFilter">
-              <h3>Inherited from <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</h3>
+              <h3>Inherited from <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</h3>
             </div><div class="parent" name="com.twitter.finagle.Filter">
-              <h3>Inherited from <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>], <a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</h3>
+              <h3>Inherited from <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>], <a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</h3>
             </div><div class="parent" name="scala.Function2">
-              <h3>Inherited from (<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</h3>
+              <h3>Inherited from (<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]]</h3>
             </div><div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>
             </div>
         
         </div>

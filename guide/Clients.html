@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Clients &#8212; Finagle 19.1.0 documentation</title>
+    <title>Clients &#8212; Finagle 19.2.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.1.0',
+        VERSION:     '19.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.1.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.2.0 documentation" href="index.html" />
     <link rel="next" title="Contexts" href="Contexts.html" />
     <link rel="prev" title="Servers" href="Servers.html" />
    
@@ -431,8 +431,8 @@ it can be configured <a class="footnote-reference" href="#example" id="id9">[3]<
 </div>
 <div class="section" id="request-draining">
 <h3>Request Draining<a class="headerlink" href="#request-draining" title="Permalink to this headline">¶</a></h3>
-<p>The <cite>Drain</cite> module guarantees that the client delays closure until all
-outstanding requests have been completed. It wraps each produced service with
+<p>The <cite>RequestDraining</cite> module guarantees that the client delays closure until all
+outstanding requests have been completed. It wraps each produced <cite>Service</cite> with
 a <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/RefcountedService.scala">RefCountedService</a>.</p>
 </div>
 <div class="section" id="load-balancing">
@@ -536,6 +536,12 @@ presence of long polling clients.</p>
 </div>
 <div class="section" id="aperture-least-loaded">
 <h4>Aperture + Least Loaded <a class="footnote-reference" href="#experimental" id="id18">[2]</a><a class="headerlink" href="#aperture-least-loaded" title="Permalink to this headline">¶</a></h4>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The aperture load balancers can be more challenging to reason about than the P2C family of
+balancers. See <a class="reference internal" href="ApertureLoadBalancers.html#aperture-load-balancers"><span class="std std-ref">Aperture Load Balancers</span></a> section for more
+information.</p>
+</div>
 <p>All the previously mentioned configurations operate optimally under high load. That is, without
 sufficient concurrent load, the previous distributors can degrade to random selection. The Aperture
 distributor aims to remedy this among other things. By employing a simple feedback controller based
@@ -620,12 +626,12 @@ a non-retryable <code class="docutils literal"><span class="pre">c.t.f.loadbalan
 <p>The following modules aim to preemptively disable sessions that will likely fail requests.
 From the perspective of the load balancer, they act as circuit breakers which, when
 triggered, temporarily suspend the use of a particular endpoint.</p>
-<p>There are at least two modules in the client stacks that might be viewed as circuit breakers:</p>
+<p>There are at least two modules in the client stacks that might be viewed as <a class="reference external" href="http://martinfowler.com/bliki/CircuitBreaker.html">circuit breakers</a>:</p>
 <ol class="arabic simple">
 <li><cite>Fail Fast</cite> - a session-driven circuit breaker</li>
-<li><cite>Failure Accrual</cite> - a <a class="reference external" href="http://martinfowler.com/bliki/CircuitBreaker.html">request-driven circuit breaker</a></li>
+<li><cite>Failure Accrual</cite> - a request-driven circuit breaker</li>
 </ol>
-<p>In addition to <cite>Fail Fast</cite> and <cite>Failure Accrual</cite>, some of the protocols (i.e., <cite>Mux</cite>) in
+<p>In addition to <cite>Fail Fast</cite> and <cite>Failure Accrual</cite>, some of the protocols (i.e., <cite>Mux</cite>, <cite>HTTP/2</cite>) in
 Finagle support <cite>Ping-based Failure Detectors</cite> <a class="footnote-reference" href="#failure-detectors" id="id21">[10]</a>
 (i.e., <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/liveness/ThresholdFailureDetector.scala">ThresholdFailureDetector</a>).</p>
 <div class="section" id="fail-fast">
@@ -637,8 +643,9 @@ background process that repeatedly attempts to reconnect with a given backoff sc
 During the time that a host is marked down, the factory is marked unavailable (and thus
 the load balancer above it will avoid its use). The factory becomes available
 again on success or when the back-off schedule runs out.</p>
-<p>See the FAQ to <a class="reference internal" href="FAQ.html#faq-failedfastexception"><span class="std std-ref">better understand</span></a> why clients
-might be seeing <code class="docutils literal"><span class="pre">com.twitter.finagle.FailedFastException</span></code>&#8216;s.</p>
+<p>This module fails closed and returns an exception when it detects a failure. See the
+FAQ to <a class="reference internal" href="FAQ.html#faq-failedfastexception"><span class="std std-ref">better understand</span></a> why clients might be
+seeing <code class="docutils literal"><span class="pre">com.twitter.finagle.FailedFastException</span></code>&#8216;s.</p>
 <p id="disabling-fail-fast">The <cite>Fail Fast</cite> module is enabled by default for all of the Finagle clients except for
 <code class="docutils literal"><span class="pre">Memcached.client</span></code> one. The following example demonstrates how to explicitly disable it for a
 particular client.</p>
@@ -651,23 +658,23 @@ particular client.</p>
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">It&#8217;s important to disable <cite>Fail Fast</cite> when only have one host in the replica set because
-Finagle doesn&#8217;t have any other path to choose.</p>
+<p class="last">Because this module fails closed, it is advised to disable <cite>Fail Fast</cite> when only one host
+is present in the replica set. For example, when configuring your client to communicate to
+a VIP or any other destination which resolves to a single entity.</p>
 </div>
 <p><a class="reference internal" href="Metrics.html#fail-fast-stats"><span class="std std-ref">Related stats</span></a></p>
 </div>
 <div class="section" id="failure-accrual">
 <span id="client-failure-accrual"></span><h4>Failure Accrual<a class="headerlink" href="#failure-accrual" title="Permalink to this headline">¶</a></h4>
-<p>The <cite>Failure Accrual</cite> module marks itself as unavailable based on the number of observed
-failures. The module remains unavailable for a predefined duration. Recall
-that the availability is propagated through the stack. Thus the load balancer
-will avoid using an endpoint where the failure accrual module is unavailable.
-The module is implemented by <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/liveness/FailureAccrualFactory.scala">FailureAccrualFactory</a>.</p>
-<p>See <a class="reference internal" href="Metrics.html#failure-accrual-stats"><span class="std std-ref">Failure Accrual Stats</span></a> for stats exported from the
-<code class="docutils literal"><span class="pre">Failure</span> <span class="pre">Accrual</span></code> module.</p>
-<p>The <code class="docutils literal"><span class="pre">FailureAccrualFactory</span></code> is configurable in terms of used policy to determine whether to mark
-an endpoint dead upon a request failure. At this point, there are two setups available out of
-the box.</p>
+<p>The <cite>Failure Accrual</cite> module marks itself as unavailable per-endpoint based on a configurable <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/liveness/FailureAccrualPolicy.scala">policy</a>.
+Unlike <cite>Fail Fast</cite>, this module fails open. That is, even if it transitions into an unavailable state, requests
+will still be allowed to flow through it. However, recall that the availability is propagated through the stack,
+so the load balancer will avoid using an endpoint where the failure accrual module is unavailable.</p>
+<p>When transitioning from an unavailable to an available state, the module is conservative and only
+allows for a probe request. If the probe fails, it goes back to unavailable regardless of the policy.
+Put differently, at least one request must succeed before the module starts to apply the policy
+again.</p>
+<p>There are two available policies out of the box:</p>
 <ol class="arabic simple">
 <li>A policy based on the requests success rate meaning (i.e, an endpoint marked dead if its success rate
 goes bellow the given threshold)</li>
@@ -735,6 +742,9 @@ client.</p>
   <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;twitter.com&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
+<p>The module is implemented by <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/liveness/FailureAccrualFactory.scala">FailureAccrualFactory</a>.
+See <a class="reference internal" href="Metrics.html#failure-accrual-stats"><span class="std std-ref">Failure Accrual Stats</span></a> for stats exported from the
+<code class="docutils literal"><span class="pre">Failure</span> <span class="pre">Accrual</span></code> module.</p>
 </div>
 </div>
 <div class="section" id="pooling">
@@ -939,14 +949,19 @@ service SocialGraph {
   <span class="c1">// #3</span>
   <span class="k">case</span> <span class="nc">ReqRep</span><span class="o">(</span><span class="nc">SocialGraph</span><span class="o">.</span><span class="nc">Follow</span><span class="o">.</span><span class="nc">Args</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">b</span><span class="o">),</span> <span class="k">_</span><span class="o">)</span> <span class="k">if</span> <span class="n">a</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="k">=&gt;</span>
     <span class="nc">ResponseClass</span><span class="o">.</span><span class="nc">NonRetryableFailure</span>
+
+  <span class="c1">// #4</span>
+  <span class="k">case</span> <span class="nc">ReqRep</span><span class="o">(</span><span class="k">_</span><span class="o">,</span> <span class="nc">Throw</span><span class="o">(</span><span class="k">_:</span> <span class="kt">InvalidQueryException</span><span class="o">))</span> <span class="k">=&gt;</span>
+    <span class="nc">ResponseClass</span><span class="o">.</span><span class="nc">Success</span>
 <span class="o">}</span>
 </pre></div>
 </div>
 <p>If you examine that classifier you&#8217;ll note a few things. First (#1), the
-deserialized <code class="docutils literal"><span class="pre">NotFoundException</span></code> can be treated as a failure. Next (#2), a
+deserialized <code class="docutils literal"><span class="pre">NotFoundException</span></code> can be treated as a failure. Second (#2), a
 &#8220;successful&#8221; response can be examined to enable services using status codes to
-classify errors. Lastly (#3), the request can be introspected to make the
-decision.</p>
+classify errors. Next (#3), the request can be introspected to make the
+decision. Lastly (#4), the deserialized <code class="docutils literal"><span class="pre">InvalidQueryException</span></code> can be treated
+as a successful response.</p>
 </div>
 <div class="section" id="other-details">
 <h3>Other Details<a class="headerlink" href="#other-details" title="Permalink to this headline">¶</a></h3>

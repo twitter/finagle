@@ -309,14 +309,6 @@ using `.withHttpStats` on `Http.Client` and `Http.Server`.
 **http/cookie/samesite_failures** `verbosity:debug`
   A counter of the number of failed attempts to decode the SameSite Cookie attribute.
 
-**http/cookie/flagless_samesites** `verbosity:debug`
-  A counter of the number of times the SameSite attribute was set in a Response despite the
-  SameSiteCodec being disabled.
-
-**http/cookie/dropped_samesites** `verbosity:debug`
-  A counter of the number of times the SameSite attribute was present in a Response Cookie
-  but dropped after encoding.
-
 HTTP2
 -----
 These stats pertain to HTTP2 only.

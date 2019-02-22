@@ -147,142 +147,10 @@ returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.h
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.mux" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="mux"></a><a id="mux:mux"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#mux" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="Package mux implements a generic RPC multiplexer with a rich protocol." href="index.html"><span class="name">mux</span></a>
-      </span>
-      
-      <p class="shortcomment cmt">Package mux implements a generic RPC multiplexer with a rich protocol.</p><div class="fullcomment"><div class="comment cmt"><p>Package mux implements a generic RPC multiplexer with a rich protocol.
-Mux is itself encoding independent, so it is meant to use as the
-transport for other RPC systems (eg. thrift). In OSI terminology, it
-is a pure session layer.</p><p>In the below description, all numeric values are unsigned and in
-big-endian byte order. The schema <i>size:4 body:10</i> defines the
-field size to be 4 bytes, followed by 10 bytes of the field body. The
-schema <i>key~4</i> defines the field key to be defined by 4 bytes
-interpreted as the size of the field, followed by that many bytes
-comprising the field itself--it is shorthand for <i>keysize:4 key:keysize</i>.
-Groups are denoted by parenthesis; <i>*</i> denotes repetition of the
-previous schema 0 or more times, while <code>{n}</code> indicates repetition
-exactly <i>n</i> times. Unspecified sizes consume the rest of the frame:
-they may be specified only as the last field in the message.</p><p>All strings  in Mux are Utf-8 encoded, and are never null-terminated.</p><h3>Message framing</h3><p>Messages in mux are framed with a 4-byte big-endian size header,
-followed by 1 byte describing the message type and a 3-byte tag; or,
-diagrammatically: <i>size:4 type:1 tag:3</i>. The remainder of the frame
-(size-4 bytes) contains the body. Its format depends on the
-message type, documented below.</p><p>Tag 0 designates a &quot;marker&quot; T message that expects no reply. Some
-messages may be split into an ordered sequence of fragments. Tag MSB=0
-denotes the last message in such a sequence, making the tag namespace
-23 bits. The tag is otherwise arbitrary, and is chosen by the sender
-of the T message.</p><p>Currently, only Tdispatch and Rdispatch messages may be split into an
-ordered sequence of fragments. TdispatchError message ends a Tdispatch
-sequence and an Rerr ends an Rdispatch sequence.</p><p>Message types, interpreted as a two's complement, 1-byte integer are
-numbered as follows: positive numbers are T-messages; their negative
-complement is the corresponding R message. T-messages greater than 63
-(correspondingly R-messages smaller than -63) are session messages.
-The message number -128 is reserved for Rerr. All other messages are
-application messages. Middle boxes may forward application messages
-indiscriminately. Because of an early implementation bug, two aliases
-exist: 127 is Rerr, and -62 is Tdiscarded.</p><p>The protocol is full duplex: both the server and client may send T
-messages initiating an exchange.</p><h3>Exchanges</h3><p>Messages are designated as &quot;T messages&quot; or &quot;R messages&quot;, T and R being
-stand-ins for transmit and receive. A T message initiates an exchange
-and is assigned a free tag by the sender. A reply is either an R
-message of the same type (Rx replies to Tx for some x), or an Rerr,
-indicating a session layer error. R messages are matched to their T
-messages by tag, and the reply concludes the exchange and frees the
-tag for future use. Implementations should reuse small tag numbers.</p><h3>Messages</h3><p><i>size:4 Tinit:1 tag:3 version:2 (key~4 value~4)*</i> reinitializes a
-session. Clients typically send this at the beginning of the session.
-When doing so, the sender may issue no more T messages until the
-corresponding <i>size:4 Rinit:1 tag:3 version:2 (key~4 value~4)*</i> has been
-received. After the Rinit was received, all connection state has been
-reset (outstanding tags are invalidated) and the stream is resumed
-according to the newly negotiated parameters. Prior to the first
-Tinit, the session operates at version 1. Rinit's version field is the
-accepted version of the session (which may be lower than the one
-requested by Tinit).</p><p><i>size:4 Treq:1 tag:3 n:1 (key:1 value~1){n} body:</i> initiates the
-request described by its body. The request body is delivered to the
-application. The request header contains a number of key-value pairs
-that describe request metadata.</p><p>Keys for <i>Treq</i> messages are as follows:</p><ol class="decimal"><li><i>traceid</i>: a 24-byte value describing the full
-<a href="http://research.google.com/archive/papers/dapper-2010-1.pdf" target="_blank">Dapper</a> trace id
-assigned by the client. The value's format is <i>spanid:8 parentid:8 traceid:8</i>.</li></ol><p> 2. <i>traceflag</i>: a bitmask describing trace flags. Currently, the
-only defined flag is bit 0 which enables &quot;debug mode&quot;, asking the
-server to force trace sampling.</p><p><i>size:4 Tdispatch:1 tag:3 nctx:2 (ckey~2 cval~2){nc} dst~2 nd:2
-(from~2 to~2){nd} body:</i> implements <i>destination dispatch</i>.
-Tdispatch messages carry a set of keyed request contexts, followed by
-a logical destination encoded as a UTF-8 string. A delegation table
-follows describing rewrite rules that apply to this request.</p><p><i>size:4 Rreq:1 tag:3 status:1 body:</i> replies to a request. Status
-codes are as follows: 0=OK; the body contains the reply. 1=ERROR; the
-body contains a string describing the error. 2=NACK; a negative
-acknowledgment, the body contains a string describing the reason.</p><p><i>size:4 Rdispatch:1 tag:3 status:1 nctx:2 (key~2 value~2){nctx} body:</i> replies
-to a Tdispatch request. Status codes are as in Rreq. Replies can include
-request contexts. MuxFailure flags are currently sent via Rdispatch contexts
-under the &quot;MuxFailure&quot; key. See the MuxFailure flags section below.</p><p><i>size:4 Rerr:1 tag:3 why:</i> indicates that the corresponding T message
-produced an error. Rerr is specifically for server errors: the server
-failed to interpret or act on the message. The body carries a string
-describing the error.</p><p><i>size:4 Tdrain:1 tag:3</i> is a request sent by the server telling the
-client to stop sending new requests. A client acknowledges this with
-an Rdrain message.</p><p><i>size:4 Tping:1 tag:3</i> is sent by either party to check the liveness of
-its peer; these should be responded to immediately with a Rping
-message.</p><p><i>size:4 Tdiscarded:1 tag:3 discard_tag:3 why:</i> is a marker message and therefore
-has a tag value of 0. <i>discard_tag</i> indicates the tag of the Tdispatch to be
-discarded by the client. This can be used as a hint for early termination. Why is
-a string describing why the request was discarded. Note that it does *not* free
-the server from the obligation of replying to the original Treq.</p><p><i>size:4 Tlease:1 tag:3 unit:1 howmuch:8</i> is a marker message indicating that a
-lease has been issued for <i>howmuch</i> units. As a marker message, its tag value must
-be 0. Unit '0' is reserved for duration in milliseconds. Whenever a lease has not been
-issued, a client can assume it holds an indefinite lease. Adhering to the lease is
-optional, but the server may reject requests or provide degraded service should the
-lease expire. This is used by servers to implement features like garbage collection
-avoidance.</p><h3>MuxFailure Flags</h3><p>Failure flags are read and written as an 8 byte integer. Unrecognized flags
-will be ignored silently, but should all be considered reserved for future
-use.</p><p> Flag          Value     Meaning
- Restartable   1 &lt;&lt; 0    Request is safe to re-issue
- Rejected      1 &lt;&lt; 1    Request was rejected/Nacked by the server
- NonRetryable  1 &lt;&lt; 2    Request should not be retried</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.mux.lease" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="lease"></a><a id="lease:lease"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/index.html#lease" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="lease/index.html"><span class="name">lease</span></a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.mux">mux</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.mux.pushsession" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="pushsession"></a><a id="pushsession:pushsession"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/index.html#pushsession" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="pushsession/index.html"><span class="name">pushsession</span></a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.mux">mux</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.mux.stats" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.stats" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="stats"></a><a id="stats:stats"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/index.html#stats" title="Permalink">
+      <a href="../../../com/twitter/finagle/index.html#stats" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -291,62 +159,122 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="stats/index.html"><span class="name">stats</span></a>
+        <a title="" href="index.html"><span class="name">stats</span></a>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.mux">mux</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.mux.transport" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="transport"></a><a id="transport:transport"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/index.html#transport" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="transport/index.html"><span class="name">transport</span></a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.mux">mux</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="ClientDiscardedRequestException.html" title="Indicates that a client requested that a given request be discarded."></a>
-                        <a href="ClientDiscardedRequestException.html" title="Indicates that a client requested that a given request be discarded.">ClientDiscardedRequestException</a>
+                        <a class="object" href="CancelledCategorizer$.html" title="Matcher for Throwables caused by some form of cancellation."></a>
+                        <a href="CancelledCategorizer$.html" title="Matcher for Throwables caused by some form of cancellation.">CancelledCategorizer</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="trait" href="OpportunisticTlsParams.html" title="Mixin for supporting Opportunistic Tls on clients and servers"></a>
-                        <a href="OpportunisticTlsParams.html" title="Mixin for supporting Opportunistic Tls on clients and servers">OpportunisticTlsParams</a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="Request$.html" title=""></a>
-                        <a class="trait" href="Request.html" title="A mux request."></a>
-                        <a href="Request.html" title="A mux request.">Request</a>
+                        <a class="object" href="ClientStatsReceiver$.html" title="A client-specific StatsReceiver."></a>
+                        <a href="ClientStatsReceiver$.html" title="A client-specific StatsReceiver.">ClientStatsReceiver</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="Requests$.html" title="For java compatibility"></a>
-                        <a href="Requests$.html" title="For java compatibility">Requests</a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="Response$.html" title=""></a>
-                        <a class="trait" href="Response.html" title="A mux response."></a>
-                        <a href="Response.html" title="A mux response.">Response</a>
+                        <a class="object" href="DefaultStatsReceiver$.html" title="A &quot;default&quot; StatsReceiver loaded by Finagle's com.twitter.finagle.util.LoadService mechanism."></a>
+                        <a href="DefaultStatsReceiver$.html" title="A &quot;default&quot; StatsReceiver loaded by Finagle's com.twitter.finagle.util.LoadService mechanism.">DefaultStatsReceiver</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="Responses$.html" title="For java compatibility"></a>
-                        <a href="Responses$.html" title="For java compatibility">Responses</a>
+                        <a class="class" href="HostMetricsExporter.html" title=""></a>
+                        <a href="HostMetricsExporter.html" title="">HostMetricsExporter</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="ServerApplicationError.html" title="Indicates that the server encountered an error whilst processing the client's request."></a>
-                        <a href="ServerApplicationError.html" title="Indicates that the server encountered an error whilst processing the client's request.">ServerApplicationError</a>
+                        <a class="trait" href="HostStatsReceiver.html" title="A StatsReceiver type that's used for per host stats only."></a>
+                        <a href="HostStatsReceiver.html" title="A StatsReceiver type that's used for per host stats only.">HostStatsReceiver</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="ServerError.html" title="Indicates that the server failed to interpret or act on the request."></a>
-                        <a href="ServerError.html" title="Indicates that the server failed to interpret or act on the request.">ServerError</a>
+                        <a class="object" href="ImmediateMetricsHistogram$.html" title=""></a>
+                        <a href="ImmediateMetricsHistogram$.html" title="">ImmediateMetricsHistogram</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="InMemoryHostStatsReceiver.html" title=""></a>
+                        <a href="InMemoryHostStatsReceiver.html" title="">InMemoryHostStatsReceiver</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="JavaLoggerStatsReceiver$.html" title=""></a>
+                        <a class="class" href="JavaLoggerStatsReceiver.html" title=""></a>
+                        <a href="JavaLoggerStatsReceiver.html" title="">JavaLoggerStatsReceiver</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="JsonExporter$.html" title=""></a>
+                        <a class="class" href="JsonExporter.html" title="A Finagle HTTP service that exports Metrics (available via MetricsView) in a JSON format."></a>
+                        <a href="JsonExporter.html" title="A Finagle HTTP service that exports Metrics (available via MetricsView) in a JSON format.">JsonExporter</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="LoadedHostStatsReceiver$.html" title="A com.twitter.finagle.stats.HostStatsReceiver that loads all service-loadable receivers and broadcasts stats to them."></a>
+                        <a href="LoadedHostStatsReceiver$.html" title="A com.twitter.finagle.stats.HostStatsReceiver that loads all service-loadable receivers and broadcasts stats to them.">LoadedHostStatsReceiver</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="LoadedStatsReceiver$.html" title="A com.twitter.finagle.stats.StatsReceiver that loads all service-loadable receivers and broadcasts stats to them."></a>
+                        <a href="LoadedStatsReceiver$.html" title="A com.twitter.finagle.stats.StatsReceiver that loads all service-loadable receivers and broadcasts stats to them.">LoadedStatsReceiver</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="Metrics$.html" title=""></a>
+                        <a href="Metrics$.html" title="">Metrics</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="MetricsBucketedHistogram.html" title="A MetricsHistogram that is latched such that a snapshot of the values are taken every latchPeriod and that value is returned for rest of latchPeriod."></a>
+                        <a href="MetricsBucketedHistogram.html" title="A MetricsHistogram that is latched such that a snapshot of the values are taken every latchPeriod and that value is returned for rest of latchPeriod.">MetricsBucketedHistogram</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="MetricsExporter.html" title=""></a>
+                        <a href="MetricsExporter.html" title="">MetricsExporter</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="MetricsHistogram.html" title="A histogram that supports writing, querying, and resetting."></a>
+                        <a href="MetricsHistogram.html" title="A histogram that supports writing, querying, and resetting.">MetricsHistogram</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="MetricsHostStatsReceiver.html" title=""></a>
+                        <a href="MetricsHostStatsReceiver.html" title="">MetricsHostStatsReceiver</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="MetricsStatsReceiver$.html" title=""></a>
+                        <a class="class" href="MetricsStatsReceiver.html" title="The standard implementation of StatsReceiver, optimized to be high precision and low overhead."></a>
+                        <a href="MetricsStatsReceiver.html" title="The standard implementation of StatsReceiver, optimized to be high precision and low overhead.">MetricsStatsReceiver</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="ServerStatsReceiver$.html" title="A server-specific StatsReceiver."></a>
+                        <a href="ServerStatsReceiver$.html" title="A server-specific StatsReceiver.">ServerStatsReceiver</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="Snapshot$.html" title=""></a>
+                        <a class="trait" href="Snapshot.html" title="A snapshot of the state of the underlying stat."></a>
+                        <a href="Snapshot.html" title="A snapshot of the state of the underlying stat.">Snapshot</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="SummarizingStatsReceiver.html" title="Provides a StatsReceiver that prints nice summaries."></a>
+                        <a href="SummarizingStatsReceiver.html" title="Provides a StatsReceiver that prints nice summaries.">SummarizingStatsReceiver</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="debugLoggedStatNames$.html" title=""></a>
+                        <a href="debugLoggedStatNames$.html" title="">debugLoggedStatNames</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="format$.html" title=""></a>
+                        <a href="format$.html" title="">format</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="includeEmptyHistograms$.html" title="If a histogram has no data collected (its count is 0), it can be beneficial to not export all the histogram details as there will be no interesting data there."></a>
+                        <a href="includeEmptyHistograms$.html" title="If a histogram has no data collected (its count is 0), it can be beneficial to not export all the histogram details as there will be no interesting data there.">includeEmptyHistograms</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="" title=""></a>
-                        <a href="" title="">gracefulShutdownEnabled</a>
+                        <a href="" title="">logOnShutdown</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="scopeSeparator$.html" title=""></a>
+                        <a href="scopeSeparator$.html" title="">scopeSeparator</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="statsFilter$.html" title="Denylist of regex, comma-separated."></a>
+                        <a href="statsFilter$.html" title="Denylist of regex, comma-separated.">statsFilter</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="statsFilterFile$.html" title="Comma-separated denylist of files."></a>
+                        <a href="statsFilterFile$.html" title="Comma-separated denylist of files.">statsFilterFile</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="useCounterDeltas$.html" title=""></a>
+                        <a href="useCounterDeltas$.html" title="">useCounterDeltas</a>
                       </li>
               </ul>
             </div>
@@ -355,9 +283,9 @@ use.</p><p> Flag          Value     Meaning
             <body class="object value">
       <div id="definition">
         <div class="big-circle object">o</div>
-        <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="index.html" class="extype" name="com.twitter.finagle.mux">mux</a></p>
-        <h1>gracefulShutdownEnabled<span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html" title="Permalink">
+        <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="index.html" class="extype" name="com.twitter.finagle.stats">stats</a></p>
+        <h1>logOnShutdown<span class="permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
@@ -370,7 +298,7 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">gracefulShutdownEnabled</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
+        <span class="name">logOnShutdown</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
       </span>
       </h4>
 
@@ -379,7 +307,7 @@ use.</p><p> Flag          Value     Meaning
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>], <a href="https://twitter.github.io/util/docs/com/twitter/app/Flag.html#com.twitter.app.Flag" class="extype" name="com.twitter.app.Flag">Flag</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>], <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>], <a href="https://twitter.github.io/util/docs/com/twitter/app/Flag.html#com.twitter.app.Flag" class="extype" name="com.twitter.app.Flag">Flag</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -405,7 +333,7 @@ use.</p><p> Flag          Value     Meaning
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.mux.gracefulShutdownEnabled"><span>gracefulShutdownEnabled</span></li><li class="in" name="com.twitter.app.GlobalFlag"><span>GlobalFlag</span></li><li class="in" name="com.twitter.app.Flag"><span>Flag</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.stats.logOnShutdown"><span>logOnShutdown</span></li><li class="in" name="com.twitter.app.GlobalFlag"><span>GlobalFlag</span></li><li class="in" name="com.twitter.app.Flag"><span>Flag</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -435,7 +363,7 @@ use.</p><p> Flag          Value     Meaning
                 <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#!=(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#!=(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -444,14 +372,14 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html###():Int" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html###():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -460,14 +388,14 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#==(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#==(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -476,14 +404,14 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.app.Flag#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="apply():T"></a><a id="apply():Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#apply():T" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#apply():T" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -492,14 +420,14 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">apply</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#asInstanceOf[T0]:T0" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#asInstanceOf[T0]:T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -515,7 +443,7 @@ use.</p><p> Flag          Value     Meaning
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#clone():Object" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#clone():Object" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -524,7 +452,7 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java/lang/index.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -539,7 +467,7 @@ use.</p><p> Flag          Value     Meaning
     </li><li name="com.twitter.app.Flag#defaultString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="defaultString():String"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#defaultString():String" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#defaultString():String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -555,7 +483,7 @@ use.</p><p> Flag          Value     Meaning
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#eq(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -564,14 +492,14 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#equals(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#equals(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -580,14 +508,14 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#finalize():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#finalize():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -596,7 +524,7 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java/lang/index.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -609,7 +537,7 @@ use.</p><p> Flag          Value     Meaning
     </li><li name="com.twitter.app.Flag#flaggable" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="flaggable:com.twitter.app.Flaggable[T]"></a><a id="flaggable:Flaggable[Boolean]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#flaggable:com.twitter.app.Flaggable[T]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#flaggable:com.twitter.app.Flaggable[T]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -618,14 +546,14 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">flaggable</span><span class="result">: <span class="extype" name="com.twitter.app.Flaggable">Flaggable</span>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
+        <span class="name">flaggable</span><span class="result">: <span class="extype" name="com.twitter.app.Flaggable">Flaggable</span>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li name="com.twitter.app.Flag#get" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="get:Option[T]"></a><a id="get:Option[Boolean]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#get:Option[T]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#get:Option[T]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -634,14 +562,14 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">get</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
+        <span class="name">get</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#getClass():Class[_]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#getClass():Class[_]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -660,7 +588,7 @@ use.</p><p> Flag          Value     Meaning
     </li><li name="com.twitter.app.GlobalFlag#getGlobalFlag" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getGlobalFlag:com.twitter.app.Flag[_]"></a><a id="getGlobalFlag:Flag[_]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#getGlobalFlag:com.twitter.app.Flag[_]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#getGlobalFlag:com.twitter.app.Flag[_]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -676,7 +604,7 @@ use.</p><p> Flag          Value     Meaning
     </li><li name="com.twitter.app.GlobalFlag#getValue" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getValue:Option[T]"></a><a id="getValue:Option[Boolean]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#getValue:Option[T]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#getValue:Option[T]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -685,14 +613,14 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getValue</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
+        <span class="name">getValue</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>GlobalFlag → Flag</dd></dl></div>
     </li><li name="com.twitter.app.Flag#getWithDefault" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getWithDefault:Option[T]"></a><a id="getWithDefault:Option[Boolean]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#getWithDefault:Option[T]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#getWithDefault:Option[T]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -701,14 +629,14 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getWithDefault</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
+        <span class="name">getWithDefault</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#hashCode():Int" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#hashCode():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -717,7 +645,7 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd><dt>Annotations</dt><dd>
@@ -727,7 +655,7 @@ use.</p><p> Flag          Value     Meaning
     </li><li name="com.twitter.app.Flag#help" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="help:String"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#help:String" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#help:String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -743,7 +671,7 @@ use.</p><p> Flag          Value     Meaning
     </li><li name="com.twitter.app.Flag#isDefined" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isDefined:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#isDefined:Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#isDefined:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -752,14 +680,14 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isDefined</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">isDefined</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#isInstanceOf[T0]:Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#isInstanceOf[T0]:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -768,14 +696,14 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.app.Flag#let" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="let[R](t:T)(f:=&gt;R):R"></a><a id="let[R](Boolean)(⇒R):R"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#let[R](t:T)(f:=&gt;R):R" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#let[R](t:T)(f:=&gt;R):R" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -784,14 +712,14 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">let</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="t">t: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.app.Flag.let.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.app.Flag.let.R">R</span></span>
+        <span class="name">let</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="t">t: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.app.Flag.let.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.app.Flag.let.R">R</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li name="com.twitter.app.Flag#letClear" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="letClear[R](f:=&gt;R):R"></a><a id="letClear[R](⇒R):R"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#letClear[R](f:=&gt;R):R" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#letClear[R](f:=&gt;R):R" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -807,7 +735,7 @@ use.</p><p> Flag          Value     Meaning
     </li><li name="com.twitter.app.GlobalFlag#name" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="name:String"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#name:String" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#name:String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -823,7 +751,7 @@ use.</p><p> Flag          Value     Meaning
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#ne(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -832,14 +760,14 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.app.Flag#noArgumentOk" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="noArgumentOk:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#noArgumentOk:Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#noArgumentOk:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -848,14 +776,14 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">noArgumentOk</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">noArgumentOk</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#notify():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#notify():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -864,7 +792,7 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -874,7 +802,7 @@ use.</p><p> Flag          Value     Meaning
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#notifyAll():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#notifyAll():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -883,7 +811,7 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -893,7 +821,7 @@ use.</p><p> Flag          Value     Meaning
     </li><li name="com.twitter.app.Flag#parse" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="parse():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#parse():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#parse():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -902,14 +830,14 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">parse</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">parse</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li name="com.twitter.app.Flag#parse" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="parse(raw:String):Unit"></a><a id="parse(String):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#parse(raw:String):Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#parse(raw:String):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -918,14 +846,14 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">parse</span><span class="params">(<span name="raw">raw: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">parse</span><span class="params">(<span name="raw">raw: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li name="com.twitter.app.GlobalFlag#parsingDone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="parsingDone:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#parsingDone:Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#parsingDone:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -934,14 +862,14 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">parsingDone</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">parsingDone</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd>GlobalFlag → Flag</dd></dl></div>
     </li><li name="com.twitter.app.Flag#reset" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="reset():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#reset():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#reset():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -950,14 +878,14 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">reset</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">reset</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -973,7 +901,7 @@ use.</p><p> Flag          Value     Meaning
     </li><li name="com.twitter.app.Flag#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#toString():String" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#toString():String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -989,7 +917,7 @@ use.</p><p> Flag          Value     Meaning
     </li><li name="com.twitter.app.Flag#usageString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="usageString:String"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#usageString:String" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#usageString:String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1005,7 +933,7 @@ use.</p><p> Flag          Value     Meaning
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#wait():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#wait():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1014,7 +942,7 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -1027,7 +955,7 @@ use.</p><p> Flag          Value     Meaning
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1036,7 +964,7 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.12.7/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -1049,7 +977,7 @@ use.</p><p> Flag          Value     Meaning
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mux/gracefulShutdownEnabled$.html#wait(x$1:Long):Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/logOnShutdown$.html#wait(x$1:Long):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1058,7 +986,7 @@ use.</p><p> Flag          Value     Meaning
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -1081,13 +1009,13 @@ use.</p><p> Flag          Value     Meaning
 
         <div id="inheritedMembers">
         <div class="parent" name="com.twitter.app.GlobalFlag">
-              <h3>Inherited from <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</h3>
+              <h3>Inherited from <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</h3>
             </div><div class="parent" name="com.twitter.app.Flag">
-              <h3>Inherited from <a href="https://twitter.github.io/util/docs/com/twitter/app/Flag.html#com.twitter.app.Flag" class="extype" name="com.twitter.app.Flag">Flag</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</h3>
+              <h3>Inherited from <a href="https://twitter.github.io/util/docs/com/twitter/app/Flag.html#com.twitter.app.Flag" class="extype" name="com.twitter.app.Flag">Flag</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</h3>
             </div><div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>
             </div>
         
         </div>

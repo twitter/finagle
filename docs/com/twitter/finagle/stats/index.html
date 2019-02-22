@@ -860,16 +860,20 @@ finagle clients and servers.
                         <a href="includeEmptyHistograms$.html" title="If a histogram has no data collected (its count is 0), it can be beneficial to not export all the histogram details as there will be no interesting data there.">includeEmptyHistograms</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="object" href="logOnShutdown$.html" title=""></a>
+                        <a href="logOnShutdown$.html" title="">logOnShutdown</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="object" href="scopeSeparator$.html" title=""></a>
                         <a href="scopeSeparator$.html" title="">scopeSeparator</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="statsFilter$.html" title="Blacklist of regex, comma-separated."></a>
-                        <a href="statsFilter$.html" title="Blacklist of regex, comma-separated.">statsFilter</a>
+                        <a class="object" href="statsFilter$.html" title="Denylist of regex, comma-separated."></a>
+                        <a href="statsFilter$.html" title="Denylist of regex, comma-separated.">statsFilter</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="statsFilterFile$.html" title="Comma-separated blacklist of files."></a>
-                        <a href="statsFilterFile$.html" title="Comma-separated blacklist of files.">statsFilterFile</a>
+                        <a class="object" href="statsFilterFile$.html" title="Comma-separated denylist of files."></a>
+                        <a href="statsFilterFile$.html" title="Comma-separated denylist of files.">statsFilterFile</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="useCounterDeltas$.html" title=""></a>
@@ -1070,7 +1074,7 @@ generator.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -1202,7 +1206,7 @@ implementation can be any StatsReceiver. The type is used as a marker.
       <p class="shortcomment cmt">A Finagle HTTP service that exports <span class="extype" name="Metrics">Metrics</span> (available via <span class="extype" name="MetricsView">MetricsView</span>)
 in a JSON format.</p><div class="fullcomment"><div class="comment cmt"><p>A Finagle HTTP service that exports <span class="extype" name="Metrics">Metrics</span> (available via <span class="extype" name="MetricsView">MetricsView</span>)
 in a JSON format.</p><p>This service respects metrics <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/Verbosity.html" class="extype" name="com.twitter.finagle.stats.Verbosity">verbosity levels</a>: it doesn't export &quot;debug&quot;
-(i.e., <span class="extype" name="Verbosity.Debug">Verbosity.Debug</span>) metrics unless they are whitelisted via the comma-separated
+(i.e., <span class="extype" name="Verbosity.Debug">Verbosity.Debug</span>) metrics unless they are allowlisted via the comma-separated
 <code>verbose</code>.
 </p></div></div>
     </li><li name="com.twitter.finagle.stats.MetricsBucketedHistogram" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -1255,7 +1259,7 @@ simple way to get consistent results.</p><p>This is safe to use from multiple th
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="A histogram that supports writing, querying, and resetting." href="MetricsHistogram.html"><span class="name">MetricsHistogram</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="A histogram that supports writing, querying, and resetting." href="MetricsHistogram.html"><span class="name">MetricsHistogram</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">A histogram that supports writing, querying, and resetting.</p><div class="fullcomment"><div class="comment cmt"><p>A histogram that supports writing, querying, and resetting.</p><p>This API is too powerful for normal usage, but is useful for implementors.
@@ -1309,7 +1313,7 @@ this value will be aggregated in the exported metrics.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="A snapshot of the state of the underlying stat." href="Snapshot.html"><span class="name">Snapshot</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="A snapshot of the state of the underlying stat." href="Snapshot.html"><span class="name">Snapshot</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">A snapshot of the state of the underlying stat.</p>
@@ -1582,7 +1586,7 @@ are prefixed with the string &quot;srv&quot; by default.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="If a histogram has no data collected (its count is 0), it can be beneficial to not export all the histogram details as there will be no interesting data there." href="includeEmptyHistograms$.html"><span class="name">includeEmptyHistograms</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
+        <a title="If a histogram has no data collected (its count is 0), it can be beneficial to not export all the histogram details as there will be no interesting data there." href="includeEmptyHistograms$.html"><span class="name">includeEmptyHistograms</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
       </span>
       
       <p class="shortcomment cmt">If a histogram has no data collected (its count is 0), it can be
@@ -1593,6 +1597,22 @@ be no interesting data there. When this flag is set to <code>false</code>,
 only the <code>count=0</code> is exported. When <code>true</code>, all of the details
 will be exported.
 </p></div></div>
+    </li><li name="com.twitter.finagle.stats.logOnShutdown" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="logOnShutdown"></a><a id="logOnShutdown:logOnShutdown"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/stats/index.html#logOnShutdown" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="logOnShutdown$.html"><span class="name">logOnShutdown</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.stats.scopeSeparator" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="scopeSeparator"></a><a id="scopeSeparator:scopeSeparator"></a>
       <span class="permalink">
@@ -1621,10 +1641,10 @@ will be exported.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="Blacklist of regex, comma-separated." href="statsFilter$.html"><span class="name">statsFilter</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+        <a title="Denylist of regex, comma-separated." href="statsFilter$.html"><span class="name">statsFilter</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">Blacklist of regex, comma-separated.</p><div class="fullcomment"><div class="comment cmt"><p>Blacklist of regex, comma-separated. Comma is a reserved character and
+      <p class="shortcomment cmt">Denylist of regex, comma-separated.</p><div class="fullcomment"><div class="comment cmt"><p>Denylist of regex, comma-separated. Comma is a reserved character and
 cannot be used. Used with regexes from statsFilterFile.</p><p>See http://www.scala-lang.org/api/current/#scala.util.matching.Regex
 </p></div></div>
     </li><li name="com.twitter.finagle.stats.statsFilterFile" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -1639,10 +1659,10 @@ cannot be used. Used with regexes from statsFilterFile.</p><p>See http://www.sca
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="Comma-separated blacklist of files." href="statsFilterFile$.html"><span class="name">statsFilterFile</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="java.io.File">File</span>]]</span>
+        <a title="Comma-separated denylist of files." href="statsFilterFile$.html"><span class="name">statsFilterFile</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="java.io.File">File</span>]]</span>
       </span>
       
-      <p class="shortcomment cmt">Comma-separated blacklist of files.</p><div class="fullcomment"><div class="comment cmt"><p>Comma-separated blacklist of files. Each file may have multiple filters,
+      <p class="shortcomment cmt">Comma-separated denylist of files.</p><div class="fullcomment"><div class="comment cmt"><p>Comma-separated denylist of files. Each file may have multiple filters,
 separated by new lines. Used with regexes from statsFilter.</p><p>See http://www.scala-lang.org/api/current/#scala.util.matching.Regex
 </p></div></div>
     </li><li name="com.twitter.finagle.stats.useCounterDeltas" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
@@ -1657,7 +1677,7 @@ separated by new lines. Used with regexes from statsFilter.</p><p>See http://www
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="useCounterDeltas$.html"><span class="name">useCounterDeltas</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
+        <a title="" href="useCounterDeltas$.html"><span class="name">useCounterDeltas</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a>]</span>
       </span>
       
       
@@ -1672,9 +1692,9 @@ separated by new lines. Used with regexes from statsFilter.</p><p>See http://www
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>
             </div>
         
         </div>

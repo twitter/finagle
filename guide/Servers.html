@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Servers &#8212; Finagle 19.1.0 documentation</title>
+    <title>Servers &#8212; Finagle 19.2.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.1.0',
+        VERSION:     '19.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,9 +26,9 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.1.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.2.0 documentation" href="index.html" />
     <link rel="next" title="Clients" href="Clients.html" />
-    <link rel="prev" title="Configuration" href="Configuration.html" />
+    <link rel="prev" title="Aperture Load Balancers" href="ApertureLoadBalancers.html" />
    
   
   <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
@@ -58,7 +58,7 @@
           <a href="Clients.html" title="Clients"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="Configuration.html" title="Configuration"
+          <a href="ApertureLoadBalancers.html" title="Aperture Load Balancers"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
       </ul>
@@ -223,14 +223,19 @@ service SocialGraph {
   <span class="c1">// #3</span>
   <span class="k">case</span> <span class="nc">ReqRep</span><span class="o">(</span><span class="nc">SocialGraph</span><span class="o">.</span><span class="nc">Follow</span><span class="o">.</span><span class="nc">Args</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">b</span><span class="o">),</span> <span class="k">_</span><span class="o">)</span> <span class="k">if</span> <span class="n">a</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="k">=&gt;</span>
     <span class="nc">ResponseClass</span><span class="o">.</span><span class="nc">NonRetryableFailure</span>
+
+  <span class="c1">// #4</span>
+  <span class="k">case</span> <span class="nc">ReqRep</span><span class="o">(</span><span class="k">_</span><span class="o">,</span> <span class="nc">Throw</span><span class="o">(</span><span class="k">_:</span> <span class="kt">InvalidQueryException</span><span class="o">))</span> <span class="k">=&gt;</span>
+    <span class="nc">ResponseClass</span><span class="o">.</span><span class="nc">Success</span>
 <span class="o">}</span>
 </pre></div>
 </div>
 <p>If you examine that classifier you&#8217;ll note a few things. First (#1), the
-deserialized <code class="docutils literal"><span class="pre">NotFoundException</span></code> can be treated as a failure. Next (#2), a
+deserialized <code class="docutils literal"><span class="pre">NotFoundException</span></code> can be treated as a failure. Second (#2), a
 &#8220;successful&#8221; response can be examined to enable services using status codes to
-classify errors. Lastly (#3), the request can be introspected to make the
-decision.</p>
+classify errors. Next (#3), the request can be introspected to make the
+decision. Lastly (#4), the deserialized <code class="docutils literal"><span class="pre">InvalidQueryException</span></code> can be treated
+as a successful response.</p>
 <p>If you have a response classifier that categorizes <code class="docutils literal"><span class="pre">Returns</span></code> as
 failures, note that they will be counted in the <code class="docutils literal"><span class="pre">StatsFilter</span></code>
 as a <code class="docutils literal"><span class="pre">com.twitter.finagle.service.ResponseClassificationSyntheticException</span></code> in the
@@ -388,7 +393,7 @@ it can be configured <a class="footnote-reference" href="#example" id="id5">[2]<
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="Configuration.html" title="previous chapter">Configuration</a></li>
+      <li>Previous: <a href="ApertureLoadBalancers.html" title="previous chapter">Aperture Load Balancers</a></li>
       <li>Next: <a href="Clients.html" title="next chapter">Clients</a></li>
   </ul></li>
 </ul>

@@ -195,6 +195,10 @@ that treats non-Exceptions as failures. In that case, while no exceptions have o
 `ResponseClassificationSyntheticException` is used as a "synthetic" exception for
 bookkeeping purposes.
 
+One specific example can be seen when using the ThriftResponseClassifier.ThriftExceptionsAsFailures.
+Successful ThriftResponses which deserialize into Thrift Exceptions use this exception to
+be counted as failures in StatsFilter.
+
 How long should my Clients live?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

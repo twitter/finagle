@@ -244,10 +244,6 @@ resources for using Finagle.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="object" href="ExpiringServerDispatcher$.html" title=""></a>
-                        <a href="ExpiringServerDispatcher$.html" title="">ExpiringServerDispatcher</a>
-                      </li><li class="current-entities indented4">
                         <a class="object" href="GenPipeliningDispatcher$.html" title=""></a>
                         <a class="class" href="GenPipeliningDispatcher.html" title="A generic pipelining dispatcher, which assumes that servers will respect normal pipelining semantics, and that replies will be sent in the same order as requests were sent."></a>
                         <a href="GenPipeliningDispatcher.html" title="A generic pipelining dispatcher, which assumes that servers will respect normal pipelining semantics, and that replies will be sent in the same order as requests were sent.">GenPipeliningDispatcher</a>
@@ -1100,7 +1096,7 @@ allowing the implementor to furnish custom dispatchers &amp; handlers.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="" href="PipeliningDispatcher.html"><span class="name">PipeliningDispatcher</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="GenPipeliningDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenPipeliningDispatcher">GenPipeliningDispatcher</a>[<span class="extype" name="com.twitter.finagle.dispatch.PipeliningDispatcher.Req">Req</span>, <span class="extype" name="com.twitter.finagle.dispatch.PipeliningDispatcher.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.dispatch.PipeliningDispatcher.Req">Req</span>, <span class="extype" name="com.twitter.finagle.dispatch.PipeliningDispatcher.Rep">Rep</span>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
+        <a title="" href="PipeliningDispatcher.html"><span class="name">PipeliningDispatcher</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="GenPipeliningDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenPipeliningDispatcher">GenPipeliningDispatcher</a>[<span class="extype" name="com.twitter.finagle.dispatch.PipeliningDispatcher.Req">Req</span>, <span class="extype" name="com.twitter.finagle.dispatch.PipeliningDispatcher.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.dispatch.PipeliningDispatcher.Req">Req</span>, <span class="extype" name="com.twitter.finagle.dispatch.PipeliningDispatcher.Rep">Rep</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
       </span>
       
       
@@ -1152,7 +1148,7 @@ released after any error.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A class eligible for configuring a timeout com.twitter.util.Duration to consider a pipeline to have stalled (stopped making progress after an initial interruption)." href="StalledPipelineTimeout.html"><span class="name">StalledPipelineTimeout</span></a><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.7/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A class eligible for configuring a timeout com.twitter.util.Duration to consider a pipeline to have stalled (stopped making progress after an initial interruption)." href="StalledPipelineTimeout.html"><span class="name">StalledPipelineTimeout</span></a><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A class eligible for configuring a timeout
@@ -1166,23 +1162,7 @@ released after any error.
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="com.twitter.finagle.dispatch.ExpiringServerDispatcher" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ExpiringServerDispatcher"></a><a id="ExpiringServerDispatcher:ExpiringServerDispatcher"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/dispatch/index.html#ExpiringServerDispatcher" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="ExpiringServerDispatcher$.html"><span class="name">ExpiringServerDispatcher</span></a>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.dispatch.GenPipeliningDispatcher" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+                <li name="com.twitter.finagle.dispatch.GenPipeliningDispatcher" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="GenPipeliningDispatcher"></a><a id="GenPipeliningDispatcher:GenPipeliningDispatcher"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/dispatch/index.html#GenPipeliningDispatcher" title="Permalink">
@@ -1242,7 +1222,7 @@ released after any error.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="StalledPipelineTimeout$.html"><span class="name">StalledPipelineTimeout</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="StalledPipelineTimeout$.html"><span class="name">StalledPipelineTimeout</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       

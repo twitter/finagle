@@ -48,6 +48,7 @@ Contents
    Futures
    ServicesAndFilters
    Configuration
+   ApertureLoadBalancers
    Servers
    Clients
    Contexts

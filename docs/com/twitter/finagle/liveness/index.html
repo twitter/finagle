@@ -375,8 +375,8 @@ stabilized (moved elsewhere) at any time.
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <a class="object" href="FailureAccrualFactory$.html" title=""></a>
-                        <a class="class" href="FailureAccrualFactory.html" title="A com.twitter.finagle.ServiceFactory that accrues failures, marking itself unavailable when deemed unhealthy according to its configuration."></a>
-                        <a href="FailureAccrualFactory.html" title="A com.twitter.finagle.ServiceFactory that accrues failures, marking itself unavailable when deemed unhealthy according to its configuration.">FailureAccrualFactory</a>
+                        <a class="class" href="FailureAccrualFactory.html" title="A com.twitter.finagle.ServiceFactory that accrues failures, marking itself unavailable when deemed unhealthy according to the configured policy."></a>
+                        <a href="FailureAccrualFactory.html" title="A com.twitter.finagle.ServiceFactory that accrues failures, marking itself unavailable when deemed unhealthy according to the configured policy.">FailureAccrualFactory</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="FailureAccrualPolicy$.html" title=""></a>
                         <a class="class" href="FailureAccrualPolicy.html" title="A FailureAccrualPolicy is used by FailureAccrualFactory to determine whether to mark an endpoint dead upon a request failure."></a>
@@ -1025,15 +1025,17 @@ generator.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="A com.twitter.finagle.ServiceFactory that accrues failures, marking itself unavailable when deemed unhealthy according to its configuration." href="FailureAccrualFactory.html"><span class="name">FailureAccrualFactory</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.liveness.FailureAccrualFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.liveness.FailureAccrualFactory.Rep">Rep</span>]</span>
+        <a title="A com.twitter.finagle.ServiceFactory that accrues failures, marking itself unavailable when deemed unhealthy according to the configured policy." href="FailureAccrualFactory.html"><span class="name">FailureAccrualFactory</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.liveness.FailureAccrualFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.liveness.FailureAccrualFactory.Rep">Rep</span>]</span>
       </span>
       
       <p class="shortcomment cmt">A <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">com.twitter.finagle.ServiceFactory</a> that accrues failures, marking
-itself unavailable when deemed unhealthy according to its configuration.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">com.twitter.finagle.ServiceFactory</a> that accrues failures, marking
-itself unavailable when deemed unhealthy according to its configuration.</p><p>This acts as a request driven
-<a href="http://martinfowler.com/bliki/CircuitBreaker.html" target="_blank">circuit breaker</a>.</p><p>When used in a typical Finagle client, there is one instance per node
-and as such, the load balancer will avoid nodes that are marked down
-via failure accrual.
+itself unavailable when deemed unhealthy according to the configured <code>policy</code>.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">com.twitter.finagle.ServiceFactory</a> that accrues failures, marking
+itself unavailable when deemed unhealthy according to the configured <code>policy</code>.</p><p>This acts as a request driven
+<a href="http://martinfowler.com/bliki/CircuitBreaker.html" target="_blank">circuit breaker</a>.</p><p>Note this module fails open – that is,  even if it transitions into a
+closed state, requests will still be allowed to flow through it. Although,
+when used in a typical Finagle client, there is one instance of this module
+per node and as such, the load balancer will avoid nodes where the status is
+not open.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#failure-accrual" target="_blank">user guide</a>
      for more details.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.liveness.FailureAccrualPolicy" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
@@ -1048,7 +1050,7 @@ via failure accrual.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="A FailureAccrualPolicy is used by FailureAccrualFactory to determine whether to mark an endpoint dead upon a request failure." href="FailureAccrualPolicy.html"><span class="name">FailureAccrualPolicy</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="A FailureAccrualPolicy is used by FailureAccrualFactory to determine whether to mark an endpoint dead upon a request failure." href="FailureAccrualPolicy.html"><span class="name">FailureAccrualPolicy</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">A <code>FailureAccrualPolicy</code> is used by <code>FailureAccrualFactory</code> to determine
@@ -1071,7 +1073,7 @@ to mark the endpoint dead for; (Some(Duration)), or None.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="A Java adaptation of the com.twitter.finagle.liveness.FailureDetector companion object." href="FailureDetectors.html"><span class="name">FailureDetectors</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="A Java adaptation of the com.twitter.finagle.liveness.FailureDetector companion object." href="FailureDetectors.html"><span class="name">FailureDetectors</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">A Java adaptation of the <code><span class="extype" name="com.twitter.finagle.liveness.FailureDetector">com.twitter.finagle.liveness.FailureDetector</span></code> companion object.</p>

@@ -281,7 +281,7 @@ resources for using Finagle.
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Finagle's default <span class="extype" name="Timer">Timer</span> that's intended to be shared across a number of servers/clients.</p><p>The default <span class="extype" name="Timer">Timer</span> is intended for scheduling tasks that will finish very quickly and
 shouldn't be used to schedule tasks that will occupy the executing thread for a significant
-duration.</p><p>Use <code>DefaultTimer.Implicit</code> to import an implicit instance of this timer into the scope.</p><pre>scala&gt; <span class="kw">import</span> com.twitter.util.Future, com.twitter.conversions.time._
+duration.</p><p>Use <code>DefaultTimer.Implicit</code> to import an implicit instance of this timer into the scope.</p><pre>scala&gt; <span class="kw">import</span> com.twitter.util.Future, com.twitter.conversions.DurationOps._
 scala&gt; <span class="kw">import</span> com.twitter.finagle.util.DefaultTimer.Implicit
 
 scala&gt; <span class="kw">val</span> f = Future.sleep(<span class="num">10.</span>seconds)
@@ -290,7 +290,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/com/twitter/util/ProxyTimer.html#com.twitter.util.ProxyTimer" class="extype" name="com.twitter.util.ProxyTimer">ProxyTimer</a>, <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html#com.twitter.util.Timer" class="extype" name="com.twitter.util.Timer">Timer</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/com/twitter/util/ProxyTimer.html#com.twitter.util.ProxyTimer" class="extype" name="com.twitter.util.ProxyTimer">ProxyTimer</a>, <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html#com.twitter.util.Timer" class="extype" name="com.twitter.util.Timer">Timer</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -355,7 +355,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -371,7 +371,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -387,7 +387,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -435,7 +435,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java/lang/index.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -491,7 +491,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -507,7 +507,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -523,7 +523,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java/lang/index.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -580,7 +580,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd><dt>Annotations</dt><dd>
@@ -599,7 +599,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
@@ -615,7 +615,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -631,7 +631,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -650,7 +650,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -669,7 +669,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">schedule</span><span class="params">(<span name="period">period: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/TimerTask.html#com.twitter.util.TimerTask" class="extype" name="com.twitter.util.TimerTask">TimerTask</a></span>
+        <span class="name">schedule</span><span class="params">(<span name="period">period: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/TimerTask.html#com.twitter.util.TimerTask" class="extype" name="com.twitter.util.TimerTask">TimerTask</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Timer</dd></dl></div>
@@ -685,7 +685,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">schedule</span><span class="params">(<span name="when">when: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>, <span name="period">period: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/TimerTask.html#com.twitter.util.TimerTask" class="extype" name="com.twitter.util.TimerTask">TimerTask</a></span>
+        <span class="name">schedule</span><span class="params">(<span name="when">when: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>, <span name="period">period: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/TimerTask.html#com.twitter.util.TimerTask" class="extype" name="com.twitter.util.TimerTask">TimerTask</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Timer</dd></dl></div>
@@ -701,7 +701,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">schedule</span><span class="params">(<span name="when">when: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/TimerTask.html#com.twitter.util.TimerTask" class="extype" name="com.twitter.util.TimerTask">TimerTask</a></span>
+        <span class="name">schedule</span><span class="params">(<span name="when">when: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/TimerTask.html#com.twitter.util.TimerTask" class="extype" name="com.twitter.util.TimerTask">TimerTask</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Timer</dd></dl></div>
@@ -717,7 +717,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">scheduleOnce</span><span class="params">(<span name="when">when: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/TimerTask.html#com.twitter.util.TimerTask" class="extype" name="com.twitter.util.TimerTask">TimerTask</a></span>
+        <span class="name">scheduleOnce</span><span class="params">(<span name="when">when: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/TimerTask.html#com.twitter.util.TimerTask" class="extype" name="com.twitter.util.TimerTask">TimerTask</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>ProxyTimer → Timer</dd></dl></div>
@@ -733,7 +733,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">schedulePeriodically</span><span class="params">(<span name="when">when: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>, <span name="period">period: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/TimerTask.html#com.twitter.util.TimerTask" class="extype" name="com.twitter.util.TimerTask">TimerTask</a></span>
+        <span class="name">schedulePeriodically</span><span class="params">(<span name="when">when: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>, <span name="period">period: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/TimerTask.html#com.twitter.util.TimerTask" class="extype" name="com.twitter.util.TimerTask">TimerTask</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>ProxyTimer → Timer</dd></dl></div>
@@ -765,7 +765,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">stop</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">stop</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.util.DefaultTimer">DefaultTimer</a> → ProxyTimer → Timer</dd></dl></div>
@@ -813,7 +813,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -835,7 +835,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.12.7/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -857,7 +857,7 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.7/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.7/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -907,9 +907,9 @@ f: com.twitter.util.Future[<span class="std">Unit</span>] = &lt;function0&gt;</p
             </div><div class="parent" name="com.twitter.util.Timer">
               <h3>Inherited from <a href="https://twitter.github.io/util/docs/com/twitter/util/Timer.html#com.twitter.util.Timer" class="extype" name="com.twitter.util.Timer">Timer</a></h3>
             </div><div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.7/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.7/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>
             </div>
         
         </div>

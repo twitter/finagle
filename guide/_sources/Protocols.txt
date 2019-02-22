@@ -58,42 +58,42 @@ following rich APIs:
 
 Serving the IDL:
 
-.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftserverapi
+.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServicePerEndpointExample.scala#thriftserverapi
    :language: scala
 
 .. _finagle_thrift_client:
 
 Construct a client:
 
-.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi
+.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServicePerEndpointExample.scala#thriftclientapi
    :language: scala
 
 A `ServicePerEndpoint` is a collection of `Services`, one for each Thrift method. Call the `log` method:
 
-.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi-call
+.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServicePerEndpointExample.scala#thriftclientapi-call
    :language: scala
 
 Thrift `Services` can be combined with :api:`Filters <com/twitter/finagle/Filter$>`.
 
-.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi-filters
+.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServicePerEndpointExample.scala#thriftclientapi-filters
    :language: scala
 
 Here's an example of a retry policy that retries on Thrift exceptions:
 
-.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi-retries
+.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServicePerEndpointExample.scala#thriftclientapi-retries
    :language: scala
 
 Another way to construct Thrift clients is using the `MethodPerEndpoint` interface:
 
-.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi-methodiface
+.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServicePerEndpointExample.scala#thriftclientapi-methodiface
    :language: scala
 
 To convert the Service interface to the method interface use :api:`Thrift.Client.methodPerEndpoint <com/twitter/finagle/Thrift$>`:
 
-.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi-method-adapter
+.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServicePerEndpointExample.scala#thriftclientapi-method-adapter
    :language: scala
 
-The complete example is at `ThriftServiceIfaceExample.scala <https://github.com/twitter/finagle/blob/develop/finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala>`_.
+The complete example is at `ThriftServicePerEndpointExample.scala <https://github.com/twitter/finagle/blob/develop/finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServicePerEndpointExample.scala>`_.
 Check out the `finagle-thrift` :api:`API <com/twitter/finagle/Thrift$>`
 for more info.
 
