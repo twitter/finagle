@@ -4,7 +4,7 @@ import java.nio.charset.{Charset, StandardCharsets}
 import java.util.concurrent.atomic.AtomicInteger
 
 import com.twitter.cache.Refresh
-import com.twitter.conversions.time._
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.postgres.messages._
 import com.twitter.finagle.postgres.values._
 import com.twitter.finagle.{Service, ServiceFactory, Status}
