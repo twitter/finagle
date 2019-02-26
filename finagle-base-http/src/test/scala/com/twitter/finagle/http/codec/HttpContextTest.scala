@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.context.{Contexts, Deadline, Retries}
+import com.twitter.finagle.context.{BackupRequest, Contexts, Deadline, Retries}
 import com.twitter.finagle.http.{Message, Method, Request, Version}
 import org.scalatest.FunSuite
 
@@ -44,6 +44,23 @@ class HttpContextTest extends FunSuite {
         HttpContext.read(m) {
           val readRetries = Retries.current.get
           assert(writtenRetries == readRetries)
+        }
+      }
+    }
+  }
+
+  test("BackupRequest written matches read") {
+    val m = newMsg()
+    assert(!BackupRequest.wasInitiated)
+    BackupRequest.let {
+      HttpContext.write(m)
+      assert(BackupRequest.wasInitiated)
+
+      Contexts.broadcast.letClearAll {
+        assert(!BackupRequest.wasInitiated)
+
+        HttpContext.read(m) {
+          assert(BackupRequest.wasInitiated)
         }
       }
     }

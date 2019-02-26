@@ -92,6 +92,12 @@ Upstream Address
 A local ``Context`` that represents the upstream (ingress)
 ``java.net.SocketAddress`` of the current request.
 
+Backup request indicator
+~~~~~~~~~~~~~~~~~~~~~~~~
+``com.twitter.finagle.context.BackupRequest.wasInitiated`` —
+A broadcast ``Context`` that indicates if the request was initiated by a backup
+request.
+
 Creating new Contexts
 ---------------------
 

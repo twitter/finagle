@@ -3,6 +3,7 @@ package com.twitter.finagle.client
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle._
+import com.twitter.finagle.context.BackupRequest
 import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier, Retries, RetryBudget}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.WindowedPercentileHistogram
@@ -380,7 +381,7 @@ private[finagle] class BackupRequestFilter[Req, Rep](
             // pass on the first successful result we get back.
             if (canIssueBackup()) {
               backupsSent.incr()
-              val backup = record(req, service(req))
+              val backup = record(req, BackupRequest.let(service(req)))
               orig.select(backup).transform { _ =>
                 val winner = if (orig.isDefined) orig else backup
                 val loser = if (winner eq orig) backup else orig

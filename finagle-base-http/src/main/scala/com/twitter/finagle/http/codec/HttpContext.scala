@@ -1,6 +1,6 @@
 package com.twitter.finagle.http.codec
 
-import com.twitter.finagle.context.{Deadline, Contexts, Retries}
+import com.twitter.finagle.context.{BackupRequest, Deadline, Contexts, Retries}
 import com.twitter.finagle.http.Message
 import com.twitter.logging.{Level, Logger}
 import com.twitter.util.Time
@@ -11,6 +11,7 @@ object HttpContext {
   private[this] val Prefix = "Finagle-Ctx-"
   private[this] val DeadlineHeaderKey = Prefix + Deadline.id
   private[this] val RetriesHeaderKey = Prefix + Retries.id
+  private[this] val BackupRequestHeaderKey = Prefix + BackupRequest.ContextId
 
   private val log = Logger(getClass.getName)
 
@@ -28,6 +29,9 @@ object HttpContext {
   private[this] def marshalRetries(retries: Retries): String =
     retries.attempt.toString
 
+  private[this] def marshalledBackupRequest: String =
+    "1"
+
   private[this] val unmarshalDeadline: String => Option[Deadline] = header => {
     try {
       val values = header.split(' ')
@@ -37,7 +41,7 @@ object HttpContext {
     } catch {
       case NonFatal(exc) =>
         if (log.isLoggable(Level.DEBUG))
-          log.debug(s"Could not unmarshal Deadline from header value: ${header}")
+          log.debug(s"Could not unmarshal Deadline from header value: $header")
         None
     }
   }
@@ -48,15 +52,18 @@ object HttpContext {
     } catch {
       case NonFatal(exc) =>
         if (log.isLoggable(Level.DEBUG))
-          log.debug(s"Could not unmarshal Retries from header value: ${header}")
+          log.debug(s"Could not unmarshal Retries from header value: $header")
         None
     }
   }
+
+  private[this] val backupRequest = new BackupRequest()
 
   /**
    * Read Finagle-Ctx header pairs from the given message for Contexts:
    *     - Deadline
    *     - Retries
+   *     - BackupRequest
    * and run `fn`.
    */
   private[http] def read[R](msg: Message)(fn: => R): R = {
@@ -74,6 +81,12 @@ object HttpContext {
       case None =>
     }
 
+    msg.headerMap.get(BackupRequestHeaderKey) match {
+      case Some("1") =>
+        ctxValues = Contexts.broadcast.KeyValuePair(BackupRequest.Ctx, backupRequest) :: ctxValues
+      case _ => ()
+    }
+
     Contexts.broadcast.let(ctxValues)(fn)
   }
 
@@ -81,6 +94,7 @@ object HttpContext {
    * Write Finagle-Ctx header pairs into the given message for Contexts:
    *     - Deadline
    *     - Retries
+   *     - BackupRequest
    */
   private[http] def write(msg: Message): Unit = {
     Deadline.current match {
@@ -93,6 +107,10 @@ object HttpContext {
       case Some(retries) =>
         msg.headerMap.setUnsafe(RetriesHeaderKey, marshalRetries(retries))
       case None =>
+    }
+
+    if (BackupRequest.wasInitiated) {
+      msg.headerMap.setUnsafe(BackupRequestHeaderKey, marshalledBackupRequest)
     }
   }
 }
