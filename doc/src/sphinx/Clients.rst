@@ -397,7 +397,7 @@ See :ref:`Request Latency metrics <metrics_stats_filter>` for more details.
           support streaming (such as with HTTP).
 
 The `Expiration` module is attached at the connection level and expires a service/session
-after a certain amount of idle time. The module is implemented by
+after a certain amount of time. The module is implemented by
 :src:`ExpiringService <com/twitter/finagle/service/ExpiringService.scala>`.
 
 The default setting for the `Expiration` module is to never expire a session. Here is how
@@ -410,14 +410,10 @@ it can be configured [#example]_.
 
   val twitter = Http.client
     .withSession.maxLifeTime(20.seconds)
-    .withSession.maxIdleTime(10.seconds)
     .newService("twitter.com")
 
-The `Expiration` module takes two parameters:
-
-1. `maxLifeTime` - the maximum duration for which a session is considered alive
-2. `maxIdleTime` - the maximum duration for which a session is allowed to idle
-   (not sending any requests)
+The `Expiration` module for clients takes one parameter: `maxLifeTime` - the maximum duration for
+which a session is considered alive.
 
 See :ref:`Expiration metrics <idle_apoptosis_stats>` for more details.
 
@@ -834,6 +830,7 @@ example [#example]_.
     .withSessionPool.minSize(10)
     .withSessionPool.maxSize(20)
     .withSessionPool.maxWaiters(100)
+    .withSessionPool.ttl(5.seconds)
     .newService("twitter.com")
 
 Thus all the three pools are configured with a single param that takes the following arguments:
@@ -842,6 +839,7 @@ Thus all the three pools are configured with a single param that takes the follo
    client will not maintain more connections than `maxSize`)
 2. `maxWaiters` - the maximum number of connection requests that are queued when the connection
    concurrency exceeds the high watermark
+3. `ttl`- the maximum amount of time a session is allowed to be cached in a pool
 
 :ref:`Related stats <pool_stats>`
 

@@ -2,7 +2,6 @@ package com.twitter.finagle.param
 
 import com.twitter.finagle.Stack
 import com.twitter.finagle.factory.TimeoutFactory
-import com.twitter.finagle.service.ExpiringService
 import com.twitter.util.Duration
 
 /**
@@ -36,14 +35,4 @@ class ClientSessionParams[A <: Stack.Parameterized[A]](self: Stack.Parameterized
    */
   def acquisitionTimeout(timeout: Duration): A =
     self.configured(TimeoutFactory.Param(timeout))
-
-  /**
-   * Configures the session max idle time `timeout` - the maximum amount of time
-   * a given session is allowed to be idle before it is closed (default: unbounded).
-   *
-   * @see [[https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration]]
-   */
-  @deprecated("Use .withSessionPool.ttl instead", "2019-02-11")
-  def maxIdleTime(timeout: Duration): A =
-    self.configured(self.params[ExpiringService.Param].copy(idleTime = timeout))
 }
