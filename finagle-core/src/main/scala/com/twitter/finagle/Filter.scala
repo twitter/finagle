@@ -255,6 +255,39 @@ object Filter {
         }
     }
 
+  implicit def typeAgnosticService[Req, Rep]: CanStackFrom[Filter.TypeAgnostic, Service[Req, Rep]] =
+    new CanStackFrom[Filter.TypeAgnostic, Service[Req, Rep]] {
+      def toStackable(
+        _role: Stack.Role,
+        filter: Filter.TypeAgnostic
+      ): Stackable[Service[Req, Rep]] = {
+        new Stack.Module0[Service[Req, Rep]] {
+          def role: Stack.Role = _role
+          def description: String = _role.name
+          def make(next: Service[Req, Rep]): Service[Req, Rep] =
+            filter.andThen(next)
+        }
+      }
+    }
+
+  implicit def typeAgnosticServiceFactory[
+    Req,
+    Rep
+  ]: CanStackFrom[Filter.TypeAgnostic, ServiceFactory[Req, Rep]] =
+    new CanStackFrom[Filter.TypeAgnostic, ServiceFactory[Req, Rep]] {
+      def toStackable(
+        _role: Stack.Role,
+        filter: Filter.TypeAgnostic
+      ): Stackable[ServiceFactory[Req, Rep]] = {
+        new Stack.Module0[ServiceFactory[Req, Rep]] {
+          def role: Stack.Role = _role
+          def description: String = _role.name
+          def make(next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] =
+            filter.andThen(next)
+        }
+      }
+    }
+
   /**
    * TypeAgnostic filters are like SimpleFilters but they leave the Rep and Req types unspecified
    * until `toFilter` is called.

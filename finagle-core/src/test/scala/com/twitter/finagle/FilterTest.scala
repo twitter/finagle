@@ -563,4 +563,25 @@ class FilterTest extends FunSuite {
     )
   }
 
+  test("Filter: CanStackFrom") {
+    val svc: Service[Int, Int] = Service.const(Future.never)
+    Stack
+      .leaf(Stack.Role("svc"), svc)
+      .prepend(Stack.Role("filter"), Filter.identity: Filter[Int, Int, Int, Int])
+
+    Stack
+      .leaf(Stack.Role("sf"), ServiceFactory.const(svc))
+      .prepend(Stack.Role("filter"), Filter.identity: Filter[Int, Int, Int, Int])
+  }
+
+  test("Filter.TypeAgnostic: CanStackFrom") {
+    val svc: Service[Int, Int] = Service.const(Future.never)
+    Stack
+      .leaf(Stack.Role("svc"), svc)
+      .prepend(Stack.Role("filter"), Filter.TypeAgnostic.Identity)
+
+    Stack
+      .leaf(Stack.Role("sf"), ServiceFactory.const(svc))
+      .prepend(Stack.Role("filter"), Filter.TypeAgnostic.Identity)
+  }
 }
