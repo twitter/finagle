@@ -6,14 +6,24 @@ import com.twitter.util.{Future, Throw}
 object TraceInitializerFilter {
   val role: Stack.Role = Stack.Role("TraceInitializerFilter")
 
+  /**
+   * @param newId Set the next TraceId when the tracer is pushed, `true` for clients.
+   */
+  private[finagle] def apply[Req, Rep](tracer: Tracer, newId: Boolean): Filter[Req, Rep, Req, Rep] =
+    new TraceInitializerFilter[Req, Rep](tracer, newId)
+
+  private[finagle] def typeAgnostic(tracer: Tracer, newId: Boolean): Filter.TypeAgnostic =
+    new Filter.TypeAgnostic {
+      def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = apply(tracer, newId)
+    }
+
   private[finagle] class Module[Req, Rep](newId: Boolean)
       extends Stack.Module1[param.Tracer, ServiceFactory[Req, Rep]] {
     def this() = this(true)
     val role: Stack.Role = TraceInitializerFilter.role
     val description = "Initialize the tracing system"
     def make(_tracer: param.Tracer, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = {
-      val param.Tracer(tracer) = _tracer
-      new TraceInitializerFilter[Req, Rep](tracer, newId).andThen(next)
+      apply(_tracer.tracer, newId).andThen(next)
     }
   }
 

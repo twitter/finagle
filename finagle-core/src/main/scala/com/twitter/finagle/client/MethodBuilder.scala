@@ -2,9 +2,9 @@ package com.twitter.finagle.client
 
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle.client.MethodBuilderTimeout.TunableDuration
-import com.twitter.finagle.param
-import com.twitter.finagle.service.{Retries, TimeoutFilter, ResponseClassifier, ResponseClass}
+import com.twitter.finagle.service.{ResponseClass, ResponseClassifier, Retries, TimeoutFilter}
 import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.tracing.TraceInitializerFilter
 import com.twitter.finagle.util.{Showable, StackRegistry}
 import com.twitter.finagle.{Filter, Name, Service, ServiceFactory, Stack, param, _}
 import com.twitter.util.tunable.Tunable
@@ -62,7 +62,10 @@ private[finagle] object MethodBuilder {
     stack: Stack[ServiceFactory[Req, Rep]]
   ): Stack[ServiceFactory[Req, Rep]] = {
     stack
-    // total timeouts are managed directly by MethodBuilder
+    // backup requests happen before the stack's filters so MethodBuilder
+    // has to place this before (outside of the stack).
+      .remove(TraceInitializerFilter.role)
+      // total timeouts are managed directly by MethodBuilder
       .remove(TimeoutFilter.totalTimeoutRole)
       // allow for dynamic per-request timeouts
       .replace(TimeoutFilter.role, DynamicTimeout.perRequestModule[Req, Rep])
@@ -75,6 +78,7 @@ private[finagle] object MethodBuilder {
      */
     def create(originalStack: Stack[_], params: Stack.Params): Config = {
       Config(
+        TraceInitializerFilter.typeAgnostic(params[param.Tracer].tracer, true),
         MethodBuilderRetry.Config(
           if (params.contains[param.ResponseClassifier]) {
             Some(params[param.ResponseClassifier].responseClassifier)
@@ -95,7 +99,10 @@ private[finagle] object MethodBuilder {
    * @see [[MethodBuilder.Config.create]] to construct an initial instance.
    *       Using its `copy` method is appropriate after that.
    */
-  case class Config private (retry: MethodBuilderRetry.Config, timeout: MethodBuilderTimeout.Config)
+  case class Config private (
+    traceInitializer: Filter.TypeAgnostic,
+    retry: MethodBuilderRetry.Config,
+    timeout: MethodBuilderTimeout.Config)
 
   /** Used by the `ClientRegistry` */
   private[client] val RegistryKey = "methods"
@@ -276,7 +283,7 @@ private[finagle] final class MethodBuilder[Req, Rep](
     val configClassifier = config.retry.underlyingClassifier
     val idempotentedConfigClassifier = idempotentify(configClassifier, classifier)
 
-    (new MethodBuilder[Req, Rep](
+    new MethodBuilder[Req, Rep](
       refCounted,
       dest,
       stack,
@@ -288,7 +295,7 @@ private[finagle] final class MethodBuilder[Req, Rep](
         + param.ResponseClassifier(idempotentedStackClassifier)
         + stackParams[Retries.Budget],
       config
-    )).withRetry.forClassifier(idempotentedConfigClassifier)
+    ).withRetry.forClassifier(idempotentedConfigClassifier)
   }
 
   private[this] def nonidempotentify(
@@ -328,6 +335,12 @@ private[finagle] final class MethodBuilder[Req, Rep](
       config
     ).withRetry.forClassifier(nonidempotentedConfigClassifier)
   }
+
+  /**
+   * Allow customizations for protocol-specific trace initialization.
+   */
+  def withTraceInitializer(initializer: Filter.TypeAgnostic): MethodBuilder[Req, Rep] =
+    withConfig(config.copy(traceInitializer = initializer))
 
   //
   // Build
@@ -373,7 +386,7 @@ private[finagle] final class MethodBuilder[Req, Rep](
   private[this] def statsReceiver(methodName: Option[String]): StatsReceiver = {
     val clientScoped = stackParams[param.Stats].statsReceiver.scope(clientName)
     methodName match {
-      case Some(methodName) => clientScoped.scope(methodName)
+      case Some(name) => clientScoped.scope(name)
       case None => clientScoped
     }
   }
@@ -387,6 +400,7 @@ private[finagle] final class MethodBuilder[Req, Rep](
     // total timeouts and before per-request timeouts so that each backup uses the per-request
     // timeout.
     //
+    // - Trace Initialization
     // - Logical Stats
     // - Failure logging
     // - Annotate method name for a `Failure`
@@ -400,12 +414,12 @@ private[finagle] final class MethodBuilder[Req, Rep](
     val timeouts = withTimeout
 
     val failureSource = methodName match {
-      case Some(methodName) => addFailureSource(methodName)
+      case Some(name) => addFailureSource(name)
       case None => TypeAgnostic.Identity
     }
 
-    retries
-      .logicalStatsFilter(stats)
+    config.traceInitializer
+      .andThen(retries.logicalStatsFilter(stats))
       .andThen(retries.logFailuresFilter(clientName, methodName))
       .andThen(failureSource)
       .andThen(timeouts.totalFilter)

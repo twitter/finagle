@@ -501,7 +501,7 @@ class BackupRequestFilterTest
     }
   }
 
-  test(s"Backup request completes unsuccessfully first") {
+  test("Backup request completes unsuccessfully first") {
     Time.withCurrentTimeFrozen { tc =>
       val origPromise, backupPromise = new Promise[String]
       val f = sendBackup(origPromise, backupPromise, tc, sendInterrupts = false)
@@ -528,7 +528,7 @@ class BackupRequestFilterTest
       assert(wp.percentile(50.percent) == (WarmupRequestLatency + 1.second).inMillis)
 
       assert(statsReceiver.counters(Seq("backups_sent")) == 1)
-      assert(statsReceiver.counters(Seq("backups_won")) == 1)
+      assert(statsReceiver.counters(Seq("backups_won")) == 0)
     }
   }
 

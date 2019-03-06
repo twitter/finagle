@@ -6,10 +6,12 @@ import com.twitter.finagle.context.BackupRequest
 import com.twitter.finagle.integration.thriftscala.Echo
 import com.twitter.finagle.service.RetryBudget
 import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.tracing.{Annotation, Record, TraceId, Tracer}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Http, Service, ThriftMux, http}
 import com.twitter.util.{Await, Future}
 import java.net.InetSocketAddress
+import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
@@ -17,6 +19,28 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 class BackupRequestFilterTest extends FunSuite with Eventually with IntegrationPatience {
 
   private def await[T](f: Future[T]): T = Await.result(f, 15.seconds)
+
+  private def newTracer(messages: LinkedBlockingQueue[String]): Tracer = new Tracer {
+    def record(record: Record): Unit = {
+      record match {
+        case Record(_, _, Annotation.Message(value), _) =>
+          messages.put(value)
+        case Record(_, _, Annotation.BinaryAnnotation(key, _), _) =>
+          messages.put(key)
+        case _ =>
+      }
+    }
+    def sampleTrace(traceId: TraceId): Option[Boolean] = Tracer.SomeTrue
+  }
+
+  private def assertTracerMessages(messages: LinkedBlockingQueue[String]): Unit = {
+    assert(messages.contains("Client Backup Request Issued"))
+    assert(
+      messages.contains("Client Backup Request Won")
+        || messages.contains("Client Backup Request Lost"))
+    assert(messages.contains("clnt/backup_request_threshold_ms"))
+    assert(messages.contains("clnt/backup_request_span_id"))
+  }
 
   test("Http client propagates BackupRequest context") {
     val goSlow = new AtomicBoolean(false)
@@ -38,8 +62,10 @@ class BackupRequestFilterTest extends FunSuite with Eventually with IntegrationP
     val server = Http.server.serve("localhost:*", service)
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
 
+    val messages = new LinkedBlockingQueue[String]()
     val statsRecv = new InMemoryStatsReceiver()
     val client = Http.client
+      .withTracer(newTracer(messages))
       .withStatsReceiver(statsRecv)
       .withRetryBudget(RetryBudget.Infinite)
       .withLabel("backend")
@@ -55,6 +81,7 @@ class BackupRequestFilterTest extends FunSuite with Eventually with IntegrationP
     }
 
     // capture state and tee it up.
+    messages.clear()
     goSlow.set(true)
     val counter = statsRecv.counter("backend", "backups", "backups_sent")
     val backupsBefore = counter()
@@ -63,6 +90,7 @@ class BackupRequestFilterTest extends FunSuite with Eventually with IntegrationP
     assert(backupsSeen.get == backupsSeenBefore + 1)
     eventually {
       assert(counter() == backupsBefore + 1)
+      assertTracerMessages(messages)
     }
   }
 
@@ -88,8 +116,10 @@ class BackupRequestFilterTest extends FunSuite with Eventually with IntegrationP
     val server = ThriftMux.server.serveIface("localhost:*", service)
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
 
+    val messages = new LinkedBlockingQueue[String]()
     val statsRecv = new InMemoryStatsReceiver()
     val client = ThriftMux.client
+      .withTracer(newTracer(messages))
       .withStatsReceiver(statsRecv)
       .withRetryBudget(RetryBudget.Infinite)
       .withLabel("backend")
@@ -105,6 +135,7 @@ class BackupRequestFilterTest extends FunSuite with Eventually with IntegrationP
     }
 
     // capture state and tee it up.
+    messages.clear()
     goSlow.set(true)
     val counter = statsRecv.counter("backend", "backups", "backups_sent")
     val backupsBefore = counter()
@@ -113,6 +144,7 @@ class BackupRequestFilterTest extends FunSuite with Eventually with IntegrationP
     assert(backupsSeen.get == backupsSeenBefore + 1)
     eventually {
       assert(counter() == backupsBefore + 1)
+      assertTracerMessages(messages)
     }
   }
 

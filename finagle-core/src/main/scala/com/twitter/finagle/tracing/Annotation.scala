@@ -10,6 +10,7 @@ import java.nio.ByteBuffer
 sealed abstract class Annotation
 
 object Annotation {
+
   case object WireSend extends Annotation
   case object WireRecv extends Annotation
   final case class WireRecvError(error: String) extends Annotation

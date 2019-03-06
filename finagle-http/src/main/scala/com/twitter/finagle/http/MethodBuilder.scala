@@ -3,6 +3,7 @@ package com.twitter.finagle.http
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.http.service.HttpResponseClassifier
+import com.twitter.finagle.param.{Tracer => TracerParam}
 import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.{Name, Resolver, Service, client}
 import com.twitter.util.Duration
@@ -47,7 +48,12 @@ object MethodBuilder {
    * @see [[com.twitter.finagle.Http.Client.methodBuilder(Name)]]
    */
   def from(dest: Name, stackClient: StackClient[Request, Response]): MethodBuilder = {
-    val mb = client.MethodBuilder.from(dest, stackClient)
+    val initializer = HttpClientTraceInitializer.typeAgnostic(
+      stackClient.params[TracerParam].tracer
+    )
+    val mb = client.MethodBuilder
+      .from(dest, stackClient)
+      .withTraceInitializer(initializer)
     new MethodBuilder(mb)
   }
 

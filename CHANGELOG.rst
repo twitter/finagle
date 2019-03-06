@@ -7,6 +7,16 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+* finagle-core: Added tracing annotations to backup requests. ``PHAB_ID=D280998``
+
+  - Timestamped annotation "Client Backup Request Issued"
+  - Timestamped annotation "Client Backup Request Won" or "Client Backup Request Lost"
+  - Binary annotation "clnt/backup_request_threshold_ms", with the current value of the latency threshold, in milliseconds
+  - Binary annotation "clnt/backup_request_span_id", with the span id of the backup request
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
