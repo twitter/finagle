@@ -24,6 +24,18 @@ Breaking API Changes
   `c.t.f.param.ServerTransportParams` and `c.t.f.builder.ServerBuilder`. Users should migrate
   to using the `tls(SslServerConfiguration)` method instead. ``PHAB_ID=D277045``
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: The tracing annotations from `MkJvmFilter` have been enhanced. ``PHAB_ID=D282590``
+
+  - Timestamped annotations "GC Start" and "GC End" for each garbage collection
+    event that occurred during the request.
+  - Binary annotation "jvm/gc_count", with the total number of garbage collection
+    events that occurred during the request.
+  - Binary annotation "jvm/gc_ms", with the total milliseconds of garbage collection
+    events that occurred during the request.
+
 19.2.0
 -------
 

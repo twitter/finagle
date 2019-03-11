@@ -235,7 +235,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
         .filter(_.traceId == theId)
         .filter {
           // Skip spurious GC messages
-          case Record(_, _, Annotation.Message(msg), _) => !msg.startsWith("Gc")
+          case Record(_, _, Annotation.Message(msg), _) => !(msg == "GC Start" || msg == "GC End")
           case Record(_, _, Annotation.BinaryAnnotation(k, _), _) => !k.contains("payload")
           case _ => true
         }
@@ -244,7 +244,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       // Verify the count of the annotations. Order may change.
       // These are set twice - by client and server
       assert(
-        traces.collect { case Record(_, _, Annotation.BinaryAnnotation(_, _), _) => () }.size == 7
+        traces.collect { case Record(_, _, Annotation.BinaryAnnotation(_, _), _) => () }.size == 9
       )
       assert(traces.collect { case Record(_, _, Annotation.ServerAddr(_), _) => () }.size == 2)
       // With Stack, we get an extra ClientAddr because of the
