@@ -1,5 +1,6 @@
 package com.twitter.finagle
 
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.service.{ConstantService, FailedService, NilService}
 import com.twitter.util._
 import org.mockito.Matchers._
@@ -18,6 +19,8 @@ object ServiceTest {
     def close(deadline: Time): Future[Unit] = Future.Done
   }
 
+  def await[A](fa: Future[A], timeout: Duration = 5.seconds): A =
+    Await.result(fa, timeout)
 }
 
 class ServiceTest extends FunSuite with MockitoSugar {
@@ -243,4 +246,36 @@ class ServiceTest extends FunSuite with MockitoSugar {
       assert(factoryCloseCalled)
     }
   )
+
+  test("pending: apply") {
+    val ok = Service.const(Future.value("ok"))
+    val boo = Service.const(Future.exception(new Exception("boo")))
+
+    assert(await(Service.pending(Future.value(ok))(1)) == "ok")
+    intercept[Exception] { await(Service.pending(Future.value(boo))(1)) }
+  }
+
+  test("pending: close") {
+    var closeCalled: Boolean = false
+    val underlying = new Service[Int, Int] {
+      def apply(req: Int): Future[Int] = Future.value(0)
+      override def close(deadline: Time): Future[Unit] = {
+        closeCalled = true
+        Future.Done
+      }
+    }
+
+    val promise = new Promise[Service[Int, Int]]
+    val svc = Service.pending(promise)
+    assert(svc.status == Status.Busy)
+
+    val rep = svc(1)
+    val closed = svc.close()
+    assert(closed.isDefined)
+    assert(rep.isDefined)
+    assert(svc.status == Status.Closed)
+
+    promise.setValue(underlying)
+    assert(closeCalled)
+  }
 }

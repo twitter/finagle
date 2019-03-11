@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
-import com.twitter.util.{Closable, Future, Time}
-import scala.util.control.NonFatal
+import com.twitter.util.{Closable, Future, Promise, Return, Time, Throw, Try}
+import scala.util.control.{NonFatal, NoStackTrace}
 
 object Service {
 
@@ -40,6 +40,78 @@ object Service {
   /** Java compatible API for [[const]] as `const` is a reserved word in Java */
   def constant[Rep](rep: Future[Rep]): Service[Any, Rep] =
     Service.const(rep)
+
+  /**
+   * A future of a service is a pending service.
+   *
+   * Requests wait behind resolution of the future. If resolution fails, all
+   * requests to this service reflect the same failure. While resolution is
+   * pending, the status of the service is Busy, otherwise it's whatever the
+   * underlying service reports.
+   *
+   * Closing the service is uninterruptible and instant: failing all subsequent
+   * requests, and interrupting those in flight. Close returns
+   * [[com.twitter.util.Future.Done Future.Done]] always, independent of the
+   * underlying service.
+   *
+   * {{{
+   * val svc = Service.pending(Future.never)
+   * val rep = svc(1)
+   * val closed = svc.close()
+   *
+   * Await.result(closed) // Future.Done
+   * Await.result(rep)    // Exception: Service is closed
+   * }}}
+   *
+   * Note: Because queued requests rely on queue order of future callbacks,
+   * it's not guaranteed that requests to the underlying service will be
+   * received in the same order they were sent.
+   */
+  def pending[Req, Rep](svc: Future[Service[Req, Rep]]): Service[Req, Rep] =
+    new Pending(svc)
+
+  private class Pending[Req, Rep](fs: Future[Service[Req, Rep]]) extends Service[Req, Rep] {
+    import Pending._
+
+    @volatile private[this] var state: Pending.State[Service[Req, Rep]] = NotReady
+    private[this] val closep: Promise[Service[Req, Rep]] = new Promise[Service[Req, Rep]]
+    private[this] def absorbInterrupt: Future[Service[Req, Rep]] = fs.interruptible()
+
+    fs.respond { t => state = Ready(t) }
+
+    def apply(req: Req): Future[Rep] =
+      state match {
+        case Closed => Future.exception(ClosedException)
+        case NotReady => closep.or(absorbInterrupt).flatMap(svc => svc(req))
+        case Ready(Return(svc)) => svc(req)
+        case Ready(t @ Throw(_)) => Future.const(t.cast[Rep])
+      }
+
+    override def status: Status =
+      state match {
+        case Closed => Status.Closed
+        case NotReady => Status.Busy
+        case Ready(Throw(exc)) => Status.Closed
+        case Ready(Return(svc)) => svc.status
+      }
+
+    override def close(deadline: Time): Future[Unit] = {
+      state = Closed
+      if (closep.updateIfEmpty(Throw(ClosedException))) {
+        fs.flatMap(svc => svc.close(deadline))
+      }
+      Future.Done
+    }
+  }
+
+  private object Pending {
+    object ClosedException extends Exception("Service is closed") with NoStackTrace
+
+    sealed trait State[+A]
+    case object Closed extends State[Nothing]
+    case object NotReady extends State[Nothing]
+    case class Ready[A](a: Try[A]) extends State[A]
+  }
 }
 
 /**
