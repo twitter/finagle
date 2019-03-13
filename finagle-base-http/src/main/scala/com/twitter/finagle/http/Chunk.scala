@@ -71,6 +71,11 @@ private[finagle] object Chunk {
   }
 
   /**
+   * A last (end of stream) empty [[Chunk]] that has neither a payload nor trailers.
+   */
+  val empty: Chunk = Last(Buf.Empty, HeaderMap.Empty)
+
+  /**
    * Creates a non last [[Chunk]] that carries a payload, `bytes`.
    */
   def content(content: Buf): Chunk = Cons(content)

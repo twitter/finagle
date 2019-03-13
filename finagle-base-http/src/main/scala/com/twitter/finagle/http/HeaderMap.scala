@@ -84,6 +84,11 @@ abstract class HeaderMap
 
 object HeaderMap {
 
+  /**
+   * Empty, read-only [[HeaderMap]].
+   */
+  val Empty: HeaderMap = new EmptyHeaderMap
+
   /** Create a new HeaderMap from header list.
    *
    * @note the headers are added to the new `HeaderMap` via `add` operations.

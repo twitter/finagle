@@ -25,11 +25,15 @@ private[http] object Netty4StreamTransport {
       private def copyLoop(): Future[Unit] =
         trans.read().flatMap {
           case chunk: LastHttpContent =>
-            // TODO (vk): Optimize against LastHttpContent.EMPTY_LAST_CONTENT (very common case)
-            val last = Chunk.Last(
-              ByteBufConversion.byteBufAsBuf(chunk.content()),
-              Bijections.netty.headersToFinagle(chunk.trailingHeaders())
-            )
+            val last =
+              if (!chunk.content.isReadable && chunk.trailingHeaders().isEmpty)
+                Chunk.empty
+              else
+                Chunk.Last(
+                  ByteBufConversion.byteBufAsBuf(chunk.content()),
+                  Bijections.netty.headersToFinagle(chunk.trailingHeaders())
+                )
+
             pipe.write(last)
 
           case chunk: HttpContent =>
@@ -101,12 +105,19 @@ private[http] object Netty4StreamTransport {
     // We need to read one more time before writing trailers to ensure HTTP stream isn't malformed.
     def terminate(trailers: HeaderMap): Future[Unit] = r.read().flatMap {
       case None =>
-        // TODO (vk): PR against Netty; we need to construct out of given Headers
-        val lastHttpContent =
-          new DefaultLastHttpContent(Unpooled.EMPTY_BUFFER, false /*validateHeaders*/ )
+        // TODO (vk): PR against Netty; we need to construct out of given Headers so we avoid
+        // copying afterwards.
+        val last =
+          if (trailers.isEmpty) LastHttpContent.EMPTY_LAST_CONTENT
+          else {
+            val content =
+              new DefaultLastHttpContent(Unpooled.EMPTY_BUFFER, false /*validateHeaders*/ )
 
-        Bijections.finagle.writeFinagleHeadersToNetty(trailers, lastHttpContent.trailingHeaders())
-        trans.write(lastHttpContent)
+            Bijections.finagle.writeFinagleHeadersToNetty(trailers, content.trailingHeaders())
+            content
+          }
+
+        trans.write(last)
 
       case _ =>
         Future.exception(
