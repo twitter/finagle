@@ -1,24 +1,29 @@
 package com.twitter.finagle.http2.transport
 
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader.Message
+import io.netty.buffer.Unpooled
 import io.netty.channel.embedded.EmbeddedChannel
-import io.netty.channel.{DefaultChannelPromise, ChannelHandlerContext}
-import io.netty.handler.codec.http.{DefaultFullHttpRequest, HttpMethod, HttpVersion}
+import io.netty.channel.{ChannelHandlerContext, DefaultChannelPromise}
+import io.netty.handler.codec.http.{
+  DefaultFullHttpRequest,
+  DefaultHttpContent,
+  DefaultHttpRequest,
+  DefaultLastHttpContent,
+  HttpMethod,
+  HttpVersion
+}
 import io.netty.handler.codec.http2.HttpConversionUtil.ExtensionHeaderNames
 import io.netty.handler.codec.http2._
-import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.{eq => meq, _}
-import org.mockito.Mockito.{verify, when, RETURNS_SMART_NULLS}
+import org.mockito.Mockito.{RETURNS_SMART_NULLS, verify, when}
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfter, FunSuite}
-import org.scalatest.junit.JUnitRunner
-@RunWith(classOf[JUnitRunner])
+
 class RichHttpToHttp2ConnectionHandlerTest extends FunSuite with BeforeAndAfter with MockitoSugar {
 
   var mockCtx: ChannelHandlerContext = null
-  var promise: DefaultChannelPromise = null
   var connectionHandler: HttpToHttp2ConnectionHandler = null
-  var request: DefaultFullHttpRequest = null
   var mockEncoder: Http2ConnectionEncoder = null
 
   before {
@@ -29,9 +34,7 @@ class RichHttpToHttp2ConnectionHandlerTest extends FunSuite with BeforeAndAfter 
 
     val channel = new EmbeddedChannel()
 
-    promise = new DefaultChannelPromise(channel)
-
-    when(mockCtx.newPromise()).thenReturn(promise)
+    when(mockCtx.newPromise()).thenReturn(new DefaultChannelPromise(channel))
     when(mockEncoder.connection()).thenReturn(mockConnection)
     when(mockDecoder.connection()).thenReturn(mockConnection)
 
@@ -39,19 +42,19 @@ class RichHttpToHttp2ConnectionHandlerTest extends FunSuite with BeforeAndAfter 
 
     connectionHandler =
       new RichHttpToHttp2ConnectionHandler(mockDecoder, mockEncoder, settings, () => ())
-
-    request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
-    request.headers().add(ExtensionHeaderNames.SCHEME.text(), "https")
   }
 
-  test("Client sets default stream-dependency and weight") {
-    val streamId: Int = 1
+  test("Sets default stream-dependency and weight") {
+    val request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
+    request.headers().add(ExtensionHeaderNames.SCHEME.text(), "https")
+
+    val streamId = 1
     val defaultStreamDependency = 0
     val defaultWeight = Http2CodecUtil.DEFAULT_PRIORITY_WEIGHT
 
-    val message = Message(request, 1)
+    val p = mockCtx.newPromise()
+    connectionHandler.write(mockCtx, Message(request, streamId), p)
 
-    connectionHandler.write(mockCtx, message, promise)
     verify(mockEncoder).writeHeaders(
       meq(mockCtx),
       meq(streamId),
@@ -61,21 +64,24 @@ class RichHttpToHttp2ConnectionHandlerTest extends FunSuite with BeforeAndAfter 
       meq(false),
       meq(0),
       meq(true),
-      meq(promise)
+      meq(p)
     )
   }
 
   test("Allows client to specify stream-dependency-id and weight") {
+    val request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
+    request.headers().add(ExtensionHeaderNames.SCHEME.text(), "https")
+
     val streamDependencyId: Int = 15
-    val weight: Short = 4
-    val streamId: Int = 1
+    val weight = 4.toShort
+    val streamId = 1
 
     request.headers().addInt(ExtensionHeaderNames.STREAM_DEPENDENCY_ID.text(), streamDependencyId)
     request.headers().addInt(ExtensionHeaderNames.STREAM_WEIGHT.text(), weight)
 
-    val message = Message(request, 1)
+    val p = mockCtx.newPromise()
+    connectionHandler.write(mockCtx, Message(request, streamId), p)
 
-    connectionHandler.write(mockCtx, message, promise)
     verify(mockEncoder).writeHeaders(
       meq(mockCtx),
       meq(streamId),
@@ -85,7 +91,118 @@ class RichHttpToHttp2ConnectionHandlerTest extends FunSuite with BeforeAndAfter 
       meq(false),
       meq(0),
       meq(true),
-      meq(promise)
+      meq(p)
+    )
+  }
+
+  test("Transmits full request w/ payload") {
+    val payload = Unpooled.wrappedBuffer("foo".getBytes)
+    val request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/", payload)
+    request.headers.add(ExtensionHeaderNames.SCHEME.text(), "https")
+    request.headers.add("bar", "baz")
+
+    val captor = ArgumentCaptor.forClass(classOf[Http2Headers])
+
+    val p = mockCtx.newPromise()
+    connectionHandler.write(mockCtx, Message(request, 1), p)
+
+    verify(mockEncoder).writeHeaders(
+      meq(mockCtx),
+      meq(1),
+      captor.capture(),
+      anyInt(),
+      anyShort(),
+      meq(false),
+      meq(0),
+      meq(false),
+      meq(p)
+    )
+
+    assert(captor.getValue.get("bar") == "baz")
+
+    verify(mockEncoder).writeData(
+      meq(mockCtx),
+      meq(1),
+      meq(payload),
+      meq(0),
+      meq(true),
+      meq(p)
+    )
+  }
+
+  test("Transmits request w/o payload") {
+    val request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/")
+    request.headers.add(ExtensionHeaderNames.SCHEME.text(), "https")
+    request.headers.add("bar", "baz")
+
+    val captor = ArgumentCaptor.forClass(classOf[Http2Headers])
+
+    val p = mockCtx.newPromise()
+    connectionHandler.write(mockCtx, Message(request, 1), p)
+
+    verify(mockEncoder).writeHeaders(
+      meq(mockCtx),
+      meq(1),
+      captor.capture(),
+      anyInt(),
+      anyShort(),
+      meq(false),
+      meq(0),
+      meq(false),
+      meq(p)
+    )
+
+    assert(captor.getValue.get("bar") == "baz")
+  }
+
+  test("Transmits payload and trailers in the last chunk") {
+    val payload = Unpooled.wrappedBuffer("foo".getBytes)
+    val chunk = new DefaultLastHttpContent(payload)
+    chunk.trailingHeaders().add("bar", "baz")
+
+    val captor = ArgumentCaptor.forClass(classOf[Http2Headers])
+
+    val p = mockCtx.newPromise()
+    connectionHandler.write(mockCtx, Message(chunk, 1), p)
+
+    verify(mockEncoder).writeData(
+      meq(mockCtx),
+      meq(1),
+      meq(payload),
+      meq(0),
+      meq(false),
+      meq(p)
+    )
+
+    verify(mockEncoder).writeHeaders(
+      meq(mockCtx),
+      meq(1),
+      captor.capture(),
+      anyInt(),
+      anyShort(),
+      meq(false),
+      meq(0),
+      meq(true),
+      meq(p)
+    )
+
+    assert(captor.getValue.get("bar") == "baz")
+  }
+
+  test("Transmits payload in chunks") {
+    val payload = Unpooled.wrappedBuffer("foo".getBytes)
+    val chunk = new DefaultHttpContent(payload)
+
+    val p = mockCtx.newPromise()
+    connectionHandler.write(mockCtx, Message(chunk, 1), p)
+
+    verify(mockEncoder).writeData(
+      meq(mockCtx),
+      meq(1),
+      meq(payload),
+      meq(0),
+      meq(false),
+      meq(p)
     )
   }
 }
