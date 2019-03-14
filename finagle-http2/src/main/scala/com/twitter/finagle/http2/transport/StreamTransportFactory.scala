@@ -3,7 +3,6 @@ package com.twitter.finagle.http2.transport
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.http.TooLongMessageException
 import com.twitter.finagle.http2.{DeadConnectionException, GoAwayException, RstException}
-import com.twitter.finagle.http2.transport.Http2ClientDowngrader._
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.netty4.transport.HasExecutor
 import com.twitter.finagle.param.Stats
@@ -51,6 +50,7 @@ final private[http2] class StreamTransportFactory(
   params: Stack.Params)
     extends ClientSession { parent =>
   import StreamTransportFactory._
+  import StreamMessage._
 
   private[this] val exec = underlying.context.executor
   private[this] val log = Logger.get(getClass.getName)

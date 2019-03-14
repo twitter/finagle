@@ -1,6 +1,5 @@
 package com.twitter.finagle.http2.transport
 
-import com.twitter.finagle.http2.transport.Http2ClientDowngrader.StreamMessage
 import com.twitter.finagle.http2.transport.Http2UpgradingTransport.{
   UpgradeAborted,
   UpgradeRejected,

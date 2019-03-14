@@ -13,7 +13,7 @@ import com.twitter.finagle.netty4.http.{
 import com.twitter.finagle.param.{Timer => TimerParam}
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.Stack
-import com.twitter.finagle.http2.transport.Http2ClientDowngrader.StreamMessage
+import com.twitter.finagle.http2.transport.StreamMessage
 import com.twitter.finagle.netty4.transport.HasExecutor
 import com.twitter.logging.Logger
 import com.twitter.util._
@@ -55,10 +55,12 @@ private[finagle] object Http2Transporter {
         params[EncoderIgnoreMaxHeaderListSize]
       val sensitivityDetector = params[HeaderSensitivity].sensitivityDetector
 
+      val connection = new DefaultHttp2Connection(false /*server*/ )
+
       val connectionHandlerBuilder = new RichHttpToHttp2ConnectionHandlerBuilder()
         .frameListener(Http2ClientDowngrader)
         .frameLogger(new LoggerPerFrameTypeLogger(params[FrameLoggerNamePrefix].loggerNamePrefix))
-        .connection(new DefaultHttp2Connection(false /*server*/ ))
+        .connection(connection)
         .initialSettings(Settings.fromParams(params, isServer = false))
         .encoderIgnoreMaxHeaderListSize(ignoreMaxHeaderListSize)
         .headerSensitivityDetector(new Http2HeadersEncoder.SensitivityDetector {

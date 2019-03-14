@@ -88,6 +88,7 @@ private[http2] class RichHttpToHttp2ConnectionHandlerBuilder
     encoder: Http2ConnectionEncoder,
     initialSettings: Http2Settings
   ): RichHttpToHttp2ConnectionHandler = {
+    val cn = connection()
     val fn = onActiveFn.getOrElse(() => ())
     configureEncoder(new RichHttpToHttp2ConnectionHandler(decoder, encoder, initialSettings, fn))
   }

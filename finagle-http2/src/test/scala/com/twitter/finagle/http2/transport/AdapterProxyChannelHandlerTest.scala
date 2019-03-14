@@ -1,7 +1,7 @@
 package com.twitter.finagle.http2.transport
 
 import com.twitter.finagle.Stack.Params
-import com.twitter.finagle.http2.transport.Http2ClientDowngrader.{Message, Rst, StreamException}
+import com.twitter.finagle.http2.transport.StreamMessage._
 import com.twitter.finagle.netty4.http
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import io.netty.buffer.{ByteBuf, Unpooled}

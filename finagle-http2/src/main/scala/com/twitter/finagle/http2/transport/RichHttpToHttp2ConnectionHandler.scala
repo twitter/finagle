@@ -1,12 +1,6 @@
 package com.twitter.finagle.http2.transport
 
-import com.twitter.finagle.http2.transport.Http2ClientDowngrader.{
-  GoAway,
-  Message,
-  Ping,
-  Rst,
-  StreamException
-}
+import com.twitter.finagle.http2.transport.StreamMessage._
 import com.twitter.logging.Logger
 import io.netty.buffer.Unpooled
 import io.netty.channel.{ChannelHandlerContext, ChannelPromise}
@@ -192,7 +186,7 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
           status
         )
 
-        ctx.fireChannelRead(Http2ClientDowngrader.Message(rep, streamId))
+        ctx.fireChannelRead(Message(rep, streamId))
         promise.trySuccess()
 
       case NonFatal(e) =>

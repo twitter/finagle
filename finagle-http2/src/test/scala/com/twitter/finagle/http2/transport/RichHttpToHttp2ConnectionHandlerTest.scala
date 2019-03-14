@@ -1,6 +1,6 @@
 package com.twitter.finagle.http2.transport
 
-import com.twitter.finagle.http2.transport.Http2ClientDowngrader.Message
+import com.twitter.finagle.http2.transport.StreamMessage._
 import io.netty.buffer.Unpooled
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.channel.{ChannelHandlerContext, DefaultChannelPromise}

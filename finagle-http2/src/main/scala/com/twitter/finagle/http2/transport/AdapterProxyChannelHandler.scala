@@ -1,7 +1,7 @@
 package com.twitter.finagle.http2.transport
 
 import com.twitter.finagle.FailureFlags
-import com.twitter.finagle.http2.transport.Http2ClientDowngrader._
+import com.twitter.finagle.http2.transport.StreamMessage._
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.logging.{Logger, Level, HasLogLevel}
 import io.netty.channel._

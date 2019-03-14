@@ -2,7 +2,6 @@ package com.twitter.finagle.http2.transport
 
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.http2.DeadTransport
-import com.twitter.finagle.http2.transport.Http2ClientDowngrader.StreamMessage
 import com.twitter.finagle.netty4.transport.HasExecutor
 import com.twitter.finagle.param.{Stats, Timer => TimerParam}
 import com.twitter.finagle.{Stack, Status}
