@@ -1793,6 +1793,36 @@ generator.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.Service#pending" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="pending[Req,Rep](svc:com.twitter.util.Future[com.twitter.finagle.Service[Req,Rep]]):com.twitter.finagle.Service[Req,Rep]"></a><a id="pending[Req,Rep](Future[Service[Req,Rep]]):Service[Req,Rep]"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Service$.html#pending[Req,Rep](svc:com.twitter.util.Future[com.twitter.finagle.Service[Req,Rep]]):com.twitter.finagle.Service[Req,Rep]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">pending</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="svc">svc: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.Service.pending.Req">Req</span>, <span class="extype" name="com.twitter.finagle.Service.pending.Rep">Rep</span>]]</span>)</span><span class="result">: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.Service.pending.Req">Req</span>, <span class="extype" name="com.twitter.finagle.Service.pending.Rep">Rep</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A future of a service is a pending service.</p><div class="fullcomment"><div class="comment cmt"><p>A future of a service is a pending service.</p><p>Requests wait behind resolution of the future. If resolution fails, all
+requests to this service reflect the same failure. While resolution is
+pending, the status of the service is Busy, otherwise it's whatever the
+underlying service reports.</p><p>Closing the service is uninterruptible and instant: failing all subsequent
+requests, and interrupting those in flight. Close returns
+<span class="extype" name="com.twitter.util.Future.Done">Future.Done</span> always, independent of the
+underlying service.</p><pre><span class="kw">val</span> svc = Service.pending(Future.never)
+<span class="kw">val</span> rep = svc(<span class="num">1</span>)
+<span class="kw">val</span> closed = svc.close()
+
+Await.result(closed) <span class="cmt">// Future.Done</span>
+Await.result(rep)    <span class="cmt">// Exception: Service is closed</span></pre><p>Note: Because queued requests rely on queue order of future callbacks,
+it's not guaranteed that requests to the underlying service will be
+received in the same order they were sent.
+</p></div></div>
     </li><li name="com.twitter.finagle.Service#rescue" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="rescue[Req,Rep](service:com.twitter.finagle.Service[Req,Rep]):com.twitter.finagle.ServiceProxy[Req,Rep]"></a><a id="rescue[Req,Rep](Service[Req,Rep]):ServiceProxy[Req,Rep]"></a>
       <span class="permalink">

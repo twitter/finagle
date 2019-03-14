@@ -1492,28 +1492,6 @@ or supports transactions).
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.0.1)</i> Used for ABI compat</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ServerBuilder#tls" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="tls(certificatePath:String,keyPath:String,caCertificatePath:String,ciphers:String,nextProtos:String):ServerBuilder.this.This"></a><a id="tls(String,String,String,String,String):This"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#tls(certificatePath:String,keyPath:String,caCertificatePath:String,ciphers:String,nextProtos:String):ServerBuilder.this.This" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2019-01-28) Use tls(SslServerConfiguration) instead">tls</span><span class="params">(<span name="certificatePath">certificatePath: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="keyPath">keyPath: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="caCertificatePath">caCertificatePath: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="ciphers">ciphers: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="nextProtos">nextProtos: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Encrypt the connection with SSL/TLS.</p><div class="fullcomment"><div class="comment cmt"><p>Encrypt the connection with SSL/TLS.</p><p>To migrate to the Stack-based APIs, use <code>ServerTransportParams.tls</code>.
-For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
-
-Http.server.withTransport.tls(...)</pre></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2019-01-28)</i> Use tls(SslServerConfiguration) instead</p></dd></dl></div>
     </li></ol>
             </div>
         </div>

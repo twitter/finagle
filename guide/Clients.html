@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Clients &#8212; Finagle 19.2.0 documentation</title>
+    <title>Clients &#8212; Finagle 19.3.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.2.0',
+        VERSION:     '19.3.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.2.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.3.0 documentation" href="index.html" />
     <link rel="next" title="Contexts" href="Contexts.html" />
     <link rel="prev" title="Servers" href="Servers.html" />
    
@@ -399,7 +399,7 @@ are not retried by default. However this can be configured through a
 support streaming (such as with HTTP).</p>
 </div>
 <p>The <cite>Expiration</cite> module is attached at the connection level and expires a service/session
-after a certain amount of idle time. The module is implemented by
+after a certain amount of time. The module is implemented by
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/ExpiringService.scala">ExpiringService</a>.</p>
 <p>The default setting for the <cite>Expiration</cite> module is to never expire a session. Here is how
 it can be configured <a class="footnote-reference" href="#example" id="id9">[3]</a>.</p>
@@ -408,16 +408,11 @@ it can be configured <a class="footnote-reference" href="#example" id="id9">[3]<
 
 <span class="k">val</span> <span class="n">twitter</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
   <span class="o">.</span><span class="n">withSession</span><span class="o">.</span><span class="n">maxLifeTime</span><span class="o">(</span><span class="mf">20.</span><span class="n">seconds</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">withSession</span><span class="o">.</span><span class="n">maxIdleTime</span><span class="o">(</span><span class="mf">10.</span><span class="n">seconds</span><span class="o">)</span>
   <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;twitter.com&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
-<p>The <cite>Expiration</cite> module takes two parameters:</p>
-<ol class="arabic simple">
-<li><cite>maxLifeTime</cite> - the maximum duration for which a session is considered alive</li>
-<li><cite>maxIdleTime</cite> - the maximum duration for which a session is allowed to idle
-(not sending any requests)</li>
-</ol>
+<p>The <cite>Expiration</cite> module for clients takes one parameter: <cite>maxLifeTime</cite> - the maximum duration for
+which a session is considered alive.</p>
 <p>See <a class="reference internal" href="Metrics.html#idle-apoptosis-stats"><span class="std std-ref">Expiration metrics</span></a> for more details.</p>
 <p>Finally, timeouts can be enforced outside of these modules on a per-request level using
 <code class="docutils literal"><span class="pre">Future#within</span></code> or <code class="docutils literal"><span class="pre">Future#raiseWithin</span></code>.  <a class="footnote-reference" href="#raise" id="id10">[4]</a>:</p>
@@ -771,6 +766,7 @@ example <a class="footnote-reference" href="#example" id="id27">[3]</a>.</p>
   <span class="o">.</span><span class="n">withSessionPool</span><span class="o">.</span><span class="n">minSize</span><span class="o">(</span><span class="mi">10</span><span class="o">)</span>
   <span class="o">.</span><span class="n">withSessionPool</span><span class="o">.</span><span class="n">maxSize</span><span class="o">(</span><span class="mi">20</span><span class="o">)</span>
   <span class="o">.</span><span class="n">withSessionPool</span><span class="o">.</span><span class="n">maxWaiters</span><span class="o">(</span><span class="mi">100</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">withSessionPool</span><span class="o">.</span><span class="n">ttl</span><span class="o">(</span><span class="mf">5.</span><span class="n">seconds</span><span class="o">)</span>
   <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;twitter.com&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
@@ -780,6 +776,7 @@ example <a class="footnote-reference" href="#example" id="id27">[3]</a>.</p>
 client will not maintain more connections than <cite>maxSize</cite>)</li>
 <li><cite>maxWaiters</cite> - the maximum number of connection requests that are queued when the connection
 concurrency exceeds the high watermark</li>
+<li><cite>ttl</cite>- the maximum amount of time a session is allowed to be cached in a pool</li>
 </ol>
 <p><a class="reference internal" href="Metrics.html#pool-stats"><span class="std std-ref">Related stats</span></a></p>
 <div class="section" id="buffering-pool">

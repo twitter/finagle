@@ -165,8 +165,8 @@ resources for using Finagle.
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="BackupRequest$.html" title="Used to signal that a request was initiated as a &quot;backup request&quot;."></a>
-                        <a href="BackupRequest$.html" title="Used to signal that a request was initiated as a &quot;backup request&quot;.">BackupRequest</a>
+                        <a class="object" href="" title="Used to signal that a request was initiated as a &quot;backup request&quot;."></a>
+                        <a href="" title="Used to signal that a request was initiated as a &quot;backup request&quot;.">BackupRequest</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="trait" href="Context.html" title="A context contains a number of let-delimited bindings."></a>
@@ -189,8 +189,8 @@ resources for using Finagle.
                         <a href="MarshalledContext.html" title="A marshalled context contains bindings that may be marshalled and sent across process boundaries.">MarshalledContext</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="RemoteInfo$.html" title=""></a>
-                        <a class="trait" href="" title="Contains the remote information for a request, if available."></a>
-                        <a href="" title="Contains the remote information for a request, if available.">RemoteInfo</a>
+                        <a class="trait" href="RemoteInfo.html" title="Contains the remote information for a request, if available."></a>
+                        <a href="RemoteInfo.html" title="Contains the remote information for a request, if available.">RemoteInfo</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="Retries$.html" title=""></a>
                         <a class="class" href="Retries.html" title="Retries contains the number of times a request has been retried."></a>
@@ -200,43 +200,37 @@ resources for using Finagle.
             </div>
           </div>
           <div id="content">
-            <body class="trait type">
+            <body class="object value">
       <div id="definition">
-        <a href="RemoteInfo$.html" title="See companion object"><div class="big-circle trait-companion-object">t</div></a>
+        <div class="big-circle object">o</div>
         <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="index.html" class="extype" name="com.twitter.finagle.context">context</a></p>
-        <h1><a href="RemoteInfo$.html" title="See companion object">RemoteInfo</a><span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/RemoteInfo.html" title="Permalink">
+        <h1>BackupRequest<span class="permalink">
+      <a href="../../../../com/twitter/finagle/context/BackupRequest$.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
-        <h3><span class="morelinks"><div>
-            Companion <a href="RemoteInfo$.html" title="See companion object">object RemoteInfo</a>
-          </div></span></h3>
+        <h3><span class="morelinks"></span></h3>
       </div>
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
-        <span class="modifier">sealed </span>
-        <span class="kind">trait</span>
+        <span class="modifier"></span>
+        <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">RemoteInfo</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <span class="name">BackupRequest</span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Contains the remote information for a request, if available.
-</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Used to signal that a request was initiated as a &quot;backup request&quot;.</p><p>Note that these are broadcast across the rest of the request's call graph.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="com.twitter.finagle.client.BackupRequestFilter">com.twitter.finagle.client.BackupRequestFilter</span> for details on
+    what a backup request is.</p></span><span class="cmt"><p>MethodBuilder's <code>idempotent</code> for configuring a client to use backups.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
-        </div><div class="toggleContainer block">
-            <span class="toggle">
-              Known Subclasses
-            </span>
-            <div class="subClasses hiddenContent"><a href="RemoteInfo$$Available.html" class="extype" name="com.twitter.finagle.context.RemoteInfo.Available">Available</a>, <a href="RemoteInfo$$NotAvailable$.html" class="extype" name="com.twitter.finagle.context.RemoteInfo.NotAvailable">NotAvailable</a></div>
-          </div></div>
+        </div></div>
         
 
       <div id="mbrsel">
@@ -261,7 +255,7 @@ resources for using Finagle.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.context.RemoteInfo"><span>RemoteInfo</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.context.BackupRequest"><span>BackupRequest</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -291,7 +285,7 @@ resources for using Finagle.
                 <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/RemoteInfo.html#!=(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/BackupRequest$.html#!=(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -307,7 +301,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/RemoteInfo.html###():Int" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/BackupRequest$.html###():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -323,7 +317,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/RemoteInfo.html#==(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/BackupRequest$.html#==(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -339,7 +333,7 @@ resources for using Finagle.
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/RemoteInfo.html#asInstanceOf[T0]:T0" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/BackupRequest$.html#asInstanceOf[T0]:T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -355,7 +349,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/RemoteInfo.html#clone():Object" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/BackupRequest$.html#clone():Object" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -379,7 +373,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/RemoteInfo.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/BackupRequest$.html#eq(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -395,7 +389,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/RemoteInfo.html#equals(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/BackupRequest$.html#equals(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -411,7 +405,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/RemoteInfo.html#finalize():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/BackupRequest$.html#finalize():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -433,7 +427,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/RemoteInfo.html#getClass():Class[_]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/BackupRequest$.html#getClass():Class[_]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -452,7 +446,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/RemoteInfo.html#hashCode():Int" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/BackupRequest$.html#hashCode():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -471,7 +465,7 @@ resources for using Finagle.
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/RemoteInfo.html#isInstanceOf[T0]:Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/BackupRequest$.html#isInstanceOf[T0]:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -487,7 +481,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/RemoteInfo.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/BackupRequest$.html#ne(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -503,7 +497,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/RemoteInfo.html#notify():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/BackupRequest$.html#notify():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -522,7 +516,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/RemoteInfo.html#notifyAll():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/BackupRequest$.html#notifyAll():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -541,7 +535,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/RemoteInfo.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/BackupRequest$.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -557,7 +551,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/RemoteInfo.html#toString():String" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/BackupRequest$.html#toString():String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -573,7 +567,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/RemoteInfo.html#wait():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/BackupRequest$.html#wait():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -595,7 +589,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/RemoteInfo.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/BackupRequest$.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -617,7 +611,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/RemoteInfo.html#wait(x$1:Long):Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/BackupRequest$.html#wait(x$1:Long):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -638,6 +632,22 @@ resources for using Finagle.
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.context.BackupRequest#wasInitiated" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="wasInitiated:Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/context/BackupRequest$.html#wasInitiated:Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wasInitiated</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Whether or not a request was initiated as a backup request.</p>
     </li>
               </ol>
             </div>
