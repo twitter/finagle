@@ -465,10 +465,15 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
         .replace(TraceInitializerFilter.role, new HttpServerTraceInitializer[Request, Response])
         .replace(StackServer.Role.preparer, HttpNackFilter.module)
         .prepend(ServerDtabContextFilter.module)
-        .prepend(ServerContextFilter.module)
         .prepend(
           new Stack.NoOpModule(http.filter.StatsFilter.role, http.filter.StatsFilter.description)
         )
+        // the backup request module adds tracing annotations and as such must come
+        // after trace initialization and deserialization of contexts.
+        .insertAfter(TraceInitializerFilter.role, ServerContextFilter.module)
+        .insertAfter(
+          ServerContextFilter.role,
+          BackupRequest.traceAnnotationModule[Request, Response])
 
     private val params: Stack.Params = StackServer.defaultParams +
       protocolLibrary +

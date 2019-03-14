@@ -7,6 +7,13 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+* finagle-http,thriftmux: Added tracing annotations to backup requests. ``PHAB_ID=D285486``
+
+  - Binary annotation "srv/backup_request_processing", when servers are processing backup requests.
+
 19.3.0
 ------
 

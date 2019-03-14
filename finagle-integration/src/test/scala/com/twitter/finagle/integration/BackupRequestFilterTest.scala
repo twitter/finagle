@@ -33,7 +33,11 @@ class BackupRequestFilterTest extends FunSuite with Eventually with IntegrationP
     def sampleTrace(traceId: TraceId): Option[Boolean] = Tracer.SomeTrue
   }
 
-  private def assertTracerMessages(messages: LinkedBlockingQueue[String]): Unit = {
+  private def assertServerTracerMessages(messages: LinkedBlockingQueue[String]): Unit = {
+    assert(messages.contains("srv/backup_request_processing"))
+  }
+
+  private def assertClientTracerMessages(messages: LinkedBlockingQueue[String]): Unit = {
     assert(messages.contains("Client Backup Request Issued"))
     assert(
       messages.contains("Client Backup Request Won")
@@ -59,13 +63,16 @@ class BackupRequestFilterTest extends FunSuite with Eventually with IntegrationP
       }
     }
 
-    val server = Http.server.serve("localhost:*", service)
+    val serverMessages = new LinkedBlockingQueue[String]()
+    val server = Http.server
+      .withTracer(newTracer(serverMessages))
+      .serve("localhost:*", service)
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
 
-    val messages = new LinkedBlockingQueue[String]()
+    val clientMessages = new LinkedBlockingQueue[String]()
     val statsRecv = new InMemoryStatsReceiver()
     val client = Http.client
-      .withTracer(newTracer(messages))
+      .withTracer(newTracer(clientMessages))
       .withStatsReceiver(statsRecv)
       .withRetryBudget(RetryBudget.Infinite)
       .withLabel("backend")
@@ -81,7 +88,8 @@ class BackupRequestFilterTest extends FunSuite with Eventually with IntegrationP
     }
 
     // capture state and tee it up.
-    messages.clear()
+    serverMessages.clear()
+    clientMessages.clear()
     goSlow.set(true)
     val counter = statsRecv.counter("backend", "backups", "backups_sent")
     val backupsBefore = counter()
@@ -90,7 +98,8 @@ class BackupRequestFilterTest extends FunSuite with Eventually with IntegrationP
     assert(backupsSeen.get == backupsSeenBefore + 1)
     eventually {
       assert(counter() == backupsBefore + 1)
-      assertTracerMessages(messages)
+      assertClientTracerMessages(clientMessages)
+      assertServerTracerMessages(serverMessages)
     }
   }
 
@@ -113,13 +122,16 @@ class BackupRequestFilterTest extends FunSuite with Eventually with IntegrationP
       }
     }
 
-    val server = ThriftMux.server.serveIface("localhost:*", service)
+    val serverMessages = new LinkedBlockingQueue[String]()
+    val server = ThriftMux.server
+      .withTracer(newTracer(serverMessages))
+      .serveIface("localhost:*", service)
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
 
-    val messages = new LinkedBlockingQueue[String]()
+    val clientMessages = new LinkedBlockingQueue[String]()
     val statsRecv = new InMemoryStatsReceiver()
     val client = ThriftMux.client
-      .withTracer(newTracer(messages))
+      .withTracer(newTracer(clientMessages))
       .withStatsReceiver(statsRecv)
       .withRetryBudget(RetryBudget.Infinite)
       .withLabel("backend")
@@ -135,7 +147,8 @@ class BackupRequestFilterTest extends FunSuite with Eventually with IntegrationP
     }
 
     // capture state and tee it up.
-    messages.clear()
+    serverMessages.clear()
+    clientMessages.clear()
     goSlow.set(true)
     val counter = statsRecv.counter("backend", "backups", "backups_sent")
     val backupsBefore = counter()
@@ -144,7 +157,8 @@ class BackupRequestFilterTest extends FunSuite with Eventually with IntegrationP
     assert(backupsSeen.get == backupsSeenBefore + 1)
     eventually {
       assert(counter() == backupsBefore + 1)
-      assertTracerMessages(messages)
+      assertClientTracerMessages(clientMessages)
+      assertServerTracerMessages(serverMessages)
     }
   }
 
