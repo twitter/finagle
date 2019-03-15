@@ -1,25 +1,25 @@
-package com.twitter.finagle.transport.ssl
+package com.twitter.finagle.ssl.session
 
 import com.twitter.util.security.NullSslSession
 import java.security.cert.X509Certificate
 import javax.net.ssl.SSLSession
 
 /**
- * Local context which indicates that no security is associated
- * with the transport for a particular request.
+ * Null object which indicates that the existing connection
+ * is not using SSL/TLS.
  */
-private[finagle] object NoSslTransportContext extends SslTransportContext {
+private[finagle] object NullSslSessionInfo extends SslSessionInfo {
 
   /**
-   * Indicates whether the transport is using SSL/TLS.
+   * Indicates whether the connection is using SSL/TLS.
    *
    * @return The returned value is always false.
    */
   def usingSsl: Boolean = false
 
   /**
-   * The `SSLSession` associated with a particular request.
-   * Indicates that there is no `SSLSession` associated with this transport.
+   * The `SSLSession` associated with a particular connection.
+   * Indicates that there is no `SSLSession` associated with this connection.
    *
    * @return The returned value is always a `NullSslSession`.
    */

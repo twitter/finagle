@@ -1,4 +1,4 @@
-package com.twitter.finagle.transport.ssl
+package com.twitter.finagle.ssl.session
 
 import com.twitter.conversions.StringOps._
 import com.twitter.util.security.NullSslSession
@@ -6,20 +6,19 @@ import java.security.cert.X509Certificate
 import javax.net.ssl.SSLSession
 
 /**
- * Local context which indicates that SSL/TLS is being used
- * on the transport for a particular request.
+ * Class which indicates that a particular connection is using SSL/TLS,
+ * and provides some shortcuts to relevant pieces of `SSLSession` data.
  *
- * @param session The `SSLSession` associated with the transport.
+ * @param session The `SSLSession` associated with the connection.
  */
-private[finagle] final class UsingSslTransportContext(val session: SSLSession)
-    extends SslTransportContext {
+private[finagle] final class UsingSslSessionInfo(val session: SSLSession) extends SslSessionInfo {
 
   // This class should not be used with a `NullSslSession`. Use
-  // `NoSslTransportContext` instead.
+  // `NullSslSessionInfo` instead.
   require(session != NullSslSession)
 
   /**
-   * Indicates whether the transport is using SSL/TLS.
+   * Indicates whether the connection is using SSL/TLS.
    *
    * @return The returned value is always true.
    */

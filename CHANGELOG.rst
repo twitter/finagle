@@ -10,6 +10,10 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
+* finagle-core: The newly renamed `SslSessionInfo` is now public. It is
+  intended for providing information about a connection's SSL/TLS session.
+  ``PHAB_ID=D286242``
+
 * finagle-http,thriftmux: Added tracing annotations to backup requests. ``PHAB_ID=D285486``
 
   - Binary annotation "srv/backup_request_processing", when servers are processing backup requests.

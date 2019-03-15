@@ -1,21 +1,29 @@
-package com.twitter.finagle.transport.ssl
+package com.twitter.finagle.ssl.session
 
 import javax.net.ssl.SSLSession
 import java.security.cert.X509Certificate
 
 /**
- * Local context which provides information about the transport
- * security associated with a particular request.
+ * `SslSessionInfo` provides information related to an existing connection's use
+ * of an SSL/TLS session. SSL/TLS sessions are either negotiated or resumed
+ * during handshaking. When using SSL/TLS, one and only one SSL/TLS session is
+ * associated with a connection, although it's possible that an SSL/TLS session
+ * may be reused between multiple connections.
+ *
+ * An instance of this class should be associated with an existing connection.
+ * When using SSL/TLS, the instance provides easy access to the session and its
+ * relevant information. When not using SSL/TLS (i.e. there is no existing
+ * SSL/TLS session), then a `NullSslSessionInfo` should be used instead.
  */
-private[finagle] trait SslTransportContext {
+abstract class SslSessionInfo {
 
   /**
-   * Indicates whether the transport is using SSL/TLS.
+   * Indicates whether the connection is using SSL/TLS.
    */
   def usingSsl: Boolean
 
   /**
-   * The `SSLSession` associated with a particular request.
+   * The `SSLSession` associated with a particular connection.
    *
    * @note If SSL/TLS is not being used a `NullSslSession` will be returned instead.
    */
