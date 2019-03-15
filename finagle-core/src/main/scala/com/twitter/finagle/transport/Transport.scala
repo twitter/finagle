@@ -5,6 +5,7 @@ import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.{Stack, Status}
 import com.twitter.finagle.ssl.client.SslClientConfiguration
 import com.twitter.finagle.ssl.server.SslServerConfiguration
+import com.twitter.finagle.ssl.session.NullSslSessionInfo
 import com.twitter.io.{Buf, Pipe, Reader, ReaderDiscardedException, Writer, StreamTermination}
 import com.twitter.util._
 import java.net.SocketAddress
@@ -396,5 +397,5 @@ class QueueTransport[In, Out](writeq: AsyncQueue[In], readq: AsyncQueue[Out])
 
   val onClose: Future[Throwable] = closep
   val context: TransportContext =
-    new SimpleTransportContext(new SocketAddress {}, new SocketAddress {}, None)
+    new SimpleTransportContext(new SocketAddress {}, new SocketAddress {}, NullSslSessionInfo)
 }

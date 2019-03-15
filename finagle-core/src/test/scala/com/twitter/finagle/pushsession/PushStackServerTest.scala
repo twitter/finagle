@@ -3,6 +3,7 @@ package com.twitter.finagle.pushsession
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.pushsession.utils.MockChannelHandle
 import com.twitter.finagle.server.StackServer
+import com.twitter.finagle.ssl.session.SslSessionInfo
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{
   ClientConnection,
@@ -15,7 +16,8 @@ import com.twitter.finagle.{
 import com.twitter.util.registry.{Entry, GlobalRegistry}
 import com.twitter.util.{Await, Awaitable, Duration, Future, Promise, Time}
 import java.net.{InetSocketAddress, SocketAddress}
-import java.security.cert.Certificate
+import java.security.cert.{Certificate, X509Certificate}
+import org.mockito.Mockito.when
 import org.scalatest.FunSuite
 import org.scalatest.mockito.MockitoSugar
 
@@ -175,9 +177,11 @@ class PushStackServerTest extends FunSuite with MockitoSugar {
     }
 
     server.serve(new InetSocketAddress(0), TestServiceFactory)
-    val mockCert = mock[Certificate]
+    val mockCert = mock[X509Certificate]
+    val mockSslSessionInfo = mock[SslSessionInfo]
+    when(mockSslSessionInfo.peerCertificates).thenReturn(Seq(mockCert))
     val handle = new MockChannelHandle[Unit, Unit](null) {
-      override def peerCertificate: Option[Certificate] = Some(mockCert)
+      override def sslSessionInfo: SslSessionInfo = mockSslSessionInfo
     }
 
     await(server.mockListener.builder(handle))

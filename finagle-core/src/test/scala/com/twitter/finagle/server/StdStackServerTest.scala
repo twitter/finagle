@@ -2,6 +2,7 @@ package com.twitter.finagle.server
 
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle._
+import com.twitter.finagle.ssl.session.SslSessionInfo
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.{Await, Closable, Future, Time}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
@@ -37,7 +38,9 @@ class StdStackServerTest extends FunSuite with MockitoSugar {
         ): ListeningServer = {
           val trans = mock[Transport[Unit, Unit]]
           val context = mock[TransportContext]
-          when(context.peerCertificate).thenReturn(Some(mockCert))
+          val sslSessionInfo = mock[SslSessionInfo]
+          when(sslSessionInfo.peerCertificates).thenReturn(Seq(mockCert))
+          when(context.sslSessionInfo).thenReturn(sslSessionInfo)
           when(trans.context).thenReturn(context)
           when(trans.remoteAddress).thenReturn(mock[SocketAddress])
           when(trans.onClose).thenReturn(Future.never)

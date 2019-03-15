@@ -1,9 +1,9 @@
 package com.twitter.finagle.pushsession
 
 import com.twitter.finagle.Status
+import com.twitter.finagle.ssl.session.SslSessionInfo
 import com.twitter.util.{Future, Time, Try}
 import java.net.SocketAddress
-import java.security.cert.Certificate
 import java.util.concurrent.Executor
 
 /**
@@ -29,7 +29,7 @@ abstract class PushChannelHandleProxy[In, Out](underlying: PushChannelHandle[In,
 
   def sendAndForget(messages: Iterable[Out]): Unit = underlying.sendAndForget(messages)
 
-  def peerCertificate: Option[Certificate] = underlying.peerCertificate
+  def sslSessionInfo: SslSessionInfo = underlying.sslSessionInfo
 
   def status: Status = underlying.status
 

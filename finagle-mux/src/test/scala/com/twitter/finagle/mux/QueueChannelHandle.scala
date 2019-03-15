@@ -3,10 +3,10 @@ package com.twitter.finagle.mux
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.{ChannelClosedException, Status}
 import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession, SentinelSession}
+import com.twitter.finagle.ssl.session.{NullSslSessionInfo, SslSessionInfo}
 import com.twitter.finagle.util.Updater
 import com.twitter.util.{Future, Promise, Return, Throw, Time, Try}
 import java.net.SocketAddress
-import java.security.cert.Certificate
 import java.util.concurrent.Executor
 import scala.util.control.NonFatal
 
@@ -99,7 +99,7 @@ private[mux] class QueueChannelHandle[In, Out](destinationQueue: AsyncQueue[Out]
     })
   }
 
-  def peerCertificate: Option[Certificate] = None
+  def sslSessionInfo: SslSessionInfo = NullSslSessionInfo
 
   def status: Status = if (closed.isDefined) Status.Closed else Status.Open
 

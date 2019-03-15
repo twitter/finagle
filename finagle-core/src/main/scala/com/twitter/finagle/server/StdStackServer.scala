@@ -81,14 +81,13 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
 
     listener.listen(addr) { transport =>
       val clientConnection = new ClientConnectionProxy(new TransportClientConnection(transport))
-
-      val futureService = transport.context.peerCertificate match {
-        case None => serviceFactory(clientConnection)
-        case Some(cert) =>
-          Contexts.local.let(Transport.peerCertCtx, cert) {
+      val peerCertificates = transport.context.sslSessionInfo.peerCertificates
+      val futureService =
+        if (peerCertificates.isEmpty) serviceFactory(clientConnection)
+        else
+          Contexts.local.let(Transport.peerCertCtx, peerCertificates.head) {
             serviceFactory(clientConnection)
           }
-      }
 
       def mkSession(service: Service[Req, Rep]): Closable = {
         val dispatcher = newDispatcher(transport, service)

@@ -78,13 +78,13 @@ trait PushStackServer[Req, Rep, This <: PushStackServer[Req, Rep, This]]
       // Note, this will not work for OppTls since `peerCertificate`
       // isn't set at this point. It will, however, propagate the correct
       // cert during service acquisition for standard Tls.
-      val futureService = handle.peerCertificate match {
-        case None => serviceFactory(conn)
-        case Some(cert) =>
-          Contexts.local.let(Transport.peerCertCtx, cert) {
+      val peerCertificates = handle.sslSessionInfo.peerCertificates
+      val futureService =
+        if (peerCertificates.isEmpty) serviceFactory(conn)
+        else
+          Contexts.local.let(Transport.peerCertCtx, peerCertificates.head) {
             serviceFactory(conn)
           }
-      }
 
       // We transform to make sure we execute the block before the Future resolves
       futureService.transform {

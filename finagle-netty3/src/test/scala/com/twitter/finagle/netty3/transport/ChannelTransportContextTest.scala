@@ -1,5 +1,6 @@
 package com.twitter.finagle.netty3.transport
 
+import com.twitter.finagle.ssl.session.NullSslSessionInfo
 import java.net.InetSocketAddress
 import java.security.cert.{Certificate, X509Certificate}
 import javax.net.ssl.{SSLEngine, SSLSession}
@@ -29,19 +30,21 @@ class ChannelTransportContextTest extends FunSuite with MockitoSugar {
     assert(remote.getPort == 2345)
   }
 
-  test("peer certificate is empty by default") {
+  test("sslSessionInfo is not used by default") {
     val ch = mock[Channel]
     val pipeline = mock[ChannelPipeline]
     when(ch.getPipeline).thenReturn(pipeline)
     when(pipeline.get(classOf[SslHandler])).thenReturn(null)
     val context = new ChannelTransportContext(ch)
-    assert(context.peerCertificate.isEmpty)
+    assert(context.sslSessionInfo == NullSslSessionInfo)
   }
 
-  test("peer certificate is retrieved from an existing SSLEngine") {
+  test("sslSessionInfo is created from an existing SSLEngine") {
     val cert = mock[X509Certificate]
     val certs = Array[Certificate](cert)
     val session = mock[SSLSession]
+    when(session.getId).thenReturn("abcd".getBytes)
+    when(session.getLocalCertificates).thenReturn(Array[Certificate]())
     when(session.getPeerCertificates).thenReturn(certs)
     val engine = mock[SSLEngine]
     when(engine.getSession).thenReturn(session)
@@ -53,7 +56,7 @@ class ChannelTransportContextTest extends FunSuite with MockitoSugar {
     when(ch.getPipeline).thenReturn(pipeline)
     when(pipeline.get(classOf[SslHandler])).thenReturn(sslHandler)
     val context = new ChannelTransportContext(ch)
-    assert(context.peerCertificate.nonEmpty)
+    assert(context.sslSessionInfo.peerCertificates.nonEmpty)
   }
 
 }

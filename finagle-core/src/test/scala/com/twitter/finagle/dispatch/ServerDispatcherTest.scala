@@ -3,6 +3,7 @@ package com.twitter.finagle.dispatch
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
 import com.twitter.finagle.context.{Contexts, RemoteInfo}
+import com.twitter.finagle.ssl.session.{NullSslSessionInfo, SslSessionInfo}
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util._
 import java.net.SocketAddress
@@ -24,7 +25,7 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
 
   trait Ctx {
     val context = mock[TransportContext]
-    when(context.peerCertificate).thenReturn(None)
+    when(context.sslSessionInfo).thenReturn(NullSslSessionInfo)
     val trans = mock[Transport[String, String]]
     when(trans.context).thenReturn(context)
     when(trans.onClose).thenReturn(Future.never)
@@ -63,7 +64,9 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
 
   test("Inject the transport certificate if present")(new Ctx {
     val mockCert = mock[X509Certificate]
-    when(context.peerCertificate).thenReturn(Some(mockCert))
+    val mockSslSessionInfo = mock[SslSessionInfo]
+    when(context.sslSessionInfo).thenReturn(mockSslSessionInfo)
+    when(mockSslSessionInfo.peerCertificates).thenReturn(Seq(mockCert))
     val service = new Service[String, String] {
       override def apply(request: String): Future[String] = Future.value {
         if (Contexts.local.get(Transport.peerCertCtx) == Some(mockCert)) "ok" else "not ok"
@@ -123,7 +126,7 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
     when(trans.onClose).thenReturn(onClose)
     when(trans.close).thenReturn(onClose.unit)
     when(trans.close(any[Time])).thenReturn(onClose.unit)
-    when(context.peerCertificate).thenReturn(None)
+    when(context.sslSessionInfo).thenReturn(NullSslSessionInfo)
     when(trans.context).thenReturn(context)
     trans
   }

@@ -1,8 +1,8 @@
 package com.twitter.finagle.pushsession
 
 import com.twitter.finagle.{ClientConnection, Status}
+import com.twitter.finagle.ssl.session.SslSessionInfo
 import com.twitter.util.{Closable, Try}
-import java.security.cert.Certificate
 import java.util.concurrent.Executor
 
 /**
@@ -77,9 +77,11 @@ trait PushChannelHandle[In, Out] extends Closable with ClientConnection {
   def sendAndForget(messages: Iterable[Out]): Unit
 
   /**
-   * Security certificate of the peer
+   * SSL/TLS session information associated with the push channel handle.
+   *
+   * @note If SSL/TLS is not being used a `NullSslSessionInfo` will be returned instead.
    */
-  def peerCertificate: Option[Certificate]
+  def sslSessionInfo: SslSessionInfo
 
   /**
    * The status of this transport; see [[com.twitter.finagle.Status]] for

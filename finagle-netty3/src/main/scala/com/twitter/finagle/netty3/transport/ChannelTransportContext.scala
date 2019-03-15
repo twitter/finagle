@@ -1,8 +1,8 @@
 package com.twitter.finagle.netty3.transport
 
+import com.twitter.finagle.ssl.session.{NullSslSessionInfo, SslSessionInfo, UsingSslSessionInfo}
 import com.twitter.finagle.transport.TransportContext
 import java.net.SocketAddress
-import java.security.cert.Certificate
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.ssl.SslHandler
 import scala.util.control.NonFatal
@@ -16,14 +16,14 @@ final class ChannelTransportContext private[transport] (ch: Channel) extends Tra
   def localAddress: SocketAddress = ch.getLocalAddress()
   def remoteAddress: SocketAddress = ch.getRemoteAddress()
 
-  def peerCertificate: Option[Certificate] =
+  def sslSessionInfo: SslSessionInfo =
     ch.getPipeline.get(classOf[SslHandler]) match {
-      case null => None
+      case null => NullSslSessionInfo
       case handler =>
         try {
-          handler.getEngine.getSession.getPeerCertificates.headOption
+          new UsingSslSessionInfo(handler.getEngine.getSession)
         } catch {
-          case NonFatal(_) => None
+          case NonFatal(_) => NullSslSessionInfo
         }
     }
 

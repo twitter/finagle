@@ -7,6 +7,7 @@ import com.twitter.finagle.{
   UnknownChannelException
 }
 import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession}
+import com.twitter.finagle.ssl.session.{NullSslSessionInfo, SslSessionInfo, UsingSslSessionInfo}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Logger
 import com.twitter.util._
@@ -22,7 +23,6 @@ import io.netty.handler.ssl.SslHandler
 import io.netty.util
 import io.netty.util.concurrent.GenericFutureListener
 import java.net.SocketAddress
-import java.security.cert.Certificate
 import java.util.concurrent.Executor
 import scala.util.control.NonFatal
 
@@ -91,14 +91,14 @@ private final class Netty4PushChannelHandle[In, Out] private (
 
   // This is a `def` in order to avoid memoizing this value eagerly (and incorrectly)
   // when doing OppTls.
-  def peerCertificate: Option[Certificate] =
+  def sslSessionInfo: SslSessionInfo =
     ch.pipeline.get(classOf[SslHandler]) match {
-      case null => None
+      case null => NullSslSessionInfo
       case handler =>
         try {
-          handler.engine.getSession.getPeerCertificates.headOption
+          new UsingSslSessionInfo(handler.engine.getSession)
         } catch {
-          case NonFatal(_) => None
+          case NonFatal(_) => NullSslSessionInfo
         }
     }
 

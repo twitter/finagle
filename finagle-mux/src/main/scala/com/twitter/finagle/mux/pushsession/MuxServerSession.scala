@@ -2,11 +2,11 @@ package com.twitter.finagle.mux.pushsession
 
 import com.twitter.finagle.{CancelledRequestException, Mux, Service, Stack, Status, param}
 import com.twitter.finagle.context.{Contexts, RemoteInfo}
-import com.twitter.finagle.mux.{Request, Response}
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport.Message
-import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession}
 import com.twitter.finagle.mux.transport.Message.Tags
+import com.twitter.finagle.mux.{Request, Response}
+import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession}
 import com.twitter.finagle.param.Label
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.transport.Transport
@@ -33,7 +33,8 @@ private[finagle] final class MuxServerSession(
       val remoteAddressLocal = Contexts.local
         .KeyValuePair(RemoteInfo.Upstream.AddressCtx, handle.remoteAddress)
       val peerCertLocal =
-        handle.peerCertificate.map(Contexts.local.KeyValuePair(Transport.peerCertCtx, _))
+        handle.sslSessionInfo.peerCertificates.headOption
+          .map(Contexts.local.KeyValuePair(Transport.peerCertCtx, _))
 
       Trace.letTracer(params[param.Tracer].tracer) {
         Contexts.local.let(Seq(remoteAddressLocal) ++ peerCertLocal) {

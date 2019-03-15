@@ -1,8 +1,8 @@
 package com.twitter.finagle.transport
 
+import com.twitter.finagle.ssl.session.{NullSslSessionInfo, SslSessionInfo}
 import com.twitter.util.Updatable
 import java.net.SocketAddress
-import java.security.cert.Certificate
 
 /**
  * Exposes a way to control the transport, and read off properties from the
@@ -21,15 +21,17 @@ abstract class TransportContext {
   def remoteAddress: SocketAddress
 
   /**
-   * The peer certificate if a TLS session is established.
+   * SSL/TLS session information associated with the transport.
+   *
+   * @note If SSL/TLS is not being used a `NullSslSessionInfo` will be returned instead.
    */
-  def peerCertificate: Option[Certificate]
+  def sslSessionInfo: SslSessionInfo
 }
 
 private[finagle] class SimpleTransportContext(
   val localAddress: SocketAddress = new SocketAddress {},
   val remoteAddress: SocketAddress = new SocketAddress {},
-  val peerCertificate: Option[Certificate] = None)
+  val sslSessionInfo: SslSessionInfo = NullSslSessionInfo)
     extends TransportContext
 
 private[finagle] class UpdatableContext(first: TransportContext)
@@ -43,5 +45,5 @@ private[finagle] class UpdatableContext(first: TransportContext)
 
   def localAddress: SocketAddress = underlying.localAddress
   def remoteAddress: SocketAddress = underlying.remoteAddress
-  def peerCertificate: Option[Certificate] = underlying.peerCertificate
+  def sslSessionInfo: SslSessionInfo = underlying.sslSessionInfo
 }

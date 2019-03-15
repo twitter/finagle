@@ -18,6 +18,15 @@ New Features
 
   - Binary annotation "srv/backup_request_processing", when servers are processing backup requests.
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: The `peerCertificate` methods of `c.t.f.t.TransportContext` and
+  `c.t.f.p.PushChannelHandle` have been replaced with the more robust
+  `sslSessionInfo`. Users looking for just the functional equivalence of
+  `peerCertificate` can use `sslSessionInfo.peerCertificates.headOption`.
+  ``PHAB_ID=D285926``
+
 19.3.0
 ------
 

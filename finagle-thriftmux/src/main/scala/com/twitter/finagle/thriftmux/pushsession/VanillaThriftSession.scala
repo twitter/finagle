@@ -62,7 +62,8 @@ private final class VanillaThriftSession(
   private[this] val locals: Local.Context =
     Local.letClear {
       val peerCertLocal =
-        handle.peerCertificate.map(Contexts.local.KeyValuePair(Transport.peerCertCtx, _)).toList
+        handle.sslSessionInfo.peerCertificates.headOption
+          .map(Contexts.local.KeyValuePair(Transport.peerCertCtx, _)).toList
 
       val remoteAddressLocal =
         Contexts.local.KeyValuePair(RemoteInfo.Upstream.AddressCtx, handle.remoteAddress)
