@@ -12,6 +12,8 @@ import io.netty.util.ReferenceCountUtil
  *
  * This handler also accounts for `DecoderResult` possibly being failed and converts malformed
  * HTTP objects into appropriate exceptions.
+ *
+ * @see [[BadRequestHandler]] for a server-side implementation of this handler.
  */
 @Sharable
 private[http] object ClientExceptionMapper extends ChannelInboundHandlerAdapter {

@@ -109,7 +109,7 @@ package object http {
         )
     }
 
-    // We're going to validate our headers right before the bad request handler.
+    // We're going to validate our headers right before the client exception mapper.
     fn(HeaderValidatorHandler.HandlerName, HeaderValidatorHandler)
 
     // Map some client related channel exceptions to something meaningful to finagle

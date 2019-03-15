@@ -2,10 +2,11 @@ package com.twitter.finagle.netty4.http.handler
 
 import com.twitter.finagle.http.{BadRequestResponse, Response}
 import com.twitter.finagle.netty4.http.Bijections
+import com.twitter.logging.Logger
 import io.netty.channel.ChannelHandler.Sharable
-import io.netty.channel.{ChannelFutureListener, ChannelHandlerContext, SimpleChannelInboundHandler}
+import io.netty.channel.{ChannelFutureListener, ChannelHandlerContext, ChannelInboundHandlerAdapter}
 import io.netty.handler.codec.TooLongFrameException
-import io.netty.handler.codec.http.HttpMessage
+import io.netty.handler.codec.http.{HttpMessage, HttpObject}
 import io.netty.util.ReferenceCountUtil
 
 /**
@@ -15,28 +16,48 @@ import io.netty.util.ReferenceCountUtil
  * request line and header lengths. A message chunk aggregator, if it exists, handles its own
  * errors. When an error is observed, we generate an appropriate response and close the pipeline
  * after the write operation is complete.
+ *
+ * @see [[ClientExceptionMapper]] for a client-side implementation of this handler
  */
 @Sharable
-private[netty4] object BadRequestHandler
-    extends SimpleChannelInboundHandler[HttpMessage](false /* auto release */ ) {
-  def channelRead0(ctx: ChannelHandlerContext, msg: HttpMessage): Unit = {
-    if (!msg.decoderResult().isFailure) ctx.fireChannelRead(msg)
-    else {
-      ReferenceCountUtil.release(msg)
-      handleException(ctx, msg.decoderResult().cause())
+private[netty4] object BadRequestHandler extends ChannelInboundHandlerAdapter {
+
+  private[this] val log = Logger()
+
+  override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit = msg match {
+    // NOTE: HttpObjectDecoder sets the DecoderResult on an inbound HTTP message when either
+    // headers or initial line exceed a desired limit.
+    case obj: HttpObject if obj.decoderResult.isFailure =>
+      ReferenceCountUtil.release(obj)
+      handleDecodeFailure(ctx, obj)
+
+    case _ =>
+      ctx.fireChannelRead(msg)
+  }
+
+  private[this] def handleDecodeFailure(ctx: ChannelHandlerContext, obj: HttpObject): Unit =
+    obj match {
+      case _: HttpMessage =>
+        // We detected a decode failure in the message's initial line. We can reply back safely.
+        val failure = obj.decoderResult.cause
+        val resp = exceptionToResponse(failure)
+        val nettyResp = Bijections.finagle.fullResponseToNetty(resp)
+
+        // We must close the connection on these types of failures since
+        // the inbound TCP stream is in an undefined state
+        ctx
+          .writeAndFlush(nettyResp)
+          .addListener(ChannelFutureListener.CLOSE)
+      case _ =>
+        // A decode failure must be from validating trailers in the last chunk. We can't really
+        // reply anything as we're not sure if application-logic already replied. The only
+        // meaningful thing we can do is to hang up.
+
+        log.debug(
+          "Detected invalid trailing headers in the HTTP stream. Tearing down the connection.")
+
+        ctx.close()
     }
-  }
-
-  private[this] def handleException(ctx: ChannelHandlerContext, ex: Throwable): Unit = {
-    val resp = exceptionToResponse(ex)
-    val nettyResp = Bijections.finagle.fullResponseToNetty(resp)
-
-    // We must close the connection on these types of failures since
-    // the inbound TCP stream is in an undefined state
-    ctx
-      .writeAndFlush(nettyResp)
-      .addListener(ChannelFutureListener.CLOSE)
-  }
 
   private[this] def exceptionToResponse(ex: Throwable): Response = ex match {
     case ex: TooLongFrameException =>

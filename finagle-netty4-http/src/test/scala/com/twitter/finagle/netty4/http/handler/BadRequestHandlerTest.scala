@@ -5,11 +5,8 @@ import io.netty.buffer.ByteBuf
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.DecoderResult
 import io.netty.handler.codec.http._
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class BadRequestHandlerTest extends FunSuite {
 
   // Get an embedded channel with the BadRequestHandler installed.
@@ -104,5 +101,23 @@ class BadRequestHandlerTest extends FunSuite {
         val out = ch.readOutbound[HttpResponse]()
         assert(out.status.code == status.code)
       }
+  }
+
+  test("Hangs up if there is a decode error in an HTTP chunk (eg invalid trailers)") {
+    val ch = getChannel
+    val content = ch.alloc.directBuffer()
+    content.writeBytes(Array[Byte](1, 2, 3, 4))
+
+    val req = new DefaultLastHttpContent(content)
+    req.setDecoderResult(DecoderResult.failure(new Exception("boom")))
+
+    assert(req.decoderResult.isFailure)
+    assert(!ch.writeInbound(req))
+    assert(ch.readInbound[Any] == null) // we shouldn't get a message in the inbound queue.
+    assert(ch.readOutbound[Any] == null) // we shouldn't get a message in the outbound queue.
+    assert(!ch.isActive)
+    // make sure we did free the content for invalid requests
+    assert(req.content eq content)
+    assert(req.content.refCnt == 0)
   }
 }
