@@ -4,18 +4,24 @@ import com.twitter.finagle.http2.transport.StreamMessage._
 import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.http._
-import io.netty.handler.codec.http2.{Http2EventAdapter, Http2Headers, HttpConversionUtil}
+import io.netty.handler.codec.http2.{
+  Http2Connection,
+  Http2EventAdapter,
+  Http2Headers,
+  HttpConversionUtil
+}
 import java.nio.charset.StandardCharsets.UTF_8
 
 /**
  * `Http2ClientDowngrader` wraps RSTs, GOAWAYs, HEADERS, Pings, and DATA in thin
  * finagle wrappers.
  */
-private[http2] object Http2ClientDowngrader extends Http2EventAdapter {
+private[http2] final class Http2ClientDowngrader(connection: Http2Connection)
+    extends Http2EventAdapter {
 
   // this is a magic string from the netty server implementation.  it's the debug
   // data it includes in the GOAWAY when the headers are too long.
-  val HeaderTooLargeBytes =
+  private val HeaderTooLargeBytes =
     Unpooled.copiedBuffer("Header size exceeded max allowed bytes", UTF_8)
 
   // Http2EventAdapter overrides
@@ -47,8 +53,6 @@ private[http2] object Http2ClientDowngrader extends Http2EventAdapter {
   }
 
   // Called when a full HEADERS sequence has been received that does not contain priority info.
-  // If this is the last message for the stream we can build a FullHttpResponse.
-  // TODO: this doesn't consider trailers.
   override def onHeadersRead(
     ctx: ChannelHandlerContext,
     streamId: Int,
@@ -56,33 +60,63 @@ private[http2] object Http2ClientDowngrader extends Http2EventAdapter {
     padding: Int,
     endOfStream: Boolean
   ): Unit = {
+    if (HttpResponseStatus.CONTINUE.codeAsText.contentEquals(headers.status)) {
+      // 100-continue response is a special case where Http2HeadersFrame#isEndStream=false
+      // but we need to decode it as a FullHttpResponse to play nice with HttpObjectAggregator.
+      // (this workaround can go away once we move to the netty multipex client)
+      val msg = HttpConversionUtil.toFullHttpResponse(
+        streamId,
+        headers,
+        ctx.alloc(),
+        false /* validateHttpHeaders */
+      )
 
-    // 100-continue response is a special case where Http2HeadersFrame#isEndStream=false
-    // but we need to decode it as a FullHttpResponse to play nice with HttpObjectAggregator.
-    // (this workaround can go away once we move to the netty multipex client)
-    val msg =
-      if (endOfStream || HttpResponseStatus.CONTINUE.codeAsText.contentEquals(headers.status)) {
-        HttpConversionUtil.toFullHttpResponse(
+      ctx.fireChannelRead(Message(msg, streamId))
+    } else if (endOfStream) {
+      // These are the last headers in the stream. They could either be initial or trailing. We can
+      // short-circuit to a FullHttpMessage if these are the initial headers.
+      if (connection.stream(streamId).isTrailersReceived) {
+        val msg = new DefaultLastHttpContent(Unpooled.EMPTY_BUFFER, /*validateHeaders*/ false)
+
+        HttpConversionUtil.addHttp2ToHttpHeaders(
+          streamId,
+          headers,
+          msg.trailingHeaders,
+          HttpVersion.HTTP_1_1,
+          /*isTrailer*/ true,
+          /*isRequest*/ false
+        )
+
+        ctx.fireChannelRead(Message(msg, streamId))
+      } else {
+        val msg = HttpConversionUtil.toFullHttpResponse(
           streamId,
           headers,
           ctx.alloc(),
           false /* validateHttpHeaders */
         )
-      } else {
-        // Unfortunately Netty doesn't have tools for converting to a non-full
-        // HttpResponse so we just do it ourselves: it's not that hard anyway.
-        val status = HttpConversionUtil.parseStatus(headers.status)
-        val msg = new DefaultHttpResponse(HttpVersion.HTTP_1_1, status, /*validateHeaders*/ false)
-        HttpConversionUtil.addHttp2ToHttpHeaders(
-          streamId,
-          headers,
-          msg.headers,
-          HttpVersion.HTTP_1_1,
-          /*isTrailer*/ false, /*isRequest*/ false
-        )
-        msg
+
+        ctx.fireChannelRead(Message(msg, streamId))
       }
-    ctx.fireChannelRead(StreamMessage.Message(msg, streamId))
+    } else {
+      // These are the initial headers that don't terminate the stream. We're converting them to a
+      // regular HttpResponse.
+      //
+      // Unfortunately Netty doesn't have tools for converting to a non-full
+      // HttpResponse so we just do it ourselves: it's not that hard anyway.
+      val status = HttpConversionUtil.parseStatus(headers.status)
+      val msg = new DefaultHttpResponse(HttpVersion.HTTP_1_1, status, /*validateHeaders*/ false)
+      HttpConversionUtil.addHttp2ToHttpHeaders(
+        streamId,
+        headers,
+        msg.headers,
+        HttpVersion.HTTP_1_1,
+        /*isTrailer*/ false,
+        /*isRequest*/ false
+      )
+
+      ctx.fireChannelRead(Message(msg, streamId))
+    }
   }
 
   // Called when a full HEADERS sequence has been received that does contain priority info.

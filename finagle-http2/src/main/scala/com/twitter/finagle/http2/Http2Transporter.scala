@@ -58,7 +58,7 @@ private[finagle] object Http2Transporter {
       val connection = new DefaultHttp2Connection(false /*server*/ )
 
       val connectionHandlerBuilder = new RichHttpToHttp2ConnectionHandlerBuilder()
-        .frameListener(Http2ClientDowngrader)
+        .frameListener(new Http2ClientDowngrader(connection))
         .frameLogger(new LoggerPerFrameTypeLogger(params[FrameLoggerNamePrefix].loggerNamePrefix))
         .connection(connection)
         .initialSettings(Settings.fromParams(params, isServer = false))
