@@ -1,7 +1,13 @@
 package com.twitter.finagle.naming
 
+import com.twitter.app.GlobalFlag
 import com.twitter.finagle._
 import com.twitter.util.Activity
+
+/**
+ * Indicates an error in Namer lookup
+ */
+class NamerExceededMaxDepthException private[finagle](description: String) extends Exception(description)
 
 /**
  * Interpret names against a Dtab. Differs from
@@ -15,6 +21,12 @@ trait NameInterpreter {
    */
   def bind(dtab: Dtab, path: Path): Activity[NameTree[Name.Bound]]
 }
+
+object namerMaxDepth
+  extends GlobalFlag[Int](
+    100,
+    "Maximum recursion level depth for Finagle namer."
+  )
 
 object NameInterpreter extends NameInterpreter {
 

@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.naming.DefaultInterpreter
+import com.twitter.finagle.naming.{DefaultInterpreter, NamerExceededMaxDepthException}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -139,7 +139,7 @@ class NameTreeTest extends FunSuite {
       /foo/bar => /bar/foo;
       /bar/foo => /foo/bar""")
 
-    intercept[IllegalArgumentException] {
+    intercept[NamerExceededMaxDepthException] {
       DefaultInterpreter.bind(dtab, Path.read("/foo/bar")).sample()
     }
   }

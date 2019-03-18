@@ -2,6 +2,7 @@ package com.twitter.finagle
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Namer.AddrWeightKey
+import com.twitter.finagle.naming.namerMaxDepth
 import com.twitter.util._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -287,6 +288,17 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
       case Addr.Failed(_: IllegalArgumentException) => true
       case _ => false
     })
+  }
+
+  test("Namer.bind: max recursion level reached") {
+    namerMaxDepth.let(2) {
+      assert(Namer.resolve(Dtab.read("/s => /s/srv"), Path.read("/s/foo/bar")).sample() match {
+        case Addr.Failed(exception: Exception) =>
+          assert(exception.getMessage === "Max recursion level: 2 reached in Namer lookup")
+          true
+        case _ => false
+      })
+    }
   }
 }
 

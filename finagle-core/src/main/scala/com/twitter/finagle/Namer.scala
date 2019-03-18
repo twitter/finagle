@@ -1,8 +1,9 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.naming.NameInterpreter
+import com.twitter.finagle.naming.{NameInterpreter, NamerExceededMaxDepthException, namerMaxDepth}
 import com.twitter.util._
 import scala.util.control.NonFatal
+
 
 /**
  * A namer is a context in which a [[com.twitter.finagle.NameTree
@@ -163,8 +164,6 @@ object Namer {
       Try(s.toDouble).toOption
   }
 
-  private val MaxDepth = 100
-
   /**
    * Bind the given tree by recursively following paths and looking them
    * up with the provided `lookup` function. A recursion depth of up to
@@ -219,8 +218,8 @@ object Namer {
     weight: Option[Double]
   )(tree: NameTree[Name]
   ): Activity[NameTree[Name.Bound]] =
-    if (depth > MaxDepth)
-      Activity.exception(new IllegalArgumentException("Max recursion level reached."))
+    if (depth > namerMaxDepth())
+      Activity.exception(new NamerExceededMaxDepthException(s"Max recursion level: ${namerMaxDepth()} reached in Namer lookup"))
     else
       tree match {
         case Leaf(Name.Path(path)) => lookup(path).flatMap(bind(lookup, depth + 1, weight))

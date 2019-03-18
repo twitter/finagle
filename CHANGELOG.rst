@@ -9,6 +9,9 @@ Unreleased
 
 New Features
 ~~~~~~~~~~~~
+* finagle-core: Make maxDepth in Namer configurable. ``PHAB_ID=D286444``
+
+  - namerMaxDepth in Namer now configurable through a global flag (namerMaxDepth)
 
 * finagle-core: The newly renamed `SslSessionInfo` is now public. It is
   intended for providing information about a connection's SSL/TLS session.
