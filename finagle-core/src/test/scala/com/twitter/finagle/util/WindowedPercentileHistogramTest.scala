@@ -2,11 +2,19 @@ package com.twitter.finagle.util
 
 import com.twitter.conversions.PercentOps._
 import com.twitter.conversions.DurationOps._
+import com.twitter.finagle.stats.BucketAndCount
 import com.twitter.util.{MockTimer, Time}
+import org.scalacheck.Gen
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import scala.collection.mutable
 
-class WindowedPercentileHistogramTest extends FunSuite with Eventually with IntegrationPatience {
+class WindowedPercentileHistogramTest
+    extends FunSuite
+    with Eventually
+    with IntegrationPatience
+    with GeneratorDrivenPropertyChecks {
 
   test("Throws IllegalArgumentException when retrieving a percentile < 0") {
     val wp = new WindowedPercentileHistogram(10, 10.seconds, new MockTimer)
@@ -153,5 +161,194 @@ class WindowedPercentileHistogramTest extends FunSuite with Eventually with Inte
         }
       }
     }
+  }
+
+  test("Can convert to BucketAndCount") {
+    val timer = new MockTimer
+    Time.withCurrentTimeFrozen { tc =>
+      val wp = new WindowedPercentileHistogram(3, 10.seconds, timer)
+
+      (0 to 3).foreach(i => wp.add(i))
+
+      tc.advance(10.seconds)
+      timer.tick()
+
+      eventually {
+        assert(
+          wp.toBucketAndCounts().toSet == generateBucketAndCounts(Seq(0, 1, 2, 3), 2000, wp).toSet
+        )
+      }
+
+      wp.close()
+    }
+  }
+
+  test("Non-contiguous conversion to BucketAndCounts") {
+    val timer = new MockTimer
+    Time.withCurrentTimeFrozen { tc =>
+      val wp = new WindowedPercentileHistogram(3, 10.seconds, timer)
+
+      wp.add(1)
+      wp.add(50)
+      wp.add(300)
+
+      tc.advance(10.seconds)
+      timer.tick()
+
+      eventually {
+        assert(
+          wp.toBucketAndCounts().toSet == generateBucketAndCounts(Seq(1, 50, 300), 2000, wp).toSet
+        )
+      }
+
+      wp.close()
+    }
+  }
+
+  test("Sliding window with BucketAndCount conversion") {
+    val timer = new MockTimer
+    Time.withCurrentTimeFrozen { tc =>
+      val wp = new WindowedPercentileHistogram(3, 10.seconds, timer)
+
+      wp.add(1)
+      wp.add(2)
+      wp.add(3)
+
+      tc.advance(10.seconds)
+      timer.tick()
+
+      eventually {
+        assert(
+          wp.toBucketAndCounts().toSet == generateBucketAndCounts(Seq(1, 2, 3), 2000, wp).toSet
+        )
+      }
+
+      wp.add(3)
+      wp.add(4)
+      wp.add(5)
+
+      tc.advance(10.seconds)
+      timer.tick()
+
+      eventually {
+        assert(
+          wp.toBucketAndCounts().toSet == generateBucketAndCounts(Seq(1, 2, 3, 3, 4, 5), 2000, wp).toSet
+        )
+      }
+
+      wp.add(4)
+      wp.add(5)
+      wp.add(7)
+
+      tc.advance(10.seconds)
+      timer.tick()
+
+      tc.advance(10.seconds) // first bucket falls out of the window
+      timer.tick()
+
+      eventually {
+        assert(
+          wp.toBucketAndCounts().toSet == generateBucketAndCounts(Seq(3, 4, 4, 5, 5, 7), 2000, wp).toSet
+        )
+      }
+
+      wp.close()
+    }
+  }
+
+  test("BucketAndCounts of histogram with really high highest trackable value") {
+    val timer = new MockTimer
+    Time.withCurrentTimeFrozen { tc =>
+      val wp = new WindowedPercentileHistogram(3, 10.seconds, 1, 10000, timer)
+
+      wp.add(3)
+      wp.add(2005)
+      wp.add(2048)
+      wp.add(3998)
+      wp.add(5000)
+      wp.add(9999)
+      wp.add(10000)
+
+      tc.advance(10.seconds)
+      timer.tick()
+
+      eventually {
+        assert(
+          wp.toBucketAndCounts().toSet == generateBucketAndCounts(
+            Seq(3, 2005, 2048, 3998, 5000, 9999, 10000),
+            10000,
+            wp).toSet
+        )
+      }
+
+      wp.close()
+    }
+  }
+
+  test("BucketAndCounts of histogram with fuzz") {
+    val histogramInputs = Gen.listOfN(10, Gen.chooseNum(1, 10000))
+    var listOfInputsToCreateBucketAndCounts = mutable.ArrayBuffer[Int]()
+
+    val timer = new MockTimer
+    Time.withCurrentTimeFrozen { tc =>
+      val wp = new WindowedPercentileHistogram(3, 10.seconds, 1, 10000, timer)
+
+      forAll(histogramInputs) { i =>
+        i.foreach(n => {
+          wp.add(n)
+          listOfInputsToCreateBucketAndCounts += n
+        })
+      }
+
+      tc.advance(10.seconds)
+      timer.tick()
+
+      eventually {
+        assert(
+          wp.toBucketAndCounts().toSet == generateBucketAndCounts(
+            listOfInputsToCreateBucketAndCounts,
+            10000,
+            wp).toSet)
+      }
+
+      wp.close()
+    }
+  }
+
+  /**
+   * Generates a sequence of BucketAndCounts given a list of inputs.
+   *
+   * Assumes significantDigits is 3, because it is defined as such in WindowedPercentileHistogram.
+   * See the HdrPrecision value.
+   */
+  def generateBucketAndCounts(
+    input: Seq[Int],
+    histogramHighestTrackableValue: Int,
+    wp: WindowedPercentileHistogram,
+    significantDigits: Int = 3
+  ): Seq[BucketAndCount] = {
+
+    def getBucketForValue(value: Int, count: Int): Option[BucketAndCount] = {
+      if (value <= histogramHighestTrackableValue)
+        Some(wp.calculateBucketForValue(value, count, significantDigits))
+      else None
+    }
+
+    def mergeBuckets(bucketAndCounts: Seq[BucketAndCount]): Seq[BucketAndCount] = {
+      bucketAndCounts
+        .groupBy(_.lowerLimit).map {
+          case (_, bucketAndCountList) =>
+            BucketAndCount(
+              bucketAndCountList.head.lowerLimit,
+              bucketAndCountList.head.upperLimit,
+              bucketAndCountList.foldLeft(0) { case (acc, b) => acc + b.count })
+        }.toSeq
+    }
+
+    mergeBuckets(
+      input
+        .groupBy(i => i).flatMap {
+          case (value, countList) => getBucketForValue(value, countList.size)
+        }.toSeq)
   }
 }
