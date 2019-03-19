@@ -1183,7 +1183,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
 
     strictReadField.get(clientParamTBF.protocolFactory) == false
     strictWriteField.get(clientParamTBF.protocolFactory) == false
-    readLimitField.get(clientParamTBF.protocolFactory) == Protocols.NoReadLimit
+    readLimitField.get(clientParamTBF.protocolFactory) == Protocols.NoLimit
   }
 
   test("TBinaryProtocol.Factory has right info after we set system property") {

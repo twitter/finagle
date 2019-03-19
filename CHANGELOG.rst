@@ -30,6 +30,10 @@ Breaking API Changes
   `peerCertificate` can use `sslSessionInfo.peerCertificates.headOption`.
   ``PHAB_ID=D285926``
 
+* finagle-thrift: Allow users to specify stringLengthLimit and containerLengthLimit ``PHAB_ID=D286346``
+  - method parameter `readLength` in com.twitter.finagle.thrift.Protocols#binaryFactory renamed to stringLengthLimit to reflect usage
+  - method parameter `containerLengthLimit` added to com.twitter.finagle.thrift.Protocols#binaryFactory
+
 19.3.0
 ------
 

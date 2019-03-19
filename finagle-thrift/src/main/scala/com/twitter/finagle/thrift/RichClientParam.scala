@@ -52,11 +52,14 @@ case class RichClientParam(
 
   /**
    * Apply system-wide read limit on TBinaryProtocol and TCompactProtocol if
-   * the System.Property("-Dorg.apache.thrift.readLength") is set.
+   * any of the following System Properties are set:
+   *   org.apache.thrift.readLength
+   *   com.twitter.finagle.thrift.stringLengthLimit
+   *   com.twitter.finagle.thrift.containerLengthLimit
    */
   val restrictedProtocolFactory: TProtocolFactory = {
     // alter the TProtocol.Factory if system property of readLength is set
-    if (SysPropReadLength > NoReadLimit) {
+    if (SysPropStringLengthLimit.isDefined || SysPropContainerLengthLimit.isDefined) {
       protocolFactory match {
         case tbf: TBinaryProtocol.Factory => restrictedTBinaryProtocolFactory(tbf)
         case tcf: TCompactProtocol.Factory => restrictedTCompactProtocolFactory(tcf)
@@ -89,11 +92,15 @@ case class RichClientParam(
 
       val stringLengthLimitField = tbf.getClass.getDeclaredField("stringLengthLimit_")
       stringLengthLimitField.setAccessible(true)
-      val stringLengthLimit = getReadLimit(stringLengthLimitField.get(tbf).asInstanceOf[Long])
+      val stringLengthLimit = minLimit(
+        limitToOption(stringLengthLimitField.get(tbf).asInstanceOf[Long]),
+        SysPropStringLengthLimit).getOrElse(NoLimit)
 
       val containerLengthLimitField = tbf.getClass.getDeclaredField("containerLengthLimit_")
       containerLengthLimitField.setAccessible(true)
-      val containerLengthLimit = containerLengthLimitField.get(tbf).asInstanceOf[Long]
+      val containerLengthLimit = minLimit(
+        limitToOption(containerLengthLimitField.get(tbf).asInstanceOf[Long]),
+        SysPropContainerLengthLimit).getOrElse(NoLimit)
 
       new TBinaryProtocol.Factory(strictRead, strictWrite, stringLengthLimit, containerLengthLimit)
     } catch {
@@ -122,11 +129,15 @@ case class RichClientParam(
     try {
       val stringLengthLimitField = tcf.getClass.getDeclaredField("stringLengthLimit_")
       stringLengthLimitField.setAccessible(true)
-      val stringLengthLimit = getReadLimit(stringLengthLimitField.get(tcf).asInstanceOf[Long])
+      val stringLengthLimit = minLimit(
+        limitToOption(stringLengthLimitField.get(tcf).asInstanceOf[Long]),
+        SysPropStringLengthLimit).getOrElse(NoLimit)
 
       val containerLengthLimitField = tcf.getClass.getDeclaredField("containerLengthLimit_")
       containerLengthLimitField.setAccessible(true)
-      val containerLengthLimit = containerLengthLimitField.get(tcf).asInstanceOf[Long]
+      val containerLengthLimit = minLimit(
+        limitToOption(containerLengthLimitField.get(tcf).asInstanceOf[Long]),
+        SysPropContainerLengthLimit).getOrElse(NoLimit)
 
       new TCompactProtocol.Factory(stringLengthLimit, containerLengthLimit)
     } catch {

@@ -28,7 +28,13 @@ class TFinagleBinaryProtocolTest extends FunSuite with BeforeAndAfter with Match
     val stats = new InMemoryStatsReceiver
     val largerThanTlOutBuffer = stats.counter("largerThanTlOutBuffer")
     val trans = new TMemoryBuffer(128)
-    val proto = new TFinagleBinaryProtocol(trans, largerThanTlOutBuffer)
+    val proto = new TFinagleBinaryProtocol(
+      trans,
+      largerThanTlOutBuffer,
+      stringLengthLimit = Protocols.NoLimit,
+      containerLengthLimit = Protocols.NoLimit,
+      strictRead = false,
+      strictWrite = true)
 
     proto.writeString("abc")
     assertSerializedBytes("abc", trans)
@@ -41,7 +47,13 @@ class TFinagleBinaryProtocolTest extends FunSuite with BeforeAndAfter with Match
       val plainProto = new TBinaryProtocol(plainTrans)
 
       val optTrans = new TMemoryBuffer(128)
-      val optProto = new TFinagleBinaryProtocol(optTrans, NullCounter)
+      val optProto = new TFinagleBinaryProtocol(
+        optTrans,
+        NullCounter,
+        stringLengthLimit = Protocols.NoLimit,
+        containerLengthLimit = Protocols.NoLimit,
+        strictRead = false,
+        strictWrite = true)
 
       plainProto.writeString(str)
       optProto.writeString(str)
@@ -60,7 +72,14 @@ class TFinagleBinaryProtocolTest extends FunSuite with BeforeAndAfter with Match
     val trans = new TMemoryBuffer(128)
     val stats = new InMemoryStatsReceiver
     val largerThanTlOutBuffer = stats.counter("largerThanTlOutBuffer")
-    val proto = new TFinagleBinaryProtocol(trans, largerThanTlOutBuffer = largerThanTlOutBuffer)
+    val proto = new TFinagleBinaryProtocol(
+      trans,
+      largerThanTlOutBuffer = largerThanTlOutBuffer,
+      stringLengthLimit = Protocols.NoLimit,
+      containerLengthLimit = Protocols.NoLimit,
+      strictRead = false,
+      strictWrite = true
+    )
     proto.writeString(longStr)
     largerThanTlOutBuffer() should be(1)
     assertSerializedBytes(longStr, trans)
@@ -79,7 +98,13 @@ class TFinagleBinaryProtocolTest extends FunSuite with BeforeAndAfter with Match
     withOffset.arrayOffset() should be(offset)
 
     val trans = new TMemoryBuffer(128)
-    val proto = new TFinagleBinaryProtocol(trans, NullCounter)
+    val proto = new TFinagleBinaryProtocol(
+      trans,
+      NullCounter,
+      stringLengthLimit = Protocols.NoLimit,
+      containerLengthLimit = Protocols.NoLimit,
+      strictRead = false,
+      strictWrite = true)
     proto.writeBinary(withOffset)
 
     val expected = bbuf.array().drop(offset)
@@ -99,7 +124,13 @@ class TFinagleBinaryProtocolTest extends FunSuite with BeforeAndAfter with Match
     buffer.limit(limit)
 
     val trans = new TMemoryBuffer(128)
-    val protocol = new TFinagleBinaryProtocol(trans, NullCounter)
+    val protocol = new TFinagleBinaryProtocol(
+      trans,
+      NullCounter,
+      stringLengthLimit = Protocols.NoLimit,
+      containerLengthLimit = Protocols.NoLimit,
+      strictRead = false,
+      strictWrite = true)
     protocol.writeBinary(buffer.asReadOnlyBuffer())
 
     val expected = buffer.array().drop(offset).take(limit - offset)
@@ -116,7 +147,13 @@ class TFinagleBinaryProtocolTest extends FunSuite with BeforeAndAfter with Match
     buffer.position(0)
 
     val trans = new TMemoryBuffer(128)
-    val protocol = new TFinagleBinaryProtocol(trans, NullCounter)
+    val protocol = new TFinagleBinaryProtocol(
+      trans,
+      NullCounter,
+      stringLengthLimit = Protocols.NoLimit,
+      containerLengthLimit = Protocols.NoLimit,
+      strictRead = false,
+      strictWrite = true)
     protocol.writeBinary(buffer.asReadOnlyBuffer())
 
     val expected = buffer.array()
