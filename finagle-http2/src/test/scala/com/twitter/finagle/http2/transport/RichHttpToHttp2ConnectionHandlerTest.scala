@@ -95,7 +95,32 @@ class RichHttpToHttp2ConnectionHandlerTest extends FunSuite with BeforeAndAfter 
     )
   }
 
-  test("Transmits full request w/ payload") {
+  test("Transmits full request w/o payload and w/o trailers") {
+    val request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/")
+    request.headers.add(ExtensionHeaderNames.SCHEME.text(), "https")
+    request.headers.add("bar", "baz")
+
+    val captor = ArgumentCaptor.forClass(classOf[Http2Headers])
+
+    val p = mockCtx.newPromise()
+    connectionHandler.write(mockCtx, Message(request, 1), p)
+
+    verify(mockEncoder).writeHeaders(
+      meq(mockCtx),
+      meq(1),
+      captor.capture(),
+      anyInt(),
+      anyShort(),
+      meq(false),
+      meq(0),
+      meq(true),
+      meq(p)
+    )
+
+    assert(captor.getValue.get("bar") == "baz")
+  }
+
+  test("Transmits full request w/ payload but w/o trailers") {
     val payload = Unpooled.wrappedBuffer("foo".getBytes)
     val request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/", payload)
     request.headers.add(ExtensionHeaderNames.SCHEME.text(), "https")
@@ -128,6 +153,98 @@ class RichHttpToHttp2ConnectionHandlerTest extends FunSuite with BeforeAndAfter 
       meq(true),
       meq(p)
     )
+  }
+
+  test("Transmits full request w/o payload but w/ trailers") {
+    val request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/")
+    request.headers.add(ExtensionHeaderNames.SCHEME.text(), "https")
+    request.headers.add("bar", "baz")
+    request.trailingHeaders.add("qux", "qwe")
+
+    val headersCaptor = ArgumentCaptor.forClass(classOf[Http2Headers])
+    val trailersCaptor = ArgumentCaptor.forClass(classOf[Http2Headers])
+
+    val p = mockCtx.newPromise()
+    connectionHandler.write(mockCtx, Message(request, 1), p)
+
+    verify(mockEncoder).writeHeaders(
+      meq(mockCtx),
+      meq(1),
+      headersCaptor.capture(),
+      anyInt(),
+      anyShort(),
+      meq(false),
+      meq(0),
+      meq(false),
+      meq(p)
+    )
+
+    assert(headersCaptor.getValue.get("bar") == "baz")
+
+    verify(mockEncoder).writeHeaders(
+      meq(mockCtx),
+      meq(1),
+      trailersCaptor.capture(),
+      anyInt(),
+      anyShort(),
+      meq(false),
+      meq(0),
+      meq(true),
+      meq(p)
+    )
+
+    assert(trailersCaptor.getValue.get("qux") == "qwe")
+  }
+
+  test("Transmits full request w/ payload and w/ trailers") {
+    val payload = Unpooled.wrappedBuffer("foo".getBytes)
+    val request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/", payload)
+    request.headers.add(ExtensionHeaderNames.SCHEME.text(), "https")
+    request.headers.add("bar", "baz")
+    request.trailingHeaders.add("qux", "qwe")
+
+    val headersCaptor = ArgumentCaptor.forClass(classOf[Http2Headers])
+    val trailersCaptor = ArgumentCaptor.forClass(classOf[Http2Headers])
+
+    val p = mockCtx.newPromise()
+    connectionHandler.write(mockCtx, Message(request, 1), p)
+
+    verify(mockEncoder).writeHeaders(
+      meq(mockCtx),
+      meq(1),
+      headersCaptor.capture(),
+      anyInt(),
+      anyShort(),
+      meq(false),
+      meq(0),
+      meq(false),
+      meq(p)
+    )
+
+    assert(headersCaptor.getValue.get("bar") == "baz")
+
+    verify(mockEncoder).writeData(
+      meq(mockCtx),
+      meq(1),
+      meq(payload),
+      meq(0),
+      meq(false),
+      meq(p)
+    )
+
+    verify(mockEncoder).writeHeaders(
+      meq(mockCtx),
+      meq(1),
+      trailersCaptor.capture(),
+      anyInt(),
+      anyShort(),
+      meq(false),
+      meq(0),
+      meq(true),
+      meq(p)
+    )
+
+    assert(trailersCaptor.getValue.get("qux") == "qwe")
   }
 
   test("Transmits request w/o payload") {

@@ -114,12 +114,19 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
       val combiner = new PromiseCombiner()
       msg match {
         case full: FullHttpRequest =>
-          //
-          // Full HTTP requests might have both, headers and a payload. We write them in order.
-          // If payload is empty, headers terminate the stream.
-          //
+          // Full HTTP requests might have everything, headers, payload, and trailers. We write them
+          // in order.
+          // - If both payload and trailers are empty, headers terminate the stream.
+          // - If trailers are empty, the payload terminates the stream.
+          // - Otherwise, trailers terminate the stream.
           val data = full.content
-          writeHeaders(ctx, streamId, full, !data.isReadable /*endStream*/, combiner)
+          val trailers = full.trailingHeaders
+          writeHeaders(
+            ctx,
+            streamId,
+            full,
+            !data.isReadable && trailers.isEmpty /*endStream*/,
+            combiner)
 
           if (data.isReadable) {
             encoder.writeData(
@@ -127,22 +134,22 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
               streamId,
               data,
               NoPadding,
-              true /*endStream*/,
+              trailers.isEmpty,
               newPromise(ctx, combiner))
           }
 
+          if (!trailers.isEmpty) {
+            writeTrailers(ctx, streamId, trailers, combiner)
+          }
+
         case req: HttpRequest =>
-          //
           // Regular HTTP requests are just headers. They never terminate the stream.
-          //
           writeHeaders(ctx, streamId, req, false /*endStream*/, combiner)
 
         case last: LastHttpContent =>
-          //
           // The last chunk in the stream may additionally carry trailers (trailing headers).
           // Similar to a full HTTP request, we write payload and trailers in order. If trailers are
           // empty, payload terminates the stream.
-          //
           val data = last.content
           val trailers = last.trailingHeaders
 
@@ -159,9 +166,7 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
           }
 
         case chunk: HttpContent =>
-          //
           // Regular HTTP chunks are just data. They never terminate the stream.
-          //
           encoder.writeData(
             ctx,
             streamId,
