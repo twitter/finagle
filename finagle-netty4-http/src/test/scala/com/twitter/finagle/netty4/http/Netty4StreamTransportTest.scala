@@ -67,7 +67,7 @@ class Netty4StreamTransportTest extends FunSuite with OneInstancePerTest {
     rw.write(Chunk.fromString("foo"))
     assert(await(write.poll()).asInstanceOf[HttpContent].content.toString(UTF_8) == "foo")
 
-    rw.write(Chunk.Last(Buf.Utf8("bar"), HeaderMap("foo" -> "bar")))
+    rw.write(Chunk.contentWithTrailers(Buf.Utf8("bar"), HeaderMap("foo" -> "bar")))
     assert(await(write.poll()).asInstanceOf[HttpContent].content.toString(UTF_8) == "bar")
 
     val trailers = write.poll()
@@ -102,7 +102,8 @@ class Netty4StreamTransportTest extends FunSuite with OneInstancePerTest {
     val content = await(in.read())
     assert(Buf.decodeString(content.get.content, UTF_8) == "foo")
 
-    val last = await(in.read()).get.asInstanceOf[Chunk.Last]
+    val last = await(in.read()).get
+    assert(last.isLast)
     assert(last.content.isEmpty)
     assert(last.trailers.isEmpty)
     assert(in.isDefined)
@@ -120,7 +121,8 @@ class Netty4StreamTransportTest extends FunSuite with OneInstancePerTest {
     val content = await(in.read())
     assert(Buf.decodeString(content.get.content, UTF_8) == "foo")
 
-    val last = await(in.read()).get.asInstanceOf[Chunk.Last]
+    val last = await(in.read()).get
+    assert(last.isLast)
     assert(last.content.isEmpty)
     assert(last.trailers.get("foo").contains("bar"))
     assert(in.isDefined)
@@ -138,13 +140,14 @@ class Netty4StreamTransportTest extends FunSuite with OneInstancePerTest {
     val content = await(in.read())
     assert(Buf.decodeString(content.get.content, UTF_8) == "foo")
 
-    val last = await(in.read()).get.asInstanceOf[Chunk.Last]
+    val last = await(in.read()).get
+    assert(last.isLast)
     assert(Buf.decodeString(last.content, UTF_8) == "bar")
     assert(last.trailers.get("foo").contains("bar"))
     assert(in.isDefined)
   }
 
-  test("streamIN: discard while reading") {
+  test("streamIn: discard while reading") {
     val fakeTransport = new TransportProxy[Any, Any](transport) {
       val p = new Promise[Any]
       var interruptedWith: Throwable = null

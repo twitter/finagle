@@ -29,7 +29,7 @@ private[http] object Netty4StreamTransport {
               if (!chunk.content.isReadable && chunk.trailingHeaders().isEmpty)
                 Chunk.empty
               else
-                Chunk.Last(
+                Chunk.contentWithTrailers(
                   ByteBufConversion.byteBufAsBuf(chunk.content()),
                   Bijections.netty.headersToFinagle(chunk.trailingHeaders())
                 )
@@ -37,7 +37,7 @@ private[http] object Netty4StreamTransport {
             pipe.write(last)
 
           case chunk: HttpContent =>
-            val cons = Chunk.Cons(ByteBufConversion.byteBufAsBuf(chunk.content))
+            val cons = Chunk.content(ByteBufConversion.byteBufAsBuf(chunk.content))
             pipe.write(cons).before(copyLoop())
 
           case other =>
@@ -85,20 +85,20 @@ private[http] object Netty4StreamTransport {
       case None =>
         trans.write(LastHttpContent.EMPTY_LAST_CONTENT)
 
-      case Some(Chunk.Last(content, trailers)) =>
+      case Some(chunk) if chunk.isLast =>
         // Chunk.trailers produces an empty last content so we check against it here
         // and potentially short-circuit to termination.
-        if (content.isEmpty) terminate(trailers)
+        if (chunk.content.isEmpty) terminate(chunk.trailers)
         else
           trans
             .write(
-              new DefaultHttpContent(ByteBufConversion.bufAsByteBuf(content))
-            ).before(terminate(trailers))
+              new DefaultHttpContent(ByteBufConversion.bufAsByteBuf(chunk.content))
+            ).before(terminate(chunk.trailers))
 
-      case Some(Chunk.Cons(content)) =>
+      case Some(chunk) =>
         trans
           .write(
-            new DefaultHttpContent(ByteBufConversion.bufAsByteBuf(content))
+            new DefaultHttpContent(ByteBufConversion.bufAsByteBuf(chunk.content))
           ).before(continue())
     }
 

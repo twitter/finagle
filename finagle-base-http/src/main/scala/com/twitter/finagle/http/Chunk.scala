@@ -61,29 +61,35 @@ private[finagle] sealed abstract class Chunk {
 
 private[finagle] object Chunk {
 
-  private[finagle] final case class Cons(content: Buf) extends Chunk {
+  private final case class Cons(content: Buf) extends Chunk {
     def trailers: HeaderMap = throw new IllegalArgumentException("Not the last chunk")
     def isLast: Boolean = false
   }
 
-  private[finagle] final case class Last(content: Buf, trailers: HeaderMap) extends Chunk {
+  private final case class Last(content: Buf, trailers: HeaderMap) extends Chunk {
     def isLast: Boolean = true
   }
 
   /**
-   * A last (end of stream) empty [[Chunk]] that has neither a payload nor trailers.
+   * A last (end of stream) empty [[Chunk]] that has neither a payload nor trailing headers.
    */
   val empty: Chunk = Last(Buf.Empty, HeaderMap.Empty)
 
   /**
-   * Creates a non last [[Chunk]] that carries a payload, `bytes`.
+   * Creates a non last [[Chunk]] that carries a payload (`content`) but no trailing headers.
    */
   def content(content: Buf): Chunk = Cons(content)
 
   /**
-   * Creates a last [[Chunk]] that carries trailers, `headers`.
+   * Creates a last [[Chunk]] that carries trailing headers (`trailers`).
    */
   def trailers(trailers: HeaderMap): Chunk = Last(Buf.Empty, trailers)
+
+  /**
+   * Creates a last [[Chunk]] that carries both payload (`content`) and trailing
+   * headers (`trailers`).
+   */
+  def contentWithTrailers(content: Buf, trailers: HeaderMap): Chunk = Last(content, trailers)
 
   /**
    * A shortcut to create a [[Chunk]] out of a UTF-8 string.
