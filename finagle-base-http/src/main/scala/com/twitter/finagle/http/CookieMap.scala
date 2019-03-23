@@ -1,22 +1,13 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.http.cookie.supportSameSiteCodec
-import com.twitter.finagle.http.netty3.Netty3CookieCodec
 import com.twitter.finagle.http.netty4.Netty4CookieCodec
-import com.twitter.finagle.server.ServerInfo
 import org.jboss.netty.handler.codec.http.HttpHeaders
 import scala.collection.mutable
 
 private[finagle] object CookieMap {
 
-  val UseNetty4CookieCodec =
-    Toggles("com.twitter.finagle.http.UseNetty4CookieCodec")
-
-  private val serverIdHashCode = ServerInfo().id.hashCode()
-
-  private def cookieCodec =
-    if (UseNetty4CookieCodec(serverIdHashCode)) Netty4CookieCodec
-    else Netty3CookieCodec
+  private def cookieCodec = Netty4CookieCodec
 
   // Note that this is a def to allow it to be toggled for unit tests.
   private[finagle] def includeSameSite: Boolean = supportSameSiteCodec()

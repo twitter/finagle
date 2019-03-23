@@ -5,12 +5,6 @@ import org.scalatest.FunSuite
 
 abstract class CookieMapTest(codec: CookieCodec, codecName: String) extends FunSuite {
 
-  test("UseNetty4CookieCodec toggle is defined") {
-    // If the toggle were Toggle.Undefined (private val), this would throw an
-    // UsupportedOperationException
-    assert(CookieMap.UseNetty4CookieCodec(5) || !CookieMap.UseNetty4CookieCodec(5))
-  }
-
   private[this] def testCookies(
     newMessage: () => Message,
     headerName: String,
