@@ -1,11 +1,6 @@
 {
   "toggles": [
     {
-      "id": "com.twitter.finagle.core.UseClientNackAdmissionFilter",
-      "description": "Enable client side nack admission control",
-      "fraction": 0.0
-    },
-    {
       "id": "com.twitter.finagle.core.UseHybridFailureAccrual",
       "description": "Use hybrid FailureAccrual by default",
       "fraction": 0.0

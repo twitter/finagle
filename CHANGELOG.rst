@@ -21,6 +21,14 @@ New Features
 
   - Binary annotation "srv/backup_request_processing", when servers are processing backup requests.
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: Client-side nacking admission control now defaults on. See the documentation
+    on `c.t.f.filter.NackAdmissionFilter` for details. This can be disabled by setting the
+    global flag, `com.twitter.finagle.client.useNackAdmissionFilter`, to false.
+    ``PHAB_ID=D289583``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -29,6 +37,10 @@ Breaking API Changes
   `sslSessionInfo`. Users looking for just the functional equivalence of
   `peerCertificate` can use `sslSessionInfo.peerCertificates.headOption`.
   ``PHAB_ID=D285926``
+
+* finagle-core: The `com.twitter.finagle.core.UseClientNackAdmissionFilter` toggle
+  has been replaced by a global flag, `com.twitter.finagle.client.useNackAdmissionFilter`.
+  ``PHAB_ID=D289583``
 
 * finagle-thrift: Allow users to specify stringLengthLimit and containerLengthLimit ``PHAB_ID=D286346``
   - method parameter `readLength` in com.twitter.finagle.thrift.Protocols#binaryFactory renamed to stringLengthLimit to reflect usage
@@ -104,20 +116,14 @@ Breaking API Changes
   `c.t.f.thrift.ThriftRichClient.MultiplexedThriftClient`, which are deprecated in November 2017.
   ``PHAB_ID=D271774``
 
-* finagle-thrift: Removed deprecated APIs located in Thrift.scala:
-    1. c.t.f.Thrift.Client.stats
-      => use c.t.f.Thrift.Client.clientParam.clientStats
-    2. c.t.f.Thrift.withProtocolFactory
-      => use c.t.f.Thrift.client.withProtocolFactory
-    3. c.t.f.Thrift.withClientId
-      => usec.t.f.Thrift.client.withClientId
-    4. c.t.f.Thrift.Server.serverLabel
-      => use c.t.f.Thrift.Server.serverParam.serviceName
-    5. c.t.f.Thrift.Server.serverStats
-      => use c.t.f.Thrift.Server.serverParam.serverStats
-    6. c.t.f.Thrift.Server.maxThriftBufferSize
-      => use c.t.f.Thrift.Server.serverParam.maxThriftBufferSize
-  ``PHAB_ID=D272811``
+* finagle-thrift: Removed deprecated APIs located in Thrift.scala: ``PHAB_ID=D272811``
+
+    1. c.t.f.Thrift.Client.stats => use c.t.f.Thrift.Client.clientParam.clientStats
+    2. c.t.f.Thrift.withProtocolFactory => use c.t.f.Thrift.client.withProtocolFactory
+    3. c.t.f.Thrift.withClientId => use c.t.f.Thrift.client.withClientId
+    4. c.t.f.Thrift.Server.serverLabel => use c.t.f.Thrift.Server.serverParam.serviceName
+    5. c.t.f.Thrift.Server.serverStats => use c.t.f.Thrift.Server.serverParam.serverStats
+    6. c.t.f.Thrift.Server.maxThriftBufferSize => use c.t.f.Thrift.Server.serverParam.maxThriftBufferSize
 
 * finagle-thrift: `c.t.f.thrift.ThriftServiceIface.Filterable` is removed, use
   `c.t.f.thrift.service.Filterable` instead. ``PHAB_ID=D272427``
@@ -125,16 +131,12 @@ Breaking API Changes
 * finagle-thrift: `c.t.f.thrift.ThriftServiceIface` is removed, use
   `c.t.f.thrift.service.ThriftServicePerEndpoint` instead. ``PHAB_ID=D272427``
 
-* finagle-thriftmux: Removed deprecated APIs located in ThriftMux.scala:
-    1. c.t.f.ThriftMux.Client.stats
-      => use c.t.f.ThriftMux.Clien.clientParam.clientStats
-    2. c.t.f.ThriftMux.Server.serverLabel
-      => use c.t.f.ThriftMux.Server.serverParam.serviceName
-    3. c.t.f.ThriftMux.Server.serverStats
-      => use c.t.f.ThriftMux.Server.serverParam.serverStats
-    4. c.t.f.ThriftMux.Server.maxThriftBufferSize
-      => use c.t.f.ThriftMux.Server.serverParam.maxThriftBufferSize
-  ``PHAB_ID=D272811``
+* finagle-thriftmux: Removed deprecated APIs located in ThriftMux.scala: ``PHAB_ID=D272811``
+
+    1. c.t.f.ThriftMux.Client.stats => use c.t.f.ThriftMux.Clien.clientParam.clientStats
+    2. c.t.f.ThriftMux.Server.serverLabel => use c.t.f.ThriftMux.Server.serverParam.serviceName
+    3. c.t.f.ThriftMux.Server.serverStats => use c.t.f.ThriftMux.Server.serverParam.serverStats
+    4. c.t.f.ThriftMux.Server.maxThriftBufferSize => use c.t.f.ThriftMux.Server.serverParam.maxThriftBufferSize
 
 * finagle-thriftmux: `ThriftMux.Client.pushMuxer` is removed. Use `ThriftMux.Client.standardMuxer`
   instead. ``PHAB_ID=D269373``

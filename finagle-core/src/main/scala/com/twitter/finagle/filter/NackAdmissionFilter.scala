@@ -2,7 +2,7 @@ package com.twitter.finagle.filter
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
-import com.twitter.finagle.server.ServerInfo
+import com.twitter.finagle.client.useNackAdmissionFilter
 import com.twitter.finagle.stats.{Counter, Gauge, StatsReceiver, Verbosity}
 import com.twitter.finagle.util.{Ema, Rng}
 import com.twitter.util._
@@ -16,13 +16,7 @@ object NackAdmissionFilter {
   )
   val role: Stack.Role = Stack.Role("NackAdmissionFilter")
 
-  /**
-   * For feature roll out only.
-   */
-  private val EnableNackAcToggle = CoreToggles(
-    "com.twitter.finagle.core.UseClientNackAdmissionFilter"
-  )
-  private def enableNackAc(): Boolean = EnableNackAcToggle(ServerInfo().id.hashCode)
+  private val enabled: Boolean = useNackAdmissionFilter()
 
   /**
    * An upper bound on what percentage of requests this filter will drop.
@@ -97,7 +91,7 @@ object NackAdmissionFilter {
         _stats: param.Stats,
         next: ServiceFactory[Req, Rep]
       ): ServiceFactory[Req, Rep] = _param match {
-        case Param.Configured(window, threshold) =>
+        case Param.Configured(window, threshold) if enabled =>
           val param.Stats(stats) = _stats
 
           // Create the filter with the given window and nack rate threshold.
@@ -112,7 +106,7 @@ object NackAdmissionFilter {
           // required for proper operation.
           filter.andThen(next)
 
-        case Param.Disabled =>
+        case _ =>
           next
       }
     }
@@ -248,7 +242,7 @@ class NackAdmissionFilter[Req, Rep](
 
   def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
     rpsCounter.incr()
-    if (enableNackAc() && shouldDropRequest()) {
+    if (enabled && shouldDropRequest()) {
       droppedRequestCounter.incr()
       OverloadFailure
     } else {

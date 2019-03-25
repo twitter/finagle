@@ -4,7 +4,6 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{Failure, FailureFlags, Service, ServiceFactory, Stack, param}
 import com.twitter.finagle.service.FailedService
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.toggle.flag
 import com.twitter.finagle.util.{DefaultLogger, Ema, Rng}
 import com.twitter.util._
 import java.util.logging.Logger
@@ -19,11 +18,11 @@ class NackAdmissionFilterTest extends FunSuite {
   class CustomRng(_doubleVal: Double) extends Rng {
     require(_doubleVal >= 0, "_doubleVal must lie in the interval [0, 1]")
     require(_doubleVal <= 1, "_doubleVal must lie in the interval [0, 1]")
-    var doubleVal = _doubleVal
-    def nextDouble() = doubleVal
-    def nextInt() = 1
-    def nextInt(n: Int) = 1
-    def nextLong(n: Long) = 1
+    var doubleVal: Double = _doubleVal
+    def nextDouble(): Double = doubleVal
+    def nextInt(): Int = 1
+    def nextInt(n: Int): Int = 1
+    def nextLong(n: Long): Long = 1
   }
 
   class FakeTimer extends Ema.Monotime {
@@ -83,9 +82,9 @@ class NackAdmissionFilterTest extends FunSuite {
 
     /**
      * Simulates not sending a request and therefore not receiving a
-     * response. This does not change [[filter]]'s [[acceptProbability]],
+     * response. This does not change [[filter]]'s acceptProbability,
      * but it does check that the filter drops the request and creates a
-     * [[NackAdmissionFilter.overloadFailure]]. If it passes, then we
+     * NackAdmissionFilter.overloadFailure. If it passes, then we
      * know that the nack rate is below the failure threshold.
      */
     def testDropsRequest(): Unit = {
@@ -95,7 +94,7 @@ class NackAdmissionFilterTest extends FunSuite {
     /**
      * Simulates sending a request and receiving a "nack" response, as if the
      * cluster is overloaded. This decreases [[filter]]'s
-     * [[acceptProbability]] and checks that the filter does not drop the
+     * acceptProbability and checks that the filter does not drop the
      * request. If it passes, then we know that the nack rate is above the
      * failure threshold.
      */
@@ -105,7 +104,7 @@ class NackAdmissionFilterTest extends FunSuite {
 
     /**
      * Simulates sending a request and receiving a "nack" response. We
-     * can use this to decrease [[filter]]'s [[acceptProbability]] without
+     * can use this to decrease [[filter]]'s acceptProbability without
      * testing for a particular failure message.
      */
     def nackWithoutTest(): Unit = {
@@ -114,7 +113,7 @@ class NackAdmissionFilterTest extends FunSuite {
 
     /**
      * Simulates sending a request and receiving a successful response. We can
-     * use this to increase [[filter]]'s [[acceptProbability]] while testing
+     * use this to increase [[filter]]'s acceptProbability while testing
      * that the response is a success.
      */
     def testGetSuccessfulResponse(): Unit = {
@@ -124,10 +123,8 @@ class NackAdmissionFilterTest extends FunSuite {
 
   def testEnabled(desc: String)(f: TimeControl => Unit): Unit = {
     test(desc) {
-      flag.overrides.let("com.twitter.finagle.core.UseClientNackAdmissionFilter", 1.0) {
-        Time.withCurrentTimeFrozen { ctl =>
-          f(ctl)
-        }
+      Time.withCurrentTimeFrozen { ctl =>
+        f(ctl)
       }
     }
   }
@@ -224,33 +221,6 @@ class NackAdmissionFilterTest extends FunSuite {
     assert(0 < successRate && successRate < 1)
     assert(1 > multiplier * successRate)
     testDropsRequest()
-  }
-
-  testEnabled("Does not drop requests when toggled off.") { ctl =>
-    val lowRng: CustomRng = new CustomRng(0)
-    val ctx = new Ctx(lowRng)
-    import ctx._
-
-    // Make the server nack requests so that the EMA drops below the accept
-    // rate threshold
-    while (filter.emaValue > DefaultAcceptRateThreshold) {
-      ctl.advance(10.milliseconds)
-      nackWithoutTest()
-    }
-
-    val successRate = filter.emaValue
-    val multiplier = 1D / DefaultAcceptRateThreshold
-
-    assert(0 < successRate && successRate < 1)
-    assert(1 > multiplier * successRate)
-
-    // Make sure it does drop a request before it's toggled
-    testDropsRequest()
-
-    // Now toggle off and make sure it goes through.
-    flag.overrides.let("com.twitter.finagle.core.UseClientNackAdmissionFilter", 0.0) {
-      testGetSuccessfulResponse()
-    }
   }
 
   testEnabled("doesn't drop requests after accept rate drops below threshold") { ctl =>
