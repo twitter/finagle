@@ -168,10 +168,12 @@ class WindowedPercentileHistogram(
         // buckets if the values are not contiguous. All the data is still there, it's
         // just the buckets are bad.
         currentSnapshot.allValues().iterator()
-      else Nil.toIterator.asInstanceOf[java.util.Iterator[HistogramIterationValue]]
+      else null
     }
 
-    createBucketAndCounts(iterator)
+    if (iterator != null)
+      createBucketAndCounts(iterator)
+    else Nil
   }
 
   /**
