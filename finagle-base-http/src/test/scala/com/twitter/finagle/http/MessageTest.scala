@@ -64,9 +64,11 @@ class MessageTest extends FunSuite {
     )
     tests.foreach {
       case (header, expected) =>
-        val request = Request()
-        request.headerMap.set("Content-Type", header)
-        assert(request.charset == Option(expected))
+        withClue(header) {
+          val request = Request()
+          request.headerMap.set("Content-Type", header)
+          assert(request.charset == Option(expected))
+        }
     }
   }
 

@@ -185,18 +185,19 @@ abstract class Message {
 
   /** Get charset from Content-Type header */
   def charset: Option[String] = {
-    contentType.foreach { contentType =>
-      val parts = StringUtil.split(contentType, ';')
-      1.until(parts.length).foreach { i =>
-        val part = parts(i).trim
-        if (part.startsWith("charset=")) {
-          val equalsIndex = part.indexOf('=')
-          val charset = part.substring(equalsIndex + 1)
-          return Some(charset)
-        }
-      }
-    }
-    None
+    val cType = headerMap.getOrNull(Fields.ContentType)
+    if (cType == null)
+      return None
+
+    // the format is roughly: "value; charset=value"
+    val charsetIdx = cType.indexOf("charset=")
+    if (charsetIdx == -1)
+      return None
+
+    val valueIdx = charsetIdx + "charset=".length
+    val semicolonIdx = cType.indexOf(';', valueIdx)
+    val endIdx = if (semicolonIdx == -1) cType.length else semicolonIdx
+    Some(cType.substring(valueIdx, endIdx).trim)
   }
 
   /** Set charset in Content-Type header.  This does not change the content. */
