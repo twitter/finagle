@@ -40,7 +40,7 @@ import java.nio.ByteBuffer
  * observe multiple trailers before reaching the EOS. These inter-stream trailers space out
  * individual HTTP streams from child readers.
  */
-private[finagle] sealed abstract class Chunk {
+sealed abstract class Chunk {
 
   /**
    * The payload of this chunk. Can be empty if this is a last chunk.
@@ -59,7 +59,7 @@ private[finagle] sealed abstract class Chunk {
   def isLast: Boolean
 }
 
-private[finagle] object Chunk {
+object Chunk {
 
   private final case class Cons(content: Buf) extends Chunk {
     def trailers: HeaderMap = throw new IllegalArgumentException("Not the last chunk")
@@ -73,36 +73,42 @@ private[finagle] object Chunk {
   /**
    * A last (end of stream) empty [[Chunk]] that has neither a payload nor trailing headers.
    */
-  val empty: Chunk = Last(Buf.Empty, HeaderMap.Empty)
-
-  /**
-   * Creates a non last [[Chunk]] that carries a payload (`content`) but no trailing headers.
-   */
-  def content(content: Buf): Chunk = Cons(content)
+  val lastEmpty: Chunk = last(HeaderMap.Empty)
 
   /**
    * Creates a last [[Chunk]] that carries trailing headers (`trailers`).
    */
-  def trailers(trailers: HeaderMap): Chunk = Last(Buf.Empty, trailers)
+  def last(trailers: HeaderMap): Chunk = last(Buf.Empty, trailers)
 
   /**
    * Creates a last [[Chunk]] that carries both payload (`content`) and trailing
    * headers (`trailers`).
    */
-  def contentWithTrailers(content: Buf, trailers: HeaderMap): Chunk = Last(content, trailers)
+  def last(content: Buf, trailers: HeaderMap): Chunk = Last(content, trailers)
+
+  /**
+   * Creates a non last [[Chunk]] that carries a payload (`content`).
+   */
+  def fromBuf(content: Buf): Chunk = Cons(content)
 
   /**
    * A shortcut to create a [[Chunk]] out of a UTF-8 string.
    */
-  def fromString(s: String): Chunk = Cons(Buf.Utf8(s))
+  def fromString(s: String): Chunk = fromBuf(Buf.Utf8(s))
 
   /**
    * A shortcut to create a [[Chunk]] out of a byte array.
    */
-  def fromByteArray(ba: Array[Byte]): Chunk = Cons(Buf.ByteArray.Owned(ba))
+  def fromByteArray(ba: Array[Byte]): Chunk = fromBuf(Buf.ByteArray.Owned(ba))
 
   /**
    * A shortcut to create a [[Chunk]] out of a Java [[ByteBuffer]].
    */
-  def fromByteBuffer(bb: ByteBuffer): Chunk = Cons(Buf.ByteBuffer.Owned(bb))
+  def fromByteBuffer(bb: ByteBuffer): Chunk = fromBuf(Buf.ByteBuffer.Owned(bb))
+
+  /**
+   * Creates a non last [[Chunk]] that carries a payload (`content`). This is an alias
+   * for [[fromBuf]].
+   */
+  def apply(content: Buf): Chunk = fromBuf(content)
 }

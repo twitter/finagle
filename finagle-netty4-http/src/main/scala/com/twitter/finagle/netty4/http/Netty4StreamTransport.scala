@@ -5,7 +5,7 @@ import com.twitter.finagle.http._
 import com.twitter.finagle.http.exp.{Multi, StreamTransportProxy}
 import com.twitter.finagle.netty4.ByteBufConversion
 import com.twitter.finagle.transport.Transport
-import com.twitter.io.{Buf, Pipe, Reader, ReaderDiscardedException, StreamTermination}
+import com.twitter.io.{Pipe, Reader, ReaderDiscardedException, StreamTermination}
 import com.twitter.util._
 import io.netty.buffer.Unpooled
 import io.netty.handler.codec.http._
@@ -27,9 +27,9 @@ private[http] object Netty4StreamTransport {
           case chunk: LastHttpContent =>
             val last =
               if (!chunk.content.isReadable && chunk.trailingHeaders().isEmpty)
-                Chunk.empty
+                Chunk.lastEmpty
               else
-                Chunk.contentWithTrailers(
+                Chunk.last(
                   ByteBufConversion.byteBufAsBuf(chunk.content()),
                   Bijections.netty.headersToFinagle(chunk.trailingHeaders())
                 )
@@ -37,7 +37,7 @@ private[http] object Netty4StreamTransport {
             pipe.write(last)
 
           case chunk: HttpContent =>
-            val cons = Chunk.content(ByteBufConversion.byteBufAsBuf(chunk.content))
+            val cons = Chunk(ByteBufConversion.byteBufAsBuf(chunk.content))
             pipe.write(cons).before(copyLoop())
 
           case other =>
@@ -127,14 +127,6 @@ private[http] object Netty4StreamTransport {
 
     continue()
   }
-
-  def asChunkReader(r: Reader[Buf]): Reader[Chunk] = r.map(Chunk.content)
-
-  def asBufReader(r: Reader[Chunk]): Reader[Buf] =
-    r.flatMap(
-      chunk =>
-        if (chunk.content.isEmpty) Reader.empty[Buf]
-        else Reader.value(chunk.content))
 }
 
 private[finagle] class Netty4ServerStreamTransport(rawTransport: Transport[Any, Any])
@@ -155,7 +147,7 @@ private[finagle] class Netty4ServerStreamTransport(rawTransport: Transport[Any, 
       case Throw(exc) =>
         wrapWriteException(exc)
       case Return(_) =>
-        if (in.isChunked) streamOut(rawTransport, asChunkReader(in.reader))
+        if (in.isChunked) streamOut(rawTransport, in.chunkReader)
         else Future.Done
     }
   }
@@ -181,7 +173,7 @@ private[finagle] class Netty4ServerStreamTransport(rawTransport: Transport[Any, 
         val coll = streamIn(rawTransport)
         val finagleReq = Bijections.netty.chunkedRequestToFinagle(
           req,
-          asBufReader(coll),
+          coll,
           // We have to match/cast as remoteAddress is stored as SocketAddress but Request's
           // constructor expects InetSocketAddress. In practice, this is always a successful match
           // given all our transports operate on inet addresses.
@@ -209,7 +201,7 @@ private[finagle] class Netty4ClientStreamTransport(rawTransport: Transport[Any, 
       case Throw(exc) =>
         wrapWriteException(exc)
       case Return(_) =>
-        if (in.isChunked) streamOut(rawTransport, asChunkReader(in.reader))
+        if (in.isChunked) streamOut(rawTransport, in.chunkReader)
         else Future.Done
     }
   }
@@ -225,7 +217,7 @@ private[finagle] class Netty4ClientStreamTransport(rawTransport: Transport[Any, 
       case rep: HttpResponse =>
         assert(!rep.isInstanceOf[HttpContent]) // chunks are handled via collation
         val coll = streamIn(rawTransport)
-        val finagleRep = Bijections.netty.chunkedResponseToFinagle(rep, asBufReader(coll))
+        val finagleRep = Bijections.netty.chunkedResponseToFinagle(rep, coll)
         Future.value(Multi(finagleRep, coll))
 
       case invalid =>

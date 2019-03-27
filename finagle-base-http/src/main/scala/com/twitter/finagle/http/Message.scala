@@ -23,16 +23,57 @@ abstract class Message {
   private[this] var _chunked: Boolean = false
 
   /**
-   * A read-only handle to the internal stream of bytes, representing the
-   * message body. See [[com.twitter.io.Reader]] for more information.
+   * A read-only handle to a stream of [[Chunk]], representing the message body. This stream is only
+   * populated on chunked messages (`isChunked == true`). Use [[content]] to access a payload of
+   * a fully-buffered message (`isChunked == false`).
+   *
+   * Prefer this API over [[reader]] when application needs to receive trailing headers (trailers).
+   * Trailers are transmitted in the very last chunk (`chunk.isLast == true`) of the stream and
+   * can be retrieved via [[Chunk.trailers]].
+   *
+   * @see [[Reader]] and [[Chunk]]
    **/
-  def reader: Reader[Buf]
+  def chunkReader: Reader[Chunk]
 
   /**
-   * A write-only handle to the internal stream of bytes, representing the
-   * message body. See [[com.twitter.io.Writer]] for more information.
+   * A write-only handle to a stream of [[Chunk]], representing the message body. Only chunked
+   * messages (`isChunked == true`) use this stream as their payload, fully-buffered messages
+   * (`isChunked == false`) use [[content]] instead.
+   *
+   * Prefer this API over [[writer]] when application needs to send trailing headers (trailers).
+   * Trailers are transmitted in the very last chunk of the stream and can be populated via
+   * `Chunk.last` factory method.
+   *
+   * @see [[Reader]] and [[Chunk]]
    **/
-  def writer: Writer[Buf]
+  def chunkWriter: Writer[Chunk]
+
+  /**
+   * A read-only handle to a stream of [[Buf]], representing the message body. This stream is only
+   * * populated on chunked messages (`isChunked == true`). Use [[content]] to access a payload of
+   * a fully-buffered message (`isChunked == false`).
+   *
+   * Prefer this API over [[chunkReader]] when application doesn't need access to trailing headers
+   * (trailers).
+   *
+   * @see [[Reader]]
+   **/
+  final lazy val reader: Reader[Buf] = chunkReader.flatMap(
+    chunk =>
+      if (chunk.isLast && chunk.content.isEmpty) Reader.empty
+      else Reader.value(chunk.content))
+
+  /**
+   * A write-only handle to the stream of [[Buf]], representing the message body. Only chunked
+   * messages (`isChunked == true`) use this stream as their payload, fully-buffered messages
+   * (`isChunked == false`) use [[content]] instead.
+   *
+   * Prefer this API over [[chunkWriter]] when application doesn't need to send trailing headers
+   * (trailers).
+   *
+   * @see [[Writer]]
+   **/
+  final lazy val writer: Writer[Buf] = chunkWriter.contramap(Chunk.apply)
 
   def isRequest: Boolean
   def isResponse: Boolean = !isRequest
@@ -108,12 +149,23 @@ abstract class Message {
   }
 
   /**
-   * A [[HeaderMap]] (i.e., HTTP headers) associated with this message.
+   * HTTP headers associated with this message.
    *
-   * @note This structure isn't thread-safe. Any concurrent access should be synchronized
+   * @note [[HeaderMap]] isn't thread-safe. Any concurrent access should be synchronized
    *       externally.
    */
   def headerMap: HeaderMap
+
+  /**
+   * Trailing headers (trailers) associated with this message.
+   *
+   * These are only populated on fully-buffered inbound messages that were aggregated
+   * (see `withStreaming(false)`) from HTTP streams terminating with trailers.
+   *
+   * @note [[HeaderMap]] isn't thread-safe. Any concurrent access should be synchronized
+   *       externally.
+   */
+  def trailers: HeaderMap
 
   /**
    * Cookies. In a request, this uses the Cookie headers.

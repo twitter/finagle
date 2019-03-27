@@ -95,7 +95,7 @@ object Response {
     // Since this is a user made `Response` we use a Pipe so they
     // can keep a handle to the writer half and the server implementation can use
     // the reader half.
-    val rw = new Pipe[Buf]()
+    val rw = new Pipe[Chunk]
     val resp = new Impl(rw, rw)
     resp.version = version
     resp.status = status
@@ -110,7 +110,7 @@ object Response {
   }
 
   private[finagle] def chunked(version: Version, status: Status, reader: Reader[Buf]): Response = {
-    val resp = new Impl(reader, FailingWriter)
+    val resp = new Impl(reader.map(Chunk.apply))
     resp.version = version
     resp.status = status
     resp.setChunked(true)
@@ -120,13 +120,15 @@ object Response {
   /** Create 200 Response with the same HTTP version as the provided Request */
   def apply(request: Request): Response = apply(request.version, Status.Ok)
 
-  private[finagle] final class Impl(val reader: Reader[Buf], val writer: Writer[Buf])
+  private[finagle] final class Impl(val chunkReader: Reader[Chunk], val chunkWriter: Writer[Chunk])
       extends Response {
 
-    def this(reader: Reader[Buf]) = this(reader, FailingWriter)
+    def this(chunkReader: Reader[Chunk]) = this(chunkReader, FailingWriter)
 
     private[this] var _status: Status = Status.Ok
+
     val headerMap: HeaderMap = HeaderMap()
+    val trailers: HeaderMap = HeaderMap()
     val ctx: Response.Schema.Record = Response.Schema.newRecord()
 
     override def status: Status = _status
@@ -142,11 +144,12 @@ object Response {
      */
     def response: Response
 
-    def reader: Reader[Buf] = response.reader
-    def writer: Writer[Buf] = response.writer
+    def chunkReader: Reader[Chunk] = response.chunkReader
+    def chunkWriter: Writer[Chunk] = response.chunkWriter
     def ctx: Response.Schema.Record = response.ctx
     override lazy val cookies: CookieMap = response.cookies
     def headerMap: HeaderMap = response.headerMap
+    def trailers: HeaderMap = response.trailers
 
     // These things should never need to be modified
     final def status: Status = response.status
@@ -157,7 +160,5 @@ object Response {
     final override def version_=(version: Version): Unit = response.version_=(version)
     final override def isChunked: Boolean = response.isChunked
     final override def setChunked(chunked: Boolean): Unit = response.setChunked(chunked)
-
   }
-
 }

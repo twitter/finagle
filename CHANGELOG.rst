@@ -17,6 +17,11 @@ New Features
   intended for providing information about a connection's SSL/TLS session.
   ``PHAB_ID=D286242``
 
+* finagle-http: Finagle HTTP implementation now supports trailing headers (trailers). Use
+  `c.t.f.http.Message.trailers` to access trailing headers on a fully-buffered message
+  (`isChunked == false`) or `c.t.f.http.Message.chunkReader` on a message with chunked payload
+  (`isChunked == true`).  ``PHAB_ID=D283999``
+
 * finagle-http,thriftmux: Added tracing annotations to backup requests. ``PHAB_ID=D285486``
 
   - Binary annotation "srv/backup_request_processing", when servers are processing backup requests.

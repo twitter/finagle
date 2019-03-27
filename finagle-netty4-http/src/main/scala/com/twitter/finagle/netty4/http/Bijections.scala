@@ -1,10 +1,10 @@
 package com.twitter.finagle.netty4.http
 
 import com.twitter.app.GlobalFlag
-import com.twitter.finagle.http.{Fields, HeaderMap, Request}
+import com.twitter.finagle.http.{Chunk, Fields, HeaderMap, Request}
 import com.twitter.finagle.netty4.ByteBufConversion
 import com.twitter.finagle.{http => FinagleHttp}
-import com.twitter.io.{Buf, Reader}
+import com.twitter.io.Reader
 import io.netty.handler.codec.{http => NettyHttp}
 import java.net.InetSocketAddress
 
@@ -31,7 +31,7 @@ private[finagle] object Bijections {
 
     private def requestToFinagleHelper(
       in: NettyHttp.HttpRequest,
-      r: Reader[Buf],
+      r: Reader[Chunk],
       remoteAddr: InetSocketAddress,
       chunked: Boolean
     ): Request = {
@@ -49,7 +49,7 @@ private[finagle] object Bijections {
 
     def chunkedRequestToFinagle(
       in: NettyHttp.HttpRequest,
-      r: Reader[Buf],
+      r: Reader[Chunk],
       remoteAddr: InetSocketAddress
     ): FinagleHttp.Request = requestToFinagleHelper(in, r, remoteAddr, chunked = true)
 
@@ -58,9 +58,14 @@ private[finagle] object Bijections {
       remoteAddr: InetSocketAddress
     ): FinagleHttp.Request = {
       val payload = ByteBufConversion.byteBufAsBuf(in.content)
-      val reader = Reader.fromBuf(payload)
+      val reader =
+        if (payload.isEmpty) Reader.empty[Chunk]
+        else Reader.value(Chunk(payload))
+
       val result = requestToFinagleHelper(in, reader, remoteAddr, chunked = false)
+
       result.content = payload
+      writeNettyHeadersToFinagle(in.trailingHeaders, result.trailers)
 
       result
     }
@@ -86,7 +91,7 @@ private[finagle] object Bijections {
 
     private def responseToFinagleHelper(
       in: NettyHttp.HttpResponse,
-      r: Reader[Buf],
+      r: Reader[Chunk],
       chunked: Boolean
     ): FinagleHttp.Response = {
       val result = new FinagleHttp.Response.Impl(r)
@@ -100,15 +105,22 @@ private[finagle] object Bijections {
       result
     }
 
-    def chunkedResponseToFinagle(in: NettyHttp.HttpResponse, r: Reader[Buf]): FinagleHttp.Response =
+    def chunkedResponseToFinagle(
+      in: NettyHttp.HttpResponse,
+      r: Reader[Chunk]
+    ): FinagleHttp.Response =
       responseToFinagleHelper(in, r, chunked = true)
 
     def fullResponseToFinagle(in: NettyHttp.FullHttpResponse): FinagleHttp.Response = {
       val payload = ByteBufConversion.byteBufAsBuf(in.content)
-      val reader = Reader.fromBuf(payload)
+      val reader =
+        if (payload.isEmpty) Reader.empty[Chunk]
+        else Reader.value(Chunk(payload))
 
       val result = responseToFinagleHelper(in, reader, chunked = false)
+
       result.content = payload
+      writeNettyHeadersToFinagle(in.trailingHeaders, result.trailers)
 
       result
     }
@@ -153,7 +165,7 @@ private[finagle] object Bijections {
         statusToNetty(r.status),
         ByteBufConversion.bufAsByteBuf(r.content),
         headersToNetty(r.headerMap),
-        NettyHttp.EmptyHttpHeaders.INSTANCE // only chunked messages have trailing headers
+        NettyHttp.EmptyHttpHeaders.INSTANCE // trailers are only propagated from chunked messages
       )
 
     def methodToNetty(m: FinagleHttp.Method): NettyHttp.HttpMethod =
@@ -182,9 +194,8 @@ private[finagle] object Bijections {
           r.uri,
           ByteBufConversion.bufAsByteBuf(r.content),
           headersToNetty(r.headerMap),
-          NettyHttp.EmptyHttpHeaders.INSTANCE // finagle-http doesn't support trailing headers
+          NettyHttp.EmptyHttpHeaders.INSTANCE // trailers are only propagated from chunked messages
         )
-
       }
     }
   }

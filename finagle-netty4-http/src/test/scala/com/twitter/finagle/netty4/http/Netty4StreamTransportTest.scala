@@ -48,7 +48,7 @@ class Netty4StreamTransportTest extends FunSuite with OneInstancePerTest {
     rw.write(Chunk.fromString("foo"))
     assert(await(write.poll()).asInstanceOf[HttpContent].content.toString(UTF_8) == "foo")
 
-    rw.write(Chunk.trailers(HeaderMap("foo" -> "bar")))
+    rw.write(Chunk.last(HeaderMap("foo" -> "bar")))
     val trailers = write.poll()
     assert(!trailers.isDefined)
 
@@ -67,7 +67,7 @@ class Netty4StreamTransportTest extends FunSuite with OneInstancePerTest {
     rw.write(Chunk.fromString("foo"))
     assert(await(write.poll()).asInstanceOf[HttpContent].content.toString(UTF_8) == "foo")
 
-    rw.write(Chunk.contentWithTrailers(Buf.Utf8("bar"), HeaderMap("foo" -> "bar")))
+    rw.write(Chunk.last(Buf.Utf8("bar"), HeaderMap("foo" -> "bar")))
     assert(await(write.poll()).asInstanceOf[HttpContent].content.toString(UTF_8) == "bar")
 
     val trailers = write.poll()
@@ -85,11 +85,11 @@ class Netty4StreamTransportTest extends FunSuite with OneInstancePerTest {
     val rw = new Pipe[Chunk]
     val out = streamOut(transport, rw)
 
-    rw.write(Chunk.trailers(HeaderMap("foo" -> "bar")))
+    rw.write(Chunk.last(HeaderMap("foo" -> "bar")))
     val trailers = write.poll()
     assert(!trailers.isDefined)
 
-    rw.write(Chunk.trailers(HeaderMap("bar" -> "baz")))
+    rw.write(Chunk.last(HeaderMap("bar" -> "baz")))
     intercept[IllegalStateException](await(out))
   }
 

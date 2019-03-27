@@ -320,7 +320,7 @@ object Request {
     // Since this is a user made `Request` we use a Pipe so they
     // can keep a handle to the writer half and the client implementation can use
     // the reader half.
-    val rw = new Pipe[Buf]()
+    val rw = new Pipe[Chunk]
     val req = new Request.Impl(rw, rw, new InetSocketAddress(0))
 
     req.version = version
@@ -348,7 +348,10 @@ object Request {
    * }}}
    */
   def apply(version: Version, method: Method, uri: String, reader: Reader[Buf]): Request = {
-    val req = new Request.Impl(reader, FailingWriter, new InetSocketAddress(0))
+    val req = new Request.Impl(
+      reader.map(Chunk.apply),
+      new InetSocketAddress(0)
+    )
 
     req.setChunked(true)
     req.version = version
@@ -393,10 +396,11 @@ object Request {
 
     def ctx: Schema.Record = request.ctx
     def remoteSocketAddress: InetSocketAddress = request.remoteSocketAddress
-    def reader: Reader[Buf] = request.reader
-    def writer: Writer[Buf] = request.writer
+    def chunkReader: Reader[Chunk] = request.chunkReader
+    def chunkWriter: Writer[Chunk] = request.chunkWriter
     override lazy val cookies: CookieMap = request.cookies
     def headerMap: HeaderMap = request.headerMap
+    def trailers: HeaderMap = request.trailers
     override def params: ParamMap = request.params
     override lazy val response: Response = request.response
     def uri: String = request.uri
@@ -414,18 +418,19 @@ object Request {
   }
 
   private[finagle] final class Impl(
-    val reader: Reader[Buf],
-    val writer: Writer[Buf],
+    val chunkReader: Reader[Chunk],
+    val chunkWriter: Writer[Chunk],
     val remoteSocketAddress: InetSocketAddress)
       extends Request {
 
-    def this(reader: Reader[Buf], remoteSocketAddress: InetSocketAddress) =
-      this(reader, FailingWriter, remoteSocketAddress)
+    def this(chunkReader: Reader[Chunk], remoteSocketAddress: InetSocketAddress) =
+      this(chunkReader, FailingWriter, remoteSocketAddress)
 
     private var _method: Method = Method.Get
     private var _uri: String = ""
 
     val headerMap: HeaderMap = HeaderMap()
+    val trailers: HeaderMap = HeaderMap()
     val ctx: Request.Schema.Record = Request.Schema.newRecord()
 
     def method: Method = _method

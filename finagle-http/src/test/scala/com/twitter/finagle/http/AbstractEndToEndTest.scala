@@ -526,6 +526,33 @@ abstract class AbstractEndToEndTest
 
       await(client.close())
     }
+
+    test(implName + ": aggregates trailers when streams are aggregated") {
+      val service = new HttpService {
+        def apply(req: Request): Future[Response] = {
+          assert(req.trailers.size == 2)
+          assert(req.trailers("foo") == "bar")
+          assert(req.trailers("bar") == "baz")
+
+          Future.value(Response())
+        }
+      }
+
+      val client = connect(service)
+
+      val req = Request()
+      req.setChunked(true)
+
+      val rep = client(req)
+
+      val out = for {
+        _ <- req.chunkWriter.write(Chunk.last(HeaderMap("foo" -> "bar", "bar" -> "baz")))
+        _ <- req.chunkWriter.close()
+      } yield ()
+
+      await(out.before(rep))
+      await(client.close())
+    }
   }
 
   def streaming(connect: HttpService => HttpService): Unit = {
@@ -556,7 +583,6 @@ abstract class AbstractEndToEndTest
           service(request).map { responseOriginal =>
             new ResponseProxy {
               override val response = responseOriginal
-              override def reader = responseOriginal.reader
             }
           }
         }
@@ -859,6 +885,77 @@ abstract class AbstractEndToEndTest
 
       await(client.close())
     }
+
+    test(implName + ": streaming session bi-directionally transmit trailing headers") {
+      val service = new HttpService {
+        def apply(req: Request): Future[Response] = {
+          val rep = Response()
+          rep.setChunked(true)
+
+          for {
+            ts <- req.chunkReader.read().map(_.get.trailers)
+            _ <- rep.chunkWriter.write(Chunk.last(ts.add("bar", "baz")))
+            _ <- req.chunkReader.read()
+            _ <- rep.chunkWriter.close()
+          } yield ()
+
+          Future.value(rep)
+        }
+      }
+
+      val client = connect(service)
+      val req = Request()
+      req.setChunked(true)
+
+      val rep = await(client(req))
+      val trailersIn = HeaderMap.apply("foo" -> "bar")
+
+      val out = for {
+        _ <- req.chunkWriter.write(Chunk.last(trailersIn))
+        _ <- req.chunkWriter.close()
+      } yield ()
+
+      await(out)
+
+      val trailersOut = await(rep.chunkReader.read()).get.trailers
+      assert(await(rep.chunkReader.read()).isEmpty)
+
+      assert(trailersOut.size == 2)
+      assert(trailersOut("foo") == "bar")
+      assert(trailersOut("bar") == "baz")
+
+      await(client.close())
+    }
+
+    test(implName + ": invalid trailer causes server to hang up") {
+      val observed = new Promise[HeaderMap]
+      val service = new HttpService {
+        def apply(req: Request): Future[Response] = {
+          observed.become(req.chunkReader.read().map(_.get.trailers))
+          Future.value(Response())
+        }
+      }
+
+      val client = connect(service)
+      val req = Request()
+      req.setChunked(true)
+
+      val rep = await(client(req))
+      assert(rep.status == Status.Ok)
+
+      val trailers = HeaderMap.newHeaderMap
+      illegalHeaders.foreach { case (k, v) => trailers.addUnsafe(k, v) }
+
+      val out = for {
+        _ <- req.chunkWriter.write(Chunk.last(trailers))
+        _ <- req.chunkWriter.close()
+      } yield ()
+
+      await(out)
+      intercept[ChannelException](await(observed))
+
+      await(client.close())
+    }
   }
 
   def tracing(connect: HttpService => HttpService): Unit = {
@@ -1092,12 +1189,12 @@ abstract class AbstractEndToEndTest
     await(server.close())
   }
 
-  test("server rejects illegal headers with a 400") {
-    val illegalHeaders = for {
-      k <- Seq("FgR", "a\fb")
-      v <- Seq("a\u000bb", "a\fb") // vtab
-    } yield k -> v
+  val illegalHeaders = for {
+    k <- Seq("FgR", "a\fb")
+    v <- Seq("a\u000bb", "a\fb") // vtab
+  } yield k -> v
 
+  test("server rejects illegal headers with a 400") {
     val service = nonStreamingConnect(Service.mk(_ => Future.value(Response())))
 
     illegalHeaders.foreach {
@@ -1111,12 +1208,31 @@ abstract class AbstractEndToEndTest
     await(service.close())
   }
 
-  test("client rejects illegal headers with an exception") {
-    val illegalHeaders = for {
-      k <- Seq("FgR", "a\fb")
-      v <- Seq("a\u000bb", "a\fb")
-    } yield k -> v
+  test("server rejects illegal trailers with a 400") {
+    val service = nonStreamingConnect(Service.mk(_ => Future.value(Response())))
 
+    illegalHeaders.foreach {
+      case (k, v) =>
+        val badRequest = Request()
+        badRequest.setChunked(true)
+
+        val trailers = HeaderMap.newHeaderMap
+        trailers.addUnsafe(k, v)
+
+        for {
+          _ <- badRequest.chunkWriter.write(Chunk.last(trailers))
+          _ <- badRequest.chunkWriter.close()
+        } yield ()
+
+        val resp = await(service(badRequest))
+
+        assert(resp.status == Status.BadRequest)
+    }
+
+    await(service.close())
+  }
+
+  test("client rejects illegal headers with an exception") {
     val current = new AtomicReference("a" -> "b")
     val service = nonStreamingConnect(Service.mk { _ =>
       val resp = Response()
@@ -1125,10 +1241,35 @@ abstract class AbstractEndToEndTest
       Future.value(resp)
     })
 
-    illegalHeaders.foreach {
-      case kv =>
-        current.set(kv)
-        intercept[Exception](await(service(Request())))
+    illegalHeaders.foreach { kv =>
+      current.set(kv)
+      intercept[Exception](await(service(Request())))
+    }
+
+    await(service.close())
+  }
+
+  test("client rejects illegal trailer with an exception") {
+    val current = new AtomicReference("a" -> "b")
+    val service = nonStreamingConnect(Service.mk { _ =>
+      val rep = Response()
+      rep.setChunked(true)
+
+      val (k, v) = current.get
+      val trailers = HeaderMap.newHeaderMap
+      trailers.addUnsafe(k, v)
+
+      for {
+        _ <- rep.chunkWriter.write(Chunk.last(trailers))
+        _ <- rep.chunkWriter.close()
+      } yield ()
+
+      Future.value(rep)
+    })
+
+    illegalHeaders.foreach { kv =>
+      current.set(kv)
+      intercept[Exception](await(service(Request())))
     }
 
     await(service.close())

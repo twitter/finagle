@@ -110,7 +110,7 @@ private[finagle] object Netty4FormPostEncoder extends FormPostEncoder {
   private[this] def chunkedReqToFinagle(nettyReq: HttpRequest, body: Buf): Request = {
     val req = Bijections.netty.chunkedRequestToFinagle(
       nettyReq,
-      Reader.fromBuf(body),
+      Reader.value(Chunk.apply(body)),
       new InetSocketAddress(0)
     )
 
