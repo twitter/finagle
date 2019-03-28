@@ -23,6 +23,30 @@ trait CommonParams[A <: Stack.Parameterized[A]] { self: Stack.Parameterized[A] =
   def withLabel(label: String): A =
     self.configured(Label(label))
 
+  /*
+   * Configures this server or client with a set of `tags` (default: empty set).
+   *
+   * Tags associate Finagle clients and servers with a set of keywords. Labels
+   * are simply Tags with a single keyword.
+   *
+   * Tags provide a general purpose configuration mechanism for functionality
+   * that is not yet known. This is powerful, but also easily misused. As such,
+   * be conservative in using them.
+   *
+   * Frameworks that create services for each endpoint should tag them with
+   * endpoint metadata, e.g.,
+   *
+   * {{{
+   * val showPost = Http.server.withLabels("GET", "/posts/show")
+   * val createPost = Http.server.withLabels("POST", "PUT", "/posts/create")
+   * }}}
+   *
+   * Note: Tags can't be used in place of Label (at least not quite yet). Label
+   * will appear in metrics, but Tags do not.
+   */
+  def withLabels(keywords: String*): A =
+    self.configured(Tags(keywords:_*))
+
   /**
    * Configures this server or client with given [[stats.StatsReceiver]]
    * (default: [[stats.DefaultStatsReceiver]]).

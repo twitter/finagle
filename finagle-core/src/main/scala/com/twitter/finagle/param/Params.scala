@@ -4,6 +4,7 @@ import com.twitter.finagle.service.StatsFilter
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Stack, stats, tracing, util}
 import com.twitter.util.{JavaTimer, NullMonitor}
+import scala.annotation.varargs
 
 /**
  * A class eligible for configuring a label used to identify finagle
@@ -17,6 +18,58 @@ object Label {
   private[finagle] val Default: String = ""
 
   implicit val param: Stack.Param[Label] = Stack.Param(Label(Default))
+}
+
+/**
+ * Tags are a more powerful Label.
+ *
+ * Tags associate Finagle clients and servers with a set of keywords. Labels
+ * are simply Tags with a single keyword.
+ *
+ * Tags provide a general purpose configuration mechanism for functionality
+ * that is not yet known. This is powerful, but also easily misused. As such,
+ * be conservative in using them.
+ *
+ * Frameworks that create services for each endpoint should tag them with
+ * endpoint metadata, e.g.,
+ *
+ * {{{
+ * val showPost = Http.server.withLabels("GET", "/posts/show")
+ * val createPost = Http.server.withLabels("POST", "PUT", "/posts/create")
+ * }}}
+ *
+ * Note: Tags can't be used in place of Label (at least not quite yet). Label
+ * will appear in metrics, but Tags do not.
+ */
+private[twitter] sealed abstract class Tags {
+  import Tags._
+
+  def mk(): (Tags, Stack.Param[Tags]) =
+    (this, Tags.param)
+
+  /**
+   * True, if Tags contains any of keyword.
+   */
+  @varargs
+  def matchAny(keyword: String*): Boolean = this match {
+    case tags @ KeySet(_) => tags.keys.intersect(keyword.toSet).nonEmpty
+  }
+
+  /**
+   * True, if Tags contains all these keywords.
+   */
+  @varargs
+  def matchAll(keywords: String*): Boolean = this match {
+    case tags @ KeySet(_) => keywords.toSet.subsetOf(tags.keys)
+  }
+}
+private[twitter] object Tags {
+  implicit val param = Stack.Param(Tags())
+
+  private case class KeySet(keys: Set[String]) extends Tags
+
+  @varargs
+  def apply(keys: String*): Tags = KeySet(keys.toSet)
 }
 
 /**
