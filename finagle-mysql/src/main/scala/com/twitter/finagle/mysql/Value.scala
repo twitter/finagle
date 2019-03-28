@@ -264,8 +264,8 @@ object DateValue extends Injectable[Date] with Extractable[Date] {
    * Value extractor for java.sql.Date
    */
   def unapply(v: Value): Option[Date] = v match {
-    case RawValue(Type.Date, MysqlCharset.Binary, false, bytes) =>
-      val str = new String(bytes, MysqlCharset(MysqlCharset.Binary))
+    case RawValue(Type.Date, charset, false, bytes) =>
+      val str = new String(bytes, MysqlCharset(charset))
       if (str == Zero.toString) Some(Zero)
       else Some(Date.valueOf(str))
 
