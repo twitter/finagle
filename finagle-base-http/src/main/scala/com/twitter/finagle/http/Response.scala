@@ -120,6 +120,28 @@ object Response {
   /** Create 200 Response with the same HTTP version as the provided Request */
   def apply(request: Request): Response = apply(request.version, Status.Ok)
 
+  /**
+   * An inbound response (a response received by a client) that can include trailers.
+   */
+  private[finagle] final class Inbound(val chunkReader: Reader[Chunk], val trailers: HeaderMap)
+      extends Response {
+
+    private[this] var _status: Status = Status.Ok
+
+    def chunkWriter: Writer[Chunk] = FailingWriter
+
+    val headerMap: HeaderMap = HeaderMap()
+    val ctx: Response.Schema.Record = Response.Schema.newRecord()
+
+    override def status: Status = _status
+    override def status_=(value: Status): Unit = {
+      _status = value
+    }
+  }
+
+  /**
+   * An outbound response (a response sent by a server).
+   */
   private[finagle] final class Impl(val chunkReader: Reader[Chunk], val chunkWriter: Writer[Chunk])
       extends Response {
 
@@ -128,8 +150,9 @@ object Response {
     private[this] var _status: Status = Status.Ok
 
     val headerMap: HeaderMap = HeaderMap()
-    val trailers: HeaderMap = HeaderMap()
     val ctx: Response.Schema.Record = Response.Schema.newRecord()
+
+    def trailers: HeaderMap = HeaderMap.Empty
 
     override def status: Status = _status
     override def status_=(value: Status): Unit = {

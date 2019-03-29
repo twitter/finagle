@@ -417,6 +417,38 @@ object Request {
     final override def setChunked(chunked: Boolean): Unit = request.setChunked(chunked)
   }
 
+  /**
+   * An inbound request (a request received by a server) that could include trailers.
+   */
+  private[finagle] final class Inbound(
+    val chunkReader: Reader[Chunk],
+    val remoteSocketAddress: InetSocketAddress,
+    val trailers: HeaderMap)
+      extends Request {
+
+    def chunkWriter: Writer[Chunk] = FailingWriter
+
+    private var _method: Method = Method.Get
+    private var _uri: String = ""
+
+    val headerMap: HeaderMap = HeaderMap()
+
+    val ctx: Request.Schema.Record = Request.Schema.newRecord()
+
+    def method: Method = _method
+    def method_=(method: Method): Unit = {
+      _method = method
+    }
+
+    def uri: String = _uri
+    def uri_=(uri: String): Unit = {
+      _uri = uri
+    }
+  }
+
+  /**
+   * An outbound request (a request sent by a client).
+   */
   private[finagle] final class Impl(
     val chunkReader: Reader[Chunk],
     val chunkWriter: Writer[Chunk],
@@ -430,8 +462,9 @@ object Request {
     private var _uri: String = ""
 
     val headerMap: HeaderMap = HeaderMap()
-    val trailers: HeaderMap = HeaderMap()
     val ctx: Request.Schema.Record = Request.Schema.newRecord()
+
+    def trailers: HeaderMap = HeaderMap.Empty
 
     def method: Method = _method
     def method_=(method: Method): Unit = {
