@@ -20,7 +20,8 @@ class ClientDispatcherTest extends FunSuite {
   val init = HandshakeInit.decode(initPacket)
 
   val params = Stack.Params.empty + Credentials(Some("username"), Some("password"))
-  val handshake = Handshake(params)
+  val settings = HandshakeSettings(params)
+  val handshake = new Handshake(settings)
   val initReply = handshake(init)
 
   private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 1.second)

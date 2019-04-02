@@ -107,7 +107,8 @@ private[finagle] final class ClientDispatcher(
     extends GenSerialClientDispatcher[Request, Result, Packet, Packet](trans) {
   import ClientDispatcher._
 
-  private[this] val handshake = Handshake(params)
+  private[this] val handshakeSettings = HandshakeSettings(params)
+  private[this] val handshake = new Handshake(handshakeSettings)
   private[this] val supportUnsigned: Boolean = params[UnsignedColumns].supported
 
   override def apply(req: Request): Future[Result] =
