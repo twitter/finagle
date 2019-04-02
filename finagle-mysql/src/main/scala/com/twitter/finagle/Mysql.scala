@@ -1,11 +1,9 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.client.{DefaultPool, StackClient, StdStackClient, Transporter}
-import com.twitter.finagle.decoder.LengthFieldFramer
 import com.twitter.finagle.mysql._
 import com.twitter.finagle.mysql.param._
 import com.twitter.finagle.mysql.transport.Packet
-import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.param.{
   ExceptionStatsHandler => _,
   Monitor => _,
@@ -167,18 +165,8 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
     protected type Out = Buf
     protected type Context = TransportContext
 
-    protected def newTransporter(addr: SocketAddress): Transporter[In, Out, Context] = {
-      val framerFactory = () => {
-        new LengthFieldFramer(
-          lengthFieldBegin = 0,
-          lengthFieldLength = 3,
-          lengthAdjust = Packet.HeaderSize, // Packet size field doesn't include the header size.
-          maxFrameLength = Packet.HeaderSize + Packet.MaxBodySize,
-          bigEndian = false
-        )
-      }
-      Netty4Transporter.framedBuf(Some(framerFactory), addr, params)
-    }
+    protected def newTransporter(addr: SocketAddress): Transporter[In, Out, Context] =
+      new MysqlTransporter(addr, params)
 
     protected def newDispatcher(
       transport: Transport[Buf, Buf] {
