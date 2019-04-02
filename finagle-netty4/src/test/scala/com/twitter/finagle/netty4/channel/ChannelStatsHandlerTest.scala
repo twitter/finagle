@@ -20,6 +20,7 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
     val ctx = mock[ChannelHandlerContext]
 
     when(chan.isWritable).thenReturn(false, true, false)
+    when(chan.eventLoop()).thenReturn(new DefaultEventLoop())
     when(ctx.channel).thenReturn(chan)
   }
 
@@ -52,8 +53,9 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
   private class TestContext(sharedStats: SharedChannelStats) {
     val ctx = mock[ChannelHandlerContext]
     val channelStatsHandler = new ChannelStatsHandler(sharedStats)
-    private val chan = new EmbeddedChannel()
+    val chan = new EmbeddedChannel()
     private val start = Time.now
+    when(ctx.channel()).thenReturn(chan)
 
     channelStatsHandler.handlerAdded(ctx)
   }
@@ -84,6 +86,29 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
 
     handler2.channelInactive(ctx2.ctx)
     connectionCountEquals(sr, 0)
+  }
+
+  test("ChannelStatsHandler counts pending_io_events") {
+    val sr = new InMemoryStatsReceiver
+    val params = Stack.Params.empty + Stats(sr)
+    val sharedStats = new SharedChannelStats(params)
+    val ch = mock[Channel]
+    val ctx = mock[ChannelHandlerContext]
+    val eventLoop = mock[SingleThreadEventLoop]
+    val handler = new ChannelStatsHandler(sharedStats)
+
+    when(eventLoop.pendingTasks()).thenReturn(1, 2)
+    when(ch.eventLoop()).thenReturn(eventLoop)
+    when(ctx.channel()).thenReturn(ch)
+
+    handler.handlerAdded(ctx)
+    assert(sr.gauges(Seq("pending_io_events"))() == 0)
+
+    handler.channelActive(ctx)
+    assert(sr.gauges(Seq("pending_io_events"))() == 1)
+
+    handler.channelInactive(ctx)
+    assert(sr.gauges(Seq("pending_io_events"))() == 0)
   }
 
   test("ChannelStatsHandler handles multiple channelInactive calls") {

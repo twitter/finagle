@@ -8,7 +8,8 @@ import io.netty.channel.{
   ChannelDuplexHandler,
   ChannelException,
   ChannelHandlerContext,
-  ChannelPromise
+  ChannelPromise,
+  SingleThreadEventLoop
 }
 import io.netty.handler.ssl.SslHandshakeCompletionEvent
 import io.netty.handler.timeout.TimeoutException
@@ -119,6 +120,12 @@ private class ChannelStatsHandler(sharedChannelStats: SharedChannelStats)
         tcpStatsUpdater = new TcpStatsUpdater(sharedChannelStats, epsc)
       case _ =>
     }
+
+    ctx.channel().eventLoop() match {
+      case stel: SingleThreadEventLoop => sharedChannelStats.registerEventLoop(stel)
+      case _ =>
+    }
+
     channelActive = true
     connectionDuration = Stopwatch.start()
     super.channelActive(ctx)
@@ -178,6 +185,11 @@ private class ChannelStatsHandler(sharedChannelStats: SharedChannelStats)
       if (tlsChannelActive) {
         tlsChannelActive = false
         sharedChannelStats.tlsConnectionCountDecrement()
+      }
+
+      ctx.channel().eventLoop() match {
+        case stel: SingleThreadEventLoop => sharedChannelStats.unregisterEventLoop(stel)
+        case _ =>
       }
     }
     super.channelInactive(ctx)

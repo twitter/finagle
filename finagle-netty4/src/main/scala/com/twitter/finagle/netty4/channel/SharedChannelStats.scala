@@ -3,6 +3,7 @@ package com.twitter.finagle.netty4.channel
 import com.twitter.finagle.Stack
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
+import io.netty.channel.SingleThreadEventLoop
 import java.util.concurrent.atomic.LongAdder
 
 /**
@@ -19,6 +20,12 @@ private[finagle] class SharedChannelStats(params: Stack.Params) {
   protected val tlsConnectionCount = new LongAdder()
   def tlsConnectionCountIncrement(): Unit = tlsConnectionCount.increment()
   def tlsConnectionCountDecrement(): Unit = tlsConnectionCount.decrement()
+
+  @volatile private var eventLoops: Set[SingleThreadEventLoop] = Set.empty
+  def registerEventLoop(e: SingleThreadEventLoop): Unit =
+    synchronized { eventLoops = eventLoops + e }
+  def unregisterEventLoop(e: SingleThreadEventLoop): Unit =
+    synchronized { eventLoops = eventLoops - e }
 
   val connects = statsReceiver.counter("connects")
 
@@ -47,6 +54,9 @@ private[finagle] class SharedChannelStats(params: Stack.Params) {
   }
   private val tlsConnections = statsReceiver.addGauge("tls", "connections") {
     tlsConnectionCount.sum()
+  }
+  private val pendingIoEvents = statsReceiver.addGauge("pending_io_events") {
+    eventLoops.foldLeft(0.0F)((acc, el) => acc + el.pendingTasks())
   }
 }
 
