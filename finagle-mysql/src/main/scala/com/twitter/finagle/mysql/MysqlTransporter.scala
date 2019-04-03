@@ -6,7 +6,6 @@ import com.twitter.finagle.decoder.LengthFieldFramer
 import com.twitter.finagle.mysql.transport.Packet
 import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.transport.{Transport, TransportContext}
-import com.twitter.io.Buf
 import com.twitter.util.Future
 import java.net.SocketAddress
 
@@ -19,7 +18,7 @@ import java.net.SocketAddress
 private[finagle] final class MysqlTransporter(
   val remoteAddress: SocketAddress,
   params: Stack.Params)
-    extends Transporter[Buf, Buf, TransportContext] {
+    extends Transporter[Packet, Packet, TransportContext] {
 
   private[this] val framerFactory = () => {
     new LengthFieldFramer(
@@ -34,7 +33,7 @@ private[finagle] final class MysqlTransporter(
   private[this] val netty4Transporter =
     Netty4Transporter.framedBuf(Some(framerFactory), remoteAddress, params)
 
-  def apply(): Future[Transport[Buf, Buf] { type Context <: TransportContext }] =
-    netty4Transporter()
+  def apply(): Future[Transport[Packet, Packet] { type Context <: TransportContext }] =
+    netty4Transporter().map(transport => transport.map(_.toBuf, Packet.fromBuf))
 
 }

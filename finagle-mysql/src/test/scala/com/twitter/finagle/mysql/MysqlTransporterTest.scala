@@ -1,7 +1,6 @@
 package com.twitter.finagle.mysql
 
 import com.twitter.finagle.{Stack, Status}
-import com.twitter.finagle.mysql.transport.Packet
 import com.twitter.util.{Await, Duration}
 import java.net.{InetAddress, InetSocketAddress, ServerSocket, SocketAddress}
 import org.scalatest.FunSuite
@@ -40,8 +39,7 @@ class MysqlTransporterTest extends FunSuite {
 
         // Read the initial greeting on the client side
         // Make sure that it can be seen as a MySQL Packet
-        val response = Await.result(transport.read(), Duration.fromSeconds(2))
-        val packet = Packet.fromBuf(response)
+        val packet = Await.result(transport.read(), Duration.fromSeconds(2))
         assert(packet.seq == 0)
         assert(packet.body.length == 74)
       } finally {

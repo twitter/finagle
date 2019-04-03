@@ -15,7 +15,6 @@ import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.{Transport, TransportContext}
-import com.twitter.io.Buf
 import com.twitter.util.{Duration, Future, Monitor}
 import java.net.SocketAddress
 
@@ -161,19 +160,19 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
       params: Stack.Params = this.params
     ): Client = copy(stack, params)
 
-    protected type In = Buf
-    protected type Out = Buf
+    protected type In = Packet
+    protected type Out = Packet
     protected type Context = TransportContext
 
     protected def newTransporter(addr: SocketAddress): Transporter[In, Out, Context] =
       new MysqlTransporter(addr, params)
 
     protected def newDispatcher(
-      transport: Transport[Buf, Buf] {
+      transport: Transport[In, Out] {
         type Context <: Client.this.Context
       }
     ): Service[Request, Result] =
-      mysql.ClientDispatcher(transport.map(_.toBuf, Packet.fromBuf), params)
+      mysql.ClientDispatcher(transport, params)
 
     /**
      * The maximum number of concurrent prepare statements.
