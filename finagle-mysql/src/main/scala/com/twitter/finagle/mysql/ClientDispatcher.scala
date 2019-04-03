@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.{Caffeine, RemovalCause, RemovalListen
 import com.twitter.cache.caffeine.CaffeineCache
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher.wrapWriteException
+import com.twitter.finagle.mysql.LostSyncException.const
 import com.twitter.finagle.mysql.param.{MaxConcurrentPrepareStatements, UnsignedColumns}
 import com.twitter.finagle.mysql.transport.{MysqlBuf, MysqlBufReader, Packet}
 import com.twitter.finagle.transport.Transport
@@ -16,11 +17,6 @@ import com.twitter.util._
  * MySQL server.
  */
 case class ServerError(code: Short, sqlState: String, message: String) extends Exception(message)
-
-case class LostSyncException(underlying: Throwable) extends RuntimeException(underlying) {
-  override def getMessage: String = underlying.toString
-  override def getStackTrace: Array[StackTraceElement] = underlying.getStackTrace
-}
 
 /**
  * Caches statements that have been successfully prepared over the connection
@@ -67,7 +63,6 @@ private[mysql] class PrepareCache(svc: Service[Request, Result], cache: Caffeine
 }
 
 private[finagle] object ClientDispatcher {
-  private val lostSyncExc = LostSyncException(new Throwable)
   private val emptyTx = (Nil, EOF(0: Short, ServerStatus(0)))
 
   /**
@@ -83,14 +78,6 @@ private[finagle] object ClientDispatcher {
     )
   }
 
-  /**
-   * Wrap a Try[T] into a Future[T]. This is useful for
-   * transforming decoded results into futures. Any Throw
-   * is assumed to be a failure to decode and thus a synchronization
-   * error (or corrupt data) between the client and server.
-   */
-  private def const[T](result: Try[T]): Future[T] =
-    Future.const(result.rescue { case exc => Throw(LostSyncException(exc)) })
 }
 
 /**
@@ -268,7 +255,7 @@ private[finagle] final class ClientDispatcher(
 
       case _ =>
         signal.setDone()
-        Future.exception(lostSyncExc)
+        LostSyncException.AsFuture
     }
   }
 
@@ -293,7 +280,7 @@ private[finagle] final class ClientDispatcher(
    */
   private[this] def readTx(req: Request, limit: Int = Int.MaxValue): Future[(Seq[Packet], EOF)] = {
     def aux(numRead: Int, xs: List[Packet]): Future[(List[Packet], EOF)] = {
-      if (numRead > limit) Future.exception(lostSyncExc)
+      if (numRead > limit) LostSyncException.AsFuture
       else
         trans.read().flatMap { packet =>
           MysqlBuf.peek(packet.body) match {
@@ -306,7 +293,7 @@ private[finagle] final class ClientDispatcher(
                 Future.exception(errorToServerError(req, err))
               }
             case Some(_) => aux(numRead + 1, packet :: xs)
-            case None => Future.exception(lostSyncExc)
+            case None => LostSyncException.AsFuture
           }
         }
     }
