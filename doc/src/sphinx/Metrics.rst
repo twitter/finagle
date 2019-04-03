@@ -282,6 +282,23 @@ These stats pertain to the HTTP protocol.
   A counter of the number of non-retryable HTTP 503 responses the HTTP server returns. Those
   responses are not automatically retried.
 
+**stream/failures/<exception_name>**
+  A counter of the number of times a specific exception has been thrown in the middle of a stream.
+
+**stream/failures**
+  A counter of the number of times any failure has been observed in the middle of a stream.
+
+**http/cookie/samesite_failures** `verbosity:debug`
+  A counter of the number of failed attempts to decode the SameSite Cookie attribute.
+
+**rejected_invalid_header_names**
+  A counter of the number of rejected requests by a server due to an invalid (as seen by RFC-7230)
+  header name.
+
+**rejected_invalid_header_values**
+  A counter of the number of rejected requests by a server due to an invalid (as seen by RFC-7230)
+  header value.
+
 These metrics are added by
 :finagle-http-src:`StatsFilter <com/twitter/finagle/http/filter/StatsFilter.scala>` and can be enabled by
 using `.withHttpStats` on `Http.Client` and `Http.Server`.
@@ -299,15 +316,6 @@ using `.withHttpStats` on `Http.Client` and `Http.Server`.
 
 **time/<statusCategory>**
   A histogram on duration in milliseconds per HTTP status code category.
-
-**stream/failures/<exception_name>**
-  A counter of the number of times a specific exception has been thrown in the middle of a stream.
-
-**stream/failures**
-  A counter of the number of times any failure has been observed in the middle of a stream.
-
-**http/cookie/samesite_failures** `verbosity:debug`
-  A counter of the number of failed attempts to decode the SameSite Cookie attribute.
 
 HTTP2
 -----

@@ -10,7 +10,7 @@ import com.twitter.finagle.netty4.http.handler.{
   PayloadSizeHandler,
   UnpoolHttpHandler
 }
-import com.twitter.finagle.param.Logger
+import com.twitter.finagle.param.{Logger, Stats}
 import com.twitter.finagle.http.param._
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.transport.TransportContext
@@ -147,6 +147,7 @@ package object http {
     val decompressionEnabled = params[Decompression].enabled
     val compressionLevel = params[CompressionLevel].level
     val log = params[Logger].log
+    val stats = params[Stats].statsReceiver
 
     { pipeline: ChannelPipeline =>
       compressionLevel match {
@@ -196,7 +197,7 @@ package object http {
       pipeline.addLast(HeaderValidatorHandler.HandlerName, HeaderValidatorHandler)
 
       // We need to handle bad requests as the dispatcher doesn't know how to handle them.
-      pipeline.addLast("badRequestHandler", BadRequestHandler)
+      pipeline.addLast("badRequestHandler", new BadRequestHandler(stats))
 
       // Given that Finagle's channel transports aren't doing anything special (yet)
       // about resource management, we have to turn pooled resources into unpooled ones as

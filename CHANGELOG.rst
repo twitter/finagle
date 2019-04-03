@@ -26,6 +26,10 @@ New Features
 
   - Binary annotation "srv/backup_request_processing", when servers are processing backup requests.
 
+* finagle-http: Added new server metrics to keep track of inbound requests that are rejected due to
+  their headers containing invalid characters (as seen by RFC-7230): `rejected_invalid_header_names`
+  and `rejected_invalid_header_values`. ``PHAB_ID=D294754``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
