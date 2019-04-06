@@ -3,7 +3,7 @@ package com.twitter.finagle.mysql
 import com.twitter.finagle.Stack
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.decoder.LengthFieldFramer
-import com.twitter.finagle.mysql.transport.Packet
+import com.twitter.finagle.mysql.transport.{MysqlTransport, Packet}
 import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.Future
@@ -34,6 +34,8 @@ private[finagle] final class MysqlTransporter(
     Netty4Transporter.framedBuf(Some(framerFactory), remoteAddress, params)
 
   def apply(): Future[Transport[Packet, Packet] { type Context <: TransportContext }] =
-    netty4Transporter().map(transport => transport.map(_.toBuf, Packet.fromBuf))
+    netty4Transporter().map { transport =>
+      new MysqlTransport(transport.map(_.toBuf, Packet.fromBuf))
+    }
 
 }

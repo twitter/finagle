@@ -8,7 +8,6 @@ import com.twitter.finagle.mysql.LostSyncException.const
 import com.twitter.finagle.mysql.param.{MaxConcurrentPrepareStatements, UnsignedColumns}
 import com.twitter.finagle.mysql.transport.{MysqlBuf, MysqlBufReader, Packet}
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Service, ServiceProxy, Stack}
 import com.twitter.util._
 
@@ -110,11 +109,7 @@ private[finagle] final class ClientDispatcher(
         case _ =>
       }
 
-  override def close(deadline: Time): Future[Unit] =
-    trans
-      .write(QuitRequest.toPacket)
-      .by(DefaultTimer, deadline)
-      .ensure(super.close(deadline))
+  override def close(deadline: Time): Future[Unit] = trans.close()
 
   /**
    * Performs the connection phase. The phase should only be performed
