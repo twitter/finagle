@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.util.Showable
+import com.twitter.finagle.util.{CachedHashCode, Showable}
 import com.twitter.util.Var
 import java.net.{InetSocketAddress, SocketAddress}
 import scala.annotation.varargs
@@ -43,7 +43,7 @@ object Name {
    * Path names comprise a [[com.twitter.finagle.Path Path]] denoting a
    * network location.
    */
-  case class Path(path: com.twitter.finagle.Path) extends Name
+  case class Path(path: com.twitter.finagle.Path) extends Name with CachedHashCode.ForCaseClass
 
   /**
    * Bound names comprise a changeable [[Addr]] which carries a host
@@ -59,11 +59,14 @@ object Name {
    */
   class Bound private (val addr: Var[Addr], val id: Any, val path: com.twitter.finagle.Path)
       extends Name
-      with Proxy {
+      with Proxy
+      with CachedHashCode.ForClass {
     def self: Any = id
 
     // Workaround for https://issues.scala-lang.org/browse/SI-4807
     def canEqual(that: Any) = true
+
+    override protected def computeHashCode: Int = self.hashCode
 
     def idStr: String =
       id match {
