@@ -38,6 +38,8 @@ Runtime Behavior Changes
     global flag, `com.twitter.finagle.client.useNackAdmissionFilter`, to false.
     ``PHAB_ID=D289583``
 
+  * `LatencyCompensation` now applies to service acquisition. ``PHAB_ID=D285574``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

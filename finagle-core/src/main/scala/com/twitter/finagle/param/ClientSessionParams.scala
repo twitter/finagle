@@ -26,7 +26,7 @@ class ClientSessionParams[A <: Stack.Parameterized[A]](self: Stack.Parameterized
    * both queueing time (e.g. because we cannot create more connections due
    * to connections limit and there are outstanding requests) as well as physical
    * TCP connection time. Futures returned from `factory()` will always be satisfied
-   * within this timeout.
+   * within this timeout plus any applied [[com.twitter.finagle.client.LatencyCompensation]].
    *
    * This timeout also includes resolving logical destinations, but the cost of
    * resolution is amortized.
