@@ -62,6 +62,10 @@ case class LTrim(key: Buf, start: Long, end: Long) extends ListRangeCommand {
   def name: Buf = Command.LTRIM
 }
 
+case class RPopLPush(source: Buf, dest: Buf) extends MoveCommand {
+  def name: Buf = Command.RPOPLPUSH
+}
+
 trait ListRangeCommand extends StrictKeyCommand {
   def start: Long
   def end: Long

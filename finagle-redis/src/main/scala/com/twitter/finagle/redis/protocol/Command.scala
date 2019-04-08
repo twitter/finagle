@@ -142,6 +142,7 @@ object Command {
   val RPOP = Buf.Utf8("RPOP")
   val RPUSH = Buf.Utf8("RPUSH")
   val LTRIM = Buf.Utf8("LTRIM")
+  val RPOPLPUSH = Buf.Utf8("RPOPLPUSH")
 
   // Key Commands
   val DEL = Buf.Utf8("DEL")
