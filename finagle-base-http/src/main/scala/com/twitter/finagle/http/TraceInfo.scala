@@ -49,6 +49,7 @@ private object TraceInfo {
         case None =>
           ()
       }
+      request.headerMap -= "b3"
     }
 
   def letTraceIdFromRequestHeaders[R](request: Request)(f: => R): R = {
