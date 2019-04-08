@@ -68,7 +68,7 @@ Netty 4
 
 **com.twitter.finagle.netty4.trackReferenceLeaks** `bool`
   Enable reference leak tracking in Netty 4 and export a counter at `finagle/netty4/reference_leaks`
-  (default: `true`).
+  (default: `false`).
 
 **com.twitter.finagle.netty4.timerTicksPerWheel** `int`
   Netty 4 timer ticks per wheel (default: `512`).

@@ -38,7 +38,11 @@ Runtime Behavior Changes
     global flag, `com.twitter.finagle.client.useNackAdmissionFilter`, to false.
     ``PHAB_ID=D289583``
 
-  * `LatencyCompensation` now applies to service acquisition. ``PHAB_ID=D285574``
+  * finagle-core: `LatencyCompensation` now applies to service acquisition. ``PHAB_ID=D285574``
+
+  * finagle-netty4: Netty's reference leak tracking now defaults to disabled.
+    Set the flag `com.twitter.finagle.netty4.trackReferenceLeaks` to `true` to enable.
+    ``PHAB_ID=D297031``
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
