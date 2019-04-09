@@ -8,7 +8,6 @@ scala_library(
     ],
     compiler_option_sets = {"fatal_warnings"},
     dependencies = [
-        "3rdparty/jvm/io/netty",
         "finagle/finagle-core",
         "finagle/finagle-netty4",
         "util/util-core",
@@ -36,7 +35,6 @@ junit_tests(
         ":pushsession-utils",
         ":stringprotocol",
         "3rdparty/jvm/com/github/ben-manes/caffeine",
-        "3rdparty/jvm/io/netty",
         "3rdparty/jvm/io/netty:netty4-codec-http",
         "3rdparty/jvm/junit",
         "3rdparty/jvm/org/hdrhistogram",

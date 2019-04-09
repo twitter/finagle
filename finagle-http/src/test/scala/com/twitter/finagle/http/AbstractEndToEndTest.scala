@@ -13,7 +13,7 @@ import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureDetector}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing.Trace
-import com.twitter.finagle.util.HashedWheelTimer
+import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.{Buf, Pipe, Reader, ReaderDiscardedException, Writer}
 import com.twitter.util._
 import io.netty.buffer.PooledByteBufAllocator
@@ -637,7 +637,7 @@ abstract class AbstractEndToEndTest
           response.setChunked(true)
 
           response.writer.write(Buf.Utf8("hello")) before {
-            Future.sleep(Duration.fromSeconds(3))(HashedWheelTimer.Default) before {
+            Future.sleep(Duration.fromSeconds(3))(DefaultTimer) before {
               response.writer.write(Buf.Utf8("world")) ensure {
                 response.close()
               }
@@ -1603,7 +1603,7 @@ abstract class AbstractEndToEndTest
   }
 
   test(implName + ": methodBuilder timeouts from Stack") {
-    implicit val timer = HashedWheelTimer.Default
+    import DefaultTimer.Implicit
     val svc = new Service[Request, Response] {
       def apply(req: Request): Future[Response] = {
         Future.sleep(50.millis).before {
@@ -1620,7 +1620,7 @@ abstract class AbstractEndToEndTest
     val stats = new InMemoryStatsReceiver()
     val client = clientImpl()
       .withStatsReceiver(stats)
-      .configured(com.twitter.finagle.param.Timer(timer))
+      .configured(com.twitter.finagle.param.Timer(DefaultTimer))
       .withLabel("a_label")
     val name = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
     val builder: MethodBuilder = client.methodBuilder(name)
@@ -1629,7 +1629,7 @@ abstract class AbstractEndToEndTest
   }
 
   test(implName + ": methodBuilder timeouts from ClientBuilder") {
-    implicit val timer = HashedWheelTimer.Default
+    import DefaultTimer.Implicit
     val svc = new Service[Request, Response] {
       def apply(req: Request): Future[Response] = {
         Future.sleep(50.millis).before {
@@ -1645,7 +1645,7 @@ abstract class AbstractEndToEndTest
 
     val stats = new InMemoryStatsReceiver()
     val client = clientImpl()
-      .configured(com.twitter.finagle.param.Timer(timer))
+      .configured(com.twitter.finagle.param.Timer(DefaultTimer))
 
     val clientBuilder = ClientBuilder()
       .reportTo(stats)

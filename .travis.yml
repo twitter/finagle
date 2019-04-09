@@ -22,7 +22,6 @@ env:
     - PROJECT=finagle-mysql
     - PROJECT=finagle-netty4
     - PROJECT=finagle-netty4-http
-    - PROJECT=finagle-netty3
     - PROJECT=finagle-opencensus-tracing
     - PROJECT=finagle-redis
     - PROJECT=finagle-serversets

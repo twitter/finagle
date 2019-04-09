@@ -47,6 +47,13 @@ Runtime Behavior Changes
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+* finagle: Dropped a dependency on Netty 3:
+ - finagle-netty3 sub-project has been removed
+ - finagle-http-cookie sub-project has been removed
+ - `c.t.f.http.Cookie` no longer takes Netty's `DefaultCookie` in the constructor
+ ``PHAB_ID=D291221``
+
+
 * finagle-core: The `peerCertificate` methods of `c.t.f.t.TransportContext` and
   `c.t.f.p.PushChannelHandle` have been replaced with the more robust
   `sslSessionInfo`. Users looking for just the functional equivalence of

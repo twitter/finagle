@@ -4,7 +4,6 @@ import com.twitter.finagle.benchmark.StdBenchAnnotations
 import io.netty.handler.codec.http.QueryStringEncoder
 import java.nio.charset.Charset
 import java.util.{List => JList, Map => JMap}
-import org.jboss.netty.handler.codec.http.QueryStringDecoder
 import org.openjdk.jmh.annotations._
 
 @State(Scope.Benchmark)
@@ -34,11 +33,6 @@ class ParamMapBenchmark extends StdBenchAnnotations {
   @Benchmark
   def queryParamDecoder(): JMap[String, JList[String]] = {
     QueryParamDecoder.decode(queryString)
-  }
-
-  @Benchmark
-  def nettyQueryStringDecoder(): JMap[String, JList[String]] = {
-    new QueryStringDecoder(queryString).getParameters
   }
 
   @Benchmark

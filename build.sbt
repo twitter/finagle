@@ -14,7 +14,6 @@ val zkVersion = "3.5.0-alpha"
 val caffeineLib = "com.github.ben-manes.caffeine" % "caffeine" % "2.3.4"
 val hdrHistogramLib = "org.hdrhistogram" % "HdrHistogram" % "2.1.11"
 val jsr305Lib = "com.google.code.findbugs" % "jsr305" % "2.0.1"
-val netty3Lib = "io.netty" % "netty" % "3.10.1.Final"
 val netty4Libs = Seq(
   "io.netty" % "netty-handler" % netty4Version,
   "io.netty" % "netty-transport" % netty4Version,
@@ -176,7 +175,6 @@ lazy val projectList = Seq[sbt.ProjectReference](
   finagleToggle,
   finagleCore,
   finagleNetty4,
-  finagleNetty3,
   finagleStats,
   finagleStatsCore,
   finagleZipkinCore,
@@ -200,8 +198,7 @@ lazy val projectList = Seq[sbt.ProjectReference](
   finagleThriftMux,
   finagleMySQL,
   finagleRedis,
-  finagleNetty4Http,
-  finagleHttpCookie
+  finagleNetty4Http
 )
 
 lazy val finagle = Project(
@@ -321,25 +318,6 @@ lazy val finagleNetty4 = Project(
   finagleCore % "compile->compile;test->test",
   finagleToggle
 )
-
-lazy val finagleNetty3 = Project(
-  id = "finagle-netty3",
-  base = file("finagle-netty3")
-).settings(
-  sharedSettings
-).settings(
-  name := "finagle-netty3",
-  libraryDependencies ++= Seq(
-    util("app"),
-    util("cache"),
-    util("codec"),
-    util("core"),
-    util("codec"),
-    util("lint"),
-    util("stats"),
-    netty3Lib
-  )
-).dependsOn(finagleCore)
 
 lazy val finagleStatsCore = Project(
   id = "finagle-stats-core",
@@ -483,7 +461,7 @@ lazy val finagleBaseHttp = Project(
     util("logging"),
     netty4Http
   ) ++ netty4Libs
-).dependsOn(finagleCore, finagleNetty3, finagleToggle, finagleHttpCookie)
+).dependsOn(finagleCore, finagleToggle)
 
 lazy val finagleNetty4Http = Project(
   id = "finagle-netty4-http",
@@ -714,18 +692,6 @@ lazy val finagleBenchmark = Project(
   finagleThriftMux,
   finagleZipkinScribe
 ).aggregate(finagleBenchmarkThrift)
-
-lazy val finagleHttpCookie = Project(
-  id = "finagle-http-cookie",
-  base = file("finagle-http-cookie")
-).settings(
-  sharedSettings
-).settings(
-  name := "finagle-http-cookie",
-  libraryDependencies ++= Seq(
-    netty3Lib
-  )
-)
 
 lazy val finagleDoc = Project(
   id = "finagle-doc",
