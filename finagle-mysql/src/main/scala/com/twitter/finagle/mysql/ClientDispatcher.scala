@@ -94,11 +94,15 @@ private[finagle] final class ClientDispatcher(
   import ClientDispatcher._
 
   private[this] val handshakeSettings = HandshakeSettings(params)
-  private[this] val handshake = new Handshake(handshakeSettings)
+  private[this] val handshake = new Handshake(handshakeSettings, trans)
+
+  // Perform the handshake once
+  private[this] val connectionPhase: Future[Result] = handshake.connectionPhase()
+
   private[this] val supportUnsigned: Boolean = params[UnsignedColumns].supported
 
   override def apply(req: Request): Future[Result] =
-    connPhase
+    connectionPhase
       .flatMap { _ =>
         super.apply(req)
       }.onFailure {
@@ -110,26 +114,6 @@ private[finagle] final class ClientDispatcher(
       }
 
   override def close(deadline: Time): Future[Unit] = trans.close()
-
-  /**
-   * Performs the connection phase. The phase should only be performed
-   * once before any other exchange between the client/server. A failure
-   * to handshake renders this service unusable.
-   * [[http://dev.mysql.com/doc/internals/en/connection-phase.html]]
-   */
-  private[this] val connPhase: Future[Result] =
-    trans
-      .read().flatMap { packet =>
-        const(HandshakeInit(packet)).flatMap { init =>
-          const(handshake(init)).flatMap { req =>
-            val rep = new Promise[Result]
-            dispatch(req, rep)
-            rep
-          }
-        }
-      }.onFailure { _ =>
-        close()
-      }
 
   /**
    * Returns a Future that represents the result of an exchange

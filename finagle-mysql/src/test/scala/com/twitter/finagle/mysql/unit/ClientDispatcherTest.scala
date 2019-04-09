@@ -20,17 +20,17 @@ class ClientDispatcherTest extends FunSuite {
   val init = HandshakeInit.decode(initPacket)
 
   val params = Stack.Params.empty + Credentials(Some("username"), Some("password"))
-  val settings = HandshakeSettings(params)
-  val handshake = new Handshake(settings)
-  val initReply = handshake(init)
 
   private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 1.second)
 
   def newCtx = new {
+    val settings = HandshakeSettings(params)
     val clientq = new AsyncQueue[Packet]()
     val serverq = new AsyncQueue[Packet]()
     val trans = new QueueTransport[Packet, Packet](serverq, clientq)
+    val handshake = new Handshake(settings, trans)
     val service = new ClientDispatcher(trans, params)
+
     // authenticate
     clientq.offer(initPacket)
     val handshakeResponse = serverq.poll()
@@ -39,18 +39,6 @@ class ClientDispatcherTest extends FunSuite {
 
   val okPacket =
     Packet(1, Buf.ByteArray.Owned(Array[Byte](0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00)))
-
-  test("handshaking") {
-    val ctx = newCtx
-    import ctx._
-    val packet = await(handshakeResponse)
-    val br = MysqlBuf.reader(packet.body)
-    assert(br.readIntLE() == initReply().clientCap.mask)
-    assert(br.readIntLE() == initReply().maxPacketSize)
-    assert(br.readByte() == initReply().charset)
-    assert(br.take(23) === Array.fill(23)(0.toByte))
-    assert(br.readNullTerminatedString() == "username")
-  }
 
   test("serially dispatch requests") {
     val ctx = newCtx
