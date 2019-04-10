@@ -33,16 +33,19 @@ New Features
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-  * finagle-core: Client-side nacking admission control now defaults on. See the documentation
-    on `c.t.f.filter.NackAdmissionFilter` for details. This can be disabled by setting the
-    global flag, `com.twitter.finagle.client.useNackAdmissionFilter`, to false.
-    ``PHAB_ID=D289583``
+* finagle-core: Client-side nacking admission control now defaults on. See the documentation
+  on `c.t.f.filter.NackAdmissionFilter` for details. This can be disabled by setting the
+  global flag, `com.twitter.finagle.client.useNackAdmissionFilter`, to false.
+  ``PHAB_ID=D289583``
 
-  * finagle-core: `LatencyCompensation` now applies to service acquisition. ``PHAB_ID=D285574``
+* finagle-core: `LatencyCompensation` now applies to service acquisition. ``PHAB_ID=D285574``
 
-  * finagle-netty4: Netty's reference leak tracking now defaults to disabled.
-    Set the flag `com.twitter.finagle.netty4.trackReferenceLeaks` to `true` to enable.
-    ``PHAB_ID=D297031``
+* finagle-http: HTTP headers validation on the outbound path is now in compliance with RFC7230.
+  ``PHAB_ID=D247125``
+
+* finagle-netty4: Netty's reference leak tracking now defaults to disabled.
+  Set the flag `com.twitter.finagle.netty4.trackReferenceLeaks` to `true` to enable.
+  ``PHAB_ID=D297031``
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
@@ -91,7 +94,7 @@ Breaking API Changes
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-  * finagle-core: The tracing annotations from `MkJvmFilter` have been enhanced. ``PHAB_ID=D282590``
+* finagle-core: The tracing annotations from `MkJvmFilter` have been enhanced. ``PHAB_ID=D282590``
 
   - Timestamped annotations "GC Start" and "GC End" for each garbage collection
     event that occurred during the request.

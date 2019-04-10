@@ -1,7 +1,12 @@
 package com.twitter.finagle.http
 
+import com.twitter.finagle.http.Rfc7230HeaderValidation.{
+  ObsFoldDetected,
+  ValidationFailure,
+  ValidationSuccess
+}
 import com.twitter.logging.Logger
-import scala.annotation.{switch, tailrec}
+import scala.annotation.tailrec
 import scala.collection.mutable
 
 /**
@@ -84,103 +89,28 @@ private object DefaultHeaderMap {
 
   private[this] val logger = Logger.get(classOf[DefaultHeaderMap])
 
-  private[this] final def MaxValueChar: Char = 255
+  // Exposed for testing
+  private[http] val ObsFoldRegex = "\r?\n[\t ]+".r
 
-  // Adopted from Netty 3 HttpHeaders.
-  private def validateName(s: String): Unit = {
-    if (s == null) throw new NullPointerException("Header names cannot be null")
-
-    var i = 0
-    while (i < s.length) {
-      val c = s.charAt(i)
-
-      if (c > 127) {
-        throw new IllegalArgumentException(
-          s"Header '$s': name cannot contain non-ASCII characters: $c")
-      }
-
-      (c: @switch) match {
-        case '\t' | '\n' | 0x0b | '\f' | '\r' | ' ' | ',' | ':' | ';' | '=' =>
-          throw new IllegalArgumentException(
-            s"Header '$s': name cannot contain the following prohibited characters: " +
-              "=,;: \\t\\r\\n\\v\\f "
-          )
-        case _ =>
-      }
-
-      i += 1
-    }
-  }
-
-  // Adopted from Netty 3 HttpHeaders.
-  private def foldReplacingValidateValue(name: String, value: String): String = {
-    if (value == null) throw new NullPointerException("Header values cannot be null")
-
-    var i = 0
-
-    // 0: Previous character was neither CR nor LF
-    // 1: The previous character was CR
-    // 2: The previous character was LF
-    var state = 0
-    var foldDetected = false
-
-    while (i < value.length) {
-      val c = value.charAt(i)
-
-      if (c > MaxValueChar)
-        throw new IllegalArgumentException(
-          s"Header '$name': value contains illegal character '$c'"
-        )
-
-      (c: @switch) match {
-        case 0x0b =>
-          throw new IllegalArgumentException(
-            s"Header '$name': value contains a prohibited character '\\v'"
-          )
-        case '\f' =>
-          throw new IllegalArgumentException(
-            s"Header '$name': value contains a prohibited character '\\f'"
-          )
-        case _ =>
-      }
-
-      (state: @switch) match {
-        case 0 =>
-          if (c == '\r') state = 1
-          else if (c == '\n') state = 2
-        case 1 =>
-          if (c == '\n') state = 2
-          else
-            throw new IllegalArgumentException(
-              s"Header '$name': only '\\n' is allowed after '\\r' in value")
-        case 2 =>
-          if (c == '\t' || c == ' ') {
-            foldDetected = true // We are going to replace the folds later
-            state = 0
-          } else
-            throw new IllegalArgumentException(
-              s"Header '$name': only ' ' and '\\t' are allowed after '\\n' in value")
-      }
-
-      i += 1
+  private def validateName(name: String): Unit =
+    Rfc7230HeaderValidation.validateName(name) match {
+      case ValidationSuccess => () // nop
+      case ValidationFailure(ex) => throw ex
     }
 
-    if (state != 0) {
-      throw new IllegalArgumentException(
-        s"Header '$name': value must not end with '\\r' or '\\n'. Observed: " +
-          (if (state == 1) "\\r" else "\\n")
-      )
-    } else if (foldDetected) {
-      logger.debug("`obs-fold` sequence replaced.")
-      // Per https://tools.ietf.org/html/rfc7230#section-3.2.4, an obs-fold is equivalent
-      // to a SP char and suggests that such header values should be 'fixed' before
-      // interpreting or forwarding the message.
-      Rfc7230HeaderValidation.replaceObsFold(value)
-    } else {
-      // Valid and no modifications needed.
-      value
+  private def foldReplacingValidateValue(name: String, value: String): String =
+    Rfc7230HeaderValidation.validateValue(name, value) match {
+      case ValidationSuccess =>
+        value
+      case ValidationFailure(ex) =>
+        throw ex
+      case ObsFoldDetected =>
+        logger.debug("`obs-fold` sequence replaced.")
+        // Per https://tools.ietf.org/html/rfc7230#section-3.2.4, an obs-fold is equivalent
+        // to a SP char and suggests that such header values should be 'fixed' before
+        // interpreting or forwarding the message.
+        Rfc7230HeaderValidation.replaceObsFold(value)
     }
-  }
 
   private final class Header(val name: String, val value: String, var next: Header = null) {
 
