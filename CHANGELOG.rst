@@ -9,6 +9,7 @@ Unreleased
 
 New Features
 ~~~~~~~~~~~~
+
 * finagle-core: Make maxDepth in Namer configurable. ``PHAB_ID=D286444``
 
   - namerMaxDepth in Namer now configurable through a global flag (namerMaxDepth)
@@ -29,6 +30,10 @@ New Features
 * finagle-http: Added new server metrics to keep track of inbound requests that are rejected due to
   their headers containing invalid characters (as seen by RFC-7230): `rejected_invalid_header_names`
   and `rejected_invalid_header_values`. ``PHAB_ID=D294754``
+
+* finagle-http: Added stats of the duration in milliseconds of request/response streams:
+  `request_stream_duration_ms` and `response_stream_duration_ms`. They are enabled by using
+  `.withHttpStats` on `Http.Client` and `Http.Server`  ``PHAB_ID=D297900``
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~

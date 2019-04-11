@@ -44,6 +44,8 @@ class StatsFilter[REQUEST <: Request](stats: StatsReceiver)
   private[this] val statusReceiver = stats.scope("status")
   private[this] val timeReceiver = stats.scope("time")
   private[this] val responseSizeStat = stats.stat("response_size")
+  private[this] val requestStreamDurationMs = stats.stat("request_stream_duration_ms")
+  private[this] val responseStreamDurationMs = stats.stat("response_stream_duration_ms")
 
   private[this] val counterCache: String => Counter =
     Memoize(statusReceiver.counter(_))
@@ -53,9 +55,16 @@ class StatsFilter[REQUEST <: Request](stats: StatsReceiver)
 
   def apply(request: REQUEST, service: Service[REQUEST, Response]): Future[Response] = {
     val elapsed = Stopwatch.start()
+
+    if (request.isChunked) {
+      countRequestStreamDuration(request)
+    }
     val future = service(request)
     future respond {
       case Return(response) =>
+        if (response.isChunked) {
+          countResponseStreamDuration(response)
+        }
         count(elapsed(), response)
       case Throw(_) =>
         // Treat exceptions as empty 500 errors
@@ -76,5 +85,17 @@ class StatsFilter[REQUEST <: Request](stats: StatsReceiver)
     statCache(statusClass).add(duration.inMilliseconds)
 
     responseSizeStat.add(response.length)
+  }
+
+  private def countRequestStreamDuration(request: REQUEST): Unit = {
+    val streamingRequestElapsed = Stopwatch.start()
+    request.reader.onClose.respond(_ =>
+      requestStreamDurationMs.add(streamingRequestElapsed().inMilliseconds))
+  }
+
+  private def countResponseStreamDuration(response: Response): Unit = {
+    val streamingResponseElapsed = Stopwatch.start()
+    response.reader.onClose.respond(_ =>
+      responseStreamDurationMs.add(streamingResponseElapsed().inMilliseconds))
   }
 }
