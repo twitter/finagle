@@ -82,7 +82,7 @@ private[finagle] object ClientDispatcher {
 /**
  * A ClientDispatcher that implements the mysql client/server protocol.
  * For a detailed exposition of the client/server protocol refer to:
- * [[http://dev.mysql.com/doc/internals/en/client-server-protocol.html]]
+ * [[https://dev.mysql.com/doc/internals/en/client-server-protocol.html]]
  *
  * Note, the mysql protocol does not support any form of multiplexing so
  * requests are dispatched serially and concurrent requests are queued.

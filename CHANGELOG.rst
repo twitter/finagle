@@ -497,7 +497,7 @@ New Features
 * finagle-core: Introducing StackTransformer, a consistent mechanism for
   accessing and transforming the default ServerStack. ``PHAB_ID=D207980``
 
-* finagle-netty4: Allow sockets to be configured with the [SO_REUSEPORT](http://lwn.net/Articles/542629/) option
+* finagle-netty4: Allow sockets to be configured with the [SO_REUSEPORT](https://lwn.net/Articles/542629/) option
   when using native epoll, which allows multiple processes to bind and accept connections
   from the same port. ``PHAB_ID=D205535``
 

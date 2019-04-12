@@ -4,7 +4,7 @@ object Type {
 
   /**
    * MySQL type codes as enumerated here:
-   * http://dev.mysql.com/doc/internals/en/com-query-response.html#column-type
+   * https://dev.mysql.com/doc/internals/en/com-query-response.html#column-type
    */
   val Decimal: Short = 0x00
   val Tiny: Short = 0x01

@@ -16,7 +16,7 @@ import org.apache.thrift.protocol.{TBinaryProtocol, TCompactProtocol, TProtocolF
  * @param responseClassifier See [[com.twitter.finagle.service.ResponseClassifier]]
  * @param perEndpointStats Whether to record per-endpoint stats, (default: false).
  *                         By enabling this, the specific Thrift Exceptions can be recorded.
- * See [[http://twitter.github.io/finagle/guide/Metrics.html#perendpoint-statsfilter PerEndpoint StatsFilter]]
+ * See [[https://twitter.github.io/finagle/guide/Metrics.html#perendpoint-statsfilter PerEndpoint StatsFilter]]
  */
 case class RichServerParam(
   protocolFactory: TProtocolFactory = Thrift.param.protocolFactory,

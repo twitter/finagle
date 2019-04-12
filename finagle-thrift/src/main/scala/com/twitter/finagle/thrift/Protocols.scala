@@ -47,9 +47,9 @@ object Protocols {
 
   private val unsafe: Option[sun.misc.Unsafe] = Option(getUnsafe)
 
-  // JDK9 Strings are no longer backed by Array[Char] - http://openjdk.java.net/jeps/254
+  // JDK9 Strings are no longer backed by Array[Char] - https://openjdk.java.net/jeps/254
   private val StringsBackedByCharArray = try {
-    // Versioning changes between 8 and 9 - http://openjdk.java.net/jeps/223
+    // Versioning changes between 8 and 9 - https://openjdk.java.net/jeps/223
     System.getProperty("java.specification.version").replace("1.", "").toInt < 9
   } catch {
     case _: Throwable => false
@@ -256,7 +256,7 @@ object Protocols {
         return
       }
       // this is based on the CharsetEncoder code at:
-      // http://psy-lob-saw.blogspot.co.nz/2013/04/writing-java-micro-benchmarks-with-jmh.html
+      // https://psy-lob-saw.blogspot.co.nz/2013/04/writing-java-micro-benchmarks-with-jmh.html
       // we could probably do better than this via:
       // https://github.com/nitsanw/jmh-samples/blob/master/src/main/java/psy/lob/saw/utf8/CustomUtf8Encoder.java
       val u = unsafe.get

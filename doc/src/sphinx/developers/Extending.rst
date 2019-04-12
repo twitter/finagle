@@ -104,10 +104,10 @@ the interface are defined as such:
     ...
   }
 
-Most Transports are implemented using `Netty <http://netty.io>`_
+Most Transports are implemented using `Netty <https://netty.io>`_
 for I/O multiplexing and protocol codecs.
 
-You have a choice of whether to use `Netty 3 or Netty 4 <http://netty.io/wiki/new-and-noteworthy-in-4.0.html>`_
+You have a choice of whether to use `Netty 3 or Netty 4 <https://netty.io/wiki/new-and-noteworthy-in-4.0.html>`_
 for your protocol implementation. As we have migrated our existing protocols
 to Netty 4, (which is currently in beta and should be considered experimental),
 our best-practice recommendations have evolved, and those will be covered in the
@@ -133,7 +133,7 @@ isn't straight forward to reason about logic split amongst them.
 
 In this case, the ``Pipeline`` will only contain a handler that decodes to/from the Netty buffer type
 (`ChannelBuffer <https://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html>`_
-for Netty 3 and `ByteBuf <http://netty.io/4.0/api/io/netty/buffer/ByteBuf.html>`_ for Netty 4)
+for Netty 3 and `ByteBuf <https://netty.io/4.0/api/io/netty/buffer/ByteBuf.html>`_ for Netty 4)
 from/to the buffer type used in Finagle, :util-core-src:`Buf<com/twitter/io/Buf.scala>`,
 and a framer (or framing could happen in the ``Transport``).
 
@@ -234,17 +234,17 @@ Server Protocol
 To frame data received over the network with respect to our
 protocol, we use a Netty Channel Pipeline. Our server pipeline defines a UTF-8
 text-based newline delimited protocol (since Netty already provides
-a `StringEncoder <http://netty.io/4.0/api/io/netty/handler/codec/string/StringEncoder.html>`_
-and `StringDecoder <http://netty.io/4.0/api/io/netty/handler/codec/string/StringDecoder.html>`_,
+a `StringEncoder <https://netty.io/4.0/api/io/netty/handler/codec/string/StringEncoder.html>`_
+and `StringDecoder <https://netty.io/4.0/api/io/netty/handler/codec/string/StringDecoder.html>`_,
 we'll put this decoding in the Pipeline). The types have different namespaces but look
 much the same in Netty 3 and Netty 4.
 
-Using a Netty 3 `ChannelPipeline <http://netty.io/3.6/api/org/jboss/netty/channel/ChannelPipeline.html>`_:
+Using a Netty 3 `ChannelPipeline <https://netty.io/3.6/api/org/jboss/netty/channel/ChannelPipeline.html>`_:
 
 .. includecode:: ../code/client-server-anatomy/netty3/Pipeline.scala#serverpipeline
    :language: scala
 
-Using a Netty 4 `ChannelPipeline <http://netty.io/4.1/api/io/netty/channel/ChannelPipeline.html>`_:
+Using a Netty 4 `ChannelPipeline <https://netty.io/4.1/api/io/netty/channel/ChannelPipeline.html>`_:
 
 .. includecode:: ../code/client-server-anatomy/netty4/Pipeline.scala#serverpipeline
    :language: scala
@@ -350,7 +350,7 @@ Finally, we make use of our service:
 
 To create a server that uses Netty 3, use a
 :src:`Netty3Listener <com/twitter/finagle/netty3/Netty3Listener.scala>`
-and a Netty 3 `ChannelPipeline <http://netty.io/3.6/api/org/jboss/netty/channel/ChannelPipeline.html>`_.
+and a Netty 3 `ChannelPipeline <https://netty.io/3.6/api/org/jboss/netty/channel/ChannelPipeline.html>`_.
 
 
 Client Protocol
@@ -360,12 +360,12 @@ Again, we'll use a Netty Channel Pipeline to frame our network traffic.
 Our client pipeline defines a UTF-8 newline delimited protocol. As with the server
 pipeline, the types have different namespaces but look much the same in Netty 3 and Netty 4.
 
-Netty 3 `ChannelPipeline <http://netty.io/3.6/api/org/jboss/netty/channel/ChannelPipeline.html>`_:
+Netty 3 `ChannelPipeline <https://netty.io/3.6/api/org/jboss/netty/channel/ChannelPipeline.html>`_:
 
 .. includecode:: ../code/client-server-anatomy/netty3/Pipeline.scala#clientpipeline
    :language: scala
 
-Netty 4 `ChannelPipeline <http://netty.io/4.1/api/io/netty/channel/ChannelPipeline.html>`_:
+Netty 4 `ChannelPipeline <https://netty.io/4.1/api/io/netty/channel/ChannelPipeline.html>`_:
 
 .. includecode:: ../code/client-server-anatomy/netty4/Pipeline.scala#clientpipeline
    :language: scala

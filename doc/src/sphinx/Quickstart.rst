@@ -4,9 +4,9 @@ Quickstart
 In this section we'll use Finagle to build a very simple HTTP server
 that is also an HTTP client — an HTTP proxy. We assume that you
 are familiar with Scala_ (if not, may we recommend
-`Scala School <http://twitter.github.com/scala_school/>`_).
+`Scala School <https://twitter.github.com/scala_school/>`_).
 
-.. _Scala: http://www.scala-lang.org
+.. _Scala: https://www.scala-lang.org
 
 The entire example is available, together with a self-contained
 script to launch sbt, in the Finagle git repository:
@@ -34,7 +34,7 @@ We no longer support ``scala`` ``2.10``.
 
 Any file in this directory will now be compiled by ``sbt``.
 
-.. _sbt: http://www.scala-sbt.org
+.. _sbt: https://www.scala-sbt.org
 
 A minimal HTTP server
 ---------------------

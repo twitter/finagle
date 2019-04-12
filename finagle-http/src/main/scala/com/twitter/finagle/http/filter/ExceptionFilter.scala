@@ -12,7 +12,7 @@ import scala.util.control.NonFatal
  * Uncaught exceptions are converted to 500 Internal Server Error. Cancellations
  * are converted to 499 Client Closed Request. 499 is an Nginx extension for
  * exactly this situation, see:
- *   http://trac.nginx.org/nginx/browser/nginx/trunk/src/http/ngx_http_request.h
+ *   https://trac.nginx.org/nginx/browser/nginx/trunk/src/http/ngx_http_request.h
  */
 class ExceptionFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response] {
   import ExceptionFilter.ClientClosedRequestStatus

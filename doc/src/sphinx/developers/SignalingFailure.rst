@@ -150,4 +150,4 @@ any information (stack trace, message, etc) except for the flags. See
   "any `Throwable with HasFailureFlags` flagged `Rejected` and `NonRetryable`","`T: HasFailureFlags`","`503 Service Unavailable` w/ 'finagle-http-nack' header","`Failure` flagged `Rejected` and `NonRetryable`"
   "any `Throwable with HasFailureFlags` flagged `Rejected`","`T: HasFailureFlags`","`503 Service Unavailable` w/ 'finagle-http-nonretryable-nack' header","`Failure` flagged `Rejected` and `NonRetryable`"
 
-.. _zipkin: http://zipkin.io
+.. _zipkin: https://zipkin.io

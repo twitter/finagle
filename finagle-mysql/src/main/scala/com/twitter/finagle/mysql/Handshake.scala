@@ -104,7 +104,7 @@ private[mysql] final class Handshake(
    * Performs the connection phase. The phase should only be performed
    * once before any other exchange between the client/server. A failure
    * to handshake renders a service unusable.
-   * [[http://dev.mysql.com/doc/internals/en/connection-phase.html]]
+   * [[https://dev.mysql.com/doc/internals/en/connection-phase.html]]
    */
   def connectionPhase(): Future[Result] = {
     val futResult = for {

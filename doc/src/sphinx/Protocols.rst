@@ -12,7 +12,7 @@ protocols. A few of these protocol implementations are documented below.
 Thrift
 ------
 
-`Apache Thrift <http://thrift.apache.org/>`_ is an interface definition
+`Apache Thrift <https://thrift.apache.org/>`_ is an interface definition
 language. With its associated code generator(s) and binary communication
 protocol, Thrift facilitates the development of scalable RPC systems. By
 “scalable”, we specifically mean that IDLs can be shared, allowing developers
@@ -25,7 +25,7 @@ implementations of servers can be swapped out transparently, since they all
 expose the same interface, regardless of language.
 
 Thrift was originally built at Facebook. For more details on the original design,
-check out the `whitepaper <http://thrift.apache.org/static/files/thrift-20070401.pdf>`_.
+check out the `whitepaper <https://thrift.apache.org/static/files/thrift-20070401.pdf>`_.
 
 `finagle-thrift` is used extensively within Twitter, but to meet the needs of our
 service-oriented architecture we had to extend the Thrift protocol. We
@@ -110,7 +110,7 @@ same way that HTTP is an application-layer protocol with ﻿﻿﻿numerous imple
 in a variety of languages, Mux is a session-layer protocol with a Scala
 implementation in the finagle-mux package. Also since it is a purely
 session-layer protocol, Mux can be used in conjunction with protocols from other
-layers of the `OSI <http://en.wikipedia.org/wiki/OSI_model>`_ model. For example,
+layers of the `OSI <https://en.wikipedia.org/wiki/OSI_model>`_ model. For example,
 Finagle currently has an implementation of the Thrift protocol on top of Mux,
 available in the `finagle-thriftmux` package.
 

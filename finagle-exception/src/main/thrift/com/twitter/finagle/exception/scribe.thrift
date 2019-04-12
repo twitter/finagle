@@ -6,7 +6,7 @@
 ##  you may not use this file except in compliance with the License.
 ##  You may obtain a copy of the License at
 ##
-##      http://www.apache.org/licenses/LICENSE-2.0
+##      https://www.apache.org/licenses/LICENSE-2.0
 ##
 ##  Unless required by applicable law or agreed to in writing, software
 ##  distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,7 +15,7 @@
 ##  limitations under the License.
 ##
 ## See accompanying file LICENSE or visit the Scribe site at:
-## http://developers.facebook.com/scribe/
+## https://developers.facebook.com/scribe/
 
 namespace java com.twitter.finagle.exception.thriftjava
 #@namespace scala com.twitter.finagle.exception.thriftscala

@@ -92,7 +92,7 @@ HTTP Proxy
 
 There is built-in support for `tunneling TCP-based protocols <https://tools.ietf.org/html/draft-luotonen-web-proxy-tunneling-01>`_
 through web proxy servers in a default Finagle client that might be used with any TCP traffic, not
-only HTTP(S). See `Squid documentation <http://wiki.squid-cache.org/Features/HTTPS>`_ on this feature.
+only HTTP(S). See `Squid documentation <https://wiki.squid-cache.org/Features/HTTPS>`_ on this feature.
 
 The following example enables tunneling HTTP traffic through a web proxy server `my-proxy-server.com`
 to `twitter.com`.
@@ -205,7 +205,7 @@ output. To override this, use the following sample.
     .withMonitor(monitor)
     .newService("twitter.com")
 
-Finally, clients have built-in support for `Zipkin <http://zipkin.io/>`_.
+Finally, clients have built-in support for `Zipkin <https://zipkin.io/>`_.
 
 .. _client_retries:
 
@@ -656,7 +656,7 @@ The following modules aim to preemptively disable sessions that will likely fail
 From the perspective of the load balancer, they act as circuit breakers which, when
 triggered, temporarily suspend the use of a particular endpoint.
 
-There are at least two modules in the client stacks that might be viewed as `circuit breakers <http://martinfowler.com/bliki/CircuitBreaker.html>`_:
+There are at least two modules in the client stacks that might be viewed as `circuit breakers <https://martinfowler.com/bliki/CircuitBreaker.html>`_:
 
 1. `Fail Fast` - a session-driven circuit breaker
 2. `Failure Accrual` - a request-driven circuit breaker
@@ -944,7 +944,7 @@ level than the  :ref:`Finagle 6 APIs <finagle6apis>` while improving upon the de
 .. rubric:: Footnotes
 
 .. [#backoff] Most of the backoff strategies implemented in Finagle are inspired by Mark
-   Brooker's `blog post <http://www.awsarchitectureblog.com/2015/03/backoff.html>`_.
+   Brooker's `blog post <https://www.awsarchitectureblog.com/2015/03/backoff.html>`_.
 
 .. [#experimental] This configuration was developed to target specific problems we encounter
    at Twitter and should be considered experimental. Note that its API may change as we continue
@@ -982,4 +982,4 @@ level than the  :ref:`Finagle 6 APIs <finagle6apis>` while improving upon the de
 .. [#probation] See ``com.twitter.finagle.loadbalancer.LoadBalancerFactory#EnableProbation``.
 
 .. [#failure_detectors] See `Failure Detectors` section from
-   Alvaro Videla's `blog post <http://videlalvaro.github.io/2015/12/learning-about-distributed-systems.html>`_.
+   Alvaro Videla's `blog post <https://videlalvaro.github.io/2015/12/learning-about-distributed-systems.html>`_.

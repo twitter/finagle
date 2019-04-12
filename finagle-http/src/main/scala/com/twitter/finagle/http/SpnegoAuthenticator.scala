@@ -93,7 +93,7 @@ object SpnegoAuthenticator {
 
       /**
        * Oid for the KRB5 mechanism  These come from
-       * http://www.oid-info.com/get/1.2.840.113554.1.2.2
+       * https://www.oid-info.com/get/1.2.840.113554.1.2.2
        *
        */
       val Krb5Mechanism = new Oid("1.2.840.113554.1.2.2")
@@ -101,7 +101,7 @@ object SpnegoAuthenticator {
 
       /**
        * Oid for the Spnego mechanism  These come from
-       * http://www.oid-info.com/get/1.3.6.1.5.5.2
+       * https://www.oid-info.com/get/1.3.6.1.5.5.2
        *
        */
       val SpnegoMechanism = new Oid("1.3.6.1.5.5.2")

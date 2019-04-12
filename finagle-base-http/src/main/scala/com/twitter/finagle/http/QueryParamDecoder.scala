@@ -20,7 +20,7 @@ private object QueryParamDecoder {
     // LinkedHashMap is known to handle hash collisions particularly well, instead of worst case
     // O(n) behavior, it will achieve O(log(n)) for keys which are of type `Comparable`, which
     // includes `String`, so there is no need to limit the number of keys.
-    // http://openjdk.java.net/jeps/180
+    // https://openjdk.java.net/jeps/180
     val params = new LinkedHashMap[String, JList[String]]
 
     var name: String = null
@@ -35,7 +35,7 @@ private object QueryParamDecoder {
             name = decodeComponent(s.substring(mark, i))
           }
           mark = i + 1
-          // http://www.w3.org/TR/html401/appendix/notes.html#h-B.2.2
+          // https://www.w3.org/TR/html401/appendix/notes.html#h-B.2.2
         } else if (c == '&' || c == ';') {
           if (name == null && mark != i) { // We haven't seen a '=' so far but moved forward.
             // Must be a param of the form '&a&' so add it with

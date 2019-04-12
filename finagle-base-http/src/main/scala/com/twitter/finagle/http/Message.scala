@@ -651,7 +651,7 @@ object Message {
    * @param date the [[java.util.Date]] to format.
    * @return an RFC 7231 formatted String representation of the time represented by the given [[java.util.Date]].
    *
-   * @see [[http://tools.ietf.org/html/rfc7231#section-7.1.1.1 RFC 7231 Section 7.1.1.1]]
+   * @see [[https://tools.ietf.org/html/rfc7231#section-7.1.1.1 RFC 7231 Section 7.1.1.1]]
    */
   def httpDateFormat(date: Date): String = {
     date.toInstant.atOffset(ZoneOffset.UTC).format(HttpDateFormat)
@@ -663,7 +663,7 @@ object Message {
    * @param millis the milliseconds to format.
    * @return an RFC 7231 formatted String representation of the time represented by the given milliseconds.
    *
-   * @see [[http://tools.ietf.org/html/rfc7231#section-7.1.1.1 RFC 7231 Section 7.1.1.1]]
+   * @see [[https://tools.ietf.org/html/rfc7231#section-7.1.1.1 RFC 7231 Section 7.1.1.1]]
    */
   def httpDateFormat(millis: Long): String = {
     HttpDateFormat.format(Instant.ofEpochMilli(millis))

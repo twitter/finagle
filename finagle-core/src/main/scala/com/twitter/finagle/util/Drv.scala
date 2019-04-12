@@ -27,7 +27,7 @@ object Drv {
    * Discrete Random Variables with General Distributions. ACM Trans.
    * Math. Softw. 3, 3 (September 1977), 253-256.
    * DOI=10.1145/355744.355749
-   * http://doi.acm.org/10.1145/355744.355749
+   * https://doi.acm.org/10.1145/355744.355749
    *
    * Package private for testing.
    */
@@ -52,7 +52,7 @@ object Drv {
    * [1] Michael D. Vose. 1991. A Linear Algorithm for Generating Random
    * Numbers with a Given Distribution. IEEE Trans. Softw. Eng. 17, 9
    * (September 1991), 972-975. DOI=10.1109/32.92917
-   * http://dx.doi.org/10.1109/32.92917
+   * https://dx.doi.org/10.1109/32.92917
    *
    * Package private for testing.
    */

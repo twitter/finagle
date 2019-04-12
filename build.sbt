@@ -60,7 +60,7 @@ val sharedSettings = Seq(
   libraryDependencies ++= Seq(
     "org.scalacheck" %% "scalacheck" % "1.13.4" % "test",
     "org.scalatest" %% "scalatest" % "3.0.0" % "test",
-    // See http://www.scala-sbt.org/0.13/docs/Testing.html#JUnit
+    // See https://www.scala-sbt.org/0.13/docs/Testing.html#JUnit
     "com.novocode" % "junit-interface" % "0.11" % "test",
     "org.mockito" % "mockito-all" % "1.9.5" % "test"
   ),
@@ -112,7 +112,7 @@ val sharedSettings = Seq(
     <licenses>
       <license>
         <name>Apache License, Version 2.0</name>
-        <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+        <url>https://www.apache.org/licenses/LICENSE-2.0</url>
       </license>
     </licenses>
     <scm>

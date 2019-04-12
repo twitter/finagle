@@ -24,7 +24,7 @@ import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory
 
 /**
- * Client and server for [[http://thrift.apache.org Apache Thrift]].
+ * Client and server for [[https://thrift.apache.org Apache Thrift]].
  * `Thrift` implements Thrift framed transport and binary protocol by
  * default, though custom protocol factories (i.e. wire encoding) may
  * be injected with `withProtocolFactory`. The client,

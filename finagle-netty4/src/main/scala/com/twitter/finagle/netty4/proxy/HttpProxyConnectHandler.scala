@@ -31,7 +31,7 @@ import java.net.SocketAddress
  *       channel handlers that write on `channelAdded` or `channelActive`.
  *
  * [1]: https://tools.ietf.org/html/draft-luotonen-web-proxy-tunneling-01
- * [2]: http://wiki.squid-cache.org/Features/HTTPS
+ * [2]: https://wiki.squid-cache.org/Features/HTTPS
  * [3]: https://github.com/netty/netty/blob/4.1/handler-proxy/src/main/java/io/netty/handler/proxy/HttpProxyHandler.java
  *
  * @param host the ultimate host a remote proxy server connects to

@@ -11,7 +11,7 @@ object RequireClientProtocol extends ErrorConversion {
 /**
  * Redis command.
  *
- * @see http://redis.io/commands
+ * @see https://redis.io/commands
  */
 abstract class Command {
   def name: Buf

@@ -29,13 +29,13 @@ their behavior.
 
 Other useful resources include:
 
-- `Your Server as a Function <http://monkey.org/~marius/funsrv.pdf>`_, a paper motivating the core abstractions behind finagle (`PLOS’13 <http://sigops.org/sosp/sosp13/plos.html>`_).
+- `Your Server as a Function <https://monkey.org/~marius/funsrv.pdf>`_, a paper motivating the core abstractions behind finagle (`PLOS’13 <https://sigops.org/sosp/sosp13/plos.html>`_).
 - `Twitter engineering blog entry introducing Finagle <https://blog.twitter.com/2011/finagle-a-protocol-agnostic-rpc-system>`_
-- Twitter's `Scala School <http://twitter.github.com/scala_school/>`_ has a section `introducing Finagle <http://twitter.github.com/scala_school/finagle.html>`_ and another `constructing a distributed search engine using Finagle <http://twitter.github.com/scala_school/searchbird.html>`_
-- `Finagle 101 <http://kostyukov.net/posts/finagle-101/>`_ by Vladimir Kostyukov
+- Twitter's `Scala School <https://twitter.github.com/scala_school/>`_ has a section `introducing Finagle <https://twitter.github.com/scala_school/finagle.html>`_ and another `constructing a distributed search engine using Finagle <https://twitter.github.com/scala_school/searchbird.html>`_
+- `Finagle 101 <https://kostyukov.net/posts/finagle-101/>`_ by Vladimir Kostyukov
 
-.. _Dapper: http://research.google.com/pubs/pub36356.html
-.. _Zipkin: http://zipkin.io
+.. _Dapper: https://research.google.com/pubs/pub36356.html
+.. _Zipkin: https://zipkin.io
 
 Contents
 --------

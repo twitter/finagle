@@ -10,7 +10,7 @@ private[redis] trait HyperLogLogCommands { self: BaseClient =>
   /**
    * Adds `elements` to a HyperLogLog data structure stored under hash `key`.
    *
-   * @see http://redis.io/commands/pfadd
+   * @see https://redis.io/commands/pfadd
    *
    * @return Whether a bit was set in the HyperLogLog data structure.
    */
@@ -23,7 +23,7 @@ private[redis] trait HyperLogLogCommands { self: BaseClient =>
    * Gets the approximated cardinality (number of unique elements) of sets
    * observed by the HyperLogLog at `keys`.
    *
-   * @see http://redis.io/commands/pfcount
+   * @see https://redis.io/commands/pfcount
    */
   def pfCount(keys: Seq[Buf]): Future[JLong] =
     doRequest(PFCount(keys)) {
@@ -33,7 +33,7 @@ private[redis] trait HyperLogLogCommands { self: BaseClient =>
   /**
    * Merges HyperLogLogs at `srcKeys` to create a new HyperLogLog at `destKey`.
    *
-   * @see http://redis.io/commands/pfmerge
+   * @see https://redis.io/commands/pfmerge
    */
   def pfMerge(destKey: Buf, srcKeys: Seq[Buf]): Future[Unit] =
     doRequest(PFMerge(destKey, srcKeys)) {

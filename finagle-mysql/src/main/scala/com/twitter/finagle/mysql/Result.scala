@@ -18,7 +18,7 @@ trait Decoder[T <: Result] extends (Packet => Try[T]) {
 
 /**
  * First result received from the server as part of the connection phase.
- * [[http://dev.mysql.com/doc/internals/en/connection-phase-packets.html]]
+ * [[https://dev.mysql.com/doc/internals/en/connection-phase-packets.html]]
  */
 object HandshakeInit extends Decoder[HandshakeInit] {
   def decode(packet: Packet): HandshakeInit = {
@@ -88,7 +88,7 @@ case class HandshakeInit(
 object OK extends Decoder[OK] {
 
   /**
-   * @see [[http://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-OK_Packet]]
+   * @see [[https://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-OK_Packet]]
    */
   def decode(packet: Packet): OK = {
     val br = MysqlBuf.reader(packet.body)
@@ -132,7 +132,7 @@ case class OK(
 
 /**
  * Represents the Error Packet received from the server and the data sent along with it.
- * [[http://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-ERR_Packet]]
+ * [[https://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-ERR_Packet]]
  */
 object Error extends Decoder[Error] {
   def decode(packet: Packet): Error = {
@@ -153,7 +153,7 @@ case class Error(code: Short, sqlState: String, message: String) extends Result
 /**
  * Represents and EOF result received from the server which
  * contains any warnings and the server status.
- * [[http://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-EOF_Packet]]
+ * [[https://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-EOF_Packet]]
  */
 object EOF extends Decoder[EOF] {
   def decode(packet: Packet): EOF = {
@@ -187,7 +187,7 @@ object FieldAttributes {
  * Represents the column meta-data associated with a query.
  * Sent during ResultSet transmission and as part of the
  * meta-data associated with a Row.
- * [[http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-Protocol::ColumnDefinition41]]
+ * [[https://dev.mysql.com/doc/internals/en/com-query-response.html#packet-Protocol::ColumnDefinition41]]
  */
 object Field extends Decoder[Field] {
   def decode(packet: Packet): Field = {
@@ -253,7 +253,7 @@ case class Field(
  * Meta data returned from the server in response to
  * a prepared statement initialization request
  * COM_STMT_PREPARE.
- * [[http://dev.mysql.com/doc/internals/en/com-stmt-prepare-response.html#packet-COM_STMT_PREPARE_OK]]
+ * [[https://dev.mysql.com/doc/internals/en/com-stmt-prepare-response.html#packet-COM_STMT_PREPARE_OK]]
  */
 object PrepareOK extends Decoder[PrepareOK] {
   def decode(header: Packet): PrepareOK = {
@@ -290,8 +290,8 @@ object CloseStatementOK extends OK(0, 0, 0, 0, "Internal Close OK")
  * Resultset returned from the server containing field definitions and
  * rows. The rows can be binary encoded (for prepared statements)
  * or text encoded (for regular queries).
- * [[http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-ProtocolText::Resultset]]
- * [[http://dev.mysql.com/doc/internals/en/binary-protocol-resultset.html]]
+ * [[https://dev.mysql.com/doc/internals/en/com-query-response.html#packet-ProtocolText::Resultset]]
+ * [[https://dev.mysql.com/doc/internals/en/binary-protocol-resultset.html]]
  */
 private object ResultSetBuilder {
   def apply(

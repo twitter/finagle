@@ -27,7 +27,7 @@ import scala.util.control.NonFatal
  * Denylist of regex, comma-separated. Comma is a reserved character and
  * cannot be used. Used with regexes from statsFilterFile.
  *
- * See http://www.scala-lang.org/api/current/#scala.util.matching.Regex
+ * See https://www.scala-lang.org/api/current/#scala.util.matching.Regex
  */
 object statsFilter
     extends GlobalFlag[String](
@@ -39,7 +39,7 @@ object statsFilter
  * Comma-separated denylist of files. Each file may have multiple filters,
  * separated by new lines. Used with regexes from statsFilter.
  *
- * See http://www.scala-lang.org/api/current/#scala.util.matching.Regex
+ * See https://www.scala-lang.org/api/current/#scala.util.matching.Regex
  */
 object statsFilterFile
     extends GlobalFlag[Set[File]](

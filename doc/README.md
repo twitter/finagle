@@ -15,4 +15,4 @@ To publish a new version of the user guide to GitHub Pages:
     2. Execute the script `finagle/pushsite.bash`.
 
 [0]: https://github.com/twitter/finagle/blob/master/CONTRIBUTING.md#building-dependencies
-[1]: http://sphinx-doc.org/install.html
+[1]: https://www.sphinx-doc.org/en/master/usage/installation.html
