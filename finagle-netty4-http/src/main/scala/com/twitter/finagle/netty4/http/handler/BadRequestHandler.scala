@@ -9,6 +9,10 @@ import io.netty.handler.codec.TooLongFrameException
 import io.netty.handler.codec.http.{HttpMessage, HttpObject}
 import io.netty.util.ReferenceCountUtil
 
+private object BadRequestHandler {
+  val log = Logger()
+}
+
 /**
  * A `ChannelHandler` for turning http decoding errors into meaningful responses.
  *
@@ -24,7 +28,7 @@ private[netty4] class BadRequestHandler(stats: StatsReceiver) extends ChannelInb
   private[this] val invalidHeaderNames = stats.counter("rejected_invalid_header_names")
   private[this] val invalidHeaderValues = stats.counter("rejected_invalid_header_values")
 
-  private[this] val log = Logger()
+  import BadRequestHandler._
 
   override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit = msg match {
     // NOTE: HttpObjectDecoder sets the DecoderResult on an inbound HTTP message when either
