@@ -82,7 +82,7 @@ We're now ready to run it:
 
 ::
 
-	$ ./sbt 'run-main Server'
+	$ ./sbt 'runMain Server'
 
 Which exposes an HTTP server on port 8080 which
 dispatches requests to ``service``:
@@ -128,7 +128,7 @@ which in turn is run by:
 
 ::
 
-	$ ./sbt 'run-main Client'
+	$ ./sbt 'runMain Client'
 	...
 	GET success: Response("HTTP/1.1 Status(200)")
 	...
@@ -149,7 +149,7 @@ And we can run it and dispatch requests to it
 
 ::
 
-	$ ./sbt 'run-main Proxy' &
+	$ ./sbt 'runMain Proxy' &
 	$ curl --dump-header - --header "Host: twitter.com" localhost:8080
 	HTTP/1.1 301 Moved Permanently
 	content-length: 0
