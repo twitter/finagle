@@ -18,6 +18,9 @@ New Features
   intended for providing information about a connection's SSL/TLS session.
   ``PHAB_ID=D286242``
 
+* finagle-core: Added the `c.t.finagle.DtabFlags` trait which defines a Flag and function for
+  appending to the "base" `c.t.finagle.Dtab` delegation table. ``PHAB_ID=D297596``
+
 * finagle-http: Finagle HTTP implementation now supports trailing headers (trailers). Use
   `c.t.f.http.Message.trailers` to access trailing headers on a fully-buffered message
   (`isChunked == false`) or `c.t.f.http.Message.chunkReader` on a message with chunked payload
