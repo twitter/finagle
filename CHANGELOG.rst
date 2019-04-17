@@ -38,6 +38,10 @@ New Features
   `request_stream_duration_ms` and `response_stream_duration_ms`. They are enabled by using
   `.withHttpStats` on `Http.Client` and `Http.Server`  ``PHAB_ID=D297900``
 
+* finagle-mysql: A new toggle, "com.twitter.finagle.mysql.IncludeHandshakeInServiceAcquisition", has
+  been added. Turning on this toggle will move MySQL session establishment (connection phase) to be
+  part of service acqusition. ``PHAB_ID=D301456``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -68,11 +68,18 @@ private[finagle] object ClientDispatcher {
    * Creates a mysql client dispatcher with write-through caches for optimization.
    * @param trans A transport that reads a writes logical mysql packets.
    * @param params A collection of `Stack.Params` useful for configuring a mysql client.
+   * @param performHandshake Indicates whether MySQL session establishment should be
+   * performed in the dispatcher. This is preferably performed in the transporter during
+   * service acquisition.
    */
-  def apply(trans: Transport[Packet, Packet], params: Stack.Params): Service[Request, Result] = {
+  def apply(
+    trans: Transport[Packet, Packet],
+    params: Stack.Params,
+    performHandshake: Boolean
+  ): Service[Request, Result] = {
     val maxConcurrentPrepareStatements = params[MaxConcurrentPrepareStatements].num
     new PrepareCache(
-      new ClientDispatcher(trans, params),
+      new ClientDispatcher(trans, params, performHandshake),
       Caffeine.newBuilder().maximumSize(maxConcurrentPrepareStatements)
     )
   }
@@ -89,15 +96,18 @@ private[finagle] object ClientDispatcher {
  */
 private[finagle] final class ClientDispatcher(
   trans: Transport[Packet, Packet],
-  params: Stack.Params)
+  params: Stack.Params,
+  performHandshake: Boolean)
     extends GenSerialClientDispatcher[Request, Result, Packet, Packet](trans) {
   import ClientDispatcher._
 
   private[this] val handshakeSettings = HandshakeSettings(params)
   private[this] val handshake = new Handshake(handshakeSettings, trans)
 
-  // Perform the handshake once
-  private[this] val connectionPhase: Future[Result] = handshake.connectionPhase()
+  // Perform the handshake (possibly) once
+  private[this] val connectionPhase: Future[Unit] =
+    if (performHandshake) handshake.connectionPhase().unit
+    else Future.Done
 
   private[this] val supportUnsigned: Boolean = params[UnsignedColumns].supported
 

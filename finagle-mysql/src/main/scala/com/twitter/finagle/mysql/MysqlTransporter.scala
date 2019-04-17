@@ -10,14 +10,15 @@ import com.twitter.util.Future
 import java.net.SocketAddress
 
 /**
- * A MySQL specific `framedBuf` `Transporter` which at this time is only
- * responsible for connection establishment and framing. Eventually this
- * `Transporter` should be responsible for session acquisition for a
- * MySQL plain or encrypted session.
+ * A MySQL specific `framedBuf` `Transporter` which is responsible
+ * for connection establishment and framing. When the `performHandshake`
+ * parameter is provided a value of `true`, it is additionally responsible
+ * for session establishment for a plain MySQL session.
  */
 private[finagle] final class MysqlTransporter(
   val remoteAddress: SocketAddress,
-  params: Stack.Params)
+  params: Stack.Params,
+  performHandshake: Boolean)
     extends Transporter[Packet, Packet, TransportContext] {
 
   private[this] val framerFactory = () => {
@@ -33,9 +34,21 @@ private[finagle] final class MysqlTransporter(
   private[this] val netty4Transporter =
     Netty4Transporter.framedBuf(Some(framerFactory), remoteAddress, params)
 
-  def apply(): Future[Transport[Packet, Packet] { type Context <: TransportContext }] =
+  private[this] def createTransport(): Future[MysqlTransport] =
     netty4Transporter().map { transport =>
       new MysqlTransport(transport.map(_.toBuf, Packet.fromBuf))
     }
+
+  private[this] def createTransportWithSession(): Future[MysqlTransport] = {
+    createTransport().flatMap { transport =>
+      val handshakeSettings = HandshakeSettings(params)
+      val handshake = new Handshake(handshakeSettings, transport)
+      handshake.connectionPhase().map(_ => transport)
+    }
+  }
+
+  def apply(): Future[Transport[Packet, Packet] { type Context <: TransportContext }] =
+    if (performHandshake) createTransportWithSession()
+    else createTransport()
 
 }
