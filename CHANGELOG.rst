@@ -55,6 +55,11 @@ Runtime Behavior Changes
   Set the flag `com.twitter.finagle.netty4.trackReferenceLeaks` to `true` to enable.
   ``PHAB_ID=D297031``
 
+* finagle-toggle, finagle-stats-core, finagle-zipkin-core, finagle-exception, finagle-serversets,
+  finagle-tunable, finagle-memcached: Upgrade jackson library to version 2.9.8 to address the
+  following vulnerabilities: CVE-2018-14718, CVE-2018-14719, CVE-2018-14720, CVE-2018-14721,
+  CVE-2018-19360, CVE-2018-19361, CVE-2018-19362.
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

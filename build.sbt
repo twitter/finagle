@@ -34,7 +34,7 @@ val netty4Http = "io.netty" % "netty-codec-http" % netty4Version
 val netty4Http2 = "io.netty" % "netty-codec-http2" % netty4Version
 val netty4StaticSsl = "io.netty" % "netty-tcnative-boringssl-static" % "2.0.19.Final"
 val opencensusVersion = "0.19.1"
-val jacksonVersion = "2.9.6"
+val jacksonVersion = "2.9.8"
 val jacksonLibs = Seq(
   "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
