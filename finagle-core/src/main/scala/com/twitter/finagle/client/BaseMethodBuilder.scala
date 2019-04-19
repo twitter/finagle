@@ -5,10 +5,11 @@ import com.twitter.util.Duration
 import com.twitter.util.tunable.Tunable
 
 /**
- * @note This interface primarily exists to share Scaladocs across
- *       protocol-specific `MethodBuilder` implementations.
+ * A base interface for protocol-specific `MethodBuilder` implementations.
+ * Acts as a template for `MethodBuilder` pattern and provides the documentation
+ * for common methods.
  */
-private[finagle] trait MethodBuilderScaladoc[T] {
+trait BaseMethodBuilder[T] {
 
   /**
    * Set a total timeout, including time spent on retries.

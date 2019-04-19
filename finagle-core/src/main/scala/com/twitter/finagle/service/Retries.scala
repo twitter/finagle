@@ -114,7 +114,7 @@ object Retries {
    * Retries failures that are guaranteed to be safe to retry
    * (see [[RetryPolicy.RetryableWriteException]]).
    */
-  private[finagle] def moduleRequeueable[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+  def moduleRequeueable[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module[ServiceFactory[Req, Rep]] {
       def role: Stack.Role = Retries.Role
 

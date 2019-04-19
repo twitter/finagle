@@ -24,7 +24,8 @@ object TimeoutFactory {
    * @param _role The stack role used to identify the TimeoutFactory when inserted
    * into a stack.
    */
-  private[finagle] def module[Req, Rep](_role: Stack.Role): Stackable[ServiceFactory[Req, Rep]] =
+  def module[Req, Rep](role: Stack.Role): Stackable[ServiceFactory[Req, Rep]] = {
+    val _role = role
     new Stack.Module4[
       Param,
       param.Timer,
@@ -32,8 +33,9 @@ object TimeoutFactory {
       LatencyCompensation.Compensation,
       ServiceFactory[Req, Rep]
     ] {
-      val role = _role
-      val description = "Timeout service acquisition after a given period"
+      val role: Stack.Role = _role
+      val description: String = "Timeout service acquisition after a given period"
+
       def make(
         _timeout: Param,
         _timer: param.Timer,
@@ -53,6 +55,7 @@ object TimeoutFactory {
         new TimeoutFactory(next, totalTimeout, exc, timer)
       }
     }
+  }
 }
 
 /**

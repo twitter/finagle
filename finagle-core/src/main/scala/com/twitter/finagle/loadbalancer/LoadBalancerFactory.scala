@@ -318,7 +318,7 @@ object LoadBalancerFactory {
     }
   }
 
-  private[finagle] def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new StackModule[Req, Rep] {
       val description = "Balances requests across a collection of endpoints."
     }

@@ -201,7 +201,7 @@ object MethodBuilder {
  * @see The [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]].
  */
 class MethodBuilder private (mb: client.MethodBuilder[Request, Response])
-    extends client.MethodBuilderScaladoc[MethodBuilder] {
+    extends client.BaseMethodBuilder[MethodBuilder] {
 
   def withTimeoutTotal(howLong: Duration): MethodBuilder =
     new MethodBuilder(mb.withTimeout.total(howLong))

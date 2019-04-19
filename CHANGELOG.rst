@@ -45,6 +45,14 @@ New Features
   been added. Turning on this toggle will move MySQL session establishment (connection phase) to be
   part of service acqusition. ``PHAB_ID=D301456``
 
+* finagle-core: Support for MethodBuilder and stack construction outside of `c.t.f` package.
+  ``PHAB_ID=D275053``.
+  This includes:
+  - `c.t.f.client.MethodBuilder` is now public.
+  - construction of the following stack modules are now public: `c.t.f.factory.TimeoutFactory`,
+    `c.t.f.filter.ExceptionSourceFilter`, `c.t.f.loadbalancer.LoadBalancerFactory`,
+    `c.t.f.service.Retries`
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -141,6 +149,7 @@ New Features
   - Request deserialization time, in nanoseconds
   - Response serialization time, in nanoseconds
   - Response deserialization time, in nanoseconds
+
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
