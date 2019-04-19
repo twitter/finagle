@@ -203,7 +203,7 @@ declares the static type of its associated values, so although the record itself
 field access is type-safe.</p><p>Given a RecordSchema declaration <code>schema</code>, any number of
 <a href="RecordSchema$Record.html" class="extype" name="com.twitter.finagle.http.collection.RecordSchema.Record">Records</a> of that schema can be obtained with
 <code>schema.newRecord</code>. The type that Scala assigns to this value is what Scala calls a
-&quot;<a href="http://lampwww.epfl.ch/~amin/dot/fpdt.pdf" target="_blank">path-dependent type</a>,&quot; meaning that
+&quot;<a href="https://lampwww.epfl.ch/~amin/dot/fpdt.pdf" target="_blank">path-dependent type</a>,&quot; meaning that
 <code>schema1.Record</code> and <code>schema2.Record</code> name distinct types. The same is true of fields:
 <code>schema1.Field[A]</code> and <code>schema2.Field[A]</code> are distinct, and can only be used with the
 corresponding Record.

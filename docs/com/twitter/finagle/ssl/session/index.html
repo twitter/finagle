@@ -147,10 +147,10 @@ returns a <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.h
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.netty3" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="netty3"></a><a id="netty3:netty3"></a>
+    </li><li name="com.twitter.finagle.ssl" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ssl"></a><a id="ssl:ssl"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#netty3" title="Permalink">
+      <a href="../../../com/twitter/finagle/index.html#ssl" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -159,22 +159,14 @@ resources for using Finagle.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="Package netty3 implements the bottom finagle primitives: {{com.twitter.finagle.Server}} and a client transport in terms of the netty3 event loop." href="../index.html"><span class="name">netty3</span></a>
+        <a title="" href="../index.html"><span class="name">ssl</span></a>
       </span>
       
-      <p class="shortcomment cmt">Package netty3 implements the bottom finagle primitives:
-{{com.twitter.finagle.Server}} and a client transport in terms of
-the netty3 event loop.</p><div class="fullcomment"><div class="comment cmt"><p>Package netty3 implements the bottom finagle primitives:
-{{com.twitter.finagle.Server}} and a client transport in terms of
-the netty3 event loop.</p><p>Note: when {{com.twitter.finagle.builder.ClientBuilder}} and
-{{com.twitter.finagle.builder.ServerBuilder}} are deprecated,
-package netty3 can move into its own package, so that only the
-(new-style) clients and servers that depend on netty3 bring it in.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.netty3.channel" visbl="pub" class="indented5 current" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="channel"></a><a id="channel:channel"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.ssl.client" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="client"></a><a id="client:client"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty3/index.html#channel" title="Permalink">
+      <a href="../../../../com/twitter/finagle/ssl/index.html#client" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -183,59 +175,47 @@ package netty3 can move into its own package, so that only the
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <span class="name">channel</span>
+        <a title="" href="../client/index.html"><span class="name">client</span></a>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.netty3">netty3</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.ssl">ssl</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.ssl.server" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="server"></a><a id="server:server"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/ssl/index.html#server" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../server/index.html"><span class="name">server</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.ssl">ssl</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.ssl.session" visbl="pub" class="indented5 current" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="session"></a><a id="session:session"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/ssl/index.html#session" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">session</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.ssl">ssl</a></dd></dl></div>
     </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="BrokerChannelHandler.html" title=""></a>
-                        <a href="BrokerChannelHandler.html" title="">BrokerChannelHandler</a>
-                      </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="class" href="ChannelStatsHandler.html" title="A org.jboss.netty.channel.ChannelHandler that tracks channel/connection statistics."></a>
-                        <a href="ChannelStatsHandler.html" title="A org.jboss.netty.channel.ChannelHandler that tracks channel/connection statistics.">ChannelStatsHandler</a>
-                      </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="class" href="IdleChannelHandler.html" title="This handler closes a channel if it receives an IDLE event."></a>
-                        <a href="IdleChannelHandler.html" title="This handler closes a channel if it receives an IDLE event.">IdleChannelHandler</a>
-                      </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="class" href="LeftFoldUpstreamHandler.html" title=""></a>
-                        <a href="LeftFoldUpstreamHandler.html" title="">LeftFoldUpstreamHandler</a>
-                      </li><li name="com.twitter.finagle.netty3.socks" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="socks"></a><a id="socks:socks"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty3/index.html#socks" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../socks/index.html"><span class="name">socks</span></a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.netty3">netty3</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.netty3.transport" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="transport"></a><a id="transport:transport"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty3/index.html#transport" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../transport/index.html"><span class="name">transport</span></a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.netty3">netty3</a></dd></dl></div>
-    </li>
+                        <a class="class" href="SslSessionInfo.html" title="SslSessionInfo provides information related to an existing connection's use of an SSL/TLS session."></a>
+                        <a href="SslSessionInfo.html" title="SslSessionInfo provides information related to an existing connection's use of an SSL/TLS session.">SslSessionInfo</a>
+                      </li>
               </ul>
             </div>
           </div>
@@ -243,9 +223,9 @@ package netty3 can move into its own package, so that only the
             <body class="package value">
       <div id="definition">
         <div class="big-circle package">p</div>
-        <p id="owner"><a href="../../../../index.html" class="extype" name="com">com</a>.<a href="../../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../index.html" class="extype" name="com.twitter.finagle.netty3">netty3</a></p>
-        <h1>channel<span class="permalink">
-      <a href="../../../../../com/twitter/finagle/netty3/channel/index.html" title="Permalink">
+        <p id="owner"><a href="../../../../index.html" class="extype" name="com">com</a>.<a href="../../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../index.html" class="extype" name="com.twitter.finagle.ssl">ssl</a></p>
+        <h1>session<span class="permalink">
+      <a href="../../../../../com/twitter/finagle/ssl/session/index.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
@@ -258,7 +238,7 @@ package netty3 can move into its own package, so that only the
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <span class="name">channel</span>
+        <span class="name">session</span>
       </span>
       </h4>
 
@@ -274,75 +254,31 @@ package netty3 can move into its own package, so that only the
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.netty3.channel.BrokerChannelHandler" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="BrokerChannelHandlerextendsSimpleChannelHandler"></a><a id="BrokerChannelHandler:BrokerChannelHandler"></a>
+              <ol><li name="com.twitter.finagle.ssl.session.SslSessionInfo" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="SslSessionInfoextendsAnyRef"></a><a id="SslSessionInfo:SslSessionInfo"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/netty3/channel/index.html#BrokerChannelHandlerextendsSimpleChannelHandler" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/ssl/session/index.html#SslSessionInfoextendsAnyRef" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">abstract </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="" href="BrokerChannelHandler.html"><span class="name">BrokerChannelHandler</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.SimpleChannelHandler">SimpleChannelHandler</span></span>
+        <a title="SslSessionInfo provides information related to an existing connection's use of an SSL/TLS session." href="SslSessionInfo.html"><span class="name">SslSessionInfo</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
-      
-    </li><li name="com.twitter.finagle.netty3.channel.ChannelStatsHandler" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ChannelStatsHandlerextendsSimpleChannelHandler"></a><a id="ChannelStatsHandler:ChannelStatsHandler"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/netty3/channel/index.html#ChannelStatsHandlerextendsSimpleChannelHandler" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="A org.jboss.netty.channel.ChannelHandler that tracks channel/connection statistics." href="ChannelStatsHandler.html"><span class="name">ChannelStatsHandler</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.SimpleChannelHandler">SimpleChannelHandler</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">A <span class="extype" name="org.jboss.netty.channel.ChannelHandler">org.jboss.netty.channel.ChannelHandler</span> that tracks channel/connection
-statistics.</p><div class="fullcomment"><div class="comment cmt"><p>A <span class="extype" name="org.jboss.netty.channel.ChannelHandler">org.jboss.netty.channel.ChannelHandler</span> that tracks channel/connection
-statistics. The handler is meant to be shared by all
-<span class="extype" name="org.jboss.netty.channel.Channel">Channels</span> within a Finagle client or
-server in order to consolidate statistics across a number of channels.
+      <p class="shortcomment cmt"><code>SslSessionInfo</code> provides information related to an existing connection's use
+of an SSL/TLS session.</p><div class="fullcomment"><div class="comment cmt"><p><code>SslSessionInfo</code> provides information related to an existing connection's use
+of an SSL/TLS session. SSL/TLS sessions are either negotiated or resumed
+during handshaking. When using SSL/TLS, one and only one SSL/TLS session is
+associated with a connection, although it's possible that an SSL/TLS session
+may be reused between multiple connections.</p><p>An instance of this class should be associated with an existing connection.
+When using SSL/TLS, the instance provides easy access to the session and its
+relevant information. When not using SSL/TLS (i.e. there is no existing
+SSL/TLS session), then a <code>NullSslSessionInfo</code> should be used instead.
 </p></div></div>
-    </li><li name="com.twitter.finagle.netty3.channel.IdleChannelHandler" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="IdleChannelHandlerextendsIdleStateAwareChannelHandler"></a><a id="IdleChannelHandler:IdleChannelHandler"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/netty3/channel/index.html#IdleChannelHandlerextendsIdleStateAwareChannelHandler" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="This handler closes a channel if it receives an IDLE event." href="IdleChannelHandler.html"><span class="name">IdleChannelHandler</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.handler.timeout.IdleStateAwareChannelHandler">IdleStateAwareChannelHandler</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">This handler closes a channel if it receives an IDLE event.</p>
-    </li><li name="com.twitter.finagle.netty3.channel.LeftFoldUpstreamHandler" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="LeftFoldUpstreamHandlerextendsAnyRef"></a><a id="LeftFoldUpstreamHandler:LeftFoldUpstreamHandler"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/netty3/channel/index.html#LeftFoldUpstreamHandlerextendsAnyRef" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="LeftFoldUpstreamHandler.html"><span class="name">LeftFoldUpstreamHandler</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
-      </span>
-      
-      
     </li></ol>
             </div>
 

@@ -197,7 +197,7 @@ resources for using Finagle.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">Bound</span><span class="result"> extends <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a> with <span class="extype" name="scala.Proxy">Proxy</span></span>
+        <span class="name">Bound</span><span class="result"> extends <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a> with <span class="extype" name="scala.Proxy">Proxy</span> with <span class="extype" name="com.twitter.finagle.util.CachedHashCode.ForClass">ForClass</span></span>
       </span>
       </h4>
 
@@ -212,7 +212,7 @@ processed during name resolution.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><span class="extype" name="scala.Proxy">Proxy</span>, <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.finagle.util.CachedHashCode.ForClass">ForClass</span>, <span class="extype" name="com.twitter.finagle.util.CachedHashCode">CachedHashCode</span>, <span class="extype" name="scala.Proxy">Proxy</span>, <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -238,7 +238,7 @@ processed during name resolution.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.Name.Bound"><span>Bound</span></li><li class="in" name="scala.Proxy"><span>Proxy</span></li><li class="in" name="com.twitter.finagle.Name"><span>Name</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.Name.Bound"><span>Bound</span></li><li class="in" name="com.twitter.finagle.util.CachedHashCode.ForClass"><span>ForClass</span></li><li class="in" name="com.twitter.finagle.util.CachedHashCode"><span>CachedHashCode</span></li><li class="in" name="scala.Proxy"><span>Proxy</span></li><li class="in" name="com.twitter.finagle.Name"><span>Name</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -385,6 +385,23 @@ processed during name resolution.
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.Name.Bound#computeHashCode" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="computeHashCode:Int"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Name$$Bound.html#computeHashCode:Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">computeHashCode</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">How <code>hashCode</code> is computed.</p><div class="fullcomment"><div class="comment cmt"><p>How <code>hashCode</code> is computed.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Name.Bound">Bound</a> → ForClass → CachedHashCode</dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -458,7 +475,7 @@ processed during name resolution.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="scala.Proxy#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.util.CachedHashCode#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Name$$Bound.html#hashCode():Int" title="Permalink">
@@ -466,14 +483,14 @@ processed during name resolution.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Proxy → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>CachedHashCode → AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.Name.Bound#id" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="id:Any"></a>
       <span class="permalink">
@@ -718,7 +735,11 @@ processed during name resolution.
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.Proxy">
+        <div class="parent" name="com.twitter.finagle.util.CachedHashCode.ForClass">
+              <h3>Inherited from <span class="extype" name="com.twitter.finagle.util.CachedHashCode.ForClass">ForClass</span></h3>
+            </div><div class="parent" name="com.twitter.finagle.util.CachedHashCode">
+              <h3>Inherited from <span class="extype" name="com.twitter.finagle.util.CachedHashCode">CachedHashCode</span></h3>
+            </div><div class="parent" name="scala.Proxy">
               <h3>Inherited from <span class="extype" name="scala.Proxy">Proxy</span></h3>
             </div><div class="parent" name="com.twitter.finagle.Name">
               <h3>Inherited from <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a></h3>

@@ -243,22 +243,6 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.http">http</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.netty3" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="netty3"></a><a id="netty3:netty3"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/index.html#netty3" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="netty3/index.html"><span class="name">netty3</span></a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.http">http</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.param" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="param"></a><a id="param:param"></a>
       <span class="permalink">
@@ -324,6 +308,10 @@ resources for using Finagle.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.http">http</a></dd></dl></div>
     </li><li class="current-entities indented4">
+                        <a class="object" href="Chunk$.html" title=""></a>
+                        <a class="class" href="Chunk.html" title="Represents a piece of an HTTP stream, commonly referred to as a chunk."></a>
+                        <a href="Chunk.html" title="Represents a piece of an HTTP stream, commonly referred to as a chunk.">Chunk</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="Cookie$.html" title=""></a>
                         <a class="class" href="Cookie.html" title=""></a>
                         <a href="Cookie.html" title="">Cookie</a>
@@ -549,7 +537,49 @@ resources for using Finagle.
 
         <div class="values members">
               <h3>Abstract Value Members</h3>
-              <ol><li name="com.twitter.finagle.http.Request#ctx" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.http.Message#chunkReader" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="chunkReader:com.twitter.io.Reader[com.twitter.finagle.http.Chunk]"></a><a id="chunkReader:Reader[Chunk]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/Request.html#chunkReader:com.twitter.io.Reader[com.twitter.finagle.http.Chunk]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">chunkReader</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/io/Reader.html#com.twitter.io.Reader" class="extype" name="com.twitter.io.Reader">Reader</a>[<a href="Chunk.html" class="extype" name="com.twitter.finagle.http.Chunk">Chunk</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A read-only handle to a stream of <a href="Chunk.html" class="extype" name="com.twitter.finagle.http.Chunk">Chunk</a>, representing the message body.</p><div class="fullcomment"><div class="comment cmt"><p>A read-only handle to a stream of <a href="Chunk.html" class="extype" name="com.twitter.finagle.http.Chunk">Chunk</a>, representing the message body. This stream is only
+populated on chunked messages (<code>isChunked == true</code>). Use <a href="Message.html#content(content:com.twitter.io.Buf):Message.this.type" class="extmbr" name="com.twitter.finagle.http.Message#content">content</a> to access a payload of
+a fully-buffered message (<code>isChunked == false</code>).</p><p>Prefer this API over <a href="Message.html#reader:com.twitter.io.Reader[com.twitter.io.Buf]" class="extmbr" name="com.twitter.finagle.http.Message#reader">reader</a> when application needs to receive trailing headers (trailers).
+Trailers are transmitted in the very last chunk (<code>chunk.isLast == true</code>) of the stream and
+can be retrieved via <a href="Chunk.html#trailers:com.twitter.finagle.http.HeaderMap" class="extmbr" name="com.twitter.finagle.http.Chunk#trailers">Chunk.trailers</a>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="Reader">Reader</span> and <a href="Chunk.html" class="extype" name="com.twitter.finagle.http.Chunk">Chunk</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Message#chunkWriter" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="chunkWriter:com.twitter.io.Writer[com.twitter.finagle.http.Chunk]"></a><a id="chunkWriter:Writer[Chunk]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/Request.html#chunkWriter:com.twitter.io.Writer[com.twitter.finagle.http.Chunk]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">chunkWriter</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/io/Writer.html#com.twitter.io.Writer" class="extype" name="com.twitter.io.Writer">Writer</a>[<a href="Chunk.html" class="extype" name="com.twitter.finagle.http.Chunk">Chunk</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A write-only handle to a stream of <a href="Chunk.html" class="extype" name="com.twitter.finagle.http.Chunk">Chunk</a>, representing the message body.</p><div class="fullcomment"><div class="comment cmt"><p>A write-only handle to a stream of <a href="Chunk.html" class="extype" name="com.twitter.finagle.http.Chunk">Chunk</a>, representing the message body. Only chunked
+messages (<code>isChunked == true</code>) use this stream as their payload, fully-buffered messages
+(<code>isChunked == false</code>) use <a href="Message.html#content(content:com.twitter.io.Buf):Message.this.type" class="extmbr" name="com.twitter.finagle.http.Message#content">content</a> instead.</p><p>Prefer this API over <a href="Message.html#writer:com.twitter.io.Writer[com.twitter.io.Buf]" class="extmbr" name="com.twitter.finagle.http.Message#writer">writer</a> when application needs to send trailing headers (trailers).
+Trailers are transmitted in the very last chunk of the stream and can be populated via
+<code>Chunk.last</code> factory method.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="Reader">Reader</span> and <a href="Chunk.html" class="extype" name="com.twitter.finagle.http.Chunk">Chunk</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Request#ctx" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="ctx:com.twitter.finagle.http.Request.Schema.Record"></a><a id="ctx:Record"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/Request.html#ctx:com.twitter.finagle.http.Request.Schema.Record" title="Permalink">
@@ -585,8 +615,8 @@ associated context explicit.
         <span class="name">headerMap</span><span class="result">: <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
       </span>
       
-      <p class="shortcomment cmt">A <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a> (i.e., HTTP headers) associated with this message.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a> (i.e., HTTP headers) associated with this message.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd><dt>Note</dt><dd><span class="cmt"><p>This structure isn't thread-safe. Any concurrent access should be synchronized
+      <p class="shortcomment cmt">HTTP headers associated with this message.</p><div class="fullcomment"><div class="comment cmt"><p>HTTP headers associated with this message.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd><dt>Note</dt><dd><span class="cmt"><p><a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a> isn't thread-safe. Any concurrent access should be synchronized
       externally.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Request#method" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="method:com.twitter.finagle.http.Method"></a><a id="method:Method"></a>
@@ -621,25 +651,6 @@ associated context explicit.
       
       <p class="shortcomment cmt">Sets the HTTP method of this request to the given <code>method</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the HTTP method of this request to the given <code>method</code>.</p><p>* @see <span class="extype" name="method(Method)">method(Method)</span> for Java users.
 </p></div></div>
-    </li><li name="com.twitter.finagle.http.Message#reader" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="reader:com.twitter.io.Reader[com.twitter.io.Buf]"></a><a id="reader:Reader[Buf]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/Request.html#reader:com.twitter.io.Reader[com.twitter.io.Buf]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">reader</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/io/Reader.html#com.twitter.io.Reader" class="extype" name="com.twitter.io.Reader">Reader</a>[<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">A read-only handle to the internal stream of bytes, representing the
-message body.</p><div class="fullcomment"><div class="comment cmt"><p>A read-only handle to the internal stream of bytes, representing the
-message body. See <a href="https://twitter.github.io/util/docs/com/twitter/io/Reader.html" class="extype" name="com.twitter.io.Reader">com.twitter.io.Reader</a> for more information.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Request#remoteSocketAddress" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="remoteSocketAddress:java.net.InetSocketAddress"></a><a id="remoteSocketAddress:InetSocketAddress"></a>
       <span class="permalink">
@@ -662,6 +673,25 @@ ephemeral address for requests that have yet to be dispatched.
                 <span class="name">@BeanProperty</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Message#trailers" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="trailers:com.twitter.finagle.http.HeaderMap"></a><a id="trailers:HeaderMap"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/Request.html#trailers:com.twitter.finagle.http.HeaderMap" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">trailers</span><span class="result">: <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Trailing headers (trailers) associated with this message.</p><div class="fullcomment"><div class="comment cmt"><p>Trailing headers (trailers) associated with this message.</p><p>These are only populated on fully-buffered inbound messages that were aggregated
+(see <code>withStreaming(false)</code>) from HTTP streams terminating with trailers.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd><dt>Note</dt><dd><span class="cmt"><p><a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a> isn't thread-safe. Any concurrent access should be synchronized
+      externally.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Request#uri" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="uri:String"></a>
       <span class="permalink">
@@ -695,25 +725,6 @@ ephemeral address for requests that have yet to be dispatched.
       
       <p class="shortcomment cmt">Set the URI of this request to the given <code>uri</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Set the URI of this request to the given <code>uri</code>.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="uri(String)">uri(String)</span> for Java users.</p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Message#writer" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="writer:com.twitter.io.Writer[com.twitter.io.Buf]"></a><a id="writer:Writer[Buf]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/Request.html#writer:com.twitter.io.Writer[com.twitter.io.Buf]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">writer</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/io/Writer.html#com.twitter.io.Writer" class="extype" name="com.twitter.io.Writer">Writer</a>[<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">A write-only handle to the internal stream of bytes, representing the
-message body.</p><div class="fullcomment"><div class="comment cmt"><p>A write-only handle to the internal stream of bytes, representing the
-message body. See <a href="https://twitter.github.io/util/docs/com/twitter/io/Writer.html" class="extype" name="com.twitter.io.Writer">com.twitter.io.Writer</a> for more information.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
     </li></ol>
             </div>
 
@@ -2244,6 +2255,26 @@ request.params
                 <span class="name">@BeanProperty</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Message#reader" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="reader:com.twitter.io.Reader[com.twitter.io.Buf]"></a><a id="reader:Reader[Buf]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/Request.html#reader:com.twitter.io.Reader[com.twitter.io.Buf]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">reader</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/io/Reader.html#com.twitter.io.Reader" class="extype" name="com.twitter.io.Reader">Reader</a>[<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A read-only handle to a stream of <span class="extype" name="Buf">Buf</span>, representing the message body.</p><div class="fullcomment"><div class="comment cmt"><p>A read-only handle to a stream of <span class="extype" name="Buf">Buf</span>, representing the message body. This stream is only
+* populated on chunked messages (<code>isChunked == true</code>). Use <a href="Message.html#content(content:com.twitter.io.Buf):Message.this.type" class="extmbr" name="com.twitter.finagle.http.Message#content">content</a> to access a payload of
+a fully-buffered message (<code>isChunked == false</code>).</p><p>Prefer this API over <a href="Message.html#chunkReader:com.twitter.io.Reader[com.twitter.finagle.http.Chunk]" class="extmbr" name="com.twitter.finagle.http.Message#chunkReader">chunkReader</a> when application doesn't need access to trailing headers
+(trailers).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="Reader">Reader</span></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#referer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="referer:Option[String]"></a>
       <span class="permalink">
@@ -2847,6 +2878,26 @@ using the <code>write(Buf)</code> method.</p><p>An <code>IllegalStateException</
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Message#writer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writer:com.twitter.io.Writer[com.twitter.io.Buf]"></a><a id="writer:Writer[Buf]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/Request.html#writer:com.twitter.io.Writer[com.twitter.io.Buf]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">writer</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/io/Writer.html#com.twitter.io.Writer" class="extype" name="com.twitter.io.Writer">Writer</a>[<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A write-only handle to the stream of <span class="extype" name="Buf">Buf</span>, representing the message body.</p><div class="fullcomment"><div class="comment cmt"><p>A write-only handle to the stream of <span class="extype" name="Buf">Buf</span>, representing the message body. Only chunked
+messages (<code>isChunked == true</code>) use this stream as their payload, fully-buffered messages
+(<code>isChunked == false</code>) use <a href="Message.html#content(content:com.twitter.io.Buf):Message.this.type" class="extmbr" name="com.twitter.finagle.http.Message#content">content</a> instead.</p><p>Prefer this API over <a href="Message.html#chunkWriter:com.twitter.io.Writer[com.twitter.finagle.http.Chunk]" class="extmbr" name="com.twitter.finagle.http.Message#chunkWriter">chunkWriter</a> when application doesn't need to send trailing headers
+(trailers).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="Writer">Writer</span></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#wwwAuthenticate" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wwwAuthenticate:Option[String]"></a>
       <span class="permalink">

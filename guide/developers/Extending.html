@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Extending Finagle &#8212; Finagle 19.3.0 documentation</title>
+    <title>Extending Finagle &#8212; Finagle 19.4.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '19.3.0',
+        VERSION:     '19.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="top" title="Finagle 19.3.0 documentation" href="../index.html" />
+    <link rel="top" title="Finagle 19.4.0 documentation" href="../index.html" />
     <link rel="next" title="Twitter Futures" href="Futures.html" />
     <link rel="prev" title="Glossary of Terms" href="../Glossary.html" />
    
@@ -153,9 +153,9 @@ the interface are defined as such:</p>
 <span class="o">}</span>
 </pre></div>
 </div>
-<p>Most Transports are implemented using <a class="reference external" href="http://netty.io">Netty</a>
+<p>Most Transports are implemented using <a class="reference external" href="https://netty.io">Netty</a>
 for I/O multiplexing and protocol codecs.</p>
-<p>You have a choice of whether to use <a class="reference external" href="http://netty.io/wiki/new-and-noteworthy-in-4.0.html">Netty 3 or Netty 4</a>
+<p>You have a choice of whether to use <a class="reference external" href="https://netty.io/wiki/new-and-noteworthy-in-4.0.html">Netty 3 or Netty 4</a>
 for your protocol implementation. As we have migrated our existing protocols
 to Netty 4, (which is currently in beta and should be considered experimental),
 our best-practice recommendations have evolved, and those will be covered in the
@@ -176,7 +176,7 @@ There are two motivations for this:</p>
 isn&#8217;t straight forward to reason about logic split amongst them.</p>
 <p>In this case, the <code class="docutils literal"><span class="pre">Pipeline</span></code> will only contain a handler that decodes to/from the Netty buffer type
 (<a class="reference external" href="https://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html">ChannelBuffer</a>
-for Netty 3 and <a class="reference external" href="http://netty.io/4.0/api/io/netty/buffer/ByteBuf.html">ByteBuf</a> for Netty 4)
+for Netty 3 and <a class="reference external" href="https://netty.io/4.0/api/io/netty/buffer/ByteBuf.html">ByteBuf</a> for Netty 4)
 from/to the buffer type used in Finagle, <a class="reference external" href="https://github.com/twitter/util/blob/master/util-core/src/main/scala/com/twitter/io/Buf.scala">Buf</a>,
 and a framer (or framing could happen in the <code class="docutils literal"><span class="pre">Transport</span></code>).</p>
 <p>On the client side, the <code class="docutils literal"><span class="pre">Pipeline</span></code> would look like:</p>
@@ -263,11 +263,11 @@ or null otherwise.</p>
 <p>To frame data received over the network with respect to our
 protocol, we use a Netty Channel Pipeline. Our server pipeline defines a UTF-8
 text-based newline delimited protocol (since Netty already provides
-a <a class="reference external" href="http://netty.io/4.0/api/io/netty/handler/codec/string/StringEncoder.html">StringEncoder</a>
-and <a class="reference external" href="http://netty.io/4.0/api/io/netty/handler/codec/string/StringDecoder.html">StringDecoder</a>,
+a <a class="reference external" href="https://netty.io/4.0/api/io/netty/handler/codec/string/StringEncoder.html">StringEncoder</a>
+and <a class="reference external" href="https://netty.io/4.0/api/io/netty/handler/codec/string/StringDecoder.html">StringDecoder</a>,
 we&#8217;ll put this decoding in the Pipeline). The types have different namespaces but look
 much the same in Netty 3 and Netty 4.</p>
-<p>Using a Netty 3 <a class="reference external" href="http://netty.io/3.6/api/org/jboss/netty/channel/ChannelPipeline.html">ChannelPipeline</a>:</p>
+<p>Using a Netty 3 <a class="reference external" href="https://netty.io/3.6/api/org/jboss/netty/channel/ChannelPipeline.html">ChannelPipeline</a>:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">org.jboss.netty.handler.codec.string.</span><span class="o">{</span><span class="nc">StringEncoder</span><span class="o">,</span> <span class="nc">StringDecoder</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">org.jboss.netty.channel._</span>
 <span class="k">import</span> <span class="nn">org.jboss.netty.handler.codec.frame.</span><span class="o">{</span><span class="nc">Delimiters</span><span class="o">,</span> <span class="nc">DelimiterBasedFrameDecoder</span><span class="o">}</span>
@@ -284,7 +284,7 @@ much the same in Netty 3 and Netty 4.</p>
 <span class="o">}</span>
 </pre></div>
 </div>
-<p>Using a Netty 4 <a class="reference external" href="http://netty.io/4.1/api/io/netty/channel/ChannelPipeline.html">ChannelPipeline</a>:</p>
+<p>Using a Netty 4 <a class="reference external" href="https://netty.io/4.1/api/io/netty/channel/ChannelPipeline.html">ChannelPipeline</a>:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">io.netty.handler.codec.string.</span><span class="o">{</span><span class="nc">StringEncoder</span><span class="o">,</span> <span class="nc">StringDecoder</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">io.netty.channel._</span>
 <span class="k">import</span> <span class="nn">io.netty.handler.codec.frame.</span><span class="o">{</span><span class="nc">Delimiters</span><span class="o">,</span> <span class="nc">DelimiterBasedFrameDecoder</span><span class="o">}</span>
@@ -412,14 +412,14 @@ processing is done in the <code class="docutils literal"><span class="pre">Dispa
 </div>
 <p>To create a server that uses Netty 3, use a
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/netty3/Netty3Listener.scala">Netty3Listener</a>
-and a Netty 3 <a class="reference external" href="http://netty.io/3.6/api/org/jboss/netty/channel/ChannelPipeline.html">ChannelPipeline</a>.</p>
+and a Netty 3 <a class="reference external" href="https://netty.io/3.6/api/org/jboss/netty/channel/ChannelPipeline.html">ChannelPipeline</a>.</p>
 </div>
 <div class="section" id="client-protocol">
 <h2>Client Protocol<a class="headerlink" href="#client-protocol" title="Permalink to this headline">¶</a></h2>
 <p>Again, we&#8217;ll use a Netty Channel Pipeline to frame our network traffic.
 Our client pipeline defines a UTF-8 newline delimited protocol. As with the server
 pipeline, the types have different namespaces but look much the same in Netty 3 and Netty 4.</p>
-<p>Netty 3 <a class="reference external" href="http://netty.io/3.6/api/org/jboss/netty/channel/ChannelPipeline.html">ChannelPipeline</a>:</p>
+<p>Netty 3 <a class="reference external" href="https://netty.io/3.6/api/org/jboss/netty/channel/ChannelPipeline.html">ChannelPipeline</a>:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">org.jboss.netty.handler.codec.string.</span><span class="o">{</span><span class="nc">StringEncoder</span><span class="o">,</span> <span class="nc">StringDecoder</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">org.jboss.netty.channel._</span>
 <span class="k">import</span> <span class="nn">org.jboss.netty.handler.codec.frame.</span><span class="o">{</span><span class="nc">Delimiters</span><span class="o">,</span> <span class="nc">DelimiterBasedFrameDecoder</span><span class="o">}</span>
@@ -446,7 +446,7 @@ pipeline, the types have different namespaces but look much the same in Netty 3 
 <span class="o">}</span>
 </pre></div>
 </div>
-<p>Netty 4 <a class="reference external" href="http://netty.io/4.1/api/io/netty/channel/ChannelPipeline.html">ChannelPipeline</a>:</p>
+<p>Netty 4 <a class="reference external" href="https://netty.io/4.1/api/io/netty/channel/ChannelPipeline.html">ChannelPipeline</a>:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">io.netty.handler.codec.string.</span><span class="o">{</span><span class="nc">StringEncoder</span><span class="o">,</span> <span class="nc">StringDecoder</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">io.netty.channel._</span>
 <span class="k">import</span> <span class="nn">io.netty.handler.codec.frame.</span><span class="o">{</span><span class="nc">Delimiters</span><span class="o">,</span> <span class="nc">DelimiterBasedFrameDecoder</span><span class="o">}</span>
@@ -643,8 +643,8 @@ allowing concurrent dispatches.</p>
 
 <h3>Useful Links</h3>
 <ul>
-  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
-  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+  <li><a href="https://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="https://github.com/twitter/finagle/issues">Issue Tracker</a></li>
 </ul>
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>

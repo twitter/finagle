@@ -489,9 +489,9 @@ generator.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.Protocols#binaryFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="binaryFactory(strictRead:Boolean,strictWrite:Boolean,readLength:Long,statsReceiver:com.twitter.finagle.stats.StatsReceiver):org.apache.thrift.protocol.TProtocolFactory"></a><a id="binaryFactory(Boolean,Boolean,Long,StatsReceiver):TProtocolFactory"></a>
+      <a id="binaryFactory(strictRead:Boolean,strictWrite:Boolean,stringLengthLimit:Long,containerLengthLimit:Long,statsReceiver:com.twitter.finagle.stats.StatsReceiver):org.apache.thrift.protocol.TProtocolFactory"></a><a id="binaryFactory(Boolean,Boolean,Long,Long,StatsReceiver):TProtocolFactory"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/thrift/Protocols$.html#binaryFactory(strictRead:Boolean,strictWrite:Boolean,readLength:Long,statsReceiver:com.twitter.finagle.stats.StatsReceiver):org.apache.thrift.protocol.TProtocolFactory" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/Protocols$.html#binaryFactory(strictRead:Boolean,strictWrite:Boolean,stringLengthLimit:Long,containerLengthLimit:Long,statsReceiver:com.twitter.finagle.stats.StatsReceiver):org.apache.thrift.protocol.TProtocolFactory" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -500,7 +500,7 @@ generator.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">binaryFactory</span><span class="params">(<span name="strictRead">strictRead: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">false</span></span>, <span name="strictWrite">strictWrite: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">true</span></span>, <span name="readLength">readLength: <a href="http://www.scala-lang.org/api/2.12.8/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a> = <span class="symbol">-1</span></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../index.html">DefaultStatsReceiver</a></span></span></span>)</span><span class="result">: <span class="extype" name="org.apache.thrift.protocol.TProtocolFactory">TProtocolFactory</span></span>
+        <span class="name">binaryFactory</span><span class="params">(<span name="strictRead">strictRead: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">false</span></span>, <span name="strictWrite">strictWrite: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a> = <span class="symbol">true</span></span>, <span name="stringLengthLimit">stringLengthLimit: <a href="http://www.scala-lang.org/api/2.12.8/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a> = <span class="symbol">NoLimit</span></span>, <span name="containerLengthLimit">containerLengthLimit: <a href="http://www.scala-lang.org/api/2.12.8/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a> = <span class="symbol">NoLimit</span></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../index.html">DefaultStatsReceiver</a></span></span></span>)</span><span class="result">: <span class="extype" name="org.apache.thrift.protocol.TProtocolFactory">TProtocolFactory</span></span>
       </span>
       
       <p class="shortcomment cmt">Returns a <code>TProtocolFactory</code> that creates <code>TProtocol</code>s that
@@ -529,6 +529,23 @@ are wire-compatible with <code>TBinaryProtocol</code>.</p>
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.thrift.Protocols#compactFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="compactFactory(stringLengthLimit:Long,containerLengthLimit:Long):org.apache.thrift.protocol.TProtocolFactory"></a><a id="compactFactory(Long,Long):TProtocolFactory"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/Protocols$.html#compactFactory(stringLengthLimit:Long,containerLengthLimit:Long):org.apache.thrift.protocol.TProtocolFactory" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">compactFactory</span><span class="params">(<span name="stringLengthLimit">stringLengthLimit: <a href="http://www.scala-lang.org/api/2.12.8/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a> = <span class="symbol">NoLimit</span></span>, <span name="containerLengthLimit">containerLengthLimit: <a href="http://www.scala-lang.org/api/2.12.8/scala/Long.html#scala.Long" class="extype" name="scala.Long">Long</a> = <span class="symbol">NoLimit</span></span>)</span><span class="result">: <span class="extype" name="org.apache.thrift.protocol.TProtocolFactory">TProtocolFactory</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns a <code>TProtocolFactory</code> that creates <code>TProtocol</code>s that
+are wire-compatible with <code>TCompactProtocol</code>.</p>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">

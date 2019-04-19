@@ -189,8 +189,8 @@ resources for using Finagle.
                         <a href="EndpointerStackClient.html" title="The standard template implementation for com.twitter.finagle.client.StackClient.">EndpointerStackClient</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="LatencyCompensation$.html" title="Latency compensation enables the modification of connection and request timeouts on a per-endpoint basis."></a>
-                        <a href="LatencyCompensation$.html" title="Latency compensation enables the modification of connection and request timeouts on a per-endpoint basis.">LatencyCompensation</a>
+                        <a class="object" href="LatencyCompensation$.html" title="Latency compensation enables the modification of connection, request, and session acquisition timeouts on a per-endpoint basis."></a>
+                        <a href="LatencyCompensation$.html" title="Latency compensation enables the modification of connection, request, and session acquisition timeouts on a per-endpoint basis.">LatencyCompensation</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="trait" href="StackBasedClient.html" title="A Client that may have its Stack transformed."></a>
@@ -211,6 +211,10 @@ resources for using Finagle.
                         <a class="object" href="Transporter$.html" title="A collection of Stack.Params useful for configuring a com.twitter.finagle.client.Transporter."></a>
                         <a class="trait" href="Transporter.html" title="Transporters construct a Future[Transport[In, Out, Context]]."></a>
                         <a href="Transporter.html" title="Transporters construct a Future[Transport[In, Out, Context]].">Transporter</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="useNackAdmissionFilter$.html" title=""></a>
+                        <a href="useNackAdmissionFilter$.html" title="">useNackAdmissionFilter</a>
                       </li>
               </ul>
             </div>
@@ -1096,6 +1100,22 @@ about its implementation at runtime.
       <p class="shortcomment cmt">Configures this server or client with given <code>label</code> (default: empty string).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <code>label</code> (default: empty string).</p><p>The <code>label</code> value is used for stats reporting to scope stats reported
 from different clients/servers to a single stats receiver.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.param.CommonParams#withLabels" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withLabels(keywords:String*):A"></a><a id="withLabels(String*):This"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/client/StdStackClient.html#withLabels(keywords:String*):A" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withLabels</span><span class="params">(<span name="keywords">keywords: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.client.StdStackClient.This">This</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
     </li><li name="com.twitter.finagle.param.CommonParams#withMonitor" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withMonitor(monitor:com.twitter.util.Monitor):A"></a><a id="withMonitor(Monitor):This"></a>
       <span class="permalink">

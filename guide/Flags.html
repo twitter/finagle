@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Flags &#8212; Finagle 19.3.0 documentation</title>
+    <title>Flags &#8212; Finagle 19.4.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.3.0',
+        VERSION:     '19.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.3.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.4.0 documentation" href="index.html" />
     <link rel="next" title="Unsuccessful Responses" href="UnsuccessfulResponses.html" />
     <link rel="prev" title="Metrics" href="Metrics.html" />
    
@@ -82,6 +82,12 @@ Twitter Server) or as JVM properties.</p>
 <div class="section" id="common">
 <h2>Common<a class="headerlink" href="#common" title="Permalink to this headline">¶</a></h2>
 <dl class="docutils">
+<dt><strong>com.twitter.finagle.client.useNackAdmissionFilter</strong> <cite>bool</cite></dt>
+<dd>A global on/off switch for client-side nack admission control (default: <cite>true</cite>,
+which opts clients into using nack admission control). This controller is designed
+to allow backends to recover when they overloaded. See
+<cite>com.twitter.finagle.filter.NackAdmissionFilter</cite> for more details. This value can
+also be set on per-client with <cite>$Client.configured(NackAdmissionFilter.Param)</cite>.</dd>
 <dt><strong>com.twitter.finagle.loadbalancer.defaultBalancer</strong> <cite>choice|heap|aperture|random_aperture</cite></dt>
 <dd>The default load balancer used in clients (default: <cite>choice</cite>). <cite>random_aperture</cite> should only
 be used in situations where subsetting is a firm requirement. An example of that is in a testing
@@ -118,7 +124,7 @@ to disable tracing in production applications.</dd>
 <dd>The number of Netty 4 worker threads in the shared even pool (default: <cite>CPUs * 2</cite>)</dd>
 <dt><strong>com.twitter.finagle.netty4.trackReferenceLeaks</strong> <cite>bool</cite></dt>
 <dd>Enable reference leak tracking in Netty 4 and export a counter at <cite>finagle/netty4/reference_leaks</cite>
-(default: <cite>true</cite>).</dd>
+(default: <cite>false</cite>).</dd>
 <dt><strong>com.twitter.finagle.netty4.timerTicksPerWheel</strong> <cite>int</cite></dt>
 <dd>Netty 4 timer ticks per wheel (default: <cite>512</cite>).</dd>
 <dt><strong>com.twitter.finagle.netty4.timerTickDuration</strong> <cite>duration</cite></dt>
@@ -173,8 +179,8 @@ out (default: empty list).</dd>
 
 <h3>Useful Links</h3>
 <ul>
-  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
-  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+  <li><a href="https://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="https://github.com/twitter/finagle/issues">Issue Tracker</a></li>
 </ul>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>

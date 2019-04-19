@@ -93,7 +93,7 @@ Feature Toggles
 ---------------
 
 Feature toggles are a commonly used mechanism for modifying system behavior.
-For background, here is a `detailed discussion <http://martinfowler.com/articles/feature-toggles.html>`_
+For background, here is a `detailed discussion <https://martinfowler.com/articles/feature-toggles.html>`_
 of the topic. As implemented in Finagle they provide a good balance of control between
 library and service owners which enables library owners to rollout functionality in a
 measured and controlled manner.

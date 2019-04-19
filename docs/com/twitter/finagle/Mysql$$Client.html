@@ -311,9 +311,9 @@ This is an easier experience for most users.
       <p class="shortcomment cmt">The type of the transport's context.</p><div class="fullcomment"><div class="comment cmt"><p>The type of the transport's context.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a> → <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Mysql.Client.In" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="In=com.twitter.io.Buf"></a><a id="In:In"></a>
+      <a id="In=com.twitter.finagle.mysql.transport.Packet"></a><a id="In:In"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/Mysql$$Client.html#In=com.twitter.io.Buf" title="Permalink">
+      <a href="../../../com/twitter/finagle/Mysql$$Client.html#In=com.twitter.finagle.mysql.transport.Packet" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -322,15 +322,15 @@ This is an easier experience for most users.
         <span class="kind">type</span>
       </span>
       <span class="symbol">
-        <span class="name">In</span><span class="result alias"> = <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>
+        <span class="name">In</span><span class="result alias"> = <a href="mysql/transport/Packet.html" class="extype" name="com.twitter.finagle.mysql.transport.Packet">Packet</a></span>
       </span>
       
       <p class="shortcomment cmt">The type we write into the transport.</p><div class="fullcomment"><div class="comment cmt"><p>The type we write into the transport.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a> → <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Mysql.Client.Out" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Out=com.twitter.io.Buf"></a><a id="Out:Out"></a>
+      <a id="Out=com.twitter.finagle.mysql.transport.Packet"></a><a id="Out:Out"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/Mysql$$Client.html#Out=com.twitter.io.Buf" title="Permalink">
+      <a href="../../../com/twitter/finagle/Mysql$$Client.html#Out=com.twitter.finagle.mysql.transport.Packet" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -339,7 +339,7 @@ This is an easier experience for most users.
         <span class="kind">type</span>
       </span>
       <span class="symbol">
-        <span class="name">Out</span><span class="result alias"> = <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>
+        <span class="name">Out</span><span class="result alias"> = <a href="mysql/transport/Packet.html" class="extype" name="com.twitter.finagle.mysql.transport.Packet">Packet</a></span>
       </span>
       
       <p class="shortcomment cmt">The type we read out of the transport.</p><div class="fullcomment"><div class="comment cmt"><p>The type we read out of the transport.
@@ -700,9 +700,9 @@ See the <a href="https://twitter.github.io/finagle/guide/Names.html" target="_bl
 for details on destination names.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Mysql.Client#newDispatcher" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="newDispatcher(transport:com.twitter.finagle.transport.Transport[com.twitter.io.Buf,com.twitter.io.Buf]{typeContext&lt;:Client.this.Context}):com.twitter.finagle.Service[com.twitter.finagle.mysql.Request,com.twitter.finagle.mysql.Result]"></a><a id="newDispatcher(Transport[Buf,Buf]{typeContext&lt;:Client.this.Context}):Service[Request,Result]"></a>
+      <a id="newDispatcher(transport:com.twitter.finagle.transport.Transport[Client.this.In,Client.this.Out]{typeContext&lt;:Client.this.Context}):com.twitter.finagle.Service[com.twitter.finagle.mysql.Request,com.twitter.finagle.mysql.Result]"></a><a id="newDispatcher(Transport[In,Out]{typeContext&lt;:Client.this.Context}):Service[Request,Result]"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/Mysql$$Client.html#newDispatcher(transport:com.twitter.finagle.transport.Transport[com.twitter.io.Buf,com.twitter.io.Buf]{typeContext&lt;:Client.this.Context}):com.twitter.finagle.Service[com.twitter.finagle.mysql.Request,com.twitter.finagle.mysql.Result]" title="Permalink">
+      <a href="../../../com/twitter/finagle/Mysql$$Client.html#newDispatcher(transport:com.twitter.finagle.transport.Transport[Client.this.In,Client.this.Out]{typeContext&lt;:Client.this.Context}):com.twitter.finagle.Service[com.twitter.finagle.mysql.Request,com.twitter.finagle.mysql.Result]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -711,7 +711,7 @@ for details on destination names.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newDispatcher</span><span class="params">(<span name="transport">transport: <a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>, <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>] { type Context &lt;: Client.this.Context }</span>)</span><span class="result">: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.mysql.Result">Result</a>]</span>
+        <span class="name">newDispatcher</span><span class="params">(<span name="transport">transport: <a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="#In=com.twitter.finagle.mysql.transport.Packet" class="extmbr" name="com.twitter.finagle.Mysql.Client.In">In</a>, <a href="#Out=com.twitter.finagle.mysql.transport.Packet" class="extmbr" name="com.twitter.finagle.Mysql.Client.Out">Out</a>] { type Context &lt;: Client.this.Context }</span>)</span><span class="result">: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.mysql.Result">Result</a>]</span>
       </span>
       
       <p class="shortcomment cmt">Defines a dispatcher, a function which reconciles the stream based
@@ -831,7 +831,7 @@ for details on destination names.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newTransporter</span><span class="params">(<span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="result">: <a href="client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<a href="#In=com.twitter.io.Buf" class="extmbr" name="com.twitter.finagle.Mysql.Client.In">In</a>, <a href="#Out=com.twitter.io.Buf" class="extmbr" name="com.twitter.finagle.Mysql.Client.Out">Out</a>, <a href="#Context=com.twitter.finagle.transport.TransportContext" class="extmbr" name="com.twitter.finagle.Mysql.Client.Context">Context</a>]</span>
+        <span class="name">newTransporter</span><span class="params">(<span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="result">: <a href="client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<a href="#In=com.twitter.finagle.mysql.transport.Packet" class="extmbr" name="com.twitter.finagle.Mysql.Client.In">In</a>, <a href="#Out=com.twitter.finagle.mysql.transport.Packet" class="extmbr" name="com.twitter.finagle.Mysql.Client.Out">Out</a>, <a href="#Context=com.twitter.finagle.transport.TransportContext" class="extmbr" name="com.twitter.finagle.Mysql.Client.Context">Context</a>]</span>
       </span>
       
       <p class="shortcomment cmt">Defines a typed <a href="client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">com.twitter.finagle.client.Transporter</a> for this client.</p><div class="fullcomment"><div class="comment cmt"><p>Defines a typed <a href="client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">com.twitter.finagle.client.Transporter</a> for this client.
@@ -1184,6 +1184,22 @@ statements return the &quot;correct&quot; update count.</p><p>See https://dev.my
       <p class="shortcomment cmt">Configures this server or client with given <code>label</code> (default: empty string).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <code>label</code> (default: empty string).</p><p>The <code>label</code> value is used for stats reporting to scope stats reported
 from different clients/servers to a single stats receiver.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a> → <a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.param.CommonParams#withLabels" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withLabels(keywords:String*):A"></a><a id="withLabels(String*):Client"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Mysql$$Client.html#withLabels(keywords:String*):A" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withLabels</span><span class="params">(<span name="keywords">keywords: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Mysql.Client#withLoadBalancer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withLoadBalancer:com.twitter.finagle.param.DefaultLoadBalancingParams[com.twitter.finagle.Mysql.Client]"></a><a id="withLoadBalancer:DefaultLoadBalancingParams[Client]"></a>
       <span class="permalink">

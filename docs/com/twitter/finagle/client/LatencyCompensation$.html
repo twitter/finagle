@@ -189,8 +189,8 @@ resources for using Finagle.
                         <a href="EndpointerStackClient.html" title="The standard template implementation for com.twitter.finagle.client.StackClient.">EndpointerStackClient</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="" title="Latency compensation enables the modification of connection and request timeouts on a per-endpoint basis."></a>
-                        <a href="" title="Latency compensation enables the modification of connection and request timeouts on a per-endpoint basis.">LatencyCompensation</a>
+                        <a class="object" href="" title="Latency compensation enables the modification of connection, request, and session acquisition timeouts on a per-endpoint basis."></a>
+                        <a href="" title="Latency compensation enables the modification of connection, request, and session acquisition timeouts on a per-endpoint basis.">LatencyCompensation</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="trait" href="StackBasedClient.html" title="A Client that may have its Stack transformed."></a>
@@ -211,6 +211,10 @@ resources for using Finagle.
                         <a class="object" href="Transporter$.html" title="A collection of Stack.Params useful for configuring a com.twitter.finagle.client.Transporter."></a>
                         <a class="trait" href="Transporter.html" title="Transporters construct a Future[Transport[In, Out, Context]]."></a>
                         <a href="Transporter.html" title="Transporters construct a Future[Transport[In, Out, Context]].">Transporter</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="useNackAdmissionFilter$.html" title=""></a>
+                        <a href="useNackAdmissionFilter$.html" title="">useNackAdmissionFilter</a>
                       </li>
               </ul>
             </div>
@@ -239,11 +243,11 @@ resources for using Finagle.
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Latency compensation enables the modification of connection and
-request timeouts on a per-endpoint basis.  For instance, if a
-client has both network-local and trans-continental endpoints, a
-reasonable latency compensator might add the speed-of-light penalty
-when communicating with distant endpoints.
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Latency compensation enables the modification of connection, request, and
+session acquisition timeouts on a per-endpoint basis.  For instance, if a client
+has both network-local and trans-continental endpoints, a reasonable latency
+compensator might add the speed-of-light penalty when communicating with distant
+endpoints.
 </p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes

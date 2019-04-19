@@ -405,22 +405,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       
-    </li><li name="com.twitter.finagle.http.netty3" visbl="pub" class="indented5 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="netty3"></a><a id="netty3:netty3"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/index.html#netty3" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="netty3/index.html"><span class="name">netty3</span></a>
-      </span>
-      
-      
     </li><li name="com.twitter.finagle.http.param" visbl="pub" class="indented5 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="param"></a><a id="param:param"></a>
       <span class="permalink">
@@ -486,6 +470,10 @@ stabilized (moved elsewhere) at any time.
       
       
     </li><li class="current-entities indented4">
+                        <a class="object" href="Chunk$.html" title=""></a>
+                        <a class="class" href="Chunk.html" title="Represents a piece of an HTTP stream, commonly referred to as a chunk."></a>
+                        <a href="Chunk.html" title="Represents a piece of an HTTP stream, commonly referred to as a chunk.">Chunk</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="Cookie$.html" title=""></a>
                         <a class="class" href="Cookie.html" title=""></a>
                         <a href="Cookie.html" title="">Cookie</a>
@@ -637,22 +625,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.httpproxy" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="httpproxy"></a><a id="httpproxy:httpproxy"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#httpproxy" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../httpproxy/index.html"><span class="name">httpproxy</span></a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.liveness" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="liveness"></a><a id="liveness:liveness"></a>
       <span class="permalink">
@@ -770,7 +742,7 @@ requested by Tinit).</p><p><i>size:4 Treq:1 tag:3 n:1 (key:1 value~1){n} body:</
 request described by its body. The request body is delivered to the
 application. The request header contains a number of key-value pairs
 that describe request metadata.</p><p>Keys for <i>Treq</i> messages are as follows:</p><ol class="decimal"><li><i>traceid</i>: a 24-byte value describing the full
-<a href="http://research.google.com/archive/papers/dapper-2010-1.pdf" target="_blank">Dapper</a> trace id
+<a href="https://research.google.com/archive/papers/dapper-2010-1.pdf" target="_blank">Dapper</a> trace id
 assigned by the client. The value's format is <i>spanid:8 parentid:8 traceid:8</i>.</li></ol><p> 2. <i>traceflag</i>: a bitmask describing trace flags. Currently, the
 only defined flag is bit 0 which enables &quot;debug mode&quot;, asking the
 server to force trace sampling.</p><p><i>size:4 Tdispatch:1 tag:3 nctx:2 (ckey~2 cval~2){nc} dst~2 nd:2
@@ -854,30 +826,6 @@ use.</p><p> Flag          Value     Meaning
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.netty3" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="netty3"></a><a id="netty3:netty3"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#netty3" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="Package netty3 implements the bottom finagle primitives: {{com.twitter.finagle.Server}} and a client transport in terms of the netty3 event loop." href="../netty3/index.html"><span class="name">netty3</span></a>
-      </span>
-      
-      <p class="shortcomment cmt">Package netty3 implements the bottom finagle primitives:
-{{com.twitter.finagle.Server}} and a client transport in terms of
-the netty3 event loop.</p><div class="fullcomment"><div class="comment cmt"><p>Package netty3 implements the bottom finagle primitives:
-{{com.twitter.finagle.Server}} and a client transport in terms of
-the netty3 event loop.</p><p>Note: when {{com.twitter.finagle.builder.ClientBuilder}} and
-{{com.twitter.finagle.builder.ServerBuilder}} are deprecated,
-package netty3 can move into its own package, so that only the
-(new-style) clients and servers that depend on netty3 bring it in.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.netty4" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="netty4"></a><a id="netty4:netty4"></a>
       <span class="permalink">
@@ -1011,22 +959,6 @@ finagle clients and servers.
       </span>
       <span class="symbol">
         <a title="" href="../service/index.html"><span class="name">service</span></a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.socks" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="socks"></a><a id="socks:socks"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#socks" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../socks/index.html"><span class="name">socks</span></a>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
@@ -1306,7 +1238,44 @@ generator.
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.http.Cookie" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.http.Chunk" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ChunkextendsAnyRef"></a><a id="Chunk:Chunk"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#ChunkextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Represents a piece of an HTTP stream, commonly referred to as a chunk." href="Chunk.html"><span class="name">Chunk</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Represents a piece of an HTTP stream, commonly referred to as a chunk.</p><div class="fullcomment"><div class="comment cmt"><p>Represents a piece of an HTTP stream, commonly referred to as a chunk.</p><p>HTTP semantics treat trailing headers as the end of stream signal hence no writes (neither
+trailers nor data) are allowed after them, only <code>close</code> (EOS) is valid. This is typically
+enforced by an HTTP dispatcher in both clients and servers.</p><p>Similarly, when consumed via <a href="https://twitter.github.io/util/docs/com/twitter/io/Reader.html" class="extype" name="com.twitter.io.Reader">com.twitter.io.Reader</a>, trailers are always followed by <code>None</code>,
+readers's EOS. Users MUST read until the end of stream to ensure resource hygiene.</p><p>The following example demonstrates one way of doing so: wiring in one extra read before
+returning from a read-loop:</p><pre><span class="kw">def</span> accumulate(r: Reader[Chunk]): Future[(Buf, <span class="std">Option</span>[HeaderMap])] = {
+  <span class="kw">def</span> loop(acc: Buf, trailers: <span class="std">Option</span>[HeaderMap]): Future[(Buf, <span class="std">Option</span>[HeaderMap])] =
+    r.read().flatMap {
+      <span class="kw">case</span> <span class="std">Some</span>(chunk) <span class="kw">=&gt;</span>
+        <span class="kw">if</span> (chunk.isLast &amp;&amp; !chunk.trailers.isEmpty)
+          loop(acc.concat(chunk.content), <span class="std">Some</span>(chunk.trailers))
+        <span class="kw">else</span>
+          loop(acc.concat(chunk.content), <span class="std">None</span>)
+      <span class="kw">case</span> <span class="std">None</span> <span class="kw">=&gt;</span>
+        Future.value(acc -&gt; trailers)
+    }
+
+  loop(Buf.Empty, <span class="std">None</span>)
+}</pre><p>The HTTP dispatcher guarantees that <code>Chunk.Last</code> will be issued in the inbound stream
+no matter if its <code>trailers</code> or <code>content</code> present.</p><p>Note: when consuming interleaved HTTP streams (i.e., via <code>Reader.flatMap</code>) it's expected to
+observe multiple trailers before reaching the EOS. These inter-stream trailers space out
+individual HTTP streams from child readers.
+</p></div></div>
+    </li><li name="com.twitter.finagle.http.Cookie" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="CookieextendsAnyRef"></a><a id="Cookie:Cookie"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/index.html#CookieextendsAnyRef" title="Permalink">
@@ -1852,7 +1821,23 @@ admin interface is different from the pattern provided in <a href="Route.html#pa
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="com.twitter.finagle.http.Cookie" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+                <li name="com.twitter.finagle.http.Chunk" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Chunk"></a><a id="Chunk:Chunk"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#Chunk" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Chunk$.html"><span class="name">Chunk</span></a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.http.Cookie" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Cookie"></a><a id="Cookie:Cookie"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/index.html#Cookie" title="Permalink">

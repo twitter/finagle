@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Quickstart &#8212; Finagle 19.3.0 documentation</title>
+    <title>Quickstart &#8212; Finagle 19.4.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.3.0',
+        VERSION:     '19.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.3.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.4.0 documentation" href="index.html" />
     <link rel="next" title="Concurrent Programming with Futures" href="Futures.html" />
     <link rel="prev" title="Contents" href="index.html" />
    
@@ -73,8 +73,8 @@
 <h1>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">¶</a></h1>
 <p>In this section we&#8217;ll use Finagle to build a very simple HTTP server
 that is also an HTTP client — an HTTP proxy. We assume that you
-are familiar with <a class="reference external" href="http://www.scala-lang.org">Scala</a> (if not, may we recommend
-<a class="reference external" href="http://twitter.github.com/scala_school/">Scala School</a>).</p>
+are familiar with <a class="reference external" href="https://www.scala-lang.org">Scala</a> (if not, may we recommend
+<a class="reference external" href="https://twitter.github.com/scala_school/">Scala School</a>).</p>
 <p>The entire example is available, together with a self-contained
 script to launch sbt, in the Finagle git repository:</p>
 <div class="highlight-text"><div class="highlight"><pre><span></span>$ git clone https://github.com/twitter/finagle.git
@@ -84,7 +84,7 @@ $ ./sbt compile
 </div>
 <div class="section" id="setting-up-sbt">
 <h2>Setting up SBT<a class="headerlink" href="#setting-up-sbt" title="Permalink to this headline">¶</a></h2>
-<p>We&#8217;ll use <a class="reference external" href="http://www.scala-sbt.org">sbt</a> to build our project. Finagle is published to Maven Central,
+<p>We&#8217;ll use <a class="reference external" href="https://www.scala-sbt.org">sbt</a> to build our project. Finagle is published to Maven Central,
 so little setup is needed: see the <code class="docutils literal"><span class="pre">build.sbt</span></code> in the <code class="docutils literal"><span class="pre">quickstart</span></code> directory.
 We no longer support <code class="docutils literal"><span class="pre">scala</span></code> <code class="docutils literal"><span class="pre">2.10</span></code>.</p>
 <pre class="literal-block">
@@ -92,7 +92,7 @@ name := &quot;quickstart&quot;
 
 version := &quot;1.0&quot;
 
-libraryDependencies += &quot;com.twitter&quot; %% &quot;finagle-http&quot; % &quot;19.3.0&quot;
+libraryDependencies += &quot;com.twitter&quot; %% &quot;finagle-http&quot; % &quot;19.4.0&quot;
 </pre>
 <p>Any file in this directory will now be compiled by <code class="docutils literal"><span class="pre">sbt</span></code>.</p>
 </div>
@@ -152,7 +152,7 @@ format, sending replies back to the client.</p>
 </pre></div>
 </div>
 <p>We&#8217;re now ready to run it:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>$ ./sbt &#39;run-main Server&#39;
+<div class="highlight-text"><div class="highlight"><pre><span></span>$ ./sbt &#39;runMain Server&#39;
 </pre></div>
 </div>
 <p>Which exposes an HTTP server on port 8080 which
@@ -207,7 +207,7 @@ a callback to notify us when the result is ready:</p>
 </pre></div>
 </div>
 <p>which in turn is run by:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>$ ./sbt &#39;run-main Client&#39;
+<div class="highlight-text"><div class="highlight"><pre><span></span>$ ./sbt &#39;runMain Client&#39;
 ...
 GET success: Response(&quot;HTTP/1.1 Status(200)&quot;)
 ...
@@ -235,7 +235,7 @@ example with one that was imported with a <code class="docutils literal"><span c
 </div>
 <p>And we can run it and dispatch requests to it
 (be sure to shutdown the Server example from earlier):</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>$ ./sbt &#39;run-main Proxy&#39; &amp;
+<div class="highlight-text"><div class="highlight"><pre><span></span>$ ./sbt &#39;runMain Proxy&#39; &amp;
 $ curl --dump-header - --header &quot;Host: twitter.com&quot; localhost:8080
 HTTP/1.1 301 Moved Permanently
 content-length: 0
@@ -261,8 +261,8 @@ location: https://twitter.com/
 
 <h3>Useful Links</h3>
 <ul>
-  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
-  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+  <li><a href="https://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="https://github.com/twitter/finagle/issues">Issue Tracker</a></li>
 </ul>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>

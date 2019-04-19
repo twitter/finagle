@@ -332,9 +332,9 @@ resources for using Finagle.
                         <a class="class" href="LongValue.html" title=""></a>
                         <a href="LongValue.html" title="">LongValue</a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="" title=""></a>
-                        <a href="" title="">LostSyncException</a>
+                        <a class="object" href="LostSyncException$.html" title=""></a>
+                        <a class="class" href="" title="A LostSyncException indicates that this finagle-mysql client and the MySQL server are no longer able to properly communicate, as there has been a failure to decode a message from the server or data has become corrupted in transmission."></a>
+                        <a href="" title="A LostSyncException indicates that this finagle-mysql client and the MySQL server are no longer able to properly communicate, as there has been a failure to decode a message from the server or data has become corrupted in transmission.">LostSyncException</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="MysqlCharset$.html" title=""></a>
@@ -462,19 +462,21 @@ resources for using Finagle.
           <div id="content">
             <body class="class type">
       <div id="definition">
-        <div class="big-circle class">c</div>
+        <a href="LostSyncException$.html" title="See companion object"><div class="big-circle class-companion-object">c</div></a>
         <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="index.html" class="extype" name="com.twitter.finagle.mysql">mysql</a></p>
-        <h1>LostSyncException<span class="permalink">
+        <h1><a href="LostSyncException$.html" title="See companion object">LostSyncException</a><span class="permalink">
       <a href="../../../../com/twitter/finagle/mysql/LostSyncException.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
-        <h3><span class="morelinks"></span></h3>
+        <h3><span class="morelinks"><div>
+            Companion <a href="LostSyncException$.html" title="See companion object">object LostSyncException</a>
+          </div></span></h3>
       </div>
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
@@ -483,7 +485,11 @@ resources for using Finagle.
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A <a href="" class="extype" name="com.twitter.finagle.mysql.LostSyncException">LostSyncException</a> indicates that this finagle-mysql client and the MySQL server are
+no longer able to properly communicate, as there has been a failure to decode a message
+from the server or data has become corrupted in transmission. It is a fatal error and the
+communication with the server must be closed, then reopened, and renogotiated.
+</p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>

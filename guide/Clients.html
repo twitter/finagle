@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Clients &#8212; Finagle 19.3.0 documentation</title>
+    <title>Clients &#8212; Finagle 19.4.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.3.0',
+        VERSION:     '19.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.3.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.4.0 documentation" href="index.html" />
     <link rel="next" title="Contexts" href="Contexts.html" />
     <link rel="prev" title="Servers" href="Servers.html" />
    
@@ -140,7 +140,7 @@ secured environments.</p>
 <h3>HTTP Proxy<a class="headerlink" href="#http-proxy" title="Permalink to this headline">¶</a></h3>
 <p>There is built-in support for <a class="reference external" href="https://tools.ietf.org/html/draft-luotonen-web-proxy-tunneling-01">tunneling TCP-based protocols</a>
 through web proxy servers in a default Finagle client that might be used with any TCP traffic, not
-only HTTP(S). See <a class="reference external" href="http://wiki.squid-cache.org/Features/HTTPS">Squid documentation</a> on this feature.</p>
+only HTTP(S). See <a class="reference external" href="https://wiki.squid-cache.org/Features/HTTPS">Squid documentation</a> on this feature.</p>
 <p>The following example enables tunneling HTTP traffic through a web proxy server <cite>my-proxy-server.com</cite>
 to <cite>twitter.com</cite>.</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Service</span><span class="o">,</span> <span class="nc">Http</span><span class="o">}</span>
@@ -235,7 +235,7 @@ output. To override this, use the following sample.</p>
   <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;twitter.com&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
-<p>Finally, clients have built-in support for <a class="reference external" href="http://zipkin.io/">Zipkin</a>.</p>
+<p>Finally, clients have built-in support for <a class="reference external" href="https://zipkin.io/">Zipkin</a>.</p>
 </div>
 <div class="section" id="retries">
 <span id="client-retries"></span><h3>Retries<a class="headerlink" href="#retries" title="Permalink to this headline">¶</a></h3>
@@ -621,7 +621,7 @@ a non-retryable <code class="docutils literal"><span class="pre">c.t.f.loadbalan
 <p>The following modules aim to preemptively disable sessions that will likely fail requests.
 From the perspective of the load balancer, they act as circuit breakers which, when
 triggered, temporarily suspend the use of a particular endpoint.</p>
-<p>There are at least two modules in the client stacks that might be viewed as <a class="reference external" href="http://martinfowler.com/bliki/CircuitBreaker.html">circuit breakers</a>:</p>
+<p>There are at least two modules in the client stacks that might be viewed as <a class="reference external" href="https://martinfowler.com/bliki/CircuitBreaker.html">circuit breakers</a>:</p>
 <ol class="arabic simple">
 <li><cite>Fail Fast</cite> - a session-driven circuit breaker</li>
 <li><cite>Failure Accrual</cite> - a request-driven circuit breaker</li>
@@ -992,7 +992,7 @@ level than the  <a class="reference internal" href="Configuration.html#finagle6a
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id4">2</a>, <a class="fn-backref" href="#id5">3</a>, <a class="fn-backref" href="#id22">4</a>)</em> Most of the backoff strategies implemented in Finagle are inspired by Mark
-Brooker&#8217;s <a class="reference external" href="http://www.awsarchitectureblog.com/2015/03/backoff.html">blog post</a>.</td></tr>
+Brooker&#8217;s <a class="reference external" href="https://www.awsarchitectureblog.com/2015/03/backoff.html">blog post</a>.</td></tr>
 </tbody>
 </table>
 <table class="docutils footnote" frame="void" id="experimental" rules="none">
@@ -1065,7 +1065,7 @@ selection process.</td></tr>
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#id21">[10]</a></td><td>See <cite>Failure Detectors</cite> section from
-Alvaro Videla&#8217;s <a class="reference external" href="http://videlalvaro.github.io/2015/12/learning-about-distributed-systems.html">blog post</a>.</td></tr>
+Alvaro Videla&#8217;s <a class="reference external" href="https://videlalvaro.github.io/2015/12/learning-about-distributed-systems.html">blog post</a>.</td></tr>
 </tbody>
 </table>
 </div>
@@ -1085,8 +1085,8 @@ Alvaro Videla&#8217;s <a class="reference external" href="http://videlalvaro.git
 
 <h3>Useful Links</h3>
 <ul>
-  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
-  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+  <li><a href="https://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="https://github.com/twitter/finagle/issues">Issue Tracker</a></li>
 </ul>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>

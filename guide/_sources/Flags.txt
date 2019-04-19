@@ -15,6 +15,13 @@ Twitter Server) or as JVM properties.
 Common
 ------
 
+**com.twitter.finagle.client.useNackAdmissionFilter** `bool`
+  A global on/off switch for client-side nack admission control (default: `true`,
+  which opts clients into using nack admission control). This controller is designed
+  to allow backends to recover when they overloaded. See
+  `com.twitter.finagle.filter.NackAdmissionFilter` for more details. This value can
+  also be set on per-client with `$Client.configured(NackAdmissionFilter.Param)`.
+
 **com.twitter.finagle.loadbalancer.defaultBalancer** `choice|heap|aperture|random_aperture`
   The default load balancer used in clients (default: `choice`). `random_aperture` should only
   be used in situations where subsetting is a firm requirement. An example of that is in a testing
@@ -61,7 +68,7 @@ Netty 4
 
 **com.twitter.finagle.netty4.trackReferenceLeaks** `bool`
   Enable reference leak tracking in Netty 4 and export a counter at `finagle/netty4/reference_leaks`
-  (default: `true`).
+  (default: `false`).
 
 **com.twitter.finagle.netty4.timerTicksPerWheel** `int`
   Netty 4 timer ticks per wheel (default: `512`).

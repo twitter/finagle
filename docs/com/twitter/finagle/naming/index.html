@@ -341,22 +341,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.httpproxy" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="httpproxy"></a><a id="httpproxy:httpproxy"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#httpproxy" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../httpproxy/index.html"><span class="name">httpproxy</span></a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.liveness" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="liveness"></a><a id="liveness:liveness"></a>
       <span class="permalink">
@@ -474,7 +458,7 @@ requested by Tinit).</p><p><i>size:4 Treq:1 tag:3 n:1 (key:1 value~1){n} body:</
 request described by its body. The request body is delivered to the
 application. The request header contains a number of key-value pairs
 that describe request metadata.</p><p>Keys for <i>Treq</i> messages are as follows:</p><ol class="decimal"><li><i>traceid</i>: a 24-byte value describing the full
-<a href="http://research.google.com/archive/papers/dapper-2010-1.pdf" target="_blank">Dapper</a> trace id
+<a href="https://research.google.com/archive/papers/dapper-2010-1.pdf" target="_blank">Dapper</a> trace id
 assigned by the client. The value's format is <i>spanid:8 parentid:8 traceid:8</i>.</li></ol><p> 2. <i>traceflag</i>: a bitmask describing trace flags. Currently, the
 only defined flag is bit 0 which enables &quot;debug mode&quot;, asking the
 server to force trace sampling.</p><p><i>size:4 Tdispatch:1 tag:3 nctx:2 (ckey~2 cval~2){nc} dst~2 nd:2
@@ -574,31 +558,15 @@ use.</p><p> Flag          Value     Meaning
                         <a class="object" href="NameInterpreter$.html" title=""></a>
                         <a class="trait" href="NameInterpreter.html" title="Interpret names against a Dtab."></a>
                         <a href="NameInterpreter.html" title="Interpret names against a Dtab.">NameInterpreter</a>
-                      </li><li name="com.twitter.finagle.netty3" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="netty3"></a><a id="netty3:netty3"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#netty3" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="Package netty3 implements the bottom finagle primitives: {{com.twitter.finagle.Server}} and a client transport in terms of the netty3 event loop." href="../netty3/index.html"><span class="name">netty3</span></a>
-      </span>
-      
-      <p class="shortcomment cmt">Package netty3 implements the bottom finagle primitives:
-{{com.twitter.finagle.Server}} and a client transport in terms of
-the netty3 event loop.</p><div class="fullcomment"><div class="comment cmt"><p>Package netty3 implements the bottom finagle primitives:
-{{com.twitter.finagle.Server}} and a client transport in terms of
-the netty3 event loop.</p><p>Note: when {{com.twitter.finagle.builder.ClientBuilder}} and
-{{com.twitter.finagle.builder.ServerBuilder}} are deprecated,
-package netty3 can move into its own package, so that only the
-(new-style) clients and servers that depend on netty3 bring it in.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.netty4" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="NamerExceededMaxDepthException.html" title="Indicates an error in Namer lookup"></a>
+                        <a href="NamerExceededMaxDepthException.html" title="Indicates an error in Namer lookup">NamerExceededMaxDepthException</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="namerMaxDepth$.html" title=""></a>
+                        <a href="namerMaxDepth$.html" title="">namerMaxDepth</a>
+                      </li><li name="com.twitter.finagle.netty4" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="netty4"></a><a id="netty4:netty4"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/index.html#netty4" title="Permalink">
@@ -731,22 +699,6 @@ finagle clients and servers.
       </span>
       <span class="symbol">
         <a title="" href="../service/index.html"><span class="name">service</span></a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.socks" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="socks"></a><a id="socks:socks"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#socks" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../socks/index.html"><span class="name">socks</span></a>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
@@ -1044,6 +996,23 @@ generator.
 <a href="../Namer.html" class="extype" name="com.twitter.finagle.Namer">Namers</a> in that the passed in
 <a href="../Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a> can affect the resolution process.
 </p></div></div>
+    </li><li name="com.twitter.finagle.naming.NamerExceededMaxDepthException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NamerExceededMaxDepthExceptionextendsException"></a><a id="NamerExceededMaxDepthException:NamerExceededMaxDepthException"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/naming/index.html#NamerExceededMaxDepthExceptionextendsException" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Indicates an error in Namer lookup" href="NamerExceededMaxDepthException.html"><span class="name">NamerExceededMaxDepthException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Indicates an error in Namer lookup
+</p>
     </li></ol>
             </div>
 
@@ -1108,6 +1077,22 @@ found, use the <a href="DefaultInterpreter$.html" class="extype" name="com.twitt
       </span>
       <span class="symbol">
         <a title="" href="NameInterpreter$.html"><span class="name">NameInterpreter</span></a><span class="result"> extends <a href="NameInterpreter.html" class="extype" name="com.twitter.finagle.naming.NameInterpreter">NameInterpreter</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.naming.namerMaxDepth" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="namerMaxDepth"></a><a id="namerMaxDepth:namerMaxDepth"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/naming/index.html#namerMaxDepth" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="namerMaxDepth$.html"><span class="name">namerMaxDepth</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/com/twitter/app/GlobalFlag.html#com.twitter.app.GlobalFlag" class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a>]</span>
       </span>
       
       

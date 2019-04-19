@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Protocols &#8212; Finagle 19.3.0 documentation</title>
+    <title>Protocols &#8212; Finagle 19.4.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.3.0',
+        VERSION:     '19.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.3.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.4.0 documentation" href="index.html" />
     <link rel="next" title="Metrics" href="Metrics.html" />
     <link rel="prev" title="Names and Naming in Finagle" href="Names.html" />
    
@@ -78,7 +78,7 @@ servers, there are a number of Finagle subprojects that implement common
 protocols. A few of these protocol implementations are documented below.</p>
 <div class="section" id="thrift">
 <span id="thrift-and-scrooge"></span><h2>Thrift<a class="headerlink" href="#thrift" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://thrift.apache.org/">Apache Thrift</a> is an interface definition
+<p><a class="reference external" href="https://thrift.apache.org/">Apache Thrift</a> is an interface definition
 language. With its associated code generator(s) and binary communication
 protocol, Thrift facilitates the development of scalable RPC systems. By
 “scalable”, we specifically mean that IDLs can be shared, allowing developers
@@ -89,7 +89,7 @@ can use to implement clients and servers. This means that different
 implementations of servers can be swapped out transparently, since they all
 expose the same interface, regardless of language.</p>
 <p>Thrift was originally built at Facebook. For more details on the original design,
-check out the <a class="reference external" href="http://thrift.apache.org/static/files/thrift-20070401.pdf">whitepaper</a>.</p>
+check out the <a class="reference external" href="https://thrift.apache.org/static/files/thrift-20070401.pdf">whitepaper</a>.</p>
 <p><cite>finagle-thrift</cite> is used extensively within Twitter, but to meet the needs of our
 service-oriented architecture we had to extend the Thrift protocol. We
 introduced the notion of “Twitter-upgraded Thrift”, or TTwitter, which augments
@@ -220,7 +220,7 @@ same way that HTTP is an application-layer protocol with ﻿﻿﻿numerous imple
 in a variety of languages, Mux is a session-layer protocol with a Scala
 implementation in the finagle-mux package. Also since it is a purely
 session-layer protocol, Mux can be used in conjunction with protocols from other
-layers of the <a class="reference external" href="http://en.wikipedia.org/wiki/OSI_model">OSI</a> model. For example,
+layers of the <a class="reference external" href="https://en.wikipedia.org/wiki/OSI_model">OSI</a> model. For example,
 Finagle currently has an implementation of the Thrift protocol on top of Mux,
 available in the <cite>finagle-thriftmux</cite> package.</p>
 <p>Much of the future work on Finagle will involve improvements to Mux and feature
@@ -355,8 +355,8 @@ removing the ServerDtabContextFilter from the server stack, or by adding your ow
 
 <h3>Useful Links</h3>
 <ul>
-  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
-  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+  <li><a href="https://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="https://github.com/twitter/finagle/issues">Issue Tracker</a></li>
 </ul>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>

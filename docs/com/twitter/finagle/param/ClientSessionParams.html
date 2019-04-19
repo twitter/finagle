@@ -473,7 +473,7 @@ draining, and much more.
 both queueing time (e.g. because we cannot create more connections due
 to connections limit and there are outstanding requests) as well as physical
 TCP connection time. Futures returned from <code>factory()</code> will always be satisfied
-within this timeout.</p><p>This timeout also includes resolving logical destinations, but the cost of
+within this timeout plus any applied <a href="../client/LatencyCompensation$.html" class="extype" name="com.twitter.finagle.client.LatencyCompensation">com.twitter.finagle.client.LatencyCompensation</a>.</p><p>This timeout also includes resolving logical destinations, but the cost of
 resolution is amortized.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration</a></p></span></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">

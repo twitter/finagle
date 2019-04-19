@@ -370,7 +370,7 @@ generator.
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Produce a client with params wrapped in RichClientParam
 </p></div><dl class="paramcmts block"><dt class="param">protocolFactory</dt><dd class="cmt"><p>A <code>TProtocolFactory</code> creates protocol objects from transports</p></dd><dt class="param">serviceName</dt><dd class="cmt"><p>For client stats, (default: empty string)</p></dd><dt class="param">maxThriftBufferSize</dt><dd class="cmt"><p>The max size of a reusable buffer for the thrift response</p></dd><dt class="param">responseClassifier</dt><dd class="cmt"><p>See <a href="../service/index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">com.twitter.finagle.service.ResponseClassifier</a></p></dd><dt class="param">clientStats</dt><dd class="cmt"><p>StatsReceiver for recording metrics</p></dd><dt class="param">perEndpointStats</dt><dd class="cmt"><p>Whether to record per-endpoint stats, (default: false).
                         By enabling this, the specific Thrift Exceptions can be recorded.
-See <a href="http://twitter.github.io/finagle/guide/Metrics.html#perendpoint-statsfilter" target="_blank">PerEndpoint StatsFilter</a></p></dd></dl><div class="toggleContainer block">
+See <a href="https://twitter.github.io/finagle/guide/Metrics.html#perendpoint-statsfilter" target="_blank">PerEndpoint StatsFilter</a></p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -517,7 +517,7 @@ See <a href="http://twitter.github.io/finagle/guide/Metrics.html#perendpoint-sta
       
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">protocolFactory</dt><dd class="cmt"><p>A <code>TProtocolFactory</code> creates protocol objects from transports</p></dd><dt class="param">serviceName</dt><dd class="cmt"><p>For client stats, (default: empty string)</p></dd><dt class="param">maxThriftBufferSize</dt><dd class="cmt"><p>The max size of a reusable buffer for the thrift response</p></dd><dt class="param">responseClassifier</dt><dd class="cmt"><p>See <a href="../service/index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">com.twitter.finagle.service.ResponseClassifier</a></p></dd><dt class="param">clientStats</dt><dd class="cmt"><p>StatsReceiver for recording metrics</p></dd><dt class="param">perEndpointStats</dt><dd class="cmt"><p>Whether to record per-endpoint stats, (default: false).
                         By enabling this, the specific Thrift Exceptions can be recorded.
-See <a href="http://twitter.github.io/finagle/guide/Metrics.html#perendpoint-statsfilter" target="_blank">PerEndpoint StatsFilter</a></p></dd></dl></div>
+See <a href="https://twitter.github.io/finagle/guide/Metrics.html#perendpoint-statsfilter" target="_blank">PerEndpoint StatsFilter</a></p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -839,7 +839,11 @@ See <a href="http://twitter.github.io/finagle/guide/Metrics.html#perendpoint-sta
       </span>
       
       <p class="shortcomment cmt">Apply system-wide read limit on TBinaryProtocol and TCompactProtocol if
-the System.Property(&quot;-Dorg.apache.thrift.readLength&quot;) is set.</p>
+any of the following System Properties are set:
+  org.apache.thrift.readLength
+  com.twitter.finagle.thrift.stringLengthLimit
+  com.twitter.finagle.thrift.containerLengthLimit
+</p>
     </li><li name="com.twitter.finagle.thrift.RichClientParam#serviceName" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="serviceName:String"></a>
       <span class="permalink">

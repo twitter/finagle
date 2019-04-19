@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Concurrent Programming with Futures &#8212; Finagle 19.3.0 documentation</title>
+    <title>Concurrent Programming with Futures &#8212; Finagle 19.4.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.3.0',
+        VERSION:     '19.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.3.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.4.0 documentation" href="index.html" />
     <link rel="next" title="Services &amp; Filters" href="ServicesAndFilters.html" />
     <link rel="prev" title="Quickstart" href="Quickstart.html" />
    
@@ -190,7 +190,7 @@ extract like this:</p>
 <span class="k">def</span> <span class="n">fetchUrl</span><span class="o">(</span><span class="n">url</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Byte</span><span class="o">]]</span> <span class="k">=</span> <span class="o">???</span>
 <span class="k">def</span> <span class="n">findImageUrls</span><span class="o">(</span><span class="n">bytes</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">Byte</span><span class="o">])</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
 
-<span class="k">val</span> <span class="n">url</span> <span class="k">=</span> <span class="s">&quot;http://www.google.com&quot;</span>
+<span class="k">val</span> <span class="n">url</span> <span class="k">=</span> <span class="s">&quot;https://www.google.com&quot;</span>
 
 <span class="k">val</span> <span class="n">f</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Byte</span><span class="o">]]</span> <span class="k">=</span> <span class="n">fetchUrl</span><span class="o">(</span><span class="n">url</span><span class="o">).</span><span class="n">flatMap</span> <span class="o">{</span> <span class="n">bytes</span> <span class="k">=&gt;</span>
   <span class="k">val</span> <span class="n">images</span> <span class="k">=</span> <span class="n">findImageUrls</span><span class="o">(</span><span class="n">bytes</span><span class="o">)</span>
@@ -276,13 +276,13 @@ a <code class="docutils literal"><span class="pre">PartialFunction</span></code>
 <div class="section" id="other-resources">
 <h2>Other resources<a class="headerlink" href="#other-resources" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><a class="reference external" href="http://twitter.github.com/effectivescala/">Effective Scala</a> contains a <a class="reference external" href="http://twitter.github.com/effectivescala/#Twitter's%20standard%20libraries-Futures">section discussing futures</a></li>
+<li><a class="reference external" href="https://twitter.github.com/effectivescala/">Effective Scala</a> contains a <a class="reference external" href="https://twitter.github.com/effectivescala/#Twitter's%20standard%20libraries-Futures">section discussing futures</a></li>
 <li>As of Scala 2.10, the Scala standard library has its own futures
-implementation and API, described <a class="reference external" href="http://docs.scala-lang.org/overviews/core/futures.html">here</a>. Note that
+implementation and API, described <a class="reference external" href="https://docs.scala-lang.org/overviews/core/futures.html">here</a>. Note that
 this is largely similar to the API used in Finagle
 (<em>com.twitter.util.Future</em>), but there are still some naming
 differences.</li>
-<li><a class="reference external" href="http://akka.io/">Akka</a>’s documentation also has a <a class="reference external" href="http://doc.akka.io/docs/akka/2.1.0/scala/futures.html">section dedicated to futures</a>.</li>
+<li><a class="reference external" href="https://akka.io/">Akka</a>’s documentation also has a <a class="reference external" href="https://doc.akka.io/docs/akka/2.1.0/scala/futures.html">section dedicated to futures</a>.</li>
 <li><a class="reference external" href="https://finagle.github.io/blog/2016/09/01/block-party/">Finagle Block Party</a> details why blocking is bad, and more
 importantly how to detect and fix it.</li>
 </ul>
@@ -292,7 +292,7 @@ importantly how to detect and fix it.</li>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Finagle uses its own <code class="docutils literal"><span class="pre">Future</span></code> implementation by a variety of reasons
 (fewer context switches, interruptibility, support for continuation-local variables,
-tail-call elimination), but mostly because it&#8217;s preceded <a class="reference external" href="http://docs.scala-lang.org/sips/completed/futures-promises.html">SIP-14</a> by over a year.</td></tr>
+tail-call elimination), but mostly because it&#8217;s preceded <a class="reference external" href="https://docs.scala-lang.org/sips/completed/futures-promises.html">SIP-14</a> by over a year.</td></tr>
 </tbody>
 </table>
 <table class="docutils footnote" frame="void" id="collecttotry" rules="none">
@@ -308,7 +308,7 @@ futures while accumulating errors instead of failing fast.</td></tr>
 <tr><td class="label"><a class="fn-backref" href="#id2">[3]</a></td><td>The name <code class="docutils literal"><span class="pre">flatMap</span></code> may seem strange and unrelated to our present
 discussion, but its etymology is impeccable: it derives from a deeper relationship
 between the sort of sequential composition we do with futures, to a similar sort of
-composition we can perform over collections. See the <a class="reference external" href="http://en.wikipedia.org/wiki/Monad_(functional_programming)">this</a> page for more details.</td></tr>
+composition we can perform over collections. See the <a class="reference external" href="https://en.wikipedia.org/wiki/Monad_(functional_programming)">this</a> page for more details.</td></tr>
 </tbody>
 </table>
 </div>
@@ -328,8 +328,8 @@ composition we can perform over collections. See the <a class="reference externa
 
 <h3>Useful Links</h3>
 <ul>
-  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
-  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+  <li><a href="https://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="https://github.com/twitter/finagle/issues">Issue Tracker</a></li>
 </ul>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>

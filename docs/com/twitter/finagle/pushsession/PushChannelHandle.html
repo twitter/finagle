@@ -346,23 +346,6 @@ any failure results in the <code>onClose</code> promise being completed with the
       
       <p class="shortcomment cmt">Expose a <code>Future</code> that is satisfied when the connection is closed.</p><div class="fullcomment"><div class="comment cmt"><p>Expose a <code>Future</code> that is satisfied when the connection is closed.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ClientConnection.html" class="extype" name="com.twitter.finagle.ClientConnection">ClientConnection</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.pushsession.PushChannelHandle#peerCertificate" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="peerCertificate:Option[java.security.cert.Certificate]"></a><a id="peerCertificate:Option[Certificate]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/pushsession/PushChannelHandle.html#peerCertificate:Option[java.security.cert.Certificate]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">peerCertificate</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.security.cert.Certificate">Certificate</span>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">Security certificate of the peer
-</p>
     </li><li name="com.twitter.finagle.pushsession.PushChannelHandle#registerSession" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="registerSession(newSession:com.twitter.finagle.pushsession.PushSession[In,Out]):Unit"></a><a id="registerSession(PushSession[In,Out]):Unit"></a>
       <span class="permalink">
@@ -493,6 +476,23 @@ Executor.</p><div class="fullcomment"><div class="comment cmt"><p>Single threade
 a happens-before relationship with respect to every other computation executed by the
 Executor. Messages from the pipeline are guaranteed to be processed in this <code>Executor</code>.
 </p></div></div>
+    </li><li name="com.twitter.finagle.pushsession.PushChannelHandle#sslSessionInfo" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="sslSessionInfo:com.twitter.finagle.ssl.session.SslSessionInfo"></a><a id="sslSessionInfo:SslSessionInfo"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/pushsession/PushChannelHandle.html#sslSessionInfo:com.twitter.finagle.ssl.session.SslSessionInfo" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sslSessionInfo</span><span class="result">: <a href="../ssl/session/SslSessionInfo.html" class="extype" name="com.twitter.finagle.ssl.session.SslSessionInfo">SslSessionInfo</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">SSL/TLS session information associated with the push channel handle.</p><div class="fullcomment"><div class="comment cmt"><p>SSL/TLS session information associated with the push channel handle.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>If SSL/TLS is not being used a <code>NullSslSessionInfo</code> will be returned instead.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.pushsession.PushChannelHandle#status" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="status:com.twitter.finagle.Status"></a><a id="status:Status"></a>
       <span class="permalink">

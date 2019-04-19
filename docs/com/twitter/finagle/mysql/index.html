@@ -341,22 +341,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.httpproxy" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="httpproxy"></a><a id="httpproxy:httpproxy"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#httpproxy" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../httpproxy/index.html"><span class="name">httpproxy</span></a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.liveness" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="liveness"></a><a id="liveness:liveness"></a>
       <span class="permalink">
@@ -474,7 +458,7 @@ requested by Tinit).</p><p><i>size:4 Treq:1 tag:3 n:1 (key:1 value~1){n} body:</
 request described by its body. The request body is delivered to the
 application. The request header contains a number of key-value pairs
 that describe request metadata.</p><p>Keys for <i>Treq</i> messages are as follows:</p><ol class="decimal"><li><i>traceid</i>: a 24-byte value describing the full
-<a href="http://research.google.com/archive/papers/dapper-2010-1.pdf" target="_blank">Dapper</a> trace id
+<a href="https://research.google.com/archive/papers/dapper-2010-1.pdf" target="_blank">Dapper</a> trace id
 assigned by the client. The value's format is <i>spanid:8 parentid:8 traceid:8</i>.</li></ol><p> 2. <i>traceflag</i>: a bitmask describing trace flags. Currently, the
 only defined flag is bit 0 which enables &quot;debug mode&quot;, asking the
 server to force trace sampling.</p><p><i>size:4 Tdispatch:1 tag:3 nctx:2 (ckey~2 cval~2){nc} dst~2 nd:2
@@ -695,9 +679,9 @@ use.</p><p> Flag          Value     Meaning
                         <a class="class" href="LongValue.html" title=""></a>
                         <a href="LongValue.html" title="">LongValue</a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="LostSyncException.html" title=""></a>
-                        <a href="LostSyncException.html" title="">LostSyncException</a>
+                        <a class="object" href="LostSyncException$.html" title=""></a>
+                        <a class="class" href="LostSyncException.html" title="A LostSyncException indicates that this finagle-mysql client and the MySQL server are no longer able to properly communicate, as there has been a failure to decode a message from the server or data has become corrupted in transmission."></a>
+                        <a href="LostSyncException.html" title="A LostSyncException indicates that this finagle-mysql client and the MySQL server are no longer able to properly communicate, as there has been a failure to decode a message from the server or data has become corrupted in transmission.">LostSyncException</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="MysqlCharset$.html" title=""></a>
@@ -850,30 +834,6 @@ use.</p><p> Flag          Value     Meaning
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.netty3" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="netty3"></a><a id="netty3:netty3"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#netty3" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="Package netty3 implements the bottom finagle primitives: {{com.twitter.finagle.Server}} and a client transport in terms of the netty3 event loop." href="../netty3/index.html"><span class="name">netty3</span></a>
-      </span>
-      
-      <p class="shortcomment cmt">Package netty3 implements the bottom finagle primitives:
-{{com.twitter.finagle.Server}} and a client transport in terms of
-the netty3 event loop.</p><div class="fullcomment"><div class="comment cmt"><p>Package netty3 implements the bottom finagle primitives:
-{{com.twitter.finagle.Server}} and a client transport in terms of
-the netty3 event loop.</p><p>Note: when {{com.twitter.finagle.builder.ClientBuilder}} and
-{{com.twitter.finagle.builder.ServerBuilder}} are deprecated,
-package netty3 can move into its own package, so that only the
-(new-style) clients and servers that depend on netty3 bring it in.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.netty4" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="netty4"></a><a id="netty4:netty4"></a>
       <span class="permalink">
@@ -1007,22 +967,6 @@ finagle clients and servers.
       </span>
       <span class="symbol">
         <a title="" href="../service/index.html"><span class="name">service</span></a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.socks" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="socks"></a><a id="socks:socks"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#socks" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../socks/index.html"><span class="name">socks</span></a>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
@@ -1426,7 +1370,7 @@ making it easier to use for most cases.
       
       <p class="shortcomment cmt">A CloseRequest deallocates a prepared statement on the server.</p><div class="fullcomment"><div class="comment cmt"><p>A CloseRequest deallocates a prepared statement on the server.
 No response is sent back to the client.
-<a href="http://dev.mysql.com/doc/internals/en/com-stmt-close.html" target="_blank">http://dev.mysql.com/doc/internals/en/com-stmt-close.html</a>
+<a href="https://dev.mysql.com/doc/internals/en/com-stmt-close.html" target="_blank">https://dev.mysql.com/doc/internals/en/com-stmt-close.html</a>
 </p></div></div>
     </li><li name="com.twitter.finagle.mysql.ColumnNotFoundException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ColumnNotFoundExceptionextendsSQLNonTransientExceptionwithFailureFlags[com.twitter.finagle.mysql.ColumnNotFoundException]"></a><a id="ColumnNotFoundException:ColumnNotFoundException"></a>
@@ -1581,7 +1525,7 @@ a lazy stream of rows.</p><p>These are SQL statements with <code>?</code>'s used
       <p class="shortcomment cmt">Uses the binary protocol to build an execute request for
 a prepared statement.</p><div class="fullcomment"><div class="comment cmt"><p>Uses the binary protocol to build an execute request for
 a prepared statement.
-<a href="http://dev.mysql.com/doc/internals/en/com-stmt-execute.html" target="_blank">http://dev.mysql.com/doc/internals/en/com-stmt-execute.html</a>
+<a href="https://dev.mysql.com/doc/internals/en/com-stmt-execute.html" target="_blank">https://dev.mysql.com/doc/internals/en/com-stmt-execute.html</a>
 </p></div></div>
     </li><li name="com.twitter.finagle.mysql.FetchRequest" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="FetchRequestextendsCommandRequest"></a><a id="FetchRequest:FetchRequest"></a>
@@ -1681,7 +1625,7 @@ a prepared statement.
       <p class="shortcomment cmt">Client response sent during connection phase.</p><div class="fullcomment"><div class="comment cmt"><p>Client response sent during connection phase.
 Responsible for encoding credentials used to
 authenticate a session.
-<a href="http://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse41" target="_blank">http://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse41</a>
+<a href="https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse41" target="_blank">https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse41</a>
 </p></div></div>
     </li><li name="com.twitter.finagle.mysql.IncompatibleServerError" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="IncompatibleServerErrorextendsException"></a><a id="IncompatibleServerError:IncompatibleServerError"></a>
@@ -1748,7 +1692,7 @@ upstream MySQL server.</p>
       </span>
       
       
-    </li><li name="com.twitter.finagle.mysql.LostSyncException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.mysql.LostSyncException" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="LostSyncExceptionextendsRuntimeExceptionwithProductwithSerializable"></a><a id="LostSyncException:LostSyncException"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/mysql/index.html#LostSyncExceptionextendsRuntimeExceptionwithProductwithSerializable" title="Permalink">
@@ -1756,14 +1700,20 @@ upstream MySQL server.</p>
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="" href="LostSyncException.html"><span class="name">LostSyncException</span></a><span class="params">(<span name="underlying">underlying: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result"> extends <span class="extype" name="scala.RuntimeException">RuntimeException</span> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="A LostSyncException indicates that this finagle-mysql client and the MySQL server are no longer able to properly communicate, as there has been a failure to decode a message from the server or data has become corrupted in transmission." href="LostSyncException.html"><span class="name">LostSyncException</span></a><span class="params">(<span name="underlying">underlying: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result"> extends <span class="extype" name="scala.RuntimeException">RuntimeException</span> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
-      
+      <p class="shortcomment cmt">A <a href="LostSyncException.html" class="extype" name="com.twitter.finagle.mysql.LostSyncException">LostSyncException</a> indicates that this finagle-mysql client and the MySQL server are
+no longer able to properly communicate, as there has been a failure to decode a message
+from the server or data has become corrupted in transmission.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="LostSyncException.html" class="extype" name="com.twitter.finagle.mysql.LostSyncException">LostSyncException</a> indicates that this finagle-mysql client and the MySQL server are
+no longer able to properly communicate, as there has been a failure to decode a message
+from the server or data has become corrupted in transmission. It is a fatal error and the
+communication with the server must be closed, then reopened, and renogotiated.
+</p></div></div>
     </li><li name="com.twitter.finagle.mysql.OK" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="OKextendsResultwithProductwithSerializable"></a><a id="OK:OK"></a>
       <span class="permalink">
@@ -1847,7 +1797,7 @@ Parameter p = Parameters.of(<span class="lit">"explicitly converted to a Paramet
       <p class="shortcomment cmt">Allocates a prepared statement on the server from the
 passed in query string.</p><div class="fullcomment"><div class="comment cmt"><p>Allocates a prepared statement on the server from the
 passed in query string.
-<a href="http://dev.mysql.com/doc/internals/en/com-stmt-prepare.html" target="_blank">http://dev.mysql.com/doc/internals/en/com-stmt-prepare.html</a>
+<a href="https://dev.mysql.com/doc/internals/en/com-stmt-prepare.html" target="_blank">https://dev.mysql.com/doc/internals/en/com-stmt-prepare.html</a>
 </p></div></div>
     </li><li name="com.twitter.finagle.mysql.PreparedStatement" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="PreparedStatementextendsAnyRef"></a><a id="PreparedStatement:PreparedStatement"></a>
@@ -1887,7 +1837,7 @@ applied concurrently with varying parameters.</p><p>These are SQL statements wit
       <p class="shortcomment cmt">A QueryRequest is used to send the server a text-based query that
 is executed immediately.</p><div class="fullcomment"><div class="comment cmt"><p>A QueryRequest is used to send the server a text-based query that
 is executed immediately.
-<a href="http://dev.mysql.com/doc/internals/en/com-query.html" target="_blank">http://dev.mysql.com/doc/internals/en/com-query.html</a>
+<a href="https://dev.mysql.com/doc/internals/en/com-query.html" target="_blank">https://dev.mysql.com/doc/internals/en/com-query.html</a>
 </p></div></div>
     </li><li name="com.twitter.finagle.mysql.RawValue" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="RawValueextendsValuewithProductwithSerializable"></a><a id="RawValue:RawValue"></a>
@@ -2185,7 +2135,7 @@ For example, asking for a string when the column is a tinyint.
       </span>
       
       <p class="shortcomment cmt">A UseRequest is used to change the default schema of the connection.</p><div class="fullcomment"><div class="comment cmt"><p>A UseRequest is used to change the default schema of the connection.
-<a href="http://dev.mysql.com/doc/internals/en/com-init-db.html" target="_blank">http://dev.mysql.com/doc/internals/en/com-init-db.html</a>
+<a href="https://dev.mysql.com/doc/internals/en/com-init-db.html" target="_blank">https://dev.mysql.com/doc/internals/en/com-init-db.html</a>
 </p></div></div>
     </li><li name="com.twitter.finagle.mysql.Value" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ValueextendsAnyRef"></a><a id="Value:Value"></a>
@@ -2378,7 +2328,7 @@ CloseRequest
       <p class="shortcomment cmt">Represents and EOF result received from the server which
 contains any warnings and the server status.</p><div class="fullcomment"><div class="comment cmt"><p>Represents and EOF result received from the server which
 contains any warnings and the server status.
-<a href="http://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-EOF_Packet" target="_blank">http://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-EOF_Packet</a>
+<a href="https://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-EOF_Packet" target="_blank">https://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-EOF_Packet</a>
 </p></div></div>
     </li><li name="com.twitter.finagle.mysql.EmptyValue" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="EmptyValue"></a><a id="EmptyValue:EmptyValue"></a>
@@ -2412,7 +2362,7 @@ contains any warnings and the server status.
       </span>
       
       <p class="shortcomment cmt">Represents the Error Packet received from the server and the data sent along with it.</p><div class="fullcomment"><div class="comment cmt"><p>Represents the Error Packet received from the server and the data sent along with it.
-<a href="http://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-ERR_Packet" target="_blank">http://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-ERR_Packet</a>
+<a href="https://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-ERR_Packet" target="_blank">https://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-ERR_Packet</a>
 </p></div></div>
     </li><li name="com.twitter.finagle.mysql.ExecuteRequest" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ExecuteRequest"></a><a id="ExecuteRequest:ExecuteRequest"></a>
@@ -2464,7 +2414,7 @@ contains any warnings and the server status.
       <p class="shortcomment cmt">Represents the column meta-data associated with a query.</p><div class="fullcomment"><div class="comment cmt"><p>Represents the column meta-data associated with a query.
 Sent during ResultSet transmission and as part of the
 meta-data associated with a Row.
-<a href="http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-Protocol::ColumnDefinition41" target="_blank">http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-Protocol::ColumnDefinition41</a>
+<a href="https://dev.mysql.com/doc/internals/en/com-query-response.html#packet-Protocol::ColumnDefinition41" target="_blank">https://dev.mysql.com/doc/internals/en/com-query-response.html#packet-Protocol::ColumnDefinition41</a>
 </p></div></div>
     </li><li name="com.twitter.finagle.mysql.FieldAttributes" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="FieldAttributes"></a><a id="FieldAttributes:FieldAttributes"></a>
@@ -2502,7 +2452,7 @@ is set for the field. Link to source code from mysql is below.
       </span>
       
       <p class="shortcomment cmt">First result received from the server as part of the connection phase.</p><div class="fullcomment"><div class="comment cmt"><p>First result received from the server as part of the connection phase.
-<a href="http://dev.mysql.com/doc/internals/en/connection-phase-packets.html" target="_blank">http://dev.mysql.com/doc/internals/en/connection-phase-packets.html</a>
+<a href="https://dev.mysql.com/doc/internals/en/connection-phase-packets.html" target="_blank">https://dev.mysql.com/doc/internals/en/connection-phase-packets.html</a>
 </p></div></div>
     </li><li name="com.twitter.finagle.mysql.IncompatibleCharset" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="IncompatibleCharset"></a><a id="IncompatibleCharset:IncompatibleCharset"></a>
@@ -2556,6 +2506,22 @@ a version of MySQL that the client is incompatible with.</p>
       <p class="shortcomment cmt">MySQL Isolation Levels.</p><div class="fullcomment"><div class="comment cmt"><p>MySQL Isolation Levels. Used to override the SESSION or GLOBAL isolation level when
 executing transactions.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="Transactions.html" class="extype" name="com.twitter.finagle.mysql.Transactions">com.twitter.finagle.mysql.Transactions</a></p></span><span class="cmt"><p><a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-transaction-isolation-levels.html" target="_blank">https://dev.mysql.com/doc/refman/5.7/en/innodb-transaction-isolation-levels.html</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.mysql.LostSyncException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="LostSyncException"></a><a id="LostSyncException:LostSyncException"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/index.html#LostSyncException" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="LostSyncException$.html"><span class="name">LostSyncException</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.mysql.MysqlCharset" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MysqlCharset"></a><a id="MysqlCharset:MysqlCharset"></a>
       <span class="permalink">
@@ -2664,7 +2630,7 @@ Parameter p = Parameters.of(<span class="lit">"explicitly converted to a Paramet
       </span>
       
       <p class="shortcomment cmt">A request to check if the server is alive.</p><div class="fullcomment"><div class="comment cmt"><p>A request to check if the server is alive.
-<a href="http://dev.mysql.com/doc/internals/en/com-ping.html" target="_blank">http://dev.mysql.com/doc/internals/en/com-ping.html</a>
+<a href="https://dev.mysql.com/doc/internals/en/com-ping.html" target="_blank">https://dev.mysql.com/doc/internals/en/com-ping.html</a>
 </p></div></div>
     </li><li name="com.twitter.finagle.mysql.PrepareOK" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="PrepareOK"></a><a id="PrepareOK:PrepareOK"></a>
@@ -2686,7 +2652,7 @@ a prepared statement initialization request
 COM_STMT_PREPARE.</p><div class="fullcomment"><div class="comment cmt"><p>Meta data returned from the server in response to
 a prepared statement initialization request
 COM_STMT_PREPARE.
-<a href="http://dev.mysql.com/doc/internals/en/com-stmt-prepare-response.html#packet-COM_STMT_PREPARE_OK" target="_blank">http://dev.mysql.com/doc/internals/en/com-stmt-prepare-response.html#packet-COM_STMT_PREPARE_OK</a>
+<a href="https://dev.mysql.com/doc/internals/en/com-stmt-prepare-response.html#packet-COM_STMT_PREPARE_OK" target="_blank">https://dev.mysql.com/doc/internals/en/com-stmt-prepare-response.html#packet-COM_STMT_PREPARE_OK</a>
 </p></div></div>
     </li><li name="com.twitter.finagle.mysql.PreparedStatement" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="PreparedStatement"></a><a id="PreparedStatement:PreparedStatement"></a>
@@ -2720,7 +2686,7 @@ COM_STMT_PREPARE.
       </span>
       
       <p class="shortcomment cmt">Tells the server that the client wants to close the connection.</p><div class="fullcomment"><div class="comment cmt"><p>Tells the server that the client wants to close the connection.
-<a href="http://dev.mysql.com/doc/internals/en/com-quit.html" target="_blank">http://dev.mysql.com/doc/internals/en/com-quit.html</a>
+<a href="https://dev.mysql.com/doc/internals/en/com-quit.html" target="_blank">https://dev.mysql.com/doc/internals/en/com-quit.html</a>
 </p></div></div>
     </li><li name="com.twitter.finagle.mysql.RollbackFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="RollbackFactory"></a><a id="RollbackFactory:RollbackFactory"></a>

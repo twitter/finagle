@@ -215,7 +215,7 @@ resources for using Finagle.
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">com.twitter.finagle.ServiceFactory</a> that accrues failures, marking
 itself unavailable when deemed unhealthy according to the configured <code>policy</code>.</p><p>This acts as a request driven
-<a href="http://martinfowler.com/bliki/CircuitBreaker.html" target="_blank">circuit breaker</a>.</p><p>Note this module fails open – that is,  even if it transitions into a
+<a href="https://martinfowler.com/bliki/CircuitBreaker.html" target="_blank">circuit breaker</a>.</p><p>Note this module fails open – that is,  even if it transitions into a
 closed state, requests will still be allowed to flow through it. Although,
 when used in a typical Finagle client, there is one instance of this module
 per node and as such, the load balancer will avoid nodes where the status is

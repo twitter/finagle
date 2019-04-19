@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &#8212; Finagle 19.3.0 documentation</title>
+    <title>Metrics &#8212; Finagle 19.4.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.3.0',
+        VERSION:     '19.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.3.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.4.0 documentation" href="index.html" />
     <link rel="next" title="Flags" href="Flags.html" />
     <link rel="prev" title="Protocols" href="Protocols.html" />
    
@@ -832,6 +832,12 @@ histograms.</dd>
 <dt><strong>connections</strong></dt>
 <dd>A gauge of the total number of connections that are currently open in the
 channel.</dd>
+<dt><strong>pending_io_events</strong></dt>
+<dd>A gauge of the number of pending IO events enqueued in all event loops servicing
+this client or server. If this metric climbs up, it indicates an overload scenario
+when IO threads are not being able to process the scheduled work (handling new
+requests and new connections). A very typical cause of these symptoms is either
+blocking or running a CPU intensive workloads on IO threads.</dd>
 <dt><strong>exn/&lt;exception_name&gt;+</strong></dt>
 <dd>A counter of the number of times a specific exception has been thrown within
 a Netty pipeline.</dd>
@@ -1128,11 +1134,29 @@ responses are automatically retried by Finagle HTTP client.</dd>
 <dt><strong>nonretryable_nacks</strong></dt>
 <dd>A counter of the number of non-retryable HTTP 503 responses the HTTP server returns. Those
 responses are not automatically retried.</dd>
+<dt><strong>stream/failures/&lt;exception_name&gt;</strong></dt>
+<dd>A counter of the number of times a specific exception has been thrown in the middle of a stream.</dd>
+<dt><strong>stream/failures</strong></dt>
+<dd>A counter of the number of times any failure has been observed in the middle of a stream.</dd>
+<dt><strong>http/cookie/samesite_failures</strong> <cite>verbosity:debug</cite></dt>
+<dd>A counter of the number of failed attempts to decode the SameSite Cookie attribute.</dd>
+<dt><strong>rejected_invalid_header_names</strong></dt>
+<dd>A counter of the number of rejected requests by a server due to an invalid (as seen by RFC-7230)
+header name.</dd>
+<dt><strong>rejected_invalid_header_values</strong></dt>
+<dd>A counter of the number of rejected requests by a server due to an invalid (as seen by RFC-7230)
+header value.</dd>
 </dl>
 <p>These metrics are added by
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-http/src/main/scala/com/twitter/finagle/http/filter/StatsFilter.scala">StatsFilter</a> and can be enabled by
 using <cite>.withHttpStats</cite> on <cite>Http.Client</cite> and <cite>Http.Server</cite>.</p>
 <dl class="docutils">
+<dt><strong>request_stream_duration_ms</strong></dt>
+<dd>A histogram of the duration of the lifetime of request streams, from the time a stream is initialized
+until it&#8217;s closed, in milliseconds.</dd>
+<dt><strong>response_stream_duration_ms</strong></dt>
+<dd>A histogram of the duration of the lifetime of response streams, from the time a stream is initialized
+until it&#8217;s closed, in milliseconds.</dd>
 <dt><strong>status/&lt;statusCode&gt;</strong></dt>
 <dd>A counter of the number of responses received, or returned for servers, that had this
 statusCode.</dd>
@@ -1143,12 +1167,6 @@ count as 5XX for this counter.</dd>
 <dd>A histogram on duration in milliseconds per HTTP status code.</dd>
 <dt><strong>time/&lt;statusCategory&gt;</strong></dt>
 <dd>A histogram on duration in milliseconds per HTTP status code category.</dd>
-<dt><strong>stream/failures/&lt;exception_name&gt;</strong></dt>
-<dd>A counter of the number of times a specific exception has been thrown in the middle of a stream.</dd>
-<dt><strong>stream/failures</strong></dt>
-<dd>A counter of the number of times any failure has been observed in the middle of a stream.</dd>
-<dt><strong>http/cookie/samesite_failures</strong> <cite>verbosity:debug</cite></dt>
-<dd>A counter of the number of failed attempts to decode the SameSite Cookie attribute.</dd>
 </dl>
 </div>
 <div class="section" id="http2">
@@ -1327,8 +1345,8 @@ when constructing a client <cite>ServicePerEndpoint</cite>. Similar metrics as s
 
 <h3>Useful Links</h3>
 <ul>
-  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
-  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+  <li><a href="https://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="https://github.com/twitter/finagle/issues">Issue Tracker</a></li>
 </ul>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>

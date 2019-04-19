@@ -222,12 +222,7 @@ transport.
             Linear Supertypes
           </span>
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
-        </div><div class="toggleContainer block">
-            <span class="toggle">
-              Known Subclasses
-            </span>
-            <div class="subClasses hiddenContent"><a href="../netty3/transport/ChannelTransportContext.html" class="extype" name="com.twitter.finagle.netty3.transport.ChannelTransportContext">ChannelTransportContext</a></div>
-          </div></div>
+        </div></div>
         
 
       <div id="mbrsel">
@@ -311,22 +306,6 @@ transport.
       </span>
       
       <p class="shortcomment cmt">The locally bound address of this transport.</p>
-    </li><li name="com.twitter.finagle.transport.TransportContext#peerCertificate" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="peerCertificate:Option[java.security.cert.Certificate]"></a><a id="peerCertificate:Option[Certificate]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/transport/TransportContext.html#peerCertificate:Option[java.security.cert.Certificate]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">peerCertificate</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.security.cert.Certificate">Certificate</span>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">The peer certificate if a TLS session is established.</p>
     </li><li name="com.twitter.finagle.transport.TransportContext#remoteAddress" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="remoteAddress:java.net.SocketAddress"></a><a id="remoteAddress:SocketAddress"></a>
       <span class="permalink">
@@ -343,6 +322,23 @@ transport.
       </span>
       
       <p class="shortcomment cmt">The remote address to which the transport is connected.</p>
+    </li><li name="com.twitter.finagle.transport.TransportContext#sslSessionInfo" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="sslSessionInfo:com.twitter.finagle.ssl.session.SslSessionInfo"></a><a id="sslSessionInfo:SslSessionInfo"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/transport/TransportContext.html#sslSessionInfo:com.twitter.finagle.ssl.session.SslSessionInfo" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sslSessionInfo</span><span class="result">: <a href="../ssl/session/SslSessionInfo.html" class="extype" name="com.twitter.finagle.ssl.session.SslSessionInfo">SslSessionInfo</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">SSL/TLS session information associated with the transport.</p><div class="fullcomment"><div class="comment cmt"><p>SSL/TLS session information associated with the transport.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>If SSL/TLS is not being used a <code>NullSslSessionInfo</code> will be returned instead.</p></span></dd></dl></div>
     </li></ol>
             </div>
 

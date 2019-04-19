@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Signaling Failure within Finagle &#8212; Finagle 19.3.0 documentation</title>
+    <title>Signaling Failure within Finagle &#8212; Finagle 19.4.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '19.3.0',
+        VERSION:     '19.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="top" title="Finagle 19.3.0 documentation" href="../index.html" />
+    <link rel="top" title="Finagle 19.4.0 documentation" href="../index.html" />
     <link rel="next" title="Changelog" href="../changelog.html" />
     <link rel="prev" title="Twitter Futures" href="Futures.html" />
    
@@ -203,7 +203,7 @@ transformed along the way.</p>
 propagate but it will be converted in to a <cite>Failure</cite>. Any other information,
 such as stack traces, will be discarded. Due to Finagle&#8217;s asynchronous nature,
 stack traces are not particularly useful. Instead Finagle provides built in
-support for <a class="reference external" href="http://zipkin.io">Zipkin</a>, the distributed tracing system.</p>
+support for <a class="reference external" href="https://zipkin.io">Zipkin</a>, the distributed tracing system.</p>
 <p>When sending these responses across service boundaries, <cite>toString</cite> is called on
 each hop. This means that messages will appear like
 &#8220;Failure(Failure(Failure(Underlying cause... &#8221; when logged. This may change in
@@ -265,8 +265,8 @@ any information (stack trace, message, etc) except for the flags. See
 
 <h3>Useful Links</h3>
 <ul>
-  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
-  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+  <li><a href="https://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="https://github.com/twitter/finagle/issues">Issue Tracker</a></li>
 </ul>
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
