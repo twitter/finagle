@@ -58,6 +58,11 @@ in our tests to keep them easy to read.  We've chosen the `assert` API, not the
 `Matchers` one, and we use the [`FunSuite` mixin][funsuite], which supports
 xUnit-like semantics.
 
+Run tests towards the project updated:
+``` bash
+./sbt 'project $project-name' test
+```
+
 We encourage our contributors to ensure Java compatibility for any new public APIs
 they introduce. The easiest way to do so is to provide _Java compilation tests_
 and make sure the new API is easily accessible (typing `X$.MODULE$` is not easy)
