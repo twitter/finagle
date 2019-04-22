@@ -40,8 +40,8 @@ object Command {
 }
 
 sealed trait Request {
-  val seq: Short
-  val cmd: Byte = Command.COM_NO_OP
+  def seq: Short
+  def cmd: Byte = Command.COM_NO_OP
   def toPacket: Packet
 }
 
@@ -53,8 +53,8 @@ sealed trait WithSql {
 }
 
 private[finagle] object PoisonConnectionRequest extends Request {
-  val seq: Short = 0
-  override val cmd: Byte = Command.COM_POISON_CONN
+  def seq: Short = 0
+  override def cmd: Byte = Command.COM_POISON_CONN
   def toPacket: Packet = ???
 }
 
@@ -63,7 +63,7 @@ private[finagle] object PoisonConnectionRequest extends Request {
  * and has a cmd byte associated with it.
  */
 abstract class CommandRequest(override val cmd: Byte) extends Request {
-  val seq: Short = 0
+  def seq: Short = 0
 }
 
 /**
@@ -134,7 +134,7 @@ private[mysql] case class SslConnectionRequest(
     clientCap.has(Capability.SSL),
     "Using SslConnectionRequest requires having the SSL capability")
 
-  override val seq: Short = 1
+  override def seq: Short = 1
 
   def toPacket: Packet = {
     val packetBodySize = 32
@@ -164,7 +164,8 @@ case class HandshakeResponse(
   charset: Short,
   maxPacketSize: Int)
     extends Request {
-  override val seq: Short = 1
+
+  def seq: Short = 1
 
   lazy val hashPassword: Array[Byte] = password match {
     case Some(p) => encryptPassword(p, salt)
@@ -208,6 +209,7 @@ case class HandshakeResponse(
 
 class FetchRequest(val prepareOK: PrepareOK, val numRows: Int)
     extends CommandRequest(Command.COM_STMT_FETCH) {
+
   val stmtId: Int = prepareOK.id
 
   def toPacket: Packet = {
@@ -231,6 +233,7 @@ class ExecuteRequest(
   val hasNewParams: Boolean,
   val flags: Byte)
     extends CommandRequest(Command.COM_STMT_EXECUTE) {
+
   private[this] val log = Logger.getLogger("finagle-mysql")
 
   private[this] def makeNullBitmap(parameters: IndexedSeq[Parameter]): Array[Byte] = {
