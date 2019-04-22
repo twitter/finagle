@@ -17,6 +17,45 @@ class SimpleCommandRequestTest extends FunSuite {
   }
 }
 
+class SslConnectionRequestTest extends FunSuite {
+  val clientCap: Capability = Capability.baseCap + Capability.ConnectWithDB + Capability.FoundRows
+  val sslClientCap: Capability = clientCap + Capability.SSL
+  val charset: Short = MysqlCharset.Utf8_general_ci
+  val maxPacketSize: Int = 12345678
+
+  test("Fails without SSL capability") {
+    intercept[IllegalArgumentException] {
+      SslConnectionRequest(clientCap, charset, maxPacketSize)
+    }
+  }
+
+  // The remaining tests for `SslConnectionRequest` are very similar
+  // to the tests for the first part of `HandshakeResponse`.
+  val req = SslConnectionRequest(sslClientCap, charset, maxPacketSize)
+  val br = MysqlBuf.reader(req.toPacket.body)
+
+  test("encode capabilities") {
+    val mask = br.readIntLE()
+    assert(mask == 0x2AE8F)
+  }
+
+  test("maxPacketSize") {
+    val max = br.readIntLE()
+    assert(max == 12345678)
+  }
+
+  test("charset") {
+    val charset = br.readByte()
+    assert(charset == 33.toByte)
+  }
+
+  test("reserved bytes") {
+    val rbytes = br.take(23)
+    assert(rbytes.forall(_ == 0))
+  }
+
+}
+
 class HandshakeResponseTest extends FunSuite {
   val username = Some("username")
   val password = Some("password")

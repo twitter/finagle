@@ -118,6 +118,38 @@ case class PrepareRequest(sqlStatement: String)
 
 /**
  * Client response sent during connection phase.
+ * It is similar to a [[HandshakeResponse]], but stops
+ * before `username`. If the server supports the `CLIENT_SSL`
+ * capability, and the client wants to use SSL/TLS, this is
+ * the packet which is sent as a response by the client to
+ * indicate that SSL/TLS should then be negotiated.
+ * [[https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::SSLRequest]]
+ */
+private[mysql] case class SslConnectionRequest(
+  clientCap: Capability,
+  charset: Short,
+  maxPacketSize: Int)
+    extends Request {
+  require(
+    clientCap.has(Capability.SSL),
+    "Using SslConnectionRequest requires having the SSL capability")
+
+  override val seq: Short = 1
+
+  def toPacket: Packet = {
+    val packetBodySize = 32
+    val bw = MysqlBuf.writer(new Array[Byte](packetBodySize))
+    bw.writeIntLE(clientCap.mask)
+    bw.writeIntLE(maxPacketSize)
+    bw.writeByte(charset)
+    bw.fill(23, 0.toByte) // 23 reserved bytes - zeroed out
+
+    Packet(seq, bw.owned())
+  }
+}
+
+/**
+ * Client response sent during connection phase.
  * Responsible for encoding credentials used to
  * authenticate a session.
  * [[https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse41]]
