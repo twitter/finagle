@@ -7,6 +7,13 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: Deterministic aperture (d-aperture) load balancers no longer export
+  "loadband" scoped metrics: "widen", "narrow", "offered_load_ema". These were not
+  necessary as d-aperture does not change the aperture size at runtime. ``PHAB_ID=D303833``
+
 19.4.0
 ------
 

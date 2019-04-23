@@ -10,7 +10,10 @@ import org.scalatest.FunSuite
 class LoadBandTest extends FunSuite with ApertureSuite {
   private val rng = Rng()
 
-  private class Bal(protected val lowLoad: Double, protected val highLoad: Double)
+  private class Bal(
+    protected val lowLoad: Double,
+    protected val highLoad: Double,
+    override protected val useDeterministicOrdering: Option[Boolean] = Some(false))
       extends TestBal
       with LeastLoaded[Unit, Unit]
       with LoadBand[Unit, Unit] {

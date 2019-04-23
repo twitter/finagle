@@ -78,6 +78,28 @@ class ApertureTest extends FunSuite with ApertureSuite {
     }
   }
 
+  test("dapertureActive does not create LoadBand metrics") {
+    val stats = new InMemoryStatsReceiver
+    val aperture = new ApertureLeastLoaded[Unit, Unit](
+      endpoints = Activity.pending,
+      smoothWin = Duration.Bottom,
+      lowLoad = 0,
+      highLoad = 0,
+      minAperture = 10,
+      maxEffort = 0,
+      rng = Rng.threadLocal,
+      statsReceiver = stats,
+      label = "",
+      timer = new NullTimer,
+      emptyException = new NoBrokersAvailableException,
+      useDeterministicOrdering = Some(true)
+    )
+
+    assert(!stats.gauges.contains(Seq("loadband", "offered_load_ema")))
+    assert(!stats.counters.contains(Seq("loadband", "widen")))
+    assert(!stats.counters.contains(Seq("loadband", "narrow")))
+  }
+
   test("closing ApertureLeastLoaded removes the loadband ema gauge") {
     val stats = new InMemoryStatsReceiver
     val aperture = new ApertureLeastLoaded[Unit, Unit](
@@ -92,7 +114,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
       label = "",
       timer = new NullTimer,
       emptyException = new NoBrokersAvailableException,
-      useDeterministicOrdering = None
+      useDeterministicOrdering = Some(false)
     )
 
     assert(stats.gauges.contains(Seq("loadband", "offered_load_ema")))
@@ -116,7 +138,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
       label = "",
       timer = new NullTimer,
       emptyException = new NoBrokersAvailableException,
-      useDeterministicOrdering = None
+      useDeterministicOrdering = Some(false)
     )
 
     assert(stats.gauges.contains(Seq("loadband", "offered_load_ema")))
