@@ -83,6 +83,12 @@ private final class DefaultHeaderMap extends HeaderMap {
 
   override def keysIterator: Iterator[String] =
     keySet.iterator
+
+  private[finagle] override def nameValueIterator: Iterator[HeaderMap.NameValue] =
+    underlying.synchronized {
+      underlying.flattenedNameValueIterator
+    }
+
 }
 
 private object DefaultHeaderMap {
@@ -112,7 +118,8 @@ private object DefaultHeaderMap {
         Rfc7230HeaderValidation.replaceObsFold(value)
     }
 
-  private final class Header(val name: String, val value: String, var next: Header = null) {
+  private final class Header(val name: String, val value: String, var next: Header = null)
+      extends HeaderMap.NameValue {
 
     def values: Seq[String] =
       if (next == null) value :: Nil
@@ -195,42 +202,46 @@ private object DefaultHeaderMap {
         loop(0)
       }
 
-    def flattenIterator: Iterator[(String, String)] = new Iterator[(String, String)] {
-      // To get the following behavior, this method must be called in a thread safe
-      // manner and as such, it is only called from within the `DefaultHeaderMap.iterator`
-      // method, which synchronizes on this instance.
-      //
-      // The resulting iterator is not invariant of mutations of the HeaderMap, but
-      // shouldn't result in corruption of the HashMap. To do that, we make a copy
-      // of the underlying values, so by key, it is immutable. However, adding more
-      // values to an existing key is still not thread safe in terms of observability
-      // since it modifies the `Header` linked list structure, but that shouldn't
-      // result in corruption of this HashMap.
-      private[this] val it = {
-        val array = new Array[Header](self.size)
-        val it = self.entriesIterator
-        var i = 0
-        while (it.hasNext) {
-          array(i) = it.next().value
-          i += 1
+    def flattenIterator: Iterator[(String, String)] =
+      flattenedNameValueIterator.map(nv => (nv.name, nv.value))
+
+    def flattenedNameValueIterator: Iterator[HeaderMap.NameValue] =
+      new Iterator[HeaderMap.NameValue] {
+        // To get the following behavior, this method must be called in a thread safe
+        // manner and as such, it is only called from within the `DefaultHeaderMap.iterator`
+        // and `DefaultHeaderMap.nameValueIterator` methods, which synchronize on this instance.
+        //
+        // The resulting iterator is not invariant of mutations of the HeaderMap, but
+        // shouldn't result in corruption of the HashMap. To do that, we make a copy
+        // of the underlying values, so by key, it is immutable. However, adding more
+        // values to an existing key is still not thread safe in terms of observability
+        // since it modifies the `Header` linked list structure, but that shouldn't
+        // result in corruption of this HashMap.
+        private[this] val it = {
+          val array = new Array[Header](self.size)
+          val it = self.entriesIterator
+          var i = 0
+          while (it.hasNext) {
+            array(i) = it.next().value
+            i += 1
+          }
+          array.iterator
         }
-        array.iterator
-      }
-      private[this] var current: Header = _
+        private[this] var current: Header = _
 
-      def hasNext: Boolean =
-        it.hasNext || current != null
+        def hasNext: Boolean =
+          it.hasNext || current != null
 
-      def next(): (String, String) = {
-        if (current == null) {
-          current = it.next()
+        def next(): HeaderMap.NameValue = {
+          if (current == null) {
+            current = it.next()
+          }
+
+          val result = current
+          current = current.next
+          result
         }
-
-        val result = (current.name, current.value)
-        current = current.next
-        result
       }
-    }
 
     def getFirstOrNull(key: String): String =
       findEntry(key) match {
