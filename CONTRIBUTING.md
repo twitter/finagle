@@ -65,6 +65,11 @@ from Java. These compilation tests also provide Java users with testable example
 of the API usage. For an example of a Java compilation test see
 [AddrCompilationTest.java][9].
 
+Run tests against the updated project:
+``` bash
+./sbt 'project $project-name' test
+```
+
 Note that while you will see a [Travis CI][travis-ci] status message in your
 pull request, this may not always be accurate, and in any case all changes will
 be tested internally at Twitter before being merged. We're working to make
