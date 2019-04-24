@@ -14,6 +14,13 @@ Runtime Behavior Changes
   "loadband" scoped metrics: "widen", "narrow", "offered_load_ema". These were not
   necessary as d-aperture does not change the aperture size at runtime. ``PHAB_ID=D303833``
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-mysql: HandshakeResponse has been removed from finagle-mysql's public
+  API. It is expected that users of the library are relying entirely on
+  finagle-mysql for handshaking. ``PHAB_ID=D304512``
+
 19.4.0
 ------
 

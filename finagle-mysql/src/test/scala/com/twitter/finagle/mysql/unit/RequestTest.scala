@@ -56,31 +56,30 @@ class SslConnectionRequestTest extends FunSuite {
 
 }
 
-class HandshakeResponseTest extends FunSuite {
+abstract class HandshakeResponseTest extends FunSuite {
   val username = Some("username")
   val password = Some("password")
+  val database = Some("test")
   val salt =
     Array[Byte](70, 38, 43, 66, 74, 48, 79, 126, 76, 66, 70, 118, 67, 40, 63, 68, 120, 80, 103, 54)
-  val req = HandshakeResponse(
-    username,
-    password,
-    Some("test"),
-    Capability(0xfffff6ff),
-    salt,
-    Capability(0xf7ff),
-    MysqlCharset.Utf8_general_ci,
-    16777216
-  )
-  val br = MysqlBuf.reader(req.toPacket.body)
+  val maxPacketSize = 16777216
+
+  protected def clientCapabilities(): Capability = Capability(0xfffff6ff)
+  protected def serverCapabilities(): Capability = Capability(0xf7ff)
+  protected def createHandshakeResponse(): HandshakeResponse
+
+  val req = createHandshakeResponse()
+  val packet = req.toPacket
+  val br = MysqlBuf.reader(packet.body)
 
   test("encode capabilities") {
     val mask = br.readIntLE()
-    assert(mask == 0xfffff6ff)
+    assert(mask == clientCapabilities().mask)
   }
 
   test("maxPacketSize") {
     val max = br.readIntLE()
-    assert(max == 16777216)
+    assert(max == maxPacketSize)
   }
 
   test("charset") {
@@ -99,6 +98,70 @@ class HandshakeResponseTest extends FunSuite {
 
   test("password") {
     assert(br.readLengthCodedBytes() === req.hashPassword)
+  }
+}
+
+class PlainHandshakeResponseTest extends HandshakeResponseTest {
+  protected def createHandshakeResponse(): HandshakeResponse =
+    PlainHandshakeResponse(
+      username,
+      password,
+      database,
+      clientCapabilities(),
+      salt,
+      serverCapabilities(),
+      MysqlCharset.Utf8_general_ci,
+      maxPacketSize
+    )
+}
+
+class SecureHandshakeResponseTest extends HandshakeResponseTest {
+
+  override protected def serverCapabilities(): Capability = Capability.baseCap + Capability.SSL
+  override protected def clientCapabilities(): Capability =
+    Capability.baseCap +
+      Capability.ConnectWithDB + Capability.FoundRows + Capability.SSL
+
+  protected def createHandshakeResponse(): HandshakeResponse =
+    SecureHandshakeResponse(
+      username,
+      password,
+      database,
+      clientCapabilities(),
+      salt,
+      serverCapabilities(),
+      MysqlCharset.Utf8_general_ci,
+      maxPacketSize
+    )
+
+  test("Fails without client SSL capability") {
+    intercept[IllegalArgumentException] {
+      SecureHandshakeResponse(
+        username,
+        password,
+        database,
+        clientCapabilities() - Capability.SSL,
+        salt,
+        serverCapabilities(),
+        MysqlCharset.Utf8_general_ci,
+        maxPacketSize
+      )
+    }
+  }
+
+  test("Fails without server SSL capability") {
+    intercept[IllegalArgumentException] {
+      SecureHandshakeResponse(
+        username,
+        password,
+        database,
+        clientCapabilities(),
+        salt,
+        serverCapabilities() - Capability.SSL,
+        MysqlCharset.Utf8_general_ci,
+        maxPacketSize
+      )
+    }
   }
 }
 

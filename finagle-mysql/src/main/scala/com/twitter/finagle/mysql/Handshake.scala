@@ -81,14 +81,14 @@ private[mysql] final class Handshake(
     } yield handshakeInit
   }
 
-  private[this] def makeHandshakeResponse(
+  private[this] def makePlainHandshakeResponse(
     handshakeInit: HandshakeInit
   ): Future[HandshakeResponse] = {
     for {
       _ <- LostSyncException.const(isCompatibleVersion(handshakeInit))
       _ <- LostSyncException.const(isCompatibleCharset(handshakeInit))
     } yield
-      HandshakeResponse(
+      PlainHandshakeResponse(
         settings.username,
         settings.password,
         settings.database,
@@ -109,7 +109,7 @@ private[mysql] final class Handshake(
   def connectionPhase(): Future[Result] = {
     val futResult = for {
       handshakeInit <- readHandshakeInit()
-      handshakeResponse <- makeHandshakeResponse(handshakeInit)
+      handshakeResponse <- makePlainHandshakeResponse(handshakeInit)
       result <- simpleDispatch(handshakeResponse)
     } yield result
     futResult.onFailure(_ => transport.close())

@@ -149,12 +149,11 @@ private[mysql] case class SslConnectionRequest(
 }
 
 /**
- * Client response sent during connection phase.
+ * Abstract client response sent during connection phase.
  * Responsible for encoding credentials used to
  * authenticate a session.
- * [[https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse41]]
  */
-case class HandshakeResponse(
+private[mysql] sealed abstract class HandshakeResponse(
   username: Option[String],
   password: Option[String],
   database: Option[String],
@@ -164,8 +163,6 @@ case class HandshakeResponse(
   charset: Short,
   maxPacketSize: Int)
     extends Request {
-
-  def seq: Short = 1
 
   lazy val hashPassword: Array[Byte] = password match {
     case Some(p) => encryptPassword(p, salt)
@@ -205,6 +202,71 @@ case class HandshakeResponse(
     }
     digest
   }
+}
+
+/**
+ * Client response sent during connection phase.
+ * Responsible for encoding credentials used to
+ * authenticate a session. Use of this class indicates
+ * that the session should not use SSL/TLS.
+ * [[https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse41]]
+ */
+private[mysql] case class PlainHandshakeResponse(
+  username: Option[String],
+  password: Option[String],
+  database: Option[String],
+  clientCap: Capability,
+  salt: Array[Byte],
+  serverCap: Capability,
+  charset: Short,
+  maxPacketSize: Int)
+    extends HandshakeResponse(
+      username,
+      password,
+      database,
+      clientCap,
+      salt,
+      serverCap,
+      charset,
+      maxPacketSize) {
+
+  override def seq: Short = 1
+}
+
+/**
+ * Client response sent during connection phase.
+ * Responsible for encoding credentials used to
+ * authenticate a session. Use of this class indicates
+ * that the session should use SSL/TLS.
+ * [[https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse41]]
+ */
+private[mysql] case class SecureHandshakeResponse(
+  username: Option[String],
+  password: Option[String],
+  database: Option[String],
+  clientCap: Capability,
+  salt: Array[Byte],
+  serverCap: Capability,
+  charset: Short,
+  maxPacketSize: Int)
+    extends HandshakeResponse(
+      username,
+      password,
+      database,
+      clientCap,
+      salt,
+      serverCap,
+      charset,
+      maxPacketSize) {
+
+  require(
+    serverCap.has(Capability.SSL),
+    "serverCap must contain Capability.SSL to send a SecureHandshakeResponse")
+  require(
+    clientCap.has(Capability.SSL),
+    "clientCap must contain Capability.SSL to send a SecureHandshakeResponse")
+
+  override def seq: Short = 2
 }
 
 class FetchRequest(val prepareOK: PrepareOK, val numRows: Int)
