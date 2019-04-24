@@ -144,6 +144,9 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
   private[this] val writer = mapper.writer
   private[this] val prettyWriter = mapper.writer(new DefaultPrettyPrinter)
 
+  private[this] def sampleVerbose(): Option[String] =
+    verbose().orElse(com.twitter.finagle.stats.verbose.get)
+
   lazy val statsFilterRegex: Option[Regex] = {
     val regexesFromFile = statsFilterFile().flatMap { file =>
       try {
@@ -237,7 +240,7 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
     }
 
     // Converting a *-wildcard expression into a regular expression so we can match on it.
-    val verbosePatten = verbose().flatMap(commaSeparatedGlob)
+    val verbosePatten = sampleVerbose().flatMap(commaSeparatedGlob)
 
     // We have to denylist debug metrics before we apply formatting, which may change
     // the names.

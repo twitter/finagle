@@ -108,6 +108,11 @@ Stats
 **com.twitter.finagle.stats.includeEmptyHistograms** `bool`
   Include full histogram details when there are no data points (default: `false`).
 
+**com.twitter.finagle.stats.verbose** `string`
+  Comma-separated list of *-wildcard expressions to allowlist debug metrics that are not exported by
+  default (default: undefined). A tunable, `com.twitter.finagle.stats.verbose` has a higher priority
+  if defined.
+
 Http
 ----
 
