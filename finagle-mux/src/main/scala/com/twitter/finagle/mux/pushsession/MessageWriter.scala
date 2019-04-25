@@ -73,24 +73,18 @@ private[finagle] object MessageWriter {
 private[finagle] final class FragmentingMessageWriter(
   handle: PushChannelHandle[_, Buf],
   windowBytes: Int,
-  statsReceiver: StatsReceiver)
+  stats: SharedFramingStats)
     extends MessageWriter {
+
+  // While this constructor defeats the purprose of sharing stats between multiple writers,
+  // it's convenient in testing.
+  def this(handle: PushChannelHandle[_, Buf], windowBytes: Int, stats: StatsReceiver) =
+    this(handle, windowBytes, new SharedFramingStats(stats, Verbosity.Default))
 
   import FragmentingMessageWriter._
 
   // The messages must have normalized tags, even fragments
   private[this] val messageQueue = new util.ArrayDeque[Message]
-
-  private[this] val writeStreamBytes = statsReceiver.stat(Verbosity.Debug, "write_stream_bytes")
-  private[this] val pendingWriteStreamsGuage =
-    statsReceiver.addGauge(Verbosity.Debug, "pending_write_streams") {
-      // Note: this access is intrinsically racy since access is not explicitly synchronized,
-      // and therefore its possible to see invalid data, but this is expected to be rare enough
-      // to be tolerable for a debug metric.
-      messageQueue.size
-    }
-  // Make sure we remove the gauge when we're done
-  handle.onClose.ensure(pendingWriteStreamsGuage.remove())
 
   // State of the MessageWriter. Transitions can be:
   // Idle <-> Flushing
@@ -122,12 +116,14 @@ private[finagle] final class FragmentingMessageWriter(
     state match {
       case Idle =>
         messageQueue.add(msg)
+        stats.pendingWriteStreams.increment()
         state = Flushing
         batchWrite()
 
       case _: FlushingState =>
         // Add message to the queue for the pending write to handle
         messageQueue.add(msg)
+        stats.pendingWriteStreams.increment()
 
       case Closed(Throw(ex)) =>
         log.debug(ex, "Discarding message %s due to previous write failure", msg)
@@ -164,7 +160,9 @@ private[finagle] final class FragmentingMessageWriter(
       }
     }
 
-    cleanLoop(messageQueue.size)
+    val sizeBeforeCleaning = messageQueue.size
+    cleanLoop(sizeBeforeCleaning)
+    stats.pendingWriteStreams.add(messageQueue.size() - sizeBeforeCleaning)
 
     result
   }
@@ -252,7 +250,7 @@ private[finagle] final class FragmentingMessageWriter(
   private[this] def takeBufFragment(): Buf = {
     val msg = takeFragment()
     val msgBuf = Message.encode(msg)
-    writeStreamBytes.add(msgBuf.length)
+    stats.writeStreamBytes.add(msgBuf.length)
     msgBuf
   }
 
@@ -260,8 +258,10 @@ private[finagle] final class FragmentingMessageWriter(
   // Note: Presumes at least one chunk exists in the write queue
   private[this] def takeFragment(): Message = {
     val msg = messageQueue.poll()
-    if (!needsFragmenting(msg)) msg
-    else {
+    if (!needsFragmenting(msg)) {
+      stats.pendingWriteStreams.decrement()
+      msg
+    } else {
       val msgBuf = msg.buf
       assert(msgBuf.length > windowBytes)
       val f1 = Fragment(msg.typ, Tags.setMsb(msg.tag), msgBuf.slice(0, windowBytes))

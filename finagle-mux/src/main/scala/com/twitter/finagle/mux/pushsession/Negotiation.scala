@@ -10,6 +10,7 @@ import com.twitter.finagle.mux.transport.{
   OpportunisticTls
 }
 import com.twitter.finagle.mux.{Handshake, Request, Response}
+import com.twitter.finagle.stats.Verbosity
 import com.twitter.finagle.{Service, Stack, param}
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.logging.{Level, Logger}
@@ -28,6 +29,9 @@ private[finagle] abstract class Negotiation(params: Stack.Params) {
   private[this] val tlsSr = statsReceiver.scope("tls")
   private[this] val tlsSuccessCounter = tlsSr.counter("upgrade", "success")
   private[this] val tlsFailureCounter = tlsSr.counter("upgrade", "incompatible")
+
+  private[this] val framerStats =
+    new SharedFramingStats(statsReceiver.scope("framer"), Verbosity.Debug)
 
   protected def builder(
     handle: PushChannelHandle[ByteReader, Buf],
@@ -103,15 +107,14 @@ private[finagle] abstract class Negotiation(params: Stack.Params) {
     handle: PushChannelHandle[ByteReader, Buf],
     peerHeaders: Option[Headers]
   ): SessionT = {
-    val framingStats = statsReceiver.scope("framer")
     val writeManager = {
       val fragmentSize = peerHeaders
         .flatMap(Handshake.valueOf(MuxFramer.Header.KeyBuf, _))
         .map(MuxFramer.Header.decodeFrameSize(_))
         .getOrElse(Int.MaxValue)
-      new FragmentingMessageWriter(handle, fragmentSize, framingStats)
+      new FragmentingMessageWriter(handle, fragmentSize, framerStats)
     }
-    val messageDecoder = new FragmentDecoder(handle.onClose, framingStats)
+    val messageDecoder = new FragmentDecoder(handle.onClose, framerStats)
 
     builder(handle, writeManager, messageDecoder)
   }

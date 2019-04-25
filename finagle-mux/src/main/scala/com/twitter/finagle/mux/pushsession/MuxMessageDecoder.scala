@@ -29,25 +29,22 @@ private[finagle] abstract class MuxMessageDecoder {
   protected def doDecode(reader: ByteReader): Message
 }
 
-private[mux] final class FragmentDecoder(onClose: Future[Unit], statsReceiver: StatsReceiver)
+private[mux] final class FragmentDecoder(onClose: Future[Unit], stats: SharedFramingStats)
     extends MuxMessageDecoder {
+
+  // While this constructor defeats the purprose of sharing stats between multiple readers,
+  // it's convenient in testing.
+  def this(onClose: Future[Unit], stats: StatsReceiver) =
+    this(onClose, new SharedFramingStats(stats, Verbosity.Default))
 
   // The keys of the fragment map are 'normalized' since fragments are signaled
   // in the MSB of the tag field. See `getKey` below.
   private[this] val fragments = new IntObjectHashMap[Buf]
 
-  private[this] val readStreamBytes = statsReceiver.stat(Verbosity.Debug, "read_stream_bytes")
-  private[this] val readStreamsGauge =
-    statsReceiver.addGauge(Verbosity.Debug, "pending_read_streams") {
-      // Note that this is technically racy since we are not imposing any explicit memory barriers
-      // but it should be sufficient for a debug metric.
-      fragments.size
-    }
-  onClose.ensure(readStreamsGauge.remove())
-
   // Doesn't take ownership of the `ByteReader`
   protected def doDecode(reader: ByteReader): Message = {
-    readStreamBytes.add(reader.remaining)
+    stats.readStreamBytes.add(reader.remaining)
+
     val header = reader.readIntBE()
     val typ = Tags.extractType(header)
     val tag = Tags.extractTag(header)
@@ -71,13 +68,19 @@ private[mux] final class FragmentDecoder(onClose: Future[Unit], statsReceiver: S
         case Tdiscarded(tagToRemove, _) => tagToRemove
         case _ => tag
       }
-      fragments.remove(getKey(tagToRemove))
+
+      if (fragments.remove(getKey(tagToRemove)) != null)
+        stats.pendingReadStreams.decrement()
+
       msg
     } else {
       val existing = fragments.remove(getKey(tag))
       val fullMessageBody =
         if (existing == null) reader
         else ByteReader(existing.concat(reader.readAll()))
+
+      if (existing != null)
+        stats.pendingReadStreams.decrement()
 
       Message.decodeMessageBody(typ, tag, fullMessageBody)
     }
@@ -89,6 +92,9 @@ private[mux] final class FragmentDecoder(onClose: Future[Unit], statsReceiver: S
     val head = fragments.get(key)
     val chunk = if (head != null) head.concat(tail) else tail
     fragments.put(key, chunk)
+
+    if (head == null)
+      stats.pendingReadStreams.increment()
   }
 
   // All fragments are stored with their tags 'normalized' since the

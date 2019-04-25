@@ -10,7 +10,7 @@ import com.twitter.finagle.pushsession.{
   PushStackClient,
   PushTransporter
 }
-import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.util.Future
 import io.netty.channel.{Channel, ChannelPipeline}
@@ -35,7 +35,7 @@ final case class NonNegotiatingClient(
   protected def newSession(handle: PushChannelHandle[ByteReader, Buf]): Future[MuxClientSession] = {
 
     val statsReceiver: StatsReceiver = params[param.Stats].statsReceiver
-    val framerStats = statsReceiver.scope("framer")
+    val framerStats = new SharedFramingStats(statsReceiver.scope("framer"), Verbosity.Debug)
 
     Future.value(
       new MuxClientSession(

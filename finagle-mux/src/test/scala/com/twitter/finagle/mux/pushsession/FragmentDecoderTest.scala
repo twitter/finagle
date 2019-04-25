@@ -6,7 +6,7 @@ import com.twitter.finagle.mux.transport.Message.{Fragment, Tags, Tdiscarded, Td
 import com.twitter.finagle.netty4.CopyingByteBufByteReader
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.io.{Buf, ByteReader}
-import com.twitter.util.{Future, Promise}
+import com.twitter.util.Future
 import io.netty.buffer.ByteBufAllocator
 import org.scalatest.FunSuite
 
@@ -83,15 +83,5 @@ class FragmentDecoderTest extends FunSuite {
     assert(bb.refCnt() == 1)
     assert(decoder.decode(br) == msg)
     assert(bb.refCnt() == 0)
-  }
-
-  test("releases gauges onClose") {
-    val sr = new DecoderStatsReceiver
-    val p = Promise[Unit]()
-    val decoder = new FragmentDecoder(p, sr)
-
-    assert(sr.gauges.contains(Seq("pending_read_streams")))
-    p.setDone()
-    assert(!sr.gauges.contains(Seq("pending_read_streams")))
   }
 }

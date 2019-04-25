@@ -141,14 +141,4 @@ class FragmentingMessageWriterTest extends FunSuite {
     // Already idle
     assert(writer.drain().isDefined)
   }
-
-  test("removes gauges onClose") {
-    val sr = new PendingStreamStatsReceiver
-    val handle = new MockChannelHandle[Any, Buf]()
-    val writer = new FragmentingMessageWriter(handle, Int.MaxValue, sr)
-
-    assert(sr.gauges.contains(Seq("pending_write_streams")))
-    handle.onClosePromise.setDone()
-    assert(!sr.gauges.contains(Seq("pending_write_streams")))
-  }
 }
