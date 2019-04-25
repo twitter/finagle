@@ -7,7 +7,7 @@ import java.time.temporal.JulianFields
 import java.util.UUID
 
 import com.twitter.util.{Return, Throw, Try}
-import org.jboss.netty.buffer.ChannelBuffer
+import io.netty.buffer.ByteBuf
 
 
 /**
@@ -30,7 +30,7 @@ trait ValueDecoder[T] {
     * @param charset The character set that is being used to communicate with Postgres
     * @return A [[Try]] encapsulating the decoding attempt
     */
-  def decodeBinary(recv: String, bytes: ChannelBuffer, charset: Charset): Try[T]
+  def decodeBinary(recv: String, bytes: ByteBuf, charset: Charset): Try[T]
 
   /**
     * Create a new [[ValueDecoder]] which is the composition of this decoder with the given function
@@ -40,7 +40,7 @@ trait ValueDecoder[T] {
     */
   def map[U](fn: T => U): ValueDecoder[U] = new ValueDecoder[U] {
     def decodeText(recv: String, text: String) = ValueDecoder.this.decodeText(recv, text).map(fn)
-    def decodeBinary(recv: String, bytes: ChannelBuffer, charset: Charset) =
+    def decodeBinary(recv: String, bytes: ByteBuf, charset: Charset) =
       ValueDecoder.this.decodeBinary(recv, bytes, charset).map(fn)
   }
 }
@@ -49,19 +49,19 @@ object ValueDecoder {
 
   def apply[T : ValueDecoder] = implicitly[ValueDecoder[T]]
 
-  def instance[T](text: String => Try[T], binary: (ChannelBuffer, Charset) => Try[T]): ValueDecoder[T] =
+  def instance[T](text: String => Try[T], binary: (ByteBuf, Charset) => Try[T]): ValueDecoder[T] =
     new ValueDecoder[T] {
       def decodeText(recv: String, s: String) = text(s)
-      def decodeBinary(recv: String, b: ChannelBuffer, charset: Charset) = binary(b, charset)
+      def decodeBinary(recv: String, b: ByteBuf, charset: Charset) = binary(b, charset)
     }
 
-  def instance[T](text: (String, String) => Try[T], binary: (String, ChannelBuffer, Charset) => Try[T]): ValueDecoder[T] =
+  def instance[T](text: (String, String) => Try[T], binary: (String, ByteBuf, Charset) => Try[T]): ValueDecoder[T] =
     new ValueDecoder[T] {
       def decodeText(recv: String, s: String) = text(recv, s)
-      def decodeBinary(recv: String, b: ChannelBuffer, charset: Charset) = binary(recv, b, charset)
+      def decodeBinary(recv: String, b: ByteBuf, charset: Charset) = binary(recv, b, charset)
     }
 
-  private def readInetAddress(buf: ChannelBuffer) = {
+  private def readInetAddress(buf: ByteBuf) = {
     val family = buf.readByte()
     val bits = buf.readByte()
     val i = buf.readByte()
@@ -165,7 +165,7 @@ object ValueDecoder {
     (recv, _ , _) => Throw(new NoSuchElementException(s"No decoder available for $recv"))
   )
 
-  def unknownBinary(t: (ChannelBuffer, Charset)): Try[Any] = Return(Buffers.readBytes(t._1))
+  def unknownBinary(t: (ByteBuf, Charset)): Try[Any] = Return(Buffers.readBytes(t._1))
 
   val decoders: PartialFunction[String, ValueDecoder[T] forSome { type T }] = {
     case "boolrecv" => boolean

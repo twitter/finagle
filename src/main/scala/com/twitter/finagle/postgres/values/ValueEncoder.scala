@@ -7,8 +7,8 @@ import java.time._
 import java.time.temporal.JulianFields
 import java.util.UUID
 
-import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.buffer.ChannelBuffers
+import io.netty.buffer.ByteBuf
+import io.netty.buffer.Unpooled
 
 import scala.language.existentials
 
@@ -23,7 +23,7 @@ import scala.language.existentials
   */
 trait ValueEncoder[T] {
   def encodeText(t: T): Option[String]
-  def encodeBinary(t: T, charset: Charset): Option[ChannelBuffer]
+  def encodeBinary(t: T, charset: Charset): Option[ByteBuf]
   def typeName: String
   def elemTypeName: Option[String]
 
@@ -45,7 +45,7 @@ object ValueEncoder extends LowPriorityEncoder {
   case class Exported[T](encoder: ValueEncoder[T])
 
   private val nullParam = {
-    val buf = ChannelBuffers.buffer(4)
+    val buf = Unpooled.buffer(4)
     buf.writeInt(-1)
     buf
   }
@@ -53,7 +53,7 @@ object ValueEncoder extends LowPriorityEncoder {
   def instance[T](
     instanceTypeName: String,
     text: T => String,
-    binary: (T, Charset) => Option[ChannelBuffer]
+    binary: (T, Charset) => Option[ByteBuf]
   ): ValueEncoder[T] = new ValueEncoder[T] {
     def encodeText(t: T) = Option(t).map(text)
     def encodeBinary(t: T, c: Charset) = binary(t, c)
@@ -66,7 +66,7 @@ object ValueEncoder extends LowPriorityEncoder {
       case None => nullParam.duplicate()
       case Some(str) =>
         val bytes = str.getBytes(charset)
-        val buf = ChannelBuffers.buffer(bytes.length + 4)
+        val buf = Unpooled.buffer(bytes.length + 4)
         buf.writeInt(bytes.length)
         buf.writeBytes(bytes)
         buf
@@ -77,14 +77,14 @@ object ValueEncoder extends LowPriorityEncoder {
       case None => nullParam.duplicate()
       case Some(inBuf) =>
         inBuf.resetReaderIndex()
-        val outBuf = ChannelBuffers.buffer(inBuf.readableBytes() + 4)
+        val outBuf = Unpooled.buffer(inBuf.readableBytes() + 4)
         outBuf.writeInt(inBuf.readableBytes())
         outBuf.writeBytes(inBuf)
         outBuf
     }
 
-  private def buffer(capacity: Int)(fn: ChannelBuffer => Unit) = {
-    val cb = ChannelBuffers.buffer(capacity)
+  private def buffer(capacity: Int)(fn: ByteBuf => Unit) = {
+    val cb = Unpooled.buffer(capacity)
     fn(cb)
     cb
   }
@@ -92,14 +92,14 @@ object ValueEncoder extends LowPriorityEncoder {
   implicit val string: ValueEncoder[String] = instance(
     "text",
     identity,
-    (s, c) => Option(s).map(s => ChannelBuffers.wrappedBuffer(s.getBytes(c)))
+    (s, c) => Option(s).map(s => Unpooled.wrappedBuffer(s.getBytes(c)))
   )
 
   implicit val boolean: ValueEncoder[Boolean] = instance(
     "bool",
     b => if(b) "t" else "f",
     (b, c) => Some {
-      val buf = ChannelBuffers.buffer(1)
+      val buf = Unpooled.buffer(1)
       buf.writeByte(if(b) 1.toByte else 0.toByte)
       buf
     }
@@ -108,7 +108,7 @@ object ValueEncoder extends LowPriorityEncoder {
   implicit val bytea: ValueEncoder[Array[Byte]] = instance(
     "bytea",
     bytes => "\\x" + bytes.map("%02x".format(_)).mkString,
-    (b, c) => Some(ChannelBuffers.copiedBuffer(b))
+    (b, c) => Some(Unpooled.copiedBuffer(b))
   )
   implicit val int2: ValueEncoder[Short] = instance("int2", _.toString, (i, c) => Some(buffer(2)(_.writeShort(i))))
   implicit val int4: ValueEncoder[Int] = instance("int4", _.toString, (i, c) => Some(buffer(4)(_.writeInt(i))))
@@ -193,7 +193,7 @@ object ValueEncoder extends LowPriorityEncoder {
     "jsonb",
     j => JSONB.stringify(j),
     (j, c) => {
-      val cb = ChannelBuffers.buffer(1 + j.bytes.length)
+      val cb = Unpooled.buffer(1 + j.bytes.length)
       cb.writeByte(1)
       cb.writeBytes(j.bytes)
       Some(cb)

@@ -1,6 +1,6 @@
 package com.twitter.finagle.postgres.messages
 
-import org.jboss.netty.buffer.ChannelBuffer
+import io.netty.buffer.ByteBuf
 
 /**
  * Responses sent from Postgres back to the client.
@@ -40,7 +40,7 @@ case class FieldDescription(
     dataTypeModifier: Int,
     fieldFormat: Short)
 
-case class DataRow(data: Array[Option[ChannelBuffer]]) extends BackendMessage
+case class DataRow(data: Array[Option[ByteBuf]]) extends BackendMessage
 
 /*
  * Sub-message types used to complete a command.

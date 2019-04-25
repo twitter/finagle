@@ -3,7 +3,7 @@ package com.twitter.finagle.postgres.messages
 import com.twitter.finagle.postgres.values.Buffers
 import com.twitter.logging.Logger
 
-import org.jboss.netty.buffer.ChannelBuffer
+import io.netty.buffer.ByteBuf
 
 /*
  * Class for converting packets into BackendMessages.
@@ -105,8 +105,8 @@ class BackendMessageParser {
   def parseE(packet: Packet): Option[BackendMessage] = {
     val Packet(_, _, content, _) = packet
 
-    def fieldStream(buf: ChannelBuffer):Stream[(Char,String)] =
-      if(buf.readable)
+    def fieldStream(buf: ByteBuf):Stream[(Char,String)] =
+      if(buf.isReadable)
         Buffers.readCString(buf) match {
           case "" => Stream.empty
           case nonempty => (nonempty.splitAt(1) match { case (fieldId, value) => (fieldId.charAt(0), value) }) #:: fieldStream(buf)
@@ -125,7 +125,7 @@ class BackendMessageParser {
       Some(SslNotSupported)
     } else {
       val builder = new StringBuilder()
-      while (content.readable) {
+      while (content.isReadable) {
         builder.append(Buffers.readCString(content))
       }
 
@@ -166,7 +166,7 @@ class BackendMessageParser {
     val Packet(_, _, content, _) = packet
 
     val fieldNumber = content.readShort
-    val fields = new Array[Option[ChannelBuffer]](fieldNumber)
+    val fields = new Array[Option[ByteBuf]](fieldNumber)
 
     for (i <- 0.until(fieldNumber)) {
       val length = content.readInt

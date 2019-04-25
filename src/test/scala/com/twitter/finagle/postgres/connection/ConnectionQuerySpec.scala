@@ -3,7 +3,7 @@ package com.twitter.finagle.postgres.connection
 import com.twitter.finagle.postgres.Spec
 import com.twitter.finagle.postgres.messages._
 import com.twitter.finagle.postgres.values.Charsets
-import org.jboss.netty.buffer.ChannelBuffers
+import io.netty.buffer.Unpooled
 
 class ConnectionQuerySpec extends Spec {
   "A postgres connection" should {
@@ -74,8 +74,8 @@ class ConnectionQuerySpec extends Spec {
     "handle a select query" in {
       val connection = new Connection(Connected)
 
-      val row1 = DataRow(Array(Some(ChannelBuffers.copiedBuffer("donald@duck.com".getBytes(Charsets.Utf8)))))
-      val row2 = DataRow(Array(Some(ChannelBuffers.copiedBuffer("daisy@duck.com".getBytes(Charsets.Utf8)))))
+      val row1 = DataRow(Array(Some(Unpooled.copiedBuffer("donald@duck.com".getBytes(Charsets.Utf8)))))
+      val row2 = DataRow(Array(Some(Unpooled.copiedBuffer("daisy@duck.com".getBytes(Charsets.Utf8)))))
 
       connection.send(Query("select * from emails"))
       connection.receive(RowDescription(Array(FieldDescription("email",16728,2,1043,-1,-1,0))))

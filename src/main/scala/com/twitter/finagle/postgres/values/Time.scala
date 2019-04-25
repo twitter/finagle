@@ -5,7 +5,7 @@ import java.time._
 import java.time.format.{DateTimeFormatter, DateTimeFormatterBuilder, ResolverStyle}
 import java.time.temporal.ChronoField
 
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import io.netty.buffer.{ByteBuf, Unpooled}
 
 private object DateTimeUtils {
   val POSTGRES_EPOCH_MICROS = 946684800000000L
@@ -25,20 +25,20 @@ private object DateTimeUtils {
     .optionalEnd()
     .toFormatter
 
-  def readTimestamp(buf: ChannelBuffer) = {
+  def readTimestamp(buf: ByteBuf) = {
     val micros = buf.readLong() + POSTGRES_EPOCH_MICROS
     val seconds = micros / 1000000L
     val nanos = (micros - seconds * 1000000L) * 1000
     Instant.ofEpochSecond(seconds, nanos)
   }
 
-  def readTimeTz(buf: ChannelBuffer) = {
+  def readTimeTz(buf: ByteBuf) = {
     val time = LocalTime.ofNanoOfDay(buf.readLong() * 1000)
     val zone = ZoneOffset.ofTotalSeconds(-buf.readInt())
     time.atOffset(zone)
   }
 
-  def readInterval(buf: ChannelBuffer) = {
+  def readInterval(buf: ByteBuf) = {
     val micros = buf.readLong()
     val days = buf.readInt()
     val months = buf.readInt()
@@ -50,7 +50,7 @@ private object DateTimeUtils {
   def writeInstant(instant: Instant) = {
     val seconds = instant.getEpochSecond
     val micros = instant.getLong(ChronoField.MICRO_OF_SECOND) + seconds * 1000000
-    val buf = ChannelBuffers.buffer(8)
+    val buf = Unpooled.buffer(8)
     buf.writeLong(micros - POSTGRES_EPOCH_MICROS)
     buf
   }
@@ -60,14 +60,14 @@ private object DateTimeUtils {
   def writeTimestampTz(timestamp: ZonedDateTime) = writeInstant(timestamp.toInstant)
 
   def writeTimeTz(time: OffsetTime) = {
-    val buf = ChannelBuffers.buffer(12)
+    val buf = Unpooled.buffer(12)
     buf.writeLong(time.toLocalTime.toNanoOfDay / 1000)
     buf.writeInt(-time.getOffset.getTotalSeconds)
     buf
   }
 
   def writeInterval(interval: Interval) = {
-    val buf = ChannelBuffers.buffer(16)
+    val buf = Unpooled.buffer(16)
     buf.writeLong(interval.timeDifference.getSeconds * 1000000 + interval.timeDifference.getNano / 1000)
     buf.writeInt(interval.dateDifference.getDays)
     buf.writeInt(interval.dateDifference.getYears * 12 + interval.dateDifference.getMonths)

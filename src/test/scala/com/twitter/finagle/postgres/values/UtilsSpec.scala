@@ -1,16 +1,16 @@
 package com.twitter.finagle.postgres.values
 
 import com.twitter.finagle.postgres.Spec
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import io.netty.buffer.{ByteBuf, Unpooled}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import com.twitter.finagle.postgres.Generators._
 
 class UtilsSpec extends Spec with GeneratorDrivenPropertyChecks {
   "Buffers.readCString" should {
-    def newBuffer(): (ChannelBuffer, String, String) = {
+    def newBuffer(): (ByteBuf, String, String) = {
       val str = "Some string"
       val cStr = str + '\u0000'
-      val buffer = ChannelBuffers.copiedBuffer(cStr, Charsets.Utf8)
+      val buffer = Unpooled.copiedBuffer(cStr, Charsets.Utf8)
 
       (buffer, str, cStr)
     }
@@ -40,7 +40,7 @@ class UtilsSpec extends Spec with GeneratorDrivenPropertyChecks {
     }
 
     "throw an appropriate exception if string passed is not C style" in {
-      val bufferWithWrongString = ChannelBuffers.copiedBuffer("not a C style string", Charsets.Utf8)
+      val bufferWithWrongString = Unpooled.copiedBuffer("not a C style string", Charsets.Utf8)
 
       an[IndexOutOfBoundsException] must be thrownBy {
         Buffers.readCString(bufferWithWrongString)

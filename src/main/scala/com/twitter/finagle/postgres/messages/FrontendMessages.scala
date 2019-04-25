@@ -2,7 +2,7 @@ package com.twitter.finagle.postgres.messages
 
 import com.twitter.finagle.postgres.values.{Strings, Convert}
 
-import org.jboss.netty.buffer.ChannelBuffer
+import io.netty.buffer.ByteBuf
 
 /**
  * Messages sent to Postgres from the client.
@@ -58,7 +58,7 @@ case class Parse(
 }
 
 case class Bind(portal: String = Strings.empty, name: String = Strings.empty, formats: Seq[Int] = Seq(),
-                params: Seq[ChannelBuffer] = Seq(), resultFormats: Seq[Int] = Seq()) extends FrontendMessage {
+                params: Seq[ByteBuf] = Seq(), resultFormats: Seq[Int] = Seq()) extends FrontendMessage {
   def asPacket() = {
     val builder = PacketBuilder('B')
       .writeCString(portal)

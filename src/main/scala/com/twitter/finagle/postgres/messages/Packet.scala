@@ -2,7 +2,7 @@ package com.twitter.finagle.postgres.messages
 
 import com.twitter.finagle.postgres.values.Charsets
 
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import io.netty.buffer.{ByteBuf, Unpooled}
 
 object Packet {
   val INT_SIZE = 4
@@ -13,9 +13,9 @@ object Packet {
  *
  * Converts content into byte format expected by Postgres.
  */
-case class Packet(code: Option[Char], length: Int, content: ChannelBuffer, inSslNegotation: Boolean = false) {
-  def encode(): ChannelBuffer = {
-    val result = ChannelBuffers.dynamicBuffer()
+case class Packet(code: Option[Char], length: Int, content: ByteBuf, inSslNegotation: Boolean = false) {
+  def encode(): ByteBuf = {
+    val result = Unpooled.buffer()
     code.map { c =>
       result.writeByte(c)
     }
@@ -31,7 +31,7 @@ case class Packet(code: Option[Char], length: Int, content: ChannelBuffer, inSsl
  * Helper class for creating packets from scala types.
  */
 class PacketBuilder(val code: Option[Char]) {
-  private val underlying = ChannelBuffers.dynamicBuffer()
+  private val underlying = Unpooled.buffer()
 
   def writeByte(byte: Byte) = {
     underlying.writeByte(byte)
@@ -43,7 +43,7 @@ class PacketBuilder(val code: Option[Char]) {
 	  this
   }
 
-  def writeBuf(bytes: ChannelBuffer) = {
+  def writeBuf(bytes: ByteBuf) = {
 	  underlying.writeBytes(bytes)
 	  this
   }

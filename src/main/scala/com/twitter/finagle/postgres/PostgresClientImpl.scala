@@ -10,7 +10,7 @@ import com.twitter.finagle.postgres.values._
 import com.twitter.finagle.{Service, ServiceFactory, Status}
 import com.twitter.logging.Logger
 import com.twitter.util._
-import org.jboss.netty.buffer.ChannelBuffer
+import io.netty.buffer.ByteBuf
 
 import scala.language.{existentials, implicitConversions}
 import scala.util.Random
@@ -234,7 +234,7 @@ class PostgresClientImpl(
       }
     }
 
-    private[this] def bind(params: Seq[ChannelBuffer]): Future[Unit] = {
+    private[this] def bind(params: Seq[ByteBuf]): Future[Unit] = {
       val req =  Bind(
         portal = name,
         name = name,

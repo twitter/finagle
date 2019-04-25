@@ -3,7 +3,7 @@ package com.twitter.finagle.postgres.values
 import java.nio.charset.Charset
 import java.security.MessageDigest
 
-import org.jboss.netty.buffer.ChannelBuffer
+import io.netty.buffer.ByteBuf
 
 import scala.annotation.tailrec
 
@@ -16,16 +16,12 @@ object Buffers {
    * Reads a string with C-style '\0' terminator at the end from a buffer.
    */
   @throws(classOf[IndexOutOfBoundsException])
-  def readCString(buffer: ChannelBuffer): String = {
+  def readCString(buffer: ByteBuf): String = {
     @tailrec
-    def countChars(buf: ChannelBuffer, count: Int): Int = {
-<<<<<<< HEAD:src/main/scala/com/twitter/finagle/postgres/protocol/Utils.scala
-      if (buffer.readByte() == 0)
-=======
-      if (!buffer.readable) {
+    def countChars(buf: ByteBuf, count: Int): Int = {
+      if (!buffer.isReadable) {
         throw new IndexOutOfBoundsException("buffer ended, but '\\0' was not found")
       } else if (buffer.readByte() == 0) {
->>>>>>> Misc. cleanups of finagle postgres library:src/main/scala/com/twitter/finagle/postgres/values/Utils.scala
         count
       } else {
         countChars(buf, count + 1)
@@ -34,29 +30,23 @@ object Buffers {
 
     buffer.markReaderIndex()
     // search for '\0'
-    var count = 0
-    var done = false
-    while (!done) {
-      if(!buffer.readable) throw new IndexOutOfBoundsException("buffer ended, but '\0' was not found")
-      done = buffer.readByte() == 0
-      count += 1
-    }
+    val count = countChars(buffer, 0)
     buffer.resetReaderIndex()
 
     // read a string without '\0'
-    val result = buffer.toString(buffer.readerIndex(), count - 1, Charsets.Utf8)
+    val result = buffer.toString(buffer.readerIndex(), count, Charsets.Utf8)
     // set reader index to the whole string length - including '\0'
-    buffer.readerIndex(buffer.readerIndex() + count)
+    buffer.readerIndex(buffer.readerIndex() + count + 1)
     result
   }
 
-  def readBytes(buffer: ChannelBuffer) = {
+  def readBytes(buffer: ByteBuf) = {
     val array = new Array[Byte](buffer.readableBytes())
     buffer.readBytes(array)
     array
   }
 
-  def readString(buffer: ChannelBuffer, charset: Charset) = {
+  def readString(buffer: ByteBuf, charset: Charset) = {
     val array = readBytes(buffer)
     new String(array, charset)
   }

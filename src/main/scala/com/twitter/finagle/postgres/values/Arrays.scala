@@ -4,7 +4,7 @@ import scala.collection.immutable.Queue
 import scala.util.parsing.combinator.RegexParsers
 
 import com.twitter.util.{Return, Throw, Try}
-import org.jboss.netty.buffer.ChannelBuffer
+import io.netty.buffer.ByteBuf
 object Arrays {
 
   object ArrayStringParser extends RegexParsers {
@@ -40,7 +40,7 @@ object Arrays {
     }
   }
 
-  def decodeArrayBinary[T](buf: ChannelBuffer, elemDecoder: ValueDecoder[T]) = {
+  def decodeArrayBinary[T](buf: ByteBuf, elemDecoder: ValueDecoder[T]) = {
     val ndims = buf.readInt()
     val flags = buf.readInt()
     val elemOid = buf.readInt()

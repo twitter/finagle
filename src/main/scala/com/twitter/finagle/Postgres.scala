@@ -4,7 +4,8 @@ import com.twitter.finagle.Stack.{Param, Params, Role}
 import com.twitter.finagle.client.{StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.dispatch.SerialClientDispatcher
 import com.twitter.finagle.naming.BindingFactory.Dest
-import com.twitter.finagle.netty3.Netty3Transporter
+import com.twitter.finagle.netty4.Netty4Transporter
+import com.twitter.finagle.netty4.param.Allocator
 import com.twitter.finagle.param._
 import com.twitter.finagle.postgres.codec._
 import com.twitter.finagle.postgres.messages._
@@ -16,8 +17,10 @@ import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.{Monitor => _, _}
 import com.twitter.logging.Logger
+import io.netty.buffer.UnpooledByteBufAllocator
+import io.netty.channel._
 import java.net.SocketAddress
-import org.jboss.netty.channel.{ChannelPipelineFactory, Channels}
+
 
 import scala.language.existentials
 
@@ -69,32 +72,30 @@ object Postgres {
     FailFast(false) +
     param.ResponseClassifier(defaultResponseClassifier) +
     Retries.Policy(defaultRetryPolicy) +
-    Monitor(PostgresDefaultMonitor)
+    Monitor(PostgresDefaultMonitor) +
+    Allocator(UnpooledByteBufAllocator.DEFAULT)
 
   private def defaultStack = StackClient.newStack[PgRequest, PgResponse]
     .replace(StackClient.Role.prepConn, PrepConnection)
     .replace(Retries.Role, Retries.moduleWithRetryPolicy[PgRequest, PgResponse])
 
-  private def pipelineFactory(params: Stack.Params) = {
+  private def channelInitializer(params: Stack.Params) = {
     val SslClientEngineFactory.Param(sslFactory) = params[SslClientEngineFactory.Param]
     val SslClientSessionVerifier.Param(sessionVerifier) = params[SslClientSessionVerifier.Param]
     val Transport.ClientSsl(ssl) = params[Transport.ClientSsl]
 
-    new ChannelPipelineFactory {
-      def getPipeline = {
-        val pipeline = Channels.pipeline()
-
-        pipeline.addLast("binary_to_packet", new PacketDecoder(ssl.nonEmpty))
-        pipeline.addLast("packet_to_backend_messages", new BackendMessageDecoder(new BackendMessageParser))
-        pipeline.addLast("backend_messages_to_postgres_response", new PgClientChannelHandler(sslFactory, sessionVerifier, ssl, ssl.nonEmpty))
-        pipeline
-      }
+    (pipeline: ChannelPipeline) => {
+      pipeline
+        .addLast("binary_to_packet", new PacketDecoder(ssl.nonEmpty))
+        .addLast("packet_to_backend_messages", new BackendMessageDecoder(new BackendMessageParser))
+        .addLast("backend_messages_to_postgres_response", new PgClientChannelHandler(sslFactory, sessionVerifier, ssl, ssl.nonEmpty))
+      ()
     }
   }
 
   private def mkTransport(params: Stack.Params, addr: SocketAddress) =
-    Netty3Transporter.apply[PgRequest, PgResponse](
-      pipelineFactory(params),
+    Netty4Transporter.raw[PgRequest, PgResponse](
+      channelInitializer(params),
       addr,
       params + Transport.ClientSsl(None)  // we want to give this param to Postgres but not directly to transport
                                           // because postgres doesn't start out in TLS
