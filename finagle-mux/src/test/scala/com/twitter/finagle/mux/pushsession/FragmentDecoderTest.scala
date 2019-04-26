@@ -6,7 +6,6 @@ import com.twitter.finagle.mux.transport.Message.{Fragment, Tags, Tdiscarded, Td
 import com.twitter.finagle.netty4.CopyingByteBufByteReader
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.io.{Buf, ByteReader}
-import com.twitter.util.Future
 import io.netty.buffer.ByteBufAllocator
 import org.scalatest.FunSuite
 
@@ -19,7 +18,7 @@ class FragmentDecoderTest extends FunSuite {
 
   test("decodes whole message") {
     val sr = new DecoderStatsReceiver
-    val decoder = new FragmentDecoder(Future.never, sr)
+    val decoder = new FragmentDecoder(sr)
     val msg = Tdispatch(2, Seq.empty, Path(), Dtab.empty, Buf.ByteArray(1, 2, 3))
     val data = ByteReader(Message.encode(msg))
     val dataSize = data.remaining
@@ -30,7 +29,7 @@ class FragmentDecoderTest extends FunSuite {
 
   test("decodes a fragment") {
     val sr = new DecoderStatsReceiver
-    val decoder = new FragmentDecoder(Future.never, sr)
+    val decoder = new FragmentDecoder(sr)
     val tag = 2
     val msg = Tdispatch(tag, Seq.empty, Path(), Dtab.empty, Buf.ByteArray(1, 2, 3, 4))
     val buf = Message.encode(msg)
@@ -51,7 +50,7 @@ class FragmentDecoderTest extends FunSuite {
 
   test("discards fragments in the event of a Tdiscard for that tag") {
     val sr = new DecoderStatsReceiver
-    val decoder = new FragmentDecoder(Future.never, sr)
+    val decoder = new FragmentDecoder(sr)
     val tag = 2
     val msg = Tdispatch(tag, Seq.empty, Path(), Dtab.empty, Buf.ByteArray(1, 2, 3, 4))
     val buf = Message.encode(msg)
@@ -73,7 +72,7 @@ class FragmentDecoderTest extends FunSuite {
   }
 
   test("releases the ByteReader") {
-    val decoder = new FragmentDecoder(Future.never, NullStatsReceiver)
+    val decoder = new FragmentDecoder(NullStatsReceiver)
     val msg = Tdispatch(2, Seq.empty, Path(), Dtab.empty, Buf.ByteArray(1, 2, 3))
     val buf = Message.encode(msg)
     val bb = ByteBufAllocator.DEFAULT.buffer(buf.length)
