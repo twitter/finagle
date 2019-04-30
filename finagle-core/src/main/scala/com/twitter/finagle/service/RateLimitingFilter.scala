@@ -13,20 +13,23 @@ class LocalRateLimitingStrategy[Req](categorizer: Req => String, windowSize: Dur
 
   private[this] val rates = mutable.HashMap.empty[String, (Int, Time)]
 
-  def apply(req: Req) = synchronized {
+  def apply(req: Req): Future[Boolean] = synchronized {
     val now = Time.now
     val id = categorizer(req)
     val (remainingRequests, timestamp) = rates.getOrElse(id, (rate, now))
 
-    val accept = if (timestamp.until(now) > windowSize) {
-      rates(id) = (rate, now)
+    val accept = if (rate <= 0) {
+      false
+    } else if (timestamp.until(now) > windowSize) {
+      rates(id) = (rate - 1, now)
       true
     } else {
       if (remainingRequests > 0) {
         rates(id) = (remainingRequests - 1, timestamp)
         true
-      } else
+      } else {
         false
+      }
     }
 
     Future.value(accept)
