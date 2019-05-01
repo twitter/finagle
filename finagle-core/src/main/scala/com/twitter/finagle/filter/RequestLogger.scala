@@ -23,16 +23,16 @@ object RequestLogger {
     case object Disabled extends Param
     case object Enabled extends Param
 
-    implicit val param: Stack.Param[Param] = Stack.Param(Param.Enabled)
+    implicit val param: Stack.Param[Param] = Stack.Param(Param.Disabled)
   }
 
   /**
-   * Enables the [[RequestLogger]] (enabled by default).
+   * Enables the [[RequestLogger]].
    */
   val Enabled: Param = Param.Enabled
 
   /**
-   * Disables the [[RequestLogger]].
+   * Disables the [[RequestLogger]] (disabled by default).
    */
   val Disabled: Param = Param.Disabled
 

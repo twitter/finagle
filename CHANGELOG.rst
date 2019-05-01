@@ -14,6 +14,9 @@ Runtime Behavior Changes
   "loadband" scoped metrics: "widen", "narrow", "offered_load_ema". These were not
   necessary as d-aperture does not change the aperture size at runtime. ``PHAB_ID=D303833``
 
+* finagle-core: Request logging now defaults to disabled. Enable it by configuring the
+  `RequestLogger` Stack parameter on your `Client` or `Server`. ``PHAB_ID=D308476``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

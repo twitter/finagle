@@ -224,7 +224,24 @@ Finagle's :ref:`clients  <client_modules>` and :ref:`servers <server_modules>`
 have many modules that are tasked with a wide assortment of jobs. When there
 is unexpected latency, it can be useful to have visibility into where time
 is spent. Finagle's `RequestLogger` can help with this. It can be enabled by
-setting the ``com.twitter.finagle.request.Logger`` level to ``TRACE``.
+setting the ``com.twitter.finagle.request.Logger`` level to ``TRACE`` and
+enabling the stack param:
+
+.. code-block:: scala
+
+  // scala
+  import com.twitter.finagle.filter.RequestLogger
+
+  Protocol.client.configured(RequestLogger.Enabled)
+  Protocol.server.configured(RequestLogger.Enabled)
+
+.. code-block:: java
+
+  // java
+  import com.twitter.finagle.filter.RequestLogger;
+
+  Protocol.client.configured(RequestLogger.Enabled().mk());
+  Protocol.server.configured(RequestLogger.Enabled().mk());
 
 The logs include synchronous and asynchronous time for each stack module's
 `Filter`. Synchronous here means the time spent from the beginning of the
