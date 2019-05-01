@@ -11,6 +11,8 @@ import com.twitter.finagle.{RefusedByRateLimiter, Service, SimpleFilter}
 class LocalRateLimitingStrategy[Req](categorizer: Req => String, windowSize: Duration, rate: Int)
     extends (Req => Future[Boolean]) {
 
+  require(rate > 0, s"rate $rate must be strictly positive.")
+
   private[this] val rates = mutable.HashMap.empty[String, (Int, Time)]
 
   def apply(req: Req): Future[Boolean] = synchronized {
@@ -18,9 +20,7 @@ class LocalRateLimitingStrategy[Req](categorizer: Req => String, windowSize: Dur
     val id = categorizer(req)
     val (remainingRequests, timestamp) = rates.getOrElse(id, (rate, now))
 
-    val accept = if (rate <= 0) {
-      false
-    } else if (timestamp.until(now) > windowSize) {
+    val accept = if (timestamp.until(now) > windowSize) {
       rates(id) = (rate - 1, now)
       true
     } else {

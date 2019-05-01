@@ -71,12 +71,9 @@ class RateLimitingFilterTest extends FunSuite with MockitoSugar {
     }
   }
 
-  test("RateLimitingFilter should refuse one request if rate limit is negative") {
-    val h = new RateLimitingFilterHelper(rate = 0)
-    import h._
-
-    intercept[Exception] {
-      Await.result(rateLimitedService(1))
+  test("RateLimitingFilter should raise exception if rate limit is negative") {
+    intercept[IllegalArgumentException] {
+      new RateLimitingFilterHelper(rate = 0)
     }
   }
 
