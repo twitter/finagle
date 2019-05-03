@@ -808,10 +808,15 @@ resources open.
 Depending on the configuration, a Finagle client's stack might contain up to _three_ connection pools
 stacked on each other: watermark, caching and buffering pools.
 
-The only Finagle protocol that doesn't require any connection pooling (a multiplexing protocol) is
-`Mux` so it uses :src:`SingletonPool <com/twitter/finagle/pool/SingletonPool.scala>` that maintains
-a single connection per endpoint. For every other Finagle-supported protocol (i.e., HTTP/1.1, Thrift),
-there a connection pooling setup built with watermark and caching pools.
+The two Finagle protocols that don't require any connection pooling (multiplexing protocols) are
+Mux and HTTP/2 as they both maintain just one connection per remote peer. For every other Finagle-
+supported protocol (i.e., HTTP/1.1, Thrift), there a connection pooling setup built with watermark
+and caching pools in front of each remote peer.
+
+.. note::
+
+  When HTTP/2 is enabled on an HTTP client (and the transport is successfully upgraded), the session
+  pool caches streams (not connections) multiplexed over a single connection.
 
 The default client stack layers caching and watermark pools which amounts to maintaining the low
 watermark (i.e., ``0``, as long as request concurrency exists), queuing requests above the unbounded high
@@ -833,13 +838,18 @@ example [#example]_.
     .withSessionPool.ttl(5.seconds)
     .newService("twitter.com")
 
+.. note::
+
+  All session pool settings are applied to each host in the replica set. Put this way, these settings
+  are per-host as opposed to per-client.
+
 Thus all the three pools are configured with a single param that takes the following arguments:
 
 1. `minSize` and `maxSize` - low and high watermarks for the watermark pool (note that a Finagle
-   client will not maintain more connections than `maxSize`)
-2. `maxWaiters` - the maximum number of connection requests that are queued when the connection
-   concurrency exceeds the high watermark
-3. `ttl`- the maximum amount of time a session is allowed to be cached in a pool
+   client will not maintain more connections than `maxSize` per host)
+2. `maxWaiters` - the maximum number of connection requests that are queued per host when the
+   connection concurrency exceeds the high watermark
+3. `ttl`- the maximum amount of time a per-host session is allowed to be cached in a pool
 
 :ref:`Related stats <pool_stats>`
 

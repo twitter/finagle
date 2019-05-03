@@ -18,7 +18,7 @@ class SessionParams[A <: Stack.Parameterized[A]](self: Stack.Parameterized[A]) {
 
   /**
    * Configures the session lifetime `timeout` - the maximum amount of time a given
-   * service is allowed to live before it is closed (default: unbounded).
+   * connection is allowed to live before it is closed (default: unbounded).
    *
    * @see [[https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration]]
    */

@@ -49,7 +49,7 @@ class SessionPoolingParams[A <: Stack.Parameterized[A]](self: Stack.Parameterize
 
   /**
    * Configures the session pool TTL timeout, the maximum amount of time
-   * a given _temporary_ session is allowed to be cached in a pool (default: unbounded).
+   * a given _temporary_ per-host session is allowed to be cached in a pool (default: unbounded).
    *
    * @note TTL does not apply to permanent sessions (up to `minSize`).
    *
