@@ -7,6 +7,14 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+New Features
+~~~~~~~~~~~~
+
+* finagle-http: Add two new methods to `com.twitter.finagle.http.MediaType`,
+  `MediaType#typeEquals` for checking if two media types have the same type and
+  subtype, ignoring their charset, and `MediaType#addUtf8Charset` for easily
+  setting a utf-8 charset.  ``PHAB_ID=D308761``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
