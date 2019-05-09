@@ -155,11 +155,13 @@ across multiple endpoints, the `endpoint stack` provides circuit breakers
 and connection pooling, and the `connection stack` provides connection life-cycle
 management and implements the wire protocol.
 
-.. figure:: _static/clientstack.svg
+.. raw:: html
+    :file: _static/clientstack.svg
 
-    Fig. 1: A visual representation of each module in a default Finagle client
-    that is configured with three endpoints and connections. Requests flow from
-    left to right.
+
+Fig. 1: A visual representation of each module in a default Finagle client
+that is configured with three endpoints and connections. Requests flow from
+left to right.
 
 
 Module Composition
