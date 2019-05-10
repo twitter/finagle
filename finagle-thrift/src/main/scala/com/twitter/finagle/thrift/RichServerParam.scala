@@ -54,7 +54,7 @@ case class RichServerParam(
   /**
    * Apply system-wide read limit on TBinaryProtocol and TCompactProtocol if
    * any of the following System Properties are set:
-   *   org.apache.thrift.readLength
+   *   org.apache.thrift.readLength (deprecated)
    *   com.twitter.finagle.thrift.stringLengthLimit
    *   com.twitter.finagle.thrift.containerLengthLimit
    */
@@ -70,15 +70,16 @@ case class RichServerParam(
   }
 
   /**
-   * Modify the user defined TBinaryProtocol.Factory if system property of readLength is set
+   * Modify the user defined TBinaryProtocol.Factory if system properties of `stringLengthLimit`
+   * and/or `containerLengthLimit` are set.
    *
    * We keep other fields as user defined by doing reflection, alter the `stringLengthLimit_`
-   * if the system property readLength is more restricted
+   * and/or `containerLengthLimit_` if the system property limits are more restricted.
    */
   @deprecated(
-    "Use TBinaryProtocol.Factory(readLengthLimit, NoReadLimit) to set readLengthLimit",
-    "2018-03-09"
-  )
+    "Use TBinaryProtocol.Factory($stringLengthLimit, $containerLengthLimit) to set " +
+      "stringLengthLimit and containerLengthLimit",
+    "2018-03-09")
   private def restrictedTBinaryProtocolFactory(
     tbf: TBinaryProtocol.Factory
   ): TBinaryProtocol.Factory = {
@@ -108,22 +109,23 @@ case class RichServerParam(
       case _: Throwable => {
         Logger
           .getLogger("finagle-thrift")
-          .log(Level.WARNING, "System Property ReadLengthLimit is not applied on ProtocolFactory")
+          .log(Level.WARNING, "System Property length limits are not applied on ProtocolFactory")
         tbf
       }
     }
   }
 
   /**
-   * Modify the user defined TCompactProtocol.Factory if system property of readLength is set
+   * Modify the user defined TCompactProtocol.Factory if system properties of `stringLengthLimit`
+   * and/or `containerLengthLimit` are set.
    *
    * We keep other fields as user defined by doing reflection, alter the `stringLengthLimit_`
-   * if the system property readLength is more restricted
+   * and/or `containerLengthLimit_` if the system property limits are more restricted.
    */
   @deprecated(
-    "Use TBinaryProtocol.Factory(readLengthLimit, NoReadLimit) to set readLengthLimit",
-    "2018-03-09"
-  )
+    "Use TCompactProtocol.Factory($stringLengthLimit, $containerLengthLimit) to set " +
+      "stringLengthLimit and containerLengthLimit",
+    "2018-03-09")
   private def restrictedTCompactProtocolFactory(
     tcf: TCompactProtocol.Factory
   ): TCompactProtocol.Factory = {
@@ -145,7 +147,7 @@ case class RichServerParam(
       case _: Throwable => {
         Logger
           .getLogger("finagle-thrift")
-          .log(Level.WARNING, "System Property ReadLengthLimit is not applied on ProtocolFactory")
+          .log(Level.WARNING, "System Property length limits are not applied on ProtocolFactory")
         tcf
       }
     }

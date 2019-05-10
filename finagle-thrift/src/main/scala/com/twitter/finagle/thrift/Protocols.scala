@@ -80,14 +80,14 @@ object Protocols {
   }
 
   /**
-   * This JVM property limits the max number of elements in a single collection in a thrift object
+   * This JVM property limits the max number of elements in a single collection in a thrift object.
    */
   private[thrift] val SysPropContainerLengthLimit: Option[Long] =
     limitToOption(
       System.getProperty("com.twitter.finagle.thrift.containerLengthLimit", "-1").toLong)
 
   /**
-   * Represents no limit for the three limits above
+   * Represents no limit for the two limits above
    */
   private[thrift] val NoLimit: Long = -1
 
