@@ -39,20 +39,20 @@ object Trace extends Tracing {
 
   private[this] val tracersCtx = new Contexts.local.Key[List[Tracer]]
 
-  private[finagle] val idCtx = new Contexts.broadcast.Key[TraceId](
-    "com.twitter.finagle.tracing.TraceContext"
-  ) {
+  private[twitter] val TraceIdContext: Contexts.broadcast.Key[TraceId] =
+    new Contexts.broadcast.Key[TraceId](
+      "com.twitter.finagle.tracing.TraceContext"
+    ) {
+      def marshal(id: TraceId): Buf =
+        Buf.ByteArray.Owned(TraceId.serialize(id))
 
-    def marshal(id: TraceId): Buf =
-      Buf.ByteArray.Owned(TraceId.serialize(id))
-
-    /**
-     * The wire format is (big-endian):
-     *     ''spanId:8 parentId:8 traceId:8 flags:8 (traceIdHigh:8)''
-     */
-    def tryUnmarshal(body: Buf): Try[TraceId] =
-      TraceId.deserialize(Buf.ByteArray.Owned.extract(body))
-  }
+      /**
+       * The wire format is (big-endian):
+       *     ''spanId:8 parentId:8 traceId:8 flags:8 (traceIdHigh:8)''
+       */
+      def tryUnmarshal(body: Buf): Try[TraceId] =
+        TraceId.deserialize(Buf.ByteArray.Owned.extract(body))
+    }
 
   // It's ok to either write or read this value without synchronizing as long as we're not
   // doing read-modify-write concurrently (which we don't).
@@ -70,9 +70,9 @@ object Trace extends Tracing {
     }
   }
 
-  def idOption: Option[TraceId] = Contexts.broadcast.get(idCtx)
+  def idOption: Option[TraceId] = Contexts.broadcast.get(TraceIdContext)
 
-  override def hasId: Boolean = Contexts.broadcast.contains(idCtx)
+  override def hasId: Boolean = Contexts.broadcast.contains(TraceIdContext)
 
   /**
    * Turn trace recording on.
@@ -101,7 +101,7 @@ object Trace extends Tracing {
     if (isTerminal) f
     else {
       val tid = if (terminal) traceId.copy(terminal = terminal) else traceId
-      Contexts.broadcast.let(idCtx, tid)(f)
+      Contexts.broadcast.let(TraceIdContext, tid)(f)
     }
 
   /**
@@ -155,10 +155,10 @@ object Trace extends Tracing {
       }
 
       val ts = tracers
-      if (ts.contains(tracer)) Contexts.broadcast.let(idCtx, newId)(f)
+      if (ts.contains(tracer)) Contexts.broadcast.let(TraceIdContext, newId)(f)
       else {
         Contexts.local.let(tracersCtx, tracer :: ts) {
-          Contexts.broadcast.let(idCtx, newId)(f)
+          Contexts.broadcast.let(TraceIdContext, newId)(f)
         }
       }
     }
@@ -170,7 +170,7 @@ object Trace extends Tracing {
    */
   def letClear[R](f: => R): R =
     Contexts.local.letClear(tracersCtx) {
-      Contexts.broadcast.letClear(idCtx) {
+      Contexts.broadcast.letClear(TraceIdContext) {
         f
       }
     }
