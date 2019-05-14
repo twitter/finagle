@@ -4,7 +4,7 @@ import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.mux.transport.Message._
 import com.twitter.finagle.pushsession.PushChannelHandle
 import com.twitter.finagle.mux.pushsession.MessageWriter.DiscardResult
-import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.io.Buf
 import com.twitter.logging.{HasLogLevel, Level, Logger}
 import com.twitter.util.{Future, Promise, Return, Throw, Try}
@@ -73,13 +73,13 @@ private[finagle] object MessageWriter {
 private[finagle] final class FragmentingMessageWriter(
   handle: PushChannelHandle[_, Buf],
   windowBytes: Int,
-  stats: SharedFramingStats)
+  stats: SharedNegotiationStats)
     extends MessageWriter {
 
   // While this constructor defeats the purprose of sharing stats between multiple writers,
   // it's convenient in testing.
   def this(handle: PushChannelHandle[_, Buf], windowBytes: Int, stats: StatsReceiver) =
-    this(handle, windowBytes, new SharedFramingStats(stats, Verbosity.Default))
+    this(handle, windowBytes, new SharedNegotiationStats(stats))
 
   import FragmentingMessageWriter._
 

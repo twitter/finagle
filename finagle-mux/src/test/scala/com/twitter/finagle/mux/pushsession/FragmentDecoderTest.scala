@@ -12,8 +12,8 @@ import org.scalatest.FunSuite
 class FragmentDecoderTest extends FunSuite {
 
   private class DecoderStatsReceiver extends InMemoryStatsReceiver {
-    def pendingReadStreams: Int = gauges(Seq("pending_read_streams"))().toInt
-    def readBytes: Seq[Int] = stats(Seq("read_stream_bytes")).map(_.toInt)
+    def pendingReadStreams: Int = gauges(Seq("mux", "framer", "pending_read_streams"))().toInt
+    def readBytes: Seq[Int] = stats(Seq("mux", "framer", "read_stream_bytes")).map(_.toInt)
   }
 
   test("decodes whole message") {

@@ -14,19 +14,27 @@ import java.util.concurrent.atomic.LongAdder
  * few instances of this class (one per server and one per client), it's sufficient to release
  * gauges via a weak reference (when the instance is collected).
  */
-private[mux] final class SharedFramingStats(sr: StatsReceiver, verbosity: Verbosity) {
+private[finagle] final class SharedNegotiationStats(
+  sr: StatsReceiver,
+  framerVerbosity: Verbosity = Verbosity.Debug,
+  tlsVerbosity: Verbosity = Verbosity.Default) {
 
-  private[this] val writeStreamsGauge = sr.addGauge(verbosity, "pending_write_streams") {
-    pendingWriteStreams.floatValue()
-  }
+  private[this] val writeStreamsGauge =
+    sr.addGauge(framerVerbosity, "mux", "framer", "pending_write_streams") {
+      pendingWriteStreams.floatValue()
+    }
 
-  private[this] val readStreamsGauge = sr.addGauge(verbosity, "pending_read_streams") {
-    pendingReadStreams.floatValue()
-  }
+  private[this] val readStreamsGauge =
+    sr.addGauge(framerVerbosity, "mux", "framer", "pending_read_streams") {
+      pendingReadStreams.floatValue()
+    }
 
-  val writeStreamBytes = sr.stat(verbosity, "write_stream_bytes")
-  val readStreamBytes = sr.stat(verbosity, "read_stream_bytes")
+  val writeStreamBytes = sr.stat(framerVerbosity, "mux", "framer", "write_stream_bytes")
+  val readStreamBytes = sr.stat(framerVerbosity, "mux", "framer", "read_stream_bytes")
 
   val pendingWriteStreams = new LongAdder()
   val pendingReadStreams = new LongAdder()
+
+  val tlsSuccess = sr.counter(tlsVerbosity, "mux", "tls", "upgrade", "success")
+  val tlsFailures = sr.counter(tlsVerbosity, "mux", "tls", "upgrade", "incompatible")
 }

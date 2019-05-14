@@ -10,7 +10,6 @@ import com.twitter.finagle.mux.transport.{
   OpportunisticTls
 }
 import com.twitter.finagle.mux.{Handshake, Request, Response}
-import com.twitter.finagle.stats.Verbosity
 import com.twitter.finagle.{Service, Stack, param}
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.logging.{Level, Logger}
@@ -19,19 +18,13 @@ import com.twitter.util.{Future, Promise, Return, Throw, Try}
 /**
  * Abstraction of negotiation logic for push-based mux clients and servers
  */
-private[finagle] abstract class Negotiation(params: Stack.Params) {
+private[finagle] abstract class Negotiation(
+  params: Stack.Params,
+  sharedStats: SharedNegotiationStats) {
 
   type SessionT <: PushSession[ByteReader, Buf]
 
   private[this] val log = Logger.get
-  private[this] val statsReceiver = params[param.Stats].statsReceiver
-
-  private[this] val tlsSr = statsReceiver.scope("tls")
-  private[this] val tlsSuccessCounter = tlsSr.counter("upgrade", "success")
-  private[this] val tlsFailureCounter = tlsSr.counter("upgrade", "incompatible")
-
-  private[this] val framerStats =
-    new SharedFramingStats(statsReceiver.scope("framer"), Verbosity.Debug)
 
   protected def builder(
     handle: PushChannelHandle[ByteReader, Buf],
@@ -80,7 +73,7 @@ private[finagle] abstract class Negotiation(params: Stack.Params) {
         )
       }
       if (useTls) {
-        tlsSuccessCounter.incr()
+        sharedStats.tlsSuccess.incr()
         turnOnTls()
       } else {
         // synthesize a handshake complete for `negotiateAsync`
@@ -88,7 +81,7 @@ private[finagle] abstract class Negotiation(params: Stack.Params) {
       }
     } catch {
       case exn: IncompatibleNegotiationException =>
-        tlsFailureCounter.incr()
+        sharedStats.tlsFailures.incr()
         log.fatal(
           exn,
           s"The local peer wanted $localEncryptLevel and the remote peer wanted" +
@@ -112,9 +105,9 @@ private[finagle] abstract class Negotiation(params: Stack.Params) {
         .flatMap(Handshake.valueOf(MuxFramer.Header.KeyBuf, _))
         .map(MuxFramer.Header.decodeFrameSize(_))
         .getOrElse(Int.MaxValue)
-      new FragmentingMessageWriter(handle, fragmentSize, framerStats)
+      new FragmentingMessageWriter(handle, fragmentSize, sharedStats)
     }
-    val messageDecoder = new FragmentDecoder(framerStats)
+    val messageDecoder = new FragmentDecoder(sharedStats)
 
     builder(handle, writeManager, messageDecoder)
   }
@@ -179,7 +172,9 @@ private[finagle] abstract class Negotiation(params: Stack.Params) {
 }
 
 private[finagle] object Negotiation {
-  final class Client(params: Stack.Params) extends Negotiation(params) {
+  final class Client(params: Stack.Params, sharedStats: SharedNegotiationStats)
+      extends Negotiation(params, sharedStats) {
+
     override type SessionT = MuxClientSession
 
     protected def builder(
@@ -199,8 +194,12 @@ private[finagle] object Negotiation {
     }
   }
 
-  final class Server(params: Stack.Params, service: Service[Request, Response])
-      extends Negotiation(params) {
+  final class Server(
+    params: Stack.Params,
+    sharedStats: SharedNegotiationStats,
+    service: Service[Request, Response])
+      extends Negotiation(params, sharedStats) {
+
     override type SessionT = MuxServerSession
 
     protected def builder(

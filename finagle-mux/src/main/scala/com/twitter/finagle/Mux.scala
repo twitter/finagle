@@ -206,7 +206,9 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       with WithDefaultLoadBalancer[Client]
       with OpportunisticTlsParams[Client] {
 
-    private[this] val scopedStatsParams = params + Stats(params[Stats].statsReceiver.scope("mux"))
+    private[this] val statsReceiver = params[Stats].statsReceiver
+    private[this] val sessionStats = new SharedNegotiationStats(statsReceiver)
+    private[this] val sessionParams = params + Stats(statsReceiver.scope("mux"))
 
     protected type SessionT = MuxClientNegotiatingSession
     protected type In = ByteReader
@@ -216,7 +218,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       handle: PushChannelHandle[ByteReader, Buf]
     ): Future[MuxClientNegotiatingSession] = {
       val negotiator: Option[Headers] => Future[MuxClientSession] = { headers =>
-        new Negotiation.Client(scopedStatsParams).negotiateAsync(handle, headers)
+        new Negotiation.Client(sessionParams, sessionStats).negotiateAsync(handle, headers)
       }
       val headers = Mux.Client
         .headers(params[MaxFrameSize].size, params[OppTls].level.getOrElse(OpportunisticTls.Off))
@@ -228,7 +230,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
           negotiator = negotiator,
           headers = headers,
           name = params[Label].label,
-          stats = scopedStatsParams[Stats].statsReceiver
+          stats = sessionParams[Stats].statsReceiver
         )
       )
     }
@@ -260,7 +262,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
           // With this builder we add support for opportunistic TLS via `MuxChannelHandle`
           // and the respective `Negotiation` types. Adding more proxy types will break this pathway.
           def wrappedBuilder(pushChannelHandle: PushChannelHandle[ByteReader, Buf]): Future[T] =
-            sessionBuilder(new MuxChannelHandle(pushChannelHandle, channel, scopedStatsParams))
+            sessionBuilder(new MuxChannelHandle(pushChannelHandle, channel, sessionParams))
 
           super.initSession(channel, protocolInit, wrappedBuilder)
         }
@@ -308,6 +310,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     type SessionF = (
       RefPushSession[ByteReader, Buf],
       Stack.Params,
+      SharedNegotiationStats,
       MuxChannelHandle,
       Service[Request, Response]
     ) => PushSession[ByteReader, Buf]
@@ -315,6 +318,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     val defaultSessionFactory: SessionF = (
       ref: RefPushSession[ByteReader, Buf],
       params: Stack.Params,
+      sharedStats: SharedNegotiationStats,
       handle: MuxChannelHandle,
       service: Service[Request, Response]
     ) => {
@@ -330,7 +334,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
             params[OppTls].level.getOrElse(OpportunisticTls.Off)
           ),
         negotiate = (service, headers) =>
-          new Negotiation.Server(scopedStatsParams, service).negotiate(handle, headers),
+          new Negotiation.Server(scopedStatsParams, sharedStats, service)
+            .negotiate(handle, headers),
         timer = params[Timer].timer
       )
       ref
@@ -379,6 +384,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     protected type PipelineReq = ByteReader
     protected type PipelineRep = Buf
 
+    private[this] val sessionStats = new SharedNegotiationStats(params[Stats].statsReceiver)
+
     protected def newListener(): PushListener[ByteReader, Buf] = {
       Mux.Server.validateTlsParamConsistency(params)
       new Netty4PushListener[ByteReader, Buf](
@@ -407,7 +414,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     ): RefPushSession[ByteReader, Buf] = handle match {
       case h: MuxChannelHandle =>
         val ref = new RefPushSession[ByteReader, Buf](h, SentinelSession[ByteReader, Buf](h))
-        sessionFactory(ref, params, h, service)
+        sessionFactory(ref, params, sessionStats, h, service)
         ref
 
       case other =>

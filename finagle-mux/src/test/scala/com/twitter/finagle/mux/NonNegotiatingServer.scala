@@ -4,7 +4,6 @@ import com.twitter.finagle.{Mux, Service, ServiceFactory, Stack, mux, param => f
 import com.twitter.finagle.Mux.Server.SessionF
 import com.twitter.finagle.mux.pushsession._
 import com.twitter.finagle.pushsession.RefPushSession
-import com.twitter.finagle.stats.Verbosity
 import com.twitter.io.{Buf, ByteReader}
 
 // Implementation of the standard mux server that doesn't attempt to negotiate.
@@ -14,16 +13,16 @@ private object NonNegotiatingServer {
   private val NonNegotiatingSessionFactory: SessionF = (
     ref: RefPushSession[ByteReader, Buf],
     params: Stack.Params,
+    sharedStats: SharedNegotiationStats,
     handle: MuxChannelHandle,
     service: Service[Request, Response]
   ) => {
     val statsReceiver = params.apply[fparam.Stats].statsReceiver
-    val framerStats = new SharedFramingStats(statsReceiver.scope("mux", "framer"), Verbosity.Debug)
 
     val session = new MuxServerSession(
       params,
-      new FragmentDecoder(framerStats),
-      new FragmentingMessageWriter(handle, Int.MaxValue, framerStats),
+      new FragmentDecoder(sharedStats),
+      new FragmentingMessageWriter(handle, Int.MaxValue, sharedStats),
       handle,
       service
     )

@@ -12,8 +12,8 @@ import org.scalatest.FunSuite
 class FragmentingMessageWriterTest extends FunSuite {
 
   private class PendingStreamStatsReceiver extends InMemoryStatsReceiver {
-    def pendingStreamCount: Int = gauges(Seq("pending_write_streams"))().toInt
-    def writes: Seq[Int] = stats(Seq("write_stream_bytes")).map(_.toInt)
+    def pendingStreamCount: Int = gauges(Seq("mux", "framer", "pending_write_streams"))().toInt
+    def writes: Seq[Int] = stats(Seq("mux", "framer", "write_stream_bytes")).map(_.toInt)
   }
 
   private val Tag = 2

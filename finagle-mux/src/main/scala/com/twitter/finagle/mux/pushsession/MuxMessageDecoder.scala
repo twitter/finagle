@@ -2,7 +2,7 @@ package com.twitter.finagle.mux.pushsession
 
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.mux.transport.Message.{Tags, Tdiscarded}
-import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.io.{Buf, ByteReader}
 import io.netty.util.collection.IntObjectHashMap
 
@@ -28,12 +28,12 @@ private[finagle] abstract class MuxMessageDecoder {
   protected def doDecode(reader: ByteReader): Message
 }
 
-private[mux] final class FragmentDecoder(stats: SharedFramingStats) extends MuxMessageDecoder {
+private[mux] final class FragmentDecoder(stats: SharedNegotiationStats) extends MuxMessageDecoder {
 
   // While this constructor defeats the purprose of sharing stats between multiple readers,
   // it's convenient in testing.
   def this(stats: StatsReceiver) =
-    this(new SharedFramingStats(stats, Verbosity.Default))
+    this(new SharedNegotiationStats(stats))
 
   // The keys of the fragment map are 'normalized' since fragments are signaled
   // in the MSB of the tag field. See `getKey` below.

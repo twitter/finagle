@@ -402,7 +402,7 @@ object ThriftMux
         .copy(
           stack = BaseServerStack,
           params = BaseServerParams,
-          sessionFactory = MuxDowngradingNegotiator.build(_, _, _, _)
+          sessionFactory = MuxDowngradingNegotiator.build(_, _, _, _, _)
         )
     }
 

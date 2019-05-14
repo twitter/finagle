@@ -10,7 +10,6 @@ import com.twitter.finagle.pushsession.{
   PushStackClient,
   PushTransporter
 }
-import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.util.Future
 import io.netty.channel.{Channel, ChannelPipeline}
@@ -24,24 +23,21 @@ final case class NonNegotiatingClient(
   params: Stack.Params = Mux.Client.params)
     extends PushStackClient[mux.Request, mux.Response, NonNegotiatingClient] {
 
-  private[this] val scopedStatsParams = params + param.Stats(
-    params[param.Stats].statsReceiver.scope("mux")
-  )
+  private[this] val statsReceiver = params[param.Stats].statsReceiver
+  private[this] val scopedStatsParams = params + param.Stats(statsReceiver.scope("mux"))
 
   protected type SessionT = MuxClientSession
   protected type In = ByteReader
   protected type Out = Buf
 
+  private[this] val sessionStats = new SharedNegotiationStats(statsReceiver)
+
   protected def newSession(handle: PushChannelHandle[ByteReader, Buf]): Future[MuxClientSession] = {
-
-    val statsReceiver: StatsReceiver = params[param.Stats].statsReceiver
-    val framerStats = new SharedFramingStats(statsReceiver.scope("framer"), Verbosity.Debug)
-
     Future.value(
       new MuxClientSession(
         handle = handle,
-        h_decoder = new FragmentDecoder(framerStats),
-        h_messageWriter = new FragmentingMessageWriter(handle, Int.MaxValue, framerStats),
+        h_decoder = new FragmentDecoder(sessionStats),
+        h_messageWriter = new FragmentingMessageWriter(handle, Int.MaxValue, sessionStats),
         detectorConfig = params[FailureDetector.Param].param,
         name = params[param.Label].label,
         params[param.Stats].statsReceiver,
