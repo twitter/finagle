@@ -28,6 +28,13 @@ Runtime Behavior Changes
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+* finagle-http: For Finagle HTTP clients, the `withMaxRequestSize(size)` API
+  method has been removed. For Finagle HTTP servers, the
+  `withMaxResponseSize(size)` method has been removed. The underlying `Stack`
+  params which are set by these methods are respectively HTTP server and HTTP
+  client side params only. Using these removed methods had no effect on the
+  setup of Finagle HTTP clients and servers. ``PHAB_ID=D314019``
+
 * finagle-mysql: HandshakeResponse has been removed from finagle-mysql's public
   API. It is expected that users of the library are relying entirely on
   finagle-mysql for handshaking. ``PHAB_ID=D304512``

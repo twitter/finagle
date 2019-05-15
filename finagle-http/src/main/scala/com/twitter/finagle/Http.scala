@@ -294,12 +294,6 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       configured(http.param.MaxInitialLineSize(size))
 
     /**
-     * Configures the maximum request size that the client can send.
-     */
-    def withMaxRequestSize(size: StorageUnit): Client =
-      configured(http.param.MaxRequestSize(size))
-
-    /**
      * Configures the maximum response size that client can receive.
      */
     def withMaxResponseSize(size: StorageUnit): Client =
@@ -527,12 +521,6 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
      */
     def withMaxRequestSize(size: StorageUnit): Server =
       configured(http.param.MaxRequestSize(size))
-
-    /**
-     * Configures the maximum response size this server can send.
-     */
-    def withMaxResponseSize(size: StorageUnit): Server =
-      configured(http.param.MaxResponseSize(size))
 
     /**
      * Streaming allows applications to work with HTTP messages that have large
