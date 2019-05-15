@@ -77,18 +77,14 @@ private final class DefaultHeaderMap extends HeaderMap {
     this
   }
 
-  override def keySet: Set[String] = underlying.synchronized {
-    underlying.values.flatMap(_.names).toSet
+  override def keysIterator: Iterator[String] = underlying.synchronized {
+    underlying.uniqueNamesIterator
   }
-
-  override def keysIterator: Iterator[String] =
-    keySet.iterator
 
   private[finagle] override def nameValueIterator: Iterator[HeaderMap.NameValue] =
     underlying.synchronized {
       underlying.flattenedNameValueIterator
     }
-
 }
 
 private object DefaultHeaderMap {
@@ -202,31 +198,66 @@ private object DefaultHeaderMap {
         loop(0)
       }
 
+    // This method must be called in a thread safe manner and as such, it is only called from within
+    // the `DefaultHeaderMap.*iterator` methods that synchronize on this instance.
+    //
+    // The resulting iterator is not invariant of mutations of the HeaderMap, but
+    // shouldn't result in corruption of the HashMap. To do that, we make a copy
+    // of the underlying values, so by key, it is immutable. However, adding more
+    // values to an existing key is still not thread safe in terms of observability
+    // since it modifies the `Header` linked list structure, but that shouldn't
+    // result in corruption of this HashMap.
+    private[this] def copiedEntitiesIterator: Iterator[Header] = {
+      val array = new Array[Header](self.size)
+      val it = self.entriesIterator
+      var i = 0
+      while (it.hasNext) {
+        array(i) = it.next().value
+        i += 1
+      }
+
+      array.iterator
+    }
+
+    def uniqueNamesIterator: Iterator[String] = new Iterator[String] {
+      private[this] val it = copiedEntitiesIterator
+      private[this] var current: List[String] = Nil
+
+      // The `contains` call here isn't a problem but a feature. We're anticipating a very few
+      // (usually zero) duplicated header names so the linear search in the list becomes a constant
+      // time lookup in the majority of the cases and is bounded by the total number of duplicated
+      // headers for a given name in the worst case.
+      //
+      // As in other parts of Headers implementation we're biased towards headers with no
+      // duplicated names hence the trade-off of using a linear search to track uniqueness of the
+      // names instead of a hash-set lookup.
+      @tailrec
+      private[this] def collectUnique(from: Header, to: List[String]): List[String] = {
+        if (from == null) to
+        else if (to.contains(from.name)) collectUnique(from.next, to)
+        else collectUnique(from.next, from.name :: to)
+      }
+
+      def hasNext: Boolean =
+        it.hasNext || !current.isEmpty
+
+      def next(): String = {
+        if (current.isEmpty) {
+          current = collectUnique(it.next(), Nil)
+        }
+
+        val result = current.head
+        current = current.tail
+        result
+      }
+    }
+
     def flattenIterator: Iterator[(String, String)] =
       flattenedNameValueIterator.map(nv => (nv.name, nv.value))
 
     def flattenedNameValueIterator: Iterator[HeaderMap.NameValue] =
       new Iterator[HeaderMap.NameValue] {
-        // To get the following behavior, this method must be called in a thread safe
-        // manner and as such, it is only called from within the `DefaultHeaderMap.iterator`
-        // and `DefaultHeaderMap.nameValueIterator` methods, which synchronize on this instance.
-        //
-        // The resulting iterator is not invariant of mutations of the HeaderMap, but
-        // shouldn't result in corruption of the HashMap. To do that, we make a copy
-        // of the underlying values, so by key, it is immutable. However, adding more
-        // values to an existing key is still not thread safe in terms of observability
-        // since it modifies the `Header` linked list structure, but that shouldn't
-        // result in corruption of this HashMap.
-        private[this] val it = {
-          val array = new Array[Header](self.size)
-          val it = self.entriesIterator
-          var i = 0
-          while (it.hasNext) {
-            array(i) = it.next().value
-            i += 1
-          }
-          array.iterator
-        }
+        private[this] val it = copiedEntitiesIterator
         private[this] var current: Header = _
 
         def hasNext: Boolean =
