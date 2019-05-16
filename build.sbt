@@ -472,7 +472,6 @@ lazy val finagleNetty4Http = Project(
   name := "finagle-netty4-http",
   libraryDependencies ++= Seq(
     util("app"), util("codec"), util("core"), util("jvm"), util("stats"),
-    "commons-lang" % "commons-lang" % "2.6",
     netty4Http
   )
 ).dependsOn(finagleNetty4, finagleBaseHttp % "test->test;compile->compile")
@@ -501,9 +500,7 @@ lazy val finagleThrift = Project(
   sharedSettings
 ).settings(
   name := "finagle-thrift",
-  libraryDependencies ++=
-    Seq(
-      "commons-lang" % "commons-lang" % "2.6" % "test") ++ scroogeLibs
+  libraryDependencies ++= scroogeLibs
 ).dependsOn(finagleCore, finagleNetty4, finagleToggle)
 
 lazy val finagleMemcached = Project(
@@ -573,7 +570,6 @@ lazy val finagleThriftMux = Project(
 ).settings(
   name := "finagle-thriftmux",
   libraryDependencies ++= Seq(
-    "commons-lang" % "commons-lang" % "2.6",
     util("core"),
     util("logging"),
     util("stats")) ++ scroogeLibs
