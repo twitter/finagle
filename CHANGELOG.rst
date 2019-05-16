@@ -15,6 +15,12 @@ New Features
   subtype, ignoring their charset, and `MediaType#addUtf8Charset` for easily
   setting a utf-8 charset.  ``PHAB_ID=D308761``
 
+Bug Fixes
+~~~~~~~~~
+
+* finagle-http: Ensure server returns 400 Bad Request when
+  non-ASCII characters are present in the HTTP request URI path. ``PHAB_ID=D312009``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
