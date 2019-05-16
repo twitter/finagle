@@ -24,7 +24,7 @@ import com.twitter.io.{Buf, ByteReader}
 import com.twitter.logging.Logger
 import com.twitter.util.{Future, StorageUnit}
 import io.netty.channel.{Channel, ChannelPipeline}
-import java.net.{InetSocketAddress, SocketAddress}
+import java.net.SocketAddress
 import java.util.concurrent.Executor
 
 /**
@@ -241,17 +241,14 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       super.newClient(dest, label0)
     }
 
-    protected def newPushTransporter(
-      inetSocketAddress: InetSocketAddress
-    ): PushTransporter[ByteReader, Buf] = {
-
+    protected def newPushTransporter(sa: SocketAddress): PushTransporter[ByteReader, Buf] = {
       // We use a custom Netty4PushTransporter to provide a handle to the
       // underlying Netty channel via MuxChannelHandle, giving us the ability to
       // add TLS support later in the lifecycle of the socket connection.
       new Netty4PushTransporter[ByteReader, Buf](
         transportInit = _ => (),
         protocolInit = PipelineInit,
-        remoteAddress = inetSocketAddress,
+        remoteAddress = sa,
         params = Mux.param.removeTlsIfOpportunisticClient(params)
       ) {
         override protected def initSession[T <: PushSession[ByteReader, Buf]](

@@ -4,7 +4,7 @@ import com.twitter.finagle.{Stack, ServiceFactory, param, Address}
 import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.transport.Transport
-import java.net.InetSocketAddress
+import java.net.SocketAddress
 
 /**
  * A module that hooks in a `ServiceFactory` that directly makes connections,
@@ -16,7 +16,7 @@ import java.net.InetSocketAddress
  */
 class EndpointerModule[Req, Rep](
   extraParams: Seq[Stack.Param[_]],
-  fn: (Stack.Params, InetSocketAddress) => ServiceFactory[Req, Rep])
+  fn: (Stack.Params, SocketAddress) => ServiceFactory[Req, Rep])
     extends Stack.Module[ServiceFactory[Req, Rep]] {
 
   val role = Endpoint

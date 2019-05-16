@@ -28,6 +28,11 @@ Runtime Behavior Changes
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+* finagle-core: The `c.t.f.client.EndpointerModule` and `c.t.f.pushsession.PushStackClient` public
+  and protected APIs have been changed to use the abstract `java.net.SocketAddress` instead of the
+  concrete `java.net.InetSocketAddress` as relying on the concrete implementation was not
+  necessary. ``PHAB_ID=D315111``
+
 * finagle-http: For Finagle HTTP clients, the `withMaxRequestSize(size)` API
   method has been removed. For Finagle HTTP servers, the
   `withMaxResponseSize(size)` method has been removed. The underlying `Stack`

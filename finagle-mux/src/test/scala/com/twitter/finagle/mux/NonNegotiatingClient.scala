@@ -13,7 +13,7 @@ import com.twitter.finagle.pushsession.{
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.util.Future
 import io.netty.channel.{Channel, ChannelPipeline}
-import java.net.InetSocketAddress
+import java.net.SocketAddress
 
 // Implementation of the standard mux client that doesn't attempt to negotiate.
 // Only useful for testing Smux to ensure that failing to negotiate doesn't circumvent TLS.
@@ -46,17 +46,14 @@ final case class NonNegotiatingClient(
     )
   }
 
-  protected def newPushTransporter(
-    inetSocketAddress: InetSocketAddress
-  ): PushTransporter[ByteReader, Buf] = {
-
+  protected def newPushTransporter(sa: SocketAddress): PushTransporter[ByteReader, Buf] = {
     // We use a custom Netty4PushTransporter to provide a handle to the
     // underlying Netty channel via MuxChannelHandle, giving us the ability to
     // add TLS support later in the lifecycle of the socket connection.
     new Netty4PushTransporter[ByteReader, Buf](
       transportInit = _ => (),
       protocolInit = PipelineInit,
-      remoteAddress = inetSocketAddress,
+      remoteAddress = sa,
       params = Mux.param.removeTlsIfOpportunisticClient(params)
     ) {
       override protected def initSession[T <: PushSession[ByteReader, Buf]](

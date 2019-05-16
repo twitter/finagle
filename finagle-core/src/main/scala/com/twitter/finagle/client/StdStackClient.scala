@@ -4,7 +4,7 @@ import com.twitter.finagle.{Service, ServiceFactory, Stack, Stackable}
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.param.{Label, ProtocolLibrary}
 import com.twitter.finagle.transport.{Transport, TransportContext}
-import java.net.{InetSocketAddress, SocketAddress}
+import java.net.SocketAddress
 
 trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
     extends EndpointerStackClient[Req, Rep, This] { self =>
@@ -60,9 +60,9 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
   protected final def endpointer: Stackable[ServiceFactory[Req, Rep]] =
     new EndpointerModule[Req, Rep](
       Seq(implicitly[Stack.Param[ProtocolLibrary]], implicitly[Stack.Param[Label]]), {
-        (prms: Stack.Params, ia: InetSocketAddress) =>
+        (prms: Stack.Params, sa: SocketAddress) =>
           val endpointClient = self.copy1(params = prms)
-          val transporter = endpointClient.newTransporter(ia)
+          val transporter = endpointClient.newTransporter(sa)
           // This assumes that the `toString` of the implementation is sufficiently descriptive.
           // Note: this should be kept in sync with the equivalent `PushStackClient` logic.
           endpointClient.registerTransporter(transporter.toString)
