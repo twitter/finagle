@@ -31,6 +31,9 @@ Runtime Behavior Changes
 * finagle-core: Request logging now defaults to disabled. Enable it by configuring the
   `RequestLogger` Stack parameter on your `Client` or `Server`. ``PHAB_ID=D308476``
 
+* finagle-core: Subtree binding failures in `NameTree.Union`'s are ignored in the
+  final binding result. ``PHAB_ID=D315282``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

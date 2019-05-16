@@ -185,8 +185,7 @@ object NameTree {
           case Nil => accum
           case Seq(Weighted(w, tree), tail @ _*) =>
             simplify(tree) match {
-              case Fail => unionFail
-              case Neg => loop(tail, accum)
+              case Fail | Neg => loop(tail, accum)
               case tree => loop(tail, accum :+ Weighted(w, tree))
             }
         }
@@ -269,8 +268,7 @@ object NameTree {
             }
           case Seq(Weighted(_, head), tail @ _*) =>
             eval(head) match {
-              case Fail => Fail
-              case Neg => loop(tail, accum)
+              case Fail | Neg => loop(tail, accum)
               case Leaf(value) => loop(tail, accum :+ value)
               case _ => scala.sys.error("bug")
             }
