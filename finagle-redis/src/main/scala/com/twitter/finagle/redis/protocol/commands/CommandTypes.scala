@@ -46,6 +46,8 @@ trait StrictMemberCommand extends MemberCommand {
 trait MoveCommand extends Command {
   def source: Buf
   def destination: Buf
+
+  override def body: Seq[Buf] = Seq(source, destination)
 }
 
 // Command that takes a script as a parameter, i.e. EVAL, SCRIPT LOAD

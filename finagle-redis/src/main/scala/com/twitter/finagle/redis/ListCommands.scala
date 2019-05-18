@@ -156,9 +156,9 @@ private[redis] trait ListCommands { self: BaseClient =>
    * @return `Some` of the value of the popped element, or `None` if the list is
    *         empty.
    */
-  def rPopLPush(source: Buf, dest: Buf): Future[Unit] =
+  def rPopLPush(source: Buf, dest: Buf): Future[Option[Buf]] =
     doRequest(RPopLPush(source, dest)) {
       case BulkReply(message) => Future.value(Some(message))
-      case EmptyBulkReply => Future.Unit
+      case EmptyBulkReply => Future.value(None)
     }
 }
