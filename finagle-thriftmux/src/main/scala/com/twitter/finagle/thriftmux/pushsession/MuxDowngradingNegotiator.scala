@@ -4,7 +4,8 @@ import com.twitter.finagle.mux.pushsession.{
   MessageWriter,
   MuxChannelHandle,
   MuxMessageDecoder,
-  Negotiation
+  Negotiation,
+  SharedNegotiationStats
 }
 import com.twitter.finagle._
 import com.twitter.finagle.mux.{Request, Response}
@@ -32,6 +33,7 @@ import scala.util.control.NonFatal
 private[finagle] final class MuxDowngradingNegotiator(
   refSession: RefPushSession[ByteReader, Buf],
   params: Stack.Params,
+  sharedStats: SharedNegotiationStats,
   handle: MuxChannelHandle,
   service: Service[Request, Response])
     extends PushSession[ByteReader, Buf](handle) {
@@ -116,7 +118,7 @@ private[finagle] final class MuxDowngradingNegotiator(
     thriftmuxConnects.incr()
     // We have a normal mux transport! Just install the handshaker, give it this
     // first message, and be on our way!
-    Mux.Server.defaultSessionFactory(refSession, params, handle, service)
+    Mux.Server.defaultSessionFactory(refSession, params, sharedStats, handle, service)
     refSession.receive(ByteReader(buf))
 
   }
@@ -136,7 +138,7 @@ private[finagle] final class MuxDowngradingNegotiator(
     // We install our new session and then send it the first thrift dispatch
     try {
       val nextSession =
-        new DowngradeNegotiatior(refSession, ttwitterHeader, params, service)
+        new DowngradeNegotiatior(refSession, ttwitterHeader, params, sharedStats, service)
           .negotiate(handle, None)
       // Register the new session and then give it the message
       refSession.updateRef(nextSession)
@@ -183,8 +185,10 @@ private[finagle] object MuxDowngradingNegotiator {
     ref: RefPushSession[ByteReader, Buf],
     ttwitterHeader: Option[Buf],
     params: Stack.Params,
+    sharedStats: SharedNegotiationStats,
     service: Service[Request, Response])
-      extends Negotiation(params) {
+      extends Negotiation(params, sharedStats) {
+
     override type SessionT = VanillaThriftSession
 
     override protected def builder(
@@ -199,12 +203,14 @@ private[finagle] object MuxDowngradingNegotiator {
   def build(
     ref: RefPushSession[ByteReader, Buf],
     params: Stack.Params,
+    sharedStats: SharedNegotiationStats,
     handle: MuxChannelHandle,
     service: Service[Request, Response]
   ): ref.type = {
     val negotiatingSession = new MuxDowngradingNegotiator(
       refSession = ref,
       params = params,
+      sharedStats = sharedStats,
       handle = handle,
       service = service
     )

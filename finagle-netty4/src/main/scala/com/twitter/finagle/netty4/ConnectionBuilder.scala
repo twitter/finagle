@@ -25,6 +25,7 @@ import io.netty.channel.{
   ChannelPipeline
 }
 import io.netty.channel.epoll.{Epoll, EpollSocketChannel}
+import io.netty.channel.local.{LocalAddress, LocalChannel}
 import io.netty.channel.socket.nio.NioSocketChannel
 import java.lang.{Boolean => JBool, Integer => JInt}
 import java.net.SocketAddress
@@ -48,7 +49,7 @@ private[finagle] final class ConnectionBuilder(
   private[this] val connectLatencyStat = statsReceiver.stat("connect_latency_ms")
   private[this] val failedConnectLatencyStat = statsReceiver.stat("failed_connect_latency_ms")
   private[this] val cancelledConnects = statsReceiver.counter("cancelled_connects")
-  private[this] val bootstrap = ConnectionBuilder.makeBootstrap(init, params)
+  private[this] val bootstrap = ConnectionBuilder.makeBootstrap(init, addr, params)
 
   /**
    * Creates a new connection then, from within the channels event loop, passes it to the
@@ -147,8 +148,17 @@ private[finagle] object ConnectionBuilder {
       params
     )
 
+  private def isLocal(addr: SocketAddress): Boolean = addr match {
+    case _: LocalAddress => true
+    case _ => false
+  }
+
   // Construct an appropriate `Bootstrap` from the provided params
-  private def makeBootstrap(init: ChannelInitializer[Channel], params: Stack.Params): Bootstrap = {
+  private def makeBootstrap(
+    init: ChannelInitializer[Channel],
+    addr: SocketAddress,
+    params: Stack.Params
+  ): Bootstrap = {
     val Transport.Options(noDelay, reuseAddr, _) = params[Transport.Options]
     val LatencyCompensation.Compensation(compensation) = params[LatencyCompensation.Compensation]
     val Transporter.ConnectTimeout(connectTimeout) = params[Transporter.ConnectTimeout]
@@ -161,18 +171,24 @@ private[finagle] object ConnectionBuilder {
       (compensation + connectTimeout).inMillis.min(Int.MaxValue)
 
     val channelClass =
-      if (useNativeEpoll() && Epoll.isAvailable) classOf[EpollSocketChannel]
+      if (isLocal(addr)) classOf[LocalChannel]
+      else if (useNativeEpoll() && Epoll.isAvailable) classOf[EpollSocketChannel]
       else classOf[NioSocketChannel]
 
     val bootstrap = new Bootstrap()
       .group(params[param.WorkerPool].eventLoopGroup)
       .channel(channelClass)
       .option(ChannelOption.ALLOCATOR, allocator)
-      .option[JBool](ChannelOption.TCP_NODELAY, noDelay)
-      .option[JBool](ChannelOption.SO_REUSEADDR, reuseAddr)
       .option[JBool](ChannelOption.AUTO_READ, !backpressure) // backpressure! no reads on transport => no reads on the socket
       .option[JInt](ChannelOption.CONNECT_TIMEOUT_MILLIS, compensatedConnectTimeoutMs.toInt)
       .handler(init)
+
+    // Trying to set these options results in an 'Unknown channel option' warning for `LocalChannel`
+    if (!isLocal(addr)) {
+      bootstrap
+        .option[JBool](ChannelOption.TCP_NODELAY, noDelay)
+        .option[JBool](ChannelOption.SO_REUSEADDR, reuseAddr)
+    }
 
     val Transport.Liveness(_, _, keepAlive) = params[Transport.Liveness]
     keepAlive.foreach(bootstrap.option[JBool](ChannelOption.SO_KEEPALIVE, _))

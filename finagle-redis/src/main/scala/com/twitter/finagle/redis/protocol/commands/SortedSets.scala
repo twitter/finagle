@@ -206,7 +206,7 @@ object ZRangeResults {
 
 /**
  * Represents part of an interval, helpers in companion object
- * See http://redis.io/commands/zrangebyscore for more info on different intervals
+ * See https://redis.io/commands/zrangebyscore for more info on different intervals
  */
 case class ZInterval(value: String) {
   import ZInterval._

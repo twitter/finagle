@@ -2,7 +2,6 @@ package com.twitter.finagle.http
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.http.cookie.SameSite
-import org.jboss.netty.handler.codec.http.DefaultCookie
 import org.scalatest.FunSuite
 
 class CookieTest extends FunSuite {
@@ -92,22 +91,6 @@ class CookieTest extends FunSuite {
     val c5 = new Cookie("name", "value", path = Some("path"), domain = Some("domain"))
     val c6 = new Cookie("name", "value", path = Some("path"), domain = Some("domain"))
     assert(c5.equals(c6))
-  }
-
-  test("defaults are the same as DefaultCookie defaults") {
-    val cookie = new Cookie("name", "value")
-    val nettyCookie = new DefaultCookie("name", "value")
-
-    assert(cookie.name == nettyCookie.getName)
-    assert(cookie.value == nettyCookie.getValue)
-    assert(cookie.domain == nettyCookie.getDomain)
-    assert(cookie.path == nettyCookie.getPath)
-    assert(cookie.maxAge.inSeconds == nettyCookie.getMaxAge)
-    assert(cookie.secure == nettyCookie.isSecure)
-    assert(cookie.httpOnly == nettyCookie.isHttpOnly)
-
-    /* Experimental */
-    assert(cookie.sameSite == SameSite.Unset)
   }
 
   test("Throws exception if name is empty") {

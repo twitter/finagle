@@ -4,19 +4,27 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, Verbosity}
 import com.twitter.util.{Await, Duration, Future, Time}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.mockito.Mockito.{spy, verify}
 
-@RunWith(classOf[JUnitRunner])
 class StatsFilterTest extends FunSuite {
 
   val service = new Service[Request, Response] {
     def apply(request: Request): Future[Response] = {
-      val response = request.response
+      val response = Response(request)
       response.statusCode = 404
       response.write("hello")
+      Future.value(response)
+    }
+  }
+
+  val streamingService = new Service[Request, Response] {
+    def apply(request: Request): Future[Response] = {
+      val response = Response(request)
+      response.setChunked(true)
+      response.statusCode = 200
+      // reach E.O.S.
+      response.reader.read()
       Future.value(response)
     }
   }
@@ -53,5 +61,22 @@ class StatsFilterTest extends FunSuite {
     verify(receiver).stat(Verbosity.Default, "time", "404")
     verify(receiver).stat(Verbosity.Default, "time", "4XX")
     verify(receiver).stat(Verbosity.Default, "response_size")
+  }
+
+  test("streaming stats are populated correctly") {
+    val receiver = spy(new InMemoryStatsReceiver)
+
+    val filter = new StatsFilter(receiver) andThen streamingService
+    val streamingRequest = Request()
+    streamingRequest.setChunked(true)
+    // reach E.O.S.
+    streamingRequest.reader.read()
+
+    Time.withCurrentTimeFrozen { _ =>
+      Await.result(filter(Request()), Duration.fromSeconds(5))
+    }
+
+    assert(receiver.stats(Seq("request_stream_duration_ms")) != Seq(0.0))
+    assert(receiver.stats(Seq("response_stream_duration_ms")) != Seq(0.0))
   }
 }

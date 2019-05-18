@@ -1,6 +1,8 @@
 package com.twitter.finagle.mysql
 
-import com.twitter.util.{Return, Throw, Try}
+import com.twitter.finagle.mysql.transport.{MysqlBuf, Packet}
+import com.twitter.finagle.transport.Transport
+import com.twitter.util.{Future, Return, Throw}
 
 /**
  * A base class for exceptions related to client incompatibility with an
@@ -27,19 +29,24 @@ case object IncompatibleCharset
     )
 
 /**
- * Bridges a server handshake (HandshakeInit) with a
- * client handshake (HandshakeResponse) using the given
- * parameters. This facilitates the connection phase of
- * the mysql protocol.
+ * A `Handshake` is responsible for using an open `Transport`
+ * to a MySQL server to establish a MySQL session by performing
+ * the `Connection Phase` of the MySQL Client/Server Protocol.
+ *
+ * https://dev.mysql.com/doc/internals/en/connection-phase.html
+ *
+ * @note At this time, the `Handshake` class only supports a
+ * `Plain Handshake`.
  *
  * @param settings A [[HandshakeSettings]] collection of MySQL
  * specific settings.
  *
- * @return A Try[HandshakeResponse] that encodes incompatibility
- * with the server.
+ * @param transport A `Transport` connected to a MySQL server which
+ * understands the reading and writing of MySQL packets.
  */
-private[mysql] final class Handshake(settings: HandshakeSettings)
-    extends (HandshakeInit => Try[HandshakeResponse]) {
+private[mysql] final class Handshake(
+  settings: HandshakeSettings,
+  transport: Transport[Packet, Packet]) {
 
   private[this] def isCompatibleVersion(init: HandshakeInit) =
     if (init.serverCap.has(Capability.Protocol41)) Return.True
@@ -49,20 +56,63 @@ private[mysql] final class Handshake(settings: HandshakeSettings)
     if (MysqlCharset.isCompatible(init.charset)) Return.True
     else Throw(IncompatibleCharset)
 
-  def apply(init: HandshakeInit): Try[HandshakeResponse] = {
+  private[this] def simpleDispatch(req: Request): Future[Result] = {
     for {
-      _ <- isCompatibleVersion(init)
-      _ <- isCompatibleCharset(init)
+      _ <- transport.write(req.toPacket)
+      packet <- transport.read()
+      result <- decodeSimpleResult(packet)
+    } yield result
+  }
+
+  private[this] def decodeSimpleResult(packet: Packet): Future[Result] =
+    MysqlBuf.peek(packet.body) match {
+      case Some(Packet.OkByte) => LostSyncException.const(OK(packet))
+      case Some(Packet.ErrorByte) =>
+        LostSyncException.const(Error(packet)).flatMap { err =>
+          Future.exception(ServerError(err.code, err.sqlState, err.message))
+        }
+      case _ => LostSyncException.AsFuture
+    }
+
+  private[this] def readHandshakeInit(): Future[HandshakeInit] = {
+    for {
+      packet <- transport.read()
+      handshakeInit <- LostSyncException.const(HandshakeInit(packet))
+    } yield handshakeInit
+  }
+
+  private[this] def makePlainHandshakeResponse(
+    handshakeInit: HandshakeInit
+  ): Future[HandshakeResponse] = {
+    for {
+      _ <- LostSyncException.const(isCompatibleVersion(handshakeInit))
+      _ <- LostSyncException.const(isCompatibleCharset(handshakeInit))
     } yield
-      HandshakeResponse(
+      PlainHandshakeResponse(
         settings.username,
         settings.password,
         settings.database,
         settings.calculatedClientCap,
-        init.salt,
-        init.serverCap,
+        handshakeInit.salt,
+        handshakeInit.serverCap,
         settings.charset,
         settings.maxPacketSize.inBytes.toInt
       )
   }
+
+  /**
+   * Performs the connection phase. The phase should only be performed
+   * once before any other exchange between the client/server. A failure
+   * to handshake renders a service unusable.
+   * [[https://dev.mysql.com/doc/internals/en/connection-phase.html]]
+   */
+  def connectionPhase(): Future[Result] = {
+    val futResult = for {
+      handshakeInit <- readHandshakeInit()
+      handshakeResponse <- makePlainHandshakeResponse(handshakeInit)
+      result <- simpleDispatch(handshakeResponse)
+    } yield result
+    futResult.onFailure(_ => transport.close())
+  }
+
 }

@@ -3,6 +3,7 @@ package com.twitter.finagle.http2.transport
 import com.twitter.finagle.netty4.http._
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.Stack.Params
+import com.twitter.finagle.netty4.http.handler.UriValidatorHandler
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import io.netty.buffer.Unpooled._
 import io.netty.buffer.{ByteBuf, ByteBufUtil}
@@ -48,6 +49,7 @@ class PriorKnowledgeHandlerTest extends FunSuite with BeforeAndAfter with Mockit
     pipeline.addLast(HttpCodecName, dummyHttp11Codec)
     val dummyUpgradeHandler = new ChannelHandlerAdapter() {}
     pipeline.addLast("upgradeHandler", dummyUpgradeHandler)
+    pipeline.addLast(UriValidatorHandler.HandlerName, UriValidatorHandler)
   }
 
   test("removes self and re-emits consumed bytes when not matching") {
@@ -61,8 +63,10 @@ class PriorKnowledgeHandlerTest extends FunSuite with BeforeAndAfter with Mockit
     channel.writeInbound(nonPrefaceBytes)
 
     verify(dummyHandler).channelRead(anyObject(), Matchers.eq(nonPrefaceBytes))
-    assert(!pipeline.names().contains(PriorKnowledgeHandlerName))
     assert(pipeline.names().contains(HttpCodecName))
+    assert(pipeline.names().contains(UriValidatorHandler.HandlerName))
+    assert(!pipeline.names().contains(PriorKnowledgeHandlerName))
+    assert(!pipeline.names().contains(H2UriValidatorHandler.HandlerName))
     assert(stats.counters(Seq("upgrade", "success")) == 0)
   }
 
@@ -84,8 +88,10 @@ class PriorKnowledgeHandlerTest extends FunSuite with BeforeAndAfter with Mockit
     val msgCapture: ArgumentCaptor[ByteBuf] = ArgumentCaptor.forClass(classOf[ByteBuf])
     verify(dummyHandler, times(2)).channelRead(anyObject(), msgCapture.capture())
 
-    assert(!pipeline.names().contains(PriorKnowledgeHandlerName))
     assert(pipeline.names().contains(HttpCodecName))
+    assert(pipeline.names().contains(UriValidatorHandler.HandlerName))
+    assert(!pipeline.names().contains(PriorKnowledgeHandlerName))
+    assert(!pipeline.names().contains(H2UriValidatorHandler.HandlerName))
 
     val capturedMessages = msgCapture.getAllValues
 
@@ -114,9 +120,11 @@ class PriorKnowledgeHandlerTest extends FunSuite with BeforeAndAfter with Mockit
 
     val msgCapture: ArgumentCaptor[ByteBuf] = ArgumentCaptor.forClass(classOf[ByteBuf])
     verify(dummyHandler, times(2)).channelRead(anyObject(), msgCapture.capture())
-    assert(!pipeline.names().contains(PriorKnowledgeHandlerName))
-    assert(!pipeline.names().contains(HttpCodecName))
     assert(pipeline.names().contains(Http2CodecName))
+    assert(pipeline.names().contains(H2UriValidatorHandler.HandlerName))
+    assert(!pipeline.names().contains(HttpCodecName))
+    assert(!pipeline.names().contains(PriorKnowledgeHandlerName))
+    assert(!pipeline.names().contains(UriValidatorHandler.HandlerName))
 
     val capturedMessages = msgCapture.getAllValues
 

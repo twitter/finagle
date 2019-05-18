@@ -12,8 +12,8 @@ import org.scalatest.FunSuite
 class FragmentingMessageWriterTest extends FunSuite {
 
   private class PendingStreamStatsReceiver extends InMemoryStatsReceiver {
-    def pendingStreamCount: Int = gauges(Seq("pending_write_streams"))().toInt
-    def writes: Seq[Int] = stats(Seq("write_stream_bytes")).map(_.toInt)
+    def pendingStreamCount: Int = gauges(Seq("mux", "framer", "pending_write_streams"))().toInt
+    def writes: Seq[Int] = stats(Seq("mux", "framer", "write_stream_bytes")).map(_.toInt)
   }
 
   private val Tag = 2
@@ -140,15 +140,5 @@ class FragmentingMessageWriterTest extends FunSuite {
 
     // Already idle
     assert(writer.drain().isDefined)
-  }
-
-  test("removes gauges onClose") {
-    val sr = new PendingStreamStatsReceiver
-    val handle = new MockChannelHandle[Any, Buf]()
-    val writer = new FragmentingMessageWriter(handle, Int.MaxValue, sr)
-
-    assert(sr.gauges.contains(Seq("pending_write_streams")))
-    handle.onClosePromise.setDone()
-    assert(!sr.gauges.contains(Seq("pending_write_streams")))
   }
 }

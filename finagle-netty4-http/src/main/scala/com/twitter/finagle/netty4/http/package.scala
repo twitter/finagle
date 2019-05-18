@@ -8,7 +8,8 @@ import com.twitter.finagle.netty4.http.handler.{
   FixedLengthMessageAggregator,
   HeaderValidatorHandler,
   PayloadSizeHandler,
-  UnpoolHttpHandler
+  UnpoolHttpHandler,
+  UriValidatorHandler
 }
 import com.twitter.finagle.param.{Logger, Stats}
 import com.twitter.finagle.http.param._
@@ -192,6 +193,9 @@ package object http {
             )
           )
       }
+
+      // Let's see if we can filter out bad URI's before Netty starts handling them...
+      pipeline.addLast(UriValidatorHandler.HandlerName, UriValidatorHandler)
 
       // We're going to validate our headers right before the bad request handler.
       pipeline.addLast(HeaderValidatorHandler.HandlerName, HeaderValidatorHandler)

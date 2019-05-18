@@ -7,7 +7,7 @@ import com.twitter.finagle.memcached.protocol.{NoOp, Quit}
 import com.twitter.finagle.mux
 import com.twitter.finagle.server.StackServer
 import com.twitter.finagle.service.TimeoutFilter
-import com.twitter.finagle.util.HashedWheelTimer
+import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Http, IndividualRequestTimeoutException, Memcached, Mux, Service, http}
 import com.twitter.util.{Await, Future, Timer}
 import java.net.InetSocketAddress
@@ -17,7 +17,7 @@ class DynamicTimeoutTest extends FunSuite {
 
   private def await[T](f: Future[T]): T = Await.result(f, 5.seconds)
 
-  private implicit val timer: Timer = HashedWheelTimer.Default
+  private implicit val timer: Timer = DefaultTimer
   private val serviceSleep = 50.milliseconds
 
   private[this] def mkService[Req, Rep](rep: Rep): Service[Req, Rep] = {

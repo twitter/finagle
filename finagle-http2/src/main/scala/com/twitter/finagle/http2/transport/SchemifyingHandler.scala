@@ -11,6 +11,7 @@ import io.netty.handler.codec.http2.HttpConversionUtil.ExtensionHeaderNames.SCHE
  * or a port, so we add the special header on behalf of users.
  */
 private[http2] class SchemifyingHandler(defaultScheme: String) extends ChannelDuplexHandler {
+
   override def userEventTriggered(ctx: ChannelHandlerContext, event: Any): Unit = {
     event match {
       case _ @UpgradeEvent.UPGRADE_REJECTED =>

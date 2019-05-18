@@ -8,11 +8,9 @@ scala_library(
     ),
     dependencies = [
         "3rdparty/jvm/com/google/code/findbugs:jsr305",
-        "3rdparty/jvm/io/netty",
         "finagle/finagle-base-http",
         "finagle/finagle-core",
         "finagle/finagle-http2",
-        "finagle/finagle-netty3",
         "finagle/finagle-netty4",
         "finagle/finagle-netty4-http",
         "finagle/finagle-toggle",
@@ -26,7 +24,6 @@ scala_library(
         "util/util-stats",
     ],
     exports = [
-        "3rdparty/jvm/io/netty",
         "finagle/finagle-base-http",
         "finagle/finagle-core",
         "util/util-core",

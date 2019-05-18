@@ -76,11 +76,12 @@ private[finagle] final class PendingRequestFilter[Req, Rep](
   if (limit < 1)
     throw new IllegalArgumentException(s"request limit must be greater than zero, saw $limit")
 
+  private[this] val pending = new AtomicInteger(0)
+
   private[this] val rejections = stats.counter("rejected")
   private[this] val requestConcurrency =
     stats.addGauge("request_concurrency") { pending.floatValue() }
 
-  private[this] val pending = new AtomicInteger(0)
   private[this] val decFn: Any => Unit = { _: Any =>
     pending.decrementAndGet()
   }

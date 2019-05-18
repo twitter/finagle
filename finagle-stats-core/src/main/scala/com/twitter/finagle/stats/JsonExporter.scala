@@ -27,7 +27,7 @@ import scala.util.control.NonFatal
  * Denylist of regex, comma-separated. Comma is a reserved character and
  * cannot be used. Used with regexes from statsFilterFile.
  *
- * See http://www.scala-lang.org/api/current/#scala.util.matching.Regex
+ * See https://www.scala-lang.org/api/current/#scala.util.matching.Regex
  */
 object statsFilter
     extends GlobalFlag[String](
@@ -39,7 +39,7 @@ object statsFilter
  * Comma-separated denylist of files. Each file may have multiple filters,
  * separated by new lines. Used with regexes from statsFilter.
  *
- * See http://www.scala-lang.org/api/current/#scala.util.matching.Regex
+ * See https://www.scala-lang.org/api/current/#scala.util.matching.Regex
  */
 object statsFilterFile
     extends GlobalFlag[Set[File]](
@@ -144,6 +144,9 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
   private[this] val writer = mapper.writer
   private[this] val prettyWriter = mapper.writer(new DefaultPrettyPrinter)
 
+  private[this] def sampleVerbose(): Option[String] =
+    verbose().orElse(com.twitter.finagle.stats.verbose.get)
+
   lazy val statsFilterRegex: Option[Regex] = {
     val regexesFromFile = statsFilterFile().flatMap { file =>
       try {
@@ -237,7 +240,7 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
     }
 
     // Converting a *-wildcard expression into a regular expression so we can match on it.
-    val verbosePatten = verbose().flatMap(commaSeparatedGlob)
+    val verbosePatten = sampleVerbose().flatMap(commaSeparatedGlob)
 
     // We have to denylist debug metrics before we apply formatting, which may change
     // the names.

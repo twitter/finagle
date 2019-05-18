@@ -10,7 +10,7 @@ import com.twitter.io.Buf
  *
  * Wrap JSON content in <callback>(<content>);
  *
- * See: http://en.wikipedia.org/wiki/JSONP
+ * See: https://en.wikipedia.org/wiki/JSONP
  */
 class JsonpFilter[Req <: Request] extends SimpleFilter[Req, Response] {
 

@@ -21,7 +21,7 @@ import com.twitter.finagle.util.LoadService
  * 0-arg constructor must be registered in a file named
  * `META-INF/services/com.twitter.finagle.serverset2.Identity` included in the
  * classpath; see Oracle's
- * [[http://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html ServiceLoader]]
+ * [[https://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html ServiceLoader]]
  * documentation for further details.
  */
 trait Identity {

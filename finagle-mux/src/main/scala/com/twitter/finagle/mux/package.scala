@@ -83,7 +83,7 @@ import com.twitter.finagle.toggle.{StandardToggleMap, ToggleMap}
  * Keys for ''Treq'' messages are as follows:
  *
  *  1. ''traceid'': a 24-byte value describing the full
- * [[http://research.google.com/archive/papers/dapper-2010-1.pdf Dapper]] trace id
+ * [[https://research.google.com/archive/papers/dapper-2010-1.pdf Dapper]] trace id
  * assigned by the client. The value's format is ''spanid:8 parentid:8 traceid:8''.
  *
  *  2. ''traceflag'': a bitmask describing trace flags. Currently, the

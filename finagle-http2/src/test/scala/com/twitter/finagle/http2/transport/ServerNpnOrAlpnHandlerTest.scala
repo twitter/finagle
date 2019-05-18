@@ -1,12 +1,13 @@
 package com.twitter.finagle.http2.transport
 
-import com.twitter.finagle.netty4.http.{HttpCodecName, Http2CodecName}
+import com.twitter.finagle.netty4.http.{Http2CodecName, HttpCodecName}
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.Stack.Params
+import com.twitter.finagle.netty4.http.handler.UriValidatorHandler
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import io.netty.channel._
 import io.netty.channel.embedded.EmbeddedChannel
-import io.netty.handler.ssl.{SslHandler, SslHandshakeCompletionEvent, ApplicationProtocolNames}
+import io.netty.handler.ssl.{ApplicationProtocolNames, SslHandler, SslHandshakeCompletionEvent}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
@@ -41,13 +42,16 @@ class ServerNpnOrAlpnHandlerTest extends FunSuite with BeforeAndAfter with Mocki
 
     val dummyHttp11Codec = new ChannelHandlerAdapter() {}
     pipeline.addLast(HttpCodecName, dummyHttp11Codec)
+    pipeline.addLast(UriValidatorHandler.HandlerName, UriValidatorHandler)
   }
 
   test("Replaces http codec with http/2 codec when h2 negotiated & records stat") {
     when(sslHandler.applicationProtocol()).thenReturn(http2)
     pipeline.fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS)
-    assert(!pipeline.names().contains(HttpCodecName))
     assert(pipeline.names().contains(Http2CodecName))
+    assert(pipeline.names().contains(H2UriValidatorHandler.HandlerName))
+    assert(!pipeline.names().contains(HttpCodecName))
+    assert(!pipeline.names().contains(UriValidatorHandler.HandlerName))
     assert(stats.counters(Seq("upgrade", "success")) == 1)
   }
 
@@ -55,7 +59,9 @@ class ServerNpnOrAlpnHandlerTest extends FunSuite with BeforeAndAfter with Mocki
     when(sslHandler.applicationProtocol()).thenReturn(http11)
     pipeline.fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS)
     assert(pipeline.names().contains(HttpCodecName))
+    assert(pipeline.names().contains(UriValidatorHandler.HandlerName))
     assert(!pipeline.names().contains(Http2CodecName))
+    assert(!pipeline.names().contains(H2UriValidatorHandler.HandlerName))
     assert(stats.counters(Seq("upgrade", "success")) == 0)
   }
 }

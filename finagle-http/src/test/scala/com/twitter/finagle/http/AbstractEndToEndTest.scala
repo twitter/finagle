@@ -7,13 +7,13 @@ import com.twitter.finagle._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.context.{Contexts, Deadline, Retries}
 import com.twitter.finagle.filter.ServerAdmissionControl
-import com.twitter.finagle.http.service.HttpResponseClassifier
+import com.twitter.finagle.http.service.{HttpResponseClassifier, NullService}
 import com.twitter.finagle.http2.param.EncoderIgnoreMaxHeaderListSize
 import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureDetector}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing.Trace
-import com.twitter.finagle.util.HashedWheelTimer
+import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.{Buf, Pipe, Reader, ReaderDiscardedException, Writer}
 import com.twitter.util._
 import io.netty.buffer.PooledByteBufAllocator
@@ -36,6 +36,7 @@ abstract class AbstractEndToEndTest
   object ClientAbort extends Feature
   object NoBodyMessage extends Feature
   object MaxHeaderSize extends Feature
+  object RequiresAsciiFilter extends Feature
 
   var saveBase: Dtab = Dtab.empty
   var statsRecv: InMemoryStatsReceiver = new InMemoryStatsReceiver()
@@ -637,7 +638,7 @@ abstract class AbstractEndToEndTest
           response.setChunked(true)
 
           response.writer.write(Buf.Utf8("hello")) before {
-            Future.sleep(Duration.fromSeconds(3))(HashedWheelTimer.Default) before {
+            Future.sleep(Duration.fromSeconds(3))(DefaultTimer) before {
               response.writer.write(Buf.Utf8("world")) ensure {
                 response.close()
               }
@@ -1303,6 +1304,25 @@ abstract class AbstractEndToEndTest
     await(service.close())
   }
 
+  testIfImplemented(RequiresAsciiFilter)(
+    "server responds with 400 Bad Request if non-ascii character is present in uri") {
+    val service = NullService
+    val server = serverImpl().withStatsReceiver(NullStatsReceiver).serve("localhost:*", service)
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+
+    val client = clientImpl()
+      .withStatsReceiver(NullStatsReceiver)
+      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+    try {
+      val rep = await(client(Request("/DSC02175拷貝.jpg")))
+      assert(rep.status == Status.BadRequest)
+    } finally {
+      await(client.close())
+      await(server.close())
+    }
+  }
+
   test("server responds 500 if an invalid header is being served") {
     val service = new HttpService {
       def apply(request: Request): Future[Response] = {
@@ -1323,6 +1343,7 @@ abstract class AbstractEndToEndTest
 
     val rep = await(client(Request("/")))
     assert(rep.status == Status.InternalServerError)
+
   }
 
   testIfImplemented(MaxHeaderSize)("client respects MaxHeaderSize in response") {
@@ -1603,7 +1624,7 @@ abstract class AbstractEndToEndTest
   }
 
   test(implName + ": methodBuilder timeouts from Stack") {
-    implicit val timer = HashedWheelTimer.Default
+    import DefaultTimer.Implicit
     val svc = new Service[Request, Response] {
       def apply(req: Request): Future[Response] = {
         Future.sleep(50.millis).before {
@@ -1620,7 +1641,7 @@ abstract class AbstractEndToEndTest
     val stats = new InMemoryStatsReceiver()
     val client = clientImpl()
       .withStatsReceiver(stats)
-      .configured(com.twitter.finagle.param.Timer(timer))
+      .configured(com.twitter.finagle.param.Timer(DefaultTimer))
       .withLabel("a_label")
     val name = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
     val builder: MethodBuilder = client.methodBuilder(name)
@@ -1629,7 +1650,7 @@ abstract class AbstractEndToEndTest
   }
 
   test(implName + ": methodBuilder timeouts from ClientBuilder") {
-    implicit val timer = HashedWheelTimer.Default
+    import DefaultTimer.Implicit
     val svc = new Service[Request, Response] {
       def apply(req: Request): Future[Response] = {
         Future.sleep(50.millis).before {
@@ -1645,7 +1666,7 @@ abstract class AbstractEndToEndTest
 
     val stats = new InMemoryStatsReceiver()
     val client = clientImpl()
-      .configured(com.twitter.finagle.param.Timer(timer))
+      .configured(com.twitter.finagle.param.Timer(DefaultTimer))
 
     val clientBuilder = ClientBuilder()
       .reportTo(stats)

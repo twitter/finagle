@@ -42,7 +42,7 @@ abstract class AbstractHeaderMapTest extends FunSuite {
     assert(map.iterator.toSet == Set(("a" -> "1"), ("a" -> "3"), ("b" -> "2")))
 
     assert(map.keys.toSet == Set("a", "b"))
-    assert(map.keySet == Set("a", "b"))
+    assert(map.keySet.toSet == Set("a", "b"))
 
     assert(map.keysIterator.toSet == Set("a", "b"))
   }
@@ -208,12 +208,12 @@ abstract class AbstractHeaderMapTest extends FunSuite {
     val map = newHeaderMap("a" -> "1", "A" -> "2", "a" -> "3")
 
     assert(map.iterator.toSet == Set("a" -> "1", "A" -> "2", "a" -> "3"))
-    assert(map.keySet == Set("a", "A"))
+    assert(map.keySet.toSet == Set("a", "A"))
 
     map.set("B", "1")
     map.add("b", "2")
 
     assert(map.iterator.toSet == Set("a" -> "1", "A" -> "2", "a" -> "3", "B" -> "1", "b" -> "2"))
-    assert(map.keySet == Set("a", "A", "b", "B"))
+    assert(map.keySet.toSet == Set("a", "A", "b", "B"))
   }
 }

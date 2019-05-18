@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.finagle._
-import com.twitter.finagle.http.Message
+import com.twitter.finagle.http.{HeaderMap, Message}
 import com.twitter.util.{Return, Throw, Try}
 import java.nio.charset.StandardCharsets.{US_ASCII, UTF_8}
 import java.util.Base64
@@ -79,9 +79,9 @@ object HttpDtab {
       bKey(bKey.length - 1) == 'b' &&
       aKey.substring(0, aKey.length - 1) == bKey.substring(0, bKey.length - 1)
 
-  private def isDtabHeader(hdr: (String, String)): Boolean =
-    hdr._1.equalsIgnoreCase(Header) ||
-      hdr._1.regionMatches(true, 0, Prefix, 0, Prefix.length)
+  private def isDtabHeader(hdr: HeaderMap.NameValue): Boolean =
+    hdr.name.equalsIgnoreCase(Header) ||
+      hdr.name.regionMatches(true, 0, Prefix, 0, Prefix.length)
 
   private val EmptyReturn = Return(Dtab.empty)
 
@@ -92,14 +92,14 @@ object HttpDtab {
    */
   private[finagle] def strip(msg: Message): Seq[(String, String)] = {
     var headerArr: ArrayBuffer[(String, String)] = null
-    val headerIt = msg.headerMap.iterator
-    while (headerIt.hasNext) {
-      val header = headerIt.next()
-      if (isDtabHeader(header)) {
+    val nameValueIt = msg.headerMap.nameValueIterator
+    while (nameValueIt.hasNext) {
+      val nameValue = nameValueIt.next()
+      if (isDtabHeader(nameValue)) {
         if (headerArr == null)
           headerArr = new ArrayBuffer[(String, String)]()
-        headerArr += header
-        msg.headerMap -= header._1
+        headerArr += ((nameValue.name, nameValue.value))
+        msg.headerMap -= nameValue.name
       }
     }
     if (headerArr == null) Nil
@@ -110,11 +110,11 @@ object HttpDtab {
    * Clear all Dtab-related headers from the given message.
    */
   def clear(msg: Message): Unit = {
-    val headerIt = msg.headerMap.iterator
+    val headerIt = msg.headerMap.nameValueIterator
     while (headerIt.hasNext) {
       val header = headerIt.next()
       if (isDtabHeader(header))
-        msg.headerMap -= header._1
+        msg.headerMap -= header.name
     }
   }
 
@@ -171,9 +171,9 @@ object HttpDtab {
   private def readXDtabPairs(msg: Message): Try[Dtab] = {
     // Common case: no actual overrides.
     var keys: ArrayBuffer[String] = null
-    val headers = msg.headerMap.iterator
+    val headers = msg.headerMap.nameValueIterator
     while (headers.hasNext) {
-      val key = headers.next()._1.toLowerCase
+      val key = headers.next().name.toLowerCase
       if (key.startsWith(Prefix)) {
         if (keys == null) keys = ArrayBuffer[String]()
         keys += key

@@ -13,10 +13,10 @@ import scala.collection.{breakOut, immutable}
 /**
  * [[ToggleMap ToggleMaps]] in JSON format.
  *
- * @define jsonschema The [[http://json-schema.org/ JSON Schema]] used is:
+ * @define jsonschema The [[https://json-schema.org/ JSON Schema]] used is:
  * {{{
  * {
- *   "\$schema": "http://json-schema.org/draft-04/schema#",
+ *   "\$schema": "https://json-schema.org/draft-04/schema#",
  *   "type": "object",
  *   "required": [
  *     "toggles"

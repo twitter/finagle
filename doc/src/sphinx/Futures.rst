@@ -138,7 +138,7 @@ extract like this:
   def fetchUrl(url: String): Future[Array[Byte]] = ???
   def findImageUrls(bytes: Array[Byte]): Seq[String] = ???
 
-  val url = "http://www.google.com"
+  val url = "https://www.google.com"
 
   val f: Future[Array[Byte]] = fetchUrl(url).flatMap { bytes =>
     val images = findImageUrls(bytes)
@@ -246,12 +246,12 @@ Other resources
 - `Finagle Block Party`_ details why blocking is bad, and more
   importantly how to detect and fix it.
 
-.. _Akka: http://akka.io/
-.. _`Effective Scala`: http://twitter.github.com/effectivescala/
+.. _Akka: https://akka.io/
+.. _`Effective Scala`: https://twitter.github.com/effectivescala/
 .. _`Finagle Block Party`: https://finagle.github.io/blog/2016/09/01/block-party/
-.. _`section discussing futures`: http://twitter.github.com/effectivescala/#Twitter's%20standard%20libraries-Futures
-.. _here: http://docs.scala-lang.org/overviews/core/futures.html
-.. _`section dedicated to futures`: http://doc.akka.io/docs/akka/2.1.0/scala/futures.html
+.. _`section discussing futures`: https://twitter.github.com/effectivescala/#Twitter's%20standard%20libraries-Futures
+.. _here: https://docs.scala-lang.org/overviews/core/futures.html
+.. _`section dedicated to futures`: https://doc.akka.io/docs/akka/2.1.0/scala/futures.html
 
 .. rubric:: Footnotes
 
@@ -268,9 +268,9 @@ Other resources
    composition we can perform over collections. See the this__ page for more details.
 
 __ WikipediaMonads_
-.. _WikipediaMonads: http://en.wikipedia.org/wiki/Monad_(functional_programming)
+.. _WikipediaMonads: https://en.wikipedia.org/wiki/Monad_(functional_programming)
 
-.. _SIP-14: http://docs.scala-lang.org/sips/completed/futures-promises.html
+.. _SIP-14: https://docs.scala-lang.org/sips/completed/futures-promises.html
 
 .. TODO
   a section about composing over failures

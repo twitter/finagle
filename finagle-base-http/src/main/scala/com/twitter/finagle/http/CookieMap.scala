@@ -2,7 +2,6 @@ package com.twitter.finagle.http
 
 import com.twitter.finagle.http.cookie.supportSameSiteCodec
 import com.twitter.finagle.http.netty4.Netty4CookieCodec
-import org.jboss.netty.handler.codec.http.HttpHeaders
 import scala.collection.mutable
 
 private[finagle] object CookieMap {
@@ -43,9 +42,9 @@ class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
 
   private[this] val cookieHeaderName =
     if (message.isRequest)
-      HttpHeaders.Names.COOKIE
+      Fields.Cookie
     else
-      HttpHeaders.Names.SET_COOKIE
+      Fields.SetCookie
 
   private[this] def decodeCookies(header: String): Iterable[Cookie] = {
     val decoding =

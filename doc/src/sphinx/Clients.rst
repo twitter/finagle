@@ -92,7 +92,7 @@ HTTP Proxy
 
 There is built-in support for `tunneling TCP-based protocols <https://tools.ietf.org/html/draft-luotonen-web-proxy-tunneling-01>`_
 through web proxy servers in a default Finagle client that might be used with any TCP traffic, not
-only HTTP(S). See `Squid documentation <http://wiki.squid-cache.org/Features/HTTPS>`_ on this feature.
+only HTTP(S). See `Squid documentation <https://wiki.squid-cache.org/Features/HTTPS>`_ on this feature.
 
 The following example enables tunneling HTTP traffic through a web proxy server `my-proxy-server.com`
 to `twitter.com`.
@@ -155,11 +155,13 @@ across multiple endpoints, the `endpoint stack` provides circuit breakers
 and connection pooling, and the `connection stack` provides connection life-cycle
 management and implements the wire protocol.
 
-.. figure:: _static/clientstack.svg
+.. raw:: html
+    :file: _static/clientstack.svg
 
-    Fig. 1: A visual representation of each module in a default Finagle client
-    that is configured with three endpoints and connections. Requests flow from
-    left to right.
+
+Fig. 1: A visual representation of each module in a default Finagle client
+that is configured with three endpoints and connections. Requests flow from
+left to right.
 
 
 Module Composition
@@ -205,7 +207,7 @@ output. To override this, use the following sample.
     .withMonitor(monitor)
     .newService("twitter.com")
 
-Finally, clients have built-in support for `Zipkin <http://zipkin.io/>`_.
+Finally, clients have built-in support for `Zipkin <https://zipkin.io/>`_.
 
 .. _client_retries:
 
@@ -656,7 +658,7 @@ The following modules aim to preemptively disable sessions that will likely fail
 From the perspective of the load balancer, they act as circuit breakers which, when
 triggered, temporarily suspend the use of a particular endpoint.
 
-There are at least two modules in the client stacks that might be viewed as `circuit breakers <http://martinfowler.com/bliki/CircuitBreaker.html>`_:
+There are at least two modules in the client stacks that might be viewed as `circuit breakers <https://martinfowler.com/bliki/CircuitBreaker.html>`_:
 
 1. `Fail Fast` - a session-driven circuit breaker
 2. `Failure Accrual` - a request-driven circuit breaker
@@ -808,10 +810,15 @@ resources open.
 Depending on the configuration, a Finagle client's stack might contain up to _three_ connection pools
 stacked on each other: watermark, caching and buffering pools.
 
-The only Finagle protocol that doesn't require any connection pooling (a multiplexing protocol) is
-`Mux` so it uses :src:`SingletonPool <com/twitter/finagle/pool/SingletonPool.scala>` that maintains
-a single connection per endpoint. For every other Finagle-supported protocol (i.e., HTTP/1.1, Thrift),
-there a connection pooling setup built with watermark and caching pools.
+The two Finagle protocols that don't require any connection pooling (multiplexing protocols) are
+Mux and HTTP/2 as they both maintain just one connection per remote peer. For every other Finagle-
+supported protocol (i.e., HTTP/1.1, Thrift), there a connection pooling setup built with watermark
+and caching pools in front of each remote peer.
+
+.. note::
+
+  When HTTP/2 is enabled on an HTTP client (and the transport is successfully upgraded), the session
+  pool caches streams (not connections) multiplexed over a single connection.
 
 The default client stack layers caching and watermark pools which amounts to maintaining the low
 watermark (i.e., ``0``, as long as request concurrency exists), queuing requests above the unbounded high
@@ -833,13 +840,18 @@ example [#example]_.
     .withSessionPool.ttl(5.seconds)
     .newService("twitter.com")
 
+.. note::
+
+  All session pool settings are applied to each host in the replica set. Put this way, these settings
+  are per-host as opposed to per-client.
+
 Thus all the three pools are configured with a single param that takes the following arguments:
 
 1. `minSize` and `maxSize` - low and high watermarks for the watermark pool (note that a Finagle
-   client will not maintain more connections than `maxSize`)
-2. `maxWaiters` - the maximum number of connection requests that are queued when the connection
-   concurrency exceeds the high watermark
-3. `ttl`- the maximum amount of time a session is allowed to be cached in a pool
+   client will not maintain more connections than `maxSize` per host)
+2. `maxWaiters` - the maximum number of connection requests that are queued per host when the
+   connection concurrency exceeds the high watermark
+3. `ttl`- the maximum amount of time a per-host session is allowed to be cached in a pool
 
 :ref:`Related stats <pool_stats>`
 
@@ -944,7 +956,7 @@ level than the  :ref:`Finagle 6 APIs <finagle6apis>` while improving upon the de
 .. rubric:: Footnotes
 
 .. [#backoff] Most of the backoff strategies implemented in Finagle are inspired by Mark
-   Brooker's `blog post <http://www.awsarchitectureblog.com/2015/03/backoff.html>`_.
+   Brooker's `blog post <https://www.awsarchitectureblog.com/2015/03/backoff.html>`_.
 
 .. [#experimental] This configuration was developed to target specific problems we encounter
    at Twitter and should be considered experimental. Note that its API may change as we continue
@@ -982,4 +994,4 @@ level than the  :ref:`Finagle 6 APIs <finagle6apis>` while improving upon the de
 .. [#probation] See ``com.twitter.finagle.loadbalancer.LoadBalancerFactory#EnableProbation``.
 
 .. [#failure_detectors] See `Failure Detectors` section from
-   Alvaro Videla's `blog post <http://videlalvaro.github.io/2015/12/learning-about-distributed-systems.html>`_.
+   Alvaro Videla's `blog post <https://videlalvaro.github.io/2015/12/learning-about-distributed-systems.html>`_.

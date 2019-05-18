@@ -74,7 +74,7 @@ object Backoff {
     require(start > Duration.Zero)
     require(maximum > Duration.Zero)
     require(start <= maximum)
-    // this is "full jitter" via http://www.awsarchitectureblog.com/2015/03/backoff.html
+    // this is "full jitter" via https://www.awsarchitectureblog.com/2015/03/backoff.html
     def next(attempt: Int): Stream[Duration] = {
       val shift = math.min(attempt, MaxBitShift)
       val maxBackoff = maximum.min(start * (1L << shift))
@@ -105,7 +105,7 @@ object Backoff {
     require(maximum > Duration.Zero)
     require(start <= maximum)
 
-    // this is "decorrelated jitter" via http://www.awsarchitectureblog.com/2015/03/backoff.html
+    // this is "decorrelated jitter" via https://www.awsarchitectureblog.com/2015/03/backoff.html
     def next(prev: Duration): Stream[Duration] = {
       val randRange = math.abs((prev.inNanoseconds * 3) - start.inNanoseconds)
       val randBackoff =
@@ -137,7 +137,7 @@ object Backoff {
     require(start > Duration.Zero)
     require(maximum > Duration.Zero)
     require(start <= maximum)
-    // this is "equal jitter" via http://www.awsarchitectureblog.com/2015/03/backoff.html
+    // this is "equal jitter" via https://www.awsarchitectureblog.com/2015/03/backoff.html
     def next(attempt: Int): Stream[Duration] = {
       val shift = math.min(attempt - 1, MaxBitShift)
       val halfExp = start * (1L << shift)

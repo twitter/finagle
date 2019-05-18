@@ -9,7 +9,6 @@ java_library(
     dependencies = [
         "3rdparty/jvm/com/fasterxml/jackson/core:jackson-databind",
         "3rdparty/jvm/com/fasterxml/jackson/module:jackson-module-scala",
-        "3rdparty/jvm/io/netty",
         "finagle/finagle-base-http/src/main/scala",
         "finagle/finagle-core/src/main/scala",
         "finagle/finagle-example/src/main/thrift:thrift-scala",

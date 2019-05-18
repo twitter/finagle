@@ -80,6 +80,10 @@ abstract class HeaderMap
     +=((kv._1, HeaderMap.format(kv._2)))
 
   override def empty: HeaderMap = DefaultHeaderMap()
+
+  private[finagle] def nameValueIterator: Iterator[HeaderMap.NameValue] =
+    iterator.map { case (n, v) => new HeaderMap.NameValueImpl(n, v) }
+
 }
 
 object HeaderMap {
@@ -110,4 +114,12 @@ object HeaderMap {
   private def format(date: Date): String =
     if (date == null) null
     else formatter.get().format(date)
+
+  private[finagle] trait NameValue {
+    def name: String
+    def value: String
+  }
+
+  private final class NameValueImpl(val name: String, val value: String) extends NameValue
+
 }

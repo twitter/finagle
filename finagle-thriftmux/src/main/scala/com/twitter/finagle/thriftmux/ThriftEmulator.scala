@@ -273,7 +273,8 @@ private[finagle] object ThriftEmulator {
           2 + (if (header.contexts == null) 0 else header.contexts.size)
         )
 
-      contextBuf += (Trace.idCtx.marshalId -> Trace.idCtx.marshal(richHeader.traceId))
+      contextBuf += (Trace.TraceIdContext.marshalId -> Trace.TraceIdContext.marshal(
+        richHeader.traceId))
 
       richHeader.clientId match {
         case Some(clientId) =>

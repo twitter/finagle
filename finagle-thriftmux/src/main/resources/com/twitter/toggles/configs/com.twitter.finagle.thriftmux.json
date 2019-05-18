@@ -1,9 +1,3 @@
 {
-  "toggles": [
-    {
-      "id": "com.twitter.finagle.thriftmux.UsePushMuxServer",
-      "description": "Use the push-based Mux implementation for the underlying server muxer",
-      "fraction": 0.0
-    }
-  ]
+  "toggles": []
 }

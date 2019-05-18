@@ -16,7 +16,7 @@ import scala.collection.JavaConverters._
  * val getRequest = RequestBuilder()
  *   .setHeader(Fields.USER_AGENT, "MyBot")
  *   .setHeader(Fields.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
- *   .url(new URL("http://www.example.com"))
+ *   .url(new URL("https://www.example.com"))
  *   .buildGet()
  * }}}
  *
@@ -36,7 +36,7 @@ import scala.collection.JavaConverters._
  *     RequestBuilder.create()
  *       .setHeader(Fields.USER_AGENT, "MyBot")
  *       .setHeader(Fields.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
- *       .url(new URL("http://www.example.com")))
+ *       .url(new URL("https://www.example.com")))
  * }}}
  *
  * Overall RequestBuilder's pretty barebones. It does provide certain protocol level support

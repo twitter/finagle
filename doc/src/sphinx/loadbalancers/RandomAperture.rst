@@ -51,12 +51,12 @@ configured to use the aperture load balancer to connect with a service consistin
 called "GadgetDuck". The goal is to pick the minimum number of connections that will result in a
 ~20% or less difference between the low and high load bands. As an initial value for exploring the
 distributions, the asymptotic value of 1 is used as the aperture size. Using `Wolfram Alpha
-<http://www.wolframalpha.com/input/?i=binomial+distribution(5000,+0.001)>`_, the mean is found
+<https://www.wolframalpha.com/input/?i=binomial+distribution(5000,+0.001)>`_, the mean is found
 to be 5, and the stddev will be 2.5. This distribution is too wide to satisfy the 20% difference
 requirement, so the next step is to increase the number of remote peers to 10. `Wolfram
-Alpha <http://www.wolframalpha.com/input/?i=binomial+distribution(50000,+0.001)>`_ computes the mean
+Alpha <https://www.wolframalpha.com/input/?i=binomial+distribution(50000,+0.001)>`_ computes the mean
 and stdev of the new distribution to be 50 and 7, respectively, which is still too wide. `A third
-attempt <http://www.wolframalpha.com/input/?i=binomial+distribution(500000,+0.001)>`_ using 100
+attempt <https://www.wolframalpha.com/input/?i=binomial+distribution(500000,+0.001)>`_ using 100
 remote peers yields a mean of 500 and stddev of 22 which is within the requirements. Thus, an
 aperture size of 100 or more will satisfy the load banding requirement. Further iterations
 could be used to shrink the aperture size to a value in the range (10, 100] that still satisfies

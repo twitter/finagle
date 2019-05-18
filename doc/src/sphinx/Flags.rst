@@ -68,7 +68,7 @@ Netty 4
 
 **com.twitter.finagle.netty4.trackReferenceLeaks** `bool`
   Enable reference leak tracking in Netty 4 and export a counter at `finagle/netty4/reference_leaks`
-  (default: `true`).
+  (default: `false`).
 
 **com.twitter.finagle.netty4.timerTicksPerWheel** `int`
   Netty 4 timer ticks per wheel (default: `512`).
@@ -107,6 +107,11 @@ Stats
 
 **com.twitter.finagle.stats.includeEmptyHistograms** `bool`
   Include full histogram details when there are no data points (default: `false`).
+
+**com.twitter.finagle.stats.verbose** `string`
+  Comma-separated list of *-wildcard expressions to allowlist debug metrics that are not exported by
+  default (default: undefined). A tunable, `com.twitter.finagle.stats.verbose` has a higher priority
+  if defined.
 
 Http
 ----

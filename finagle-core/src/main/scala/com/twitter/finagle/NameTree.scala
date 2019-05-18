@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.util.Showable
+import com.twitter.finagle.util.{CachedHashCode, Showable}
 import scala.annotation.tailrec
 
 /**
@@ -75,14 +75,14 @@ object NameTree {
    * fallback; it is evaluated by picking the first nonnegative
    * (evaluated) subtree.
    */
-  case class Alt[+T](trees: NameTree[T]*) extends NameTree[T] {
-    override def toString = "Alt(%s)".format(trees mkString ",")
+  case class Alt[+T](trees: NameTree[T]*) extends NameTree[T] with CachedHashCode.ForCaseClass {
+    override def toString: String = "Alt(%s)".format(trees mkString ",")
   }
   object Alt {
     private[finagle] def fromSeq[T](trees: Seq[NameTree[T]]): Alt[T] = Alt(trees: _*)
   }
 
-  case class Weighted[+T](weight: Double, tree: NameTree[T])
+  case class Weighted[+T](weight: Double, tree: NameTree[T]) extends CachedHashCode.ForCaseClass
 
   object Weighted {
     val defaultWeight = 1D
@@ -99,34 +99,34 @@ object NameTree {
    * higher in the stack) except to simplify away single-child Unions
    * regardless of weight.
    */
-  case class Union[+T](trees: Weighted[T]*) extends NameTree[T] {
-    override def toString = "Union(%s)".format(trees mkString ",")
+  case class Union[+T](trees: Weighted[T]*) extends NameTree[T] with CachedHashCode.ForCaseClass {
+    override def toString: String = "Union(%s)".format(trees mkString ",")
   }
   object Union {
     private[finagle] def fromSeq[T](trees: Seq[Weighted[T]]): Union[T] = Union(trees: _*)
   }
 
-  case class Leaf[+T](value: T) extends NameTree[T]
+  case class Leaf[+T](value: T) extends NameTree[T] with CachedHashCode.ForCaseClass
 
   /**
    * A failing [[com.twitter.finagle.NameTree NameTree]].
    */
   object Fail extends NameTree[Nothing] {
-    override def toString = "Fail"
+    override def toString: String = "Fail"
   }
 
   /**
    * A negative [[com.twitter.finagle.NameTree NameTree]].
    */
   object Neg extends NameTree[Nothing] {
-    override def toString = "Neg"
+    override def toString: String = "Neg"
   }
 
   /**
    * An empty [[com.twitter.finagle.NameTree NameTree]].
    */
   object Empty extends NameTree[Nothing] {
-    override def toString = "Empty"
+    override def toString: String = "Empty"
   }
 
   /**
@@ -185,8 +185,7 @@ object NameTree {
           case Nil => accum
           case Seq(Weighted(w, tree), tail @ _*) =>
             simplify(tree) match {
-              case Fail => unionFail
-              case Neg => loop(tail, accum)
+              case Fail | Neg => loop(tail, accum)
               case tree => loop(tail, accum :+ Weighted(w, tree))
             }
         }
@@ -269,8 +268,7 @@ object NameTree {
             }
           case Seq(Weighted(_, head), tail @ _*) =>
             eval(head) match {
-              case Fail => Fail
-              case Neg => loop(tail, accum)
+              case Fail | Neg => loop(tail, accum)
               case Leaf(value) => loop(tail, accum :+ value)
               case _ => scala.sys.error("bug")
             }
@@ -325,7 +323,7 @@ object NameTree {
    * Alt(Union(Leaf(Path(foo)),Leaf(Path(bar))),Leaf(Path(baz)),Empty)
    * }}}
    *
-   * The production `path` is documented at [[com.twitter.finagle.Path$ Path.read]].
+   * The production `path` is documented at [[com.twitter.finagle.Path.read Path.read]].
    *
    * @throws IllegalArgumentException when the string does not
    * represent a valid name tree.

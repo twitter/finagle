@@ -7,7 +7,11 @@ import com.twitter.finagle.{param => fparam}
 import com.twitter.finagle.mux.{Request, Response}
 import com.twitter.finagle.mux.transport.{Message, OpportunisticTls}
 import com.twitter.finagle.{Service, Stack, ThriftMux}
-import com.twitter.finagle.mux.pushsession.{MuxChannelHandle, MuxClientNegotiatingSession}
+import com.twitter.finagle.mux.pushsession.{
+  MuxChannelHandle,
+  MuxClientNegotiatingSession,
+  SharedNegotiationStats
+}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.thriftmux.thriftscala.TestService
 import com.twitter.io.{Buf, ByteReader}
@@ -30,6 +34,8 @@ class MuxDowngradingNegotiatorTest extends FunSuite {
 
     lazy val statsReceiver: InMemoryStatsReceiver = new InMemoryStatsReceiver
 
+    lazy val sharedStats = new SharedNegotiationStats(statsReceiver)
+
     lazy val params: Stack.Params = ThriftMux.BaseServerParams + fparam.Stats(statsReceiver)
 
     lazy val muxChannelHandle: MuxChannelHandle = new MockMuxChannelHandle
@@ -47,6 +53,7 @@ class MuxDowngradingNegotiatorTest extends FunSuite {
       val session = new MuxDowngradingNegotiator(
         refSession = refSession,
         params = params,
+        sharedStats,
         handle = muxChannelHandle,
         service = service
       )
@@ -94,9 +101,8 @@ class MuxDowngradingNegotiatorTest extends FunSuite {
   test("fails to start a downgraded session if opportunistic TLS is required") {
     new Ctx {
       override lazy val params: Stack.Params =
-        ThriftMux.BaseServerParams + fparam.Stats(statsReceiver) + OppTls(
-          Some(OpportunisticTls.Required)
-        )
+        ThriftMux.BaseServerParams + fparam.Stats(statsReceiver) +
+          OppTls(Some(OpportunisticTls.Required))
 
       val thriftMsg = {
         val buffer = new TMemoryBuffer(1)
@@ -112,7 +118,7 @@ class MuxDowngradingNegotiatorTest extends FunSuite {
       refSession.receive(ByteReader(thriftMsg))
 
       assert(handle.closedCalled)
-      assert(statsReceiver.counters(Seq("tls", "upgrade", "incompatible")) == 1l)
+      assert(statsReceiver.counters(Seq("mux", "tls", "upgrade", "incompatible")) == 1l)
     }
   }
 }

@@ -113,7 +113,7 @@ object FailureAccrualFactory {
   //  1. The param inserted into Stack.Params should be casted to its base type in order to tell
   //     the compiler what implicit value to look up.
   //  2. It's not possible to construct a triply-nested Scala class in Java using the sane API.
-  //     See http://stackoverflow.com/questions/30809070/accessing-scala-nested-classes-from-java
+  //     See https://stackoverflow.com/questions/30809070/accessing-scala-nested-classes-from-java
 
   // Create a consecutiveFailures FailureAccrualPolicy, helper method used by Param to provide
   // description details, without overriding toString method description will only show function0
@@ -271,7 +271,7 @@ object FailureAccrualFactory {
  * itself unavailable when deemed unhealthy according to the configured `policy`.
  *
  * This acts as a request driven
- * [[http://martinfowler.com/bliki/CircuitBreaker.html circuit breaker]].
+ * [[https://martinfowler.com/bliki/CircuitBreaker.html circuit breaker]].
  *
  * Note this module fails open – that is,  even if it transitions into a
  * closed state, requests will still be allowed to flow through it. Although,

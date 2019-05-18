@@ -2,12 +2,13 @@ package com.twitter.finagle.http2
 
 import com.twitter.finagle.Stack
 import com.twitter.finagle.http.Fields
-import com.twitter.finagle.http2.transport.{H2Filter, H2StreamChannelInit, PriorKnowledgeHandler}
+import com.twitter.finagle.http2.transport.{H2StreamChannelInit, PriorKnowledgeHandler}
 import com.twitter.finagle.netty4.http.HttpCodecName
-import com.twitter.finagle.param.{Stats, Timer => TimerParam}
+import com.twitter.finagle.netty4.http.util.UriUtils
+import com.twitter.finagle.param.Stats
 import com.twitter.logging.Logger
-import io.netty.channel.socket.SocketChannel
 import io.netty.channel._
+import io.netty.channel.socket.SocketChannel
 import io.netty.handler.codec.http.HttpServerUpgradeHandler.{
   SourceCodec,
   UpgradeCodec,
@@ -56,9 +57,7 @@ final private[finagle] class Http2CleartextServerInitializer(
 
             // we insert immediately after the Http2MultiplexCodec#0, which we know is the
             // last Http2 frames before they're converted to Http/1.1
-            val timer = params[TimerParam].timer
-            ctx.pipeline
-              .addAfter(MultiplexCodecName, H2Filter.HandlerName, new H2Filter(timer))
+            Http2PipelineInitializer.setup(ctx, params, MultiplexCodecName)
           }
         }
       } else null
@@ -74,7 +73,7 @@ final private[finagle] class Http2CleartextServerInitializer(
         val msg = s"Unexpected codec found: ${other.getClass.getSimpleName}. " +
           "Aborting channel initialization"
         val ex = new IllegalStateException(msg)
-        Logger.get(this.getClass).error(ex, msg)
+        log.error(ex, msg)
         throw ex
     }
     p.addBefore(
@@ -121,10 +120,16 @@ private object Http2CleartextServerInitializer {
   val Name: String = "upgradeHandler"
   val MultiplexCodecName: String = "multiplexCodec"
 
+  val log = Logger.get()
+
   // For an HTTP/1.x request to have a body it must have either a content-length or a
   // transfer-encoding header, otherwise the server can't be sure when the message will end.
   private def dontUpgrade(req: HttpRequest): Boolean =
     req.protocolVersion != HttpVersion.HTTP_1_1 ||
       (req.headers.contains(Fields.ContentLength) && HttpUtil.getContentLength(req) != 0) ||
-      req.headers.contains(Fields.TransferEncoding)
+      req.headers.contains(Fields.TransferEncoding) ||
+      // We need to validate here, as `UriValidatorHandler` requires `BadRequestHandler` in the
+      // pipeline. If we rework the pipeline, it's possible this can be removed in the future.
+      !UriUtils.isValidUri(req.uri)
+
 }

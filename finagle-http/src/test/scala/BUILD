@@ -3,7 +3,6 @@ junit_tests(
     compiler_option_sets = {"fatal_warnings"},
     dependencies = [
         "3rdparty/jvm/com/google/code/findbugs:jsr305",
-        "3rdparty/jvm/io/netty",
         "3rdparty/jvm/io/netty:netty4-codec-http2",
         "3rdparty/jvm/io/netty:netty4-handler-proxy",
         "3rdparty/jvm/io/netty:netty4-tcnative-boringssl-static",
@@ -16,7 +15,6 @@ junit_tests(
         "finagle/finagle-http",
         "finagle/finagle-http/src/test/resources",
         "finagle/finagle-http2/src/main/scala",
-        "finagle/finagle-netty3/src/main/scala",
         "finagle/finagle-netty4-http",
         "finagle/finagle-netty4/src/main/scala",
         "finagle/finagle-toggle",

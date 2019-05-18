@@ -8,7 +8,6 @@ import com.twitter.finagle.mysql.LostSyncException.const
 import com.twitter.finagle.mysql.param.{MaxConcurrentPrepareStatements, UnsignedColumns}
 import com.twitter.finagle.mysql.transport.{MysqlBuf, MysqlBufReader, Packet}
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Service, ServiceProxy, Stack}
 import com.twitter.util._
 
@@ -69,11 +68,18 @@ private[finagle] object ClientDispatcher {
    * Creates a mysql client dispatcher with write-through caches for optimization.
    * @param trans A transport that reads a writes logical mysql packets.
    * @param params A collection of `Stack.Params` useful for configuring a mysql client.
+   * @param performHandshake Indicates whether MySQL session establishment should be
+   * performed in the dispatcher. This is preferably performed in the transporter during
+   * service acquisition.
    */
-  def apply(trans: Transport[Packet, Packet], params: Stack.Params): Service[Request, Result] = {
+  def apply(
+    trans: Transport[Packet, Packet],
+    params: Stack.Params,
+    performHandshake: Boolean
+  ): Service[Request, Result] = {
     val maxConcurrentPrepareStatements = params[MaxConcurrentPrepareStatements].num
     new PrepareCache(
-      new ClientDispatcher(trans, params),
+      new ClientDispatcher(trans, params, performHandshake),
       Caffeine.newBuilder().maximumSize(maxConcurrentPrepareStatements)
     )
   }
@@ -83,23 +89,30 @@ private[finagle] object ClientDispatcher {
 /**
  * A ClientDispatcher that implements the mysql client/server protocol.
  * For a detailed exposition of the client/server protocol refer to:
- * [[http://dev.mysql.com/doc/internals/en/client-server-protocol.html]]
+ * [[https://dev.mysql.com/doc/internals/en/client-server-protocol.html]]
  *
  * Note, the mysql protocol does not support any form of multiplexing so
  * requests are dispatched serially and concurrent requests are queued.
  */
 private[finagle] final class ClientDispatcher(
   trans: Transport[Packet, Packet],
-  params: Stack.Params)
+  params: Stack.Params,
+  performHandshake: Boolean)
     extends GenSerialClientDispatcher[Request, Result, Packet, Packet](trans) {
   import ClientDispatcher._
 
   private[this] val handshakeSettings = HandshakeSettings(params)
-  private[this] val handshake = new Handshake(handshakeSettings)
+  private[this] val handshake = new Handshake(handshakeSettings, trans)
+
+  // Perform the handshake (possibly) once
+  private[this] val connectionPhase: Future[Unit] =
+    if (performHandshake) handshake.connectionPhase().unit
+    else Future.Done
+
   private[this] val supportUnsigned: Boolean = params[UnsignedColumns].supported
 
   override def apply(req: Request): Future[Result] =
-    connPhase
+    connectionPhase
       .flatMap { _ =>
         super.apply(req)
       }.onFailure {
@@ -110,31 +123,7 @@ private[finagle] final class ClientDispatcher(
         case _ =>
       }
 
-  override def close(deadline: Time): Future[Unit] =
-    trans
-      .write(QuitRequest.toPacket)
-      .by(DefaultTimer, deadline)
-      .ensure(super.close(deadline))
-
-  /**
-   * Performs the connection phase. The phase should only be performed
-   * once before any other exchange between the client/server. A failure
-   * to handshake renders this service unusable.
-   * [[http://dev.mysql.com/doc/internals/en/connection-phase.html]]
-   */
-  private[this] val connPhase: Future[Result] =
-    trans
-      .read().flatMap { packet =>
-        const(HandshakeInit(packet)).flatMap { init =>
-          const(handshake(init)).flatMap { req =>
-            val rep = new Promise[Result]
-            dispatch(req, rep)
-            rep
-          }
-        }
-      }.onFailure { _ =>
-        close()
-      }
+  override def close(deadline: Time): Future[Unit] = trans.close()
 
   /**
    * Returns a Future that represents the result of an exchange

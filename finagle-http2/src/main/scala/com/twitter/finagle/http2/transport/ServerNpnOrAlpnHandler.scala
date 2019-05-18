@@ -1,9 +1,9 @@
 package com.twitter.finagle.http2.transport
 
 import com.twitter.finagle.Stack
-import com.twitter.finagle.http2.MultiplexCodecBuilder
+import com.twitter.finagle.http2.{Http2PipelineInitializer, MultiplexCodecBuilder}
 import com.twitter.finagle.netty4.http._
-import com.twitter.finagle.param.{Stats, Timer => TimerParam}
+import com.twitter.finagle.param.Stats
 import io.netty.channel.{Channel, ChannelHandlerContext, ChannelInitializer}
 import io.netty.handler.ssl.{ApplicationProtocolNames, ApplicationProtocolNegotiationHandler}
 
@@ -26,8 +26,8 @@ final private[http2] class ServerNpnOrAlpnHandler(
         val http2MultiplexCodec = MultiplexCodecBuilder.serverMultiplexCodec(params, initializer)
         MultiplexCodecBuilder.addStreamsGauge(statsReceiver, http2MultiplexCodec, ctx.channel)
         ctx.pipeline.replace(HttpCodecName, Http2CodecName, http2MultiplexCodec)
-        val timer = params[TimerParam].timer
-        ctx.pipeline.addAfter(Http2CodecName, H2Filter.HandlerName, new H2Filter(timer))
+
+        Http2PipelineInitializer.setup(ctx, params, Http2CodecName)
 
       case ApplicationProtocolNames.HTTP_1_1 =>
       // The Http codec is already in the pipeline, so we are good!

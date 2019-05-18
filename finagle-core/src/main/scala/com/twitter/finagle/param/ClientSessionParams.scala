@@ -26,10 +26,14 @@ class ClientSessionParams[A <: Stack.Parameterized[A]](self: Stack.Parameterized
    * both queueing time (e.g. because we cannot create more connections due
    * to connections limit and there are outstanding requests) as well as physical
    * TCP connection time. Futures returned from `factory()` will always be satisfied
-   * within this timeout.
+   * within this timeout plus any applied [[com.twitter.finagle.client.LatencyCompensation]].
    *
-   * This timeout also includes resolving logical destinations, but the cost of
-   * resolution is amortized.
+   * This timeout also includes the following, but the cost is amortized over subsequent
+   * acquisitions of the same (possibly cached) session:
+   *
+   * - Resolving logical destinations
+   * - SSL handshake if configured
+   * - HTTP proxy handshake if configured
    *
    * @see [[https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration]]
    */

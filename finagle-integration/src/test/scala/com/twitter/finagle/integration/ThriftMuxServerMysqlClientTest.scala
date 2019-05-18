@@ -4,7 +4,7 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.mysql.OK
 import com.twitter.finagle.mysql.integration.IntegrationClient
 import com.twitter.finagle.thriftmux.thriftscala.TestService
-import com.twitter.finagle.util.HashedWheelTimer
+import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Address, Name, RequestTimeoutException, ThriftMux, param}
 import com.twitter.util.{Await, Future, Promise}
 import java.net.{InetAddress, InetSocketAddress}
@@ -47,7 +47,7 @@ class ThriftMuxServerMysqlClientTest
 
   test("interruption during transaction") {
     for (mysqlClient <- client) {
-      val timer = HashedWheelTimer.Default
+      val timer = DefaultTimer
 
       val mysqlLatch = new Promise[Unit]()
 

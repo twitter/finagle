@@ -40,8 +40,8 @@ object Command {
 }
 
 sealed trait Request {
-  val seq: Short
-  val cmd: Byte = Command.COM_NO_OP
+  def seq: Short
+  def cmd: Byte = Command.COM_NO_OP
   def toPacket: Packet
 }
 
@@ -53,8 +53,8 @@ sealed trait WithSql {
 }
 
 private[finagle] object PoisonConnectionRequest extends Request {
-  val seq: Short = 0
-  override val cmd: Byte = Command.COM_POISON_CONN
+  def seq: Short = 0
+  override def cmd: Byte = Command.COM_POISON_CONN
   def toPacket: Packet = ???
 }
 
@@ -63,7 +63,7 @@ private[finagle] object PoisonConnectionRequest extends Request {
  * and has a cmd byte associated with it.
  */
 abstract class CommandRequest(override val cmd: Byte) extends Request {
-  val seq: Short = 0
+  def seq: Short = 0
 }
 
 /**
@@ -77,19 +77,19 @@ class SimpleCommandRequest(command: Byte, data: Array[Byte]) extends CommandRequ
 
 /**
  * A request to check if the server is alive.
- * [[http://dev.mysql.com/doc/internals/en/com-ping.html]]
+ * [[https://dev.mysql.com/doc/internals/en/com-ping.html]]
  */
 case object PingRequest extends SimpleCommandRequest(Command.COM_PING, Array.emptyByteArray)
 
 /**
  * Tells the server that the client wants to close the connection.
- * [[http://dev.mysql.com/doc/internals/en/com-quit.html]]
+ * [[https://dev.mysql.com/doc/internals/en/com-quit.html]]
  */
 case object QuitRequest extends SimpleCommandRequest(Command.COM_QUIT, Array.emptyByteArray)
 
 /**
  * A UseRequest is used to change the default schema of the connection.
- * [[http://dev.mysql.com/doc/internals/en/com-init-db.html]]
+ * [[https://dev.mysql.com/doc/internals/en/com-init-db.html]]
  */
 case class UseRequest(dbName: String)
     extends SimpleCommandRequest(Command.COM_INIT_DB, dbName.getBytes)
@@ -97,7 +97,7 @@ case class UseRequest(dbName: String)
 /**
  * A QueryRequest is used to send the server a text-based query that
  * is executed immediately.
- * [[http://dev.mysql.com/doc/internals/en/com-query.html]]
+ * [[https://dev.mysql.com/doc/internals/en/com-query.html]]
  */
 case class QueryRequest(sqlStatement: String)
     extends SimpleCommandRequest(Command.COM_QUERY, sqlStatement.getBytes)
@@ -108,7 +108,7 @@ case class QueryRequest(sqlStatement: String)
 /**
  * Allocates a prepared statement on the server from the
  * passed in query string.
- * [[http://dev.mysql.com/doc/internals/en/com-stmt-prepare.html]]
+ * [[https://dev.mysql.com/doc/internals/en/com-stmt-prepare.html]]
  */
 case class PrepareRequest(sqlStatement: String)
     extends SimpleCommandRequest(Command.COM_STMT_PREPARE, sqlStatement.getBytes)
@@ -118,11 +118,42 @@ case class PrepareRequest(sqlStatement: String)
 
 /**
  * Client response sent during connection phase.
+ * It is similar to a [[HandshakeResponse]], but stops
+ * before `username`. If the server supports the `CLIENT_SSL`
+ * capability, and the client wants to use SSL/TLS, this is
+ * the packet which is sent as a response by the client to
+ * indicate that SSL/TLS should then be negotiated.
+ * [[https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::SSLRequest]]
+ */
+private[mysql] case class SslConnectionRequest(
+  clientCap: Capability,
+  charset: Short,
+  maxPacketSize: Int)
+    extends Request {
+  require(
+    clientCap.has(Capability.SSL),
+    "Using SslConnectionRequest requires having the SSL capability")
+
+  override def seq: Short = 1
+
+  def toPacket: Packet = {
+    val packetBodySize = 32
+    val bw = MysqlBuf.writer(new Array[Byte](packetBodySize))
+    bw.writeIntLE(clientCap.mask)
+    bw.writeIntLE(maxPacketSize)
+    bw.writeByte(charset)
+    bw.fill(23, 0.toByte) // 23 reserved bytes - zeroed out
+
+    Packet(seq, bw.owned())
+  }
+}
+
+/**
+ * Abstract client response sent during connection phase.
  * Responsible for encoding credentials used to
  * authenticate a session.
- * [[http://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse41]]
  */
-case class HandshakeResponse(
+private[mysql] sealed abstract class HandshakeResponse(
   username: Option[String],
   password: Option[String],
   database: Option[String],
@@ -132,7 +163,6 @@ case class HandshakeResponse(
   charset: Short,
   maxPacketSize: Int)
     extends Request {
-  override val seq: Short = 1
 
   lazy val hashPassword: Array[Byte] = password match {
     case Some(p) => encryptPassword(p, salt)
@@ -174,8 +204,74 @@ case class HandshakeResponse(
   }
 }
 
+/**
+ * Client response sent during connection phase.
+ * Responsible for encoding credentials used to
+ * authenticate a session. Use of this class indicates
+ * that the session should not use SSL/TLS.
+ * [[https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse41]]
+ */
+private[mysql] case class PlainHandshakeResponse(
+  username: Option[String],
+  password: Option[String],
+  database: Option[String],
+  clientCap: Capability,
+  salt: Array[Byte],
+  serverCap: Capability,
+  charset: Short,
+  maxPacketSize: Int)
+    extends HandshakeResponse(
+      username,
+      password,
+      database,
+      clientCap,
+      salt,
+      serverCap,
+      charset,
+      maxPacketSize) {
+
+  override def seq: Short = 1
+}
+
+/**
+ * Client response sent during connection phase.
+ * Responsible for encoding credentials used to
+ * authenticate a session. Use of this class indicates
+ * that the session should use SSL/TLS.
+ * [[https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse41]]
+ */
+private[mysql] case class SecureHandshakeResponse(
+  username: Option[String],
+  password: Option[String],
+  database: Option[String],
+  clientCap: Capability,
+  salt: Array[Byte],
+  serverCap: Capability,
+  charset: Short,
+  maxPacketSize: Int)
+    extends HandshakeResponse(
+      username,
+      password,
+      database,
+      clientCap,
+      salt,
+      serverCap,
+      charset,
+      maxPacketSize) {
+
+  require(
+    serverCap.has(Capability.SSL),
+    "serverCap must contain Capability.SSL to send a SecureHandshakeResponse")
+  require(
+    clientCap.has(Capability.SSL),
+    "clientCap must contain Capability.SSL to send a SecureHandshakeResponse")
+
+  override def seq: Short = 2
+}
+
 class FetchRequest(val prepareOK: PrepareOK, val numRows: Int)
     extends CommandRequest(Command.COM_STMT_FETCH) {
+
   val stmtId: Int = prepareOK.id
 
   def toPacket: Packet = {
@@ -191,7 +287,7 @@ class FetchRequest(val prepareOK: PrepareOK, val numRows: Int)
 /**
  * Uses the binary protocol to build an execute request for
  * a prepared statement.
- * [[http://dev.mysql.com/doc/internals/en/com-stmt-execute.html]]
+ * [[https://dev.mysql.com/doc/internals/en/com-stmt-execute.html]]
  */
 class ExecuteRequest(
   val stmtId: Int,
@@ -199,6 +295,7 @@ class ExecuteRequest(
   val hasNewParams: Boolean,
   val flags: Byte)
     extends CommandRequest(Command.COM_STMT_EXECUTE) {
+
   private[this] val log = Logger.getLogger("finagle-mysql")
 
   private[this] def makeNullBitmap(parameters: IndexedSeq[Parameter]): Array[Byte] = {
@@ -309,7 +406,7 @@ object ExecuteRequest {
 /**
  * A CloseRequest deallocates a prepared statement on the server.
  * No response is sent back to the client.
- * [[http://dev.mysql.com/doc/internals/en/com-stmt-close.html]]
+ * [[https://dev.mysql.com/doc/internals/en/com-stmt-close.html]]
  */
 case class CloseRequest(stmtId: Int) extends CommandRequest(Command.COM_STMT_CLOSE) {
   val toPacket: Packet = {

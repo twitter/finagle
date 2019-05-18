@@ -2,7 +2,13 @@ package com.twitter.finagle.client
 
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle.client.MethodBuilderTimeout.TunableDuration
-import com.twitter.finagle.service.{ResponseClass, ResponseClassifier, Retries, TimeoutFilter}
+import com.twitter.finagle.service.{
+  Filterable,
+  ResponseClass,
+  ResponseClassifier,
+  Retries,
+  TimeoutFilter
+}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.TraceInitializerFilter
 import com.twitter.finagle.util.{Showable, StackRegistry}
@@ -11,7 +17,7 @@ import com.twitter.util.tunable.Tunable
 import com.twitter.util.{Future, Promise, Time}
 import java.util.concurrent.atomic.AtomicBoolean
 
-private[finagle] object MethodBuilder {
+object MethodBuilder {
 
   /**
    * Note that metrics will be scoped (e.g. "clnt/your_client_label/method_name").
@@ -58,7 +64,7 @@ private[finagle] object MethodBuilder {
    * Modifies the given [[Stack]] so that it is ready for use
    * in a [[MethodBuilder]] client.
    */
-  def modifiedStack[Req, Rep](
+  private[finagle] def modifiedStack[Req, Rep](
     stack: Stack[ServiceFactory[Req, Rep]]
   ): Stack[ServiceFactory[Req, Rep]] = {
     stack
@@ -71,7 +77,7 @@ private[finagle] object MethodBuilder {
       .replace(TimeoutFilter.role, DynamicTimeout.perRequestModule[Req, Rep])
   }
 
-  object Config {
+  private[finagle] object Config {
 
     /**
      * @param originalStack the `Stack` before [[modifiedStack]] was called.
@@ -99,7 +105,7 @@ private[finagle] object MethodBuilder {
    * @see [[MethodBuilder.Config.create]] to construct an initial instance.
    *       Using its `copy` method is appropriate after that.
    */
-  case class Config private (
+  private[finagle] case class Config private (
     traceInitializer: Filter.TypeAgnostic,
     retry: MethodBuilderRetry.Config,
     timeout: MethodBuilderTimeout.Config)
@@ -115,7 +121,7 @@ private[finagle] object MethodBuilder {
  *
  * @see [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]]
  */
-private[finagle] final class MethodBuilder[Req, Rep](
+final class MethodBuilder[Req, Rep] private[finagle] (
   val refCounted: RefcountedClosable[Service[Req, Rep]],
   dest: Name,
   stack: Stack[_],
@@ -337,6 +343,12 @@ private[finagle] final class MethodBuilder[Req, Rep](
   }
 
   /**
+   * Returns the client stack parameters.
+   */
+  def params: Stack.Params =
+    stackParams
+
+  /**
    * Allow customizations for protocol-specific trace initialization.
    */
   def withTraceInitializer(initializer: Filter.TypeAgnostic): MethodBuilder[Req, Rep] =
@@ -345,7 +357,6 @@ private[finagle] final class MethodBuilder[Req, Rep](
   //
   // Build
   //
-
   private[this] def newService(methodName: Option[String]): Service[Req, Rep] =
     filters(methodName).andThen(wrappedService(methodName))
 
@@ -361,12 +372,33 @@ private[finagle] final class MethodBuilder[Req, Rep](
   def newService: Service[Req, Rep] =
     newService(None)
 
+  /**
+   * Create a [[ServicePerEndpoint]] from the current configuration.
+   */
+  def newServicePerEndpoint[ServicePerEndpoint <: Filterable[ServicePerEndpoint]](
+    builder: ServicePerEndpointBuilder[Req, Rep, ServicePerEndpoint]
+  ): ServicePerEndpoint = newServicePerEndpoint(builder, None)
+
+  /**
+   * Create a [[ServicePerEndpoint]] from the current configuration.
+   */
+  def newServicePerEndpoint[ServicePerEndpoint <: Filterable[ServicePerEndpoint]](
+    builder: ServicePerEndpointBuilder[Req, Rep, ServicePerEndpoint],
+    methodName: String
+  ): ServicePerEndpoint = newServicePerEndpoint(builder, Some(methodName))
+
+  private[this] def newServicePerEndpoint[ServicePerEndpoint <: Filterable[ServicePerEndpoint]](
+    builder: ServicePerEndpointBuilder[Req, Rep, ServicePerEndpoint],
+    methodName: Option[String]
+  ): ServicePerEndpoint = {
+    builder
+      .servicePerEndpoint(wrappedService(methodName))
+      .filtered(filters(methodName))
+  }
+
   //
   // Internals
   //
-
-  def params: Stack.Params =
-    stackParams
 
   /**
    * '''For implementers'''
@@ -391,7 +423,7 @@ private[finagle] final class MethodBuilder[Req, Rep](
     }
   }
 
-  def filters(methodName: Option[String]): Filter.TypeAgnostic = {
+  private[this] def filters(methodName: Option[String]): Filter.TypeAgnostic = {
     // Ordering of filters:
     // Requests start at the top and traverse down.
     // Responses flow back from the bottom up.
@@ -473,7 +505,7 @@ private[finagle] final class MethodBuilder[Req, Rep](
     }
   }
 
-  def wrappedService(name: Option[String]): Service[Req, Rep] = {
+  private[this] def wrappedService(name: Option[String]): Service[Req, Rep] = {
     addToRegistry(name)
     refCounted.open()
 

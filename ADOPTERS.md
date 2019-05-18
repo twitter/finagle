@@ -9,46 +9,46 @@ URLs if possible) and [submit a pull request][1]!
 * [Attendify](https://attendify.com/)
 * [Box](https://www.box.com/)
 * [Brigade](https://www.brigade.com/)
-* [Buoyant](http://buoyant.io/)
+* [Buoyant](https://buoyant.io/)
 * [Chartboost](https://www.chartboost.com/)
-* [Crimson Hexagon](http://www.crimsonhexagon.com/)
-* [Criteo](http://www.criteo.com/)
-* [Despegar](http://www.despegar.com/)
-* [DICE](http://dice.se/)
-* [Dwango](http://dwango.co.jp/)
+* [Crimson Hexagon](https://www.crimsonhexagon.com/)
+* [Criteo](https://www.criteo.com/)
+* [Despegar](https://www.despegar.com/)
+* [DICE](https://dice.se/)
+* [Dwango](https://dwango.co.jp/)
 * [Etsy](https://www.etsy.com/)
   * ["Your Search Service as a Composable Function"][14]
 * [EnerNOC](https://www.enernoc.com/)
 * [Fitbit](https://www.fitbit.com/)
 * [Foursquare](https://foursquare.com/)
 * [Gigya](https://www.gigya.com/)
-* [Globo.com](http://globo.com/)
-* [Green Man Gaming](http://www.greenmangaming.com/)
-* [Gutefrage.net](http://www.gutefrage.net/)
+* [Globo.com](https://globo.com/)
+* [Green Man Gaming](https://www.greenmangaming.com/)
+* [Gutefrage.net](https://www.gutefrage.net/)
   * ["Introducing Gutefrage.net's Service-Oriented Architecture"][2]
 * [Hotels.com](https://www.hotels.com)
 * [Hotel Urbano](https://www.hotelurbano.com/)
 * [Hopper](https://www.hopper.com/)
 * [ING Bank](https://ing.nl/)
-* [JusBrasil](http://www.jusbrasil.com.br/)
+* [JusBrasil](https://www.jusbrasil.com.br/)
 * [Magine TV](https://magine.com/)
 * [National Center for Biotechnology Information (NCBI)](https://www.ncbi.nlm.nih.gov/)
 * [Nest](https://nest.com/)
-* The [New York Times](http://www.nytimes.com/)
+* The [New York Times](https://www.nytimes.com/)
 * [Nubank](https://www.nubank.com.br/)
-* [OpenAura](http://openaura.com/)
+* [OpenAura](https://openaura.com/)
 * [OrchardPlatform](https://orchardplatform.com/)
 * [PagerDuty](https://www.pagerduty.com/)
-* [Pellucid Analytics](http://www.pellucid.com/)
+* [Pellucid Analytics](https://www.pellucid.com/)
 * [Pinterest](https://www.pinterest.com/)
   * ["How we make pins more useful"][3]
-* [Quanttus](http://www.Quanttus.com/)
-* [Qubit](http://www.qubitproducts.com/)
+* [Quanttus](https://www.Quanttus.com/)
+* [Qubit](https://www.qubitproducts.com/)
 * [QuizUp](https://www.quizup.com/)
 * [Rdio](https://www.rdio.com/)
   * [Thor, a Finagle-based image processor][4]
 * [Reputation.com](https://www.reputation.com/)
-* [Sabre Labs](http://sabrelabs.com/)
+* [Sabre Labs](https://sabrelabs.com/)
 * [Salesforce](https://www.salesforce.com/)
 * [Sharethrough](https://www.sharethrough.com/)
   * ["Finagle @ Sharethrough: Twitter #Conf Presentation"][5]
@@ -62,22 +62,22 @@ URLs if possible) and [submit a pull request][1]!
 * [Spright](https://spright.com/)
 * [SproutSocial](https://www.sproutsocial.com/)
   * ["Trendy Engineering: How We Built the Twitter Trends Report"][7]
-* [Strava](http://www.strava.com/)
+* [Strava](https://www.strava.com/)
   * ["Introducing Routemaster"][8]
 * [StumbleUpon](https://www.stumbleupon.com/)
 * [Südtirol Pass](https://www.sii.bz.it/)
 * [Talenteca](https://www.talenteca.com/)
-* [Tapad](http://www.tapad.com/)
+* [Tapad](https://www.tapad.com/)
   * [Case study][9] by [Typesafe][10]
 * [Teads.tv](https://teads.tv/)
-* [Tendril](http://www.tendrilinc.com/)
+* [Tendril](https://www.tendrilinc.com/)
 * [Threat Stack](https://www.threatstack.com/)
 * [Tinder](https://www.tinder.com/)
 * [Tradeshift](https://tradeshift.com/)
 * [Tumblr](https://www.tumblr.com/)
 * [Twitter](https://twitter.com/)
   * ["Finagle: A Protocol-Agnostic RPC System"][11]
-* [wasted.io](http://wasted.io/)
+* [wasted.io](https://wasted.io/)
 * [Whisk](https://whisk.com/)
 * [XiaoMi](https://www.mi.com/)
   * ["Linden: A distributed and real-time search engine built on top of
@@ -85,13 +85,13 @@ URLs if possible) and [submit a pull request][1]!
 
 [0]: https://twitter.com/finagle
 [1]: https://github.com/twitter/finagle/blob/master/CONTRIBUTING.md
-[2]: http://engineering.gutefrage.net/post/47693566182/introducing-gutefrage-net-s-service-oriented
-[3]: http://engineering.pinterest.com/post/59132790640/how-we-make-pins-more-useful
+[2]: https://engineering.gutefrage.net/post/47693566182/introducing-gutefrage-net-s-service-oriented
+[3]: https://engineering.pinterest.com/post/59132790640/how-we-make-pins-more-useful
 [4]: https://github.com/rdio/thor
-[5]: http://engineering.sharethrough.com/blog/2014/04/17/finagle-at-sharethrough-twitter-conf-talk/
+[5]: https://engineering.sharethrough.com/blog/2014/04/17/finagle-at-sharethrough-twitter-conf-talk/
 [6]: https://developers.soundcloud.com/blog/building-products-at-soundcloud-part-3-microservices-in-scala-and-finagle
-[7]: http://sproutsocial.com/insights/engineering-twitter-trends-report/
-[8]: http://engineering.strava.com/routemaster/
+[7]: https://sproutsocial.com/insights/engineering-twitter-trends-report/
+[8]: https://engineering.strava.com/routemaster/
 [9]: https://typesafe.com/blog/tapad_turns_to_typesafe_platform
 [10]: https://typesafe.com/
 [11]: https://blog.twitter.com/2011/finagle-a-protocol-agnostic-rpc-system

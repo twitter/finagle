@@ -12,7 +12,7 @@ import java.util.IdentityHashMap
  * Given a RecordSchema declaration `schema`, any number of
  * [[com.twitter.finagle.http.collection.RecordSchema.Record Records]] of that schema can be obtained with
  * `schema.newRecord`. The type that Scala assigns to this value is what Scala calls a
- * "[[http://lampwww.epfl.ch/~amin/dot/fpdt.pdf path-dependent type]]," meaning that
+ * "[[https://lampwww.epfl.ch/~amin/dot/fpdt.pdf path-dependent type]]," meaning that
  * `schema1.Record` and `schema2.Record` name distinct types. The same is true of fields:
  * `schema1.Field[A]` and `schema2.Field[A]` are distinct, and can only be used with the
  * corresponding Record.

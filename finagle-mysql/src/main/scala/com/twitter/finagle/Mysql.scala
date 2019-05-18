@@ -11,8 +11,10 @@ import com.twitter.finagle.param.{
   Tracer => _,
   _
 }
+import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.{Duration, Future, Monitor}
@@ -97,6 +99,9 @@ object MySqlClientTracingFilter {
  */
 object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichClient {
 
+  private[this] val includeHandshakeInServiceAcquisitionToggle: Toggle[Int] =
+    Toggles("com.twitter.finagle.mysql.IncludeHandshakeInServiceAcquisition")
+
   protected val supportUnsigned: Boolean = UnsignedColumns.param.default.supported
 
   object Client {
@@ -153,6 +158,9 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
       with WithDefaultLoadBalancer[Client]
       with MysqlRichClient {
 
+    private[this] val includeHandshakeInServiceAcquisition: Boolean =
+      includeHandshakeInServiceAcquisitionToggle(ServerInfo().id.hashCode)
+
     protected val supportUnsigned: Boolean = params[UnsignedColumns].supported
 
     protected def copy1(
@@ -165,14 +173,16 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
     protected type Context = TransportContext
 
     protected def newTransporter(addr: SocketAddress): Transporter[In, Out, Context] =
-      new MysqlTransporter(addr, params)
+      new MysqlTransporter(addr, params, includeHandshakeInServiceAcquisition)
 
     protected def newDispatcher(
-      transport: Transport[In, Out] {
-        type Context <: Client.this.Context
-      }
+      transport: Transport[In, Out] { type Context <: Client.this.Context }
     ): Service[Request, Result] =
-      mysql.ClientDispatcher(transport, params)
+      // If we're performing handshaking during the service acquisition phase
+      // (via the transporter, see the `newTransporter` method above), then we
+      // don't want to perform it again here. If we didn't there, then we do here.
+      // Eventually `newTransporter` should be the only place where it's done.
+      mysql.ClientDispatcher(transport, params, !includeHandshakeInServiceAcquisition)
 
     /**
      * The maximum number of concurrent prepare statements.

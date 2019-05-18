@@ -6,13 +6,13 @@ import com.twitter.util.{Duration, Future}
 import scala.collection.mutable
 
 /**
- * @see [[MethodBuilderScaladoc]]
+ * @see [[BaseMethodBuilder]]
  */
 private[finagle] class MethodBuilderTimeout[Req, Rep] private[client] (
   mb: MethodBuilder[Req, Rep]) {
 
   /**
-   * @see [[MethodBuilderScaladoc.withTimeoutTotal(Duration)]]
+   * @see [[BaseMethodBuilder.withTimeoutTotal(Duration)]]
    */
   def total(howLong: Duration): MethodBuilder[Req, Rep] = {
     val timeouts = mb.config.timeout.copy(total = mb.config.timeout.total.copy(duration = howLong))
@@ -20,7 +20,7 @@ private[finagle] class MethodBuilderTimeout[Req, Rep] private[client] (
   }
 
   /**
-   * @see [[MethodBuilderScaladoc.withTimeoutTotal(Tunable[Duration])]]
+   * @see [[BaseMethodBuilder.withTimeoutTotal(Tunable[Duration])]]
    */
   def total(howLong: Tunable[Duration]): MethodBuilder[Req, Rep] = {
     val timeouts = mb.config.timeout.copy(total = mb.config.timeout.total.copy(tunable = howLong))
@@ -28,7 +28,7 @@ private[finagle] class MethodBuilderTimeout[Req, Rep] private[client] (
   }
 
   /**
-   * @see [[MethodBuilderScaladoc.withTimeoutPerRequest(Duration)]]
+   * @see [[BaseMethodBuilder.withTimeoutPerRequest(Duration)]]
    */
   def perRequest(howLong: Duration): MethodBuilder[Req, Rep] = {
     val timeouts =
@@ -37,7 +37,7 @@ private[finagle] class MethodBuilderTimeout[Req, Rep] private[client] (
   }
 
   /**
-   * @see [[MethodBuilderScaladoc.withTimeoutPerRequest(Tunable[Duration])]]
+   * @see [[BaseMethodBuilder.withTimeoutPerRequest(Tunable[Duration])]]
    */
   def perRequest(howLong: Tunable[Duration]): MethodBuilder[Req, Rep] = {
     val timeouts =

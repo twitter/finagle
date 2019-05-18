@@ -50,11 +50,15 @@ private[twitter] object ServerAdmissionControl {
   val role = new Stack.Role("Server Admission Controller")
 
   /**
-   * A class eligible for enabling admission control filters in the server Stack.
+   * The class is eligible for enabling admission control filters in the server Stack.
+   *
+   * @param serverAdmissionControlEnabled On/off switch for all admission controllers.
+   *                                      When this is set to `false`, all requests
+   *                                      bypass admission control.
    *
    * @see [[com.twitter.finagle.filter.ServerAdmissionControl]]
    */
-  case class Param(enabled: Boolean)
+  case class Param(serverAdmissionControlEnabled: Boolean)
   object Param {
     implicit val param = new Stack.Param[Param] {
       lazy val default = Param(true)

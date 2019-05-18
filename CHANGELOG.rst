@@ -7,8 +7,61 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+19.5.0
+------
+
 New Features
 ~~~~~~~~~~~~
+
+* finagle-http: Add two new methods to `com.twitter.finagle.http.MediaType`,
+  `MediaType#typeEquals` for checking if two media types have the same type and
+  subtype, ignoring their charset, and `MediaType#addUtf8Charset` for easily
+  setting a utf-8 charset.  ``PHAB_ID=D308761``
+
+Bug Fixes
+~~~~~~~~~
+
+* finagle-http: Ensure server returns 400 Bad Request when
+  non-ASCII characters are present in the HTTP request URI path. ``PHAB_ID=D312009``
+
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: Deterministic aperture (d-aperture) load balancers no longer export
+  "loadband" scoped metrics: "widen", "narrow", "offered_load_ema". These were not
+  necessary as d-aperture does not change the aperture size at runtime. ``PHAB_ID=D303833``
+
+* finagle-core: Request logging now defaults to disabled. Enable it by configuring the
+  `RequestLogger` Stack parameter on your `Client` or `Server`. ``PHAB_ID=D308476``
+
+* finagle-core: Subtree binding failures in `NameTree.Union`'s are ignored in the
+  final binding result. ``PHAB_ID=D315282``
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: The `c.t.f.client.EndpointerModule` and `c.t.f.pushsession.PushStackClient` public
+  and protected APIs have been changed to use the abstract `java.net.SocketAddress` instead of the
+  concrete `java.net.InetSocketAddress` as relying on the concrete implementation was not
+  necessary. ``PHAB_ID=D315111``
+
+* finagle-http: For Finagle HTTP clients, the `withMaxRequestSize(size)` API
+  method has been removed. For Finagle HTTP servers, the
+  `withMaxResponseSize(size)` method has been removed. The underlying `Stack`
+  params which are set by these methods are respectively HTTP server and HTTP
+  client side params only. Using these removed methods had no effect on the
+  setup of Finagle HTTP clients and servers. ``PHAB_ID=D314019``
+
+* finagle-mysql: HandshakeResponse has been removed from finagle-mysql's public
+  API. It is expected that users of the library are relying entirely on
+  finagle-mysql for handshaking. ``PHAB_ID=D304512``
+
+19.4.0
+------
+
+New Features
+~~~~~~~~~~~~
+
 * finagle-core: Make maxDepth in Namer configurable. ``PHAB_ID=D286444``
 
   - namerMaxDepth in Namer now configurable through a global flag (namerMaxDepth)
@@ -16,6 +69,9 @@ New Features
 * finagle-core: The newly renamed `SslSessionInfo` is now public. It is
   intended for providing information about a connection's SSL/TLS session.
   ``PHAB_ID=D286242``
+
+* finagle-core: Added the `c.t.finagle.DtabFlags` trait which defines a Flag and function for
+  appending to the "base" `c.t.finagle.Dtab` delegation table. ``PHAB_ID=D297596``
 
 * finagle-http: Finagle HTTP implementation now supports trailing headers (trailers). Use
   `c.t.f.http.Message.trailers` to access trailing headers on a fully-buffered message
@@ -30,16 +86,48 @@ New Features
   their headers containing invalid characters (as seen by RFC-7230): `rejected_invalid_header_names`
   and `rejected_invalid_header_values`. ``PHAB_ID=D294754``
 
+* finagle-http: Added stats of the duration in milliseconds of request/response streams:
+  `request_stream_duration_ms` and `response_stream_duration_ms`. They are enabled by using
+  `.withHttpStats` on `Http.Client` and `Http.Server`  ``PHAB_ID=D297900``
+
+* finagle-mysql: A new toggle, "com.twitter.finagle.mysql.IncludeHandshakeInServiceAcquisition", has
+  been added. Turning on this toggle will move MySQL session establishment (connection phase) to be
+  part of service acqusition. ``PHAB_ID=D301456``
+
+* finagle-core: Support for MethodBuilder and stack construction outside of `c.t.f` package.
+  ``PHAB_ID=D275053``.
+  This includes:
+  - `c.t.f.client.MethodBuilder` is now public.
+  - construction of the following stack modules are now public: `c.t.f.factory.TimeoutFactory`,
+    `c.t.f.filter.ExceptionSourceFilter`, `c.t.f.loadbalancer.LoadBalancerFactory`,
+    `c.t.f.service.Retries`
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-  * finagle-core: Client-side nacking admission control now defaults on. See the documentation
-    on `c.t.f.filter.NackAdmissionFilter` for details. This can be disabled by setting the
-    global flag, `com.twitter.finagle.client.useNackAdmissionFilter`, to false.
-    ``PHAB_ID=D289583``
+* finagle-core: Client-side nacking admission control now defaults on. See the documentation
+  on `c.t.f.filter.NackAdmissionFilter` for details. This can be disabled by setting the
+  global flag, `com.twitter.finagle.client.useNackAdmissionFilter`, to false.
+  ``PHAB_ID=D289583``
+
+* finagle-core: `LatencyCompensation` now applies to service acquisition. ``PHAB_ID=D285574``
+
+* finagle-http: HTTP headers validation on the outbound path is now in compliance with RFC7230.
+  ``PHAB_ID=D247125``
+
+* finagle-netty4: Netty's reference leak tracking now defaults to disabled.
+  Set the flag `com.twitter.finagle.netty4.trackReferenceLeaks` to `true` to enable.
+  ``PHAB_ID=D297031``
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
+
+* finagle: Dropped a dependency on Netty 3:
+ - finagle-netty3 sub-project has been removed
+ - finagle-http-cookie sub-project has been removed
+ - `c.t.f.http.Cookie` no longer takes Netty's `DefaultCookie` in the constructor
+ ``PHAB_ID=D291221``
+
 
 * finagle-core: The `peerCertificate` methods of `c.t.f.t.TransportContext` and
   `c.t.f.p.PushChannelHandle` have been replaced with the more robust
@@ -78,7 +166,7 @@ Breaking API Changes
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-  * finagle-core: The tracing annotations from `MkJvmFilter` have been enhanced. ``PHAB_ID=D282590``
+* finagle-core: The tracing annotations from `MkJvmFilter` have been enhanced. ``PHAB_ID=D282590``
 
   - Timestamped annotations "GC Start" and "GC End" for each garbage collection
     event that occurred during the request.
@@ -110,6 +198,7 @@ New Features
   - Request deserialization time, in nanoseconds
   - Response serialization time, in nanoseconds
   - Response deserialization time, in nanoseconds
+
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
@@ -476,7 +565,7 @@ New Features
 * finagle-core: Introducing StackTransformer, a consistent mechanism for
   accessing and transforming the default ServerStack. ``PHAB_ID=D207980``
 
-* finagle-netty4: Allow sockets to be configured with the [SO_REUSEPORT](http://lwn.net/Articles/542629/) option
+* finagle-netty4: Allow sockets to be configured with the [SO_REUSEPORT](https://lwn.net/Articles/542629/) option
   when using native epoll, which allows multiple processes to bind and accept connections
   from the same port. ``PHAB_ID=D205535``
 
