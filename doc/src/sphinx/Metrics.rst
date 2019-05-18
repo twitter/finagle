@@ -303,6 +303,14 @@ These metrics are added by
 :finagle-http-src:`StatsFilter <com/twitter/finagle/http/filter/StatsFilter.scala>` and can be enabled by
 using `.withHttpStats` on `Http.Client` and `Http.Server`.
 
+**request_stream_duration_ms**
+  A histogram of the duration of the lifetime of request streams, from the time a stream is initialized
+  until it's closed, in milliseconds.
+
+**response_stream_duration_ms**
+  A histogram of the duration of the lifetime of response streams, from the time a stream is initialized
+  until it's closed, in milliseconds.
+
 **status/<statusCode>**
   A counter of the number of responses received, or returned for servers, that had this
   statusCode.

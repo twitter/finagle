@@ -14,7 +14,7 @@ import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Service, ServiceFactory, Stack}
 import com.twitter.util.{Duration, Future}
-import java.net.InetSocketAddress
+import java.net.SocketAddress
 
 object PushStringClient {
 
@@ -34,9 +34,9 @@ object PushStringClient {
     protected type Out = String
     protected type SessionT = PipeliningClientPushSession[String, String]
 
-    protected def newPushTransporter(ia: InetSocketAddress): PushTransporter[String, String] = {
+    protected def newPushTransporter(sa: SocketAddress): PushTransporter[String, String] = {
       val init = if (appendDelimeter) StringClientPipeline else NoDelimStringPipeline
-      Netty4PushTransporter.raw[String, String](init, ia, params)
+      Netty4PushTransporter.raw[String, String](init, sa, params)
     }
 
     protected def newSession(handle: PushChannelHandle[String, String]): Future[SessionT] =

@@ -7,20 +7,20 @@ import com.twitter.logging.{Level, Logger}
 import com.twitter.util.{Future, Stopwatch, Throw, Try}
 
 /**
- * @see [[MethodBuilderScaladoc]]
+ * @see [[BaseMethodBuilder]]
  */
 private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (mb: MethodBuilder[Req, Rep]) {
 
   import MethodBuilderRetry._
 
   /**
-   * @see [[MethodBuilderScaladoc.withRetryForClassifier]]
+   * @see [[BaseMethodBuilder.withRetryForClassifier]]
    */
   def forClassifier(classifier: ResponseClassifier): MethodBuilder[Req, Rep] =
     mb.withConfig(mb.config.copy(retry = Config(Some(classifier))))
 
   /**
-   * @see [[MethodBuilderScaladoc.withRetryDisabled]]
+   * @see [[BaseMethodBuilder.withRetryDisabled]]
    */
   def disabled: MethodBuilder[Req, Rep] =
     forClassifier(Disabled)

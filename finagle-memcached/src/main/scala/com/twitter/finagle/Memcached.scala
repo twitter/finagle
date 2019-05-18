@@ -46,7 +46,7 @@ import com.twitter.io.Buf
 import com.twitter.util._
 import com.twitter.util.registry.GlobalRegistry
 import com.twitter.{finagle, hashing}
-import java.net.{InetSocketAddress, SocketAddress}
+import java.net.SocketAddress
 import scala.collection.mutable
 
 private[finagle] object MemcachedTracingFilter {
@@ -301,8 +301,8 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
     protected type Out = Command
     protected type SessionT = PipeliningClientPushSession[Response, Command]
 
-    protected def newPushTransporter(ia: InetSocketAddress): PushTransporter[Response, Command] =
-      Netty4PushTransporter.raw(MemcachedNetty4ClientPipelineInit, ia, params)
+    protected def newPushTransporter(sa: SocketAddress): PushTransporter[Response, Command] =
+      Netty4PushTransporter.raw(MemcachedNetty4ClientPipelineInit, sa, params)
 
     protected def newSession(handle: PushChannelHandle[Response, Command]): Future[SessionT] = {
       Future.value(

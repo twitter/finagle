@@ -8,6 +8,9 @@ import scala.util.control.NoStackTrace
 private[twitter] object OpportunisticTls {
   private[this] val log = Logger.get()
 
+  /** The sequence of [[OpportunisticTls.Level]]s from least to most secure */
+  final val Values: Seq[OpportunisticTls.Level] = Seq(Off, Desired, Required)
+
   /**
    * Defines encrypter keys and values exchanged as part of a
    * mux session header during initialization.
@@ -54,7 +57,7 @@ private[twitter] object OpportunisticTls {
    * support.
    * @note Java users: See [[OpportunisticTlsConfig]].
    */
-  sealed abstract class Level(value: String) {
+  sealed abstract class Level(val value: String) {
     val buf: Buf = Buf.Utf8(value)
   }
 

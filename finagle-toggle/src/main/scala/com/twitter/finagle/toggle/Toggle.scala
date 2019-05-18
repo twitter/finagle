@@ -8,7 +8,7 @@ package com.twitter.finagle.toggle
  *           between libraries. For example, "com.twitter.finagle.CoolThing".
  *           Valid characters are `A-Z`, `a-z`, `0-9`, `_`, `-`, `.`.
  *
- * @see [[http://martinfowler.com/articles/feature-toggles.html Feature Toggles]]
+ * @see [[https://martinfowler.com/articles/feature-toggles.html Feature Toggles]]
  *      for detailed discussion on the topic.
  * @see [[ToggleMap]]
  */

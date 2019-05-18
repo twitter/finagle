@@ -5,7 +5,7 @@
 
 # Finagle
 
-[![Build status](https://travis-ci.org/twitter/finagle.svg?branch=develop)](https://travis-ci.org/twitter/finagle)
+[![Build status](https://travis-ci.org/twitter/finagle.svg?branch=master)](https://travis-ci.org/twitter/finagle)
 [![Codecov](https://codecov.io/gh/twitter/finagle/branch/develop/graph/badge.svg)](https://codecov.io/gh/twitter/finagle)
 [![Project status](https://img.shields.io/badge/status-active-brightgreen.svg)](#status)
 [![Gitter](https://badges.gitter.im/twitter/finagle.svg)](https://gitter.im/twitter/finagle?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
@@ -19,7 +19,7 @@ This project is used in production at Twitter (and many other organizations), an
 ## Releases
 
 [Releases](https://maven-badges.herokuapp.com/maven-central/com.twitter/finagle_2.12)
-are done on an approximately monthly schedule. While [semver](http://semver.org/)
+are done on an approximately monthly schedule. While [semver](https://semver.org/)
 is not followed, the [changelogs](CHANGELOG.rst) are detailed and include sections on
 public API breaks and changes in runtime behavior.
 

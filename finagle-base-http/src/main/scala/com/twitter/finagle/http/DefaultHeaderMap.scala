@@ -1,7 +1,12 @@
 package com.twitter.finagle.http
 
+import com.twitter.finagle.http.Rfc7230HeaderValidation.{
+  ObsFoldDetected,
+  ValidationFailure,
+  ValidationSuccess
+}
 import com.twitter.logging.Logger
-import scala.annotation.{switch, tailrec}
+import scala.annotation.tailrec
 import scala.collection.mutable
 
 /**
@@ -72,117 +77,45 @@ private final class DefaultHeaderMap extends HeaderMap {
     this
   }
 
-  override def keySet: Set[String] = underlying.synchronized {
-    underlying.values.flatMap(_.names).toSet
+  override def keysIterator: Iterator[String] = underlying.synchronized {
+    underlying.uniqueNamesIterator
   }
 
-  override def keysIterator: Iterator[String] =
-    keySet.iterator
+  private[finagle] override def nameValueIterator: Iterator[HeaderMap.NameValue] =
+    underlying.synchronized {
+      underlying.flattenedNameValueIterator
+    }
 }
 
 private object DefaultHeaderMap {
 
   private[this] val logger = Logger.get(classOf[DefaultHeaderMap])
 
-  private[this] final def MaxValueChar: Char = 255
+  // Exposed for testing
+  private[http] val ObsFoldRegex = "\r?\n[\t ]+".r
 
-  // Adopted from Netty 3 HttpHeaders.
-  private def validateName(s: String): Unit = {
-    if (s == null) throw new NullPointerException("Header names cannot be null")
-
-    var i = 0
-    while (i < s.length) {
-      val c = s.charAt(i)
-
-      if (c > 127) {
-        throw new IllegalArgumentException(
-          s"Header '$s': name cannot contain non-ASCII characters: $c")
-      }
-
-      (c: @switch) match {
-        case '\t' | '\n' | 0x0b | '\f' | '\r' | ' ' | ',' | ':' | ';' | '=' =>
-          throw new IllegalArgumentException(
-            s"Header '$s': name cannot contain the following prohibited characters: " +
-              "=,;: \\t\\r\\n\\v\\f "
-          )
-        case _ =>
-      }
-
-      i += 1
-    }
-  }
-
-  // Adopted from Netty 3 HttpHeaders.
-  private def foldReplacingValidateValue(name: String, value: String): String = {
-    if (value == null) throw new NullPointerException("Header values cannot be null")
-
-    var i = 0
-
-    // 0: Previous character was neither CR nor LF
-    // 1: The previous character was CR
-    // 2: The previous character was LF
-    var state = 0
-    var foldDetected = false
-
-    while (i < value.length) {
-      val c = value.charAt(i)
-
-      if (c > MaxValueChar)
-        throw new IllegalArgumentException(
-          s"Header '$name': value contains illegal character '$c'"
-        )
-
-      (c: @switch) match {
-        case 0x0b =>
-          throw new IllegalArgumentException(
-            s"Header '$name': value contains a prohibited character '\\v'"
-          )
-        case '\f' =>
-          throw new IllegalArgumentException(
-            s"Header '$name': value contains a prohibited character '\\f'"
-          )
-        case _ =>
-      }
-
-      (state: @switch) match {
-        case 0 =>
-          if (c == '\r') state = 1
-          else if (c == '\n') state = 2
-        case 1 =>
-          if (c == '\n') state = 2
-          else
-            throw new IllegalArgumentException(
-              s"Header '$name': only '\\n' is allowed after '\\r' in value")
-        case 2 =>
-          if (c == '\t' || c == ' ') {
-            foldDetected = true // We are going to replace the folds later
-            state = 0
-          } else
-            throw new IllegalArgumentException(
-              s"Header '$name': only ' ' and '\\t' are allowed after '\\n' in value")
-      }
-
-      i += 1
+  private def validateName(name: String): Unit =
+    Rfc7230HeaderValidation.validateName(name) match {
+      case ValidationSuccess => () // nop
+      case ValidationFailure(ex) => throw ex
     }
 
-    if (state != 0) {
-      throw new IllegalArgumentException(
-        s"Header '$name': value must not end with '\\r' or '\\n'. Observed: " +
-          (if (state == 1) "\\r" else "\\n")
-      )
-    } else if (foldDetected) {
-      logger.debug("`obs-fold` sequence replaced.")
-      // Per https://tools.ietf.org/html/rfc7230#section-3.2.4, an obs-fold is equivalent
-      // to a SP char and suggests that such header values should be 'fixed' before
-      // interpreting or forwarding the message.
-      Rfc7230HeaderValidation.replaceObsFold(value)
-    } else {
-      // Valid and no modifications needed.
-      value
+  private def foldReplacingValidateValue(name: String, value: String): String =
+    Rfc7230HeaderValidation.validateValue(name, value) match {
+      case ValidationSuccess =>
+        value
+      case ValidationFailure(ex) =>
+        throw ex
+      case ObsFoldDetected =>
+        logger.debug("`obs-fold` sequence replaced.")
+        // Per https://tools.ietf.org/html/rfc7230#section-3.2.4, an obs-fold is equivalent
+        // to a SP char and suggests that such header values should be 'fixed' before
+        // interpreting or forwarding the message.
+        Rfc7230HeaderValidation.replaceObsFold(value)
     }
-  }
 
-  private final class Header(val name: String, val value: String, var next: Header = null) {
+  private final class Header(val name: String, val value: String, var next: Header = null)
+      extends HeaderMap.NameValue {
 
     def values: Seq[String] =
       if (next == null) value :: Nil
@@ -265,42 +198,81 @@ private object DefaultHeaderMap {
         loop(0)
       }
 
-    def flattenIterator: Iterator[(String, String)] = new Iterator[(String, String)] {
-      // To get the following behavior, this method must be called in a thread safe
-      // manner and as such, it is only called from within the `DefaultHeaderMap.iterator`
-      // method, which synchronizes on this instance.
-      //
-      // The resulting iterator is not invariant of mutations of the HeaderMap, but
-      // shouldn't result in corruption of the HashMap. To do that, we make a copy
-      // of the underlying values, so by key, it is immutable. However, adding more
-      // values to an existing key is still not thread safe in terms of observability
-      // since it modifies the `Header` linked list structure, but that shouldn't
-      // result in corruption of this HashMap.
-      private[this] val it = {
-        val array = new Array[Header](self.size)
-        val it = self.entriesIterator
-        var i = 0
-        while (it.hasNext) {
-          array(i) = it.next().value
-          i += 1
-        }
-        array.iterator
+    // This method must be called in a thread safe manner and as such, it is only called from within
+    // the `DefaultHeaderMap.*iterator` methods that synchronize on this instance.
+    //
+    // The resulting iterator is not invariant of mutations of the HeaderMap, but
+    // shouldn't result in corruption of the HashMap. To do that, we make a copy
+    // of the underlying values, so by key, it is immutable. However, adding more
+    // values to an existing key is still not thread safe in terms of observability
+    // since it modifies the `Header` linked list structure, but that shouldn't
+    // result in corruption of this HashMap.
+    private[this] def copiedEntitiesIterator: Iterator[Header] = {
+      val array = new Array[Header](self.size)
+      val it = self.entriesIterator
+      var i = 0
+      while (it.hasNext) {
+        array(i) = it.next().value
+        i += 1
       }
-      private[this] var current: Header = _
+
+      array.iterator
+    }
+
+    def uniqueNamesIterator: Iterator[String] = new Iterator[String] {
+      private[this] val it = copiedEntitiesIterator
+      private[this] var current: List[String] = Nil
+
+      // The `contains` call here isn't a problem but a feature. We're anticipating a very few
+      // (usually zero) duplicated header names so the linear search in the list becomes a constant
+      // time lookup in the majority of the cases and is bounded by the total number of duplicated
+      // headers for a given name in the worst case.
+      //
+      // As in other parts of Headers implementation we're biased towards headers with no
+      // duplicated names hence the trade-off of using a linear search to track uniqueness of the
+      // names instead of a hash-set lookup.
+      @tailrec
+      private[this] def collectUnique(from: Header, to: List[String]): List[String] = {
+        if (from == null) to
+        else if (to.contains(from.name)) collectUnique(from.next, to)
+        else collectUnique(from.next, from.name :: to)
+      }
 
       def hasNext: Boolean =
-        it.hasNext || current != null
+        it.hasNext || !current.isEmpty
 
-      def next(): (String, String) = {
-        if (current == null) {
-          current = it.next()
+      def next(): String = {
+        if (current.isEmpty) {
+          current = collectUnique(it.next(), Nil)
         }
 
-        val result = (current.name, current.value)
-        current = current.next
+        val result = current.head
+        current = current.tail
         result
       }
     }
+
+    def flattenIterator: Iterator[(String, String)] =
+      flattenedNameValueIterator.map(nv => (nv.name, nv.value))
+
+    def flattenedNameValueIterator: Iterator[HeaderMap.NameValue] =
+      new Iterator[HeaderMap.NameValue] {
+        private[this] val it = copiedEntitiesIterator
+        private[this] var current: Header = _
+
+        def hasNext: Boolean =
+          it.hasNext || current != null
+
+        def next(): HeaderMap.NameValue = {
+          if (current == null) {
+            current = it.next()
+          }
+
+          val result = current
+          current = current.next
+          result
+        }
+      }
 
     def getFirstOrNull(key: String): String =
       findEntry(key) match {

@@ -44,10 +44,12 @@ Finagle servers are simple; they are designed to serve requests quickly. As such
 Finagle minimally furnishes servers with additional behavior. More sophisticated
 behavior lives in the :ref:`clients <finagle_clients>`.
 
-.. figure:: _static/serverstack.svg
+.. raw:: html
+    :file: _static/serverstack.svg
 
-    Fig. 1: A visual representation of each module in a default Finagle server.
-    Requests flow from left to right.
+
+Fig. 1: A visual representation of each module in a default Finagle server.
+Requests flow from left to right.
 
 Many of the server modules act as `admission controllers` that make a decision (based on either a dynamic or
 static property) whether this server can handle the incoming request while maintaining some SLO (Service Level

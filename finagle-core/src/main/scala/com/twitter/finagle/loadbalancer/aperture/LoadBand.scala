@@ -2,7 +2,7 @@ package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle._
 import com.twitter.finagle.loadbalancer.{BalancerNode, NodeT}
-import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.Ema
 import com.twitter.util.{Closable, Duration, Future, Return, Throw, Time}
 
@@ -20,14 +20,17 @@ import com.twitter.util.{Closable, Duration, Future, Return, Throw, Time}
  *
  * 1. Distributed clients should be able to converge on a uniform aperture size if
  * they are offered the same amount of load. The tighter the high and low bands, the
- * less "wiggle" room distributed clients have to diverge aperture sizes. This is an
- * important property to maintain, especially when using [[DeterministicAperture]], in
- * order to have a more uniform load distribution.
+ * less "wiggle" room distributed clients have to diverge aperture sizes.
  *
  * 2. Large changes or oscillations in the aperture window size are minimized in order to
  * avoid creating undue resource (e.g. sessions) churn. The `smoothWindow` allows to
  * dampen the rate of changes by rolling the offered load into an exponentially weighted
  * moving average.
+ *
+ * @note When using deterministic aperture, the aperture is not resized on the request
+ *       path. Instead it changes with server set updates. Due to the mechanism with
+ *       which this gets mixed in, this trait works as a no-op when [[Aperture.dapertureActive]]
+ *       is true.
  */
 private[loadbalancer] trait LoadBand[Req, Rep] extends BalancerNode[Req, Rep] with Closable {
   self: Aperture[Req, Rep] =>
@@ -62,7 +65,10 @@ private[loadbalancer] trait LoadBand[Req, Rep] extends BalancerNode[Req, Rep] wi
   private[this] val monoTime = new Ema.Monotime
   private[this] val ema = new Ema(smoothWin.inNanoseconds)
 
-  private[this] val sr = statsReceiver.scope("loadband")
+  // As noted above, d-aperture balancers do not need these metrics.
+  private[this] val sr =
+    if (dapertureActive) NullStatsReceiver
+    else statsReceiver.scope("loadband")
   private[this] val widenCounter = sr.counter("widen")
   private[this] val narrowCounter = sr.counter("narrow")
 
@@ -118,19 +124,23 @@ private[loadbalancer] trait LoadBand[Req, Rep] extends BalancerNode[Req, Rep] wi
 
   protected trait LoadBandNode extends NodeT[Req, Rep] {
     abstract override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
-      adjustTotalLoad(1)
-      super.apply(conn).transform {
-        case Return(svc) =>
-          Future.value(new ServiceProxy(svc) {
-            override def close(deadline: Time): Future[Unit] =
-              super.close(deadline).ensure {
-                adjustTotalLoad(-1)
-              }
-          })
+      if (dapertureActive) {
+        super.apply(conn)
+      } else {
+        adjustTotalLoad(1)
+        super.apply(conn).transform {
+          case Return(svc) =>
+            Future.value(new ServiceProxy(svc) {
+              override def close(deadline: Time): Future[Unit] =
+                super.close(deadline).ensure {
+                  adjustTotalLoad(-1)
+                }
+            })
 
-        case t @ Throw(_) =>
-          adjustTotalLoad(-1)
-          Future.const(t)
+          case t @ Throw(_) =>
+            adjustTotalLoad(-1)
+            Future.const(t)
+        }
       }
     }
   }

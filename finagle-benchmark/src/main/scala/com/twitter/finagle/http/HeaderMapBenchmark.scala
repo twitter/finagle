@@ -30,6 +30,17 @@ abstract class HeaderMapBenchmark extends StdBenchAnnotations {
 
   @Benchmark
   def iterate(b: Blackhole): Unit = map.foreach(h => b.consume(h))
+
+  @Benchmark
+  def keySet(): scala.collection.Set[String] = map.keySet
+
+  @Benchmark
+  def iterateKeys(b: Blackhole): Unit =
+    map.keysIterator.foreach(k => b.consume(k))
+
+  @Benchmark
+  def iterateValues(b: Blackhole): Unit =
+    map.valuesIterator.foreach(k => b.consume(k))
 }
 
 class DefaultHeaderMapBenchmark extends HeaderMapBenchmark {

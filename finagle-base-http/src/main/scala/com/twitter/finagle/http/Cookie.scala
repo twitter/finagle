@@ -1,10 +1,8 @@
 package com.twitter.finagle.http
 
-import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.http.cookie.SameSite
 import com.twitter.util.Duration
 import java.util.{BitSet => JBitSet}
-import org.jboss.netty.handler.codec.http.{Cookie => NettyCookie}
 
 object Cookie {
 
@@ -132,20 +130,6 @@ final class Cookie private (
     httpOnly,
     SameSite.Unset
   )
-
-  @deprecated("Use Bijections.from to create a Cookie from a Netty Cookie")
-  def this(underlying: NettyCookie) = {
-    this(
-      underlying.getName,
-      underlying.getValue,
-      underlying.getDomain,
-      underlying.getPath,
-      Option(underlying.getMaxAge.seconds),
-      underlying.isSecure,
-      underlying.isHttpOnly,
-      SameSite.Unset /* Netty cookies do not support the SameSite attribute */
-    )
-  }
 
   def maxAge: Duration = _maxAge match {
     case Some(maxAge) => maxAge

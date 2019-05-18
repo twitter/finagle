@@ -1,7 +1,8 @@
 package com.twitter.finagle.factory
 
 import com.twitter.finagle._
-import com.twitter.util.{Future, Duration, Timer}
+import com.twitter.finagle.client.LatencyCompensation
+import com.twitter.util.{Duration, Future, Timer}
 
 object TimeoutFactory {
 
@@ -23,25 +24,38 @@ object TimeoutFactory {
    * @param _role The stack role used to identify the TimeoutFactory when inserted
    * into a stack.
    */
-  private[finagle] def module[Req, Rep](_role: Stack.Role): Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module3[Param, param.Timer, param.Label, ServiceFactory[Req, Rep]] {
-      val role = _role
-      val description = "Timeout service acquisition after a given period"
+  def module[Req, Rep](role: Stack.Role): Stackable[ServiceFactory[Req, Rep]] = {
+    val _role = role
+    new Stack.Module4[
+      Param,
+      param.Timer,
+      param.Label,
+      LatencyCompensation.Compensation,
+      ServiceFactory[Req, Rep]
+    ] {
+      val role: Stack.Role = _role
+      val description: String = "Timeout service acquisition after a given period"
+
       def make(
         _timeout: Param,
         _timer: param.Timer,
         _label: param.Label,
+        compensation: LatencyCompensation.Compensation,
         next: ServiceFactory[Req, Rep]
       ): TimeoutFactory[Req, Rep] = {
         val Param(timeout) = _timeout
         val param.Label(label) = _label
         val param.Timer(timer) = _timer
+        val howLong = compensation.howlong
 
-        val exc = new ServiceTimeoutException(timeout)
+        val totalTimeout = howLong + timeout
+
+        val exc = new ServiceTimeoutException(totalTimeout)
         exc.serviceName = label
-        new TimeoutFactory(next, timeout, exc, timer)
+        new TimeoutFactory(next, totalTimeout, exc, timer)
       }
     }
+  }
 }
 
 /**

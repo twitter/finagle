@@ -359,7 +359,7 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
     } yield TraceId(traceId, parentId, spanId, sampled, flags)
 
     for (id <- traceIds)
-      assert(Trace.idCtx.tryUnmarshal(Trace.idCtx.marshal(id)) == Return(id))
+      assert(Trace.TraceIdContext.tryUnmarshal(Trace.TraceIdContext.marshal(id)) == Return(id))
   }
 
   test("trace ID serialization: valid ids (128-bit)") {
@@ -372,7 +372,8 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
       Some(SpanId(2L))
     )
 
-    assert(Trace.idCtx.tryUnmarshal(Trace.idCtx.marshal(traceId)) == Return(traceId))
+    assert(
+      Trace.TraceIdContext.tryUnmarshal(Trace.TraceIdContext.marshal(traceId)) == Return(traceId))
   }
 
   // example from X-Amzn-Trace-Id: Root=1-5759e988-bd862e3fe1be46a994272793;Sampled=1
@@ -386,7 +387,7 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
   test("trace ID serialization: throw in handle on invalid size") {
     val bytes = new Array[Byte](33)
 
-    Trace.idCtx.tryUnmarshal(Buf.ByteArray.Owned(bytes)) match {
+    Trace.TraceIdContext.tryUnmarshal(Buf.ByteArray.Owned(bytes)) match {
       case Throw(_: IllegalArgumentException) =>
       case rv => fail(s"Got $rv")
     }

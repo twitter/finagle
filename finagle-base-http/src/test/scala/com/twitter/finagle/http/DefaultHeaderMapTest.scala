@@ -7,30 +7,6 @@ class DefaultHeaderMapTest extends AbstractHeaderMapTest with GeneratorDrivenPro
 
   import Rfc7230HeaderValidationTest._
 
-  def genValidFoldedHeader: Gen[(String, String)] =
-    for {
-      k <- genNonEmptyString
-      v <- genFoldedValue
-    } yield (k, v)
-
-  def genInvalidHeaderNameHeader: Gen[(String, String)] =
-    for {
-      (k, v) <- genValidHeader
-      c <- Gen.oneOf(Seq[Char]('\t', '\n', '\f', '\r', ' ', ',', ':', ';', '=', 0x0b))
-    } yield (k + c, v)
-
-  def genNonAsciiHeaderNameHeader: Gen[(String, String)] =
-    for {
-      k <- genNonAsciiHeaderName
-      v <- genNonEmptyString
-    } yield (k, v)
-
-  def genInvalidHeaderValueHeader: Gen[(String, String)] =
-    for {
-      (k, v) <- genValidHeader
-      c <- Gen.oneOf(Seq[Char]('\f', 0x0b))
-    } yield (k, v + c)
-
   def genValidHeader: Gen[(String, String)] =
     for {
       k <- genNonEmptyString
@@ -77,59 +53,58 @@ class DefaultHeaderMapTest extends AbstractHeaderMapTest with GeneratorDrivenPro
   }
 
   test("validates header names & values with obs-folds (success)") {
-    forAll(genValidFoldedHeader) {
-      case (k, v) =>
-        val value = DefaultHeaderMap(k -> v).apply(k)
-        assert(value == Rfc7230HeaderValidation.replaceObsFold(v))
-        assert(v.contains("\n"))
-        assert(!value.contains("\n"))
+    forAll(genFoldedValue) { v =>
+      val value = DefaultHeaderMap("foo" -> v).apply("foo")
+      assert(value == DefaultHeaderMap.ObsFoldRegex.replaceAllIn(v, " "))
+      assert(v.contains("\n"))
+      assert(!value.contains("\n"))
     }
   }
 
   test("validates header names (failure)") {
-    forAll(genInvalidHeaderNameHeader) { h =>
-      val e = intercept[IllegalArgumentException](DefaultHeaderMap(h))
-      assert(e.getMessage.contains("prohibited characters"))
+    forAll(genInvalidHeaderName) { k =>
+      val e = intercept[IllegalArgumentException](DefaultHeaderMap(k -> "foo"))
+      assert(e.getMessage.contains("prohibited character"))
     }
 
-    forAll(genNonAsciiHeaderNameHeader) { h =>
-      val e = intercept[IllegalArgumentException](DefaultHeaderMap(h))
-      assert(e.getMessage.contains("non-ASCII characters"))
+    forAll(genNonAsciiHeaderName) { k =>
+      val e = intercept[IllegalArgumentException](DefaultHeaderMap(k -> "foo"))
+      assert(e.getMessage.contains("prohibited character"))
     }
   }
 
   test("validates header values (failure)") {
-    forAll(genInvalidHeaderValueHeader) { h =>
-      val e = intercept[IllegalArgumentException](DefaultHeaderMap(h))
+    forAll(genInvalidHeaderValue) { v =>
+      val e = intercept[IllegalArgumentException](DefaultHeaderMap("foo" -> v))
       assert(e.getMessage.contains("prohibited character"))
     }
 
-    forAll(genInvalidClrfHeaderValue) { h =>
-      intercept[IllegalArgumentException](DefaultHeaderMap("foo" -> h))
+    forAll(genInvalidClrfHeaderValue) { v =>
+      intercept[IllegalArgumentException](DefaultHeaderMap("foo" -> v))
     }
   }
 
   test("does not validate header names or values with addUnsafe") {
     val headerMap = newHeaderMap()
 
-    forAll(genInvalidHeaderNameHeader) { h =>
-      headerMap.addUnsafe(h._1, h._2)
+    forAll(genInvalidHeaderName) { k =>
+      headerMap.addUnsafe(k, "foo")
     }
 
-    forAll(genInvalidHeaderValueHeader) { h =>
-      headerMap.addUnsafe(h._1, h._2)
+    forAll(genInvalidHeaderValue) { v =>
+      headerMap.addUnsafe("foo", v)
     }
   }
 
   test("does not validate header names or values with setUnsafe") {
     val headerMap = newHeaderMap()
 
-    forAll(genInvalidHeaderNameHeader) { h =>
-      headerMap.setUnsafe(h._1, h._2)
+    forAll(genInvalidHeaderName) { k =>
+      headerMap.setUnsafe(k, "foo")
     }
 
-    forAll(genInvalidHeaderValueHeader) { h =>
-      headerMap.setUnsafe(h._1, h._2)
+    forAll(genInvalidHeaderValue) { v =>
+      headerMap.setUnsafe("foo", v)
     }
   }
 
@@ -142,5 +117,16 @@ class DefaultHeaderMapTest extends AbstractHeaderMapTest with GeneratorDrivenPro
 
     val empty = DefaultHeaderMap()
     assert(empty.getOrNull("foo") == empty.get("foo").orNull)
+  }
+
+  // a handful of non-property based tests
+  test("empty header name is rejected") {
+    intercept[IllegalArgumentException](DefaultHeaderMap("" -> "bar"))
+  }
+
+  test("header names with separators are rejected") {
+    ((0x1 to 0x20).map(_.toChar) ++ "\"(),/:;<=>?@[\\]{}").foreach { illegalChar =>
+      intercept[IllegalArgumentException](DefaultHeaderMap(illegalChar.toString -> "bar"))
+    }
   }
 }

@@ -185,7 +185,8 @@ object RetryPolicy extends JavaSingleton {
   }
 
   /**
-   * Use [[ResponseClassifier.RetryOnTimeout]] for the [[ResponseClassifier]] equivalent.
+   * Use [[ResponseClassifier.RetryOnTimeout]] composed with
+   * [[ResponseClassifier.RetryOnWriteExceptions]] for the [[ResponseClassifier]] equivalent.
    */
   val TimeoutAndWriteExceptionsOnly: PartialFunction[Try[Nothing], Boolean] =
     WriteExceptionsOnly.orElse {

@@ -1,0 +1,60 @@
+package com.twitter.finagle.util
+
+import org.scalatest.FunSuite
+
+class CachedHashCodeTest extends FunSuite {
+
+  private class HashTo(hc: Int) extends CachedHashCode.ForClass {
+    override protected def computeHashCode: Int = hc
+
+    // note: we leave equals as is, so that it is based on reference equality.
+  }
+
+  private case class CachedCaseClass(i: Int) extends CachedHashCode.ForCaseClass
+
+  test("hashCode") {
+    val h1 = new HashTo(1)
+    assert(1 == h1.hashCode)
+
+    val h2 = new HashTo(2)
+    assert(2 == h2.hashCode)
+  }
+
+  test("hashCode to the sentinel value") {
+    val h0 = new HashTo(CachedHashCode.NotComputed)
+    assert(CachedHashCode.ComputedCollision == h0.hashCode)
+  }
+
+  test("used as keys in a Map") {
+    val h0a = new HashTo(0)
+    val h0b = new HashTo(0)
+    val h1c = new HashTo(1)
+    val h1d = new HashTo(1)
+    val map = Map(h0a -> "a", h0b -> "b", h1c -> "c", h1d -> "d")
+
+    assert("a" == map(h0a))
+    assert("b" == map(h0b))
+    assert("c" == map(h1c))
+    assert("d" == map(h1d))
+
+    assert(map.get(new HashTo(1)).isEmpty)
+  }
+
+  test("mixed into case classes") {
+    val a = CachedCaseClass(0)
+    val b = CachedCaseClass(0)
+    assert(a == b)
+    assert(a.hashCode == b.hashCode)
+  }
+
+  test("same hashCode mixed in or not") {
+    case class NotMixedIn(s: String)
+    case class MixedIn(s: String) extends CachedHashCode.ForCaseClass
+
+    val nmi = NotMixedIn("hello")
+    val mi = MixedIn("hello")
+
+    assert(nmi.hashCode == mi.hashCode)
+  }
+
+}

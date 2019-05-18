@@ -13,9 +13,7 @@ final class SpanId(val self: Long) extends Proxy {
 }
 
 object SpanId {
-  // StringBuilder.appendAll(char..) seems to be faster than
-  // StringBuilder.append(string..)
-  private val lut: Array[Array[Char]] = (
+  private[this] val lut: Array[Array[Char]] = (
     for (b <- Byte.MinValue to Byte.MaxValue) yield {
       val bb = if (b < 0) b + 256 else b
       val s = "%02x".format(bb)
@@ -25,18 +23,26 @@ object SpanId {
 
   private def byteToChars(b: Byte): Array[Char] = lut(b + 128)
 
-  // This is invoked a lot, so they need to be fast.
+  private[this] val chars = new ThreadLocal[Array[Char]] {
+    override def initialValue(): Array[Char] = new Array[Char](16)
+  }
+
+  private[this] def append(chs: Array[Char], offset: Int, input: Array[Char]): Unit = {
+    chs(offset) = input(0)
+    chs(offset + 1) = input(1)
+  }
+
   def toString(l: Long): String = {
-    val b = new StringBuilder(16)
-    b.appendAll(byteToChars((l >> 56 & 0xff).toByte))
-    b.appendAll(byteToChars((l >> 48 & 0xff).toByte))
-    b.appendAll(byteToChars((l >> 40 & 0xff).toByte))
-    b.appendAll(byteToChars((l >> 32 & 0xff).toByte))
-    b.appendAll(byteToChars((l >> 24 & 0xff).toByte))
-    b.appendAll(byteToChars((l >> 16 & 0xff).toByte))
-    b.appendAll(byteToChars((l >> 8 & 0xff).toByte))
-    b.appendAll(byteToChars((l & 0xff).toByte))
-    b.toString
+    val chs = chars.get()
+    append(chs, 0, byteToChars((l >> 56 & 0xff).toByte))
+    append(chs, 2, byteToChars((l >> 48 & 0xff).toByte))
+    append(chs, 4, byteToChars((l >> 40 & 0xff).toByte))
+    append(chs, 6, byteToChars((l >> 32 & 0xff).toByte))
+    append(chs, 8, byteToChars((l >> 24 & 0xff).toByte))
+    append(chs, 10, byteToChars((l >> 16 & 0xff).toByte))
+    append(chs, 12, byteToChars((l >> 8 & 0xff).toByte))
+    append(chs, 14, byteToChars((l & 0xff).toByte))
+    new String(chs)
   }
 
   def apply(spanId: Long): SpanId = new SpanId(spanId)

@@ -6,7 +6,7 @@ import com.twitter.io.Buf
 /**
  * Defines a row where the data is presumed to be encoded with the mysql
  * text-based protocol.
- * [[http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-ProtocolText::ResultsetRow]]
+ * [[https://dev.mysql.com/doc/internals/en/com-query-response.html#packet-ProtocolText::ResultsetRow]]
  */
 private class StringEncodedRow(
   rawRow: Buf,
@@ -18,7 +18,7 @@ private class StringEncodedRow(
   /**
    * Convert the string representation of each value
    * into an appropriate Value object.
-   * [[http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-ProtocolText::ResultsetRow]]
+   * [[https://dev.mysql.com/doc/internals/en/com-query-response.html#packet-ProtocolText::ResultsetRow]]
    */
   lazy val values: IndexedSeq[Value] = {
     val reader = MysqlBuf.reader(rawRow)

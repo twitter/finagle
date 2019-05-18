@@ -1,9 +1,9 @@
 package com.twitter.finagle.http2.transport
 
 import com.twitter.finagle.Stack
-import com.twitter.finagle.http2.MultiplexCodecBuilder
+import com.twitter.finagle.http2.{Http2PipelineInitializer, MultiplexCodecBuilder}
 import com.twitter.finagle.netty4.http._
-import com.twitter.finagle.param.{Stats, Timer => TimerParam}
+import com.twitter.finagle.param.Stats
 import com.twitter.logging.Logger
 import io.netty.buffer.{ByteBuf, ByteBufUtil}
 import io.netty.channel.{
@@ -13,6 +13,10 @@ import io.netty.channel.{
   ChannelInitializer
 }
 import io.netty.handler.codec.http2.Http2CodecUtil.connectionPrefaceBuf
+
+private[http2] object PriorKnowledgeHandler {
+  val logger = Logger.get()
+}
 
 /**
  * This handler allows an instant upgrade to HTTP/2 if the first bytes received from the client
@@ -28,6 +32,8 @@ final private[http2] class PriorKnowledgeHandler(
   initializer: ChannelInitializer[Channel],
   params: Stack.Params)
     extends ChannelInboundHandlerAdapter {
+
+  import PriorKnowledgeHandler._
 
   val prefaceToRead: ByteBuf = connectionPrefaceBuf
   var bytesConsumed: Integer = 0
@@ -81,8 +87,8 @@ final private[http2] class PriorKnowledgeHandler(
 
           p.replace(HttpCodecName, Http2CodecName, http2MultiplexCodec)
           p.remove("upgradeHandler")
-          val timer = params[TimerParam].timer
-          p.addAfter(Http2CodecName, H2Filter.HandlerName, new H2Filter(timer))
+
+          Http2PipelineInitializer.setup(ctx, params, Http2CodecName)
 
           // Since we changed the pipeline, our current ctx points to the wrong handler
           // but we can still use this handler as the reference point in the new pipeline
@@ -103,12 +109,7 @@ final private[http2] class PriorKnowledgeHandler(
       case _ =>
         // Not sure if there are valid cases for this. Allow it for now but log it.
 
-        Logger
-          .get(this.getClass)
-          .warning(
-            s"Unexpected non ByteBuf message read: " +
-              s"${msg.getClass.getName} - $msg"
-          )
+        logger.warning(s"Unexpected non ByteBuf message read: ${msg.getClass.getName} - $msg")
         ctx.fireChannelRead(msg)
     }
   }

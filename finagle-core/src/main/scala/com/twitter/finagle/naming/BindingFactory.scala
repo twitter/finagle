@@ -5,9 +5,9 @@ import com.twitter.finagle._
 import com.twitter.finagle.factory.ServiceFactoryCache
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.param
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.Trace
-import com.twitter.finagle.util.Showable
+import com.twitter.finagle.util.{CachedHashCode, Showable}
 import com.twitter.util._
 
 /**
@@ -54,12 +54,14 @@ private[finagle] class BindingFactory[Req, Rep](
   cacheTti: Duration = 10.minutes)
     extends ServiceFactory[Req, Rep] {
 
+  import BindingFactory.Dtabs
+
   private[this] val nameCache =
     new ServiceFactoryCache[Name.Bound, Req, Rep](
       bound =>
         new ServiceFactoryProxy(newFactory(bound)) {
           private val boundShow = Showable.show(bound)
-          override def apply(conn: ClientConnection) = {
+          override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
             Trace.recordBinary("namer.name", boundShow)
             super.apply(conn)
           }
@@ -75,7 +77,7 @@ private[finagle] class BindingFactory[Req, Rep](
       tree =>
         new ServiceFactoryProxy(NameTreeFactory(path, tree, nameCache)) {
           private val treeShow = tree.show
-          override def apply(conn: ClientConnection) = {
+          override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
             Trace.recordBinary("namer.tree", treeShow)
             super.apply(conn)
           }
@@ -87,8 +89,8 @@ private[finagle] class BindingFactory[Req, Rep](
     )
 
   private[this] val dtabCache = {
-    val newFactory: ((Dtab, Dtab)) => ServiceFactory[Req, Rep] = {
-      case (baseDtab, localDtab) =>
+    val newFactory: Dtabs => ServiceFactory[Req, Rep] = {
+      case Dtabs(baseDtab, localDtab) =>
         val factory = new DynNameFactory(
           NameInterpreter.bind(baseDtab ++ localDtab, path),
           nameTreeCache,
@@ -98,12 +100,12 @@ private[finagle] class BindingFactory[Req, Rep](
         new ServiceFactoryProxy(factory) {
           private val pathShow = path.show
           private val baseDtabShow = baseDtab.show
-          override def apply(conn: ClientConnection) = {
+          override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
             Trace.recordBinary("namer.path", pathShow)
             Trace.recordBinary("namer.dtab.base", baseDtabShow)
             // dtab.local is annotated on the client & server tracers.
 
-            super.apply(conn) rescue {
+            super.apply(conn).rescue {
               // we don't have the dtabs handy at the point we throw
               // the exception; fill them in on the way out
               case e: NoBrokersAvailableException =>
@@ -113,7 +115,7 @@ private[finagle] class BindingFactory[Req, Rep](
         }
     }
 
-    new ServiceFactoryCache[(Dtab, Dtab), Req, Rep](
+    new ServiceFactoryCache[Dtabs, Req, Rep](
       newFactory,
       timer,
       statsReceiver.scope("dtabcache"),
@@ -123,15 +125,25 @@ private[finagle] class BindingFactory[Req, Rep](
   }
 
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
-    dtabCache((baseDtab(), Dtab.local), conn)
+    dtabCache(Dtabs(baseDtab(), Dtab.local), conn)
 
-  def close(deadline: Time) =
+  def close(deadline: Time): Future[Unit] =
     Closable.sequence(dtabCache, nameTreeCache, nameCache).close(deadline)
 
-  override def status = dtabCache.status((baseDtab(), Dtab.local))
+  override def status: Status = dtabCache.status(Dtabs(baseDtab(), Dtab.local))
 }
 
 private[finagle] object BindingFactory {
+
+  private case class Dtabs(base: Dtab, local: Dtab) extends CachedHashCode.ForClass {
+    override protected def computeHashCode: Int = {
+      var hash = 1
+      hash = 31 * hash + base.hashCode
+      hash = 31 * hash + local.hashCode
+      hash
+    }
+  }
+
   val role = Stack.Role("Binding")
 
   /**
@@ -176,8 +188,8 @@ private[finagle] object BindingFactory {
    * seen `Name.Bound`s).
    */
   private[finagle] trait Module[Req, Rep] extends Stack.Module[ServiceFactory[Req, Rep]] {
-    val role = BindingFactory.role
-    val description = "Bind destination names to endpoints"
+    val role: Stack.Role = BindingFactory.role
+    val description: String = "Bind destination names to endpoints"
     val parameters = Seq(
       implicitly[Stack.Param[BaseDtab]],
       implicitly[Stack.Param[Dest]],
@@ -193,7 +205,10 @@ private[finagle] object BindingFactory {
      */
     protected[this] def boundPathFilter(path: Path): Filter[Req, Rep, Req, Rep]
 
-    def make(params: Stack.Params, next: Stack[ServiceFactory[Req, Rep]]) = {
+    def make(
+      params: Stack.Params,
+      next: Stack[ServiceFactory[Req, Rep]]
+    ): Stack[ServiceFactory[Req, Rep]] = {
       val param.Label(label) = params[param.Label]
       val param.Stats(stats) = params[param.Stats]
       val Dest(dest) = params[Dest]
@@ -234,6 +249,6 @@ private[finagle] object BindingFactory {
   private[finagle] def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Module[Req, Rep] {
       private[this] val f = Filter.identity[Req, Rep]
-      protected[this] def boundPathFilter(path: Path) = f
+      protected[this] def boundPathFilter(path: Path): Filter[Req, Rep, Req, Rep] = f
     }
 }

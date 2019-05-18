@@ -240,7 +240,7 @@ but note there are subtleties regarding where it is placed and the retry budgets
 .. note::
 
    Backup requests were popularized by Google in Dean, J. and Barroso, L.A. (2013),
-   `The Tail at Scale <http://cacm.acm.org/magazines/2013/2/160173-the-tail-at-scale/fulltext>`_,
+   `The Tail at Scale <https://cacm.acm.org/magazines/2013/2/160173-the-tail-at-scale/fulltext>`_,
    Communications of the ACM, Vol. 56 No. 2, Pages 74-80.
    Non-paywalled slides `here <https://static.googleusercontent.com/media/research.google.com/en//people/jeff/Berkeley-Latency-Mar2012.pdf>`_.
 

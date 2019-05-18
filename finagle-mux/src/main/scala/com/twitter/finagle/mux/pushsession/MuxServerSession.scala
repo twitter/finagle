@@ -126,6 +126,9 @@ private[finagle] final class MuxServerSession(
       h_dispatchState = State.Draining
 
       log.debug("Draining session")
+
+      // This stat is intentionally created on-demand as this event is infrequent enough to
+      // outweigh the benefit of a persistent counter.
       statsReceiver.counter("draining").incr()
 
       h_messageWriter.write(Message.Tdrain(Tags.ControlTag))

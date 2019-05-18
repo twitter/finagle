@@ -32,9 +32,10 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
     (PushChannelHandle[ByteReader, Buf], Option[Headers]) => Future[MuxClientSession]
 
   private[this] val fragmentingParams = Mux.client.params + MaxFrameSize(2.megabytes)
+  private[this] val sharedStats = new SharedNegotiationStats(NullStatsReceiver)
 
   private[this] val newClientSession: Negotiator = (handle, hs) => {
-    new Negotiation.Client(fragmentingParams).negotiateAsync(handle, hs)
+    new Negotiation.Client(fragmentingParams, sharedStats).negotiateAsync(handle, hs)
   }
 
   // Used to observe the headers received from the Server
@@ -144,7 +145,7 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
     // Make sure we are fragmenting the messages
 
     // Server only wants 100 byte chunks, so make the message at lest 150 bytes
-    val decoder = new FragmentDecoder(Future.never, NullStatsReceiver)
+    val decoder = new FragmentDecoder(NullStatsReceiver)
     val data = Buf.ByteArray((0 until 150).map(_.toByte): _*)
 
     service.apply(Request(Path(), data))
@@ -191,7 +192,10 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
 
   test("Handle onClose failure cancels the handshake") {
     val negotiate: Negotiator =
-      (handle, hs) => Future.value(new Negotiation.Client(fragmentingParams).negotiate(handle, hs))
+      (handle, hs) =>
+        Future.value(
+          new Negotiation.Client(fragmentingParams, sharedStats).negotiate(handle, hs)
+      )
 
     val (handle, negotiatingSession, stats) = withMockHandle(negotiate, fragmentingParams)
     assert(stats.gauges(Seq("negotiating")).apply() == 0.0f)
@@ -277,7 +281,7 @@ class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {
     val p = Promise[MuxClientSession]
     @volatile var setNegotiatePromise: () => Unit = null
     val negotiate: Negotiator = (handle, hs) => {
-      val n = new Negotiation.Client(fragmentingParams).negotiate(handle, hs)
+      val n = new Negotiation.Client(fragmentingParams, sharedStats).negotiate(handle, hs)
       setNegotiatePromise = () => p.setValue(n)
       p
     }

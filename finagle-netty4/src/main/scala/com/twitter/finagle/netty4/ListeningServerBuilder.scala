@@ -18,6 +18,7 @@ import io.netty.channel.unix.UnixChannelOption
 import io.netty.channel.epoll.{Epoll, EpollEventLoopGroup, EpollServerSocketChannel}
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
+import io.netty.channel.local.{LocalAddress, LocalServerChannel}
 import io.netty.util.concurrent.{FutureListener, Future => NettyFuture}
 import java.lang.{Boolean => JBool, Integer => JInt}
 import java.net.SocketAddress
@@ -76,23 +77,31 @@ private class ListeningServerBuilder(
   def bindWithBridge(bridge: ChannelInboundHandler, addr: SocketAddress): ListeningServer =
     new ListeningServer with CloseAwaitably {
       private[this] val bossLoop: EventLoopGroup =
-        if (useNativeEpoll() && Epoll.isAvailable) mkEpollEventLoopGroup()
+        if (ListeningServerBuilder.isLocal(addr)) mkNioEventLoopGroup()
+        else if (useNativeEpoll() && Epoll.isAvailable) mkEpollEventLoopGroup()
         else mkNioEventLoopGroup()
 
       private[this] val bootstrap = new ServerBootstrap()
 
-      if (useNativeEpoll() && Epoll.isAvailable) {
-        bootstrap.channel(classOf[EpollServerSocketChannel])
-        bootstrap.option[JBool](UnixChannelOption.SO_REUSEPORT, reusePort)
-      } else
-        bootstrap.channel(classOf[NioServerSocketChannel])
+      if (ListeningServerBuilder.isLocal(addr)) {
+        bootstrap.channel(classOf[LocalServerChannel])
+      } else {
+        if (useNativeEpoll() && Epoll.isAvailable) {
+          bootstrap.channel(classOf[EpollServerSocketChannel])
+          bootstrap.option[JBool](UnixChannelOption.SO_REUSEPORT, reusePort)
+        } else {
+          bootstrap.channel(classOf[NioServerSocketChannel])
+        }
+        // Trying to set SO_REUSEADDR and TCP_NODELAY gives 'Unkonwn channel option' warnings
+        // when used with `LocalServerChannel`.
+        bootstrap.option[JBool](ChannelOption.SO_REUSEADDR, reuseAddr)
+        bootstrap.childOption[JBool](ChannelOption.TCP_NODELAY, noDelay)
+      }
 
       bootstrap.group(bossLoop, params[param.WorkerPool].eventLoopGroup)
-      bootstrap.childOption[JBool](ChannelOption.TCP_NODELAY, noDelay)
       bootstrap.option(ChannelOption.ALLOCATOR, allocator)
       bootstrap.childOption(ChannelOption.ALLOCATOR, allocator)
 
-      bootstrap.option[JBool](ChannelOption.SO_REUSEADDR, reuseAddr)
       backlog.foreach(bootstrap.option[JInt](ChannelOption.SO_BACKLOG, _))
       sendBufSize.foreach(bootstrap.childOption[JInt](ChannelOption.SO_SNDBUF, _))
       recvBufSize.foreach(bootstrap.childOption[JInt](ChannelOption.SO_RCVBUF, _))
@@ -212,4 +221,11 @@ private class ListeningServerBuilder(
         )
       }
     }
+}
+
+private object ListeningServerBuilder {
+  def isLocal(addr: SocketAddress): Boolean = addr match {
+    case _: LocalAddress => true
+    case _ => false
+  }
 }

@@ -2,10 +2,6 @@ junit_tests(
     sources = rglobs("*.scala"),
     compiler_option_sets = {"fatal_warnings"},
     dependencies = [
-        scoped(
-            "3rdparty/jvm/io/netty",
-            scope = "forced",
-        ),
         "3rdparty/jvm/io/netty:netty4-codec-http",
         "3rdparty/jvm/io/netty:netty4-codec-http2",
         "3rdparty/jvm/io/netty:netty4-handler-proxy",

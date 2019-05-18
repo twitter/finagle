@@ -1,7 +1,6 @@
 scala_library(
     sources = rglobs("*.scala"),
     dependencies = [
-        "3rdparty/jvm/io/netty",
         "3rdparty/jvm/org/apache/curator:curator-framework",
         "3rdparty/jvm/org/apache/curator:curator-test",
         "3rdparty/jvm/org/apache/thrift:libthrift",
@@ -15,7 +14,6 @@ scala_library(
         "finagle/finagle-memcached/src/main/scala",
         "finagle/finagle-mux/src/main/scala",
         "finagle/finagle-mysql/src/main/scala",
-        "finagle/finagle-netty3/src/main/scala",
         "finagle/finagle-netty4/src/main/scala",
         "finagle/finagle-serversets/src/main/scala",
         "finagle/finagle-stats/src/main/scala",

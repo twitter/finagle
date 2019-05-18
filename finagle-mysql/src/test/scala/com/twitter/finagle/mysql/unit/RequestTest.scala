@@ -17,31 +17,69 @@ class SimpleCommandRequestTest extends FunSuite {
   }
 }
 
-class HandshakeResponseTest extends FunSuite {
-  val username = Some("username")
-  val password = Some("password")
-  val salt =
-    Array[Byte](70, 38, 43, 66, 74, 48, 79, 126, 76, 66, 70, 118, 67, 40, 63, 68, 120, 80, 103, 54)
-  val req = HandshakeResponse(
-    username,
-    password,
-    Some("test"),
-    Capability(0xfffff6ff),
-    salt,
-    Capability(0xf7ff),
-    MysqlCharset.Utf8_general_ci,
-    16777216
-  )
+class SslConnectionRequestTest extends FunSuite {
+  val clientCap: Capability = Capability.baseCap + Capability.ConnectWithDB + Capability.FoundRows
+  val sslClientCap: Capability = clientCap + Capability.SSL
+  val charset: Short = MysqlCharset.Utf8_general_ci
+  val maxPacketSize: Int = 12345678
+
+  test("Fails without SSL capability") {
+    intercept[IllegalArgumentException] {
+      SslConnectionRequest(clientCap, charset, maxPacketSize)
+    }
+  }
+
+  // The remaining tests for `SslConnectionRequest` are very similar
+  // to the tests for the first part of `HandshakeResponse`.
+  val req = SslConnectionRequest(sslClientCap, charset, maxPacketSize)
   val br = MysqlBuf.reader(req.toPacket.body)
 
   test("encode capabilities") {
     val mask = br.readIntLE()
-    assert(mask == 0xfffff6ff)
+    assert(mask == 0x2AE8F)
   }
 
   test("maxPacketSize") {
     val max = br.readIntLE()
-    assert(max == 16777216)
+    assert(max == 12345678)
+  }
+
+  test("charset") {
+    val charset = br.readByte()
+    assert(charset == 33.toByte)
+  }
+
+  test("reserved bytes") {
+    val rbytes = br.take(23)
+    assert(rbytes.forall(_ == 0))
+  }
+
+}
+
+abstract class HandshakeResponseTest extends FunSuite {
+  val username = Some("username")
+  val password = Some("password")
+  val database = Some("test")
+  val salt =
+    Array[Byte](70, 38, 43, 66, 74, 48, 79, 126, 76, 66, 70, 118, 67, 40, 63, 68, 120, 80, 103, 54)
+  val maxPacketSize = 16777216
+
+  protected def clientCapabilities(): Capability = Capability(0xfffff6ff)
+  protected def serverCapabilities(): Capability = Capability(0xf7ff)
+  protected def createHandshakeResponse(): HandshakeResponse
+
+  val req = createHandshakeResponse()
+  val packet = req.toPacket
+  val br = MysqlBuf.reader(packet.body)
+
+  test("encode capabilities") {
+    val mask = br.readIntLE()
+    assert(mask == clientCapabilities().mask)
+  }
+
+  test("maxPacketSize") {
+    val max = br.readIntLE()
+    assert(max == maxPacketSize)
   }
 
   test("charset") {
@@ -60,6 +98,70 @@ class HandshakeResponseTest extends FunSuite {
 
   test("password") {
     assert(br.readLengthCodedBytes() === req.hashPassword)
+  }
+}
+
+class PlainHandshakeResponseTest extends HandshakeResponseTest {
+  protected def createHandshakeResponse(): HandshakeResponse =
+    PlainHandshakeResponse(
+      username,
+      password,
+      database,
+      clientCapabilities(),
+      salt,
+      serverCapabilities(),
+      MysqlCharset.Utf8_general_ci,
+      maxPacketSize
+    )
+}
+
+class SecureHandshakeResponseTest extends HandshakeResponseTest {
+
+  override protected def serverCapabilities(): Capability = Capability.baseCap + Capability.SSL
+  override protected def clientCapabilities(): Capability =
+    Capability.baseCap +
+      Capability.ConnectWithDB + Capability.FoundRows + Capability.SSL
+
+  protected def createHandshakeResponse(): HandshakeResponse =
+    SecureHandshakeResponse(
+      username,
+      password,
+      database,
+      clientCapabilities(),
+      salt,
+      serverCapabilities(),
+      MysqlCharset.Utf8_general_ci,
+      maxPacketSize
+    )
+
+  test("Fails without client SSL capability") {
+    intercept[IllegalArgumentException] {
+      SecureHandshakeResponse(
+        username,
+        password,
+        database,
+        clientCapabilities() - Capability.SSL,
+        salt,
+        serverCapabilities(),
+        MysqlCharset.Utf8_general_ci,
+        maxPacketSize
+      )
+    }
+  }
+
+  test("Fails without server SSL capability") {
+    intercept[IllegalArgumentException] {
+      SecureHandshakeResponse(
+        username,
+        password,
+        database,
+        clientCapabilities(),
+        salt,
+        serverCapabilities() - Capability.SSL,
+        MysqlCharset.Utf8_general_ci,
+        maxPacketSize
+      )
+    }
   }
 }
 

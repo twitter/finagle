@@ -6,3 +6,10 @@ java_thrift_library(
         repo = artifactory,
     ),
 )
+
+java_thrift_library(
+    name = "thrift-scala",
+    sources = globs("*.thrift"),
+    compiler = "scrooge",
+    language = "scala",
+)

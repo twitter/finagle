@@ -202,4 +202,4 @@ passing them through.
    stack client or server that one creates by following methods outlined in the
    user's guide.
 
-.. _zipkin: http://zipkin.io
+.. _zipkin: https://zipkin.io

@@ -63,7 +63,7 @@ object LogFormatter {
 
 /** Apache-style common log formatter */
 class CommonLogFormatter extends LogFormatter {
-  /* See http://httpd.apache.org/docs/2.0/logs.html
+  /* See https://httpd.apache.org/docs/2.0/logs.html
    *
    * Apache common log format is: "%h %l %u %t \"%r\" %>s %b"
    *   %h: remote host

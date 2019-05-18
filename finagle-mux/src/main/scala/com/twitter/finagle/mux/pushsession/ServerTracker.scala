@@ -34,7 +34,6 @@ private class ServerTracker(
   // We use the netty type because it results in less allocations, but this could
   // just as well be a java Map if we wanted.
   private[this] val h_dispatches = new IntObjectHashMap[Dispatch]
-  private[this] val orphanedTdiscardCounter = statsReceiver.counter("orphaned_tdiscard")
 
   private[this] val drainedP = Promise[Unit]()
   // Note, the vars below are only read within the context of
@@ -94,7 +93,10 @@ private class ServerTracker(
         if (h_messageWriter.removeForTag(tag) == MessageWriter.DiscardResult.NotFound) {
           // We either never had a dispatch and the client is misbehaving or
           // or we already sent the response so the tag is freed in servers eyes.
-          orphanedTdiscardCounter.incr()
+
+          // This stat is intentionally created on-demand as this event is infrequent enough to
+          // outweigh the benefit of a persistent counter.
+          statsReceiver.counter("orphaned_tdiscard").incr()
         } else {
           // We had something queued for write so send an `Rdiscarded` to let
           // the peer know that we've aborted the dispatch.
@@ -226,6 +228,9 @@ private class ServerTracker(
     // Note: we don't send two Rerr's for the dispatches that had the duplicate tag
     val msg = s"Received duplicate tag ${tag} from client."
     log.warning(msg)
+
+    // This stat is intentionally created on-demand as this event is infrequent enough to
+    // outweigh the benefit of a persistent counter.
     statsReceiver.counter("duplicate_tag").incr()
 
     val pending = handleTakeAllDispatches()

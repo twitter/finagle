@@ -15,7 +15,7 @@ sealed trait ApplicationProtocols
 object ApplicationProtocols {
 
   // IANA Application-Layer Protocol Negotiation (ALPN) IDs
-  // From: http://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#alpn-protocol-ids
+  // From: https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#alpn-protocol-ids
   private val alpnProtocolIds: Set[String] = Set(
     "http/1.1",
     "spdy/1",

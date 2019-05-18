@@ -88,7 +88,7 @@ public class Constants {
 
   /**
    * The following is from BigBrotherBird:
-   *  http://j.mp/fZZnyD
+   *  https://j.mp/fZZnyD
    * Optionally logs an attempt to send a message on the wire. Multiple wire send
    * events could indicate network retries. A lag between client or server send
    * and wire send might indicate queuing or processing delay.

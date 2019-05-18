@@ -157,7 +157,8 @@ class NameTreeTest extends FunSuite {
       "~ | (~ | $) | /blah" -> Some(Set.empty),
       "(~|$|/foo) & (/bar|/blah) & ~ & /FOO" -> Some(Set("/bar", "/FOO")),
       "! | /ok" -> None,
-      "/ok & !" -> None,
+      "/ok & !" -> Some(Set("/ok")),
+      "! & ! & !" -> None,
       "~ | /ok | !" -> Some(Set("/ok"))
     )
 

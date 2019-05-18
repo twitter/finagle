@@ -10,6 +10,11 @@ import com.twitter.logging.Logger
 import com.twitter.util.{Future, Promise, Return, Time}
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicReference
+import scala.annotation.tailrec
+
+private[http2] object PriorKnowledgeTransporter {
+  val log: Logger = Logger.get()
+}
 
 /**
  * This `Transporter` makes `Transports` that speak netty http/1.1, but writes
@@ -26,7 +31,8 @@ private[http2] final class PriorKnowledgeTransporter(
     extends Transporter[Any, Any, TransportContext]
     with MultiplexTransporter { self =>
 
-  private[this] val log = Logger.get()
+  import PriorKnowledgeTransporter._
+
   private[this] val Stats(statsReceiver) = params[Stats]
   private[this] val upgradeCounter = statsReceiver.scope("upgrade").counter("success")
   private[this] val timer = params[TimerParam].timer
@@ -48,9 +54,6 @@ private[http2] final class PriorKnowledgeTransporter(
         remoteAddress,
         params
       )
-      transport.onClose.ensure {
-        cachedSession.set(None)
-      }
 
       // Consider the creation of a new prior knowledge transport as an upgrade
       upgradeCounter.incr()
@@ -58,37 +61,54 @@ private[http2] final class PriorKnowledgeTransporter(
     }
   }
 
-  private[this] def getStreamTransportFactory(): Future[StreamTransportFactory] = {
+  // We're returning `Some(_)` intentionally as we need the exact reference for the CAS
+  // later. AtomicReference checks reference equality, not value equality.
+  //
+  // This method is recursive as we end up trying to grab an instance of StreamTransportFactory
+  // again when some other thread raced with us.
+  @tailrec
+  private[this] def getStreamTransportFactory(): Some[Future[StreamTransportFactory]] =
     cachedSession.get match {
-      case Some(f) => f
+      case f @ Some(_) => f
       case None =>
-        val p = Promise[StreamTransportFactory]()
-        if (cachedSession.compareAndSet(None, Some(p))) {
+        val p = new Promise[StreamTransportFactory]
+        val f = Some(p)
+        if (cachedSession.compareAndSet(None, f)) {
           p.become(createStreamTransportFactory())
-          p
+          f
         } else getStreamTransportFactory()
     }
-  }
 
-  def apply(): Future[Transport[Any, Any]] = getStreamTransportFactory().flatMap { fac =>
-    fac.newChildTransport().handle {
-      case exn: Throwable =>
-        log.warning(
-          exn,
-          s"A previously successful connection to address $remoteAddress stopped being successful."
-        )
+  def apply(): Future[Transport[Any, Any]] = {
+    val result = getStreamTransportFactory()
 
-        cachedSession.set(None)
-        new DeadTransport(exn, remoteAddress)
+    result.x.flatMap { fac =>
+      fac.newChildTransport().rescue {
+        case exn: Throwable =>
+          // We try to evict the current session concurrently. We recurse if some other thread raced
+          // with us.
+          if (cachedSession.compareAndSet(result, None)) {
+            log.warning(
+              exn,
+              s"A previously successful connection to address $remoteAddress stopped being successful."
+            )
+
+            // We rely on other machinery to close failed transport (ping detector, etc).
+            Future.value(new DeadTransport(exn, remoteAddress))
+          } else apply()
+      }
     }
   }
 
+  @tailrec
   def close(deadline: Time): Future[Unit] = cachedSession.get match {
     case None => Future.Done
-    case Some(f) =>
-      f.flatMap(_.close(deadline))
-        .by(timer, deadline)
-        .rescue { case _: Throwable => Future.Done }
+    case prev @ Some(f) =>
+      if (cachedSession.compareAndSet(prev, None)) {
+        f.flatMap(_.close(deadline))
+          .by(timer, deadline)
+          .rescue { case _: Throwable => Future.Done }
+      } else close(deadline)
   }
 
   def transporterStatus: Status = cachedSession.get match {

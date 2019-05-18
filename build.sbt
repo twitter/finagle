@@ -2,7 +2,7 @@ import Tests._
 import scoverage.ScoverageKeys
 
 // All Twitter library releases are date versioned as YY.MM.patch
-val releaseVersion = "19.4.0-SNAPSHOT"
+val releaseVersion = "19.5.0"
 
 val libthriftVersion = "0.10.0"
 
@@ -14,7 +14,6 @@ val zkVersion = "3.5.0-alpha"
 val caffeineLib = "com.github.ben-manes.caffeine" % "caffeine" % "2.3.4"
 val hdrHistogramLib = "org.hdrhistogram" % "HdrHistogram" % "2.1.11"
 val jsr305Lib = "com.google.code.findbugs" % "jsr305" % "2.0.1"
-val netty3Lib = "io.netty" % "netty" % "3.10.1.Final"
 val netty4Libs = Seq(
   "io.netty" % "netty-handler" % netty4Version,
   "io.netty" % "netty-transport" % netty4Version,
@@ -35,7 +34,7 @@ val netty4Http = "io.netty" % "netty-codec-http" % netty4Version
 val netty4Http2 = "io.netty" % "netty-codec-http2" % netty4Version
 val netty4StaticSsl = "io.netty" % "netty-tcnative-boringssl-static" % "2.0.19.Final"
 val opencensusVersion = "0.19.1"
-val jacksonVersion = "2.9.6"
+val jacksonVersion = "2.9.8"
 val jacksonLibs = Seq(
   "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
@@ -61,7 +60,7 @@ val sharedSettings = Seq(
   libraryDependencies ++= Seq(
     "org.scalacheck" %% "scalacheck" % "1.13.4" % "test",
     "org.scalatest" %% "scalatest" % "3.0.0" % "test",
-    // See http://www.scala-sbt.org/0.13/docs/Testing.html#JUnit
+    // See https://www.scala-sbt.org/0.13/docs/Testing.html#JUnit
     "com.novocode" % "junit-interface" % "0.11" % "test",
     "org.mockito" % "mockito-all" % "1.9.5" % "test"
   ),
@@ -113,7 +112,7 @@ val sharedSettings = Seq(
     <licenses>
       <license>
         <name>Apache License, Version 2.0</name>
-        <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+        <url>https://www.apache.org/licenses/LICENSE-2.0</url>
       </license>
     </licenses>
     <scm>
@@ -176,7 +175,6 @@ lazy val projectList = Seq[sbt.ProjectReference](
   finagleToggle,
   finagleCore,
   finagleNetty4,
-  finagleNetty3,
   finagleStats,
   finagleStatsCore,
   finagleZipkinCore,
@@ -200,8 +198,7 @@ lazy val projectList = Seq[sbt.ProjectReference](
   finagleThriftMux,
   finagleMySQL,
   finagleRedis,
-  finagleNetty4Http,
-  finagleHttpCookie
+  finagleNetty4Http
 )
 
 lazy val finagle = Project(
@@ -321,25 +318,6 @@ lazy val finagleNetty4 = Project(
   finagleCore % "compile->compile;test->test",
   finagleToggle
 )
-
-lazy val finagleNetty3 = Project(
-  id = "finagle-netty3",
-  base = file("finagle-netty3")
-).settings(
-  sharedSettings
-).settings(
-  name := "finagle-netty3",
-  libraryDependencies ++= Seq(
-    util("app"),
-    util("cache"),
-    util("codec"),
-    util("core"),
-    util("codec"),
-    util("lint"),
-    util("stats"),
-    netty3Lib
-  )
-).dependsOn(finagleCore)
 
 lazy val finagleStatsCore = Project(
   id = "finagle-stats-core",
@@ -483,7 +461,7 @@ lazy val finagleBaseHttp = Project(
     util("logging"),
     netty4Http
   ) ++ netty4Libs
-).dependsOn(finagleCore, finagleNetty3, finagleToggle, finagleHttpCookie)
+).dependsOn(finagleCore, finagleToggle)
 
 lazy val finagleNetty4Http = Project(
   id = "finagle-netty4-http",
@@ -494,7 +472,6 @@ lazy val finagleNetty4Http = Project(
   name := "finagle-netty4-http",
   libraryDependencies ++= Seq(
     util("app"), util("codec"), util("core"), util("jvm"), util("stats"),
-    "commons-lang" % "commons-lang" % "2.6",
     netty4Http
   )
 ).dependsOn(finagleNetty4, finagleBaseHttp % "test->test;compile->compile")
@@ -523,9 +500,7 @@ lazy val finagleThrift = Project(
   sharedSettings
 ).settings(
   name := "finagle-thrift",
-  libraryDependencies ++=
-    Seq(
-      "commons-lang" % "commons-lang" % "2.6" % "test") ++ scroogeLibs
+  libraryDependencies ++= scroogeLibs
 ).dependsOn(finagleCore, finagleNetty4, finagleToggle)
 
 lazy val finagleMemcached = Project(
@@ -595,7 +570,6 @@ lazy val finagleThriftMux = Project(
 ).settings(
   name := "finagle-thriftmux",
   libraryDependencies ++= Seq(
-    "commons-lang" % "commons-lang" % "2.6",
     util("core"),
     util("logging"),
     util("stats")) ++ scroogeLibs
@@ -714,18 +688,6 @@ lazy val finagleBenchmark = Project(
   finagleThriftMux,
   finagleZipkinScribe
 ).aggregate(finagleBenchmarkThrift)
-
-lazy val finagleHttpCookie = Project(
-  id = "finagle-http-cookie",
-  base = file("finagle-http-cookie")
-).settings(
-  sharedSettings
-).settings(
-  name := "finagle-http-cookie",
-  libraryDependencies ++= Seq(
-    netty3Lib
-  )
-)
 
 lazy val finagleDoc = Project(
   id = "finagle-doc",

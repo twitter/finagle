@@ -104,7 +104,7 @@ object Transporter {
 
   /**
    * $param a HttpProxy as the endpoint for a `Transporter`.
-   * @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#9.9
+   * @see https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#9.9
    */
   case class HttpProxy(sa: Option[SocketAddress], credentials: Option[Credentials]) {
     def mk(): (HttpProxy, Stack.Param[HttpProxy]) =

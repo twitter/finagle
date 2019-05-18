@@ -33,6 +33,13 @@ object MaxInitialLineSize {
     Stack.Param(MaxInitialLineSize(4.kilobytes))
 }
 
+/**
+ * The maximum size of an inbound HTTP request that this
+ * Finagle server can receive from a client.
+ *
+ * @note This param only applies to Finagle HTTP servers,
+ * and not to Finagle HTTP clients.
+ */
 case class MaxRequestSize(size: StorageUnit) {
   require(size < 2.gigabytes, s"MaxRequestSize should be less than 2 Gb, but was $size")
 }
@@ -41,6 +48,13 @@ object MaxRequestSize {
     Stack.Param(MaxRequestSize(5.megabytes))
 }
 
+/**
+ * The maximum size of an inbound HTTP response that this
+ * Finagle client can receive from a server.
+ *
+ * @note This param only applies to Finagle HTTP clients,
+ * and not to Finagle HTTP servers.
+ */
 case class MaxResponseSize(size: StorageUnit) {
   require(size < 2.gigabytes, s"MaxResponseSize should be less than 2 Gb, but was $size")
 }

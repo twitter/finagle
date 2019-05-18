@@ -1,11 +1,11 @@
 package com.twitter.finagle.thriftmux
 
-import com.twitter.finagle._
+import com.twitter.finagle.{client, _}
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
 import com.twitter.finagle.client.RefcountedClosable
 import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.thrift.service.{Filterable, ServicePerEndpointBuilder}
-import com.twitter.finagle.thrift.{ServiceIfaceBuilder, ThriftClientRequest, ThriftRichClient}
+import com.twitter.finagle.thrift.{ServiceIfaceBuilder, ThriftClientRequest}
 import com.twitter.util.{Duration, Future, Time}
 import com.twitter.util.tunable.Tunable
 
@@ -60,7 +60,7 @@ object MethodBuilder {
       params,
       Config.create(thriftMuxClient.stack, params)
     )
-    new MethodBuilder(thriftMuxClient.asInstanceOf[ThriftRichClient], mb)
+    new MethodBuilder(thriftMuxClient, mb)
   }
 
   /**
@@ -236,9 +236,9 @@ object MethodBuilder {
  * @see The [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]].
  */
 class MethodBuilder(
-  rich: ThriftRichClient,
+  thriftMuxClient: ThriftMux.Client,
   mb: client.MethodBuilder[ThriftClientRequest, Array[Byte]])
-    extends client.MethodBuilderScaladoc[MethodBuilder] {
+    extends client.BaseMethodBuilder[MethodBuilder] {
 
   /**
    * Configured client label. The `label` is used to assign a label to the underlying Thrift client.
@@ -250,22 +250,22 @@ class MethodBuilder(
   def label: String = mb.params[param.Label].label
 
   def withTimeoutTotal(howLong: Duration): MethodBuilder =
-    new MethodBuilder(rich, mb.withTimeout.total(howLong))
+    new MethodBuilder(thriftMuxClient, mb.withTimeout.total(howLong))
 
   def withTimeoutTotal(howLong: Tunable[Duration]): MethodBuilder =
-    new MethodBuilder(rich, mb.withTimeout.total(howLong))
+    new MethodBuilder(thriftMuxClient, mb.withTimeout.total(howLong))
 
   def withTimeoutPerRequest(howLong: Duration): MethodBuilder =
-    new MethodBuilder(rich, mb.withTimeout.perRequest(howLong))
+    new MethodBuilder(thriftMuxClient, mb.withTimeout.perRequest(howLong))
 
   def withTimeoutPerRequest(howLong: Tunable[Duration]): MethodBuilder =
-    new MethodBuilder(rich, mb.withTimeout.perRequest(howLong))
+    new MethodBuilder(thriftMuxClient, mb.withTimeout.perRequest(howLong))
 
   def withRetryForClassifier(classifier: ResponseClassifier): MethodBuilder =
-    new MethodBuilder(rich, mb.withRetry.forClassifier(classifier))
+    new MethodBuilder(thriftMuxClient, mb.withRetry.forClassifier(classifier))
 
   def withRetryDisabled: MethodBuilder =
-    new MethodBuilder(rich, mb.withRetry.disabled)
+    new MethodBuilder(thriftMuxClient, mb.withRetry.disabled)
 
   /**
    * @inheritdoc
@@ -274,7 +274,7 @@ class MethodBuilder(
    */
   def idempotent(maxExtraLoad: Double): MethodBuilder =
     new MethodBuilder(
-      rich,
+      thriftMuxClient,
       mb.idempotent(maxExtraLoad, sendInterrupts = true, ResponseClassifier.RetryOnThrows)
     )
 
@@ -285,12 +285,12 @@ class MethodBuilder(
    */
   def idempotent(maxExtraLoad: Tunable[Double]): MethodBuilder =
     new MethodBuilder(
-      rich,
+      thriftMuxClient,
       mb.idempotent(maxExtraLoad, sendInterrupts = true, ResponseClassifier.RetryOnThrows)
     )
 
   def nonIdempotent: MethodBuilder =
-    new MethodBuilder(rich, mb.nonIdempotent)
+    new MethodBuilder(thriftMuxClient, mb.nonIdempotent)
 
   /**
    * Construct a `ServiceIface` to be used for the `methodName` function.
@@ -303,36 +303,74 @@ class MethodBuilder(
   )(
     implicit builder: ServiceIfaceBuilder[ServiceIface]
   ): ServiceIface = {
-    val filters: Filter.TypeAgnostic = mb.filters(Some(methodName))
-    val serviceIface: ServiceIface = rich.newServiceIface(
-      mb.wrappedService(Some(methodName)),
-      label
-    )(builder)
-    serviceIface.filtered(filters)
+    val clientBuilder = new ClientServiceIfaceBuilder[ServiceIface](builder)
+    mb.newServicePerEndpoint(clientBuilder, methodName)
   }
 
-  private[this] def servicePerEndpoint[ServicePerEndpoint <: Filterable[ServicePerEndpoint]](
-    methodName: Option[String]
+  /**
+   * Construct a `ServicePerEndpoint` to be used for the `methodName` function.
+   *
+   * @param methodName used for scoping metrics (e.g. "clnt/your_client_label/method_name").
+   */
+  def servicePerEndpoint[ServicePerEndpoint <: Filterable[ServicePerEndpoint]](
+    methodName: String
   )(
     implicit builder: ServicePerEndpointBuilder[ServicePerEndpoint]
   ): ServicePerEndpoint = {
-    val servicePerEndpoint: ServicePerEndpoint = rich.servicePerEndpoint(
-      new DelayedService(methodName),
-      label
-    )(builder)
+    val clientBuilder = new ClientServicePerEndpointBuilder[ServicePerEndpoint](builder)
+    mb.newServicePerEndpoint(clientBuilder, methodName).getServicePerEndpoint
+  }
 
-    val filters: Filter.TypeAgnostic = mb.filters(methodName)
-    val delayedTypeAgnostic = new DelayedTypeAgnostic(filters)
-    servicePerEndpoint.filtered(delayedTypeAgnostic)
+  /**
+   * Construct a `ServicePerEndpoint` to be used for the client.
+   */
+  def servicePerEndpoint[ServicePerEndpoint <: Filterable[ServicePerEndpoint]](
+    implicit builder: ServicePerEndpointBuilder[ServicePerEndpoint]
+  ): ServicePerEndpoint = {
+    val clientBuilder = new ClientServicePerEndpointBuilder[ServicePerEndpoint](builder)
+    mb.newServicePerEndpoint(clientBuilder).getServicePerEndpoint
+  }
+
+  final private class ClientServiceIfaceBuilder[ServiceIface <: Filterable[ServiceIface]](
+    builder: ServiceIfaceBuilder[ServiceIface])
+      extends client.ServicePerEndpointBuilder[
+        ThriftClientRequest,
+        Array[Byte],
+        ServiceIface
+      ] {
+    override def servicePerEndpoint(
+      service: => Service[ThriftClientRequest, Array[Byte]]
+    ): ServiceIface = thriftMuxClient.newServiceIface(service, label)(builder)
+  }
+
+  final private class ClientServicePerEndpointBuilder[
+    ServicePerEndpoint <: Filterable[ServicePerEndpoint]
+  ](builder: ServicePerEndpointBuilder[ServicePerEndpoint])
+      extends client.ServicePerEndpointBuilder[
+        ThriftClientRequest,
+        Array[Byte],
+        DelayedTypeAgnosticFilterable[ServicePerEndpoint]
+      ] {
+
+    override def servicePerEndpoint(
+      service: => Service[ThriftClientRequest, Array[Byte]]
+    ): DelayedTypeAgnosticFilterable[ServicePerEndpoint] = {
+      new DelayedTypeAgnosticFilterable(
+        thriftMuxClient.servicePerEndpoint(
+          new DelayedService(service),
+          label
+        )(builder)
+      )
+    }
   }
 
   // used to delay creation of the Service until the first request
   // as `mb.wrappedService` eagerly creates some metrics that are best
   // avoided until the first request.
-  final private class DelayedService(methodName: Option[String])
+  final private class DelayedService(service: => Service[ThriftClientRequest, Array[Byte]])
       extends Service[ThriftClientRequest, Array[Byte]] {
     private[this] lazy val svc: Service[ThriftClientRequest, Array[Byte]] =
-      mb.wrappedService(methodName)
+      service
 
     def apply(request: ThriftClientRequest): Future[Array[Byte]] =
       svc(request)
@@ -342,6 +380,19 @@ class MethodBuilder(
 
     override def status: Status =
       svc.status
+  }
+
+  // A filterable that wraps each filter with DelayedTypeAgnostic before applying
+  // it to the underlying servicePerEndpoint
+  final private class DelayedTypeAgnosticFilterable[T <: Filterable[T]](servicePerEndpoint: T)
+      extends Filterable[DelayedTypeAgnosticFilterable[T]] {
+
+    def getServicePerEndpoint: T = servicePerEndpoint
+
+    override def filtered(filter: Filter.TypeAgnostic): DelayedTypeAgnosticFilterable[T] =
+      new DelayedTypeAgnosticFilterable[T](
+        servicePerEndpoint.filtered(new DelayedTypeAgnostic(filter))
+      )
   }
 
   // used to delay creation of the Filters until the first request
@@ -357,24 +408,4 @@ class MethodBuilder(
         filter(request, service)
     }
   }
-
-  /**
-   * Construct a `ServicePerEndpoint` to be used for the `methodName` function.
-   *
-   * @param methodName used for scoping metrics (e.g. "clnt/your_client_label/method_name").
-   */
-  def servicePerEndpoint[ServicePerEndpoint <: Filterable[ServicePerEndpoint]](
-    methodName: String
-  )(
-    implicit builder: ServicePerEndpointBuilder[ServicePerEndpoint]
-  ): ServicePerEndpoint =
-    servicePerEndpoint(Some(methodName))
-
-  /**
-   * Construct a `ServicePerEndpoint` to be used for the client.
-   */
-  def servicePerEndpoint[ServicePerEndpoint <: Filterable[ServicePerEndpoint]](
-    implicit builder: ServicePerEndpointBuilder[ServicePerEndpoint]
-  ): ServicePerEndpoint =
-    servicePerEndpoint(None)
 }

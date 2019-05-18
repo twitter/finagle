@@ -4,7 +4,7 @@ import com.twitter.finagle.{Filter, Service}
 import com.twitter.finagle.http.{Request, Response, Method}
 import com.twitter.util.{Duration, Future}
 
-/** Implements http://www.w3.org/TR/cors/ */
+/** Implements https://www.w3.org/TR/cors/ */
 object Cors {
 
   /**
@@ -123,7 +123,7 @@ object Cors {
       response
     }
 
-    /** http://www.w3.org/TR/cors/#resource-requests */
+    /** https://www.w3.org/TR/cors/#resource-requests */
     protected[this] def handleSimple(request: Request, response: Response): Response =
       getOrigin(request) map {
         setOriginAndCredentials(response, _)
@@ -193,7 +193,7 @@ object Cors {
       response
     }
 
-    /** http://www.w3.org/TR/cors/#resource-preflight-requests */
+    /** https://www.w3.org/TR/cors/#resource-preflight-requests */
     protected[this] def handlePreflight(request: Request): Option[Response] =
       getOrigin(request) flatMap { origin =>
         getMethod(request) flatMap { method =>

@@ -15,7 +15,6 @@ junit_tests(
     compiler_option_sets = {"fatal_warnings"},
     dependencies = [
         "3rdparty/jvm/com/github/ben-manes/caffeine",
-        "3rdparty/jvm/io/netty",
         "3rdparty/jvm/junit",
         "3rdparty/jvm/mysql:mysql-connector-java",
         "3rdparty/jvm/mysql:mysql-connector-mxj-gpl-db-files",

@@ -6,7 +6,7 @@ import com.twitter.io.Buf
 /**
  * Defines a Row where the data is presumed to be encoded with the
  * mysql binary protocol.
- * [[http://dev.mysql.com/doc/internals/en/binary-protocol-resultset-row.html]]
+ * [[https://dev.mysql.com/doc/internals/en/binary-protocol-resultset-row.html]]
  */
 private class BinaryEncodedRow(
   rawRow: Buf,

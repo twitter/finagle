@@ -24,10 +24,11 @@ class ClientTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
     extends TransportParams(self) {
 
   /**
-   * Configures the TCP connection `timeout` of this client (default: 1 second).
+   * Configures the socket connect `timeout` of this client (default: 1 second).
    *
    * The connection timeout is the maximum amount of time a transport is allowed
-   * to spend establishing a TCP connection.
+   * to spend connecting to a remote socket. This does not include an actual session creation
+   * (SSL handshake, HTTP proxy handshake, etc.) only raw socket connect.
    */
   def connectTimeout(timeout: Duration): A =
     self.configured(Transporter.ConnectTimeout(timeout))

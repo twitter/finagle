@@ -213,7 +213,7 @@ class LatencyCompensationTest
             assert(!sup.isDefined)
             assert(respond.interrupted == None)
 
-            clock.advance(4.seconds)
+            clock.advance(6.seconds)
             timer.tick() // triggers the timeout
 
             eventually {

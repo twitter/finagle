@@ -21,7 +21,7 @@ import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.{Duration, Future, Monitor, StorageUnit, Time}
-import java.net.{InetSocketAddress, SocketAddress}
+import java.net.SocketAddress
 
 /**
  * A rich HTTP/1.1 client with a *very* basic URL fetcher. (It does not handle
@@ -236,7 +236,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     protected def endpointer: Stackable[ServiceFactory[Request, Response]] = {
       new EndpointerModule[Request, Response](
         Seq(implicitly[Stack.Param[HttpImpl]], implicitly[Stack.Param[param.Stats]]), {
-          (prms: Stack.Params, addr: InetSocketAddress) =>
+          (prms: Stack.Params, addr: SocketAddress) =>
             val transporter = params[HttpImpl].transporter(prms)(addr)
             new ServiceFactory[Request, Response] {
               def apply(conn: ClientConnection): Future[Service[Request, Response]] =
@@ -292,12 +292,6 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
      */
     def withMaxInitialLineSize(size: StorageUnit): Client =
       configured(http.param.MaxInitialLineSize(size))
-
-    /**
-     * Configures the maximum request size that the client can send.
-     */
-    def withMaxRequestSize(size: StorageUnit): Client =
-      configured(http.param.MaxRequestSize(size))
 
     /**
      * Configures the maximum response size that client can receive.
@@ -527,12 +521,6 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
      */
     def withMaxRequestSize(size: StorageUnit): Server =
       configured(http.param.MaxRequestSize(size))
-
-    /**
-     * Configures the maximum response size this server can send.
-     */
-    def withMaxResponseSize(size: StorageUnit): Server =
-      configured(http.param.MaxResponseSize(size))
 
     /**
      * Streaming allows applications to work with HTTP messages that have large

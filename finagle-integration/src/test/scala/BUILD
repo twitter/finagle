@@ -14,7 +14,6 @@ junit_tests(
         "finagle/finagle-mux/src/main/scala",
         "finagle/finagle-mysql/src/main/scala",
         "finagle/finagle-mysql/src/test/scala:integration-client",
-        "finagle/finagle-netty3/src/main/scala",
         "finagle/finagle-netty4-http",
         "finagle/finagle-redis",
         "finagle/finagle-thrift",

@@ -26,7 +26,7 @@ import scala.util.hashing.MurmurHash3
  * @see [[Toggle]]
  * @see [[ServiceLoadedToggleMap]] and [[StandardToggleMap]] for typical usage
  *      entry points.
- * @see [[http://martinfowler.com/articles/feature-toggles.html Feature Toggles]]
+ * @see [[https://martinfowler.com/articles/feature-toggles.html Feature Toggles]]
  *      for detailed discussion on the topic.
  */
 abstract class ToggleMap { self =>
