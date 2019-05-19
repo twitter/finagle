@@ -88,6 +88,8 @@ object Command {
   val ZSCAN = Buf.Utf8("ZSCAN")
   val ZSCORE = Buf.Utf8("ZSCORE")
   val ZUNIONSTORE = Buf.Utf8("ZUNIONSTORE")
+  val ZPOPMIN = Buf.Utf8("ZPOPMIN")
+  val ZPOPMAX = Buf.Utf8("ZPOPMAX")
 
   // Sets
   val SADD = Buf.Utf8("SADD")
