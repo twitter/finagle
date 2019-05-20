@@ -166,11 +166,16 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    */
   protected def label: String
 
-  protected def dapertureActive: Boolean =
-    useDeterministicOrdering match {
-      case Some(bool) => bool
-      case None => true
+  protected def dapertureActive: Boolean = {
+    if (ProcessCoordinate().isEmpty) {
+      false
+    } else {
+      useDeterministicOrdering match {
+        case Some(bool) => bool
+        case None => true
+      }
     }
+  }
 
   @volatile private[this] var _vectorHash: Int = -1
   // Make a hash of the passed in `vec` and set `vectorHash`.
@@ -205,9 +210,6 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   )
 
   private[this] val coordinateUpdates = statsReceiver.counter("coordinate_updates")
-  // note, this can be lifted to a "verbose/debug" counter when we are sufficiently
-  // confident in d-aperture.
-  private[this] val noCoordinate = statsReceiver.counter("rebuild_no_coordinate")
 
   private[this] val coordObservation = ProcessCoordinate.changes.respond { _ =>
     // One nice side-effect of deferring to the balancers `updater` is
@@ -290,21 +292,24 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     }
 
     final def rebuild(): This = rebuild(vector)
+
     final def rebuild(vec: Vector[Node]): This = {
       updateVectorHash(vec)
-      if (vec.isEmpty) new EmptyVector(initAperture)
-      else
+      if (vec.isEmpty) {
+        new EmptyVector(initAperture)
+      } else if (dapertureActive) {
         ProcessCoordinate() match {
-          case Some(coord) if dapertureActive =>
+          case Some(coord) =>
             new DeterministicAperture(vec, initAperture, coord)
-
-          case None if dapertureActive =>
-            noCoordinate.incr()
-            new RandomAperture(vec, initAperture)
-
-          case _ =>
+          case None =>
+            // this should not happen as `dapertureActive` should prevent this case
+            // but hypothetically, the coordinate could get unset between calls
+            // to `dapertureActive` and `ProcessCoordinate()`
             new RandomAperture(vec, initAperture)
         }
+      } else {
+        new RandomAperture(vec, initAperture)
+      }
     }
 
     /**

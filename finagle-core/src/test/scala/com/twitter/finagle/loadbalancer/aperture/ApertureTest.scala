@@ -79,6 +79,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
   }
 
   test("dapertureActive does not create LoadBand metrics") {
+    ProcessCoordinate.setCoordinate(1, 4)
     val stats = new InMemoryStatsReceiver
     val aperture = new ApertureLeastLoaded[Unit, Unit](
       endpoints = Activity.pending,
@@ -98,6 +99,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
     assert(!stats.gauges.contains(Seq("loadband", "offered_load_ema")))
     assert(!stats.counters.contains(Seq("loadband", "widen")))
     assert(!stats.counters.contains(Seq("loadband", "narrow")))
+    ProcessCoordinate.unsetCoordinate()
   }
 
   test("closing ApertureLeastLoaded removes the loadband ema gauge") {

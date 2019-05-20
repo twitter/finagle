@@ -85,10 +85,6 @@ Aperture Based Load Balancers
   A counter of the number of times the Aperture implementation receives
   updates from the `ProcessCoordinate` process global.
 
-**rebuild_no_coordinate**
-  A counter which tracks the number of rebuilds without a `coordinate` set
-  when `use_deterministic_ordering` is 1.
-
 **expired**
   A counter of the number of endpoints which have been closed because they
   have fallen out of the aperture window and become idle.
