@@ -31,26 +31,9 @@ private[http] class FixedLengthMessageAggregator(
     extends FinagleHttpObjectAggregator(maxContentLength.inBytes.toInt, handleExpectContinue) {
   require(maxContentLength.bytes >= 0)
 
-  private[this] var decoding = false
-
-  override def acceptInboundMessage(msg: Any): Boolean = msg match {
-    case _: FullHttpMessage =>
-      false
-
-    case msg: HttpMessage if shouldAggregate(msg) =>
-      decoding = true
-      true
-
-    case _: HttpContent if decoding =>
-      true
-
-    case _ =>
-      false
-  }
-
-  override def finishAggregation(aggregated: FullHttpMessage): Unit = {
-    decoding = false
-    super.finishAggregation(aggregated)
+  override def isStartMessage(msg: HttpObject): Boolean = msg match {
+    case httpMsg: HttpMessage => shouldAggregate(httpMsg)
+    case _ => false
   }
 
   private[this] def shouldAggregate(msg: HttpMessage): Boolean = {
