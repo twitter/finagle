@@ -197,6 +197,10 @@ resources for using Finagle.
                         <a href="FailingFactory.html" title="A com.twitter.finagle.ServiceFactory that fails to construct services.">FailingFactory</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="trait" href="Filterable.html" title="Allows filtering of a ServicePerEndpoint when constructing new ServicePerEndpoint through MethodBuilder"></a>
+                        <a href="Filterable.html" title="Allows filtering of a ServicePerEndpoint when constructing new ServicePerEndpoint through MethodBuilder">Filterable</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="class" href="KetamaShardingServiceBuilder.html" title=""></a>
                         <a href="KetamaShardingServiceBuilder.html" title="">KetamaShardingServiceBuilder</a>
                       </li><li class="current-entities indented4">
@@ -621,6 +625,23 @@ being retried.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.service.Retries#moduleRequeueable" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="moduleRequeueable[Req,Rep]:com.twitter.finagle.Stackable[com.twitter.finagle.ServiceFactory[Req,Rep]]"></a><a id="moduleRequeueable[Req,Rep]:Stackable[ServiceFactory[Req,Rep]]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/Retries$.html#moduleRequeueable[Req,Rep]:com.twitter.finagle.Stackable[com.twitter.finagle.ServiceFactory[Req,Rep]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">moduleRequeueable</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result">: <a href="../Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a>[<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.service.Retries.moduleRequeueable.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.Retries.moduleRequeueable.Rep">Rep</span>]]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Retries failures that are guaranteed to be safe to retry
+(see <a href="RetryPolicy$$RetryableWriteException$.html" class="extype" name="com.twitter.finagle.service.RetryPolicy.RetryableWriteException">RetryPolicy.RetryableWriteException</a>).</p>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">

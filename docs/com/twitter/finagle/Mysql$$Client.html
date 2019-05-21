@@ -1493,7 +1493,8 @@ to offer more available connections connections.
         <span class="name">withSessionPool</span><span class="result">: <a href="param/SessionPoolingParams.html" class="extype" name="com.twitter.finagle.param.SessionPoolingParams">SessionPoolingParams</a>[<a href="" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">An entry point for configuring the client's session pool.</p><div class="fullcomment"><div class="comment cmt"><p>An entry point for configuring the client's session pool.
+      <p class="shortcomment cmt">An entry point for configuring the client's session pool.</p><div class="fullcomment"><div class="comment cmt"><p>An entry point for configuring the client's session pool.</p><p>All session pool settings are applied to each host in the replica set. Put this way, these
+settings are per-host as opposed to per-client.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a> → <a href="param/WithSessionPool.html" class="extype" name="com.twitter.finagle.param.WithSessionPool">WithSessionPool</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#pooling" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#pooling</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.Mysql.Client#withSessionQualifier" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withSessionQualifier:com.twitter.finagle.param.SessionQualificationParams[com.twitter.finagle.Mysql.Client]"></a><a id="withSessionQualifier:SessionQualificationParams[Client]"></a>

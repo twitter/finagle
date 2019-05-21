@@ -652,10 +652,6 @@ use.</p><p> Flag          Value     Meaning
                         <a href="HandshakeInit.html" title="">HandshakeInit</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="HandshakeResponse.html" title="Client response sent during connection phase."></a>
-                        <a href="HandshakeResponse.html" title="Client response sent during connection phase.">HandshakeResponse</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="object" href="IncompatibleCharset$.html" title="Indicates that the server to which the client is connected is configured to use a charset that the client is incompatible with."></a>
                         <a href="IncompatibleCharset$.html" title="Indicates that the server to which the client is connected is configured to use a charset that the client is incompatible with.">IncompatibleCharset</a>
                       </li><li class="current-entities indented4">
@@ -1607,26 +1603,6 @@ a prepared statement.
       </span>
       
       
-    </li><li name="com.twitter.finagle.mysql.HandshakeResponse" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="HandshakeResponseextendsRequestwithProductwithSerializable"></a><a id="HandshakeResponse:HandshakeResponse"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mysql/index.html#HandshakeResponseextendsRequestwithProductwithSerializable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="Client response sent during connection phase." href="HandshakeResponse.html"><span class="name">HandshakeResponse</span></a><span class="params">(<span name="username">username: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="password">password: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="database">database: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="clientCap">clientCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.mysql.Capability">Capability</a></span>, <span name="salt">salt: <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]</span>, <span name="serverCap">serverCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.mysql.Capability">Capability</a></span>, <span name="charset">charset: <a href="http://www.scala-lang.org/api/2.12.8/scala/Short.html#scala.Short" class="extype" name="scala.Short">Short</a></span>, <span name="maxPacketSize">maxPacketSize: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>)</span><span class="result"> extends <a href="Request.html" class="extype" name="com.twitter.finagle.mysql.Request">Request</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Client response sent during connection phase.</p><div class="fullcomment"><div class="comment cmt"><p>Client response sent during connection phase.
-Responsible for encoding credentials used to
-authenticate a session.
-<a href="https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse41" target="_blank">https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse41</a>
-</p></div></div>
     </li><li name="com.twitter.finagle.mysql.IncompatibleServerError" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="IncompatibleServerErrorextendsException"></a><a id="IncompatibleServerError:IncompatibleServerError"></a>
       <span class="permalink">

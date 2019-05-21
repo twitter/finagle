@@ -473,8 +473,10 @@ draining, and much more.
 both queueing time (e.g. because we cannot create more connections due
 to connections limit and there are outstanding requests) as well as physical
 TCP connection time. Futures returned from <code>factory()</code> will always be satisfied
-within this timeout plus any applied <a href="../client/LatencyCompensation$.html" class="extype" name="com.twitter.finagle.client.LatencyCompensation">com.twitter.finagle.client.LatencyCompensation</a>.</p><p>This timeout also includes resolving logical destinations, but the cost of
-resolution is amortized.
+within this timeout plus any applied <a href="../client/LatencyCompensation$.html" class="extype" name="com.twitter.finagle.client.LatencyCompensation">com.twitter.finagle.client.LatencyCompensation</a>.</p><p>This timeout also includes the following, but the cost is amortized over subsequent
+acquisitions of the same (possibly cached) session:</p><p>- Resolving logical destinations
+- SSL handshake if configured
+- HTTP proxy handshake if configured
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration</a></p></span></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
@@ -640,8 +642,8 @@ resolution is amortized.
       </span>
       
       <p class="shortcomment cmt">Configures the session lifetime <code>timeout</code> - the maximum amount of time a given
-service is allowed to live before it is closed (default: unbounded).</p><div class="fullcomment"><div class="comment cmt"><p>Configures the session lifetime <code>timeout</code> - the maximum amount of time a given
-service is allowed to live before it is closed (default: unbounded).
+connection is allowed to live before it is closed (default: unbounded).</p><div class="fullcomment"><div class="comment cmt"><p>Configures the session lifetime <code>timeout</code> - the maximum amount of time a given
+connection is allowed to live before it is closed (default: unbounded).
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="SessionParams.html" class="extype" name="com.twitter.finagle.param.SessionParams">SessionParams</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration</a></p></span></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Servers &#8212; Finagle 19.4.0 documentation</title>
+    <title>Servers &#8212; Finagle 19.5.1 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.4.0',
+        VERSION:     '19.5.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.4.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.5.1 documentation" href="index.html" />
     <link rel="next" title="Clients" href="Clients.html" />
     <link rel="prev" title="Aperture Load Balancers" href="ApertureLoadBalancers.html" />
    
@@ -106,10 +106,79 @@ for more details.</p>
 <p>Finagle servers are simple; they are designed to serve requests quickly. As such,
 Finagle minimally furnishes servers with additional behavior. More sophisticated
 behavior lives in the <a class="reference internal" href="Clients.html#finagle-clients"><span class="std std-ref">clients</span></a>.</p>
-<div class="figure" id="id6">
-<img alt="_images/serverstack.svg" src="_images/serverstack.svg" /><p class="caption"><span class="caption-text">Fig. 1: A visual representation of each module in a default Finagle server.
-Requests flow from left to right.</span></p>
-</div>
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "https://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="https://www.w3.org/2000/svg"
+  xmlns:xlink="https://www.w3.org/1999/xlink"
+  viewBox="0 0 400 130" x="0" y="0">
+
+  <defs>
+    <style type="text/css">
+      <![CDATA[
+        .node {
+          fill: white;
+          stroke: gray;
+          stroke-width: 1;
+        }
+
+        .node-label {
+          fill: #025167;
+          font-size: 9pt;
+          font-family: "Helvetica";
+        }
+
+        .heavy-label {
+          font-weight: bold;
+        }
+
+        .bridge {
+          stroke: gray;
+        }
+
+        .shadow {
+          fill: #fafafa;
+          stroke: gray;
+          stroke-width: .5;
+        }
+      ]]>
+    </style>
+  </defs>
+
+  <g id="serverStack" transform="translate(100, 20)">
+    <g transform="translate(100, 100) rotate(-90)">
+      <rect class="node" width="110" height="25"/>
+      <text class="node-label" x="55" y="17.5" text-anchor="middle">Session Expiration</text>
+    </g>
+
+    <g transform="translate(75, 100) rotate(-90)">
+      <rect class="node" width="110" height="25"/>
+      <text class="node-label" x="55" y="17.5" text-anchor="middle">Request Timeout</text>
+    </g>
+
+    <g transform="translate(50, 100) rotate(-90)">
+      <rect class="node" width="110" height="25"/>
+      <text class="node-label" x="55" y="17.5" text-anchor="middle">Request Deadline</text>
+    </g>
+
+    <g transform="translate(25, 100) rotate(-90)">
+      <rect class="node" width="110" height="25"/>
+      <text class="node-label" x="55" y="17.5" text-anchor="middle">Concurrency Limit</text>
+    </g>
+
+    <g transform="translate(0, 100) rotate(-90)">
+      <rect class="node" width="110" height="25"/>
+      <text class="node-label" x="55" y="17.5" text-anchor="middle">Observe</text>
+    </g>
+
+    <g transform="translate(125, 100) rotate(-90)">
+      <rect class="node" width="110" height="100"/>
+      <text class="heavy-label node-label" x="55" y="-50" text-anchor="middle"
+        transform="rotate(90)">Endpoint</text>
+    </g>
+  </g>
+</svg>
+<p>Fig. 1: A visual representation of each module in a default Finagle server.
+Requests flow from left to right.</p>
 <p>Many of the server modules act as <cite>admission controllers</cite> that make a decision (based on either a dynamic or
 static property) whether this server can handle the incoming request while maintaining some SLO (Service Level
 Objective).</p>

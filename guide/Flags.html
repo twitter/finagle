@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Flags &#8212; Finagle 19.4.0 documentation</title>
+    <title>Flags &#8212; Finagle 19.5.1 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.4.0',
+        VERSION:     '19.5.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.4.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.5.1 documentation" href="index.html" />
     <link rel="next" title="Unsuccessful Responses" href="UnsuccessfulResponses.html" />
     <link rel="prev" title="Metrics" href="Metrics.html" />
    
@@ -154,6 +154,10 @@ out (default: empty list).</dd>
 <dd>Format style for stat names (default: <cite>commonmetrics</cite>).</dd>
 <dt><strong>com.twitter.finagle.stats.includeEmptyHistograms</strong> <cite>bool</cite></dt>
 <dd>Include full histogram details when there are no data points (default: <cite>false</cite>).</dd>
+<dt><strong>com.twitter.finagle.stats.verbose</strong> <cite>string</cite></dt>
+<dd>Comma-separated list of <a href="#id1"><span class="problematic" id="id2">*</span></a>-wildcard expressions to allowlist debug metrics that are not exported by
+default (default: undefined). A tunable, <cite>com.twitter.finagle.stats.verbose</cite> has a higher priority
+if defined.</dd>
 </dl>
 </div>
 <div class="section" id="http">

@@ -472,7 +472,7 @@ resources for using Finagle.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">MethodBuilder</span><span class="result"> extends <span class="extype" name="com.twitter.finagle.client.MethodBuilderScaladoc">MethodBuilderScaladoc</span>[<a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a>]</span>
+        <span class="name">MethodBuilder</span><span class="result"> extends <a href="../client/BaseMethodBuilder.html" class="extype" name="com.twitter.finagle.client.BaseMethodBuilder">BaseMethodBuilder</a>[<a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a>]</span>
       </span>
       </h4>
 
@@ -536,7 +536,7 @@ Further details, including the request and response, are available at
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.finagle.client.MethodBuilderScaladoc">MethodBuilderScaladoc</span>[<a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="../client/BaseMethodBuilder.html" class="extype" name="com.twitter.finagle.client.BaseMethodBuilder">BaseMethodBuilder</a>[<a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a>], <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -562,7 +562,7 @@ Further details, including the request and response, are available at
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.http.MethodBuilder"><span>MethodBuilder</span></li><li class="in" name="com.twitter.finagle.client.MethodBuilderScaladoc"><span>MethodBuilderScaladoc</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.http.MethodBuilder"><span>MethodBuilder</span></li><li class="in" name="com.twitter.finagle.client.BaseMethodBuilder"><span>BaseMethodBuilder</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -788,7 +788,7 @@ Further details, including the request and response, are available at
 retried, <span class="extype" name="BackupRequestFilter">BackupRequestFilter</span> is configured with the params <code>maxExtraLoad</code>
 to decrease tail latency by sending an additional fraction of requests.</p><p>This additionally causes any server error HTTP status codes (500s) to be retried.</p></div><dl class="paramcmts block"><dt class="param">maxExtraLoad</dt><dd class="cmt"><p>How much extra load, as a Tunable[Double], we are willing to send to the
                     server. Must be between 0.0 and 1.0.
-                    Backup requests can be disabled by setting this to 0.0.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a> → MethodBuilderScaladoc</dd></dl></div>
+                    Backup requests can be disabled by setting this to 0.0.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a> → <a href="../client/BaseMethodBuilder.html" class="extype" name="com.twitter.finagle.client.BaseMethodBuilder">BaseMethodBuilder</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.MethodBuilder#idempotent" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="idempotent(maxExtraLoad:Double):com.twitter.finagle.http.MethodBuilder"></a><a id="idempotent(Double):MethodBuilder"></a>
       <span class="permalink">
@@ -813,7 +813,7 @@ your p999/p9999 latencies to (roughly) now be that of your p99 latency. For 5.pe
 latencies would shift to your p95 latency. You should also ensure that your backend can
 tolerate the increased load.</p><p>This additionally causes any server error HTTP status codes (500s) to be retried.</p></div><dl class="paramcmts block"><dt class="param">maxExtraLoad</dt><dd class="cmt"><p>How much extra load, as a fraction, we are willing to send to the server.
                     Must be between 0.0 and 1.0.
-                    Backup requests can be disabled by setting this to 0.0.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a> → MethodBuilderScaladoc</dd></dl></div>
+                    Backup requests can be disabled by setting this to 0.0.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a> → <a href="../client/BaseMethodBuilder.html" class="extype" name="com.twitter.finagle.client.BaseMethodBuilder">BaseMethodBuilder</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -898,7 +898,7 @@ tolerate the increased load.</p><p>This additionally causes any server error HTT
 disabled, and only those failures that are known to be safe to retry (i.e., write failures,
 where the request was never sent) are retried via requeue filter; any previously configured
 retries are removed.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a> → MethodBuilderScaladoc</dd><dt>See also</dt><dd><span class="cmt"><p>The MethodBuilder section in the
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a> → <a href="../client/BaseMethodBuilder.html" class="extype" name="com.twitter.finagle.client.BaseMethodBuilder">BaseMethodBuilder</a></dd><dt>See also</dt><dd><span class="cmt"><p>The MethodBuilder section in the
      <a href="https://twitter.github.io/finagle/guide/MethodBuilder.html#idempotency" target="_blank">user guide</a>
      for further details.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -1058,7 +1058,7 @@ retries are removed.
 to be safe to retry via <code>com.twitter.finagle.service.RequeueFilter</code>.</p><p>This causes the logical success metrics to be based on the
 <span class="extype" name="ResponseClassifier.Default">default response classifier</span> rules
 of a <code>Return</code> response is a success, while everything else is not.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a> → MethodBuilderScaladoc</dd><div class="block">Example:
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a> → <a href="../client/BaseMethodBuilder.html" class="extype" name="com.twitter.finagle.client.BaseMethodBuilder">BaseMethodBuilder</a></dd><div class="block">Example:
                <ol><li class="cmt"><p></p><pre><span class="kw">import</span> com.twitter.finagle.http.Http
 
 <span class="kw">val</span> client: Http.Client = ???
@@ -1090,7 +1090,7 @@ logging unsuccessful requests at debug level.
 </p></div><dl class="paramcmts block"><dt class="param">classifier</dt><dd class="cmt"><p>when a <a href="../service/ResponseClass$$Failed.html" class="extype" name="com.twitter.finagle.service.ResponseClass.Failed">Failed</a>
                   with <code>retryable</code> is <code>true</code> is returned for a given <code>ReqRep</code>, the
                   request will be retried. This is often a
-                  <code>ResponseClass.RetryableFailure</code>.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a> → MethodBuilderScaladoc</dd><div class="block">Example:
+                  <code>ResponseClass.RetryableFailure</code>.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a> → <a href="../client/BaseMethodBuilder.html" class="extype" name="com.twitter.finagle.client.BaseMethodBuilder">BaseMethodBuilder</a></dd><div class="block">Example:
                <ol><li class="cmt"><p>
 For example, retrying on a 418 status code:</p><pre><span class="kw">import</span> com.twitter.conversions.DurationOps._
 <span class="kw">import</span> com.twitter.finagle.http.Http
@@ -1130,7 +1130,7 @@ which is typically set via
 </p></div><dl class="paramcmts block"><dt class="param">howLong</dt><dd class="cmt"><p>how long, from the initial request issuance,
                an individual attempt given to complete.
                If it is not finite (e.g. <code>Duration.Top</code>),
-               no method specific timeout will be applied.</p></dd><dt>returns</dt><dd class="cmt"><p>a new instance with all other settings copied</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a> → MethodBuilderScaladoc</dd><div class="block">Example:
+               no method specific timeout will be applied.</p></dd><dt>returns</dt><dd class="cmt"><p>a new instance with all other settings copied</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a> → <a href="../client/BaseMethodBuilder.html" class="extype" name="com.twitter.finagle.client.BaseMethodBuilder">BaseMethodBuilder</a></dd><div class="block">Example:
                <ol><li class="cmt"><p>
 For example, a per-request timeout of 50 milliseconds:</p><pre><span class="kw">import</span> com.twitter.conversions.DurationOps._
 <span class="kw">import</span> com.twitter.finagle.http.Http
@@ -1168,7 +1168,7 @@ which is typically set via
 </p></div><dl class="paramcmts block"><dt class="param">howLong</dt><dd class="cmt"><p>how long, from the initial request issuance,
                an individual attempt given to complete.
                If it is not finite (e.g. <code>Duration.Top</code>),
-               no method specific timeout will be applied.</p></dd><dt>returns</dt><dd class="cmt"><p>a new instance with all other settings copied</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a> → MethodBuilderScaladoc</dd><div class="block">Example:
+               no method specific timeout will be applied.</p></dd><dt>returns</dt><dd class="cmt"><p>a new instance with all other settings copied</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a> → <a href="../client/BaseMethodBuilder.html" class="extype" name="com.twitter.finagle.client.BaseMethodBuilder">BaseMethodBuilder</a></dd><div class="block">Example:
                <ol><li class="cmt"><p>
 For example, a per-request timeout of 50 milliseconds:</p><pre><span class="kw">import</span> com.twitter.conversions.DurationOps._
 <span class="kw">import</span> com.twitter.finagle.http.Http
@@ -1201,7 +1201,7 @@ will be satisfied with a <a href="../GlobalRequestTimeoutException.html" class="
 </p></div><dl class="paramcmts block"><dt class="param">howLong</dt><dd class="cmt"><p>how long, from the initial request issuance,
                is the request given to complete.
                If it is not finite (e.g. <code>Duration.Top</code>),
-               no method specific timeout will be applied.</p></dd><dt>returns</dt><dd class="cmt"><p>a new instance with all other settings copied</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a> → MethodBuilderScaladoc</dd><div class="block">Example:
+               no method specific timeout will be applied.</p></dd><dt>returns</dt><dd class="cmt"><p>a new instance with all other settings copied</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a> → <a href="../client/BaseMethodBuilder.html" class="extype" name="com.twitter.finagle.client.BaseMethodBuilder">BaseMethodBuilder</a></dd><div class="block">Example:
                <ol><li class="cmt"><p>
 For example, a total timeout of 200 milliseconds:</p><pre><span class="kw">import</span> com.twitter.conversions.DurationOps._
 <span class="kw">import</span> com.twitter.finagle.http.Http
@@ -1236,7 +1236,7 @@ will be satisfied with a <a href="../GlobalRequestTimeoutException.html" class="
 </p></div><dl class="paramcmts block"><dt class="param">howLong</dt><dd class="cmt"><p>how long, from the initial request issuance,
                is the request given to complete.
                If it is not finite (e.g. <code>Duration.Top</code>),
-               no method specific timeout will be applied.</p></dd><dt>returns</dt><dd class="cmt"><p>a new instance with all other settings copied</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a> → MethodBuilderScaladoc</dd><div class="block">Example:
+               no method specific timeout will be applied.</p></dd><dt>returns</dt><dd class="cmt"><p>a new instance with all other settings copied</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a> → <a href="../client/BaseMethodBuilder.html" class="extype" name="com.twitter.finagle.client.BaseMethodBuilder">BaseMethodBuilder</a></dd><div class="block">Example:
                <ol><li class="cmt"><p>
 For example, a total timeout of 200 milliseconds:</p><pre><span class="kw">import</span> com.twitter.conversions.DurationOps._
 <span class="kw">import</span> com.twitter.finagle.http.Http
@@ -1258,8 +1258,8 @@ builder.withTimeoutTotal(<span class="num">200.</span>milliseconds))</pre></li><
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="com.twitter.finagle.client.MethodBuilderScaladoc">
-              <h3>Inherited from <span class="extype" name="com.twitter.finagle.client.MethodBuilderScaladoc">MethodBuilderScaladoc</span>[<a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a>]</h3>
+        <div class="parent" name="com.twitter.finagle.client.BaseMethodBuilder">
+              <h3>Inherited from <a href="../client/BaseMethodBuilder.html" class="extype" name="com.twitter.finagle.client.BaseMethodBuilder">BaseMethodBuilder</a>[<a href="" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a>]</h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

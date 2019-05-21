@@ -506,8 +506,9 @@ finagle clients and servers.
         <span class="name">connectTimeout</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientTransportParams.A">A</span></span>
       </span>
       
-      <p class="shortcomment cmt">Configures the TCP connection <code>timeout</code> of this client (default: 1 second).</p><div class="fullcomment"><div class="comment cmt"><p>Configures the TCP connection <code>timeout</code> of this client (default: 1 second).</p><p>The connection timeout is the maximum amount of time a transport is allowed
-to spend establishing a TCP connection.
+      <p class="shortcomment cmt">Configures the socket connect <code>timeout</code> of this client (default: 1 second).</p><div class="fullcomment"><div class="comment cmt"><p>Configures the socket connect <code>timeout</code> of this client (default: 1 second).</p><p>The connection timeout is the maximum amount of time a transport is allowed
+to spend connecting to a remote socket. This does not include an actual session creation
+(SSL handshake, HTTP proxy handshake, etc.) only raw socket connect.
 </p></div></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>

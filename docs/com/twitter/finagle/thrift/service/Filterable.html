@@ -262,7 +262,7 @@ generator.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <span class="name">Filterable</span><span class="tparams">[<span name="T">+T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <span class="name">Filterable</span><span class="tparams">[<span name="T">+T</span>]</span><span class="result"> extends <a href="../../service/Filterable.html" class="extype" name="com.twitter.finagle.service.Filterable">service.Filterable</a>[<span class="extype" name="com.twitter.finagle.thrift.service.Filterable.T">T</span>]</span>
       </span>
       </h4>
 
@@ -273,7 +273,7 @@ of a <code>ServicePerEndpoint</code>.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="../../service/Filterable.html" class="extype" name="com.twitter.finagle.service.Filterable">service.Filterable</a>[<span class="extype" name="com.twitter.finagle.thrift.service.Filterable.T">T</span>], <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div><div class="toggleContainer block">
             <span class="toggle">
               Known Subclasses
@@ -304,7 +304,7 @@ of a <code>ServicePerEndpoint</code>.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.thrift.service.Filterable"><span>Filterable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.thrift.service.Filterable"><span>Filterable</span></li><li class="in" name="com.twitter.finagle.service.Filterable"><span>Filterable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -328,7 +328,7 @@ of a <code>ServicePerEndpoint</code>.
 
         <div class="values members">
               <h3>Abstract Value Members</h3>
-              <ol><li name="com.twitter.finagle.thrift.service.Filterable#filtered" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.thrift.service.Filterable#filtered" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="filtered(filter:com.twitter.finagle.Filter.TypeAgnostic):T"></a><a id="filtered(TypeAgnostic):T"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/thrift/service/Filterable.html#filtered(filter:com.twitter.finagle.Filter.TypeAgnostic):T" title="Permalink">
@@ -343,7 +343,8 @@ of a <code>ServicePerEndpoint</code>.
         <span class="name">filtered</span><span class="params">(<span name="filter">filter: <a href="../../Filter$$TypeAgnostic.html" class="extype" name="com.twitter.finagle.Filter.TypeAgnostic">TypeAgnostic</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.thrift.service.Filterable.T">T</span></span>
       </span>
       
-      <p class="shortcomment cmt">Prepend the given type-agnostic <a href="../../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>.</p>
+      <p class="shortcomment cmt">Prepend the given type-agnostic <a href="../../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Prepend the given type-agnostic <a href="../../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thrift.service.Filterable">Filterable</a> → <a href="../../service/Filterable.html" class="extype" name="com.twitter.finagle.service.Filterable">Filterable</a></dd></dl></div>
     </li></ol>
             </div>
 
@@ -710,7 +711,9 @@ of a <code>ServicePerEndpoint</code>.
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.AnyRef">
+        <div class="parent" name="com.twitter.finagle.service.Filterable">
+              <h3>Inherited from <a href="../../service/Filterable.html" class="extype" name="com.twitter.finagle.service.Filterable">service.Filterable</a>[<span class="extype" name="com.twitter.finagle.thrift.service.Filterable.T">T</span>]</h3>
+            </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>

@@ -204,6 +204,10 @@ resources for using Finagle.
                         <a class="object" href="BackupRequestFilter$.html" title=""></a>
                         <a href="BackupRequestFilter$.html" title="">BackupRequestFilter</a>
                       </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="BaseMethodBuilder.html" title="A base interface for protocol-specific MethodBuilder implementations."></a>
+                        <a href="BaseMethodBuilder.html" title="A base interface for protocol-specific MethodBuilder implementations.">BaseMethodBuilder</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="DefaultPool$.html" title=""></a>
                         <a class="class" href="DefaultPool.html" title="Create a watermark pool backed by a caching pool."></a>
                         <a href="DefaultPool.html" title="Create a watermark pool backed by a caching pool.">DefaultPool</a>
@@ -223,6 +227,14 @@ resources for using Finagle.
                         <span class="separator"></span>
                         <a class="object" href="LatencyCompensation$.html" title="Latency compensation enables the modification of connection, request, and session acquisition timeouts on a per-endpoint basis."></a>
                         <a href="LatencyCompensation$.html" title="Latency compensation enables the modification of connection, request, and session acquisition timeouts on a per-endpoint basis.">LatencyCompensation</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="MethodBuilder$.html" title=""></a>
+                        <a class="class" href="MethodBuilder.html" title=""></a>
+                        <a href="MethodBuilder.html" title="">MethodBuilder</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="ServicePerEndpointBuilder.html" title="ServicePerEndpointBuilder creates ServicePerEndpoint typed interfaces from underlying Service[Req, Rep] typed services."></a>
+                        <a href="ServicePerEndpointBuilder.html" title="ServicePerEndpointBuilder creates ServicePerEndpoint typed interfaces from underlying Service[Req, Rep] typed services.">ServicePerEndpointBuilder</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="trait" href="StackBasedClient.html" title="A Client that may have its Stack transformed."></a>
@@ -1006,7 +1018,26 @@ generator.
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.client.DefaultPool" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.client.BaseMethodBuilder" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="BaseMethodBuilder[T]extendsAnyRef"></a><a id="BaseMethodBuilder[T]:BaseMethodBuilder[T]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/client/index.html#BaseMethodBuilder[T]extendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="A base interface for protocol-specific MethodBuilder implementations." href="BaseMethodBuilder.html"><span class="name">BaseMethodBuilder</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A base interface for protocol-specific <code>MethodBuilder</code> implementations.</p><div class="fullcomment"><div class="comment cmt"><p>A base interface for protocol-specific <code>MethodBuilder</code> implementations.
+Acts as a template for <code>MethodBuilder</code> pattern and provides the documentation
+for common methods.
+</p></div></div>
+    </li><li name="com.twitter.finagle.client.DefaultPool" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="DefaultPool[Req,Rep]extendscom.twitter.finagle.stats.StatsReceiver=&gt;com.twitter.finagle.client.Transformer[Req,Rep]withProductwithSerializable"></a><a id="DefaultPool[Req,Rep]:DefaultPool[Req,Rep]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/client/index.html#DefaultPool[Req,Rep]extendscom.twitter.finagle.stats.StatsReceiver=&gt;com.twitter.finagle.client.Transformer[Req,Rep]withProductwithSerializable" title="Permalink">
@@ -1071,6 +1102,40 @@ endpointer.</p>
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html" target="_blank">user guide</a>
      for further details on Finagle clients and their configuration.</p></span><span class="cmt"><p><a href="StackClient$.html#newStack[Req,Rep]:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]" class="extmbr" name="com.twitter.finagle.client.StackClient#newStack">StackClient.newStack</a> for the default modules used by Finagle
      clients.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.client.MethodBuilder" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="MethodBuilder[Req,Rep]extendsAnyRef"></a><a id="MethodBuilder[Req,Rep]:MethodBuilder[Req,Rep]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/client/index.html#MethodBuilder[Req,Rep]extendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="MethodBuilder.html"><span class="name">MethodBuilder</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><code>methodBuilder</code> methods on client protocols, such as <code>Http.Client</code>
+     or <code>ThriftMux.Client</code> for an entry point.</p></span><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/MethodBuilder.html" target="_blank">user guide</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.client.ServicePerEndpointBuilder" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ServicePerEndpointBuilder[Req,Rep,ServicePerEndpoint&lt;:com.twitter.finagle.service.Filterable[ServicePerEndpoint]]extendsAnyRef"></a><a id="ServicePerEndpointBuilder[Req,Rep,ServicePerEndpoint&lt;:Filterable[ServicePerEndpoint]]:ServicePerEndpointBuilder[Req,Rep,ServicePerEndpoint]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/client/index.html#ServicePerEndpointBuilder[Req,Rep,ServicePerEndpoint&lt;:com.twitter.finagle.service.Filterable[ServicePerEndpoint]]extendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="ServicePerEndpointBuilder creates ServicePerEndpoint typed interfaces from underlying Service[Req, Rep] typed services." href="ServicePerEndpointBuilder.html"><span class="name">ServicePerEndpointBuilder</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="ServicePerEndpoint">ServicePerEndpoint &lt;: <a href="../service/Filterable.html" class="extype" name="com.twitter.finagle.service.Filterable">Filterable</a>[<span class="extype" name="com.twitter.finagle.client.ServicePerEndpointBuilder.ServicePerEndpoint">ServicePerEndpoint</span>]</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">ServicePerEndpointBuilder creates <code>ServicePerEndpoint</code> typed interfaces from underlying
+<code>Service[Req, Rep]</code> typed services.</p>
     </li><li name="com.twitter.finagle.client.StackBasedClient" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="StackBasedClient[Req,Rep]extendsClient[Req,Rep]withStack.Parameterized[com.twitter.finagle.client.StackBasedClient[Req,Rep]]withStack.Transformable[com.twitter.finagle.client.StackBasedClient[Req,Rep]]"></a><a id="StackBasedClient[Req,Rep]:StackBasedClient[Req,Rep]"></a>
       <span class="permalink">
@@ -1256,6 +1321,22 @@ has both network-local and trans-continental endpoints, a reasonable latency
 compensator might add the speed-of-light penalty when communicating with distant
 endpoints.
 </p></div></div>
+    </li><li name="com.twitter.finagle.client.MethodBuilder" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MethodBuilder"></a><a id="MethodBuilder:MethodBuilder"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/client/index.html#MethodBuilder" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="MethodBuilder$.html"><span class="name">MethodBuilder</span></a>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.client.StackClient" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="StackClient"></a><a id="StackClient:StackClient"></a>
       <span class="permalink">

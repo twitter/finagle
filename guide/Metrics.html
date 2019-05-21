@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &#8212; Finagle 19.4.0 documentation</title>
+    <title>Metrics &#8212; Finagle 19.5.1 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.4.0',
+        VERSION:     '19.5.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.4.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.5.1 documentation" href="index.html" />
     <link rel="next" title="Flags" href="Flags.html" />
     <link rel="prev" title="Protocols" href="Protocols.html" />
    
@@ -417,9 +417,6 @@ the backends to operate correctly.</dd>
 <dt><strong>coordinate_updates</strong></dt>
 <dd>A counter of the number of times the Aperture implementation receives
 updates from the <cite>ProcessCoordinate</cite> process global.</dd>
-<dt><strong>rebuild_no_coordinate</strong></dt>
-<dd>A counter which tracks the number of rebuilds without a <cite>coordinate</cite> set
-when <cite>use_deterministic_ordering</cite> is 1.</dd>
 <dt><strong>expired</strong></dt>
 <dd>A counter of the number of endpoints which have been closed because they
 have fallen out of the aperture window and become idle.</dd>
@@ -1300,12 +1297,6 @@ connection. This does not include downgraded Thrift connections.</dd>
 <dt><strong>&lt;server_label&gt;/thriftmux/downgraded_connects</strong></dt>
 <dd>A counter of the number of times the server has created a downgraded
 connection for &#8220;plain&#8221; Thrift.</dd>
-<dt><strong>&lt;server_label&gt;/thriftmux/tls/upgrade/success</strong></dt>
-<dd>A counter of the number of times the client or server has successfully
-upgraded a connection to TLS.</dd>
-<dt><strong>&lt;server_label&gt;/mux/tls/upgrade/incompatible</strong></dt>
-<dd>A counter of the number of times a client or server failed to establish a session
-due to incompatible TLS requirements or capabilities.</dd>
 </dl>
 </div>
 <div class="section" id="perendpoint-statsfilter">

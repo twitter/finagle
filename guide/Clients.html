@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Clients &#8212; Finagle 19.4.0 documentation</title>
+    <title>Clients &#8212; Finagle 19.5.1 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.4.0',
+        VERSION:     '19.5.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.4.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.5.1 documentation" href="index.html" />
     <link rel="next" title="Contexts" href="Contexts.html" />
     <link rel="prev" title="Servers" href="Servers.html" />
    
@@ -194,11 +194,162 @@ stacks: the <cite>client stack</cite> manages <cite>name</cite> resolution and b
 across multiple endpoints, the <cite>endpoint stack</cite> provides circuit breakers
 and connection pooling, and the <cite>connection stack</cite> provides connection life-cycle
 management and implements the wire protocol.</p>
-<div class="figure" id="id32">
-<img alt="_images/clientstack.svg" src="_images/clientstack.svg" /><p class="caption"><span class="caption-text">Fig. 1: A visual representation of each module in a default Finagle client
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "https://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="https://www.w3.org/2000/svg"
+  xmlns:xlink="https://www.w3.org/1999/xlink"
+  viewBox="0 0 725 360" x="0" y="0">
+
+  <defs>
+    <style type="text/css">
+      <![CDATA[
+        .node {
+          fill: white;
+          stroke: gray;
+          stroke-width: 1;
+        }
+
+        .node-label {
+          fill: #025167;
+          font-size: 9pt;
+          font-family: "Helvetica";
+        }
+
+        .heavy-label {
+          font-weight: bold;
+        }
+
+        .bridge {
+          stroke: gray;
+        }
+
+        .shadow {
+          fill: #fafafa;
+          stroke: gray;
+          stroke-width: .5;
+        }
+      ]]>
+    </style>
+
+    <g id="endpointGroup">
+      <rect class="shadow" width="100" height="250" />
+      <g transform="translate(50, 250)">
+        <line class="bridge" x1="0" x2="50" transform="rotate(45)"/>
+        <rect class="shadow" width="25" height="150" transform="translate(25, 25)" />
+        <line class="bridge" x1="0" x2="50" transform="rotate(90)"/>
+        <rect class="shadow" width="25" height="150" transform="translate(-12.5, 25)" />
+        <line class="bridge" x1="0" x2="50" transform="rotate(135)"/>
+        <rect class="shadow" width="25" height="150" transform="translate(-50, 25)" />
+      </g>
+    </g>
+  </defs>
+
+  <g id="clienStack" transform="translate(0, 10)">
+    <g id="observed" transform="translate(25, 220) rotate(-90)">
+      <rect class="node" width="100" height="25"/>
+      <text class="node-label" x="50" y="17.5" text-anchor="middle">Observe</text>
+    </g>
+
+    <g id="retries" transform="translate(50, 220) rotate(-90)">
+      <rect class="node" width="100" height="25"/>
+      <text class="node-label" x="50" y="17.5" text-anchor="middle">Retries</text>
+    </g>
+
+    <g id="serviceTimeout" transform="translate(75, 220) rotate(-90)">
+      <rect class="node" width="100" height="25"/>
+      <text class="node-label" x="50" y="17.5" text-anchor="middle">Session Timeout</text>
+    </g>
+
+    <g id="refcounted" transform="translate(100, 220) rotate(-90)">
+      <rect class="node" width="100" height="25"/>
+      <text class="node-label" x="50" y="17.5" text-anchor="middle">Request Draining</text>
+    </g>
+
+    <g id="loadbalancer" transform="translate(125, 220) rotate(-90)">
+      <rect class="node" width="100" height="100"/>
+      <text class="heavy-label node-label" x="50" y="-50" text-anchor="middle"
+        transform="rotate(90)">Load Balancer</text>
+
+      <!-- endpoint stack -->
+      <g id="endpointStack" transform="translate(50, 100)">
+        <line class="bridge" x1="0" x2="150" transform="rotate(45)"/>
+        <g id="endpoint2" transform="translate(75, 75)">
+          <use xlink:href="#endpointGroup"/>
+        </g>
+
+        <line class="bridge" x1="0" x2="75" transform="rotate(90)"/>
+        <g id="endpoint1" transform="translate(-50, 75)">
+          <g id="monitored" transform="translate(0, 0)">
+            <rect class="node" width="100" height="25"/>
+            <text class="node-label" x="50" y="17.5" text-anchor="middle">Monitor</text>
+          </g>
+
+          <g id="traced" transform="translate(0, 25)">
+            <rect class="node" width="100" height="25"/>
+            <text class="node-label" x="50" y="17.5" text-anchor="middle">Trace</text>
+          </g>
+
+          <g id="observed" transform="translate(0, 50)">
+            <rect class="node" width="100" height="25"/>
+            <text class="node-label" x="50" y="17.5" text-anchor="middle">Observe</text>
+          </g>
+
+          <g id="failureAccrual" transform="translate(0, 75)">
+            <rect class="node" width="100" height="25"/>
+            <text class="heavy-label node-label" x="50" y="17.5" text-anchor="middle">Failure Accrual</text>
+          </g>
+
+          <g id="requestTimeout" transform="translate(0, 100)">
+            <rect class="node" width="100" height="25"/>
+            <text class="node-label" x="50" y="17.5" text-anchor="middle">Request Timeout</text>
+          </g>
+
+          <g id="pool" transform="translate(0, 125)">
+            <rect class="node" width="100" height="100"/>
+            <text class="heavy-label node-label" x="50" y="-50" text-anchor="middle"
+              transform="rotate(90)">Pool</text>
+          </g>
+
+          <g id="failFast" transform="translate(0, 225)">
+            <rect class="node" width="100" height="25"/>
+            <text class="heavy-label node-label" x="50" y="17.5" text-anchor="middle">Fail Fast</text>
+          </g>
+
+          <g id="transportStack" transform="translate(50, 250)">
+              <line class="bridge" x1="0" x2="50" transform="rotate(45)"/>
+              <rect class="shadow" width="25" height="150" transform="translate(25, 25)" />
+
+              <line class="bridge" x1="0" x2="25" transform="rotate(90)"/>
+              <g id="expiration" transform="translate(-12.5, 25)">
+                <rect class="node" width="25" height="75"/>
+                <text class="node-label" x="37.5" y="-8.5" transform="rotate(90)"
+                  text-anchor="middle">Expiration</text>
+              </g>
+
+              <g id="dispatcher" transform="translate(-12.5, 100)">
+                <rect class="node" width="25" height="75"/>
+                <text class="node-label" x="37.5" y="-8.5" transform="rotate(90)"
+                  text-anchor="middle">Dispatcher</text>
+              </g>
+
+              <line class="bridge" x1="0" x2="50" transform="rotate(135)"/>
+              <rect class="shadow" width="25" height="150" transform="translate(-50, 25)" />
+          </g>
+        </g>
+
+        <line class="bridge" x1="0" x2="150" transform="rotate(135)"/>
+        <g id="endpoint2" transform="translate(-175, 75)">
+          <use xlink:href="#endpointGroup"/>
+        </g>
+      </g>
+    </g>
+
+  </g>
+
+</svg>
+<p>Fig. 1: A visual representation of each module in a default Finagle client
 that is configured with three endpoints and connections. Requests flow from
-left to right.</span></p>
-</div>
+left to right.</p>
 <div class="section" id="module-composition">
 <h3>Module Composition<a class="headerlink" href="#module-composition" title="Permalink to this headline">¶</a></h3>
 <p>A materialized Finagle client is a <a class="reference internal" href="ServicesAndFilters.html#service-factory"><span class="std std-ref">ServiceFactory</span></a>. It produces
@@ -749,10 +900,15 @@ Pooling is designed to balance connection churn and service acquisition latency 
 resources open.</p>
 <p>Depending on the configuration, a Finagle client&#8217;s stack might contain up to _three_ connection pools
 stacked on each other: watermark, caching and buffering pools.</p>
-<p>The only Finagle protocol that doesn&#8217;t require any connection pooling (a multiplexing protocol) is
-<cite>Mux</cite> so it uses <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/pool/SingletonPool.scala">SingletonPool</a> that maintains
-a single connection per endpoint. For every other Finagle-supported protocol (i.e., HTTP/1.1, Thrift),
-there a connection pooling setup built with watermark and caching pools.</p>
+<p>The two Finagle protocols that don&#8217;t require any connection pooling (multiplexing protocols) are
+Mux and HTTP/2 as they both maintain just one connection per remote peer. For every other Finagle-
+supported protocol (i.e., HTTP/1.1, Thrift), there a connection pooling setup built with watermark
+and caching pools in front of each remote peer.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">When HTTP/2 is enabled on an HTTP client (and the transport is successfully upgraded), the session
+pool caches streams (not connections) multiplexed over a single connection.</p>
+</div>
 <p>The default client stack layers caching and watermark pools which amounts to maintaining the low
 watermark (i.e., <code class="docutils literal"><span class="pre">0</span></code>, as long as request concurrency exists), queuing requests above the unbounded high
 watermark (i.e., <code class="docutils literal"><span class="pre">Int.MaxValue</span></code>), and applying an unbounded TTL (i.e., <code class="docutils literal"><span class="pre">Duration.Top</span></code>) for services
@@ -770,13 +926,18 @@ example <a class="footnote-reference" href="#example" id="id27">[3]</a>.</p>
   <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;twitter.com&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">All session pool settings are applied to each host in the replica set. Put this way, these settings
+are per-host as opposed to per-client.</p>
+</div>
 <p>Thus all the three pools are configured with a single param that takes the following arguments:</p>
 <ol class="arabic simple">
 <li><cite>minSize</cite> and <cite>maxSize</cite> - low and high watermarks for the watermark pool (note that a Finagle
-client will not maintain more connections than <cite>maxSize</cite>)</li>
-<li><cite>maxWaiters</cite> - the maximum number of connection requests that are queued when the connection
-concurrency exceeds the high watermark</li>
-<li><cite>ttl</cite>- the maximum amount of time a session is allowed to be cached in a pool</li>
+client will not maintain more connections than <cite>maxSize</cite> per host)</li>
+<li><cite>maxWaiters</cite> - the maximum number of connection requests that are queued per host when the
+connection concurrency exceeds the high watermark</li>
+<li><cite>ttl</cite>- the maximum amount of time a per-host session is allowed to be cached in a pool</li>
 </ol>
 <p><a class="reference internal" href="Metrics.html#pool-stats"><span class="std std-ref">Related stats</span></a></p>
 <div class="section" id="buffering-pool">

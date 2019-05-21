@@ -1169,22 +1169,6 @@ These may be set independently via the .configured API.
       </span>
       
       <p class="shortcomment cmt">Configures the maximum initial line length the client can receive from a server.</p>
-    </li><li name="com.twitter.finagle.Http.Client#withMaxRequestSize" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="withMaxRequestSize(size:com.twitter.util.StorageUnit):com.twitter.finagle.Http.Client"></a><a id="withMaxRequestSize(StorageUnit):Client"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Http$$Client.html#withMaxRequestSize(size:com.twitter.util.StorageUnit):com.twitter.finagle.Http.Client" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">withMaxRequestSize</span><span class="params">(<span name="size">size: <a href="https://twitter.github.io/util/docs/com/twitter/util/StorageUnit.html#com.twitter.util.StorageUnit" class="extype" name="com.twitter.util.StorageUnit">StorageUnit</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Http.Client">Client</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Configures the maximum request size that the client can send.</p>
     </li><li name="com.twitter.finagle.Http.Client#withMaxResponseSize" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="withMaxResponseSize(size:com.twitter.util.StorageUnit):com.twitter.finagle.Http.Client"></a><a id="withMaxResponseSize(StorageUnit):Client"></a>
       <span class="permalink">
@@ -1427,7 +1411,8 @@ retries that can be made by this client.
         <span class="name">withSessionPool</span><span class="result">: <a href="param/SessionPoolingParams.html" class="extype" name="com.twitter.finagle.param.SessionPoolingParams">SessionPoolingParams</a>[<a href="" class="extype" name="com.twitter.finagle.Http.Client">Client</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">An entry point for configuring the client's session pool.</p><div class="fullcomment"><div class="comment cmt"><p>An entry point for configuring the client's session pool.
+      <p class="shortcomment cmt">An entry point for configuring the client's session pool.</p><div class="fullcomment"><div class="comment cmt"><p>An entry point for configuring the client's session pool.</p><p>All session pool settings are applied to each host in the replica set. Put this way, these
+settings are per-host as opposed to per-client.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Http.Client">Client</a> → <a href="param/WithSessionPool.html" class="extype" name="com.twitter.finagle.param.WithSessionPool">WithSessionPool</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#pooling" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#pooling</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.Http.Client#withSessionQualifier" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withSessionQualifier:com.twitter.finagle.param.SessionQualificationParams[com.twitter.finagle.Http.Client]"></a><a id="withSessionQualifier:SessionQualificationParams[Client]"></a>

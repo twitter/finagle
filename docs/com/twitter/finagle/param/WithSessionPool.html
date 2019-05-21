@@ -754,7 +754,8 @@ finagle clients and servers.
         <span class="name">withSessionPool</span><span class="result">: <a href="SessionPoolingParams.html" class="extype" name="com.twitter.finagle.param.SessionPoolingParams">SessionPoolingParams</a>[<span class="extype" name="com.twitter.finagle.param.WithSessionPool.A">A</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">An entry point for configuring the client's session pool.</p><div class="fullcomment"><div class="comment cmt"><p>An entry point for configuring the client's session pool.
+      <p class="shortcomment cmt">An entry point for configuring the client's session pool.</p><div class="fullcomment"><div class="comment cmt"><p>An entry point for configuring the client's session pool.</p><p>All session pool settings are applied to each host in the replica set. Put this way, these
+settings are per-host as opposed to per-client.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#pooling" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#pooling</a></p></span></dd></dl></div>
     </li>
               </ol>
