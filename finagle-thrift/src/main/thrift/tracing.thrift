@@ -211,6 +211,9 @@ struct Span {
   8: list<BinaryAnnotation> binary_annotations, // any binary annotations
   9: bool debug,                  // if true, we DEMAND that this span passes all samplers
   10: optional i64 timestamp      // the time at which the span was generated
+  11: optional i64 duration       // measurement in microseconds of the critical path, if known
+  12: optional i64 trace_id_high  // the optional high 64 bits of a 128 bit identifier
+                                  // (must be non-zero if present)
 }
 
 
