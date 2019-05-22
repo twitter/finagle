@@ -7,7 +7,17 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
-* finagle: Upgrade to Netty 4.1.35.Final and netty-tcnative 2.0.25.Final. 
+New Features
+~~~~~~~~~~~~
+
+* finagle-http: Add two new API variants in `CookieMap`: `addAll` and `removeAll` that allow for
+  adding and removing cookies in bulk, without triggering a header rewrite on each item.
+  ``PHAB_ID=D318013``
+
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle: Upgrade to Netty 4.1.35.Final and netty-tcnative 2.0.25.Final.
   ``PHAB_ID=D312439``
 
 19.5.1

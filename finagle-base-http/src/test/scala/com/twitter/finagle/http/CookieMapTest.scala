@@ -34,6 +34,34 @@ abstract class CookieMapTest(codec: CookieCodec, codecName: String) extends FunS
       assert(message.headerMap(headerName) == "name=value")
     }
 
+    test(s"$codec: Add multiple cookies to the CookieMap on a $messageType adds them to the header") {
+      val message = newMessage()
+      val allPossibleHeaders = Seq("foo=foo", "bar=bar", "baz=baz").permutations
+        .map(_.mkString("; "))
+        .toSeq
+
+      val cookieMap = new CookieMap(message, codec)
+      val foo = new Cookie("foo", "foo")
+      val bar = new Cookie("bar", "bar")
+      val baz = new Cookie("baz", "baz")
+
+      cookieMap ++= Seq("foo" -> foo, "bar" -> bar, "baz" -> baz)
+      assert(cookieMap.size == 3)
+      assert(allPossibleHeaders.contains(message.headerMap.getAll(headerName).mkString("; ")))
+
+      cookieMap --= Seq("foo", "bar", "baz")
+      assert(cookieMap.isEmpty)
+      assert(message.headerMap.get(headerName).isEmpty || message.headerMap(headerName) == "")
+
+      cookieMap.addAll(Seq(foo, bar, baz))
+      assert(cookieMap.size == 3)
+      assert(allPossibleHeaders.contains(message.headerMap.getAll(headerName).mkString("; ")))
+
+      cookieMap.removeAll(Seq("foo", "bar", "baz"))
+      assert(cookieMap.isEmpty)
+      assert(message.headerMap.get(headerName).isEmpty || message.headerMap(headerName) == "")
+    }
+
     test(
       s"$codec: Adding the same cookie object to a CookieMap on a $messageType more than once " +
         s"results in a $messageType with one cookie"

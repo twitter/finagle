@@ -2,6 +2,7 @@ package com.twitter.finagle.http
 
 import com.twitter.finagle.http.cookie.supportSameSiteCodec
 import com.twitter.finagle.http.netty4.Netty4CookieCodec
+import scala.collection.mutable.ListBuffer
 import scala.collection.mutable
 
 private[finagle] object CookieMap {
@@ -10,7 +11,6 @@ private[finagle] object CookieMap {
 
   // Note that this is a def to allow it to be toggled for unit tests.
   private[finagle] def includeSameSite: Boolean = supportSameSiteCodec()
-
 }
 
 /**
@@ -40,11 +40,9 @@ class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
   def isValid: Boolean = _isValid
   private[this] var _isValid = true
 
-  private[this] val cookieHeaderName =
-    if (message.isRequest)
-      Fields.Cookie
-    else
-      Fields.SetCookie
+  private[this] final def cookieHeaderName: String =
+    if (message.isRequest) Fields.Cookie
+    else Fields.SetCookie
 
   private[this] def decodeCookies(header: String): Iterable[Cookie] = {
     val decoding =
@@ -84,101 +82,121 @@ class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
     } yield (name, cookie)
 
   /**
-   * Applies the given function ''f'' to each cookie in this map.
-   *
-   * @param f a function that takes cookie ''name'' and ''Cookie'' itself
-   */
-  override def foreach[U](f: ((String, Cookie)) => U): Unit = iterator.foreach(f)
-
-  /**
-   * Fetches the first cookie with the given ''name'' from this map.
-   *
-   * @param name the cookie name
-   * @return a first ''Cookie'' with the given ''name''
+   * Fetches the first cookie with the given `name` from this map.
    **/
   def get(name: String): Option[Cookie] = getAll(name).headOption
 
   /**
-   * Fetches the value of the first cookie with the given ''name'' from this map.
-   *
-   * @param name the cookie name
-   * @return a value of the first cookie of the given ''name''
+   * Fetches the value of the first cookie with the given `name` from this map.
    */
-  def getValue(name: String): Option[String] = get(name) map { _.value }
+  def getValue(name: String): Option[String] = get(name).map(_.value)
 
   /**
-   * Fetches all cookies with the given ''name'' from this map.
-   *
-   * @param name the cookie name
-   * @return a sequence of cookies with the same ''name''
+   * Fetches all cookies with the given `name` from this map.
    */
   def getAll(name: String): Seq[Cookie] = underlying(name).toSeq
 
   /**
-   * Adds the given ''cookie'' (which is a tuple of cookie ''name''
-   * and ''Cookie'' itself) into this map. If there are already cookies
-   * with the given ''name'' in the map, they will be removed.
-   *
-   * @param cookie the tuple representing ''name'' and ''Cookie''
+   * Adds the given `cookie` (which is a tuple of cookie `name`
+   * and Cookie` itself) into this map. If there are already cookies
+   * with the given `name` in the map, they will be removed.
    */
-  def +=(cookie: (String, Cookie)) = {
+  def +=(cookie: (String, Cookie)): this.type = {
     val (n, c) = cookie
-    underlying(n) = Set(c)
+    setNoRewrite(n, c)
     rewriteCookieHeaders()
     this
   }
 
   /**
-   * Adds the given  ''cookie'' into this map. If there are already cookies
-   * with the given ''name'' in the map, they will be removed.
-   *
-   * @param cookie the ''Cookie'' to add
+   * Adds the given `cookie` into this map. If there are already cookies
+   * with the given `name` in the map, they will be removed.
    */
   def +=(cookie: Cookie): CookieMap = {
     this += ((cookie.name, cookie))
   }
 
-  /**
-   * Deletes all cookies with the given ''name'' from this map.
-   *
-   * @param name the name of the cookies to delete
-   */
-  def -=(name: String) = {
-    underlying -= name
+  override def ++=(xs: TraversableOnce[(String, Cookie)]): this.type = {
+    xs.foreach { case (n, c) => setNoRewrite(n, c) }
+    rewriteCookieHeaders()
+    this
+  }
+
+  override def --=(xs: TraversableOnce[String]): this.type = {
+    xs.foreach { n =>
+      underlying -= n
+    }
     rewriteCookieHeaders()
     this
   }
 
   /**
-   * Adds the given ''cookie'' with ''name'' into this map. Existing cookies
+   * Deletes all cookies with the given `name` from this map.
+   */
+  def -=(name: String): this.type = {
+    underlying -= name
+    rewriteCookieHeaders()
+    this
+  }
+
+  private[this] def setNoRewrite(name: String, cookie: Cookie): Unit = {
+    underlying(name) = Set(cookie)
+  }
+
+  private[this] def addNoRewrite(name: String, cookie: Cookie): Unit = {
+    underlying(name) = (underlying(name) - cookie) + cookie
+  }
+
+  /**
+   * Adds the given `cookie` with `name` into this map. Existing cookies
    * with this name but different domain/path will be kept. If there is already
    * an identical cookie (different value but name/path/domain is the same) in the
    * map, it will be replaced within a new version.
    *
-   * @param name the cookie name to add
-   * @param cookie the ''Cookie'' to add
+   * @see [[addAll]] for adding cookies in bulk
    */
   def add(name: String, cookie: Cookie): Unit = {
-    underlying(name) = (underlying(name) - cookie) + cookie
+    addNoRewrite(name, cookie)
     rewriteCookieHeaders()
   }
 
   /**
-   * Adds the given ''cookie'' into this map. Existing cookies with this name
+   * Adds the given `cookie` into this map. Existing cookies with this name
    * but different domain/path will be kept. If there is already an identical
    * cookie (different value but name/path/domain is the same) in the map,
    * it will be replaced within a new version.
    *
-   * @param cookie the ''Cookie'' to add
+   * @see [[addAll]] for adding cookies in bulk
    */
   def add(cookie: Cookie): Unit = {
     add(cookie.name, cookie)
   }
 
-  for {
-    cookieHeader <- message.headerMap.getAll(cookieHeaderName)
-    cookie <- decodeCookies(cookieHeader)
-  } {
-    add(cookie)
+  /**
+   * Adds multiple `cookies` into this map. Existing cookies with this name
+   * but different domain/path will be kept. If there is already an identical
+   * cookie (different value but name/path/domain is the same) in the map,
+   * it will be replaced within a new version.
+   */
+  def addAll(cookies: TraversableOnce[Cookie]): Unit = {
+    cookies.foreach(c => addNoRewrite(c.name, c))
+    rewriteCookieHeaders()
   }
+
+  /**
+   * Removes multiple `cookies` from this map.
+   */
+  def removeAll(cookies: TraversableOnce[String]): Unit = {
+    this --= cookies
+  }
+
+  private[this] def rewriteFirstTime(): Unit = {
+    val cookies = new ListBuffer[Cookie]
+    message.headerMap.getAll(cookieHeaderName).foreach { header =>
+      cookies ++= decodeCookies(header)
+    }
+    addAll(cookies.toList)
+  }
+
+  rewriteFirstTime()
 }
