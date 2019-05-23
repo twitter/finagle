@@ -32,7 +32,7 @@ class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
   override def empty: CookieMap = new CookieMap(Request())
 
   private[this] val underlying =
-    mutable.Map[String, Set[Cookie]]().withDefaultValue(Set.empty)
+    mutable.Map[String, List[Cookie]]().withDefaultValue(Nil)
 
   /**
    * Checks if there was a parse error. Invalid cookies are ignored.
@@ -75,11 +75,21 @@ class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
   /**
    * Returns an iterator that iterates over all cookies in this map.
    */
-  def iterator: Iterator[(String, Cookie)] =
-    for {
-      (name, cookies) <- underlying.iterator
-      cookie <- cookies
-    } yield (name, cookie)
+  def iterator: Iterator[(String, Cookie)] = new Iterator[(String, Cookie)] {
+    private[this] val outer: Iterator[(String, List[Cookie])] = underlying.iterator
+    private[this] var inner: List[Cookie] = Nil
+
+    def hasNext: Boolean = outer.hasNext || !inner.isEmpty
+    def next(): (String, Cookie) = {
+      if (inner.isEmpty) {
+        inner = outer.next()._2
+      }
+
+      val result = inner.head
+      inner = inner.tail
+      result.name -> result
+    }
+  }
 
   /**
    * Fetches the first cookie with the given `name` from this map.
@@ -94,7 +104,7 @@ class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
   /**
    * Fetches all cookies with the given `name` from this map.
    */
-  def getAll(name: String): Seq[Cookie] = underlying(name).toSeq
+  def getAll(name: String): Seq[Cookie] = underlying(name)
 
   /**
    * Adds the given `cookie` (which is a tuple of cookie `name`
@@ -140,11 +150,16 @@ class CookieMap private[finagle] (message: Message, cookieCodec: CookieCodec)
   }
 
   private[this] def setNoRewrite(name: String, cookie: Cookie): Unit = {
-    underlying(name) = Set(cookie)
+    underlying(name) = cookie :: Nil
   }
 
   private[this] def addNoRewrite(name: String, cookie: Cookie): Unit = {
-    underlying(name) = (underlying(name) - cookie) + cookie
+    val prev = underlying(name)
+    val next =
+      if (prev.contains(cookie)) cookie :: prev.filter(c => c != cookie)
+      else cookie :: prev
+
+    underlying(name) = next
   }
 
   /**
