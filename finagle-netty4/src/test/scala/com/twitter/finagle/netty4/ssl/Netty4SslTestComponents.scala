@@ -40,6 +40,17 @@ object Netty4SslTestComponents {
       false
   }
 
+  val serverConfig = SslServerConfiguration(
+    keyCredentials = KeyCredentials.CertAndKey(serverCert, serverKey),
+    trustCredentials = TrustCredentials.CertCollection(chainCert),
+    clientAuth = ClientAuth.Needed
+  )
+
+  val clientConfig = SslClientConfiguration(
+    keyCredentials = KeyCredentials.CertAndKey(clientCert, clientKey),
+    trustCredentials = TrustCredentials.CertCollection(chainCert)
+  )
+
   def getPort(server: ListeningServer): Int =
     server.boundAddress.asInstanceOf[InetSocketAddress].getPort
 
@@ -50,11 +61,6 @@ object Netty4SslTestComponents {
     sessionVerifier: SslClientSessionVerifier = SslClientSessionVerifier.AlwaysValid,
     onHandshakeComplete: Try[Unit] => Unit = _ => ()
   ): Service[String, String] = {
-    val clientConfig = SslClientConfiguration(
-      keyCredentials = KeyCredentials.CertAndKey(clientCert, clientKey),
-      trustCredentials = TrustCredentials.CertCollection(chainCert)
-    )
-
     // inject a handler which is called when the ssl handshake is complete.
     // Note, this isn't something which we expose outside of finagle and thus,
     // we don't have a "friendly" with* API for it.
@@ -74,12 +80,6 @@ object Netty4SslTestComponents {
     statsReceiver: StatsReceiver = NullStatsReceiver,
     sessionVerifier: SslServerSessionVerifier = SslServerSessionVerifier.AlwaysValid
   ): ListeningServer = {
-    val serverConfig = SslServerConfiguration(
-      keyCredentials = KeyCredentials.CertAndKey(serverCert, serverKey),
-      trustCredentials = TrustCredentials.CertCollection(chainCert),
-      clientAuth = ClientAuth.Needed
-    )
-
     StringServer.server.withTransport
       .tls(serverConfig, sessionVerifier)
       .withLabel(label)

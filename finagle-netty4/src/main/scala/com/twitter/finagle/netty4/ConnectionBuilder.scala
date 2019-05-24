@@ -179,15 +179,19 @@ private[finagle] object ConnectionBuilder {
       .group(params[param.WorkerPool].eventLoopGroup)
       .channel(channelClass)
       .option(ChannelOption.ALLOCATOR, allocator)
-      .option[JBool](ChannelOption.AUTO_READ, !backpressure) // backpressure! no reads on transport => no reads on the socket
       .option[JInt](ChannelOption.CONNECT_TIMEOUT_MILLIS, compensatedConnectTimeoutMs.toInt)
       .handler(init)
 
-    // Trying to set these options results in an 'Unknown channel option' warning for `LocalChannel`
     if (!isLocal(addr)) {
+      // Trying to set SO_REUSEADDR and TCP_NODELAY gives 'Unkonwn channel option' warnings
+      // when used with `LocalServerChannel`. So skip setting them at all.
+      bootstrap.option[JBool](ChannelOption.TCP_NODELAY, noDelay)
+      bootstrap.option[JBool](ChannelOption.SO_REUSEADDR, reuseAddr)
+
+      // Turning off AUTO_READ causes SSL/TLS errors in Finagle when using `LocalChannel`.
+      // So skip setting it at all.
       bootstrap
-        .option[JBool](ChannelOption.TCP_NODELAY, noDelay)
-        .option[JBool](ChannelOption.SO_REUSEADDR, reuseAddr)
+        .option[JBool](ChannelOption.AUTO_READ, !backpressure) // backpressure! no reads on transport => no reads on the socket
     }
 
     val Transport.Liveness(_, _, keepAlive) = params[Transport.Liveness]

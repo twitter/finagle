@@ -93,9 +93,13 @@ private class ListeningServerBuilder(
           bootstrap.channel(classOf[NioServerSocketChannel])
         }
         // Trying to set SO_REUSEADDR and TCP_NODELAY gives 'Unkonwn channel option' warnings
-        // when used with `LocalServerChannel`.
+        // when used with `LocalServerChannel`. So skip setting them at all.
         bootstrap.option[JBool](ChannelOption.SO_REUSEADDR, reuseAddr)
         bootstrap.childOption[JBool](ChannelOption.TCP_NODELAY, noDelay)
+
+        // Turning off AUTO_READ causes SSL/TLS errors in Finagle when using `LocalChannel`.
+        // So skip setting it at all.
+        bootstrap.childOption[JBool](ChannelOption.AUTO_READ, !backPressureEnabled)
       }
 
       bootstrap.group(bossLoop, params[param.WorkerPool].eventLoopGroup)
@@ -106,7 +110,6 @@ private class ListeningServerBuilder(
       sendBufSize.foreach(bootstrap.childOption[JInt](ChannelOption.SO_SNDBUF, _))
       recvBufSize.foreach(bootstrap.childOption[JInt](ChannelOption.SO_RCVBUF, _))
       keepAlive.foreach(bootstrap.childOption[JBool](ChannelOption.SO_KEEPALIVE, _))
-      bootstrap.childOption[JBool](ChannelOption.AUTO_READ, !backPressureEnabled)
       params[Listener.TrafficClass].value.foreach { tc =>
         bootstrap.option[JInt](Netty4Listener.TrafficClass, tc)
         bootstrap.childOption[JInt](Netty4Listener.TrafficClass, tc)

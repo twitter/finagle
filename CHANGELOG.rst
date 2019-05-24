@@ -20,6 +20,10 @@ Runtime Behavior Changes
 * finagle: Upgrade to Netty 4.1.35.Final and netty-tcnative 2.0.25.Final.
   ``PHAB_ID=D312439``
 
+* finagle-netty4: When using a Netty `LocalChannel`, the value of the `BackPressure`
+  stack param is effectively changed to `backPressureDisabled` so that other functionality
+  (e.g. SSL/TLS) works as expected. ``PHAB_ID=D319011``
+
 19.5.1
 ------
 
