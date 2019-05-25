@@ -159,6 +159,6 @@ private[redis] trait ListCommands { self: BaseClient =>
   def rPopLPush(source: Buf, dest: Buf): Future[Option[Buf]] =
     doRequest(RPopLPush(source, dest)) {
       case BulkReply(message) => Future.value(Some(message))
-      case EmptyBulkReply => Future.value(None)
+      case EmptyBulkReply => Future.None
     }
 }
