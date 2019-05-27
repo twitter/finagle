@@ -77,24 +77,4 @@ class RateLimitingFilterTest extends FunSuite with MockitoSugar {
     }
   }
 
-  test("RateLimitingFilter should execute exact number of requests after one sliding time window") {
-    val h = new RateLimitingFilterHelper()
-    import h._
-
-    var t = Time.now
-    Time.withTimeFunction(t) { _ =>
-      assert(Await.result(rateLimitedService(1)) == 1)
-
-      t += 2.second
-
-      (1 to 5) foreach { _ =>
-        assert(Await.result(rateLimitedService(1)) == 1)
-        t += 100.milliseconds
-      }
-
-      intercept[Exception] {
-        Await.result(rateLimitedService(1))
-      }
-    }
-  }
 }

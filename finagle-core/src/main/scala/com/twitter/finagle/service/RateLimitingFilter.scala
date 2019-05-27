@@ -21,7 +21,7 @@ class LocalRateLimitingStrategy[Req](categorizer: Req => String, windowSize: Dur
     val (remainingRequests, timestamp) = rates.getOrElse(id, (rate, now))
 
     val accept = if (timestamp.until(now) > windowSize) {
-      rates(id) = (rate - 1, now)
+      rates(id) = (rate, now)
       true
     } else {
       if (remainingRequests > 0) {
