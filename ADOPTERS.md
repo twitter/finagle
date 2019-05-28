@@ -20,6 +20,7 @@ URLs if possible) and [submit a pull request][1]!
   * ["Your Search Service as a Composable Function"][14]
 * [EnerNOC](https://www.enernoc.com/)
 * [Fitbit](https://www.fitbit.com/)
+* [FOLIO](https://folio-sec.com/)
 * [Foursquare](https://foursquare.com/)
 * [Gigya](https://www.gigya.com/)
 * [Globo.com](https://globo.com/)
