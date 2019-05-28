@@ -5,10 +5,9 @@ import com.twitter.finagle.Service
 import com.twitter.util.Future
 import java.util.concurrent.Executor
 import java.util.concurrent.LinkedBlockingQueue
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.FunSuite
 
-class PrepareCacheTest extends FunSuite with Eventually with IntegrationPatience {
+class PrepareCacheTest extends FunSuite {
 
   test("cache prepare requests") {
 
@@ -45,10 +44,7 @@ class PrepareCacheTest extends FunSuite with Eventually with IntegrationPatience
     svc(PrepareRequest("SELECT 11"))
     q.poll()
 
-    eventually {
-      System.gc()
-      assert(q.peek == CloseRequest(stmtId))
-    }
+    assert(q.peek == CloseRequest(stmtId))
 
     q.clear()
 

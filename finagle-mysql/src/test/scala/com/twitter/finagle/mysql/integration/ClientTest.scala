@@ -161,6 +161,19 @@ class ClientTest extends FunSuite with IntegrationClient with BeforeAndAfterAll 
     }
   }
 
+  test("can execute more prepared statements than allowed in cache") {
+    val queryStrings = (0 to (maxConcurrentPreparedStatements * 2)).map { i =>
+      s"SELECT $i"
+    }
+    val queryResults = Future.collect(queryStrings.map { query =>
+      c.prepare(query)().map(_ => "ok")
+    })
+    val results = await(queryResults)
+    results.map { result =>
+      assert(result == "ok")
+    }
+  }
+
   test("prepared statement") {
     val prepareQuery =
       "SELECT COUNT(*) AS 'numRecords' FROM `finagle-mysql-test` WHERE `name` LIKE ?"

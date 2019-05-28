@@ -11,6 +11,7 @@ import org.scalatest.{FunSuiteLike, Tag}
 import scala.util.control.NonFatal
 
 trait IntegrationClient extends FunSuiteLike {
+  protected val maxConcurrentPreparedStatements = 10
   private val logger = Logger.getLogger("integration-client")
 
   // Check if default mysql port is available.
@@ -53,6 +54,7 @@ trait IntegrationClient extends FunSuiteLike {
   protected def configureClient(username: String, password: String, db: String): Mysql.Client =
     Mysql.client
       .withCredentials(username, password)
+      .withMaxConcurrentPrepareStatements(maxConcurrentPreparedStatements)
       .withDatabase(db)
 
   protected def configureClient(): Mysql.Client = {

@@ -26,17 +26,13 @@ case class ServerError(code: Short, sqlState: String, message: String) extends E
 private[mysql] class PrepareCache(svc: Service[Request, Result], cache: Caffeine[Object, Object])
     extends ServiceProxy[Request, Result](svc) {
 
-  def closable(num: Int): Closable = Closable.make { _ =>
-    svc(CloseRequest(num)).unit
-  }
-
   private[this] val fn = {
     val listener = new RemovalListener[Request, Future[Result]] {
       // make sure prepared futures get removed eventually
       def onRemoval(request: Request, response: Future[Result], cause: RemovalCause): Unit = {
         response.respond {
           case Return(r: PrepareOK) =>
-            Closable.closeOnCollect(closable(r.id), r)
+            svc(CloseRequest(r.id)).unit
           case _ =>
         }
       }

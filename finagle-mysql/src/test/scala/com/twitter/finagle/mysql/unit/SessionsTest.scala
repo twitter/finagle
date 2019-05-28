@@ -76,6 +76,39 @@ class SessionsTest extends FunSuite with MockitoSugar {
     verify(service, times(1)).close(any[Time])
   }
 
+  test("multiple nested transactions are not supported:") {
+    val service = spy(new MockService())
+    val factory = spy(new MockServiceFactory(service))
+    val client = Client(factory, NullStatsReceiver, supportUnsigned = false)
+    val sqlQuery2 = "SELECT * FROM BAR"
+    val result = client.transaction {
+      case tx1: Client with Transactions =>
+        tx1.query(sqlQuery).flatMap { _ =>
+          tx1.transaction {
+            case tx2: Client with Transactions =>
+              tx2.query(sqlQuery).flatMap { _ =>
+                tx2.transaction { tx3 =>
+                  tx3.query(sqlQuery2)
+                }
+              }
+            case _ => fail("Client is assumed to have transactions")
+          }
+        }
+      case _ => fail("Client is assumed to have transactions")
+    }
+    intercept[IllegalStateException] { await(result) }
+
+    assert(
+      service.requests == List(
+        "START TRANSACTION",
+        sqlQuery,
+        "START TRANSACTION",
+        sqlQuery,
+        "ROLLBACK",
+        "ROLLBACK"
+      ).map(QueryRequest))
+  }
+
   test("sessions with nested transaction and discard") {
     val service = spy(new MockService())
     val factory = spy(new MockServiceFactory(service))

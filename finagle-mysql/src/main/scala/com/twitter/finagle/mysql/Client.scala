@@ -1,5 +1,6 @@
 package com.twitter.finagle.mysql
 
+import com.twitter.concurrent.AsyncMutex
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.{
   ChannelClosedException,
@@ -290,8 +291,8 @@ private class StdClient(
     extends Client
     with Transactions {
 
-  import StdClient._
   import Client._
+  import StdClient._
 
   def this(
     factory: ServiceFactory[Request, Result],
@@ -344,23 +345,56 @@ private class StdClient(
     }
   }
 
-  private def session(): Future[Client with Transactions with Session] = factory().map { svc =>
-    val singleton: ServiceFactory[Request, Result] = new ServiceFactory[Request, Result] {
-      // Because the `singleton` is used in the context of a `FactoryToService` we override
-      // `Service#close` to ensure that we can control the checkout lifetime of the `Service`.
-      private[this] val proxiedService: Future[Service[Request, Result]] = Future.value(
-        new ServiceProxy(svc) {
-          override def close(deadline: Time): Future[Unit] = Future.Done
-        }
-      )
+  protected def session(): Future[Client with Transactions with Session] = factory().map { svc =>
+    def singleton: ServiceFactory[Request, Result] = new ServiceFactory[Request, Result] {
+      // This mutex is used to ensure that the `svc` is used in only a single context at a time.
+      // This is important during the execution of a `PrepareStatement` - to guarantee that
+      // the `PrepareOk` result is still open on the server when using the `svc` to execute the
+      // `ExecuteRequest` operation.
+      val asyncMutex = new AsyncMutex()
 
-      def apply(conn: ClientConnection): Future[Service[Request, Result]] = proxiedService
+      private def proxy(): Future[Service[Request, Result]] = {
+        asyncMutex.acquire().map { permit =>
+          new ServiceProxy(svc) {
+
+            // Because the `proxy` is used in the context of a `FactoryToService` we override
+            // `Service#close` to ensure that we can control the checkout lifetime of the `Service`.
+            override def close(deadline: Time): Future[Unit] = {
+              permit.release()
+              Future.Done
+            }
+          }
+        }
+      }
+
+      def apply(conn: ClientConnection): Future[Service[Request, Result]] = proxy()
 
       def close(deadline: Time): Future[Unit] = svc.close(deadline)
     }
 
     val client = new StdClient(singleton, supportUnsigned, statsReceiver, rollbackQuery)
     with Session {
+
+      // This provides continuing support for nested transactions.  The nested transaction
+      // requires a new mutex to gain access to the underlying `svc`.   The parent transaction
+      // cannot use the underlying `svc` until the nested transaction is complete.
+      // Note, this only provides support for 1 level of nested transactions.
+      override protected def session(): Future[Client with Transactions with Session] =
+        Future.value(
+          new StdClient(singleton, supportUnsigned, statsReceiver, rollbackQuery) with Session {
+            def discard(): Future[Unit] = {
+              singleton().flatMap { svc =>
+                svc(PoisonConnectionRequest)
+              }.unit
+            }
+
+            override def session(): Future[Client with Transactions with Session] =
+              Future.exception(
+                new IllegalStateException("Multiple nested transactions are not supported"))
+
+            override def close(deadline: Time): Future[Unit] = Future.Done
+          })
+
       def discard(): Future[Unit] = {
         singleton().flatMap { svc =>
           svc(PoisonConnectionRequest)
