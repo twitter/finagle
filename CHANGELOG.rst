@@ -24,6 +24,9 @@ Runtime Behavior Changes
   stack param is effectively changed to `backPressureDisabled` so that other functionality
   (e.g. SSL/TLS) works as expected. ``PHAB_ID=D319011``
 
+* finagle-netty4: `finagle/netty/pooling/used` now includes the size of the buffers in the
+  thread-local caches.  ``PHAB_ID=D320021``
+
 19.5.1
 ------
 

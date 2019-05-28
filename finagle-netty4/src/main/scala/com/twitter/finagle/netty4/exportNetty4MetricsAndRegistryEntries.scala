@@ -99,11 +99,15 @@ private object exportNetty4MetricsAndRegistryEntries {
     )
 
     // Used.
-
     gauges.add(
-      poolingStats.addGauge("used")(
-        metric.usedDirectMemory()
-      )
+      poolingStats.addGauge("used") {
+        val threadLocalCacheSize =
+          metric.tinyCacheSize() + metric.smallCacheSize() + metric.normalCacheSize()
+        val threadLocalCaches =
+          metric.directArenas().asScala.foldLeft(0)((acc, c) => acc + c.numThreadCaches())
+
+        metric.usedDirectMemory() + (threadLocalCaches * threadLocalCacheSize)
+      }
     )
   }
 

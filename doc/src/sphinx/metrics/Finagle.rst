@@ -150,7 +150,8 @@ on any instance running Finagle with Netty 4.
   (i.e., less than 512 bytes).
 
 **pooling/used*** `verbosity:debug`
-  A gauge of the number of bytes used for *direct allocations*.
+  A gauge of the number of bytes used for *direct allocations* (this includes buffers in the
+  thread-local caches).
 
 
 **reference_leaks**
