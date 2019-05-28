@@ -1,14 +1,11 @@
 package com.twitter.finagle.http
 
-import java.net.URLDecoder
-import java.nio.charset.StandardCharsets
+import io.netty.handler.codec.http.QueryStringDecoder
 import java.util.{ArrayList, Collections, LinkedHashMap, List => JList, Map => JMap}
 import scala.annotation.tailrec
 
 /** Query parameter decoder heavily inspired by the Netty projects QueryStringDecoder */
 private object QueryParamDecoder {
-
-  private[this] val CharsetName: String = StandardCharsets.UTF_8.name
 
   def decode(uri: String): JMap[String, JList[String]] = {
     val qPos = uri.indexOf('?')
@@ -83,7 +80,6 @@ private object QueryParamDecoder {
     values.add(value)
   }
 
-  // TODO: this is slow, so lets investigate making a faster version
   private[this] def decodeComponent(s: String): String =
-    URLDecoder.decode(s, CharsetName)
+    QueryStringDecoder.decodeComponent(s)
 }
