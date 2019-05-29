@@ -148,4 +148,17 @@ private[redis] trait ListCommands { self: BaseClient =>
     doRequest(LTrim(key, start, end)) {
       case StatusReply(message) => Future.Unit
     }
+
+  /**
+   * Atomically returns and removes the last element (tail) of the list stored at source,
+   * and pushes the element at the first element (head) of the list stored at destination
+   *
+   * @return `Some` of the value of the popped element, or `None` if the list is
+   *         empty.
+   */
+  def rPopLPush(source: Buf, dest: Buf): Future[Option[Buf]] =
+    doRequest(RPopLPush(source, dest)) {
+      case BulkReply(message) => Future.value(Some(message))
+      case EmptyBulkReply => Future.None
+    }
 }

@@ -43,6 +43,13 @@ trait StrictMemberCommand extends MemberCommand {
   RequireClientProtocol(member != null && member.length > 0, "Found unexpected empty set member")
 }
 
+trait MoveCommand extends Command {
+  def source: Buf
+  def destination: Buf
+
+  override def body: Seq[Buf] = Seq(source, destination)
+}
+
 // Command that takes a script as a parameter, i.e. EVAL, SCRIPT LOAD
 trait ScriptCommand extends Command {
   val script: Buf
