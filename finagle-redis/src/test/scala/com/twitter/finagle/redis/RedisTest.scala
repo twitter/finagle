@@ -12,6 +12,7 @@ import org.scalacheck.{Arbitrary, Gen}
 import java.net.InetSocketAddress
 import org.scalactic.source.Position
 import scala.language.implicitConversions
+import java.lang.{Long => JLong}
 
 trait RedisTest extends FunSuite {
 
@@ -60,6 +61,14 @@ trait MissingInstances {
     } yield b
 
   implicit val arbitraryBuf: Arbitrary[Buf] = Arbitrary(genBuf)
+
+  def genOptionalJLong: Gen[Option[JLong]] =
+    for {
+      i <- Gen.choose(-1000L, 1000L)
+      o <- Option(new JLong(i))
+    } yield o
+
+  implicit val arbitraryOptionJLong: Arbitrary[Option[JLong]] = Arbitrary(genOptionalJLong)
 
   def genStatusReply: Gen[StatusReply] = genNonEmptyString.map(StatusReply.apply)
   def genErrorReply: Gen[ErrorReply] = genNonEmptyString.map(ErrorReply.apply)
@@ -241,6 +250,7 @@ trait RedisRequestTest extends RedisTest with GeneratorDrivenPropertyChecks with
           _.asString
         )
       )
+
     }
 
     intercept[ClientError](encodeCommand(f(Buf.Empty, Seq.empty)))
@@ -256,6 +266,22 @@ trait RedisRequestTest extends RedisTest with GeneratorDrivenPropertyChecks with
 
     intercept[ClientError](encodeCommand(f(Buf.Empty, Buf.Empty)))
     intercept[ClientError](encodeCommand(f(Buf.Utf8("x"), Buf.Empty)))
+  }
+
+  def checkSingleKeyOptionCount(c: String, f: (Buf, Option[JLong]) => Command): Unit = {
+    forAll { (key: Buf, count: Option[JLong]) =>
+      count match {
+        case Some(_) =>
+          assert(
+            encodeCommand(f(key, count)) == c.split(" ").toSeq ++
+              Seq(key.asString, count.get.toString)
+          )
+        case None =>
+          assert(
+            encodeCommand(f(key, count)) == c.split(" ").toSeq ++ Seq(key.asString)
+          )
+      }
+    }
   }
 
   def checkSingleKeyDoubleVal(c: String, f: (Buf, Buf, Buf) => Command): Unit = {

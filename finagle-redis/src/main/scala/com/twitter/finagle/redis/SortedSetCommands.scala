@@ -213,4 +213,22 @@ private[redis] trait SortedSetCommands { self: BaseClient =>
       case MBulkReply(messages) => Future.value(ReplyFormat.toBuf(messages))
       case EmptyMBulkReply => Future.Nil
     }
+
+  /**
+   * Removes and returns up to `count` members with the lowest scores
+   * in the sorted set stored at `key`.
+   */
+  def zPopMin(key: Buf, count: Option[JLong]): Future[Either[ZRangeResults, Seq[Buf]]] =
+    doRequest(ZPopMin(key, count)) {
+      parseMBulkReply(JBoolean.TRUE)
+    }
+
+  /**
+   * Removes and returns up to `count` members with the highest scores
+   * in the sorted set stored at `key`.
+   */
+  def zPopMax(key: Buf, count: Option[JLong]): Future[Either[ZRangeResults, Seq[Buf]]] =
+    doRequest(ZPopMax(key, count)) {
+      parseMBulkReply(JBoolean.TRUE)
+    }
 }

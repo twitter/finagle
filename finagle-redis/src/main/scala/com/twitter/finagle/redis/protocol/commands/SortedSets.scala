@@ -353,3 +353,23 @@ case class ZScan(key: Buf, cursor: Long, count: Option[JLong] = None, pattern: O
     }
   }
 }
+
+case class ZPopMin(key: Buf, count: Option[JLong] = None) extends Command {
+  def name: Buf = Command.ZPOPMIN
+  override def body: Seq[Buf] = {
+    count match {
+      case Some(count) => Seq(key, Buf.Utf8(count.toString))
+      case None => Seq(key)
+    }
+  }
+}
+
+case class ZPopMax(key: Buf, count: Option[JLong] = None) extends Command {
+  def name: Buf = Command.ZPOPMAX
+  override def body: Seq[Buf] = {
+    count match {
+      case Some(count) => Seq(key, Buf.Utf8(count.toString))
+      case None => Seq(key)
+    }
+  }
+}

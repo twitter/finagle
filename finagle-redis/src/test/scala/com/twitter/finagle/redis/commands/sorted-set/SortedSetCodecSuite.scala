@@ -90,4 +90,12 @@ final class SortedSetCodecSuite extends RedisRequestTest {
       (k: Buf, a: Long, b: Long) => ZRemRangeByRank(k, a, b)
     )
   }
+
+  test("ZPOPMIN", CodecTest) {
+    checkSingleKeyOptionCount("ZPOPMIN", ZPopMin.apply)
+  }
+
+  test("ZPOPMAX", CodecTest) {
+    checkSingleKeyOptionCount("ZPOPMAX", ZPopMax.apply)
+  }
 }
