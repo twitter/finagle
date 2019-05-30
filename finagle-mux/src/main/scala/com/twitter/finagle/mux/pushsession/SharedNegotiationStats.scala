@@ -19,6 +19,15 @@ private[finagle] final class SharedNegotiationStats(
   framerVerbosity: Verbosity = Verbosity.Debug,
   tlsVerbosity: Verbosity = Verbosity.Default) {
 
+  val pendingWriteStreams = new LongAdder()
+  val pendingReadStreams = new LongAdder()
+
+  val writeStreamBytes = sr.stat(framerVerbosity, "mux", "framer", "write_stream_bytes")
+  val readStreamBytes = sr.stat(framerVerbosity, "mux", "framer", "read_stream_bytes")
+
+  val tlsSuccess = sr.counter(tlsVerbosity, "mux", "tls", "upgrade", "success")
+  val tlsFailures = sr.counter(tlsVerbosity, "mux", "tls", "upgrade", "incompatible")
+
   private[this] val writeStreamsGauge =
     sr.addGauge(framerVerbosity, "mux", "framer", "pending_write_streams") {
       pendingWriteStreams.floatValue()
@@ -28,13 +37,4 @@ private[finagle] final class SharedNegotiationStats(
     sr.addGauge(framerVerbosity, "mux", "framer", "pending_read_streams") {
       pendingReadStreams.floatValue()
     }
-
-  val writeStreamBytes = sr.stat(framerVerbosity, "mux", "framer", "write_stream_bytes")
-  val readStreamBytes = sr.stat(framerVerbosity, "mux", "framer", "read_stream_bytes")
-
-  val pendingWriteStreams = new LongAdder()
-  val pendingReadStreams = new LongAdder()
-
-  val tlsSuccess = sr.counter(tlsVerbosity, "mux", "tls", "upgrade", "success")
-  val tlsFailures = sr.counter(tlsVerbosity, "mux", "tls", "upgrade", "incompatible")
 }
