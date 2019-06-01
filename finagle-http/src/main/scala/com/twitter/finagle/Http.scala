@@ -214,6 +214,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
         .prepend(
           new Stack.NoOpModule(http.filter.StatsFilter.role, http.filter.StatsFilter.description)
         )
+        .insertAfter(http.filter.StatsFilter.role, StreamingStatsFilter.module)
 
     private def params: Stack.Params =
       StackClient.defaultParams +
@@ -462,6 +463,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
         .prepend(
           new Stack.NoOpModule(http.filter.StatsFilter.role, http.filter.StatsFilter.description)
         )
+        .insertAfter(http.filter.StatsFilter.role, StreamingStatsFilter.module)
         // the backup request module adds tracing annotations and as such must come
         // after trace initialization and deserialization of contexts.
         .insertAfter(TraceInitializerFilter.role, ServerContextFilter.module)

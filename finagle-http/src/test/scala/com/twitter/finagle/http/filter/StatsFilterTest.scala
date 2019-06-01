@@ -18,17 +18,6 @@ class StatsFilterTest extends FunSuite {
     }
   }
 
-  val streamingService = new Service[Request, Response] {
-    def apply(request: Request): Future[Response] = {
-      val response = Response(request)
-      response.setChunked(true)
-      response.statusCode = 200
-      // reach E.O.S.
-      response.reader.read()
-      Future.value(response)
-    }
-  }
-
   test("increment stats") {
     val receiver = spy(new InMemoryStatsReceiver)
 
@@ -61,22 +50,5 @@ class StatsFilterTest extends FunSuite {
     verify(receiver).stat(Verbosity.Default, "time", "404")
     verify(receiver).stat(Verbosity.Default, "time", "4XX")
     verify(receiver).stat(Verbosity.Default, "response_size")
-  }
-
-  test("streaming stats are populated correctly") {
-    val receiver = spy(new InMemoryStatsReceiver)
-
-    val filter = new StatsFilter(receiver) andThen streamingService
-    val streamingRequest = Request()
-    streamingRequest.setChunked(true)
-    // reach E.O.S.
-    streamingRequest.reader.read()
-
-    Time.withCurrentTimeFrozen { _ =>
-      Await.result(filter(Request()), Duration.fromSeconds(5))
-    }
-
-    assert(receiver.stats(Seq("request_stream_duration_ms")) != Seq(0.0))
-    assert(receiver.stats(Seq("response_stream_duration_ms")) != Seq(0.0))
   }
 }

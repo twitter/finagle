@@ -10,12 +10,25 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
+* finagle-http: Added counters for request/response stream as: `stream/request/closed`,
+  `stream/request/failures`, `stream/request/failures/<exception_name>`, `stream/request/opened`,
+  `stream/request/pending` and `stream/response/closed`, `stream/response/failures`,
+  `stream/response/failures/<exception_name>`, `stream/response/opened`, `stream/response/pending`.
+  The counters will be populated when `isChunked` is set to true, the failures counters will be
+  populated when `isChunked` is set to true and the stream fails before it has been fully read in the
+  request and response respectively.  ``PHAB_ID=D315041``
+
 * finagle-http: Add two new API variants in `CookieMap`: `addAll` and `removeAll` that allow for
   adding and removing cookies in bulk, without triggering a header rewrite on each item.
   ``PHAB_ID=D318013``
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-http: Rename `request_stream_duration_ms` to `stream/request/duration_ms` and
+  `response_stream_duration_ms` to `stream/response/duration_ms`. The stats will be
+  populated when `isChunked` is set to true in the request and response respectively.
+  ``PHAB_ID=D315041``
 
 * finagle: Upgrade to Netty 4.1.35.Final and netty-tcnative 2.0.25.Final.
   ``PHAB_ID=D312439``
