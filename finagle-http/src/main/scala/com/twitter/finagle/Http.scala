@@ -11,6 +11,7 @@ import com.twitter.finagle.http.filter._
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.http2.transport.MultiplexTransporter
 import com.twitter.finagle.http2.{Http2Listener, Http2Transporter}
+import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.netty4.http.{Netty4HttpListener, Netty4HttpTransporter}
 import com.twitter.finagle.netty4.http.{Netty4ClientStreamTransport, Netty4ServerStreamTransport}
 import com.twitter.finagle.server._
@@ -126,7 +127,12 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       "Netty4"
     ) +
     param.ProtocolLibrary("http/2") +
-    netty4.ssl.Alpn(ApplicationProtocols.Supported(Seq("h2", "http/1.1")))
+    netty4.ssl.Alpn(ApplicationProtocols.Supported(Seq("h2", "http/1.1"))) +
+    // There is something funky about how ping-based failure detector is wired in H2 that
+    // it does more harm than good: when/if it kicks in, the client is having a really hard time
+    // to recover. Disabling it and relying on other circuit breakers in the stack instead, makes
+    // client way more stable under a high load.
+    FailureDetector.Param(FailureDetector.NullConfig)
 
   private val protocolLibrary = param.ProtocolLibrary("http")
 
