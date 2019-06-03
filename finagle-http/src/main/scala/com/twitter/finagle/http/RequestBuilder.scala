@@ -65,7 +65,7 @@ object RequestBuilder {
     "Http RequestBuilder is not correctly configured for form post: HasUrl (exp: Yes): ${HasUrl}, HasForm (exp: Yes): ${HasForm}."
   )
   trait PostRequestEvidence[HasUrl, HasForm]
-  private object PostRequestEvidence {
+  object PostRequestEvidence {
     implicit object FullyConfigured extends PostRequestEvidence[Valid, Valid]
   }
 
