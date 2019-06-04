@@ -1,16 +1,13 @@
 package com.twitter.finagle.zipkin.core
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.thrift.thrift.Constants
 import com.twitter.finagle.tracing.{SpanId, TraceId}
 import com.twitter.util.{Duration, Future, MockTimer, Time}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 
-@RunWith(classOf[JUnitRunner])
-class DeadlineSpanMapTest extends FunSuite {
+class DeadlineSpanMapTest extends FunSuite with Eventually with IntegrationPatience {
 
   /**
    * Tests state transition sequence (iii): live -> flushed -> logged.
@@ -25,10 +22,10 @@ class DeadlineSpanMapTest extends FunSuite {
       }
 
       val timer = new MockTimer
-      val map = new DeadlineSpanMap(logger, 1.milliseconds, NullStatsReceiver, timer)
+      val map = new DeadlineSpanMap(logger, 1.milliseconds, timer)
       val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None)
 
-      val span = map.update(traceId)(_.setServiceName("service").setName("name"))
+      map.update(traceId)(_.setServiceName("service").setName("name"))
       tc.advance(10.seconds) // advance timer
       timer.tick() // execute scheduled event
 
@@ -56,7 +53,7 @@ class DeadlineSpanMapTest extends FunSuite {
       val timer = new MockTimer
       val ttl: Duration = 10.milliseconds
       val hold: Duration = 2.milliseconds
-      val map = new DeadlineSpanMap(logger, ttl, NullStatsReceiver, timer, hold)
+      val map = new DeadlineSpanMap(logger, ttl, timer, hold)
       val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None)
 
       // Add an annotation to transition the span to hold state.
@@ -107,7 +104,7 @@ class DeadlineSpanMapTest extends FunSuite {
       val timer = new MockTimer
       val ttl: Duration = 1.milliseconds
       val hold: Duration = 2.milliseconds
-      val map = new DeadlineSpanMap(logger, ttl, NullStatsReceiver, timer, hold)
+      val map = new DeadlineSpanMap(logger, ttl, timer, hold)
       val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None)
 
       // Add an annotation to transition the span to hold state.
@@ -137,4 +134,5 @@ class DeadlineSpanMapTest extends FunSuite {
       assert(annotationCount == 4, "Wrong number of annotations")
     }
   }
+
 }

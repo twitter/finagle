@@ -52,6 +52,12 @@ Runtime Behavior Changes
   failures (e.g. backup request cancellations). To represent these cases, we
   introduce a new ResponseClass: Ignorable. ``PHAB_ID=D316884``
 
+Bug Fixes
+~~~~~~~~~
+
+* finagle-zipkin-core: Fix a race condition which could cause a span to get logged
+  missing some annotations. ``PHAB_ID=D319367``
+
 19.5.1
 ------
 

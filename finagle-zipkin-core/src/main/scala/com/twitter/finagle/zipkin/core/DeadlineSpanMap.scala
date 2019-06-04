@@ -1,13 +1,10 @@
 package com.twitter.finagle.zipkin.core
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle.service.TimeoutFilter
-import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.thrift.thrift.Constants
 import com.twitter.finagle.tracing.TraceId
 import com.twitter.util.{Duration, Future, Time, Timer}
 import java.util.concurrent.ConcurrentHashMap
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.ListBuffer
 
 /**
  * Takes care of storing the spans in a thread safe fashion. If a span
@@ -32,75 +29,80 @@ import scala.collection.mutable.ArrayBuffer
 private class DeadlineSpanMap(
   logSpans: Seq[Span] => Future[Unit],
   ttl: Duration,
-  statsReceiver: StatsReceiver,
   timer: Timer,
   hold: Duration = 500.milliseconds) {
 
   private[this] val spanMap = new ConcurrentHashMap[TraceId, MutableSpan](64)
 
-  private[this] val timerTask = timer.schedule(ttl / 2) { flush(ttl.ago) }
+  private[this] val flushTask = timer.schedule(ttl / 2) { flush(ttl.ago) }
 
   /**
-   * Update the mutable span.
+   * Update the mutable span for the given TraceId.
    *
    * This will create a new MutableSpan if one does not exist otherwise the existing
    * span will be provided.
    *
    * If the span is on hold (almost complete), wait a short time for any more locally
-   * generated annotations before removing from the map and sending to `logSpans`.
+   * generated annotations before removing from the map and sending to [[logSpans]].
+   *
+   * @param f expected to be a "quick" operation. No bitcoin mining, please.
    */
   def update(traceId: TraceId)(f: MutableSpan => Unit): Unit = {
-    val span: MutableSpan = {
-      val span = spanMap.get(traceId)
-      if (span != null) {
-        span
+    // there are a few "dances" here in order to avoid race conditions.
+    // avoiding a removal from the map and a logSpans call is important
+    // or updates written to the MutableSpan may not get logged.
+    val ms: MutableSpan =
+      spanMap.computeIfAbsent(traceId, new java.util.function.Function[TraceId, MutableSpan]() {
+        def apply(t: TraceId): MutableSpan = new MutableSpan(traceId, Time.now)
+      })
+
+    val toFlush: Option[MutableSpan] = ms.synchronized {
+      if (ms.wasFlushed) {
+        // it's already been flushed. copy most of it and immediately log it.
+        val copy = ms.copyForImmediateLogging()
+        f(copy)
+        copy.addAnnotation(ZipkinAnnotation(Time.now, "finagle.zipkin.late_arrival", ms.endpoint))
+        Some(copy)
       } else {
-        val newSpan = new MutableSpan(traceId, Time.now)
-        val prev = spanMap.putIfAbsent(traceId, newSpan)
-        if (prev == null) newSpan else prev
+        f(ms)
+        if (ms.isOnHold) {
+          timer.doLater(hold) { complete(traceId, ms) }
+        }
+        None
       }
     }
 
-    f(span)
-
-    if (span.isOnHold) {
-      timer.doLater(hold) { complete(traceId, span) }
+    toFlush match {
+      case Some(copy) => logSpans(Seq(copy.toSpan))
+      case None => ()
     }
   }
 
   /**
-   * Flush spans created earlier than `now`
+   * Flush spans created at or before the given `deadline`.
+   *
+   * They will be removed and have [[logSpans]] called on them.
    *
    * @return Future indicating completion.
    */
   def flush(deadline: Time): Future[Unit] = {
-    val ss = new ArrayBuffer[Span](spanMap.size)
+    val beforeDeadline = new ListBuffer[Span]()
 
-    val iter = spanMap.entrySet.iterator
+    val iter = spanMap.entrySet.iterator()
     while (iter.hasNext) {
-      val kv = iter.next()
-      val span = kv.getValue
-      if (span.started <= deadline) {
-        spanMap.remove(kv.getKey, span)
-        span.addAnnotation(ZipkinAnnotation(deadline, "finagle.flush", span.endpoint))
-        ss.append(span.toSpan)
+      val ms = iter.next().getValue
+      if (ms.started <= deadline) {
+        ms.synchronized {
+          ms.addAnnotation(ZipkinAnnotation(deadline, "finagle.flush", ms.endpoint))
+          beforeDeadline.append(ms.toSpan)
+          preventMoreUpdates(ms)
+          iter.remove()
+        }
       }
     }
 
-    if (ss.isEmpty) Future.Done
-    else logSpans(ss)
-  }
-
-  /**
-   * Remove and log the span.
-   * @param span
-   * @return Future indicating done.
-   */
-  def complete(traceId: TraceId, span: MutableSpan): Future[Unit] = {
-    val removed = spanMap.remove(traceId, span)
-    if (removed)
-      logSpans(Seq(span.toSpan))
-    Future.Done
+    if (beforeDeadline.isEmpty) Future.Done
+    else logSpans(beforeDeadline)
   }
 
   /**
@@ -110,68 +112,27 @@ private class DeadlineSpanMap(
    */
   def flush(): Future[Unit] =
     flush(Time.Top)
-}
-
-private final class MutableSpan(val traceId: TraceId, val started: Time) {
-  private[this] var _name: Option[String] = None
-  private[this] var _service: Option[String] = None
-  private[this] var _endpoint: Endpoint = Endpoint.Unknown
-  private[this] var _onHold: Boolean = false
-
-  private[this] val annotations = ArrayBuffer.empty[ZipkinAnnotation]
-  private[this] val binaryAnnotations = ArrayBuffer.empty[BinaryAnnotation]
-
-  def endpoint: Endpoint = synchronized { _endpoint }
-
-  def setName(n: String): MutableSpan = synchronized {
-    _name = Some(n)
-    this
-  }
-
-  def setServiceName(n: String): MutableSpan = synchronized {
-    _service = Some(n)
-    this
-  }
 
   /**
-   * Add an annotation to the map.
+   * Remove and log the span.
    *
-   * The special annotations ClientRecv and ServerSend, at client or server respectively,
-   * are taken as a hint that the span will complete soon. In this case, we don't set the span
-   * complete right away because additional annotations may still arrive. We want to try and avoid
-   * annotations that arrive after the rest of the span has been logged because they are likely to
-   * get dropped at the collector.
+   * @return Future indicating done.
    */
-  def addAnnotation(ann: ZipkinAnnotation): MutableSpan = synchronized {
-    if (ann.value.equals(Constants.CLIENT_RECV) ||
-      ann.value.equals(Constants.SERVER_SEND) ||
-      ann.value.equals(TimeoutFilter.TimeoutAnnotation)) {
-      _onHold = true
+  def complete(traceId: TraceId, ms: MutableSpan): Future[Unit] = {
+    val logIt: Boolean = ms.synchronized {
+      val removed = spanMap.remove(traceId, ms)
+      if (removed) {
+        preventMoreUpdates(ms)
+        true
+      } else {
+        false
+      }
     }
-
-    annotations.append(ann)
-    this
+    if (logIt) logSpans(Seq(ms.toSpan))
+    else Future.Done
   }
 
-  def addBinaryAnnotation(ann: BinaryAnnotation): MutableSpan = synchronized {
-    binaryAnnotations.append(ann)
-    this
-  }
+  private[this] def preventMoreUpdates(ms: MutableSpan): Unit =
+    ms.flush()
 
-  def setEndpoint(ep: Endpoint): MutableSpan = synchronized {
-    _endpoint = ep
-    var idx = 0
-    while (idx < annotations.size) {
-      val a = annotations(idx)
-      if (a.endpoint == Endpoint.Unknown) annotations(idx) = a.copy(endpoint = ep)
-      idx += 1
-    }
-    this
-  }
-
-  def toSpan: Span = synchronized {
-    Span(traceId, _service, _name, annotations, binaryAnnotations, _endpoint, started)
-  }
-
-  def isOnHold: Boolean = synchronized { _onHold }
 }

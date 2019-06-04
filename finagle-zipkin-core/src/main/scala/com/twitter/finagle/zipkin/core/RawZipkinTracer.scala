@@ -27,7 +27,7 @@ abstract class RawZipkinTracer(statsReceiver: StatsReceiver, timer: Timer = Defa
 
   // this sends off spans after the deadline is hit, no matter if it ended naturally or not.
   private[this] val spanMap: DeadlineSpanMap =
-    new DeadlineSpanMap(sendSpans, 120.seconds, statsReceiver, timer)
+    new DeadlineSpanMap(sendSpans, 120.seconds, timer)
 
   protected[core] def flush(): Future[Unit] = spanMap.flush()
 
