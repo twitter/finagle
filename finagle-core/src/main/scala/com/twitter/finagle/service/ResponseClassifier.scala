@@ -1,7 +1,7 @@
 package com.twitter.finagle.service
 
 import com.twitter.finagle.service.RetryPolicy.RetryableWriteException
-import com.twitter.finagle.{ChannelClosedException, Failure, TimeoutException}
+import com.twitter.finagle.{ChannelClosedException, Failure, FailureFlags, TimeoutException}
 import com.twitter.util.{Throw, TimeoutException => UtilTimeoutException, Return}
 
 object ResponseClassifier {
@@ -43,6 +43,8 @@ object ResponseClassifier {
    */
   val Default: ResponseClassifier = named("DefaultResponseClassifier") {
     case ReqRep(_, Return(_)) => ResponseClass.Success
+    case ReqRep(_, Throw(f: FailureFlags[_])) if f.isFlagged(FailureFlags.Ignorable) =>
+      ResponseClass.Ignored
     case ReqRep(_, Throw(RetryableWriteException(_))) => ResponseClass.RetryableFailure
     case ReqRep(_, Throw(_)) => ResponseClass.NonRetryableFailure
   }

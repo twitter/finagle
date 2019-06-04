@@ -43,6 +43,15 @@ Runtime Behavior Changes
 * finagle-netty4: `finagle/netty/pooling/used` now includes the size of the buffers in the
   thread-local caches.  ``PHAB_ID=D320021``
 
+* finagle-core: Stats and retry modules use a ResponseClassifier to give hints
+  for how to handle failure (e.g., Is this a success or is it a failure? If
+  it's a failure, may I retry the request?). The stats module increments a
+  success counter for successes, and increments a failure counter for failures.
+  But there isn't a way to tell the stats module to just do nothing. And, this
+  is exactly what the stats module should do (nothing) in the case of ignorable
+  failures (e.g. backup request cancellations). To represent these cases, we
+  introduce a new ResponseClass: Ignorable. ``PHAB_ID=D316884``
+
 19.5.1
 ------
 

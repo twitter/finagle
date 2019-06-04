@@ -343,6 +343,7 @@ private[finagle] class BackupRequestFilter[Req, Rep](
     responseClassifier.applyOrElse(reqRep, ResponseClassifier.Default) match {
       case ResponseClass.Successful(_) => true
       case ResponseClass.Failed(_) => false
+      case ResponseClass.Ignorable => false
     }
 
   // Record latency for successful responses, timeouts, and those we interrupted with

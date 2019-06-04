@@ -17,6 +17,7 @@ private[thrift] object ThriftMethodStatsHandler {
     val responseClass =
       responseClassifier.applyOrElse(ReqRep(args, response), ResponseClassifier.Default)
     responseClass match {
+      case ResponseClass.Ignorable => // Do nothing.
       case ResponseClass.Successful(_) =>
         thriftMethodStats.successCounter.incr()
       case ResponseClass.Failed(_) =>

@@ -28,4 +28,10 @@ public final class ResponseClasses {
   public static final ResponseClass.Failed RETRYABLE_FAILURE =
       ResponseClass$.MODULE$.RetryableFailure();
 
+  /**
+   * See {@link ResponseClass$#Ignorable()}
+   */
+  public static final ResponseClass IGNORED =
+      ResponseClass.Ignored();
+
 }

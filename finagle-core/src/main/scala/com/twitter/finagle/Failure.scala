@@ -272,6 +272,10 @@ object Failure {
 
   /**
    * Create a new [[FailureFlags.Ignorable]] failure with the given message.
+   *
+   * @note `Ignorable` implies `NonRetryable`, but does not set the flag
+   *       explicitly. See [[com.twitter.finagle.service.ResponseClassifier]]
+   *       for how `Ignorable` is used.
    */
   def ignorable(why: String): Failure =
     new Failure(why, None, FailureFlags.Ignorable, logLevel = Level.TRACE)

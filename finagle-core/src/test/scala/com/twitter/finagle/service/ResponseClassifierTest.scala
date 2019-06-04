@@ -46,6 +46,11 @@ class ResponseClassifierTest extends FunSuite {
       NonRetryableFailure ==
         ResponseClassifier.Default(ReqRep(null, Throw(Failure("nope"))))
     )
+
+    assert(
+      Ignorable ==
+        ResponseClassifier.Default(ReqRep(null, Throw(Failure.ignorable("ignore"))))
+    )
   }
 
   test("composition") {

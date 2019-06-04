@@ -5,7 +5,7 @@ package com.twitter.finagle.service
  *
  * @see [[ResponseClassifier]]
  */
-sealed trait ResponseClass {
+sealed abstract class ResponseClass {
 
   /**
    * Accomodates responses that can be partially successful.
@@ -41,6 +41,21 @@ object ResponseClass {
    * @see `ResponseClasses.SUCCESS` for a Java friendly API.
    */
   val Success: Successful = Successful(1.0)
+
+  /**
+   * Represents a request/response that has failed, but the failure is
+   * ignorable. Ignorables are never safe to retry.
+   */
+  final case object Ignorable extends ResponseClass {
+    def fractionalSuccess: Double = 0.0
+  }
+
+  /**
+   * An ignored request/response.
+   *
+   * @see `ResponseClasses.IGNORED` for a Java friendly API.
+   */
+  val Ignored: ResponseClass = Ignorable
 
   /**
    * Represents a request/response that has failed.

@@ -325,12 +325,6 @@ class FailureAccrualFactory[Req, Rep](
     didFail()
   }
 
-  protected def isSuccess(reqRep: ReqRep): Boolean =
-    responseClassifier.applyOrElse(reqRep, ResponseClassifier.Default) match {
-      case ResponseClass.Successful(_) => true
-      case ResponseClass.Failed(_) => false
-    }
-
   protected def didSucceed(): Unit = self.synchronized {
     // Only count revivals when the probe succeeds.
     state match {
@@ -399,6 +393,13 @@ class FailureAccrualFactory[Req, Rep](
       case _ =>
     }
   }
+
+  protected def isSuccess(reqRep: ReqRep): Boolean =
+    responseClassifier.applyOrElse(reqRep, ResponseClassifier.Default) match {
+      case ResponseClass.Successful(_) => true
+      case ResponseClass.Failed(_) => false
+      case ResponseClass.Ignorable => false
+    }
 
   private[this] def makeService(service: Service[Req, Rep]): Service[Req, Rep] = {
     // N.B. the reason we can't simply filter the service factory is so that

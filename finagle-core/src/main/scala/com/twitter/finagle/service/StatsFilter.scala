@@ -176,6 +176,7 @@ class StatsFilter[Req, Rep](
           ReqRep(request, response),
           ResponseClassifier.Default
         ) match {
+          case ResponseClass.Ignorable => // Do nothing.
           case ResponseClass.Failed(_) =>
             latencyStat.add(elapsed().inUnit(timeUnit))
             response match {

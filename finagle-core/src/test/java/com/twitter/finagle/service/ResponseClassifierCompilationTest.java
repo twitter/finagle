@@ -39,6 +39,10 @@ public class ResponseClassifierCompilationTest {
     assertEquals(
         ResponseClasses.RETRYABLE_FAILURE,
         classifier.apply(new ReqRep(null, new Throw<Object>(Failure.rejected()))));
+
+    assertEquals(
+        ResponseClasses.IGNORED,
+        classifier.apply(new ReqRep(null, new Throw<Object>(Failure.ignorable("")))));
   }
 
   @Test
