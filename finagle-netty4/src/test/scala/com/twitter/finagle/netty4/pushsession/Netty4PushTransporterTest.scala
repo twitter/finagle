@@ -5,7 +5,6 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle._
 import com.twitter.finagle.pushsession.{PushChannelHandle, PushSession, PushTransporter}
-import com.twitter.finagle.netty4.channel.Netty4ClientChannelInitializer.BufCodecKey
 import com.twitter.finagle.netty4.codec.BufCodec
 import com.twitter.finagle.netty4.decoder.{DecoderHandler, TestFramer}
 import com.twitter.finagle.transport.Transport
@@ -43,7 +42,7 @@ class Netty4PushTransporterTest extends FunSuite with Eventually with Integratio
         out.add(Buf.Utf8.unapply(msg).getOrElse("???"))
     }
 
-    pipeline.addLast(BufCodecKey, BufCodec)
+    pipeline.addLast(BufCodec.Key, BufCodec)
     pipeline.addLast("framer", new DecoderHandler(new TestFramer(frameSize)))
     pipeline.addLast("transcoder", new BufToStringCodec)
   }

@@ -7,7 +7,6 @@ import com.twitter.finagle.netty4.decoder.DecoderHandler
 import io.netty.channel._
 
 private[netty4] object Netty4ClientChannelInitializer {
-  val BufCodecKey = "bufCodec"
   val DecoderKey = "decoder"
   val WriteTimeoutHandlerKey = "writeTimeout"
   val ReadTimeoutHandlerKey = "readTimeout"
@@ -40,7 +39,7 @@ final private[netty4] class Netty4ClientChannelInitializer[T](
 
     val pipe = ch.pipeline
 
-    pipe.addLast(BufCodecKey, BufCodec)
+    pipe.addLast(BufCodec.Key, BufCodec)
 
     decoderFactory.foreach { newDecoder =>
       pipe.addLast(DecoderKey, new DecoderHandler(newDecoder()))
