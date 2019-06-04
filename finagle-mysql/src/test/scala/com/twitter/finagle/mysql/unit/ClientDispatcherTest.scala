@@ -31,11 +31,10 @@ class ClientDispatcherTest extends FunSuite {
   }
 
   def newHandshakeCtx = new {
-    val settings = HandshakeSettings(params)
     val clientq = new AsyncQueue[Packet]()
     val serverq = new AsyncQueue[Packet]()
     val trans = new QueueTransport[Packet, Packet](serverq, clientq)
-    val handshake = new Handshake(settings, trans)
+    val handshake = Handshake(params, trans)
     val service = new ClientDispatcher(trans, params, performHandshake = true)
 
     // authenticate

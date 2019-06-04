@@ -41,8 +41,7 @@ private[finagle] final class MysqlTransporter(
 
   private[this] def createTransportWithSession(): Future[MysqlTransport] = {
     createTransport().flatMap { transport =>
-      val handshakeSettings = HandshakeSettings(params)
-      val handshake = new Handshake(handshakeSettings, transport)
+      val handshake = Handshake(params, transport)
       handshake.connectionPhase().map(_ => transport)
     }
   }

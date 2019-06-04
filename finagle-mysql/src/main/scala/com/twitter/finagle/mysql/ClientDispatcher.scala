@@ -97,8 +97,7 @@ private[finagle] final class ClientDispatcher(
     extends GenSerialClientDispatcher[Request, Result, Packet, Packet](trans) {
   import ClientDispatcher._
 
-  private[this] val handshakeSettings = HandshakeSettings(params)
-  private[this] val handshake = new Handshake(handshakeSettings, trans)
+  private[this] val handshake = Handshake(params, trans)
 
   // Perform the handshake (possibly) once
   private[this] val connectionPhase: Future[Unit] =
