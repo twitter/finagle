@@ -1,5 +1,5 @@
 .. Author notes: this file is formatted with restructured text
-  (http://docutils.sourceforge.net/docs/user/rst/quickstart.html)
+  (https://docutils.sourceforge.net/docs/user/rst/quickstart.html)
   as it is included in Finagle's user's guide.
 
 Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in commits.

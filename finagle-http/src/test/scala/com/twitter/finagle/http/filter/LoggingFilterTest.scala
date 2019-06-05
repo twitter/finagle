@@ -22,7 +22,7 @@ class LoggingFilterTest extends FunSuite {
     val request = Request("/search.json")
     request.method = Method.Get
     request.xForwardedFor = "10.0.0.1"
-    request.referer = "http://www.example.com/"
+    request.referer = "https://www.example.com/"
     request.userAgent = "User Agent"
     request.version = Version.Http11
 

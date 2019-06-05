@@ -20,7 +20,7 @@ import org.scalatest.mockito.MockitoSugar
 class SpnegoAuthenticatorTest extends FunSuite with MockitoSugar {
   import SpnegoAuthenticator._
 
-  def builder = RequestBuilder().url("http://0.0.0.0/arbitrary")
+  def builder = RequestBuilder().url("https://0.0.0.0/arbitrary")
   def anyAuthenticated = any[Authenticated[Request]]
 
   test("no header") {

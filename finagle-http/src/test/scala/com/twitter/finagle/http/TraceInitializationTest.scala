@@ -15,7 +15,7 @@ private object Svc extends Service[Request, Response] {
 
 @RunWith(classOf[JUnitRunner])
 class TraceInitializationTest extends FunSuite {
-  def req = RequestBuilder().url("http://foo/this/is/a/uri/path").buildGet()
+  def req = RequestBuilder().url("https://foo/this/is/a/uri/path").buildGet()
 
   def assertAnnotationsInOrder(records: Seq[Record], annos: Seq[Annotation]): Unit = {
     assert(records.collect { case Record(_, _, ann, _) if annos.contains(ann) => ann } == annos)

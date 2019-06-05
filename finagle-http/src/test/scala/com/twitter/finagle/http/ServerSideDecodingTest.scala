@@ -79,7 +79,7 @@ class ServerSideDecodingTest extends FunSuite with GeneratorDrivenPropertyChecks
     // URL at which all requests should be made
     val url: String = {
       val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-      s"http://${addr.getHostName}:${addr.getPort}/"
+      s"https://${addr.getHostName}:${addr.getPort}/"
     }
 
     forAll { (content: String, encoder: Encoder) ⇒

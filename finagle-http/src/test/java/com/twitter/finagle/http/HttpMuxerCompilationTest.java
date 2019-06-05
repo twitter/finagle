@@ -12,7 +12,7 @@ public class HttpMuxerCompilationTest {
   /** a comment */
   @Test
   public void testHttpMuxer() {
-    HttpMuxers.apply(Request.apply("http://192.168.0.1/"));
+    HttpMuxers.apply(Request.apply("https://192.168.0.1/"));
 
     HttpMuxers.patterns();
 

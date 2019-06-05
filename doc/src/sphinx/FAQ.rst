@@ -67,7 +67,7 @@ You can disable this behavior by using the :API:`MaskCancelFilter <com/twitter/f
   import com.twitter.finagle.http.
 
   val service: Service[http.Request, http.Response] =
-    Http.client.newService("http://twitter.com")
+    Http.client.newService("https://twitter.com")
   val masked = new MaskCancelFilter[http.Request, http.Response]
 
   val maskedService = masked.andThen(service)

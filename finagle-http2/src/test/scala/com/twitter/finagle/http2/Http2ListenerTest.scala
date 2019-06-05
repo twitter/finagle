@@ -54,7 +54,7 @@ class Http2ListenerTest extends FunSuite {
   import Http2ListenerTest._
 
   test("Http2Listener should upgrade neatly")(new Ctx {
-    await(write("""GET http:/// HTTP/1.1
+    await(write("""GET https:/// HTTP/1.1
       |x-http2-stream-id: 1
       |upgrade: h2c
       |HTTP2-Settings: AAEAABAAAAIAAAABAAN_____AAQAAP__AAUAAEAAAAZ_____
@@ -77,7 +77,7 @@ class Http2ListenerTest extends FunSuite {
 
   test("Http2Listener should not upgrade with an invalid URI")(new Ctx {
 
-    await(write(s"""GET http:///DSC02175拷貝.jpg HTTP/1.1
+    await(write(s"""GET https:///DSC02175拷貝.jpg HTTP/1.1
                   |x-http2-stream-id: 1
                   |upgrade: h2c
                   |HTTP2-Settings: AAEAABAAAAIAAAABAAN_____AAQAAP__AAUAAEAAAAZ_____

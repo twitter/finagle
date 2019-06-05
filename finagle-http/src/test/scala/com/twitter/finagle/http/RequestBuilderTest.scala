@@ -5,9 +5,9 @@ import java.net.URL
 import org.scalatest.FunSuite
 
 class RequestBuilderTest extends FunSuite {
-  val URL0 = new URL("http://joe:blow@www.google.com:77/xxx?foo=bar#xxx")
+  val URL0 = new URL("https://joe:blow@www.google.com:77/xxx?foo=bar#xxx")
   val URL1 = new URL("https://www.google.com/")
-  val URL2 = new URL("http://joe%40host.com:blow@www.google.com:77/xxx?foo=bar#xxx")
+  val URL2 = new URL("https://joe%40host.com:blow@www.google.com:77/xxx?foo=bar#xxx")
   val URL3 = new URL("https://foo_bar_prod.www.address.com")
 
   val BODY0 = Buf.Utf8("blah")
@@ -106,17 +106,17 @@ v33
   }
 
   test("replace the empty path with /") {
-    val req0 = RequestBuilder().url(new URL("http://a.com")).buildGet
-    val req1 = RequestBuilder().url(new URL("http://a.com?xxx")).buildGet
+    val req0 = RequestBuilder().url(new URL("https://a.com")).buildGet
+    val req1 = RequestBuilder().url(new URL("https://a.com?xxx")).buildGet
 
     req0.uri == "/"
     req1.uri == "/?xxx"
   }
 
   test("not include the fragment in the resource") {
-    val u0 = new URL("http://a.com#xxx")
-    val u1 = new URL("http://a.com/#xxx")
-    val u2 = new URL("http://a.com/?abc=def#xxx")
+    val u0 = new URL("https://a.com#xxx")
+    val u1 = new URL("https://a.com/#xxx")
+    val u2 = new URL("https://a.com/?abc=def#xxx")
 
     val get0 = RequestBuilder().url(u0).buildGet
     val get1 = RequestBuilder().url(u1).buildGet
@@ -152,9 +152,9 @@ v33
   }
 
   test("not include the empty query string") {
-    val u0 = new URL("http://a.com?")
-    val u1 = new URL("http://a.com/?")
-    val u2 = new URL("http://a.com/?#xxx")
+    val u0 = new URL("https://a.com?")
+    val u1 = new URL("https://a.com/?")
+    val u2 = new URL("https://a.com/?#xxx")
 
     val get0 = RequestBuilder().url(u0).buildGet
     val get1 = RequestBuilder().url(u1).buildGet

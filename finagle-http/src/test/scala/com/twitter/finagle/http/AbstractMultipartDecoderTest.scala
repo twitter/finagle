@@ -18,7 +18,7 @@ abstract class AbstractMultipartDecoderTest(decoder: MultipartDecoder) extends F
    */
   private[this] def newRequest(buf: Buf): Request =
     RequestBuilder()
-      .url("http://example.com")
+      .url("https://example.com")
       .add(FileElement("groups", buf, Some("image/gif"), Some("dealwithit.gif")))
       .add(SimpleElement("type", "text"))
       .buildFormPost(multipart = true)

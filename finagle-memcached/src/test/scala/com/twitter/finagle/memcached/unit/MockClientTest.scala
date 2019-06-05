@@ -16,7 +16,7 @@ class MockClientTest extends FunSuite {
 
   val TimeOut = 15.seconds
 
-  // http://t.co/momentofzen.jpg
+  // https://t.co/momentofzen.jpg
   private[this] val zen: Time = Time.epoch + 1288834974657L.milliseconds // Twepoch
 
   private def run[T](awaitable: Awaitable[T]): T = Await.result(awaitable, TimeOut)
