@@ -8,7 +8,7 @@ import javax.net.ssl.SSLSession
  * Null object which indicates that the existing connection
  * is not using SSL/TLS.
  */
-private[finagle] object NullSslSessionInfo extends SslSessionInfo {
+object NullSslSessionInfo extends SslSessionInfo {
 
   /**
    * Indicates whether the connection is using SSL/TLS.

@@ -10,6 +10,7 @@ import com.twitter.finagle.{
   ServiceFactory
 }
 import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.ssl.session.SslSessionInfo
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.{Closable, Future, Return, Throw, Time}
 import java.net.SocketAddress
@@ -133,5 +134,6 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
     // they both will complete the transports `onClose` future.
     override val onClose: Future[Unit] = t.onClose.unit
     override def close(deadline: Time): Future[Unit] = t.close(deadline)
+    override def sslSessionInfo: SslSessionInfo = t.context.sslSessionInfo
   }
 }

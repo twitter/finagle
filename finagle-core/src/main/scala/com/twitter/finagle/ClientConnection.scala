@@ -1,5 +1,6 @@
 package com.twitter.finagle
 
+import com.twitter.finagle.ssl.session.{NullSslSessionInfo, SslSessionInfo}
 import com.twitter.finagle.util.InetSocketAddressUtil.unconnected
 import com.twitter.util.{Closable, Future, Time}
 import java.net.SocketAddress
@@ -27,6 +28,11 @@ trait ClientConnection extends Closable {
    * Expose a `Future` that is satisfied when the connection is closed.
    */
   def onClose: Future[Unit]
+
+  /**
+   * SSL/TLS information associated with a client connection.
+   */
+  def sslSessionInfo: SslSessionInfo
 }
 
 object ClientConnection {
@@ -43,5 +49,6 @@ object ClientConnection {
     def localAddress: SocketAddress = unconnected
     def close(deadline: Time): Future[Unit] = Future.Done
     def onClose: Future[Unit] = Future.never
+    def sslSessionInfo: SslSessionInfo = NullSslSessionInfo
   }
 }

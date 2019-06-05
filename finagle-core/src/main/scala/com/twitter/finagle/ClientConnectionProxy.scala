@@ -1,5 +1,6 @@
 package com.twitter.finagle
 
+import com.twitter.finagle.ssl.session.SslSessionInfo
 import com.twitter.util.{Closable, Future, Time}
 import java.net.SocketAddress
 
@@ -51,4 +52,5 @@ private class ClientConnectionProxy(underlying: ClientConnection) extends Client
   def remoteAddress: SocketAddress = underlying.remoteAddress
   def localAddress: SocketAddress = underlying.localAddress
   def onClose: Future[Unit] = underlying.onClose
+  def sslSessionInfo: SslSessionInfo = underlying.sslSessionInfo
 }

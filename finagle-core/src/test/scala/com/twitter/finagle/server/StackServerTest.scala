@@ -9,6 +9,7 @@ import com.twitter.finagle.filter.{RequestSemaphoreFilter, ServerAdmissionContro
 import com.twitter.finagle.param.{Stats, Timer}
 import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.service.{ExpiringService, TimeoutFilter}
+import com.twitter.finagle.ssl.session.{NullSslSessionInfo, SslSessionInfo}
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.util.StackRegistry
@@ -92,6 +93,7 @@ class StackServerTest extends FunSuite with Eventually {
         Future.Done
       }
       def onClose: Future[Unit] = closed
+      def sslSessionInfo: SslSessionInfo = NullSslSessionInfo
     }
 
     val svc = Await.result(factory(conn), 5.seconds)
