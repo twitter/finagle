@@ -12,6 +12,11 @@ import com.twitter.util.{Future, Return, Try}
  *
  * 1. "request_payload_bytes" - a distribution of request payload sizes in bytes
  * 2. "response_payload_bytes" - a distribution of response payload sizes in bytes
+ *
+ * The sizes are also traced using the binary annotations
+ * clnt/request_payload_bytes and clnt/response_payload_bytes on the
+ * client side, and srv/request_payload_bytes and srv/response_payload_bytes.
+ * on the server.
  */
 private[finagle] class PayloadSizeFilter[Req, Rep](
   statsReceiver: StatsReceiver,
@@ -27,16 +32,16 @@ private[finagle] class PayloadSizeFilter[Req, Rep](
   private[this] def recordRepSize(trace: Tracing): Try[Rep] => Unit = {
     case Return(rep) =>
       val size = repSize(rep)
-      trace.recordBinary(repTraceKey, size.toString)
+      if (trace.isActivelyTracing) trace.recordBinary(repTraceKey, size)
       responseBytes.add(size.toFloat)
     case _ =>
   }
 
   def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
     val size = reqSize(req)
-    val trace = Trace()
-    trace.recordBinary(reqTraceKey, size.toString)
     requestBytes.add(size.toFloat)
+    val trace = Trace()
+    if (trace.isActivelyTracing) trace.recordBinary(reqTraceKey, size)
     service(req).respond(recordRepSize(trace))
   }
 }
@@ -52,11 +57,11 @@ private[finagle] object PayloadSizeFilter {
     reqSize: Req => Int,
     repSize: Rep => Int
   ): Stackable[ServiceFactory[Req, Rep]] = new Module1[param.Stats, ServiceFactory[Req, Rep]] {
-    override def role: Role = PayloadSizeFilter.Role
-    override def description: String = PayloadSizeFilter.Description
+    def role: Role = PayloadSizeFilter.Role
+    def description: String = PayloadSizeFilter.Description
 
-    override def make(stats: Stats, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = {
-      val filter =
+    def make(stats: Stats, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = {
+      val filter: SimpleFilter[Req, Rep] =
         new PayloadSizeFilter(stats.statsReceiver, reqTraceKey, repTraceKey, reqSize, repSize)
       filter.andThen(next)
     }
