@@ -4,13 +4,13 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable
 
 private object MetricsRegistry {
-  case class StatEntryImpl(delta: Double, value: Double) extends StatEntry
+  case class StatEntryImpl(delta: Double, value: Double, metricType: String) extends StatEntry
 
-  def instantaneous(value: Double): StatEntry =
-    StatEntryImpl(value, value)
+  def instantaneous(value: Double, metricType: String): StatEntry =
+    StatEntryImpl(value, value, metricType)
 
-  def cumulative(delta: Double, value: Double): StatEntry =
-    StatEntryImpl(delta, value)
+  def cumulative(delta: Double, value: Double, metricType: String): StatEntry =
+    StatEntryImpl(delta, value, metricType)
 }
 
 private[twitter] trait MetricsRegistry extends StatsRegistry {
@@ -21,6 +21,8 @@ private[twitter] trait MetricsRegistry extends StatsRegistry {
    * Note, this may be null.
    */
   val registry: Metrics
+
+  val latched: Boolean = useCounterDeltas()
 
   private[this] val metrics = mutable.Map.empty[String, StatEntry]
 
@@ -35,8 +37,8 @@ private[twitter] trait MetricsRegistry extends StatsRegistry {
         val key = entry.getKey()
         val newValue = entry.getValue().doubleValue
         val newMetric = metrics.get(key) match {
-          case Some(prev) => cumulative(newValue - prev.value, newValue)
-          case None => cumulative(newValue, newValue)
+          case Some(prev) => cumulative(newValue - prev.value, newValue, "counter")
+          case None => cumulative(newValue, newValue, "counter")
         }
         metrics.put(key, newMetric)
       }
@@ -44,7 +46,7 @@ private[twitter] trait MetricsRegistry extends StatsRegistry {
       for (entry <- registry.gauges.entrySet) {
         val key = entry.getKey()
         val newValue = entry.getValue().doubleValue
-        metrics.put(key, instantaneous(newValue))
+        metrics.put(key, instantaneous(newValue, "gauge"))
       }
     }
 }
