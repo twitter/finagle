@@ -125,8 +125,8 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
       type Context <: self.Context
     }) extends ClientConnection {
 
-    override def remoteAddress: SocketAddress = t.remoteAddress
-    override def localAddress: SocketAddress = t.localAddress
+    override def remoteAddress: SocketAddress = t.context.remoteAddress
+    override def localAddress: SocketAddress = t.context.localAddress
     // In the Transport + Dispatcher model, the Transport is a source of truth for
     // the `onClose` future: closing the dispatcher will result in closing the
     // Transport and closing the Transport will trigger shutdown of the dispatcher.

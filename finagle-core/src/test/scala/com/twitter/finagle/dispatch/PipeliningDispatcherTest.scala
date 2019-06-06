@@ -3,17 +3,23 @@ package com.twitter.finagle.dispatch
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.{IndividualRequestTimeoutException => FinagleTimeoutException}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.{Promise, Future, Time, MockTimer, TimeoutException => UtilTimeoutException}
-import org.junit.runner.RunWith
 import org.mockito.Matchers._
-import org.mockito.Mockito.{when, never, verify, times}
+import org.mockito.Mockito
+import org.mockito.Mockito.{never, verify, times}
+import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
+import scala.language.reflectiveCalls
 
-@RunWith(classOf[JUnitRunner])
 class PipeliningDispatcherTest extends FunSuite with MockitoSugar {
+
+  // Don't let the Scala compiler get confused about which `thenREturn`
+  // method we want to use.
+  private[this] def when[T](o: T) =
+    Mockito.when(o).asInstanceOf[{ def thenReturn[RT](s: RT): OngoingStubbing[RT] }]
+
   val exns = Seq(
     ("util", new UtilTimeoutException("boom!"), never()),
     ("finagle", new FinagleTimeoutException(1.second), never())
@@ -25,6 +31,8 @@ class PipeliningDispatcherTest extends FunSuite with MockitoSugar {
         val timer = new MockTimer
         Time.withCurrentTimeFrozen { _ =>
           val trans = mock[Transport[Unit, Unit]]
+          val context = mock[TransportContext]
+          when(trans.context).thenReturn(context)
           when(trans.write(())).thenReturn(Future.Done)
           when(trans.read()).thenReturn(Future.never)
           when(trans.onClose).thenReturn(Future.never)
@@ -41,6 +49,8 @@ class PipeliningDispatcherTest extends FunSuite with MockitoSugar {
     val timer = new MockTimer
     Time.withCurrentTimeFrozen { ctl =>
       val trans = mock[Transport[Unit, Unit]]
+      val context = mock[TransportContext]
+      when(trans.context).thenReturn(context)
       when(trans.write(())).thenReturn(Future.Done)
       when(trans.read()).thenReturn(Future.never)
       when(trans.onClose).thenReturn(Future.never)
@@ -57,6 +67,8 @@ class PipeliningDispatcherTest extends FunSuite with MockitoSugar {
     val timer = new MockTimer
     Time.withCurrentTimeFrozen { ctl =>
       val trans = mock[Transport[Unit, Unit]]
+      val context = mock[TransportContext]
+      when(trans.context).thenReturn(context)
       when(trans.write(())).thenReturn(Future.Done)
       when(trans.read()).thenReturn(Future.never)
       when(trans.onClose).thenReturn(Future.never)
@@ -77,6 +89,8 @@ class PipeliningDispatcherTest extends FunSuite with MockitoSugar {
     val timer = new MockTimer
     Time.withCurrentTimeFrozen { ctl =>
       val trans = mock[Transport[Unit, Unit]]
+      val context = mock[TransportContext]
+      when(trans.context).thenReturn(context)
       val readP = Promise[Unit]()
       when(trans.write(())).thenReturn(Future.Done)
       when(trans.read()).thenReturn(readP)
@@ -100,6 +114,8 @@ class PipeliningDispatcherTest extends FunSuite with MockitoSugar {
 
     val p0, p1, p2 = new Promise[String]()
     val trans = mock[Transport[String, String]]
+    val context = mock[TransportContext]
+    when(trans.context).thenReturn(context)
     when(trans.write(any[String])).thenReturn(Future.Done)
     when(trans.read())
       .thenReturn(p0)

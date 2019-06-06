@@ -28,7 +28,7 @@ abstract class GenSerialClientDispatcher[Req, Rep, In, Out](
       semaphore.numWaiters
     }
 
-  private[this] val localAddress: InetSocketAddress = trans.localAddress match {
+  private[this] val localAddress: InetSocketAddress = trans.context.localAddress match {
     case ia: InetSocketAddress => ia
     case _ => new InetSocketAddress(0)
   }
