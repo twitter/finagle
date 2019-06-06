@@ -400,6 +400,8 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
         Future.value("safe")
       else if (x == "slow")
         Future.sleep(1.second)(DefaultTimer).before(Future.value("slow"))
+      else if (x == "ignore")
+        Future.const(Throw(Failure.ignorable("hello?")))
       else
         Future.exception(new InvalidQueryException(x.length))
   }
@@ -431,6 +433,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("client", "requests")) == 1)
     assert(sr.counters(Seq("client", "success")) == 0)
+    assert(sr.counters(Seq("client", "failures")) == 1)
 
     // test that we can examine the request as well.
     intercept[InvalidQueryException] {
@@ -438,11 +441,13 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     }
     assert(sr.counters(Seq("client", "requests")) == 2)
     assert(sr.counters(Seq("client", "success")) == 1)
+    assert(sr.counters(Seq("client", "failures")) == 1)
 
     // test that we can mark a successfully deserialized result as a failure
     assert("safe" == await(client.echo("safe")))
     assert(sr.counters(Seq("client", "requests")) == 3)
     assert(sr.counters(Seq("client", "success")) == 1)
+    assert(sr.counters(Seq("client", "failures")) == 2)
 
     // this query produces a `Throw` response produced on the client side and
     // we want to ensure that we can translate it to a `Success`.
@@ -451,6 +456,15 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     }
     assert(sr.counters(Seq("client", "requests")) == 4)
     assert(sr.counters(Seq("client", "success")) == 2)
+    assert(sr.counters(Seq("client", "failures")) == 2)
+
+    // This query makes the server throw an ignorable failure.
+    intercept[TApplicationException] {
+      await(client.echo("ignore"), 10.seconds)
+    }
+    assert(sr.counters(Seq("client", "requests")) == 5)
+    assert(sr.counters(Seq("client", "success")) == 3)
+    assert(sr.counters(Seq("client", "failures")) == 2)
   }
 
   private def testScalaServerResponseClassification(
@@ -463,9 +477,11 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("thrift", "echo", "requests")) == 1)
     assert(sr.counters(Seq("thrift", "echo", "success")) == 0)
+    assert(sr.counters(Seq("thrift", "echo", "failures")) == 1)
 
     assert(sr.counters(Seq("requests")) == 1)
-    assert(sr.counters.get(Seq("success")) == Some(0))
+    assert(sr.counters(Seq("success")) == 0)
+    assert(sr.counters(Seq("failures")) == 1)
 
     // test that we can examine the request as well.
     intercept[InvalidQueryException] {
@@ -473,17 +489,21 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     }
     assert(sr.counters(Seq("thrift", "echo", "requests")) == 2)
     assert(sr.counters(Seq("thrift", "echo", "success")) == 1)
+    assert(sr.counters(Seq("thrift", "echo", "failures")) == 1)
 
     assert(sr.counters(Seq("requests")) == 2)
     assert(sr.counters(Seq("success")) == 1)
+    assert(sr.counters(Seq("failures")) == 1)
 
     // test that we can mark a successfully deserialized result as a failure
     assert("safe" == await(client.echo("safe")))
     assert(sr.counters(Seq("thrift", "echo", "requests")) == 3)
     assert(sr.counters(Seq("thrift", "echo", "success")) == 1)
+    assert(sr.counters(Seq("thrift", "echo", "failures")) == 2)
 
     assert(sr.counters(Seq("requests")) == 3)
     assert(sr.counters(Seq("success")) == 1)
+    assert(sr.counters(Seq("failures")) == 2)
 
     // this query produces a Timeout exception in server side and it should be
     // translated to `Success`
@@ -492,9 +512,24 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     }
     assert(sr.counters(Seq("thrift", "echo", "requests")) == 4)
     assert(sr.counters(Seq("thrift", "echo", "success")) == 2)
+    assert(sr.counters(Seq("thrift", "echo", "failures")) == 2)
 
     assert(sr.counters(Seq("requests")) == 4)
     assert(sr.counters(Seq("success")) == 2)
+    assert(sr.counters(Seq("failures")) == 2)
+
+    // This query makes the server throw an ignorable failure. This increments
+    // the request count, but not the failure count.
+    intercept[TApplicationException] {
+      await(client.echo("ignore"), 10.seconds)
+    }
+    assert(sr.counters(Seq("thrift", "echo", "requests")) == 5)
+    assert(sr.counters(Seq("thrift", "echo", "success")) == 2)
+    assert(sr.counters(Seq("thrift", "echo", "failures")) == 2)
+
+    assert(sr.counters(Seq("requests")) == 4)
+    assert(sr.counters(Seq("success")) == 2)
+    assert(sr.counters(Seq("failures")) == 2)
   }
 
   private def testJavaClientResponseClassification(
@@ -631,9 +666,11 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("thrift", "echo", "requests")) == 1)
     assert(sr.counters(Seq("thrift", "echo", "success")) == 0)
+    assert(sr.counters(Seq("thrift", "echo", "failures")) == 1)
 
     assert(sr.counters(Seq("requests")) == 1)
     assert(sr.counters(Seq("success")) == 0)
+    assert(sr.counters(Seq("failures")) == 1)
 
     // test that we can examine the request as well.
     intercept[InvalidQueryException] {
@@ -641,17 +678,21 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     }
     assert(sr.counters(Seq("thrift", "echo", "requests")) == 2)
     assert(sr.counters(Seq("thrift", "echo", "success")) == 1)
+    assert(sr.counters(Seq("thrift", "echo", "failures")) == 1)
 
     assert(sr.counters(Seq("requests")) == 2)
     assert(sr.counters(Seq("success")) == 1)
+    assert(sr.counters(Seq("failures")) == 1)
 
     // test that we can mark a successfully deserialized result as a failure
     assert("safe" == await(client.echo(Echo.Echo.Args("safe"))))
     assert(sr.counters(Seq("thrift", "echo", "requests")) == 3)
     assert(sr.counters(Seq("thrift", "echo", "success")) == 1)
+    assert(sr.counters(Seq("thrift", "echo", "failures")) == 2)
 
     assert(sr.counters(Seq("requests")) == 3)
     assert(sr.counters(Seq("success")) == 1)
+    assert(sr.counters(Seq("failures")) == 2)
 
     // this query produces a Timeout exception in server side and it should be
     // translated to `Success`
@@ -660,9 +701,25 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     }
     assert(sr.counters(Seq("thrift", "echo", "requests")) == 4)
     assert(sr.counters(Seq("thrift", "echo", "success")) == 2)
+    assert(sr.counters(Seq("thrift", "echo", "failures")) == 2)
 
     assert(sr.counters(Seq("requests")) == 4)
     assert(sr.counters(Seq("success")) == 2)
+    assert(sr.counters(Seq("failures")) == 2)
+
+    // This query makes the server throw an ignorable failure. This increments
+    // the request count, but not the failure count.
+    intercept[TApplicationException] {
+      await(client.echo(Echo.Echo.Args("ignore")))
+    }
+    assert(sr.counters(Seq("thrift", "echo", "requests")) == 5)
+    assert(sr.counters(Seq("thrift", "echo", "success")) == 2)
+    assert(sr.counters(Seq("thrift", "echo", "failures")) == 2)
+
+    assert(sr.counters(Seq("requests")) == 4)
+    assert(sr.counters(Seq("success")) == 2)
+    assert(sr.counters(Seq("failures")) == 2)
+
     server.close()
   }
 
