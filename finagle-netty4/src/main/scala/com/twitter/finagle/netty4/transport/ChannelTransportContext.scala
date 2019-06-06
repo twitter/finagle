@@ -6,6 +6,7 @@ import io.netty.channel.Channel
 import io.netty.handler.ssl.SslHandler
 import java.net.SocketAddress
 import java.util.concurrent.Executor
+import scala.annotation.tailrec
 import scala.util.control.NonFatal
 
 /**
@@ -20,9 +21,19 @@ private[finagle] final class ChannelTransportContext(val ch: Channel)
 
   def remoteAddress: SocketAddress = ch.remoteAddress
 
-  val sslSessionInfo: SslSessionInfo =
-    ch.pipeline.get(classOf[SslHandler]) match {
-      case null => NullSslSessionInfo
+  private[this] def getSslHandler(ch: Channel): SslHandler =
+    ch.pipeline.get(classOf[SslHandler])
+
+  // We extract the `SslHandler` from this `Channel` if it's available.
+  // If not, we try the channel's parent instead. Looking at the parent
+  // is necessary when a request is processed by a child channel and
+  // pipeline (i.e. HTTP/2).
+  @tailrec
+  private[this] def getSslSessionInfo(ch: Channel): SslSessionInfo =
+    getSslHandler(ch) match {
+      case null =>
+        if (ch.parent != null) getSslSessionInfo(ch.parent)
+        else NullSslSessionInfo
       case handler =>
         try {
           new UsingSslSessionInfo(handler.engine.getSession)
@@ -30,6 +41,8 @@ private[finagle] final class ChannelTransportContext(val ch: Channel)
           case NonFatal(_) => NullSslSessionInfo
         }
     }
+
+  val sslSessionInfo: SslSessionInfo = getSslSessionInfo(ch)
 
   def executor: Executor = ch.eventLoop
 }
