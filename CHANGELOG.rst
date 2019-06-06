@@ -58,6 +58,9 @@ Runtime Behavior Changes
 Bug Fixes
 ~~~~~~~~~
 
+* finagle-core: `UsingSslSessionInfo` would fail to be constructed properly when
+  `SSLSession.getLocalCertificates` returns 'null'. ``PHAB_ID=D324499``
+
 * finagle-http: Finagle now properly sets the `Transport.peerCertificate` local context
   when using HTTP/2. ``PHAB_ID=D324392``
 

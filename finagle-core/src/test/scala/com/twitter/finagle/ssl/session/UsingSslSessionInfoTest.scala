@@ -64,6 +64,17 @@ class UsingSslSessionInfoTest extends FunSuite with MockitoSugar {
     assert(sessionInfo.localCertificates.head.getSerialNumber == localSerialNumber)
   }
 
+  test("UsingSslSessionInfo works when local certificates are null") {
+    val nullLocalSession: SSLSession = mock[SSLSession]
+    when(nullLocalSession.getId).thenReturn(sessionID)
+    when(nullLocalSession.getLocalCertificates).thenReturn(null)
+    when(nullLocalSession.getPeerCertificates).thenReturn(Array[Certificate](peerCert))
+    when(nullLocalSession.getCipherSuite).thenReturn("my-made-up-cipher")
+
+    val sessionInfo: SslSessionInfo = new UsingSslSessionInfo(nullLocalSession)
+    assert(sessionInfo.localCertificates.length == 0)
+  }
+
   test("UsingSslSessionInfo returns a peer X509Certificate") {
     assert(sessionInfo.peerCertificates.length == 1)
     assert(sessionInfo.peerCertificates.head.getSerialNumber == peerSerialNumber)

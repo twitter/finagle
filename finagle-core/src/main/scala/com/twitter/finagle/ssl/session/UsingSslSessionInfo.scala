@@ -50,8 +50,11 @@ private[finagle] final class UsingSslSessionInfo(val session: SSLSession) extend
    *
    * @return The sequence of local certificates sent.
    */
-  val localCertificates: Seq[X509Certificate] =
-    session.getLocalCertificates.toSeq.collect { case cert: X509Certificate => cert }
+  val localCertificates: Seq[X509Certificate] = {
+    val localCerts = session.getLocalCertificates
+    if (localCerts == null) Nil
+    else localCerts.toSeq.collect { case cert: X509Certificate => cert }
+  }
 
   /**
    * The `X509Certificate`s that were received from the peer during the SSL/TLS handshake.
