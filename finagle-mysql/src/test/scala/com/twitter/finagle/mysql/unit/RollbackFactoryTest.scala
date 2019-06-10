@@ -2,7 +2,7 @@ package com.twitter.finagle.mysql
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.finagle.{ChannelClosedException, ClientConnection, Service, ServiceFactory}
+import com.twitter.finagle.{ClientConnection, Service, ServiceFactory}
 import com.twitter.util.{Await, Awaitable, Future, Time}
 import org.scalatest.FunSuite
 
@@ -64,42 +64,6 @@ class RollbackFactoryTest extends FunSuite {
       svc(QueryRequest("1")).ensure { svc.close() }
     })
     assert(closeCalled)
-  }
-
-  test("doesn't try to poison connection or close, if connection is already closed") {
-    var closeCalled = false
-    val queryRequest = QueryRequest("1")
-
-    val client: ServiceFactory[Request, Result] = new ServiceFactory[Request, Result] {
-      private[this] val svc = new Service[Request, Result] {
-        def apply(req: Request): Future[Result] = {
-          if (req == queryRequest) {
-            Future.value(EOF(0, ServerStatus(0)))
-          } else {
-            Future.exception(new ChannelClosedException())
-          }
-        }
-
-        override def close(when: Time): Future[Unit] = {
-          closeCalled = true
-          Future.Done
-        }
-      }
-      def apply(c: ClientConnection): Future[Service[Request, Result]] = Future.value(svc)
-      def close(deadline: Time): Future[Unit] = svc.close(deadline)
-    }
-
-    val rollbackClient = new RollbackFactory(client, NullStatsReceiver)
-
-    await {
-      for {
-        service <- rollbackClient()
-        response <- service(queryRequest)
-        _ <- service.close()
-      } yield ()
-    }
-
-    assert(!closeCalled)
   }
 
   test("poison request is sent when rollback fails") {

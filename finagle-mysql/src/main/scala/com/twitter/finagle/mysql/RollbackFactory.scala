@@ -46,9 +46,6 @@ final class RollbackFactory(client: ServiceFactory[Request, Result], statsReceiv
           rollbackLatencyStat.add(elapsed().inMillis)
           result match {
             case Return(_) => self.close(deadline)
-            case Throw(_: ChannelClosedException) =>
-              // Connection is already closed, no need to do anything else
-              Future.Done
             case Throw(t) =>
               log.warning(
                 t,
