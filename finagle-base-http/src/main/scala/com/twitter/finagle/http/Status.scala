@@ -1,5 +1,7 @@
 package com.twitter.finagle.http
 
+import scala.annotation.switch
+
 /**
  * Represents an HTTP status code.
  *
@@ -132,69 +134,69 @@ object Status {
   val NotExtended = Status(510)
   val NetworkAuthenticationRequired = Status(511)
 
-  def fromCode(code: Int): Status =
-    statuses.getOrElse(code, Status(code))
-
-  private val statuses: Map[Int, Status] = Map(
-    100 -> Continue,
-    101 -> SwitchingProtocols,
-    102 -> Processing,
-    200 -> Ok,
-    201 -> Created,
-    202 -> Accepted,
-    203 -> NonAuthoritativeInformation,
-    204 -> NoContent,
-    205 -> ResetContent,
-    206 -> PartialContent,
-    207 -> MultiStatus,
-    300 -> MultipleChoices,
-    301 -> MovedPermanently,
-    302 -> Found,
-    303 -> SeeOther,
-    304 -> NotModified,
-    305 -> UseProxy,
-    307 -> TemporaryRedirect,
-    308 -> PermanentRedirect,
-    400 -> BadRequest,
-    401 -> Unauthorized,
-    402 -> PaymentRequired,
-    403 -> Forbidden,
-    404 -> NotFound,
-    405 -> MethodNotAllowed,
-    406 -> NotAcceptable,
-    407 -> ProxyAuthenticationRequired,
-    408 -> RequestTimeout,
-    409 -> Conflict,
-    410 -> Gone,
-    411 -> LengthRequired,
-    412 -> PreconditionFailed,
-    413 -> RequestEntityTooLarge,
-    414 -> RequestURITooLong,
-    415 -> UnsupportedMediaType,
-    416 -> RequestedRangeNotSatisfiable,
-    417 -> ExpectationFailed,
-    420 -> EnhanceYourCalm,
-    422 -> UnprocessableEntity,
-    423 -> Locked,
-    424 -> FailedDependency,
-    425 -> UnorderedCollection,
-    426 -> UpgradeRequired,
-    428 -> PreconditionRequired,
-    429 -> TooManyRequests,
-    431 -> RequestHeaderFieldsTooLarge,
-    451 -> UnavailableForLegalReasons,
-    499 -> ClientClosedRequest,
-    500 -> InternalServerError,
-    501 -> NotImplemented,
-    502 -> BadGateway,
-    503 -> ServiceUnavailable,
-    504 -> GatewayTimeout,
-    505 -> HttpVersionNotSupported,
-    506 -> VariantAlsoNegotiates,
-    507 -> InsufficientStorage,
-    510 -> NotExtended,
-    511 -> NetworkAuthenticationRequired
-  )
+  def fromCode(code: Int): Status = {
+    (code: @switch) match {
+      case 100 => Continue
+      case 101 => SwitchingProtocols
+      case 102 => Processing
+      case 200 => Ok
+      case 201 => Created
+      case 202 => Accepted
+      case 203 => NonAuthoritativeInformation
+      case 204 => NoContent
+      case 205 => ResetContent
+      case 206 => PartialContent
+      case 207 => MultiStatus
+      case 300 => MultipleChoices
+      case 301 => MovedPermanently
+      case 302 => Found
+      case 303 => SeeOther
+      case 304 => NotModified
+      case 305 => UseProxy
+      case 307 => TemporaryRedirect
+      case 308 => PermanentRedirect
+      case 400 => BadRequest
+      case 401 => Unauthorized
+      case 402 => PaymentRequired
+      case 403 => Forbidden
+      case 404 => NotFound
+      case 405 => MethodNotAllowed
+      case 406 => NotAcceptable
+      case 407 => ProxyAuthenticationRequired
+      case 408 => RequestTimeout
+      case 409 => Conflict
+      case 410 => Gone
+      case 411 => LengthRequired
+      case 412 => PreconditionFailed
+      case 413 => RequestEntityTooLarge
+      case 414 => RequestURITooLong
+      case 415 => UnsupportedMediaType
+      case 416 => RequestedRangeNotSatisfiable
+      case 417 => ExpectationFailed
+      case 420 => EnhanceYourCalm
+      case 422 => UnprocessableEntity
+      case 423 => Locked
+      case 424 => FailedDependency
+      case 425 => UnorderedCollection
+      case 426 => UpgradeRequired
+      case 428 => PreconditionRequired
+      case 429 => TooManyRequests
+      case 431 => RequestHeaderFieldsTooLarge
+      case 451 => UnavailableForLegalReasons
+      case 499 => ClientClosedRequest
+      case 500 => InternalServerError
+      case 501 => NotImplemented
+      case 502 => BadGateway
+      case 503 => ServiceUnavailable
+      case 504 => GatewayTimeout
+      case 505 => HttpVersionNotSupported
+      case 506 => VariantAlsoNegotiates
+      case 507 => InsufficientStorage
+      case 510 => NotExtended
+      case 511 => NetworkAuthenticationRequired
+      case _ => Status(code)
+    }
+  }
 
   // See note in Status.
   private val reasons: Map[Status, String] = Map(
