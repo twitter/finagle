@@ -13,6 +13,8 @@ New Features
 * finagle-core: SSL/TLS session information has been added to `c.t.f.ClientConnection`.
   ``PHAB_ID=D323305``
 
+* finagle-core: Add a Stack Module with 7 parameters for convenience sake. ``PHAB_ID=D325382``
+
 * finagle-http: Added counters for request/response stream as: `stream/request/closed`,
   `stream/request/failures`, `stream/request/failures/<exception_name>`, `stream/request/opened`,
   `stream/request/pending` and `stream/response/closed`, `stream/response/failures`,
