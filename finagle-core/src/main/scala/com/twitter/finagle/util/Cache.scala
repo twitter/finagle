@@ -1,16 +1,17 @@
 package com.twitter.finagle.util
 
-import java.util.ArrayDeque
+import com.twitter.util.{Duration, Time, TimerTask}
+import java.util.{ArrayDeque, ArrayList}
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
-
-import com.twitter.util.{Time, TimerTask, Duration}
 
 /**
  * A key-less LIFO cache that supports TTLs.
  *
  * Why LIFO? In the presence of a TTL, we want to reuse the most recently
  * used items in the cache, so that we need fewer of them.
+ *
+ * @note This class is thread-safe.
  *
  * @param cacheSize the maximum size that the cache will not exceed
  * @param ttl time-to-live for cached objects.  Note: Collection is
@@ -26,14 +27,23 @@ private[finagle] class Cache[A](
   evictor: Option[A => Unit] = None: None.type) {
   require(cacheSize > 0)
 
+  // Thread-safety for state is provided by synchronization on `this`.
+
   // We assume monotonically increasing time.  Thus the items at the
   // end of the deque are also the newest (i.e. LIFO behavior).
-  private[this] var deque = new ArrayDeque[(Time, A)]
-  private[this] var timerTask: Option[TimerTask] = None
+  //
+  // The two ArrayDeques work together to hold each item it's expiry.
+  // So an item in the front of one will have it's expiry at the
+  // front of the other.
+  //
+  // A reasonable starting size is used, balancing the max size (cacheSize)
+  // and not too eagerly allocating the initial underlying array.
+  private[this] val expirations = new ArrayDeque[Time](math.min(cacheSize + 1, 128))
+  private[this] val items = new ArrayDeque[A](math.min(cacheSize + 1, 128))
+  private[this] var timerTask: TimerTask = null
 
   /**
-   * Removes expired items from deque, starting from "last" (oldest)
-   * @returns expired items
+   * Removes expired items from deque, starting from "last" (oldest).
    *
    * Assumes that internal order of return value (seq of expired
    * items) does not matter
@@ -42,60 +52,71 @@ private[finagle] class Cache[A](
    *
    * Implementation: Assume that there are relatively few items to
    * evict, so it is cheaper to traverse from old->new than new->old
+   *
+   * @return expired items
    */
   private[this] def removeExpiredItems(): Seq[A] = synchronized {
     val deadline = Time.now - ttl
 
     @tailrec
     def constructExpiredList(acc: List[A]): List[A] = {
-      Option(deque.peekLast) match {
-        case Some((ts, item)) if ts <= deadline =>
-          // should ditch *oldest* items, so take from deque's last
-          deque.removeLast()
-          constructExpiredList(item :: acc)
-        case _ =>
-          // assumes time monotonicity (all items below the split
-          //   point are old, all items above the split point are
-          //   young)
-          acc
+      val ts = expirations.peekLast()
+      if (ts != null && ts <= deadline) {
+        // should ditch *oldest* items, so take from the end
+        expirations.removeLast()
+        val item = items.removeLast()
+        constructExpiredList(item :: acc)
+      } else {
+        // assumes time monotonicity (all items below the split
+        //   point are old, all items above the split point are
+        //   young)
+        acc
       }
     }
     constructExpiredList(Nil)
   }
 
   private[this] def scheduleTimer(): Unit = synchronized {
-    require(!timerTask.isDefined)
-    timerTask = Some(timer.schedule(ttl.fromNow) { timeout() })
+    require(timerTask == null)
+    timerTask = timer.schedule(ttl.fromNow) { timeout() }
   }
 
-  private[this] def cancelTimer() = synchronized {
-    timerTask foreach { _.cancel() }
-    timerTask = None
+  private[this] def cancelTimer(): Unit = synchronized {
+    if (timerTask != null) {
+      timerTask.cancel()
+      timerTask = null
+    }
   }
 
-  private[this] def timeout() = {
+  private[this] def timeout(): Unit = {
     val evicted = synchronized {
-      timerTask = None
+      timerTask = null
       val es = removeExpiredItems()
-      if (!deque.isEmpty) scheduleTimer()
+      if (!expirations.isEmpty) scheduleTimer()
       es
     }
-    evicted foreach { evict(_) }
+    evicted.foreach(evict)
   }
 
-  private[this] def evict(item: A) = evictor foreach { _(item) }
+  private[this] def evict(item: A): Unit = {
+    evictor match {
+      case Some(e) => e(item)
+      case None => ()
+    }
+  }
 
   /**
    * Retrieve an item from the cache.  Items are retrieved in LIFO
    * order.
    */
-  def get() = synchronized {
-    if (!deque.isEmpty) {
-      val rv = Some(deque.pop()._2)
-      if (deque.isEmpty) cancelTimer()
-      rv
-    } else {
+  def get(): Option[A] = synchronized {
+    if (expirations.isEmpty) {
       None
+    } else {
+      expirations.removeFirst()
+      val rv = Some(items.removeFirst())
+      if (expirations.isEmpty) cancelTimer()
+      rv
     }
   }
 
@@ -104,35 +125,39 @@ private[finagle] class Cache[A](
    */
   def put(item: A): Unit = {
     val evicted = synchronized {
-      if (deque.isEmpty && ttl != Duration.Top) scheduleTimer()
-      deque.push((Time.now, item))
-      if (deque.size > cacheSize) { // it will ever only be over by 1
-        // should ditch *oldest* items, so take from last of deque
-        val (time, oldest) = deque.removeLast()
-        Some(oldest)
+      if (expirations.isEmpty && ttl != Duration.Top) scheduleTimer()
+      expirations.addFirst(Time.now)
+      items.addFirst(item)
+      if (expirations.size > cacheSize) { // it will ever only be over by 1
+        // should ditch *oldest* items, so take from last
+        expirations.removeLast()
+        items.removeLast()
       } else {
-        None
+        null
       }
     }
-    evicted foreach { evict(_) }
+    if (evicted != null) {
+      evict(evicted.asInstanceOf[A])
+    }
   }
 
   /**
    * Evict all items, clearing the cache.
    */
-  def evictAll() = {
+  def evictAll(): Unit = {
     val evicted = synchronized {
-      val oldDeque = deque
-      deque = new ArrayDeque[(Time, A)] // clear deque
+      val oldItems = new ArrayList[A](items)
+      items.clear()
+      expirations.clear()
       cancelTimer()
-      oldDeque
+      oldItems
     }
 
-    evicted.asScala foreach { case (_, item) => evict(item) }
+    evicted.asScala.foreach(evict)
   }
 
   /**
    * The current size of the cache.
    */
-  def size = synchronized { deque.size }
+  def size: Int = synchronized { expirations.size }
 }

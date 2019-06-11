@@ -3,21 +3,18 @@ package com.twitter.finagle.util
 import com.twitter.conversions.DurationOps._
 import com.twitter.util._
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 import org.scalatest.mockito.MockitoSugar
 import org.mockito.Mockito.{times, verify}
 import org.mockito.Mockito
 import org.mockito.Matchers._
 
-@RunWith(classOf[JUnitRunner])
 class CacheTest extends FunSuite with MockitoSugar {
 
   class CacheHelper {
     val timer = new MockTimer
     val evictor = mock[Object => Unit]
     val cache = Mockito.spy(new Cache[Object](5, 5.seconds, timer, Some(evictor)))
-    val objects = 0 until 10 map { _ =>
+    val objects = 0.until(10).map { _ =>
       mock[Object]
     }
   }
@@ -26,7 +23,7 @@ class CacheTest extends FunSuite with MockitoSugar {
     val h = new CacheHelper
     import h._
 
-    objects foreach { cache.put(_) }
+    objects.foreach(cache.put)
     assert(cache.size == 5)
     objects take 5 foreach { obj =>
       verify(evictor)(obj)
@@ -37,8 +34,8 @@ class CacheTest extends FunSuite with MockitoSugar {
     val h = new CacheHelper
     import h._
 
-    objects take 5 foreach { cache.put(_) }
-    (objects take 5).reverse foreach { x =>
+    objects.take(5).foreach(cache.put)
+    objects.take(5).reverse.foreach { x =>
       assert(cache.get() == Some(x))
     }
   }
@@ -93,11 +90,11 @@ class CacheTest extends FunSuite with MockitoSugar {
     val h = new CacheHelper
     import h._
 
-    objects take 5 foreach { cache.put(_) }
+    objects.take(5).foreach { cache.put(_) }
     assert(cache.size == 5)
     verify(evictor, times(0))(any)
     cache.evictAll()
-    objects take 5 foreach { verify(evictor)(_) }
+    objects.take(5).foreach { verify(evictor)(_) }
     assert(cache.size == 0)
   }
 
