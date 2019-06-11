@@ -4,10 +4,10 @@ import org.scalatest.FunSuite
 
 class RecordSchemaTest extends FunSuite {
 
-  val schema = new RecordSchema
-  val field = schema.newField[Object]()
-  val fieldWithDefault = schema.newField[Object](new Object)
-  val fields = Seq(field, fieldWithDefault)
+  private val schema = new RecordSchema
+  private val field = schema.newField[Object]()
+  private val fieldWithDefault = schema.newField[Object](new Object)
+  private val fields = Seq(field, fieldWithDefault)
 
   test("apply should throw IllegalStateException when field is uninitialized") {
     val record = schema.newRecord()
@@ -93,7 +93,7 @@ class RecordSchemaTest extends FunSuite {
 
   test("copy should not be modified when the original is updated") {
     val record = schema.newRecord()
-    val copy = record.copy
+    val copy = record.copy()
 
     for (f <- fields) {
       record.update(f, new Object)

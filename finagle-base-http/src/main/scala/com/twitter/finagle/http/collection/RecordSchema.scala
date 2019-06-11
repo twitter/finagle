@@ -30,12 +30,20 @@ final class RecordSchema {
    * that field.
    */
   final class Record private[RecordSchema] (
-    // note: modifications to `fields` must be synchronized as `IdentityHashMap` itself
+    // note: modifications to `_fields` must be synchronized as `IdentityHashMap` itself
     // is not thread-safe.
-    fields: IdentityHashMap[Field[_], Entry] = new IdentityHashMap[Field[_], Entry]) {
+    private[this] var _fields: IdentityHashMap[Field[_], Entry] = null) {
+
+    private[this] def fields: IdentityHashMap[Field[_], Entry] = {
+      if (_fields == null) {
+        // start w/small expected size (5 mappings), allowing it to grow as needed.
+        _fields = new IdentityHashMap[Field[_], Entry](5)
+      }
+      _fields
+    }
 
     private[this] def getOrInitializeEntry(field: Field[_]): Entry = {
-      fields.synchronized {
+      synchronized {
         var entry = fields.get(field)
         if (entry eq null) {
           entry = new Entry(field.default())
@@ -99,7 +107,7 @@ final class RecordSchema {
      */
     @throws(classOf[IllegalStateException])
     def update[A](field: Field[A], value: A): Record = {
-      fields.synchronized {
+      synchronized {
         val entry = fields.get(field)
         if (entry eq null) {
           fields.put(field, new Entry(value))
@@ -133,10 +141,10 @@ final class RecordSchema {
       update(field, value).lock(field)
 
     private[this] def copyFields(): IdentityHashMap[Field[_], Entry] = {
-      fields.synchronized {
-        val newFields = new IdentityHashMap[Field[_], Entry]
+      synchronized {
+        val newFields = new IdentityHashMap[Field[_], Entry](fields.size)
         val iter = fields.entrySet().iterator()
-        while (iter.hasNext()) {
+        while (iter.hasNext) {
           val kv = iter.next()
           val entry = kv.getValue()
           val newEntry = new Entry(entry.value)
@@ -148,8 +156,8 @@ final class RecordSchema {
     }
 
     /**
-     * Create a copy of this record.  Fields are locked in the copy iff they were locked in the
-     * original record.
+     * Create a copy of this record.  Fields are locked in the copy if and only if they
+     * were locked in the original record.
      *
      * @return a copy of this record
      */
@@ -159,8 +167,8 @@ final class RecordSchema {
 
     /**
      * Create a copy of this record with `value` assigned to `field`.  `field` will be locked in the
-     * copy iff it was present and locked in the original record.  If `field` was not present in the
-     * original then the following are equivalent:
+     * copy if and only if it was present and locked in the original record.  If `field` was not
+     * present in the original then the following are equivalent:
      *
      * {{{
      * record.copy(field, value)

@@ -131,7 +131,15 @@ object Response {
     def chunkWriter: Writer[Chunk] = FailingWriter
 
     val headerMap: HeaderMap = HeaderMap()
-    val ctx: Response.Schema.Record = Response.Schema.newRecord()
+
+    // Lazily created which allows those not using this functionality to not pay for it.
+    @volatile private[this] var _ctx: Response.Schema.Record = _
+    def ctx: Response.Schema.Record = {
+      if (_ctx == null) synchronized {
+        if (_ctx == null) _ctx = Response.Schema.newRecord()
+      }
+      _ctx
+    }
 
     override def status: Status = _status
     override def status_=(value: Status): Unit = {
@@ -150,7 +158,15 @@ object Response {
     private[this] var _status: Status = Status.Ok
 
     val headerMap: HeaderMap = HeaderMap()
-    val ctx: Response.Schema.Record = Response.Schema.newRecord()
+
+    // Lazily created which allows those not using this functionality to not pay for it.
+    @volatile private[this] var _ctx: Response.Schema.Record = _
+    def ctx: Response.Schema.Record = {
+      if (_ctx == null) synchronized {
+        if (_ctx == null) _ctx = Response.Schema.newRecord()
+      }
+      _ctx
+    }
 
     def trailers: HeaderMap = HeaderMap.Empty
 

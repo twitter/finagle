@@ -433,7 +433,14 @@ object Request {
 
     val headerMap: HeaderMap = HeaderMap()
 
-    val ctx: Request.Schema.Record = Request.Schema.newRecord()
+    // Lazily created which allows those not using this functionality to not pay for it.
+    @volatile private[this] var _ctx: Request.Schema.Record = _
+    def ctx: Request.Schema.Record = {
+      if (_ctx == null) synchronized {
+        if (_ctx == null) _ctx = Request.Schema.newRecord()
+      }
+      _ctx
+    }
 
     def method: Method = _method
     def method_=(method: Method): Unit = {
@@ -462,7 +469,15 @@ object Request {
     private var _uri: String = ""
 
     val headerMap: HeaderMap = HeaderMap()
-    val ctx: Request.Schema.Record = Request.Schema.newRecord()
+
+    // Lazily created which allows those not using this functionality to not pay for it.
+    @volatile private[this] var _ctx: Request.Schema.Record = _
+    def ctx: Request.Schema.Record = {
+      if (_ctx == null) synchronized {
+        if (_ctx == null) _ctx = Request.Schema.newRecord()
+      }
+      _ctx
+    }
 
     def trailers: HeaderMap = HeaderMap.Empty
 
