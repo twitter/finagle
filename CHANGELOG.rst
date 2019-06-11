@@ -71,6 +71,9 @@ Bug Fixes
 * finagle-http: Finagle now properly sets the `Transport.peerCertificate` local context
   when using HTTP/2. ``PHAB_ID=D324392``
 
+* finagle-http: `c.t.f.http.collection.RecordSchema.Record` is now thread-safe.
+  ``PHAB_ID=D325700``
+
 * finagle-zipkin-core: Fix a race condition which could cause a span to get logged
   missing some annotations. ``PHAB_ID=D319367``
 

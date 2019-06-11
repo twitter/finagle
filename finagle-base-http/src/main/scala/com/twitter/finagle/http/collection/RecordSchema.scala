@@ -19,8 +19,8 @@ import java.util.IdentityHashMap
  */
 final class RecordSchema {
 
-  private[RecordSchema] final class Entry(var value: Any) {
-    var locked: Boolean = false
+  private[RecordSchema] final class Entry(@volatile var value: Any) {
+    @volatile var locked: Boolean = false
   }
 
   /**
@@ -28,21 +28,21 @@ final class RecordSchema {
    * Records are mutable; the `update` method assigns or reassigns a value to a given field. If
    * the user requires that a field's assigned value is never reassigned later, the user can `lock`
    * that field.
-   *
-   * '''Note that this implementation is not synchronized.''' If multiple threads access a record
-   * concurrently, and at least one of the threads modifies the record, it ''must'' be synchronized
-   * externally.
    */
   final class Record private[RecordSchema] (
+    // note: modifications to `fields` must be synchronized as `IdentityHashMap` itself
+    // is not thread-safe.
     fields: IdentityHashMap[Field[_], Entry] = new IdentityHashMap[Field[_], Entry]) {
 
     private[this] def getOrInitializeEntry(field: Field[_]): Entry = {
-      var entry = fields.get(field)
-      if (entry eq null) {
-        entry = new Entry(field.default())
-        fields.put(field, entry)
+      fields.synchronized {
+        var entry = fields.get(field)
+        if (entry eq null) {
+          entry = new Entry(field.default())
+          fields.put(field, entry)
+        }
+        entry
       }
-      entry
     }
 
     /**
@@ -99,15 +99,17 @@ final class RecordSchema {
      */
     @throws(classOf[IllegalStateException])
     def update[A](field: Field[A], value: A): Record = {
-      val entry = fields.get(field)
-      if (entry eq null) {
-        fields.put(field, new Entry(value))
-      } else if (entry.locked) {
-        throw new IllegalStateException(
-          s"attempt to assign $value to a locked field (with current value ${entry.value})"
-        )
-      } else {
-        entry.value = value
+      fields.synchronized {
+        val entry = fields.get(field)
+        if (entry eq null) {
+          fields.put(field, new Entry(value))
+        } else if (entry.locked) {
+          throw new IllegalStateException(
+            s"attempt to assign $value to a locked field (with current value ${entry.value})"
+          )
+        } else {
+          entry.value = value
+        }
       }
       this
     }
@@ -131,16 +133,18 @@ final class RecordSchema {
       update(field, value).lock(field)
 
     private[this] def copyFields(): IdentityHashMap[Field[_], Entry] = {
-      val newFields = new IdentityHashMap[Field[_], Entry]
-      val iter = fields.entrySet().iterator()
-      while (iter.hasNext()) {
-        val kv = iter.next()
-        val entry = kv.getValue()
-        val newEntry = new Entry(entry.value)
-        newEntry.locked = entry.locked
-        newFields.put(kv.getKey(), newEntry)
+      fields.synchronized {
+        val newFields = new IdentityHashMap[Field[_], Entry]
+        val iter = fields.entrySet().iterator()
+        while (iter.hasNext()) {
+          val kv = iter.next()
+          val entry = kv.getValue()
+          val newEntry = new Entry(entry.value)
+          newEntry.locked = entry.locked
+          newFields.put(kv.getKey(), newEntry)
+        }
+        newFields
       }
-      newFields
     }
 
     /**
