@@ -97,7 +97,9 @@ private[finagle] final class ClientDispatcher(
     extends GenSerialClientDispatcher[Request, Result, Packet, Packet](trans) {
   import ClientDispatcher._
 
-  private[this] val handshake = Handshake(params, trans)
+  // We only support plain handshaking when it's done inside
+  // the dispatcher. Eventually it should be entirely removed.
+  private[this] val handshake = new PlainHandshake(params, trans)
 
   // Perform the handshake (possibly) once
   private[this] val connectionPhase: Future[Unit] =
