@@ -395,12 +395,19 @@ object StackClient {
      *    request. It must appear above all other modules so the
      *    request span encompasses all tracing in the course of a
      *    request.
+     *
+     *  * `OffloadFilter` shifts future continuations (callbacks and
+     *    transformations) off of IO threads into a configured `FuturePool`.
+     *    This module is intentionally placed at the top of the stack
+     *    such that execution context shifts as client's response leaves
+     *    the stack and enters the application code.
      */
     stk.push(Role.protoTracing, identity[ServiceFactory[Req, Rep]](_))
     stk.push(Failure.module)
     stk.push(ClientTracingFilter.module)
     stk.push(TraceInitializerFilter.clientModule)
     stk.push(RegistryEntryLifecycle.module)
+    stk.push(OffloadFilter.client)
     stk.result
   }
 

@@ -40,6 +40,7 @@ object StackServer {
    * in the finagle package object ([[com.twitter.finagle.param]]) and specific
    * params defined in the companion objects of the respective modules.
    *
+   * @see [[com.twitter.finagle.filter.OffloadFilter]]
    * @see [[com.twitter.finagle.tracing.ServerDestTracingProxy]]
    * @see [[com.twitter.finagle.service.TimeoutFilter]]
    * @see [[com.twitter.finagle.service.DeadlineFilter]]
@@ -56,6 +57,11 @@ object StackServer {
    */
   def newStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] = {
     val stk = new StackBuilder[ServiceFactory[Req, Rep]](stack.nilStack[Req, Rep])
+
+    // This module is placed at the bottom of the stack and shifts Future execution context
+    // from IO threads into a configured FuturePool right before user-defined Service.apply is
+    // being called.
+    stk.push(OffloadFilter.server)
 
     stk.push(ServerTracingFilter.module)
 

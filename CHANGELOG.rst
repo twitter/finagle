@@ -15,6 +15,11 @@ New Features
 
 * finagle-core: Add a Stack Module with 7 parameters for convenience sake. ``PHAB_ID=D325382``
 
+* finagle-core: For both, servers and clients, introduce a way to shift application-level future
+  callbacks off of IO threads, into a given `FuturePool` or `ExecutorService`.
+  Use `withExecutionOffloaded` configuration method (on a client or a server) to access
+  new functionality. ``PHAB_ID=D325049``
+
 * finagle-http: Added counters for request/response stream as: `stream/request/closed`,
   `stream/request/failures`, `stream/request/failures/<exception_name>`, `stream/request/opened`,
   `stream/request/pending` and `stream/response/closed`, `stream/response/failures`,

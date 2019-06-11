@@ -1,10 +1,12 @@
 package com.twitter.finagle.param
 
+import com.twitter.finagle.filter.OffloadFilter
 import com.twitter.finagle.service.TimeoutFilter
-import com.twitter.finagle.{service, stats, tracing, Stack}
+import com.twitter.finagle.{Stack, service, stats, tracing}
 import com.twitter.util
-import com.twitter.util.Duration
+import com.twitter.util.{Duration, FuturePool}
 import com.twitter.util.tunable.Tunable
+import java.util.concurrent.ExecutorService
 
 /**
  * A collection of methods for configuring common parameters (labels, stats receivers, etc)
@@ -45,7 +47,7 @@ trait CommonParams[A <: Stack.Parameterized[A]] { self: Stack.Parameterized[A] =
    * will appear in metrics, but Tags do not.
    */
   def withLabels(keywords: String*): A =
-    self.configured(Tags(keywords:_*))
+    self.configured(Tags(keywords: _*))
 
   /**
    * Configures this server or client with given [[stats.StatsReceiver]]
@@ -193,4 +195,34 @@ trait CommonParams[A <: Stack.Parameterized[A]] { self: Stack.Parameterized[A] =
    */
   def withRequestTimeout(timeout: Tunable[Duration]): A =
     self.configured(TimeoutFilter.Param(timeout))
+
+  /**
+   * Configures this server or client to shift user-defined computation ([[com.twitter.util.Future]]
+   * callbacks and transformations) off of IO threads into a given [[FuturePool]].
+   *
+   * By default, Finagle executes all futures in the IO threads, minimizing context switches. Given
+   * there is usually a fixed number of IO threads shared across a JVM process, it's critically
+   * important to ensure they aren't being blocked by the application code, affecting system's
+   * responsiveness. Shifting application-level work onto a dedicated [[FuturePool]] or
+   * [[ExecutorService]] offloads IO threads, which may improve throughput in CPU-bound systems.
+   *
+   * As always, run your own tests before enabling this feature.
+   */
+  def withExecutionOffloaded(pool: FuturePool): A =
+    self.configured(OffloadFilter.Param(pool))
+
+  /**
+   * Configures this server or client to shift user-defined computation ([[com.twitter.util.Future]]
+   * callbacks and transformations) off of IO threads into a given [[ExecutorService]].
+   *
+   * By default, Finagle executes all futures in the IO threads, minimizing context switches. Given
+   * there is usually a fixed number of IO threads shared across a JVM process, it's critically
+   * important to ensure they aren't being blocked by the application code, affecting system's
+   * responsiveness. Shifting application-level work onto a dedicated [[FuturePool]] or
+   * [[ExecutorService]] offloads IO threads, which may improve throughput in CPU-bound systems.
+   *
+   * As always, run your own tests before enabling this feature.
+   */
+  def withExecutionOffloaded(executor: ExecutorService): A =
+    self.configured(OffloadFilter.Param(executor))
 }
