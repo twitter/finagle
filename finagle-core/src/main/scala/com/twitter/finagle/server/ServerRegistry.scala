@@ -1,8 +1,8 @@
 package com.twitter.finagle.server
 
+import com.twitter.finagle.ClientConnection
 import com.twitter.finagle.util.{InetSocketAddressUtil, StackRegistry}
 import com.twitter.logging.Level
-import com.twitter.util.Time
 import java.net.SocketAddress
 import java.util.concurrent.ConcurrentHashMap
 import java.util.function.{Function => JFunction}
@@ -52,22 +52,21 @@ private[twitter] object ServerRegistry extends StackRegistry {
       new ConnectionRegistry(localAddr)
   }
 
-  private[server] case class ConnectionInfo(establishedAt: Time)
-
   /**
-   * Used to maintain a registry of connections to a server, represented by the remote
-   * [[SocketAddress]], to [[ConnectionInfo]].
+   * Used to maintain a registry of client connections to a server, represented by the remote
+   * [[SocketAddress]], to [[ClientConnection]].
+   *
+   * @note This is scoped as private[twitter] so that it is accessible by TwitterServer.
    */
-  private[server] class ConnectionRegistry(localAddr: SocketAddress) {
+  private[twitter] class ConnectionRegistry(localAddr: SocketAddress) {
+    private[this] val map = new ConcurrentHashMap[SocketAddress, ClientConnection]
 
-    private[this] val map = new ConcurrentHashMap[SocketAddress, ConnectionInfo]
+    def register(session: ClientConnection): ClientConnection =
+      map.put(session.remoteAddress, session)
 
-    def register(remoteAddr: SocketAddress): ConnectionInfo =
-      map.put(remoteAddr, ConnectionInfo(Time.now))
+    def unregister(session: ClientConnection): Unit = map.remove(session.remoteAddress)
 
-    def unregister(remoteAddr: SocketAddress): Unit = map.remove(remoteAddr)
-
-    def iterator: Iterator[SocketAddress] = map.keySet.iterator.asScala
+    def iterator: Iterator[ClientConnection] = map.values.iterator.asScala
 
     // Exposed for testing
     def clear(): Unit = map.clear()

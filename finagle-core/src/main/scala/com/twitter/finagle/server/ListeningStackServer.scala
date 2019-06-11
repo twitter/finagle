@@ -85,11 +85,11 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
       private[this] val sessions = new Closables
 
       private[this] val underlying = server.newListeningServer(serviceFactory, addr) { session =>
-        registry.register(session.remoteAddress)
+        registry.register(session)
         sessions.register(session)
         session.onClose.ensure {
           sessions.unregister(session)
-          registry.unregister(session.remoteAddress)
+          registry.unregister(session)
         }
       }
 
