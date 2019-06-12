@@ -41,7 +41,16 @@ private[mysql] final case class HandshakeSettings(
 
   require(maxPacketSize <= 1.gigabyte, s"Max packet size ($maxPacketSize) cannot exceed 1 gigabyte")
 
-  val calculatedClientCap: Capability = {
+  /**
+   * Optionally adds either or both the `ConnectWithDB` and
+   * `FoundRows` capabilities to the initial `clientCap`
+   * based on the `database` and `enableFoundRows` values
+   * passed in to the constructor.
+   *
+   * @note This method does not include the `SSL` capability
+   * by default. For one that does, see `sslCalculatedClientCap`.
+   */
+  def calculatedClientCap: Capability = {
     val capDb = if (database.isDefined) {
       clientCap + Capability.ConnectWithDB
     } else {
@@ -51,6 +60,12 @@ private[mysql] final case class HandshakeSettings(
     if (enableFoundRows) capDb + Capability.FoundRows
     else capDb - Capability.FoundRows
   }
+
+  /**
+   * Adds the `SSL` capability to the `calculatedClientCap`.
+   */
+  def sslCalculatedClientCap: Capability =
+    calculatedClientCap + Capability.SSL
 }
 
 private[mysql] object HandshakeSettings {
