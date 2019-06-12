@@ -77,6 +77,9 @@ Bug Fixes
 * finagle-zipkin-core: Fix a race condition which could cause a span to get logged
   missing some annotations. ``PHAB_ID=D319367``
 
+* finagle-mysql: Don't log `c.t.f.ChannelClosedException` when rolling back a transaction
+  fails. ``PHAB_ID=D327111``
+
 19.5.1
 ------
 

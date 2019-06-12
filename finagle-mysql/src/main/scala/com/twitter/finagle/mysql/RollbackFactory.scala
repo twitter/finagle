@@ -46,18 +46,29 @@ final class RollbackFactory(client: ServiceFactory[Request, Result], statsReceiv
           rollbackLatencyStat.add(elapsed().inMillis)
           result match {
             case Return(_) => self.close(deadline)
+            case Throw(_: ChannelClosedException) =>
+              // Don't log the exception on ChannelClosedExceptions because it is noisy.
+
+              // We want to close the connection if we can't issue a rollback
+              // since we assume it isn't a "clean" connection to put back into
+              // the pool.
+              poisonAndClose(deadline)
             case Throw(t) =>
               log.warning(
                 t,
                 "rollback failed when putting service back into pool, closing connection"
               )
-              // we want to close the connection if we can't issue a rollback
+              // We want to close the connection if we can't issue a rollback
               // since we assume it isn't a "clean" connection to put back into
               // the pool.
-              self(PoisonConnectionRequest).transform { _ =>
-                self.close(deadline)
-              }
+              poisonAndClose(deadline)
           }
+        }
+      }
+
+      private[this] def poisonAndClose(deadline: Time): Future[Unit] = {
+        self(PoisonConnectionRequest).transform { _ =>
+          self.close(deadline)
         }
       }
     }
