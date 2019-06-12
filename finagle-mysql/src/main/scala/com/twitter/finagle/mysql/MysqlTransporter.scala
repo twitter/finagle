@@ -32,7 +32,11 @@ private[finagle] final class MysqlTransporter(
   }
 
   private[this] val netty4Transporter =
-    Netty4Transporter.framedBuf(Some(framerFactory), remoteAddress, params)
+    Netty4Transporter.framedBuf(
+      Some(framerFactory),
+      remoteAddress,
+      MysqlTransporter.paramsWithoutSsl(params)
+    )
 
   private[this] def createTransport(): Future[MysqlTransport] =
     netty4Transporter().map { transport =>
@@ -49,5 +53,17 @@ private[finagle] final class MysqlTransporter(
   def apply(): Future[Transport[Packet, Packet] { type Context <: TransportContext }] =
     if (performHandshake) createTransportWithSession()
     else createTransport()
+
+}
+
+private[mysql] object MysqlTransporter {
+
+  // If it is set, we remove the `Transport.ClientSsl` param from the collection
+  // of params that we pass to the `Netty4Transporter`. If it is left in, then the
+  // `SslHandler` will be added _now_, which we don't want. SSL/TLS for MySQL is
+  // negotiated as part of the protocol. So we want the `SslHandler` to be added
+  // later as part of the `SecureHandshake` instead.
+  def paramsWithoutSsl(params: Stack.Params): Stack.Params =
+    params + Transport.ClientSsl(None)
 
 }
