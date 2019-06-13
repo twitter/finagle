@@ -4,6 +4,11 @@
       "id": "com.twitter.util.BypassScheduler",
       "description": "Bypass the scheduler for Future.map operations (we expect this toggle to be temporary).",
       "fraction": 0.0
+    },
+    {
+      "id": "com.twitter.util.UseLocalInInterruptible",
+      "description": "Use local state at time of interrupt handler creation.",
+      "fraction": 0.0
     }
   ]
 }
