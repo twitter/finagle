@@ -26,7 +26,7 @@ private[mysql] final class PlainHandshake(
   def connectionPhase(): Future[Result] =
     readHandshakeInit()
       .map(makePlainHandshakeResponse)
-      .flatMap(simpleDispatch)
+      .flatMap(messageDispatch)
       .onFailure(_ => transport.close())
 
 }

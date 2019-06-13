@@ -64,8 +64,8 @@ private[mysql] abstract class Handshake(
       LostSyncException.const(isCompatibleCharset(handshakeInit)).map(_ => handshakeInit)
     }
 
-  protected final def simpleDispatch(req: Request): Future[Result] =
-    transport.write(req.toPacket).flatMap(_ => transport.read().flatMap(decodeSimpleResult))
+  protected final def messageDispatch(msg: ProtocolMessage): Future[Result] =
+    transport.write(msg.toPacket).flatMap(_ => transport.read().flatMap(decodeSimpleResult))
 
   protected final def decodeSimpleResult(packet: Packet): Future[Result] =
     MysqlBuf.peek(packet.body) match {

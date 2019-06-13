@@ -90,6 +90,14 @@ Bug Fixes
 * finagle-mysql: Don't log `c.t.f.ChannelClosedException` when rolling back a transaction
   fails. ``PHAB_ID=D327111``
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-mysql: The structure of `c.t.f.mysql.Request` has changed. It is now based on
+  a higher level `c.t.f.mysql.ProtocolMessage` and the `cmd` field must contain a value.
+  Additionally, the synthetic `Command.COM_NO_OP` has been removed, as due to the
+  restructuring it was no longer necessary. ``PHAB_ID=D327554``
+
 19.5.1
 ------
 

@@ -7,7 +7,6 @@ import java.util.logging.Logger
 
 object Command {
   val COM_POISON_CONN: Byte = (-2).toByte // used internally to close an underlying connection
-  val COM_NO_OP: Byte = (-1).toByte // used internally by this client
   val COM_SLEEP: Byte = 0x00.toByte // internal thread state
   val COM_QUIT: Byte = 0x01.toByte // mysql_close
   val COM_INIT_DB: Byte = 0x02.toByte // mysql_select_db
@@ -39,10 +38,24 @@ object Command {
   val COM_STMT_FETCH: Byte = 0x1C.toByte // mysql_stmt_fetch
 }
 
-sealed trait Request {
+/**
+ * A `ProtocolMessage` is an outgoing message sent by the
+ * client as part of the MySQL protocol. It contains a
+ * sequence number and is able to be converted to a MySQL
+ * packet to be sent across the wire.
+ */
+private[mysql] trait ProtocolMessage {
   def seq: Short
-  def cmd: Byte = Command.COM_NO_OP
   def toPacket: Packet
+}
+
+/**
+ * A `Request` is an outgoing message sent by the client
+ * as part of the MySQL protocol. It is packet-based and
+ * based around a MySQL command.
+ */
+sealed trait Request extends ProtocolMessage {
+  def cmd: Byte
 }
 
 /**
@@ -54,7 +67,7 @@ sealed trait WithSql {
 
 private[finagle] object PoisonConnectionRequest extends Request {
   def seq: Short = 0
-  override def cmd: Byte = Command.COM_POISON_CONN
+  def cmd: Byte = Command.COM_POISON_CONN
   def toPacket: Packet = ???
 }
 
@@ -62,7 +75,7 @@ private[finagle] object PoisonConnectionRequest extends Request {
  * A command request is a request initiated by the client
  * and has a cmd byte associated with it.
  */
-abstract class CommandRequest(override val cmd: Byte) extends Request {
+abstract class CommandRequest(val cmd: Byte) extends Request {
   def seq: Short = 0
 }
 
@@ -129,12 +142,12 @@ private[mysql] case class SslConnectionRequest(
   clientCap: Capability,
   charset: Short,
   maxPacketSize: Int)
-    extends Request {
+    extends ProtocolMessage {
   require(
     clientCap.has(Capability.SSL),
     "Using SslConnectionRequest requires having the SSL capability")
 
-  override def seq: Short = 1
+  def seq: Short = 1
 
   def toPacket: Packet = {
     val packetBodySize = 32
@@ -162,7 +175,7 @@ private[mysql] sealed abstract class HandshakeResponse(
   serverCap: Capability,
   charset: Short,
   maxPacketSize: Int)
-    extends Request {
+    extends ProtocolMessage {
 
   lazy val hashPassword: Array[Byte] = password match {
     case Some(p) => encryptPassword(p, salt)
@@ -230,7 +243,7 @@ private[mysql] case class PlainHandshakeResponse(
       charset,
       maxPacketSize) {
 
-  override def seq: Short = 1
+  def seq: Short = 1
 }
 
 /**
@@ -266,7 +279,7 @@ private[mysql] case class SecureHandshakeResponse(
     clientCap.has(Capability.SSL),
     "clientCap must contain Capability.SSL to send a SecureHandshakeResponse")
 
-  override def seq: Short = 2
+  def seq: Short = 2
 }
 
 class FetchRequest(val prepareOK: PrepareOK, val numRows: Int)
