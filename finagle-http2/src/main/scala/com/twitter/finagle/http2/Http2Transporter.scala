@@ -59,7 +59,6 @@ private[finagle] object Http2Transporter {
 
       val connectionHandlerBuilder = new RichHttpToHttp2ConnectionHandlerBuilder()
         .frameListener(new Http2ClientDowngrader(connection))
-        .frameLogger(new LoggerPerFrameTypeLogger(params[FrameLoggerNamePrefix].loggerNamePrefix))
         .connection(connection)
         .initialSettings(Settings.fromParams(params, isServer = false))
         .encoderIgnoreMaxHeaderListSize(ignoreMaxHeaderListSize)
@@ -68,6 +67,11 @@ private[finagle] object Http2Transporter {
             sensitivityDetector(name, value)
           }
         })
+
+      if (params[FrameLogging].enabled) {
+        connectionHandlerBuilder.frameLogger(
+          new LoggerPerFrameTypeLogger(params[FrameLoggerNamePrefix].loggerNamePrefix))
+      }
 
       val PriorKnowledge(priorKnowledge) = params[PriorKnowledge]
       val Transport.ClientSsl(config) = params[Transport.ClientSsl]

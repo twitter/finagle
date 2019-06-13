@@ -35,6 +35,9 @@ New Features
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+* finagle: Upgrade to Netty 4.1.35.Final and netty-tcnative 2.0.25.Final.
+  ``PHAB_ID=D312439``
+
 * finagle-core: The default failure accrual policy has been changed from one
   which uses only consecutive failures to a hybrid model which uses both
   success rate over a window and consecutive failures. Previously this was
@@ -46,11 +49,12 @@ Runtime Behavior Changes
   populated when `isChunked` is set to true in the request and response respectively.
   ``PHAB_ID=D315041``
 
-* finagle: Upgrade to Netty 4.1.35.Final and netty-tcnative 2.0.25.Final.
-  ``PHAB_ID=D312439``
-
 * finagle-http2: Disable ping-based failure detector in HTTP/2 client as it seems to do
   more harm than good.  ``PHAB_ID=D322357``
+
+* finagle-http2: Frame logging is now disabled by default for clients. To enable,
+  use the `c.t.f.http2.param.FrameLogging.Enabled` Stack Param. For example:
+  `Http.client.configured(FrameLogging.Enabled)`. ``PHAB_ID=D326727``
 
 * finagle-netty4: When using a Netty `LocalChannel`, the value of the `BackPressure`
   stack param is effectively changed to `backPressureDisabled` so that other functionality

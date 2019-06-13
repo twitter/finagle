@@ -141,6 +141,35 @@ object HeaderSensitivity {
 }
 
 /**
+ * Whether or not HTTP/2 frame logging is enabled.
+ *
+ * Defaults to disabled.
+ *
+ * @see `Enabled` and `Disabled` on companion class for getting instances.
+ */
+final case class FrameLogging private (enabled: Boolean) {
+  def mk(): (FrameLogging, Stack.Param[FrameLogging]) =
+    (this, FrameLogging.param)
+}
+
+object FrameLogging {
+
+  /**
+   * Frame logging is disabled.
+   */
+  val Disabled: FrameLogging = FrameLogging(false)
+
+  /**
+   * Frame logging is enabled.
+   *
+   * @see [[FrameLoggerNamePrefix]] for further configuration.
+   */
+  val Enabled: FrameLogging = FrameLogging(true)
+
+  implicit val param: Stack.Param[FrameLogging] = Stack.Param(Disabled)
+}
+
+/**
  * The logger name to be used for the root HTTP/2 frame logger. This allows each frame type
  * to be turned on and off by changing the level of prefix.<FRAME_TYPE>, or turning everything
  * on by changing the level of prefix. The HTTP/2 frame logger logs at the level TRACE, so you

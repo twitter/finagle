@@ -4,6 +4,7 @@ import com.twitter.finagle.Stack
 import com.twitter.finagle.http2.param.{
   EncoderIgnoreMaxHeaderListSize,
   FrameLoggerNamePrefix,
+  FrameLogging,
   HeaderSensitivity
 }
 import com.twitter.finagle.param.Stats
@@ -95,19 +96,23 @@ private object MultiplexCodecBuilder {
     inboundInitializer: ChannelHandler,
     isServer: Boolean
   ): Http2MultiplexCodecBuilder = {
-    val logger = new LoggerPerFrameTypeLogger(params[FrameLoggerNamePrefix].loggerNamePrefix)
     val initialSettings = Settings.fromParams(params, isServer = isServer)
     val builder: Http2MultiplexCodecBuilder =
       if (isServer) Http2MultiplexCodecBuilder.forServer(inboundInitializer)
       else Http2MultiplexCodecBuilder.forClient(inboundInitializer)
 
     builder
-      .frameLogger(logger)
       .initialSettings(initialSettings)
       .encoderIgnoreMaxHeaderListSize(
         params[EncoderIgnoreMaxHeaderListSize].ignoreMaxHeaderListSize
       )
       .headerSensitivityDetector(detector(params))
+
+    if (params[FrameLogging].enabled) {
+      builder.frameLogger(
+        new LoggerPerFrameTypeLogger(params[FrameLoggerNamePrefix].loggerNamePrefix))
+    }
+    builder
   }
 
   // Build a sensitivity detector from the params
