@@ -33,42 +33,29 @@ object FailureAccrualFactory {
   private[finagle] val jitteredBackoff: Stream[Duration] =
     Backoff.equalJittered(5.seconds, 300.seconds)
 
-  private[finagle] def defaultPolicy: Function0[FailureAccrualPolicy] = {
-    if (useHybridDefaultPolicy) {
-      new Function0[FailureAccrualPolicy] {
-        def apply(): FailureAccrualPolicy =
-          FailureAccrualPolicy
-            .successRateWithinDuration(
-              DefaultSuccessRateThreshold,
-              DefaultSuccessRateWindow,
-              jitteredBackoff,
-              DefaultMinimumRequestThreshold
-            )
-            .orElse(
-              FailureAccrualPolicy
-                .consecutiveFailures(DefaultConsecutiveFailures, jitteredBackoff)
-            )
+  private[finagle] def defaultPolicy: Function0[FailureAccrualPolicy] =
+    new Function0[FailureAccrualPolicy] {
+      def apply(): FailureAccrualPolicy =
+        FailureAccrualPolicy
+          .successRateWithinDuration(
+            DefaultSuccessRateThreshold,
+            DefaultSuccessRateWindow,
+            jitteredBackoff,
+            DefaultMinimumRequestThreshold
+          )
+          .orElse(
+            FailureAccrualPolicy
+              .consecutiveFailures(DefaultConsecutiveFailures, jitteredBackoff)
+          )
 
-        override def toString: String =
-          "FailureAccrualPolicy" +
-            ".successRateWithinDuration(" +
-            s"successRate = $DefaultSuccessRateThreshold, window = $DefaultSuccessRateWindow, " +
-            s"markDeadFor = $jitteredBackoff)" +
-            ".orElse(FailureAccrualPolicy" +
-            s".consecutiveFailures(numFailures: $DefaultConsecutiveFailures, markDeadFor: $jitteredBackoff)"
-      }
-    } else {
-      new Function0[FailureAccrualPolicy] {
-        def apply(): FailureAccrualPolicy =
-          FailureAccrualPolicy
-            .consecutiveFailures(DefaultConsecutiveFailures, jitteredBackoff)
-
-        override def toString: String =
-          s"FailureAccrualPolicy.consecutiveFailures(numFailures: " +
-            s"$DefaultConsecutiveFailures, markDeadFor: $jitteredBackoff)"
-      }
+      override def toString: String =
+        "FailureAccrualPolicy" +
+          ".successRateWithinDuration(" +
+          s"successRate = $DefaultSuccessRateThreshold, window = $DefaultSuccessRateWindow, " +
+          s"markDeadFor = $jitteredBackoff)" +
+          ".orElse(FailureAccrualPolicy" +
+          s".consecutiveFailures(numFailures: $DefaultConsecutiveFailures, markDeadFor: $jitteredBackoff)"
     }
-  }
 
   /**
    * Add jitter in `markDeadFor` to reduce correlation.

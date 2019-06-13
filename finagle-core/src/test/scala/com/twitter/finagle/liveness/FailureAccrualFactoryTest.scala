@@ -4,21 +4,17 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.service._
 import com.twitter.finagle._
-import com.twitter.finagle.toggle.flag
 import com.twitter.util._
 import java.util.concurrent.TimeUnit
-import org.junit.runner.RunWith
 import org.mockito.Mockito.{times, verify, when}
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
 import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 import scala.util.Random
 
-@RunWith(classOf[JUnitRunner])
 class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
 
   val markDeadFor = Backoff.equalJittered(5.seconds, 60.seconds)
@@ -63,21 +59,12 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     verify(underlying)()
   }
 
-  test("default policy is consecutiveFailures") {
+  test("default policy is hybrid") {
+    val faf = FailureAccrualFactory.defaultPolicy.toString
     assert(
-      FailureAccrualFactory.defaultPolicy.toString
-        .contains("FailureAccrualPolicy.consecutiveFailures")
+      faf.contains("FailureAccrualPolicy.successRateWithinDuration") &&
+        faf.contains("FailureAccrualPolicy.consecutiveFailures")
     )
-  }
-
-  test("default policy can be toggled to hybrid with window") {
-    flag.overrides.let("com.twitter.finagle.core.UseHybridFailureAccrual", 1.0) {
-      val faf = FailureAccrualFactory.defaultPolicy.toString
-      assert(
-        faf.contains("FailureAccrualPolicy.successRateWithinDuration") &&
-          faf.contains("FailureAccrualPolicy.consecutiveFailures")
-      )
-    }
   }
 
   test("a failing service should become unavailable") {

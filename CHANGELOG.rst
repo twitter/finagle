@@ -35,6 +35,12 @@ New Features
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+* finagle-core: The default failure accrual policy has been changed from one
+  which uses only consecutive failures to a hybrid model which uses both
+  success rate over a window and consecutive failures. Previously this was
+  changeable via toggle. The toggle has been removed, and the hybrid version
+  has been made the default. ``PHAB_ID=D327394``
+
 * finagle-http: Rename `request_stream_duration_ms` to `stream/request/duration_ms` and
   `response_stream_duration_ms` to `stream/response/duration_ms`. The stats will be
   populated when `isChunked` is set to true in the request and response respectively.
