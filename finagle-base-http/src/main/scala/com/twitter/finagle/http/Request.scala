@@ -428,8 +428,8 @@ object Request {
 
     def chunkWriter: Writer[Chunk] = FailingWriter
 
-    private var _method: Method = Method.Get
-    private var _uri: String = ""
+    @volatile private var _method: Method = Method.Get
+    @volatile private var _uri: String = ""
 
     val headerMap: HeaderMap = HeaderMap()
 
@@ -465,8 +465,8 @@ object Request {
     def this(chunkReader: Reader[Chunk], remoteSocketAddress: InetSocketAddress) =
       this(chunkReader, FailingWriter, remoteSocketAddress)
 
-    private var _method: Method = Method.Get
-    private var _uri: String = ""
+    @volatile private var _method: Method = Method.Get
+    @volatile private var _uri: String = ""
 
     val headerMap: HeaderMap = HeaderMap()
 

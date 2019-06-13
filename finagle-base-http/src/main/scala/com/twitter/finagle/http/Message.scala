@@ -18,9 +18,9 @@ import scala.collection.JavaConverters._
  */
 abstract class Message {
 
-  private[this] var _content: Buf = Buf.Empty
-  private[this] var _version: Version = Version.Http11
-  private[this] var _chunked: Boolean = false
+  @volatile private[this] var _content: Buf = Buf.Empty
+  @volatile private[this] var _version: Version = Version.Http11
+  @volatile private[this] var _chunked: Boolean = false
 
   /**
    * A read-only handle to a stream of [[Chunk]], representing the message body. This stream is only

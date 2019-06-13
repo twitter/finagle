@@ -10,8 +10,7 @@ import scala.annotation.tailrec
 import scala.collection.mutable
 
 /**
- * Mutable, non-thread-safe [[HeaderMap]] implementation. Any concurrent access
- * to instances of this class should be synchronized externally.
+ * Mutable, thread-safe [[HeaderMap]] implementation.
  */
 private final class DefaultHeaderMap extends HeaderMap {
 

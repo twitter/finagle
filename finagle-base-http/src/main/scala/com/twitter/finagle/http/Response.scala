@@ -126,7 +126,7 @@ object Response {
   private[finagle] final class Inbound(val chunkReader: Reader[Chunk], val trailers: HeaderMap)
       extends Response {
 
-    private[this] var _status: Status = Status.Ok
+    @volatile private[this] var _status: Status = Status.Ok
 
     def chunkWriter: Writer[Chunk] = FailingWriter
 
@@ -155,7 +155,7 @@ object Response {
 
     def this(chunkReader: Reader[Chunk]) = this(chunkReader, FailingWriter)
 
-    private[this] var _status: Status = Status.Ok
+    @volatile private[this] var _status: Status = Status.Ok
 
     val headerMap: HeaderMap = HeaderMap()
 
