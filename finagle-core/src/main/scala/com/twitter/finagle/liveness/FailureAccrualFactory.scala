@@ -5,7 +5,6 @@ import com.twitter.finagle.Stack.{Params, Role}
 import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.service.{Backoff, ResponseClass, ResponseClassifier, ReqRep}
-import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Level
 import com.twitter.util._
@@ -19,11 +18,6 @@ object FailureAccrualFactory {
   private[this] val DefaultSuccessRateWindow = FailureAccrualPolicy.DefaultSuccessRateWindow
   private[this] val DefaultMinimumRequestThreshold =
     FailureAccrualPolicy.DefaultMinimumRequestThreshold
-
-  private[this] val UseHybridDefaultPolicyId =
-    "com.twitter.finagle.core.UseHybridFailureAccrual"
-  private[this] def useHybridDefaultPolicy: Boolean =
-    CoreToggles(UseHybridDefaultPolicyId)(ServerInfo().id.hashCode)
 
   // Use equalJittered backoff in order to wait more time in between
   // each revival attempt on successive failures; if an endpoint has failed
