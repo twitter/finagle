@@ -471,7 +471,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       val width = apertureWidth
       if (rebuildLog.isLoggable(Level.DEBUG)) {
         rebuildLog.debug(
-          f"[DeterministicApeture.physicalAperture $lbl] ringUnit=${ring.unitWidth}%1.6f coordUnit=${coord.unitWidth}%1.6f coordOffset=${coord.offset}%1.6f apertureWidth=$width%1.6f"
+          f"[DeterministicAperture.physicalAperture $lbl] ringUnit=${ring.unitWidth}%1.6f coordUnit=${coord.unitWidth}%1.6f coordOffset=${coord.offset}%1.6f apertureWidth=$width%1.6f"
         )
       }
       ring.range(coord.offset, width)
@@ -505,13 +505,13 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
               f"(index=$i, weight=$weight%1.6f, addr=$addr)"
           }.mkString("[", ", ", "]")
       }
-      rebuildLog.debug(s"[DeterministicApeture.rebuild $lbl] nodes=$apertureSlice")
+      rebuildLog.debug(s"[DeterministicAperture.rebuild $lbl] nodes=$apertureSlice")
 
       // It may be useful see the raw server vector for d-aperture since we expect
       // uniformity across processes.
       if (rebuildLog.isLoggable(Level.TRACE)) {
         val vectorString = vector.map(_.factory.address).mkString("[", ", ", "]")
-        rebuildLog.trace(s"[DeterministicApeture.rebuild $lbl] nodes=$vectorString")
+        rebuildLog.trace(s"[DeterministicAperture.rebuild $lbl] nodes=$vectorString")
       }
     }
 
@@ -549,7 +549,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
 
       if (pickLog.isLoggable(Level.TRACE)) {
         pickLog.trace(
-          f"[DeterministicApeture.pick] a=(index=$a, weight=$aw%1.6f, node=$nodeA) b=(index=$b, weight=$bw%1.6f, node=$nodeB) picked=$picked"
+          f"[DeterministicAperture.pick] a=(index=$a, weight=$aw%1.6f, node=$nodeA) b=(index=$b, weight=$bw%1.6f, node=$nodeB) picked=$picked"
         )
       }
 
