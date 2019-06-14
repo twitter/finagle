@@ -23,6 +23,8 @@ private[mysql] final class PlainHandshake(
     )
   }
 
+  // For the `PlainHandshake`, after the init
+  // we just return a handshake response.
   def connectionPhase(): Future[Result] =
     readHandshakeInit()
       .map(makePlainHandshakeResponse)

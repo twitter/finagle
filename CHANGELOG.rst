@@ -32,6 +32,10 @@ New Features
   adding and removing cookies in bulk, without triggering a header rewrite on each item.
   ``PHAB_ID=D318013``
 
+* finagle-mysql: finagle-mysql now supports using SSL/TLS with MySQL. SSL/TLS can be turned on by
+  calling `withTransport.tls(sslClientConfiguration)` with a specified
+  `c.t.f.ssl.client.SslClientConfiguration`. ``PHAB_ID=D328077``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

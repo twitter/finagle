@@ -102,6 +102,11 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
   private[this] val includeHandshakeInServiceAcquisitionToggle: Toggle[Int] =
     Toggles("com.twitter.finagle.mysql.IncludeHandshakeInServiceAcquisition")
 
+  // This param having a value other than `None` indicates that
+  // the client is setup to try to use SSL/TLS.
+  private[this] def wantsToUseSsl(params: Stack.Params): Boolean =
+    params[Transport.ClientSsl].sslClientConfiguration.isDefined
+
   protected val supportUnsigned: Boolean = UnsignedColumns.param.default.supported
 
   object Client {
@@ -158,8 +163,14 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
       with WithDefaultLoadBalancer[Client]
       with MysqlRichClient {
 
+    // If the param is set to use SSL/TLS, we force handshaking to
+    // be done as part of service acquisition. We want all handshaking
+    // to be done eventually as part of service acquisition, and SSL/TLS
+    // is functionality that didn't exist previously, so make SSL/TLS take
+    // the preferred path.
     private[this] val includeHandshakeInServiceAcquisition: Boolean =
-      includeHandshakeInServiceAcquisitionToggle(ServerInfo().id.hashCode)
+      wantsToUseSsl(params) ||
+        includeHandshakeInServiceAcquisitionToggle(ServerInfo().id.hashCode)
 
     protected val supportUnsigned: Boolean = params[UnsignedColumns].supported
 

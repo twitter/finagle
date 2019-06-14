@@ -36,9 +36,6 @@ case object IncompatibleCharset
  *
  * https://dev.mysql.com/doc/internals/en/connection-phase.html
  *
- * @note At this time, the `Handshake` class only supports a
- * `Plain Handshake` extension, `PlainHandshake`.
- *
  * @param params The collection `Stack` params necessary to create the
  * desired MySQL session.
  *
@@ -97,11 +94,12 @@ private[mysql] object Handshake {
 
   /**
    * Creates a `Handshake` based on the specific `Stack` params and `Transport` passed in.
-   *
-   * @note At this time, only a `PlainHandshake` is supported, but eventually a
-   * `SecureHandshake` will be conditionally returned.
+   * If the `Transport.ClientSsl` param is set, then a `SecureHandshake` will be returned.
+   * Otherwise a `PlainHandshake is returned.
    */
   def apply(params: Stack.Params, transport: Transport[Packet, Packet]): Handshake =
-    new PlainHandshake(params, transport)
+    if (params[Transport.ClientSsl].sslClientConfiguration.isDefined)
+      new SecureHandshake(params, transport)
+    else new PlainHandshake(params, transport)
 
 }
