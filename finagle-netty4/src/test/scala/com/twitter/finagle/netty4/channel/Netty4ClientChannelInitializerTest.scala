@@ -12,6 +12,7 @@ import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
+import io.netty.handler.proxy.ProxyConnectException
 import java.net.InetSocketAddress
 import org.scalatest.FunSuite
 
@@ -82,5 +83,15 @@ class Netty4ClientChannelInitializerTest extends FunSuite {
     e.connect(new InetSocketAddress("localhost", 12345))
     assert(e.pipeline.get(classOf[Netty4ProxyConnectHandler]) == null)
     assert(!e.finish())
+  }
+
+  test("abstract channel initializer doesn't bypass SOCKS5 proxied connections to localhost when asked not to") {
+    val proxyParams = Stack.Params.empty +
+      Transporter.SocksProxy(Some(new InetSocketAddress(0)), None, false)
+    val init = new AbstractNetty4ClientChannelInitializer(proxyParams) {}
+    val e = new EmbeddedChannel(init)
+    e.connect(new InetSocketAddress("localhost", 12345))
+    assert(e.pipeline.get(classOf[Netty4ProxyConnectHandler]) != null)
+    assertThrows[ProxyConnectException](e.finish())
   }
 }

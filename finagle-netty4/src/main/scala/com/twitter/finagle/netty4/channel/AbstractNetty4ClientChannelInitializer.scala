@@ -26,7 +26,7 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(params: St
   private[this] val Stats(stats) = params[Stats]
   private[this] val Transporter.HttpProxyTo(httpHostAndCredentials) =
     params[Transporter.HttpProxyTo]
-  private[this] val Transporter.SocksProxy(socksAddress, socksCredentials) =
+  private[this] val Transporter.SocksProxy(socksAddress, socksCredentials, socksBypassLocalhost) =
     params[Transporter.SocksProxy]
   private[this] val Transporter.HttpProxy(httpAddress, httpCredentials) =
     params[Transporter.HttpProxy]
@@ -99,7 +99,7 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(params: St
 
       pipe.addFirst(
         "socksProxyConnect",
-        new Netty4ProxyConnectHandler(proxyHandler, bypassLocalhostConnections = true)
+        new Netty4ProxyConnectHandler(proxyHandler, bypassLocalhostConnections = socksBypassLocalhost)
       )
     }
 

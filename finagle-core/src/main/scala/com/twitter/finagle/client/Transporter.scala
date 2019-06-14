@@ -67,7 +67,7 @@ object Transporter {
   /**
    * $param a SocksProxy as the endpoint for a `Transporter`.
    */
-  case class SocksProxy(sa: Option[SocketAddress], credentials: Option[(String, String)]) {
+  case class SocksProxy(sa: Option[SocketAddress], credentials: Option[(String, String)], bypassLocalhost: Boolean = true) {
     def mk(): (SocksProxy, Stack.Param[SocksProxy]) =
       (this, SocksProxy)
   }
@@ -85,7 +85,7 @@ object Transporter {
         case _ => None
       }
 
-    val default: SocksProxy = SocksProxy(socksProxy, socksUsernameAndPassword)
+    val default: SocksProxy = SocksProxy(socksProxy, socksUsernameAndPassword, !socksProxyForLocalhost())
 
     override def show(p: SocksProxy): Seq[(String, () => String)] = {
       // do not show the password for security reasons

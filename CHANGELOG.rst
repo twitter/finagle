@@ -55,6 +55,9 @@ New Features
   Use `withExecutionOffloaded` configuration method (on a client or a server) to access
   new functionality. ``PHAB_ID=D325049``
 
+* finagle-core: Allow to not bypass SOCKS proxy for localhost by usingg the GlobalFlag
+  `-com.twitter.finagle.socks.socksProxyForLocalhost`
+
 * finagle-http: Added counters for request/response stream as: `stream/request/closed`,
   `stream/request/failures`, `stream/request/failures/<exception_name>`, `stream/request/opened`,
   `stream/request/pending` and `stream/response/closed`, `stream/response/failures`,
