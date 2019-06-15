@@ -45,7 +45,7 @@ private trait PeakEwma[Req, Rep] extends BalancerNode[Req, Rep] { self: Balancer
     // Note, because the frequency of observations represents an
     // unevenly spaced time-series[1], we consider the time between
     // observations when calculating our weight.
-    // [1] https://www.eckner.com/papers/ts_alg.pdf
+    // [1] http://www.eckner.com/papers/unevenly_spaced_time_series_analysis.pdf
     private[this] def observe(rtt: Double): Unit = {
       val t = nanoTime()
       val td = math.max(t - stamp, 0)
