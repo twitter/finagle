@@ -33,6 +33,7 @@ URLs if possible) and [submit a pull request][1]!
 * [ING Bank](https://ing.nl/)
 * [JusBrasil](https://www.jusbrasil.com.br/)
 * [Magine TV](https://magine.com/)
+* [Merit](https://merits.com)
 * [National Center for Biotechnology Information (NCBI)](https://www.ncbi.nlm.nih.gov/)
 * [Nest](https://nest.com/)
 * The [New York Times](https://www.nytimes.com/)
@@ -53,7 +54,6 @@ URLs if possible) and [submit a pull request][1]!
 * [Salesforce](https://www.salesforce.com/)
 * [Sharethrough](https://www.sharethrough.com/)
   * ["Finagle @ Sharethrough: Twitter #Conf Presentation"][5]
-* [Sigma](https://sig.ma)
 * [SmartNews](https://www.smartnews.com/en/)
   * ["Scala (Finagle) @ SmartNews"][12]
 * [SoFi](https://www.sofi.com/)
