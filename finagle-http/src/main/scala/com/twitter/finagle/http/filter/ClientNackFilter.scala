@@ -30,7 +30,7 @@ private[http] final class ClientNackFilter extends SimpleFilter[Request, Respons
         // to retry this request with a body.
         request.headerMap.setUnsafe(HttpNackFilter.RetryableRequestHeader, "")
       }
-      service(request).flatMap(convertNackFn)
+      service(request).transform(convertNackFn)
     }
   }
 }
@@ -49,15 +49,14 @@ object ClientNackFilter {
   // note: in the nack case we use `transform` since we've already
   // decided it's a nack response regardless of if we succeed in
   // swallowing the body.
-  private val convertNackFn: Response => Future[Response] = {
-    case res if HttpNackFilter.isRetryableNack(res) =>
+  private val convertNackFn: Try[Response] => Future[Response] = {
+    case Return(res) if HttpNackFilter.isRetryableNack(res) =>
       swallowNackResponse(res).transform(respondRetryableFailure)
 
-    case res if HttpNackFilter.isNonRetryableNack(res) =>
+    case Return(res) if HttpNackFilter.isNonRetryableNack(res) =>
       swallowNackResponse(res).transform(respondNonRetryableFailure)
 
-    // Clean responses pass through
-    case res => Future.value(res)
+    case t => Future.const(t)
   }
 
   // It's likely unsafe to retry this request based on request body being chunked so
@@ -66,14 +65,11 @@ object ClientNackFilter {
     case Return(res) if HttpNackFilter.isNack(res) =>
       swallowNackResponse(res).transform(respondNonRetryableFailure)
 
-    // Clean responses pass through
-    case Return(res) => Future.value(res)
-
     case Throw(ex: FailureFlags[_]) =>
       Future.exception(ex.asNonRetryable)
 
-    case t @ Throw(_) =>
-      Future.const(t)
+    // Everything else passes through
+    case t => Future.const(t)
   }
 
   /**
