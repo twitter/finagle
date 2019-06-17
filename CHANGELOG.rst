@@ -102,6 +102,12 @@ Breaking API Changes
   Additionally, the synthetic `Command.COM_NO_OP` has been removed, as due to the
   restructuring it was no longer necessary. ``PHAB_ID=D327554``
 
+Deprecations
+~~~~~~~~~~~~
+
+* finagle-http: Removed deprecated `response_size` in Finagle Http stats. This is a duplicate stat
+  of `response_payload_bytes`. PHAB_ID=D328254``
+
 19.5.1
 ------
 

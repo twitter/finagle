@@ -31,10 +31,9 @@ class StatsFilterTest extends FunSuite {
     assert(receiver.counters(Seq("status", "4XX")) == 1)
     assert(receiver.stats(Seq("time", "404")) == Seq(0.0))
     assert(receiver.stats(Seq("time", "4XX")) == Seq(0.0))
-    assert(receiver.stats(Seq("response_size")) == Seq(5.0))
   }
 
-  test("status and time counters and stats are memoised") {
+  test("status and time counters and stats are memoized") {
     val receiver = spy(new InMemoryStatsReceiver)
 
     val filter = new StatsFilter(receiver) andThen service
@@ -49,6 +48,5 @@ class StatsFilterTest extends FunSuite {
     verify(receiver).counter(Verbosity.Default, "status", "4XX")
     verify(receiver).stat(Verbosity.Default, "time", "404")
     verify(receiver).stat(Verbosity.Default, "time", "4XX")
-    verify(receiver).stat(Verbosity.Default, "response_size")
   }
 }

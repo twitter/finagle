@@ -24,7 +24,6 @@ object StatsFilter {
           new StatsFilter[Request](statsParam.statsReceiver.scope("http")).andThen(next)
       }
     }
-
 }
 
 /**
@@ -33,7 +32,6 @@ object StatsFilter {
  * Add counters:
  *    status.[code]
  *    status.[class]
- *    response_size (deprecated?)
  * And metrics:
  *    time.[code]
  *    time.[class]
@@ -43,7 +41,6 @@ class StatsFilter[REQUEST <: Request](stats: StatsReceiver)
 
   private[this] val statusReceiver = stats.scope("status")
   private[this] val timeReceiver = stats.scope("time")
-  private[this] val responseSizeStat = stats.stat("response_size")
 
   private[this] val counterCache: String => Counter =
     Memoize(statusReceiver.counter(_))
@@ -75,7 +72,5 @@ class StatsFilter[REQUEST <: Request](stats: StatsReceiver)
 
     statCache(statusCode).add(duration.inMilliseconds)
     statCache(statusClass).add(duration.inMilliseconds)
-
-    responseSizeStat.add(response.length)
   }
 }
