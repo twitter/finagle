@@ -24,6 +24,8 @@ import java.net.SocketAddress
 
 private[finagle] object Http2Transporter {
 
+  private val log = Logger.get()
+
   def apply(params: Stack.Params)(addr: SocketAddress): Transporter[Any, Any, TransportContext] = {
     // current http2 client implementation doesn't support
     // netty-style backpressure
@@ -78,7 +80,6 @@ private[finagle] object Http2Transporter {
       val tlsEnabled = config.isDefined
 
       if (tlsEnabled) {
-        val p = Promise[Unit]()
         val buffer = BufferingHandler.alpn()
         val connectionHandler = connectionHandlerBuilder
           .onActive { () =>
@@ -143,7 +144,7 @@ private[http2] class Http2Transporter(
       fallbackToHttp11WhileNegotiating = !alpnUpgrade
     ) { self =>
 
-  private[this] val log = Logger.get()
+  import Http2Transporter.log
 
   protected def attemptUpgrade(): (Future[Option[ClientSession]], Future[Transport[Any, Any]]) = {
     val clientSessionF = Promise[Option[ClientSession]]()
@@ -168,7 +169,7 @@ private[http2] class Http2Transporter(
                 ]
 
               val streamTransportFactory =
-                new StreamTransportFactory(contextCasted, trans.remoteAddress, params)
+                new StreamTransportFactory(contextCasted, trans.context.remoteAddress, params)
 
               clientSessionF.setValue(Some(streamTransportFactory))
               streamTransportFactory.newChildTransport()

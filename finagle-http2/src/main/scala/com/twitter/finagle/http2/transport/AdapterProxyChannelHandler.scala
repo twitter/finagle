@@ -34,7 +34,6 @@ private[http2] final class AdapterProxyChannelHandler(
   // this handler cannot be shared, and depends on netty's thread model to avoid
   // having to synchronize
   private[this] val map = HashMap[Int, CompletingChannel]()
-  private[this] val log = Logger.get()
   private[this] var cur = -1
 
   private[this] val channelSizeGauge = statsReceiver.addGauge("channels") {
@@ -58,7 +57,7 @@ private[http2] final class AdapterProxyChannelHandler(
     map.get(streamId) match {
       case Some(completingChannel) =>
         completingChannel.embedded
-      case None if (streamId > cur) =>
+      case None if streamId > cur =>
         cur = streamId
         val completingChannel = new CompletingChannel(setupEmbeddedChannel(ctx, streamId))
         map.put(streamId, completingChannel)
@@ -267,6 +266,8 @@ private[http2] final class AdapterProxyChannelHandler(
 
 private[http2] object AdapterProxyChannelHandler {
   val HandlerName = "aggregate"
+
+  private val log = Logger.get()
 
   /**
    * Creates a new promise that can be used instead of the `sink` promise, but

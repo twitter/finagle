@@ -11,6 +11,10 @@ import io.netty.util.ReferenceCountUtil
 import io.netty.util.concurrent.PromiseCombiner
 import scala.util.control.NonFatal
 
+private object RichHttpToHttp2ConnectionHandler {
+  private val log = Logger.get(getClass.getName)
+}
+
 /**
  * An extension of HttpToHttp2ConnectionHandler that handles streaming
  * correctly, by handling [[Message]] instead of [[HttpObject]] directly.
@@ -22,13 +26,13 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
   onActive: () => Unit)
     extends HttpToHttp2ConnectionHandler(dec, enc, initialSettings, false) {
 
+  import RichHttpToHttp2ConnectionHandler.log
+
   // We have a dedicated component that already validates all headers in our pipelines.
   // See com.twitter.finagle.netty4.http.handler.HeaderValidationHandler
   private[this] final val NoHeaderValidation = false
   private[this] final val NoPadding = 0
   private[this] final val NoExclusive = false
-
-  private[this] val log = Logger.get(getClass.getName)
 
   private[this] def writeHeaders(
     ctx: ChannelHandlerContext,

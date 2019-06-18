@@ -15,7 +15,7 @@ import io.netty.channel.{
 import io.netty.handler.codec.http2.Http2CodecUtil.connectionPrefaceBuf
 
 private[http2] object PriorKnowledgeHandler {
-  val logger = Logger.get()
+  private val logger = Logger.get()
 }
 
 /**

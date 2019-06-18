@@ -33,7 +33,6 @@ private[http2] abstract class Http2NegotiatingTransporter(
     with MultiplexTransporter {
 
   import Http2NegotiatingTransporter._
-  private[this] val log = Logger.get()
 
   private[this] val cachedConnection =
     new AtomicReference[Future[Option[ClientSession]]]()
@@ -189,6 +188,8 @@ private[http2] abstract class Http2NegotiatingTransporter(
 }
 
 private object Http2NegotiatingTransporter {
+  private val log = Logger.get()
+
   // Sentinel that we check early to avoid polling a promise forever
   private val UpgradeRejectedFuture: Future[Option[ClientSession]] = Future.None
 }

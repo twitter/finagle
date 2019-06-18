@@ -53,7 +53,6 @@ final private[http2] class StreamTransportFactory(
   import StreamMessage._
 
   private[this] val exec = underlying.context.executor
-  private[this] val log = Logger.get(getClass.getName)
 
   // A map of active streamIds -> StreamTransport. Concurrency issues are handled by the serial
   // executor.
@@ -595,6 +594,8 @@ final private[http2] class StreamTransportFactory(
 }
 
 private[http2] object StreamTransportFactory {
+  private val log = Logger.get(getClass.getName)
+
   val PingOutstandingFailure: Failure =
     Failure("A ping is already outstanding on this session.")
 
