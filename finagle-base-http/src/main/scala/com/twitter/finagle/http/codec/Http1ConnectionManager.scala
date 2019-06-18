@@ -91,7 +91,7 @@ private[finagle] class Http1ConnectionManager extends ConnectionManager {
     // either the `Transfer-Encoding: chunked` mechanism, the Content-Length header,
     // or the end of the connection, in that order.
     // See https://tools.ietf.org/html/rfc7230#section-3.3.3 for more details.
-    mayHaveContent(resp.status) && !resp.isChunked && resp.contentLength.isEmpty
+    mayHaveContent(resp.status) && !resp.isChunked && !resp.headerMap.contains(Fields.ContentLength)
   }
 
   // Some status codes are not permitted to have a message body.
