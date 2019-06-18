@@ -39,7 +39,7 @@ private[mysql] final class SecureHandshake(
 
   private[this] def writeSslConnectionRequest(handshakeInit: HandshakeInit): Future[Unit] = {
     val request = SslConnectionRequest(
-      settings.sslCalculatedClientCap,
+      settings.sslCalculatedClientCapabilities,
       settings.charset,
       settings.maxPacketSize.inBytes.toInt)
     transport.write(request.toPacket)
@@ -50,9 +50,9 @@ private[mysql] final class SecureHandshake(
       settings.username,
       settings.password,
       settings.database,
-      settings.sslCalculatedClientCap,
+      settings.sslCalculatedClientCapabilities,
       handshakeInit.salt,
-      handshakeInit.serverCap,
+      handshakeInit.serverCapabilities,
       settings.charset,
       settings.maxPacketSize.inBytes.toInt
     )

@@ -15,9 +15,9 @@ private[mysql] final class PlainHandshake(
       settings.username,
       settings.password,
       settings.database,
-      settings.calculatedClientCap,
+      settings.calculatedClientCapabilities,
       handshakeInit.salt,
-      handshakeInit.serverCap,
+      handshakeInit.serverCapabilities,
       settings.charset,
       settings.maxPacketSize.inBytes.toInt
     )

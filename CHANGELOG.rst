@@ -102,6 +102,10 @@ Breaking API Changes
   Additionally, the synthetic `Command.COM_NO_OP` has been removed, as due to the
   restructuring it was no longer necessary. ``PHAB_ID=D327554``
 
+* finagle-mysql: Uses of the abbreivation 'cap' have been renamed to the full
+  word: 'capabilities', including for the `baseCapabilities` of `Capability`.
+  ``PHAB_ID=D329603``
+
 Deprecations
 ~~~~~~~~~~~~
 

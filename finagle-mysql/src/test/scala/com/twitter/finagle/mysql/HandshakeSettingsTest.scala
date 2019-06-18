@@ -13,26 +13,26 @@ class HandshakeSettingsTest extends FunSuite {
   private val withFoundRows = initial + Capability.FoundRows
 
   test("HandshakeSettings adds FoundRows by default") {
-    val settings = HandshakeSettings(clientCap = initial)
-    assert(settings.calculatedClientCap == withFoundRows)
+    val settings = HandshakeSettings(clientCapabilities = initial)
+    assert(settings.calculatedClientCapabilities == withFoundRows)
   }
 
   test("HandshakeSettings returns initial when found rows is disabled") {
-    val settings = HandshakeSettings(clientCap = initial, enableFoundRows = false)
-    assert(settings.calculatedClientCap == initial)
+    val settings = HandshakeSettings(clientCapabilities = initial, enableFoundRows = false)
+    assert(settings.calculatedClientCapabilities == initial)
   }
 
   test("HandshakeSettings adds ConnectWithDB if database is defined") {
-    val settings = HandshakeSettings(clientCap = initial, database = Some("test"))
+    val settings = HandshakeSettings(clientCapabilities = initial, database = Some("test"))
     val withDB = withFoundRows + Capability.ConnectWithDB
-    assert(settings.calculatedClientCap == withDB)
+    assert(settings.calculatedClientCapabilities == withDB)
   }
 
   test("HandshakeSettings can calculate settings for SSL/TLS") {
-    val settings = HandshakeSettings(clientCap = initial, database = Some("test"))
+    val settings = HandshakeSettings(clientCapabilities = initial, database = Some("test"))
     val withDB = withFoundRows + Capability.ConnectWithDB
     val withSSL = withDB + Capability.SSL
-    assert(settings.sslCalculatedClientCap == withSSL)
+    assert(settings.sslCalculatedClientCapabilities == withSSL)
   }
 
   test("HandshakeSettings can read values from Stack params") {

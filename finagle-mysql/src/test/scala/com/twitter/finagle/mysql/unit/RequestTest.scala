@@ -18,20 +18,21 @@ class SimpleCommandRequestTest extends FunSuite {
 }
 
 class SslConnectionRequestTest extends FunSuite {
-  val clientCap: Capability = Capability.baseCap + Capability.ConnectWithDB + Capability.FoundRows
-  val sslClientCap: Capability = clientCap + Capability.SSL
+  val clientCapabilities: Capability =
+    Capability.baseCapabilities + Capability.ConnectWithDB + Capability.FoundRows
+  val sslClientCapabilities: Capability = clientCapabilities + Capability.SSL
   val charset: Short = MysqlCharset.Utf8_general_ci
   val maxPacketSize: Int = 12345678
 
   test("Fails without SSL capability") {
     intercept[IllegalArgumentException] {
-      SslConnectionRequest(clientCap, charset, maxPacketSize)
+      SslConnectionRequest(clientCapabilities, charset, maxPacketSize)
     }
   }
 
   // The remaining tests for `SslConnectionRequest` are very similar
   // to the tests for the first part of `HandshakeResponse`.
-  val req = SslConnectionRequest(sslClientCap, charset, maxPacketSize)
+  val req = SslConnectionRequest(sslClientCapabilities, charset, maxPacketSize)
   val br = MysqlBuf.reader(req.toPacket.body)
 
   test("encode capabilities") {
@@ -117,10 +118,10 @@ class PlainHandshakeResponseTest extends HandshakeResponseTest {
 
 class SecureHandshakeResponseTest extends HandshakeResponseTest {
 
-  override protected def serverCapabilities(): Capability = Capability.baseCap + Capability.SSL
+  override protected def serverCapabilities(): Capability =
+    Capability.baseCapabilities + Capability.SSL
   override protected def clientCapabilities(): Capability =
-    Capability.baseCap +
-      Capability.ConnectWithDB + Capability.FoundRows + Capability.SSL
+    Capability.baseCapabilities + Capability.ConnectWithDB + Capability.FoundRows + Capability.SSL
 
   protected def createHandshakeResponse(): HandshakeResponse =
     SecureHandshakeResponse(

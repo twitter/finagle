@@ -11,34 +11,45 @@ class CapabilityTest extends FunSuite {
   )
 
   test("contain capability") {
-    assertResult(true) { c.has(Capability.SSL) }
-    assertResult(false) { c.has(Capability.Compress) }
+    assert(c.has(Capability.SSL))
+    assert(!c.has(Capability.Compress))
   }
 
   test("contain all capabilities") {
-    assertResult(false) { c.hasAll(Capability.LongPassword, Capability.NoSchema) }
-    assertResult(true) {
+    assert(!c.hasAll(Capability.LongPassword, Capability.NoSchema))
+    assert(
       c.hasAll(
         Capability.LongPassword,
         Capability.SSL,
         Capability.Transactions,
-        Capability.MultiResults
-      )
-    }
+        Capability.MultiResults))
   }
 
   test("subtract capability") {
     val c2 = c - Capability.SSL
-    assertResult(false) { c2.has(Capability.SSL) }
+    assert(!c2.has(Capability.SSL))
   }
 
   test("add capability") {
     val c2 = c + Capability.LocalFiles + Capability.Compress
-    assertResult(true) {
-      c2.hasAll(
-        Capability.LocalFiles,
-        Capability.Compress
-      )
-    }
+    assert(c2.hasAll(Capability.LocalFiles, Capability.Compress))
+  }
+
+  test("set capability based on condition") {
+    val withSsl = c.set(true, Capability.SSL)
+    assert(withSsl.has(Capability.SSL))
+    val withoutSsl = c.set(false, Capability.SSL)
+    assert(!withoutSsl.has(Capability.SSL))
+
+    val withFoundRows = c.set(true, Capability.FoundRows)
+    assert(withFoundRows.has(Capability.FoundRows))
+    val withoutFoundRows = c.set(false, Capability.FoundRows)
+    assert(!withoutFoundRows.has(Capability.FoundRows))
+  }
+
+  test("toString lists capabilities") {
+    val capabilities = Capability(Capability.SSL + Capability.PluginAuth)
+    val expected = "Capability(526336: CLIENT_PLUGIN_AUTH, CLIENT_SSL)"
+    assert(capabilities.toString == expected)
   }
 }

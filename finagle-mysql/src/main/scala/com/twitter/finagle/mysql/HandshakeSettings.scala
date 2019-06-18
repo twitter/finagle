@@ -16,7 +16,7 @@ import com.twitter.util.StorageUnit
  *
  * @param database initial database to use for the session.
  *
- * @param clientCap The capability this client has.
+ * @param clientCapabilities The capabilities that this client has.
  *
  * @param charset default character established with the server.
  *
@@ -34,7 +34,7 @@ private[mysql] final case class HandshakeSettings(
   username: Option[String] = None,
   password: Option[String] = None,
   database: Option[String] = None,
-  clientCap: Capability = Capability.baseCap,
+  clientCapabilities: Capability = Capability.baseCapabilities,
   charset: Short = Utf8_general_ci,
   enableFoundRows: Boolean = true,
   maxPacketSize: StorageUnit = 1.gigabyte) {
@@ -43,29 +43,23 @@ private[mysql] final case class HandshakeSettings(
 
   /**
    * Optionally adds either or both the `ConnectWithDB` and
-   * `FoundRows` capabilities to the initial `clientCap`
+   * `FoundRows` capabilities to the initial `clientCapabilities`
    * based on the `database` and `enableFoundRows` values
    * passed in to the constructor.
    *
    * @note This method does not include the `SSL` capability
-   * by default. For one that does, see `sslCalculatedClientCap`.
+   * by default. For one that does, see `sslCalculatedClientCapabilities`.
    */
-  def calculatedClientCap: Capability = {
-    val capDb = if (database.isDefined) {
-      clientCap + Capability.ConnectWithDB
-    } else {
-      clientCap - Capability.ConnectWithDB
-    }
-
-    if (enableFoundRows) capDb + Capability.FoundRows
-    else capDb - Capability.FoundRows
-  }
+  def calculatedClientCapabilities: Capability =
+    clientCapabilities
+      .set(database.isDefined, Capability.ConnectWithDB)
+      .set(enableFoundRows, Capability.FoundRows)
 
   /**
-   * Adds the `SSL` capability to the `calculatedClientCap`.
+   * Adds the `SSL` capability to the `calculatedClientCapabilities`.
    */
-  def sslCalculatedClientCap: Capability =
-    calculatedClientCap + Capability.SSL
+  def sslCalculatedClientCapabilities: Capability =
+    calculatedClientCapabilities + Capability.SSL
 }
 
 private[mysql] object HandshakeSettings {

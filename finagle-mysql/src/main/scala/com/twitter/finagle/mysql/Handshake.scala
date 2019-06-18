@@ -49,7 +49,7 @@ private[mysql] abstract class Handshake(
   protected final val settings = HandshakeSettings(params)
 
   private[this] def isCompatibleVersion(init: HandshakeInit): Try[Boolean] =
-    if (init.serverCap.has(Capability.Protocol41)) Return.True
+    if (init.serverCapabilities.has(Capability.Protocol41)) Return.True
     else Throw(IncompatibleVersion)
 
   private[this] def isCompatibleCharset(init: HandshakeInit): Try[Boolean] =

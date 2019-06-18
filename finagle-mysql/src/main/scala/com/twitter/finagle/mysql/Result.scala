@@ -80,7 +80,7 @@ case class HandshakeInit(
   version: String,
   threadId: Int,
   salt: Array[Byte],
-  serverCap: Capability,
+  serverCapabilities: Capability,
   charset: Short,
   status: Short)
     extends Result

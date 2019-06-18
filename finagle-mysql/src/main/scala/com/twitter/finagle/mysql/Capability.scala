@@ -37,14 +37,15 @@ object Capability {
     "CLIENT_TRANSACTIONS" -> Transactions,
     "CLIENT_SECURE_CONNECTION" -> SecureConnection,
     "CLIENT_MULTI_STATEMENTS" -> MultiStatements,
-    "CLIENT_MULTI_RESULTS" -> MultiResults
+    "CLIENT_MULTI_RESULTS" -> MultiResults,
+    "CLIENT_PLUGIN_AUTH" -> PluginAuth
   )
 
   /**
    * Encapsulates this client's base
-   * capability.
+   * capabilities.
    */
-  val baseCap = Capability(
+  val baseCapabilities: Capability = Capability(
     Capability.LongFlag,
     Capability.Transactions,
     Capability.Protocol41,
@@ -58,23 +59,25 @@ object Capability {
   )
 
   def apply(flags: Int*): Capability = {
-    val m = flags.foldLeft(0)(_ | _)
-    Capability(m)
+    val mask = flags.foldLeft(0)(_ | _)
+    Capability(mask)
   }
 }
 
 case class Capability(mask: Int) {
-  def +(flag: Int) = Capability(mask, flag)
-  def -(flag: Int) = Capability(mask & ~flag)
-  def has(flag: Int) = hasAll(flag)
-  def hasAll(flags: Int*) =
-    flags map { f: Int =>
-      (f & mask) > 0
-    } reduceLeft { _ && _ }
-  override def toString() = {
-    val cs = Capability.CapabilityMap filter { t =>
-      has(t._2)
-    } map { _._1 } mkString (", ")
-    "Capability(" + mask + ": " + cs + ")"
+  def +(flag: Int): Capability = Capability(mask, flag)
+  def -(flag: Int): Capability = Capability(mask & ~flag)
+  def set(condition: Boolean, flag: Int): Capability =
+    if (condition) this + flag else this - flag
+  def has(flag: Int): Boolean = (flag & mask) > 0
+  def hasAll(flags: Int*): Boolean = flags.forall(has)
+  override def toString(): String = {
+    val capabilities = Capability.CapabilityMap
+      .filter(t => has(t._2))
+      .map(_._1)
+      .toSeq
+      .sorted
+      .mkString(", ")
+    s"Capability($mask: $capabilities)"
   }
 }

@@ -139,12 +139,12 @@ case class PrepareRequest(sqlStatement: String)
  * [[https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::SSLRequest]]
  */
 private[mysql] case class SslConnectionRequest(
-  clientCap: Capability,
+  clientCapabilities: Capability,
   charset: Short,
   maxPacketSize: Int)
     extends ProtocolMessage {
   require(
-    clientCap.has(Capability.SSL),
+    clientCapabilities.has(Capability.SSL),
     "Using SslConnectionRequest requires having the SSL capability")
 
   def seq: Short = 1
@@ -152,7 +152,7 @@ private[mysql] case class SslConnectionRequest(
   def toPacket: Packet = {
     val packetBodySize = 32
     val bw = MysqlBuf.writer(new Array[Byte](packetBodySize))
-    bw.writeIntLE(clientCap.mask)
+    bw.writeIntLE(clientCapabilities.mask)
     bw.writeIntLE(maxPacketSize)
     bw.writeByte(charset)
     bw.fill(23, 0.toByte) // 23 reserved bytes - zeroed out
@@ -170,9 +170,9 @@ private[mysql] sealed abstract class HandshakeResponse(
   username: Option[String],
   password: Option[String],
   database: Option[String],
-  clientCap: Capability,
+  clientCapabilities: Capability,
   salt: Array[Byte],
-  serverCap: Capability,
+  serverCapabilities: Capability,
   charset: Short,
   maxPacketSize: Int)
     extends ProtocolMessage {
@@ -188,13 +188,14 @@ private[mysql] sealed abstract class HandshakeResponse(
     val packetBodySize =
       username.getOrElse("").length + hashPassword.length + dbStrSize + fixedBodySize
     val bw = MysqlBuf.writer(new Array[Byte](packetBodySize))
-    bw.writeIntLE(clientCap.mask)
+    bw.writeIntLE(clientCapabilities.mask)
     bw.writeIntLE(maxPacketSize)
     bw.writeByte(charset)
     bw.fill(23, 0.toByte) // 23 reserved bytes - zeroed out
     bw.writeNullTerminatedString(username.getOrElse(""))
     bw.writeLengthCodedBytes(hashPassword)
-    if (clientCap.has(Capability.ConnectWithDB) && serverCap.has(Capability.ConnectWithDB))
+    if (clientCapabilities.has(Capability.ConnectWithDB) &&
+      serverCapabilities.has(Capability.ConnectWithDB))
       bw.writeNullTerminatedString(database.get)
 
     Packet(seq, bw.owned())
