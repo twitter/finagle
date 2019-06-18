@@ -31,6 +31,7 @@ scala_library(
 junit_tests(
     sources = rglobs("*.scala"),
     compiler_option_sets = {"fatal_warnings"},
+    tags = ["known-to-fail-jira:CSL-8343"],
     dependencies = [
         ":pushsession-utils",
         ":stringprotocol",
