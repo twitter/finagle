@@ -78,13 +78,13 @@ object FailureAccrualPolicy {
   // workloads, this approach will better deal with randomly distributed failures.
   // Note that if an endpoint begins to fail all requests, FailureAccrual will
   // trigger in (window) * (1 - threshold) seconds - 6 seconds for these values.
-  val DefaultSuccessRateThreshold = 0.8
-  val DefaultSuccessRateWindow = 30.seconds
+  val DefaultSuccessRateThreshold: Double = 0.8
+  val DefaultSuccessRateWindow: Duration = 30.seconds
 
   private[this] val Success = 1
   private[this] val Failure = 0
 
-  protected[this] val constantBackoff = Backoff.const(300.seconds)
+  protected[this] val constantBackoff: Stream[Duration] = Backoff.const(300.seconds)
 
   /**
    * A policy based on an exponentially-weighted moving average success rate
@@ -129,11 +129,11 @@ object FailureAccrualPolicy {
 
     private[this] val successRate = new Ema(window)
 
-    override def recordSuccess(): Unit = synchronized {
+    def recordSuccess(): Unit = synchronized {
       successRate.update(emaStamp, Success)
     }
 
-    override def markDeadOnFailure(): Option[Duration] = synchronized {
+    def markDeadOnFailure(): Option[Duration] = synchronized {
       val emaStampForRequest = emaStamp
       val sr = successRate.update(emaStampForRequest, Failure)
       if (canRemove(emaStampForRequest, sr)) {
@@ -145,7 +145,7 @@ object FailureAccrualPolicy {
       }
     }
 
-    override def revived: Unit = synchronized {
+    def revived(): Unit = synchronized {
       nextMarkDeadFor = freshMarkDeadFor
       resetEmaCounter()
       successRate.reset()
@@ -207,18 +207,18 @@ object FailureAccrualPolicy {
     new SuccessRateFailureAccrualPolicy(requiredSuccessRate, window, markDeadFor) {
       private[this] var totalRequests = 0L
 
-      override protected def emaStamp: Long = {
+      protected def emaStamp: Long = {
         totalRequests += 1
         totalRequests
       }
 
-      override protected def resetEmaCounter(): Unit = {
+      protected def resetEmaCounter(): Unit = {
         totalRequests = 0
       }
 
       // Since this FailureAccrualPolicy is based on number of requests, there are always sufficient
       // requests
-      override protected def sufficientRequests: Boolean = true
+      protected def sufficientRequests: Boolean = true
     }
   }
 
@@ -250,6 +250,23 @@ object FailureAccrualPolicy {
     window: Duration,
     markDeadFor: Stream[Duration],
     minRequestThreshold: Int
+  ): FailureAccrualPolicy =
+    successRateWithinDuration(
+      requiredSuccessRate,
+      window,
+      markDeadFor,
+      minRequestThreshold,
+      Stopwatch.systemMillis)
+
+  /**
+   * Package protected for testing.
+   */
+  private[liveness] def successRateWithinDuration(
+    requiredSuccessRate: Double,
+    window: Duration,
+    markDeadFor: Stream[Duration],
+    minRequestThreshold: Int,
+    nowMillis: () => Long
   ): FailureAccrualPolicy = {
     assert(window.isFinite, s"window must be finite: $window")
 
@@ -260,17 +277,17 @@ object FailureAccrualPolicy {
       private[this] val requestCounter: WindowedAdder =
         WindowedAdder(window.inMilliseconds, 5, Stopwatch.systemMillis)
 
-      override protected def sufficientRequests: Boolean = requestCounter.sum >= minRequestThreshold
+      protected def sufficientRequests: Boolean = requestCounter.sum >= minRequestThreshold
 
-      // Time elapsed since this instance was built, or since the endpoint was revived.
-      private[this] var timeElapsed: Stopwatch.Elapsed = Stopwatch.start()
+      // when the instance was built or the endpoint was revived.
+      private[this] var startMillis: Long = nowMillis()
 
-      override protected def emaStamp: Long = {
-        timeElapsed.apply().inMilliseconds
+      protected def emaStamp: Long = {
+        nowMillis() - startMillis
       }
 
-      override protected def resetEmaCounter(): Unit = {
-        timeElapsed = Stopwatch.start()
+      protected def resetEmaCounter(): Unit = {
+        startMillis = nowMillis()
         requestCounter.reset()
       }
 

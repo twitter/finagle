@@ -24,12 +24,17 @@ class StatsFilterTest extends FunSuite {
       def apply(request: String): Future[String] = promise
     }
 
-    (promise, receiver, statsFilter andThen service)
+    (promise, receiver, statsFilter.andThen(service))
   }
 
   test("latency stat defaults to milliseconds") {
     val sr = new InMemoryStatsReceiver()
-    val filter = new StatsFilter[String, String](sr)
+    val filter = new StatsFilter[String, String](
+      sr,
+      ResponseClassifier.Default,
+      StatsFilter.DefaultExceptions,
+      TimeUnit.MILLISECONDS,
+      Stopwatch.timeMillis)
     val promise = new Promise[String]
     val svc = filter.andThen(new Service[String, String] {
       def apply(request: String): Promise[String] = promise
@@ -46,17 +51,45 @@ class StatsFilterTest extends FunSuite {
   test("latency stat in microseconds") {
     val sr = new InMemoryStatsReceiver()
     val filter =
-      new StatsFilter[String, String](sr, StatsFilter.DefaultExceptions, TimeUnit.MICROSECONDS)
+      new StatsFilter[String, String](
+        sr,
+        ResponseClassifier.Default,
+        StatsFilter.DefaultExceptions,
+        TimeUnit.MICROSECONDS,
+        Stopwatch.timeMicros)
     val promise = new Promise[String]
-    val svc = filter andThen new Service[String, String] {
+    val svc = filter.andThen(new Service[String, String] {
       def apply(request: String): Promise[String] = promise
-    }
+    })
 
     Time.withCurrentTimeFrozen { tc =>
       svc("1")
       tc.advance(100.millis)
       promise.setValue("done")
       assert(sr.stat("request_latency_us")() == Seq(100.millis.inMicroseconds))
+    }
+  }
+
+  test("latency stat in seconds") {
+    val sr = new InMemoryStatsReceiver()
+    val timeSeconds: () => Long = () => Time.now.inSeconds
+    val filter =
+      new StatsFilter[String, String](
+        sr,
+        ResponseClassifier.Default,
+        StatsFilter.DefaultExceptions,
+        TimeUnit.SECONDS,
+        timeSeconds)
+    val promise = new Promise[String]
+    val svc = filter.andThen(new Service[String, String] {
+      def apply(request: String): Promise[String] = promise
+    })
+
+    Time.withCurrentTimeFrozen { tc =>
+      svc("1")
+      tc.advance(22.seconds)
+      promise.setValue("done")
+      assert(sr.stat("request_latency_secs")() == Seq(22))
     }
   }
 
@@ -167,7 +200,7 @@ class StatsFilterTest extends FunSuite {
     val chain = new Service[String, String] {
       def apply(request: String): Future[String] =
         statsFilter.apply(request, new Service[String, String] {
-          def apply(req: String) = verifyingFilter.apply(req, service)
+          def apply(req: String): Future[String] = verifyingFilter.apply(req, service)
         })
     }
 

@@ -90,11 +90,22 @@ object StatsFilter {
       new StatsFilter[Req, Rep](statsReceiver, responseClassifier, exceptionStatsHandler, timeUnit)
   }
 
+  private def nowForTimeUnit(timeUnit: TimeUnit): () => Long = timeUnit match {
+    case TimeUnit.NANOSECONDS => Stopwatch.systemNanos
+    case TimeUnit.MICROSECONDS => Stopwatch.systemMicros
+    case TimeUnit.MILLISECONDS => Stopwatch.systemMillis
+    case _ =>
+      () =>
+        timeUnit.convert(System.nanoTime(), TimeUnit.NANOSECONDS)
+  }
+
 }
 
 /**
  * A `StatsFilter` reports request statistics including number of requests,
  * number successful and request latency to the given [[StatsReceiver]].
+ *
+ * This constructor is exposed for testing purposes.
  *
  * @param responseClassifier used to determine when a response
  * is successful or not.
@@ -104,32 +115,71 @@ object StatsFilter {
  * but other values are valid. The choice of this changes the name of the stat
  * attached to the given [[StatsReceiver]]. For the common units,
  * it will be "request_latency_ms".
- *
- * @note The innocent bystander may find the semantics with respect
- * to backup requests a bit puzzling; they are entangled in legacy.
- * "requests" counts the total number of requests: subtracting
- * "success" from this produces the failure count. However, this
- * doesn't allow for "shadow" requests to be accounted for in
- * "requests". This is why we don't modify metrics for backup
- * request failures.
  */
-class StatsFilter[Req, Rep](
+class StatsFilter[Req, Rep] private[service] (
   statsReceiver: StatsReceiver,
   responseClassifier: ResponseClassifier,
   exceptionStatsHandler: ExceptionStatsHandler,
-  timeUnit: TimeUnit)
+  timeUnit: TimeUnit,
+  now: () => Long)
     extends SimpleFilter[Req, Rep] {
   import StatsFilter.SyntheticException
 
+  /**
+   * A `StatsFilter` reports request statistics including number of requests,
+   * number successful, and request latency to the given [[StatsReceiver]].
+   *
+   * This constructor is exposed for testing purposes.
+   *
+   * @param responseClassifier used to determine when a response
+   * is successful or not.
+   *
+   * @param timeUnit this controls what granularity is used for
+   * measuring latency.  The default is milliseconds,
+   * but other values are valid. The choice of this changes the name of the stat
+   * attached to the given [[StatsReceiver]]. For the common units,
+   * it will be "request_latency_ms".
+   */
+  def this(
+    statsReceiver: StatsReceiver,
+    responseClassifier: ResponseClassifier,
+    exceptionStatsHandler: ExceptionStatsHandler,
+    timeUnit: TimeUnit
+  ) =
+    this(
+      statsReceiver,
+      responseClassifier,
+      exceptionStatsHandler,
+      timeUnit,
+      StatsFilter.nowForTimeUnit(timeUnit))
+
+  /**
+   * A `StatsFilter` reports request statistics including number of requests,
+   * number successful and request latency to the given [[StatsReceiver]].
+   *
+   * @param timeUnit this controls what granularity is used for
+   * measuring latency.  The default is milliseconds,
+   * but other values are valid. The choice of this changes the name of the stat
+   * attached to the given [[StatsReceiver]]. For the common units,
+   * it will be "request_latency_ms".
+   */
   def this(
     statsReceiver: StatsReceiver,
     exceptionStatsHandler: ExceptionStatsHandler,
     timeUnit: TimeUnit
   ) = this(statsReceiver, ResponseClassifier.Default, exceptionStatsHandler, timeUnit)
 
+  /**
+   * A `StatsFilter` reports request statistics including number of requests,
+   * number successful and request latency to the given [[StatsReceiver]].
+   */
   def this(statsReceiver: StatsReceiver, exceptionStatsHandler: ExceptionStatsHandler) =
     this(statsReceiver, exceptionStatsHandler, TimeUnit.MILLISECONDS)
 
+  /**
+   * A `StatsFilter` reports request statistics including number of requests,
+   * number successful and request latency to the given [[StatsReceiver]].
+   */
   def this(statsReceiver: StatsReceiver) = this(statsReceiver, StatsFilter.DefaultExceptions)
 
   private[this] def latencyStatSuffix: String = {
@@ -157,7 +207,7 @@ class StatsFilter[Req, Rep](
   }
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
-    val elapsed = Stopwatch.start()
+    val start = now()
 
     outstandingRequestCount.increment()
 
@@ -178,7 +228,7 @@ class StatsFilter[Req, Rep](
         ) match {
           case ResponseClass.Ignorable => // Do nothing.
           case ResponseClass.Failed(_) =>
-            latencyStat.add(elapsed().inUnit(timeUnit))
+            latencyStat.add(now() - start)
             response match {
               case Throw(e) =>
                 exceptionStatsHandler.record(statsReceiver, e)
@@ -187,7 +237,7 @@ class StatsFilter[Req, Rep](
             }
           case ResponseClass.Successful(_) =>
             successCount.incr()
-            latencyStat.add(elapsed().inUnit(timeUnit))
+            latencyStat.add(now() - start)
         }
       }
     }

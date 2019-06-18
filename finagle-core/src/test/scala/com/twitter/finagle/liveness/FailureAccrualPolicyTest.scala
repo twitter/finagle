@@ -3,17 +3,14 @@ package com.twitter.finagle.liveness
 import com.twitter.conversions.DurationOps._
 import com.twitter.util._
 import com.twitter.finagle.service._
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
 
-  val constantBackoff = Backoff.const(5.seconds)
-  val expBackoff = Backoff.equalJittered(5.seconds, 60.seconds)
-  val expBackoffList = expBackoff take 6
+  private[this] val constantBackoff = Backoff.const(5.seconds)
+  private[this] val expBackoff = Backoff.equalJittered(5.seconds, 60.seconds)
+  private[this] val expBackoffList = expBackoff take 6
 
   test("Consecutive failures policy: fail on nth attempt") {
     val policy = FailureAccrualPolicy.consecutiveFailures(3, constantBackoff)
@@ -141,7 +138,12 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
     val successRateDuration = 30.seconds
     Time.withCurrentTimeFrozen { timeControl =>
       val policy =
-        FailureAccrualPolicy.successRateWithinDuration(1, successRateDuration, expBackoffList, 0)
+        FailureAccrualPolicy.successRateWithinDuration(
+          1,
+          successRateDuration,
+          expBackoffList,
+          0,
+          Stopwatch.timeMillis)
 
       assert(policy.markDeadOnFailure() == None)
 
@@ -162,7 +164,12 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
     val successRateDuration = 30.seconds
     Time.withCurrentTimeFrozen { timeControl =>
       val policy =
-        FailureAccrualPolicy.successRateWithinDuration(1, successRateDuration, expBackoffList, 0)
+        FailureAccrualPolicy.successRateWithinDuration(
+          1,
+          successRateDuration,
+          expBackoffList,
+          0,
+          Stopwatch.timeMillis)
 
       timeControl.advance(successRateDuration)
       for (i <- 0 until expBackoffList.length)
@@ -184,7 +191,12 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
     val successRateDuration = 100.seconds
     Time.withCurrentTimeFrozen { timeControl =>
       val policy =
-        FailureAccrualPolicy.successRateWithinDuration(0.5, successRateDuration, constantBackoff, 0)
+        FailureAccrualPolicy.successRateWithinDuration(
+          0.5,
+          successRateDuration,
+          constantBackoff,
+          0,
+          Stopwatch.timeMillis)
 
       for (i <- 0 until 100) {
         timeControl.advance(1.second)
@@ -208,7 +220,12 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
     val successRateDuration = 30.seconds
     Time.withCurrentTimeFrozen { timeControl =>
       val policy =
-        FailureAccrualPolicy.successRateWithinDuration(1, successRateDuration, expBackoffList, 5)
+        FailureAccrualPolicy.successRateWithinDuration(
+          1,
+          successRateDuration,
+          expBackoffList,
+          5,
+          Stopwatch.timeMillis)
 
       timeControl.advance(30.seconds)
 
@@ -228,7 +245,8 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
           requiredSuccessRate = 0.8,
           window = 30.seconds,
           markDeadFor = expBackoff,
-          minRequestThreshold = 0
+          minRequestThreshold = 0,
+          Stopwatch.timeMillis
         )
       )
 
