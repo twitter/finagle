@@ -516,29 +516,6 @@ case class SslVerificationFailedException(ex: Option[Throwable], remoteAddr: Opt
 }
 
 /**
- * Indicates that an error occurred while an SSL handshake was being performed
- * with a server at a given `remoteAddress`.
- */
-case class SslHandshakeException(ex: Option[Throwable], remoteAddr: Option[SocketAddress])
-    extends SslException(ex, remoteAddr) {
-  def this(underlying: Throwable, remoteAddress: SocketAddress) =
-    this(Option(underlying), Option(remoteAddress))
-  def this() = this(None, None)
-
-  /**
-   * The cause of this exception, or `null` if there is no cause.
-   */
-  def underlying: Throwable = ex.orNull
-}
-
-/**
- * Indicates that the certificate for a given session was invalidated.
- */
-case class SslHostVerificationException(principal: String) extends SslException(None, None) {
-  def this() = this(null)
-}
-
-/**
  * Indicates that connecting to a given `remoteAddress` was refused.
  */
 case class ConnectionRefusedException(remoteAddr: Option[SocketAddress])

@@ -97,6 +97,10 @@ Bug Fixes
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+* finagle-core: The exceptions `c.t.f.SslHandshakeException` and
+  `c.t.f.SslHostVerificationException` were no longer used and have
+  been removed. ``PHAB_ID=D330138``
+
 * finagle-mysql: The structure of `c.t.f.mysql.Request` has changed. It is now based on
   a higher level `c.t.f.mysql.ProtocolMessage` and the `cmd` field must contain a value.
   Additionally, the synthetic `Command.COM_NO_OP` has been removed, as due to the
