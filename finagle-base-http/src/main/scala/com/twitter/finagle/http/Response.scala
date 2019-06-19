@@ -61,14 +61,6 @@ abstract class Response private extends Message {
     this
   }
 
-  /** Get the status code of this response */
-  @deprecated("2017-02-17", "Use [[statusCode]] instead")
-  final def getStatusCode(): Int = statusCode
-
-  /** Set the status code of this response */
-  @deprecated("2017-02-17", "Use [[statusCode(Int)]] instead")
-  final def setStatusCode(value: Int): Unit = { statusCode = value }
-
   override def toString =
     "Response(\"" + version + " " + status + "\")"
 }
