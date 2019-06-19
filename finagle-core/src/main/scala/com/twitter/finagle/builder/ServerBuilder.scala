@@ -638,16 +638,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
     ]
   ): ListeningServer = build(ServiceFactory.const(service))
 
-  @deprecated("Used for ABI compat", "5.0.1")
-  final def build(
-    service: Service[Req, Rep],
-    THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: ThisConfig =:= FullySpecifiedConfig
-  ): ListeningServer =
-    build(
-      ServiceFactory.const(service),
-      THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION
-    )
-
   /**
    * Construct the Server, given the provided Service factory.
    */

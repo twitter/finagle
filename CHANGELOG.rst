@@ -7,6 +7,13 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: A long deprecated `c.t.f.builder.ServerBuilder#build` method, which
+  takes a `Service[Req, Rep]` and a not fully specified config as params, has been
+  removed. ``PHAB_ID=D330348``
+
 19.6.0
 ------
 
