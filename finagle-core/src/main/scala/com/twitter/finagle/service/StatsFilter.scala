@@ -28,14 +28,32 @@ object StatsFilter {
   }
 
   /**
+   * Allows customizing how `now` is computed.
+   * Exposed for testing purposes.
+   *
+   * Defaults to `None` which uses the System clock for timings.
+   */
+  private[finagle] case class Now(private val nowOpt: Option[() => Long]) {
+    def nowOrDefault(timeUnit: TimeUnit): () => Long = nowOpt match {
+      case Some(n) => n
+      case None => nowForTimeUnit(timeUnit)
+    }
+  }
+
+  private[finagle] object Now {
+    implicit val param: Stack.Param[Now] = Stack.Param(Now(None))
+  }
+
+  /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.StatsFilter]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module4[
+    new Stack.Module5[
       param.Stats,
       param.ExceptionStatsHandler,
       param.ResponseClassifier,
       Param,
+      Now,
       ServiceFactory[Req, Rep]
     ] {
       val role: Stack.Role = StatsFilter.role
@@ -45,15 +63,21 @@ object StatsFilter {
         _exceptions: param.ExceptionStatsHandler,
         _classifier: param.ResponseClassifier,
         _param: Param,
+        now: Now,
         next: ServiceFactory[Req, Rep]
       ): ServiceFactory[Req, Rep] = {
         val param.Stats(statsReceiver) = _stats
-        val param.ExceptionStatsHandler(handler) = _exceptions
-        val classifier = _classifier.responseClassifier
         if (statsReceiver.isNull)
           next
-        else
-          new StatsFilter(statsReceiver, classifier, handler, _param.unit).andThen(next)
+        else {
+          new StatsFilter(
+            statsReceiver,
+            _classifier.responseClassifier,
+            _exceptions.categorizer,
+            _param.unit,
+            now.nowOrDefault(_param.unit)
+          ).andThen(next)
+        }
       }
     }
 
@@ -85,9 +109,28 @@ object StatsFilter {
     responseClassifier: ResponseClassifier,
     exceptionStatsHandler: ExceptionStatsHandler,
     timeUnit: TimeUnit
+  ): TypeAgnostic =
+    typeAgnostic(
+      statsReceiver,
+      responseClassifier,
+      exceptionStatsHandler,
+      timeUnit,
+      nowForTimeUnit(timeUnit))
+
+  private[finagle] def typeAgnostic(
+    statsReceiver: StatsReceiver,
+    responseClassifier: ResponseClassifier,
+    exceptionStatsHandler: ExceptionStatsHandler,
+    timeUnit: TimeUnit,
+    now: () => Long
   ): TypeAgnostic = new TypeAgnostic {
     def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] =
-      new StatsFilter[Req, Rep](statsReceiver, responseClassifier, exceptionStatsHandler, timeUnit)
+      new StatsFilter[Req, Rep](
+        statsReceiver,
+        responseClassifier,
+        exceptionStatsHandler,
+        timeUnit,
+        now)
   }
 
   private def nowForTimeUnit(timeUnit: TimeUnit): () => Long = timeUnit match {

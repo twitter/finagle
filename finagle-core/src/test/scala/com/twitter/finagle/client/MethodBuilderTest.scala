@@ -166,6 +166,7 @@ class MethodBuilderTest
         param.Label(clientLabel) +
         param.Timer(timer) +
         param.Stats(stats) +
+        StatsFilter.Now(Some(Stopwatch.timeMillis)) +
         Retries.Budget(RetryBudget.Infinite)
 
     val perReqTimeout = 50.milliseconds

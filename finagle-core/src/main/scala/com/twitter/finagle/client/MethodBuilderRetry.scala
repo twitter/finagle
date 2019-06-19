@@ -46,13 +46,16 @@ private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (mb: MethodB
     }
   }
 
-  private[client] def logicalStatsFilter(stats: StatsReceiver): Filter.TypeAgnostic =
+  private[client] def logicalStatsFilter(stats: StatsReceiver): Filter.TypeAgnostic = {
+    val timeUnit = mb.params[StatsFilter.Param].unit
     StatsFilter.typeAgnostic(
       new DenylistStatsReceiver(stats.scope(LogicalScope), LogicalStatsDenylistFn),
       mb.config.retry.responseClassifier,
       mb.params[param.ExceptionStatsHandler].categorizer,
-      mb.params[StatsFilter.Param].unit
+      timeUnit,
+      mb.params[StatsFilter.Now].nowOrDefault(timeUnit)
     )
+  }
 
   private[client] def logFailuresFilter(
     clientName: String,
