@@ -1,0 +1,251 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Threading Model &#8212; Finagle 19.6.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '19.6.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="Finagle 19.6.0 documentation" href="index.html" />
+    <link rel="next" title="Contexts" href="Contexts.html" />
+    <link rel="prev" title="Clients" href="Clients.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-39101739-4', 'twitter.github.io');
+    ga('send', 'pageview');
+
+  </script>
+
+  </head>
+  <body role="document">
+  
+  
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="Contexts.html" title="Contexts"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Clients.html" title="Clients"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="threading-model">
+<h1>Threading Model<a class="headerlink" href="#threading-model" title="Permalink to this headline">¶</a></h1>
+<p>Similar to other non-blocking event-driven frameworks, Finagle leverages a fixed size thread pool
+(I/O worker pool) shared between all clients and servers running within the same JVM process. While
+unlocking tremendous scalability potential (less resources are spent to process more events), this
+approach comes at the expense of services&#8217; responsiveness, being notably sensitive to blocking
+operations. Put this way, when blocked, I/O threads can&#8217;t process the incoming events (new requests,
+new connections) thereby degrading the system&#8217;s overall velocity.</p>
+<p>Somewhat conservative defaults for Finagle&#8217;s worker pool size only exaggerate the problem: there are
+few (two per each logical CPU core with the floor of 8 workers) threads in the pool and blocking
+even one of them may affect multiple clients and servers. While it&#8217;s recommended sticking to these
+defaults (numerous experiments showed they are good), it&#8217;s possible to override the worker pool size
+with a command line flag.</p>
+<p>The following sets the worker pool size to 24.</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">com</span><span class="o">.</span><span class="n">twitter</span><span class="o">.</span><span class="n">finagle</span><span class="o">.</span><span class="n">netty4</span><span class="o">.</span><span class="n">numWorkers</span><span class="k">=</span><span class="mi">24</span>
+</pre></div>
+</div>
+<div class="section" id="i-o-thread-affinity">
+<h2>I/O Thread Affinity<a class="headerlink" href="#i-o-thread-affinity" title="Permalink to this headline">¶</a></h2>
+<p>As evident by the flag name, Finagle&#8217;s I/O threads are allocated and managed within its underlying
+networking library, <a class="reference external" href="https://netty.io/">Netty</a>. Built on top of native non-blocking I/O APIs (<a class="reference external" href="https://en.wikipedia.org/wiki/Epoll">epoll</a>, <a class="reference external" href="https://en.wikipedia.org/wiki/Kqueue">kqueue</a>), Netty
+dictates an affinity between I/O threads and the list of opened file descriptors (network sockets)
+they are watching over. Once a network connection is established, it&#8217;s assigned a serving I/O thread
+that can never be reassigned. This is why blocking even a single I/O thread halts progress in
+multiple independent connections (clients, servers).</p>
+</div>
+<div class="section" id="i-o-threads-and-user-code">
+<h2>I/O Threads and User Code<a class="headerlink" href="#i-o-threads-and-user-code" title="Permalink to this headline">¶</a></h2>
+<p>Although not immediately obvious, all users&#8217; code that&#8217;s triggered by receiving a message is run on
+Finagle I/O threads, unless explicitly executed somewhere else (e.g., application&#8217;s own thread pool, a
+<a class="reference internal" href="Futures.html#future-pools"><span class="std std-ref">FuturePool</span></a>). This includes server&#8217;s <cite>Service.apply</cite> and all <cite>Future</cite> callbacks
+but excludes application startup code (executed in the main thread) and the work triggered by a
+timeout expiring (executed in the timer thread).</p>
+<p>This design is on par with the asynchronous nature of <a class="reference internal" href="developers/Futures.html"><span class="doc">Twitter Futures</span></a>,
+which are purely a coordination mechanism that does not describe any execution environment
+(callbacks are run in whatever thread satisfies a <cite>Promise</cite>). Given it&#8217;s typically I/O threads that
+satisfy promises (pending future RPC responses), they are also on the hook for running promises&#8217;
+callbacks. Sticking with the caller thread reduces context switches at the expense of making I/O
+threads vulnerable to users blocking (or just slow) code.</p>
+</div>
+<div class="section" id="blocking-examples">
+<h2>Blocking Examples<a class="headerlink" href="#blocking-examples" title="Permalink to this headline">¶</a></h2>
+<p>Not only blocking I/O (e.g., calling a JDBC driver, using the JDK&#8217;s File API) can block Finagle
+threads. CPU intensive computations are equally dangerous: keeping I/O threads busy processing
+application-level work means they underserve critical RPC events.</p>
+<p>Consider a CPU-bound server application running an algorithm with profoundly bad asymptotic
+complexity. Scala&#8217;s <cite>permutations</cite> operation can serve a good example with its O(n!) worst case
+running time. As implemented below, such a server would have a hard time staying responsive as its
+I/O threads would be constantly busy (blocked) calculating permutations as opposed to serving
+networking events.</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Service</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+
+<span class="k">class</span> <span class="nc">MyHttpService</span> <span class="k">extends</span> <span class="nc">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">Request</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+    <span class="k">val</span> <span class="n">rep</span> <span class="k">=</span> <span class="nc">Response</span><span class="o">()</span>
+    <span class="n">rep</span><span class="o">.</span><span class="n">contentString</span> <span class="k">=</span> <span class="n">req</span><span class="o">.</span><span class="n">contentString</span><span class="o">.</span><span class="n">permutations</span><span class="o">.</span><span class="n">mkString</span><span class="o">(</span><span class="s">&quot;\n&quot;</span><span class="o">)</span>
+
+    <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="n">rep</span><span class="o">)</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>A comparably bad thing can happen to clients too. Running <cite>permutations</cite> as part of any callback
+(<cite>flatMap</cite>, <cite>onSuccess</cite>, <cite>onFailure</cite>, etc)  on a <cite>Future</cite> returned from a client has the exact same
+effect - it saturates an I/O thread.</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Service</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
+
+<span class="k">def</span> <span class="n">process</span><span class="o">(</span><span class="n">client</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">])</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span>
+  <span class="n">client</span><span class="o">(</span><span class="nc">Request</span><span class="o">()).</span><span class="n">map</span><span class="o">(</span><span class="n">rep</span> <span class="k">=&gt;</span> <span class="n">rep</span><span class="o">.</span><span class="n">contentString</span><span class="o">.</span><span class="n">permutations</span><span class="o">.</span><span class="n">mkString</span><span class="o">(</span><span class="s">&quot;\n&quot;</span><span class="o">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="identifying-blocking">
+<h2>Identifying Blocking<a class="headerlink" href="#identifying-blocking" title="Permalink to this headline">¶</a></h2>
+<p>General-purpose JVM profilers and even <a class="reference external" href="https://docs.oracle.com/javase/7/docs/technotes/tools/share/jstack.html">jstack</a> can be quite effective in identifying bottlenecks on
+the request path (within I/O threads). There are, however, two metrics that can provide a valuable
+insight with no need for external tools.</p>
+<ul class="simple">
+<li><cite>blocking_ms</cite> - a counter of total time spent in <cite>Await.result</cite> and <cite>Await.ready</cite> blocking an I/O
+thread. Refer to <a class="reference external" href="https://finagle.github.io/blog/2016/09/01/block-party/">this blog post</a>  on
+what to do when this counter is not zero.</li>
+<li><cite>pending_io_events</cite> - a gauge of the number of pending I/O events enqueued in all event loops
+serving this client or server. When this metric climbs up, it indicates I/O queues are clogged
+and I/O threads overloaded.</li>
+</ul>
+<p>Whereas getting rid of <cite>Await</cite> on the request path is generally advised, there is no guidance that
+could be provided with regards to what is a healthy number of pending I/O events. Clearly, striving
+for &#8220;zero&#8221; or &#8220;near zero&#8221; might be a reasonable strategy if taken not as the gold standard but a
+friendly recommendation. Depending on the workload, even double-digit values could be acceptable for
+some applications.</p>
+</div>
+<div class="section" id="offloading">
+<h2>Offloading<a class="headerlink" href="#offloading" title="Permalink to this headline">¶</a></h2>
+<p>Shifting users&#8217; work off of I/O threads can go a long way in improving an application&#8217;s
+responsiveness, minding the increase in context switches as well as associated cost of managing
+additional JVM threads. However, run your own tests to determine if offloading is good for your
+service given its traffic profile and resource allocation.</p>
+<p><a class="reference internal" href="Futures.html#future-pools"><span class="std std-ref">FuturePools</span></a> provide a convenient API to wrap any expression with a <cite>Future</cite>
+that&#8217;s scheduled in the underlying <a class="reference external" href="https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ExecutorService.html">ExecutorService</a>. They come in handy for offloading the I/O
+threads in Finagle while preserving the first-class support to Twitter Futures (interrupts, locals).</p>
+<p>Offloading can be done on per-method (endpoint) basis:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.</span><span class="o">{</span><span class="nc">Future</span><span class="o">,</span> <span class="nc">FuturePool</span><span class="o">}</span>
+
+<span class="k">def</span> <span class="n">offloadedPermutations</span><span class="o">(</span><span class="n">s</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">pool</span><span class="k">:</span> <span class="kt">FuturePool</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span>
+  <span class="n">pool</span><span class="o">(</span><span class="n">s</span><span class="o">.</span><span class="n">permutations</span><span class="o">.</span><span class="n">mkString</span><span class="o">(</span><span class="s">&quot;\n&quot;</span><span class="o">))</span>
+</pre></div>
+</div>
+<p>As well as per entire client or server:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.util.FuturePool</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+
+<span class="k">val</span> <span class="n">server</span><span class="k">:</span> <span class="kt">Http.Server</span> <span class="o">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">server</span>
+  <span class="o">.</span><span class="n">withExecutionOffloaded</span><span class="o">(</span><span class="nc">FuturePool</span><span class="o">.</span><span class="n">unboundedPool</span><span class="o">)</span>
+
+<span class="k">val</span> <span class="n">client</span><span class="k">:</span> <span class="kt">Http.Client</span> <span class="o">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
+  <span class="o">.</span><span class="n">withExecutionOffloaded</span><span class="o">(</span><span class="nc">FuturePool</span><span class="o">.</span><span class="n">unboundedPool</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
+  <img class="logo" src="_static/logo_small.png" alt="Logo"/>
+</a></p><a href="index.html"><h3>Finagle</h3></a>
+<p>
+  Finagle is a network stack for distributed systems.
+</p>
+
+<h3>Useful Links</h3>
+<ul>
+  <li><a href="https://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="https://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+</ul>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Threading Model</a><ul>
+<li><a class="reference internal" href="#i-o-thread-affinity">I/O Thread Affinity</a></li>
+<li><a class="reference internal" href="#i-o-threads-and-user-code">I/O Threads and User Code</a></li>
+<li><a class="reference internal" href="#blocking-examples">Blocking Examples</a></li>
+<li><a class="reference internal" href="#identifying-blocking">Identifying Blocking</a></li>
+<li><a class="reference internal" href="#offloading">Offloading</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="Clients.html" title="previous chapter">Clients</a></li>
+      <li>Next: <a href="Contexts.html" title="next chapter">Contexts</a></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Search the contents of this site.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">&copy; Copyright 2019 Twitter, Inc.</div>
+  
+  </body>
+</html>

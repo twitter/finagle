@@ -268,6 +268,71 @@ These metrics correspond to :ref:`feature toggles <toggles>`.
   A gauge summarizing the current state of a `ToggleMap` which may be useful
   for comparing state across a cluster or over time.
 
+Streaming
+---------
+
+These metrics are added by
+:finagle-http-src:`StreamingStatsFilter <com/twitter/finagle/http/filter/StreamingStatsFilter.scala>`
+and can be enabled by setting `isChunked` as true on Http request and response.
+
+**stream/request/closed**
+  A counter of the number of closed request streams.
+
+**stream/request/duration_ms**
+  A histogram of the duration of the lifetime of request streams, from the time a stream is
+  initialized until it's closed, in milliseconds.
+
+**stream/request/failures**
+  A counter of the number of times any failure has been observed in the middle of a request stream.
+
+**stream/request/failures/<exception_name>**
+  A counter of the number of times a specific exception has been thrown in the middle of a request
+  stream.
+
+**stream/request/opened**
+  A counter of the number of opened request streams.
+
+**stream/request/pending**
+  A gauge of the number of pending request streams.
+
+**stream/response/closed**
+  A counter of the number of closed response streams.
+
+**stream/response/duration_ms**
+  A histogram of the duration of the lifetime of response streams, from the time a stream is
+  initialized until it's closed, in milliseconds.
+
+**stream/response/failures**
+  A counter of the number of times any failure has been observed in the middle of a response stream.
+
+**stream/response/failures/<exception_name>**
+  A counter of the number of times a specific exception has been thrown in the middle of a response
+  stream.
+
+**stream/response/opened**
+  A counter of the number of opened response streams.
+
+**stream/response/pending**
+  A gauge of the number of pending response streams.
+
+You could derive the streaming success rate of:
+  - the total number of streams
+    number of successful streams divided by number of total streams
+  - closed streams
+    number of successful streams divided by number of closed streams
+Here we assume a success stream as a stream terminated without an exception or a stream that has not
+terminated yet.
+
+Take request stream as an example, assuming your counters are not "latched", which means that their
+values are monotonically increasing:
+
+  # Success rate of total number of streams:
+  1 - (rated_counter(stream/request/failures)
+       / (gauge(stream/request/pending) + rated_counter(stream/request/closed)))
+
+  # Success rate of number of closed streams:
+  1 - (rated_counter(stream/request/failures) / rated_counter(stream/request/closed))
+
 HTTP
 ----
 .. _http_stats:
@@ -282,10 +347,12 @@ These stats pertain to the HTTP protocol.
   A counter of the number of non-retryable HTTP 503 responses the HTTP server returns. Those
   responses are not automatically retried.
 
-**stream/failures/<exception_name>**
+**Deprecated: stream/failures/<exception_name>**
+  The replacement is `stream/request/failures/<exception_name>` and `stream/response/failures/<exception_name>`.
   A counter of the number of times a specific exception has been thrown in the middle of a stream.
 
-**stream/failures**
+**Deprecated: stream/failures**
+  The replacement is `stream/request/failures` and `stream/response/failures`.
   A counter of the number of times any failure has been observed in the middle of a stream.
 
 **http/cookie/samesite_failures** `verbosity:debug`
@@ -302,14 +369,6 @@ These stats pertain to the HTTP protocol.
 These metrics are added by
 :finagle-http-src:`StatsFilter <com/twitter/finagle/http/filter/StatsFilter.scala>` and can be enabled by
 using `.withHttpStats` on `Http.Client` and `Http.Server`.
-
-**request_stream_duration_ms**
-  A histogram of the duration of the lifetime of request streams, from the time a stream is initialized
-  until it's closed, in milliseconds.
-
-**response_stream_duration_ms**
-  A histogram of the duration of the lifetime of response streams, from the time a stream is initialized
-  until it's closed, in milliseconds.
 
 **status/<statusCode>**
   A counter of the number of responses received, or returned for servers, that had this

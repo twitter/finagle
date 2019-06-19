@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &#8212; Finagle 19.5.1 documentation</title>
+    <title>Metrics &#8212; Finagle 19.6.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.5.1',
+        VERSION:     '19.6.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.5.1 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.6.0 documentation" href="index.html" />
     <link rel="next" title="Flags" href="Flags.html" />
     <link rel="prev" title="Protocols" href="Protocols.html" />
    
@@ -334,7 +334,8 @@ on any instance running Finagle with Netty 4.</p>
 <dd>A gauge of the total number of TINY <em>direct deallocations</em>
 (i.e., less than 512 bytes).</dd>
 <dt><strong>pooling/used*</strong> <cite>verbosity:debug</cite></dt>
-<dd>A gauge of the number of bytes used for <em>direct allocations</em>.</dd>
+<dd>A gauge of the number of bytes used for <em>direct allocations</em> (this includes buffers in the
+thread-local caches).</dd>
 <dt><strong>reference_leaks</strong></dt>
 <dd>A counter of detected reference leaks. See longer note on
 <cite>com.twitter.finagle.netty4.trackReferenceLeaks</cite> for details.</dd>
@@ -1121,6 +1122,62 @@ include direct and mapped, though the names are subject to change.</dd>
 for comparing state across a cluster or over time.</dd>
 </dl>
 </div>
+<div class="section" id="streaming">
+<h2>Streaming<a class="headerlink" href="#streaming" title="Permalink to this headline">¶</a></h2>
+<p>These metrics are added by
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-http/src/main/scala/com/twitter/finagle/http/filter/StreamingStatsFilter.scala">StreamingStatsFilter</a>
+and can be enabled by setting <cite>isChunked</cite> as true on Http request and response.</p>
+<dl class="docutils">
+<dt><strong>stream/request/closed</strong></dt>
+<dd>A counter of the number of closed request streams.</dd>
+<dt><strong>stream/request/duration_ms</strong></dt>
+<dd>A histogram of the duration of the lifetime of request streams, from the time a stream is
+initialized until it&#8217;s closed, in milliseconds.</dd>
+<dt><strong>stream/request/failures</strong></dt>
+<dd>A counter of the number of times any failure has been observed in the middle of a request stream.</dd>
+<dt><strong>stream/request/failures/&lt;exception_name&gt;</strong></dt>
+<dd>A counter of the number of times a specific exception has been thrown in the middle of a request
+stream.</dd>
+<dt><strong>stream/request/opened</strong></dt>
+<dd>A counter of the number of opened request streams.</dd>
+<dt><strong>stream/request/pending</strong></dt>
+<dd>A gauge of the number of pending request streams.</dd>
+<dt><strong>stream/response/closed</strong></dt>
+<dd>A counter of the number of closed response streams.</dd>
+<dt><strong>stream/response/duration_ms</strong></dt>
+<dd>A histogram of the duration of the lifetime of response streams, from the time a stream is
+initialized until it&#8217;s closed, in milliseconds.</dd>
+<dt><strong>stream/response/failures</strong></dt>
+<dd>A counter of the number of times any failure has been observed in the middle of a response stream.</dd>
+<dt><strong>stream/response/failures/&lt;exception_name&gt;</strong></dt>
+<dd>A counter of the number of times a specific exception has been thrown in the middle of a response
+stream.</dd>
+<dt><strong>stream/response/opened</strong></dt>
+<dd>A counter of the number of opened response streams.</dd>
+<dt><strong>stream/response/pending</strong></dt>
+<dd>A gauge of the number of pending response streams.</dd>
+<dt>You could derive the streaming success rate of:</dt>
+<dd><ul class="first last simple">
+<li>the total number of streams
+number of successful streams divided by number of total streams</li>
+<li>closed streams
+number of successful streams divided by number of closed streams</li>
+</ul>
+</dd>
+</dl>
+<p>Here we assume a success stream as a stream terminated without an exception or a stream that has not
+terminated yet.</p>
+<p>Take request stream as an example, assuming your counters are not &#8220;latched&#8221;, which means that their
+values are monotonically increasing:</p>
+<blockquote>
+<div><p># Success rate of total number of streams:
+1 - (rated_counter(stream/request/failures)</p>
+<blockquote>
+<div>/ (gauge(stream/request/pending) + rated_counter(stream/request/closed)))</div></blockquote>
+<p># Success rate of number of closed streams:
+1 - (rated_counter(stream/request/failures) / rated_counter(stream/request/closed))</p>
+</div></blockquote>
+</div>
 <div class="section" id="http">
 <h2>HTTP<a class="headerlink" href="#http" title="Permalink to this headline">¶</a></h2>
 <p id="http-stats">These stats pertain to the HTTP protocol.</p>
@@ -1131,10 +1188,12 @@ responses are automatically retried by Finagle HTTP client.</dd>
 <dt><strong>nonretryable_nacks</strong></dt>
 <dd>A counter of the number of non-retryable HTTP 503 responses the HTTP server returns. Those
 responses are not automatically retried.</dd>
-<dt><strong>stream/failures/&lt;exception_name&gt;</strong></dt>
-<dd>A counter of the number of times a specific exception has been thrown in the middle of a stream.</dd>
-<dt><strong>stream/failures</strong></dt>
-<dd>A counter of the number of times any failure has been observed in the middle of a stream.</dd>
+<dt><strong>Deprecated: stream/failures/&lt;exception_name&gt;</strong></dt>
+<dd>The replacement is <cite>stream/request/failures/&lt;exception_name&gt;</cite> and <cite>stream/response/failures/&lt;exception_name&gt;</cite>.
+A counter of the number of times a specific exception has been thrown in the middle of a stream.</dd>
+<dt><strong>Deprecated: stream/failures</strong></dt>
+<dd>The replacement is <cite>stream/request/failures</cite> and <cite>stream/response/failures</cite>.
+A counter of the number of times any failure has been observed in the middle of a stream.</dd>
 <dt><strong>http/cookie/samesite_failures</strong> <cite>verbosity:debug</cite></dt>
 <dd>A counter of the number of failed attempts to decode the SameSite Cookie attribute.</dd>
 <dt><strong>rejected_invalid_header_names</strong></dt>
@@ -1148,12 +1207,6 @@ header value.</dd>
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-http/src/main/scala/com/twitter/finagle/http/filter/StatsFilter.scala">StatsFilter</a> and can be enabled by
 using <cite>.withHttpStats</cite> on <cite>Http.Client</cite> and <cite>Http.Server</cite>.</p>
 <dl class="docutils">
-<dt><strong>request_stream_duration_ms</strong></dt>
-<dd>A histogram of the duration of the lifetime of request streams, from the time a stream is initialized
-until it&#8217;s closed, in milliseconds.</dd>
-<dt><strong>response_stream_duration_ms</strong></dt>
-<dd>A histogram of the duration of the lifetime of response streams, from the time a stream is initialized
-until it&#8217;s closed, in milliseconds.</dd>
 <dt><strong>status/&lt;statusCode&gt;</strong></dt>
 <dd>A counter of the number of responses received, or returned for servers, that had this
 statusCode.</dd>
@@ -1430,6 +1483,7 @@ when constructing a client <cite>ServicePerEndpoint</cite>. Similar metrics as s
 </li>
 <li><a class="reference internal" href="#jvm">JVM</a></li>
 <li><a class="reference internal" href="#toggles">Toggles</a></li>
+<li><a class="reference internal" href="#streaming">Streaming</a></li>
 <li><a class="reference internal" href="#http">HTTP</a></li>
 <li><a class="reference internal" href="#http2">HTTP2</a></li>
 <li><a class="reference internal" href="#memcached">Memcached</a></li>

@@ -233,7 +233,7 @@ resources for using Finagle.
                         <a href="RequeueFilter$.html" title="">RequeueFilter</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="ResponseClass$.html" title=""></a>
-                        <a class="trait" href="ResponseClass.html" title="A classification of the result of a request/response pair."></a>
+                        <a class="class" href="ResponseClass.html" title="A classification of the result of a request/response pair."></a>
                         <a href="ResponseClass.html" title="A classification of the result of a request/response pair.">ResponseClass</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -330,14 +330,8 @@ resources for using Finagle.
 
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A <code>StatsFilter</code> reports request statistics including number of requests,
-number successful and request latency to the given <span class="extype" name="StatsReceiver">StatsReceiver</span>.
-</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>The innocent bystander may find the semantics with respect
-to backup requests a bit puzzling; they are entangled in legacy.
-&quot;requests&quot; counts the total number of requests: subtracting
-&quot;success&quot; from this produces the failure count. However, this
-doesn't allow for &quot;shadow&quot; requests to be accounted for in
-&quot;requests&quot;. This is why we don't modify metrics for backup
-request failures.</p></span></dd></dl><div class="toggleContainer block">
+number successful and request latency to the given <span class="extype" name="StatsReceiver">StatsReceiver</span>.</p><p>This constructor is exposed for testing purposes.
+</p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -402,7 +396,8 @@ request failures.</p></span></dd></dl><div class="toggleContainer block">
         <span class="name">StatsFilter</span><span class="params">(<span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>)</span>
       </span>
       
-      
+      <p class="shortcomment cmt">A <code>StatsFilter</code> reports request statistics including number of requests,
+number successful and request latency to the given <span class="extype" name="StatsReceiver">StatsReceiver</span>.</p>
     </li><li name="com.twitter.finagle.service.StatsFilter#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="&lt;init&gt;(statsReceiver:com.twitter.finagle.stats.StatsReceiver,exceptionStatsHandler:com.twitter.finagle.stats.ExceptionStatsHandler):com.twitter.finagle.service.StatsFilter[Req,Rep]"></a><a id="&lt;init&gt;:StatsFilter[Req,Rep]"></a>
       <span class="permalink">
@@ -418,8 +413,9 @@ request failures.</p></span></dd></dl><div class="toggleContainer block">
         <span class="name">StatsFilter</span><span class="params">(<span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>, <span name="exceptionStatsHandler">exceptionStatsHandler: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/ExceptionStatsHandler.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">ExceptionStatsHandler</a></span>)</span>
       </span>
       
-      
-    </li><li name="com.twitter.finagle.service.StatsFilter#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">A <code>StatsFilter</code> reports request statistics including number of requests,
+number successful and request latency to the given <span class="extype" name="StatsReceiver">StatsReceiver</span>.</p>
+    </li><li name="com.twitter.finagle.service.StatsFilter#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="&lt;init&gt;(statsReceiver:com.twitter.finagle.stats.StatsReceiver,exceptionStatsHandler:com.twitter.finagle.stats.ExceptionStatsHandler,timeUnit:java.util.concurrent.TimeUnit):com.twitter.finagle.service.StatsFilter[Req,Rep]"></a><a id="&lt;init&gt;:StatsFilter[Req,Rep]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/service/StatsFilter.html#&lt;init&gt;(statsReceiver:com.twitter.finagle.stats.StatsReceiver,exceptionStatsHandler:com.twitter.finagle.stats.ExceptionStatsHandler,timeUnit:java.util.concurrent.TimeUnit):com.twitter.finagle.service.StatsFilter[Req,Rep]" title="Permalink">
@@ -434,7 +430,14 @@ request failures.</p></span></dd></dl><div class="toggleContainer block">
         <span class="name">StatsFilter</span><span class="params">(<span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>, <span name="exceptionStatsHandler">exceptionStatsHandler: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/ExceptionStatsHandler.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">ExceptionStatsHandler</a></span>, <span name="timeUnit">timeUnit: <span class="extype" name="java.util.concurrent.TimeUnit">TimeUnit</span></span>)</span>
       </span>
       
-      
+      <p class="shortcomment cmt">A <code>StatsFilter</code> reports request statistics including number of requests,
+number successful and request latency to the given <span class="extype" name="StatsReceiver">StatsReceiver</span>.</p><div class="fullcomment"><div class="comment cmt"><p>A <code>StatsFilter</code> reports request statistics including number of requests,
+number successful and request latency to the given <span class="extype" name="StatsReceiver">StatsReceiver</span>.
+</p></div><dl class="paramcmts block"><dt class="param">timeUnit</dt><dd class="cmt"><p>this controls what granularity is used for
+measuring latency.  The default is milliseconds,
+but other values are valid. The choice of this changes the name of the stat
+attached to the given <span class="extype" name="StatsReceiver">StatsReceiver</span>. For the common units,
+it will be &quot;request_latency_ms&quot;.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.service.StatsFilter#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="&lt;init&gt;(statsReceiver:com.twitter.finagle.stats.StatsReceiver,responseClassifier:com.twitter.finagle.service.ResponseClassifier,exceptionStatsHandler:com.twitter.finagle.stats.ExceptionStatsHandler,timeUnit:java.util.concurrent.TimeUnit):com.twitter.finagle.service.StatsFilter[Req,Rep]"></a><a id="&lt;init&gt;:StatsFilter[Req,Rep]"></a>
       <span class="permalink">
@@ -450,7 +453,10 @@ request failures.</p></span></dd></dl><div class="toggleContainer block">
         <span class="name">StatsFilter</span><span class="params">(<span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver.html#com.twitter.finagle.stats.StatsReceiver" class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a></span>, <span name="responseClassifier">responseClassifier: <a href="index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a></span>, <span name="exceptionStatsHandler">exceptionStatsHandler: <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/ExceptionStatsHandler.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">ExceptionStatsHandler</a></span>, <span name="timeUnit">timeUnit: <span class="extype" name="java.util.concurrent.TimeUnit">TimeUnit</span></span>)</span>
       </span>
       
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">responseClassifier</dt><dd class="cmt"><p>used to determine when a response
+      <p class="shortcomment cmt">A <code>StatsFilter</code> reports request statistics including number of requests,
+number successful, and request latency to the given <span class="extype" name="StatsReceiver">StatsReceiver</span>.</p><div class="fullcomment"><div class="comment cmt"><p>A <code>StatsFilter</code> reports request statistics including number of requests,
+number successful, and request latency to the given <span class="extype" name="StatsReceiver">StatsReceiver</span>.</p><p>This constructor is exposed for testing purposes.
+</p></div><dl class="paramcmts block"><dt class="param">responseClassifier</dt><dd class="cmt"><p>used to determine when a response
 is successful or not.</p></dd><dt class="param">timeUnit</dt><dd class="cmt"><p>this controls what granularity is used for
 measuring latency.  The default is milliseconds,
 but other values are valid. The choice of this changes the name of the stat

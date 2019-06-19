@@ -545,6 +545,10 @@ resources for using Finagle.
                         <a href="Move.html" title="">Move</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
+                        <a class="trait" href="MoveCommand.html" title=""></a>
+                        <a href="MoveCommand.html" title="">MoveCommand</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
                         <a class="object" href="Multi$.html" title=""></a>
                         <a href="Multi$.html" title="">Multi</a>
                       </li><li class="current-entities indented5">
@@ -639,6 +643,10 @@ resources for using Finagle.
                         <span class="separator"></span>
                         <a class="class" href="RPop.html" title=""></a>
                         <a href="RPop.html" title="">RPop</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="RPopLPush.html" title=""></a>
+                        <a href="RPopLPush.html" title="">RPopLPush</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
                         <a class="class" href="RPush.html" title=""></a>
@@ -1043,6 +1051,14 @@ resources for using Finagle.
                         <span class="separator"></span>
                         <a class="class" href="ZMember.html" title=""></a>
                         <a href="ZMember.html" title="">ZMember</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="ZPopMax.html" title=""></a>
+                        <a href="ZPopMax.html" title="">ZPopMax</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="ZPopMin.html" title=""></a>
+                        <a href="ZPopMin.html" title="">ZPopMin</a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="ZRange$.html" title=""></a>
                         <a class="class" href="ZRange.html" title=""></a>
@@ -2407,6 +2423,22 @@ resources for using Finagle.
       </span>
       
       
+    </li><li name="com.twitter.finagle.redis.protocol.MoveCommand" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="MoveCommandextendsCommand"></a><a id="MoveCommand:MoveCommand"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/redis/protocol/index.html#MoveCommandextendsCommand" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="MoveCommand.html"><span class="name">MoveCommand</span></a><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a></span>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.redis.protocol.MultiLineReply" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="MultiLineReplyextendsReply"></a><a id="MultiLineReply:MultiLineReply"></a>
       <span class="permalink">
@@ -2692,6 +2724,22 @@ resources for using Finagle.
       </span>
       <span class="symbol">
         <a title="" href="RPop.html"><span class="name">RPop</span></a><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.redis.protocol.RPopLPush" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RPopLPushextendsCommandwithMoveCommandwithProductwithSerializable"></a><a id="RPopLPush:RPopLPush"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/redis/protocol/index.html#RPopLPushextendsCommandwithMoveCommandwithProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="RPopLPush.html"><span class="name">RPopLPush</span></a><span class="params">(<span name="source">source: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>, <span name="destination">destination: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="MoveCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.MoveCommand">MoveCommand</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -4166,6 +4214,38 @@ See https://redis.io/commands/zrangebyscore for more info on different intervals
       </span>
       <span class="symbol">
         <a title="" href="ZMember.html"><span class="name">ZMember</span></a><span class="params">(<span name="score">score: <a href="http://www.scala-lang.org/api/2.12.8/scala/Double.html#scala.Double" class="extype" name="scala.Double">Double</a></span>, <span name="member">member: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.redis.protocol.ZPopMax" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ZPopMaxextendsCommandwithProductwithSerializable"></a><a id="ZPopMax:ZPopMax"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/redis/protocol/index.html#ZPopMaxextendsCommandwithProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ZPopMax.html"><span class="name">ZPopMax</span></a><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>, <span name="count">count: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.lang.Long">Long</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.redis.protocol.ZPopMin" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ZPopMinextendsCommandwithProductwithSerializable"></a><a id="ZPopMin:ZPopMin"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/redis/protocol/index.html#ZPopMinextendsCommandwithProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ZPopMin.html"><span class="name">ZPopMin</span></a><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>, <span name="count">count: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.lang.Long">Long</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       

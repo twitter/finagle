@@ -1048,6 +1048,52 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
 <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/ExceptionStatsHandler.html" class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">exception stats handler</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given
 <a href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/ExceptionStatsHandler.html" class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">exception stats handler</a>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a> → <a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.param.CommonParams#withExecutionOffloaded" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withExecutionOffloaded(executor:java.util.concurrent.ExecutorService):A"></a><a id="withExecutionOffloaded(ExecutorService):Server"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Memcached$$Server.html#withExecutionOffloaded(executor:java.util.concurrent.ExecutorService):A" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withExecutionOffloaded</span><span class="params">(<span name="executor">executor: <span class="extype" name="java.util.concurrent.ExecutorService">ExecutorService</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Configures this server or client to shift user-defined computation (<a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a>
+callbacks and transformations) off of IO threads into a given <span class="extype" name="ExecutorService">ExecutorService</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client to shift user-defined computation (<a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a>
+callbacks and transformations) off of IO threads into a given <span class="extype" name="ExecutorService">ExecutorService</span>.</p><p>By default, Finagle executes all futures in the IO threads, minimizing context switches. Given
+there is usually a fixed number of IO threads shared across a JVM process, it's critically
+important to ensure they aren't being blocked by the application code, affecting system's
+responsiveness. Shifting application-level work onto a dedicated <span class="extype" name="FuturePool">FuturePool</span> or
+<span class="extype" name="ExecutorService">ExecutorService</span> offloads IO threads, which may improve throughput in CPU-bound systems.</p><p>As always, run your own tests before enabling this feature.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.param.CommonParams#withExecutionOffloaded" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withExecutionOffloaded(pool:com.twitter.util.FuturePool):A"></a><a id="withExecutionOffloaded(FuturePool):Server"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Memcached$$Server.html#withExecutionOffloaded(pool:com.twitter.util.FuturePool):A" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withExecutionOffloaded</span><span class="params">(<span name="pool">pool: <a href="https://twitter.github.io/util/docs/com/twitter/util/FuturePool.html#com.twitter.util.FuturePool" class="extype" name="com.twitter.util.FuturePool">FuturePool</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Configures this server or client to shift user-defined computation (<a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a>
+callbacks and transformations) off of IO threads into a given <span class="extype" name="FuturePool">FuturePool</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client to shift user-defined computation (<a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html" class="extype" name="com.twitter.util.Future">com.twitter.util.Future</a>
+callbacks and transformations) off of IO threads into a given <span class="extype" name="FuturePool">FuturePool</span>.</p><p>By default, Finagle executes all futures in the IO threads, minimizing context switches. Given
+there is usually a fixed number of IO threads shared across a JVM process, it's critically
+important to ensure they aren't being blocked by the application code, affecting system's
+responsiveness. Shifting application-level work onto a dedicated <span class="extype" name="FuturePool">FuturePool</span> or
+<span class="extype" name="ExecutorService">ExecutorService</span> offloads IO threads, which may improve throughput in CPU-bound systems.</p><p>As always, run your own tests before enabling this feature.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Memcached.Server#withLabel" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withLabel(label:String):com.twitter.finagle.Memcached.Server"></a><a id="withLabel(String):Server"></a>
       <span class="permalink">

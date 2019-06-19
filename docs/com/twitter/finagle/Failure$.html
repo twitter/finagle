@@ -1252,14 +1252,6 @@ generator.
                         <a href="SslException.html" title="Indicates that an SSL/TLS exception occurred.">SslException</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
-                        <a class="class" href="SslHandshakeException.html" title="Indicates that an error occurred while an SSL handshake was being performed with a server at a given remoteAddress."></a>
-                        <a href="SslHandshakeException.html" title="Indicates that an error occurred while an SSL handshake was being performed with a server at a given remoteAddress.">SslHandshakeException</a>
-                      </li><li class="current-entities indented3">
-                        <span class="separator"></span>
-                        <a class="class" href="SslHostVerificationException.html" title="Indicates that the certificate for a given session was invalidated."></a>
-                        <a href="SslHostVerificationException.html" title="Indicates that the certificate for a given session was invalidated.">SslHostVerificationException</a>
-                      </li><li class="current-entities indented3">
-                        <span class="separator"></span>
                         <a class="class" href="SslVerificationFailedException.html" title="Indicates that an error occurred while SslClientSessionVerification was being performed, or the server disconnected from the client in a way that indicates that there was high probability that the server failed to verify the client's certificate."></a>
                         <a href="SslVerificationFailedException.html" title="Indicates that an error occurred while SslClientSessionVerification was being performed, or the server disconnected from the client in a way that indicates that there was high probability that the server failed to verify the client's certificate.">SslVerificationFailedException</a>
                       </li><li class="current-entities indented3">
@@ -1783,7 +1775,7 @@ it returns a new failure with the given flags.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.Failure#ignorable" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.Failure#ignorable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ignorable(why:String):com.twitter.finagle.Failure"></a><a id="ignorable(String):Failure"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Failure$.html#ignorable(why:String):com.twitter.finagle.Failure" title="Permalink">
@@ -1798,7 +1790,10 @@ it returns a new failure with the given flags.
         <span class="name">ignorable</span><span class="params">(<span name="why">why: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
       </span>
       
-      <p class="shortcomment cmt">Create a new <span class="extype" name="FailureFlags.Ignorable">FailureFlags.Ignorable</span> failure with the given message.</p>
+      <p class="shortcomment cmt">Create a new <span class="extype" name="FailureFlags.Ignorable">FailureFlags.Ignorable</span> failure with the given message.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new <span class="extype" name="FailureFlags.Ignorable">FailureFlags.Ignorable</span> failure with the given message.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p><code>Ignorable</code> implies <code>NonRetryable</code>, but does not set the flag
+      explicitly. See <a href="service/index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">com.twitter.finagle.service.ResponseClassifier</a>
+      for how <code>Ignorable</code> is used.</p></span></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Concurrent Programming with Futures &#8212; Finagle 19.5.1 documentation</title>
+    <title>Concurrent Programming with Futures &#8212; Finagle 19.6.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.5.1',
+        VERSION:     '19.6.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.5.1 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.6.0 documentation" href="index.html" />
     <link rel="next" title="Services &amp; Filters" href="ServicesAndFilters.html" />
     <link rel="prev" title="Quickstart" href="Quickstart.html" />
    
@@ -92,7 +92,7 @@ of course it&#8217;s possible for blocking operations to be combined safely
 with Futures as we&#8217;ll see.</p>
 <div class="section" id="blocking-or-synchronous-work">
 <h2>Blocking or synchronous work<a class="headerlink" href="#blocking-or-synchronous-work" title="Permalink to this headline">¶</a></h2>
-<p>When you have work that is blocking, say I/O or a library
+<p id="future-pools">When you have work that is blocking, say I/O or a library
 not written in an asynchronous style, you should use a
 <code class="docutils literal"><span class="pre">com.twitter.util.FuturePool</span></code>. FuturePool manages a pool of
 threads that don&#8217;t do any other work, which means that blocking

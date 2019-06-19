@@ -233,7 +233,7 @@ resources for using Finagle.
                         <a href="RequeueFilter$.html" title="">RequeueFilter</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="" title=""></a>
-                        <a class="trait" href="ResponseClass.html" title="A classification of the result of a request/response pair."></a>
+                        <a class="class" href="ResponseClass.html" title="A classification of the result of a request/response pair."></a>
                         <a href="ResponseClass.html" title="A classification of the result of a request/response pair.">ResponseClass</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -306,15 +306,15 @@ resources for using Finagle.
           <div id="content">
             <body class="object value">
       <div id="definition">
-        <a href="ResponseClass.html" title="See companion trait"><div class="big-circle object-companion-trait">o</div></a>
+        <a href="ResponseClass.html" title="See companion class"><div class="big-circle object-companion-class">o</div></a>
         <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="index.html" class="extype" name="com.twitter.finagle.service">service</a></p>
-        <h1><a href="ResponseClass.html" title="See companion trait">ResponseClass</a><span class="permalink">
+        <h1><a href="ResponseClass.html" title="See companion class">ResponseClass</a><span class="permalink">
       <a href="../../../../com/twitter/finagle/service/ResponseClass$.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
         <h3><span class="morelinks"><div>
-            Companion <a href="ResponseClass.html" title="See companion trait">trait ResponseClass</a>
+            Companion <a href="ResponseClass.html" title="See companion class">class ResponseClass</a>
           </div></span></h3>
       </div>
 
@@ -474,6 +474,23 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.service.ResponseClass#Ignored" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Ignored:com.twitter.finagle.service.ResponseClass"></a><a id="Ignored:ResponseClass"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/ResponseClass$.html#Ignored:com.twitter.finagle.service.ResponseClass" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Ignored</span><span class="result">: <a href="ResponseClass.html" class="extype" name="com.twitter.finagle.service.ResponseClass">ResponseClass</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">An ignored request/response.</p><div class="fullcomment"><div class="comment cmt"><p>An ignored request/response.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><code>ResponseClasses.IGNORED</code> for a Java friendly API.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.service.ResponseClass#NonRetryableFailure" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="NonRetryableFailure:com.twitter.finagle.service.ResponseClass.Failed"></a><a id="NonRetryableFailure:Failed"></a>
       <span class="permalink">
@@ -827,6 +844,25 @@ resources for using Finagle.
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.service.ResponseClass.Ignorable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Ignorable"></a><a id="Ignorable:Ignorable"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/ResponseClass$.html#Ignorable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Represents a request/response that has failed, but the failure is ignorable." href="ResponseClass$$Ignorable$.html"><span class="name">Ignorable</span></a><span class="result"> extends <a href="ResponseClass.html" class="extype" name="com.twitter.finagle.service.ResponseClass">ResponseClass</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Represents a request/response that has failed, but the failure is
+ignorable.</p><div class="fullcomment"><div class="comment cmt"><p>Represents a request/response that has failed, but the failure is
+ignorable. Ignorables are never safe to retry.
+</p></div></div>
     </li>
               </ol>
             </div>

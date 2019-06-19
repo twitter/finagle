@@ -2178,6 +2178,27 @@ to patterns) for the specified <code>channels</code>.
 non-list element, an exception will be thrown.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p><code>Some</code> of the value of the popped element, or <code>None</code> if the list is
         empty.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd>ListCommands</dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.ListCommands#rPopLPush" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="rPopLPush(source:com.twitter.io.Buf,dest:com.twitter.io.Buf):com.twitter.util.Future[Option[com.twitter.io.Buf]]"></a><a id="rPopLPush(Buf,Buf):Future[Option[Buf]]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/redis/NormalCommands.html#rPopLPush(source:com.twitter.io.Buf,dest:com.twitter.io.Buf):com.twitter.util.Future[Option[com.twitter.io.Buf]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">rPopLPush</span><span class="params">(<span name="source">source: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>, <span name="dest">dest: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>]]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Atomically returns and removes the last element (tail) of the list stored at source,
+and pushes the element at the first element (head) of the list stored at destination
+</p><div class="fullcomment"><div class="comment cmt"><p>Atomically returns and removes the last element (tail) of the list stored at source,
+and pushes the element at the first element (head) of the list stored at destination
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p><code>Some</code> of the value of the popped element, or <code>None</code> if the list is
+        empty.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd>ListCommands</dd></dl></div>
     </li><li name="com.twitter.finagle.redis.ListCommands#rPush" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="rPush(key:com.twitter.io.Buf,values:List[com.twitter.io.Buf]):com.twitter.util.Future[Long]"></a><a id="rPush(Buf,List[Buf]):Future[Long]"></a>
       <span class="permalink">
@@ -3246,6 +3267,44 @@ between <code>min</code> and <code>max</code>.
 Returns <code>Some</code> of the new value of the incremented member or <code>None</code> if
 the member is not found or the set is empty. Throws an exception if
 the key refers to a structure that is not a sorted set.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>SortedSetCommands</dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.SortedSetCommands#zPopMax" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="zPopMax(key:com.twitter.io.Buf,count:Option[Long]):com.twitter.util.Future[Either[com.twitter.finagle.redis.protocol.ZRangeResults,Seq[com.twitter.io.Buf]]]"></a><a id="zPopMax(Buf,Option[Long]):Future[Either[ZRangeResults,Seq[Buf]]]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/redis/NormalCommands.html#zPopMax(key:com.twitter.io.Buf,count:Option[Long]):com.twitter.util.Future[Either[com.twitter.finagle.redis.protocol.ZRangeResults,Seq[com.twitter.io.Buf]]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">zPopMax</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>, <span name="count">count: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="scala.Either">Either</span>[<a href="protocol/ZRangeResults.html" class="extype" name="com.twitter.finagle.redis.protocol.ZRangeResults">ZRangeResults</a>, <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>]]]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Removes and returns up to <code>count</code> members with the highest scores
+in the sorted set stored at <code>key</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Removes and returns up to <code>count</code> members with the highest scores
+in the sorted set stored at <code>key</code>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>SortedSetCommands</dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.SortedSetCommands#zPopMin" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="zPopMin(key:com.twitter.io.Buf,count:Option[Long]):com.twitter.util.Future[Either[com.twitter.finagle.redis.protocol.ZRangeResults,Seq[com.twitter.io.Buf]]]"></a><a id="zPopMin(Buf,Option[Long]):Future[Either[ZRangeResults,Seq[Buf]]]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/redis/NormalCommands.html#zPopMin(key:com.twitter.io.Buf,count:Option[Long]):com.twitter.util.Future[Either[com.twitter.finagle.redis.protocol.ZRangeResults,Seq[com.twitter.io.Buf]]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">zPopMin</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a></span>, <span name="count">count: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="scala.Either">Either</span>[<a href="protocol/ZRangeResults.html" class="extype" name="com.twitter.finagle.redis.protocol.ZRangeResults">ZRangeResults</a>, <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/com/twitter/io/Buf.html#com.twitter.io.Buf" class="extype" name="com.twitter.io.Buf">Buf</a>]]]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Removes and returns up to <code>count</code> members with the lowest scores
+in the sorted set stored at <code>key</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Removes and returns up to <code>count</code> members with the lowest scores
+in the sorted set stored at <code>key</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>SortedSetCommands</dd></dl></div>
     </li><li name="com.twitter.finagle.redis.SortedSetCommands#zRange" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="zRange(key:com.twitter.io.Buf,start:Long,stop:Long,withScores:Boolean):com.twitter.util.Future[Either[com.twitter.finagle.redis.protocol.ZRangeResults,Seq[com.twitter.io.Buf]]]"></a><a id="zRange(Buf,Long,Long,Boolean):Future[Either[ZRangeResults,Seq[Buf]]]"></a>

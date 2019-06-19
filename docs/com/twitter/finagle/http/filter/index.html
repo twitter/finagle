@@ -307,6 +307,10 @@ resources for using Finagle.
                         <a class="object" href="StatsFilter$.html" title=""></a>
                         <a class="class" href="StatsFilter.html" title="Statistic filter."></a>
                         <a href="StatsFilter.html" title="Statistic filter.">StatsFilter</a>
+                      </li><li class="current-entities indented5">
+                        <a class="object" href="StreamingStatsFilter$.html" title=""></a>
+                        <a class="class" href="StreamingStatsFilter.html" title="A filter to export statistics for HTTP streaming requests and responses."></a>
+                        <a href="StreamingStatsFilter.html" title="A filter to export statistics for HTTP streaming requests and responses.">StreamingStatsFilter</a>
                       </li><li name="com.twitter.finagle.http.param" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="param"></a><a id="param:param"></a>
       <span class="permalink">
@@ -604,11 +608,63 @@ exactly this situation, see:
       <p class="shortcomment cmt">Statistic filter.</p><div class="fullcomment"><div class="comment cmt"><p>Statistic filter.</p><p>Add counters:
    status.[code]
    status.[class]
-   response_size (deprecated?)
 And metrics:
    time.[code]
    time.[class]
 </p></div></div>
+    </li><li name="com.twitter.finagle.http.filter.StreamingStatsFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="StreamingStatsFilterextendsSimpleFilter[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]"></a><a id="StreamingStatsFilter:StreamingStatsFilter"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/http/filter/index.html#StreamingStatsFilterextendsSimpleFilter[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A filter to export statistics for HTTP streaming requests and responses." href="StreamingStatsFilter.html"><span class="name">StreamingStatsFilter</span></a><span class="result"> extends <a href="../../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A filter to export statistics for HTTP streaming requests and responses.</p><div class="fullcomment"><div class="comment cmt"><p>A filter to export statistics for HTTP streaming requests and responses.
+A streaming request/response is an HTTP request/response with <code>isChunked</code> set to true.</p><p>This filter is included in HTTP stack by default, all metrics defined in this filter are only
+populated for HTTP streaming requests/responses.</p><p>Stats:
+   ---------------Request Stream------------</p><ul><li>stream/request/duration_ms:
+       A histogram of the duration of the lifetime of request streams, from the time a stream is
+       initialized until it's closed, in milliseconds.
+   ---------------Response Stream-----------</li><li>stream/response/duration_ms:
+       A histogram of the duration of the lifetime of response streams, from the time a stream is
+       initialized until it's closed, in milliseconds.
+Counters:
+   ---------------Request Stream------------</li><li>stream/request/closed:
+       A counter of the number of closed request streams.</li><li>stream/request/failures
+       A counter of the number of times any failure has been observed in the middle of a request
+       stream.</li><li>stream/request/failures/&lt;exception_name&gt;:
+       A counter of the number of times a specific exception has been thrown in the middle of a
+       request stream.</li><li>stream/request/opened:
+       A counter of the number of opened request streams.
+   ---------------Response Stream-----------</li><li>stream/response/closed:
+       A counter of the number of closed response streams.</li><li>stream/response/failures
+       A counter of the number of times any failure has been observed in the middle of a response
+       stream.</li><li>stream/response/failures/&lt;exception_name&gt;:
+       A counter of the number of times a specific exception has been thrown in the middle of a
+       response stream.</li><li>stream/response/opened:
+       A counter of the number of opened response streams.
+Gauges:
+   ---------------Request Stream------------</li><li>stream/request/pending:
+       A gauge of the number of pending request streams.
+   ---------------Response Stream------------</li><li>stream/response/pending:
+       A gauge of the number of pending response streams.</li></ul><p>You could derive the streaming success rate of:</p><ul><li>the total number of streams
+     number of successful streams divided by number of total streams</li><li>closed streams
+     number of successful streams divided by number of closed streams
+Here we assume a success stream as a stream terminated without an exception or a stream that has
+not terminated yet.</li></ul><p>Take request stream as an example, assuming your counters are not &quot;latched&quot;, which means that
+their values are monotonically increasing:</p><ul><li>Success rate of total number of streams:
+     1 - (rated_counter(stream/request/failures)
+          / (gauge(stream/request/pending) + rated_counter(stream/request/closed)))</li><li>Success rate of number of closed streams:
+     1 - (rated_counter(stream/request/failures) / rated_counter(stream/request/closed))
+</li></ul></div></div>
     </li></ol>
             </div>
 
@@ -846,6 +902,22 @@ other 503 response.
       </span>
       <span class="symbol">
         <a title="" href="StatsFilter$.html"><span class="name">StatsFilter</span></a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.http.filter.StreamingStatsFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="StreamingStatsFilter"></a><a id="StreamingStatsFilter:StreamingStatsFilter"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/http/filter/index.html#StreamingStatsFilter" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="StreamingStatsFilter$.html"><span class="name">StreamingStatsFilter</span></a>
       </span>
       
       

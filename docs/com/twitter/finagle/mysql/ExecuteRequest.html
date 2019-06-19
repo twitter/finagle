@@ -381,8 +381,8 @@ resources for using Finagle.
                         <a href="RawValue.html" title="A RawValue contains the raw bytes that represent a value and enough meta data to decode the bytes.">RawValue</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="trait" href="Request.html" title=""></a>
-                        <a href="Request.html" title="">Request</a>
+                        <a class="trait" href="Request.html" title="A Request is an outgoing message sent by the client as part of the MySQL protocol."></a>
+                        <a href="Request.html" title="A Request is an outgoing message sent by the client as part of the MySQL protocol.">Request</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="trait" href="Result.html" title=""></a>
@@ -488,7 +488,7 @@ a prepared statement.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="CommandRequest.html" class="extype" name="com.twitter.finagle.mysql.CommandRequest">CommandRequest</a>, <a href="Request.html" class="extype" name="com.twitter.finagle.mysql.Request">Request</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="CommandRequest.html" class="extype" name="com.twitter.finagle.mysql.CommandRequest">CommandRequest</a>, <a href="Request.html" class="extype" name="com.twitter.finagle.mysql.Request">Request</a>, <span class="extype" name="com.twitter.finagle.mysql.ProtocolMessage">ProtocolMessage</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -514,7 +514,7 @@ a prepared statement.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.mysql.ExecuteRequest"><span>ExecuteRequest</span></li><li class="in" name="com.twitter.finagle.mysql.CommandRequest"><span>CommandRequest</span></li><li class="in" name="com.twitter.finagle.mysql.Request"><span>Request</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.mysql.ExecuteRequest"><span>ExecuteRequest</span></li><li class="in" name="com.twitter.finagle.mysql.CommandRequest"><span>CommandRequest</span></li><li class="in" name="com.twitter.finagle.mysql.Request"><span>Request</span></li><li class="in" name="com.twitter.finagle.mysql.ProtocolMessage"><span>ProtocolMessage</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -889,7 +889,7 @@ a prepared statement.
         <span class="name">seq</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Short.html#scala.Short" class="extype" name="scala.Short">Short</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="CommandRequest.html" class="extype" name="com.twitter.finagle.mysql.CommandRequest">CommandRequest</a> → <a href="Request.html" class="extype" name="com.twitter.finagle.mysql.Request">Request</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="CommandRequest.html" class="extype" name="com.twitter.finagle.mysql.CommandRequest">CommandRequest</a> → ProtocolMessage</dd></dl></div>
     </li><li name="com.twitter.finagle.mysql.ExecuteRequest#stmtId" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="stmtId:Int"></a>
       <span class="permalink">
@@ -937,7 +937,7 @@ a prepared statement.
         <span class="name">toPacket</span><span class="result">: <a href="transport/Packet.html" class="extype" name="com.twitter.finagle.mysql.transport.Packet">Packet</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.mysql.ExecuteRequest">ExecuteRequest</a> → <a href="Request.html" class="extype" name="com.twitter.finagle.mysql.Request">Request</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.mysql.ExecuteRequest">ExecuteRequest</a> → ProtocolMessage</dd></dl></div>
     </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">
@@ -1036,6 +1036,8 @@ a prepared statement.
               <h3>Inherited from <a href="CommandRequest.html" class="extype" name="com.twitter.finagle.mysql.CommandRequest">CommandRequest</a></h3>
             </div><div class="parent" name="com.twitter.finagle.mysql.Request">
               <h3>Inherited from <a href="Request.html" class="extype" name="com.twitter.finagle.mysql.Request">Request</a></h3>
+            </div><div class="parent" name="com.twitter.finagle.mysql.ProtocolMessage">
+              <h3>Inherited from <span class="extype" name="com.twitter.finagle.mysql.ProtocolMessage">ProtocolMessage</span></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

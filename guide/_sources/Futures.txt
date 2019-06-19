@@ -26,6 +26,8 @@ with Futures as we'll see.
 Blocking or synchronous work
 ----------------------------
 
+.. _future_pools:
+
 When you have work that is blocking, say I/O or a library
 not written in an asynchronous style, you should use a
 ``com.twitter.util.FuturePool``. FuturePool manages a pool of

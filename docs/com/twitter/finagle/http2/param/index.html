@@ -204,6 +204,10 @@ resources for using Finagle.
                         <a class="class" href="FrameLoggerNamePrefix.html" title="The logger name to be used for the root HTTP/2 frame logger."></a>
                         <a href="FrameLoggerNamePrefix.html" title="The logger name to be used for the root HTTP/2 frame logger.">FrameLoggerNamePrefix</a>
                       </li><li class="current-entities indented5">
+                        <a class="object" href="FrameLogging$.html" title=""></a>
+                        <a class="class" href="FrameLogging.html" title="Whether or not HTTP/2 frame logging is enabled."></a>
+                        <a href="FrameLogging.html" title="Whether or not HTTP/2 frame logging is enabled.">FrameLogging</a>
+                      </li><li class="current-entities indented5">
                         <a class="object" href="HeaderSensitivity$.html" title=""></a>
                         <a class="class" href="HeaderSensitivity.html" title="A class for configuring the http/2 encoder to mark a header entry as sensitive or not."></a>
                         <a href="HeaderSensitivity.html" title="A class for configuring the http/2 encoder to mark a header entry as sensitive or not.">HeaderSensitivity</a>
@@ -349,6 +353,23 @@ must set logger to that level to see the frame logs. The prefix if not set defau
 io.netty.handler.codec.http2.Http2MultiplexCodec
 </p></div><dl class="paramcmts block"><dt class="param">loggerNamePrefix</dt><dd class="cmt"><p>The name of the logger to be used as the root logger name for
                         netty HTTP/2 frame logging.</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.http2.param.FrameLogging" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="FrameLoggingextendsProductwithSerializable"></a><a id="FrameLogging:FrameLogging"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/http2/param/index.html#FrameLoggingextendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Whether or not HTTP/2 frame logging is enabled." href="FrameLogging.html"><span class="name">FrameLogging</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Whether or not HTTP/2 frame logging is enabled.</p><div class="fullcomment"><div class="comment cmt"><p>Whether or not HTTP/2 frame logging is enabled.</p><p>Defaults to disabled.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><code>Enabled</code> and <code>Disabled</code> on companion class for getting instances.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http2.param.HeaderSensitivity" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="HeaderSensitivityextendsProductwithSerializable"></a><a id="HeaderSensitivity:HeaderSensitivity"></a>
       <span class="permalink">
@@ -505,6 +526,22 @@ protocol or not.</p><p>Note that both client and server must be configured for p
       </span>
       <span class="symbol">
         <a title="" href="FrameLoggerNamePrefix$.html"><span class="name">FrameLoggerNamePrefix</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.http2.param.FrameLogging" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="FrameLogging"></a><a id="FrameLogging:FrameLogging"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/http2/param/index.html#FrameLogging" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="FrameLogging$.html"><span class="name">FrameLogging</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       

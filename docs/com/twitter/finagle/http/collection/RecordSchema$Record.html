@@ -247,9 +247,7 @@ corresponding Record.
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Record is an instance of a <a href="RecordSchema.html" class="extype" name="com.twitter.finagle.http.collection.RecordSchema">RecordSchema</a> declaration.
 Records are mutable; the <code>update</code> method assigns or reassigns a value to a given field. If
 the user requires that a field's assigned value is never reassigned later, the user can <code>lock</code>
-that field.</p><p><b>Note that this implementation is not synchronized.</b> If multiple threads access a record
-concurrently, and at least one of the threads modifies the record, it <i>must</i> be synchronized
-externally.
+that field.
 </p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
@@ -436,8 +434,8 @@ record(field)</pre></div><dl class="paramcmts block"><dt class="param">field</dt
       </span>
       
       <p class="shortcomment cmt">Create a copy of this record with <code>value</code> assigned to <code>field</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a copy of this record with <code>value</code> assigned to <code>field</code>.  <code>field</code> will be locked in the
-copy iff it was present and locked in the original record.  If <code>field</code> was not present in the
-original then the following are equivalent:</p><pre>record.copy(field, value)
+copy if and only if it was present and locked in the original record.  If <code>field</code> was not
+present in the original then the following are equivalent:</p><pre>record.copy(field, value)
 record.copy().update(field, value)</pre></div><dl class="paramcmts block"><dt class="param">field</dt><dd class="cmt"><p>the field to assign in the copy</p></dd><dt class="param">value</dt><dd class="cmt"><p>the value to assign to <code>field</code> in the copy</p></dd><dt>returns</dt><dd class="cmt"><p>a copy of this record</p></dd></dl></div>
     </li><li name="com.twitter.finagle.http.collection.RecordSchema.Record#copy" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="copy():RecordSchema.this.Record"></a><a id="copy():Record"></a>
@@ -454,8 +452,8 @@ record.copy().update(field, value)</pre></div><dl class="paramcmts block"><dt cl
         <span class="name">copy</span><span class="params">()</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.collection.RecordSchema.Record">Record</a></span>
       </span>
       
-      <p class="shortcomment cmt">Create a copy of this record.</p><div class="fullcomment"><div class="comment cmt"><p>Create a copy of this record.  Fields are locked in the copy iff they were locked in the
-original record.
+      <p class="shortcomment cmt">Create a copy of this record.</p><div class="fullcomment"><div class="comment cmt"><p>Create a copy of this record.  Fields are locked in the copy if and only if they
+were locked in the original record.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a copy of this record</p></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>

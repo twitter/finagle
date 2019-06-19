@@ -794,10 +794,10 @@ the <i>message</i>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike</dd></dl></div>
-    </li><li name="scala.collection.generic.Growable#++=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="++=(xs:scala.collection.TraversableOnce[A]):Growable.this.type"></a><a id="++=(TraversableOnce[(String,Cookie)]):CookieMap.this.type"></a>
+    </li><li name="com.twitter.finagle.http.CookieMap#++=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="++=(xs:TraversableOnce[(String,com.twitter.finagle.http.Cookie)]):CookieMap.this.type"></a><a id="++=(TraversableOnce[(String,Cookie)]):CookieMap.this.type"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/CookieMap.html#++=(xs:scala.collection.TraversableOnce[A]):Growable.this.type" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/CookieMap.html#++=(xs:TraversableOnce[(String,com.twitter.finagle.http.Cookie)]):CookieMap.this.type" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -806,10 +806,10 @@ the <i>message</i>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $plus$plus$eq" class="name">++=</span><span class="params">(<span name="xs">xs: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/TraversableOnce.html#scala.collection.TraversableOnce" class="extype" name="scala.collection.TraversableOnce">TraversableOnce</a>[(<span class="extype" name="scala.Predef.String">String</span>, <a href="Cookie.html" class="extype" name="com.twitter.finagle.http.Cookie">Cookie</a>)]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.CookieMap">CookieMap</a>.this.type</span>
+        <span title="gt4s: $plus$plus$eq" class="name">++=</span><span class="params">(<span name="xs">xs: <span class="extype" name="scala.TraversableOnce">TraversableOnce</span>[(<span class="extype" name="scala.Predef.String">String</span>, <a href="Cookie.html" class="extype" name="com.twitter.finagle.http.Cookie">Cookie</a>)]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.CookieMap">CookieMap</a>.this.type</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Growable</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.CookieMap">CookieMap</a> → Growable</dd></dl></div>
     </li><li name="com.twitter.finagle.http.CookieMap#+=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="+=(cookie:com.twitter.finagle.http.Cookie):com.twitter.finagle.http.CookieMap"></a><a id="+=(Cookie):CookieMap"></a>
       <span class="permalink">
@@ -825,9 +825,9 @@ the <i>message</i>
         <span title="gt4s: $plus$eq" class="name">+=</span><span class="params">(<span name="cookie">cookie: <a href="Cookie.html" class="extype" name="com.twitter.finagle.http.Cookie">Cookie</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.CookieMap">CookieMap</a></span>
       </span>
       
-      <p class="shortcomment cmt">Adds the given  <i>cookie</i> into this map.</p><div class="fullcomment"><div class="comment cmt"><p>Adds the given  <i>cookie</i> into this map. If there are already cookies
-with the given <i>name</i> in the map, they will be removed.
-</p></div><dl class="paramcmts block"><dt class="param">cookie</dt><dd class="cmt"><p>the <i>Cookie</i> to add</p></dd></dl></div>
+      <p class="shortcomment cmt">Adds the given <code>cookie</code> into this map.</p><div class="fullcomment"><div class="comment cmt"><p>Adds the given <code>cookie</code> into this map. If there are already cookies
+with the given <code>name</code> in the map, they will be removed.
+</p></div></div>
     </li><li name="com.twitter.finagle.http.CookieMap#+=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="+=(cookie:(String,com.twitter.finagle.http.Cookie)):CookieMap.this.type"></a><a id="+=((String,Cookie)):CookieMap.this.type"></a>
       <span class="permalink">
@@ -843,11 +843,13 @@ with the given <i>name</i> in the map, they will be removed.
         <span title="gt4s: $plus$eq" class="name">+=</span><span class="params">(<span name="cookie">cookie: (<span class="extype" name="scala.Predef.String">String</span>, <a href="Cookie.html" class="extype" name="com.twitter.finagle.http.Cookie">Cookie</a>)</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.CookieMap">CookieMap</a>.this.type</span>
       </span>
       
-      <p class="shortcomment cmt">Adds the given <i>cookie</i> (which is a tuple of cookie <i>name</i>
-and <i>Cookie</i> itself) into this map.</p><div class="fullcomment"><div class="comment cmt"><p>Adds the given <i>cookie</i> (which is a tuple of cookie <i>name</i>
-and <i>Cookie</i> itself) into this map. If there are already cookies
-with the given <i>name</i> in the map, they will be removed.
-</p></div><dl class="paramcmts block"><dt class="param">cookie</dt><dd class="cmt"><p>the tuple representing <i>name</i> and <i>Cookie</i></p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.CookieMap">CookieMap</a> → MapLike → Builder → Growable</dd></dl></div>
+      <p class="shortcomment cmt">Adds the given <code>cookie</code> (which is a tuple of cookie <code>name</code>
+and Cookie<code> itself) into this map. If there are already cookies
+with the given </code>name<code> in the map, they will be removed.
+</code></p><div class="fullcomment"><div class="comment cmt"><p>Adds the given <code>cookie</code> (which is a tuple of cookie <code>name</code>
+and Cookie<code> itself) into this map. If there are already cookies
+with the given </code>name<code> in the map, they will be removed.
+</code></p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.CookieMap">CookieMap</a> → MapLike → Builder → Growable</dd></dl></div>
     </li><li name="scala.collection.generic.Growable#+=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="+=(elem1:A,elem2:A,elems:A*):Growable.this.type"></a><a id="+=((String,Cookie),(String,Cookie),(String,Cookie)*):CookieMap.this.type"></a>
       <span class="permalink">
@@ -921,10 +923,10 @@ with the given <i>name</i> in the map, they will be removed.
                 <span class="name">@migration</span>
               
         </dd><dt>Migration</dt><dd class="cmt"><p><i>(Changed in version 2.8.0)</i> <code>--</code> creates a new map. Use <code>--=</code> to remove an element from this map and return that map itself.</p></dd></dl></div>
-    </li><li name="scala.collection.generic.Shrinkable#--=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="--=(xs:scala.collection.TraversableOnce[A]):Shrinkable.this.type"></a><a id="--=(TraversableOnce[String]):CookieMap.this.type"></a>
+    </li><li name="com.twitter.finagle.http.CookieMap#--=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="--=(xs:TraversableOnce[String]):CookieMap.this.type"></a><a id="--=(TraversableOnce[String]):CookieMap.this.type"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/CookieMap.html#--=(xs:scala.collection.TraversableOnce[A]):Shrinkable.this.type" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/CookieMap.html#--=(xs:TraversableOnce[String]):CookieMap.this.type" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -933,10 +935,10 @@ with the given <i>name</i> in the map, they will be removed.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $minus$minus$eq" class="name">--=</span><span class="params">(<span name="xs">xs: <a href="http://www.scala-lang.org/api/2.12.8/scala/collection/TraversableOnce.html#scala.collection.TraversableOnce" class="extype" name="scala.collection.TraversableOnce">TraversableOnce</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.CookieMap">CookieMap</a>.this.type</span>
+        <span title="gt4s: $minus$minus$eq" class="name">--=</span><span class="params">(<span name="xs">xs: <span class="extype" name="scala.TraversableOnce">TraversableOnce</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.CookieMap">CookieMap</a>.this.type</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Shrinkable</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.CookieMap">CookieMap</a> → Shrinkable</dd></dl></div>
     </li><li name="com.twitter.finagle.http.CookieMap#-=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="-=(name:String):CookieMap.this.type"></a><a id="-=(String):CookieMap.this.type"></a>
       <span class="permalink">
@@ -952,8 +954,8 @@ with the given <i>name</i> in the map, they will be removed.
         <span title="gt4s: $minus$eq" class="name">-=</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.CookieMap">CookieMap</a>.this.type</span>
       </span>
       
-      <p class="shortcomment cmt">Deletes all cookies with the given <i>name</i> from this map.</p><div class="fullcomment"><div class="comment cmt"><p>Deletes all cookies with the given <i>name</i> from this map.
-</p></div><dl class="paramcmts block"><dt class="param">name</dt><dd class="cmt"><p>the name of the cookies to delete</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.CookieMap">CookieMap</a> → MapLike → Shrinkable</dd></dl></div>
+      <p class="shortcomment cmt">Deletes all cookies with the given <code>name</code> from this map.</p><div class="fullcomment"><div class="comment cmt"><p>Deletes all cookies with the given <code>name</code> from this map.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.CookieMap">CookieMap</a> → MapLike → Shrinkable</dd></dl></div>
     </li><li name="scala.collection.generic.Shrinkable#-=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="-=(elem1:A,elem2:A,elems:A*):Shrinkable.this.type"></a><a id="-=(String,String,String*):CookieMap.this.type"></a>
       <span class="permalink">
@@ -1033,11 +1035,11 @@ with the given <i>name</i> in the map, they will be removed.
         <span class="name">add</span><span class="params">(<span name="cookie">cookie: <a href="Cookie.html" class="extype" name="com.twitter.finagle.http.Cookie">Cookie</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
-      <p class="shortcomment cmt">Adds the given <i>cookie</i> into this map.</p><div class="fullcomment"><div class="comment cmt"><p>Adds the given <i>cookie</i> into this map. Existing cookies with this name
+      <p class="shortcomment cmt">Adds the given <code>cookie</code> into this map.</p><div class="fullcomment"><div class="comment cmt"><p>Adds the given <code>cookie</code> into this map. Existing cookies with this name
 but different domain/path will be kept. If there is already an identical
 cookie (different value but name/path/domain is the same) in the map,
 it will be replaced within a new version.
-</p></div><dl class="paramcmts block"><dt class="param">cookie</dt><dd class="cmt"><p>the <i>Cookie</i> to add</p></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#addAll(cookies:TraversableOnce[com.twitter.finagle.http.Cookie]):Unit" class="extmbr" name="com.twitter.finagle.http.CookieMap#addAll">addAll</a> for adding cookies in bulk</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.CookieMap#add" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="add(name:String,cookie:com.twitter.finagle.http.Cookie):Unit"></a><a id="add(String,Cookie):Unit"></a>
       <span class="permalink">
@@ -1053,11 +1055,31 @@ it will be replaced within a new version.
         <span class="name">add</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="cookie">cookie: <a href="Cookie.html" class="extype" name="com.twitter.finagle.http.Cookie">Cookie</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
-      <p class="shortcomment cmt">Adds the given <i>cookie</i> with <i>name</i> into this map.</p><div class="fullcomment"><div class="comment cmt"><p>Adds the given <i>cookie</i> with <i>name</i> into this map. Existing cookies
+      <p class="shortcomment cmt">Adds the given <code>cookie</code> with <code>name</code> into this map.</p><div class="fullcomment"><div class="comment cmt"><p>Adds the given <code>cookie</code> with <code>name</code> into this map. Existing cookies
 with this name but different domain/path will be kept. If there is already
 an identical cookie (different value but name/path/domain is the same) in the
 map, it will be replaced within a new version.
-</p></div><dl class="paramcmts block"><dt class="param">name</dt><dd class="cmt"><p>the cookie name to add</p></dd><dt class="param">cookie</dt><dd class="cmt"><p>the <i>Cookie</i> to add</p></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#addAll(cookies:TraversableOnce[com.twitter.finagle.http.Cookie]):Unit" class="extmbr" name="com.twitter.finagle.http.CookieMap#addAll">addAll</a> for adding cookies in bulk</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.CookieMap#addAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addAll(cookies:TraversableOnce[com.twitter.finagle.http.Cookie]):Unit"></a><a id="addAll(TraversableOnce[Cookie]):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/CookieMap.html#addAll(cookies:TraversableOnce[com.twitter.finagle.http.Cookie]):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addAll</span><span class="params">(<span name="cookies">cookies: <span class="extype" name="scala.TraversableOnce">TraversableOnce</span>[<a href="Cookie.html" class="extype" name="com.twitter.finagle.http.Cookie">Cookie</a>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Adds multiple <code>cookies</code> into this map.</p><div class="fullcomment"><div class="comment cmt"><p>Adds multiple <code>cookies</code> into this map. Existing cookies with this name
+but different domain/path will be kept. If there is already an identical
+cookie (different value but name/path/domain is the same) in the map,
+it will be replaced within a new version.
+</p></div></div>
     </li><li name="scala.collection.MapLike#addString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="addString(b:StringBuilder,start:String,sep:String,end:String):StringBuilder"></a><a id="addString(StringBuilder,String,String,String):StringBuilder"></a>
       <span class="permalink">
@@ -1707,10 +1729,10 @@ map, it will be replaced within a new version.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → TraversableLike → TraversableOnce → GenTraversableOnce</dd></dl></div>
-    </li><li name="com.twitter.finagle.http.CookieMap#foreach" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="foreach[U](f:((String,com.twitter.finagle.http.Cookie))=&gt;U):Unit"></a><a id="foreach[U](((String,Cookie))⇒U):Unit"></a>
+    </li><li name="scala.collection.IterableLike#foreach" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="foreach[U](f:A=&gt;U):Unit"></a><a id="foreach[U](((String,Cookie))⇒U):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/CookieMap.html#foreach[U](f:((String,com.twitter.finagle.http.Cookie))=&gt;U):Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/CookieMap.html#foreach[U](f:A=&gt;U):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1719,11 +1741,10 @@ map, it will be replaced within a new version.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">foreach</span><span class="tparams">[<span name="U">U</span>]</span><span class="params">(<span name="f">f: ((<span class="extype" name="scala.Predef.String">String</span>, <a href="Cookie.html" class="extype" name="com.twitter.finagle.http.Cookie">Cookie</a>)) ⇒ <span class="extype" name="com.twitter.finagle.http.CookieMap.foreach.U">U</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+        <span class="name">foreach</span><span class="tparams">[<span name="U">U</span>]</span><span class="params">(<span name="f">f: ((<span class="extype" name="scala.Predef.String">String</span>, <a href="Cookie.html" class="extype" name="com.twitter.finagle.http.Cookie">Cookie</a>)) ⇒ <span class="extype" name="scala.collection.IterableLike.foreach.U">U</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
       </span>
       
-      <p class="shortcomment cmt">Applies the given function <i>f</i> to each cookie in this map.</p><div class="fullcomment"><div class="comment cmt"><p>Applies the given function <i>f</i> to each cookie in this map.
-</p></div><dl class="paramcmts block"><dt class="param">f</dt><dd class="cmt"><p>a function that takes cookie <i>name</i> and <i>Cookie</i> itself</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.CookieMap">CookieMap</a> → IterableLike → GenericTraversableTemplate → TraversableLike → GenTraversableLike → TraversableOnce → GenTraversableOnce → FilterMonadic</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IterableLike → TraversableLike → GenTraversableLike → TraversableOnce → GenTraversableOnce → FilterMonadic</dd></dl></div>
     </li><li name="scala.collection.generic.GenericTraversableTemplate#genericBuilder" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="genericBuilder[B]:scala.collection.mutable.Builder[B,CC[B]]"></a><a id="genericBuilder[B]:Builder[B,Iterable[B]]"></a>
       <span class="permalink">
@@ -1755,9 +1776,9 @@ map, it will be replaced within a new version.
         <span class="name">get</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<a href="Cookie.html" class="extype" name="com.twitter.finagle.http.Cookie">Cookie</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">Fetches the first cookie with the given <i>name</i> from this map.</p><div class="fullcomment"><div class="comment cmt"><p>Fetches the first cookie with the given <i>name</i> from this map.
-</p></div><dl class="paramcmts block"><dt class="param">name</dt><dd class="cmt"><p>the cookie name</p></dd><dt>returns</dt><dd class="cmt"><p>a first <i>Cookie</i> with the given <i>name</i></p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.CookieMap">CookieMap</a> → MapLike → GenMapLike</dd></dl></div>
-    </li><li name="com.twitter.finagle.http.CookieMap#getAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <p class="shortcomment cmt">Fetches the first cookie with the given <code>name</code> from this map.</p><div class="fullcomment"><div class="comment cmt"><p>Fetches the first cookie with the given <code>name</code> from this map.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.CookieMap">CookieMap</a> → MapLike → GenMapLike</dd></dl></div>
+    </li><li name="com.twitter.finagle.http.CookieMap#getAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="getAll(name:String):Seq[com.twitter.finagle.http.Cookie]"></a><a id="getAll(String):Seq[Cookie]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/CookieMap.html#getAll(name:String):Seq[com.twitter.finagle.http.Cookie]" title="Permalink">
@@ -1772,8 +1793,7 @@ map, it will be replaced within a new version.
         <span class="name">getAll</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="Cookie.html" class="extype" name="com.twitter.finagle.http.Cookie">Cookie</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">Fetches all cookies with the given <i>name</i> from this map.</p><div class="fullcomment"><div class="comment cmt"><p>Fetches all cookies with the given <i>name</i> from this map.
-</p></div><dl class="paramcmts block"><dt class="param">name</dt><dd class="cmt"><p>the cookie name</p></dd><dt>returns</dt><dd class="cmt"><p>a sequence of cookies with the same <i>name</i></p></dd></dl></div>
+      <p class="shortcomment cmt">Fetches all cookies with the given <code>name</code> from this map.</p>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -1825,7 +1845,7 @@ map, it will be replaced within a new version.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike</dd></dl></div>
-    </li><li name="com.twitter.finagle.http.CookieMap#getValue" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.CookieMap#getValue" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="getValue(name:String):Option[String]"></a><a id="getValue(String):Option[String]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/CookieMap.html#getValue(name:String):Option[String]" title="Permalink">
@@ -1840,8 +1860,7 @@ map, it will be replaced within a new version.
         <span class="name">getValue</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">Fetches the value of the first cookie with the given <i>name</i> from this map.</p><div class="fullcomment"><div class="comment cmt"><p>Fetches the value of the first cookie with the given <i>name</i> from this map.
-</p></div><dl class="paramcmts block"><dt class="param">name</dt><dd class="cmt"><p>the cookie name</p></dd><dt>returns</dt><dd class="cmt"><p>a value of the first cookie of the given <i>name</i></p></dd></dl></div>
+      <p class="shortcomment cmt">Fetches the value of the first cookie with the given <code>name</code> from this map.</p>
     </li><li name="scala.collection.TraversableLike#groupBy" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="groupBy[K](f:A=&gt;K):scala.collection.immutable.Map[K,Repr]"></a><a id="groupBy[K](((String,Cookie))⇒K):Map[K,CookieMap]"></a>
       <span class="permalink">
@@ -2621,6 +2640,22 @@ map, it will be replaced within a new version.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike</dd></dl></div>
+    </li><li name="com.twitter.finagle.http.CookieMap#removeAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="removeAll(cookies:TraversableOnce[String]):Unit"></a><a id="removeAll(TraversableOnce[String]):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/CookieMap.html#removeAll(cookies:TraversableOnce[String]):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">removeAll</span><span class="params">(<span name="cookies">cookies: <span class="extype" name="scala.TraversableOnce">TraversableOnce</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Removes multiple <code>cookies</code> from this map.</p>
     </li><li name="scala.collection.TraversableLike#repr" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="repr:Repr"></a><a id="repr:CookieMap"></a>
       <span class="permalink">

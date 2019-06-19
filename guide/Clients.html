@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Clients &#8212; Finagle 19.5.1 documentation</title>
+    <title>Clients &#8212; Finagle 19.6.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.5.1',
+        VERSION:     '19.6.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,8 +26,8 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.5.1 documentation" href="index.html" />
-    <link rel="next" title="Contexts" href="Contexts.html" />
+    <link rel="top" title="Finagle 19.6.0 documentation" href="index.html" />
+    <link rel="next" title="Threading Model" href="ThreadingModel.html" />
     <link rel="prev" title="Servers" href="Servers.html" />
    
   
@@ -55,7 +55,7 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="Contexts.html" title="Contexts"
+          <a href="ThreadingModel.html" title="Threading Model"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="Servers.html" title="Servers"
@@ -1045,22 +1045,41 @@ is used. This gives us the simple classification rules of responses that are
 <code class="docutils literal"><span class="pre">Returns</span></code> are successful and <code class="docutils literal"><span class="pre">Throws</span></code> are failures.</p>
 <div class="section" id="custom-classifiers">
 <h3>Custom Classifiers<a class="headerlink" href="#custom-classifiers" title="Permalink to this headline">¶</a></h3>
-<p>Writing a custom classifier requires understanding of the few classes used. A
-<code class="docutils literal"><span class="pre">ResponseClassifier</span></code> is a <code class="docutils literal"><span class="pre">PartialFunction</span></code> from <code class="docutils literal"><span class="pre">ReqRep</span></code> to
-<code class="docutils literal"><span class="pre">ResponseClass</span></code>.</p>
-<p>Let&#8217;s work our way backwards through those, beginning with <code class="docutils literal"><span class="pre">ResponseClass</span></code>.
-This can be either <code class="docutils literal"><span class="pre">Successful</span></code> or <code class="docutils literal"><span class="pre">Failed</span></code> and those values are
-self-explanatory. There are three constants which will cover the vast majority
-of usage: <code class="docutils literal"><span class="pre">Success</span></code>, <code class="docutils literal"><span class="pre">NonRetryableFailure</span></code> and <code class="docutils literal"><span class="pre">RetryableFailure</span></code>. While
-as of today there is no distinction made between retryable and non-retryable
-failures, this lays the groundwork for use in the future.</p>
-<p>A <code class="docutils literal"><span class="pre">ReqRep</span></code> is a request/response struct with a request of type <code class="docutils literal"><span class="pre">Any</span></code> and a
-response of type <code class="docutils literal"><span class="pre">Try[Any]</span></code>. While all of this functionality is called
-response classification, you’ll note that classifiers make judgements on both a
-request and response.</p>
-<p>Creating a custom <code class="docutils literal"><span class="pre">ResponseClassifier</span></code> is fairly straightforward for HTTP
-as the <code class="docutils literal"><span class="pre">ReqRep</span></code> is an <code class="docutils literal"><span class="pre">http.Request</span></code> and <code class="docutils literal"><span class="pre">Try[http.Response]</span></code> pair.
-Here is an example that counts HTTP 503s as failures:</p>
+<p><code class="docutils literal"><span class="pre">ResponseClassifier</span></code> is a <code class="docutils literal"><span class="pre">PartialFunction</span></code> from <code class="docutils literal"><span class="pre">ReqRep</span></code> to
+<code class="docutils literal"><span class="pre">ResponseClass</span></code>. Custom classifiers allow the user to tell Finagle what
+constitutes a failed outcome, and also what to do about it. Users define
+classifiers in terms of <code class="docutils literal"><span class="pre">ReqRep</span></code> and <code class="docutils literal"><span class="pre">Try</span></code>.</p>
+<p><code class="docutils literal"><span class="pre">rc</span></code>, defined below, is a classifier that tells Finagle that <code class="docutils literal"><span class="pre">Throw</span></code> means
+failure, and <code class="docutils literal"><span class="pre">Return</span></code> means success.</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">rc</span><span class="k">:</span> <span class="kt">ResponseClassifier</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="k">case</span> <span class="nc">ReqRep</span><span class="o">(</span><span class="n">req</span><span class="o">,</span> <span class="nc">Throw</span><span class="o">(</span><span class="n">exc</span><span class="o">))</span> <span class="k">=&gt;</span> <span class="nc">ResponseClass</span><span class="o">.</span><span class="nc">RetryableFailure</span>
+  <span class="k">case</span> <span class="nc">ReqRep</span><span class="o">(</span><span class="n">req</span><span class="o">,</span> <span class="nc">Return</span><span class="o">(</span><span class="n">rep</span><span class="o">))</span> <span class="k">=&gt;</span> <span class="nc">ResponseClass</span><span class="o">.</span><span class="nc">Success</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>A <code class="docutils literal"><span class="pre">ReqRep</span></code> is a request-response pair. This is so that classifiers can make
+judgements on both a request and response.</p>
+<p>More than just telling Finagle if this <code class="docutils literal"><span class="pre">ReqRep</span></code> is a successful or failed
+outcome, it also gives Finagle a hint about what it should do next. Finagle can
+respond to failed outcomes with some nuance, for example, it may retry the
+operation.</p>
+<p><code class="docutils literal"><span class="pre">ResponseClass</span></code> defines three classes of failure:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">NonRetryableFailure</span></code>: Something went wrong, don&#8217;t retry.</li>
+<li><code class="docutils literal"><span class="pre">RetryableFailure</span></code>: Something went wrong, consider retrying the operation.</li>
+<li><code class="docutils literal"><span class="pre">Ignorable</span></code>: Something went wrong, but it can be ignored.</li>
+</ul>
+<p>And, of course, <code class="docutils literal"><span class="pre">Success</span></code> means that the operation succeeded.
+<code class="docutils literal"><span class="pre">Ignorable</span></code> does not apply to <code class="docutils literal"><span class="pre">Success</span></code> because it is a mapping from
+<code class="docutils literal"><span class="pre">FailureFlags.Ignorable</span></code> which only applies to <code class="docutils literal"><span class="pre">Failure</span></code> and not any
+arbitrary response.</p>
+<p>It&#8217;s important to note that classifiers are only consulted but not obeyed. For
+example, a classifier may emit <code class="docutils literal"><span class="pre">Ignorable</span></code> for a given <code class="docutils literal"><span class="pre">ReqRep</span></code> but what
+actually happens depends on how the caller chooses to interpret <code class="docutils literal"><span class="pre">Ignorable</span></code>.
+Similarly, just because a classifier emits <code class="docutils literal"><span class="pre">RetryableFailure</span></code> does not mean
+the caller will retry the operation.</p>
+<p>Now that we&#8217;ve covered the basics, let&#8217;s look at an example in HTTP. Here is
+an example that counts HTTP 503s as failures:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.http</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">ReqRep</span><span class="o">,</span> <span class="nc">ResponseClass</span><span class="o">,</span> <span class="nc">ResponseClassifier</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.Return</span>
@@ -1301,7 +1320,7 @@ Alvaro Videla&#8217;s <a class="reference external" href="https://videlalvaro.gi
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="Servers.html" title="previous chapter">Servers</a></li>
-      <li>Next: <a href="Contexts.html" title="next chapter">Contexts</a></li>
+      <li>Next: <a href="ThreadingModel.html" title="next chapter">Threading Model</a></li>
   </ul></li>
 </ul>
 <div id="searchbox" style="display: none">

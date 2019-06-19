@@ -728,8 +728,8 @@ use.</p><p> Flag          Value     Meaning
                         <a href="RawValue.html" title="A RawValue contains the raw bytes that represent a value and enough meta data to decode the bytes.">RawValue</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="trait" href="Request.html" title=""></a>
-                        <a href="Request.html" title="">Request</a>
+                        <a class="trait" href="Request.html" title="A Request is an outgoing message sent by the client as part of the MySQL protocol."></a>
+                        <a href="Request.html" title="A Request is an outgoing message sent by the client as part of the MySQL protocol.">Request</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="trait" href="Result.html" title=""></a>
@@ -1599,7 +1599,7 @@ a prepared statement.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="" href="HandshakeInit.html"><span class="name">HandshakeInit</span></a><span class="params">(<span name="protocol">protocol: <a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a></span>, <span name="version">version: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="threadId">threadId: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="salt">salt: <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]</span>, <span name="serverCap">serverCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.mysql.Capability">Capability</a></span>, <span name="charset">charset: <a href="http://www.scala-lang.org/api/2.12.8/scala/Short.html#scala.Short" class="extype" name="scala.Short">Short</a></span>, <span name="status">status: <a href="http://www.scala-lang.org/api/2.12.8/scala/Short.html#scala.Short" class="extype" name="scala.Short">Short</a></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.mysql.Result">Result</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="HandshakeInit.html"><span class="name">HandshakeInit</span></a><span class="params">(<span name="protocol">protocol: <a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a></span>, <span name="version">version: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="threadId">threadId: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>, <span name="salt">salt: <a href="http://www.scala-lang.org/api/2.12.8/scala/Array.html#scala.Array" class="extype" name="scala.Array">Array</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Byte.html#scala.Byte" class="extype" name="scala.Byte">Byte</a>]</span>, <span name="serverCapabilities">serverCapabilities: <a href="Capability.html" class="extype" name="com.twitter.finagle.mysql.Capability">Capability</a></span>, <span name="charset">charset: <a href="http://www.scala-lang.org/api/2.12.8/scala/Short.html#scala.Short" class="extype" name="scala.Short">Short</a></span>, <span name="status">status: <a href="http://www.scala-lang.org/api/2.12.8/scala/Short.html#scala.Short" class="extype" name="scala.Short">Short</a></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.mysql.Result">Result</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -1836,10 +1836,10 @@ bytes.</p><div class="fullcomment"><div class="comment cmt"><p>A RawValue contai
 a value and enough meta data to decode the
 bytes.
 </p></div><dl class="paramcmts block"><dt class="param">typ</dt><dd class="cmt"><p>The MySQL <a href="Type$.html" class="extype" name="com.twitter.finagle.mysql.Type">type</a> code for this value.</p></dd><dt class="param">charset</dt><dd class="cmt"><p>The <a href="MysqlCharset$.html" class="extype" name="com.twitter.finagle.mysql.MysqlCharset">charset</a> encoding of the bytes.</p></dd><dt class="param">isBinary</dt><dd class="cmt"><p>Disambiguates between the text and binary protocol.</p></dd><dt class="param">bytes</dt><dd class="cmt"><p>The raw bytes for this value.</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.mysql.Request" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="RequestextendsAnyRef"></a><a id="Request:Request"></a>
+    </li><li name="com.twitter.finagle.mysql.Request" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="RequestextendsProtocolMessage"></a><a id="Request:Request"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mysql/index.html#RequestextendsAnyRef" title="Permalink">
+      <a href="../../../../com/twitter/finagle/mysql/index.html#RequestextendsProtocolMessage" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1848,10 +1848,14 @@ bytes.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="" href="Request.html"><span class="name">Request</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+        <a title="A Request is an outgoing message sent by the client as part of the MySQL protocol." href="Request.html"><span class="name">Request</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.mysql.ProtocolMessage">ProtocolMessage</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">A <code>Request</code> is an outgoing message sent by the client
+as part of the MySQL protocol.</p><div class="fullcomment"><div class="comment cmt"><p>A <code>Request</code> is an outgoing message sent by the client
+as part of the MySQL protocol. It is packet-based and
+based around a MySQL command.
+</p></div></div>
     </li><li name="com.twitter.finagle.mysql.Result" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ResultextendsAnyRef"></a><a id="Result:Result"></a>
       <span class="permalink">
