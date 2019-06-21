@@ -40,6 +40,7 @@ abstract class GenSerialClientDispatcher[Req, Rep, In, Out](
       case Throw(exc) => exc
     }
 
+    queueSize.remove() // ensure that we don't leak the gauge
     semaphore.fail(Failure.retryable(exc))
   }
 

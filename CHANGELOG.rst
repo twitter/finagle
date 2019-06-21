@@ -17,6 +17,12 @@ Breaking API Changes
   takes a `Service[Req, Rep]` and a not fully specified config as params, has been
   removed. ``PHAB_ID=D330348``
 
+Bug Fixes
+~~~~~~~~~
+
+* finagle-core: Ensure ClientDispatcher `queueSize` gauge is removed on transport
+  close, instead of waiting for clean-up at GC time. ``PHAB_ID=D331923``
+
 19.6.0
 ------
 
