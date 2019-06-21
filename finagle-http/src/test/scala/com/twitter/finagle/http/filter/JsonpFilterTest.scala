@@ -1,18 +1,16 @@
 package com.twitter.finagle.http.filter
 
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{MediaType, Method, Request, Response, Status}
 import com.twitter.util.{Await, Future}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class JsonpFilterTest extends FunSuite {
 
   val dummyService = new Service[Request, Response] {
     def apply(request: Request): Future[Response] = {
-      val response = request.response
+      val response = Response()
       response.status = Status.Ok
       if (request.params.contains("not_json"))
         response.mediaType = "not_json"
@@ -25,7 +23,7 @@ class JsonpFilterTest extends FunSuite {
 
   test("wrap json") {
     val request = Request("/test.json", "callback" -> "mycallback")
-    val response = Await.result(JsonpFilter(request, dummyService))
+    val response = Await.result(JsonpFilter(request, dummyService), 1.second)
 
     assert(response.contentType == Some("application/javascript"))
     assert(response.contentString == "/**/mycallback({});")
@@ -33,7 +31,7 @@ class JsonpFilterTest extends FunSuite {
 
   test("ignore non-json") {
     val request = Request("/test.json", "callback" -> "mycallback", "not_json" -> "t")
-    val response = Await.result(JsonpFilter(request, dummyService))
+    val response = Await.result(JsonpFilter(request, dummyService), 1.second)
 
     assert(response.mediaType == Some("not_json"))
     assert(response.contentString == "{}")
@@ -53,7 +51,7 @@ class JsonpFilterTest extends FunSuite {
     // Search Varnish sets callback to blank.  These should not be wrapped.
     val request = Request("/test.json", "callback" -> "")
 
-    val response = Await.result(JsonpFilter(request, dummyService))
+    val response = Await.result(JsonpFilter(request, dummyService), 1.second)
     assert(response.contentType == Some("application/json"))
     assert(response.contentString == "{}")
   }

@@ -1,18 +1,16 @@
 package com.twitter.finagle.http.filter
 
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Method, Request, Response, Status}
 import com.twitter.util.{Await, Future}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class MethodRequiredFilterTest extends FunSuite {
 
   val dummyService = new Service[Request, Response] {
     def apply(request: Request): Future[Response] = {
-      val response = request.response
+      val response = Response()
       request.params
         .get("exception")
         .foreach(e => {
@@ -32,7 +30,7 @@ class MethodRequiredFilterTest extends FunSuite {
   test("return 407 when disallowed method is used") {
     val request = Request()
     request.method = Method.Get
-    val response = Await.result(filter(request, dummyService))
+    val response = Await.result(filter(request, dummyService), 1.second)
     assert(response.status == Status.MethodNotAllowed)
     assert(response.headerMap.get("Allow") == Some("POST"))
   }
@@ -40,7 +38,7 @@ class MethodRequiredFilterTest extends FunSuite {
   test("return 200 when allowed method is used") {
     val request = Request()
     request.method = Method.Post
-    val response = Await.result(filter(request, dummyService))
+    val response = Await.result(filter(request, dummyService), 1.second)
     assert(response.status == Status.Ok)
   }
 }

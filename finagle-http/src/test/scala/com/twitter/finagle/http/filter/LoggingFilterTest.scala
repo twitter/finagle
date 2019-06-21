@@ -1,15 +1,13 @@
 package com.twitter.finagle.http.filter
 
+import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Method, Request, Response, Version}
 import com.twitter.logging.{BareFormatter, Logger, StringHandler}
 import com.twitter.util.{Await, Future, Time}
 import java.time.ZonedDateTime
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class LoggingFilterTest extends FunSuite {
 
   test("log") {
@@ -29,16 +27,16 @@ class LoggingFilterTest extends FunSuite {
     val formatter = new CommonLogFormatter
     val service = new Service[Request, Response] {
       def apply(request: Request): Future[Response] = {
-        val response = request.response
+        val response = Response()
         response.statusCode = 123
         response.write("hello")
         Future.value(response)
       }
     }
-    val filter = (new LoggingFilter(logger, formatter)) andThen service
+    val filter = (new LoggingFilter(logger, formatter)).andThen(service)
 
     Time.withTimeAt(Time.fromSeconds(1302121932)) { _ =>
-      Await.result(filter(request))
+      Await.result(filter(request), 1.second)
     }
 
     stringHandler.get == ("""127\.0\.0\.1 - - \[06/Apr/2011:20:32:12 \+0000\] "GET /search\.json HTTP/1\.1" 123 5 [0-9]+ "User Agent"""" + "\n")

@@ -83,7 +83,7 @@ class HttpTest extends FunSuite with Eventually {
 
     val service = new Service[Request, Response] {
       def apply(request: Request): Future[Response] = {
-        val response = request.response
+        val response = Response()
         response.statusCode = 404
         response.write("hello")
         Future.value(response)
