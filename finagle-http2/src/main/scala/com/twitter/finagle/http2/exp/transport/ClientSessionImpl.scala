@@ -145,7 +145,6 @@ private final class ClientSessionImpl(
         } else {
           val channel = future.get
           val trans = new ChildTransport(channel)
-          channel.connect(channel.remoteAddress)
           p.setValue(trans)
         }
       }
