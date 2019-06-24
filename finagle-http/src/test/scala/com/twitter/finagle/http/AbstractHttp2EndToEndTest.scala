@@ -27,4 +27,21 @@ abstract class AbstractHttp2EndToEndTest extends AbstractEndToEndTest {
     }
     await(server.close())
   }
+
+  test("client doesn't honor the Netty stream dependency extension header") {
+    val server = serverImpl().serve("localhost:*", initService)
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl().newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+    initClient(client)
+
+    val req = Request(Method.Get, "/")
+    req.headerMap.add("x-http2-stream-dependency-id", "1")
+
+    try await(client(req))
+    finally {
+      await(client.close())
+      await(server.close())
+    }
+  }
 }

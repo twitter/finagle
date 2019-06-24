@@ -13,6 +13,11 @@ import scala.util.control.NonFatal
 
 private object RichHttpToHttp2ConnectionHandler {
   private val log = Logger.get(getClass.getName)
+
+  // We have a dedicated component that already validates all headers in our pipelines.
+  // See com.twitter.finagle.netty4.http.handler.HeaderValidationHandler
+  private final val NoHeaderValidation = false
+  private final val NoPadding = 0
 }
 
 /**
@@ -26,13 +31,7 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
   onActive: () => Unit)
     extends HttpToHttp2ConnectionHandler(dec, enc, initialSettings, false) {
 
-  import RichHttpToHttp2ConnectionHandler.log
-
-  // We have a dedicated component that already validates all headers in our pipelines.
-  // See com.twitter.finagle.netty4.http.handler.HeaderValidationHandler
-  private[this] final val NoHeaderValidation = false
-  private[this] final val NoPadding = 0
-  private[this] final val NoExclusive = false
+  import RichHttpToHttp2ConnectionHandler._
 
   private[this] def writeHeaders(
     ctx: ChannelHandlerContext,
@@ -67,25 +66,12 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
     endStream: Boolean,
     combiner: PromiseCombiner
   ): ChannelPromise = {
-    val dependencyId = h1Headers.getInt(
-      HttpConversionUtil.ExtensionHeaderNames.STREAM_DEPENDENCY_ID.text,
-      0
-    )
-
-    val weight = h1Headers.getShort(
-      HttpConversionUtil.ExtensionHeaderNames.STREAM_WEIGHT.text,
-      Http2CodecUtil.DEFAULT_PRIORITY_WEIGHT
-    )
-
     val p = newPromise(ctx, combiner)
 
     encoder.writeHeaders(
       ctx,
       streamId,
       h2Headers,
-      dependencyId,
-      weight,
-      NoExclusive,
       NoPadding,
       endStream,
       p

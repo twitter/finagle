@@ -49,8 +49,6 @@ class RichHttpToHttp2ConnectionHandlerTest extends FunSuite with BeforeAndAfter 
     request.headers().add(ExtensionHeaderNames.SCHEME.text(), "https")
 
     val streamId = 1
-    val defaultStreamDependency = 0
-    val defaultWeight = Http2CodecUtil.DEFAULT_PRIORITY_WEIGHT
 
     val p = mockCtx.newPromise()
     connectionHandler.write(mockCtx, Message(request, streamId), p)
@@ -59,9 +57,6 @@ class RichHttpToHttp2ConnectionHandlerTest extends FunSuite with BeforeAndAfter 
       meq(mockCtx),
       meq(streamId),
       anyObject(),
-      meq(defaultStreamDependency),
-      meq(defaultWeight),
-      meq(false),
       meq(0),
       meq(true),
       meq(p)
@@ -86,9 +81,6 @@ class RichHttpToHttp2ConnectionHandlerTest extends FunSuite with BeforeAndAfter 
       meq(mockCtx),
       meq(streamId),
       anyObject(),
-      meq(streamDependencyId),
-      meq(weight),
-      meq(false),
       meq(0),
       meq(true),
       meq(p)
@@ -109,9 +101,6 @@ class RichHttpToHttp2ConnectionHandlerTest extends FunSuite with BeforeAndAfter 
       meq(mockCtx),
       meq(1),
       captor.capture(),
-      anyInt(),
-      anyShort(),
-      meq(false),
       meq(0),
       meq(true),
       meq(p)
@@ -135,9 +124,6 @@ class RichHttpToHttp2ConnectionHandlerTest extends FunSuite with BeforeAndAfter 
       meq(mockCtx),
       meq(1),
       captor.capture(),
-      anyInt(),
-      anyShort(),
-      meq(false),
       meq(0),
       meq(false),
       meq(p)
@@ -171,9 +157,6 @@ class RichHttpToHttp2ConnectionHandlerTest extends FunSuite with BeforeAndAfter 
       meq(mockCtx),
       meq(1),
       headersCaptor.capture(),
-      anyInt(),
-      anyShort(),
-      meq(false),
       meq(0),
       meq(false),
       meq(p)
@@ -185,9 +168,6 @@ class RichHttpToHttp2ConnectionHandlerTest extends FunSuite with BeforeAndAfter 
       meq(mockCtx),
       meq(1),
       trailersCaptor.capture(),
-      anyInt(),
-      anyShort(),
-      meq(false),
       meq(0),
       meq(true),
       meq(p)
@@ -213,9 +193,6 @@ class RichHttpToHttp2ConnectionHandlerTest extends FunSuite with BeforeAndAfter 
       meq(mockCtx),
       meq(1),
       headersCaptor.capture(),
-      anyInt(),
-      anyShort(),
-      meq(false),
       meq(0),
       meq(false),
       meq(p)
@@ -236,9 +213,6 @@ class RichHttpToHttp2ConnectionHandlerTest extends FunSuite with BeforeAndAfter 
       meq(mockCtx),
       meq(1),
       trailersCaptor.capture(),
-      anyInt(),
-      anyShort(),
-      meq(false),
       meq(0),
       meq(true),
       meq(p)
@@ -261,9 +235,6 @@ class RichHttpToHttp2ConnectionHandlerTest extends FunSuite with BeforeAndAfter 
       meq(mockCtx),
       meq(1),
       captor.capture(),
-      anyInt(),
-      anyShort(),
-      meq(false),
       meq(0),
       meq(false),
       meq(p)
@@ -295,9 +266,6 @@ class RichHttpToHttp2ConnectionHandlerTest extends FunSuite with BeforeAndAfter 
       meq(mockCtx),
       meq(1),
       captor.capture(),
-      anyInt(),
-      anyShort(),
-      meq(false),
       meq(0),
       meq(true),
       meq(p)

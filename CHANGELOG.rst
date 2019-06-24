@@ -23,6 +23,9 @@ Bug Fixes
 * finagle-core: Ensure ClientDispatcher `queueSize` gauge is removed on transport
   close, instead of waiting for clean-up at GC time. ``PHAB_ID=D331923``
 
+* finagle-http2: Don't propagate stream dependency information for the H2 client.
+  ``PHAB_ID=D332191``
+
 19.6.0
 ------
 
