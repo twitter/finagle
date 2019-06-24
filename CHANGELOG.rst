@@ -13,9 +13,9 @@ Breaking API Changes
 * finagle-base-http: Removed the methods `setStatusCode` and `getStatusCode` from
   `c.t.f.http.Response` which have been deprecated since 2017. ``PHAB_ID=D326326``
 
-* finagle-core: A long deprecated `c.t.f.builder.ServerBuilder#build` method, which
-  takes a `Service[Req, Rep]` and a not fully specified config as params, has been
-  removed. ``PHAB_ID=D330348``
+* finagle-core: All deprecated `c.t.f.builder.ServerBuilder#build` methods have
+  been removed. Users should migrate to using the `build` method which takes a
+  `ServiceFactory[Req, Rep]` as a parameter. ``PHAB_ID=D331011``
 
 Bug Fixes
 ~~~~~~~~~

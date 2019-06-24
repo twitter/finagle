@@ -639,38 +639,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
   ): ListeningServer = build(ServiceFactory.const(service))
 
   /**
-   * Construct the Server, given the provided Service factory.
-   */
-  @deprecated("Use the ServiceFactory variant instead", "5.0.1")
-  final def build(
-    serviceFactory: () => Service[Req, Rep]
-  )(
-    implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: ThisConfig =:= FullySpecifiedConfig
-  ): ListeningServer =
-    build((_: ClientConnection) => serviceFactory())(
-      THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION
-    )
-
-  /**
-   * Construct the Server, given the provided ServiceFactory. This
-   * is useful if the protocol is stateful (e.g., requires authentication
-   * or supports transactions).
-   */
-  @deprecated("Use the ServiceFactory variant instead", "5.0.1")
-  final def build(
-    serviceFactory: (ClientConnection) => Service[Req, Rep]
-  )(
-    implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: ThisConfig =:= FullySpecifiedConfig
-  ): ListeningServer =
-    build(
-      new ServiceFactory[Req, Rep] {
-        def apply(conn: ClientConnection) = Future.value(serviceFactory(conn))
-        def close(deadline: Time) = Future.Done
-      },
-      THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION
-    )
-
-  /**
    * Construct the Server, given the provided ServiceFactory. This
    * is useful if the protocol is stateful (e.g., requires authentication
    * or supports transactions).
@@ -715,13 +683,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder] (
       override def boundAddress: SocketAddress = listeningServer.boundAddress
     }
   }
-
-  @deprecated("Used for ABI compat", "5.0.1")
-  final def build(
-    serviceFactory: ServiceFactory[Req, Rep],
-    THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ServerBuilder_DOCUMENTATION: ThisConfig =:= FullySpecifiedConfig
-  ): ListeningServer =
-    build(serviceFactory)(new ServerConfigEvidence[HasCodec, HasBindTo, HasName] {})
 
   /**
    * Construct a Service, with runtime checks for builder
