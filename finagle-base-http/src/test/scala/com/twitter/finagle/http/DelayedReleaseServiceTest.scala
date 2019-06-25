@@ -99,7 +99,7 @@ class DelayedReleaseServiceTest extends FunSuite with MockitoSugar {
     stub(service.apply(any[Request])).toReturn(Future.exception(new Exception))
 
     val request = Request()
-    request.response.setChunked(true)
+
     proxy(request)
     proxy.close()
     verify(service).close()
