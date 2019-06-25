@@ -3,15 +3,12 @@ package com.twitter.finagle.serverset2.client
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{MockTimer, Time}
-import org.junit.runner.RunWith
-import org.scalatest.FlatSpec
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.FunSuite
 
-@RunWith(classOf[JUnitRunner])
-class StateTrackerTest extends FlatSpec {
+class StateTrackerTest extends FunSuite {
   val statsReceiver = new InMemoryStatsReceiver
 
-  "StateTracker" should "correctly count state durations" in {
+  test("StateTracker correctly counts state durations") {
     Time.withCurrentTimeFrozen { tc =>
       val timer = new MockTimer
       val stateTracker = new StateTracker(statsReceiver, 1.second, timer)

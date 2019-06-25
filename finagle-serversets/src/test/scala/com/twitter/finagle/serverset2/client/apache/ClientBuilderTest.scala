@@ -2,14 +2,11 @@ package com.twitter.finagle.serverset2.client.apache
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.serverset2.client._
-import com.twitter.util.Timer
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.FlatSpec
 import com.twitter.finagle.stats.DefaultStatsReceiver
+import com.twitter.util.Timer
+import org.scalatest.FunSuite
 
-@RunWith(classOf[JUnitRunner])
-class ClientBuilderTest extends FlatSpec {
+class ClientBuilderTest extends FunSuite {
   val config = ClientConfig(
     hosts = "localhost:2181",
     sessionTimeout = 10.seconds,
@@ -20,21 +17,21 @@ class ClientBuilderTest extends FlatSpec {
     timer = Timer.Nil
   )
 
-  "reader" should "return Apache ZK reader" in {
+  test("ClientBuilder.reader returns an Apache ZK reader") {
     val zkr = ClientBuilder().reader()
 
     assert(zkr.value.isInstanceOf[ZooKeeperReader])
     assert(zkr.value.getClass == ApacheZooKeeper.newClient(config).value.getClass)
   }
 
-  "writer" should "return Apache ZK writer" in {
+  test("ClientBuilder.writer returns an Apache ZK writer") {
     val zkw = ClientBuilder().writer()
 
     assert(zkw.value.isInstanceOf[ZooKeeperRW])
     assert(zkw.value.getClass == ApacheZooKeeper.newClient(config).value.getClass)
   }
 
-  "multi" should "raise RuntimeException" in {
+  test("ClientBuilder.multi raises a RuntimeException") {
     intercept[RuntimeException] {
       ClientBuilder().multi()
     }

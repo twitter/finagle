@@ -7,17 +7,13 @@ import com.twitter.io.Buf
 import com.twitter.util.{Return, Await}
 import java.util.concurrent.ExecutionException
 import org.apache.zookeeper
-import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.{eq => meq}
 import org.mockito.Mockito.{doNothing, doThrow, verify, when}
-import org.scalatest.{FlatSpec, OneInstancePerTest}
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
+import org.scalatest.{FunSuite, OneInstancePerTest}
 import scala.collection.JavaConverters._
-
-@RunWith(classOf[JUnitRunner])
-class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePerTest {
+class ApacheZooKeeperTest extends FunSuite with MockitoSugar with OneInstancePerTest {
   val statsReceiver = new InMemoryStatsReceiver
   val mockZK = mock[org.apache.zookeeper.ZooKeeper]
   val watchedZK = {
@@ -70,45 +66,45 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
 
   val watcher = ArgumentCaptor.forClass(classOf[ApacheWatcher])
 
-  "sessionId" should "return proper sessionId" in {
+  test("Zk sessionId returns a proper sessionId") {
     when(mockZK.getSessionId).thenReturn(42)
     assert(zk.sessionId == 42)
   }
 
-  "sessionPasswd" should "return proper sessionPasswd" in {
+  test("Zk sessionPasswd returns a proper sessionPasswd") {
     val pw = List[Byte](1, 2, 3, 4).toArray
     when(mockZK.getSessionPasswd).thenReturn(pw)
     assert(zk.sessionPasswd == Buf.ByteArray.Owned(pw))
   }
 
-  "sessionTimeout" should "return proper duration" in {
+  test("Zk sessionTimeout returns a proper duration") {
     val timeout = 10.seconds
     when(mockZK.getSessionTimeout).thenReturn(timeout.inMilliseconds.toInt)
     assert(zk.sessionTimeout == timeout)
   }
 
-  "addAuthInfo" should "submit properly constructed auth" in {
+  test("Zk addAuthInfo submits properly constructed auth") {
     val scheme = "digest"
     val auth = List[Byte](1, 2, 3, 4).toArray
     zk.addAuthInfo(scheme, data)
     verify(mockZK).addAuthInfo(scheme, auth)
   }
 
-  "getEphemerals" should "raise unimplemented exception" in {
+  test("Zk getEphemerals raises unimplemented exception") {
     intercept[KeeperException.Unimplemented] {
-      Await.result(zk.getEphemerals())
+      Await.result(zk.getEphemerals(), 5.seconds)
     }
   }
 
-  "close" should "submit properly constructed close" in {
+  test("Zk close submits properly constructed close") {
     doNothing().when(mockZK).close()
 
     val closed = zk.close()
 
-    assert(Await.result(closed.liftToTry) == Return.Unit)
+    assert(Await.result(closed.liftToTry, 1.second) == Return.Unit)
   }
 
-  "close" should "handle error conditions" in {
+  test("Zk close handles error conditions") {
     doThrow(new InterruptedException()).when(mockZK).close()
 
     val closed = zk.close()
@@ -118,7 +114,7 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     }
   }
 
-  "create" should "submit properly constructed empty znode create" in {
+  test("Zk create submits properly constructed empty znode create") {
     val created = zk.create(path, None, List(acl), mode)
 
     verify(mockZK).create(
@@ -132,11 +128,11 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
 
     val expected = path + "_expected"
     stringCB.getValue.processResult(apacheOk, path, null, expected)
-    assert(Await.result(created) == expected)
+    assert(Await.result(created, 1.second) == expected)
     assert(statsReceiver.counter("write_successes")() == 1)
   }
 
-  "create" should "submit properly constructed ephemeral empty znode create" in {
+  test("Zk create submits properly constructed ephemeral empty znode create") {
     val created = zk.create(path, None, List(acl), ephMode)
 
     verify(mockZK).create(
@@ -150,11 +146,11 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
 
     val expected = path + "_expected"
     stringCB.getValue.processResult(apacheOk, path, null, expected)
-    assert(Await.result(created) == expected)
+    assert(Await.result(created, 1.second) == expected)
     assert(statsReceiver.counter("ephemeral_successes")() == 1)
   }
 
-  "create" should "submit properly constructed create" in {
+  test("Zk create submits properly constructed create") {
     val created = zk.create(path, Some(data), List(acl), mode)
 
     verify(mockZK).create(
@@ -168,11 +164,11 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
 
     val expected = path + "_expected"
     stringCB.getValue.processResult(apacheOk, path, null, expected)
-    assert(Await.result(created) == expected)
+    assert(Await.result(created, 1.second) == expected)
     assert(statsReceiver.counter("write_successes")() == 1)
   }
 
-  "create" should "handle ZK error" in {
+  test("Zk create handles Zk error") {
     val created = zk.create(path, Some(data), List(acl), mode)
 
     verify(mockZK).create(
@@ -186,12 +182,12 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
 
     stringCB.getValue.processResult(apacheConnLoss, path, null, null)
     intercept[KeeperException.ConnectionLoss] {
-      Await.result(created)
+      Await.result(created, 5.seconds)
     }
     assert(statsReceiver.counter("connection_loss")() == 1)
   }
 
-  "create" should "handle synchronous error" in {
+  test("Zk create handles synchronous error") {
     when(
       mockZK.create(
         meq(path),
@@ -214,76 +210,76 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     )
 
     intercept[IllegalArgumentException] {
-      Await.result(created)
+      Await.result(created, 5.seconds)
     }
     assert(statsReceiver.counter("write_failures")() == 1)
   }
 
-  "delete" should "submit properly constructed versioned delete" in {
+  test("Zk delete submits properly constructed versioned delete") {
     val deleted = zk.delete(path, Some(version))
 
     verify(mockZK).delete(meq(path), meq(version), voidCB.capture, meq(null))
 
     voidCB.getValue.processResult(apacheOk, path, null)
-    assert(Await.result(deleted.liftToTry) == Return.Unit)
+    assert(Await.result(deleted.liftToTry, 1.second) == Return.Unit)
     assert(statsReceiver.counter("write_successes")() == 1)
   }
 
-  "delete" should "submit properly constructed unversioned delete" in {
+  test("Zk delete submits properly constructed unversioned delete") {
     val deleted = zk.delete(path, None)
 
     verify(mockZK).delete(meq(path), meq(-1), voidCB.capture, meq(null))
 
     voidCB.getValue.processResult(apacheOk, path, null)
-    assert(Await.result(deleted.liftToTry) == Return.Unit)
+    assert(Await.result(deleted.liftToTry, 1.second) == Return.Unit)
     assert(statsReceiver.counter("write_successes")() == 1)
   }
 
-  "delete" should "handle ZK error" in {
+  test("Zk delete handles Zk error") {
     val deleted = zk.delete(path, Some(version))
 
     verify(mockZK).delete(meq(path), meq(version), voidCB.capture, meq(null))
 
     voidCB.getValue.processResult(apacheConnLoss, path, null)
     intercept[KeeperException.ConnectionLoss] {
-      Await.result(deleted)
+      Await.result(deleted, 5.seconds)
     }
     assert(statsReceiver.counter("connection_loss")() == 1)
   }
 
-  "exists" should "submit properly constructed exists" in {
+  test("Zk exists submits properly constructed exists") {
     val existed = zk.exists(path)
 
     verify(mockZK).exists(meq(path), meq(null), statCB.capture, meq(null))
 
     statCB.getValue.processResult(apacheOk, path, null, apacheStat)
-    assert(Await.result(existed) == Some(stat))
+    assert(Await.result(existed, 1.second) == Some(stat))
     assert(statsReceiver.counter("read_successes")() == 1)
   }
 
-  "exists" should "handle missing node" in {
+  test("Zk exists handles missing node") {
     val existed = zk.exists(path)
 
     verify(mockZK).exists(meq(path), meq(null), statCB.capture, meq(null))
 
     statCB.getValue.processResult(apacheNoNode, path, null, null)
-    assert(Await.result(existed) == None)
+    assert(Await.result(existed, 1.second) == None)
     assert(statsReceiver.counter("read_successes")() == 1)
   }
 
-  "exists" should "handle ZK error" in {
+  test("Zk exists handles Zk error") {
     val existed = zk.exists(path)
 
     verify(mockZK).exists(meq(path), meq(null), statCB.capture, meq(null))
 
     statCB.getValue.processResult(apacheConnLoss, path, null, null)
     intercept[KeeperException.ConnectionLoss] {
-      Await.result(existed)
+      Await.result(existed, 5.seconds)
     }
     assert(statsReceiver.counter("connection_loss")() == 1)
   }
 
-  "exists" should "handle synchronous error" in {
+  test("Zk exists handles synchronous error") {
     when(mockZK.exists(meq(path), meq(null), statCB.capture, meq(null)))
       .thenThrow(new IllegalArgumentException)
 
@@ -292,44 +288,44 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     verify(mockZK).exists(meq(path), meq(null), statCB.capture, meq(null))
 
     intercept[IllegalArgumentException] {
-      Await.result(existed)
+      Await.result(existed, 5.seconds)
     }
     assert(statsReceiver.counter("read_failures")() == 1)
   }
 
-  "existsWatch" should "submit properly constructed exists" in {
+  test("Zk existsWatch submits properly constructed exists") {
     val existed = zk.existsWatch(path)
 
     verify(mockZK).exists(meq(path), watcher.capture, statCB.capture, meq(null))
 
     statCB.getValue.processResult(apacheOk, path, null, apacheStat)
-    assert(Await.result(existed).value == Some(stat))
+    assert(Await.result(existed, 1.second).value == Some(stat))
     assert(statsReceiver.counter("watch_successes")() == 1)
   }
 
-  "existsWatch" should "handle missing node" in {
+  test("Zk existsWatch handles missing node") {
     val existed = zk.existsWatch(path)
 
     verify(mockZK).exists(meq(path), watcher.capture, statCB.capture, meq(null))
 
     statCB.getValue.processResult(apacheNoNode, path, null, apacheStat)
-    assert(Await.result(existed).value == None)
+    assert(Await.result(existed, 1.second).value == None)
     assert(statsReceiver.counter("watch_successes")() == 1)
   }
 
-  "existsWatch" should "handle ZK error" in {
+  test("Zk existsWatch handles Zk error") {
     val existed = zk.existsWatch(path)
 
     verify(mockZK).exists(meq(path), watcher.capture, statCB.capture, meq(null))
 
     statCB.getValue.processResult(apacheConnLoss, path, null, null)
     intercept[KeeperException.ConnectionLoss] {
-      Await.result(existed)
+      Await.result(existed, 5.seconds)
     }
     assert(statsReceiver.counter("connection_loss")() == 1)
   }
 
-  "existsWatch" should "handle synchronous error" in {
+  test("Zk existsWatch handles synchronous error") {
     when(mockZK.exists(meq(path), watcher.capture, statCB.capture, meq(null)))
       .thenThrow(new IllegalArgumentException)
     val existed = zk.existsWatch(path)
@@ -337,44 +333,44 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     verify(mockZK).exists(meq(path), watcher.capture, statCB.capture, meq(null))
 
     intercept[IllegalArgumentException] {
-      Await.result(existed)
+      Await.result(existed, 5.seconds)
     }
     assert(statsReceiver.counter("watch_failures")() == 1)
   }
 
-  "getData" should "submit properly constructed getData" in {
+  test("Zk getData submits properly constructed getData") {
     val nodeData = zk.getData(path)
 
     verify(mockZK).getData(meq(path), meq(null), dataCB.capture, meq(null))
 
     dataCB.getValue.processResult(apacheOk, path, null, _data, apacheStat)
-    assert(Await.result(nodeData) == Node.Data(Some(data), stat))
+    assert(Await.result(nodeData, 1.second) == Node.Data(Some(data), stat))
     assert(statsReceiver.counter("read_successes")() == 1)
   }
 
-  "getData" should "handle empty znodes" in {
+  test("Zk getData handles empty znodes") {
     val nodeData = zk.getData(path)
 
     verify(mockZK).getData(meq(path), meq(null), dataCB.capture, meq(null))
 
     dataCB.getValue.processResult(apacheOk, path, null, null, apacheStat)
-    assert(Await.result(nodeData) == Node.Data(None, stat))
+    assert(Await.result(nodeData, 1.second) == Node.Data(None, stat))
     assert(statsReceiver.counter("read_successes")() == 1)
   }
 
-  "getData" should "handle ZK error" in {
+  test("Zk getData handles Zk error") {
     val nodeData = zk.getData(path)
 
     verify(mockZK).getData(meq(path), meq(null), dataCB.capture, meq(null))
 
     dataCB.getValue.processResult(apacheConnLoss, path, null, null, null)
     intercept[KeeperException.ConnectionLoss] {
-      Await.result(nodeData)
+      Await.result(nodeData, 5.seconds)
     }
     assert(statsReceiver.counter("connection_loss")() == 1)
   }
 
-  "getData" should "handle synchronous error" in {
+  test("Zk getData handles synchronous error") {
     when(mockZK.getData(meq(path), meq(null), dataCB.capture, meq(null)))
       .thenThrow(new IllegalArgumentException)
     val nodeData = zk.getData(path)
@@ -382,44 +378,44 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     verify(mockZK).getData(meq(path), meq(null), dataCB.capture, meq(null))
 
     intercept[IllegalArgumentException] {
-      Await.result(nodeData)
+      Await.result(nodeData, 5.seconds)
     }
     assert(statsReceiver.counter("read_failures")() == 1)
   }
 
-  "getDataWatch" should "submit properly constructed getData" in {
+  test("Zk getDataWatch submits properly constructed getData") {
     val nodeDataWatch = zk.getDataWatch(path)
 
     verify(mockZK).getData(meq(path), watcher.capture, dataCB.capture, meq(null))
 
     dataCB.getValue.processResult(apacheOk, path, null, _data, apacheStat)
-    assert(Await.result(nodeDataWatch).value == Node.Data(Some(data), stat))
+    assert(Await.result(nodeDataWatch, 1.second).value == Node.Data(Some(data), stat))
     assert(statsReceiver.counter("watch_successes")() == 1)
   }
 
-  "getDataWatch" should "handle empty znodes" in {
+  test("Zk getDataWatch handles empty znodes") {
     val nodeDataWatch = zk.getDataWatch(path)
 
     verify(mockZK).getData(meq(path), watcher.capture, dataCB.capture, meq(null))
 
     dataCB.getValue.processResult(apacheOk, path, null, null, apacheStat)
-    assert(Await.result(nodeDataWatch).value == Node.Data(None, stat))
+    assert(Await.result(nodeDataWatch, 1.second).value == Node.Data(None, stat))
     assert(statsReceiver.counter("watch_successes")() == 1)
   }
 
-  "getDataWatch" should "handle ZK error" in {
+  test("Zk getDataWatch handles Zk error") {
     val nodeDataWatch = zk.getDataWatch(path)
 
     verify(mockZK).getData(meq(path), watcher.capture, dataCB.capture, meq(null))
 
     dataCB.getValue.processResult(apacheConnLoss, path, null, null, null)
     intercept[KeeperException.ConnectionLoss] {
-      Await.result(nodeDataWatch)
+      Await.result(nodeDataWatch, 5.seconds)
     }
     assert(statsReceiver.counter("connection_loss")() == 1)
   }
 
-  "getDataWatch" should "handle synchronous error" in {
+  test("Zk getDataWatch handles synchronous error") {
     when(mockZK.getData(meq(path), watcher.capture, dataCB.capture, meq(null)))
       .thenThrow(new IllegalArgumentException)
     val nodeDataWatch = zk.getDataWatch(path)
@@ -427,54 +423,54 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     verify(mockZK).getData(meq(path), watcher.capture, dataCB.capture, meq(null))
 
     intercept[IllegalArgumentException] {
-      Await.result(nodeDataWatch)
+      Await.result(nodeDataWatch, 5.seconds)
     }
     assert(statsReceiver.counter("watch_failures")() == 1)
   }
 
-  "setData" should "submit properly constructed versioned setData" in {
+  test("Zk setData submits properly constructed versioned setData") {
     val nodeStat = zk.setData(path, Some(data), Some(version))
 
     verify(mockZK).setData(meq(path), meq(_data), meq(version), statCB.capture, meq(null))
 
     statCB.getValue.processResult(apacheOk, path, null, apacheStat)
-    assert(Await.result(nodeStat) == stat)
+    assert(Await.result(nodeStat, 1.second) == stat)
     assert(statsReceiver.counter("write_successes")() == 1)
   }
 
-  "setData" should "submit properly constructed unversioned setData" in {
+  test("Zk setData submits properly constructed unversioned setData") {
     val nodeStat = zk.setData(path, Some(data), None)
 
     verify(mockZK).setData(meq(path), meq(_data), meq(-1), statCB.capture, meq(null))
 
     statCB.getValue.processResult(apacheOk, path, null, apacheStat)
-    assert(Await.result(nodeStat) == stat)
+    assert(Await.result(nodeStat, 1.second) == stat)
     assert(statsReceiver.counter("write_successes")() == 1)
   }
 
-  "setData" should "submit properly constructed unversioned empty znode setData" in {
+  test("Zk setData submits properly constructed unversioned empty znode setData") {
     val nodeStat = zk.setData(path, None, None)
 
     verify(mockZK).setData(meq(path), meq(null), meq(-1), statCB.capture, meq(null))
 
     statCB.getValue.processResult(apacheOk, path, null, apacheStat)
-    assert(Await.result(nodeStat) == stat)
+    assert(Await.result(nodeStat, 1.second) == stat)
     assert(statsReceiver.counter("write_successes")() == 1)
   }
 
-  "setData" should "handle ZK error" in {
+  test("Zk setData handles ZK error") {
     val nodeStat = zk.setData(path, Some(data), Some(version))
 
     verify(mockZK).setData(meq(path), meq(_data), meq(version), statCB.capture, meq(null))
 
     statCB.getValue.processResult(apacheConnLoss, path, null, null)
     intercept[KeeperException.ConnectionLoss] {
-      Await.result(nodeStat)
+      Await.result(nodeStat, 5.seconds)
     }
     assert(statsReceiver.counter("connection_loss")() == 1)
   }
 
-  "setData" should "handle synchronous error" in {
+  test("Zk setData handles synchronous error") {
     when(mockZK.setData(meq(path), meq(_data), meq(version), statCB.capture, meq(null)))
       .thenThrow(new IllegalArgumentException)
     val nodeStat = zk.setData(path, Some(data), Some(version))
@@ -482,34 +478,34 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     verify(mockZK).setData(meq(path), meq(_data), meq(version), statCB.capture, meq(null))
 
     intercept[IllegalArgumentException] {
-      Await.result(nodeStat)
+      Await.result(nodeStat, 5.seconds)
     }
     assert(statsReceiver.counter("write_failures")() == 1)
   }
 
-  "getACL" should "submit properly constructed getACL" in {
+  test("Zk getACL submits properly constructed getACL") {
     val nodeACL = zk.getACL(path)
 
     verify(mockZK).getACL(meq(path), meq(null), aclCB.capture, meq(null))
 
     aclCB.getValue.processResult(apacheOk, path, null, apacheACLS, apacheStat)
-    assert(Await.result(nodeACL) == Node.ACL(acls, stat))
+    assert(Await.result(nodeACL, 1.second) == Node.ACL(acls, stat))
     assert(statsReceiver.counter("read_successes")() == 1)
   }
 
-  "getACL" should "handle ZK error" in {
+  test("Zk getACL handles Zk error") {
     val nodeACL = zk.getACL(path)
 
     verify(mockZK).getACL(meq(path), meq(null), aclCB.capture, meq(null))
 
     aclCB.getValue.processResult(apacheConnLoss, path, null, null, null)
     intercept[KeeperException.ConnectionLoss] {
-      Await.result(nodeACL)
+      Await.result(nodeACL, 5.seconds)
     }
     assert(statsReceiver.counter("connection_loss")() == 1)
   }
 
-  "getACL" should "handle synchronous error" in {
+  test("Zk getACL handles synchronous error") {
     when(mockZK.getACL(meq(path), meq(null), aclCB.capture, meq(null)))
       .thenThrow(new IllegalArgumentException)
     val nodeACL = zk.getACL(path)
@@ -517,44 +513,44 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     verify(mockZK).getACL(meq(path), meq(null), aclCB.capture, meq(null))
 
     intercept[IllegalArgumentException] {
-      Await.result(nodeACL)
+      Await.result(nodeACL, 5.seconds)
     }
     assert(statsReceiver.counter("read_failures")() == 1)
   }
 
-  "setACL" should "submit properly constructed versioned setACL" in {
+  test("Zk setACL submits properly constructed versioned setACL") {
     val nodeStat = zk.setACL(path, acls, Some(version))
 
     verify(mockZK).setACL(meq(path), meq(apacheACLS), meq(version), statCB.capture, meq(null))
 
     statCB.getValue.processResult(apacheOk, path, null, apacheStat)
-    assert(Await.result(nodeStat) == stat)
+    assert(Await.result(nodeStat, 1.second) == stat)
     assert(statsReceiver.counter("write_successes")() == 1)
   }
 
-  "setACL" should "submit properly constructed unversioned setACL" in {
+  test("Zk setACL submits properly constructed unversioned setACL") {
     val nodeStat = zk.setACL(path, acls, None)
 
     verify(mockZK).setACL(meq(path), meq(apacheACLS), meq(-1), statCB.capture, meq(null))
 
     statCB.getValue.processResult(apacheOk, path, null, apacheStat)
-    assert(Await.result(nodeStat) == stat)
+    assert(Await.result(nodeStat, 1.second) == stat)
     assert(statsReceiver.counter("write_successes")() == 1)
   }
 
-  "setACL" should "handle ZK error" in {
+  test("Zk setACL handles Zk error") {
     val nodeStat = zk.setACL(path, acls, Some(version))
 
     verify(mockZK).setACL(meq(path), meq(apacheACLS), meq(version), statCB.capture, meq(null))
 
     statCB.getValue.processResult(apacheConnLoss, path, null, apacheStat)
     intercept[KeeperException.ConnectionLoss] {
-      Await.result(nodeStat)
+      Await.result(nodeStat, 5.seconds)
     }
     assert(statsReceiver.counter("connection_loss")() == 1)
   }
 
-  "setACL" should "handle synchronous error" in {
+  test("Zk setACL handles synchronous error") {
     when(mockZK.setACL(meq(path), meq(apacheACLS), meq(version), statCB.capture, meq(null)))
       .thenThrow(new IllegalArgumentException)
     val nodeStat = zk.setACL(path, acls, Some(version))
@@ -562,34 +558,34 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     verify(mockZK).setACL(meq(path), meq(apacheACLS), meq(version), statCB.capture, meq(null))
 
     intercept[IllegalArgumentException] {
-      Await.result(nodeStat)
+      Await.result(nodeStat, 5.seconds)
     }
     assert(statsReceiver.counter("write_failures")() == 1)
   }
 
-  "getChildren" should "submit properly constructed getChildren" in {
+  test("Zk getChildren submits properly constructed getChildren") {
     val nodeChildren = zk.getChildren(path)
 
     verify(mockZK).getChildren(meq(path), meq(null), childrenCB.capture, meq(null))
 
     childrenCB.getValue.processResult(apacheOk, path, null, apacheChildren, apacheStat)
-    assert(Await.result(nodeChildren) == children)
+    assert(Await.result(nodeChildren, 1.second) == children)
     assert(statsReceiver.counter("read_successes")() == 1)
   }
 
-  "getChildren" should "handle ZK error" in {
+  test("Zk getChildren handles Zk error") {
     val nodeChildren = zk.getChildren(path)
 
     verify(mockZK).getChildren(meq(path), meq(null), childrenCB.capture, meq(null))
 
     childrenCB.getValue.processResult(apacheConnLoss, path, null, apacheChildren, apacheStat)
     intercept[KeeperException.ConnectionLoss] {
-      Await.result(nodeChildren)
+      Await.result(nodeChildren, 5.seconds)
     }
     assert(statsReceiver.counter("connection_loss")() == 1)
   }
 
-  "getChildren" should "handle synchronous error" in {
+  test("Zk getChildren handles synchronous error") {
     when(mockZK.getChildren(meq(path), meq(null), childrenCB.capture, meq(null)))
       .thenThrow(new IllegalArgumentException)
     val nodeChildren = zk.getChildren(path)
@@ -597,34 +593,34 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     verify(mockZK).getChildren(meq(path), meq(null), childrenCB.capture, meq(null))
 
     intercept[IllegalArgumentException] {
-      Await.result(nodeChildren)
+      Await.result(nodeChildren, 5.seconds)
     }
     assert(statsReceiver.counter("read_failures")() == 1)
   }
 
-  "getChildrenWatch" should "submit properly constructed getChildren" in {
+  test("Zk getChildrenWatch submits properly constructed getChildren") {
     val nodeChildren = zk.getChildrenWatch(path)
 
     verify(mockZK).getChildren(meq(path), watcher.capture, childrenCB.capture, meq(null))
 
     childrenCB.getValue.processResult(apacheOk, path, null, apacheChildren, apacheStat)
-    assert(Await.result(nodeChildren).value == children)
+    assert(Await.result(nodeChildren, 1.second).value == children)
     assert(statsReceiver.counter("watch_successes")() == 1)
   }
 
-  "getChildrenWatch" should "handle ZK error" in {
+  test("Zk getChildrenWatch handles Zk error") {
     val nodeChildren = zk.getChildrenWatch(path)
 
     verify(mockZK).getChildren(meq(path), watcher.capture, childrenCB.capture, meq(null))
 
     childrenCB.getValue.processResult(apacheConnLoss, path, null, apacheChildren, apacheStat)
     intercept[KeeperException.ConnectionLoss] {
-      Await.result(nodeChildren)
+      Await.result(nodeChildren, 5.seconds)
     }
     assert(statsReceiver.counter("connection_loss")() == 1)
   }
 
-  "getChildrenWatch" should "handle synchronous error" in {
+  test("Zk getChildrenWatch handles synchronous error") {
     when(mockZK.getChildren(meq(path), watcher.capture, childrenCB.capture, meq(null)))
       .thenThrow(new IllegalArgumentException)
     val nodeChildren = zk.getChildrenWatch(path)
@@ -632,12 +628,12 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     verify(mockZK).getChildren(meq(path), watcher.capture, childrenCB.capture, meq(null))
 
     intercept[IllegalArgumentException] {
-      Await.result(nodeChildren)
+      Await.result(nodeChildren, 5.seconds)
     }
     assert(statsReceiver.counter("watch_failures")() == 1)
   }
 
-  "sync" should "submit properly constructed sync" in {
+  test("Zk sync submits properly constructed sync") {
     val synced = zk.sync(path)
 
     verify(mockZK).sync(
@@ -647,11 +643,11 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     )
 
     voidCB.getValue.processResult(apacheOk, path, null)
-    assert(Await.result(synced.liftToTry) == Return.Unit)
+    assert(Await.result(synced.liftToTry, 1.second) == Return.Unit)
     assert(statsReceiver.counter("read_successes")() == 1)
   }
 
-  "sync" should "handle ZK error" in {
+  test("Zk sync handles Zk error") {
     val synced = zk.sync(path)
 
     verify(mockZK).sync(
@@ -662,12 +658,12 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
 
     voidCB.getValue.processResult(apacheConnLoss, path, null)
     intercept[KeeperException.ConnectionLoss] {
-      Await.result(synced)
+      Await.result(synced, 5.seconds)
     }
     assert(statsReceiver.counter("connection_loss")() == 1)
   }
 
-  "sync" should "handle synchronous error" in {
+  test("Zk sync handles synchronous error") {
     when(
       mockZK.sync(
         meq(path),
@@ -684,7 +680,7 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     )
 
     intercept[IllegalArgumentException] {
-      Await.result(synced)
+      Await.result(synced, 5.seconds)
     }
     assert(statsReceiver.counter("read_failures")() == 1)
   }
