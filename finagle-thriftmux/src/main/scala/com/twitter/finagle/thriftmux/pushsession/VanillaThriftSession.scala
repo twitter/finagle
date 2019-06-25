@@ -152,8 +152,6 @@ private final class VanillaThriftSession(
     handle.onClose
   }
 
-  private[this] def isDraining: Boolean = state.isInstanceOf[Draining]
-
   // For closing we attempt to field dispatches until we've received an Rdrain
   // and then subsequently have no more outstanding dispatches
   private[this] def handleClose(deadline: Time): Unit = {
