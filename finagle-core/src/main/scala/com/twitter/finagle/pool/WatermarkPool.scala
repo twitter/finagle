@@ -60,12 +60,17 @@ final class WatermarkPool[Req, Rep](
 
   private[this] val numWaiters = statsReceiver.counter("pool_num_waited")
   private[this] val tooManyWaiters = statsReceiver.counter("pool_num_too_many_waiters")
-  private[this] val waitersStat = statsReceiver.addGauge("pool_waiters") {
+  private[this] val waitersGauge = statsReceiver.addGauge("pool_waiters") {
     thePool.synchronized { waiters.size }
   }
-  private[this] val sizeStat = statsReceiver.addGauge("pool_size") {
-    thePool.synchronized { numServices }
-  }
+  private[this] val sizeGauge = statsReceiver.addGauge("pool_size") { size }
+
+  /**
+   * The current size of the pool.
+   *
+   * Exposed for testing.
+   */
+  private[pool] def size: Int = synchronized(numServices)
 
   /**
    * Flush waiters by creating new services for them. This must
@@ -235,6 +240,10 @@ final class WatermarkPool[Req, Rep](
       (new ServiceWrapper(svc)).close()
     }
     queue.clear()
+
+    // Clear out the gauges
+    sizeGauge.remove()
+    waitersGauge.remove()
 
     // Close the underlying factory.
     factory.close(deadline)

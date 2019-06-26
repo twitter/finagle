@@ -113,6 +113,7 @@ private class ThreadUsage(statsReceiver: StatsReceiver, timer: Timer) extends Cl
 
   def close(deadline: Time): Future[Unit] = {
     computeTask.cancel()
+    gauges.foreach(_.remove())
     Future.Done
   }
 }

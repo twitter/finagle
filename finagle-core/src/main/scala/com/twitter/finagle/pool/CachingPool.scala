@@ -76,16 +76,17 @@ private[finagle] class CachingPool[Req, Rep](
     }
   }
 
-  def close(deadline: Time) = CachingPool.this.synchronized {
+  def close(deadline: Time): Future[Unit] = CachingPool.this.synchronized {
     isOpen = false
 
     cache.evictAll()
+    sizeGauge.remove()
     factory.close(deadline)
   }
 
-  override def status =
+  override def status: Status =
     if (isOpen) factory.status
     else Status.Closed
 
-  override val toString = "caching_pool_%s".format(factory.toString)
+  override val toString: String = "caching_pool_%s".format(factory.toString)
 }

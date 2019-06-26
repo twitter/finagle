@@ -314,40 +314,38 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
       val sr = new InMemoryStatsReceiver
       val wmp = new WatermarkPool[Int, Int](svcFac, 0, 5, sr)
 
-      def pool_size() = sr.gauges(Seq("pool_size"))()
-
       val svc1 = Await.result(wmp(), 5.seconds)
-      assert(pool_size() == 1)
+      assert(wmp.size == 1)
       val svc2 = Await.result(wmp(), 5.seconds)
-      assert(pool_size() == 2)
+      assert(wmp.size == 2)
       val svc3 = Await.result(wmp(), 5.seconds)
-      assert(pool_size() == 3)
+      assert(wmp.size == 3)
 
       Await.ready(svc3.close(), 5.seconds)
-      assert(pool_size() == 2)
+      assert(wmp.size == 2)
 
       // closing the same instance again, is a no-op
       Await.ready(svc3.close(), 5.seconds)
-      assert(pool_size() == 2)
+      assert(wmp.size == 2)
 
       val svc4 = Await.result(wmp(), 5.seconds)
-      assert(pool_size() == 3)
+      assert(wmp.size == 3)
 
       // another no-op on the already closed svc3
       Await.ready(svc3.close(), 5.seconds)
-      assert(pool_size() == 3)
+      assert(wmp.size == 3)
 
       // first close on svc4
       Await.ready(svc4.close(), 5.seconds)
-      assert(pool_size() == 2)
+      assert(wmp.size == 2)
 
       // first close on svc2
       Await.ready(svc2.close(), 5.seconds)
-      assert(pool_size() == 1)
+      assert(wmp.size == 1)
 
       // first close on svc1
       Await.ready(svc1.close(), 5.seconds)
-      assert(pool_size() == 0)
+      assert(wmp.size == 0)
     }
 
     it("allows service reuse without messing up pool accounting") {
@@ -360,22 +358,20 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
       val sr = new InMemoryStatsReceiver
       val wmp = new WatermarkPool[Int, Int](svcFac, 0, 1, sr)
 
-      def pool_size() = sr.gauges(Seq("pool_size"))()
-
-      assert(pool_size() == 0)
+      assert(wmp.size == 0)
       val svc1 = Await.result(wmp(), 5.seconds)
-      assert(pool_size() == 1)
+      assert(wmp.size == 1)
       val waitingSvc = wmp()
       Await.result(svc1.close(), 5.seconds)
-      assert(pool_size() == 1) // we have a waiter so the service should go back in the pool
+      assert(wmp.size == 1) // we have a waiter so the service should go back in the pool
       val svc2 = Await.result(waitingSvc, 5.seconds)
 
       // double-closing first service is a no-op
       Await.ready(svc1.close(), 5.seconds)
-      assert(pool_size() == 1)
+      assert(wmp.size == 1)
 
       Await.result(svc2.close(), 5.seconds)
-      assert(pool_size() == 0)
+      assert(wmp.size == 0)
     }
 
     it("should not leak services when they are born unhealthy") {
@@ -484,14 +480,13 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
   describe("a closed pool") {
     it("should drain the queue") {
       new WatermarkPoolLowOneHighFive {
-        def pool_size() = sr.gauges(Seq("pool_size"))()
         when(factory()).thenReturn(Future.value(service))
         val s = Await.result(pool())
-        assert(pool_size() == 1)
+        assert(pool.size == 1)
         s.close()
         verify(service, never()).close(any[Time])
         pool.close()
-        assert(pool_size() == 0)
+        assert(pool.size == 0)
         verify(service).close(any[Time])
       }
     }
