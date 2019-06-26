@@ -42,13 +42,11 @@ object Cors {
     maxAge: Option[Duration] = None)
 
   /** A CORS policy that lets you do whatever you want.  Don't use this in production. */
-  val UnsafePermissivePolicy: Policy = Policy(allowsOrigin = { origin =>
-    Some(origin)
-  }, allowsMethods = { method =>
-    Some(method :: Nil)
-  }, allowsHeaders = { headers =>
-    Some(headers)
-  }, supportsCredentials = true)
+  val UnsafePermissivePolicy: Policy = Policy(
+    allowsOrigin = origin => Some(origin),
+    allowsMethods = method => Some(Seq(method)),
+    allowsHeaders = headers => Some(headers),
+    supportsCredentials = true)
 
   /**
    * An HTTP filter that handles preflight (OPTIONS) requests and sets CORS response headers
@@ -60,19 +58,15 @@ object Cors {
      * Simple Cross-Origin Request, Actual Request, and Redirects
      */
 
-    protected[this] def getOrigin(request: Request): Option[String] = {
-      /*
-       * If the Origin header is not present terminate this set of steps. The request is outside
-       * the scope of this specification.
-       */
-      request.headerMap.get("Origin").flatMap { origin =>
-        /*
-         * If the value of the Origin header is not a case-sensitive match for any of the values
-         * in list of origins, do not set any additional headers and terminate this set of steps.
-         */
-        policy.allowsOrigin(origin)
-      }
-    }
+    /*
+     * If the Origin header is not present terminate this set of steps. The request is outside
+     * the scope of this specification.
+     *
+     * If the value of the Origin header is not a case-sensitive match for any of the values
+     * in list of origins, do not set any additional headers and terminate this set of steps.
+     */
+    protected[this] def getOrigin(request: Request): Option[String] =
+      request.headerMap.get("Origin").flatMap(policy.allowsOrigin)
 
     /**
      * If the resource supports credentials add a single Access-Control-Allow-Origin
@@ -85,7 +79,7 @@ object Cors {
      *
      * n.b. The string "*" cannot be used for a resource that supports credentials.
      */
-    protected[this] def setOriginAndCredentials(response: Response, origin: String): Response = {
+    private[this] def setOriginAndCredentials(response: Response, origin: String): Response = {
       response.headerMap.add("Access-Control-Allow-Origin", origin)
       if (policy.supportsCredentials && origin != "*") {
         response.headerMap.addUnsafe("Access-Control-Allow-Credentials", "true")
@@ -125,19 +119,16 @@ object Cors {
 
     /** https://www.w3.org/TR/cors/#resource-requests */
     protected[this] def handleSimple(request: Request, response: Response): Response =
-      getOrigin(request) map {
-        setOriginAndCredentials(response, _)
-      } map {
-        addExposedHeaders(_)
-      } getOrElse response
+      getOrigin(request)
+        .map(setOriginAndCredentials(response, _))
+        .map(addExposedHeaders)
+        .getOrElse(response)
 
     /*
      * Preflight (OPTIONS) requests
      */
-
     protected[this] object Preflight {
-      def unapply(request: Request): Boolean =
-        request.method == Method.Options
+      def unapply(request: Request): Boolean = request.method == Method.Options
     }
 
     /** Let method be the value as result of parsing the Access-Control-Request-Method header. */
@@ -150,7 +141,7 @@ object Cors {
      * Add one or more Access-Control-Allow-Methods headers consisting of (a subset of) the list of
      * methods.
      */
-    protected[this] def setMethod(response: Response, methods: Seq[String]): Response = {
+    private[this] def setMethod(response: Response, methods: Seq[String]): Response = {
       response.headerMap.set("Access-Control-Allow-Methods", methods.mkString(", "))
       response
     }
@@ -159,8 +150,8 @@ object Cors {
      * Optionally add a single Access-Control-Max-Age header with as value the amount of seconds
      * the user agent is allowed to cache the result of the request.
      */
-    protected[this] def setMaxAge(response: Response): Response = {
-      policy.maxAge foreach { maxAge =>
+    private[this] def setMaxAge(response: Response): Response = {
+      policy.maxAge.foreach { maxAge =>
         response.headerMap.setUnsafe("Access-Control-Max-Age", maxAge.inSeconds.toString)
       }
       response
@@ -176,7 +167,7 @@ object Cors {
     protected[this] def getHeaders(request: Request): Seq[String] =
       request.headerMap.get("Access-Control-Request-Headers") match {
         case Some(value) => commaSpace.split(value).toSeq
-        case None => Seq.empty
+        case None => Nil
       }
 
     /**
@@ -186,7 +177,7 @@ object Cors {
      * Add one or more Access-Control-Allow-Headers headers consisting of (a subset of) the list of
      * headers.
      */
-    protected[this] def setHeaders(response: Response, headers: Seq[String]): Response = {
+    private[this] def setHeaders(response: Response, headers: Seq[String]): Response = {
       if (headers.nonEmpty) {
         response.headerMap.set("Access-Control-Allow-Headers", headers.mkString(", "))
       }
@@ -195,18 +186,17 @@ object Cors {
 
     /** https://www.w3.org/TR/cors/#resource-preflight-requests */
     protected[this] def handlePreflight(request: Request): Option[Response] =
-      getOrigin(request) flatMap { origin =>
-        getMethod(request) flatMap { method =>
+      getOrigin(request).flatMap { origin =>
+        getMethod(request).flatMap { method =>
           val headers = getHeaders(request)
-          policy.allowsMethods(method) flatMap { allowedMethods =>
-            policy.allowsHeaders(headers) map { allowedHeaders =>
-              setHeaders(
-                setMethod(
-                  setMaxAge(setOriginAndCredentials(request.response, origin)),
-                  allowedMethods
-                ),
-                allowedHeaders
-              )
+          policy.allowsMethods(method).flatMap { allowedMethods =>
+            policy.allowsHeaders(headers).map { allowedHeaders =>
+              val response = Response()
+              setOriginAndCredentials(response, origin)
+              setMaxAge(response)
+              setMethod(response, allowedMethods)
+              setHeaders(response, allowedHeaders)
+              response
             }
           }
         }
@@ -222,13 +212,11 @@ object Cors {
     def apply(request: Request, service: Service[Request, Response]): Future[Response] = {
       val response = request match {
         case Preflight() =>
-          Future {
-            // If preflight is not acceptable, just return a 200 without CORS headers
-            handlePreflight(request) getOrElse request.response
-          }
-        case _ => service(request) map { handleSimple(request, _) }
+          // If preflight is not acceptable, just return a 200 without CORS headers
+          Future(handlePreflight(request).getOrElse(Response()))
+        case _ => service(request).map(handleSimple(request, _))
       }
-      response map { setVary(_) }
+      response.map(setVary)
     }
   }
 }
@@ -250,12 +238,7 @@ object CorsFilter {
     val methodList = Some(sep.split(methods).toSeq)
     val headerList = Some(sep.split(headers).toSeq)
     val exposeList = sep.split(exposes).toSeq
-    new Cors.HttpFilter(Cors.Policy({ _ =>
-      Some(origin)
-    }, { _ =>
-      methodList
-    }, { _ =>
-      headerList
-    }, exposeList))
+    new Cors.HttpFilter(
+      Cors.Policy(_ => Some(origin), _ => methodList, _ => headerList, exposeList))
   }
 }

@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-http: `c.t.f.http.Cors` has been changed to no longer use the `c.t.f.http.Response`
+  associated with the passed in `c.t.f.http.Request`. ``PHAB_ID=D332765``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -16,6 +22,9 @@ Breaking API Changes
 * finagle-core: All deprecated `c.t.f.builder.ServerBuilder#build` methods have
   been removed. Users should migrate to using the `build` method which takes a
   `ServiceFactory[Req, Rep]` as a parameter. ``PHAB_ID=D331011``
+
+* finagle-http: The `setOriginAndCredentials`, `setMaxAge`, `setMethod`, and `setHeaders` methods
+  of `c.t.f.http.Cors.HttpFilter` are no longer overridable. ``PHAB_ID=D332765``
 
 Bug Fixes
 ~~~~~~~~~
