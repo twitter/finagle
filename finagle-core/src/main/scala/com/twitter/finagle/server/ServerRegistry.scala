@@ -9,9 +9,33 @@ import java.util.function.{Function => JFunction}
 import java.util.logging.Logger
 import scala.collection.JavaConverters._
 
-private[twitter] object ServerRegistry extends StackRegistry {
+private[twitter] object ServerRegistry extends ServerRegistry {
   private val log = Logger.getLogger(getClass.getName)
-  private var addrNames = Map[SocketAddress, String]()
+
+  /**
+   * Used to maintain a registry of client connections to a server, represented by the remote
+   * [[SocketAddress]], to [[ClientConnection]].
+   *
+   * @note This is scoped as private[twitter] so that it is accessible by TwitterServer.
+   */
+  private[twitter] class ConnectionRegistry(localAddr: SocketAddress) {
+    private[this] val map = new ConcurrentHashMap[SocketAddress, ClientConnection]
+
+    def register(session: ClientConnection): ClientConnection =
+      map.put(session.remoteAddress, session)
+
+    def unregister(session: ClientConnection): Unit = map.remove(session.remoteAddress)
+
+    def iterator: Iterator[ClientConnection] = map.values.iterator.asScala
+
+    def clear(): Unit = map.clear()
+  }
+}
+
+private[twitter] class ServerRegistry extends StackRegistry {
+  import ServerRegistry._
+
+  private[this] var addrNames = Map[SocketAddress, String]()
 
   def registryName: String = "server"
 
@@ -52,23 +76,5 @@ private[twitter] object ServerRegistry extends StackRegistry {
       new ConnectionRegistry(localAddr)
   }
 
-  /**
-   * Used to maintain a registry of client connections to a server, represented by the remote
-   * [[SocketAddress]], to [[ClientConnection]].
-   *
-   * @note This is scoped as private[twitter] so that it is accessible by TwitterServer.
-   */
-  private[twitter] class ConnectionRegistry(localAddr: SocketAddress) {
-    private[this] val map = new ConcurrentHashMap[SocketAddress, ClientConnection]
-
-    def register(session: ClientConnection): ClientConnection =
-      map.put(session.remoteAddress, session)
-
-    def unregister(session: ClientConnection): Unit = map.remove(session.remoteAddress)
-
-    def iterator: Iterator[ClientConnection] = map.values.iterator.asScala
-
-    // Exposed for testing
-    def clear(): Unit = map.clear()
-  }
+  private[twitter] def serverAddresses: Seq[SocketAddress] = registries.keySet().asScala.toSeq
 }
