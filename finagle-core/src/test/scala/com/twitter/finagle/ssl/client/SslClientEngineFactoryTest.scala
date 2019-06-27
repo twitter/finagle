@@ -21,14 +21,14 @@ class SslClientEngineFactoryTest extends FunSuite {
     new Engine(sslContext.createSSLEngine())
   }
 
-  test("getHostname with config.hostname set") {
+  test("getHostString with config.hostname set") {
     val config = SslClientConfiguration(hostname = Some("localhost.twitter.com"))
-    assert("localhost.twitter.com" == SslClientEngineFactory.getHostname(isa, config))
+    assert("localhost.twitter.com" == SslClientEngineFactory.getHostString(isa, config))
   }
 
-  test("getHostname without config.hostname set") {
+  test("getHostString without config.hostname set") {
     val config = SslClientConfiguration()
-    assert("localhost" == SslClientEngineFactory.getHostname(isa, config))
+    assert("localhost" == SslClientEngineFactory.getHostString(isa, config))
   }
 
   test("configureEngine sets client mode, protocols, and cipher suites") {

@@ -79,19 +79,6 @@ object SslClientEngineFactory {
 
   /**
    * Return the hostname from the [[SslClientConfiguration configuration]] if set,
-   * or fall back to the hostname of the `java.net.InetSocketAddress`.
-   *
-   * @note If the config does not contain a hostname, and the address was created
-   * with a literal IP address, this method will perform a reverse DNS lookup.
-   */
-  def getHostname(isa: InetSocketAddress, config: SslClientConfiguration): String =
-    config.hostname match {
-      case Some(host) => host
-      case None => isa.getHostName
-    }
-
-  /**
-   * Return the hostname from the [[SslClientConfiguration configuration]] if set,
    * or fall back to the host string of the `java.net.InetSocketAddress`.
    *
    * @note If the config does not contain a hostname, this method will not perform

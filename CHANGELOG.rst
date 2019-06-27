@@ -27,6 +27,10 @@ Breaking API Changes
   been removed. Users should migrate to using the `build` method which takes a
   `ServiceFactory[Req, Rep]` as a parameter. ``PHAB_ID=D331011``
 
+* finagle-core: The `c.t.f.ssl.client.SslClientEngineFactory#getHostname` method has been removed.
+  All uses should be changed to use the `getHostString` method of `SslClientEngineFactory` instead.
+  ``PHAB_ID=DD334087``
+
 * finagle-http: The `setOriginAndCredentials`, `setMaxAge`, `setMethod`, and `setHeaders` methods
   of `c.t.f.http.Cors.HttpFilter` are no longer overridable. ``PHAB_ID=D332765``
 
