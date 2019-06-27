@@ -13,6 +13,10 @@ Runtime Behavior Changes
 * finagle-http: `c.t.f.http.Cors` has been changed to no longer use the `c.t.f.http.Response`
   associated with the passed in `c.t.f.http.Request`. ``PHAB_ID=D332765``
 
+* finagle-http: `c.t.f.http.filter.ExceptionFilter` has been changed to no longer
+  use the `c.t.f.http.Response` associated with the passed in `c.t.f.http.Request`.
+  ``PHAB_ID=D333509``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

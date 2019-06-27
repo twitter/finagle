@@ -30,11 +30,11 @@ class ExceptionFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response
     case e: CancelledRequestException =>
       // This only happens when ChannelService cancels a reply.
       log.warning("cancelled request: uri:%s", request.uri)
-      respond(request, ClientClosedRequestStatus)
+      respond(ClientClosedRequestStatus)
     case e: Throwable =>
       try {
         log.warning(e, "exception: uri:%s exception:%s", request.uri, e)
-        respond(request, Status.InternalServerError)
+        respond(Status.InternalServerError)
       } catch {
         // logging or internals are broken.  Write static string to console -
         // don't attempt to include request or exception.
@@ -44,13 +44,8 @@ class ExceptionFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response
       }
   }
 
-  private def respond(request: REQUEST, responseStatus: Status): Future[Response] = {
-    val response = request.response
-    response.status = responseStatus
-    response.clearContent()
-    response.contentLength = 0
-    Future.value(response)
-  }
+  private def respond(responseStatus: Status): Future[Response] =
+    Future.value(Response(responseStatus))
 }
 
 object ExceptionFilter extends ExceptionFilter[Request] {

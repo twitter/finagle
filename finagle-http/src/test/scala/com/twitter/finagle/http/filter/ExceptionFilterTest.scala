@@ -41,7 +41,7 @@ class ExceptionFilterTest extends FunSuite {
 
     assert(response.status == Status.InternalServerError)
     assert(response.contentString == "")
-    assert(response.contentLength == Some(0))
+    assert(response.contentLength == None)
   }
 
   test("handle throw") {
@@ -50,7 +50,7 @@ class ExceptionFilterTest extends FunSuite {
 
     assert(response.status == Status.InternalServerError)
     assert(response.contentString == "")
-    assert(response.contentLength == Some(0))
+    assert(response.contentLength == None)
   }
 
   test("handle cancel") {
@@ -59,6 +59,6 @@ class ExceptionFilterTest extends FunSuite {
 
     assert(response.statusCode == 499)
     assert(response.contentString == "")
-    assert(response.contentLength == Some(0))
+    assert(response.contentLength == None)
   }
 }
