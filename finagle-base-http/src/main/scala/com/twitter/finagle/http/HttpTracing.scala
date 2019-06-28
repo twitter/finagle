@@ -8,6 +8,7 @@ object HttpTracing {
    * See [[headers()]] for Java compatibility.
    */
   object Header {
+    val TraceContext = "b3"
     val TraceId = "X-B3-TraceId"
     val SpanId = "X-B3-SpanId"
     val ParentSpanId = "X-B3-ParentSpanId"

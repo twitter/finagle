@@ -84,4 +84,34 @@ class TraceInfoTest extends FunSuite {
       )
     )
   }
+
+  test("b3-header is parsed into a proper TraceId, most basic header") {
+    val req = Request(Method.Get, "/")
+    req.headerMap.put("b3", "0000000000000abc-0000000000000def")
+    TraceInfo.convertB3Trace(req)
+    assert(req.headerMap.keys == Set("X-B3-TraceId", "X-B3-SpanId"))
+  }
+
+  test("b3 header, just sampled/debug flag") {
+    val req = Request(Method.Get, "/")
+    // flags == 0
+    req.headerMap.put("b3", "0")
+    TraceInfo.convertB3Trace(req)
+    assert(req.headerMap.keys == Set("X-B3-Flags"))
+
+    // debug == d
+    req.headerMap.clear
+    req.headerMap.put("b3", "1")
+    TraceInfo.convertB3Trace(req)
+
+    assert(req.headerMap.keys == Set("X-B3-Sampled"))
+  }
+
+  test("b3 header with all the fields") {
+    val req = Request(Method.Get, "/")
+    req.headerMap.put("b3", "0000000000000abc-0000000000000def-1-0000000000000def")
+    TraceInfo.convertB3Trace(req)
+    assert(
+      req.headerMap.keys == Set("X-B3-SpanId", "X-B3-Sampled", "X-B3-ParentSpanId", "X-B3-TraceId"))
+  }
 }

@@ -11,7 +11,54 @@ private object TraceInfo {
     while (iter.hasNext) headers -= iter.next()
   }
 
+  def convertB3Trace(request: Request) =
+    if (request.headerMap.contains(Header.TraceContext)) {
+      def handleSampled(headers: HeaderMap, value: String): Unit =
+        value match {
+          case "0" => headers.set(Header.Flags, "0")
+          case "d" => headers.set(Header.Flags, "1")
+          case "1" => headers.set(Header.Sampled, "1")
+          case _ => ()
+        }
+      def handleTraceAndSpanIds(headers: HeaderMap, a: String, b: String): Unit = {
+        headers.set(Header.TraceId, a)
+        headers.set(Header.SpanId, b)
+      }
+
+      val _ = request.headerMap.get(Header.TraceContext).map(_.split("-").toList) match {
+        case Some(a) =>
+          val headers = request.headerMap
+          a.size match {
+            case 0 =>
+              // bogus
+              ()
+            case 1 =>
+              // either debug flag or sampled
+              handleSampled(headers, a(0))
+            case 2 =>
+              // this is required to be traceId, spanId
+              handleTraceAndSpanIds(headers, a(0), a(1))
+            case 3 =>
+              handleTraceAndSpanIds(headers, a(0), a(1))
+              handleSampled(headers, a(2))
+            case 4 =>
+              handleTraceAndSpanIds(headers, a(0), a(1))
+              handleSampled(headers, a(2))
+              headers.set(Header.ParentSpanId, a(3))
+          }
+        case None =>
+          ()
+      }
+      request.headerMap -= "b3"
+    }
+
   def letTraceIdFromRequestHeaders[R](request: Request)(f: => R): R = {
+    // rather than rewrite all this to handle reading and writing the
+    // new b3 trace header format this code sets up the request to
+    // allow the existing code to consume, but not produce, b3 header
+    // traces.
+    convertB3Trace(request)
+
     val id =
       if (Header.hasAllRequired(request.headerMap)) {
         val spanId = SpanId.fromString(request.headerMap(Header.SpanId))
