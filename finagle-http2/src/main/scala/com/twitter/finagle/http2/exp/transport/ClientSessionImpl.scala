@@ -3,6 +3,7 @@ package com.twitter.finagle.http2.exp.transport
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.http2.DeadConnectionException
 import com.twitter.finagle.http2.transport.ClientSession
+import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.netty4.param.Allocator
 import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.transport.Transport
@@ -52,11 +53,14 @@ private final class ClientSessionImpl(
     codec
   }
 
-  private[this] val bootstrap: Http2StreamChannelBootstrap =
+  private[this] val bootstrap: Http2StreamChannelBootstrap = {
+    // Note that we need to invert the boolean since auto read means no backpressure.
+    val streamAutoRead = !params[Netty4Transporter.Backpressure].backpressure
     new Http2StreamChannelBootstrap(channel)
       .option(ChannelOption.ALLOCATOR, params[Allocator].allocator)
-      .option[JBool](ChannelOption.AUTO_READ, false) // backpressure for streams
+      .option[JBool](ChannelOption.AUTO_READ, streamAutoRead)
       .handler(initializer)
+  }
 
   // Thread safety provided by synchronization on `this`
   private[this] var closeInitiated: Boolean = false

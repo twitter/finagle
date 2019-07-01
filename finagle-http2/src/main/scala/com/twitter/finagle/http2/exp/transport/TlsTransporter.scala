@@ -22,7 +22,7 @@ import com.twitter.finagle.param.{Stats, Timer}
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.Stack
 import com.twitter.util.Future
-import io.netty.channel.{Channel, ChannelPipeline}
+import io.netty.channel.Channel
 import io.netty.handler.ssl.{ApplicationProtocolNames, SslHandler}
 import java.net.SocketAddress
 
@@ -97,23 +97,18 @@ object TlsTransporter {
 
   def make(addr: SocketAddress, params: Stack.Params): Transporter[Any, Any, TransportContext] = {
     val connectionBuilder = {
-      // current http2 client implementation doesn't support
-      // netty-style backpressure
-      // https://github.com/netty/netty/issues/3667#issue-69640214
-      val withBackpressure = params + Netty4Transporter.Backpressure(false)
+      // For the initial TLS handshake and MultiplexCodec handler we don't want back pressure
+      // so we disable it for now. If we end up with a HTTP/1.x session we will honor the
+      // settings specified in the params when reconfiguring as a HTTP/1.x pipeline.
       ConnectionBuilder.rawClient(
-        init(withBackpressure),
+        _ => (),
         addr,
-        withBackpressure
+        params + Netty4Transporter.Backpressure(false)
       )
     }
 
     val underlyingHttp11 = Netty4HttpTransporter(params)(addr)
     new TlsTransporter(connectionBuilder, params, underlyingHttp11)
-  }
-
-  private def init(params: Stack.Params)(pipeline: ChannelPipeline): Unit = {
-    // nop
   }
 
   def configureHttp2Pipeline(channel: Channel, params: Stack.Params): ClientSession = {
@@ -128,7 +123,14 @@ object TlsTransporter {
     val pipeline = channel.pipeline
     pipeline.addLast(HttpCodecName, newHttpClientCodec(params))
     initClient(params)(pipeline)
-    pipeline.channel.config.setAutoRead(false)
+
+    // We've found ourselves with a HTTP/1.x connection so we need to configure the
+    // socket pipeline with back pressure to whatever the params say. Unfortunately,
+    // we need to make sure to properly invert the boolean since
+    // auto read means no backpressure.
+    val autoRead = !params[Netty4Transporter.Backpressure].backpressure
+    pipeline.channel.config.setAutoRead(autoRead)
+
     // This is a traditional channel, so we want to keep the stack traces.
     new ChannelTransport(channel, new AsyncQueue[Any], omitStackTraceOnInactive = false)
   }

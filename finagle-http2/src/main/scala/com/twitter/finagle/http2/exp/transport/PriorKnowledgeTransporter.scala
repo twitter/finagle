@@ -55,6 +55,8 @@ private final class PriorKnowledgeTransporter private (
 
   private[this] def initH2SocketChannel(channel: Channel): ClientSession = {
     upgradeCounter.incr()
+    // By design, the MultiplexCodec handler needs the socket channel to have auto-read enabled.
+    // The stream channels are configured appropriately via the params in the `ClientSessionImpl`.
     channel.config.setAutoRead(true) // Needs to be on for h2
     val codec = MultiplexCodecBuilder.clientMultiplexCodec(params, None)
     MultiplexCodecBuilder.addStreamsGauge(statsReceiver, codec, channel)
@@ -66,6 +68,7 @@ private final class PriorKnowledgeTransporter private (
 }
 
 private[http2] object PriorKnowledgeTransporter {
+
   def make(addr: SocketAddress, params: Stack.Params): Transporter[Any, Any, TransportContext] =
     new PriorKnowledgeTransporter(addr, params)
 
