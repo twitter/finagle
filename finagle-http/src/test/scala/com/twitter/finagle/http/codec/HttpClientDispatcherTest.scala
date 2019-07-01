@@ -4,7 +4,7 @@ import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.Status
 import com.twitter.finagle.http.{Request, Response, Version, Status => HttpStatus}
 import com.twitter.finagle.netty4.http.{Bijections, Netty4ClientStreamTransport}
-import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.transport.{
   QueueTransport,
   SimpleTransportContext,
@@ -143,10 +143,15 @@ class HttpClientDispatcherTest extends FunSuite {
   }
 
   test("invalid message") {
+    val statsReceiver = new InMemoryStatsReceiver()
     val (in, out) = mkPair()
-    val disp = new HttpClientDispatcher(in, NullStatsReceiver)
+    val disp = new HttpClientDispatcher(in, statsReceiver)
     out.write("invalid message")
     intercept[IllegalArgumentException] { Await.result(disp(Request())) }
+
+    assert(statsReceiver.counters(Seq("stream", "failures")) == 1)
+    assert(
+      statsReceiver.counters(Seq("stream", "failures", "java.lang.IllegalArgumentException")) == 1)
   }
 
   test("not chunked") {

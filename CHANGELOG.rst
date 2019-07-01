@@ -22,6 +22,9 @@ Runtime Behavior Changes
   use the `c.t.f.http.Response` associated with the passed in `c.t.f.http.Request`.
   ``PHAB_ID=D333509``
 
+* finagle-http: Optimize creation of new Http Dispatchers by re-using created metrics and loggers.
+  ``PHAB_ID=D335114``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

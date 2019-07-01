@@ -3,9 +3,15 @@ package com.twitter.finagle.http.codec
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.http.{Fields, Request, Response}
 import com.twitter.finagle.http.exp.{Multi, StreamTransport}
-import com.twitter.finagle.stats.{StatsReceiver, RollupStatsReceiver}
+import com.twitter.finagle.stats.{CategorizingExceptionStatsHandler, StatsReceiver}
 import com.twitter.logging.Logger
-import com.twitter.util.{Future, Promise, Return, Throwables}
+import com.twitter.util.{Future, Promise, Return}
+
+private[finagle] object HttpClientDispatcher {
+  private val logger = Logger.get(getClass())
+  private val unit: (Unit, Unit) => Unit = (_, _) => ()
+  private val exceptionStatsHandler = new CategorizingExceptionStatsHandler()
+}
 
 /**
  * Client dispatcher for HTTP.
@@ -20,12 +26,7 @@ private[finagle] class HttpClientDispatcher(
       statsReceiver
     ) {
 
-  private[this] val logger = Logger.get(this.getClass.getName)
-
-  private[this] val failureReceiver =
-    new RollupStatsReceiver(statsReceiver.scope("stream")).scope("failures")
-
-  private[this] val unit: (Unit, Unit) => Unit = (_, _) => ()
+  import HttpClientDispatcher._
 
   protected def dispatch(req: Request, p: Promise[Response]): Future[Unit] = {
     if (!req.isChunked && !req.headerMap.contains(Fields.ContentLength)) {
@@ -50,7 +51,7 @@ private[finagle] class HttpClientDispatcher(
         // thus failure represents *any* failure that can happen
         // during the exchange.
         logger.debug(t, "Failed mid-stream. Terminating stream, closing connection")
-        failureReceiver.counter(Throwables.mkString(t): _*).incr()
+        exceptionStatsHandler.record(statsReceiver.scope("stream"), t)
         req.reader.discard()
         trans.close()
       }

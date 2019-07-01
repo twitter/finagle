@@ -245,6 +245,9 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
         Seq(implicitly[Stack.Param[HttpImpl]], implicitly[Stack.Param[param.Stats]]), {
           (prms: Stack.Params, addr: SocketAddress) =>
             val transporter = params[HttpImpl].transporter(prms)(addr)
+            val dispatcherStats =
+              prms[param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
+
             new ServiceFactory[Request, Response] {
               def apply(conn: ClientConnection): Future[Service[Request, Response]] =
                 // we do not want to capture and request specific Locals
@@ -255,7 +258,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
 
                     new HttpClientDispatcher(
                       new HttpTransport(streamTransport),
-                      prms[param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
+                      dispatcherStats
                     )
                   }
                 }
@@ -491,6 +494,9 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     protected type Out = Any
     protected type Context = TransportContext
 
+    private[this] val dispatcherStats =
+      params[param.Stats].statsReceiver.scope("dispatch")
+
     protected def newListener(): Listener[Any, Any, TransportContext] = {
       params[HttpImpl].listener(params)
     }
@@ -505,7 +511,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       service: Service[Request, Response]
     ): HttpServerDispatcher = {
       val param.Stats(stats) = params[param.Stats]
-      new HttpServerDispatcher(newStreamTransport(transport), service, stats.scope("dispatch"))
+      new HttpServerDispatcher(newStreamTransport(transport), service, dispatcherStats)
     }
 
     protected def copy1(

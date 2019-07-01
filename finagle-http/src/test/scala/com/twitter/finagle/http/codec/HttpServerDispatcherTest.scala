@@ -6,7 +6,7 @@ import com.twitter.finagle.{Service, Status}
 import com.twitter.finagle.http.{Fields, Request, Response, Version, Status => HttpStatus}
 import com.twitter.finagle.http.exp.StreamTransport
 import com.twitter.finagle.netty4.http.{Bijections, Netty4ServerStreamTransport}
-import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.io.{Buf, Reader, ReaderDiscardedException}
 import com.twitter.util.{Await, Awaitable, Future, Promise}
@@ -108,7 +108,7 @@ class HttpServerDispatcherTest extends FunSuite {
 
   test("client abort after dispatch") {
     val req = Request()
-    val res = req.response
+    val res = Response()
     val service = Service.mk { _: Request =>
       Future.value(res)
     }
@@ -116,7 +116,7 @@ class HttpServerDispatcherTest extends FunSuite {
     val (in, out) = mkPair[Any, Any]
     val disp = new HttpServerDispatcher(out, service, NullStatsReceiver)
 
-    req.response.setChunked(true)
+    res.setChunked(true)
     in.write(from(req))
 
     await(in.read())
@@ -124,6 +124,28 @@ class HttpServerDispatcherTest extends FunSuite {
     // Simulate channel closure
     out.close()
     intercept[ReaderDiscardedException] { await(res.writer.write(Buf.Utf8("."))) }
+  }
+
+  test("server response fails mid-stream") {
+    val statsReceiver = new InMemoryStatsReceiver()
+    val req = Request()
+    val res = Response()
+    val service = Service.mk { _: Request =>
+      Future.value(res)
+    }
+
+    val (in, out) = mkPair[Any, Any]
+    val disp = new HttpServerDispatcher(out, service, statsReceiver)
+
+    res.setChunked(true)
+    res.writer.fail(new IllegalArgumentException())
+    in.write(from(req))
+
+    await(in.read())
+
+    assert(statsReceiver.counters(Seq("stream", "failures")) == 1)
+    assert(
+      statsReceiver.counters(Seq("stream", "failures", "java.lang.IllegalArgumentException")) == 1)
   }
 }
 
