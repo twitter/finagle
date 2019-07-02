@@ -38,7 +38,7 @@ private[finagle] object SingletonPool {
    * from crossing the 0 boundary multiple times -- it may thus call
    * 'close' on the underlying service multiple times.
    */
-  class RefcountedService[Req, Rep](underlying: Service[Req, Rep])
+  private class RefcountedService[Req, Rep](underlying: Service[Req, Rep])
       extends ServiceProxy[Req, Rep](underlying) {
     private[this] val count = new AtomicInteger(1)
     private[this] val future = Future.value(this)
@@ -60,11 +60,11 @@ private[finagle] object SingletonPool {
       }
   }
 
-  sealed trait State[-Req, +Rep]
-  case object Idle extends State[Any, Nothing]
-  case object Closed extends State[Any, Nothing]
-  case class Awaiting(done: Future[Unit]) extends State[Any, Nothing]
-  case class Open[Req, Rep](service: RefcountedService[Req, Rep]) extends State[Req, Rep]
+  private sealed trait State[-Req, +Rep]
+  private case object Idle extends State[Any, Nothing]
+  private case object Closed extends State[Any, Nothing]
+  private case class Awaiting(done: Future[Unit]) extends State[Any, Nothing]
+  private case class Open[Req, Rep](service: RefcountedService[Req, Rep]) extends State[Req, Rep]
 }
 
 /**
