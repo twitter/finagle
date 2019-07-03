@@ -91,6 +91,7 @@ private[http2] final class AdapterProxyChannelHandler(
 
   override def handlerRemoved(ctx: ChannelHandlerContext): Unit = {
     closeAll()
+    channelSizeGauge.remove()
   }
 
   override def close(ctx: ChannelHandlerContext, promise: ChannelPromise): Unit = {

@@ -302,6 +302,7 @@ final private[http2] class StreamTransportFactory(
       }
     }
     underlying.close(deadline)
+    activeStreamsGauge.remove()
   }
 
   def close(deadline: Time): Future[Unit] = {
