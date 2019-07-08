@@ -70,7 +70,7 @@ public class StackParamCompilationTest {
           new DefaultPool.Param(0, Integer.MAX_VALUE, 0, Duration.Top(), Integer.MAX_VALUE).mk())
         .configured(new Transporter.ConnectTimeout(Duration.Top()).mk())
         .configured(
-          new Transporter.SocksProxy(Option.empty(), Option.empty()).mk())
+          new Transporter.SocksProxy(Option.empty(), Option.empty(), true).mk())
         .configured(
           new Transporter.HttpProxy(
             Option.<SocketAddress>empty(),

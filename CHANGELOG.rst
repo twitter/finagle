@@ -12,6 +12,9 @@ New Features
 
 * finagle-base-http: Add support for new "b3" tracing header. ``PHAB_ID=D334419``
 
+* finagle-core: Allow to not bypass SOCKS proxy for localhost by using the GlobalFlag
+  `-com.twitter.finagle.socks.socksProxyForLocalhost` ``PHAB_ID=D337073``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
