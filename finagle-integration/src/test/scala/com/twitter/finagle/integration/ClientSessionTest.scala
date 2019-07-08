@@ -81,7 +81,7 @@ class ClientSessionTest extends FunSuite with MockitoSugar {
 
   testSessionStatus(
     "http-transport", { tr: Transport[Any, Any] =>
-      val manager = mock[http.codec.ConnectionManager]
+      val manager = mock[http.codec.Http1ConnectionManager]
       val closeP = new Promise[Unit]
       when(manager.shouldClose).thenReturn(false)
       when(manager.onClose).thenReturn(closeP)

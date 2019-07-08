@@ -1,6 +1,5 @@
 package com.twitter.finagle.http2.exp.transport
 
-import com.twitter.finagle.http.Fields
 import io.netty.channel.{ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise}
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http._
@@ -35,17 +34,5 @@ class Http2ClientEventMapperTest extends FunSuite {
     assert(response.status == HttpResponseStatus.REQUEST_HEADER_FIELDS_TOO_LARGE)
     assert(response.isInstanceOf[LastHttpContent])
     assert(!ec.isOpen)
-  }
-
-  test("Adds a 'Connection: close' header to HttpResponse objects") {
-    val ctx = new Ctx
-    import ctx._
-
-    val msg = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
-    ec.writeInbound(msg)
-    val response = ec.readInbound[HttpResponse]()
-
-    assert(msg eq response)
-    assert(response.headers.get(Fields.Connection) == "close")
   }
 }

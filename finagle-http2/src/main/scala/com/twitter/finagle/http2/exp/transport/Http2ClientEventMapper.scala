@@ -1,16 +1,16 @@
 package com.twitter.finagle.http2.exp.transport
 
-import com.twitter.finagle.http.{BadRequestResponse, Fields}
+import com.twitter.finagle.http.BadRequestResponse
 import com.twitter.finagle.netty4.http.Bijections
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.{
-  ChannelDuplexHandler,
   ChannelFuture,
   ChannelFutureListener,
   ChannelHandlerContext,
+  ChannelOutboundHandlerAdapter,
   ChannelPromise
 }
-import io.netty.handler.codec.http.{FullHttpResponse, HttpRequest, HttpResponse}
+import io.netty.handler.codec.http.{FullHttpResponse, HttpRequest}
 import io.netty.handler.codec.http2.Http2Exception.HeaderListSizeException
 
 /**
@@ -21,24 +21,13 @@ import io.netty.handler.codec.http2.Http2Exception.HeaderListSizeException
  * stream channel from the `Http2MultiplexCodec`.
  */
 @Sharable
-private[http2] object Http2ClientEventMapper extends ChannelDuplexHandler {
+private[http2] object Http2ClientEventMapper extends ChannelOutboundHandlerAdapter {
 
   override def write(ctx: ChannelHandlerContext, msg: scala.Any, promise: ChannelPromise): Unit =
     msg match {
       case headers: HttpRequest => super.write(ctx, headers, mapWriteExceptions(ctx, promise))
       case _ => super.write(ctx, msg, promise)
     }
-
-  override def channelRead(ctx: ChannelHandlerContext, msg: scala.Any): Unit = {
-    msg match {
-      // We don't reuse streams, so we need to alert the dispatcher that we're closed.
-      case resp: HttpResponse =>
-        resp.headers.set(Fields.Connection, "close")
-
-      case _ => () // noop
-    }
-    ctx.fireChannelRead(msg)
-  }
 
   private[this] def mapWriteExceptions(
     ctx: ChannelHandlerContext,

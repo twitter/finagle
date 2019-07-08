@@ -9,6 +9,7 @@ import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatche
 import com.twitter.finagle.http.exp.StreamTransport
 import com.twitter.finagle.http.filter._
 import com.twitter.finagle.http.service.HttpResponseClassifier
+import com.twitter.finagle.http2.exp.transport.{Http2Transport, StreamChannelTransport}
 import com.twitter.finagle.http2.transport.MultiplexTransporter
 import com.twitter.finagle.http2.{Http2Listener, Http2Transporter}
 import com.twitter.finagle.liveness.FailureDetector
@@ -37,7 +38,7 @@ trait HttpRichClient { self: Client[Request, Response] =>
     }
     val req = http.RequestBuilder().url(url).buildGet()
     val service = newService(Name.bound(addr), "")
-    service(req) ensure {
+    service(req).respond { _ =>
       service.close()
     }
   }
@@ -255,9 +256,13 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
                 Contexts.letClearAll {
                   transporter().map { trans =>
                     val streamTransport = prms[HttpImpl].clientTransport(trans)
+                    val httpTransport = trans match {
+                      case _: StreamChannelTransport => new Http2Transport(streamTransport)
+                      case _ => new HttpTransport(streamTransport)
+                    }
 
                     new HttpClientDispatcher(
-                      new HttpTransport(streamTransport),
+                      httpTransport,
                       dispatcherStats
                     )
                   }
@@ -501,7 +506,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       params[HttpImpl].listener(params)
     }
 
-    protected def newStreamTransport(
+    private[this] def newStreamTransport(
       transport: Transport[Any, Any]
     ): StreamTransport[Response, Request] =
       new HttpTransport(params[HttpImpl].serverTransport(transport))

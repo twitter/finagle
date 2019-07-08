@@ -1,7 +1,7 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.{Status => CoreStatus}
-import com.twitter.finagle.http.codec.{ConnectionManager, Http1ConnectionManager}
+import com.twitter.finagle.http.codec.Http1ConnectionManager
 import com.twitter.finagle.http.exp.{Multi, StreamTransport, StreamTransportProxy}
 import com.twitter.util.{Future, Promise, Return, Try}
 import scala.util.control.NonFatal
@@ -14,7 +14,7 @@ import scala.util.control.NonFatal
  */
 private[finagle] class HttpTransport[A <: Message, B <: Message](
   self: StreamTransport[A, B],
-  manager: ConnectionManager)
+  manager: Http1ConnectionManager)
     extends StreamTransportProxy[A, B](self)
     with (Try[Multi[B]] => Unit) {
 

@@ -8,7 +8,7 @@ import com.twitter.util.{Future, Promise}
  * accordance with RFC 2616 § 8. This is just the state machine; the
  * codec implementations are in {Server,Client}ConnectionManager.
  */
-private[finagle] class Http1ConnectionManager extends ConnectionManager {
+private[finagle] class Http1ConnectionManager {
 
   /**
    * Indicates whether the connection should be closed when it becomes idle.

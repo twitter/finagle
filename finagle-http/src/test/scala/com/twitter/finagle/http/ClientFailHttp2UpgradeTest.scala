@@ -18,7 +18,7 @@ class ClientFailHttp2UpgradeTest extends AbstractHttp1EndToEndTest {
   def featureImplemented(feature: Feature): Boolean = feature != NoBodyMessage
 
   test("Upgrade counters are not incremented") {
-    val client = nonStreamingConnect(Service.mk { req: Request =>
+    val client = nonStreamingConnect(Service.mk { _: Request =>
       Future.value(Response())
     })
 

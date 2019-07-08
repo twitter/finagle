@@ -1,11 +1,9 @@
 package com.twitter.finagle.http2.exp.transport
 
-import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.http2.DeadConnectionException
 import com.twitter.finagle.http2.transport.ClientSession
 import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.netty4.param.Allocator
-import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{CancelledConnectionException, Failure, FailureFlags, Stack, Status}
 import com.twitter.logging.Level
@@ -32,12 +30,9 @@ private final class ClientSessionImpl(
   channel: Channel)
     extends ClientSession {
 
-  private[this] final class ChildTransport(ch: Channel)
-      extends ChannelTransport(
-        ch = ch,
-        readQueue = new AsyncQueue[Any],
-        omitStackTraceOnInactive = true
-      ) {
+  // For the client we want to consider the status of the session.
+  private[this] final class ChildTransport(ch: Channel) extends StreamChannelTransport(ch) {
+
     override def status: Status = {
       Status.worst(ClientSessionImpl.this.status, super.status)
     }
