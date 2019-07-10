@@ -9,7 +9,7 @@ import com.twitter.finagle.stats.{DefaultStatsReceiver, FinagleStatsReceiver}
 import com.twitter.finagle.server.{ServerInfo, StackServer}
 import com.twitter.finagle.util.{DefaultLogger, DefaultTimer, LoadService}
 import com.twitter.jvm.JvmStats
-import com.twitter.util.{Future, FuturePool, Promise}
+import com.twitter.util.{FuturePool, Promise}
 import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.Level
 import java.util.Properties
@@ -21,7 +21,6 @@ import scala.util.control.NonFatal
 private[twitter] object Init {
   private val log = DefaultLogger
 
-  private val bypassScheduler = CoreToggles("com.twitter.util.BypassScheduler")
   private val useLocalInInterruptible = CoreToggles("com.twitter.util.UseLocalInInterruptible")
 
   // Used to record Finagle versioning in trace info.
@@ -108,13 +107,6 @@ private[twitter] object Init {
     }
 
     FinagleScheduler.init()
-
-    // Bypass scheduler for Future.map operations.
-    // Evaluate toggle every minute so we can change the behavior at runtime.
-    DefaultTimer.schedule(1.minute) {
-      val setting = bypassScheduler(ServerInfo().id.hashCode())
-      Future.bypassScheduler(setting)
-    }
 
     // Use state at time of callback creation in Interruptible
     // Evaluate toggle every minute so we can change the behavior at runtime.
