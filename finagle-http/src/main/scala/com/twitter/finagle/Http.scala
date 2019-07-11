@@ -3,7 +3,7 @@ package com.twitter.finagle
 import com.twitter.finagle.client._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
-import com.twitter.finagle.filter.{NackAdmissionFilter, PayloadSizeFilter}
+import com.twitter.finagle.filter.NackAdmissionFilter
 import com.twitter.finagle.http._
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
 import com.twitter.finagle.http.exp.StreamTransport
@@ -157,32 +157,6 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     param.ResponseClassifier(rc)
   }
 
-  // Only record payload sizes when streaming is disabled.
-  private[finagle] def nonChunkedPayloadSize(
-    reqTraceKey: String,
-    repTraceKey: String
-  ): Stackable[ServiceFactory[Request, Response]] =
-    new Stack.Module2[http.param.Streaming, param.Stats, ServiceFactory[Request, Response]] {
-      override def role: Stack.Role = PayloadSizeFilter.Role
-      override def description: String = PayloadSizeFilter.Description
-
-      override def make(
-        streaming: http.param.Streaming,
-        stats: param.Stats,
-        next: ServiceFactory[Request, Response]
-      ): ServiceFactory[Request, Response] = {
-        if (streaming.disabled)
-          new PayloadSizeFilter[Request, Response](
-            stats.statsReceiver,
-            reqTraceKey,
-            repTraceKey,
-            _.content.length,
-            _.content.length
-          ).andThen(next)
-        else next
-      }
-    }
-
   object Client {
     private val stack: Stack[ServiceFactory[Request, Response]] =
       StackClient.newStack
@@ -213,10 +187,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
         // after the tracing context is initialized.
         .insertAfter(
           TraceInitializerFilter.role,
-          nonChunkedPayloadSize(
-            PayloadSizeFilter.ClientReqTraceKey,
-            PayloadSizeFilter.ClientRepTraceKey
-          )
+          PayloadSizeFilter.module(PayloadSizeFilter.clientTraceKeyPrefix)
         )
         .prepend(
           new Stack.NoOpModule(http.filter.StatsFilter.role, http.filter.StatsFilter.description)
@@ -466,10 +437,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       // after the tracing context is initialized.
         .insertAfter(
           TraceInitializerFilter.role,
-          nonChunkedPayloadSize(
-            PayloadSizeFilter.ServerReqTraceKey,
-            PayloadSizeFilter.ServerRepTraceKey
-          )
+          PayloadSizeFilter.module(PayloadSizeFilter.serverTraceKeyPrefix)
         )
         .replace(TraceInitializerFilter.role, new HttpServerTraceInitializer[Request, Response])
         .replace(StackServer.Role.preparer, HttpNackFilter.module)

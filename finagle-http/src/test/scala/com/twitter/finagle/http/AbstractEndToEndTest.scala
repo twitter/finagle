@@ -805,17 +805,27 @@ abstract class AbstractEndToEndTest
       await(client.close())
     }
 
-    test(s"$implName (streaming)" + ": does not measure payload size") {
-      val svc = Service.mk[Request, Response] { _ =>
-        Future.value(Response())
+    test(s"$implName (streaming)" + ": measure chunk payload size") {
+      val svc = Service.mk[Request, Response] { req =>
+        req.reader.read()
+        val rep = Response()
+        rep.setChunked(true)
+        rep.writer.write(Buf.Utf8("01234"))
+        Future.value(rep)
       }
+      val req = Request()
+      req.setChunked(true)
+      req.writer.write(Buf.Utf8("0123456789"))
       val client = connect(svc)
-      await(client(Request()))
+      val response = await(client(req))
+      response.reader.read()
 
-      assert(statsRecv.stat("client", "request_payload_bytes")() == Nil)
-      assert(statsRecv.stat("client", "response_payload_bytes")() == Nil)
-      assert(statsRecv.stat("server", "request_payload_bytes")() == Nil)
-      assert(statsRecv.stat("server", "response_payload_bytes")() == Nil)
+      eventually {
+        assert(statsRecv.stat("client", "stream", "request", "chunk_payload_bytes")() == Seq(10f))
+        assert(statsRecv.stat("client", "stream", "response", "chunk_payload_bytes")() == Seq(5f))
+        assert(statsRecv.stat("server", "stream", "request", "chunk_payload_bytes")() == Seq(10f))
+        assert(statsRecv.stat("server", "stream", "response", "chunk_payload_bytes")() == Seq(5f))
+      }
       await(client.close())
     }
 

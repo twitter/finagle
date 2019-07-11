@@ -10,6 +10,11 @@ Unreleased
 New Features
 ~~~~~~~~~~~~
 
+* finagle-http: Measure streaming (message.isChunked) chunk payload size with two new histograms:
+  `stream/request/chunk_payload_bytes` and `stream/response/chunk_payload_bytes`, they are
+  published with a debug verbosity level. These chunk payload sizes are also traced via the same
+  trace keys. ``PHAB_ID=D337877``
+
 * finagle-base-http: Add support for new "b3" tracing header. ``PHAB_ID=D334419``
 
 * finagle-core: Allow to not bypass SOCKS proxy for localhost by using the GlobalFlag

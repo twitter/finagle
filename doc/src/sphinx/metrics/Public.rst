@@ -89,7 +89,7 @@ RequestSemaphoreFilter
   A gauge of the total number of requests which are waiting because of the limit
   on simultaneous requests.
 
-PayloadSizeFilter (enabled for Mux, HTTP (non-chunked), Thrift)
+PayloadSizeFilter (enabled for Mux, HTTP, Thrift)
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 **request_payload_bytes** `verbosity:debug`
