@@ -46,6 +46,20 @@ Scheduler
   outside of ``com.twitter.util.Await.result``/``Await.ready``. For example,
   ``Future(someSlowSynchronousIO)`` would not be accounted for in this metric.
 
+OffloadFilter
+<<<<<<<<<<<<<
+
+These metrics correspond to the state of the offload filter thread pool when configured. 
+
+**finagle/offload_pool/pool_size**
+  A gauge of the number of threads in the pool.
+
+**finagle/offload_pool/active_tasks**
+  A gauge of the number of tasks actively executing.
+
+**finagle/offload_pool/completed_tasks**
+  A gauge of the number of total tasks that have completed execution.
+
 Timer
 <<<<<
 

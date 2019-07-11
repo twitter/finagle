@@ -20,6 +20,8 @@ New Features
 * finagle-core: Allow to not bypass SOCKS proxy for localhost by using the GlobalFlag
   `-com.twitter.finagle.socks.socksProxyForLocalhost` ``PHAB_ID=D337073``
 
+* finagle-core: OffloadFilter flag to reduce network contention. ``PHAB_ID=D331502``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

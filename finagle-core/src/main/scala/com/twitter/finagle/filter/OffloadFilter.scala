@@ -1,17 +1,39 @@
 package com.twitter.finagle.filter
 
+import com.twitter.concurrent.NamedPoolThreadFactory
+import com.twitter.finagle.offload.numWorkers
+import com.twitter.finagle.stats.FinagleStatsReceiver
 import com.twitter.finagle.{Service, ServiceFactory, SimpleFilter, Stack, Stackable}
 import com.twitter.util.{Future, FuturePool, Promise}
-import java.util.concurrent.ExecutorService
+import java.util.concurrent.{ExecutorService, Executors}
 
 /**
  * These modules introduce async-boundary into the future chain, effectively shifting continuations
  * off of IO threads (into a given [[FuturePool]]).
+ *
+ * This filter can be enabled by default through the flag `com.twitter.finagle.offload.numWorkers`.
  */
 private[finagle] object OffloadFilter {
 
   val Role = Stack.Role("OffloadWorkFromIO")
   val Description = "Offloading computations from IO threads"
+
+  private[this] lazy val (defautPool, defautPoolStats) = {
+    numWorkers.get match {
+      case None =>
+        (None, Seq.empty)
+      case Some(threads) =>
+        val factory = new NamedPoolThreadFactory("finagle/offload", makeDaemons = true)
+        val pool = FuturePool.interruptible(Executors.newFixedThreadPool(threads, factory))
+        val stats = FinagleStatsReceiver.scope("offload_pool")
+        val gauges = Seq(
+          stats.addGauge("pool_size") { pool.poolSize },
+          stats.addGauge("active_tasks") { pool.numActiveTasks },
+          stats.addGauge("completed_tasks") { pool.numCompletedTasks },
+        )
+        (Some(pool), gauges)
+    }
+  }
 
   sealed abstract class Param
   object Param {
@@ -22,7 +44,8 @@ private[finagle] object OffloadFilter {
     final case class Enabled(pool: FuturePool) extends Param
     final case object Disabled extends Param
 
-    implicit val param: Stack.Param[Param] = Stack.Param(Disabled)
+    implicit val param: Stack.Param[Param] =
+      Stack.Param(defautPool.map(Enabled(_)).getOrElse(Disabled))
   }
 
   def client[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] = new Module[Req, Rep](new Client(_))
