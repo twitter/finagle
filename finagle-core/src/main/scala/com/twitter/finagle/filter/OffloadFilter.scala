@@ -29,7 +29,7 @@ private[finagle] object OffloadFilter {
         val gauges = Seq(
           stats.addGauge("pool_size") { pool.poolSize },
           stats.addGauge("active_tasks") { pool.numActiveTasks },
-          stats.addGauge("completed_tasks") { pool.numCompletedTasks },
+          stats.addGauge("completed_tasks") { pool.numCompletedTasks }
         )
         (Some(pool), gauges)
     }
