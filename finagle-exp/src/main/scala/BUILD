@@ -7,6 +7,7 @@ scala_library(
         repo = artifactory,
     ),
     dependencies = [
+        "3rdparty/jvm/com/netflix/concurrency:concurrency-limits-core",
         "finagle/finagle-core/src/main/scala",
         "finagle/finagle-thrift/src/main/java",
         "util/util-core/src/main/scala",

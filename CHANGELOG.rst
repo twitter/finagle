@@ -22,6 +22,9 @@ New Features
 
 * finagle-core: OffloadFilter flag to reduce network contention. ``PHAB_ID=D331502``
 
+* finagle-exp: Add private `c.t.f.exp.ConcurrencyLimitFilter` for rejecting requests
+  that exceed estimated concurrency limit ``PHAB_ID=D328815``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
