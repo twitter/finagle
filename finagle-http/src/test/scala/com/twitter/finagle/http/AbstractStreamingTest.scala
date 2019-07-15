@@ -3,9 +3,8 @@ package com.twitter.finagle.http
 import com.twitter.conversions.DurationOps._
 import com.twitter.conversions.StorageUnitOps._
 import com.twitter.finagle.{Http => FinagleHttp, _}
-import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.service.ConstantService
-import com.twitter.finagle.transport.{Transport, TransportContext}
+import com.twitter.finagle.transport.Transport
 import com.twitter.io.{Buf, Pipe, Reader, ReaderDiscardedException, StreamTermination, Writer}
 import com.twitter.util._
 import java.net.{InetSocketAddress, SocketAddress}
@@ -513,12 +512,10 @@ abstract class AbstractStreamingTest extends FunSuite {
     singletonPool: Boolean = false
   )(mod: Modifier
   ): Service[Request, Response] = {
-    val poolSize = if (singletonPool) 1 else Int.MaxValue
-    val modifiedImpl = impl.copy(transporter = modifiedTransporterFn(mod, impl.transporter))
     configureClient(FinagleHttp.client).withSessionPool
-      .maxSize(poolSize)
+      .maxSize(if (singletonPool) 1 else Int.MaxValue)
       .withStreaming(0.bytes) // no aggregation
-      .configured(modifiedImpl)
+      .configured(ClientEndpointer.TransportModifier(mod))
       .newService(Name.bound(Address(addr.asInstanceOf[InetSocketAddress])), name)
   }
 
@@ -576,22 +573,5 @@ object StreamingTest {
     val res = Response(Version.Http11, Status.Ok, readerIn)
     res.headerMap.set("Connection", "close")
     res
-  }
-
-  def modifiedTransporterFn(
-    mod: Modifier,
-    fn: Stack.Params => SocketAddress => Transporter[Any, Any, TransportContext]
-  ): Stack.Params => SocketAddress => Transporter[Any, Any, TransportContext] = {
-    params: Stack.Params =>
-      { addr =>
-        val underlying = fn(params)(addr)
-        new Transporter[Any, Any, TransportContext] {
-          def apply(): Future[Transport[Any, Any]] = {
-            underlying().map(mod)
-          }
-
-          def remoteAddress: SocketAddress = underlying.remoteAddress
-        }
-      }
   }
 }

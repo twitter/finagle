@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.filter.NackAdmissionFilter
-import com.twitter.finagle.http.{Request, Response, serverErrorsAsFailures}
+import com.twitter.finagle.http.{ClientEndpointer, Request, Response, serverErrorsAsFailures}
 import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Await, Duration, Future, Return}
@@ -131,12 +131,10 @@ class HttpTest extends FunSuite with Eventually {
   }
 
   test("Netty 4 is a default implementation") {
-    val transporter = Http.client.params[Http.HttpImpl].transporter
+    val transporter = Http.client.params[Http.HttpImpl].clientEndpointer
     val listener = Http.server.params[Http.HttpImpl].listener
 
-    val addr = InetSocketAddress.createUnresolved("supdog", 0)
-
-    assert(transporter(Stack.Params.empty)(addr).toString == "Netty4Transporter")
+    assert(transporter == ClientEndpointer.HttpEndpointer)
     assert(listener(Stack.Params.empty).toString == "Netty4Listener")
   }
 }

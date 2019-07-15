@@ -1,20 +1,16 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.client._
-import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.filter.NackAdmissionFilter
 import com.twitter.finagle.http._
-import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
+import com.twitter.finagle.http.codec.HttpServerDispatcher
 import com.twitter.finagle.http.exp.StreamTransport
 import com.twitter.finagle.http.filter._
 import com.twitter.finagle.http.service.HttpResponseClassifier
-import com.twitter.finagle.http2.exp.transport.{Http2Transport, StreamChannelTransport}
-import com.twitter.finagle.http2.transport.MultiplexTransporter
-import com.twitter.finagle.http2.{Http2Listener, Http2Transporter}
+import com.twitter.finagle.http2.Http2Listener
 import com.twitter.finagle.liveness.FailureDetector
-import com.twitter.finagle.netty4.http.{Netty4HttpListener, Netty4HttpTransporter}
-import com.twitter.finagle.netty4.http.{Netty4ClientStreamTransport, Netty4ServerStreamTransport}
+import com.twitter.finagle.netty4.http.Netty4HttpListener
+import com.twitter.finagle.netty4.http.Netty4ServerStreamTransport
 import com.twitter.finagle.server._
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.ssl.ApplicationProtocols
@@ -22,7 +18,7 @@ import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.{Transport, TransportContext}
-import com.twitter.util.{Duration, Future, Monitor, StorageUnit, Time}
+import com.twitter.util.{Duration, Future, Monitor, StorageUnit}
 import java.net.SocketAddress
 
 /**
@@ -63,33 +59,39 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     private[this] val underlying: Toggle[Int] = Toggles("com.twitter.finagle.http.UseH2CServers")
     def apply(): Boolean = underlying(ServerInfo().id.hashCode)
   }
-  private[this] object useHttp2MultiplexCodecClient {
-    private[this] val underlying: Toggle[Int] = Toggles(
-      "com.twitter.finagle.http.UseHttp2MultiplexCodecClient"
-    )
-    def apply(): Boolean = underlying(ServerInfo().id.hashCode)
-  }
 
   /**
    * configure alternative http 1.1 implementations
    *
-   * @param clientTransport client [[StreamTransport]] factory
+   * @param clientEndpointer client `Stackable[ServiceFactory]`
    * @param serverTransport server [[StreamTransport]] factory
-   * @param transporter [[Transporter]] factory
    * @param listener [[Listener]] factory
    */
-  case class HttpImpl(
-    clientTransport: Transport[Any, Any] => StreamTransport[Request, Response],
-    serverTransport: Transport[Any, Any] => StreamTransport[Response, Request],
-    transporter: Stack.Params => SocketAddress => Transporter[Any, Any, TransportContext],
-    listener: Stack.Params => Listener[Any, Any, TransportContext],
-    implName: String) {
+  final class HttpImpl private (
+    private[finagle] val clientEndpointer: Stackable[ServiceFactory[Request, Response]],
+    private[finagle] val serverTransport: Transport[Any, Any] => StreamTransport[Response, Request],
+    private[finagle] val listener: Stack.Params => Listener[Any, Any, TransportContext],
+    private[finagle] val implName: String) {
 
     def mk(): (HttpImpl, Stack.Param[HttpImpl]) = (this, HttpImpl.httpImplParam)
   }
 
   object HttpImpl {
     implicit val httpImplParam: Stack.Param[HttpImpl] = Stack.Param(Netty4Impl)
+
+    val Netty4Impl: Http.HttpImpl = new Http.HttpImpl(
+      ClientEndpointer.HttpEndpointer,
+      new Netty4ServerStreamTransport(_),
+      Netty4HttpListener,
+      "Netty4"
+    )
+
+    val Http2Impl: Http.HttpImpl = new Http.HttpImpl(
+      ClientEndpointer.Http2Endpointer,
+      new Netty4ServerStreamTransport(_),
+      Http2Listener.apply _,
+      "Netty4"
+    )
   }
 
   case class H2ClientImpl(useMultiplexClient: Option[Boolean])
@@ -97,36 +99,12 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
   object H2ClientImpl {
     implicit val useMultiplexClientParam: Stack.Param[H2ClientImpl] =
       Stack.Param(H2ClientImpl(None))
-
-    def transporter(
-      params: Stack.Params
-    ): SocketAddress => Transporter[Any, Any, TransportContext] = {
-      params[H2ClientImpl].useMultiplexClient match {
-        case Some(true) => http2.exp.transport.Http2Transporter(params)
-        case Some(false) => Http2Transporter(params)
-        case None =>
-          if (useHttp2MultiplexCodecClient()) http2.exp.transport.Http2Transporter(params)
-          else Http2Transporter(params)
-      }
-    }
   }
 
-  val Netty4Impl: Http.HttpImpl = Http.HttpImpl(
-    new Netty4ClientStreamTransport(_),
-    new Netty4ServerStreamTransport(_),
-    Netty4HttpTransporter,
-    Netty4HttpListener,
-    "Netty4"
-  )
+  val Netty4Impl: Http.HttpImpl = HttpImpl.Netty4Impl
 
   val Http2: Stack.Params = Stack.Params.empty +
-    Http.HttpImpl(
-      new Netty4ClientStreamTransport(_),
-      new Netty4ServerStreamTransport(_),
-      H2ClientImpl.transporter,
-      Http2Listener.apply _,
-      "Netty4"
-    ) +
+    HttpImpl.Http2Impl +
     param.ProtocolLibrary("http/2") +
     netty4.ssl.Alpn(ApplicationProtocols.Supported(Seq("h2", "http/1.1"))) +
     // There is something funky about how ping-based failure detector is wired in H2 that
@@ -212,46 +190,8 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     protected type Out = Any
     protected type Context = TransportContext
 
-    protected def endpointer: Stackable[ServiceFactory[Request, Response]] = {
-      new EndpointerModule[Request, Response](
-        Seq(implicitly[Stack.Param[HttpImpl]], implicitly[Stack.Param[param.Stats]]), {
-          (prms: Stack.Params, addr: SocketAddress) =>
-            val transporter = params[HttpImpl].transporter(prms)(addr)
-            val dispatcherStats =
-              prms[param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
-
-            new ServiceFactory[Request, Response] {
-              def apply(conn: ClientConnection): Future[Service[Request, Response]] =
-                // we do not want to capture and request specific Locals
-                // that would live for the life of the session.
-                Contexts.letClearAll {
-                  transporter().map { trans =>
-                    val streamTransport = prms[HttpImpl].clientTransport(trans)
-                    val httpTransport = trans match {
-                      case _: StreamChannelTransport => new Http2Transport(streamTransport)
-                      case _ => new HttpTransport(streamTransport)
-                    }
-
-                    new HttpClientDispatcher(
-                      httpTransport,
-                      dispatcherStats
-                    )
-                  }
-                }
-
-              def close(deadline: Time): Future[Unit] = transporter match {
-                case multiplex: MultiplexTransporter => multiplex.close(deadline)
-                case _ => Future.Done
-              }
-
-              override def status: Status = transporter match {
-                case http2: MultiplexTransporter => http2.transporterStatus
-                case _ => super.status
-              }
-            }
-        }
-      )
-    }
+    protected def endpointer: Stackable[ServiceFactory[Request, Response]] =
+      params[HttpImpl].clientEndpointer
 
     protected def copy1(
       stack: Stack[ServiceFactory[Request, Response]] = this.stack,
@@ -345,7 +285,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
      * @note this will override whatever has been set in the toggle.
      */
     def withNoHttp2: Client =
-      configured(Netty4Impl)
+      configured(HttpImpl.Netty4Impl)
 
     /**
      * Create a [[http.MethodBuilder]] for a given destination.
@@ -586,7 +526,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
      * @note this will override whatever has been set in the toggle.
      */
     def withNoHttp2: Server =
-      configured(Netty4Impl)
+      configured(HttpImpl.Netty4Impl)
 
     /**
      * By default finagle-http automatically sends 100-CONTINUE responses to inbound
@@ -601,7 +541,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
      *       can be met.
      *
      * @note Disabling automatic continues is only supported in
-     *       [[com.twitter.finagle.Http.Netty4Impl]] servers.
+     *       [[com.twitter.finagle.Http.HttpImpl.Netty4Impl]] servers.
      */
     def withNoAutomaticContinue: Server =
       configured(http.param.AutomaticContinue(false))

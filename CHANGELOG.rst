@@ -55,6 +55,11 @@ Breaking API Changes
 * finagle-http: The `setOriginAndCredentials`, `setMaxAge`, `setMethod`, and `setHeaders` methods
   of `c.t.f.http.Cors.HttpFilter` are no longer overridable. ``PHAB_ID=D332765``
 
+* finagle-http: The details of the `c.t.f.Http.HttpImpl` class are meant to be implementation
+  details so the class constructor was made private along with the fields. Along these same lines
+  the `c.t.f.Http.H2ClientImpl.transporter` method has been moved to a private location.
+  ``PHAB_ID=D337136``
+
 Bug Fixes
 ~~~~~~~~~
 
