@@ -563,6 +563,22 @@ the netty4 event loop.</p><div class="fullcomment"><div class="comment cmt"><p>P
 <a href="Server.html" class="extype" name="com.twitter.finagle.Server">com.twitter.finagle.Server</a> and a client transport in terms of
 the netty4 event loop.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.offload" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="offload"></a><a id="offload:offload"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#offload" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="offload/index.html"><span class="name">offload</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.param" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="param"></a><a id="param:param"></a>
       <span class="permalink">
@@ -1439,24 +1455,23 @@ generator.
       </span>
       
       
-    </li><li name="com.twitter.finagle.Http.HttpImpl" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="HttpImplextendsProductwithSerializable"></a><a id="HttpImpl:HttpImpl"></a>
+    </li><li name="com.twitter.finagle.Http.HttpImpl" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpImplextendsAnyRef"></a><a id="HttpImpl:HttpImpl"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/Http$.html#HttpImplextendsProductwithSerializable" title="Permalink">
+      <a href="../../../com/twitter/finagle/Http$.html#HttpImplextendsAnyRef" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="configure alternative http 1.1 implementations" href="Http$$HttpImpl.html"><span class="name">HttpImpl</span></a><span class="params">(<span name="clientTransport">clientTransport: (<a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>]) ⇒ <span class="extype" name="com.twitter.finagle.http.exp.StreamTransport">StreamTransport</span>[<a href="http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>, <span name="serverTransport">serverTransport: (<a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>]) ⇒ <span class="extype" name="com.twitter.finagle.http.exp.StreamTransport">StreamTransport</span>[<a href="http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>, <a href="http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>]</span>, <span name="transporter">transporter: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>) ⇒ <a href="client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>, <a href="transport/TransportContext.html" class="extype" name="com.twitter.finagle.transport.TransportContext">TransportContext</a>]</span>, <span name="listener">listener: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ <a href="server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>, <a href="transport/TransportContext.html" class="extype" name="com.twitter.finagle.transport.TransportContext">TransportContext</a>]</span>, <span name="implName">implName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="configure alternative http 1.1 implementations" href="Http$$HttpImpl.html"><span class="name">HttpImpl</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">configure alternative http 1.1 implementations
-</p><div class="fullcomment"><div class="comment cmt"><p>configure alternative http 1.1 implementations
-</p></div><dl class="paramcmts block"><dt class="param">clientTransport</dt><dd class="cmt"><p>client <span class="extype" name="StreamTransport">StreamTransport</span> factory</p></dd><dt class="param">serverTransport</dt><dd class="cmt"><p>server <span class="extype" name="StreamTransport">StreamTransport</span> factory</p></dd><dt class="param">transporter</dt><dd class="cmt"><p><span class="extype" name="Transporter">Transporter</span> factory</p></dd><dt class="param">listener</dt><dd class="cmt"><p><span class="extype" name="Listener">Listener</span> factory</p></dd></dl></div>
+</p>
     </li><li name="com.twitter.finagle.Http.Server" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ServerextendsStdStackServer[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response,com.twitter.finagle.Http.Server]withProductwithSerializable"></a><a id="Server:Server"></a>
       <span class="permalink">
@@ -2259,7 +2274,7 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="Http$$HttpImpl$.html"><span class="name">HttpImpl</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <a title="" href="Http$$HttpImpl$.html"><span class="name">HttpImpl</span></a>
       </span>
       
       

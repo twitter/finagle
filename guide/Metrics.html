@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &#8212; Finagle 19.6.0 documentation</title>
+    <title>Metrics &#8212; Finagle 19.7.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.6.0',
+        VERSION:     '19.7.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.6.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.7.0 documentation" href="index.html" />
     <link rel="next" title="Flags" href="Flags.html" />
     <link rel="prev" title="Protocols" href="Protocols.html" />
    
@@ -168,8 +168,8 @@ pauses, and queue backups can contribute here. Not supported by all protocols.</
 on simultaneous requests.</dd>
 </dl>
 </div>
-<div class="section" id="payloadsizefilter-enabled-for-mux-http-non-chunked-thrift">
-<h3>PayloadSizeFilter (enabled for Mux, HTTP (non-chunked), Thrift)<a class="headerlink" href="#payloadsizefilter-enabled-for-mux-http-non-chunked-thrift" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="payloadsizefilter-enabled-for-mux-http-thrift">
+<h3>PayloadSizeFilter (enabled for Mux, HTTP, Thrift)<a class="headerlink" href="#payloadsizefilter-enabled-for-mux-http-thrift" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
 <dt><strong>request_payload_bytes</strong> <cite>verbosity:debug</cite></dt>
 <dd>A histogram of the number of bytes per request&#8217;s payload.</dd>
@@ -248,6 +248,18 @@ Of the built-in <code class="docutils literal"><span class="pre">Schedulers</spa
 implementation. Note that this does not include time spent doing blocking code
 outside of <code class="docutils literal"><span class="pre">com.twitter.util.Await.result</span></code>/<code class="docutils literal"><span class="pre">Await.ready</span></code>. For example,
 <code class="docutils literal"><span class="pre">Future(someSlowSynchronousIO)</span></code> would not be accounted for in this metric.</dd>
+</dl>
+</div>
+<div class="section" id="offloadfilter">
+<h3>OffloadFilter<a class="headerlink" href="#offloadfilter" title="Permalink to this headline">¶</a></h3>
+<p>These metrics correspond to the state of the offload filter thread pool when configured.</p>
+<dl class="docutils">
+<dt><strong>finagle/offload_pool/pool_size</strong></dt>
+<dd>A gauge of the number of threads in the pool.</dd>
+<dt><strong>finagle/offload_pool/active_tasks</strong></dt>
+<dd>A gauge of the number of tasks actively executing.</dd>
+<dt><strong>finagle/offload_pool/completed_tasks</strong></dt>
+<dd>A gauge of the number of total tasks that have completed execution.</dd>
 </dl>
 </div>
 <div class="section" id="timer">
@@ -1124,7 +1136,7 @@ for comparing state across a cluster or over time.</dd>
 </div>
 <div class="section" id="streaming">
 <h2>Streaming<a class="headerlink" href="#streaming" title="Permalink to this headline">¶</a></h2>
-<p>These metrics are added by
+<p id="streaming-metrics">These metrics are added by
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-http/src/main/scala/com/twitter/finagle/http/filter/StreamingStatsFilter.scala">StreamingStatsFilter</a>
 and can be enabled by setting <cite>isChunked</cite> as true on Http request and response.</p>
 <dl class="docutils">
@@ -1156,6 +1168,12 @@ stream.</dd>
 <dd>A counter of the number of opened response streams.</dd>
 <dt><strong>stream/response/pending</strong></dt>
 <dd>A gauge of the number of pending response streams.</dd>
+<dt><strong>stream/request/chunk_payload_bytes</strong> <cite>verbosity:debug</cite></dt>
+<dd>A histogram of the number of bytes per chunk&#8217;s payload of request streams. This is measured in
+c.t.finagle.http.filter.PayloadSizeFilter.</dd>
+<dt><strong>stream/response/chunk_payload_bytes</strong> <cite>verbosity:debug</cite></dt>
+<dd>A histogram of the number of bytes per chunk&#8217;s payload of response streams. This is measured in
+c.t.finagle.http.filter.PayloadSizeFilter.</dd>
 <dt>You could derive the streaming success rate of:</dt>
 <dd><ul class="first last simple">
 <li>the total number of streams
@@ -1400,7 +1418,7 @@ when constructing a client <cite>ServicePerEndpoint</cite>. Similar metrics as s
 <li><a class="reference internal" href="#statsfactorywrapper">StatsFactoryWrapper</a></li>
 <li><a class="reference internal" href="#serverstatsfilter">ServerStatsFilter</a></li>
 <li><a class="reference internal" href="#requestsemaphorefilter">RequestSemaphoreFilter</a></li>
-<li><a class="reference internal" href="#payloadsizefilter-enabled-for-mux-http-non-chunked-thrift">PayloadSizeFilter (enabled for Mux, HTTP (non-chunked), Thrift)</a></li>
+<li><a class="reference internal" href="#payloadsizefilter-enabled-for-mux-http-thrift">PayloadSizeFilter (enabled for Mux, HTTP, Thrift)</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#construction">Construction</a><ul>
@@ -1413,6 +1431,7 @@ when constructing a client <cite>ServicePerEndpoint</cite>. Similar metrics as s
 <li><a class="reference internal" href="#futurepool">FuturePool</a></li>
 <li><a class="reference internal" href="#push-based-abstractions">Push Based Abstractions</a></li>
 <li><a class="reference internal" href="#scheduler">Scheduler</a></li>
+<li><a class="reference internal" href="#offloadfilter">OffloadFilter</a></li>
 <li><a class="reference internal" href="#timer">Timer</a></li>
 <li><a class="reference internal" href="#clientregistry">ClientRegistry</a></li>
 <li><a class="reference internal" href="#name-resolution">Name Resolution</a></li>

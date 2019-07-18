@@ -667,22 +667,6 @@ Concrete StackServer implementations are expected to specify this.
 Each new session is passed to the <code>trackSession</code> function exactly once
 to facilitate connection resource management.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a> → <a href="server/ListeningStackServer.html" class="extype" name="com.twitter.finagle.server.ListeningStackServer">ListeningStackServer</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.Http.Server#newStreamTransport" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="newStreamTransport(transport:com.twitter.finagle.transport.Transport[Any,Any]):com.twitter.finagle.http.exp.StreamTransport[com.twitter.finagle.http.Response,com.twitter.finagle.http.Request]"></a><a id="newStreamTransport(Transport[Any,Any]):StreamTransport[Response,Request]"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Http$$Server.html#newStreamTransport(transport:com.twitter.finagle.transport.Transport[Any,Any]):com.twitter.finagle.http.exp.StreamTransport[com.twitter.finagle.http.Response,com.twitter.finagle.http.Request]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">newStreamTransport</span><span class="params">(<span name="transport">transport: <a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.http.exp.StreamTransport">StreamTransport</span>[<a href="http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>, <a href="http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>]</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
@@ -1346,7 +1330,7 @@ appropriate. This method disables those automatic responses.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Servers operating as proxies should disable automatic responses in
       order to allow origin servers to determine whether the expectation
       can be met.</p></span>, <span class="cmt"><p>Disabling automatic continues is only supported in
-      <a href="Http$.html#Netty4Impl:com.twitter.finagle.Http.HttpImpl" class="extmbr" name="com.twitter.finagle.Http#Netty4Impl">com.twitter.finagle.Http.Netty4Impl</a> servers.</p></span></dd></dl></div>
+      <a href="Http$$HttpImpl$.html#Netty4Impl:com.twitter.finagle.Http.HttpImpl" class="extmbr" name="com.twitter.finagle.Http.HttpImpl#Netty4Impl">com.twitter.finagle.Http.HttpImpl.Netty4Impl</a> servers.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.Http.Server#withNoHttp2" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withNoHttp2:com.twitter.finagle.Http.Server"></a><a id="withNoHttp2:Server"></a>
       <span class="permalink">

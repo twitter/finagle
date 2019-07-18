@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Flags &#8212; Finagle 19.6.0 documentation</title>
+    <title>Flags &#8212; Finagle 19.7.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.6.0',
+        VERSION:     '19.7.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.6.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.7.0 documentation" href="index.html" />
     <link rel="next" title="Unsuccessful Responses" href="UnsuccessfulResponses.html" />
     <link rel="prev" title="Metrics" href="Metrics.html" />
    
@@ -115,6 +115,10 @@ to disable tracing in production applications.</dd>
 <dd>Maximum runtime allowed for tasks before they are reported (default: <cite>2.seconds</cite>).</dd>
 <dt><strong>com.twitter.finagle.util.defaultTimerSlowTaskLogMinInterval</strong> <cite>duration</cite></dt>
 <dd>Minimum interval between recording stack traces for slow tasks (default: <cite>20.seconds</cite>).</dd>
+<dt><strong>com.twitter.finagle.offload.numWorkers</strong> <cite>int</cite></dt>
+<dd>Experimental flag. Enables the offload filter using a thread pool with the specified number of threads.
+When this flag is greater than zero, the execution of application code happens in an isolated pool and the netty threads are used only to handle the network channels. This behavior changes the assumptions regarding the scheduling of tasks in finagle applications. Traditionally, the recommendation is to execute CPU-intensive tasks using a <cite>FuturePool</cite> but, when this flag is enabled, CPU-intensive tasks don&#8217;t require a <cite>FuturePool</cite>. Important: Blocking tasks should still use a <cite>FuturePool</cite>.
+It&#8217;s important to review the allocation of thread pools when this flag is enabled otherwise the application might create too many threads, which leads to more GC pressure and increases the risk of CPU throttling.</dd>
 </dl>
 </div>
 <div class="section" id="netty-4">
