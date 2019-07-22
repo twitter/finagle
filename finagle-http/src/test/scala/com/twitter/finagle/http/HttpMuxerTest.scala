@@ -32,6 +32,20 @@ class HttpMuxerTest extends FunSuite {
     assert(Await.result(muxService(Request("/foo/bar/blah?j={}"))).contentString == fooBarPrefix)
   }
 
+  test("normalize basics") {
+    assert(HttpMuxer.normalize("") == "")
+    assert(HttpMuxer.normalize("/") == "/")
+    assert(HttpMuxer.normalize("/foo") == "/foo")
+    assert(HttpMuxer.normalize("/foo/") == "/foo/")
+    assert(HttpMuxer.normalize("foo") == "/foo")
+  }
+
+  test("normalize duplicate slashes") {
+    assert(HttpMuxer.normalize("/foo//bar") == "/foo/bar")
+    assert(HttpMuxer.normalize("///foo//bar") == "/foo/bar")
+    assert(HttpMuxer.normalize("/foo//bar///") == "/foo/bar/")
+  }
+
   test("prefix matching is handled correctly") {
     assert(await(muxService(Request("/foo/<a>"))).contentString == percentEncode)
 

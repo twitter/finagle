@@ -2,8 +2,9 @@ package com.twitter.finagle.http
 
 import com.twitter.finagle.util.LoadService
 import com.twitter.finagle.Service
-import com.twitter.util.{Future, Time, Closable}
+import com.twitter.util.{Closable, Future, Time}
 import java.util.logging.Logger
+import scala.annotation.tailrec
 
 /**
  * A service that dispatches incoming requests to registered handlers.
@@ -23,6 +24,7 @@ import java.util.logging.Logger
  *  NOTE: When multiple pattern matches exist, the longest pattern wins.
  */
 class HttpMuxer(_routes: Seq[Route]) extends Service[Request, Response] {
+  import HttpMuxer.normalize
 
   def this() = this(Seq.empty[Route])
 
@@ -77,18 +79,6 @@ class HttpMuxer(_routes: Seq[Route]) extends Service[Request, Response] {
     case None => Future.value(Response(request.version, Status.NotFound))
   }
 
-  /**
-   * - ensure path starts with "/"
-   * - get rid of excessive "/"s. For example "/a//b///c/" => "/a/b/c/"
-   * - return "" if path is ""
-   * - return "/" if path is "/" or "///" etc
-   */
-  private[this] def normalize(path: String) = {
-    val suffix = if (path.endsWith("/")) "/" else ""
-    val p = path.split("/").filterNot(_.isEmpty).mkString("/")
-    if (p == "") suffix else "/" + p + suffix
-  }
-
   override def close(deadline: Time): Future[Unit] =
     Closable.all(routes.map(_.handler): _*).close(deadline)
 }
@@ -100,6 +90,45 @@ class HttpMuxer(_routes: Seq[Route]) extends Service[Request, Response] {
  */
 object HttpMuxer extends HttpMuxer {
   @volatile private[this] var underlying = new HttpMuxer()
+
+  private[this] def addLeadingAndStripDuplicateSlashes(s: String): String = {
+    val b = new java.lang.StringBuilder(s.length)
+    b.append('/')
+
+    @tailrec
+    def go(i: Int, lastSlash: Boolean): Unit = {
+      if (i < s.length) {
+        val c = s.charAt(i)
+        if (lastSlash && c == '/') go(i + 1, true)
+        else {
+          b.append(c)
+          go(i + 1, c == '/')
+        }
+      }
+    }
+    go(0, true)
+
+    b.toString
+  }
+
+  /**
+   * - ensure path starts with "/" (unless path is "")
+   * - get rid of excessive "/"s. For example "/a//b///c/" => "/a/b/c/"
+   * - return "" if path is ""
+   * - return "/" if path is "/" or "///" etc
+   *
+   * @note exposed for testing.
+   */
+  private[http] def normalize(path: String): String = {
+    if (path.isEmpty) {
+      ""
+    } else if (!path.contains("//")) {
+      if (path.startsWith("/")) path
+      else "/" + path
+    } else {
+      addLeadingAndStripDuplicateSlashes(path)
+    }
+  }
 
   /**
    * add handlers to mutate dispatching strategies.
