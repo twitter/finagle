@@ -4,6 +4,7 @@ import com.twitter.finagle.client.{StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.dispatch.SerialClientDispatcher
 import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.param.ProtocolLibrary
+import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.{Service, ServiceFactory, Stack}
 import io.netty.channel.{
@@ -72,7 +73,7 @@ object StringClient {
     protected def newDispatcher(
       transport: Transport[In, Out] { type Context <: Client.this.Context }
     ): Service[String, String] =
-      new SerialClientDispatcher(transport)
+      new SerialClientDispatcher(transport, NullStatsReceiver)
 
     def withEndpoint(s: Service[String, String]): Client =
       withStack(

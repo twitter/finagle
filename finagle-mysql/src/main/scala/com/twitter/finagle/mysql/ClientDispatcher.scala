@@ -3,10 +3,11 @@ package com.twitter.finagle.mysql
 import com.github.benmanes.caffeine.cache.{Caffeine, RemovalCause, RemovalListener}
 import com.twitter.cache.caffeine.CaffeineCache
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
-import com.twitter.finagle.dispatch.GenSerialClientDispatcher.wrapWriteException
+import com.twitter.finagle.dispatch.ClientDispatcher.wrapWriteException
 import com.twitter.finagle.mysql.LostSyncException.const
 import com.twitter.finagle.mysql.param.{MaxConcurrentPrepareStatements, UnsignedColumns}
 import com.twitter.finagle.mysql.transport.{MysqlBuf, MysqlBufReader, Packet}
+import com.twitter.finagle.param.Stats
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Service, ServiceProxy, Stack}
 import com.twitter.util._
@@ -94,7 +95,9 @@ private[finagle] final class ClientDispatcher(
   trans: Transport[Packet, Packet],
   params: Stack.Params,
   performHandshake: Boolean)
-    extends GenSerialClientDispatcher[Request, Result, Packet, Packet](trans) {
+    extends GenSerialClientDispatcher[Request, Result, Packet, Packet](
+      trans,
+      params[Stats].statsReceiver) {
   import ClientDispatcher._
 
   // We only support plain handshaking when it's done inside

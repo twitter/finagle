@@ -4,7 +4,7 @@ import com.twitter.finagle.{Status => FinagleStatus, _}
 import com.twitter.finagle.Http.{H2ClientImpl, HttpImpl}
 import com.twitter.finagle.client.{EndpointerModule, Transporter}
 import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.dispatch.GenSerialClientDispatcher
+import com.twitter.finagle.dispatch.ClientDispatcher
 import com.twitter.finagle.http.codec.HttpClientDispatcher
 import com.twitter.finagle.http2.transport.MultiplexTransporter
 import com.twitter.finagle.http.exp.StreamTransport
@@ -80,7 +80,7 @@ private[finagle] object ClientEndpointer {
           val modifier = prms[TransportModifier].modifier
           val transporter = mkTransporter(prms)(addr)
           val dispatcherStats =
-            prms[Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
+            prms[Stats].statsReceiver.scope(ClientDispatcher.StatsScope)
 
           new ServiceFactory[Request, Response] {
             def apply(conn: ClientConnection): Future[Service[Request, Response]] =

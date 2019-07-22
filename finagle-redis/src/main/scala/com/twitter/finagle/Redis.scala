@@ -2,7 +2,7 @@ package com.twitter.finagle
 
 import com.twitter.finagle
 import com.twitter.finagle.client._
-import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, StalledPipelineTimeout}
+import com.twitter.finagle.dispatch.{ClientDispatcher, StalledPipelineTimeout}
 import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.param.{
   ExceptionStatsHandler => _,
@@ -85,7 +85,7 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
     ): Service[Command, Reply] =
       RedisPool.newDispatcher(
         new StageTransport(transport),
-        params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope),
+        params[finagle.param.Stats].statsReceiver.scope(ClientDispatcher.StatsScope),
         params[StalledPipelineTimeout].timeout
       )
 

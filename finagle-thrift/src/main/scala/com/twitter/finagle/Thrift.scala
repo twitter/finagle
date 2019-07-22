@@ -2,7 +2,7 @@ package com.twitter.finagle
 
 import com.twitter.finagle.client.{ClientRegistry, StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.dispatch.GenSerialClientDispatcher
+import com.twitter.finagle.dispatch.ClientDispatcher
 import com.twitter.finagle.param.{
   ExceptionStatsHandler => _,
   Monitor => _,
@@ -263,7 +263,7 @@ object Thrift
     ): Service[ThriftClientRequest, Array[Byte]] =
       new ThriftSerialClientDispatcher(
         transport,
-        params[Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
+        params[Stats].statsReceiver.scope(ClientDispatcher.StatsScope)
       )
 
     def withProtocolFactory(protocolFactory: TProtocolFactory): Client =

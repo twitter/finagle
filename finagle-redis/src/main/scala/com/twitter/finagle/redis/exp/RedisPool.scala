@@ -30,7 +30,7 @@ object RedisPool {
     stallTimeout: Duration
   ): Service[Command, Reply] =
     useFor() match {
-      case Some(Subscription) => new SubscribeDispatcher(transport)
+      case Some(Subscription) => new SubscribeDispatcher(transport, statsReceiver)
       case _ => new PipeliningDispatcher(transport, statsReceiver, stallTimeout, DefaultTimer)
     }
 

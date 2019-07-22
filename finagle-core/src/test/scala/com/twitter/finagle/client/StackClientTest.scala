@@ -14,7 +14,7 @@ import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.service.PendingRequestFilter
-import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.util.StackRegistry
 import com.twitter.finagle.{Name, param}
@@ -56,7 +56,7 @@ private object StackClientTest {
             Future.exception(new IllegalStateException("should not have a local context: " + s))
           )
         case None =>
-          new SerialClientDispatcher(transport)
+          new SerialClientDispatcher(transport, NullStatsReceiver)
       }
     }
   }

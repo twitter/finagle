@@ -1,6 +1,6 @@
 package com.twitter.finagle.netty4.http
 
-import com.twitter.finagle.dispatch.GenSerialClientDispatcher.wrapWriteException
+import com.twitter.finagle.dispatch.ClientDispatcher.wrapWriteException
 import com.twitter.finagle.http._
 import com.twitter.finagle.http.exp.{Multi, StreamTransportProxy}
 import com.twitter.finagle.netty4.ByteBufConversion

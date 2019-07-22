@@ -1,6 +1,6 @@
 package com.twitter.finagle.thrift
 
-import com.twitter.finagle.dispatch.GenSerialClientDispatcher.wrapWriteException
+import com.twitter.finagle.dispatch.ClientDispatcher.wrapWriteException
 import com.twitter.finagle.dispatch.SerialClientDispatcher
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport

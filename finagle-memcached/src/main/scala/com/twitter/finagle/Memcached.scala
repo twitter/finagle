@@ -4,7 +4,7 @@ import com.twitter.concurrent.Broker
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.{
-  GenSerialClientDispatcher,
+  ClientDispatcher,
   SerialServerDispatcher,
   StalledPipelineTimeout
 }
@@ -308,7 +308,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
       Future.value(
         new PipeliningClientPushSession[Response, Command](
           handle,
-          params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope),
+          params[finagle.param.Stats].statsReceiver.scope(ClientDispatcher.StatsScope),
           params[StalledPipelineTimeout].timeout,
           params[finagle.param.Timer].timer
         )

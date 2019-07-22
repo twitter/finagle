@@ -7,6 +7,14 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: The contents of the `c.t.f.dispatch.GenSerialClientDispatcher` object have been
+  moved to the new `c.t.f.dispatch.ClientDispatcher` object. The stats receiver free constructors
+  of `GenSerialClientDispatcher` and `SerialClientDispatcher` have been removed.
+  ``PHAB_ID=D342883``
+
 19.7.0
 ------
 
