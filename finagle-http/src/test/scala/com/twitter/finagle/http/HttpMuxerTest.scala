@@ -41,9 +41,11 @@ class HttpMuxerTest extends FunSuite {
   }
 
   test("normalize duplicate slashes") {
+    assert(HttpMuxer.normalize("////") == "/")
     assert(HttpMuxer.normalize("/foo//bar") == "/foo/bar")
     assert(HttpMuxer.normalize("///foo//bar") == "/foo/bar")
     assert(HttpMuxer.normalize("/foo//bar///") == "/foo/bar/")
+    assert(HttpMuxer.normalize("foo////bar//") == "/foo/bar/")
   }
 
   test("prefix matching is handled correctly") {
