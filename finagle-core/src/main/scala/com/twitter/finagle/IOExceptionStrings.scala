@@ -8,6 +8,7 @@ private[finagle] object IOExceptionStrings {
     "Broken pipe", // Found on linux
     "An existing connection was forcibly closed by the remote host", // Found on windows
     "syscall:read(..) failed: Connection reset by peer", // Found on linux w/ native epoll
+    "readAddress(..) failed: Connection reset by peer", // Found on linux w/ native epoll
     "writeAddress(..) failed: Connection reset by peer" // Found on linux w/ native epoll
   )
 

@@ -15,6 +15,13 @@ Breaking API Changes
   of `GenSerialClientDispatcher` and `SerialClientDispatcher` have been removed.
   ``PHAB_ID=D342883``
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-core: Failed reads on Linux due to a remote peer disconnecting should now be properly
+  seen as `c.t.f.ChannelClosedException` instead of a `c.t.f.UnknownChannelException`.
+  ``PHAB_ID=D336428``
+
 19.7.0
 ------
 
