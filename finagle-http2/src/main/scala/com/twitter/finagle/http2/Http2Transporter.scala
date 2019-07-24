@@ -26,7 +26,7 @@ private[finagle] object Http2Transporter {
 
   private val log = Logger.get()
 
-  def apply(params: Stack.Params)(addr: SocketAddress): Transporter[Any, Any, TransportContext] = {
+  def apply(params: Stack.Params, addr: SocketAddress): Transporter[Any, Any, TransportContext] = {
     // This http2 client implementation doesn't support netty-style back pressure so
     // we disable it. See the MultiplexCodec based client for backpressure support.
     val underlying = Netty4Transporter.raw[Any, Any](
