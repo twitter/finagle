@@ -94,7 +94,11 @@ private final class ClientSessionImpl(
     // However, since `status` is racy anyway we tolerate it as fixing it would be much
     // more complex.
     if (!channel.isOpen) Status.Closed
+    // Note that these two probes of the connection instance are not thread safe because
+    // Netty expects all operations to happen within the channels executor but since
+    // Status is racy anyway, it should be good enough.
     else if (codec.connection.goAwayReceived) Status.Closed
+    else if (!codec.connection.remote.canOpenStream) Status.Busy
     else Status.Open
   }
 

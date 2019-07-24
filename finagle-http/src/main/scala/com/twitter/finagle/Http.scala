@@ -167,6 +167,9 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
           TraceInitializerFilter.role,
           PayloadSizeFilter.module(PayloadSizeFilter.clientTraceKeyPrefix)
         )
+        // The pooling strategy depends on whether we're using H2, and if so, what variant.
+        // We use a custom module to isolate the selection logic.
+        .replace(DefaultPool.Role, HttpPool)
         .prepend(
           new Stack.NoOpModule(http.filter.StatsFilter.role, http.filter.StatsFilter.description)
         )
@@ -344,7 +347,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     override def filtered(filter: Filter[Request, Response, Request, Response]): Client =
       super.filtered(filter)
 
-    protected def superNewClient(dest: Name, label0: String): ServiceFactory[Request, Response] = {
+    private def superNewClient(dest: Name, label0: String): ServiceFactory[Request, Response] = {
       super.newClient(dest, label0)
     }
     override def newClient(dest: Name, label0: String): ServiceFactory[Request, Response] = {
@@ -422,10 +425,8 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     protected def newDispatcher(
       transport: Transport[In, Out] { type Context <: Server.this.Context },
       service: Service[Request, Response]
-    ): HttpServerDispatcher = {
-      val param.Stats(stats) = params[param.Stats]
+    ): HttpServerDispatcher =
       new HttpServerDispatcher(newStreamTransport(transport), service, dispatcherStats)
-    }
 
     protected def copy1(
       stack: Stack[ServiceFactory[Request, Response]] = this.stack,

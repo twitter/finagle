@@ -8,27 +8,16 @@ import com.twitter.logging.Logger
 import com.twitter.util.{Future, Promise, Return}
 
 private[finagle] object HttpClientDispatcher {
-  private val logger = Logger.get(getClass())
-  private val unit: (Unit, Unit) => Unit = (_, _) => ()
-  private val exceptionStatsHandler = new CategorizingExceptionStatsHandler()
-}
+  private[this] val logger = Logger.get(getClass())
+  private[this] val unit: (Unit, Unit) => Unit = (_, _) => ()
+  private[this] val exceptionStatsHandler = new CategorizingExceptionStatsHandler()
 
-/**
- * Client dispatcher for HTTP.
- *
- * @param statsReceiver typically scoped to `clientName/dispatcher`
- */
-private[finagle] class HttpClientDispatcher(
-  trans: StreamTransport[Request, Response],
-  statsReceiver: StatsReceiver)
-    extends GenSerialClientDispatcher[Request, Response, Request, Multi[Response]](
-      trans,
-      statsReceiver
-    ) {
-
-  import HttpClientDispatcher._
-
-  protected def dispatch(req: Request, p: Promise[Response]): Future[Unit] = {
+  def dispatch(
+    trans: StreamTransport[Request, Response],
+    statsReceiver: StatsReceiver,
+    req: Request,
+    p: Promise[Response]
+  ): Future[Unit] = {
     if (!req.isChunked && !req.headerMap.contains(Fields.ContentLength)) {
       val len = req.content.length
       // Only set the content length if we are sure there is content. This
@@ -56,4 +45,21 @@ private[finagle] class HttpClientDispatcher(
         trans.close()
       }
   }
+}
+
+/**
+ * Client dispatcher for HTTP.
+ *
+ * @param statsReceiver typically scoped to `clientName/dispatcher`
+ */
+private[finagle] class HttpClientDispatcher(
+  trans: StreamTransport[Request, Response],
+  statsReceiver: StatsReceiver)
+    extends GenSerialClientDispatcher[Request, Response, Request, Multi[Response]](
+      trans,
+      statsReceiver
+    ) {
+
+  protected def dispatch(req: Request, p: Promise[Response]): Future[Unit] =
+    HttpClientDispatcher.dispatch(trans, statsReceiver, req, p)
 }
