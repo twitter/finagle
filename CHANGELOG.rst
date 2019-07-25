@@ -22,6 +22,8 @@ Runtime Behavior Changes
   seen as `c.t.f.ChannelClosedException` instead of a `c.t.f.UnknownChannelException`.
   ``PHAB_ID=D336428``
 
+* finagle: Upgrade to Jackson 2.9.9. ``PHAB_ID=D345969``
+
 19.7.0
 ------
 
