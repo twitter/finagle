@@ -12,6 +12,7 @@ import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.ClientDispatcher
 import com.twitter.finagle.http.ClientEndpointer.TransportModifier
 import com.twitter.finagle.http.codec.HttpClientDispatcher
+import com.twitter.finagle.http2.exp.transport.{Http2Transport, StreamChannelTransport}
 import com.twitter.finagle.http2.transport.MultiplexTransporter
 import com.twitter.finagle.netty4.http.Netty4ClientStreamTransport
 import com.twitter.finagle.param.Stats
@@ -34,8 +35,13 @@ private class TransporterServiceFactory(
       transporter().map { trans =>
         val streamTransport = new Netty4ClientStreamTransport(modifierFn(trans))
 
+        val httpTransport = trans match {
+          case _: StreamChannelTransport => new Http2Transport(streamTransport)
+          case _ => new HttpTransport(streamTransport)
+        }
+
         new HttpClientDispatcher(
-          new HttpTransport(streamTransport),
+          httpTransport,
           dispatcherStats
         )
       }
