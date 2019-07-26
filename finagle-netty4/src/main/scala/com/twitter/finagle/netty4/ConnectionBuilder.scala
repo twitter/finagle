@@ -52,6 +52,11 @@ private[finagle] final class ConnectionBuilder(
   private[this] val bootstrap = ConnectionBuilder.makeBootstrap(init, addr, params)
 
   /**
+   * The socket address targeted for connection establishment.
+   */
+  def remoteAddress: SocketAddress = addr
+
+  /**
    * Creates a new connection then, from within the channels event loop, passes it to the
    * provided builder function, returning the result asynchronously.
    *

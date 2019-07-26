@@ -5,6 +5,7 @@ import com.twitter.finagle.{ChannelClosedException, ChannelException, Failure, S
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Future, Promise, Return, Time}
 import io.netty.{channel => nettyChan}
+import java.net.SocketAddress
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
 import scala.util.control.NoStackTrace
 
@@ -171,7 +172,7 @@ private[finagle] class ChannelTransport(
 
       override def channelInactive(ctx: nettyChan.ChannelHandlerContext): Unit = {
         if (omitStackTraceOnInactive) {
-          fail(new ChannelClosedException(remoteAddress) with NoStackTrace)
+          fail(new NoStackTraceChannelClosedException(remoteAddress))
         } else fail(new ChannelClosedException(remoteAddress))
       }
 
@@ -186,4 +187,8 @@ private[finagle] class ChannelTransport(
 
 private[finagle] object ChannelTransport {
   val HandlerName: String = "finagleChannelTransport"
+
+  private class NoStackTraceChannelClosedException(remoteAddress: SocketAddress)
+      extends ChannelClosedException(remoteAddress)
+      with NoStackTrace
 }

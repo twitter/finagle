@@ -111,7 +111,7 @@ object TlsTransporter {
     new TlsTransporter(connectionBuilder, params, underlyingHttp11)
   }
 
-  def configureHttp2Pipeline(channel: Channel, params: Stack.Params): ClientSession = {
+  private def configureHttp2Pipeline(channel: Channel, params: Stack.Params): ClientSession = {
     val multiplex = MultiplexCodecBuilder.clientMultiplexCodec(params, None)
     val streamChannelInit = H2StreamChannelInit.initClient(params)
     channel.pipeline.addLast(Http2CodecName, multiplex)
@@ -119,7 +119,10 @@ object TlsTransporter {
     new ClientSessionImpl(params, streamChannelInit, channel)
   }
 
-  def configureHttp1Pipeline(channel: Channel, params: Stack.Params): Transport[Any, Any] = {
+  private def configureHttp1Pipeline(
+    channel: Channel,
+    params: Stack.Params
+  ): Transport[Any, Any] = {
     val pipeline = channel.pipeline
     pipeline.addLast(HttpCodecName, newHttpClientCodec(params))
     initClient(params)(pipeline)
