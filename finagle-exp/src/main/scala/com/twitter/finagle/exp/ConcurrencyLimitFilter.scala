@@ -47,7 +47,7 @@ private[finagle] object ConcurrencyLimitFilter {
   private val DefaultMaxLimit: Int = 50
   private val DefaultAlpha: Int = 3
   private val DefaultBeta: Int = 6
-  private val DefaultSmoothing: Double = 1.0
+  private val DefaultSmoothing: Double = 0.6
   private val StartTime: Long = 0
 
   val role: Stack.Role = Stack.Role("ConcurrencyLimitFilter")
@@ -116,6 +116,10 @@ private[finagle] object ConcurrencyLimitFilter {
 
     private[this] val rejections: Counter = statsReceiver.counter("dropped_requests")
     private[exp] val pending = new AtomicInteger(0)
+    private[this] val pendingGauge = statsReceiver.addGauge("pending") { pending.get() }
+    private[this] val estimatedLimit = statsReceiver.addGauge("estimated_concurrency_limit") {
+      limit.getLimit()
+    }
 
     /**
      * Updates limit with every request

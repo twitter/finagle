@@ -601,7 +601,10 @@ lazy val finagleExp = Project(
   libraryDependencies ++= Seq(
     "com.netflix.concurrency-limits" % "concurrency-limits-core" % "0.3.0"
   )
-).dependsOn(finagleCore, finagleThrift)
+).dependsOn(
+  finagleCore % "compile->compile;test->test",
+  finagleThrift
+)
 
 lazy val finagleGrpcContext = Project(
   id = "finagle-grpc-context",
