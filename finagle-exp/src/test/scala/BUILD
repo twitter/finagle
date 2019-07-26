@@ -6,6 +6,7 @@ junit_tests(
         "3rdparty/jvm/org/mockito:mockito-all",
         "3rdparty/jvm/org/scalatest",
         "finagle/finagle-core/src/main/scala",
+        "finagle/finagle-core/src/test/scala:stringprotocol",
         "finagle/finagle-exp",
         "finagle/finagle-thrift/src/main/java",
         "util/util-core/src/main/scala",
