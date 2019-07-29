@@ -8,6 +8,8 @@ git:
   quiet: true
 
 env:
+  - USE_NETTY_SNAPSHOT=false
+  - USE_NETTY_SNAPSHOT=true
   global:
     - JAVA_OPTS="-DSKIP_FLAKY=1 -DSKIP_FLAKY_TRAVIS=1 -Dsbt.log.noformat=true"
   matrix:
@@ -33,6 +35,11 @@ env:
     - PROJECT=finagle-tunable
     - PROJECT=finagle-zipkin-core
     - PROJECT=finagle-zipkin-scribe
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - env: USE_NETTY_SNAPSHOT=true
 
 # These directories are cached to S3 at the end of the build
 cache:
@@ -60,6 +67,12 @@ notifications:
     on_failure: change
     on_success: change
 
+before_install:
+  - sudo apt-get install -y xmlstarlet
+addons:
+  apt:
+    update: true
+
 before_script:
   - unset SBT_OPTS # default $SBT_OPTS is irrelevant to sbt launcher
   # note: this is not ideal to run before every job in the matrix but is the only way that works consistently
@@ -69,6 +82,7 @@ before_script:
   - ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
 
 script:
+  - source ./netty-snapshot-env.sh $USE_NETTY_SNAPSHOT
   - travis_retry ./sbt ++$TRAVIS_SCALA_VERSION coverage "$PROJECT/test" coverageReport
 
 after_success:
