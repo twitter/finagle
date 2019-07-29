@@ -50,6 +50,7 @@ matrix:
     - env: PROJECT=finagle-http USE_NETTY_SNAPSHOT=true
     - env: PROJECT=finagle-http2 USE_NETTY_SNAPSHOT=true
     - env: PROJECT=finagle-integration USE_NETTY_SNAPSHOT=true
+    - env: PROJECT=finagle-mux USE_NETTY_SNAPSHOT=true
     - env: PROJECT=finagle-mysql USE_NETTY_SNAPSHOT=true
     - env: PROJECT=finagle-netty4 USE_NETTY_SNAPSHOT=true
     - env: PROJECT=finagle-netty4-http USE_NETTY_SNAPSHOT=true
