@@ -105,7 +105,7 @@ before_script:
   - ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
 
 script:
-  - if [[ ! -z "${FINAGLE_USE_NETTY_4_SNAPSHOT}" ]]; then source ./netty-snapshot-env.sh $USE_NETTY_SNAPSHOT; fi
+  - if [[ ! -z "${USE_NETTY_SNAPSHOT}" ]]; then source ./netty-snapshot-env.sh $USE_NETTY_SNAPSHOT; fi
   - travis_retry ./sbt ++$TRAVIS_SCALA_VERSION coverage "$PROJECT/test" coverageReport
 
 after_success:
