@@ -6,7 +6,38 @@ val releaseVersion = "19.8.0-SNAPSHOT"
 
 val libthriftVersion = "0.10.0"
 
-val netty4Version = "4.1.35.Final"
+val defaultNetty4Version = "4.1.35.Final"
+val defaultNetty4StaticSslVersion = "2.0.25.Final"
+
+val useNettySnapshot: Boolean = sys.env.get("FINAGLE_USE_NETTY_4_SNAPSHOT") match {
+  case Some(useSnapshot) => useSnapshot.toBoolean
+  case _ => false
+}
+
+// we only want to allow for resolving dependencies from the snapshots repo IF we're using a
+// Netty SNAPSHOT build.
+val extraSnapshotResolvers =
+  if (useNettySnapshot) {
+    Seq(Resolver.sonatypeRepo("snapshots"))
+  } else {
+    Seq.empty
+  }
+
+val netty4Version: String =
+  if (useNettySnapshot) {
+    sys.env("FINAGLE_NETTY_4_VERSION")
+  } else {
+    defaultNetty4Version
+  }
+
+val netty4StaticSslVersion: String =
+  if (useNettySnapshot) {
+    sys.env("FINAGLE_NETTY_4_TCNATIVE_VERSION")
+  } else {
+    defaultNetty4StaticSslVersion
+  }
+
+val nettyVersionInfo = settingKey[String]("A setting reference for printing the netty version info")
 
 // zkVersion should be kept in sync with the 'util-zk' dependency version
 val zkVersion = "3.5.0-alpha"
@@ -32,7 +63,7 @@ val netty4LibsTest = Seq(
 )
 val netty4Http = "io.netty" % "netty-codec-http" % netty4Version
 val netty4Http2 = "io.netty" % "netty-codec-http2" % netty4Version
-val netty4StaticSsl = "io.netty" % "netty-tcnative-boringssl-static" % "2.0.25.Final"
+val netty4StaticSsl = "io.netty" % "netty-tcnative-boringssl-static" % netty4StaticSslVersion
 val opencensusVersion = "0.19.1"
 val jacksonVersion = "2.9.9"
 val jacksonLibs = Seq(
@@ -95,6 +126,8 @@ val sharedSettings = Seq(
 
   // -a: print stack traces for failing asserts
   testOptions += Tests.Argument(TestFrameworks.JUnit, "-a"),
+
+  resolvers ++= extraSnapshotResolvers,
 
   // This effectively disables packageDoc, which craps out
   // on generating docs for generated thrift due to the use
@@ -207,6 +240,13 @@ lazy val finagle = Project(
 ).enablePlugins(
   ScalaUnidocPlugin
 ).settings(
+  nettyVersionInfo := {
+    val log = sLog.value
+    log.info(s"Using Netty SNAPSHOT build mode: ${ useNettySnapshot }")
+    log.info(s"Netty version: ${ netty4Version }")
+    log.info(s"Netty tcnative version ${ netty4StaticSslVersion }")
+    ""
+  },
   sharedSettings ++
   noPublishSettings ++
   Seq(
