@@ -1,20 +1,29 @@
 #!/bin/bash
 
-if [ $# -ne 1 ]; then
-  USAGE_MSG=('usage: source ' $0 ' {true|false}')
-  echo ${USAGE_MSG[*]} 1>&2
-  echo '  true            Netty SNAPSHOT version info can be sourced into environment variables for Finagle sbt build'
-  echo '  false           Netty SNAPSHOT version info will be unset from environment variables'
-  exit 1
-fi
-
-USE_SNAPSHOT=$1
-
 print_env () {
   echo "FINAGLE_USE_NETTY_4_SNAPSHOT=$FINAGLE_USE_NETTY_4_SNAPSHOT"
   echo "FINAGLE_NETTY_4_VERSION=$FINAGLE_NETTY_4_VERSION"
   echo "FINAGLE_NETTY_4_TCNATIVE_VERSION=$FINAGLE_NETTY_4_TCNATIVE_VERSION"
 }
+
+unset_env() {
+  unset FINAGLE_NETTY_4_VERSION
+  unset FINAGLE_NETTY_4_TCNATIVE_VERSION
+  unset FINAGLE_USE_NETTY_4_SNAPSHOT
+  print_env
+}
+
+if [ $# -ne 1 ]; then
+  USAGE_MSG=('usage: source ' $0 ' <true|false>')
+  echo "${USAGE_MSG[*]}" 1>&2
+  echo '  true            Netty SNAPSHOT version info can be sourced into environment variables for Finagle sbt build'
+  echo '  false           Netty SNAPSHOT version info will be unset from environment variables'
+  echo -e '\n\nDefault usage is "false", ensuring environment variables are unset:'
+  unset_env
+  exit 0
+fi
+
+USE_SNAPSHOT=$1
 
 if [ "$USE_SNAPSHOT" = "true" ]; then
   echo "Setting Finagle Netty Snapshot environment variables"
@@ -34,9 +43,5 @@ if [ "$USE_SNAPSHOT" = "true" ]; then
   print_env
 else
   echo "Using released Netty version. Unsetting Finagle Netty Snapshot environment variables"
-
-  unset FINAGLE_NETTY_4_VERSION
-  unset FINAGLE_NETTY_4_TCNATIVE_VERSION
-  unset FINAGLE_USE_NETTY_4_SNAPSHOT
-  print_env
+  unset_env
 fi
