@@ -17,21 +17,21 @@ val useNettySnapshot: Boolean = sys.env.get("FINAGLE_USE_NETTY_4_SNAPSHOT") matc
 // we only want to allow for resolving dependencies from the snapshots repo IF we're using a
 // Netty SNAPSHOT build.
 val extraSnapshotResolvers =
-  if(useNettySnapshot) {
+  if (useNettySnapshot) {
     Seq(Resolver.sonatypeRepo("snapshots"))
   } else {
     Seq.empty
   }
 
 val netty4Version: String =
-  if(useNettySnapshot) {
+  if (useNettySnapshot) {
     sys.env("FINAGLE_NETTY_4_VERSION")
   } else {
     defaultNetty4Version
   }
 
 val netty4StaticSslVersion: String =
-  if(useNettySnapshot) {
+  if (useNettySnapshot) {
     sys.env("FINAGLE_NETTY_4_TCNATIVE_VERSION")
   } else {
     defaultNetty4StaticSslVersion
@@ -65,7 +65,7 @@ val netty4Http = "io.netty" % "netty-codec-http" % netty4Version
 val netty4Http2 = "io.netty" % "netty-codec-http2" % netty4Version
 val netty4StaticSsl = "io.netty" % "netty-tcnative-boringssl-static" % netty4StaticSslVersion
 val opencensusVersion = "0.19.1"
-val jacksonVersion = "2.9.8"
+val jacksonVersion = "2.9.9"
 val jacksonLibs = Seq(
   "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
@@ -641,7 +641,10 @@ lazy val finagleExp = Project(
   libraryDependencies ++= Seq(
     "com.netflix.concurrency-limits" % "concurrency-limits-core" % "0.3.0"
   )
-).dependsOn(finagleCore, finagleThrift)
+).dependsOn(
+  finagleCore % "compile->compile;test->test",
+  finagleThrift
+)
 
 lazy val finagleGrpcContext = Project(
   id = "finagle-grpc-context",

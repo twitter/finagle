@@ -11,25 +11,19 @@ env:
   global:
     - JAVA_OPTS="-DSKIP_FLAKY=1 -DSKIP_FLAKY_TRAVIS=1 -Dsbt.log.noformat=true"
   matrix:
+    # We specify all of the finagle projects and explicitly assign the USE_NETTY_SNAPSHOT property
+    # to 'false', as the 'netty-snapshot-env.sh' requires a 'true' or 'false' argument.
     - PROJECT=finagle-core USE_NETTY_SNAPSHOT=false
-    - PROJECT=finagle-core USE_NETTY_SNAPSHOT=true
     - PROJECT=finagle-exception  USE_NETTY_SNAPSHOT=false
     - PROJECT=finagle-exp USE_NETTY_SNAPSHOT=false
     - PROJECT=finagle-grpc-context USE_NETTY_SNAPSHOT=false
     - PROJECT=finagle-http USE_NETTY_SNAPSHOT=false
-    - PROJECT=finagle-http USE_NETTY_SNAPSHOT=true
     - PROJECT=finagle-http2 USE_NETTY_SNAPSHOT=false
-    - PROJECT=finagle-http2 USE_NETTY_SNAPSHOT=true
     - PROJECT=finagle-integration USE_NETTY_SNAPSHOT=false
-    - PROJECT=finagle-integration USE_NETTY_SNAPSHOT=true
     - PROJECT=finagle-mux USE_NETTY_SNAPSHOT=false
-    - PROJECT=finagle-mux USE_NETTY_SNAPSHOT=true
     - PROJECT=finagle-mysql USE_NETTY_SNAPSHOT=false
-    - PROJECT=finagle-mysql USE_NETTY_SNAPSHOT=true
     - PROJECT=finagle-netty4 USE_NETTY_SNAPSHOT=false
-    - PROJECT=finagle-netty4 USE_NETTY_SNAPSHOT=true
     - PROJECT=finagle-netty4-http USE_NETTY_SNAPSHOT=false
-    - PROJECT=finagle-netty4-http USE_NETTY_SNAPSHOT=true
     - PROJECT=finagle-opencensus-tracing USE_NETTY_SNAPSHOT=false
     - PROJECT=finagle-redis USE_NETTY_SNAPSHOT=false
     - PROJECT=finagle-serversets USE_NETTY_SNAPSHOT=false
@@ -37,15 +31,31 @@ env:
     - PROJECT=finagle-stats-core USE_NETTY_SNAPSHOT=false
     - PROJECT=finagle-thrift USE_NETTY_SNAPSHOT=false
     - PROJECT=finagle-thriftmux USE_NETTY_SNAPSHOT=false
-    - PROJECT=finagle-thriftmux USE_NETTY_SNAPSHOT=true
     - PROJECT=finagle-toggle USE_NETTY_SNAPSHOT=false
     - PROJECT=finagle-tunable USE_NETTY_SNAPSHOT=false
     - PROJECT=finagle-zipkin-core USE_NETTY_SNAPSHOT=false
     - PROJECT=finagle-zipkin-scribe USE_NETTY_SNAPSHOT=false
+    # Here we specify the projects that we want to build and test against the most recent
+    # Netty SNAPSHOT build. We do this to determine if we are introducing changes that will break
+    # against the latest Netty development branch (or if Netty has introduced a breaking change to
+    # the Finagle code). We choose specific projects to target that are more likely to be impacted
+    # by Netty changes to prevent having to build & test for every project.
+    - PROJECT=finagle-core USE_NETTY_SNAPSHOT=true
+    - PROJECT=finagle-http USE_NETTY_SNAPSHOT=true
+    - PROJECT=finagle-http2 USE_NETTY_SNAPSHOT=true
+    - PROJECT=finagle-integration USE_NETTY_SNAPSHOT=true
+    - PROJECT=finagle-mux USE_NETTY_SNAPSHOT=true
+    - PROJECT=finagle-mysql USE_NETTY_SNAPSHOT=true
+    - PROJECT=finagle-netty4 USE_NETTY_SNAPSHOT=true
+    - PROJECT=finagle-netty4-http USE_NETTY_SNAPSHOT=true
+    - PROJECT=finagle-thriftmux USE_NETTY_SNAPSHOT=true
 
 matrix:
+  # Allows for assigning a build result if the non-'allow_failures' targets are complete
   fast_finish: true
   allow_failures:
+    # Anything that tests against a Netty SNAPSHOT build should not be considered when failing
+    # the overall build result. The env vars here must match EXACTLY to the env matrix properties.
     - env: PROJECT=finagle-core USE_NETTY_SNAPSHOT=true
     - env: PROJECT=finagle-http USE_NETTY_SNAPSHOT=true
     - env: PROJECT=finagle-http2 USE_NETTY_SNAPSHOT=true

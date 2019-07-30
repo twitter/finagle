@@ -1,7 +1,8 @@
 #!/bin/bash
 
 if [ $# -ne 1 ]; then
-  echo 'usage: source '$0' {true|false}' 1>&2
+  USAGE_MSG=('usage: source ' $0 ' {true|false}')
+  echo ${USAGE_MSG[*]} 1>&2
   echo '  true            Netty SNAPSHOT version info can be sourced into environment variables for Finagle sbt build'
   echo '  false           Netty SNAPSHOT version info will be unset from environment variables'
   exit 1
@@ -19,7 +20,7 @@ if [ "$USE_SNAPSHOT" = "true" ]; then
   echo "Setting Finagle Netty Snapshot environment variables"
   echo "Loading latest Netty info..."
   FILE=netty4-snapshot-pom.xml
-  curl -s https://raw.githubusercontent.com/netty/netty/4.1/pom.xml > $FILE
+  curl -s --connect-timeout 5 --max-time 10 --retry 5 --retry-max-time 60 https://raw.githubusercontent.com/netty/netty/4.1/pom.xml > $FILE
   echo "Parsing Netty version info..."
   FINAGLE_USE_NETTY_4_SNAPSHOT=true
   FINAGLE_NETTY_4_VERSION=$(xmlstarlet sel -N mvn='http://maven.apache.org/POM/4.0.0' -t -m '/mvn:project/mvn:version' -v . -n < $FILE)
@@ -32,7 +33,7 @@ if [ "$USE_SNAPSHOT" = "true" ]; then
 
   print_env
 else
-  echo "Unsetting Finagle Netty Snapshot environment variables"
+  echo "Using released Netty version. Unsetting Finagle Netty Snapshot environment variables"
 
   unset FINAGLE_NETTY_4_VERSION
   unset FINAGLE_NETTY_4_TCNATIVE_VERSION
