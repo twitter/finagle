@@ -39,8 +39,12 @@ abstract class TransportParams[A <: Stack.Parameterized[A]](self: Stack.Paramete
    * Configures this client or server with given transport-level read `timeout`
    * (default: unbounded).
    *
-   * The transport-level read timeout is the maximum amount of time a
-   * connection/transport may have received no data.
+   * The transport-level read timeout is the maximum amount of time a transport may have received
+   * no data. This covers both connections in use (have outstanding requests) and connections
+   * that are idle (sitting in the connection pool).
+   *
+   * Transport-level timeouts have a side effect of acting as TTL (expiration) for cached (idle)
+   * connection.
    */
   def readTimeout(timeout: Duration): A =
     self.configured(self.params[Transport.Liveness].copy(readTimeout = timeout))
@@ -49,8 +53,12 @@ abstract class TransportParams[A <: Stack.Parameterized[A]](self: Stack.Paramete
    * Configures this client or server with given transport-level write `timeout`
    * (default: unbounded).
    *
-   * The transport-level write timeout is the maximum amount of time a
-   * connection/transport may not have sent any data.
+   * The transport-level write timeout is the maximum amount of time a transport may not have sent
+   * any data. This covers both connections in use (have outstanding requests) and connections
+   * that are idle (sitting in the connection pool).
+   *
+   * Transport-level timeouts have a side effect of acting as TTL (expiration) for cached (idle)
+   * connection.
    */
   def writeTimeout(timeout: Duration): A =
     self.configured(self.params[Transport.Liveness].copy(writeTimeout = timeout))
