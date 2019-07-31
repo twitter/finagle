@@ -27,6 +27,8 @@ Runtime Behavior Changes
 
 * finagle: Upgrade to Jackson 2.9.9. ``PHAB_ID=D345969``
 
+* finagle: Upgrade to Netty 4.1.38.Final. ``PHAB_ID=D346259``
+
 19.7.0
 ------
 
