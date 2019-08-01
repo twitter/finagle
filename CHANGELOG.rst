@@ -15,6 +15,9 @@ Breaking API Changes
   of `GenSerialClientDispatcher` and `SerialClientDispatcher` have been removed.
   ``PHAB_ID=D342883``
 
+* finagle-core: The constructor on `c.t.f.filter.NackAdmissionFilter` used for testing that
+  took an `Ema.Monotime` has been removed. ``PHAB_ID=D346532``
+
 * finagle-thrift: The deprecated `ReqRepThriftServiceBuilder` object has been
   removed. Users should migrate to `ReqRepMethodPerEndpointBuilder`. ``PHAB_ID=D345740``
 
