@@ -356,10 +356,21 @@ class MessageTest extends FunSuite {
     assert(
       Message.httpDateFormat(timeLASummer.toInstant.toEpochMilli) == "Sat, 30 Jun 2012 19:30:40 GMT"
     )
-    assert(Message.httpDateFormat(timeLAWinter) == "Sun, 30 Dec 2012 20:30:40 GMT")
-    assert(
-      Message.httpDateFormat(timeLAWinter.toInstant.toEpochMilli) == "Sun, 30 Dec 2012 20:30:40 GMT"
-    )
+
+    // workaround for https://bugs.openjdk.java.net/browse/JDK-8066982
+    if (sys.props("java.version").startsWith("1.")) {
+      assert(Message.httpDateFormat(timeLAWinter) == "Sun, 30 Dec 2012 20:30:40 GMT")
+      assert(
+        Message
+          .httpDateFormat(timeLAWinter.toInstant.toEpochMilli) == "Sun, 30 Dec 2012 20:30:40 GMT"
+      )
+    } else {
+      assert(Message.httpDateFormat(timeLAWinter) == "Sun, 30 Dec 2012 19:30:40 GMT")
+      assert(
+        Message
+          .httpDateFormat(timeLAWinter.toInstant.toEpochMilli) == "Sun, 30 Dec 2012 19:30:40 GMT"
+      )
+    }
     assert(Message.httpDateFormat(timeSH) == "Sun, 03 Jun 2012 04:30:40 GMT")
     assert(Message.httpDateFormat(timeSH.toInstant.toEpochMilli) == "Sun, 03 Jun 2012 04:30:40 GMT")
     assert(Message.httpDateFormat(timeEurope) == "Sat, 30 Jun 2012 11:30:40 GMT")
