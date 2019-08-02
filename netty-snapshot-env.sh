@@ -32,8 +32,8 @@ if [ "$USE_SNAPSHOT" = "true" ]; then
   curl -s --connect-timeout 5 --max-time 10 --retry 5 --retry-max-time 60 https://raw.githubusercontent.com/netty/netty/4.1/pom.xml > $FILE
   echo "Parsing Netty version info..."
   FINAGLE_USE_NETTY_4_SNAPSHOT=true
-  FINAGLE_NETTY_4_VERSION=$(xmlstarlet sel -N mvn='http://maven.apache.org/POM/4.0.0' -t -m '/mvn:project/mvn:version' -v . -n < $FILE)
-  FINAGLE_NETTY_4_TCNATIVE_VERSION=$(xmlstarlet sel -N mvn='http://maven.apache.org/POM/4.0.0' -t -m '/mvn:project/mvn:properties/mvn:tcnative.version' -v . -n < $FILE)
+  FINAGLE_NETTY_4_VERSION=$(grep -m 2 "<version>" $FILE | grep SNAPSHOT | awk -F'[<>]' '/version/{print $3}')
+  FINAGLE_NETTY_4_TCNATIVE_VERSION=$(grep -m 1 "<tcnative.version>" $FILE | awk -F'[<>]' '/version/{print $3}')
   rm $FILE
 
   export FINAGLE_USE_NETTY_4_SNAPSHOT

@@ -66,7 +66,6 @@ matrix:
 
 # These directories are cached to S3 at the end of the build
 cache:
-  apt: true
   directories:
    - $HOME/.ivy2/cache
    - $HOME/.ivy2/local/com.twitter
@@ -90,11 +89,6 @@ notifications:
     secure: PfUgPphNmKcZLIjTjd46IHBzqB0vkzK8clCqdsUr5taJRHhMSgRg8ks81sUhCmu+hTl3FG+jEzGgqMUvcisS+OziP/8QR/C41f5jdaETfkBE53DZIWVXZ80QRabphRTCbRUfibC39WWrhhLgWCIqzvTM8qsO/43JuQOGLQbuqcs=
     on_failure: change
     on_success: change
-
-addons:
-  apt:
-    packages:
-      - xmlstarlet
 
 before_script:
   - unset SBT_OPTS # default $SBT_OPTS is irrelevant to sbt launcher
