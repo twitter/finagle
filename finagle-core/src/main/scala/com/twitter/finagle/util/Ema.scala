@@ -4,10 +4,6 @@ package com.twitter.finagle.util
  * Maintain an exponential moving average of Double-typed values over a
  * given window on a user-defined clock.
  *
- * This is an implementation of the "Application to measuring computer performance"
- * algorithm defined on the moving average Wikipedia page
- * (https://en.wikipedia.org/wiki/Moving_average).
- *
  * `Ema` requires monotonic timestamps. A monotonic
  * time source is available at `Ema.Monotime`.
  *
@@ -15,9 +11,6 @@ package com.twitter.finagle.util
  * the timestamp generation and calls to update.
  *
  * @param window The mean lifetime of observations.
- *
- * @see [[LossyEma]] for an implementation that offers better contended
- *     throughput by ignoring contended updates.
  */
 private[finagle] class Ema(window: Long) {
   // as noted above, thread safety must be handled external to the class.

@@ -1,10 +1,10 @@
 package com.twitter.finagle.filter
 
 import com.twitter.conversions.DurationOps._
+import com.twitter.finagle.{Failure, FailureFlags, Service, ServiceFactory, Stack, param}
 import com.twitter.finagle.service.FailedService
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.util.{DefaultLogger, Rng}
-import com.twitter.finagle.{Failure, FailureFlags, Service, ServiceFactory, Stack, param}
+import com.twitter.finagle.util.{DefaultLogger, Ema, Rng}
 import com.twitter.util._
 import java.util.logging.Logger
 import org.scalatest.FunSuite
@@ -23,6 +23,10 @@ class NackAdmissionFilterTest extends FunSuite {
     def nextInt(): Int = 1
     def nextInt(n: Int): Int = 1
     def nextLong(n: Long): Long = 1
+  }
+
+  class FakeTimer extends Ema.Monotime {
+    override def nanos(): Long = Time.now.inNanoseconds
   }
 
   class Ctx(
@@ -49,14 +53,16 @@ class NackAdmissionFilterTest extends FunSuite {
 
     // Used to ensure that the accept rate is safely above or below the
     // accept rate threshold.
-    val extraProbability: Double = 0.02
+    val extraProbability: Double = 0.01
+
+    val monoTimer = new FakeTimer()
 
     val filter: NackAdmissionFilter[Int, Int] = new NackAdmissionFilter[Int, Int](
       _window,
       _nackRateThreshold,
       random,
       statsReceiver,
-      Stopwatch.timeNanos
+      monoTimer
     )
 
     def successfulResponse(): Unit = {
@@ -123,7 +129,7 @@ class NackAdmissionFilterTest extends FunSuite {
     }
   }
 
-  testEnabled("Can be disabled by configuration param") { _ =>
+  testEnabled("Can be disabled by configuration param") { ctl =>
     val nackSvc = ServiceFactory.const[Int, Int](new FailedService(Failure.rejected("goaway")))
     val stats = new InMemoryStatsReceiver
 
@@ -258,8 +264,8 @@ class NackAdmissionFilterTest extends FunSuite {
 
   testEnabled("Respects MaxDropProbability, and recovers.") { ctl =>
     val ctx = new Ctx(Rng.threadLocal)
-    import NackAdmissionFilter.MaxDropProbability
     import ctx._
+    import NackAdmissionFilter.MaxDropProbability
 
     val NumRequests = 1000
 
@@ -452,7 +458,7 @@ class NackAdmissionFilterTest extends FunSuite {
 
   testEnabled("can be triggered by failure-flag encoded nacks") { ctl =>
     class Reject extends FailureFlags[Reject] {
-      val flags: Long = FailureFlags.Rejected
+      val flags = FailureFlags.Rejected
 
       protected def copyWithFlags(flags: Long): Reject = ???
     }
@@ -462,7 +468,7 @@ class NackAdmissionFilterTest extends FunSuite {
       DefaultNackRateThreshold,
       Rng(0x5eeded),
       NullStatsReceiver,
-      Stopwatch.timeNanos
+      new FakeTimer
     )
 
     val filtered = nack.andThen(Service.mk[Int, Int](_ => Future.exception(new Reject)))
