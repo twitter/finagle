@@ -90,12 +90,6 @@ notifications:
     on_failure: change
     on_success: change
 
-before_install:
-  - sudo apt-get install -y xmlstarlet
-addons:
-  apt:
-    update: true
-
 before_script:
   - unset SBT_OPTS # default $SBT_OPTS is irrelevant to sbt launcher
   # note: this is not ideal to run before every job in the matrix but is the only way that works consistently
