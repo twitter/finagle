@@ -36,7 +36,7 @@ private[finagle] object ClientEndpointer {
     def apply(): Boolean = underlying(ServerInfo().id.hashCode)
   }
 
-  private def isMultiplexCodec(params: Stack.Params): Boolean = {
+  def isMultiplexCodec(params: Stack.Params): Boolean = {
     params[H2ClientImpl].useMultiplexClient match {
       case Some(useMultiplex) => useMultiplex
       case None => useHttp2MultiplexCodecClient()
@@ -71,8 +71,12 @@ private[finagle] object ClientEndpointer {
             // Based on the provided params, build the correct Transporter,
             // either the classic or the MultiplexCodec based Transporter.
             val transporter =
-              if (isMultiplexCodec(prms)) http2exp.transport.Http2Transporter(prms, addr)
-              else Http2Transporter(prms, addr)
+              if (isMultiplexCodec(prms)) {
+                val modifierFn = prms[TransportModifier].modifier
+                http2exp.transport.Http2Transporter(addr, modifierFn, prms)
+              } else {
+                Http2Transporter(prms, addr)
+              }
 
             new TransporterServiceFactory(transporter, prms)
           }
