@@ -46,9 +46,12 @@ private final class UpgradeRequestHandler(params: Stack.Params, httpClientCodec:
     parentCtx.pipeline.remove(this)
 
     ch.pipeline.addLast(streamChannelInit)
+
     val trans = clientSession.newChildTransport(ch)
     parentCtx.fireChannelRead(
-      Http2UpgradingTransport.UpgradeSuccessful(_ => clientSession -> trans)
+      Http2UpgradingTransport.UpgradeSuccessful(_ =>
+        new DeferredCloseSession(clientSession, trans.onClose.unit) -> new SingleDispatchTransport(
+          trans))
     )
   }
 

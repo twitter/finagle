@@ -8,7 +8,11 @@ import java.net.SocketAddress
 
 private[finagle] object Http2Transporter {
 
-  def apply(params: Stack.Params, addr: SocketAddress): Transporter[Any, Any, TransportContext] = {
+  def apply(
+    addr: SocketAddress,
+    modifier: Transport[Any, Any] => Transport[Any, Any],
+    params: Stack.Params
+  ): Transporter[Any, Any, TransportContext] = {
 
     val tlsEnabled = params[Transport.ClientSsl].sslClientConfiguration.isDefined
     val isPriorKnowledge = params[PriorKnowledge].enabled
@@ -16,9 +20,9 @@ private[finagle] object Http2Transporter {
     if (isPriorKnowledge) {
       throw new IllegalStateException(s"Prior Knowledge not supported in ${getClass.getSimpleName}")
     } else if (tlsEnabled) {
-      TlsTransporter.make(addr, params)
+      TlsTransporter.make(addr, modifier, params)
     } else {
-      H2CTransporter.make(addr, params)
+      H2CTransporter.make(addr, modifier, params)
     }
   }
 }
