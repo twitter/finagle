@@ -2,6 +2,7 @@ package com.twitter.finagle.http2.exp.transport
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.http.Request
+import com.twitter.finagle.http2.transport.ClientSession
 import com.twitter.finagle.netty4.http.Bijections
 import com.twitter.finagle.{Stack, Status}
 import com.twitter.util.{Await, Awaitable}
@@ -45,11 +46,13 @@ class ClientSessionImplTest extends FunSuite {
       val ch = new EmbeddedChannel(multiplexCodec)
       ch
     }
+
+    lazy val clientSession: ClientSession =
+      new ClientSessionImpl(params, initializer, testChannel)
   }
 
   test("presents status as closed if the parent channel is closed") {
     new Ctx {
-      val clientSession = new ClientSessionImpl(params, initializer, testChannel)
       assert(clientSession.status == Status.Open)
 
       testChannel.close()
@@ -60,7 +63,6 @@ class ClientSessionImplTest extends FunSuite {
 
   test("Child streams present status as closed if the parent channel is closed") {
     new Ctx {
-      val clientSession = new ClientSessionImpl(params, initializer, testChannel)
       val stream = await(clientSession.newChildTransport())
       assert(stream.status == Status.Open)
 
@@ -72,26 +74,44 @@ class ClientSessionImplTest extends FunSuite {
 
   test("No streams are initialized until the first write happens") {
     new Ctx {
-      val clientSession = new ClientSessionImpl(params, initializer, testChannel)
       val stream = await(clientSession.newChildTransport())
       assert(stream.status == Status.Open)
 
-      assert(multiplexCodec.connection().local().lastStreamCreated() == 0)
+      assert(multiplexCodec.connection.local.lastStreamCreated == 0)
 
       val req = Bijections.finagle.requestToNetty(Request())
       await(stream.write(req))
 
-      assert(multiplexCodec.connection().local().lastStreamCreated() > 0)
+      assert(multiplexCodec.connection.local.lastStreamCreated == 3)
     }
   }
 
   test("Session that has received a GOAWAY reports its status as Closed") {
     new Ctx {
-      val clientSession = new ClientSessionImpl(params, initializer, testChannel)
       assert(clientSession.status == Status.Open)
-      multiplexCodec.connection().goAwayReceived(0, 0, Unpooled.EMPTY_BUFFER)
+      multiplexCodec.connection.goAwayReceived(0, 0, Unpooled.EMPTY_BUFFER)
       assert(clientSession.status == Status.Closed)
 
+    }
+  }
+
+  test("Status is Closed when we're less than 50 streams away from exhausting the identifiers") {
+    new Ctx {
+      assert(clientSession.status == Status.Open)
+      // client streams are odd streams so to be less than 50 we need to multiply by 2.
+      multiplexCodec.connection.local.createStream(Int.MaxValue - 100 + 2, false)
+      assert(clientSession.status == Status.Closed)
+    }
+  }
+
+  test("Status is busy when we have exhausted the max concurrent stream limit") {
+    new Ctx {
+      assert(clientSession.status == Status.Open)
+      // client streams are odd streams
+      multiplexCodec.connection.local.maxActiveStreams(1)
+      assert(clientSession.status == Status.Open)
+      multiplexCodec.connection.local.createStream(1, false)
+      assert(clientSession.status == Status.Busy)
     }
   }
 }
