@@ -3,7 +3,7 @@ package com.twitter.finagle.http.filter
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, Verbosity}
-import com.twitter.util.{Await, Duration, Future, Time}
+import com.twitter.util.{Await, Duration, Future, Stopwatch, Time}
 import org.scalatest.FunSuite
 import org.mockito.Mockito.{spy, verify}
 
@@ -21,7 +21,7 @@ class StatsFilterTest extends FunSuite {
   test("increment stats") {
     val receiver = spy(new InMemoryStatsReceiver)
 
-    val filter = new StatsFilter(receiver) andThen service
+    val filter = new StatsFilter(receiver, Stopwatch.timeMillis) andThen service
 
     Time.withCurrentTimeFrozen { _ =>
       Await.result(filter(Request()), Duration.fromSeconds(5))
@@ -36,7 +36,7 @@ class StatsFilterTest extends FunSuite {
   test("status and time counters and stats are memoized") {
     val receiver = spy(new InMemoryStatsReceiver)
 
-    val filter = new StatsFilter(receiver) andThen service
+    val filter = new StatsFilter(receiver, Stopwatch.timeMillis) andThen service
 
     Time.withCurrentTimeFrozen { _ =>
       Await.result(filter(Request()), Duration.fromSeconds(5))

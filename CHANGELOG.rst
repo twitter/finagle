@@ -7,6 +7,19 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-http: improve performance of c.t.f.http.filter.StatsFilter. This results in two notable
+  API changes:
+    1. There is a `private[filter]` constructor which can take a `() => Long` for
+       determining the current time in milliseconds (the existing `StatsFilter(StatsReceiver)`
+       constructor defaults to using `Stopwatch.systemMillis` for determining the current time in
+       milliseconds.
+    2. The `protected count(Duration, Response)` method has been changed to
+       `private[this] count(Long, Response)` and is no longer part of the public API.
+  ``PHAB_ID=D350733``
+
 19.8.0
 ------
 
