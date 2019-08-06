@@ -670,8 +670,10 @@ finagle clients and servers.
       
       <p class="shortcomment cmt">Configures this client or server with given transport-level read <code>timeout</code>
 (default: unbounded).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this client or server with given transport-level read <code>timeout</code>
-(default: unbounded).</p><p>The transport-level read timeout is the maximum amount of time a
-connection/transport may have received no data.
+(default: unbounded).</p><p>The transport-level read timeout is the maximum amount of time a transport may have received
+no data. This covers both connections in use (have outstanding requests) and connections
+that are idle (sitting in the connection pool).</p><p>Transport-level timeouts have a side effect of acting as TTL (expiration) for cached (idle)
+connection.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TransportParams.html" class="extype" name="com.twitter.finagle.param.TransportParams">TransportParams</a></dd></dl></div>
     </li><li name="com.twitter.finagle.param.TransportParams#receiveBufferSize" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="receiveBufferSize(size:com.twitter.util.StorageUnit):A"></a><a id="receiveBufferSize(StorageUnit):A"></a>
@@ -928,8 +930,10 @@ standard output).
       
       <p class="shortcomment cmt">Configures this client or server with given transport-level write <code>timeout</code>
 (default: unbounded).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this client or server with given transport-level write <code>timeout</code>
-(default: unbounded).</p><p>The transport-level write timeout is the maximum amount of time a
-connection/transport may not have sent any data.
+(default: unbounded).</p><p>The transport-level write timeout is the maximum amount of time a transport may not have sent
+any data. This covers both connections in use (have outstanding requests) and connections
+that are idle (sitting in the connection pool).</p><p>Transport-level timeouts have a side effect of acting as TTL (expiration) for cached (idle)
+connection.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TransportParams.html" class="extype" name="com.twitter.finagle.param.TransportParams">TransportParams</a></dd></dl></div>
     </li>
               </ol>

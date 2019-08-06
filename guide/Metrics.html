@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &#8212; Finagle 19.7.0 documentation</title>
+    <title>Metrics &#8212; Finagle 19.8.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '19.7.0',
+        VERSION:     '19.8.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 19.7.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 19.8.0 documentation" href="index.html" />
     <link rel="next" title="Flags" href="Flags.html" />
     <link rel="prev" title="Protocols" href="Protocols.html" />
    
@@ -1136,44 +1136,46 @@ for comparing state across a cluster or over time.</dd>
 </div>
 <div class="section" id="streaming">
 <h2>Streaming<a class="headerlink" href="#streaming" title="Permalink to this headline">¶</a></h2>
-<p id="streaming-metrics">These metrics are added by
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-http/src/main/scala/com/twitter/finagle/http/filter/StreamingStatsFilter.scala">StreamingStatsFilter</a>
-and can be enabled by setting <cite>isChunked</cite> as true on Http request and response.</p>
+<p id="streaming-metrics">All streaming metrics are automatically collected by Finagle by setting <cite>isChunked</cite> as true on Http
+request or response. All metrics are traced using the binary annotations with a <cite>clnt/&lt;clnt_name&gt;/</cite>
+prefix on the client side, and <cite>srv/</cite> prefix on the server side.</p>
+<p>The following metrics are added by
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-http/src/main/scala/com/twitter/finagle/http/filter/StreamingStatsFilter.scala">StreamingStatsFilter</a></p>
 <dl class="docutils">
-<dt><strong>stream/request/closed</strong></dt>
+<dt><strong>http/stream/request/closed</strong></dt>
 <dd>A counter of the number of closed request streams.</dd>
-<dt><strong>stream/request/duration_ms</strong></dt>
+<dt><strong>http/stream/request/duration_ms</strong></dt>
 <dd>A histogram of the duration of the lifetime of request streams, from the time a stream is
 initialized until it&#8217;s closed, in milliseconds.</dd>
-<dt><strong>stream/request/failures</strong></dt>
+<dt><strong>http/stream/request/failures</strong></dt>
 <dd>A counter of the number of times any failure has been observed in the middle of a request stream.</dd>
-<dt><strong>stream/request/failures/&lt;exception_name&gt;</strong></dt>
+<dt><strong>http/stream/request/failures/&lt;exception_name&gt;</strong></dt>
 <dd>A counter of the number of times a specific exception has been thrown in the middle of a request
 stream.</dd>
-<dt><strong>stream/request/opened</strong></dt>
+<dt><strong>http/stream/request/opened</strong></dt>
 <dd>A counter of the number of opened request streams.</dd>
-<dt><strong>stream/request/pending</strong></dt>
+<dt><strong>http/stream/request/pending</strong></dt>
 <dd>A gauge of the number of pending request streams.</dd>
-<dt><strong>stream/response/closed</strong></dt>
+<dt><strong>http/stream/response/closed</strong></dt>
 <dd>A counter of the number of closed response streams.</dd>
-<dt><strong>stream/response/duration_ms</strong></dt>
+<dt><strong>http/stream/response/duration_ms</strong></dt>
 <dd>A histogram of the duration of the lifetime of response streams, from the time a stream is
 initialized until it&#8217;s closed, in milliseconds.</dd>
-<dt><strong>stream/response/failures</strong></dt>
+<dt><strong>http/stream/response/failures</strong></dt>
 <dd>A counter of the number of times any failure has been observed in the middle of a response stream.</dd>
-<dt><strong>stream/response/failures/&lt;exception_name&gt;</strong></dt>
+<dt><strong>http/stream/response/failures/&lt;exception_name&gt;</strong></dt>
 <dd>A counter of the number of times a specific exception has been thrown in the middle of a response
 stream.</dd>
-<dt><strong>stream/response/opened</strong></dt>
+<dt><strong>http/stream/response/opened</strong></dt>
 <dd>A counter of the number of opened response streams.</dd>
-<dt><strong>stream/response/pending</strong></dt>
+<dt><strong>http/stream/response/pending</strong></dt>
 <dd>A gauge of the number of pending response streams.</dd>
 <dt><strong>stream/request/chunk_payload_bytes</strong> <cite>verbosity:debug</cite></dt>
 <dd>A histogram of the number of bytes per chunk&#8217;s payload of request streams. This is measured in
-c.t.finagle.http.filter.PayloadSizeFilter.</dd>
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-http/src/main/scala/com/twitter/finagle/http/filter/PayloadSizeFilter.scala">c.t.finagle.http.filter.PayloadSizeFilter</a></dd>
 <dt><strong>stream/response/chunk_payload_bytes</strong> <cite>verbosity:debug</cite></dt>
 <dd>A histogram of the number of bytes per chunk&#8217;s payload of response streams. This is measured in
-c.t.finagle.http.filter.PayloadSizeFilter.</dd>
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-http/src/main/scala/com/twitter/finagle/http/filter/PayloadSizeFilter.scala">c.t.finagle.http.filter.PayloadSizeFilter</a></dd>
 <dt>You could derive the streaming success rate of:</dt>
 <dd><ul class="first last simple">
 <li>the total number of streams

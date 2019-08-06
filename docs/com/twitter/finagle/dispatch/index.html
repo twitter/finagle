@@ -244,6 +244,10 @@ resources for using Finagle.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li class="current-entities indented4">
+                        <a class="object" href="ClientDispatcher$.html" title=""></a>
+                        <a class="class" href="ClientDispatcher.html" title="Dispatches requests."></a>
+                        <a href="ClientDispatcher.html" title="Dispatches requests.">ClientDispatcher</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="GenPipeliningDispatcher$.html" title=""></a>
                         <a class="class" href="GenPipeliningDispatcher.html" title="A generic pipelining dispatcher, which assumes that servers will respect normal pipelining semantics, and that replies will be sent in the same order as requests were sent."></a>
                         <a href="GenPipeliningDispatcher.html" title="A generic pipelining dispatcher, which assumes that servers will respect normal pipelining semantics, and that replies will be sent in the same order as requests were sent.">GenPipeliningDispatcher</a>
@@ -981,7 +985,26 @@ generator.
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.dispatch.GenPipeliningDispatcher" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.dispatch.ClientDispatcher" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ClientDispatcher[Req,Rep,In,Out]extendsService[Req,Rep]"></a><a id="ClientDispatcher[Req,Rep,In,Out]:ClientDispatcher[Req,Rep,In,Out]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/index.html#ClientDispatcher[Req,Rep,In,Out]extendsService[Req,Rep]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Dispatches requests." href="ClientDispatcher.html"><span class="name">ClientDispatcher</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher.Req">Req</span>, <span class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher.Rep">Rep</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Dispatches requests.</p><div class="fullcomment"><div class="comment cmt"><p>Dispatches requests.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>this construct makes no guarantees with regard to concurrent
+dispatches. For implementations that require serial dispatch see the
+<a href="GenSerialClientDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialClientDispatcher">GenSerialClientDispatcher</a>.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.dispatch.GenPipeliningDispatcher" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="GenPipeliningDispatcher[Req,Rep,In,Out,T]extendsGenSerialClientDispatcher[Req,Rep,In,Out]"></a><a id="GenPipeliningDispatcher[Req,Rep,In,Out,T]:GenPipeliningDispatcher[Req,Rep,In,Out,T]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/dispatch/index.html#GenPipeliningDispatcher[Req,Rep,In,Out,T]extendsGenSerialClientDispatcher[Req,Rep,In,Out]" title="Permalink">
@@ -1122,7 +1145,23 @@ released after any error.
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="com.twitter.finagle.dispatch.GenPipeliningDispatcher" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+                <li name="com.twitter.finagle.dispatch.ClientDispatcher" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ClientDispatcher"></a><a id="ClientDispatcher:ClientDispatcher"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/index.html#ClientDispatcher" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ClientDispatcher$.html"><span class="name">ClientDispatcher</span></a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.dispatch.GenPipeliningDispatcher" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="GenPipeliningDispatcher"></a><a id="GenPipeliningDispatcher:GenPipeliningDispatcher"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/dispatch/index.html#GenPipeliningDispatcher" title="Permalink">

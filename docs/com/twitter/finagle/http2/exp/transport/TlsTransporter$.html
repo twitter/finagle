@@ -372,38 +372,6 @@ resources for using Finagle.
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.http2.exp.transport.TlsTransporter#configureHttp1Pipeline" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="configureHttp1Pipeline(channel:io.netty.channel.Channel,params:com.twitter.finagle.Stack.Params):com.twitter.finagle.transport.Transport[Any,Any]"></a><a id="configureHttp1Pipeline(Channel,Params):Transport[Any,Any]"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html#configureHttp1Pipeline(channel:io.netty.channel.Channel,params:com.twitter.finagle.Stack.Params):com.twitter.finagle.transport.Transport[Any,Any]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">configureHttp1Pipeline</span><span class="params">(<span name="channel">channel: <span class="extype" name="io.netty.channel.Channel">Channel</span></span>, <span name="params">params: <a href="../../../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span><span class="result">: <a href="../../../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>]</span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.http2.exp.transport.TlsTransporter#configureHttp2Pipeline" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="configureHttp2Pipeline(channel:io.netty.channel.Channel,params:com.twitter.finagle.Stack.Params):com.twitter.finagle.http2.transport.ClientSession"></a><a id="configureHttp2Pipeline(Channel,Params):ClientSession"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html#configureHttp2Pipeline(channel:io.netty.channel.Channel,params:com.twitter.finagle.Stack.Params):com.twitter.finagle.http2.transport.ClientSession" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">configureHttp2Pipeline</span><span class="params">(<span name="channel">channel: <span class="extype" name="io.netty.channel.Channel">Channel</span></span>, <span name="params">params: <a href="../../../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.http2.transport.ClientSession">ClientSession</span></span>
-      </span>
-      
-      
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -513,9 +481,9 @@ resources for using Finagle.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.http2.exp.transport.TlsTransporter#make" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="make(addr:java.net.SocketAddress,params:com.twitter.finagle.Stack.Params):com.twitter.finagle.client.Transporter[Any,Any,com.twitter.finagle.transport.TransportContext]"></a><a id="make(SocketAddress,Params):Transporter[Any,Any,TransportContext]"></a>
+      <a id="make(addr:java.net.SocketAddress,modifier:com.twitter.finagle.transport.Transport[Any,Any]=&gt;com.twitter.finagle.transport.Transport[Any,Any],params:com.twitter.finagle.Stack.Params):com.twitter.finagle.client.Transporter[Any,Any,com.twitter.finagle.transport.TransportContext]"></a><a id="make(SocketAddress,(Transport[Any,Any])⇒Transport[Any,Any],Params):Transporter[Any,Any,TransportContext]"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html#make(addr:java.net.SocketAddress,params:com.twitter.finagle.Stack.Params):com.twitter.finagle.client.Transporter[Any,Any,com.twitter.finagle.transport.TransportContext]" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/http2/exp/transport/TlsTransporter$.html#make(addr:java.net.SocketAddress,modifier:com.twitter.finagle.transport.Transport[Any,Any]=&gt;com.twitter.finagle.transport.Transport[Any,Any],params:com.twitter.finagle.Stack.Params):com.twitter.finagle.client.Transporter[Any,Any,com.twitter.finagle.transport.TransportContext]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -524,7 +492,7 @@ resources for using Finagle.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">make</span><span class="params">(<span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="params">params: <a href="../../../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span><span class="result">: <a href="../../../client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>, <a href="../../../transport/TransportContext.html" class="extype" name="com.twitter.finagle.transport.TransportContext">TransportContext</a>]</span>
+        <span class="name">make</span><span class="params">(<span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="modifier">modifier: (<a href="../../../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>]) ⇒ <a href="../../../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>]</span>, <span name="params">params: <a href="../../../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span><span class="result">: <a href="../../../client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a>, <a href="../../../transport/TransportContext.html" class="extype" name="com.twitter.finagle.transport.TransportContext">TransportContext</a>]</span>
       </span>
       
       

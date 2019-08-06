@@ -165,8 +165,8 @@ resources for using Finagle.
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <a class="object" href="ClientDispatcher$.html" title=""></a>
-                        <a class="class" href="ClientDispatcher.html" title="Dispatches requests."></a>
-                        <a href="ClientDispatcher.html" title="Dispatches requests.">ClientDispatcher</a>
+                        <a class="class" href="" title="Dispatches requests."></a>
+                        <a href="" title="Dispatches requests.">ClientDispatcher</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="GenPipeliningDispatcher$.html" title=""></a>
                         <a class="class" href="GenPipeliningDispatcher.html" title="A generic pipelining dispatcher, which assumes that servers will respect normal pipelining semantics, and that replies will be sent in the same order as requests were sent."></a>
@@ -193,8 +193,8 @@ resources for using Finagle.
                         <a href="SerialServerDispatcher.html" title="Dispatch requests from transport one at a time, queueing concurrent requests.">SerialServerDispatcher</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="StalledPipelineTimeout$.html" title=""></a>
-                        <a class="class" href="" title="A class eligible for configuring a timeout com.twitter.util.Duration to consider a pipeline to have stalled (stopped making progress after an initial interruption)."></a>
-                        <a href="" title="A class eligible for configuring a timeout com.twitter.util.Duration to consider a pipeline to have stalled (stopped making progress after an initial interruption).">StalledPipelineTimeout</a>
+                        <a class="class" href="StalledPipelineTimeout.html" title="A class eligible for configuring a timeout com.twitter.util.Duration to consider a pipeline to have stalled (stopped making progress after an initial interruption)."></a>
+                        <a href="StalledPipelineTimeout.html" title="A class eligible for configuring a timeout com.twitter.util.Duration to consider a pipeline to have stalled (stopped making progress after an initial interruption).">StalledPipelineTimeout</a>
                       </li>
               </ul>
             </div>
@@ -202,37 +202,37 @@ resources for using Finagle.
           <div id="content">
             <body class="class type">
       <div id="definition">
-        <a href="StalledPipelineTimeout$.html" title="See companion object"><div class="big-circle class-companion-object">c</div></a>
+        <a href="ClientDispatcher$.html" title="See companion object"><div class="big-circle class-companion-object">c</div></a>
         <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="index.html" class="extype" name="com.twitter.finagle.dispatch">dispatch</a></p>
-        <h1><a href="StalledPipelineTimeout$.html" title="See companion object">StalledPipelineTimeout</a><span class="permalink">
-      <a href="../../../../com/twitter/finagle/dispatch/StalledPipelineTimeout.html" title="Permalink">
+        <h1><a href="ClientDispatcher$.html" title="See companion object">ClientDispatcher</a><span class="permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
         <h3><span class="morelinks"><div>
-            Companion <a href="StalledPipelineTimeout$.html" title="See companion object">object StalledPipelineTimeout</a>
+            Companion <a href="ClientDispatcher$.html" title="See companion object">object ClientDispatcher</a>
           </div></span></h3>
       </div>
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">StalledPipelineTimeout</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
+        <span class="name">ClientDispatcher</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher.Req">Req</span>, <span class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher.Rep">Rep</span>]</span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A class eligible for configuring a timeout
-<a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html" class="extype" name="com.twitter.util.Duration">com.twitter.util.Duration</a> to consider a pipeline to have stalled
-(stopped making progress after an initial interruption).
-</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Dispatches requests.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>this construct makes no guarantees with regard to concurrent
+dispatches. For implementations that require serial dispatch see the
+<a href="GenSerialClientDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialClientDispatcher">GenSerialClientDispatcher</a>.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Equals.html#scala.Equals" class="extype" name="scala.Equals">Equals</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher.Req">Req</span>, <span class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher.Rep">Rep</span>], <a href="https://twitter.github.io/util/docs/com/twitter/util/Closable.html#com.twitter.util.Closable" class="extype" name="com.twitter.util.Closable">Closable</a>, (<span class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher.Rep">Rep</span>], <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
         </div></div>
         
 
@@ -258,7 +258,7 @@ resources for using Finagle.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.dispatch.StalledPipelineTimeout"><span>StalledPipelineTimeout</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.dispatch.ClientDispatcher"><span>ClientDispatcher</span></li><li class="in" name="com.twitter.finagle.Service"><span>Service</span></li><li class="in" name="com.twitter.util.Closable"><span>Closable</span></li><li class="in" name="scala.Function1"><span>Function1</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -278,10 +278,10 @@ resources for using Finagle.
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="com.twitter.finagle.dispatch.StalledPipelineTimeout#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(timeout:com.twitter.util.Duration):com.twitter.finagle.dispatch.StalledPipelineTimeout"></a><a id="&lt;init&gt;:StalledPipelineTimeout"></a>
+              <ol><li name="com.twitter.finagle.dispatch.ClientDispatcher#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(trans:com.twitter.finagle.transport.Transport[In,Out]):com.twitter.finagle.dispatch.ClientDispatcher[Req,Rep,In,Out]"></a><a id="&lt;init&gt;:ClientDispatcher[Req,Rep,In,Out]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/dispatch/StalledPipelineTimeout.html#&lt;init&gt;(timeout:com.twitter.util.Duration):com.twitter.finagle.dispatch.StalledPipelineTimeout" title="Permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#&lt;init&gt;(trans:com.twitter.finagle.transport.Transport[In,Out]):com.twitter.finagle.dispatch.ClientDispatcher[Req,Rep,In,Out]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -290,7 +290,7 @@ resources for using Finagle.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">StalledPipelineTimeout</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span>
+        <span class="name">ClientDispatcher</span><span class="params">(<span name="trans">trans: <a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher.In">In</span>, <span class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher.Out">Out</span>]</span>)</span>
       </span>
       
       
@@ -299,15 +299,42 @@ resources for using Finagle.
 
         
 
-        
+        <div class="values members">
+              <h3>Abstract Value Members</h3>
+              <ol><li name="com.twitter.finagle.dispatch.ClientDispatcher#dispatch" visbl="prt" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="dispatch(req:Req,p:com.twitter.util.Promise[Rep]):com.twitter.util.Future[Unit]"></a><a id="dispatch(Req,Promise[Rep]):Future[Unit]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#dispatch(req:Req,p:com.twitter.util.Promise[Rep]):com.twitter.util.Future[Unit]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">dispatch</span><span class="params">(<span name="req">req: <span class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher.Req">Req</span></span>, <span name="p">p: <a href="https://twitter.github.io/util/docs/com/twitter/util/Promise.html#com.twitter.util.Promise" class="extype" name="com.twitter.util.Promise">Promise</a>[<span class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher.Rep">Rep</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Dispatch a request, satisfying Promise <code>p</code> with the response;
+the returned Future is satisfied when the dispatch is complete:
+only one request is admitted at any given time.</p><div class="fullcomment"><div class="comment cmt"><p>Dispatch a request, satisfying Promise <code>p</code> with the response;
+the returned Future is satisfied when the dispatch is complete:
+only one request is admitted at any given time.</p><p>Note that GenSerialClientDispatcher manages interrupts,
+satisfying <code>p</code> should it be interrupted -- implementors beware:
+use only <code>updateIfEmpty</code> variants for satisfying the Promise.</p><p>GenSerialClientDispatcher will also attempt to satisfy the promise
+if the returned <code>Future[Unit]</code> fails.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+    </li></ol>
+            </div>
 
         <div class="values members">
-              <h3>Value Members</h3>
+              <h3>Concrete Value Members</h3>
               <ol>
                 <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/dispatch/StalledPipelineTimeout.html#!=(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#!=(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -323,7 +350,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/dispatch/StalledPipelineTimeout.html###():Int" title="Permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html###():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -339,7 +366,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/dispatch/StalledPipelineTimeout.html#==(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#==(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -352,10 +379,46 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.Function1#andThen" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="andThen[A](g:R=&gt;A):T1=&gt;A"></a><a id="andThen[A]((Future[Rep])⇒A):(Req)⇒A"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#andThen[A](g:R=&gt;A):T1=&gt;A" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">andThen</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher.Rep">Rep</span>]) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>)</span><span class="result">: (<span class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher.Req">Req</span>) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd><dt>Annotations</dt><dd>
+                <span class="name">@unspecialized</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="com.twitter.finagle.dispatch.ClientDispatcher#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="apply(req:Req):com.twitter.util.Future[Rep]"></a><a id="apply(Req):Future[Rep]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#apply(req:Req):com.twitter.util.Future[Rep]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">apply</span><span class="params">(<span name="req">req: <span class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher.Req">Req</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher.Rep">Rep</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">This is the method to override/implement to create your own Service.</p><div class="fullcomment"><div class="comment cmt"><p>This is the method to override/implement to create your own Service.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher">ClientDispatcher</a> → <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a> → Function1</dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/dispatch/StalledPipelineTimeout.html#asInstanceOf[T0]:T0" title="Permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#asInstanceOf[T0]:T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -371,7 +434,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/dispatch/StalledPipelineTimeout.html#clone():Object" title="Permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#clone():Object" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -392,10 +455,77 @@ resources for using Finagle.
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.dispatch.ClientDispatcher#close" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="close(deadline:com.twitter.util.Time):com.twitter.util.Future[Unit]"></a><a id="close(Time):Future[Unit]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#close(deadline:com.twitter.util.Time):com.twitter.util.Future[Unit]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <a href="https://twitter.github.io/util/docs/com/twitter/util/Time.html#com.twitter.util.Time" class="extype" name="com.twitter.util.Time">Time</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher">ClientDispatcher</a> → <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a> → Closable</dd></dl></div>
+    </li><li name="com.twitter.util.Closable#close" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="close(after:com.twitter.util.Duration):com.twitter.util.Future[Unit]"></a><a id="close(Duration):Future[Unit]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#close(after:com.twitter.util.Duration):com.twitter.util.Future[Unit]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">close</span><span class="params">(<span name="after">after: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
+    </li><li name="com.twitter.util.Closable#close" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="close():com.twitter.util.Future[Unit]"></a><a id="close():Future[Unit]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#close():com.twitter.util.Future[Unit]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">close</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<a href="http://www.scala-lang.org/api/2.12.8/scala/Unit.html#scala.Unit" class="extype" name="scala.Unit">Unit</a>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
+    </li><li name="scala.Function1#compose" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="compose[A](g:A=&gt;T1):A=&gt;R"></a><a id="compose[A]((A)⇒Req):(A)⇒Future[Rep]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#compose[A](g:A=&gt;T1):A=&gt;R" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">compose</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <span class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher.Req">Req</span></span>)</span><span class="result">: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher.Rep">Rep</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd><dt>Annotations</dt><dd>
+                <span class="name">@unspecialized</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/dispatch/StalledPipelineTimeout.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#eq(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -408,10 +538,26 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#equals(x$1:Any):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/dispatch/StalledPipelineTimeout.html#finalize():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#finalize():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -433,7 +579,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/dispatch/StalledPipelineTimeout.html#getClass():Class[_]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#getClass():Class[_]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -449,10 +595,48 @@ resources for using Finagle.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#hashCode():Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Int.html#scala.Int" class="extype" name="scala.Int">Int</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd><dt>Annotations</dt><dd>
+                <span class="name">@native</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="com.twitter.finagle.Service#isAvailable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isAvailable:Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#isAvailable:Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isAvailable</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.8/scala/Boolean.html#scala.Boolean" class="extype" name="scala.Boolean">Boolean</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Determines whether this <code>Service</code> is available (can accept requests
+with a reasonable likelihood of success).</p><div class="fullcomment"><div class="comment cmt"><p>Determines whether this <code>Service</code> is available (can accept requests
+with a reasonable likelihood of success).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/dispatch/StalledPipelineTimeout.html#isInstanceOf[T0]:Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#isInstanceOf[T0]:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -465,10 +649,10 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.dispatch.StalledPipelineTimeout#mk" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="mk():(com.twitter.finagle.dispatch.StalledPipelineTimeout,com.twitter.finagle.Stack.Param[com.twitter.finagle.dispatch.StalledPipelineTimeout])"></a><a id="mk():(StalledPipelineTimeout,Param[StalledPipelineTimeout])"></a>
+    </li><li name="com.twitter.finagle.Service#map" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="map[Req1](f:Req1=&gt;Req):com.twitter.finagle.Service[Req1,Rep]"></a><a id="map[Req1]((Req1)⇒Req):Service[Req1,Rep]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/dispatch/StalledPipelineTimeout.html#mk():(com.twitter.finagle.dispatch.StalledPipelineTimeout,com.twitter.finagle.Stack.Param[com.twitter.finagle.dispatch.StalledPipelineTimeout])" title="Permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#map[Req1](f:Req1=&gt;Req):com.twitter.finagle.Service[Req1,Rep]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -477,14 +661,14 @@ resources for using Finagle.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">mk</span><span class="params">()</span><span class="result">: (<a href="" class="extype" name="com.twitter.finagle.dispatch.StalledPipelineTimeout">StalledPipelineTimeout</a>, <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a>[<a href="" class="extype" name="com.twitter.finagle.dispatch.StalledPipelineTimeout">StalledPipelineTimeout</a>])</span>
+        <span class="name">map</span><span class="tparams">[<span name="Req1">Req1</span>]</span><span class="params">(<span name="f">f: (<span class="extype" name="com.twitter.finagle.Service.map.Req1">Req1</span>) ⇒ <span class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher.Req">Req</span></span>)</span><span class="result">: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.Service.map.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher.Rep">Rep</span>]</span>
       </span>
       
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/dispatch/StalledPipelineTimeout.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#ne(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -500,7 +684,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/dispatch/StalledPipelineTimeout.html#notify():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#notify():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -519,7 +703,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/dispatch/StalledPipelineTimeout.html#notifyAll():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#notifyAll():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -535,10 +719,27 @@ resources for using Finagle.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.dispatch.ClientDispatcher#status" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="status:com.twitter.finagle.Status"></a><a id="status:Status"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#status:com.twitter.finagle.Status" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">status</span><span class="result">: <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">The current availability <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a> of this <code>Service</code>.</p><div class="fullcomment"><div class="comment cmt"><p>The current availability <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a> of this <code>Service</code>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher">ClientDispatcher</a> → <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/dispatch/StalledPipelineTimeout.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -551,26 +752,26 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.dispatch.StalledPipelineTimeout#timeout" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="timeout:com.twitter.util.Duration"></a><a id="timeout:Duration"></a>
+    </li><li name="com.twitter.finagle.Service#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/dispatch/StalledPipelineTimeout.html#timeout:com.twitter.util.Duration" title="Permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#toString():String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">timeout</span><span class="result">: <a href="https://twitter.github.io/util/docs/com/twitter/util/Duration.html#com.twitter.util.Duration" class="extype" name="com.twitter.util.Duration">Duration</a></span>
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a> → Function1 → AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/dispatch/StalledPipelineTimeout.html#wait():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#wait():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -592,7 +793,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/dispatch/StalledPipelineTimeout.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -614,7 +815,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/dispatch/StalledPipelineTimeout.html#wait(x$1:Long):Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/dispatch/ClientDispatcher.html#wait(x$1:Long):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -645,14 +846,12 @@ resources for using Finagle.
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.Serializable">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></h3>
-            </div><div class="parent" name="java.io.Serializable">
-              <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
-            </div><div class="parent" name="scala.Product">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a></h3>
-            </div><div class="parent" name="scala.Equals">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/Equals.html#scala.Equals" class="extype" name="scala.Equals">Equals</a></h3>
+        <div class="parent" name="com.twitter.finagle.Service">
+              <h3>Inherited from <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher.Req">Req</span>, <span class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher.Rep">Rep</span>]</h3>
+            </div><div class="parent" name="com.twitter.util.Closable">
+              <h3>Inherited from <a href="https://twitter.github.io/util/docs/com/twitter/util/Closable.html#com.twitter.util.Closable" class="extype" name="com.twitter.util.Closable">Closable</a></h3>
+            </div><div class="parent" name="scala.Function1">
+              <h3>Inherited from (<span class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/com/twitter/util/Future.html#com.twitter.util.Future" class="extype" name="com.twitter.util.Future">Future</a>[<span class="extype" name="com.twitter.finagle.dispatch.ClientDispatcher.Rep">Rep</span>]</h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
