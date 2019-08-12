@@ -1,7 +1,7 @@
 package com.twitter.finagle.http2.transport
 
 import io.netty.channel.embedded.EmbeddedChannel
-import io.netty.handler.codec.http2.{Http2Headers, Http2HeadersFrame, Http2ResetFrame}
+import io.netty.handler.codec.http2.{Http2Headers, Http2HeadersFrame}
 import org.mockito.Mockito._
 import org.scalatest.FunSuite
 import org.scalatest.mockito.MockitoSugar
@@ -29,7 +29,7 @@ class H2UriValidatorHandlerTest extends FunSuite with MockitoSugar {
     when(headers.path()).thenReturn("/DSC02175拷貝.jpg")
 
     assert(channel.writeInbound(frame) == false)
-    assert(channel.readOutbound[Http2ResetFrame].errorCode() == 400)
+    assert(channel.readOutbound[Http2HeadersFrame].headers().status().toString == "400")
   }
 
 }

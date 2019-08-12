@@ -30,7 +30,9 @@ private[http2] object H2StreamChannelInit {
       val alloc = params[Allocator].allocator
       ch.config.setAllocator(alloc)
       if (isServer) {
-        ch.pipeline.addLast(new Http2NackHandler)
+        ch.pipeline
+          .addLast(new Http2NackHandler)
+          .addLast(H2UriValidatorHandler.HandlerName, H2UriValidatorHandler)
       }
 
       ch.pipeline.addLast(

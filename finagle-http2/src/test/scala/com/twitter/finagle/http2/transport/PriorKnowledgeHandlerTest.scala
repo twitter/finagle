@@ -91,7 +91,6 @@ class PriorKnowledgeHandlerTest extends FunSuite with BeforeAndAfter with Mockit
     assert(pipeline.names().contains(HttpCodecName))
     assert(pipeline.names().contains(UriValidatorHandler.HandlerName))
     assert(!pipeline.names().contains(PriorKnowledgeHandlerName))
-    assert(!pipeline.names().contains(H2UriValidatorHandler.HandlerName))
 
     val capturedMessages = msgCapture.getAllValues
 
@@ -121,7 +120,6 @@ class PriorKnowledgeHandlerTest extends FunSuite with BeforeAndAfter with Mockit
     val msgCapture: ArgumentCaptor[ByteBuf] = ArgumentCaptor.forClass(classOf[ByteBuf])
     verify(dummyHandler, times(2)).channelRead(anyObject(), msgCapture.capture())
     assert(pipeline.names().contains(Http2CodecName))
-    assert(pipeline.names().contains(H2UriValidatorHandler.HandlerName))
     assert(!pipeline.names().contains(HttpCodecName))
     assert(!pipeline.names().contains(PriorKnowledgeHandlerName))
     assert(!pipeline.names().contains(UriValidatorHandler.HandlerName))

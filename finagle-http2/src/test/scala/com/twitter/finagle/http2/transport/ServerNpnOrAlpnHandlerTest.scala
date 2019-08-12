@@ -49,7 +49,6 @@ class ServerNpnOrAlpnHandlerTest extends FunSuite with BeforeAndAfter with Mocki
     when(sslHandler.applicationProtocol()).thenReturn(http2)
     pipeline.fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS)
     assert(pipeline.names().contains(Http2CodecName))
-    assert(pipeline.names().contains(H2UriValidatorHandler.HandlerName))
     assert(!pipeline.names().contains(HttpCodecName))
     assert(!pipeline.names().contains(UriValidatorHandler.HandlerName))
     assert(stats.counters(Seq("upgrade", "success")) == 1)
@@ -61,7 +60,6 @@ class ServerNpnOrAlpnHandlerTest extends FunSuite with BeforeAndAfter with Mocki
     assert(pipeline.names().contains(HttpCodecName))
     assert(pipeline.names().contains(UriValidatorHandler.HandlerName))
     assert(!pipeline.names().contains(Http2CodecName))
-    assert(!pipeline.names().contains(H2UriValidatorHandler.HandlerName))
     assert(stats.counters(Seq("upgrade", "success")) == 0)
   }
 }

@@ -4,7 +4,11 @@ private[finagle] object UriUtils {
 
   case class InvalidUriException(uri: CharSequence) extends Exception(s"Invalid URI found: $uri")
 
-  def isValidUri(uri: CharSequence): Boolean = isValidUri(uri, uri.length())
+  /**
+   * @return true if the uri is valid or null, false otherwise
+   */
+  def isValidUri(uri: CharSequence): Boolean =
+    if (uri == null) true else isValidUri(uri, uri.length())
 
   private[this] def isValidUri(uri: CharSequence, size: Int): Boolean = {
     if (size == 0 || uri == "/") return true
