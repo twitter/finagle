@@ -4,7 +4,7 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.client.useNackAdmissionFilter
 import com.twitter.finagle.stats.{Counter, Gauge, StatsReceiver, Verbosity}
-import com.twitter.finagle.util.{Ema, Rng}
+import com.twitter.finagle.util.{LossyEma, Rng}
 import com.twitter.util._
 
 object NackAdmissionFilter {
@@ -167,14 +167,17 @@ object NackAdmissionFilter {
  *
  * @param random Random number generator used in probability calculation.
  */
-class NackAdmissionFilter[Req, Rep](
+class NackAdmissionFilter[Req, Rep] private[filter] (
   window: Duration,
   nackRateThreshold: Double,
   random: Rng,
   statsReceiver: StatsReceiver,
-  monoTime: Ema.Monotime = new Ema.Monotime)
+  now: () => Long)
     extends SimpleFilter[Req, Rep] {
   import NackAdmissionFilter._
+
+  def this(window: Duration, nackRateThreshold: Double, random: Rng, statsReceiver: StatsReceiver) =
+    this(window, nackRateThreshold, random, statsReceiver, Stopwatch.systemNanos)
 
   require(window > Duration.Zero, s"window size must be positive: $window")
   require(nackRateThreshold < 1, s"nackRateThreshold must lie in (0, 1): $nackRateThreshold")
@@ -182,28 +185,23 @@ class NackAdmissionFilter[Req, Rep](
 
   private[this] val acceptRateThreshold: Double = 1.0 - nackRateThreshold
   private[this] val multiplier: Double = 1D / acceptRateThreshold
-  private[this] val windowInNs: Long = window.inNanoseconds
 
   // Tracks the number of requests attempted during the previous 1000 ms. In
   // other words, tracks the client's rps. We arbitrarily give the Adder 10
   // slices.
   private[this] val rpsCounter: WindowedAdder = WindowedAdder(1000, 10, Stopwatch.systemMillis)
 
-  // EMA representing the rate of responses that are not nacks. We update it
+  // moving average representing the rate of responses that are not nacks. update it
   // whenever we get a response from the cluster with 0 when the service responds
-  // with a nack and 1 otherwise.
-  // NB: Usage of the ema must be synchronized with the generation of the timestamp.
-  //     and neither the Ema nor Monotime class is threadsafe.
-  private[this] val ema: Ema = new Ema(windowInNs)
-  // Start the ema at 1.0. No need for synchronization during construction.
-  ema.update(monoTime.nanos(), 1)
+  // with a nack and 1 otherwise. Start the moving average out with no nacks (1.0)
+  private[this] val ema = new LossyEma(window.inNanoseconds, now, 1.0)
 
-  // visible for testing. `Ema.last` is threadsafe
+  // visible for testing.
   private[filter] def emaValue: Double = ema.last
 
   private[this] val droppedRequestCounter: Counter = statsReceiver.counter("dropped_requests")
   private[this] val emaPercent: Gauge = statsReceiver.addGauge(Verbosity.Debug, "ema_value") {
-    (emaValue * 100).toFloat
+    (emaValue * 100.0).toFloat
   }
 
   // Decrease the EMA if the response is a Nack, increase otherwise. Update the
@@ -220,9 +218,7 @@ class NackAdmissionFilter[Req, Rep](
         1
       }
 
-    // Avoid a race condition where another update occurs between the call to
-    // nanos and the update.
-    synchronized { ema.update(monoTime.nanos(), value) }
+    ema.update(value)
   }
 
   // Determines whether the client's rps is high enough to lower the ema
