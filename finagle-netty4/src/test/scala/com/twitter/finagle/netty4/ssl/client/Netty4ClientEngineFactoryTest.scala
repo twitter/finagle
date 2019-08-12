@@ -232,17 +232,4 @@ class Netty4ClientEngineFactoryTest extends FunSuite {
       factory(address, config)
     }
   }
-
-  // application protocols are supported only by netty-tcnative, which is
-  // not tested via these tests.
-  test("config with any application protocols fails for JDK provider") {
-    // tests are run against the JDK provider which does not support NPN_AND_ALPN
-    val appProtocols = ApplicationProtocols.Supported(Seq("h2"))
-    val config = SslClientConfiguration(applicationProtocols = appProtocols)
-
-    intercept[RuntimeException] {
-      factory(address, config)
-    }
-  }
-
 }
