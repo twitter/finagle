@@ -1,11 +1,11 @@
 package com.twitter.finagle.http2.exp.transport
 
 import com.twitter.finagle.http.{Request, Response}
-import com.twitter.finagle.http2.transport.{ClientSession, H2Filter, H2StreamChannelInit}
+import com.twitter.finagle.http2.transport.{ClientSession, H2StreamChannelInit}
 import com.twitter.finagle.http2.MultiplexCodecBuilder
 import com.twitter.finagle.netty4.ConnectionBuilder
 import com.twitter.finagle.netty4.http.Http2CodecName
-import com.twitter.finagle.param.{Stats, Timer}
+import com.twitter.finagle.param.Stats
 import com.twitter.finagle.{ClientConnection, Service, ServiceFactory, Stack}
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Future, Time}
@@ -33,7 +33,6 @@ private[finagle] final class PriorKnowledgeServiceFactory(
   private[this] val childInit = H2StreamChannelInit.initClient(params)
   private[this] val statsReceiver = params[Stats].statsReceiver
   private[this] val upgradeCounter = statsReceiver.counter("upgrade", "success")
-  private[this] val timer = params[Timer].timer
 
   def apply(conn: ClientConnection): Future[Service[Request, Response]] = {
     connectionBuilder.build { channel =>
@@ -52,8 +51,8 @@ private[finagle] final class PriorKnowledgeServiceFactory(
     MultiplexCodecBuilder.addStreamsGauge(statsReceiver, codec, parentChannel)
 
     parentChannel.pipeline.addLast(Http2CodecName, codec)
-    // TODO: the H2Filter does a lot of extra stuff that doesn't apply to the client.
-    parentChannel.pipeline.addLast(H2Filter.HandlerName, new H2Filter(timer))
-    new ClientSessionImpl(params, childInit, parentChannel)
+    val pingDetectionHandler = new H2ClientFilter(params)
+    parentChannel.pipeline.addLast(H2ClientFilter.HandlerName, pingDetectionHandler)
+    new ClientSessionImpl(params, childInit, parentChannel, () => pingDetectionHandler.status)
   }
 }

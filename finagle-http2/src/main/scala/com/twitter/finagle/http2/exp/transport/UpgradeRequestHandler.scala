@@ -1,10 +1,10 @@
 package com.twitter.finagle.http2.exp.transport
 
 import com.twitter.finagle.http2.MultiplexCodecBuilder
-import com.twitter.finagle.http2.transport.{H2Filter, H2StreamChannelInit, Http2UpgradingTransport}
+import com.twitter.finagle.http2.transport.{H2StreamChannelInit, Http2UpgradingTransport}
 import com.twitter.finagle.netty4.Netty4Listener.BackPressure
 import com.twitter.finagle.netty4.transport.ChannelTransport
-import com.twitter.finagle.param.{Stats, Timer}
+import com.twitter.finagle.param.Stats
 import com.twitter.finagle.Stack
 import io.netty.channel._
 import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
@@ -37,9 +37,14 @@ private final class UpgradeRequestHandler(params: Stack.Params, httpClientCodec:
         p.remove(entry.getValue)
       }
 
-    p.addBefore(HandlerName, H2Filter.HandlerName, new H2Filter(params[Timer].timer))
+    val pingDetectionHandler = new H2ClientFilter(params)
+    p.addBefore(HandlerName, H2ClientFilter.HandlerName, pingDetectionHandler)
     val streamChannelInit = H2StreamChannelInit.initClient(params)
-    val clientSession = new ClientSessionImpl(params, streamChannelInit, parentCtx.channel)
+    val clientSession = new ClientSessionImpl(
+      params,
+      streamChannelInit,
+      parentCtx.channel,
+      () => pingDetectionHandler.status)
 
     upgradeCounter.incr()
     // let the Http2UpgradingTransport know that this was an upgrade request

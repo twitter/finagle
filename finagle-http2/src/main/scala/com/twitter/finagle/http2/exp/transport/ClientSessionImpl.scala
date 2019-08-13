@@ -27,7 +27,8 @@ import java.lang.{Boolean => JBool}
 private final class ClientSessionImpl(
   params: Stack.Params,
   initializer: ChannelInitializer[Channel],
-  channel: Channel)
+  channel: Channel,
+  failureDetectorStatus: () => Status)
     extends ClientSession {
 
   import ClientSessionImpl.StreamHighWaterMark
@@ -90,10 +91,7 @@ private final class ClientSessionImpl(
     closeP
   }
 
-  // Note that the probes of the connection instance are not thread safe because
-  // Netty expects all operations to happen within the channels executor but since
-  // Status is racy anyway, it should be good enough.
-  def status: Status = {
+  private[this] def sessionStatus: Status = {
     // Note that the result of `connection.goAwayReceived` doesn't have any guarantees
     // regarding memory visibility since the field that stores the value is not volatile.
     // However, since `status` is racy anyway we tolerate it as fixing it would be much
@@ -109,6 +107,11 @@ private final class ClientSessionImpl(
     else if (!codec.connection.local.canOpenStream) Status.Busy
     else Status.Open
   }
+
+  // Note that the probes of the connection instance are not thread safe because
+  // Netty expects all operations to happen within the channels executor but since
+  // Status is racy anyway, it should be good enough.
+  def status: Status = Status.worst(failureDetectorStatus(), sessionStatus)
 
   /**
    * Construct a new `Transport` from a Netty4 stream channel.

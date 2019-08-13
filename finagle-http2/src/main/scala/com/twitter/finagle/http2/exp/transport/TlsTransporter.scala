@@ -3,7 +3,7 @@ package com.twitter.finagle.http2.exp.transport
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.http2.MultiplexCodecBuilder
-import com.twitter.finagle.http2.transport.{ClientSession, H2Filter, H2StreamChannelInit}
+import com.twitter.finagle.http2.transport.{ClientSession, H2StreamChannelInit}
 import com.twitter.finagle.netty4.http.{
   Http2CodecName,
   HttpCodecName,
@@ -12,7 +12,7 @@ import com.twitter.finagle.netty4.http.{
 }
 import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.netty4.{ConnectionBuilder, Netty4Transporter}
-import com.twitter.finagle.param.{Stats, Timer}
+import com.twitter.finagle.param.Stats
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.Stack
 import com.twitter.util.{Future, Return, Throw}
@@ -117,8 +117,9 @@ object TlsTransporter {
     val multiplex = MultiplexCodecBuilder.clientMultiplexCodec(params, None)
     val streamChannelInit = H2StreamChannelInit.initClient(params)
     channel.pipeline.addLast(Http2CodecName, multiplex)
-    channel.pipeline.addLast(H2Filter.HandlerName, new H2Filter(params[Timer].timer))
-    new ClientSessionImpl(params, streamChannelInit, channel)
+    val pingDetectionHandler = new H2ClientFilter(params)
+    channel.pipeline.addLast(H2ClientFilter.HandlerName, pingDetectionHandler)
+    new ClientSessionImpl(params, streamChannelInit, channel, () => pingDetectionHandler.status)
   }
 
   private def configureHttp1Pipeline(
