@@ -7,8 +7,8 @@ import com.twitter.finagle.netty4.http.Bijections
 import com.twitter.finagle.{Stack, Status}
 import com.twitter.util.{Await, Awaitable}
 import io.netty.buffer.Unpooled
-import io.netty.channel.{Channel, ChannelHandler, ChannelInitializer}
 import io.netty.channel.embedded.EmbeddedChannel
+import io.netty.channel.{Channel, ChannelHandler, ChannelInitializer}
 import io.netty.handler.codec.http2.{
   Http2MultiplexCodec,
   Http2MultiplexCodecBuilder,
@@ -26,6 +26,8 @@ class ClientSessionImplTest extends FunSuite {
       def initChannel(ch: Channel): Unit =
         throw new IllegalStateException("Shouldn't get here.")
     }
+
+    def failureDetectorStatus: () => Status = () => Status.Open
 
     def params: Stack.Params = Stack.Params.empty
 
@@ -48,7 +50,7 @@ class ClientSessionImplTest extends FunSuite {
     }
 
     lazy val clientSession: ClientSession =
-      new ClientSessionImpl(params, initializer, testChannel)
+      new ClientSessionImpl(params, initializer, testChannel, failureDetectorStatus)
   }
 
   test("presents status as closed if the parent channel is closed") {
@@ -112,6 +114,16 @@ class ClientSessionImplTest extends FunSuite {
       assert(clientSession.status == Status.Open)
       multiplexCodec.connection.local.createStream(1, false)
       assert(clientSession.status == Status.Busy)
+    }
+  }
+
+  test("Status is Closed if PingDetectionHandler is Closed") {
+    new Ctx {
+      var status: Status = Status.Open
+      override def failureDetectorStatus = () => status
+      assert(clientSession.status == Status.Open)
+      status = Status.Closed
+      assert(clientSession.status == Status.Closed)
     }
   }
 }
