@@ -48,6 +48,16 @@ Runtime Behavior Changes
 
 * finagle: Upgrade to Netty 4.1.38.Final. ``PHAB_ID=D346259``
 
+* finagle-base-http: Moved c.t.f.http.serverErrorsAsFailures out of its package
+  object, which changes its name from
+  `com.twitter.finagle.http.package$serverErrorsAsFailures` to
+  `com.twitter.finagle.http.serverErrorsAsFailures`. ``PHAB_ID=D353045``
+
+* finagle-thrift: Moved c.t.f.thrift.maxReusableBufferSize out of its package
+  object, which changes its name from
+  `com.twitter.finagle.thrift.package$maxReusableBufferSize` to
+  `com.twitter.finagle.thrift.maxReusableBufferSize`. ``PHAB_ID=D353045``
+
 19.7.0
 ------
 
