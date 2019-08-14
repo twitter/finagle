@@ -77,7 +77,7 @@ public class StackParamCompilationTest {
             Option.<Transporter.Credentials>empty()).mk())
         .configured(
           new BindingFactory.BaseDtab(new Function0<Dtab>() {
-              public Dtab apply() { return Dtab.empty(); }
+              public Dtab apply() { return Dtabs.empty(); }
           }).mk())
         .configured(new TimeoutFactory.Param(Duration.Top()).mk())
         .configured(new MaskCancelFilter.Param(false).mk())

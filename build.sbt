@@ -113,6 +113,7 @@ def gcJavaOptions: Seq[String] = {
     "-Xmx3G"
   )
 }
+val with213 = Seq(crossScalaVersions += "2.13.0")
 
 val sharedSettings = Seq(
   version := releaseVersion,
@@ -128,6 +129,14 @@ val sharedSettings = Seq(
     "org.mockito" % "mockito-all" % "1.9.5" % "test"
   ),
 
+  unmanagedSourceDirectories in Compile += {
+    val sourceDir = (sourceDirectory in Compile).value
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, n)) if n >= 13 => sourceDir / "scala-2.13+"
+      case _ => sourceDir / "scala-2.12-"
+    }
+  },
+  
   ScoverageKeys.coverageHighlighting := true,
   ScroogeSBT.autoImport.scroogeLanguages in Test := Seq("java", "scala"),
 
@@ -141,6 +150,7 @@ val sharedSettings = Seq(
   scalacOptions := Seq(
     // Note: Add -deprecation when deprecated methods are removed
     "-target:jvm-1.8",
+    "-deprecation",
     "-unchecked",
     "-feature",
     "-language:_",
@@ -294,6 +304,7 @@ lazy val finagle = Project(
     ""
   },
   sharedSettings ++
+  with213 ++
   noPublishSettings ++
   Seq(
     unidocProjectFilter in(ScalaUnidoc, unidoc) :=
@@ -337,7 +348,8 @@ lazy val finagleToggle = Project(
   id = "finagle-toggle",
   base = file("finagle-toggle")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  with213
 ).settings(
   name := "finagle-toggle",
   libraryDependencies ++= Seq(
@@ -352,7 +364,8 @@ lazy val finagleInit = Project(
   id = "finagle-init",
   base = file("finagle-init")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  with213
 ).settings(
   name := "finagle-init"
 )
@@ -361,7 +374,8 @@ lazy val finagleCore = Project(
   id = "finagle-core",
   base = file("finagle-core")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  with213
 ).settings(
   name := "finagle-core",
   libraryDependencies ++= Seq(

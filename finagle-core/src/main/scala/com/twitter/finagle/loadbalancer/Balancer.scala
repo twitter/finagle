@@ -159,7 +159,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
 
     // These nodes are currently maintained by `Distributor`.
     val oldFactories: mutable.HashMap[EndpointFactory[Req, Rep], Node] =
-      dist.vector.map(factoryToNode)(collection.breakOut)
+      mutable.HashMap(dist.vector.map(factoryToNode): _*)
 
     var numAdded: Int = 0
 

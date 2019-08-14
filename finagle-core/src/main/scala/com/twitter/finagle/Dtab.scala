@@ -4,27 +4,16 @@ import com.twitter.app.Flaggable
 import com.twitter.io.Buf
 import com.twitter.util.Local
 import java.io.PrintWriter
-import scala.collection.generic.CanBuildFrom
-import scala.collection.immutable.VectorBuilder
-import scala.collection.mutable.Builder
 
-/**
- * A Dtab--short for delegation table--comprises a sequence of
- * delegation rules. Together, these describe how to bind a
- * [[com.twitter.finagle.Path]] to a set of
- * [[com.twitter.finagle.Addr]]. [[com.twitter.finagle.naming.DefaultInterpreter]]
- * implements the default binding strategy.
- *
- * @see The [[https://twitter.github.io/finagle/guide/Names.html#interpreting-paths-with-delegation-tables user guide]]
- *      for further details.
- */
-case class Dtab(dentries0: IndexedSeq[Dentry]) extends IndexedSeq[Dentry] {
+private[finagle] trait DtabBase extends IndexedSeq[Dentry] { self: Dtab =>
 
+  val dentries0: IndexedSeq[Dentry]
   private lazy val dentries = dentries0.reverse
 
   def apply(i: Int): Dentry = dentries0(i)
   def length: Int = dentries0.length
   override def isEmpty: Boolean = dentries0.isEmpty
+  def map(f: Dentry => Dentry): Dtab = Dtab(dentries0.map(f))
 
   /**
    * Lookup the given `path` with this dtab.
@@ -112,10 +101,7 @@ case class Dtab(dentries0: IndexedSeq[Dentry]) extends IndexedSeq[Dentry] {
    */
   def simplified: Dtab =
     Dtab({
-      val simple = this map {
-        case Dentry(prefix, dst) => Dentry(prefix, dst.simplified)
-      }
-
+      val simple = self.map( (entry: Dentry) => entry.copy(dst = entry.dst.simplified))
       // Negative destinations are no-ops
       simple.filter(_.dst != NameTree.Neg)
     })
@@ -275,7 +261,7 @@ object Dentry {
 /**
  * Object Dtab manages 'base' and 'local' Dtabs.
  */
-object Dtab {
+private[finagle] trait DtabCompanionBase {
   implicit val equiv: Equiv[Dtab] = new Equiv[Dtab] {
     def equiv(d1: Dtab, d2: Dtab): Boolean = (
       d1.size == d2.size &&
@@ -358,12 +344,6 @@ object Dtab {
   /** Scala collection plumbing required to build new dtabs */
   def newBuilder: DtabBuilder = new DtabBuilder
 
-  implicit val canBuildFrom: CanBuildFrom[TraversableOnce[Dentry], Dentry, Dtab] =
-    new CanBuildFrom[TraversableOnce[Dentry], Dentry, Dtab] {
-      def apply(_ign: TraversableOnce[Dentry]): DtabBuilder = newBuilder
-      def apply(): DtabBuilder = newBuilder
-    }
-
   /**
    * implicit conversion from [[com.twitter.finagle.Dtab]] to
    * [[com.twitter.app.Flaggable]], allowing Dtabs to be easily used as
@@ -374,17 +354,4 @@ object Dtab {
     def parse(s: String): Dtab = Dtab.read(s)
     override def show(dtab: Dtab): String = dtab.show
   }
-}
-
-final class DtabBuilder extends Builder[Dentry, Dtab] {
-  private[this] val builder = new VectorBuilder[Dentry]
-
-  def +=(d: Dentry): this.type = {
-    builder += d
-    this
-  }
-
-  def clear(): Unit = builder.clear()
-
-  def result(): Dtab = Dtab(builder.result)
 }

@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.io.Buf
-import scala.collection.mutable.{ArrayBuffer, Buffer}
+import scala.collection.immutable.VectorBuilder
 
 private[finagle] object NameTreeParsers {
   def parsePath(str: String): Path = new NameTreeParsers(str).parseAllPath()
@@ -147,13 +147,13 @@ private class NameTreeParsers private (str: String) {
     if (!isDentryPrefixElemChar(peek))
       Dentry.Prefix.empty
     else {
-      val elems = Buffer[Dentry.Prefix.Elem]()
+      val elems = new VectorBuilder[Dentry.Prefix.Elem]()
 
       do {
         elems += parseDentryPrefixElem()
       } while (maybeEat('/'))
 
-      Dentry.Prefix(elems: _*)
+      Dentry.Prefix(elems.result(): _*)
     }
   }
 
@@ -164,37 +164,39 @@ private class NameTreeParsers private (str: String) {
     if (!isLabelChar(peek))
       Path.empty
     else {
-      val labels = Buffer[Buf]()
+      val labels = new VectorBuilder[Buf]()
 
       do {
         labels += parseLabel()
       } while (maybeEat('/'))
 
-      Path(labels: _*)
+      Path(labels.result(): _*)
     }
   }
 
   private[this] def parseTree(): NameTree[Path] = {
-    val trees = Buffer[NameTree[Path]]()
+    val treesb = new VectorBuilder[NameTree[Path]]()
 
     do {
-      trees += parseTree1()
+      treesb += parseTree1()
       eatWhitespace()
     } while (maybeEat('|'))
+    val trees = treesb.result()
 
-    if (trees.size > 1)
+    if (trees.length > 1)
       NameTree.Alt(trees: _*)
     else
       trees(0)
   }
 
   private[this] def parseTree1(): NameTree[Path] = {
-    val trees = Buffer[NameTree.Weighted[Path]]()
+    val treesb = new VectorBuilder[NameTree.Weighted[Path]]()
 
     do {
-      trees += parseWeighted()
+      treesb += parseWeighted()
       eatWhitespace()
     } while (maybeEat('&'))
+    val trees = treesb.result()
 
     if (trees.size > 1)
       NameTree.Union(trees: _*)
@@ -257,7 +259,7 @@ private class NameTreeParsers private (str: String) {
   }
 
   private[this] def parseDtab(): Dtab = {
-    val dentries = ArrayBuffer[Dentry]()
+    val dentries = new VectorBuilder[Dentry]()
 
     do {
       eatWhitespace()
@@ -267,7 +269,7 @@ private class NameTreeParsers private (str: String) {
       }
     } while (maybeEat(';'))
 
-    Dtab(dentries)
+    Dtab(dentries.result())
   }
 
   def parseAllPath(): Path = {

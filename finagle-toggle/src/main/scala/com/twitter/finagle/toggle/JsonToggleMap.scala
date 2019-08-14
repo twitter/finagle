@@ -8,7 +8,7 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.twitter.util.Try
 import java.net.URL
 import scala.collection.mutable
-import scala.collection.{breakOut, immutable}
+import scala.collection.immutable
 
 /**
  * [[ToggleMap ToggleMaps]] in JSON format.
@@ -126,13 +126,13 @@ object JsonToggleMap {
       }
 
       val metadata: immutable.Seq[Toggle.Metadata] =
-        toggles.map { jsonToggle =>
+        toggles.map(jsonToggle => {
           val description = descriptionMode match {
             case DescriptionRequired => jsonToggle.description
             case DescriptionIgnored => None
           }
           Toggle.Metadata(jsonToggle.id, jsonToggle.fraction, description, source)
-        }(breakOut)
+        }).toList
 
       val ids = metadata.map(_.id)
       val uniqueIds = ids.distinct
@@ -196,12 +196,12 @@ object JsonToggleMap {
     }.toMap
 
     // create a mapping of id to a seq of its components.
-    val idToComponents = mutable.Map.empty[String, mutable.ArrayBuffer[Component]]
+    val idToComponents = mutable.Map.empty[String, List[Component]]
     ToggleMap.components(toggleMap).foreach { tm =>
       tm.iterator.foreach { md =>
-        val components: mutable.ArrayBuffer[Component] =
-          idToComponents.getOrElse(md.id, mutable.ArrayBuffer.empty[Component])
-        idToComponents.put(md.id, components += Component(md.source, md.fraction))
+        val components: List[Component] =
+          idToComponents.getOrElse(md.id, List.empty[Component])
+        idToComponents.put(md.id, Component(md.source, md.fraction) :: components)
       }
     }
 

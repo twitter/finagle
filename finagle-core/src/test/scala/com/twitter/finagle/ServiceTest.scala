@@ -188,7 +188,7 @@ class ServiceTest extends FunSuite with MockitoSugar {
 
   test("FactoryToService closes underlying service after request, does not close factory")(new Ctx {
     val service = new FactoryToService(underlyingFactory)
-    Await.result(service(Unit))
+    Await.result(service(()))
 
     assert(serviceCloseCalled)
     assert(!factoryCloseCalled)
@@ -225,7 +225,7 @@ class ServiceTest extends FunSuite with MockitoSugar {
     val factory = stack.make(Stack.Params.empty + FactoryToService.Enabled(true))
 
     val service = new FactoryToService(factory)
-    Await.result(service(Unit))
+    Await.result(service(()))
 
     assert(serviceCloseCalled)
     assert(!factoryCloseCalled)

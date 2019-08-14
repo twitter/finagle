@@ -21,12 +21,12 @@ class GroupTest extends FunSuite {
     group() = Set(1, 2)
     assert(mapped.isEmpty)
     assert(derived() == Set(2, 3))
-    assert(Set(mapped: _*) == Set(1, 2))
+    assert(mapped.toSet == Set(1, 2))
     assert(derived() eq derived())
 
     group() = Set(1, 2, 3)
     assert(derived() == Set(2, 3, 4))
-    assert(Set(mapped: _*) == Set(1, 2, 3))
+    assert(mapped.toSet == Set(1, 2, 3))
     assert(derived() eq derived())
   }
 
@@ -40,7 +40,7 @@ class GroupTest extends FunSuite {
     assert(derived() == Set(3))
     group() = Set(1, 2)
     assert(derived() == Set(2, 3))
-    assert(Set(mapped: _*) == Set(1, 2))
+    assert(mapped.toSet == Set(1, 2))
   }
 
   test("collect") {

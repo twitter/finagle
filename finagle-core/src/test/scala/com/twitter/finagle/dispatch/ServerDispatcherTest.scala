@@ -81,6 +81,7 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
 
   test("Inject the transport remote address")(new Ctx {
     val mockAddr = mock[SocketAddress]
+    when(trans.remoteAddress).thenReturn(mockAddr)
     when(trans.context.remoteAddress).thenReturn(mockAddr)
     val service = new Service[String, String] {
       override def apply(request: String): Future[String] = Future.value {

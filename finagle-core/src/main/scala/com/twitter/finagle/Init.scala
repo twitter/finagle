@@ -89,7 +89,8 @@ private[twitter] object Init {
     val candidates = Seq(
       "finagle-core",
       "finagle-core_2.11",
-      "finagle-core_2.12"
+      "finagle-core_2.12",
+      "finagle-core_2.13"
     )
     candidates.flatMap { c =>
       tryProps(s"/com/twitter/$c/build.properties")

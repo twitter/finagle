@@ -48,8 +48,12 @@ class CachedHashCodeTest extends FunSuite {
   }
 
   test("same hashCode mixed in or not") {
-    case class NotMixedIn(s: String)
-    case class MixedIn(s: String) extends CachedHashCode.ForCaseClass
+    case class NotMixedIn(s: String) {
+      override def productPrefix = "prefix"
+    }
+    case class MixedIn(s: String) extends CachedHashCode.ForCaseClass {
+      override def productPrefix = "prefix"
+    }
 
     val nmi = NotMixedIn("hello")
     val mi = MixedIn("hello")

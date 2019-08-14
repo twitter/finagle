@@ -11,7 +11,7 @@ import java.util.{function => juf}
 import java.{lang => jl}
 import scala.annotation.varargs
 import scala.collection.JavaConverters._
-import scala.collection.{breakOut, immutable, mutable}
+import scala.collection.{immutable, mutable}
 import scala.util.hashing.MurmurHash3
 
 /**
@@ -135,14 +135,7 @@ object ToggleMap {
     def currentFraction: Double = fraction
   }
 
-  private[this] val MetadataOrdering: Ordering[Toggle.Metadata] =
-    new Ordering[Toggle.Metadata] {
-      def compare(x: Metadata, y: Metadata): Int = {
-        val ids = Ordering.String.compare(x.id, y.id)
-        if (ids != 0) ids
-        else Ordering.Double.compare(x.fraction, y.fraction)
-      }
-    }
+  private[this] val MetadataOrdering: Ordering[Toggle.Metadata] = Ordering.by((md: Toggle.Metadata) => (md.id, md.fraction))
 
   /**
    * Creates a [[ToggleMap]] with a `Gauge`, "checksum", which summarizes the
@@ -351,9 +344,9 @@ object ToggleMap {
   class Immutable(metadata: immutable.Seq[Toggle.Metadata]) extends ToggleMap {
 
     private[this] val toggles: immutable.Map[String, Toggle[Int]] =
-      metadata.map { md =>
+      metadata.map(md =>
         md.id -> fractional(md.id, md.fraction)
-      }(breakOut)
+      ).toMap
 
     override def toString: String =
       s"ToggleMap.Immutable@${System.identityHashCode(this)}"

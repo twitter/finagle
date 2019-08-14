@@ -6,8 +6,8 @@ import com.twitter.util.Time
 import com.twitter.util.{Return, Throw}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, times, verify, when, atLeast}
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{OneInstancePerTest, BeforeAndAfter, FunSuite}
+import org.scalatestplus.mockito.MockitoSugar
 import scala.util.Random
 
 class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneInstancePerTest {
