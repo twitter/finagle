@@ -109,7 +109,7 @@ def gcJavaOptions: Seq[String] = {
     "-XX:MaxTenuringThreshold=0",
     "-Xss8M",
     "-Xms512M",
-    "-Xmx2G"
+    "-Xmx3G"
   )
 }
 
