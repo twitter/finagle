@@ -8,8 +8,6 @@ git:
   quiet: true
 
 env:
-  global:
-    - JAVA_OPTS=""
   matrix:
     - PROJECT=finagle-core
     - PROJECT=finagle-exception
