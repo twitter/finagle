@@ -19,7 +19,7 @@ import io.netty.util.ReferenceCountUtil
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * A handler for managing some aspects of the HTTP/2 servers main pipeline
+ * A handler for managing some aspects of the HTTP/2 Server main pipeline
  *
  * This filter handles a number of session concerns that the `Http2MultiplexCodec`
  * exposes as pipeline events.
@@ -29,9 +29,11 @@ import java.util.concurrent.atomic.AtomicBoolean
  * - Manages graceful shutdown to allow servers to perform the preferred method of
  *   session draining where we process new streams that raced with the GOAWAY sent to
  *   the client.
+ *
+ * @see [[com.twitter.finagle.http2.exp.transport.H2ClientFilter]] for clients
  */
-private[http2] final class H2Filter(timer: Timer) extends ChannelDuplexHandler {
-  import H2Filter.logger
+private[http2] final class H2ServerFilter(timer: Timer) extends ChannelDuplexHandler {
+  import H2ServerFilter.logger
 
   @volatile private[this] var closeDeadline: Time = Time.Bottom
 
@@ -58,7 +60,7 @@ private[http2] final class H2Filter(timer: Timer) extends ChannelDuplexHandler {
 
     if (connectionHandler == null) {
       // Illegal state.
-      val message = s"Found H2Filter in a pipeline without a Http2ConnectionHandler. " +
+      val message = s"Found H2ServerFilter in a pipeline without a Http2ConnectionHandler. " +
         s"Pipeline: ${ctx.pipeline}"
       val ex = new IllegalStateException(message)
       logger.error(ex, message)
@@ -134,8 +136,8 @@ private[http2] final class H2Filter(timer: Timer) extends ChannelDuplexHandler {
   }
 }
 
-private[http2] object H2Filter {
-  private val logger = Logger.get(classOf[H2Filter])
+private[http2] object H2ServerFilter {
+  private val logger = Logger.get(classOf[H2ServerFilter])
 
-  val HandlerName: String = "H2Filter"
+  val HandlerName: String = "H2ServerFilter"
 }

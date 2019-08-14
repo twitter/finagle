@@ -1,7 +1,7 @@
 package com.twitter.finagle.http2
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.http2.transport.H2Filter
+import com.twitter.finagle.http2.transport.H2ServerFilter
 import com.twitter.finagle.{Announcement, ListeningServer, Stack}
 import com.twitter.finagle.netty4.Netty4Listener
 import com.twitter.finagle.netty4.http.{HttpCodecName, initServer, newHttpServerCodec}
@@ -70,9 +70,9 @@ private[http2] class Http2Listener[In, Out](
     if (duration > 0) {
       channels.asScala.foreach { channel =>
         val pipeline = channel.pipeline
-        val handler = pipeline.get(classOf[H2Filter])
+        val handler = pipeline.get(classOf[H2ServerFilter])
         if (handler != null) {
-          // This is a HTTP/2 connection. Add the deadline to the `H2Filter` and
+          // This is a HTTP/2 connection. Add the deadline to the `H2ServerFilter` and
           // we'll let it take care of the rest. Note that this races with upgrades
           // but we can't win them all.
           handler.setDeadline(deadline)
