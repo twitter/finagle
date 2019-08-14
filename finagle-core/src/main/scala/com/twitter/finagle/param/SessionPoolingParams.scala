@@ -51,8 +51,11 @@ class SessionPoolingParams[A <: Stack.Parameterized[A]](self: Stack.Parameterize
    * Configures the session pool TTL timeout, the maximum amount of time
    * a given _temporary_ per-host session is allowed to be cached in a pool (default: unbounded).
    *
-   * @note TTL does not apply to permanent sessions (up to `minSize`).
+   * The expiration task runs at most per min(TTL, 1s), thus the "real" TTL is a uniform
+   * distribution in the range [ttl, min(ttl + 1s, ttl * 2)). Put this way, it is acceptable to lag
+   * the session expiration for at most TTL or 1 second, whichever is shorter.
    *
+   * @note TTL does not apply to permanent sessions (up to `minSize`).
    * @see [[https://twitter.github.io/finagle/guide/Clients.html#pooling]]
    */
   def ttl(timeout: Duration): A =
