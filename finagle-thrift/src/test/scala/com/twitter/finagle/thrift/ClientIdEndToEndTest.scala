@@ -49,4 +49,8 @@ class ClientIdEndToEndTest extends FunSuite with ThriftTest {
   }
 
   runThriftTests()
+
+  test("foo") {
+    val arr = new Array[Byte](512 * 1024*1024) // 512 MB
+  }
 }
