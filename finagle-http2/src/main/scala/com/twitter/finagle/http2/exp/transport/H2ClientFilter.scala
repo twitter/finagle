@@ -22,7 +22,7 @@ import io.netty.util.ReferenceCountUtil
  *   - Swallows inbound H2 session frames that are propagated down the main pipeline.
  *     (the Http2 -> Http1 object conversion should take place prior to this filter).
  *
- * @see [[com.twitter.finagle.http2.transport.H2Filter]] for servers
+ * @see [[com.twitter.finagle.http2.transport.H2ServerFilter]] for servers
  */
 private[transport] final class H2ClientFilter(params: Stack.Params)
     extends ChannelInboundHandlerAdapter {

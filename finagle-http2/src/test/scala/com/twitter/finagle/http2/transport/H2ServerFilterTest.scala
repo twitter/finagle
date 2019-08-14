@@ -7,9 +7,9 @@ import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http2.{DefaultHttp2DataFrame, Http2FrameCodecBuilder}
 import org.scalatest.FunSuite
 
-class H2FilterTest extends FunSuite {
+class H2ServerFilterTest extends FunSuite {
   test("doesn't leak messages") {
-    val em = new EmbeddedChannel(new H2Filter(DefaultTimer))
+    val em = new EmbeddedChannel(new H2ServerFilter(DefaultTimer))
     val payload = io.netty.buffer.Unpooled.buffer(10)
     assert(payload.refCnt() == 1)
     em.writeInbound(new DefaultHttp2DataFrame(payload))
@@ -19,10 +19,10 @@ class H2FilterTest extends FunSuite {
   private class Ctx {
     val timer = new MockTimer
     val em = new EmbeddedChannel()
-    val filter = new H2Filter(timer)
+    val filter = new H2ServerFilter(timer)
     val h2FrameCodec = Http2FrameCodecBuilder.forServer().build()
 
-    em.pipeline.addFirst(H2Filter.HandlerName, filter)
+    em.pipeline.addFirst(H2ServerFilter.HandlerName, filter)
     em.pipeline.addFirst("TheFrameCodec", h2FrameCodec)
   }
 
