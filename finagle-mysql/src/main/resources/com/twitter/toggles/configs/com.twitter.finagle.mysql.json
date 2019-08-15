@@ -1,9 +1,3 @@
 {
-  "toggles": [
-    {
-      "id": "com.twitter.finagle.mysql.IncludeHandshakeInServiceAcquisition",
-      "description": "Perform MySQL session connection phase (handshaking) as part of service acquisition",
-      "fraction": 0.0
-    }
-  ]
+  "toggles": []
 }

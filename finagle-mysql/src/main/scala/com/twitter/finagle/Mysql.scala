@@ -11,10 +11,8 @@ import com.twitter.finagle.param.{
   Tracer => _,
   _
 }
-import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.{Duration, Future, Monitor}
@@ -99,14 +97,6 @@ object MySqlClientTracingFilter {
  */
 object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichClient {
 
-  private[this] val includeHandshakeInServiceAcquisitionToggle: Toggle[Int] =
-    Toggles("com.twitter.finagle.mysql.IncludeHandshakeInServiceAcquisition")
-
-  // This param having a value other than `None` indicates that
-  // the client is setup to try to use SSL/TLS.
-  private[this] def wantsToUseSsl(params: Stack.Params): Boolean =
-    params[Transport.ClientSsl].sslClientConfiguration.isDefined
-
   protected val supportUnsigned: Boolean = UnsignedColumns.param.default.supported
 
   object Client {
@@ -163,15 +153,6 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
       with WithDefaultLoadBalancer[Client]
       with MysqlRichClient {
 
-    // If the param is set to use SSL/TLS, we force handshaking to
-    // be done as part of service acquisition. We want all handshaking
-    // to be done eventually as part of service acquisition, and SSL/TLS
-    // is functionality that didn't exist previously, so make SSL/TLS take
-    // the preferred path.
-    private[this] val includeHandshakeInServiceAcquisition: Boolean =
-      wantsToUseSsl(params) ||
-        includeHandshakeInServiceAcquisitionToggle(ServerInfo().id.hashCode)
-
     protected val supportUnsigned: Boolean = params[UnsignedColumns].supported
 
     protected def copy1(
@@ -184,16 +165,12 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
     protected type Context = TransportContext
 
     protected def newTransporter(addr: SocketAddress): Transporter[In, Out, Context] =
-      new MysqlTransporter(addr, params, includeHandshakeInServiceAcquisition)
+      new MysqlTransporter(addr, params)
 
     protected def newDispatcher(
       transport: Transport[In, Out] { type Context <: Client.this.Context }
     ): Service[Request, Result] =
-      // If we're performing handshaking during the service acquisition phase
-      // (via the transporter, see the `newTransporter` method above), then we
-      // don't want to perform it again here. If we didn't there, then we do here.
-      // Eventually `newTransporter` should be the only place where it's done.
-      mysql.ClientDispatcher(transport, params, !includeHandshakeInServiceAcquisition)
+      mysql.ClientDispatcher(transport, params)
 
     /**
      * The maximum number of concurrent prepare statements.

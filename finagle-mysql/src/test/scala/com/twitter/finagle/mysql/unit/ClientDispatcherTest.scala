@@ -3,7 +3,6 @@ package com.twitter.finagle.mysql
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Stack
-import com.twitter.finagle.mysql.param.Credentials
 import com.twitter.finagle.mysql.transport.{Packet, MysqlBuf}
 import com.twitter.finagle.transport.QueueTransport
 import com.twitter.io.Buf
@@ -11,91 +10,61 @@ import com.twitter.util.{Await, Awaitable}
 import org.scalatest.FunSuite
 
 class ClientDispatcherTest extends FunSuite {
-  val rawInit = Array[Byte](
-    10, 53, 46, 53, 46, 50, 52, 0, 31, 0, 0, 0, 70, 38, 43, 66, 74, 48, 79, 126, 0, -1, -9, 33, 2,
-    0, 15, -128, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 76, 66, 70, 118, 67, 40, 63, 68, 120, 80, 103,
-    54, 0
-  )
-  val initPacket = Packet(0, Buf.ByteArray.Owned(rawInit))
-  val init = HandshakeInit.decode(initPacket)
-
-  val params = Stack.Params.empty + Credentials(Some("username"), Some("password"))
-
   private[this] def await[T](t: Awaitable[T]): T = Await.result(t, 1.second)
+
+  val params = Stack.Params.empty
 
   def newCtx = new {
     val clientq = new AsyncQueue[Packet]()
     val serverq = new AsyncQueue[Packet]()
     val trans = new QueueTransport[Packet, Packet](serverq, clientq)
-    val service = new ClientDispatcher(trans, params, performHandshake = false)
-  }
-
-  def newHandshakeCtx = new {
-    val clientq = new AsyncQueue[Packet]()
-    val serverq = new AsyncQueue[Packet]()
-    val trans = new QueueTransport[Packet, Packet](serverq, clientq)
-    val handshake = Handshake(params, trans)
-    val service = new ClientDispatcher(trans, params, performHandshake = true)
-
-    // authenticate
-    clientq.offer(initPacket)
-    val handshakeResponse = serverq.poll()
-    clientq.offer(okPacket)
+    val service = new ClientDispatcher(trans, params)
   }
 
   val okPacket =
     Packet(1, Buf.ByteArray.Owned(Array[Byte](0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00)))
 
   test("serially dispatch requests") {
-    for {
-      ctx <- Seq(newCtx, newHandshakeCtx)
-    } {
-      import ctx._
-      val r1 = service(QueryRequest("SELECT 1"))
-      val r2 = service(QueryRequest("SELECT 2"))
-      val r3 = service(QueryRequest("SELECT 3"))
-      assert(serverq.size == 1)
-      clientq.offer(okPacket)
-      assert(r1.isDefined)
-      assert(!r2.isDefined)
-      assert(!r3.isDefined)
-    }
+    val ctx = newCtx
+    import ctx._
+    val r1 = service(QueryRequest("SELECT 1"))
+    val r2 = service(QueryRequest("SELECT 2"))
+    val r3 = service(QueryRequest("SELECT 3"))
+    assert(serverq.size == 1)
+    clientq.offer(okPacket)
+    assert(r1.isDefined)
+    assert(!r2.isDefined)
+    assert(!r3.isDefined)
   }
 
   test("decode OK packet") {
-    for {
-      ctx <- Seq(newCtx, newHandshakeCtx)
-    } {
-      import ctx._
-      val r = service(PingRequest)
-      clientq.offer(okPacket)
-      assert(await(r).isInstanceOf[OK])
-      val okResult = await(r).asInstanceOf[OK]
-      assert(okResult == OK.decode(okPacket))
-    }
+    val ctx = newCtx
+    import ctx._
+    val r = service(PingRequest)
+    clientq.offer(okPacket)
+    assert(await(r).isInstanceOf[OK])
+    val okResult = await(r).asInstanceOf[OK]
+    assert(okResult == OK.decode(okPacket))
   }
 
   test("decode Error packet as ServerError") {
-    for {
-      ctx <- Seq(newCtx, newHandshakeCtx)
-    } {
-      import ctx._
-      val message = "Unknown table 'q'"
-      val size = 9 + message.size
-      val bw = MysqlBuf.writer(new Array[Byte](size))
-      bw.writeByte(0xff) // field count
-      bw.writeShortLE(0x041b) //err no
-      bw.writeBytes("#42S02".getBytes) // sqlstate
-      bw.writeBytes(message.getBytes(MysqlCharset.defaultCharset.displayName))
+    val ctx = newCtx
+    import ctx._
+    val message = "Unknown table 'q'"
+    val size = 9 + message.size
+    val bw = MysqlBuf.writer(new Array[Byte](size))
+    bw.writeByte(0xff) // field count
+    bw.writeShortLE(0x041b) //err no
+    bw.writeBytes("#42S02".getBytes) // sqlstate
+    bw.writeBytes(message.getBytes(MysqlCharset.defaultCharset.displayName))
 
-      val errpacket = Packet(1, bw.owned())
-      val expectedError = Error.decode(errpacket)
+    val errpacket = Packet(1, bw.owned())
+    val expectedError = Error.decode(errpacket)
 
-      val r = service(QueryRequest("SELECT * FROM q"))
-      clientq.offer(errpacket)
-      intercept[ServerError] {
-        await(r)
-      }
+    val r = service(QueryRequest("SELECT * FROM q"))
+    clientq.offer(errpacket)
+    intercept[ServerError] {
+      await(r)
     }
   }
 
@@ -174,21 +143,18 @@ class ClientDispatcherTest extends FunSuite {
   val rowPackets = for (i <- 1 to numRows) yield rowPacket
 
   test("Decode a ResultSet") {
-    for {
-      ctx <- Seq(newCtx, newHandshakeCtx)
-    } {
-      import ctx._
-      val query = service(QueryRequest("SELECT 1 + 1"))
-      clientq.offer(headerPacket)
-      fieldPackets foreach { clientq.offer(_) }
-      clientq.offer(eof)
-      rowPackets foreach { clientq.offer(_) }
-      clientq.offer(eof)
-      assert(await(query).isInstanceOf[ResultSet])
-      val rs = await(query).asInstanceOf[ResultSet]
-      assert(rs.fields.size == numFields)
-      assert(rs.rows.size == numRows)
-    }
+    val ctx = newCtx
+    import ctx._
+    val query = service(QueryRequest("SELECT 1 + 1"))
+    clientq.offer(headerPacket)
+    fieldPackets foreach { clientq.offer(_) }
+    clientq.offer(eof)
+    rowPackets foreach { clientq.offer(_) }
+    clientq.offer(eof)
+    assert(await(query).isInstanceOf[ResultSet])
+    val rs = await(query).asInstanceOf[ResultSet]
+    assert(rs.fields.size == numFields)
+    assert(rs.rows.size == numRows)
   }
 
   def makePreparedHeader(numColumns: Int, numParams: Int) = {
@@ -203,79 +169,58 @@ class ClientDispatcherTest extends FunSuite {
   }
 
   test("Decode PreparedStatement numParams = 0, numCols = 0") {
-    for {
-      ctx <- Seq(newCtx, newHandshakeCtx)
-    } {
-      import ctx._
-      val query = service(PrepareRequest(""))
-      clientq.offer(makePreparedHeader(0, 0))
-      assert(await(query).isInstanceOf[PrepareOK])
-      val res = await(query).asInstanceOf[PrepareOK]
-      assert(res.numOfCols == 0)
-      assert(res.numOfParams == 0)
-    }
+    val ctx = newCtx
+    import ctx._
+    val query = service(PrepareRequest(""))
+    clientq.offer(makePreparedHeader(0, 0))
+    assert(await(query).isInstanceOf[PrepareOK])
+    val res = await(query).asInstanceOf[PrepareOK]
+    assert(res.numOfCols == 0)
+    assert(res.numOfParams == 0)
   }
 
   test("Decode PreparedStatement numParams > 0, numCols > 0") {
-    for {
-      ctx <- Seq(newCtx, newHandshakeCtx)
-    } {
-      import ctx._
-      val query = service(PrepareRequest("SELECT name FROM t1 WHERE id IN (?, ?, ?, ?, ?)"))
-      val numParams = numFields
-      clientq.offer(makePreparedHeader(1, numParams))
-      fieldPackets foreach { clientq.offer(_) }
-      clientq.offer(eof)
-      val cols = createFields(1)
-      val colPackets = cols map { toPacket(_) }
-      colPackets foreach { clientq.offer(_) }
-      clientq.offer(eof)
-      assert(await(query).isInstanceOf[PrepareOK])
-      val res = await(query).asInstanceOf[PrepareOK]
-      assert(res.numOfCols == 1)
-      assert(res.numOfParams == numParams)
-      assert(res.columns == cols.toList)
-      assert(res.params == fields.toList)
-    }
+    val ctx = newCtx
+    import ctx._
+    val query = service(PrepareRequest("SELECT name FROM t1 WHERE id IN (?, ?, ?, ?, ?)"))
+    val numParams = numFields
+    clientq.offer(makePreparedHeader(1, numParams))
+    fieldPackets foreach { clientq.offer(_) }
+    clientq.offer(eof)
+    val cols = createFields(1)
+    val colPackets = cols map { toPacket(_) }
+    colPackets foreach { clientq.offer(_) }
+    clientq.offer(eof)
+    assert(await(query).isInstanceOf[PrepareOK])
+    val res = await(query).asInstanceOf[PrepareOK]
+    assert(res.numOfCols == 1)
+    assert(res.numOfParams == numParams)
+    assert(res.columns == cols.toList)
+    assert(res.params == fields.toList)
   }
 
   test("CloseStatement satisfies rpc") {
-    for {
-      ctx <- Seq(newCtx, newHandshakeCtx)
-    } {
-      import ctx._
-      val stmtId = 5
-      val query = service(CloseRequest(5))
-      val sent = await(serverq.poll())
-      val br = MysqlBuf.reader(sent.body)
-      assert(br.readByte() == Command.COM_STMT_CLOSE)
-      assert(br.readIntLE() == stmtId)
-      // response should be synthesized
-      val resp = await(query)
-      assert(resp.isInstanceOf[OK])
-    }
+    val ctx = newCtx
+    import ctx._
+    val stmtId = 5
+    val query = service(CloseRequest(5))
+    val sent = await(serverq.poll())
+    val br = MysqlBuf.reader(sent.body)
+    assert(br.readByte() == Command.COM_STMT_CLOSE)
+    assert(br.readIntLE() == stmtId)
+    // response should be synthesized
+    val resp = await(query)
+    assert(resp.isInstanceOf[OK])
   }
 
   test("LostSyncException closes the service") {
-    for {
-      ctx <- Seq(newCtx, newHandshakeCtx)
-    } {
-      import ctx._
-      // offer an ill-formed packet
-      clientq.offer(Packet(0, Buf.ByteArray.Owned(Array[Byte]())))
-      intercept[LostSyncException] { await(service(PingRequest)) }
-      assert(!service.isAvailable)
-      assert(trans.onClose.isDefined)
-    }
-  }
-
-  test("Failure to auth closes the service") {
-    val clientq = new AsyncQueue[Packet]()
-    val trans = new QueueTransport[Packet, Packet](new AsyncQueue[Packet](), clientq)
-    val service = new ClientDispatcher(trans, params, performHandshake = true)
+    val ctx = newCtx
+    import ctx._
+    // offer an ill-formed packet
     clientq.offer(Packet(0, Buf.ByteArray.Owned(Array[Byte]())))
     intercept[LostSyncException] { await(service(PingRequest)) }
     assert(!service.isAvailable)
     assert(trans.onClose.isDefined)
   }
+
 }
