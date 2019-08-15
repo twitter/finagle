@@ -1,5 +1,21 @@
 scala_library(
-    sources = rglobs("*.scala"),
+    name = "filter_flags",
+    sources = ["com/twitter/finagle/stats/StatsFilterFlags.scala"],
+    provides = scala_artifact(
+        org = "com.twitter",
+        name = "finagle-stats-core-filterflags",
+        repo = artifactory,
+    ),
+    dependencies = [
+        "util/util-app/src/main/scala",
+    ],
+)
+
+scala_library(
+    sources = rglobs(
+        "*.scala",
+        exclude = ["com/twitter/finagle/stats/StatsFilterFlags.scala"],
+    ),
     compiler_option_sets = {"fatal_warnings"},
     provides = scala_artifact(
         org = "com.twitter",
@@ -11,6 +27,7 @@ scala_library(
     # need it at compiletime that it is non-trivial to split the target at this juncture.
     scope = "forced",
     dependencies = [
+        ":filter_flags",
         "3rdparty/jvm/com/fasterxml/jackson/core:jackson-annotations",
         "3rdparty/jvm/com/fasterxml/jackson/core:jackson-core",
         "3rdparty/jvm/com/fasterxml/jackson/core:jackson-databind",
