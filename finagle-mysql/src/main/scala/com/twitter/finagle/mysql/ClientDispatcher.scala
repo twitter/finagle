@@ -65,18 +65,11 @@ private[finagle] object ClientDispatcher {
    * Creates a mysql client dispatcher with write-through caches for optimization.
    * @param trans A transport that reads a writes logical mysql packets.
    * @param params A collection of `Stack.Params` useful for configuring a mysql client.
-   * @param performHandshake Indicates whether MySQL session establishment should be
-   * performed in the dispatcher. This is preferably performed in the transporter during
-   * service acquisition.
    */
-  def apply(
-    trans: Transport[Packet, Packet],
-    params: Stack.Params,
-    performHandshake: Boolean
-  ): Service[Request, Result] = {
+  def apply(trans: Transport[Packet, Packet], params: Stack.Params): Service[Request, Result] = {
     val maxConcurrentPrepareStatements = params[MaxConcurrentPrepareStatements].num
     new PrepareCache(
-      new ClientDispatcher(trans, params, performHandshake),
+      new ClientDispatcher(trans, params),
       Caffeine.newBuilder().maximumSize(maxConcurrentPrepareStatements)
     )
   }
@@ -93,35 +86,22 @@ private[finagle] object ClientDispatcher {
  */
 private[finagle] final class ClientDispatcher(
   trans: Transport[Packet, Packet],
-  params: Stack.Params,
-  performHandshake: Boolean)
+  params: Stack.Params)
     extends GenSerialClientDispatcher[Request, Result, Packet, Packet](
       trans,
       params[Stats].statsReceiver) {
   import ClientDispatcher._
 
-  // We only support plain handshaking when it's done inside
-  // the dispatcher. Eventually it should be entirely removed.
-  private[this] val handshake = new PlainHandshake(params, trans)
-
-  // Perform the handshake (possibly) once
-  private[this] val connectionPhase: Future[Unit] =
-    if (performHandshake) handshake.connectionPhase().unit
-    else Future.Done
-
   private[this] val supportUnsigned: Boolean = params[UnsignedColumns].supported
 
   override def apply(req: Request): Future[Result] =
-    connectionPhase
-      .flatMap { _ =>
-        super.apply(req)
-      }.onFailure {
-        // a LostSyncException represents a fatal state between
-        // the client / server. The error is unrecoverable
-        // so we close the service.
-        case e @ LostSyncException(_) => close()
-        case _ =>
-      }
+    super.apply(req).onFailure {
+      // a LostSyncException represents a fatal state between
+      // the client / server. The error is unrecoverable
+      // so we close the service.
+      case e @ LostSyncException(_) => close()
+      case _ =>
+    }
 
   override def close(deadline: Time): Future[Unit] = trans.close()
 

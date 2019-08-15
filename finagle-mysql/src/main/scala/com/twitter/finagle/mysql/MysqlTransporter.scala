@@ -11,14 +11,11 @@ import java.net.SocketAddress
 
 /**
  * A MySQL specific `framedBuf` `Transporter` which is responsible
- * for connection establishment and framing. When the `performHandshake`
- * parameter is provided a value of `true`, it is additionally responsible
- * for session establishment for a plain MySQL session.
+ * for connection establishment, framing, and session establishment.
  */
 private[finagle] final class MysqlTransporter(
   val remoteAddress: SocketAddress,
-  params: Stack.Params,
-  performHandshake: Boolean)
+  params: Stack.Params)
     extends Transporter[Packet, Packet, TransportContext] {
 
   private[this] val framerFactory = () => {
@@ -38,21 +35,12 @@ private[finagle] final class MysqlTransporter(
       MysqlTransporter.paramsWithoutSsl(params)
     )
 
-  private[this] def createTransport(): Future[MysqlTransport] =
-    netty4Transporter().map { transport =>
-      new MysqlTransport(transport.map(_.toBuf, Packet.fromBuf))
-    }
-
-  private[this] def createTransportWithSession(): Future[MysqlTransport] = {
-    createTransport().flatMap { transport =>
-      val handshake = Handshake(params, transport)
-      handshake.connectionPhase().map(_ => transport)
-    }
-  }
-
   def apply(): Future[Transport[Packet, Packet] { type Context <: TransportContext }] =
-    if (performHandshake) createTransportWithSession()
-    else createTransport()
+    netty4Transporter().flatMap { transport =>
+      val mysqlTransport = new MysqlTransport(transport.map(_.toBuf, Packet.fromBuf))
+      val handshake = Handshake(params, mysqlTransport)
+      handshake.connectionPhase().map(_ => mysqlTransport)
+    }
 
 }
 

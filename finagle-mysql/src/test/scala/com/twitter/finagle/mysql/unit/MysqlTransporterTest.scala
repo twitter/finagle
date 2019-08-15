@@ -20,40 +20,8 @@ class MysqlTransporterTest extends FunSuite {
 
   test("MysqlTransporter remoteAddress is the address passed in") {
     val addr: SocketAddress = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    val transporter = new MysqlTransporter(addr, Stack.Params.empty, performHandshake = false)
+    val transporter = new MysqlTransporter(addr, Stack.Params.empty)
     assert(transporter.remoteAddress == addr)
-  }
-
-  test("MysqlTransporter can create a transport for MySQL") {
-    // Setup the ServerSocket. 50 is the default for the listen backlog.
-    // Need to supply it in order to supply the third param (bindAddr)
-    val server = new ServerSocket(0, 50, InetAddress.getLoopbackAddress)
-    try {
-      val addr = new InetSocketAddress(InetAddress.getLoopbackAddress, server.getLocalPort)
-      val transporter = new MysqlTransporter(addr, Stack.Params.empty, performHandshake = false)
-      val transportFut = transporter()
-      val acceptedSocket = server.accept()
-      val transport = Await.result(transportFut, Duration.fromSeconds(2))
-      try {
-        assert(transport.status == Status.Open)
-
-        // Write the MySQL initial greeting to the client
-        val outStream = acceptedSocket.getOutputStream
-        outStream.write(initialBytes)
-        outStream.flush()
-        outStream.close()
-
-        // Read the initial greeting on the client side
-        // Make sure that it can be seen as a MySQL Packet
-        val packet = Await.result(transport.read(), Duration.fromSeconds(2))
-        assert(packet.seq == 0)
-        assert(packet.body.length == initialBodyLength)
-      } finally {
-        transport.close()
-      }
-    } finally {
-      server.close()
-    }
   }
 
   test("MysqlTransporter can create a Transport which performs a plain handshake") {
@@ -62,7 +30,7 @@ class MysqlTransporterTest extends FunSuite {
     val server = new ServerSocket(0, 50, InetAddress.getLoopbackAddress)
     try {
       val addr = new InetSocketAddress(InetAddress.getLoopbackAddress, server.getLocalPort)
-      val transporter = new MysqlTransporter(addr, Stack.Params.empty, performHandshake = true)
+      val transporter = new MysqlTransporter(addr, Stack.Params.empty)
       val transportFut = transporter()
       val acceptedSocket = server.accept()
       // Write the MySQL initial greeting to the client
@@ -100,27 +68,29 @@ class MysqlTransporterTest extends FunSuite {
       // protocol handshake.
 
       val addr = new InetSocketAddress(InetAddress.getLoopbackAddress, server.getLocalPort)
-      val transporter = new MysqlTransporter(addr, params, performHandshake = false)
+      val transporter = new MysqlTransporter(addr, params)
       val transportFut = transporter()
       val acceptedSocket = server.accept()
-      val transport = Await.result(transportFut, Duration.fromSeconds(2))
-      try {
-        assert(transport.status == Status.Open)
 
-        // Write the MySQL initial greeting to the client
-        val outStream = acceptedSocket.getOutputStream
-        outStream.write(initialBytes)
-        outStream.flush()
-        outStream.close()
+      // Write the MySQL initial greeting to the client
+      val outStream = acceptedSocket.getOutputStream
+      outStream.write(initialBytes)
+      outStream.flush()
 
-        // Read the initial greeting on the client side
-        // Make sure that it can be seen as a MySQL Packet
-        val packet = Await.result(transport.read(), Duration.fromSeconds(2))
-        assert(packet.seq == 0)
-        assert(packet.body.length == initialBodyLength)
-      } finally {
-        transport.close()
-      }
+      val inBuffer = Array[Byte](0)
+      val inStream = acceptedSocket.getInputStream
+      val didRead = inStream.read(inBuffer, 0, 1)
+      assert(didRead == 1)
+
+      // We test that our finagle-mysql client is returning the
+      // SSL Connection Request Packet. The packet body size of
+      // the SslConnectionRequest is always 32 bytes. So if the
+      // first byte received (the packet size) is 32, we consider
+      // this successful.
+      assert(inBuffer(0) == 32)
+
+      outStream.close()
+      inStream.close()
     } finally {
       server.close()
     }

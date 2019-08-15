@@ -23,6 +23,14 @@ Breaking API Changes
        `private[this] count(Long, Response)` and is no longer part of the public API.
   ``PHAB_ID=D350733``
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle-mysql: Handshaking for the MySQL 'Connection Phase' now occurs as part of session
+  acquisition. As part of this change, the 
+  `com.twitter.finagle.mysql.IncludeHandshakeInServiceAcquisition` toggle
+  has been removed and it no longer applies. ``PHAB_ID=D355549``
+
 19.8.0
 ------
 
