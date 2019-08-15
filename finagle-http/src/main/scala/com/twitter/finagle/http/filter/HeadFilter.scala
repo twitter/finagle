@@ -11,9 +11,6 @@ class HeadFilter[Req <: Request] extends SimpleFilter[Req, Response] {
 
   def apply(request: Req, service: Service[Req, Response]): Future[Response] =
     if (request.method == Method.Head) {
-      // Require nothing has been written
-      require(request.response.content.isEmpty)
-
       // Convert to GET and forward
       request.method = Method.Get
 
