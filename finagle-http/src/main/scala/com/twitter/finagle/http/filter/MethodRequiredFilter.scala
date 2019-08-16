@@ -17,7 +17,7 @@ class MethodRequiredFilter[REQUEST <: Request](
 
   def apply(request: REQUEST, service: Service[REQUEST, Response]): Future[Response] =
     if (!supportedMethods.contains(request.method)) {
-      val response = request.response
+      val response = Response()
       response.status = Status.MethodNotAllowed
       response.allow = allowedMethods
       Future.value(response)
