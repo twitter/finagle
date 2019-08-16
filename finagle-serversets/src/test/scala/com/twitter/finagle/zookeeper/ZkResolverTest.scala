@@ -6,14 +6,11 @@ import com.twitter.finagle.{Addr, Address, Resolver}
 import com.twitter.thrift.Status._
 import com.twitter.util.{Duration, RandomSocket, Var}
 import java.net.InetSocketAddress
-import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.concurrent.Eventually._
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.time._
 import scala.collection.JavaConverters._
 
-@RunWith(classOf[JUnitRunner])
 class ZkResolverTest extends FunSuite with BeforeAndAfter {
   val zkTimeout = 100.milliseconds
   var inst: ZkInstance = _

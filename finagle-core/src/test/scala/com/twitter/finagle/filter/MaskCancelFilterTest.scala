@@ -2,15 +2,12 @@ package com.twitter.finagle.filter
 
 import com.twitter.finagle.Service
 import com.twitter.util.{Future, Promise, Return}
-import org.junit.runner.RunWith
 import org.mockito.Matchers.anyObject
 import org.mockito.Mockito.{when, verify}
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 import scala.language.reflectiveCalls
 
-@RunWith(classOf[JUnitRunner])
 class MaskCancelFilterTest extends FunSuite with MockitoSugar {
   trait MaskHelper {
     val service = mock[Service[Int, Int]]

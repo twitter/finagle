@@ -2,10 +2,7 @@ package com.twitter.finagle.context
 
 import com.twitter.io.Buf
 import com.twitter.util.{Return, Throw}
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class MarshalledContextTest extends AbstractContextTest {
   val ctx = new MarshalledContext
 

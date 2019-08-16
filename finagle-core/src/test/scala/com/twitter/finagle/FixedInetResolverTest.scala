@@ -5,11 +5,8 @@ import com.twitter.finagle.service.Backoff
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Await, Future, MockTimer, Time}
 import java.net.{UnknownHostException, InetAddress}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class FixedInetResolverTest extends FunSuite {
 
   // The caching resolver (like the InetResolver, NilResolver)

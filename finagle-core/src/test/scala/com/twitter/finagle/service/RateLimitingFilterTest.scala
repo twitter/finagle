@@ -1,8 +1,6 @@
 package com.twitter.finagle.service
 
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 import org.scalatest.mockito.MockitoSugar
 import org.mockito.Mockito.when
 import org.mockito.Matchers
@@ -11,7 +9,6 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Service
 import com.twitter.util.{Await, Duration, Future, Time}
 
-@RunWith(classOf[JUnitRunner])
 class RateLimitingFilterTest extends FunSuite with MockitoSugar {
 
   class RateLimitingFilterHelper(duration: Duration = 1.second, rate: Int = 5) {

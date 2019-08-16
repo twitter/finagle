@@ -1,10 +1,7 @@
 package com.twitter.finagle.util
 
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class ByteArraysTest extends FunSuite {
   test("ByteArrays.concat: add two arrays") {
     val a = Array[Byte](0, 1, 2)

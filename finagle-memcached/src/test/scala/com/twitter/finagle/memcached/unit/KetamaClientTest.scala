@@ -9,14 +9,11 @@ import com.twitter.io.Buf
 import com.twitter.util.{Await, Awaitable, Future, ReadWriteVar}
 import scala.collection.mutable
 import _root_.java.io.{BufferedReader, InputStreamReader}
-import org.junit.runner.RunWith
 import org.mockito.Matchers._
 import org.mockito.Mockito.{RETURNS_SMART_NULLS, times, verify, verifyZeroInteractions, when}
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.FunSuite
 
-@RunWith(classOf[JUnitRunner])
 class KetamaClientTest extends FunSuite with MockitoSugar {
 
   val TimeOut = 15.seconds

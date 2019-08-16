@@ -2,10 +2,7 @@ package com.twitter.finagle.util
 
 import com.twitter.util.Promise
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 
-@RunWith(classOf[JUnitRunner])
 class CloseNotifierTest extends FunSuite {
 
   test("CloseNotifier should invoke onClose handlers in reverse order of adding") {

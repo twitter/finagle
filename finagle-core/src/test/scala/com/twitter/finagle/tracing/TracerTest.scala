@@ -1,12 +1,9 @@
 package com.twitter.finagle.tracing
 
-import org.junit.runner.RunWith
 import org.scalacheck.Gen
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
-@RunWith(classOf[JUnitRunner])
 class TracerTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   case class TestTracer(res: Option[Boolean]) extends Tracer {

@@ -2,13 +2,10 @@ package com.twitter.finagle.memcached.unit
 
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.protocol.Value
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 import scala.collection.immutable
 
-@RunWith(classOf[JUnitRunner])
 class GetResultTest extends FunSuite with MockitoSugar {
 
   class Context {

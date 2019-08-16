@@ -1,8 +1,6 @@
 package com.twitter.finagle.serverset2
 
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
 class TestIdentity extends Identity {
   val scheme = "test"
@@ -10,7 +8,6 @@ class TestIdentity extends Identity {
   val priority = 0
 }
 
-@RunWith(classOf[JUnitRunner])
 class IdentityTest extends FunSuite {
   test("UserIdentity captures current user") {
     val userIdent = new UserIdentity()

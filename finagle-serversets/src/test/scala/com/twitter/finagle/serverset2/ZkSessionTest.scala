@@ -6,10 +6,8 @@ import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.io.Buf
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicReference
-import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import scala.collection.immutable
 
 sealed private trait ZkOp { type Res; val res = new Promise[Res] }
@@ -98,7 +96,6 @@ private class OpqueueZkReader(
   def getACL(path: String): Future[Node.ACL] = Future.never
 }
 
-@RunWith(classOf[JUnitRunner])
 class ZkSessionTest extends FunSuite with Eventually with IntegrationPatience {
 
   import ZkOp._

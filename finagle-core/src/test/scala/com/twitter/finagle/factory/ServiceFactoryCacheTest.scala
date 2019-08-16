@@ -3,12 +3,9 @@ package com.twitter.finagle.factory
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.util.{Future, MockTimer, Time, Timer, Await}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class ServiceFactoryCacheTest extends FunSuite with MockitoSugar {
   trait Ctx {
     var factories: Map[Int, Int] = Map.empty

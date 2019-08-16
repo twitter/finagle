@@ -3,15 +3,12 @@ package com.twitter.finagle.exception
 import com.twitter.finagle.exception.thriftscala.{LogEntry, ResultCode, Scribe}
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}
-import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.anyObject
 import org.mockito.Mockito._
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class DefaultReporterTest extends FunSuite with MockitoSugar {
   val logger = mock[Scribe.FutureIface]
   when(logger.log(anyObject())).thenReturn(Future.value(ResultCode.Ok))
@@ -35,7 +32,6 @@ class DefaultReporterTest extends FunSuite with MockitoSugar {
   }
 }
 
-@RunWith(classOf[JUnitRunner])
 class ClientReporterTest extends FunSuite with MockitoSugar {
   val logger = mock[Scribe.FutureIface]
   when(logger.log(anyObject())).thenReturn(Future.value(ResultCode.Ok))
@@ -63,7 +59,6 @@ class ClientReporterTest extends FunSuite with MockitoSugar {
   }
 }
 
-@RunWith(classOf[JUnitRunner])
 class SourceClientReporterTest extends FunSuite with MockitoSugar {
   val logger = mock[Scribe.FutureIface]
   when(logger.log(anyObject())).thenReturn(Future.value(ResultCode.Ok))
@@ -95,7 +90,6 @@ class SourceClientReporterTest extends FunSuite with MockitoSugar {
   }
 }
 
-@RunWith(classOf[JUnitRunner])
 class ExceptionReporterTest extends FunSuite with MockitoSugar {
 
   test("logs an exception") {

@@ -4,12 +4,9 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.serverset2.ServiceDiscoverer.ClientHealth
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util._
-import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfter, FunSuite}
-import org.scalatest.junit.JUnitRunner
 import java.util.concurrent.atomic.AtomicReference
 
-@RunWith(classOf[JUnitRunner])
 class HealthStabilizerTest extends FunSuite with BeforeAndAfter {
 
   val healthy = Var.value[ClientHealth](ClientHealth.Healthy)

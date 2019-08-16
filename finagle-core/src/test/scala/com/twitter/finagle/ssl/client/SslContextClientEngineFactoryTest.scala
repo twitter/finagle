@@ -5,11 +5,8 @@ import com.twitter.finagle.ssl._
 import com.twitter.io.TempFile
 import java.net.InetSocketAddress
 import javax.net.ssl.SSLContext
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class SslContextClientEngineFactoryTest extends FunSuite {
 
   private[this] val address: Address = Address(new InetSocketAddress("localhost", 12345))

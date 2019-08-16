@@ -8,13 +8,10 @@ import io.netty.handler.ssl.SslHandler
 import io.netty.util.concurrent.DefaultPromise
 import java.net.InetSocketAddress
 import javax.net.ssl.{SSLEngine, SSLSession}
-import org.junit.runner.RunWith
 import org.mockito.Mockito._
 import org.scalatest.{FunSuite, OneInstancePerTest}
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class SslClientVerificationHandlerTest extends FunSuite with MockitoSugar with OneInstancePerTest {
 
   val fakeAddress = InetSocketAddress.createUnresolved("ssl", 8081)

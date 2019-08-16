@@ -1,15 +1,12 @@
 package com.twitter.finagle.service
 
-import org.junit.runner.RunWith
 import org.mockito.Mockito.{verify, when, times}
 import org.mockito.Matchers._
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 import com.twitter.finagle.{WriteException, Service, Status}
 import com.twitter.util.{Await, Promise, Future}
 
-@RunWith(classOf[JUnitRunner])
 class CloseOnReleaseServiceTest extends FunSuite with MockitoSugar {
 
   class Helper {

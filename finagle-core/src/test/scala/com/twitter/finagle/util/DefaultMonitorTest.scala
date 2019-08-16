@@ -7,14 +7,11 @@ import com.twitter.finagle.{Failure, TimeoutException}
 import com.twitter.logging.{Level, Logger}
 import com.twitter.util.{Duration, TimeoutException => UtilTimeoutException}
 import java.util.logging.Handler
-import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.verify
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterEach, FunSuite, Matchers}
 
-@RunWith(classOf[JUnitRunner])
 class DefaultMonitorTest extends FunSuite with Matchers with MockitoSugar with BeforeAndAfterEach {
 
   private var handler: Handler = _

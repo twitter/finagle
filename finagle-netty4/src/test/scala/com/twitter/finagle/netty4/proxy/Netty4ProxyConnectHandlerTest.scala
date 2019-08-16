@@ -6,12 +6,9 @@ import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.proxy.{ProxyHandler, ProxyConnectException => NettyProxyConnectException}
 import io.netty.util.concurrent.{Future, GenericFutureListener}
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSuite, OneInstancePerTest}
 import java.net.InetSocketAddress
 
-@RunWith(classOf[JUnitRunner])
 class Netty4ProxyConnectHandlerTest extends FunSuite with OneInstancePerTest {
 
   val fakeAddress = InetSocketAddress.createUnresolved("proxy", 0)

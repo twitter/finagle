@@ -1,10 +1,7 @@
 package com.twitter.finagle.ssl
 
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class CipherSuitesTest extends FunSuite {
 
   test("fromString results in unspecified when ciphers are empty") {

@@ -1,11 +1,8 @@
 package com.twitter.finagle.util
 
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import java.util.concurrent.{CyclicBarrier, CountDownLatch}
 
-@RunWith(classOf[JUnitRunner])
 class UpdaterTest extends FunSuite {
   test("Prioritization") {
     case class Work(p: Int)

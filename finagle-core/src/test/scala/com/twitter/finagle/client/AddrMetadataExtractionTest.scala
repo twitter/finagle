@@ -6,11 +6,9 @@ import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.stack.nilStack
 import com.twitter.util.{Await, Future, Var}
-import org.junit.runner.RunWith
-import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
+import org.scalatest.junit.AssertionsForJUnit
 import org.scalatest.FunSuite
 
-@RunWith(classOf[JUnitRunner])
 class AddrMetadataExtractionTest extends FunSuite with AssertionsForJUnit {
   class Ctx {
     val unbound = Name.Path(Path.read("/$/fail"))

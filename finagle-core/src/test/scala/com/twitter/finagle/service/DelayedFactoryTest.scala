@@ -2,11 +2,8 @@ package com.twitter.finagle.service
 
 import com.twitter.finagle.{Status, ClientConnection, Service, ServiceFactory, Failure}
 import com.twitter.util._
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class DelayedFactoryTest extends FunSuite {
   trait DelayedHelper {
     val service = Service.mk[Int, Int] { int: Int =>

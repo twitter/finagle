@@ -4,12 +4,10 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Namer.AddrWeightKey
 import com.twitter.finagle.naming.namerMaxDepth
 import com.twitter.util._
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
+import org.scalatest.junit.AssertionsForJUnit
 import scala.language.reflectiveCalls
 
-@RunWith(classOf[JUnitRunner])
 class NamerTest extends FunSuite with AssertionsForJUnit {
   trait Ctx {
     case class OrElse(fst: Namer, snd: Namer) extends Namer {

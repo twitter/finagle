@@ -7,13 +7,10 @@ import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.zookeeper.ZkInstance
 import com.twitter.io.Buf
 import com.twitter.util._
-import org.junit.runner.RunWith
 import org.scalatest.concurrent.Eventually._
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.time._
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-@RunWith(classOf[JUnitRunner])
 class ZkSessionEndToEndTest extends FunSuite with BeforeAndAfter {
   val zkTimeout = 100.milliseconds
   val retryStream = new RetryStream(Backoff.const(zkTimeout))

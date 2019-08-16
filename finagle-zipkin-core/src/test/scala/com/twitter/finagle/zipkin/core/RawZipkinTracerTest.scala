@@ -6,10 +6,7 @@ import com.twitter.finagle.tracing._
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 
-@RunWith(classOf[JUnitRunner])
 class RawZipkinTracerTest extends FunSuite {
 
   val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None, Flags().setDebug)

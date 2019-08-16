@@ -3,14 +3,11 @@ package com.twitter.finagle.factory
 import com.twitter.finagle.{ClientConnection, ServiceFactory}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Await, Future}
-import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class StatsFactoryWrapperTest extends FunSuite with MockitoSugar {
   val underlying = mock[ServiceFactory[Int, Int]]
   val rex = new RuntimeException

@@ -4,15 +4,12 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.io.Buf
 import com.twitter.util.Time
 import com.twitter.util.{Return, Throw}
-import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, times, verify, when, atLeast}
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{OneInstancePerTest, BeforeAndAfter, FunSuite}
 import scala.util.Random
 
-@RunWith(classOf[JUnitRunner])
 class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneInstancePerTest {
   val Seq(id0, id1, id2) = 0 until 3 map { i =>
     TraceId(Some(SpanId(i)), Some(SpanId(i)), SpanId(i), None, Flags(i))

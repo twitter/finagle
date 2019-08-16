@@ -10,11 +10,8 @@ import com.twitter.finagle.{
   WriteException
 }
 import com.twitter.util._
-import org.junit.runner.RunWith
 import org.scalatest.FunSpec
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class RetryPolicyTest extends FunSpec {
   def getBackoffs(
     policy: RetryPolicy[Try[Nothing]],

@@ -2,11 +2,8 @@ package com.twitter.finagle.memcached.protocol.text
 
 import com.twitter.io.Buf
 import com.twitter.util.Promise
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class DecoderTest extends FunSuite {
 
   test("Decode tokens when no more data needed returns Decoding") {

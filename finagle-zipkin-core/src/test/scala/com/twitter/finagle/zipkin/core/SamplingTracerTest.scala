@@ -2,16 +2,13 @@ package com.twitter.finagle.zipkin.core
 
 import com.twitter.finagle.tracing._
 import com.twitter.util._
-import org.junit.runner.RunWith
 import org.mockito.Mockito._
 import org.scalacheck.{Gen, Arbitrary}
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import java.net.InetSocketAddress
 
-@RunWith(classOf[JUnitRunner])
 class ZipkinTracerTest extends FunSuite with MockitoSugar with GeneratorDrivenPropertyChecks {
   test("ZipkinTracer should handle sampling") {
     val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None)

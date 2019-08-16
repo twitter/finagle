@@ -7,11 +7,8 @@ import io.netty.channel.{ChannelHandlerContext, ChannelOutboundHandlerAdapter, C
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http._
 import java.nio.channels.ClosedChannelException
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class PayloadSizeHandlerTest extends FunSuite {
 
   object SuppressClose extends ChannelOutboundHandlerAdapter {

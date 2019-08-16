@@ -5,16 +5,13 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.{FailedFastException, Service, ServiceFactory, SourcedException, Status}
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicInteger
-import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, times, verify, when}
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Conductors, IntegrationPatience}
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 import scala.language.reflectiveCalls
 
-@RunWith(classOf[JUnitRunner])
 class FailFastFactoryTest
     extends FunSuite
     with MockitoSugar

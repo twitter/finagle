@@ -5,11 +5,8 @@ import com.twitter.finagle.stats.{DefaultStatsReceiver, InMemoryStatsReceiver}
 import com.twitter.util._
 import java.net.{InetAddress, UnknownHostException}
 import java.util.concurrent.{CountDownLatch, TimeUnit}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class InetResolverTest extends FunSuite {
   val statsReceiver = new InMemoryStatsReceiver
 

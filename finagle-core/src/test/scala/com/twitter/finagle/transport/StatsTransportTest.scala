@@ -3,11 +3,8 @@ package com.twitter.finagle.transport
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.stats.{CategorizingExceptionStatsHandler, InMemoryStatsReceiver}
 import com.twitter.util.{Await, Future}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class StatsTransportTest extends FunSuite {
 
   test("read/write failures") {

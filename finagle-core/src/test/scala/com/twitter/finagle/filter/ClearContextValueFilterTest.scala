@@ -5,11 +5,8 @@ import com.twitter.finagle._
 import com.twitter.finagle.context.{Contexts, Retries}
 import com.twitter.finagle.stack.nilStack
 import com.twitter.util.{Promise, Await, Future}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class ClearContextValueFilterTest extends FunSuite {
 
   trait Helper {

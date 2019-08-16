@@ -3,11 +3,8 @@ package com.twitter.finagle.thrift.transport.netty4
 import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel.embedded.EmbeddedChannel
 import java.nio.charset.StandardCharsets
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class ThriftByteBufToArrayDecoderTest extends FunSuite {
 
   val decoder = ThriftByteBufToArrayDecoder

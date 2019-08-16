@@ -4,12 +4,9 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.{Failure, FailureFlags, Service}
 import com.twitter.util.{Await, Promise, Future}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.OneInstancePerTest
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class PendingRequestFilterTest extends FunSuite with OneInstancePerTest {
 
   val svc = Service.mk { p: Future[Unit] =>

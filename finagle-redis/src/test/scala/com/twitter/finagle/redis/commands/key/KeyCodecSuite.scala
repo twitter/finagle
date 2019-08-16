@@ -5,10 +5,7 @@ import com.twitter.finagle.redis.tags.CodecTest
 import com.twitter.io.Buf
 import com.twitter.util.{Duration, Time}
 import java.net.InetSocketAddress
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 final class KeyCodecSuite extends RedisRequestTest {
 
   test("DEL", CodecTest) { checkMultiKey("DEL", Del.apply) }

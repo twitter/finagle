@@ -2,11 +2,8 @@ package com.twitter.finagle.serverset2
 
 import com.twitter.finagle.service.Backoff
 import com.twitter.util.Duration
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class RetryStreamTest extends FunSuite {
 
   test("RetryStream never ends") {

@@ -3,13 +3,10 @@ package com.twitter.finagle.service
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.util.Rng
 import com.twitter.util.Duration
-import org.junit.runner.RunWith
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
-@RunWith(classOf[JUnitRunner])
 class BackoffTest extends FunSuite with GeneratorDrivenPropertyChecks {
   test("exponential") {
     val backoffs = Backoff.exponential(1.seconds, 2) take 10

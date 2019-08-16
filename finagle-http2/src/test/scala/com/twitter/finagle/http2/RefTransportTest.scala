@@ -3,14 +3,11 @@ package com.twitter.finagle.http2
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.transport.{Transport, TransportProxy}
 import com.twitter.util.{Await, Future, Time}
-import org.junit.runner.RunWith
 import org.mockito.Matchers.{anyInt, any}
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class RefTransportTest extends FunSuite with MockitoSugar {
 
   // wrapping the transport in a thin proxy provides a correct map

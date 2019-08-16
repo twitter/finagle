@@ -7,12 +7,9 @@ import com.twitter.finagle.service.{Retries, RetryPolicy, TimeoutFilter}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.util._
 import com.twitter.util.tunable.Tunable
-import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSuite, Matchers}
 
-@RunWith(classOf[JUnitRunner])
 class DynamicTimeoutTest extends FunSuite with Matchers with Eventually with IntegrationPatience {
 
   private[this] val timer = new MockTimer()

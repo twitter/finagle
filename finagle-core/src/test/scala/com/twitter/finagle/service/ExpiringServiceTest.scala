@@ -4,14 +4,11 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.{Counter, StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.{Service, Status}
 import com.twitter.util.{Future, Time, MockTimer, Promise, Return, Duration, Timer}
-import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, verify, when}
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
 import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class ExpiringServiceTest extends FunSuite with MockitoSugar {
 
   val frozenNow = Time.now

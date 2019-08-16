@@ -5,15 +5,12 @@ import com.twitter.finagle.{Announcer, Addr, Address}
 import com.twitter.util.{Await, Duration, Var}
 import java.io.{InputStreamReader, BufferedReader}
 import java.net.{InetSocketAddress, URL}
-import org.junit.runner.RunWith
 import org.scalactic.source.Position
 import org.scalatest.concurrent.Eventually._
 import org.scalatest.exceptions.TestFailedDueToTimeoutException
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.time._
 import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
 
-@RunWith(classOf[JUnitRunner])
 class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
   val port1 = 80
   val port2 = 81

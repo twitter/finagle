@@ -2,10 +2,7 @@ package com.twitter.finagle.tracing
 
 import scala.util.Random
 import org.scalatest.FunSuite
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class IdTest extends FunSuite {
   test("compare unequal ids") {
     assert(TraceId(None, None, SpanId(0L), None) != TraceId(None, None, SpanId(1L), None))

@@ -7,11 +7,8 @@ import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.{ChannelClosedException, ClientConnection, Http, ServiceFactory}
 import com.twitter.util.Await
 import java.net.InetSocketAddress
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class ClientTest extends FunSuite {
   def withServer(
     factory: ServiceFactory[Request, Response]

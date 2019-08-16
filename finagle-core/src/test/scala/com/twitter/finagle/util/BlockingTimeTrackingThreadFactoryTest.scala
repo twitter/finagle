@@ -1,14 +1,11 @@
 package com.twitter.finagle.util
 
 import java.util.concurrent.ThreadFactory
-import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.verify
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class BlockingTimeTrackingThreadFactoryTest extends FunSuite with MockitoSugar {
 
   private class RunnableCount extends Runnable {
