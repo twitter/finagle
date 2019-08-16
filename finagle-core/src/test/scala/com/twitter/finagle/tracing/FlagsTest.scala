@@ -1,10 +1,7 @@
 package com.twitter.finagle.tracing
 
 import org.scalatest.FunSuite
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class FlagsTest extends FunSuite {
   test("set flag and return it") {
     val flags = Flags()

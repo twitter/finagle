@@ -1,11 +1,8 @@
 package com.twitter.finagle.util
 
 import com.twitter.finagle.core.util.NetUtil
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class NetUtilTest extends FunSuite {
   test("NetUtil should isIpv4Address") {
     import NetUtil.isIpv4Address

@@ -6,11 +6,9 @@ import com.twitter.finagle.param.Stats
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.util.{Await, Future}
-import org.junit.runner.RunWith
-import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
+import org.scalatest.junit.AssertionsForJUnit
 import org.scalatest.FunSuite
 
-@RunWith(classOf[JUnitRunner])
 class StatsScopingTest extends FunSuite with AssertionsForJUnit {
   class Ctx {
     val stats = new InMemoryStatsReceiver

@@ -8,11 +8,8 @@ import com.twitter.finagle.ssl.{
   TrustCredentials
 }
 import java.io.File
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class SslClientConfigurationTest extends FunSuite {
 
   test("client configuration should contain non-destructive defaults") {

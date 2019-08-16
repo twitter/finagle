@@ -1,10 +1,7 @@
 package com.twitter.finagle.stats
 
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class CounterDeltasTest extends FunSuite {
 
   test("deltas are computed based on last call to update") {

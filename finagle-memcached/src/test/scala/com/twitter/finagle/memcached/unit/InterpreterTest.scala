@@ -6,12 +6,9 @@ import com.twitter.finagle.memcached.util.AtomicMap
 import com.twitter.finagle.memcached.{Entry, Interpreter}
 import com.twitter.io.Buf
 import com.twitter.util.Time
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
 
-@RunWith(classOf[JUnitRunner])
 class InterpreterTest extends FunSuite {
 
   val map = mutable.Map[Buf, Entry]()

@@ -4,11 +4,8 @@ import com.twitter.finagle.http.{Request, Status}
 import com.twitter.finagle.http.Method.{Get, Post}
 import com.twitter.finagle.http.path._
 import com.twitter.util.Await
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class RoutingServiceTest extends FunSuite {
 
   test("RoutingService.byPath") {

@@ -1,14 +1,11 @@
 package com.twitter.finagle.mux.lease.exp
 
 import java.util.logging.Logger
-import org.junit.runner.RunWith
 import org.mockito.Mockito.{never, times, verify}
 import org.mockito.Matchers.anyString
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class DedupingLogsReceiverTest extends FunSuite with MockitoSugar {
   test("DedupingLogsReceiver logs when recording and flushing") {
     val mockLog = mock[Logger]

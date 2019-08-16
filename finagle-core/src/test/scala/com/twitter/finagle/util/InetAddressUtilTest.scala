@@ -1,12 +1,9 @@
 package com.twitter.finagle.util
 
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 import com.twitter.finagle.core.util.InetAddressUtil
 import java.net.InetAddress
 
-@RunWith(classOf[JUnitRunner])
 class InetAddressUtilTest extends FunSuite {
 
   test("InetAddressUtil should isPrivateAddress") {

@@ -3,14 +3,11 @@ package com.twitter
 import com.twitter.finagle._
 import com.twitter.finagle.serverset2.Zk2Resolver
 import com.twitter.util.{Activity, Var}
-import org.junit.runner.RunWith
 import org.mockito.Matchers.{anyString, any}
 import org.mockito.Mockito.{verify, when, never, times}
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class ServersetNamerTest extends FunSuite with MockitoSugar {
   trait Ctx {
     val zk2 = mock[Zk2Resolver]

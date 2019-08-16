@@ -1,14 +1,11 @@
 package com.twitter.finagle.http
 
 import java.util.Date
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
 /**
  * Test battery that all `HeaderMap` types should pass.
  */
-@RunWith(classOf[JUnitRunner])
 abstract class AbstractHeaderMapTest extends FunSuite {
 
   // Constructs a new HeaderMap with the semantics of headers.foreach { case (k,v) => map.add(k,v) }

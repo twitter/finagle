@@ -1,10 +1,7 @@
 package com.twitter.finagle.stats
 
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class SummarizingStatsReceiverTest extends FunSuite {
   test("SummarizingStatsReceiver doesn't fail on empty/low stats") {
     val receiver = new SummarizingStatsReceiver

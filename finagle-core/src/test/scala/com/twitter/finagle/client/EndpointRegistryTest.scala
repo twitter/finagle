@@ -3,11 +3,8 @@ package com.twitter.finagle.client
 import com.twitter.finagle.{Addr, Dtab, Address}
 import com.twitter.finagle.Namer.AddrWeightKey
 import com.twitter.util.Var
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 final class EndpointRegistryTest extends FunSuite {
 
   val name = "fooClient"

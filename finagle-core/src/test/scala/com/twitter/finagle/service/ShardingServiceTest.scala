@@ -4,14 +4,11 @@ import com.twitter.finagle.Status
 import com.twitter.finagle.{NotShardableException, ShardNotAvailableException, Service}
 import com.twitter.hashing.Distributor
 import com.twitter.util.{Await, Future}
-import org.junit.runner.RunWith
 import org.mockito.Matchers._
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class ShardingServiceTest extends FunSuite with MockitoSugar {
 
   class MockRequest

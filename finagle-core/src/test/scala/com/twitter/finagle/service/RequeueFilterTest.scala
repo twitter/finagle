@@ -6,11 +6,8 @@ import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.util._
 import java.io.IOException
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class RequeueFilterTest extends FunSuite {
 
   test("respects maxRetriesPerReq") {

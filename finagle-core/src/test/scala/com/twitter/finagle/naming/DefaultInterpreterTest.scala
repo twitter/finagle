@@ -3,8 +3,6 @@ package com.twitter.finagle.naming
 import com.twitter.finagle._
 import com.twitter.finagle.Namer.AddrWeightKey
 import com.twitter.util.{Activity, Var}
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
 
 class testnamer extends Namer {
@@ -12,7 +10,6 @@ class testnamer extends Namer {
     Activity.value(NameTree.Leaf(Name.Path(Path.read("/rewritten/by/test/namer"))))
 }
 
-@RunWith(classOf[JUnitRunner])
 class DefaultInterpreterTest extends FunSuite {
 
   def assertEval(dtab: Dtab, path: String, expected: Name.Bound*): Unit = {

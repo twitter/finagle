@@ -1,13 +1,11 @@
 package com.twitter.finagle.context
 
 import com.twitter.util.{Time, Duration, Return}
-import org.junit.runner.RunWith
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
-import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
+import org.scalatest.junit.AssertionsForJUnit
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
-@RunWith(classOf[JUnitRunner])
 class DeadlineTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenPropertyChecks {
 
   val time = for (t <- Gen.choose(0L, Long.MaxValue)) yield Time.fromNanoseconds(t)

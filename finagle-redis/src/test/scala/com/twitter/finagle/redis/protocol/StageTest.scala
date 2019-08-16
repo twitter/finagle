@@ -2,12 +2,9 @@ package com.twitter.finagle.redis.protocol
 
 import com.twitter.finagle.redis.MissingInstances
 import com.twitter.io.{Buf, ByteReader}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
-@RunWith(classOf[JUnitRunner])
 class StageTest extends FunSuite with GeneratorDrivenPropertyChecks with MissingInstances {
 
   import Stage.NextStep

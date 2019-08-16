@@ -10,12 +10,9 @@ import io.netty.channel.{
 }
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http._
-import org.junit.runner.RunWith
 import org.scalatest.{FunSuite, OneInstancePerTest}
-import org.scalatest.junit.JUnitRunner
 import java.net.{InetSocketAddress, SocketAddress}
 
-@RunWith(classOf[JUnitRunner])
 class HttpProxyConnectHandlerTest extends FunSuite with OneInstancePerTest {
 
   class ConnectPromiseSnooper extends ChannelOutboundHandlerAdapter {

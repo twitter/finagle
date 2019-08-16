@@ -8,9 +8,7 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.util._
 import com.twitter.util.tunable.Tunable
 import java.util.concurrent.atomic.AtomicReference
-import org.junit.runner.RunWith
 import org.scalatest.{FunSuite, Matchers}
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 import scala.language.reflectiveCalls
 
@@ -50,7 +48,6 @@ private object TimeoutFilterTest {
   }
 }
 
-@RunWith(classOf[JUnitRunner])
 class TimeoutFilterTest extends FunSuite with Matchers with MockitoSugar {
 
   import TimeoutFilterTest.TimeoutFilterHelper

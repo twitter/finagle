@@ -9,14 +9,11 @@ import javax.security.auth.Subject
 import javax.security.auth.kerberos.{KerberosPrincipal, KerberosTicket}
 import javax.security.auth.login.LoginContext
 import org.ietf.jgss.GSSContext
-import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{stub, verify}
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class SpnegoAuthenticatorTest extends FunSuite with MockitoSugar {
   import SpnegoAuthenticator._
 

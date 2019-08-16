@@ -4,11 +4,8 @@ import com.twitter.finagle.http.filter.HttpNackFilter
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
 import com.twitter.util.{Return, Try}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class HttpResponseClassifierTest extends FunSuite {
   private val req = Request()
   private def rep(code: Status): Try[Response] = Return(Response(code))

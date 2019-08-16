@@ -8,11 +8,8 @@ import com.twitter.finagle.memcached.protocol.{Command, Response}
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Awaitable}
 import java.net.{InetAddress, InetSocketAddress}
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-@RunWith(classOf[JUnitRunner])
 class ProxyTest extends FunSuite with BeforeAndAfter {
 
   val TimeOut = 15.seconds

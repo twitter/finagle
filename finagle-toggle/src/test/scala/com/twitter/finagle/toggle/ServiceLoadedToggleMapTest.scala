@@ -1,8 +1,6 @@
 package com.twitter.finagle.toggle
 
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
 //
 // These are used via the `LoadService` mechanism.
@@ -26,7 +24,6 @@ class ServiceLoadedToggleTestBToo extends ServiceLoadedToggleMap with ToggleMap.
   def libraryName: String = "com.twitter.finagle.toggle.test.B"
 }
 
-@RunWith(classOf[JUnitRunner])
 class ServiceLoadedToggleMapTest extends FunSuite {
 
   test("one libraryName match") {

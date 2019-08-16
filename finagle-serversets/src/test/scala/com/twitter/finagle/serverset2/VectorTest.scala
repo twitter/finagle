@@ -1,10 +1,7 @@
 package com.twitter.finagle.serverset2
 
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
 
-@RunWith(classOf[JUnitRunner])
 class VectorTest extends FunSuite {
   val port = 80 // not bound
   test("Selector.matches") {

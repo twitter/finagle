@@ -1,10 +1,7 @@
 package com.twitter.finagle.stats
 
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class ImmediateStatsReceiverTest extends FunSuite {
 
   test("ImmediateStatsReceiver report adds immediately") {

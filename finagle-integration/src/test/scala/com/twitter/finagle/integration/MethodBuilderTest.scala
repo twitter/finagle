@@ -9,11 +9,8 @@ import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{mux, _}
 import com.twitter.util.{Await, Future}
 import java.net.InetSocketAddress
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class MethodBuilderTest extends FunSuite {
 
   private def await[T](f: Future[T]): T = Await.result(f, 15.seconds)

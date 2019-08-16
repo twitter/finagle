@@ -13,15 +13,12 @@ import com.twitter.io.Buf.ByteArray
 import com.twitter.thrift
 import com.twitter.thrift.ServiceInstance
 import com.twitter.util._
-import org.junit.runner.RunWith
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
 import org.scalatest.mockito.MockitoSugar
 import java.util.concurrent.atomic.AtomicReference
 
-@RunWith(classOf[JUnitRunner])
 class ServiceDiscovererTest
     extends FunSuite
     with MockitoSugar

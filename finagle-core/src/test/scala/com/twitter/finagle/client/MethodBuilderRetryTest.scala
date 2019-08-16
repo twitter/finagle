@@ -6,11 +6,8 @@ import com.twitter.finagle.service.{ReqRep, ResponseClass, _}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.finagle.{Failure, FailureFlags, Service, ServiceFactory, Stack, param}
 import com.twitter.util.{Await, Future, Throw}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class MethodBuilderRetryTest extends FunSuite {
 
   private[this] class RetrySvc {

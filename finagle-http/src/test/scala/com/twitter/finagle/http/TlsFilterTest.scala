@@ -4,11 +4,8 @@ import com.twitter.finagle.ssl.client.SslClientConfiguration
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Service, ServiceFactory, Stack}
 import com.twitter.util.{Await, Promise, Future}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class TlsFilterTest extends FunSuite {
   import Version._
   import Method._

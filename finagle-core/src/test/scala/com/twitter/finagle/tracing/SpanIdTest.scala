@@ -1,10 +1,7 @@
 package com.twitter.finagle.tracing
 
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
 
-@RunWith(classOf[JUnitRunner])
 class SpanIdTest extends FunSuite {
   test("parse positive long") {
     assert(SpanId.fromString("7fffffffffffffff").get.toLong == Long.MaxValue)

@@ -1,10 +1,7 @@
 package com.twitter.finagle.util
 
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 
-@RunWith(classOf[JUnitRunner])
 class AsyncLatchTest extends FunSuite {
   test("when count=0, AsyncLatch should execute waiters immediately") {
     val latch = new AsyncLatch(0)

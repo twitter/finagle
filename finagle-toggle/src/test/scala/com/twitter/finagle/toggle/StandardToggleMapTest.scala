@@ -3,12 +3,9 @@ package com.twitter.finagle.toggle
 import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import java.util.concurrent.{ConcurrentHashMap, ConcurrentMap}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import scala.collection.JavaConverters._
 
-@RunWith(classOf[JUnitRunner])
 class StandardToggleMapTest extends FunSuite {
 
   private def newRegistry(): ConcurrentMap[String, ToggleMap.Mutable] =

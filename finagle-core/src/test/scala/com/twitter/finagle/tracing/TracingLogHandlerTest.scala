@@ -3,10 +3,7 @@ package com.twitter.finagle.tracing
 import com.twitter.finagle.tracing.Annotation.Message
 import com.twitter.logging.{Level, LogRecord}
 import org.scalatest.{BeforeAndAfter, FunSuite}
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class TracingLogHandlerTest extends FunSuite with BeforeAndAfter {
   test("TracingLogHandler: send messages to Tracer") {
     val tracer = new BufferingTracer()

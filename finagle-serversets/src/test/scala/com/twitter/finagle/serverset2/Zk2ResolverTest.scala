@@ -7,16 +7,13 @@ import com.twitter.finagle.serverset2.addr.ZkMetadata
 import com.twitter.finagle.zookeeper.ZkInstance
 import com.twitter.util.RandomSocket
 import java.net.InetSocketAddress
-import org.junit.runner.RunWith
 import org.scalactic.source.Position
 import org.scalatest.concurrent.Eventually
 import org.scalatest.concurrent.PatienceConfiguration
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.time.{Span, SpanSugar}
 import org.scalatest.{FunSuite, BeforeAndAfter, Tag}
 import scala.collection.JavaConverters.mapAsJavaMapConverter
 
-@RunWith(classOf[JUnitRunner])
 class Zk2ResolverTest
     extends FunSuite
     with BeforeAndAfter

@@ -1,12 +1,9 @@
 package com.twitter.finagle.memcached.unit.util
 
 import com.twitter.finagle.memcached.util.NotFound
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import scala.collection.immutable.SortedSet
 
-@RunWith(classOf[JUnitRunner])
 class NotFoundTest extends FunSuite {
 
   val set = SortedSet(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)

@@ -3,14 +3,11 @@ package com.twitter.finagle.builder
 import com.twitter.finagle.{Failure, RequestException}
 import java.io.IOException
 import java.util.logging.{Level, Logger}
-import org.junit.runner.RunWith
 import org.mockito.Matchers.{any, eq => mockitoEq}
 import org.mockito.Mockito.{never, verify}
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class SourceTrackingMonitorTest extends FunSuite with MockitoSugar {
   test("handles unrolling properly") {
     val logger = mock[Logger]

@@ -14,14 +14,11 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.io.Buf
 import com.twitter.util.{Command => _, _}
 import java.net.{InetAddress, InetSocketAddress}
-import org.junit.runner.RunWith
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterEach, FunSuite, MustMatchers}
 
-@RunWith(classOf[JUnitRunner])
 class MemcachedPartitioningServiceTest
     extends FunSuite
     with MockitoSugar

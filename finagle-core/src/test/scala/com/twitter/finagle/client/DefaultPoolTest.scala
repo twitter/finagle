@@ -3,11 +3,8 @@ package com.twitter.finagle.client
 import com.twitter.finagle.{Status, ClientConnection, Service, ServiceFactory}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Return, Await, Future, Time}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class DefaultPoolTest extends FunSuite {
   class MockServiceFactory extends ServiceFactory[Unit, Unit] {
     override def apply(conn: ClientConnection): Future[Service[Unit, Unit]] =

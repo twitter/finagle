@@ -1,11 +1,8 @@
 package com.twitter.finagle.util
 
 import java.net.{InetAddress, InetSocketAddress, UnknownHostException}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class InetSocketAddressUtilTest extends FunSuite {
   val port1 = 80 // never bound
   val port2 = 53 // ditto

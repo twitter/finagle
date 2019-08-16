@@ -5,8 +5,6 @@ import com.twitter.finagle._
 import com.twitter.finagle.service.ConstantService
 import com.twitter.finagle.util.Rng
 import com.twitter.util.{Activity, Await, Future, Time, Var}
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSuite, OneInstancePerTest}
 import scala.util.Random
 
@@ -56,7 +54,6 @@ object LoadDistributionTest {
  * Assuming that the upper bound for a load on a given node is 1.5x and solving `log log x = 2`
  * for x, we can get the maximum size of the cluster (~1600) for which these tests are correct.
  */
-@RunWith(classOf[JUnitRunner])
 abstract class LoadDistributionTest(newBalancerFactory: Rng => LoadBalancerFactory)
     extends FunSuite
     with OneInstancePerTest {

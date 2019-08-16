@@ -1,10 +1,8 @@
 package com.twitter.finagle
 
-import org.junit.runner.RunWith
 import org.scalatest.{FunSuite, Assertion}
-import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
+import org.scalatest.junit.AssertionsForJUnit
 
-@RunWith(classOf[JUnitRunner])
 class DtabTest extends FunSuite with AssertionsForJUnit {
 
   def pathTree(t: String) =

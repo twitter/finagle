@@ -3,12 +3,9 @@ package com.twitter.finagle.ssl
 import java.net.Socket
 import java.security.cert.X509Certificate
 import javax.net.ssl.SSLEngine
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class IgnorantTrustManagerTest extends FunSuite with MockitoSugar {
 
   val authType = "DHE_DSS"

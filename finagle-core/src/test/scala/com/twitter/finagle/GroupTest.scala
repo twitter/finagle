@@ -1,11 +1,8 @@
 package com.twitter.finagle
 
 import collection.mutable
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class GroupTest extends FunSuite {
   class Ctx {
     val group = Group.mutable[Int]()

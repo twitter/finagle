@@ -4,15 +4,12 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.{FailedFastException, Failure, FailureFlags, Service, WriteException}
 import com.twitter.util._
-import org.junit.runner.RunWith
 import org.mockito.Matchers.anyObject
 import org.mockito.Mockito.{times, verify, when}
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfter, FunSpec}
 import scala.language.reflectiveCalls
 
-@RunWith(classOf[JUnitRunner])
 class RetryFilterTest extends FunSpec with MockitoSugar with BeforeAndAfter {
   var timer: JavaTimer = _
   val backoffs = Stream(1.second, 2.seconds, 3.seconds)

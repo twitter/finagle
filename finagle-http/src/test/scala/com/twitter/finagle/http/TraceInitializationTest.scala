@@ -5,15 +5,12 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle.Service
 import com.twitter.util.{Await, Closable, Future}
 import java.net.{InetAddress, InetSocketAddress}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
 private object Svc extends Service[Request, Response] {
   def apply(req: Request) = Future.value(req.response)
 }
 
-@RunWith(classOf[JUnitRunner])
 class TraceInitializationTest extends FunSuite {
   def req = RequestBuilder().url("http://foo/this/is/a/uri/path").buildGet()
 

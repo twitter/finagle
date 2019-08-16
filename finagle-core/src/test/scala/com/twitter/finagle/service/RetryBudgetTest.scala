@@ -2,11 +2,8 @@ package com.twitter.finagle.service
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.util.{Stopwatch, Time, Duration}
-import org.junit.runner.RunWith
 import org.scalatest.{Matchers, FunSuite}
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class RetryBudgetTest extends FunSuite with Matchers {
 
   test("Empty") {

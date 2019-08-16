@@ -3,11 +3,8 @@ package com.twitter.finagle.thrift.transport
 import com.twitter.finagle.thrift.Protocols
 import com.twitter.test.B.Client
 import org.apache.thrift.transport.TMemoryBuffer
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 abstract class AbstractBufferedTransportDecoderTest extends FunSuite {
 
   /**

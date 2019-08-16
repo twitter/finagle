@@ -8,15 +8,12 @@ import com.twitter.finagle.memcached._
 import com.twitter.finagle.service.{Backoff, ResponseClassifier}
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.util.{Await, Awaitable, Future, MockTimer, Time}
-import org.junit.runner.RunWith
 import org.mockito.Mockito.{times, verify, when}
 import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class KetamaFailureAccrualFactoryTest extends FunSuite with MockitoSugar {
 
   val TimeOut = 15.seconds

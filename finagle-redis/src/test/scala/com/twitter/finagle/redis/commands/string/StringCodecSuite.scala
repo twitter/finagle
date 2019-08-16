@@ -3,11 +3,8 @@ package com.twitter.finagle.redis.protocol
 import com.twitter.finagle.redis.RedisRequestTest
 import com.twitter.finagle.redis.tags.CodecTest
 import com.twitter.io.Buf
-import org.junit.runner.RunWith
 import org.scalacheck.Gen
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 final class StringCodecSuite extends RedisRequestTest {
 
   test("APPEND", CodecTest) { checkSingleKeySingleVal("APPEND", Append.apply) }

@@ -3,9 +3,7 @@ package com.twitter.finagle.util
 import com.twitter.finagle.{Stack, StackBuilder, Stackable, param, stack}
 import com.twitter.util.Var
 import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
 case class TestParam(p1: Int) {
   def mk() = (this, TestParam.param)
@@ -34,7 +32,6 @@ object NotCaseClassParam {
   }
 }
 
-@RunWith(classOf[JUnitRunner])
 class StackRegistryTest extends FunSuite {
 
   val headRole = Stack.Role("head")

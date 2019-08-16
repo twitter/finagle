@@ -2,15 +2,12 @@ package com.twitter.finagle.service
 
 import com.twitter.util._
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 import org.scalatest.mockito.MockitoSugar
 import org.mockito.Mockito.{times, verify, when}
 import org.mockito.{Matchers, Mockito}
 import org.mockito.Matchers._
 import com.twitter.finagle.Service
 
-@RunWith(classOf[JUnitRunner])
 class RefcountedServiceTest extends FunSuite with MockitoSugar {
 
   class PoolServiceWrapperHelper {

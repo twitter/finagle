@@ -1,10 +1,8 @@
 package com.twitter.finagle
 
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
+import org.scalatest.junit.AssertionsForJUnit
 
-@RunWith(classOf[JUnitRunner])
 class NameTreeParsersTest extends FunSuite with AssertionsForJUnit {
   test("parsePath") {
     assert(NameTreeParsers.parsePath("/") == Path.empty)

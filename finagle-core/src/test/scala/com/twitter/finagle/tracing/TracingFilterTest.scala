@@ -2,17 +2,15 @@ package com.twitter.finagle.tracing
 
 import com.twitter.finagle.{Filter, Dtab, Service}
 import com.twitter.util.{Await, Future}
-import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.{spy, verify, when, atLeastOnce}
 import org.mockito.Matchers.any
 import org.scalactic.source.Position
-import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
+import org.scalatest.junit.AssertionsForJUnit
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
 import scala.collection.JavaConverters._
 
-@RunWith(classOf[JUnitRunner])
 class TracingFilterTest
     extends FunSuite
     with MockitoSugar
