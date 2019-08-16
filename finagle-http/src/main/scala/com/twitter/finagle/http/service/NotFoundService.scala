@@ -9,7 +9,7 @@ import com.twitter.util.Future
  */
 class NotFoundService[REQUEST <: Request] extends Service[REQUEST, Response] {
   def apply(request: REQUEST): Future[Response] = {
-    val response = request.response
+    val response = Response()
     response.status = Status.NotFound
     Future.value(response)
   }
