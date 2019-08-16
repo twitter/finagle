@@ -2063,8 +2063,7 @@ class EndToEndTest
             "client"
           )
 
-      val failure = intercept[ChannelClosedException](await(client.query("ok")))
-      assert(failure.getMessage.startsWith("ChannelException at remote address"))
+      intercept[ChannelClosedException](await(client.query("ok")))
 
       assert(serverSr.counters(Seq("thrift", "requests")) == 1)
       assert(serverSr.counters(Seq("thrift", "connects")) == 1)
