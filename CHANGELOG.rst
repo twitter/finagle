@@ -26,8 +26,12 @@ Breaking API Changes
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+* finagle-http: `c.t.f.http.service.NotFoundService` has been changed to no longer
+  use `Request.response`. Use of `Request.response` is deprecated and discouraged.
+  ``PHAB_ID=D357348``
+
 * finagle-mysql: Handshaking for the MySQL 'Connection Phase' now occurs as part of session
-  acquisition. As part of this change, the 
+  acquisition. As part of this change, the
   `com.twitter.finagle.mysql.IncludeHandshakeInServiceAcquisition` toggle
   has been removed and it no longer applies. ``PHAB_ID=D355549``
 
