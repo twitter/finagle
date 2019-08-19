@@ -7,7 +7,6 @@ import com.twitter.finagle.netty4.http.handler.{
   ClientExceptionMapper,
   FixedLengthMessageAggregator,
   HeaderValidatorHandler,
-  PayloadSizeHandler,
   UnpoolHttpHandler,
   UriValidatorHandler
 }
@@ -170,11 +169,6 @@ package object http {
       // install handlers to replicate this behavior when streaming.
       params[Streaming] match {
         case Streaming.Enabled(fixedLengthStreamedAfter) =>
-          pipeline.addLast(
-            "payloadSizeHandler",
-            new PayloadSizeHandler(maxRequestSize, Some(log))
-          )
-
           if (autoContinue)
             pipeline.addLast("expectContinue", new HttpServerExpectContinueHandler)
 
