@@ -5,6 +5,7 @@ import com.twitter.finagle.http2.transport.H2ServerFilter
 import com.twitter.finagle.netty4.http.handler.UriValidatorHandler
 import com.twitter.finagle.param.Timer
 import io.netty.channel.ChannelHandlerContext
+import io.netty.handler.codec.http2.Http2MultiplexHandler
 
 private[http2] object Http2PipelineInitializer {
 
@@ -13,15 +14,18 @@ private[http2] object Http2PipelineInitializer {
    *
    * @param ctx
    * @param params
-   * @param codecName The name of the handler where the remaining handlers will be added after
    */
-  def setup(ctx: ChannelHandlerContext, params: Stack.Params, codecName: String): Unit = {
-    // we insert immediately after the Http2MultiplexCodec#0, which we know are the
+  def setup(ctx: ChannelHandlerContext, params: Stack.Params): Unit = {
+    // we insert immediately after the Http2MultiplexHandler#0, which we know are the
     // last Http2 frames before they're converted to Http/1.1
     val timer = params[Timer].timer
+
+    val codecName = ctx.pipeline
+      .context(classOf[Http2MultiplexHandler])
+      .name
+
     ctx.pipeline
       .addAfter(codecName, H2ServerFilter.HandlerName, new H2ServerFilter(timer))
       .remove(UriValidatorHandler.HandlerName)
   }
-
 }

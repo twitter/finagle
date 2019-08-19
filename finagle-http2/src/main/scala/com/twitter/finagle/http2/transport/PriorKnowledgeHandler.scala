@@ -1,7 +1,7 @@
 package com.twitter.finagle.http2.transport
 
 import com.twitter.finagle.Stack
-import com.twitter.finagle.http2.{Http2PipelineInitializer, MultiplexCodecBuilder}
+import com.twitter.finagle.http2.{Http2PipelineInitializer, MultiplexHandlerBuilder}
 import com.twitter.finagle.netty4.http._
 import com.twitter.finagle.param.Stats
 import com.twitter.logging.Logger
@@ -82,13 +82,14 @@ final private[http2] class PriorKnowledgeHandler(
           upgradeCounter.incr()
 
           // we have read a complete preface. Setup HTTP/2 pipeline.
-          val http2MultiplexCodec = MultiplexCodecBuilder.serverMultiplexCodec(params, initializer)
-          MultiplexCodecBuilder.addStreamsGauge(statsReceiver, http2MultiplexCodec, ctx.channel)
+          val (codec, handler) = MultiplexHandlerBuilder.serverFrameCodec(params, initializer)
+          MultiplexHandlerBuilder.addStreamsGauge(statsReceiver, codec, ctx.channel)
 
-          p.replace(HttpCodecName, Http2CodecName, http2MultiplexCodec)
+          p.replace(HttpCodecName, Http2CodecName, codec)
+          p.addAfter(Http2CodecName, Http2MultiplexHandlerName, handler)
           p.remove("upgradeHandler")
 
-          Http2PipelineInitializer.setup(ctx, params, Http2CodecName)
+          Http2PipelineInitializer.setup(ctx, params)
 
           // Since we changed the pipeline, our current ctx points to the wrong handler
           // but we can still use this handler as the reference point in the new pipeline

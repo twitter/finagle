@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * A handler for managing some aspects of the HTTP/2 Server main pipeline
  *
- * This filter handles a number of session concerns that the `Http2MultiplexCodec`
+ * This filter handles a number of session concerns that the `Http2MultiplexHandler`
  * exposes as pipeline events.
  *
  * - Swallows inbound H2 session frames that are propagated down the main pipeline.

@@ -1,14 +1,20 @@
 package com.twitter.finagle.http2.exp.transport
 
-import com.twitter.finagle.http2.MultiplexCodecBuilder
+import com.twitter.finagle.http2.MultiplexHandlerBuilder
 import com.twitter.finagle.http2.transport.{H2StreamChannelInit, Http2UpgradingTransport}
 import com.twitter.finagle.netty4.Netty4Listener.BackPressure
 import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.Stack
+import com.twitter.finagle.netty4.http.{Http2CodecName, Http2MultiplexHandlerName}
 import io.netty.channel._
 import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
-import io.netty.handler.codec.http.{FullHttpRequest, HttpClientCodec, HttpClientUpgradeHandler}
+import io.netty.handler.codec.http.{
+  FullHttpRequest,
+  FullHttpResponse,
+  HttpClientCodec,
+  HttpClientUpgradeHandler
+}
 import io.netty.handler.codec.http2.Http2ClientUpgradeCodec
 import scala.collection.JavaConverters.iterableAsScalaIterableConverter
 
@@ -66,9 +72,23 @@ private final class UpgradeRequestHandler(params: Stack.Params, httpClientCodec:
       def initChannel(ch: Channel): Unit = initializeUpgradeStreamChannel(ch, ctx)
     }
 
-    val multiplex = MultiplexCodecBuilder.clientMultiplexCodec(params, Some(upgradeStreamhandler))
+    val (codec, handler) =
+      MultiplexHandlerBuilder.clientFrameCodec(params, Some(upgradeStreamhandler))
 
-    val upgradeCodec = new Http2ClientUpgradeCodec(multiplex)
+    val upgradeCodec = new Http2ClientUpgradeCodec(codec) {
+      override def upgradeTo(
+        ctx: ChannelHandlerContext,
+        upgradeResponse: FullHttpResponse
+      ): Unit = {
+        // Add the handler to the pipeline.
+        ctx.pipeline
+          .addAfter(ctx.name, Http2CodecName, codec)
+          .addAfter(Http2CodecName, Http2MultiplexHandlerName, handler)
+
+        // Reserve local stream for the response with stream id of '1'
+        codec.onHttpClientUpgrade()
+      }
+    }
     // The parameter for `HttpClientUpgradeHandler.maxContentLength` can be 0 because
     // the HTTP2 spec requires that a 101 request not have a body and for any other
     // response status it will remove itself from the pipeline.

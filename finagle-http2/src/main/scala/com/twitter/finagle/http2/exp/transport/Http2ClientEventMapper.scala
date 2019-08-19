@@ -18,7 +18,7 @@ import io.netty.handler.codec.http2.Http2Exception.HeaderListSizeException
  *
  * This stage translates certain exceptions and modifies the inbound response to
  * trigger closing of the `Transport` since each request will get it's own Netty
- * stream channel from the `Http2MultiplexCodec`.
+ * stream channel from the `Http2MultiplexHandler`.
  */
 @Sharable
 private[http2] object Http2ClientEventMapper extends ChannelOutboundHandlerAdapter {

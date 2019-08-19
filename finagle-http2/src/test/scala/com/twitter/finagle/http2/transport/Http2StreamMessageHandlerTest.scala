@@ -23,13 +23,12 @@ class Http2StreamMessageHandlerTest
       when(stream.id()).thenReturn(1)
       rstFrame.stream(stream)
 
-      if (isServer) em.writeInbound(rstFrame)
+      if (isServer) em.pipeline.fireUserEventTriggered(rstFrame)
       else
         intercept[RstException] {
-          // The client propagates an exception forward to close the pipeline
-          // and the EmbeddedChannel surfaces that by throwing an exception
-          // from the writeInbound call.
-          em.writeInbound(rstFrame)
+          // The client propagates an exception forward to close the pipeline.
+          em.pipeline.fireUserEventTriggered(rstFrame)
+          em.checkException()
         }
 
       val msg = io.netty.buffer.Unpooled.buffer(10)

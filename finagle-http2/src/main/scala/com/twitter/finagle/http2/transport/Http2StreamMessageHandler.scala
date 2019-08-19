@@ -13,7 +13,7 @@ import scala.util.control.NoStackTrace
 /**
  * A handler to rectify any other Http2StreamMessage objects.
  *
- * The Netty `Http2MultiplexCodec` passes `Http2StreamFrame` messages to the child pipeline
+ * The Netty `Http2MultiplexHandler` passes `Http2StreamFrame` messages to the child pipeline
  * including
  * - Http2HeadersFrame
  * - Http2DataFrame
@@ -50,14 +50,19 @@ private[http2] abstract class Http2StreamMessageHandler private () extends Chann
         p.tryFailure(new ClientDiscardedRequestException(code))
     }
 
+  override def userEventTriggered(ctx: ChannelHandlerContext, evt: Any): Unit = evt match {
+    case rst: Http2ResetFrame =>
+      resetErrorCode = Some(rst.errorCode)
+      handleReset(ctx, rst, observedFirstHttpObject)
+
+    case _ =>
+      ctx.fireUserEventTriggered(evt)
+  }
+
   override def channelRead(ctx: ChannelHandlerContext, msg: Object): Unit = msg match {
     case update: Http2WindowUpdateFrame =>
       // We don't care about these at this level so just release it.
       ReferenceCountUtil.release(update)
-
-    case rst: Http2ResetFrame =>
-      resetErrorCode = Some(rst.errorCode)
-      handleReset(ctx, rst, observedFirstHttpObject)
 
     case httpObject: HttpObject =>
       observedFirstHttpObject = true

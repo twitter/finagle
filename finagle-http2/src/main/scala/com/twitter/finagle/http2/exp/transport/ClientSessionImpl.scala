@@ -16,7 +16,7 @@ import io.netty.channel.{
   ChannelOption
 }
 import io.netty.handler.codec.http2.{
-  Http2MultiplexCodec,
+  Http2FrameCodec,
   Http2StreamChannel,
   Http2StreamChannelBootstrap
 }
@@ -41,11 +41,11 @@ private final class ClientSessionImpl(
     }
   }
 
-  private[this] val codec: Http2MultiplexCodec = {
-    val codec = channel.pipeline.get(classOf[Http2MultiplexCodec])
+  private[this] val codec: Http2FrameCodec = {
+    val codec = channel.pipeline.get(classOf[Http2FrameCodec])
     if (codec == null) {
       throw new IllegalStateException(
-        s"Parent Channel doesn't have an instance of ${classOf[Http2MultiplexCodec].getSimpleName}"
+        s"Parent Channel doesn't have an instance of ${classOf[Http2FrameCodec].getSimpleName}"
       )
     }
     codec
@@ -117,7 +117,7 @@ private final class ClientSessionImpl(
    * Construct a new `Transport` from a Netty4 stream channel.
    *
    * @note This method is only useful for handling the upgrade pathway since in that
-   *       circumstance the `Http2MultiplexCodec` initializes the upgraded stream.
+   *       circumstance the `Http2MultiplexHandler` initializes the upgraded stream.
    */
   def newChildTransport(streamChannel: Channel): Transport[Any, Any] =
     new ChildTransport(streamChannel)

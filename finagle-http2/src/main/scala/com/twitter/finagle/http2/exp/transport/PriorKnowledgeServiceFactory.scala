@@ -2,9 +2,9 @@ package com.twitter.finagle.http2.exp.transport
 
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.http2.transport.{ClientSession, H2StreamChannelInit}
-import com.twitter.finagle.http2.MultiplexCodecBuilder
+import com.twitter.finagle.http2.MultiplexHandlerBuilder
 import com.twitter.finagle.netty4.ConnectionBuilder
-import com.twitter.finagle.netty4.http.Http2CodecName
+import com.twitter.finagle.netty4.http.{Http2CodecName, Http2MultiplexHandlerName}
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.{ClientConnection, Service, ServiceFactory, Stack}
 import com.twitter.finagle.transport.Transport
@@ -47,12 +47,16 @@ private[finagle] final class PriorKnowledgeServiceFactory(
     // By design, the MultiplexCodec handler needs the socket channel to have auto-read enabled.
     // The stream channels are configured appropriately via the params in the `ClientSessionImpl`.
     parentChannel.config.setAutoRead(true) // Needs to be on for h2
-    val codec = MultiplexCodecBuilder.clientMultiplexCodec(params, None)
-    MultiplexCodecBuilder.addStreamsGauge(statsReceiver, codec, parentChannel)
+    val (codec, handler) = MultiplexHandlerBuilder.clientFrameCodec(params, None)
 
-    parentChannel.pipeline.addLast(Http2CodecName, codec)
+    MultiplexHandlerBuilder.addStreamsGauge(statsReceiver, codec, parentChannel)
     val pingDetectionHandler = new H2ClientFilter(params)
-    parentChannel.pipeline.addLast(H2ClientFilter.HandlerName, pingDetectionHandler)
+
+    parentChannel.pipeline
+      .addLast(Http2CodecName, codec)
+      .addLast(Http2MultiplexHandlerName, handler)
+      .addLast(H2ClientFilter.HandlerName, pingDetectionHandler)
+
     new ClientSessionImpl(params, childInit, parentChannel, () => pingDetectionHandler.status)
   }
 }
