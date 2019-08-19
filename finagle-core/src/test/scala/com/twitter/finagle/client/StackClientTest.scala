@@ -520,12 +520,12 @@ abstract class AbstractStackClientTest
       client.configured[param.Label]((param.Label("foo"), param.Label.param))
   }
 
-  test("StackClient binds to a local service via exp.Address.ServiceFactory") {
+  test("StackClient binds to a local service via Address.ServiceFactory") {
     val reverser = Service.mk[String, String] { in =>
       Future.value(in.reverse)
     }
     val sf = ServiceFactory(() => Future.value(reverser))
-    val addr = exp.Address(sf)
+    val addr = Address(sf)
     val name = Name.bound(addr)
     val service = baseClient.newService(name, "sfsa-test")
     val forward = "a man a plan a canal: panama"
@@ -538,7 +538,7 @@ abstract class AbstractStackClientTest
       Future.value(in)
     }
     val sf = ServiceFactory(() => Future.value(echoServer))
-    val addr = exp.Address(sf)
+    val addr = Address(sf)
     val name = Name.bound(addr)
 
     val reverseFilter = new SimpleFilter[String, String] {

@@ -30,7 +30,7 @@ class EndpointerModule[Req, Rep](
   def make(prms: Stack.Params, next: Stack[ServiceFactory[Req, Rep]]) = {
     val Transporter.EndpointAddr(addr) = prms[Transporter.EndpointAddr]
     val factory = addr match {
-      case com.twitter.finagle.exp.Address.ServiceFactory(sf: ServiceFactory[Req, Rep], _) => sf
+      case Address.ServiceFactory(sf: ServiceFactory[Req, Rep], _) => sf
       case Address.Inet(ia, _) => fn(prms, ia)
       case Address.Failed(e) => new FailingFactory[Req, Rep](e)
     }

@@ -11,7 +11,7 @@ object TestAddr {
   }
 
   def apply(arg: String): Address = {
-    exp.Address[Any, String](StringFactory(arg))
+    Address[Any, String](StringFactory(arg))
   }
 }
 

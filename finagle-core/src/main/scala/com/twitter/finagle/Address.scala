@@ -77,6 +77,15 @@ object Address {
    */
   case class Failed(cause: Throwable) extends Address
 
+  /**
+   * An endpoint address represented by a [[com.twitter.finagle.ServiceFactory]]
+   * that implements the endpoint.
+   */
+  case class ServiceFactory[Req, Rep](
+    factory: com.twitter.finagle.ServiceFactory[Req, Rep],
+    metadata: Addr.Metadata)
+      extends Address
+
   /** Create a new [[Address]] with given [[java.net.InetSocketAddress]]. */
   def apply(addr: InetSocketAddress): Address =
     Address.Inet(addr, Addr.Metadata.empty)
@@ -88,24 +97,11 @@ object Address {
   /** Create a new loopback [[Address]] with the given `port`. */
   def apply(port: Int): Address =
     Address(new InetSocketAddress(InetAddress.getLoopbackAddress, port))
-}
 
-package exp {
-  object Address {
+  /** Create a new [[Address]] with the given [[com.twitter.finagle.ServiceFactory]]. */
+  def apply[Req, Rep](factory: com.twitter.finagle.ServiceFactory[Req, Rep]): Address =
+    Address.ServiceFactory(factory, Addr.Metadata.empty)
 
-    /** Create a new [[Address]] with the given [[com.twitter.finagle.ServiceFactory]]. */
-    def apply[Req, Rep](factory: com.twitter.finagle.ServiceFactory[Req, Rep]): Address =
-      Address.ServiceFactory(factory, Addr.Metadata.empty)
-
-    /**
-     * An endpoint address represented by a [[com.twitter.finagle.ServiceFactory]]
-     * that implements the endpoint.
-     */
-    case class ServiceFactory[Req, Rep](
-      factory: com.twitter.finagle.ServiceFactory[Req, Rep],
-      metadata: Addr.Metadata)
-        extends Address
-  }
 }
 
 /**
