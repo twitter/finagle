@@ -1,7 +1,6 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.conversions.DurationOps._
-import com.twitter.finagle
 import com.twitter.finagle._
 import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory.ErrorLabel
@@ -203,11 +202,9 @@ class LoadBalancerFactoryTest extends FunSuite with Eventually with IntegrationP
     val withFailed = failed +: addresses
     assert(withFailed.sorted(ordering).last == failed)
 
-    val sf = finagle.exp.Address.ServiceFactory(ServiceFactory.const[Int, Int] {
-      Service.mk[Int, Int] { _ =>
-        ???
-      }
-    }, Addr.Metadata.empty)
+    val sf = Address.ServiceFactory(
+      ServiceFactory.const[Int, Int](Service.mk[Int, Int](_ => ???)),
+      Addr.Metadata.empty)
     val withSf = sf +: addresses
     assert(withSf.sorted(ordering).last == sf)
 

@@ -13,6 +13,9 @@ Breaking API Changes
 * finagle-core: The constructor on `c.t.f.filter.NackAdmissionFilter` used for testing that
   took an `Ema.Monotime` has been removed. ``PHAB_ID=D351249``
 
+* finagle-core: The `Adddress.ServiceFactory` variant has been promoted from experimental
+  status and moved to be properly part of `c.t.f.Address`. ``PHAB_ID=D357122``
+
 * finagle-http: improve performance of c.t.f.http.filter.StatsFilter. This results in two notable
   API changes:
     1. There is a `private[filter]` constructor which can take a `() => Long` for

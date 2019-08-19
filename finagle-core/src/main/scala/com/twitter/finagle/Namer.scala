@@ -4,7 +4,6 @@ import com.twitter.finagle.naming.{NameInterpreter, NamerExceededMaxDepthExcepti
 import com.twitter.util._
 import scala.util.control.NonFatal
 
-
 /**
  * A namer is a context in which a [[com.twitter.finagle.NameTree
  * NameTree]] is bound. The context is provided by the
@@ -219,7 +218,9 @@ object Namer {
   )(tree: NameTree[Name]
   ): Activity[NameTree[Name.Bound]] =
     if (depth > namerMaxDepth())
-      Activity.exception(new NamerExceededMaxDepthException(s"Max recursion level: ${namerMaxDepth()} reached in Namer lookup"))
+      Activity.exception(
+        new NamerExceededMaxDepthException(
+          s"Max recursion level: ${namerMaxDepth()} reached in Namer lookup"))
     else
       tree match {
         case Leaf(Name.Path(path)) => lookup(path).flatMap(bind(lookup, depth + 1, weight))
@@ -283,7 +284,7 @@ trait ServiceNamer[Req, Rep] extends Namer {
       Activity.value(NameTree.Neg)
     case Some(svc) =>
       val factory = ServiceFactory(() => Future.value(svc))
-      val addr = Addr.Bound(exp.Address(factory))
+      val addr = Addr.Bound(Address(factory))
       val name = Name.Bound(Var.value(addr), factory, path)
       Activity.value(NameTree.Leaf(name))
   }

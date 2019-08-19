@@ -1,7 +1,6 @@
 package com.twitter.finagle.addr
 
 import com.twitter.finagle.{Addr, Address, ServiceFactory}
-import com.twitter.finagle.exp
 
 /**
  * This object contains utility functions for adding and removing
@@ -23,8 +22,8 @@ object WeightedAddress {
     addr match {
       case Address.Inet(ia, metadata) =>
         Address.Inet(ia, metadata + (weightKey -> weight))
-      case exp.Address.ServiceFactory(sf: ServiceFactory[_, _], metadata) =>
-        exp.Address.ServiceFactory(sf, metadata + (weightKey -> weight))
+      case Address.ServiceFactory(sf: ServiceFactory[_, _], metadata) =>
+        Address.ServiceFactory(sf, metadata + (weightKey -> weight))
       case addr => addr
     }
 
@@ -45,8 +44,8 @@ object WeightedAddress {
     addr match {
       case Address.Inet(ia, metadata) =>
         (Address.Inet(ia, metadata - weightKey), weight(metadata))
-      case exp.Address.ServiceFactory(sf: ServiceFactory[_, _], metadata) =>
-        (exp.Address.ServiceFactory(sf, metadata - weightKey), weight(metadata))
+      case Address.ServiceFactory(sf: ServiceFactory[_, _], metadata) =>
+        (Address.ServiceFactory(sf, metadata - weightKey), weight(metadata))
       case addr =>
         (addr, defaultWeight)
     }
