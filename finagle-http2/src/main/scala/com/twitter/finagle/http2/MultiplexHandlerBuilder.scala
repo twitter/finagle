@@ -18,16 +18,17 @@ import io.netty.channel.{
   ChannelInitializer
 }
 import io.netty.handler.codec.http2.{
+  Http2FrameCodec,
+  Http2FrameCodecBuilder,
   Http2HeadersEncoder,
-  Http2MultiplexCodec,
-  Http2MultiplexCodecBuilder
+  Http2MultiplexHandler
 }
 import io.netty.util.AttributeKey
 
 /**
- * Tooling for building a `Http2MultiplexCodec` for clients and servers
+ * Tooling for building a `Http2MultiplexHandler` for clients and servers
  */
-private object MultiplexCodecBuilder {
+private object MultiplexHandlerBuilder {
 
   // An initializer for use with the client that closes all inbound (pushed)
   // streams since we don't support push-promises on the client at this time.
@@ -39,7 +40,7 @@ private object MultiplexCodecBuilder {
   /** Attach a "streams" gauge to the channel and manage its lifecycle */
   def addStreamsGauge(
     statsReceiver: StatsReceiver,
-    http2MultiplexCodec: Http2MultiplexCodec,
+    frameCodec: Http2FrameCodec,
     channel: Channel
   ): Unit = {
     // scalafix:off StoreGaugesAsMemberVariables
@@ -47,7 +48,7 @@ private object MultiplexCodecBuilder {
       // Note that this isn't thread-safe because the session state is intended to be
       // single-threaded and used only from within the channel, but addressing that
       // would be very challenging.
-      http2MultiplexCodec.connection.numActiveStreams
+      frameCodec.connection.numActiveStreams
     }
     // scalafix:on StoreGaugesAsMemberVariables
 
@@ -61,12 +62,12 @@ private object MultiplexCodecBuilder {
     })
   }
 
-  /** Construct a `Http2MultiplexCodec` for server pipelines */
-  def serverMultiplexCodec(
+  /** Construct a `Http2MultiplexHandler` for server pipelines */
+  def serverFrameCodec(
     params: Stack.Params,
     inboundInitializer: ChannelHandler
-  ): Http2MultiplexCodec = {
-    val codec = newMultiplexCodec(params, inboundInitializer, isServer = true).build()
+  ): (Http2FrameCodec, Http2MultiplexHandler) = {
+    val codec = newFrameCodec(params, isServer = true)
     if (trackH2SessionExceptions()) {
       // Add the listener so that we can count up different exceptions seen during the session.
       val oldListener = codec.decoder.frameListener
@@ -74,32 +75,29 @@ private object MultiplexCodecBuilder {
       codec.decoder.frameListener(new ExceptionTrackingFrameListener(statsReceiver, oldListener))
     }
 
-    codec
+    codec -> new Http2MultiplexHandler(inboundInitializer)
   }
 
-  /** Construct a `Http2MultiplexCodec` for client pipelines */
-  def clientMultiplexCodec(
+  /** Construct a `Http2MultiplexHandler` for client pipelines */
+  def clientFrameCodec(
     params: Stack.Params,
     upgradeHandler: Option[ChannelHandler]
-  ): Http2MultiplexCodec = {
-    val builder = newMultiplexCodec(params, ClosePushedStreamsInitializer, isServer = false)
-    upgradeHandler match {
-      case Some(handler) => builder.withUpgradeStreamHandler(handler)
-      case None => () // nop.
+  ): (Http2FrameCodec, Http2MultiplexHandler) = {
+    val codec = newFrameCodec(params, isServer = false)
+    val handler = upgradeHandler match {
+      case Some(handler) => new Http2MultiplexHandler(ClosePushedStreamsInitializer, handler)
+      case None => new Http2MultiplexHandler(ClosePushedStreamsInitializer)
     }
-    builder.build()
+
+    codec -> handler
   }
 
   // Create a new MultiplexHttp2Codec from the supplied configuration
-  private def newMultiplexCodec(
-    params: Stack.Params,
-    inboundInitializer: ChannelHandler,
-    isServer: Boolean
-  ): Http2MultiplexCodecBuilder = {
+  private def newFrameCodec(params: Stack.Params, isServer: Boolean): Http2FrameCodec = {
     val initialSettings = Settings.fromParams(params, isServer = isServer)
-    val builder: Http2MultiplexCodecBuilder =
-      if (isServer) Http2MultiplexCodecBuilder.forServer(inboundInitializer)
-      else Http2MultiplexCodecBuilder.forClient(inboundInitializer)
+    val builder: Http2FrameCodecBuilder =
+      if (isServer) Http2FrameCodecBuilder.forServer()
+      else Http2FrameCodecBuilder.forClient()
 
     builder
       .initialSettings(initialSettings)
@@ -112,7 +110,8 @@ private object MultiplexCodecBuilder {
       builder.frameLogger(
         new LoggerPerFrameTypeLogger(params[FrameLoggerNamePrefix].loggerNamePrefix))
     }
-    builder
+
+    builder.build()
   }
 
   // Build a sensitivity detector from the params

@@ -42,10 +42,10 @@ final private[finagle] class Http2CleartextServerInitializer(
   def upgradeCodecFactory(channel: Channel): UpgradeCodecFactory = new UpgradeCodecFactory {
     override def newUpgradeCodec(protocol: CharSequence): UpgradeCodec = {
       if (AsciiString.contentEquals(Http2CodecUtil.HTTP_UPGRADE_PROTOCOL_NAME, protocol)) {
-        val http2MultiplexCodec = MultiplexCodecBuilder.serverMultiplexCodec(params, initializer)
-        MultiplexCodecBuilder.addStreamsGauge(statsReceiver, http2MultiplexCodec, channel)
+        val (codec, handler) = MultiplexHandlerBuilder.serverFrameCodec(params, initializer)
+        MultiplexHandlerBuilder.addStreamsGauge(statsReceiver, codec, channel)
 
-        new Http2ServerUpgradeCodec(MultiplexCodecName, http2MultiplexCodec) {
+        new Http2ServerUpgradeCodec(codec, handler) {
           override def upgradeTo(
             ctx: ChannelHandlerContext,
             upgradeRequest: FullHttpRequest
@@ -55,9 +55,9 @@ final private[finagle] class Http2CleartextServerInitializer(
             ctx.channel.config.setAutoRead(true)
             super.upgradeTo(ctx, upgradeRequest)
 
-            // we insert immediately after the Http2MultiplexCodec#0, which we know is the
+            // we insert immediately after the Http2MultiplexHandler#0, which we know is the
             // last Http2 frames before they're converted to Http/1.1
-            Http2PipelineInitializer.setup(ctx, params, MultiplexCodecName)
+            Http2PipelineInitializer.setup(ctx, params)
           }
         }
       } else null
@@ -118,7 +118,6 @@ final private[finagle] class Http2CleartextServerInitializer(
 
 private object Http2CleartextServerInitializer {
   val Name: String = "upgradeHandler"
-  val MultiplexCodecName: String = "multiplexCodec"
 
   val log = Logger.get()
 

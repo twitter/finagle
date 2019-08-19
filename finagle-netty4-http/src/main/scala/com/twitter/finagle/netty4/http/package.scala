@@ -33,6 +33,7 @@ package object http {
    * The name assigned to an `Http2MultiplexCodec` instance in a netty `ChannelPipeline`
    */
   private[finagle] val Http2CodecName = "http2Codec"
+  private[finagle] val Http2MultiplexHandlerName = "Http2MultiplexHandler"
 
   private[finagle] def newHttpClientCodec(params: Stack.Params): HttpClientCodec = {
     val maxInitialLineSize = params[MaxInitialLineSize].size
