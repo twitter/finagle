@@ -1,6 +1,7 @@
 package com.twitter.finagle.postgres.connection
 
 import com.twitter.logging.Logger
+import com.twitter.util.{Promise, Try}
 
 object Undefined extends PartialFunction[Any, Nothing] {
   def isDefinedAt(o: Any) = false
@@ -16,7 +17,9 @@ case class WrongStateForEvent[E, S](event: E, state: S)
  * in Connection.scala.
  */
 trait StateMachine[E, R, S] {
-  type Transition = PartialFunction[(E, S), (Option[R], S)]
+  import StateMachine._
+  type Transition = PartialFunction[(E, S), (Option[TransitionResult[R]], S)]
+  type SimpleTransition = PartialFunction[(E, S), (Option[R], S)]
 
   val id: Int
 
@@ -29,11 +32,19 @@ trait StateMachine[E, R, S] {
     currentState = s
   }
 
-  def transition(t: Transition) {
+  def transition(t: SimpleTransition) {
+    fullTransition(
+      t.andThen {
+        case (r, s) => (r.map(Response(_)), s)
+      }
+    )
+  }
+
+  def fullTransition(t: Transition) {
     transitionFunction = transitionFunction orElse t
   }
 
-  private[this] def handleMisc: PartialFunction[(E, S), (Option[R], S)] = {
+  private[this] def handleMisc: PartialFunction[(E, S), (Option[TransitionResult[R]], S)] = {
     case (e, s) => throw WrongStateForEvent(e, s)
   }
 
@@ -45,6 +56,21 @@ trait StateMachine[E, R, S] {
     logger.ifDebug("Transitioning to state %s and emiting result".format(newState.getClass.getName))
 
     currentState = newState
-    result
+
+    result.flatMap {
+      case Response(r) => Some(r)
+      case Complete(promise, value) =>
+        promise.update(value)
+        None
+    }
   }
+}
+
+object StateMachine {
+  // The result of a transition
+  //   This is either a response value or a Promise to fulfill (either successfully or not)
+  //   In both cases, state machine's current state is updated before this result is returned / applied.
+  sealed trait TransitionResult[+R]
+  case class Response[R](value: R) extends TransitionResult[R]
+  case class Complete(signal: Promise[Unit], value: Try[Unit]) extends TransitionResult[Nothing]
 }

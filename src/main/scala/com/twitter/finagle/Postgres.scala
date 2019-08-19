@@ -178,6 +178,14 @@ object Postgres {
   private class Dispatcher(transport: Transport[PgRequest, PgResponse], statsReceiver: StatsReceiver)
     extends SerialClientDispatcher[PgRequest, PgResponse](transport, statsReceiver) {
 
+    override def dispatch(req: PgRequest, p: Promise[PgResponse]): Future[Unit] =
+      super.dispatch(req, p) before p.flatMap {
+        case s: AsyncPgResponse =>
+          // Only release the connection when the state machine has finished processing the events for this request
+          s.complete
+        case _ => Future.Done
+      }
+
     override def apply(
       req: PgRequest
     ): Future[PgResponse] = req match {

@@ -2,13 +2,11 @@ package com.twitter.finagle.postgres
 
 import java.nio.charset.Charset
 
-import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
-
 import com.twitter.finagle.postgres.messages.{DataRow, Field}
 import com.twitter.finagle.postgres.values.ValueDecoder
 import com.twitter.util.Try
 import Try._
+import com.twitter.concurrent.AsyncStream
 import com.twitter.finagle.postgres.PostgresClient.TypeSpecifier
 import com.twitter.finagle.postgres.codec.NullValue
 import io.netty.buffer.ByteBuf
@@ -157,7 +155,7 @@ sealed trait QueryResponse
 
 case class OK(affectedRows: Int) extends QueryResponse
 
-case class ResultSet(rows: List[Row]) extends QueryResponse
+case class ResultSet(rows: AsyncStream[Row]) extends QueryResponse
 
 /*
  * Helper object to generate ResultSets for responses with custom types.
@@ -166,7 +164,7 @@ object ResultSet {
   def apply(
     fields: Array[Field],
     charset: Charset,
-    dataRows: List[DataRow],
+    dataRows: AsyncStream[DataRow],
     types: Map[Int, TypeSpecifier],
     receives: PartialFunction[String, ValueDecoder[T] forSome { type T }]
   ): ResultSet = {

@@ -4,6 +4,7 @@ import java.nio.charset.{Charset, StandardCharsets}
 import java.util.concurrent.atomic.AtomicInteger
 
 import com.twitter.cache.Refresh
+import com.twitter.concurrent.AsyncStream
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.postgres.messages._
 import com.twitter.finagle.postgres.values._
@@ -51,24 +52,24 @@ class PostgresClientImpl(
 
     val serviceF = factory.apply
 
-    val bootstrapTypes = Map(
-      Types.INT_4 -> ValueDecoder.int4,
-      Types.TEXT -> ValueDecoder.string
-    )
+    def extractTypes(response: PgResponse): Future[Map[Int, PostgresClient.TypeSpecifier]] =
+      response match {
+        case SelectResult(fields, rows) =>
+          val rowValues = ResultSet(fields, charset, rows, PostgresClient.defaultTypes, receiveFunctions).rows
+          rowValues.map {
+            row =>
+              row.get[Int]("oid") -> PostgresClient.TypeSpecifier(
+                row.get[String]("typreceive"),
+                row.get[String]("type"),
+                row.get[Int]("typelem"))
+          }.toSeq().map(_.toMap)
+      }
 
     val customTypesResult = for {
       service <- serviceF
       response <- service.apply(PgRequest(Query(customTypesQuery)))
-    } yield response match {
-      case SelectResult(fields, rows) =>
-        val rowValues = ResultSet(fields, charset, rows, PostgresClient.defaultTypes, receiveFunctions).rows
-        rowValues.map {
-          row => row.get[Int]("oid") -> PostgresClient.TypeSpecifier(
-            row.get[String]("typreceive"),
-            row.get[String]("type"),
-            row.get[Int]("typelem"))
-        }.toMap
-    }
+      types <- extractTypes(response)
+    } yield types
 
     customTypesResult.ensure {
       serviceF.foreach(_.close())
@@ -141,25 +142,27 @@ class PostgresClientImpl(
   /*
    * Run a single SELECT query and wrap the results with the provided function.
    */
-  override def select[T](sql: String)(f: Row => T): Future[Seq[T]] = for {
-    types  <- typeMap()
-    result <- fetch(sql)
-  } yield result match {
-    case SelectResult(fields, rows) => ResultSet(fields, charset, rows, types, receiveFunctions).rows.map(f)
-  }
+  override def selectToStream[T](sql: String)(f: Row => T): AsyncStream[T] =
+    AsyncStream.fromFuture {
+      for {
+        types <- typeMap()
+        SelectResult(fields, rows) <- fetch(sql)
+      } yield ResultSet(fields, charset, rows, types, receiveFunctions).rows.map(f)
+    }.flatten
 
   /*
    * Issue a single, prepared SELECT query and wrap the response rows with the provided function.
    */
-  override def prepareAndQuery[T](sql: String, params: Param[_]*)(f: Row => T): Future[Seq[T]] = {
-    typeMap().flatMap { _ =>
-      for {
-        service   <- factory()
-        statement = new PreparedStatementImpl("", sql, service)
-        result    <- statement.select(params: _*)(f)
-      } yield result
-    }
-  }
+  override def prepareAndQueryToStream[T](sql: String, params: Param[_]*)(f: Row => T): AsyncStream[T] =
+    AsyncStream.fromFuture {
+      typeMap().flatMap { _ =>
+        for {
+          service   <- factory()
+          statement = new PreparedStatementImpl("", sql, service)
+          result    <- statement.selectToStream(params: _*)(f)
+        } yield result
+      }
+    }.flatten
 
   /*
    * Issue a single, prepared arbitrary query without an expected result set, and provide the affected row count
@@ -292,7 +295,8 @@ class PostgresClientImpl(
         exec   <- execute()
       } yield exec match {
         case CommandCompleteResponse(rows) => OK(rows)
-        case Rows(rows, true) => ResultSet(fields, charset, rows, types, receiveFunctions)
+        case Rows(rows) =>
+          ResultSet(fields, charset, rows, types, receiveFunctions)
       }
       f.transform {
         result =>

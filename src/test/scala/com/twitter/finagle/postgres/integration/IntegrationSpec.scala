@@ -130,7 +130,6 @@ class IntegrationSpec extends Spec {
         firstRow.getOption[Boolean]("bool_field") must equal(Some(false))
         firstRow.getOption[String]("bad_column") must equal(None)
 
-
       }
 
       "execute a select that returns nothing" in {

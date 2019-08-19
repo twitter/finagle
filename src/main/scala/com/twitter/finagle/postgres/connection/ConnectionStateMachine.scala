@@ -1,9 +1,10 @@
 package com.twitter.finagle.postgres.connection
 
+import com.twitter.concurrent.AsyncStream
+import com.twitter.finagle.postgres.codec.Errors
 import com.twitter.finagle.postgres.messages._
 import com.twitter.logging.Logger
-
-import scala.collection.mutable.ListBuffer
+import com.twitter.util.{Promise, Return, Throw}
 
 /*
  * State machine that captures transitions between states.
@@ -87,7 +88,8 @@ class ConnectionStateMachine(state: State = AuthenticationRequired, val id: Int)
   }
 
   transition {
-    case (EmptyQueryResponse, SimpleQuery) => (None, EmitOnReadyForQuery(SelectResult(Array.empty, List())))
+    case (EmptyQueryResponse, SimpleQuery) =>
+      (None, EmitOnReadyForQuery(SelectResult.Empty))
     case (CommandComplete(CreateExtension | CreateFunction | CreateIndex | CreateTable | CreateTrigger | CreateType), SimpleQuery) =>
       (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
     case (CommandComplete(DropTable), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
@@ -100,8 +102,11 @@ class ConnectionStateMachine(state: State = AuthenticationRequired, val id: Int)
     case (CommandComplete(Do), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
 
     case (RowDescription(fields), SimpleQuery) =>
-      (None, AggregateRows(fields.map(f => Field(f.name, f.fieldFormat, f.dataType))))
-    case (ErrorResponse(details), SimpleQuery) => (None, EmitOnReadyForQuery(Error(details)))
+      val complete = new Promise[Unit]()
+      val nextRow = StreamRows(complete, extended = false)
+      (Some(SelectResult(fields.map(f => Field(f.name, f.fieldFormat, f.dataType)), nextRow.asyncStream)(complete)), nextRow)
+    case (ErrorResponse(details), SimpleQuery) =>
+      (None, EmitOnReadyForQuery(Error(details)))
   }
 
   transition {
@@ -110,7 +115,7 @@ class ConnectionStateMachine(state: State = AuthenticationRequired, val id: Int)
   }
 
   transition {
-    case (EmptyQueryResponse, ExecutePreparedStatement) => (Some(SelectResult(Array.empty, List())), Connected)
+    case (EmptyQueryResponse, ExecutePreparedStatement) => (Some(SelectResult.Empty), Connected)
     case (CommandComplete(CreateExtension | CreateFunction | CreateIndex | CreateTable | CreateType | CreateTrigger), ExecutePreparedStatement) =>
       (Some(CommandCompleteResponse(1)), Connected)
     case (CommandComplete(DropTable), ExecutePreparedStatement) => (Some(CommandCompleteResponse(1)), Connected)
@@ -122,36 +127,54 @@ class ConnectionStateMachine(state: State = AuthenticationRequired, val id: Int)
     case (CommandComplete(RollBack), ExecutePreparedStatement) => (Some(CommandCompleteResponse(1)), Connected)
     case (CommandComplete(Commit), ExecutePreparedStatement) => (Some(CommandCompleteResponse(1)), Connected)
     case (CommandComplete(Do), ExecutePreparedStatement) => (Some(CommandCompleteResponse(1)), Connected)
-    case (row:DataRow, ExecutePreparedStatement) => (None, AggregateRowsWithoutFields(ListBuffer(row)))
-    case (row:DataRow, state:AggregateRowsWithoutFields) =>
-      state.buff += row
-      (None, state)
-    case (PortalSuspended, AggregateRowsWithoutFields(buff)) => (Some(Rows(buff.toList, completed = false)), Connected)
-    case (CommandComplete(Select(0)), ExecutePreparedStatement) => (Some(Rows(List.empty, completed = true)), Connected)
-    case (CommandComplete(Select(_)), AggregateRowsWithoutFields(buff)) =>
-      (Some(Rows(buff.toList, completed = true)), Connected)
-    case (CommandComplete(Insert(_)), AggregateRowsWithoutFields(buff)) =>
-      (Some(Rows(buff.toList, completed = true)), Connected)
-    case (CommandComplete(Update(_)), AggregateRowsWithoutFields(buff)) =>
-      (Some(Rows(buff.toList, completed = true)), Connected)
-    case (CommandComplete(Delete(_)), AggregateRowsWithoutFields(buff)) => 
-      (Some(Rows(buff.toList, completed = true)), Connected)
-    case (ErrorResponse(details), ExecutePreparedStatement) => (Some(Error(details)), Connected)
-    case (ErrorResponse(details), AggregateRowsWithoutFields(_)) => (Some(Error(details)), Connected)
+    case (row: DataRow, ExecutePreparedStatement) =>
+      val complete = new Promise[Unit]
+      val nextRow = StreamRows(complete, extended = true)
+      val thisRow = AsyncStream.mk(row, nextRow.asyncStream)
+      val response = Rows(thisRow)(complete)
+      (Some(response), nextRow)
+    case (CommandComplete(Select(0)), ExecutePreparedStatement) =>
+      (Some(Rows.Empty), Connected)
+    case (ErrorResponse(details), ExecutePreparedStatement) =>
+      (Some(Error(details)), Connected)
   }
 
-  transition {
-    case (row: DataRow, state: AggregateRows) =>
-      state.buff += row
-      (None, state)
-    case (CommandComplete(_), AggregateRows(fields, rows)) =>
-      (None, EmitOnReadyForQuery(SelectResult(fields, rows.toList)))
-    case (ErrorResponse(details), AggregateRows(_, _)) => (Some(Error(details)), Connected)
+  fullTransition {
+    case (row: DataRow, StreamRows(complete, extended, thisRow)) =>
+      val nextRow = StreamRows(complete, extended)
+      thisRow.setValue(AsyncStream.mk(row, nextRow.asyncStream))
+      (None, nextRow)
+    case (PortalSuspended, StreamRows(complete, _, thisRow)) =>
+      thisRow.setValue(AsyncStream.empty)
+      (Some(StateMachine.Complete(complete, Return.Unit)), Connected)
+    case (CommandComplete(_), StreamRows(complete, extended, thisRow)) =>
+      thisRow.setValue(AsyncStream.empty)
+      val response = StateMachine.Complete(complete, Return.Unit)
+      if (extended) {
+        // in extended mode, we don't expect a ReadyForQuery, so we respond now
+        (Some(response), Connected)
+      } else {
+        (None, EmitOnReadyForQuery(response))
+      }
+    case (ErrorResponse(details), StreamRows(complete, extended, thisRow)) =>
+      val exn = Errors.server(Error(details), None)
+      thisRow.setValue(AsyncStream.exception(exn))
+      val response = StateMachine.Complete(complete, Throw(exn))
+      if (extended) {
+        // in extended mode, we don't expect a ReadyForQuery, so we respond now
+        (Some(response), Connected)
+      } else {
+        (None, EmitOnReadyForQuery(response))
+      }
   }
 
-  transition {
+  fullTransition {
     case (ReadyForQuery(_), EmitOnReadyForQuery(response)) => (Some(response), Connected)
-    case (ErrorResponse(details), EmitOnReadyForQuery(response)) => (Some(Error(details)), Connected)
+    case (ErrorResponse(details), EmitOnReadyForQuery(StateMachine.Response(_))) =>
+      (Some(StateMachine.Response(Error(details))), Connected)
+    case (ErrorResponse(details), EmitOnReadyForQuery(StateMachine.Complete(promise, _))) =>
+      val exn = Errors.server(Error(details), None)
+      (Some(StateMachine.Complete(promise, Throw(exn))), Connected)
   }
 
   transition {

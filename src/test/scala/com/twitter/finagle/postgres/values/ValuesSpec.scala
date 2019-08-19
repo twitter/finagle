@@ -17,6 +17,7 @@ import com.twitter.util.Await
 import io.netty.buffer.Unpooled
 import org.scalacheck.{Arbitrary, Gen}
 import Arbitrary.arbitrary
+import com.twitter.concurrent.AsyncStream
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import io.circe.testing.instances.arbitraryJson
 
@@ -38,8 +39,10 @@ class ValuesSpec extends Spec with GeneratorDrivenPropertyChecks {
       (t: T) =>
         //TODO: change this once prepared statements are available
         val escaped = toStr(t).replaceAllLiterally("'", "\\'")
-        val ResultSet(List(binaryRow)) = Await.result(client.query(s"SELECT $send('$escaped'::$typ) AS out"))
-        val ResultSet(List(textRow)) = Await.result(client.query(s"SELECT CAST('$escaped'::$typ AS text) AS out"))
+        val ResultSet(binaryRows) = Await.result(client.query(s"SELECT $send('$escaped'::$typ) AS out"))
+        val binaryRow = Await.result(binaryRows.toSeq).head
+        val ResultSet(textRows) = Await.result(client.query(s"SELECT CAST('$escaped'::$typ AS text) AS out"))
+        val textRow = Await.result(textRows.toSeq).head
         val bytes = binaryRow.get[Array[Byte]]("out")
         val textString = textRow.get[String]("out")
         val binaryOut = decoder.decodeBinary(recv, Unpooled.wrappedBuffer(bytes), client.charset).get
@@ -64,11 +67,13 @@ class ValuesSpec extends Spec with GeneratorDrivenPropertyChecks {
           fail(s"text: $t was encoded/decoded to $textInOut")
 
         if(!nonDefault) {
-          val List(rowBinary) = ResultSet(
-            Array(Field("column", 1, 0)), StandardCharsets.UTF_8,
-            List(DataRow(Array(Some(encodedBinary)))),
-            Map(0 -> TypeSpecifier(recv, typ, 0)), ValueDecoder.decoders
-          ).rows
+          val List(rowBinary) = Await.result(
+            ResultSet(
+              Array(Field("column", 1, 0)), StandardCharsets.UTF_8,
+              AsyncStream.fromSeq(List(DataRow(Array(Some(encodedBinary))))),
+              Map(0 -> TypeSpecifier(recv, typ, 0)), ValueDecoder.decoders
+            ).rows.toSeq.map(_.toList)
+          )
 
           assert(tester(rowBinary.getAnyOption("column").get.asInstanceOf[T], t))
           assert(tester(rowBinary.getAnyOption(0).get.asInstanceOf[T], t))
@@ -79,11 +84,13 @@ class ValuesSpec extends Spec with GeneratorDrivenPropertyChecks {
           assert(tester(rowBinary.getTry[T]("column").get, t))
           assert(tester(rowBinary.getTry[T](0).get, t))
 
-          val List(rowText) = ResultSet(
-            Array(Field("column", 0, 0)), StandardCharsets.UTF_8,
-            List(DataRow(Array(Some(Unpooled.copiedBuffer(encodedText, StandardCharsets.UTF_8))))),
-            Map(0 -> TypeSpecifier(recv, typ, 0)), ValueDecoder.decoders
-          ).rows
+          val List(rowText) = Await.result(
+            ResultSet(
+              Array(Field("column", 0, 0)), StandardCharsets.UTF_8,
+              AsyncStream.fromSeq(List(DataRow(Array(Some(Unpooled.copiedBuffer(encodedText, StandardCharsets.UTF_8)))))),
+              Map(0 -> TypeSpecifier(recv, typ, 0)), ValueDecoder.decoders
+            ).rows.toSeq.map(_.toList)
+          )
 
           assert(tester(rowText.getAnyOption("column").get.asInstanceOf[T], t))
           assert(tester(rowText.getAnyOption(0).get.asInstanceOf[T], t))
