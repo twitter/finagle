@@ -90,8 +90,7 @@ def travisTestJavaOptions: Seq[String] = {
   if (travisBuild) {
     Seq(
       "-DSKIP_FLAKY=true",
-      "-DSKIP_FLAKY_TRAVIS=true",
-      "-Dsbt.log.noformat=true"
+      "-DSKIP_FLAKY_TRAVIS=true"
     )
   } else {
     Seq(
