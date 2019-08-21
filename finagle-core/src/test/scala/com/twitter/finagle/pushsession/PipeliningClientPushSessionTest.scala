@@ -36,7 +36,7 @@ class PipeliningClientPushSessionTest extends FunSuite with MockitoSugar {
               10.seconds,
               timer
             ).toService
-          val f = session()
+          val f = session(())
           f.raise(exc)
           assert(!handle.closedCalled)
         }

@@ -40,8 +40,8 @@ class Netty4TimerTest extends FunSuite with MockitoSugar with Eventually {
     when(underlying.newTimeout(any[TimerTask], any[Long], any[TimeUnit])).thenReturn(timeout)
 
     // Cancel both tasks.
-    timer.schedule(Time.Top)().cancel()
-    timer.schedule(Duration.Top)().cancel()
+    timer.schedule(Time.Top)(()).cancel()
+    timer.schedule(Duration.Top)(()).cancel()
     verify(timeout, times(2)).cancel()
   }
 

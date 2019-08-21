@@ -307,7 +307,7 @@ class RetriesTest extends FunSuite {
         Stopwatch.timeMillis
       )
 
-    val svc = endToEndToEndSvc(stats, backReqs, mkBudget)
+    val svc = endToEndToEndSvc(stats, backReqs, mkBudget _)
 
     val numReqs = 100
     Time.withCurrentTimeFrozen { _ =>
@@ -330,7 +330,7 @@ class RetriesTest extends FunSuite {
     val backReqs = new AtomicInteger()
     def mkBudget() = RetryBudget.Infinite
 
-    val svc = endToEndToEndSvc(stats, backReqs, mkBudget)
+    val svc = endToEndToEndSvc(stats, backReqs, mkBudget _)
 
     val retries = 4
     val numReqs = 100

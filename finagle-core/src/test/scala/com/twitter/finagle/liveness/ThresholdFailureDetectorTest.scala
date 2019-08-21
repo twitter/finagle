@@ -33,10 +33,10 @@ class ThresholdFailureDetectorTest
 
     val timer = new MockTimer
     val d = new ThresholdFailureDetector(
-      ping,
+      ping _,
       minPeriod = 10.milliseconds,
       closeTimeout = closeTimeout,
-      nanoTime = nanoTime,
+      nanoTime = nanoTime _,
       statsReceiver = sr,
       timer = timer
     )
@@ -114,10 +114,10 @@ class ThresholdFailureDetectorTest
     }
 
     val d = new ThresholdFailureDetector(
-      ping,
+      ping _,
       minPeriod = 10.milliseconds,
       closeTimeout = Duration.Top,
-      nanoTime = nanoTime,
+      nanoTime = nanoTime _,
       timer = timer,
       statsReceiver = sr
     )
