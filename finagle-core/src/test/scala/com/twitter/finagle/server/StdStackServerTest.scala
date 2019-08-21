@@ -42,7 +42,7 @@ class StdStackServerTest extends FunSuite with MockitoSugar {
           when(sslSessionInfo.peerCertificates).thenReturn(Seq(mockCert))
           when(context.sslSessionInfo).thenReturn(sslSessionInfo)
           when(trans.context).thenReturn(context)
-          when(trans.remoteAddress).thenReturn(mock[SocketAddress])
+          when(trans.context.remoteAddress).thenReturn(mock[SocketAddress])
           when(trans.onClose).thenReturn(Future.never)
           serveTransport(trans)
           NullServer

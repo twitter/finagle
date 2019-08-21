@@ -6,8 +6,8 @@ import com.twitter.finagle.redis.util._
 import com.twitter.finagle.Redis
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Awaitable, Duration, Future, Try}
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scalatest.{BeforeAndAfterAll, FunSuite, Tag}
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scalacheck.{Arbitrary, Gen}
 import java.net.InetSocketAddress
 import org.scalactic.source.Position

@@ -74,7 +74,7 @@ private[finagle] abstract class GenStreamingSerialServerDispatcher[Req, Rep, In,
       if (state.compareAndSet(Idle, Running)) {
         val save = Local.save()
         val dispatched = try {
-          Contexts.local.let(RemoteInfo.Upstream.AddressCtx, trans.remoteAddress) {
+          Contexts.local.let(RemoteInfo.Upstream.AddressCtx, trans.context.remoteAddress) {
             val peerCertificates = trans.context.sslSessionInfo.peerCertificates
             if (peerCertificates.isEmpty) dispatch(req)
             else

@@ -82,7 +82,7 @@ private[http2] final class PriorKnowledgeTransporter(
   def apply(): Future[Transport[Any, Any]] = {
     val result = getStreamTransportFactory()
 
-    result.x.flatMap { fac =>
+    result.get.flatMap { fac =>
       fac.newChildTransport().rescue {
         case exn: Throwable =>
           // We try to evict the current session concurrently. We recurse if some other thread raced

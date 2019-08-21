@@ -2,13 +2,13 @@ package com.twitter.finagle.http
 
 import com.twitter.util.Base64StringEncoder
 import java.nio.charset.StandardCharsets
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 object ProxyCredentials {
   def apply(credentials: java.util.Map[String, String]): Option[ProxyCredentials] =
-    apply(credentials.toMap)
+    apply(credentials.asScala)
 
-  def apply(credentials: Map[String, String]): Option[ProxyCredentials] = {
+  def apply(credentials: scala.collection.Map[String, String]): Option[ProxyCredentials] = {
     for {
       user <- credentials.get("http_proxy_user")
       pass <- credentials.get("http_proxy_pass")

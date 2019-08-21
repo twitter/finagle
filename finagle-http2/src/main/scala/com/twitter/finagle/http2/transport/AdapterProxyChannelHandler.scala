@@ -10,6 +10,8 @@ import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
 import io.netty.handler.codec.http.{HttpObject, LastHttpContent}
 import io.netty.util.ReferenceCountUtil
 import io.netty.util.concurrent.PromiseCombiner
+import io.netty.util.concurrent.ImmediateEventExecutor
+import io.netty.util.concurrent.{Future => NFuture}
 import scala.collection.mutable.HashMap
 
 /**
@@ -96,11 +98,11 @@ private[http2] final class AdapterProxyChannelHandler(
   }
 
   override def close(ctx: ChannelHandlerContext, promise: ChannelPromise): Unit = {
-    val combiner = new PromiseCombiner()
+    val combiner = new PromiseCombiner(ImmediateEventExecutor.INSTANCE)
     map.foreach {
       case (_, value) =>
         val p = value.embedded.newPromise()
-        combiner.add(p)
+        combiner.add(p: NFuture[_])
         value.embedded.close(p)
     }
     val streamsClosed = ctx.newPromise()
