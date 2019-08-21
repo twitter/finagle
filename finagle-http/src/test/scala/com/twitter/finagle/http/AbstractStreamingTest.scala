@@ -519,11 +519,6 @@ abstract class AbstractStreamingTest extends FunSuite {
       .newService(Name.bound(Address(addr.asInstanceOf[InetSocketAddress])), name)
   }
 
-  private def closingTransport(closed: Future[Unit]): Modifier = { transport: Transport[Any, Any] =>
-    closed.ensure { transport.close() }
-    transport
-  }
-
   def closingOnceTransport(closed: Future[Unit]): Modifier = {
     val setFail = new AtomicBoolean(false)
 
