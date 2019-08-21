@@ -10,7 +10,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import scala.collection.JavaConverters._
 
 class TTwitterClientFilterTest extends FunSuite with MockitoSugar {

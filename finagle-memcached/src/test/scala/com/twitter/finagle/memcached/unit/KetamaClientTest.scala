@@ -11,7 +11,7 @@ import scala.collection.mutable
 import _root_.java.io.{BufferedReader, InputStreamReader}
 import org.mockito.Matchers._
 import org.mockito.Mockito.{RETURNS_SMART_NULLS, times, verify, verifyZeroInteractions, when}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.FunSuite
 
 class KetamaClientTest extends FunSuite with MockitoSugar {

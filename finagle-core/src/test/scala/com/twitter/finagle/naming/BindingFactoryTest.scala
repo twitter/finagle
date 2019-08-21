@@ -9,7 +9,7 @@ import com.twitter.util._
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{atLeastOnce, spy, verify, when}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfter, FunSuite}
 import scala.collection.JavaConverters._
 

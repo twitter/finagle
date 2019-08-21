@@ -5,7 +5,7 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import io.netty.channel._
 import org.mockito.Mockito.when
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class ChannelRequestStatsHandlerTest extends FunSuite with MockitoSugar {
 

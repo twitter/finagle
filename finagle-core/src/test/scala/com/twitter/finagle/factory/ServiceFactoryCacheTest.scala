@@ -4,7 +4,7 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.util.{Future, MockTimer, Time, Timer, Await}
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class ServiceFactoryCacheTest extends FunSuite with MockitoSugar {
   trait Ctx {

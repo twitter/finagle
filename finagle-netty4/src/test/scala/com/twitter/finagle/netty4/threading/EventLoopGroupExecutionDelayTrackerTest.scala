@@ -10,7 +10,7 @@ import org.mockito.Mockito.{never, verify, atLeast}
 import org.mockito.Matchers.{anyString, contains, anyVararg}
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import scala.collection.JavaConversions.asScalaSet
 
 class EventLoopGroupExecutionDelayTrackerTest

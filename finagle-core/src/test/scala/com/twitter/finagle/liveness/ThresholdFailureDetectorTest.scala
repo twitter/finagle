@@ -7,7 +7,7 @@ import com.twitter.util._
 import java.util.concurrent.atomic.AtomicInteger
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.junit.AssertionsForJUnit
+import org.scalatestplus.junit.AssertionsForJUnit
 
 class ThresholdFailureDetectorTest
     extends FunSuite

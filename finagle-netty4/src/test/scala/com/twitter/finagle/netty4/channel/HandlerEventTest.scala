@@ -8,7 +8,7 @@ import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.channel.nio.NioEventLoopGroup
 import java.net.SocketAddress
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class HandlerEventTest extends FunSuite with MockitoSugar {
 

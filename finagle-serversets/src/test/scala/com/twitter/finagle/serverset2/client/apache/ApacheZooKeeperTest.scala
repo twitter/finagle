@@ -10,7 +10,7 @@ import org.apache.zookeeper
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.{eq => meq}
 import org.mockito.Mockito.{doNothing, doThrow, verify, when}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{FunSuite, OneInstancePerTest}
 import scala.collection.JavaConverters._
 class ApacheZooKeeperTest extends FunSuite with MockitoSugar with OneInstancePerTest {

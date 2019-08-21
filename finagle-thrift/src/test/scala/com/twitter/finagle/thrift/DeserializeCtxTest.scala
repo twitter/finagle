@@ -5,7 +5,7 @@ import com.twitter.scrooge.ThriftStruct
 import com.twitter.util.Return
 import java.util.concurrent.atomic.AtomicInteger
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class DeserializeCtxTest extends FunSuite with MockitoSugar {
 

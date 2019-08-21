@@ -1,10 +1,10 @@
 package com.twitter.finagle.stats
 
 import org.scalacheck.Gen
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scalatest.{Matchers, FunSuite}
 
-class BucketedHistogramTest extends FunSuite with GeneratorDrivenPropertyChecks with Matchers {
+class BucketedHistogramTest extends FunSuite with ScalaCheckDrivenPropertyChecks with Matchers {
   test("percentile when empty") {
     val h = BucketedHistogram()
     assert(h.percentile(0.0) == 0)

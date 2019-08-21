@@ -11,7 +11,7 @@ import com.twitter.finagle.ssl.server.{
 import com.twitter.finagle.transport.Transport
 import javax.net.ssl.SSLSession
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class ServerTransportParamsTest extends FunSuite with MockitoSugar {
 

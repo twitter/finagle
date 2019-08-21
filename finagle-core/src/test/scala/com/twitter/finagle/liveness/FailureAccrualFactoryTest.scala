@@ -12,7 +12,7 @@ import org.mockito.stubbing.Answer
 import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import scala.util.Random
 
 class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {

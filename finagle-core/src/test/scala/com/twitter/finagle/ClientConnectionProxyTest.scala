@@ -3,7 +3,7 @@ package com.twitter.finagle
 import com.twitter.finagle.ssl.session.SslSessionInfo
 import org.mockito.Mockito.when
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class ClientConnectionProxyTest extends FunSuite with MockitoSugar {
 

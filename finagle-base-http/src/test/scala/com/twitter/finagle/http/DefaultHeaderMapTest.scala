@@ -1,9 +1,9 @@
 package com.twitter.finagle.http
 
 import org.scalacheck.Gen
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-class DefaultHeaderMapTest extends AbstractHeaderMapTest with GeneratorDrivenPropertyChecks {
+class DefaultHeaderMapTest extends AbstractHeaderMapTest with ScalaCheckDrivenPropertyChecks {
 
   import Rfc7230HeaderValidationTest._
 

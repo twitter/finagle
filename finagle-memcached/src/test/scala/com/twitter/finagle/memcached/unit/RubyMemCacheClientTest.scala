@@ -6,7 +6,7 @@ import com.twitter.util.{Await, Future}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class RubyMemCacheClientTest extends FunSuite with MockitoSugar {
 

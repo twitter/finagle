@@ -16,7 +16,7 @@ import com.twitter.finagle.toggle.flag
 import com.twitter.util.{Await, Time}
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class MemcachedTest extends FunSuite with MockitoSugar with Eventually with IntegrationPatience {
 

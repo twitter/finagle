@@ -12,7 +12,7 @@ import org.mockito.Matchers._
 import org.mockito.Mockito.{times, verify, when}
 import org.mockito.{Matchers, Mockito}
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class MonitorFilterTest extends FunSuite with MockitoSugar {
 

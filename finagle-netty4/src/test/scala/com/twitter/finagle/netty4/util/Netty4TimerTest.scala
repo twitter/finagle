@@ -3,7 +3,7 @@ package com.twitter.finagle.netty4.util
 import com.twitter.conversions.DurationOps._
 import com.twitter.util.{Duration, Time}
 import io.netty.util.{HashedWheelTimer, Timeout, Timer, TimerTask}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.FunSuite
 import org.mockito.Mockito._
 import org.mockito.Matchers._

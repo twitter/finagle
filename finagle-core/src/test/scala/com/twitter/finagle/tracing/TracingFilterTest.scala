@@ -6,8 +6,8 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.{spy, verify, when, atLeastOnce}
 import org.mockito.Matchers.any
 import org.scalactic.source.Position
-import org.scalatest.junit.AssertionsForJUnit
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.junit.AssertionsForJUnit
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
 import scala.collection.JavaConverters._
 

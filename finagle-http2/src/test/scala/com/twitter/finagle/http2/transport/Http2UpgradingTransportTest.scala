@@ -12,7 +12,7 @@ import com.twitter.util.{Await, Future, Promise}
 import java.util.concurrent.Executor
 import io.netty.handler.codec.http._
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class Http2UpgradingTransportTest extends FunSuite with MockitoSugar {
   class Ctx {

@@ -16,7 +16,7 @@ import com.twitter.util.{Command => _, _}
 import java.net.{InetAddress, InetSocketAddress}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterEach, FunSuite, MustMatchers}
 
 class MemcachedPartitioningServiceTest

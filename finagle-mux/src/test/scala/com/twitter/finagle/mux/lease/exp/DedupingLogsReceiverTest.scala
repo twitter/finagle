@@ -4,7 +4,7 @@ import java.util.logging.Logger
 import org.mockito.Mockito.{never, times, verify}
 import org.mockito.Matchers.anyString
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class DedupingLogsReceiverTest extends FunSuite with MockitoSugar {
   test("DedupingLogsReceiver logs when recording and flushing") {

@@ -10,7 +10,7 @@ import org.mockito.Matchers.anyObject
 import org.mockito.Mockito.when
 import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 object crtnamer {
   @volatile var observationsOpened = 0

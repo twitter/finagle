@@ -7,12 +7,12 @@ import java.nio.charset.StandardCharsets
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scala.collection.JavaConverters._
 
 class QueryParamCodecTest
     extends FunSuite
-    with GeneratorDrivenPropertyChecks
+    with ScalaCheckDrivenPropertyChecks
     with Eventually
     with IntegrationPatience {
 

@@ -3,7 +3,7 @@ package com.twitter.finagle.memcached.unit
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.protocol.Value
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import scala.collection.immutable
 
 class GetResultTest extends FunSuite with MockitoSugar {

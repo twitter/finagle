@@ -8,7 +8,7 @@ import java.net.{InetSocketAddress, URI}
 import java.nio.charset.StandardCharsets.UTF_8
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.FunSuite
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scala.collection.JavaConverters._
 import scala.util.Random
 
@@ -129,7 +129,7 @@ object BijectionsTest {
   }
 }
 
-class BijectionsTest extends FunSuite with GeneratorDrivenPropertyChecks {
+class BijectionsTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
   import BijectionsTest._
 
   test("netty http request -> finagle") {

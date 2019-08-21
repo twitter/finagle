@@ -9,13 +9,13 @@ import io.netty.channel.{ChannelException => _, _}
 import io.netty.channel.embedded.EmbeddedChannel
 import org.scalatest.{FunSuite, OneInstancePerTest}
 import org.scalatest.concurrent.Eventually._
-import org.scalatest.mockito.MockitoSugar
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.mockito.Mockito._
 
 class ChannelTransportTest
     extends FunSuite
-    with GeneratorDrivenPropertyChecks
+    with ScalaCheckDrivenPropertyChecks
     with OneInstancePerTest
     with MockitoSugar {
 

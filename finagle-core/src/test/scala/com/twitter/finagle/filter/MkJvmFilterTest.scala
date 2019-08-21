@@ -8,7 +8,7 @@ import com.twitter.util.{TimeControl, Promise, Time, Duration}
 import org.mockito.Matchers._
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class MkJvmFilterTest extends FunSuite with MockitoSugar {
   private class JvmHelper {

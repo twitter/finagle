@@ -12,7 +12,7 @@ import org.ietf.jgss.GSSContext
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{stub, verify}
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class SpnegoAuthenticatorTest extends FunSuite with MockitoSugar {
   import SpnegoAuthenticator._

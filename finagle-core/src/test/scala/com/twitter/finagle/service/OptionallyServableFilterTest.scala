@@ -1,7 +1,7 @@
 package com.twitter.finagle.service
 
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import com.twitter.finagle.{NotServableException, Service}
 import org.mockito.Mockito.{times, verify, when}
 import org.mockito.Matchers._

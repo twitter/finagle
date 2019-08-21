@@ -16,7 +16,7 @@ import java.net.{InetAddress, InetSocketAddress}
 import javax.net.ssl.SSLSession
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class ServerBuilderTest
     extends FunSuite

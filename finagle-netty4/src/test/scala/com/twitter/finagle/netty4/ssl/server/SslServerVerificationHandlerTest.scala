@@ -9,7 +9,7 @@ import io.netty.util.concurrent.DefaultPromise
 import javax.net.ssl.{SSLEngine, SSLSession}
 import org.mockito.Mockito.when
 import org.scalatest.{FunSuite, OneInstancePerTest}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class SslServerVerificationHandlerTest extends FunSuite with MockitoSugar with OneInstancePerTest {
 

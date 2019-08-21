@@ -121,8 +121,8 @@ val sharedSettings = Seq(
   crossScalaVersions := Seq("2.11.12", "2.12.8"),
   fork in Test := true, // We have to fork to get the JavaOptions
   libraryDependencies ++= Seq(
-    "org.scalacheck" %% "scalacheck" % "1.13.4" % "test",
-    "org.scalatest" %% "scalatest" % "3.0.0" % "test",
+    "org.scalacheck" %% "scalacheck" % "1.14.0" % "test",
+    "org.scalatest" %% "scalatest" % "3.0.8" % "test",
     // See https://www.scala-sbt.org/0.13/docs/Testing.html#JUnit
     "com.novocode" % "junit-interface" % "0.11" % "test",
     "org.mockito" % "mockito-all" % "1.9.5" % "test"

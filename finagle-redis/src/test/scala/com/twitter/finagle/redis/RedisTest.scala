@@ -6,7 +6,7 @@ import com.twitter.finagle.redis.util._
 import com.twitter.finagle.Redis
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Awaitable, Duration, Future, Try}
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scalatest.{BeforeAndAfterAll, FunSuite, Tag}
 import org.scalacheck.{Arbitrary, Gen}
 import java.net.InetSocketAddress
@@ -117,7 +117,7 @@ trait MissingInstances {
   implicit def arbitraryReply: Arbitrary[Reply] = Arbitrary(genReply)
 }
 
-trait RedisResponseTest extends RedisTest with GeneratorDrivenPropertyChecks with MissingInstances {
+trait RedisResponseTest extends RedisTest with ScalaCheckDrivenPropertyChecks with MissingInstances {
 
   private[this] def chunk(buf: Buf): Gen[Seq[Buf]] =
     if (buf.isEmpty) Gen.const(Seq.empty[Buf])
@@ -167,7 +167,7 @@ trait RedisResponseTest extends RedisTest with GeneratorDrivenPropertyChecks wit
   }
 }
 
-trait RedisRequestTest extends RedisTest with GeneratorDrivenPropertyChecks with MissingInstances {
+trait RedisRequestTest extends RedisTest with ScalaCheckDrivenPropertyChecks with MissingInstances {
 
   def genZMember: Gen[ZMember] =
     for {

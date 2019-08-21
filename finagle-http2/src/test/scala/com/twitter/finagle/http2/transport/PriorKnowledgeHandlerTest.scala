@@ -14,7 +14,7 @@ import io.netty.util.CharsetUtil._
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.mockito.{ArgumentCaptor, Matchers}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
 class PriorKnowledgeHandlerTest extends FunSuite with BeforeAndAfter with MockitoSugar {

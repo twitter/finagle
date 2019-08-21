@@ -7,7 +7,7 @@ import com.twitter.util.{Await, Future}
 import org.mockito.Matchers._
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class ShardingServiceTest extends FunSuite with MockitoSugar {
 

@@ -9,7 +9,7 @@ import org.mockito.Mockito
 import org.mockito.Mockito.{times, verify}
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import scala.language.reflectiveCalls
 
 class TransportClientConnectionTest extends FunSuite with MockitoSugar {

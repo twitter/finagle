@@ -6,7 +6,7 @@ import com.twitter.util.{Await, Future}
 import org.mockito.Matchers
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class ClientIdRequiredFilterTest extends FunSuite with MockitoSugar {
 

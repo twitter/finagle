@@ -74,7 +74,7 @@ private[memcached] object ExternalMemcached { self =>
   def start(address: Option[InetSocketAddress]): Option[TestMemcachedServer] = {
     def exec(address: InetSocketAddress): Process = {
       val cmd = Seq("memcached", "-l", address.getHostName, "-p", address.getPort.toString)
-      val builder = new ProcessBuilder(cmd.toList)
+      val builder = new ProcessBuilder(cmd: _*)
       builder.start()
     }
 

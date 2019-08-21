@@ -6,9 +6,9 @@ import com.twitter.finagle.tracing.{Flags, SpanId, Trace, TraceId}
 import com.twitter.util.{Await, Future}
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-class TracingTest extends FunSuite with GeneratorDrivenPropertyChecks {
+class TracingTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
 
   import HttpTracing.{Header, stripParameters}
 

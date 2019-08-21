@@ -8,7 +8,7 @@ import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
 import org.mockito.Matchers
 import org.mockito.Mockito.{verify, when, times}
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class ValidateThriftServiceTest extends FunSuite with MockitoSugar {
 

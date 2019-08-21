@@ -13,7 +13,7 @@ import org.mockito.Mockito
 import org.mockito.Mockito.{atLeastOnce, never, times, verify}
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import scala.language.reflectiveCalls
 
 class SerialServerDispatcherTest extends FunSuite with MockitoSugar {

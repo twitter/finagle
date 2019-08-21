@@ -8,7 +8,7 @@ import com.twitter.finagle.tracing.Trace
 import com.twitter.util.{Await, Future, Time}
 import java.net.InetSocketAddress
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class ExceptionRemoteInfoFactoryTest extends FunSuite with MockitoSugar {
   test(

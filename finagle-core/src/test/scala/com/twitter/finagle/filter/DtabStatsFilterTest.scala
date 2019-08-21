@@ -1,7 +1,7 @@
 package com.twitter.finagle.filter
 
 import org.scalatest.FunSuite
-import org.scalatest.junit.AssertionsForJUnit
+import org.scalatestplus.junit.AssertionsForJUnit
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.{Dtab, Service}
 import com.twitter.util.{Await, Future}

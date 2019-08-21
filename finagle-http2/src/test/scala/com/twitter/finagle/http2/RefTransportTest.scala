@@ -6,7 +6,7 @@ import com.twitter.util.{Await, Future, Time}
 import org.mockito.Matchers.{anyInt, any}
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class RefTransportTest extends FunSuite with MockitoSugar {
 

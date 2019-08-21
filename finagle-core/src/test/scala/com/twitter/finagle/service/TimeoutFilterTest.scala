@@ -9,7 +9,7 @@ import com.twitter.util._
 import com.twitter.util.tunable.Tunable
 import java.util.concurrent.atomic.AtomicReference
 import org.scalatest.{FunSuite, Matchers}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import scala.language.reflectiveCalls
 
 private object TimeoutFilterTest {

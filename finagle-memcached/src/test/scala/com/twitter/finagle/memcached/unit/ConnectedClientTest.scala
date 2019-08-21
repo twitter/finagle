@@ -8,7 +8,7 @@ import com.twitter.finagle.Service
 import com.twitter.util.{Await, Awaitable, Future}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.FunSuite
 
 class ConnectedClientTest extends FunSuite with MockitoSugar {

@@ -6,7 +6,7 @@ import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.stack.nilStack
 import com.twitter.util.{Await, Future, Var}
-import org.scalatest.junit.AssertionsForJUnit
+import org.scalatestplus.junit.AssertionsForJUnit
 import org.scalatest.FunSuite
 
 class AddrMetadataExtractionTest extends FunSuite with AssertionsForJUnit {

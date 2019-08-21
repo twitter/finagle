@@ -9,7 +9,7 @@ import com.twitter.finagle.stack.Endpoint
 import com.twitter.util.{Await, Future}
 import java.util.concurrent.atomic.AtomicInteger
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class ServerAdmissionControlTest extends FunSuite with MockitoSugar {
   class Ctx {

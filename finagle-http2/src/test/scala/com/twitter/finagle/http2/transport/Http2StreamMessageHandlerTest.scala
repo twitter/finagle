@@ -8,13 +8,13 @@ import io.netty.util.ReferenceCounted
 import org.scalatest.FunSuite
 import org.mockito.Mockito.when
 import org.scalacheck.Gen
-import org.scalatest.mockito.MockitoSugar
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 class Http2StreamMessageHandlerTest
     extends FunSuite
     with MockitoSugar
-    with GeneratorDrivenPropertyChecks {
+    with ScalaCheckDrivenPropertyChecks {
   test("doesn't leak message written post-RST") {
     forAll { isServer: Boolean =>
       val em = new EmbeddedChannel(Http2StreamMessageHandler(isServer))

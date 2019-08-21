@@ -9,7 +9,7 @@ import com.twitter.util.{Duration, TimeoutException => UtilTimeoutException}
 import java.util.logging.Handler
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.verify
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterEach, FunSuite, Matchers}
 
 class DefaultMonitorTest extends FunSuite with Matchers with MockitoSugar with BeforeAndAfterEach {
