@@ -6,7 +6,7 @@ General Finagle FAQ
 
 .. _propagate_failure:
 
-What are CancelledRequestException and CancelledConnectionException?
+What are CancelledRequestException, CancelledConnectionException, and ClientDiscardedRequestException?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When a client connected to a Finagle server disconnects, the server raises
@@ -51,12 +51,27 @@ A simplified code snippet that exemplifies the intra-process structure:
        the RPC call to the client. This is clearly the case in the above
        example where the call to the client is indeed the returned Future.
        However, this will still hold if the client call was in the context
-       of a Future combinator (ex. `Future#select`, `Future#join`, etc.)
+       of a Future combinator (e.g. `Future#select`, `Future#join`, etc.)
 
-This is the source of the :API:`CancelledRequestException <com/twitter/finagle/CancelledRequestException>` --
+This is the source of the :API:`CancelledRequestException <com/twitter/finagle/CancelledRequestException>` –
 when a Finagle client receives the cancellation interrupt while a request is pending, it
 fails that request with this exception. A special case of this is when a request is in the process
 of establishing a session and is instead interrupted with a :API:`CancelledConnectionException <com/twitter/finagle/CancelledConnectionException>`
+
+Note, in mux, when work is interrupted/cancelled on behalf of a request we encode this failure with
+a :API:`ClientDiscardedRequestException <com/twitter/finagle/mux/ClientDiscardedRequestException>`. The concept
+is the same as above though.
+
+Server operators may prefer to measure their server side success rates excluding these classes of
+exceptions. The rationale is that these failures don't neccessarily represent a server side issue
+and are dependent on client side configuration (e.g. timeouts). The recommended way to achieve this
+is to configure a custom `com.twitter.finagle.service.ResponseClassifier` via `$Protocol.server.withResponseClassifier(...)`.
+
+An important note is that these failures may sometimes show up in client stats! The interrupt will
+propagate through the call graph until it finds an unsatisfied future. In some cases, that outstanding
+future will have originated from a client backend within a server (i.e. `Finagle Client` in the topology
+above). Thus, when the interrupt reaches the client future, all references to the future will see
+the interrupt with the cancellation exception.
 
 You can disable this behavior by using the :API:`MaskCancelFilter <com/twitter/finagle/filter/MaskCancelFilter>`:
 
