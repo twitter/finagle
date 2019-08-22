@@ -7,6 +7,12 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* finagle: Upgrade to Netty 4.1.39.Final. ``PHAB_ID=D355848``
+
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
