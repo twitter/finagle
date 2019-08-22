@@ -6,6 +6,7 @@ import com.twitter.finagle.netty4.Netty4Listener.BackPressure
 import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.Stack
+import com.twitter.finagle.http2.transport.Http2UpgradingTransport.UpgradeResult
 import com.twitter.finagle.netty4.http.{Http2CodecName, Http2MultiplexHandlerName}
 import io.netty.channel._
 import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
@@ -108,12 +109,7 @@ private final class UpgradeRequestHandler(params: Stack.Params, httpClientCodec:
         // we don't attempt to upgrade when the request may have content, so we remove
         // ourselves and let the backend handlers know that we're not going to try upgrading.
         ignoredCounter.incr()
-        ctx.pipeline.remove(this)
-
-        // Configure the original backpressure strategy since the pipeline started life
-        // with autoread enabled.
-        ctx.channel.config.setAutoRead(!params[BackPressure].enabled)
-        ctx.fireUserEventTriggered(Http2UpgradingTransport.UpgradeAborted)
+        noUpgrade(ctx, Http2UpgradingTransport.UpgradeAborted)
         ctx.write(msg, promise)
     }
   }
@@ -122,14 +118,22 @@ private final class UpgradeRequestHandler(params: Stack.Params, httpClientCodec:
     case UpgradeEvent.UPGRADE_ISSUED => // no surprises here.
 
     case UpgradeEvent.UPGRADE_REJECTED =>
-      // Configure the original backpressure strategy since the pipeline started life
-      // with autoread enabled.
-      ctx.channel.config.setAutoRead(!params[BackPressure].enabled)
-      ctx.pipeline.remove(this)
-      ctx.fireChannelRead(Http2UpgradingTransport.UpgradeRejected)
+      noUpgrade(ctx, Http2UpgradingTransport.UpgradeRejected)
 
     case _ =>
       super.userEventTriggered(ctx, event)
+  }
+
+  private[this] def noUpgrade(ctx: ChannelHandlerContext, result: UpgradeResult): Unit = {
+    ctx.pipeline.remove(this)
+    ctx.fireChannelRead(result)
+
+    // Configure the original backpressure strategy since the pipeline started life
+    // with autoread enabled.
+    ctx.channel.config.setAutoRead(!params[BackPressure].enabled)
+    // Make sure we request at least one more message so that we don't starve the
+    // ChannelTransport.
+    ctx.read()
   }
 }
 

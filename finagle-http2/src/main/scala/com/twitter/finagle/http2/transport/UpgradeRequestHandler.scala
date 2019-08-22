@@ -3,6 +3,7 @@ package com.twitter.finagle.http2.transport
 import com.twitter.finagle.http2.transport.Http2UpgradingTransport.{
   UpgradeAborted,
   UpgradeRejected,
+  UpgradeResult,
   UpgradeSuccessful
 }
 import com.twitter.finagle.netty4.Netty4Listener.BackPressure
@@ -69,12 +70,7 @@ private[http2] final class UpgradeRequestHandler(
         // we don't attempt to upgrade when the request may have content, so we remove
         // ourselves and let the backend handlers know that we're not going to try upgrading.
         ignoredCounter.incr()
-        ctx.pipeline.remove(this)
-
-        // Configure the original backpressure strategy since the pipeline started life
-        // with autoread enabled.
-        ctx.channel.config.setAutoRead(!params[BackPressure].enabled)
-        ctx.fireUserEventTriggered(UpgradeAborted)
+        noUpgrade(ctx, UpgradeAborted)
         ctx.write(msg, promise)
     }
   }
@@ -84,11 +80,7 @@ private[http2] final class UpgradeRequestHandler(
       case UpgradeEvent.UPGRADE_ISSUED => // no surprises here.
 
       case UpgradeEvent.UPGRADE_REJECTED =>
-        // Configure the original backpressure strategy since the pipeline started life
-        // with autoread enabled.
-        ctx.channel.config.setAutoRead(!params[BackPressure].enabled)
-        ctx.pipeline.remove(this)
-        ctx.fireUserEventTriggered(UpgradeRejected)
+        noUpgrade(ctx, UpgradeRejected)
 
       case UpgradeEvent.UPGRADE_SUCCESSFUL =>
         prepareForUpgrade(ctx)
@@ -96,6 +88,18 @@ private[http2] final class UpgradeRequestHandler(
       case _ =>
         super.userEventTriggered(ctx, event)
     }
+  }
+
+  private[this] def noUpgrade(ctx: ChannelHandlerContext, result: UpgradeResult): Unit = {
+    ctx.pipeline.remove(this)
+    ctx.fireChannelRead(result)
+
+    // Configure the original backpressure strategy since the pipeline started life
+    // with autoread enabled.
+    ctx.channel.config.setAutoRead(!params[BackPressure].enabled)
+    // Make sure we request at least one more message so that we don't starve the
+    // ChannelTransport.
+    ctx.read()
   }
 
   private[this] def prepareForUpgrade(ctx: ChannelHandlerContext): Unit = {
