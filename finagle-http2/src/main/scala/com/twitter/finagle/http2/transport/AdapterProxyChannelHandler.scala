@@ -11,7 +11,7 @@ import io.netty.handler.codec.http.{HttpObject, LastHttpContent}
 import io.netty.util.ReferenceCountUtil
 import io.netty.util.concurrent.PromiseCombiner
 import io.netty.util.concurrent.ImmediateEventExecutor
-import io.netty.util.concurrent.{Future => NFuture}
+import io.netty.util.concurrent.{Future => NettyFuture}
 import scala.collection.mutable.HashMap
 
 /**
@@ -102,7 +102,7 @@ private[http2] final class AdapterProxyChannelHandler(
     map.foreach {
       case (_, value) =>
         val p = value.embedded.newPromise()
-        combiner.add(p: NFuture[_])
+        combiner.add(p: NettyFuture[_])
         value.embedded.close(p)
     }
     val streamsClosed = ctx.newPromise()

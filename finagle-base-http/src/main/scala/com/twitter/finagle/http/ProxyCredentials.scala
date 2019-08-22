@@ -6,9 +6,9 @@ import scala.collection.JavaConverters._
 
 object ProxyCredentials {
   def apply(credentials: java.util.Map[String, String]): Option[ProxyCredentials] =
-    apply(credentials.asScala)
+    apply(credentials.asScala.toMap)
 
-  def apply(credentials: scala.collection.Map[String, String]): Option[ProxyCredentials] = {
+  def apply(credentials: Map[String, String]): Option[ProxyCredentials] = {
     for {
       user <- credentials.get("http_proxy_user")
       pass <- credentials.get("http_proxy_pass")
