@@ -35,7 +35,7 @@ private[finagle] class TestFramer(frameSize: Int) extends Framer {
       }
 
       accumulated = merged.slice(sliceIdx, sliceIdx + frameSize)
-      result
+      result.toIndexedSeq
     }
   }
 }

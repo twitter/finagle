@@ -402,7 +402,8 @@ lazy val finagleNetty4 = Project(
   id = "finagle-netty4",
   base = file("finagle-netty4")
 ).settings(
-  sharedSettings
+  sharedSettings,
+  with213
 ).settings(
   name := "finagle-netty4",
   libraryDependencies ++= Seq(
