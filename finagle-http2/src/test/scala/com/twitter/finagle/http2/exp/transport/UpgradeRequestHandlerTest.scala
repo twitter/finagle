@@ -51,6 +51,7 @@ class UpgradeRequestHandlerTest extends FunSuite {
       channel.writeOutbound(request)
 
       assert(stats.counters.get(Seq("upgrade", "ignored")) == Some(1l))
+      assert(channel.readInbound[Object]() == Http2UpgradingTransport.UpgradeAborted)
       assert(channel.pipeline.get(classOf[HttpClientUpgradeHandler]) == null)
       assert(channel.pipeline.get(classOf[UpgradeRequestHandler]) == null)
     }
