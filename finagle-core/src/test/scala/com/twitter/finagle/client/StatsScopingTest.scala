@@ -6,8 +6,8 @@ import com.twitter.finagle.param.Stats
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.util.{Await, Future}
-import org.scalatestplus.junit.AssertionsForJUnit
 import org.scalatest.FunSuite
+import org.scalatestplus.junit.AssertionsForJUnit
 
 class StatsScopingTest extends FunSuite with AssertionsForJUnit {
   class Ctx {
