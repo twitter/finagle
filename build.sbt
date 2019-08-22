@@ -6,7 +6,7 @@ val releaseVersion = "19.9.0-SNAPSHOT"
 
 val libthriftVersion = "0.10.0"
 
-val defaultNetty4Version = "4.1.38.Final"
+val defaultNetty4Version = "4.1.39.Final"
 val defaultNetty4StaticSslVersion = "2.0.25.Final"
 
 val useNettySnapshot: Boolean = sys.env.get("FINAGLE_USE_NETTY_4_SNAPSHOT") match {
