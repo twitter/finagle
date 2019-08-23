@@ -15,7 +15,7 @@ class P2CPeakEwmaTest extends FunSuite with P2CSuite {
   override def newBal(
     fs: Var[Vector[P2CServiceFactory]],
     sr: StatsReceiver = NullStatsReceiver,
-    clock: (() => Long) = System.nanoTime
+    clock: (() => Long) = System.nanoTime _
   ): ServiceFactory[Unit, Int] = new P2CPeakEwma(
     Activity(fs.map(Activity.Ok(_))),
     maxEffort = 5,

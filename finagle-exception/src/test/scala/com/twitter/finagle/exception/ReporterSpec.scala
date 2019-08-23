@@ -7,7 +7,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.anyObject
 import org.mockito.Mockito._
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class DefaultReporterTest extends FunSuite with MockitoSugar {
   val logger = mock[Scribe.FutureIface]

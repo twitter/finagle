@@ -2,9 +2,9 @@ package com.twitter.finagle.mux.util
 
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.FunSuite
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-class TagMapTest extends FunSuite with GeneratorDrivenPropertyChecks {
+class TagMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
 
   val min = 8
   val max = 10000

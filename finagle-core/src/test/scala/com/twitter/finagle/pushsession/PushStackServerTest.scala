@@ -19,7 +19,7 @@ import java.net.{InetSocketAddress, SocketAddress}
 import java.security.cert.{Certificate, X509Certificate}
 import org.mockito.Mockito.when
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class PushStackServerTest extends FunSuite with MockitoSugar {
 

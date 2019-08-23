@@ -4,7 +4,7 @@ import com.twitter.conversions.StorageUnitOps._
 import com.twitter.util.StorageUnit
 import org.mockito.Mockito.{when, verify}
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class MemorySpaceTest extends FunSuite with MockitoSugar {
   test("MemorySpace#left should find the number of bytes left before we hit minDiscount") {

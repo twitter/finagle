@@ -7,7 +7,7 @@ import com.twitter.util.{Await, Awaitable, Future, Promise, Return, Throw, Time}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, times, verify, when}
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 object SingletonPoolTest {
   private def await[T](t: Awaitable[T]): T = Await.result(t, 1.second)

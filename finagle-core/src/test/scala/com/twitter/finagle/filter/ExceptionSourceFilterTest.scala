@@ -3,11 +3,10 @@ package com.twitter.finagle.filter
 import com.twitter.finagle.{Service, SourcedException, Failure}
 import com.twitter.util.{Await, Future}
 
-
 import org.mockito.Matchers.anyInt
 import org.mockito.Mockito.when
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class ExceptionSourceFilterTest extends FunSuite with MockitoSugar {
   test("ExceptionSourceFilter should add a name to sourced exceptions") {

@@ -6,7 +6,7 @@ import java.security.cert.{Certificate, X509Certificate}
 import javax.net.ssl.SSLSession
 import org.mockito.Mockito.when
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class UsingSslSessionInfoTest extends FunSuite with MockitoSugar {
 

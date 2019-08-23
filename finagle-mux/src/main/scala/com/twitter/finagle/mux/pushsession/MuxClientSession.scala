@@ -61,7 +61,7 @@ private[finagle] final class MuxClientSession(
   private[this] val exec: Executor = handle.serialExecutor
 
   private[this] val failureDetector =
-    FailureDetector(detectorConfig, ping, statsReceiver.scope("failuredetector"))
+    FailureDetector(detectorConfig, ping _, statsReceiver.scope("failuredetector"))
 
   // Metrics
   private[this] val leaseCounter = statsReceiver.counter(Verbosity.Debug, "leased")

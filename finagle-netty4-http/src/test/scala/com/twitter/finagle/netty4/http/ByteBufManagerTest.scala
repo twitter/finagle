@@ -6,7 +6,7 @@ import com.twitter.finagle.http.codec.ChannelBufferUsageTracker
 import io.netty.buffer.Unpooled
 import io.netty.channel.{ChannelHandlerContext, ChannelPromise}
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class ByteBufManagerTest extends FunSuite with MockitoSugar {
 

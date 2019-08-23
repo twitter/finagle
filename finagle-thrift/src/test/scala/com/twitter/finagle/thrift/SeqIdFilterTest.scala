@@ -7,7 +7,7 @@ import org.apache.thrift.transport.TMemoryBuffer
 import org.mockito.{Matchers, ArgumentCaptor}
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.{OneInstancePerTest, FunSuite}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class SeqIdFilterTest extends FunSuite with MockitoSugar with OneInstancePerTest {
   val protocolFactory = new TBinaryProtocol.Factory()

@@ -11,7 +11,7 @@ import com.twitter.io.Buf
 import com.twitter.util.{Await, Future, Return}
 import java.net.{InetAddress, InetSocketAddress}
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class ContextPropagationTest extends FunSuite with MockitoSugar {
 

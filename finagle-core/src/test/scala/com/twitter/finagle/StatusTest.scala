@@ -5,13 +5,13 @@ import com.twitter.util.{Await, Return}
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.junit.AssertionsForJUnit
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.junit.AssertionsForJUnit
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 class StatusTest
     extends FunSuite
     with AssertionsForJUnit
-    with GeneratorDrivenPropertyChecks
+    with ScalaCheckDrivenPropertyChecks
     with Eventually
     with IntegrationPatience {
 

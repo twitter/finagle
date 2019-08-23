@@ -5,7 +5,7 @@ import com.twitter.util.{FuturePool, MockTimer, Time}
 import io.netty.handler.ssl.SslContext
 import java.util.concurrent.atomic.AtomicInteger
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class ContextReloaderTest extends FunSuite with MockitoSugar {
 

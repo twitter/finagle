@@ -193,7 +193,7 @@ private[finagle] class ClockedDrainer(
       )
     }
 
-    coord.sleepUntilFinishedDraining(space, maxWait, npending, log)
+    coord.sleepUntilFinishedDraining(space, maxWait, npending _, log)
   }
 
   // GC

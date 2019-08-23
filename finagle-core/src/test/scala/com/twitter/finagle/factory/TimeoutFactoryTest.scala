@@ -6,7 +6,7 @@ import com.twitter.util.{Await, Future, Promise, MockTimer, Return, Time}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import scala.language.reflectiveCalls
 
 class TimeoutFactoryTest extends FunSuite with MockitoSugar {

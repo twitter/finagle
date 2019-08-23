@@ -140,14 +140,14 @@ class BadRequestHandlerTest extends FunSuite {
     }
 
     check(
-      "foo\0",
+      "foo\u0000",
       "bar",
       Seq("rejected_invalid_header_names")
     )
 
     check(
       "foo",
-      "bar\0",
+      "bar\u0000",
       Seq("rejected_invalid_header_values")
     )
   }

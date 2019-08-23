@@ -10,7 +10,7 @@ import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.ssl.{ApplicationProtocolNames, SslHandler, SslHandshakeCompletionEvent}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
 class ServerNpnOrAlpnHandlerTest extends FunSuite with BeforeAndAfter with MockitoSugar {

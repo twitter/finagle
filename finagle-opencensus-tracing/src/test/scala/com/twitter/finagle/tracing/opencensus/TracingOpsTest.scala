@@ -5,7 +5,7 @@ import io.opencensus.trace.{BlankSpan, EndSpanOptions, Span, SpanBuilder}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class TracingOpsTest extends FunSuite with MockitoSugar {
   import TracingOps._

@@ -8,7 +8,7 @@ import java.util.logging.Logger
 import org.mockito.Mockito.when
 import org.scalactic.source.Position
 import org.scalatest.{FunSuite, Tag}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import scala.collection.mutable.Buffer
 
 class CoordinatorTest extends FunSuite with LocalConductors with MockitoSugar {

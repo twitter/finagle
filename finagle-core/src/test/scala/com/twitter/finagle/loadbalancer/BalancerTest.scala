@@ -7,10 +7,10 @@ import com.twitter.util.{Await, Future, Time}
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.Conductors
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scala.language.reflectiveCalls
 
-class BalancerTest extends FunSuite with Conductors with GeneratorDrivenPropertyChecks {
+class BalancerTest extends FunSuite with Conductors with ScalaCheckDrivenPropertyChecks {
 
   private class TestBalancer(
     protected val statsReceiver: InMemoryStatsReceiver = new InMemoryStatsReceiver)

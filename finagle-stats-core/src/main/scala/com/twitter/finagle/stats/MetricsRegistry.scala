@@ -1,6 +1,6 @@
 package com.twitter.finagle.stats
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 private object MetricsRegistry {
@@ -33,7 +33,7 @@ private[twitter] trait MetricsRegistry extends StatsRegistry {
 
   private[this] def updateMetrics(): Unit =
     if (registry != null) {
-      for (entry <- registry.counters.entrySet) {
+      for (entry <- registry.counters.entrySet.asScala) {
         val key = entry.getKey()
         val newValue = entry.getValue().doubleValue
         val newMetric = metrics.get(key) match {
@@ -43,7 +43,7 @@ private[twitter] trait MetricsRegistry extends StatsRegistry {
         metrics.put(key, newMetric)
       }
 
-      for (entry <- registry.gauges.entrySet) {
+      for (entry <- registry.gauges.entrySet.asScala) {
         val key = entry.getKey()
         val newValue = entry.getValue().doubleValue
         metrics.put(key, instantaneous(newValue, "gauge"))

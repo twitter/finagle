@@ -8,7 +8,7 @@ import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util.{Duration, FuturePool, JavaTimer, Return, Throw}
 import org.apache.zookeeper.Watcher.Event.KeeperState
 import org.apache.zookeeper.{WatchedEvent, Watcher}
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 object ZookeeperStateMonitor {
   val DefaultZkConnectionRetryBackoff =
@@ -149,7 +149,7 @@ trait ZookeeperStateMonitor {
           .get(DefaultZKWaitTimeout)
           .getChildren(zkPath, true, null)
 
-        applyZKChildren(children.toList)
+        applyZKChildren(children.asScala.toList)
     }
 
   /**

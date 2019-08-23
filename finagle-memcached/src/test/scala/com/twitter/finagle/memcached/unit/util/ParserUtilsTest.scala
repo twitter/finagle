@@ -4,9 +4,9 @@ import com.twitter.finagle.memcached.util.ParserUtils
 import com.twitter.io.Buf
 import java.nio.charset.StandardCharsets.UTF_8
 import org.scalatest.FunSuite
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-class ParserUtilsTest extends FunSuite with GeneratorDrivenPropertyChecks {
+class ParserUtilsTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
 
   private def isDigitsBB(str: String): Boolean = {
     val bb = UTF_8.encode(str)

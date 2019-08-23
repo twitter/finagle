@@ -211,7 +211,7 @@ private class StdCursorResult[T](
         }
       }
     }
-    go
+    go _
   }
 
   override def stream: AsyncStream[T] = self.synchronized {

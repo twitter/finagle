@@ -17,7 +17,7 @@ import io.netty.handler.codec.http2._
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.{eq => meq, _}
 import org.mockito.Mockito.{RETURNS_SMART_NULLS, verify, when}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
 class RichHttpToHttp2ConnectionHandlerTest extends FunSuite with BeforeAndAfter with MockitoSugar {

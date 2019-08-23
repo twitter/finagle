@@ -6,7 +6,7 @@ import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.finagle.{Dtab, Service}
 import com.twitter.util.{Await, Future}
 import org.scalatest.FunSuite
-import org.scalatest.junit.AssertionsForJUnit
+import org.scalatestplus.junit.AssertionsForJUnit
 
 class DtabFilterTest extends FunSuite with AssertionsForJUnit {
 

@@ -5,7 +5,7 @@ import com.twitter.finagle.Namer.AddrWeightKey
 import com.twitter.finagle.naming.namerMaxDepth
 import com.twitter.util._
 import org.scalatest.FunSuite
-import org.scalatest.junit.AssertionsForJUnit
+import org.scalatestplus.junit.AssertionsForJUnit
 import scala.language.reflectiveCalls
 
 class NamerTest extends FunSuite with AssertionsForJUnit {

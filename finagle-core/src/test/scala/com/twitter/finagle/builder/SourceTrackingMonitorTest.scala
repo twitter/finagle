@@ -6,7 +6,7 @@ import java.util.logging.{Level, Logger}
 import org.mockito.Matchers.{any, eq => mockitoEq}
 import org.mockito.Mockito.{never, verify}
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class SourceTrackingMonitorTest extends FunSuite with MockitoSugar {
   test("handles unrolling properly") {

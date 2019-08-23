@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
 import org.scalatest.FunSuite
-import org.scalatest.junit.AssertionsForJUnit
+import org.scalatestplus.junit.AssertionsForJUnit
 
 class NameTreeParsersTest extends FunSuite with AssertionsForJUnit {
   test("parsePath") {

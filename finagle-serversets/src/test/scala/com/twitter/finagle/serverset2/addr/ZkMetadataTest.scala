@@ -4,10 +4,10 @@ import com.twitter.finagle.{Addr, Address}
 import java.net.InetSocketAddress
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scala.util.Random
 
-class ZkMetadataTest extends FunSuite with GeneratorDrivenPropertyChecks {
+class ZkMetadataTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
   val shardHashOrdering = ZkMetadata.shardHashOrdering(ZkMetadata.key.hashCode)
   val metadata = ZkMetadata(Some(4))
 

@@ -2,7 +2,7 @@ package com.twitter.finagle.mux.lease.exp
 
 import org.mockito.Mockito.{when, verify, times}
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import scala.util.Random
 
 class GenerationalRandomTest extends FunSuite with MockitoSugar {

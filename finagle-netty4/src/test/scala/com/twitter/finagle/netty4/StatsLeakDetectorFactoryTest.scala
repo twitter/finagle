@@ -3,7 +3,7 @@ package com.twitter.finagle.netty4
 import io.netty.buffer.ByteBuf
 import io.netty.util.{ResourceLeakDetector, ResourceLeakDetectorFactory}
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.Mockito._
 import org.mockito.Matchers._
 

@@ -98,7 +98,7 @@ abstract class GenPipeliningDispatcher[Req, Rep, In, Out, T](
               // we check stalled so that we log exactly once per failed pipeline
               if (!stalled) {
                 stalled = true
-                val addr = trans.remoteAddress
+                val addr = trans.context.remoteAddress
                 GenPipeliningDispatcher.log.warning(
                   s"pipelined connection stalled with ${q.size} items, talking to $addr"
                 )

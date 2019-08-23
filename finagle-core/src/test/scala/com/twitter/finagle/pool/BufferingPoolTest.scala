@@ -1,7 +1,7 @@
 package com.twitter.finagle.pool
 
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.Mockito.{times, verify, when}
 import org.mockito.Matchers._
 import com.twitter.finagle.{ClientConnection, Service, ServiceFactory, Status}

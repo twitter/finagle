@@ -17,7 +17,7 @@ class OffloadFilterTest extends FunSuite {
       val s = new OffloadFilter.Client[Unit, Unit](FuturePool(executor)).andThen(next)
       val caller = Thread.currentThread()
 
-      assert(Await.result(s().map(_ => Thread.currentThread()), 5.seconds) != caller)
+      assert(Await.result(s(()).map(_ => Thread.currentThread()), 5.seconds) != caller)
     } finally {
       executor.shutdownNow()
     }
@@ -31,7 +31,7 @@ class OffloadFilterTest extends FunSuite {
       }
       val s = new OffloadFilter.Server[Unit, Thread](FuturePool(executor)).andThen(next)
       val caller = Thread.currentThread()
-      assert(Await.result(s(), 5.seconds) != caller)
+      assert(Await.result(s(()), 5.seconds) != caller)
 
     } finally {
       executor.shutdownNow()

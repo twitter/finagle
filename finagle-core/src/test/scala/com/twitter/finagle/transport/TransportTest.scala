@@ -6,10 +6,10 @@ import com.twitter.finagle.Status
 import com.twitter.io.{Buf, Pipe, Reader, ReaderDiscardedException}
 import com.twitter.util.{Await, Future, Promise, Return, Throw, Time}
 import org.scalatest.FunSuite
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scala.language.reflectiveCalls
 
-class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
+class TransportTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
 
   private def awaitResult[T](f: Future[T]): T = {
     Await.result(f, 5.seconds)

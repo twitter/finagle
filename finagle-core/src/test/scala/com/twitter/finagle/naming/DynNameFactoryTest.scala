@@ -6,7 +6,7 @@ import com.twitter.util.{Await, Activity, Future, Return, Throw}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class DynNameFactoryTest extends FunSuite with MockitoSugar {
   private trait Ctx {

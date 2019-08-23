@@ -7,7 +7,7 @@ import java.lang.{Double => JDouble, Float => JFloat}
 import java.nio.charset.StandardCharsets
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 object CopyingByteBufByteReaderTest {
 
@@ -64,7 +64,7 @@ class CopyingByteBufByteReaderProcessorTest
       }
     )
 
-abstract class AbstractByteBufByteReaderTest extends FunSuite with GeneratorDrivenPropertyChecks {
+abstract class AbstractByteBufByteReaderTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
 
   private val SignedMediumMax = 0x800000
 

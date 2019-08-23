@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
 import org.scalatest.{FunSuite, Assertion}
-import org.scalatest.junit.AssertionsForJUnit
+import org.scalatestplus.junit.AssertionsForJUnit
 
 class DtabTest extends FunSuite with AssertionsForJUnit {
 

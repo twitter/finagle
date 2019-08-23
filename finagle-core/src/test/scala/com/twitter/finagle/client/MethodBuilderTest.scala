@@ -12,7 +12,7 @@ import com.twitter.util.tunable.Tunable
 import java.util.concurrent.atomic.AtomicInteger
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{FunSuite, Matchers}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 private object MethodBuilderTest {
   private val neverSvc: Service[Int, Int] =

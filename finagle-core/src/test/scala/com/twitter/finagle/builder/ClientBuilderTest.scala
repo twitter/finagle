@@ -21,7 +21,7 @@ import org.mockito.Matchers._
 import org.mockito.Mockito.when
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class ClientBuilderTest
     extends FunSuite

@@ -34,7 +34,7 @@ private class ThresholdFailureDetector(
   ping: () => Future[Unit],
   minPeriod: Duration = 5.seconds,
   closeTimeout: Duration = 4.seconds,
-  nanoTime: () => Long = System.nanoTime,
+  nanoTime: () => Long = System.nanoTime _,
   statsReceiver: StatsReceiver = NullStatsReceiver,
   implicit val timer: Timer = DefaultTimer)
     extends FailureDetector {

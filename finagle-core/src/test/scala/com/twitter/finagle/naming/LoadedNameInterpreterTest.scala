@@ -38,7 +38,7 @@ class LoadedNameInterpreterTest extends FunSuite with BeforeAndAfter {
       }
       Seq(interpreter)
     }
-    val interpreter = new LoadedNameInterpreter(load)
+    val interpreter = new LoadedNameInterpreter(load _)
     assert(created)
     val act = interpreter.bind(Dtab.empty, Path.read("/a"))
     val NameTree.Leaf(name) = act.sample()

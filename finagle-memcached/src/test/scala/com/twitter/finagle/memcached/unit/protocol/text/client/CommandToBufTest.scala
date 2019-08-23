@@ -5,9 +5,9 @@ import com.twitter.io.BufByteWriter
 import java.nio.charset.StandardCharsets
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-class CommandToBufTest extends FunSuite with GeneratorDrivenPropertyChecks {
+class CommandToBufTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
 
   test("`commandToBuf.lengthAsString` returns same value as `Integer.toString.length`") {
     forAll(Gen.posNum[Int]) { i: Int =>

@@ -2,10 +2,10 @@ package com.twitter.finagle.decoder
 
 import com.twitter.io.Buf
 import org.scalatest.FunSuite
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scala.util.Random
 
-class LengthFieldFramerTest extends FunSuite with GeneratorDrivenPropertyChecks {
+class LengthFieldFramerTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
 
   val MaxTestFrameSize = 32
   val MaxTestFrames = 30

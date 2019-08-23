@@ -21,7 +21,7 @@ import java.nio.ByteBuffer
 import java.util.concurrent.atomic.{AtomicInteger, AtomicBoolean}
 import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.junit.AssertionsForJUnit
+import org.scalatestplus.junit.AssertionsForJUnit
 import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
 import scala.language.reflectiveCalls
 

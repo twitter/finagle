@@ -2,9 +2,9 @@ package com.twitter.finagle.toggle
 
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatest.FunSuite
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-class NullToggleMapTest extends FunSuite with GeneratorDrivenPropertyChecks {
+class NullToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
 
   private val IntGen = arbitrary[Int]
 

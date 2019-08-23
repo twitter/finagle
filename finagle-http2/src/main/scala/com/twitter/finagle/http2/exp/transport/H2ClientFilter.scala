@@ -36,7 +36,7 @@ private[transport] final class H2ClientFilter(params: Stack.Params)
   private[this] val failureDetector: FailureDetector = {
     val statsReceiver = params[Stats].statsReceiver
     val detectorConfig = params[FailureDetector.Param].param
-    FailureDetector(detectorConfig, ping, statsReceiver.scope("failuredetector"))
+    FailureDetector(detectorConfig, ping _, statsReceiver.scope("failuredetector"))
   }
 
   // exposed for testing

@@ -21,7 +21,7 @@ class EndToEndTest extends FunSuite {
     Time.withCurrentTimeFrozen { tc =>
       val svc = new Service[String, String] {
         def apply(request: String) = {
-          reqMade.setValue()
+          reqMade.setValue(())
           Future.never
         }
       }

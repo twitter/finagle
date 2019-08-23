@@ -3,10 +3,10 @@ package com.twitter.finagle.toggle
 import com.twitter.util.{Return, Throw, Try}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatest.FunSuite
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scala.collection.JavaConverters._
 
-class JsonToggleMapTest extends FunSuite with GeneratorDrivenPropertyChecks {
+class JsonToggleMapTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
 
   import JsonToggleMap.{DescriptionIgnored, DescriptionRequired}
 

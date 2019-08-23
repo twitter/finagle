@@ -6,7 +6,7 @@ import com.twitter.util.{Activity, Var}
 import org.mockito.Matchers.{anyString, any}
 import org.mockito.Mockito.{verify, when, never, times}
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class ServersetNamerTest extends FunSuite with MockitoSugar {
   trait Ctx {

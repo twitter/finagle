@@ -4,7 +4,7 @@ import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http2.{Http2Headers, Http2HeadersFrame}
 import org.mockito.Mockito._
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class H2UriValidatorHandlerTest extends FunSuite with MockitoSugar {
 

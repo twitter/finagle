@@ -33,7 +33,7 @@ import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol._
 import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.junit.AssertionsForJUnit
+import org.scalatestplus.junit.AssertionsForJUnit
 import org.scalatest.{FunSuite, Tag}
 import scala.language.reflectiveCalls
 

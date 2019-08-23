@@ -1,7 +1,7 @@
 package com.twitter.finagle.loadbalancer
 
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class BalancerRegistryTest extends FunSuite with MockitoSugar {
 

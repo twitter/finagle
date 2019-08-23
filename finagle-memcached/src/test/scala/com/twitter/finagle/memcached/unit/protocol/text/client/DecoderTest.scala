@@ -10,7 +10,7 @@ import com.twitter.finagle.memcached.protocol.text.{
 }
 import com.twitter.io.Buf
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import scala.collection.mutable
 
 class DecoderTest extends FunSuite with MockitoSugar {

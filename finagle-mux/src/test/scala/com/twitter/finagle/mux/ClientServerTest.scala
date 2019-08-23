@@ -25,8 +25,8 @@ import org.mockito.Mockito.{never, verify, when}
 import org.mockito.stubbing.Answer
 import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.junit.AssertionsForJUnit
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.junit.AssertionsForJUnit
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{FunSuite, OneInstancePerTest, Tag}
 
 private object TestContext {
