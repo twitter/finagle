@@ -6,7 +6,7 @@ import io.netty.handler.ssl.SslHandler
 import java.security.cert.{Certificate, X509Certificate}
 import javax.net.ssl.{SSLEngine, SSLSession}
 import org.mockito.Mockito.when
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.FunSuite
 
 class ChannelTransportContextTest extends FunSuite with MockitoSugar {

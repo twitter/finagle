@@ -13,7 +13,7 @@ import org.mockito.Mockito
 import org.mockito.Mockito.{atLeastOnce, never, times, verify}
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import scala.language.reflectiveCalls
 
 class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
@@ -81,7 +81,7 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
 
   test("Inject the transport remote address")(new Ctx {
     val mockAddr = mock[SocketAddress]
-    when(trans.remoteAddress).thenReturn(mockAddr)
+    when(trans.context.remoteAddress).thenReturn(mockAddr)
     val service = new Service[String, String] {
       override def apply(request: String): Future[String] = Future.value {
         if (Contexts.local.get(RemoteInfo.Upstream.AddressCtx) == Some(mockAddr)) "ok" else "not ok"

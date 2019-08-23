@@ -7,7 +7,7 @@ import com.twitter.util.{Future, Time, MockTimer, Promise, Return, Duration, Tim
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, verify, when}
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class ExpiringServiceTest extends FunSuite with MockitoSugar {
 

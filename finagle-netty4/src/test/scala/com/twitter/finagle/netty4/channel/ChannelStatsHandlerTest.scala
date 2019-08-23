@@ -11,7 +11,7 @@ import io.netty.channel.embedded.EmbeddedChannel
 import java.util.concurrent.TimeoutException
 import org.mockito.Mockito.when
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
 

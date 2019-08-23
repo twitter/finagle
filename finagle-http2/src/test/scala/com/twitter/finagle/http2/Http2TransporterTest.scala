@@ -11,7 +11,7 @@ import io.netty.handler.codec.http._
 import org.mockito.Mockito._
 import org.mockito.Matchers._
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class Http2TransporterTest extends FunSuite with MockitoSugar {
   def await[T](f: Future[T], wait: Duration = 1.second) =

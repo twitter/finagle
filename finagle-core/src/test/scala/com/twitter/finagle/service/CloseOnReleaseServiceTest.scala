@@ -3,7 +3,7 @@ package com.twitter.finagle.service
 import org.mockito.Mockito.{verify, when, times}
 import org.mockito.Matchers._
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import com.twitter.finagle.{WriteException, Service, Status}
 import com.twitter.util.{Await, Promise, Future}
 

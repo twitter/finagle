@@ -101,7 +101,7 @@ private[finagle] class ChannelTransport(
       def operationComplete(f: nettyChan.ChannelFuture): Unit =
         if (f.isSuccess) p.setDone()
         else {
-          p.setException(ChannelException(f.cause, remoteAddress))
+          p.setException(ChannelException(f.cause, context.remoteAddress))
         }
     })
 
@@ -172,12 +172,12 @@ private[finagle] class ChannelTransport(
 
       override def channelInactive(ctx: nettyChan.ChannelHandlerContext): Unit = {
         if (omitStackTraceOnInactive) {
-          fail(new NoStackTraceChannelClosedException(remoteAddress))
-        } else fail(new ChannelClosedException(remoteAddress))
+          fail(new NoStackTraceChannelClosedException(context.remoteAddress))
+        } else fail(new ChannelClosedException(context.remoteAddress))
       }
 
       override def exceptionCaught(ctx: nettyChan.ChannelHandlerContext, e: Throwable): Unit = {
-        fail(ChannelException(e, remoteAddress))
+        fail(ChannelException(e, context.remoteAddress))
       }
     }
   )

@@ -18,7 +18,7 @@ import com.twitter.util._
 import com.twitter.conversions.DurationOps._
 import org.mockito.Mockito.when
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 /**
  * We want client session statuses to reflect the status of their underlying transports/handles

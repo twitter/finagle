@@ -10,7 +10,7 @@ import com.twitter.finagle.server.utils.StringServer
 import com.twitter.util._
 import java.net.InetSocketAddress
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.junit.AssertionsForJUnit
+import org.scalatestplus.junit.AssertionsForJUnit
 import org.scalatest.{BeforeAndAfterEach, FunSuite}
 
 /**

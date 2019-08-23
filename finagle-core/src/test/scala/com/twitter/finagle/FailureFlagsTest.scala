@@ -4,9 +4,9 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.util.{Await, Future, Throw}
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-class FailureFlagsTest extends FunSuite with GeneratorDrivenPropertyChecks {
+class FailureFlagsTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
   import FailureFlags._
 
   private def await[T](f: Future[T]): T =

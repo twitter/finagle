@@ -7,7 +7,7 @@ import com.twitter.util.{Await, Awaitable, Future, Time}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{spy, times, verify}
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class SessionsTest extends FunSuite with MockitoSugar {
   private[this] val sqlQuery = "SELECT * FROM FOO"

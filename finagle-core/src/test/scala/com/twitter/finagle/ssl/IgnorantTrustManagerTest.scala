@@ -4,7 +4,7 @@ import java.net.Socket
 import java.security.cert.X509Certificate
 import javax.net.ssl.SSLEngine
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class IgnorantTrustManagerTest extends FunSuite with MockitoSugar {
 

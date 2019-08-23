@@ -6,7 +6,7 @@ import com.twitter.finagle.{FailedFastException, Failure, FailureFlags, Service,
 import com.twitter.util._
 import org.mockito.Matchers.anyObject
 import org.mockito.Mockito.{times, verify, when}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfter, FunSpec}
 import scala.language.reflectiveCalls
 

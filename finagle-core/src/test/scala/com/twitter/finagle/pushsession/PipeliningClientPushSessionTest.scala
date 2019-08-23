@@ -8,7 +8,7 @@ import com.twitter.util.{Await, MockTimer, Promise, Time, TimeoutException => Ut
 import java.net.{InetSocketAddress, SocketAddress}
 import org.mockito.Mockito.never
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class PipeliningMockChannelHandle[In, Out] extends MockChannelHandle[In, Out] {
 
@@ -36,7 +36,7 @@ class PipeliningClientPushSessionTest extends FunSuite with MockitoSugar {
               10.seconds,
               timer
             ).toService
-          val f = session()
+          val f = session(())
           f.raise(exc)
           assert(!handle.closedCalled)
         }

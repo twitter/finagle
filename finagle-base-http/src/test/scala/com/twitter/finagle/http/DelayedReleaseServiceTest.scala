@@ -5,7 +5,7 @@ import com.twitter.util.{Await, Duration, Future}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, stub, verify}
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class DelayedReleaseServiceTest extends FunSuite with MockitoSugar {
 

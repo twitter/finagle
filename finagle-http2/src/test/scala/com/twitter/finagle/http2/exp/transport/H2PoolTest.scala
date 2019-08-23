@@ -8,7 +8,7 @@ import com.twitter.finagle.http2.exp.transport.H2Pool.OnH2Session
 import com.twitter.util.{Await, Awaitable, Closable, Duration, Future, Time}
 import java.util.concurrent.atomic.AtomicInteger
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.Mockito._
 import org.mockito.Matchers._
 

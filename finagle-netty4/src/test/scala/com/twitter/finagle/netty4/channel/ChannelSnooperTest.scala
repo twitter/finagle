@@ -6,7 +6,7 @@ import io.netty.channel._
 import java.net.InetSocketAddress
 import org.mockito.Mockito.when
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class ChannelSnooperTest extends FunSuite with MockitoSugar {
 

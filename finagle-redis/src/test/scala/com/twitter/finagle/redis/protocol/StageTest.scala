@@ -3,9 +3,9 @@ package com.twitter.finagle.redis.protocol
 import com.twitter.finagle.redis.MissingInstances
 import com.twitter.io.{Buf, ByteReader}
 import org.scalatest.FunSuite
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-class StageTest extends FunSuite with GeneratorDrivenPropertyChecks with MissingInstances {
+class StageTest extends FunSuite with ScalaCheckDrivenPropertyChecks with MissingInstances {
 
   import Stage.NextStep
 

@@ -12,7 +12,7 @@ import org.mockito.Mockito.{times, verify, when}
 import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class KetamaFailureAccrualFactoryTest extends FunSuite with MockitoSugar {
 

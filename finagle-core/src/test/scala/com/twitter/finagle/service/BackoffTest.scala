@@ -5,9 +5,9 @@ import com.twitter.finagle.util.Rng
 import com.twitter.util.Duration
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-class BackoffTest extends FunSuite with GeneratorDrivenPropertyChecks {
+class BackoffTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
   test("exponential") {
     val backoffs = Backoff.exponential(1.seconds, 2) take 10
     assert(backoffs.force.toSeq == (0 until 10 map { i =>

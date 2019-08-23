@@ -103,7 +103,7 @@ final private[http2] class StreamTransportFactory(
   }
 
   private[this] val detector =
-    FailureDetector(detectorConfig, ping, statsReceiver.scope("failuredetector"))
+    FailureDetector(detectorConfig, ping _, statsReceiver.scope("failuredetector"))
 
   // H2 uses the default WatermarkPool, which believes each StreamTransport
   // represents a connection. When the WatermarkPool sees a peer marked "Closed",

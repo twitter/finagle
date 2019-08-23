@@ -4,7 +4,7 @@ import java.util.concurrent.ThreadFactory
 import org.mockito.Matchers.any
 import org.mockito.Mockito.verify
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class BlockingTimeTrackingThreadFactoryTest extends FunSuite with MockitoSugar {
 

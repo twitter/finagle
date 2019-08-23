@@ -5,10 +5,10 @@ import com.twitter.logging.{HasLogLevel, Level}
 import com.twitter.util.{Await, Future}
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
-import org.scalatest.junit.AssertionsForJUnit
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.junit.AssertionsForJUnit
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenPropertyChecks {
+class FailureTest extends FunSuite with AssertionsForJUnit with ScalaCheckDrivenPropertyChecks {
   private val exc = Gen.oneOf[Throwable](null, new Exception("first"), new Exception("second"))
 
   private val flag = Gen.oneOf(

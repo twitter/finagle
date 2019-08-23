@@ -5,7 +5,7 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.conversions.StorageUnitOps._
 import org.mockito.Mockito.when
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class RequestSnooperTest extends FunSuite with MockitoSugar {
   test("RequestSnooper should compute handleBytes reasonably") {

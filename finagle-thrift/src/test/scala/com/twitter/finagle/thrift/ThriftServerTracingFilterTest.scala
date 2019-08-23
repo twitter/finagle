@@ -8,7 +8,7 @@ import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
 import org.mockito.Matchers
 import org.mockito.Mockito.when
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class ThriftServerTracingFilterTest extends FunSuite with MockitoSugar {
   val protocolFactory = new TBinaryProtocol.Factory()

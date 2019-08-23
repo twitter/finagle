@@ -8,7 +8,7 @@ import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.http.exp.{Multi, StreamTransport}
 import com.twitter.finagle.http2.exp.transport.Http2Transport
 import com.twitter.util.{Await, Awaitable, Duration, Future, Promise, Time}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{FunSuite, OneInstancePerTest}
 
 class Http2TransportTest extends FunSuite with OneInstancePerTest with MockitoSugar {

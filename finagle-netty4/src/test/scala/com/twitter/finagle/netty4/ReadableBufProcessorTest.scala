@@ -2,7 +2,7 @@ package com.twitter.finagle.netty4
 
 import com.twitter.io.Buf
 import org.scalatest.FunSuite
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 object ReadableBufProcessorTest {
 
@@ -38,7 +38,7 @@ abstract class ReadableBufProcessorTest(
   processable: String,
   newProcessable: (Array[Byte] => ReadableBufProcessorTest.CanProcess))
     extends FunSuite
-    with GeneratorDrivenPropertyChecks {
+    with ScalaCheckDrivenPropertyChecks {
   import ReadableBufProcessorTest._
 
   test(s"$processable: process throws exception when `from` < 0") {

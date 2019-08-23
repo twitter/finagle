@@ -6,7 +6,7 @@ import com.twitter.finagle.{Service, ServiceFactory, Status}
 import com.twitter.util.{Await, Duration, Future, MockTimer, Time}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, times, verify, when}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{FunSuite, OneInstancePerTest}
 
 class CachingPoolTest extends FunSuite with MockitoSugar with OneInstancePerTest {

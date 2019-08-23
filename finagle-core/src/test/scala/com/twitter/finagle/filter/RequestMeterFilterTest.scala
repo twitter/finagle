@@ -9,7 +9,7 @@ import java.util.concurrent.RejectedExecutionException
 
 import org.mockito.Mockito.when
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class RequestMeterFilterTest extends FunSuite with MockitoSugar {
 

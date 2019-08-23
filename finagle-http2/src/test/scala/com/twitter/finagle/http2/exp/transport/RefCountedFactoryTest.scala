@@ -3,7 +3,7 @@ package com.twitter.finagle.http2.exp.transport
 import com.twitter.finagle.{FailureFlags, Service, Status}
 import com.twitter.util.{Await, Awaitable, Duration, Future}
 import org.scalatest.{FunSuite, OneInstancePerTest}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.Mockito._
 import org.mockito.Matchers._
 

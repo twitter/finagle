@@ -8,9 +8,9 @@ import io.netty.channel.embedded.EmbeddedChannel
 import java.nio.ByteBuffer
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.{FunSuite, OneInstancePerTest}
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-class BufCodecTest extends FunSuite with GeneratorDrivenPropertyChecks with OneInstancePerTest {
+class BufCodecTest extends FunSuite with ScalaCheckDrivenPropertyChecks with OneInstancePerTest {
 
   val channel = new EmbeddedChannel(BufCodec)
 

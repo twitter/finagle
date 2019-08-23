@@ -10,7 +10,7 @@ import java.security.cert.{Certificate, X509Certificate}
 import org.mockito.Mockito
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import scala.language.reflectiveCalls
 
 class StdStackServerTest extends FunSuite with MockitoSugar {
@@ -42,7 +42,7 @@ class StdStackServerTest extends FunSuite with MockitoSugar {
           when(sslSessionInfo.peerCertificates).thenReturn(Seq(mockCert))
           when(context.sslSessionInfo).thenReturn(sslSessionInfo)
           when(trans.context).thenReturn(context)
-          when(trans.remoteAddress).thenReturn(mock[SocketAddress])
+          when(trans.context.remoteAddress).thenReturn(mock[SocketAddress])
           when(trans.onClose).thenReturn(Future.never)
           serveTransport(trans)
           NullServer

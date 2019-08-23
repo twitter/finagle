@@ -6,7 +6,7 @@ import com.twitter.io.Buf
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import scala.collection.mutable.ArrayBuffer
 
 class DecoderHandlerTest extends FunSuite with MockitoSugar {

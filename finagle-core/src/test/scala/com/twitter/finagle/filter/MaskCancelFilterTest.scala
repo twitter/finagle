@@ -5,7 +5,7 @@ import com.twitter.util.{Future, Promise, Return}
 import org.mockito.Matchers.anyObject
 import org.mockito.Mockito.{when, verify}
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import scala.language.reflectiveCalls
 
 class MaskCancelFilterTest extends FunSuite with MockitoSugar {

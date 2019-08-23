@@ -8,6 +8,8 @@ import io.netty.handler.codec.http._
 import io.netty.handler.codec.http2.Http2Exception.HeaderListSizeException
 import io.netty.handler.codec.http2._
 import io.netty.util.ReferenceCountUtil
+import io.netty.util.concurrent.{Future => NettyFuture}
+import io.netty.util.concurrent.ImmediateEventExecutor
 import io.netty.util.concurrent.PromiseCombiner
 import scala.util.control.NonFatal
 
@@ -90,7 +92,7 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
     // our very own Future.join.
     //
     val p = ctx.newPromise()
-    combiner.add(p.asInstanceOf[io.netty.util.concurrent.Future[_]])
+    combiner.add(p: NettyFuture[_])
     p
   }
 
@@ -101,7 +103,7 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
     streamId: Int
   ): Unit = {
     try {
-      val combiner = new PromiseCombiner()
+      val combiner = new PromiseCombiner(ImmediateEventExecutor.INSTANCE)
       msg match {
         case full: FullHttpRequest =>
           // Full HTTP requests might have everything, headers, payload, and trailers. We write them

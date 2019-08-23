@@ -6,7 +6,7 @@ import com.twitter.util.{Await, Awaitable, Duration, Future}
 import io.netty.buffer.{ByteBufAllocator, EmptyByteBuf}
 import io.netty.handler.codec.http.{DefaultHttpContent, DefaultLastHttpContent, HttpContent}
 import org.scalatest.{FunSuite, OneInstancePerTest}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.Mockito._
 
 class SingleDispatchTransportTest extends FunSuite with MockitoSugar with OneInstancePerTest {

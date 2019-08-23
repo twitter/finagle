@@ -63,7 +63,7 @@ class ClearContextValueFilterTest extends FunSuite {
         .make(Stack.Params.empty)
 
       val svc: Service[Unit, Unit] = Await.result(factory(), 1.second)
-      Await.result(svc(), 1.second)
+      Await.result(svc(()), 1.second)
       assert(setContextFilterCalled.isDefined)
       assert(verifyContextClearedFilterCalled.isDefined)
     }
@@ -78,7 +78,7 @@ class ClearContextValueFilterTest extends FunSuite {
         .make(Stack.Params.empty)
 
       val svc: Service[Unit, Unit] = Await.result(factory(), 1.second)
-      Await.result(svc(), 1.second)
+      Await.result(svc(()), 1.second)
       assert(verifyContextClearedFilterCalled.isDefined)
     }
   }

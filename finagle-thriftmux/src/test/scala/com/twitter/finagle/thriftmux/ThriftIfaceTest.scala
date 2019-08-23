@@ -3,7 +3,7 @@ package com.twitter.finagle.thriftmux
 import com.twitter.finagle.ThriftMux
 import com.twitter.util.Future
 import org.scalatest.FunSuite
-import org.scalatest.junit.AssertionsForJUnit
+import org.scalatestplus.junit.AssertionsForJUnit
 
 class ThriftIfaceTest extends FunSuite with AssertionsForJUnit {
   test("invalid thrift ifaces") {

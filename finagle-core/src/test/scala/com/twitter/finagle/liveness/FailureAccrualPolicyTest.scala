@@ -4,7 +4,7 @@ import com.twitter.conversions.DurationOps._
 import com.twitter.util._
 import com.twitter.finagle.service._
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
 

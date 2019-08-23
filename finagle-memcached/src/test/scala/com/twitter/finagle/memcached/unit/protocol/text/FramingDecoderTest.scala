@@ -3,7 +3,7 @@ package com.twitter.finagle.memcached.unit.protocol.text
 import com.twitter.finagle.memcached.protocol.text.{FrameDecoder, FramingDecoder}
 import com.twitter.io.{Buf, ByteReader}
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import scala.collection.mutable
 
 class FramingDecoderTest extends FunSuite with MockitoSugar {

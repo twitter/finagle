@@ -3,9 +3,9 @@ package com.twitter.finagle.mux
 import com.twitter.io.Buf
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-class ReqRepHeadersTest extends FunSuite with GeneratorDrivenPropertyChecks {
+class ReqRepHeadersTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
 
   private val Header: Gen[(Buf, Buf)] = {
     val byte = Gen.choose[Byte](Byte.MinValue, Byte.MaxValue)

@@ -10,8 +10,8 @@ import org.mockito.Mockito.{never, verify, atLeast}
 import org.mockito.Matchers.{anyString, contains, anyVararg}
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.mockito.MockitoSugar
-import scala.collection.JavaConversions.asScalaSet
+import org.scalatestplus.mockito.MockitoSugar
+import scala.collection.JavaConverters._
 
 class EventLoopGroupExecutionDelayTrackerTest
     extends FunSuite
@@ -54,7 +54,7 @@ class EventLoopGroupExecutionDelayTrackerTest
     assert(statsReceiver.stats.get(Seq("workerpool", "deviation_ms")).isDefined)
 
     // we should have no threads with the name no_threads_expected
-    asScalaSet(Thread.getAllStackTraces.keySet()).foreach { thread: Thread =>
+    Thread.getAllStackTraces.keySet().asScala.foreach { thread: Thread =>
       assert(!thread.getName.contains("no_threads_expected"))
     }
 
@@ -98,7 +98,8 @@ class EventLoopGroupExecutionDelayTrackerTest
 
     // we should have threads with the name no_threads_expected
     assert(
-      asScalaSet(Thread.getAllStackTraces.keySet())
+      Thread.getAllStackTraces
+        .keySet().asScala
         .exists(thread => thread.getName.contains("execution_delay_test_pool"))
     )
 

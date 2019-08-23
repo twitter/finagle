@@ -6,7 +6,7 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util._
 import com.twitter.conversions.DurationOps._
 import org.scalatest.{OneInstancePerTest, FunSuite}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerTest {
   import DeadlineFilter.DeadlineExceededException

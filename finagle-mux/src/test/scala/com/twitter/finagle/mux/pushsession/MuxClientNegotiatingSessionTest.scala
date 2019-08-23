@@ -15,7 +15,7 @@ import com.twitter.finagle.{ChannelClosedException, Failure, FailureFlags, Mux, 
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.util.{Await, Awaitable, Future, Promise}
 import org.scalactic.source.Position
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{FunSuite, Tag}
 
 class MuxClientNegotiatingSessionTest extends FunSuite with MockitoSugar {

@@ -9,13 +9,13 @@ import io.netty.channel.{ChannelException => _, _}
 import io.netty.channel.embedded.EmbeddedChannel
 import org.scalatest.{FunSuite, OneInstancePerTest}
 import org.scalatest.concurrent.Eventually._
-import org.scalatest.mockito.MockitoSugar
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.mockito.Mockito._
 
 class ChannelTransportTest
     extends FunSuite
-    with GeneratorDrivenPropertyChecks
+    with ScalaCheckDrivenPropertyChecks
     with OneInstancePerTest
     with MockitoSugar {
 
@@ -30,7 +30,7 @@ class ChannelTransportTest
 
   def assertFailedRead[A](seen: Future[A], e: Exception): Unit = {
     val thrown = intercept[Exception](Await.result(seen, timeout))
-    assert(thrown == ChannelException(e, transport.remoteAddress))
+    assert(thrown == ChannelException(e, transport.context.remoteAddress))
     assert(transport.status == Status.Closed)
   }
 
@@ -93,7 +93,9 @@ class ChannelTransportTest
     })
 
     forAll { s: String =>
-      assert(transport.write(s).poll == Some(Throw(ChannelException(e, transport.remoteAddress))))
+      assert(
+        transport.write(s).poll == Some(
+          Throw(ChannelException(e, transport.context.remoteAddress))))
     }
   }
 
@@ -120,7 +122,9 @@ class ChannelTransportTest
     assert(!transport.onClose.isDefined)
     channel.pipeline.fireExceptionCaught(e)
 
-    assert(Await.result(transport.onClose, timeout) == ChannelException(e, transport.remoteAddress))
+    assert(
+      Await
+        .result(transport.onClose, timeout) == ChannelException(e, transport.context.remoteAddress))
     assert(transport.status == Status.Closed)
   }
 

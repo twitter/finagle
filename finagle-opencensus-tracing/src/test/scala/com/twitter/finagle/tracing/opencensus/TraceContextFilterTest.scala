@@ -3,10 +3,10 @@ package com.twitter.finagle.tracing.opencensus
 import io.opencensus.trace.{SpanContext, SpanId, TraceId, TraceOptions, Tracestate}
 import java.util.concurrent.ThreadLocalRandom
 import org.scalacheck.Gen
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scalatest.FunSuite
 
-class TraceContextFilterTest extends FunSuite with GeneratorDrivenPropertyChecks {
+class TraceContextFilterTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
 
   private def genSpanContext: Gen[SpanContext] =
     Gen.resultOf { isSampled: Boolean =>

@@ -9,7 +9,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Mockito._
 import org.mockito.Matchers._
 import org.scalatest.{FunSuite, OneInstancePerTest}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 class ThriftRichClientTest extends FunSuite with MockitoSugar with OneInstancePerTest {
   object ThriftRichClientMock

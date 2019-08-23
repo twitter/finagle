@@ -16,7 +16,7 @@ import com.twitter.util._
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.FunSuite
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import java.util.concurrent.atomic.AtomicReference
 
 class ServiceDiscovererTest
