@@ -130,8 +130,9 @@ final class MarshalledContext private[context] extends Context {
 
   // Exposed for testing
   private[context] def marshal(env: Map[Buf, Cell]): Iterable[(Buf, Buf)] = {
+    //TODO: change back to .mapValues once it's strict to avoid N tuple allocations
     env.transform {
-      case (_, Real(k, v)) => k.marshal(v.get)
+      case (_, Real(k, Some(v))) => k.marshal(v)
       case (_, Translucent(_, vBuf)) => vBuf
     }.toSeq
   }
