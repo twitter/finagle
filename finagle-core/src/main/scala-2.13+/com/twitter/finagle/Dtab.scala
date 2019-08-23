@@ -15,9 +15,7 @@ import scala.collection.mutable.ReusableBuilder
  */
 case class Dtab(dentries0: IndexedSeq[Dentry]) extends DtabBase
 
-object Dtab extends DtabCompanionBase {
-  
-}
+object Dtab extends DtabCompanionBase
 
 final class DtabBuilder extends ReusableBuilder[Dentry, Dtab] {
   private[this] val builder = new VectorBuilder[Dentry]

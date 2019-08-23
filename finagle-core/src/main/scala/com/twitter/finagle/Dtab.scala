@@ -261,7 +261,7 @@ object Dentry {
 /**
  * Object Dtab manages 'base' and 'local' Dtabs.
  */
-private[finagle] trait DtabCompanionBase {
+private[finagle] abstract class DtabCompanionBase {
   implicit val equiv: Equiv[Dtab] = new Equiv[Dtab] {
     def equiv(d1: Dtab, d2: Dtab): Boolean = (
       d1.size == d2.size &&
@@ -272,7 +272,7 @@ private[finagle] trait DtabCompanionBase {
   /**
    * A failing delegation table.
    */
-  val fail: Dtab = Dtab.read("/=>!")
+  def fail: Dtab = Dtab.read("/=>!")
 
   /**
    * An empty delegation table.

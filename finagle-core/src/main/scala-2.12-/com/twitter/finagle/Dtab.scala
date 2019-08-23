@@ -16,6 +16,7 @@ import scala.collection.immutable.VectorBuilder
 case class Dtab(dentries0: IndexedSeq[Dentry]) extends DtabBase
 
 object Dtab extends DtabCompanionBase {
+
   implicit val canBuildFrom: CanBuildFrom[TraversableOnce[Dentry], Dentry, Dtab] =
   new CanBuildFrom[TraversableOnce[Dentry], Dentry, Dtab] {
     def apply(_ign: TraversableOnce[Dentry]): DtabBuilder = newBuilder
