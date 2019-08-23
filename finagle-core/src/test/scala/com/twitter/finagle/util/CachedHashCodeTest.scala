@@ -48,6 +48,11 @@ class CachedHashCodeTest extends FunSuite {
   }
 
   test("same hashCode mixed in or not") {
+    //case class productPrefix (class name) gets mixed in
+    //into hash in 2.13+, so we have to override
+    //it if we want to check whether two separate
+    //case classes would have hashed the same if
+    //the only difference had been the mixin.
     case class NotMixedIn(s: String) {
       override def productPrefix = "prefix"
     }
