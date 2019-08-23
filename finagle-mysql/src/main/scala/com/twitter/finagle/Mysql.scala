@@ -109,7 +109,8 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
         bufferSize = 0,
         idleTime = Duration.Top,
         maxWaiters = Int.MaxValue
-      )
+      ) +
+      param.Monitor(ServerErrorMonitor(Seq()))
 
     private val stack: Stack[ServiceFactory[Request, Result]] = StackClient.newStack
       .replace(ClientTracingFilter.role, MySqlClientTracingFilter.Stackable)
