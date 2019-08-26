@@ -86,32 +86,6 @@ final private[http2] class StreamTransportFactory(
     activeStreams.remove(streamId).isDefined
   }
 
-  // exposed for testing
-  private[http2] def ping(): Future[Unit] = {
-    val done = new Promise[Unit]
-    exec.execute(new Runnable {
-      def run(): Unit = {
-        if (pingPromise == null) {
-          pingPromise = done
-          underlying.write(Ping)
-        } else {
-          done.setException(PingOutstandingFailure)
-        }
-      }
-    })
-    done
-  }
-
-  private[this] val detector =
-    FailureDetector(detectorConfig, ping _, statsReceiver.scope("failuredetector"))
-
-  // H2 uses the default WatermarkPool, which believes each StreamTransport
-  // represents a connection. When the WatermarkPool sees a peer marked "Closed",
-  // it believes the connection has already been torn down and doesn't make an
-  // attempt to close it. Therefore, we ensure that if the FailureDetector marks
-  // this connection as closed, it gets torn down.
-  detector.onClose.ensure(close())
-
   private[this] def handleGoaway(
     addr: SocketAddress,
     obj: HttpObject,
@@ -212,13 +186,6 @@ final private[http2] class StreamTransportFactory(
           if (log.isLoggable(Level.DEBUG))
             log.debug(exn, s"Got exception for nonexistent stream: $streamId")
       }
-    case Ping =>
-      if (pingPromise != null) {
-        pingPromise.setDone()
-        pingPromise = null
-      } else {
-        log.debug(s"Got unmatched PING message for address $addr")
-      }
 
     case rep =>
       if (log.isLoggable(Level.DEBUG)) {
@@ -313,7 +280,7 @@ final private[http2] class StreamTransportFactory(
   }
 
   // Ensure we report closed if closed has been called but the detector has not yet been triggered
-  def status: Status = if (dead) Status.Closed else detector.status
+  def status: Status = if (dead) Status.Closed else Status.Open
 
   /**
    * StreamTransport represents a single http/2 stream at a time.  Once the stream

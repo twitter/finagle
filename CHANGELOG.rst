@@ -7,12 +7,6 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 Unreleased
 ----------
 
-Runtime Behavior Changes
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-* finagle: Upgrade to Netty 4.1.39.Final. ``PHAB_ID=D355848``
-
-
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -43,6 +37,12 @@ Runtime Behavior Changes
   acquisition. As part of this change, the
   `com.twitter.finagle.mysql.IncludeHandshakeInServiceAcquisition` toggle
   has been removed and it no longer applies. ``PHAB_ID=D355549``
+
+* finagle: Upgrade to Netty 4.1.39.Final. ``PHAB_ID=D355848``
+
+* finagle-http: Enable Ping Failure Detection for MultiplexHandler based HTTP/2 clients. Note that
+  the Ping Failure Detection implementation has been removed completely from the
+  non-MultiplexHandler based HTTP/2 client. ``PHAB_ID=D360712``
 
 19.8.0
 ------
