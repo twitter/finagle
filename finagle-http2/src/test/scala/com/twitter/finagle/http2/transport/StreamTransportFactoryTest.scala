@@ -221,25 +221,6 @@ class StreamTransportFactoryTest extends FunSuite {
     assert(streamFac.numActiveStreams == 0)
   }
 
-  test("StreamTransportFactory reflects detector status") {
-    val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport =
-      new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
-        type Context = TransportContext with HasExecutor
-      }]
-    val addr = new SocketAddress {}
-    var cur: Status = Status.Open
-    val params = Stack.Params.empty + FailureDetector.Param(
-      new FailureDetector.MockConfig(() => cur)
-    )
-    val streamFac = new StreamTransportFactory(transport, addr, params)
-
-    assert(streamFac.status == Status.Open)
-    cur = Status.Busy
-    assert(streamFac.status == Status.Busy)
-    assert(streamFac.numActiveStreams == 0)
-  }
-
   test("StreamTransportFactory call to first() provides stream with streamId == 1") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
     val transport =
@@ -408,26 +389,6 @@ class StreamTransportFactoryTest extends FunSuite {
       await(writeq.poll())
     }
     assert(streamFac.numActiveStreams == 0)
-  }
-
-  test("PINGs receive replies every time") {
-    val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport =
-      new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
-        type Context = TransportContext with HasExecutor
-      }]
-    val addr = new SocketAddress {}
-    var cur: Status = Status.Open
-    val params = Stack.Params.empty + FailureDetector.Param(
-      new FailureDetector.MockConfig(() => cur)
-    )
-    val streamFac = new StreamTransportFactory(transport, addr, params)
-
-    for (_ <- 1 to 10) {
-      streamFac.ping()
-      assert(await(writeq.poll()) == Ping)
-      readq.offer(Ping)
-    }
   }
 
   test("reading a StreamException fails that stream") {
