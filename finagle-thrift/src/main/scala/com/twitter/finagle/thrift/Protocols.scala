@@ -167,6 +167,21 @@ object Protocols {
 
   // Visible for testing purposes.
   private[thrift] object TFinagleBinaryProtocol {
+
+    /**
+     * JDK 9 introduced a change in how Strings are stored.
+     * This is known as compact strings: https://openjdk.java.net/jeps/254
+     * With that change, the optimization below no longer works.
+     * A future effort could look into supporting something similar with compact strings.
+     */
+    val usesCompactStrings: Boolean = {
+      // minimum JDK version is 8.
+      // Java 8 has the format: 1.8.0_211
+      // Java 9 and higher has the format: 9.0.1, 11.0.4, 12, 12.0.1
+      val version = System.getProperty("java.version", "")
+      !version.startsWith("1.8")
+    }
+
     // zero-length strings are written to the wire as an i32 of its length, which is 0
     private val EmptyStringInBytes = Array[Byte](0, 0, 0, 0)
 
@@ -250,11 +265,7 @@ object Protocols {
       ) {
     import TFinagleBinaryProtocol._
 
-    override def writeString(str: String): Unit = {
-      if (str.length == 0) {
-        trans.write(EmptyStringInBytes)
-        return
-      }
+    private[this] def writeNonCompactString(str: String): Unit = {
       // this is based on the CharsetEncoder code at:
       // https://psy-lob-saw.blogspot.co.nz/2013/04/writing-java-micro-benchmarks-with-jmh.html
       // we could probably do better than this via:
@@ -295,6 +306,19 @@ object Protocols {
 
       writeI32(out.position())
       trans.write(out.array(), 0, out.position())
+    }
+
+    override def writeString(str: String): Unit = {
+      if (str.length == 0) {
+        trans.write(EmptyStringInBytes)
+        return
+      }
+
+      if (usesCompactStrings) {
+        super.writeString(str)
+      } else {
+        writeNonCompactString(str)
+      }
     }
 
     // Note: libthrift 0.5.0 has a bug when operating on ByteBuffer's with a non-zero arrayOffset.

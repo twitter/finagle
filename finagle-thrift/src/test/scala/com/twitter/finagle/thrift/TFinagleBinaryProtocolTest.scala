@@ -67,6 +67,9 @@ class TFinagleBinaryProtocolTest extends FunSuite with BeforeAndAfter with Match
   }
 
   test("writeString larger than threadlocal out buffer") {
+    // todo: remove this test after dropping support for JDK8.
+    assume(!TFinagleBinaryProtocol.usesCompactStrings)
+
     val longStr = new Random(214566).nextString(TFinagleBinaryProtocol.OutBufferSize + 1)
 
     val trans = new TMemoryBuffer(128)
@@ -86,6 +89,9 @@ class TFinagleBinaryProtocolTest extends FunSuite with BeforeAndAfter with Match
   }
 
   test("writeBinary handles non-zero arrayOffsets") {
+    // todo: remove this test after dropping support for JDK8.
+    assume(!TFinagleBinaryProtocol.usesCompactStrings)
+
     val len = 16
     val offset = 2
 
