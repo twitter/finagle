@@ -50,8 +50,9 @@ env:
     - PROJECT=finagle-thriftmux USE_NETTY_SNAPSHOT=true
 
 matrix:
-  # Allows for assigning a build result if the non-'allow_failures' targets are complete
-  fast_finish: true
+  # Does not allow for assigning a build result if the non-'allow_failures' targets are complete
+  # because of https://travis-ci.community/t/receiving-too-many-emails/4888
+  fast_finish: false
   allow_failures:
     # Anything that tests against a Netty SNAPSHOT build should not be considered when failing
     # the overall build result. The env vars here must match EXACTLY to the env matrix properties.
