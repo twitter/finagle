@@ -10,6 +10,7 @@ import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy
 import com.twitter.finagle.memcached.{Client, KetamaPartitionedClient, TwemcacheClient}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.param.Stats
+import com.twitter.finagle.partitioning.{param => pparam}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.toggle.flag
@@ -30,7 +31,7 @@ class MemcachedTest extends FunSuite with MockitoSugar with Eventually with Inte
       .configured(Transporter.ConnectTimeout(100.milliseconds))
       .configured(TimeoutFilter.Param(200.milliseconds))
       .configured(TimeoutFactory.Param(200.milliseconds))
-      .configured(Memcached.param.EjectFailedHost(false))
+      .configured(pparam.EjectFailedHost(false))
 
     val stack = client.stack
     assert(stack.contains(FailureAccrualFactory.role))
@@ -45,7 +46,7 @@ class MemcachedTest extends FunSuite with MockitoSugar with Eventually with Inte
       1.second
     }))
     assert(params[Transporter.ConnectTimeout] == Transporter.ConnectTimeout(100.milliseconds))
-    assert(params[Memcached.param.EjectFailedHost] == Memcached.param.EjectFailedHost(false))
+    assert(params[pparam.EjectFailedHost] == pparam.EjectFailedHost(false))
     assert(params[FailFastFactory.FailFast] == FailFastFactory.FailFast(false))
   }
 

@@ -1,12 +1,12 @@
-package com.twitter.finagle.memcached.partitioning
+package com.twitter.finagle.partitioning
 
 import com.twitter.concurrent.Broker
-import com.twitter.finagle._
+import com.twitter.finagle
+import com.twitter.finagle.{param => _, _}
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
-import com.twitter.finagle.memcached._
-import com.twitter.finagle.serverset2.addr.ZkMetadata
+import com.twitter.finagle.partitioning.zk.ZkMetadata
 import com.twitter.finagle.service.FailedService
 import com.twitter.hashing._
 import com.twitter.util._
@@ -25,7 +25,7 @@ private[partitioning] class KetamaNodeManager[Req, Rep, Key](
   numReps: Int = KetamaPartitioningService.DefaultNumReps) { self =>
 
   private[this] val statsReceiver = {
-    val param.Stats(stats) = params[param.Stats]
+    val finagle.param.Stats(stats) = params[finagle.param.Stats]
     stats.scope("partitioner")
   }
   private[this] val ejectionCount = statsReceiver.counter("ejections")
@@ -61,7 +61,7 @@ private[partitioning] class KetamaNodeManager[Req, Rep, Key](
   @volatile private[this] var snapshot: Set[KetamaKeyAndNode] = Set.empty
 
   // The nodeHealthBroker is use to track health of the nodes. Optionally, when the param
-  // 'Memcached.param.EjectFailedHost' is true, unhealthy nodes are removed from the hash ring. It
+  // 'param.EjectFailedHost' is true, unhealthy nodes are removed from the hash ring. It
   // connects the KetamaFailureAccrualFactory with the partition service to communicate the
   // health events.
   private[this] val nodeHealthBroker = new Broker[NodeHealth]

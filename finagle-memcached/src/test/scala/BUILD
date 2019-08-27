@@ -36,6 +36,7 @@ junit_tests(
         "finagle/finagle-core/src/test/scala:stringprotocol",
         "finagle/finagle-memcached/src/main/scala",
         "finagle/finagle-memcached/src/test/resources",
+        "finagle/finagle-partitioning/src/main/scala",
         "finagle/finagle-serversets",
         "finagle/finagle-toggle/src/main/scala",
         "util/util-core/src/main/scala",

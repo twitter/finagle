@@ -1,4 +1,4 @@
-package com.twitter.finagle.serverset2.addr
+package com.twitter.finagle.partitioning.zk
 
 import com.twitter.finagle.{Addr, Address}
 import scala.util.hashing.MurmurHash3
@@ -18,7 +18,7 @@ case class ZkMetadata(shardId: Option[Int])
 
 object ZkMetadata {
   // visibility exposed for testing
-  private[addr] val key = "zk_metadata"
+  private[partitioning] val key = "zk_metadata"
 
   /**
    * Orders a Finagle [[Address]] based on a deterministic hash of its shard id.

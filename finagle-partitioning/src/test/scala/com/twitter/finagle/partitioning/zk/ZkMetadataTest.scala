@@ -1,4 +1,4 @@
-package com.twitter.finagle.serverset2.addr
+package com.twitter.finagle.partitioning.zk
 
 import com.twitter.finagle.{Addr, Address}
 import java.net.InetSocketAddress

@@ -1,6 +1,6 @@
 package com.twitter.finagle.serverset2
 
-import com.twitter.finagle.serverset2.addr.ZkMetadata
+import com.twitter.finagle.partitioning.zk.ZkMetadata
 import com.twitter.finagle.{Addr, Address}
 import com.twitter.util._
 import java.net.InetSocketAddress

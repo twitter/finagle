@@ -1,10 +1,11 @@
-package com.twitter.finagle.memcached.unit.partitioning
+package com.twitter.finagle.partitioning
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.client.utils.StringClient
 import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.naming.BindingFactory
+import com.twitter.finagle.{param => ctfparam}
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.server.utils.StringServer
 import com.twitter.finagle.stats.StatsReceiver
@@ -104,8 +105,8 @@ trait PartitioningServiceTestBase extends FunSuite with BeforeAndAfterEach with 
       .withRequestTimeout(1.second)
       .configured(Stats(sr))
       .configured(FailureAccrualFactory.Param(1, () => 10.minutes))
-      .configured(Memcached.param.EjectFailedHost(ejectFailedHosts))
-      .configured(param.Timer(timer))
+      .configured(param.EjectFailedHost(ejectFailedHosts))
+      .configured(ctfparam.Timer(timer))
       .newService(dest, "client")
   }
 }

@@ -9,6 +9,13 @@ import com.twitter.io.Buf
 import com.twitter.util.{Await, Awaitable, Future, ReadWriteVar}
 import scala.collection.mutable
 import _root_.java.io.{BufferedReader, InputStreamReader}
+import com.twitter.finagle.partitioning.{
+  CacheNode,
+  KetamaClientKey,
+  NodeHealth,
+  NodeMarkedDead,
+  NodeRevived
+}
 import org.mockito.Matchers._
 import org.mockito.Mockito.{RETURNS_SMART_NULLS, times, verify, verifyZeroInteractions, when}
 import org.scalatestplus.mockito.MockitoSugar

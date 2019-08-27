@@ -4,7 +4,14 @@ import com.twitter.concurrent.Broker
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle._
 import com.twitter.finagle.liveness.FailureAccrualPolicy
-import com.twitter.finagle.memcached._
+import com.twitter.finagle.partitioning.{
+  FailureAccrualException,
+  KetamaClientKey,
+  KetamaFailureAccrualFactory,
+  NodeHealth,
+  NodeMarkedDead,
+  NodeRevived
+}
 import com.twitter.finagle.service.{Backoff, ResponseClassifier}
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.util.{Await, Awaitable, Future, MockTimer, Time}

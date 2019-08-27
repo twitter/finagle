@@ -1,10 +1,9 @@
-package com.twitter.finagle.memcached.unit.partitioning
+package com.twitter.finagle.partitioning
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle._
-import com.twitter.finagle.memcached.partitioning.KetamaPartitioningService
-import com.twitter.finagle.memcached.partitioning.KetamaPartitioningService.NoPartitioningKeys
+import com.twitter.finagle.partitioning.KetamaPartitioningService.NoPartitioningKeys
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.hashing.KeyHasher
 import com.twitter.util._

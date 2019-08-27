@@ -2,9 +2,10 @@ package com.twitter.finagle.memcached.integration
 
 import com.twitter.conversions.DurationOps._
 import com.twitter.finagle.Memcached.UsePartitioningMemcachedClientToggle
-import com.twitter.finagle._
+import com.twitter.finagle.{param => ctfparam, _}
 import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.memcached.{Client, TwemcacheClient}
+import com.twitter.finagle.partitioning.param
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.toggle.flag
 import com.twitter.util.ReadWriteVar
@@ -51,7 +52,7 @@ class MemcachedUtilityTest extends MemcachedTest {
       (dest, clientName) => {
         Memcached.client
           .configured(FailureAccrualFactory.Param(1, () => 10.minutes))
-          .configured(Memcached.param.EjectFailedHost(true))
+          .configured(param.EjectFailedHost(true))
           .withStatsReceiver(sr)
           .newRichClient(dest, clientName)
       }
@@ -71,9 +72,9 @@ class MemcachedUtilityTest extends MemcachedTest {
           (dest, clientName) => {
             Memcached.client
               .configured(FailureAccrualFactory.Param(1, () => 10.minutes))
-              .configured(Memcached.param.EjectFailedHost(true))
-              .configured(param.Timer(timer))
-              .configured(param.Stats(statsReceiver))
+              .configured(param.EjectFailedHost(true))
+              .configured(ctfparam.Timer(timer))
+              .configured(ctfparam.Stats(statsReceiver))
               .newRichClient(dest, clientName)
           }
         )

@@ -26,6 +26,7 @@ scala_library(
         "finagle/finagle-memcached/src/main/java:pants-workaround",
         "finagle/finagle-memcached/src/main/resources",
         "finagle/finagle-netty4",
+        "finagle/finagle-partitioning",
         "finagle/finagle-serversets",
         "finagle/finagle-serversets/src/main/java",
         "finagle/finagle-serversets/src/main/thrift:thrift-java",
@@ -41,6 +42,7 @@ scala_library(
     exports = [
         "3rdparty/jvm/com/twitter/bijection:core",
         "finagle/finagle-core/src/main/scala",
+        "finagle/finagle-partitioning",
         "util/util-core/src/main/scala",
     ],
 )

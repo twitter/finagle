@@ -14,6 +14,7 @@ scala_library(
         "3rdparty/jvm/org/apache/thrift:libthrift",
         "3rdparty/jvm/org/apache/zookeeper:zookeeper-client",
         "finagle/finagle-core/src/main/scala",
+        "finagle/finagle-partitioning/src/main/scala",
         "finagle/finagle-serversets/src/main/java",
         "finagle/finagle-serversets/src/main/resources",
         "finagle/finagle-serversets/src/main/thrift:thrift-java",
@@ -24,6 +25,7 @@ scala_library(
         "util/util-stats/src/main/scala",
     ],
     exports = [
+        "finagle/finagle-partitioning/src/main/scala",
         "util/util-core/src/main/scala",
     ],
 )
